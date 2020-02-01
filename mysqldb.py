@@ -1,12 +1,17 @@
 import sqlite3
 
-conn = sqlite3.connect('calendar.db')
+conn = sqlite3.connect('newcalendar.db')
 
 c = conn.cursor()
 
 def create_table():
     with conn:
         c.execute('CREATE TABLE Teachers (id INTEGER, language TEXT, teacher TEXT, day TEXT, time TEXT, type TEXT)')
+
+
+def create_table_cid():
+    with conn:
+        c.execute('CREATE TABLE CID (channel_id INTEGER, message_id INTEGER)')
 
 
 def add_teacher_class(id: int, language: str, teacher: str, day: str, time: str, type: str):
@@ -57,4 +62,27 @@ def show_teachers():
 
 def drop_table():
     c.execute('DROP TABLE Teachers')
+
+
+def add_cid_id(channel_id: int, message_id: int):
+    with conn:
+        if len(show_config()) > 0:
+            c.execute(f"UPDATE CID SET channel_id = {channel_id}, message_id = {message_id} WHERE message_id = message_id")
+        else:
+            c.execute(f"INSERT INTO CID VALUES ({channel_id}, {message_id})")
+
+
+def remove_cid_id():
+    with conn:
+        c.execute(f"DELETE FROM CID WHERE channel_id = channel_id")
+
+
+def show_config():
+    with conn:
+        c.execute('SELECT * FROM CID')
+        return c.fetchall()
+
+
+def drop_table_cid():
+    c.execute("DROP TABLE CID")
 
