@@ -62,13 +62,13 @@ async def teachers(ctx):
 @client.command()
 async def classes(ctx):
     classes = show_teachers()
-    embed = discord.Embed(title='Classes', description='All available classes and their schedules (UTC+1)', colour=discord.Colour.gold())
+    embed = discord.Embed(title='Classes', description='All available classes and their schedules (UTC+1)', colour=discord.Colour.dark_green())
     embed.set_author(name='DNK', icon_url='https://cdn.discordapp.com/avatars/550057247456100353/e3e2a56379f6457066a630c0eb68d34e.png?size=256')
     embed.set_footer(text=ctx.author.guild.name)
-    embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/562019489642709022/658745955343925268/test1.gif')
+    embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/673592568268980244/673685902312341509/a_0fc103e90b7fcbea53f42dd59d17e920.gif')
     if len(classes) != 0:
         for c in classes:
-            embed.add_field(name=f'{c[0]} - {c[1]}', value=f'Teacher: {c[2]} | Day: {c[3]} | Time: {c[4]} | Type: {c[5]}', inline=False)
+            embed.add_field(name=f'{c[0]} - {c[1]}', value=f'Teacher: {c[2]} | Day: {c[3]} | Time: {c[4]} | Type: {c[5]} | For: {c[6]}', inline=False)
         await ctx.send(content=None, embed=embed)
     else:
         embed.add_field(name='None', value='No classes available')
@@ -78,8 +78,10 @@ async def classes(ctx):
 # Add classes
 @client.command()
 @commands.has_permissions(administrator=True)
-async def add_class(ctx, language: str, teacher: str, day: str, time: str, type: str):
-    add_teacher_class(len(show_teachers())+1, language.title(), teacher.title(), day.title(), time.upper(), type.title())
+async def add_class(ctx, language: str, teacher: str, day: str, time: str, type: str, forr: str = None):
+    if not forr:
+        forr = 'General people'
+    add_teacher_class(len(show_teachers())+1, language.title(), teacher.title(), day.title(), time.upper(), type.title(), forr.title())
     await ctx.send(f"{teacher.title()}'s class successfully added!")
 
 
@@ -188,7 +190,26 @@ async def update_type(ctx, id: str = None, type: str = None):
             return await ctx.send(f"Teacher's **type** updated!")
     else:
         await ctx.send('Teacher not found')
-    
+
+
+# Updates the aiming public
+@client.command()
+@commands.has_permissions(administrator=True)
+async def update_public(ctx, id: str = None, forr: str = None):
+    if id is None:
+        return await ctx.send('Inform all parameters!')
+    elif not id.isnumeric():
+        return await ctx.send('Inform a valid id!')
+    elif not forr:
+        forr = 'General people'
+
+    teachers = show_teachers()
+    for teacher in teachers:
+        if id == str(teacher[0]):
+            edit_teacher_class_forr(id, forr.title())
+            return await ctx.send(f"Teacher's **public** updated!")
+    else:
+        await ctx.send('Teacher not found')
 
 # Wrong command 1
 @client.command()
@@ -220,22 +241,22 @@ async def spy(ctx, cid, *messages):
 @client.command()
 async def fclasses(ctx):
     classes = show_teachers()
-    embed = discord.Embed(title='(f) Classes', description='All available classes and their schedules (UTC+1)', colour=discord.Colour.gold())
+    embed = discord.Embed(title='(f) Classes', description='All available classes and their schedules (UTC+1)', colour=discord.Colour.dark_green())
     embed.set_footer(text=f"Requested by {ctx.author}", icon_url=ctx.author.avatar_url)
-    embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/562019489642709022/658745955343925268/test1.gif')
+    embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/673592568268980244/673685902312341509/a_0fc103e90b7fcbea53f42dd59d17e920.gif')
     the_class = await ctx.send(embed=embed)
     if len(classes) != 0:
         await asyncio.sleep(3)
         for i, c in enumerate(classes):
-            embed = discord.Embed(title=f'(f) Classes ({i+1}/{len(classes)})', description=f'**Class:** {c[1]}\n**Teacher:** {c[2]}\n**Day:** {c[3]}\n**Time:** {c[4]}\n**Type:** {c[5]}', colour=discord.Colour.gold())
+            embed = discord.Embed(title=f'(f) Classes ({i+1}/{len(classes)})', description=f'**Class:** {c[1]}\n**Teacher:** {c[2]}\n**Day:** {c[3]}\n**Time:** {c[4]}\n**Type:** {c[5]}\n**For:** {c[6]}', colour=discord.Colour.dark_green())
             embed.set_footer(text=f"Requested by {ctx.author}", icon_url=ctx.author.avatar_url)
-            embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/562019489642709022/658745955343925268/test1.gif')
+            embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/673592568268980244/673685902312341509/a_0fc103e90b7fcbea53f42dd59d17e920.gif')
             await the_class.edit(embed=embed)
             await asyncio.sleep(5)
 
-        embed = discord.Embed(title=f'Reviewed {len(classes)} classes!', description='Thank you for using me! 🦥', colour=discord.Colour.gold())
+        embed = discord.Embed(title=f'Reviewed {len(classes)} classes!', description='Thank you for using me! 🦥', colour=discord.Colour.dark_green())
         embed.set_footer(text=f"Requested by {ctx.author}", icon_url=ctx.author.avatar_url)
-        embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/562019489642709022/658745955343925268/test1.gif')
+        embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/673592568268980244/673685902312341509/a_0fc103e90b7fcbea53f42dd59d17e920.gif')
         await the_class.edit(embed=embed)
 
     else:
@@ -247,6 +268,7 @@ async def fclasses(ctx):
 @client.command()
 async def update(ctx):
     await ctx.message.delete()
+    copy_channel = discord.utils.get(ctx.author.guild.channels, id=673592568268980244)
     configs = show_config()
     if len(configs) > 0:
         channel = discord.utils.get(ctx.author.guild.channels, id=configs[0][0])
@@ -255,68 +277,34 @@ async def update(ctx):
     draw = ImageDraw.Draw(img)
     small = ImageFont.truetype("built titling sb.ttf", 45) #Make sure you insert a valid font from your folder.
     teachers = show_teachers()
+    events = show_events()
     #    (x,y)::↓ ↓ ↓ (text)::↓ ↓     (r,g,b)::↓ ↓ ↓
     for teacher in teachers:
-        x = y = 0
-        clr = (0, 255, 0)
-        if teacher[3] == 'Monday':
-            x = 335
-        elif teacher[3] == 'Tuesday':
-            x = 550
-        elif teacher[3] == 'Wednesday':
-            x = 760
-        elif teacher[3] == 'Thursday':
-            x = 970
-        elif teacher[3] == 'Friday':
-            x = 1180
-        elif teacher[3] == 'Saturday':
-            x = 1400
-        elif teacher[3] == 'Sunday':
-            x = 1590
-
-        if teacher[4] == '1AM':
-            y = 320
-        elif teacher[4] == '3AM':
-            y = 390
-        elif teacher[4] == '12PM':
-            y = 460
-        elif teacher[4] == '4PM':
-            y = 530
-        elif teacher[4] == '5PM':
-            y = 595
-        elif teacher[4] == '6PM':
-            y = 665
-        elif teacher[4] == '7PM':
-            y = 740
-        elif teacher[4] == '8PM':
-            y = 810
-        elif teacher[4] == '9PM':
-            y = 880
-        elif teacher[4] == '10PM':
-            y = 955
-
-        if teacher[5] == 'Grammar':
-            clr = (0, 0, 0)
-        elif teacher[5] == 'Pronunciation':
-            clr = (0, 153, 153)
-        elif teacher[5] == 'Both':
-            clr = (255, 0, 0)
+        x = check_x(teacher)
+        y = check_y(teacher)
+        clr = check_clr(teacher)
 
         if x != 0 and y != 0:
             draw.text((x, y), f"{teacher[1]}", clr, font=small)
 
+    for event in events:
+        x = check_x(event)
+        y = check_y(event)
+        clr = check_clr(event)
+
+        if x != 0 and y != 0:
+            draw.text((x, y), f"{event[1]}", clr, font=small)
+
     img.save('calendar_template2.png') #Change name2.png if needed.
-    e = discord.Embed()
-    new_message = await ctx.send(file=discord.File('calendar_template2.png'))
+    e = discord.Embed(colour=discord.Colour.dark_green())
+    new_message = await copy_channel.send(file=discord.File('calendar_template2.png'))
 
     for u in new_message.attachments:
         e.set_image(url=u.url)
         if len(configs) > 0:
-            await msg.edit(embed=e)
+            return await msg.edit(embed=e)
         else:
-            await ctx.send(embed=e)
-        await asyncio.sleep(1)
-    await new_message.delete()
+            return await ctx.send(embed=e)
 
 
 # Show specific class
@@ -331,7 +319,7 @@ async def show(ctx, id: str = None):
     teachers = show_teachers()
     for teacher in teachers:
         if teacher[0] == int(id):
-            embed = discord.Embed(title=f'Class - {id}#', description=f'**Class:** {teacher[1]}\n**Teacher:** {teacher[2]}\n**Day:** {teacher[3]}\n**Time:** {teacher[4]}\n**Type:** {teacher[5]}', colour=discord.Colour.gold())
+            embed = discord.Embed(title=f'Class - {id}#', description=f'**Class:** {teacher[1]}\n**Teacher:** {teacher[2]}\n**Day:** {teacher[3]}\n**Time:** {teacher[4]}\n**Type:** {teacher[5]}\n**For:** {teacher[6]}', colour=discord.Colour.dark_green())
             return await ctx.send(embed=embed)
     else:
         return await ctx.send('**Class not found!**')
@@ -344,17 +332,21 @@ async def exception(ctx):
     days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
     hours = ['1AM', '3AM', '12PM', '4PM', '5PM', '6PM', '7PM', '8PM', '9PM', '10PM']
     teachers = show_teachers()
-    embed = discord.Embed(title='Excepted Classes', description='All classes that cannot be inserted into the calendar.', colour=discord.Colour.gold())
+    events = show_events()
+    embed = discord.Embed(title='Excepted Classes & Events', description='All classes and events that cannot be inserted into the calendar.', colour=discord.Colour.dark_green())
     for teacher in teachers:
         if teacher[3] not in days or teacher[4] not in hours:
-            embed.add_field(name=f'{teacher[0]} - {teacher[1]}', value=f"{teacher[2]} | {teacher[3]} | {teacher[4]} | {teacher[5]}", inline=False)            
-            
+            embed.add_field(name=f'{teacher[0]} - {teacher[1]}', value=f"{teacher[2]} | {teacher[3]} | {teacher[4]} | {teacher[5]} | {teacher[6]}", inline=False)
+
+    for event in events:
+        if event[2] not in days or event[3] not in hours:
+            embed.add_field(name=f'{event[0]} - {event[1]}', value=f"{event[2]} | {event[3]}", inline=False)
+
+    if len(embed.fields) == 0:
+        embed.add_field(name='None', value='No exceptions.', inline=False)
+        await ctx.send(embed=embed)
     else:
-        if len(embed.fields) == 0:
-            embed.add_field(name='None', value='No exceptions.', inline=False)
-            await ctx.send(embed=embed)
-        else:
-            await ctx.send(embed=embed)
+        await ctx.send(embed=embed)
             
 
 @commands.has_permissions(administrator=True)
@@ -364,20 +356,31 @@ async def repeated(ctx):
     days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
     hours = ['1AM', '3AM', '12PM', '4PM', '5PM', '6PM', '7PM', '8PM', '9PM', '10PM']
     teachers1 = teachers2 = show_teachers()
+    events = show_events()
     dupes = []
-    embed = discord.Embed(title="Repeated values", description="All classes that have values equal to other classes'", colour=discord.Colour.gold())
+    embed = discord.Embed(title="Repeated values", description="All classes and events that have values equal to others'", colour=discord.Colour.dark_green())
     for teacher1 in teachers1:
         for teacher2 in teachers2:
             if teacher1[0] != teacher2[0] and teacher1[3] == teacher2[3] and teacher1[4] == teacher2[4] and teacher1[3] in days and teacher1[4] in hours:
                 dupes.append(teacher1)
 
+    for teacher1 in teachers1:
+        for event in events:
+            if teacher1[3] == event[2] and teacher1[4] == event[3] and teacher1[3] in days and teacher1[4] in hours:
+                dupes.append(teacher1)
+                dupes.append(event)
+
     if len(dupes) > 0:
         for d in dupes:
-            embed.add_field(name=f'{d[0]} - {d[1]}', value=f"{d[2]} | **{d[3]}** | **{d[4]}** | {d[5]}", inline=False)
+            if len(d) == 7:
+                embed.add_field(name=f'{d[0]} - {d[1]} (Class)', value=f"{d[2]} | **{d[3]}** | **{d[4]}** | {d[5]} | {d[6]}", inline=False)
+            elif len(d) == 4:
+                embed.add_field(name=f'{d[0]} - {d[1]} (Event)', value=f"**{d[2]}** | **{d[3]}**", inline=False)
+
         await ctx.send(embed=embed)
 
     else:
-        embed.add_field(name=f'None', value='No classes are repeated!', inline=False)
+        embed.add_field(name=f'None', value='Neither classes nor events are repeated!', inline=False)
         await ctx.send(embed=embed)
 
 
@@ -411,11 +414,124 @@ async def showconfigs(ctx):
     else:
         return await ctx.send("**There aren't configurations**")
 
-    
+
+# Teachers' schedules
+@client.command()
+async def events(ctx):
+    events = show_events()
+    embed = discord.Embed(title='Events', description='All available events and their schedules (UTC+1)', colour=discord.Colour.dark_green())
+    embed.set_author(name='DNK', icon_url='https://cdn.discordapp.com/avatars/550057247456100353/e3e2a56379f6457066a630c0eb68d34e.png?size=256')
+    embed.set_footer(text=ctx.author.guild.name)
+    embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/673592568268980244/673685902312341509/a_0fc103e90b7fcbea53f42dd59d17e920.gif')
+    if len(events) != 0:
+        for e in events:
+            embed.add_field(name=f'{e[0]} - {e[1]}', value=f'Day: {e[2]} | Time: {e[3]}', inline=False)
+        await ctx.send(content=None, embed=embed)
+    else:
+        embed.add_field(name='None', value='No events available')
+        await ctx.send(content=None, embed=embed)
+
+
+# Add events
+@client.command()
+@commands.has_permissions(administrator=True)
+async def add_event(ctx, event: str, day: str, time: str):
+    add_the_event(len(show_events())+1, event.title(), day.title(), time.upper())
+    await ctx.send(f"{event.title()} event successfully added!")
+
+
+# Remove classes
+@client.command()
+@commands.has_permissions(administrator=True)
+async def remove_event(ctx, id: str = None):
+    if not id:
+        return await ctx.send('Inform the id!')
+    elif not id.isnumeric():
+        return await ctx.send('Inform a valid id!')
+
+    events = show_events()
+    for event in events:
+        if id == str(event[0]):
+            remove_the_event(id)
+            return await ctx.send(f"{event[1]} event successfully removed!")
+    else:
+        await ctx.send('Event not found!')
+
+
+# Updates events
+@commands.has_permissions(administrator=True)
+@client.command()
+async def update_event_name(ctx, id: str = None, name: str = None):
+    if id is None or name is None:
+        return await ctx.send('Inform all parameters!')
+    elif not id.isnumeric():
+        return await ctx.send('Inform a valid id!')
+
+    events = show_events()
+    for event in events:
+        if id == str(event[0]):
+            edit_event_name(id, name.title())
+            return await ctx.send(f"Event's **name** updated!")
+    else:
+        await ctx.send('Event not found')
+
+@commands.has_permissions(administrator=True)
+@client.command()
+async def update_event_time(ctx, id: str = None, time: str = None):
+    if id is None or time is None:
+        return await ctx.send('Inform all parameters!')
+    elif not id.isnumeric():
+        return await ctx.send('Inform a valid id!')
+
+    events = show_events()
+    for event in events:
+        if id == str(event[0]):
+            edit_event_time(id, time.upper())
+            return await ctx.send(f"Event's **name** updated!")
+    else:
+        await ctx.send('Event not found')
+# Updates events
+
+
+@commands.has_permissions(administrator=True)
+@client.command()
+async def update_event_day(ctx, id: str = None, day: str = None):
+    if id is None or day is None:
+        return await ctx.send('Inform all parameters!')
+    elif not id.isnumeric():
+        return await ctx.send('Inform a valid id!')
+
+    events = show_events()
+    for event in events:
+        if id == str(event[0]):
+            edit_event_day(id, day.title())
+            return await ctx.send(f"Event's **day** updated!")
+    else:
+        await ctx.send('Event not found')
+
+
 # Calendar commands
 @client.command()
 async def cmds(ctx):
-    embed = discord.Embed(title="Calendar's command list", description="Some useful commands", colour=discord.Colour.dark_red())
+    embed = discord.Embed(title="Calendar's command list", description="Some useful commands", colour=discord.Colour.dark_green())
+    embed.add_field(name='(Admin+) !update_calendar', value='Updates the calendar by organizing each of the available classes in their respective positions.', inline=False)
+    embed.add_field(name="(Admin+) !showconfigs", value="Shows the calendar's configuration ids.", inline=False)
+    embed.add_field(name="(Admin+) !addconfigs [channel_id] [message_id]", value="Adds the calendar's configuration ids.", inline=False)
+    embed.add_field(name="(Admin+) !delconfigs", value="Deletes the calendar's configuration ids.", inline=False)
+    embed.add_field(name="(Admin+) !exception", value="Shows the excepted classes and events.", inline=False)
+    embed.add_field(name="(Admin+) !repeated", value="Shows the repeated values.", inline=False)
+    embed.add_field(name="(Admin+) !spy [channel_id] [message]", value="The bot sends a message to the given channel.", inline=False)
+    embed.add_field(name="!cmds", value="Shows this.", inline=False)
+    embed.set_author(name='DNK', icon_url='https://cdn.discordapp.com/avatars/550057247456100353/e3e2a56379f6457066a630c0eb68d34e.png?size=256')
+    embed.set_footer(text=ctx.author.guild.name)
+    embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/673592568268980244/673685902312341509/a_0fc103e90b7fcbea53f42dd59d17e920.gif')
+    await ctx.send(embed=embed)
+
+
+# Calendar commands
+@client.command()
+async def class_cmds(ctx):
+    embed = discord.Embed(title="Calendar's class command list", description="Some useful class commands", colour=discord.Colour.dark_green())
     embed.add_field(name='(Admin+) !add_class [language] [teacher] [day] [time] [type]', value='Adds a new class.', inline=False)
     embed.add_field(name='(Admin+) !remove_class [id]', value='Removes an existent class.', inline=False)
     embed.add_field(name='(Admin+) !update_language [id] [new_language]', value='Updates the language of an existent class.', inline=False)
@@ -423,21 +539,29 @@ async def cmds(ctx):
     embed.add_field(name='(Admin+) !update_day [id] [new_day]', value='Updates the day of an existent class.', inline=False)
     embed.add_field(name='(Admin+) !update_time [id] [new_time]', value='Updates the time of an existent class.', inline=False)
     embed.add_field(name='(Admin+) !update_type [id] [new_type]', value='Updates the type of an existent class.', inline=False)
-    embed.add_field(name='(Admin+) !update_calendar', value='Updates the calendar by organizing each of the available classes in their respective positions.', inline=False)
-    embed.add_field(name="(Admin+) !showconfigs", value="Shows the calendar's configuration ids.", inline=False)
-    embed.add_field(name="(Admin+) !addconfigs [channel_id] [message_id]", value="Adds the calendar's configuration ids.", inline=False)
-    embed.add_field(name="(Admin+) !delconfigs", value="Deletes the calendar's configuration ids.", inline=False)
-    embed.add_field(name="(Admin+) !exception", value="Shows the excepted classes.", inline=False)
-    embed.add_field(name="(Admin+) !repeated", value="Shows the repeated values.", inline=False)
-    embed.add_field(name="(Admin+) !spy [channel_id] [message]", value="The bot sends a message to the given channel.", inline=False)
     embed.add_field(name='!teachers', value='Tells the amount of scheduled teachers.', inline=False)
     embed.add_field(name='!show [id]', value='Shows a specific class.', inline=False)
     embed.add_field(name='!classes', value='Shows all the available classes.', inline=False)
     embed.add_field(name='!fclasses', value='Shows all available classes one at a time.', inline=False)
-    embed.add_field(name="!cmds", value="Shows all of the commands.", inline=False)
+    embed.add_field(name="!class_cmds", value="Shows this.", inline=False)
     embed.set_author(name='DNK', icon_url='https://cdn.discordapp.com/avatars/550057247456100353/e3e2a56379f6457066a630c0eb68d34e.png?size=256')
     embed.set_footer(text=ctx.author.guild.name)
-    embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/562019489642709022/652636445982588970/ezgif.com-gif-maker-1.gif')
+    embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/673592568268980244/673685902312341509/a_0fc103e90b7fcbea53f42dd59d17e920.gif')
     await ctx.send(embed=embed)
+
+@client.command()
+async def event_cmds(ctx):
+    embed = discord.Embed(title="Calendar's event command list", description="Some useful event commands", colour=discord.Colour.dark_green())
+    embed.add_field(name='(Admin+) !add_event [event] [day] [time]', value='Adds a new event.', inline=False)
+    embed.add_field(name='(Admin+) !remove_event [id]', value='Removes an existent event.', inline=False)
+    embed.add_field(name='(Admin+) !update_event_name [id] [new_name]', value='Updates the name of an existent event.', inline=False)
+    embed.add_field(name='(Admin+) !update_event_day [id] [new_day]', value='Updates the day of an existent event.', inline=False)
+    embed.add_field(name='(Admin+) !update_event_time [id] [new_time]', value='Updates the time of an existent event.', inline=False)
+    embed.add_field(name="!event_cmds", value="Shows this.", inline=False)
+    embed.set_author(name='DNK', icon_url='https://cdn.discordapp.com/avatars/550057247456100353/e3e2a56379f6457066a630c0eb68d34e.png?size=256')
+    embed.set_footer(text=ctx.author.guild.name)
+    embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/673592568268980244/673685902312341509/a_0fc103e90b7fcbea53f42dd59d17e920.gif')
+    await ctx.send(embed=embed)
+
 
 client.run(token)

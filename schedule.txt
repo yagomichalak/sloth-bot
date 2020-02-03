@@ -26,3 +26,8 @@ Teacher: Semmy | Day: Flexible | Time: UNKNOWN | Type: Pronunciation
 Teacher: Mari | Day: Sunday | Time: 9PM | Type: Both
 14 - Swedish
 Teacher: Blondy | Day: Wednesday | Time: 6PM | Type: Pronunciation
+
+Karaoke on Tuesday at 9PM
+Movie on Thursday at 9PM
+Debate on Friday at 7PM
+Game Night on Saturday at 7PM
