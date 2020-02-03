@@ -268,7 +268,7 @@ async def fclasses(ctx):
 @client.command()
 async def update(ctx):
     await ctx.message.delete()
-    guild_test = discord.utils.get(ctx.author.guilds, id=671693591457955850)
+    guild_test = discord.utils.get(client.guild, id=671693591457955850)
     copy_channel = discord.utils.get(guild_test.channels, id=673592568268980244)
     configs = show_config()
     if len(configs) > 0:
