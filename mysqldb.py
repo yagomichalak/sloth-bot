@@ -186,47 +186,47 @@ def check_y(something):
     y = 0
     if len(something) == 7:
         if something[4] == '1AM':
-            y = 320
+            y = 360
         elif something[4] == '3AM':
-            y = 390
+            y = 430
         elif something[4] == '12PM':
-            y = 460
+            y = 500
         elif something[4] == '4PM':
-            y = 530
+            y = 570
         elif something[4] == '5PM':
-            y = 595
+            y = 635
         elif something[4] == '6PM':
-            y = 665
+            y = 705
         elif something[4] == '7PM':
-            y = 740
+            y = 780
         elif something[4] == '8PM':
-            y = 810
+            y = 850
         elif something[4] == '9PM':
-            y = 880
+            y = 920
         elif something[4] == '10PM':
-            y = 955
+            y = 995
 
     elif len(something) == 4:
         if something[3] == '1AM':
-            y = 320
+            y = 360
         elif something[3] == '3AM':
-            y = 390
+            y = 430
         elif something[3] == '12PM':
-            y = 460
+            y = 500
         elif something[3] == '4PM':
-            y = 530
+            y = 570
         elif something[3] == '5PM':
-            y = 595
+            y = 635
         elif something[3] == '6PM':
-            y = 665
+            y = 705
         elif something[3] == '7PM':
-            y = 740
+            y = 780
         elif something[3] == '8PM':
-            y = 810
+            y = 850
         elif something[3] == '9PM':
-            y = 880
+            y = 920
         elif something[3] == '10PM':
-            y = 955
+            y = 995
 
     return y
 
@@ -243,7 +243,7 @@ def check_clr(something):
             clr = (255, 0, 0)
 
     elif len(something) == 4:
-        clr = (76, 0, 153)
+        clr = (199,21,133)
 
     return clr
 
