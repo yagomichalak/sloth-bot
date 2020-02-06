@@ -27,13 +27,13 @@ async def on_ready():
 
 
 # Handles the errors
-#@client.event
-#async def on_command_error(ctx, error):
-#    if isinstance(error, commands.MissingPermissions):
-#        await ctx.send("You can't do that!")
+@client.event
+async def on_command_error(ctx, error):
+    if isinstance(error, commands.MissingPermissions):
+        await ctx.send("You can't do that!")
 
-#    if isinstance(error, commands.MissingRequiredArgument):
- #       await ctx.send('Please, inform all parameters!')
+    if isinstance(error, commands.MissingRequiredArgument):
+        await ctx.send('Please, inform all parameters!')
 
 
 # Teachers status update
