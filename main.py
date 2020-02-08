@@ -18,7 +18,6 @@ token = read_token()
 # Making the client variable
 client = commands.Bot(command_prefix='!')
 
-
 # Tells when the bot is online
 @client.event
 async def on_ready():
@@ -44,6 +43,41 @@ async def change_status():
         await client.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=f'{len_teachers} teacher.'))
     else:
         await client.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=f'{len_teachers} teachers.'))
+
+
+# Joins VC log
+@client.event
+async def on_voice_state_update(member, before, after):
+    mod_role = discord.utils.get(member.guild.roles, name='👮‍♂️Moderators')
+    if mod_role not in member.roles:
+        return
+
+    mod_log = client.get_channel(675745413760024595)
+    if after.channel is not None:
+        # Switched between voice channels
+        if before.channel is not None:
+            embed = discord.Embed(description=f'**{member}** switched between voice channels: {before.channel.name} - {after.channel.name}', colour=discord.Colour.dark_green())
+            embed.add_field(name='Channels', value=f'{before.channel.name} - {after.channel.name}', inline=False)
+            embed.add_field(name='ID', value=f'```py\nUser = {member.id}\nPrevious Channel = {before.channel.id}\nCurrent Channel = {after.channel.id}```')
+            embed.set_footer(text=f"Guild name: {member.guild.name}")
+            embed.set_author(name=member, icon_url=member.avatar_url)
+            await mod_log.send(embed=embed)
+        # Entered a voice channel
+        else:
+            embed = discord.Embed(description=f'**{member}** joined voice channel: {after.channel.name}', colour=discord.Colour.green())
+            embed.add_field(name='Channel', value=f'{after.channel.name}', inline=False)
+            embed.add_field(name='ID', value=f'```py\nUser = {member.id}\nChannel = {after.channel.id}```')
+            embed.set_footer(text=f"Guild name: {member.guild.name}")
+            embed.set_author(name=member, icon_url=member.avatar_url)
+            await mod_log.send(embed=embed)
+    # Left voice channel
+    elif after.channel is None:
+        embed = discord.Embed(description=f'**{member}** left voice channel: {before.channel.name}', colour=discord.Colour.red())
+        embed.add_field(name='Channel', value=f'{before.channel.name}', inline=False)
+        embed.add_field(name='ID', value=f'```py\nUser = {member.id}\nChannel = {before.channel.id}```')
+        embed.set_footer(text=f"Guild name: {member.guild.name}")
+        embed.set_author(name=member, icon_url=member.avatar_url)
+        await mod_log.send(embed=embed)
 
 
 # Available teachers
