@@ -53,6 +53,9 @@ async def on_voice_state_update(member, before, after):
     if mod_role not in member.roles:
         return
 
+    if not before.self_mute == after.self_mute or not before.self_deaf == after.self_deaf:
+        return
+
     mod_log = client.get_channel(675745413760024595)
     if after.channel is not None:
         # Switched between voice channels
