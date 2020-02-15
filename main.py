@@ -112,7 +112,7 @@ async def teachers(ctx):
 async def rule(ctx, numb: int = None):
     if not numb:
         return await ctx.send('**Invalid parameter!**')
-    if numb > 10 or number <= 0:
+    if numb > 10 or numb <= 0:
         return await ctx.send('**Paremeter out of range!**')
     
     embed = discord.Embed(title=f'Rule - {numb}#', description=f"{rules[numb+1]}", colour=discord.Colour.dark_green())
