@@ -115,7 +115,7 @@ async def rule(ctx, numb: int = None):
     if numb > 10 or numb <= 0:
         return await ctx.send('**Paremeter out of range!**')
     
-    embed = discord.Embed(title=f'Rule - {numb}#', description=f"{rules[numb+1]}", colour=discord.Colour.dark_green())
+    embed = discord.Embed(title=f'Rule - {numb}#', description=f"{rules[numb-1]}", colour=discord.Colour.dark_green())
     embed.set_footer(text=ctx.author.guild.name)
     await ctx.send(embed=embed)
 
