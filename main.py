@@ -19,6 +19,17 @@ token = read_token()
 # Making the client variable
 client = commands.Bot(command_prefix='!')
 
+rules = ["Do not post or talk about NSFW content in text or voice chat. This server is a safe for work, that is except in #💩sloth-shitposting💩.",
+"Be respectful of all members, especially Staff.",
+"Avoid topics such as: Politics,Religion,Self-Harm or anything considered controversial.",
+"Do not share others' personal information without their consent.",
+"Do not advertise your server or other communities without express consent from an Owner of this server.",
+"Do not flood or spam the text chat. Do not tag native roles repeatedly without need.",
+"No ear rape or mic spam. If you have a loud background, go on push-to-talk or mute.",
+"Check a user’s DM status before direct messaging them and respect their wishes.",
+"Try to resolve disputes personally. You may mute or block a user. If you cannot resolve the issue, contact 👮‍♂️Moderators ",
+"Abide by Discord’s Terms of Service and Community Guidelines."]
+
 # Tells when the bot is online
 @client.event
 async def on_ready():
@@ -95,6 +106,18 @@ async def teachers(ctx):
     else:
         await ctx.send(f'There are {len(teachers)} scheduled teachers!')
 
+
+# Shows the specific rule
+@client.command()
+async def rule(ctx, numb: int = None):
+    if not numb:
+        return await ctx.send('**Invalid parameter!**')
+    if numb > 10 or number <= 0:
+        return await ctx.send('**Paremeter out of range!**')
+    
+    embed = discord.Embed(title=f'Rule - {numb}#', description=f"{rules[numb+1]}", colour=discord.Colour.dark_green())
+    embed.set_footer(text=ctx.author.guild.name)
+    await ctx.send(embed=embed)
 
 # Teachers' schedules
 @client.command()
