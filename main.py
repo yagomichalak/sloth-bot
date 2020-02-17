@@ -110,6 +110,7 @@ async def teachers(ctx):
 # Shows the specific rule
 @client.command()
 async def rule(ctx, numb: int = None):
+    await ctx.message.delete()
     if not numb:
         return await ctx.send('**Invalid parameter!**')
     if numb > 10 or numb <= 0:
