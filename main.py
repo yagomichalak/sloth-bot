@@ -70,7 +70,7 @@ async def on_voice_state_update(member, before, after):
 
     mod_log = client.get_channel(675745413760024595)
     lesson_log = client.get_channel(679043911225966608)
-    lesson_cat = 562019317114339329
+    lesson_cat = 562019326295670806
     if after.channel is not None:
         # Switched between voice channels
         if before.channel is not None:
