@@ -61,38 +61,89 @@ async def change_status():
 @client.event
 async def on_voice_state_update(member, before, after):
     mod_role = discord.utils.get(member.guild.roles, name='👮‍♂️Moderators')
-    if mod_role not in member.roles:
+    teacher_role = discord.utils.get(member.guild.roles, name='👨‍🏫Teachers')
+    if mod_role not in member.roles and teacher_role not in member.roles:
         return
 
     if not before.self_mute == after.self_mute or not before.self_deaf == after.self_deaf:
         return
 
     mod_log = client.get_channel(675745413760024595)
+    lesson_log = client.get_channel(679043911225966608)
+    lesson_cat = 562019317114339329
     if after.channel is not None:
         # Switched between voice channels
         if before.channel is not None:
-            embed = discord.Embed(description=f'**{member}** switched between voice channels: {before.channel.name} - {after.channel.name}', colour=discord.Colour.dark_green(), timestamp=datetime.utcnow())
-            embed.add_field(name='Channels', value=f'{before.channel.name} - {after.channel.name}', inline=False)
-            embed.add_field(name='ID', value=f'```py\nUser = {member.id}\nPrevious Channel = {before.channel.id}\nCurrent Channel = {after.channel.id}```')
-            embed.set_footer(text=f"Guild name: {member.guild.name}")
-            embed.set_author(name=member, icon_url=member.avatar_url)
-            await mod_log.send(embed=embed)
+            # Switched between channels in the lessons category. (Switched)
+            if teacher_role in member.roles and after.channel.category_id == lesson_cat and before.channel.category_id == lesson_cat:
+                embed = discord.Embed(description=f'**{member}** switched between voice channels: {before.channel.name} - {after.channel.name}', colour=discord.Colour.dark_green(), timestamp=datetime.utcnow())
+                embed.add_field(name='Channels', value=f'{before.channel.name} - {after.channel.name}', inline=False)
+                embed.add_field(name='ID', value=f'```py\nUser = {member.id}\nPrevious Channel = {before.channel.id}\nCurrent Channel = {after.channel.id}```')
+                embed.set_footer(text=f"Guild name: {member.guild.name}")
+                embed.set_author(name=member, icon_url=member.avatar_url)
+                await lesson_log.send(embed=embed)
+
+            # Switched between channels, considering that the former is not in the lesson category and the latter is. (Joined)
+            elif teacher_role in member.roles and after.channel.category_id == lesson_cat and before.channel.category_id != lesson_cat:
+                embed = discord.Embed(description=f'**{member}** joined voice channel: {after.channel.name}', colour=discord.Colour.green(), timestamp=datetime.utcnow())
+                embed.add_field(name='Channel', value=f'{after.channel.name}', inline=False)
+                embed.add_field(name='ID', value=f'```py\nUser = {member.id}\nChannel = {after.channel.id}```')
+                embed.set_footer(text=f"Guild name: {member.guild.name}")
+                embed.set_author(name=member, icon_url=member.avatar_url)
+                await lesson_log.send(embed=embed)
+
+            # Switched between channels, considering that the former is in the lesson category and the latter is not. (Left)
+            elif teacher_role in member.roles and after.channel.category_id != lesson_cat and before.channel.category_id == lesson_cat:
+                embed = discord.Embed(description=f'**{member}** left voice channel: {before.channel.name}', colour=discord.Colour.red(), timestamp=datetime.utcnow())
+                embed.add_field(name='Channel', value=f'{before.channel.name}', inline=False)
+                embed.add_field(name='ID', value=f'```py\nUser = {member.id}\nChannel = {before.channel.id}```')
+                embed.set_footer(text=f"Guild name: {member.guild.name}")
+                embed.set_author(name=member, icon_url=member.avatar_url)
+                await lesson_log.send(embed=embed)
+
+
+            if mod_role in member.roles:
+                embed = discord.Embed(description=f'**{member}** switched between voice channels: {before.channel.name} - {after.channel.name}', colour=discord.Colour.dark_green(), timestamp=datetime.utcnow())
+                embed.add_field(name='Channels', value=f'{before.channel.name} - {after.channel.name}', inline=False)
+                embed.add_field(name='ID', value=f'```py\nUser = {member.id}\nPrevious Channel = {before.channel.id}\nCurrent Channel = {after.channel.id}```')
+                embed.set_footer(text=f"Guild name: {member.guild.name}")
+                embed.set_author(name=member, icon_url=member.avatar_url)
+                await mod_log.send(embed=embed)
         # Entered a voice channel
         else:
-            embed = discord.Embed(description=f'**{member}** joined voice channel: {after.channel.name}', colour=discord.Colour.green(), timestamp=datetime.utcnow())
-            embed.add_field(name='Channel', value=f'{after.channel.name}', inline=False)
-            embed.add_field(name='ID', value=f'```py\nUser = {member.id}\nChannel = {after.channel.id}```')
+            if teacher_role in member.roles and after.channel.category_id == lesson_cat:
+                embed = discord.Embed(description=f'**{member}** joined voice channel: {after.channel.name}', colour=discord.Colour.green(), timestamp=datetime.utcnow())
+                embed.add_field(name='Channel', value=f'{after.channel.name}', inline=False)
+                embed.add_field(name='ID', value=f'```py\nUser = {member.id}\nChannel = {after.channel.id}```')
+                embed.set_footer(text=f"Guild name: {member.guild.name}")
+                embed.set_author(name=member, icon_url=member.avatar_url)
+                await lesson_log.send(embed=embed)
+
+            if mod_role in member.roles:
+                embed = discord.Embed(description=f'**{member}** joined voice channel: {after.channel.name}', colour=discord.Colour.green(), timestamp=datetime.utcnow())
+                embed.add_field(name='Channel', value=f'{after.channel.name}', inline=False)
+                embed.add_field(name='ID', value=f'```py\nUser = {member.id}\nChannel = {after.channel.id}```')
+                embed.set_footer(text=f"Guild name: {member.guild.name}")
+                embed.set_author(name=member, icon_url=member.avatar_url)
+                await mod_log.send(embed=embed)
+
+    # Left voice channel
+    elif after.channel is None:
+        if teacher_role in member.roles and before.channel.category_id == lesson_cat:
+            embed = discord.Embed(description=f'**{member}** left voice channel: {before.channel.name}', colour=discord.Colour.red(), timestamp=datetime.utcnow())
+            embed.add_field(name='Channel', value=f'{before.channel.name}', inline=False)
+            embed.add_field(name='ID', value=f'```py\nUser = {member.id}\nChannel = {before.channel.id}```')
+            embed.set_footer(text=f"Guild name: {member.guild.name}")
+            embed.set_author(name=member, icon_url=member.avatar_url)
+            await lesson_log.send(embed=embed)
+
+        if mod_role in member.roles:
+            embed = discord.Embed(description=f'**{member}** left voice channel: {before.channel.name}', colour=discord.Colour.red(), timestamp=datetime.utcnow())
+            embed.add_field(name='Channel', value=f'{before.channel.name}', inline=False)
+            embed.add_field(name='ID', value=f'```py\nUser = {member.id}\nChannel = {before.channel.id}```')
             embed.set_footer(text=f"Guild name: {member.guild.name}")
             embed.set_author(name=member, icon_url=member.avatar_url)
             await mod_log.send(embed=embed)
-    # Left voice channel
-    elif after.channel is None:
-        embed = discord.Embed(description=f'**{member}** left voice channel: {before.channel.name}', colour=discord.Colour.red(), timestamp=datetime.utcnow())
-        embed.add_field(name='Channel', value=f'{before.channel.name}', inline=False)
-        embed.add_field(name='ID', value=f'```py\nUser = {member.id}\nChannel = {before.channel.id}```')
-        embed.set_footer(text=f"Guild name: {member.guild.name}")
-        embed.set_author(name=member, icon_url=member.avatar_url)
-        await mod_log.send(embed=embed)
 
 
 # Available teachers
