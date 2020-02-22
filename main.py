@@ -348,8 +348,35 @@ async def spy(ctx, cid, *messages):
     msg = ctx.message.content.split(cid)
     embed = discord.Embed(description=msg[1], colour=discord.Colour.dark_blue())
     await spychannel.send(embed=embed)
+
+
+# Spy command
+@client.command()
+@commands.has_permissions(administrator=True)
+async def rspy(ctx, cid, *messages):
+    await ctx.message.delete()
+    if len(ctx.message.content.split()) < 3:
+        return await ctx.send('You must inform all parameters!')
+
+    spychannel = client.get_channel(int(cid))
+    msg = ctx.message.content.split(cid)
+    embed = discord.Embed(description=msg[1], colour=discord.Colour.red())
+    await spychannel.send(embed=embed)
     
 
+# Embed command    
+@client.command()
+@commands.has_permissions(administrator=True)
+async def embed(ctx):
+    await ctx.message.delete()
+    if len(ctx.message.content.split()) < 2:
+        return await ctx.send('You must inform all parameters!')
+
+    msg = ctx.message.content.split('embed', 1)
+    embed = discord.Embed(description=msg[1], colour=discord.Colour.dark_green())
+    await ctx.send(embed=embed)
+    
+    
 # Fast classes
 @client.command()
 async def fclasses(ctx):
