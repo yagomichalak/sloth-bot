@@ -650,6 +650,22 @@ async def update_event_day(ctx, id: str = None, day: str = None):
         await ctx.send('Event not found')
 
 
+# Countdown command
+@client.command()
+@commands.has_permissions(administrator=True)
+async def count(ctx, amount=0):
+    await ctx.message.delete()
+    if amount > 0:
+        msg = await ctx.send(f'**{amount}**')
+        await asyncio.sleep(1)
+        for x in range(int(amount)-1, -1, -1):
+            await msg.edit(content=f'**{x}**')
+            await asyncio.sleep(1)
+        await msg.edit(content='**Done!**')
+    else:
+        await ctx.send('Invalid parameters!')
+        
+        
 # Calendar commands
 @client.command()
 async def cmds(ctx):
