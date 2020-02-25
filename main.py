@@ -375,6 +375,13 @@ async def embed(ctx):
     msg = ctx.message.content.split('embed', 1)
     embed = discord.Embed(description=msg[1], colour=discord.Colour.dark_green())
     await ctx.send(embed=embed)
+
+
+# Member counting command
+@client.command()
+async def members(ctx):
+    all_users = ctx.guild.members
+    await ctx.send(f'{len(all_users)} members!')
     
     
 # Fast classes
