@@ -47,7 +47,8 @@ async def on_message(message):
                 member = discord.utils.get(message.author.guild.members, id=message.author.id)
                 if message.content.startswith('!report') and len(message.content.split()) >= 3:
                     gid = 459195345419763713 # Guild id
-                    cid = 570724209056022567 # Admin's channel id
+                    cid = 683693966016774168 # Report log's channel id
+                    moderators = discord.utils.get(guid.roles, id=497522510212890655)
                     guild = client.get_guild(gid)
                     the_channel = discord.utils.get(guild.channels, id=cid)
                     report = message.content.split('!report', 1)
@@ -61,7 +62,7 @@ async def on_message(message):
                     embed_report = discord.Embed(description=report, colour=discord.Colour.green(), timestamp=message.created_at)
                     embed_report.set_author(name=f'{message.author} | ID: {message.author.id}', icon_url=message.author.avatar_url)
 
-
+                    await the_channel_send(moderators.mention)
                     await the_channel.send(embed=embed_report)
                     return await member.send(embed=embed)
                 elif message.content.startswith('!report') and len(message.content.split()) < 3:
