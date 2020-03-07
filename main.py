@@ -62,7 +62,7 @@ async def on_message(message):
                     embed_report = discord.Embed(description=report, colour=discord.Colour.green(), timestamp=message.created_at)
                     embed_report.set_author(name=f'{message.author} | ID: {message.author.id}', icon_url=message.author.avatar_url)
 
-                    await the_channel_send(moderators.mention)
+                    await the_channel.send(moderators.mention)
                     await the_channel.send(embed=embed_report)
                     return await member.send(embed=embed)
                 elif message.content.startswith('!report') and len(message.content.split()) < 3:
