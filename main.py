@@ -40,28 +40,33 @@ async def on_ready():
 @client.event
 async def on_message(message):
     if not message.author.bot:
-        if 'Direct Message' in str(message.channel):
-            if message.content.startswith('!report') and len(message.content.split()) >= 3:
-                gid = 459195345419763713 # Guild id
-                cid = 683693966016774168 # Report-log's channel id
-                guild = client.get_guild(gid)
-                the_channel = discord.utils.get(guild.channels, id=cid)
-                report = message.content.split('!report', 1)
-                report = report[1].strip()
+        report_channel = 685832739517366340
+        if 'Direct Message' not in str(message.channel):
+            if message.channel.id == report_channel:
+                await message.delete()
+                member = discord.utils.get(message.author.guild.members, id=message.author.id)
+                if message.content.startswith('!report') and len(message.content.split()) >= 3:
+                    gid = 459195345419763713 # Guild id
+                    cid = 570724209056022567 # Admin's channel id
+                    guild = client.get_guild(gid)
+                    the_channel = discord.utils.get(guild.channels, id=cid)
+                    report = message.content.split('!report', 1)
+                    report = report[1].strip()
 
-                # Within dm embed
-                embed = discord.Embed(title='Report sent!', description='The Staff will check the report ASP!', colour=discord.Colour.green(), timestamp=message.created_at)
-                embed.set_author(name=message.author.name, icon_url=message.author.avatar_url)
+                    # Within dm embed
+                    embed = discord.Embed(title='Report sent!', description='The Staff will check the report ASP!', colour=discord.Colour.green(), timestamp=message.created_at)
+                    embed.set_author(name=message.author, icon_url=message.author.avatar_url)
 
-                # Within server report
-                embed_report = discord.Embed(description=report, colour=discord.Colour.green(), timestamp=message.created_at)
-                embed_report.set_author(name=message.author.name, icon_url=message.author.avatar_url)
+                    # Within server report
+                    embed_report = discord.Embed(description=report, colour=discord.Colour.green(), timestamp=message.created_at)
+                    embed_report.set_author(name=f'{message.author} | ID: {message.author.id}', icon_url=message.author.avatar_url)
 
-                await the_channel.send(embed=embed_report)
-                return await message.channel.send(embed=embed)
-            elif message.content.startswith('!report') and len(message.content.split()) < 3:
-                embed = discord.Embed(title='Report incomplete!', description="__**After `!report`, please, inform the following things:**__\n**-**The tag of the member who you are reporting;\n**-**The reason for the report.", colour=discord.Colour.green(), timestamp=message.created_at)
-                return await message.channel.send(embed=embed)
+
+                    await the_channel.send(embed=embed_report)
+                    return await member.send(embed=embed)
+                elif message.content.startswith('!report') and len(message.content.split()) < 3:
+                    embed = discord.Embed(title='Report incomplete!', description="**After `!report`, please, inform the following things:**__\n**-**The tag of the member who you are reporting;\n**-**The reason for the report.", colour=discord.Colour.green(), timestamp=message.created_at)
+                    return await member.send(embed=embed)
             
     await client.process_commands(message)
 
