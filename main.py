@@ -47,9 +47,9 @@ async def on_message(message):
                 member = discord.utils.get(message.author.guild.members, id=message.author.id)
                 if message.content.startswith('!report') and len(message.content.split()) >= 3:
                     gid = 459195345419763713 # Guild id
-                    cid = 683693966016774168 # Report log's channel id
-                    moderators = discord.utils.get(gid.roles, id=497522510212890655)
+                    cid = 683693966016774168 # Report log's channel id         
                     guild = client.get_guild(gid)
+                    moderators = discord.utils.get(guild.roles, id=497522510212890655)
                     the_channel = discord.utils.get(guild.channels, id=cid)
                     report = message.content.split('!report', 1)
                     report = report[1].strip()
