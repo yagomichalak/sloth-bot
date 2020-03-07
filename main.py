@@ -66,7 +66,7 @@ async def on_message(message):
                     await the_channel.send(embed=embed_report)
                     return await member.send(embed=embed)
                 elif message.content.startswith('!report') and len(message.content.split()) < 3:
-                    embed = discord.Embed(title='Report incomplete!', description="**After `!report`, please, inform the following things:**__\n**-**The tag of the member who you are reporting;\n**-**The reason for the report.", colour=discord.Colour.green(), timestamp=message.created_at)
+                    embed = discord.Embed(title='Report incomplete!', description="__**After `!report`, please, inform the following things:**__\n**-**The tag of the member who you are reporting;\n**-**The reason for the report.", colour=discord.Colour.green(), timestamp=message.created_at)
                     return await member.send(embed=embed)
             
     await client.process_commands(message)
