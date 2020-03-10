@@ -49,6 +49,7 @@ async def on_message(message):
                 cid = 683693966016774168 # Report log's channel id         
                 guild = client.get_guild(gid)
                 moderators = discord.utils.get(guild.roles, id=497522510212890655)
+                cosmos = discord.utils.get(guild.members, id=423829836537135108)
                 the_channel = discord.utils.get(guild.channels, id=cid)
                 report = message.content
 
@@ -56,7 +57,7 @@ async def on_message(message):
                 embed_report = discord.Embed(description=report, colour=discord.Colour.green(), timestamp=message.created_at)
                 embed_report.set_author(name=f'{message.author} | ID: {message.author.id}', icon_url=message.author.avatar_url)
 
-                await the_channel.send(moderators.mention)
+                await the_channel.send(f'{moderators.mention}, {cosmos.mention}')
                 await the_channel.send(embed=embed_report)
             
     await client.process_commands(message)
