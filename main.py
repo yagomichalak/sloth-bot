@@ -80,11 +80,13 @@ Here are the commands you can use:
 Above commands are only usable by the owner of the room.
 Ownership is automatically transferred to another member in the room when the original owner leaves.
 For transfering ownership without leaving the room use:
-`vc/transfer @user` '''
+`vc/transfer @user`
+The role will disappear after 1 minute.'''
 
     if overload.message_id == message:
         if str(overload.emoji) == '⌛':
-            await user.send(pvm)
+            embed = discord.Embed(description=pvm, colour=discord.Colour.dark_green())
+            await user.send(embed=embed)
      
         
 # Handles the errors
