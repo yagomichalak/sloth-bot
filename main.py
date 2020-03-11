@@ -63,6 +63,30 @@ async def on_message(message):
     await client.process_commands(message)
 
 
+@client.event
+async def on_raw_reaction_add(overload):
+    guild = client.get_guild(overload.guild_id)
+    user = discord.utils.get(guild.members, id=overload.user_id)
+    message = 686821958708363281
+    pvm = '''You can create your own room by joining any room with a plus on it.
+
+Public Commands:
+
+Here are the commands you can use:
+
+`vc/lock` - Locks the room so no one can join.
+`vc/unlock` - Unlocks the room allowing people to join.
+`vc/kick @username` - Kicks and locks the room for an user 
+Above commands are only usable by the owner of the room.
+Ownership is automatically transferred to another member in the room when the original owner leaves.
+For transfering ownership without leaving the room use:
+`vc/transfer @user` '''
+
+    if overload.message_id == message:
+        if str(overload.emoji) == '⌛':
+            await user.send(pvm)
+     
+        
 # Handles the errors
 @client.event
 async def on_command_error(ctx, error):
