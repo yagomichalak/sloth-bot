@@ -70,7 +70,7 @@ async def on_raw_reaction_add(overload):
     message = 686821958708363281
     pvm = '''You can create your own room by joining any room with a plus on it.
 
-Public Commands:
+**Public Commands:**
 
 Here are the commands you can use:
 
