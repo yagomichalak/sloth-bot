@@ -84,19 +84,48 @@ For transfering ownership without leaving the room use:
 `vc/transfer @user`
 The role will disappear after 1 minute.'''
 
-    germanic = 687653940602339349
-    engmsg = '''🇬🇧  Heyo 🙃 You chose English as your native language. 
-You now have access to the English voice chat and text chat! 
-If you have any question about the server check this guide out <#562019362022883341>'''
     if overload.message_id == message:
         if str(overload.emoji) == '⌛':
             embed = discord.Embed(description=pvm, colour=discord.Colour.dark_green())
             await user.send(embed=embed)
     
-    if overload.message_id == germanic:
+    native_germanic = 687653940602339349
+    native_uralic = 687653990791774218
+    native_celtic = 687654028905021584
+    native_romance = 687654128905748743
+    native_baltic = 687654156852264978
+    native_slavic = 687654179707027495
+    native_semitic = 687654243653779478
+    native_turkic = 687654272284098560
+    native_iranian = 687654283684085771
+    native_asian = 687654312465137679
+    native_indian = 687654329921830933
+
+    elif overload.message_id == native_germanic:
         if str(overload.emoji) == '🇬🇧':
-            embed = discord.Embed(description=pvm, colour=discord.Colour.dark_green())
-            await user.send(engmsg)
+            embed = discord.Embed(title='English', description=read_native('native', 'english'), colour=discord.Colour.dark_green())
+        elif str(overload.emoji) == '🇩🇪':
+            embed = discord.Embed(title='German', description=read_native('native', 'german'), colour=discord.Colour.dark_green())
+        elif str(overload.emoji) == '🇩🇰':
+            embed = discord.Embed(title='Danish', description=read_native('native', 'danish'), colour=discord.Colour.dark_green())
+        elif str(overload.emoji) == '🇳🇱':
+            embed = discord.Embed(title='Dutch', description=read_native('native', 'dutch'), colour=discord.Colour.dark_green())
+        elif str(overload.emoji) == '🇳🇴':
+            embed = discord.Embed(title='Norwegian', description=read_native('native', 'norwegian'), colour=discord.Colour.dark_green())
+        elif str(overload.emoji) == '🇸🇪':
+            embed = discord.Embed(title='Swedish', description=read_native('native', 'swedish'), colour=discord.Colour.dark_green())
+        elif str(overload.emoji) == '🇮🇸':
+            embed = discord.Embed(title='Icelandic', description=read_native('native', 'icelandic'), colour=discord.Colour.dark_green())
+        elif str(overload.emoji) == '🇿🇦':
+            embed = discord.Embed(title='Afrikaans', description=read_native('native', 'afrikaans'), colour=discord.Colour.dark_green())
+        elif str(overload.emoji) == '🇫🇴':
+            embed = discord.Embed(title='Faroese', description=read_native('native', 'faroese'), colour=discord.Colour.dark_green())
+        elif str(overload.emoji) == '🇱🇺':
+            embed = discord.Embed(title='Luxembourgish', description=read_native('native', 'luxembourgish'), colour=discord.Colour.dark_green())
+
+        embed.set_footer(text=f"Guild name: {guild.name}")
+        embed.set_author(name=user, icon_url=user.avatar_url)
+        return await user.send(embed=embed)
         
 # Handles the errors
 @client.event
@@ -780,6 +809,13 @@ async def files(ctx, type: str = None):
     await ctx.send(content=None, embed=embed)
 
 
+def read_native(type, language):
+    with open(f'texts/germanic/{type}/{language}.txt', 'r', encoding='utf-8') as f:
+        text = f.readlines()
+        text = ''.join(text)
+        return text
+        
+        
 # Calendar commands
 @client.command()
 async def cmds(ctx):
