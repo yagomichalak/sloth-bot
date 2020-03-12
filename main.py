@@ -70,7 +70,7 @@ async def on_raw_reaction_add(overload):
     user = discord.utils.get(guild.members, id=overload.user_id)
     message = 686821958708363281
     pvm = '''You can create your own room by joining any room with a plus on it.
-
+    
 **Public Commands:**
 
 Here are the commands you can use:
@@ -84,11 +84,19 @@ For transfering ownership without leaving the room use:
 `vc/transfer @user`
 The role will disappear after 1 minute.'''
 
+    germanic = 687653940602339349
+    engmsg = '''🇬🇧  Heyo 🙃 You chose English as your native language. 
+You now have access to the English voice chat and text chat! 
+If you have any question about the server check this guide out <#562019362022883341>'''
     if overload.message_id == message:
         if str(overload.emoji) == '⌛':
             embed = discord.Embed(description=pvm, colour=discord.Colour.dark_green())
             await user.send(embed=embed)
-     
+    
+    if overload.message_id == germanic:
+        if str(overload.emoji) == '🇬🇧':
+            embed = discord.Embed(description=pvm, colour=discord.Colour.dark_green())
+            await user.send(engmsg)
         
 # Handles the errors
 @client.event
