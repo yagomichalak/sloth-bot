@@ -727,6 +727,7 @@ async def count(ctx, amount=0):
         
         
 @bot.command()
+@commands.has_permissions(administrator=True)
 async def gif(ctx, name: str = None):
     await ctx.message.delete()
     try:
@@ -737,6 +738,7 @@ async def gif(ctx, name: str = None):
 
 
 @bot.command()
+@commands.has_permissions(administrator=True)
 async def png(ctx, name: str = None):
     await ctx.message.delete()
     try:
@@ -746,6 +748,7 @@ async def png(ctx, name: str = None):
 
 
 @bot.command()
+@commands.has_permissions(administrator=True)
 async def files(ctx, type: str = None):
     await ctx.message.delete()
     if not type:
