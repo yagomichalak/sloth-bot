@@ -726,7 +726,7 @@ async def count(ctx, amount=0):
         await ctx.send('Invalid parameters!')
         
         
-@bot.command()
+@client.command()
 @commands.has_permissions(administrator=True)
 async def gif(ctx, name: str = None):
     await ctx.message.delete()
@@ -737,7 +737,7 @@ async def gif(ctx, name: str = None):
         return await ctx.send("**File not found!**")
 
 
-@bot.command()
+@client.command()
 @commands.has_permissions(administrator=True)
 async def png(ctx, name: str = None):
     await ctx.message.delete()
@@ -747,7 +747,7 @@ async def png(ctx, name: str = None):
         return await ctx.send("**File not found!**")
 
 
-@bot.command()
+@client.command()
 @commands.has_permissions(administrator=True)
 async def files(ctx, type: str = None):
     await ctx.message.delete()
