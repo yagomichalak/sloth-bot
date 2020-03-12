@@ -7,6 +7,8 @@ from PIL import ImageFont
 from PIL import ImageDraw
 from datetime import datetime
 import os
+import pytz
+from pytz import timezone
 
 def read_token():
     with open('token.txt', 'r') as f:
@@ -35,6 +37,7 @@ rules = ["Do not post or talk about NSFW content in text or voice chat. This ser
 @client.event
 async def on_ready():
     change_status.start()
+    update_timezones.start()
     print('Bot is ready!')
 
 
@@ -144,6 +147,21 @@ async def change_status():
         await client.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=f'{len_teachers} teacher.'))
     else:
         await client.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=f'{len_teachers} teachers.'))
+
+
+@tasks.loop(seconds=60)
+async def update_timezones():
+    gid = 459195345419763713  # Guild id
+    guild = client.get_guild(gid)
+    time_now = datetime.now()
+    timezones = {'Etc/GMT-1': [687783432222277695, 'CET']}
+
+    for tz in timezones:
+        tzone = timezone(tz)
+        date_and_time = time_now.astimezone(tzone)
+        date_and_time_in_text = date_and_time.strftime('%H:%M')
+        the_vc = discord.utils.get(guild.channels, id=timezones[tz][0])
+        await the_vc.edit(name=f'{timezones[tz][1]} - {date_and_time_in_text}')
 
 
 # Joins VC log
