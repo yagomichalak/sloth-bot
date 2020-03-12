@@ -69,6 +69,17 @@ async def on_raw_reaction_add(overload):
     guild = client.get_guild(overload.guild_id)
     user = discord.utils.get(guild.members, id=overload.user_id)
     message = 686821958708363281
+    native_germanic = 687653940602339349
+    native_uralic = 687653990791774218
+    native_celtic = 687654028905021584
+    native_romance = 687654128905748743
+    native_baltic = 687654156852264978
+    native_slavic = 687654179707027495
+    native_semitic = 687654243653779478
+    native_turkic = 687654272284098560
+    native_iranian = 687654283684085771
+    native_asian = 687654312465137679
+    native_indian = 687654329921830933
     pvm = '''You can create your own room by joining any room with a plus on it.
     
 **Public Commands:**
@@ -88,18 +99,6 @@ The role will disappear after 1 minute.'''
         if str(overload.emoji) == '⌛':
             embed = discord.Embed(description=pvm, colour=discord.Colour.dark_green())
             await user.send(embed=embed)
-    
-    native_germanic = 687653940602339349
-    native_uralic = 687653990791774218
-    native_celtic = 687654028905021584
-    native_romance = 687654128905748743
-    native_baltic = 687654156852264978
-    native_slavic = 687654179707027495
-    native_semitic = 687654243653779478
-    native_turkic = 687654272284098560
-    native_iranian = 687654283684085771
-    native_asian = 687654312465137679
-    native_indian = 687654329921830933
 
     elif overload.message_id == native_germanic:
         if str(overload.emoji) == '🇬🇧':
