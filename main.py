@@ -79,64 +79,66 @@ async def on_raw_reaction_add(overload):
     guild = client.get_guild(overload.guild_id)
     user = discord.utils.get(guild.members, id=overload.user_id)
 	
-	# User reaction info
-	user_emoji = overload.emoji
-	rid = overload.message_id
+    # User reaction info
+    user_emoji = overload.emoji
+    rid = overload.message_id
 	
-	# Create room message id
+    # Create room message id
     message = 688391033829982209
-	
+    info = []
+
     languages = {
-        'germanic': [{'native': 687653940602339349, 'fluent': 688070989757808653, 'studying': 2}, {'🇬🇧': 'english', '🇩🇪': 'german', '🇩🇰': 'danish', '🇳🇱': 'dutch', '🇳🇴': 'norwegian', '🇸🇪': 'swedish', '🇮🇸': 'icelandic', '🇿🇦': 'afrikaans', '🇫🇴': 'faroese', '🇱🇺': 'luxembourgish'}],
-        'uralic': [{'native': 687653990791774218, 'fluent': 688071024356360372, 'studying': 2}, {'🇫🇮': 'finnish', '🇭🇺': 'hungarian', '🇪🇪': 'estonian', '<:flag_smi:490116718241513472> ': 'sámi'}],
-        'celtic': [{'native': 687654028905021584, 'studying': 2}, {'🇮🇪': 'celtic'}],
-        'romance': [{'native': 687654128905748743, 'fluent': 688071741448519708, 'studying': 2}, {'🇫🇷': 'french', '🇪🇸': 'spanish', '🇧🇷': 'portuguese', '🇮🇹': 'italian', '🇷🇴': 'romanian', '<:flag_cat:635441691419082773>': 'catalan', '<:flag_gal:490116682417963008> ': 'galician', '<:flag_rm:490116699190722570>': 'latin'}],
-        'baltic': [{'native': 687654156852264978, 'fluent': 688072044243714095, 'studying': 2}, {'🇱🇹': 'lithuanian', '🇱🇻': 'latvian'}],
-        'slavic': [{'native': 687654179707027495, 'fluent': 688072145687019524, 'studying': 2}, {'🇷🇺': 'russian', '🇺🇦': 'ukrainian', '🇵🇱': 'polish', '🇧🇾': 'belarusian', '🇨🇿': 'czech', '🇸🇰': 'slovak', '🇧🇦': 'bosnian', '🇷🇸': 'serbian', '🇸🇮': 'slovenian', '🇭🇷': 'croatian', '🇲🇰': 'macedonian', '🇧🇬': 'bulgarian'}],
-        'semitic': [{'native': 687654243653779478, 'fluent': 688072184811618432, 'studying': 2}, {'🇸🇦': 'arabic', '🇮🇱': 'hebrew', '🇪🇹': 'amharic'}],
-        'turkic': [{'native': 687654272284098560, 'fluent': 688072219053785093, 'studying': 2}, {'🇹🇷': 'turkish', '🇰🇿': 'kazakh', '🇦🇿': 'azerbaijani'}],
-        'iranian': [{'native': 687654283684085771, 'fluent': 688073486459207745, 'studying': 2}, {'🇦🇫': 'pashto', '<:flag_kd:490181096873525258>': 'kurdish', '🇮🇷': 'persian'}],
-        'asian': [{'native': 687654312465137679, 'fluent': 688073546835951700, 'studying': 2}, {'🇯🇵': 'japanese', '🇨🇳': 'chinese', '🇰🇷': 'korean', '🇻🇳': 'vietnamese', '🇹🇭': 'thai', '🇱🇰': 'sinhalese', '🇵🇭': 'tagalog', '🇮🇩': 'indonesian', '🇲🇾': 'malay', '🇲🇳': 'mongolian', '🇭🇰': 'cantonese'}],
-        'indian': [{'native': 687654329921830933, 'fluent': 688073575298629788, 'studying': 2}, {'🇮🇳': 'hindustani'}],
-        'nonafiliated': [{'native': 688048079697739852, 'fluent': 688073619515113485, 'studying': 2}, {'🇬🇷': 'greek', '<:flag_bas:490116649467379712>': 'basque', '🇦🇲': 'armenian', '🇦🇱': 'albanian'}],
-        'constructed': [{'studying': 2}, {'<:flag1:490116752567697410>': 'esperanto', '🤖': 'programming'}]
+        'germanic': [{'native': 687653940602339349, 'fluent': 688070989757808653, 'studying': 688532522052878349}, {'🇬🇧': 'english', '🇩🇪': 'german', '🇩🇰': 'danish', '🇳🇱': 'dutch', '🇳🇴': 'norwegian', '🇸🇪': 'swedish', '🇮🇸': 'icelandic', '🇿🇦': 'afrikaans', '🇫🇴': 'faroese', '🇱🇺': 'luxembourgish'}],
+        'uralic': [{'native': 687653990791774218, 'fluent': 688071024356360372, 'studying': 688532812797706255}, {'🇫🇮': 'finnish', '🇭🇺': 'hungarian', '🇪🇪': 'estonian', '<:flag_smi:490116718241513472> ': 'sámi'}],
+        'celtic': [{'native': 687654028905021584, 'studying': 688532738810183692}, {'🇮🇪': 'celtic'}],
+        'romance': [{'native': 687654128905748743, 'fluent': 688071741448519708, 'studying': 688532923401371649}, {'🇫🇷': 'french', '🇪🇸': 'spanish', '🇧🇷': 'portuguese', '🇮🇹': 'italian', '🇷🇴': 'romanian', '<:flag_cat:635441691419082773>': 'catalan', '<:flag_gal:490116682417963008> ': 'galician', '<:flag_rm:490116699190722570>': 'latin'}],
+        'baltic': [{'native': 687654156852264978, 'fluent': 688072044243714095, 'studying': 688532873312993340}, {'🇱🇹': 'lithuanian', '🇱🇻': 'latvian'}],
+        'slavic': [{'native': 687654179707027495, 'fluent': 688072145687019524, 'studying': 688532945245307068}, {'🇷🇺': 'russian', '🇺🇦': 'ukrainian', '🇵🇱': 'polish', '🇧🇾': 'belarusian', '🇨🇿': 'czech', '🇸🇰': 'slovak', '🇧🇦': 'bosnian', '🇷🇸': 'serbian', '🇸🇮': 'slovenian', '🇭🇷': 'croatian', '🇲🇰': 'macedonian', '🇧🇬': 'bulgarian'}],
+        'semitic': [{'native': 687654243653779478, 'fluent': 688072184811618432, 'studying': 688533046894395424}, {'🇸🇦': 'arabic', '🇮🇱': 'hebrew', '🇪🇹': 'amharic'}],
+        'turkic': [{'native': 687654272284098560, 'fluent': 688072219053785093, 'studying': 688533085306093754}, {'🇹🇷': 'turkish', '🇰🇿': 'kazakh', '🇦🇿': 'azerbaijani'}],
+        'iranian': [{'native': 687654283684085771, 'fluent': 688073486459207745, 'studying': 123456789}, {'🇦🇫': 'pashto', '<:flag_kd:490181096873525258>': 'kurdish', '🇮🇷': 'persian'}],
+        'asian': [{'native': 687654312465137679, 'fluent': 688073546835951700, 'studying': 688533171112902663}, {'🇯🇵': 'japanese', '🇨🇳': 'chinese', '🇰🇷': 'korean', '🇻🇳': 'vietnamese', '🇹🇭': 'thai', '🇱🇰': 'sinhalese', '🇵🇭': 'tagalog', '🇮🇩': 'indonesian', '🇲🇾': 'malay', '🇲🇳': 'mongolian', '🇭🇰': 'cantonese'}],
+        'indian': [{'native': 687654329921830933, 'fluent': 688073575298629788, 'studying': 688533187315499127}, {'🇮🇳': 'hindustani'}],
+        'nonafiliated': [{'native': 688048079697739852, 'fluent': 688073619515113485, 'studying': 688533247986106373}, {'🇬🇷': 'greek', '<:flag_bas:490116649467379712>': 'basque', '🇦🇲': 'armenian', '🇦🇱': 'albanian'}],
+        'constructed': [{'studying': 688533271021486091}, {'<:flag1:490116752567697410>': 'esperanto', '🤖': 'programming'}]
     }
     
-	# Create room dm message
+    # Create room dm message
     if overload.message_id == message:
         if str(overload.emoji) == '⚙️':
-			with open('texts/random/create_room.txt', 'r', encoding='utf-8') as f:
-				text = f.readlines()
-				text = ''.join(text)
-					
+            with open('texts/random/create_room.txt', 'r', encoding='utf-8') as f:
+                text = f.readlines()
+                text = ''.join(text)
+
             embed = discord.Embed(description=text, colour=discord.Colour.dark_green())
             await user.send(embed=embed)
 	
-
-	
-	for branch in languages:
-
-    # Get the language equivalent to the reacted emoji
-    language_emojis = languages[branch][1]
-    for le in language_emojis:
-        if user_emoji == le:
-            the_language = language_emojis[le]
+    for branch in languages:
+        # Get the language equivalent to the reacted emoji
+        language_emojis = languages[branch][1]
+        for le in language_emojis:
+            if str(user_emoji) == str(le):
+                info.append(branch)
+                info.append(language_emojis[le])
+                break
+        if len(info) == 2:
             break
 
     # Get the type of the language
-    language_types = languages[branch][0]
+    language_types = languages[info[0]][0]
     for lt in language_types:
-        if rid == language_types[lt]:
-            the_type = lt
+        if rid == int(language_types[lt]):
+            info.append(lt)
             break
-            
-    if the_type == 'native':
-        text = read_native(branch, the_type, the_language)
+
+    print(info)
+    if info[2] == 'native':
+        text = read_native(info[0], info[2], info[1])
         embed = discord.Embed(title='', description=text, colour=discord.Colour.dark_green())
         embed.set_footer(text=f"Guild name: {guild.name}")
         embed.set_author(name=user, icon_url=user.avatar_url)
         return await user.send(embed=embed)
-    break
+
 
 
 @client.event
@@ -147,51 +149,46 @@ async def on_raw_reaction_remove(overload):
     # User reaction info
     user_emoji = overload.emoji
     rid = overload.message_id
+    info = []
 
     # Create room message id
     message = 688391033829982209
 
     languages = {
-        'germanic': [{'native': 687653940602339349, 'fluent': 688070989757808653, 'studying': 2}, {'🇬🇧': 'english', '🇩🇪': 'german', '🇩🇰': 'danish', '🇳🇱': 'dutch', '🇳🇴': 'norwegian', '🇸🇪': 'swedish', '🇮🇸': 'icelandic', '🇿🇦': 'afrikaans', '🇫🇴': 'faroese', '🇱🇺': 'luxembourgish'}],
-        'uralic': [{'native': 687653990791774218, 'fluent': 688071024356360372, 'studying': 2}, {'🇫🇮': 'finnish', '🇭🇺': 'hungarian', '🇪🇪': 'estonian', '<:flag_smi:490116718241513472> ': 'sámi'}],
-        'celtic': [{'native': 687654028905021584, 'studying': 2}, {'🇮🇪': 'celtic'}],
-        'romance': [{'native': 687654128905748743, 'fluent': 688071741448519708, 'studying': 2}, {'🇫🇷': 'french', '🇪🇸': 'spanish', '🇧🇷': 'portuguese', '🇮🇹': 'italian', '🇷🇴': 'romanian', '<:flag_cat:635441691419082773>': 'catalan', '<:flag_gal:490116682417963008> ': 'galician', '<:flag_rm:490116699190722570>': 'latin'}],
-        'baltic': [{'native': 687654156852264978, 'fluent': 688072044243714095, 'studying': 2}, {'🇱🇹': 'lithuanian', '🇱🇻': 'latvian'}],
-        'slavic': [{'native': 687654179707027495, 'fluent': 688072145687019524, 'studying': 2}, {'🇷🇺': 'russian', '🇺🇦': 'ukrainian', '🇵🇱': 'polish', '🇧🇾': 'belarusian', '🇨🇿': 'czech', '🇸🇰': 'slovak', '🇧🇦': 'bosnian', '🇷🇸': 'serbian', '🇸🇮': 'slovenian', '🇭🇷': 'croatian', '🇲🇰': 'macedonian', '🇧🇬': 'bulgarian'}],
-        'semitic': [{'native': 687654243653779478, 'fluent': 688072184811618432, 'studying': 2}, {'🇸🇦': 'arabic', '🇮🇱': 'hebrew', '🇪🇹': 'amharic'}],
-        'turkic': [{'native': 687654272284098560, 'fluent': 688072219053785093, 'studying': 2}, {'🇹🇷': 'turkish', '🇰🇿': 'kazakh', '🇦🇿': 'azerbaijani'}],
-        'iranian': [{'native': 687654283684085771, 'fluent': 688073486459207745, 'studying': 2}, {'🇦🇫': 'pashto', '<:flag_kd:490181096873525258>': 'kurdish', '🇮🇷': 'persian'}],
-        'asian': [{'native': 687654312465137679, 'fluent': 688073546835951700, 'studying': 2}, {'🇯🇵': 'japanese', '🇨🇳': 'chinese', '🇰🇷': 'korean', '🇻🇳': 'vietnamese', '🇹🇭': 'thai', '🇱🇰': 'sinhalese', '🇵🇭': 'tagalog', '🇮🇩': 'indonesian', '🇲🇾': 'malay', '🇲🇳': 'mongolian', '🇭🇰': 'cantonese'}],
-        'indian': [{'native': 687654329921830933, 'fluent': 688073575298629788, 'studying': 2}, {'🇮🇳': 'hindustani'}],
-        'nonafiliated': [{'native': 688048079697739852, 'fluent': 688073619515113485, 'studying': 2}, {'🇬🇷': 'greek', '<:flag_bas:490116649467379712>': 'basque', '🇦🇲': 'armenian', '🇦🇱': 'albanian'}],
-        'constructed': [{'studying': 2}, {'<:flag1:490116752567697410>': 'esperanto', '🤖': 'programming'}]
+        'germanic': [{'native': 687653940602339349, 'fluent': 688070989757808653, 'studying': 688532522052878349}, {'🇬🇧': 'english', '🇩🇪': 'german', '🇩🇰': 'danish', '🇳🇱': 'dutch', '🇳🇴': 'norwegian', '🇸🇪': 'swedish', '🇮🇸': 'icelandic', '🇿🇦': 'afrikaans', '🇫🇴': 'faroese', '🇱🇺': 'luxembourgish'}],
+        'uralic': [{'native': 687653990791774218, 'fluent': 688071024356360372, 'studying': 688532812797706255}, {'🇫🇮': 'finnish', '🇭🇺': 'hungarian', '🇪🇪': 'estonian', '<:flag_smi:490116718241513472> ': 'sámi'}],
+        'celtic': [{'native': 687654028905021584, 'studying': 688532738810183692}, {'🇮🇪': 'celtic'}],
+        'romance': [{'native': 687654128905748743, 'fluent': 688071741448519708, 'studying': 688532923401371649}, {'🇫🇷': 'french', '🇪🇸': 'spanish', '🇧🇷': 'portuguese', '🇮🇹': 'italian', '🇷🇴': 'romanian', '<:flag_cat:635441691419082773>': 'catalan', '<:flag_gal:490116682417963008> ': 'galician', '<:flag_rm:490116699190722570>': 'latin'}],
+        'baltic': [{'native': 687654156852264978, 'fluent': 688072044243714095, 'studying': 688532873312993340}, {'🇱🇹': 'lithuanian', '🇱🇻': 'latvian'}],
+        'slavic': [{'native': 687654179707027495, 'fluent': 688072145687019524, 'studying': 688532945245307068}, {'🇷🇺': 'russian', '🇺🇦': 'ukrainian', '🇵🇱': 'polish', '🇧🇾': 'belarusian', '🇨🇿': 'czech', '🇸🇰': 'slovak', '🇧🇦': 'bosnian', '🇷🇸': 'serbian', '🇸🇮': 'slovenian', '🇭🇷': 'croatian', '🇲🇰': 'macedonian', '🇧🇬': 'bulgarian'}],
+        'semitic': [{'native': 687654243653779478, 'fluent': 688072184811618432, 'studying': 688533046894395424}, {'🇸🇦': 'arabic', '🇮🇱': 'hebrew', '🇪🇹': 'amharic'}],
+        'turkic': [{'native': 687654272284098560, 'fluent': 688072219053785093, 'studying': 688533085306093754}, {'🇹🇷': 'turkish', '🇰🇿': 'kazakh', '🇦🇿': 'azerbaijani'}],
+        'iranian': [{'native': 687654283684085771, 'fluent': 688073486459207745, 'studying': 123456789}, {'🇦🇫': 'pashto', '<:flag_kd:490181096873525258>': 'kurdish', '🇮🇷': 'persian'}],
+        'asian': [{'native': 687654312465137679, 'fluent': 688073546835951700, 'studying': 688533171112902663}, {'🇯🇵': 'japanese', '🇨🇳': 'chinese', '🇰🇷': 'korean', '🇻🇳': 'vietnamese', '🇹🇭': 'thai', '🇱🇰': 'sinhalese', '🇵🇭': 'tagalog', '🇮🇩': 'indonesian', '🇲🇾': 'malay', '🇲🇳': 'mongolian', '🇭🇰': 'cantonese'}],
+        'indian': [{'native': 687654329921830933, 'fluent': 688073575298629788, 'studying': 688533187315499127}, {'🇮🇳': 'hindustani'}],
+        'nonafiliated': [{'native': 688048079697739852, 'fluent': 688073619515113485, 'studying': 688533247986106373}, {'🇬🇷': 'greek', '<:flag_bas:490116649467379712>': 'basque', '🇦🇲': 'armenian', '🇦🇱': 'albanian'}],
+        'constructed': [{'studying': 688533271021486091}, {'<:flag1:490116752567697410>': 'esperanto', '🤖': 'programming'}]
     }
-
 
     for branch in languages:
 
         # Get the language equivalent to the reacted emoji
         language_emojis = languages[branch][1]
         for le in language_emojis:
-            if user_emoji == le:
-                the_language = language_emojis[le]
+            if str(user_emoji) == str(le):
+                info.append(branch)
+                info.append(language_emojis[le])
                 break
+        if len(info) == 2:
+            break
 
-        # Get the type of the language
-        language_types = languages[branch][0]
-        for lt in language_types:
-            if rid == language_types[lt]:
-                the_type = lt
-                break
-
-        if the_type == 'native':
-            pass
-        elif the_type == 'fluent':
-            pass
-        elif the_type == 'studying':
-            pass
-
-        break
+    # Get the type of the language
+    language_types = languages[info[0]][0]
+    for lt in language_types:
+        if rid == language_types[lt]:
+            info.append(lt)
+            break
+    print(info)
       
       
 # Handles the errors
