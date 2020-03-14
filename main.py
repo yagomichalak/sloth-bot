@@ -67,125 +67,131 @@ async def on_message(message):
     await client.process_commands(message)
 
 
+def read_native(branch, type, language):
+    with open(f'texts/{branch}/{type}/{language}.txt', 'r', encoding='utf-8') as f:
+        text = f.readlines()
+        text = ''.join(text)
+        return text
+        
+        
 @client.event
 async def on_raw_reaction_add(overload):
     guild = client.get_guild(overload.guild_id)
     user = discord.utils.get(guild.members, id=overload.user_id)
+	
+	# User reaction info
+	user_emoji = overload.emoji
+	rid = overload.message_id
+	
+	# Create room message id
     message = 688391033829982209
-    native_germanic = 687653940602339349
-    native_uralic = 687653990791774218
-    native_celtic = 687654028905021584
-    native_romance = 687654128905748743
-    native_baltic = 687654156852264978
-    native_slavic = 687654179707027495
-    native_semitic = 687654243653779478
-    native_turkic = 687654272284098560
-    native_iranian = 687654283684085771
-    native_asian = 687654312465137679
-    native_indian = 687654329921830933
-    native_nonafiliated = 1234567890
+	
+    languages = {
+        'germanic': [{'native': 687653940602339349, 'fluent': 688070989757808653, 'studying': 2}, {'🇬🇧': 'english', '🇩🇪': 'german', '🇩🇰': 'danish', '🇳🇱': 'dutch', '🇳🇴': 'norwegian', '🇸🇪': 'swedish', '🇮🇸': 'icelandic', '🇿🇦': 'afrikaans', '🇫🇴': 'faroese', '🇱🇺': 'luxembourgish'}],
+        'uralic': [{'native': 687653990791774218, 'fluent': 688071024356360372, 'studying': 2}, {'🇫🇮': 'finnish', '🇭🇺': 'hungarian', '🇪🇪': 'estonian', '<:flag_smi:490116718241513472> ': 'sámi'}],
+        'celtic': [{'native': 687654028905021584, 'studying': 2}, {'🇮🇪': 'celtic'}],
+        'romance': [{'native': 687654128905748743, 'fluent': 688071741448519708, 'studying': 2}, {'🇫🇷': 'french', '🇪🇸': 'spanish', '🇧🇷': 'portuguese', '🇮🇹': 'italian', '🇷🇴': 'romanian', '<:flag_cat:635441691419082773>': 'catalan', '<:flag_gal:490116682417963008> ': 'galician', '<:flag_rm:490116699190722570>': 'latin'}],
+        'baltic': [{'native': 687654156852264978, 'fluent': 688072044243714095, 'studying': 2}, {'🇱🇹': 'lithuanian', '🇱🇻': 'latvian'}],
+        'slavic': [{'native': 687654179707027495, 'fluent': 688072145687019524, 'studying': 2}, {'🇷🇺': 'russian', '🇺🇦': 'ukrainian', '🇵🇱': 'polish', '🇧🇾': 'belarusian', '🇨🇿': 'czech', '🇸🇰': 'slovak', '🇧🇦': 'bosnian', '🇷🇸': 'serbian', '🇸🇮': 'slovenian', '🇭🇷': 'croatian', '🇲🇰': 'macedonian', '🇧🇬': 'bulgarian'}],
+        'semitic': [{'native': 687654243653779478, 'fluent': 688072184811618432, 'studying': 2}, {'🇸🇦': 'arabic', '🇮🇱': 'hebrew', '🇪🇹': 'amharic'}],
+        'turkic': [{'native': 687654272284098560, 'fluent': 688072219053785093, 'studying': 2}, {'🇹🇷': 'turkish', '🇰🇿': 'kazakh', '🇦🇿': 'azerbaijani'}],
+        'iranian': [{'native': 687654283684085771, 'fluent': 688073486459207745, 'studying': 2}, {'🇦🇫': 'pashto', '<:flag_kd:490181096873525258>': 'kurdish', '🇮🇷': 'persian'}],
+        'asian': [{'native': 687654312465137679, 'fluent': 688073546835951700, 'studying': 2}, {'🇯🇵': 'japanese', '🇨🇳': 'chinese', '🇰🇷': 'korean', '🇻🇳': 'vietnamese', '🇹🇭': 'thai', '🇱🇰': 'sinhalese', '🇵🇭': 'tagalog', '🇮🇩': 'indonesian', '🇲🇾': 'malay', '🇲🇳': 'mongolian', '🇭🇰': 'cantonese'}],
+        'indian': [{'native': 687654329921830933, 'fluent': 688073575298629788, 'studying': 2}, {'🇮🇳': 'hindustani'}],
+        'nonafiliated': [{'native': 688048079697739852, 'fluent': 688073619515113485, 'studying': 2}, {'🇬🇷': 'greek', '<:flag_bas:490116649467379712>': 'basque', '🇦🇲': 'armenian', '🇦🇱': 'albanian'}],
+        'constructed': [{'studying': 2}, {'<:flag1:490116752567697410>': 'esperanto', '🤖': 'programming'}]
+    }
     
-    pvm = '''You can create your own room by joining any room with a plus on it.
-    
-**Public Commands:**
-
-Here are the commands you can use:
-
-`vc/lock` - Locks the room so no one can join.
-`vc/unlock` - Unlocks the room allowing people to join.
-`vc/kick @username` - Kicks and locks the room for an user 
-Above commands are only usable by the owner of the room.
-Ownership is automatically transferred to another member in the room when the original owner leaves.
-For transfering ownership without leaving the room use:
-`vc/transfer @user`
-The role will disappear after 1 minute.'''
-
+	# Create room dm message
     if overload.message_id == message:
         if str(overload.emoji) == '⚙️':
-            embed = discord.Embed(description=pvm, colour=discord.Colour.dark_green())
+			with open('texts/random/create_room.txt', 'r', encoding='utf-8') as f:
+				text = f.readlines()
+				text = ''.join(text)
+					
+            embed = discord.Embed(description=text, colour=discord.Colour.dark_green())
             await user.send(embed=embed)
+	
 
-    elif overload.message_id == native_germanic:
-        if str(overload.emoji) == '🇬🇧':
-            embed = discord.Embed(title='English', description=read_native('native', 'english'), colour=discord.Colour.dark_green())
-        elif str(overload.emoji) == '🇩🇪':
-            embed = discord.Embed(title='German', description=read_native('native', 'german'), colour=discord.Colour.dark_green())
-        elif str(overload.emoji) == '🇩🇰':
-            embed = discord.Embed(title='Danish', description=read_native('native', 'danish'), colour=discord.Colour.dark_green())
-        elif str(overload.emoji) == '🇳🇱':
-            embed = discord.Embed(title='Dutch', description=read_native('native', 'dutch'), colour=discord.Colour.dark_green())
-        elif str(overload.emoji) == '🇳🇴':
-            embed = discord.Embed(title='Norwegian', description=read_native('native', 'norwegian'), colour=discord.Colour.dark_green())
-        elif str(overload.emoji) == '🇸🇪':
-            embed = discord.Embed(title='Swedish', description=read_native('native', 'swedish'), colour=discord.Colour.dark_green())
-        elif str(overload.emoji) == '🇮🇸':
-            embed = discord.Embed(title='Icelandic', description=read_native('native', 'icelandic'), colour=discord.Colour.dark_green())
-        elif str(overload.emoji) == '🇿🇦':
-            embed = discord.Embed(title='Afrikaans', description=read_native('native', 'afrikaans'), colour=discord.Colour.dark_green())
-        elif str(overload.emoji) == '🇫🇴':
-            embed = discord.Embed(title='Faroese', description=read_native('native', 'faroese'), colour=discord.Colour.dark_green())
-        elif str(overload.emoji) == '🇱🇺':
-            embed = discord.Embed(title='Luxembourgish', description=read_native('native', 'luxembourgish'), colour=discord.Colour.dark_green())
-        
-    elif overload.message_id == native_uralic:
-        if str(overload.emoji) == '':
-            embed = discord.Embed(title='Finnish', description=read_native('native', 'finnish'), colour=discord.Colour.dark_green())
-        elif str(overload.emoji) == '':
-            embed = discord.Embed(title='Hungarian', description=read_native('native', 'hungarian'), colour=discord.Colour.dark_green())
-        elif str(overload.emoji) == '':
-            embed = discord.Embed(title='Estonian', description=read_native('native', 'estonian'), colour=discord.Colour.dark_green())
-        elif str(overload.emoji) == '':
-            embed = discord.Embed(title='Sámi', description=read_native('native', 'sámi'), colour=discord.Colour.dark_green())
-            
-    elif overload.message_id == native_celtic:
-        if str(overload.emoji) == '':
-            embed = discord.Embed(title='Celtic', description=read_native('native', 'celtic'), colour=discord.Colour.dark_green())
-            
-    elif overload.message_id == native_romance:
-        if str(overload.emoji) == '':
-            embed = discord.Embed(title='French', description=read_native('native', 'french'), colour=discord.Colour.dark_green())
-        elif str(overload.emoji) == '':
-            embed = discord.Embed(title='Spanish', description=read_native('native', 'spanish'), colour=discord.Colour.dark_green())
-        elif str(overload.emoji) == '':
-            embed = discord.Embed(title='Portuguese', description=read_native('native', 'portuguese'), colour=discord.Colour.dark_green())
-        elif str(overload.emoji) == '':
-            embed = discord.Embed(title='Italian', description=read_native('native', 'italian'), colour=discord.Colour.dark_green())
-        elif str(overload.emoji) == '':
-            embed = discord.Embed(title='Romanian', description=read_native('native', 'romanian'), colour=discord.Colour.dark_green())
-        elif str(overload.emoji) == '':
-            embed = discord.Embed(title='Catalan', description=read_native('native', 'catalan'), colour=discord.Colour.dark_green())
-            
-    elif overload.message_id == native_baltic:
-        if str(overload.emoji) == '':
-            embed = discord.Embed(title='Lithuanian', description=read_native('native', 'lithuanian'), colour=discord.Colour.dark_green())
-        elif str(overload.emoji) == '':
-            embed = discord.Embed(title='Latvian', description=read_native('native', 'latvian'), colour=discord.Colour.dark_green())
-            
-    elif overload.message_id == native_slavic:
-        if str(overload.emoji) == '':
-            embed = discord.Embed(title='', description=read_native('native', ''), colour=discord.Colour.dark_green())
-    elif overload.message_id == native_semitic:
-        if str(overload.emoji) == '':
-            embed = discord.Embed(title='', description=read_native('native', ''), colour=discord.Colour.dark_green())
-    elif overload.message_id == native_turkic:
-        if str(overload.emoji) == '':
-            embed = discord.Embed(title='', description=read_native('native', ''), colour=discord.Colour.dark_green())
-    elif overload.message_id == native_iranian:
-        if str(overload.emoji) == '🇬🇧':
-            embed = discord.Embed(title='', description=read_native('native', ''), colour=discord.Colour.dark_green())
-    elif overload.message_id == native_asian:
-        if str(overload.emoji) == '':
-            embed = discord.Embed(title='', description=read_native('native', ''), colour=discord.Colour.dark_green())
-    elif overload.message_id == native_indian:
-        if str(overload.emoji) == '':
-            embed = discord.Embed(title='', description=read_native('native', ''), colour=discord.Colour.dark_green())
-    elif overload.message_id == native_nonafiliated:
-        if str(overload.emoji) == '':
-            embed = discord.Embed(title='', description=read_native('native', ''), colour=discord.Colour.dark_green())
+	
+	for branch in languages:
 
+    # Get the language equivalent to the reacted emoji
+    language_emojis = languages[branch][1]
+    for le in language_emojis:
+        if user_emoji == le:
+            the_language = language_emojis[le]
+            break
+
+    # Get the type of the language
+    language_types = languages[branch][0]
+    for lt in language_types:
+        if rid == language_types[lt]:
+            the_type = lt
+            break
+            
+    if the_type == 'native':
+        text = read_native(branch, the_type, the_language)
+        embed = discord.Embed(title='', description=text, colour=discord.Colour.dark_green())
         embed.set_footer(text=f"Guild name: {guild.name}")
         embed.set_author(name=user, icon_url=user.avatar_url)
         return await user.send(embed=embed)
+    break
+
+
+@client.event
+async def on_raw_reaction_remove(overload):
+    guild = client.get_guild(overload.guild_id)
+    user = discord.utils.get(guild.members, id=overload.user_id)
+
+    # User reaction info
+    user_emoji = overload.emoji
+    rid = overload.message_id
+
+    # Create room message id
+    message = 688391033829982209
+
+    languages = {
+        'germanic': [{'native': 687653940602339349, 'fluent': 688070989757808653, 'studying': 2}, {'🇬🇧': 'english', '🇩🇪': 'german', '🇩🇰': 'danish', '🇳🇱': 'dutch', '🇳🇴': 'norwegian', '🇸🇪': 'swedish', '🇮🇸': 'icelandic', '🇿🇦': 'afrikaans', '🇫🇴': 'faroese', '🇱🇺': 'luxembourgish'}],
+        'uralic': [{'native': 687653990791774218, 'fluent': 688071024356360372, 'studying': 2}, {'🇫🇮': 'finnish', '🇭🇺': 'hungarian', '🇪🇪': 'estonian', '<:flag_smi:490116718241513472> ': 'sámi'}],
+        'celtic': [{'native': 687654028905021584, 'studying': 2}, {'🇮🇪': 'celtic'}],
+        'romance': [{'native': 687654128905748743, 'fluent': 688071741448519708, 'studying': 2}, {'🇫🇷': 'french', '🇪🇸': 'spanish', '🇧🇷': 'portuguese', '🇮🇹': 'italian', '🇷🇴': 'romanian', '<:flag_cat:635441691419082773>': 'catalan', '<:flag_gal:490116682417963008> ': 'galician', '<:flag_rm:490116699190722570>': 'latin'}],
+        'baltic': [{'native': 687654156852264978, 'fluent': 688072044243714095, 'studying': 2}, {'🇱🇹': 'lithuanian', '🇱🇻': 'latvian'}],
+        'slavic': [{'native': 687654179707027495, 'fluent': 688072145687019524, 'studying': 2}, {'🇷🇺': 'russian', '🇺🇦': 'ukrainian', '🇵🇱': 'polish', '🇧🇾': 'belarusian', '🇨🇿': 'czech', '🇸🇰': 'slovak', '🇧🇦': 'bosnian', '🇷🇸': 'serbian', '🇸🇮': 'slovenian', '🇭🇷': 'croatian', '🇲🇰': 'macedonian', '🇧🇬': 'bulgarian'}],
+        'semitic': [{'native': 687654243653779478, 'fluent': 688072184811618432, 'studying': 2}, {'🇸🇦': 'arabic', '🇮🇱': 'hebrew', '🇪🇹': 'amharic'}],
+        'turkic': [{'native': 687654272284098560, 'fluent': 688072219053785093, 'studying': 2}, {'🇹🇷': 'turkish', '🇰🇿': 'kazakh', '🇦🇿': 'azerbaijani'}],
+        'iranian': [{'native': 687654283684085771, 'fluent': 688073486459207745, 'studying': 2}, {'🇦🇫': 'pashto', '<:flag_kd:490181096873525258>': 'kurdish', '🇮🇷': 'persian'}],
+        'asian': [{'native': 687654312465137679, 'fluent': 688073546835951700, 'studying': 2}, {'🇯🇵': 'japanese', '🇨🇳': 'chinese', '🇰🇷': 'korean', '🇻🇳': 'vietnamese', '🇹🇭': 'thai', '🇱🇰': 'sinhalese', '🇵🇭': 'tagalog', '🇮🇩': 'indonesian', '🇲🇾': 'malay', '🇲🇳': 'mongolian', '🇭🇰': 'cantonese'}],
+        'indian': [{'native': 687654329921830933, 'fluent': 688073575298629788, 'studying': 2}, {'🇮🇳': 'hindustani'}],
+        'nonafiliated': [{'native': 688048079697739852, 'fluent': 688073619515113485, 'studying': 2}, {'🇬🇷': 'greek', '<:flag_bas:490116649467379712>': 'basque', '🇦🇲': 'armenian', '🇦🇱': 'albanian'}],
+        'constructed': [{'studying': 2}, {'<:flag1:490116752567697410>': 'esperanto', '🤖': 'programming'}]
+    }
+
+
+    for branch in languages:
+
+        # Get the language equivalent to the reacted emoji
+        language_emojis = languages[branch][1]
+        for le in language_emojis:
+            if user_emoji == le:
+                the_language = language_emojis[le]
+                break
+
+        # Get the type of the language
+        language_types = languages[branch][0]
+        for lt in language_types:
+            if rid == language_types[lt]:
+                the_type = lt
+                break
+
+        if the_type == 'native':
+            pass
+        elif the_type == 'fluent':
+            pass
+        elif the_type == 'studying':
+            pass
+
+        break
       
       
 # Handles the errors
@@ -883,13 +889,6 @@ async def files(ctx, type: str = None):
         embed.add_field(name='None', value='No files available')
 
     await ctx.send(content=None, embed=embed)
-
-
-def read_native(type, language):
-    with open(f'texts/germanic/{type}/{language}.txt', 'r', encoding='utf-8') as f:
-        text = f.readlines()
-        text = ''.join(text)
-        return text
         
         
 # Calendar commands
