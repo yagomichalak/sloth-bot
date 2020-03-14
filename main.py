@@ -71,7 +71,7 @@ async def on_message(message):
 async def on_raw_reaction_add(overload):
     guild = client.get_guild(overload.guild_id)
     user = discord.utils.get(guild.members, id=overload.user_id)
-    message = 686821958708363281
+    message = 688391033829982209
     native_germanic = 687653940602339349
     native_uralic = 687653990791774218
     native_celtic = 687654028905021584
@@ -83,6 +83,8 @@ async def on_raw_reaction_add(overload):
     native_iranian = 687654283684085771
     native_asian = 687654312465137679
     native_indian = 687654329921830933
+    native_nonafiliated = 1234567890
+    
     pvm = '''You can create your own room by joining any room with a plus on it.
     
 **Public Commands:**
@@ -99,7 +101,7 @@ For transfering ownership without leaving the room use:
 The role will disappear after 1 minute.'''
 
     if overload.message_id == message:
-        if str(overload.emoji) == '⌛':
+        if str(overload.emoji) == '⚙️':
             embed = discord.Embed(description=pvm, colour=discord.Colour.dark_green())
             await user.send(embed=embed)
 
@@ -124,11 +126,68 @@ The role will disappear after 1 minute.'''
             embed = discord.Embed(title='Faroese', description=read_native('native', 'faroese'), colour=discord.Colour.dark_green())
         elif str(overload.emoji) == '🇱🇺':
             embed = discord.Embed(title='Luxembourgish', description=read_native('native', 'luxembourgish'), colour=discord.Colour.dark_green())
+        
+    elif overload.message_id == native_uralic:
+        if str(overload.emoji) == '':
+            embed = discord.Embed(title='Finnish', description=read_native('native', 'finnish'), colour=discord.Colour.dark_green())
+        elif str(overload.emoji) == '':
+            embed = discord.Embed(title='Hungarian', description=read_native('native', 'hungarian'), colour=discord.Colour.dark_green())
+        elif str(overload.emoji) == '':
+            embed = discord.Embed(title='Estonian', description=read_native('native', 'estonian'), colour=discord.Colour.dark_green())
+        elif str(overload.emoji) == '':
+            embed = discord.Embed(title='Sámi', description=read_native('native', 'sámi'), colour=discord.Colour.dark_green())
+            
+    elif overload.message_id == native_celtic:
+        if str(overload.emoji) == '':
+            embed = discord.Embed(title='Celtic', description=read_native('native', 'celtic'), colour=discord.Colour.dark_green())
+            
+    elif overload.message_id == native_romance:
+        if str(overload.emoji) == '':
+            embed = discord.Embed(title='French', description=read_native('native', 'french'), colour=discord.Colour.dark_green())
+        elif str(overload.emoji) == '':
+            embed = discord.Embed(title='Spanish', description=read_native('native', 'spanish'), colour=discord.Colour.dark_green())
+        elif str(overload.emoji) == '':
+            embed = discord.Embed(title='Portuguese', description=read_native('native', 'portuguese'), colour=discord.Colour.dark_green())
+        elif str(overload.emoji) == '':
+            embed = discord.Embed(title='Italian', description=read_native('native', 'italian'), colour=discord.Colour.dark_green())
+        elif str(overload.emoji) == '':
+            embed = discord.Embed(title='Romanian', description=read_native('native', 'romanian'), colour=discord.Colour.dark_green())
+        elif str(overload.emoji) == '':
+            embed = discord.Embed(title='Catalan', description=read_native('native', 'catalan'), colour=discord.Colour.dark_green())
+            
+    elif overload.message_id == native_baltic:
+        if str(overload.emoji) == '':
+            embed = discord.Embed(title='Lithuanian', description=read_native('native', 'lithuanian'), colour=discord.Colour.dark_green())
+        elif str(overload.emoji) == '':
+            embed = discord.Embed(title='Latvian', description=read_native('native', 'latvian'), colour=discord.Colour.dark_green())
+            
+    elif overload.message_id == native_slavic:
+        if str(overload.emoji) == '':
+            embed = discord.Embed(title='', description=read_native('native', ''), colour=discord.Colour.dark_green())
+    elif overload.message_id == native_semitic:
+        if str(overload.emoji) == '':
+            embed = discord.Embed(title='', description=read_native('native', ''), colour=discord.Colour.dark_green())
+    elif overload.message_id == native_turkic:
+        if str(overload.emoji) == '':
+            embed = discord.Embed(title='', description=read_native('native', ''), colour=discord.Colour.dark_green())
+    elif overload.message_id == native_iranian:
+        if str(overload.emoji) == '🇬🇧':
+            embed = discord.Embed(title='', description=read_native('native', ''), colour=discord.Colour.dark_green())
+    elif overload.message_id == native_asian:
+        if str(overload.emoji) == '':
+            embed = discord.Embed(title='', description=read_native('native', ''), colour=discord.Colour.dark_green())
+    elif overload.message_id == native_indian:
+        if str(overload.emoji) == '':
+            embed = discord.Embed(title='', description=read_native('native', ''), colour=discord.Colour.dark_green())
+    elif overload.message_id == native_nonafiliated:
+        if str(overload.emoji) == '':
+            embed = discord.Embed(title='', description=read_native('native', ''), colour=discord.Colour.dark_green())
 
         embed.set_footer(text=f"Guild name: {guild.name}")
         embed.set_author(name=user, icon_url=user.avatar_url)
         return await user.send(embed=embed)
-        
+      
+      
 # Handles the errors
 @client.event
 async def on_command_error(ctx, error):
