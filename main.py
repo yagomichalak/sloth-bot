@@ -913,7 +913,7 @@ async def auto(ctx, member: discord.Member = None, text: str = None):
 
 
     general_channel = discord.utils.get(ctx.guild.channels, id=562019539135627276)
-    await general_channel.send(f'''{member.mention} - Hey! since you didn't assign your native language I went ahead and assigned it for you automatically based on my best guess of what is your native language, i came to the conclusion that it is {text.title()}.  If I'm incorrect please let me know!''')
+    await general_channel.send(f'''{member.mention} - Hey! since you didn't assign your native language I went ahead and assigned it for you automatically based on my best guess of what is your native language, I came to the conclusion that it is {text.title()}.  If I'm incorrect please let me know!''')
         
         
 @client.command()
