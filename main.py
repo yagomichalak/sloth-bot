@@ -892,7 +892,7 @@ async def files(ctx, type: str = None):
 @commands.has_permissions(administrator=True)
 async def embed_join_us(ctx):
     await ctx.message.delete()
-    embed = discord.Embed(title="Become a Teacher", description="Do you want to teach on our server? Since this community is made by people like you, we are always looking for people to join our ranks ! Teach your native language here ! [Click here to apply](https://docs.google.com/forms/d/1H-rzl9AKgfH1WuKN7nYAW-xJx411Q4-HxfPXuPUFQXs", url='https://docs.google.com/forms/d/1H-rzl9AKgfH1WuKN7nYAW-xJx411Q4-HxfPXuPUFQXs', colour=2788104, timestamp=ctx.message.created_at)
+    embed = discord.Embed(title="Become a Teacher", description="Do you want to teach on our server? Since this community is made by people like you, we are always looking for people to join our ranks ! Teach your native language here ! [Click here to apply](https://docs.google.com/forms/d/1H-rzl9AKgfH1WuKN7nYAW-xJx411Q4-HxfPXuPUFQXs", url='https://docs.google.com/forms/d/1H-rzl9AKgfH1WuKN7nYAW-xJx411Q4-HxfPXuPUFQXs)', colour=2788104, timestamp=ctx.message.created_at)
     embed.add_field(name='<:zslothcrazy:686738789162549337>', value='Although we are accepting teachers of any languages, There are some languages in particular that we sought to incorporate in our server.', inline=False)
     embed.add_field(name="Japanese Teacher Needed :flag_jp:", value="Are you a native japanese speaker? Japanese Native speaker needed for advanced japanese pronunciation lesson !", inline=False)
     embed.add_field(name="German Teacher Needed :flag_de:", value="We are looking for native german speakers to help us once a week with basic german grammar.", inline=False)
