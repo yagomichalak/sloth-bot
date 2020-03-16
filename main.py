@@ -890,6 +890,19 @@ async def files(ctx, type: str = None):
         
 @client.command()
 @commands.has_permissions(administrator=True)
+async def welcome(ctx, member: discord.Member = None):
+    await ctx.message.delete()
+    if not member:
+        return await ctx.send('Inform a member!')
+
+    general_channel = discord.utils.get(ctx.guild.channels, id=562019539135627276)
+    await general_channel.send(f'''{member.mention}, remember to Assign your Native language in  <#679333977705676830>, click in the flag that best represents your native language!
+This way you will have full access to the server and its voice channels!
+Enjoy!!''')
+        
+        
+@client.command()
+@commands.has_permissions(administrator=True)
 async def embed_join_us(ctx):
     await ctx.message.delete()
     embed = discord.Embed(title="Become a Teacher", description="Do you want to teach on our server? Since this community is made by people like you, we are always looking for people to join our ranks ! Teach your native language here ! [Click here to apply](https://docs.google.com/forms/d/1H-rzl9AKgfH1WuKN7nYAW-xJx411Q4-HxfPXuPUFQXs)", url='https://docs.google.com/forms/d/1H-rzl9AKgfH1WuKN7nYAW-xJx411Q4-HxfPXuPUFQXs)', colour=2788104, timestamp=ctx.message.created_at)
