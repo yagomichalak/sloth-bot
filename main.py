@@ -900,6 +900,21 @@ async def welcome(ctx, member: discord.Member = None):
 This way you will have full access to the server and its voice channels!
 Enjoy!!''')
         
+    
+@client.command()
+@commands.has_permissions(administrator=True)
+async def auto(ctx, member: discord.Member = None, text: str = None):
+    await ctx.message.delete()
+    if not text:
+        return await ctx.send('Inform the parameters!')
+    
+    elif not member:
+        return await ctx.send('Inform a member!')
+
+
+    general_channel = discord.utils.get(ctx.guild.channels, id=562019539135627276)
+    await general_channel.send(f'''{member.mention} - Hey! since you didn't assign your native language I went ahead and assigned it for you automatically based on my best guess of what is your native language, i came to the conclusion that it is {text.title()}.  If I'm incorrect please let me know!''')
+        
         
 @client.command()
 @commands.has_permissions(administrator=True)
