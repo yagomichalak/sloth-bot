@@ -914,7 +914,19 @@ async def auto(ctx, member: discord.Member = None, text: str = None):
 
     general_channel = discord.utils.get(ctx.guild.channels, id=562019539135627276)
     await general_channel.send(f'''{member.mention} - Hey! since you didn't assign your native language I went ahead and assigned it for you automatically based on my best guess of what is your native language, I came to the conclusion that it is {text.title()}.  If I'm incorrect please let me know!''')
-        
+      
+
+@client.command()
+@commands.has_permissions(administrator=True)
+async def announce(ctx):
+    await ctx.message.delete()
+    if len(ctx.message.content.split()) < 2:
+        return await ctx.send('You must inform all parameters!')
+    
+    general_channel = discord.utils.get(ctx.guild.channels, id=562019353583681536)
+    msg = ctx.message.content.split('!announce', 1)
+    await general_channel.send(msg[1])
+      
         
 @client.command()
 @commands.has_permissions(administrator=True)
