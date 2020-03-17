@@ -99,7 +99,7 @@ async def on_raw_reaction_add(overload):
         'iranian': [{'native': 687654283684085771, 'fluent': 688073486459207745, 'studying': 123456789}, {'🇦🇫': 'pashto', '<:flag_kd:490181096873525258>': 'kurdish', '🇮🇷': 'persian'}],
         'asian': [{'native': 687654312465137679, 'fluent': 688073546835951700, 'studying': 688533171112902663}, {'🇯🇵': 'japanese', '🇨🇳': 'chinese', '🇰🇷': 'korean', '🇻🇳': 'vietnamese', '🇹🇭': 'thai', '🇱🇰': 'sinhalese', '🇵🇭': 'tagalog', '🇮🇩': 'indonesian', '🇲🇾': 'malay', '🇲🇳': 'mongolian', '🇭🇰': 'cantonese'}],
         'indian': [{'native': 687654329921830933, 'fluent': 688073575298629788, 'studying': 688533187315499127}, {'🇮🇳': 'hindustani'}],
-        'nonafiliated': [{'native': 688048079697739852, 'fluent': 688073619515113485, 'studying': 688533247986106373}, {'🇬🇷': 'greek', '<:flag_bas:490116649467379712>': 'basque', '🇦🇲': 'armenian', '🇦🇱': 'albanian'}],
+        'unafiliated': [{'native': 688048079697739852, 'fluent': 688073619515113485, 'studying': 688533247986106373}, {'🇬🇷': 'greek', '<:flag_bas:490116649467379712>': 'basque', '🇦🇲': 'armenian', '🇦🇱': 'albanian'}],
         'constructed': [{'studying': 688533271021486091}, {'<:flag1:490116752567697410>': 'esperanto', '🤖': 'programming'}]
     }
     
