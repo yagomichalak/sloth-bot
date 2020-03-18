@@ -926,7 +926,18 @@ async def announce(ctx):
     general_channel = discord.utils.get(ctx.guild.channels, id=562019353583681536)
     msg = ctx.message.content.split('!announce', 1)
     await general_channel.send(msg[1])
-      
+  
+  
+  @client.command()
+@commands.has_permissions(administrator=True)
+async def say(ctx):
+    await ctx.message.delete()
+    if len(ctx.message.content.split()) < 2:
+        return await ctx.send('You must inform all parameters!')
+
+    msg = ctx.message.content.split('!say', 1)
+    await ctx.send(msg[1])
+        
         
 @client.command()
 @commands.has_permissions(administrator=True)
