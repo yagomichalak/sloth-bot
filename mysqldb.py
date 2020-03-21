@@ -1,149 +1,241 @@
-import mysql.connector
+import aiomysql
+import asyncio
 
-# mysql://b538834d791963:23cbe0c7@us-cdbr-iron-east-04.cleardb.net/heroku_e2ddae4f4191b3e?reconnect=true
-
-db = mysql.connector.connect(
-    host='us-cdbr-iron-east-04.cleardb.net',
-    user='b538834d791963',
-    passwd='23cbe0c7',
-    database='heroku_e2ddae4f4191b3e'
-)
-
-mycursor = db.cursor()
-
-def create_table():
-    mycursor.execute('CREATE TABLE Teachers (id int NOT NULL, language VARCHAR(30) NOT NULL, teacher VARCHAR(30) NOT NULL, day VARCHAR(30) NOT NULL, time VARCHAR(30) NOT NULL, type VARCHAR(30), forr VARCHAR(30))')
+loop = asyncio.get_event_loop()
 
 
-def create_table_cid():
-    mycursor.execute('CREATE TABLE CID (channel_id bigint, message_id bigint)')
+async def the_data_base():
+    db = await aiomysql.connect(host='us-cdbr-iron-east-04.cleardb.net',
+                                user='b538834d791963',
+                                password='23cbe0c7',
+                                db='heroku_e2ddae4f4191b3e', loop=loop)
+
+    mycursor = await db.cursor()
+    return mycursor, db
 
 
-def create_table_event():
-    mycursor.execute('CREATE TABLE Events (id int, event VARCHAR(30), day VARCHAR(30), time VARCHAR(30))')
+async def create_class_announcement():
+    mycursor, db = await the_data_base()
+    await mycursor.execute('CREATE TABLE class_announcement (id bigint, class_id bigint)')
+    await mycursor.close()
 
 
-def add_teacher_class(id: int, language: str, teacher: str, day: str, time: str, type: str, forr: str):
-    mycursor.execute(f"INSERT INTO Teachers (id, language, teacher, day, time, type, forr) VALUES (%s, %s, %s, %s, %s, %s, %s)", (id, language, teacher, day, time, type, forr))
-    db.commit()
-    
-
-def remove_teacher_class(id: int):
-        mycursor.execute(f'DELETE FROM Teachers WHERE id = {id}')
-        db.commit()
-        teachers = show_teachers()
-        count = 0
-        for teacher in teachers:
-            count += 1
-            mycursor.execute(f"UPDATE Teachers SET id = {count} WHERE id = {teacher[0]}")
-            db.commit()
+async def add_class_announcement(id: int, class_id: int):
+    mycursor, db = await the_data_base()
+    await mycursor.execute(f"INSERT INTO class_announcement (id, class_id) VALUES (%s, %s)", (id, class_id))
+    await db.commit()
+    await mycursor.close()
 
 
-def edit_teacher_class_language(id: int, language: str):
-    mycursor.execute(f"UPDATE Teachers SET language = '{language}' WHERE id = {id}")
-    db.commit()
-        
-
-def edit_teacher_class_name(id: int, name: str):
-    mycursor.execute(f"UPDATE Teachers SET teacher = '{name}' WHERE id = {id}")
-    db.commit()
-    
-    
-def edit_teacher_class_day(id: int, day: str):
-    mycursor.execute(f"UPDATE Teachers SET day = '{day}' WHERE id = {id}")
-    db.commit()
+async def show_class_announcements():
+    mycursor, db = await the_data_base()
+    await mycursor.execute('SELECT * FROM class_announcement')
+    announcements = await mycursor.fetchall()
+    await mycursor.close()
+    return announcements
 
 
-def edit_teacher_class_time(id: int, time: str):
-    mycursor.execute(f"UPDATE Teachers SET time = '{time}' WHERE id = {id}")
-    db.commit()
+async def remove_announcement(class_id: int):
+    mycursor, db = await the_data_base()
+    await mycursor.execute(f'DELETE FROM class_announcement WHERE class_id = {class_id}')
+    await db.commit()
+    await mycursor.close()
 
 
-def edit_teacher_class_type(id: int, type: str):
-    mycursor.execute(f"UPDATE Teachers SET type = '{type}' WHERE id = {id}")
-    db.commit()
+async def drop_class_announcement():
+    mycursor, db = await the_data_base()
+    await mycursor.execute('DROP TABLE class_announcement')
+    await db.commit()
+    await mycursor.close()
 
 
-def edit_teacher_class_forr(id: int, forr: str):
-    mycursor.execute(f"UPDATE Teachers SET forr = '{forr}' WHERE id = {id}")
-    db.commit()
+async def remove_all_class_announcements():
+    mycursor, db = await the_data_base()
+    announs = await show_class_announcements()
+    for ann in announs:
+        await mycursor.execute(f'DELETE FROM class_announcement WHERE class_id = {ann[1]}')
+        await db.commit()
+    await mycursor.close()
 
 
-def show_teachers():
-    mycursor.execute('SELECT * FROM Teachers ORDER BY id')
-    teachers = []
-    for x in mycursor:
-        teachers.append(x)
+async def create_table():
+    mycursor, db = await the_data_base()
+    await mycursor.execute(
+        'CREATE TABLE Teachers (id int NOT NULL, language VARCHAR(30) NOT NULL, teacher VARCHAR(30) NOT NULL, day VARCHAR(30) NOT NULL, time VARCHAR(30) NOT NULL, type VARCHAR(30), forr VARCHAR(30))')
+
+
+async def create_table_cid():
+    mycursor, db = await the_data_base()
+    await mycursor.execute('CREATE TABLE CID (channel_id bigint, message_id bigint)')
+
+
+async def create_table_event():
+    mycursor, db = await the_data_base()
+    await mycursor.execute('CREATE TABLE Events (id int, event VARCHAR(30), day VARCHAR(30), time VARCHAR(30))')
+
+
+async def add_teacher_class(id: int, language: str, teacher: str, day: str, time: str, type: str, forr: str):
+    mycursor, db = await the_data_base()
+    await mycursor.execute(
+        f"INSERT INTO Teachers (id, language, teacher, day, time, type, forr) VALUES (%s, %s, %s, %s, %s, %s, %s)",
+        (id, language, teacher, day, time, type, forr))
+    await db.commit()
+    await mycursor.close()
+
+
+async def remove_teacher_class(id: int):
+    mycursor, db = await the_data_base()
+    await mycursor.execute(f'DELETE FROM Teachers WHERE id = {id}')
+    await db.commit()
+    teachers = await show_teachers()
+    count = 0
+    for teacher in teachers:
+        count += 1
+        await mycursor.execute(f"UPDATE Teachers SET id = {count} WHERE id = {teacher[0]}")
+        await db.commit()
+    await mycursor.close()
+
+
+async def edit_teacher_class_language(id: int, language: str):
+    mycursor, db = await the_data_base()
+    await mycursor.execute(f"UPDATE Teachers SET language = '{language}' WHERE id = {id}")
+    await db.commit()
+    await mycursor.close()
+
+
+async def edit_teacher_class_name(id: int, name: str):
+    mycursor, db = await the_data_base()
+    await mycursor.execute(f"UPDATE Teachers SET teacher = '{name}' WHERE id = {id}")
+    await db.commit()
+    await mycursor.close()
+
+
+async def edit_teacher_class_day(id: int, day: str):
+    mycursor, db = await the_data_base()
+    await mycursor.execute(f"UPDATE Teachers SET day = '{day}' WHERE id = {id}")
+    await db.commit()
+    await mycursor.close()
+
+
+async def edit_teacher_class_time(id: int, time: str):
+    mycursor, db = await the_data_base()
+    await mycursor.execute(f"UPDATE Teachers SET time = '{time}' WHERE id = {id}")
+    await db.commit()
+    await mycursor.close()
+
+
+async def edit_teacher_class_type(id: int, type: str):
+    mycursor, db = await the_data_base()
+    await mycursor.execute(f"UPDATE Teachers SET type = '{type}' WHERE id = {id}")
+    await db.commit()
+    await mycursor.close()
+
+
+async def edit_teacher_class_forr(id: int, forr: str):
+    mycursor, db = await the_data_base()
+    await mycursor.execute(f"UPDATE Teachers SET forr = '{forr}' WHERE id = {id}")
+    await db.commit()
+    await mycursor.close()
+
+
+async def show_teachers():
+    mycursor, db = await the_data_base()
+    await mycursor.execute('SELECT * FROM Teachers ORDER BY id')
+    teachers = await mycursor.fetchall()
+    await mycursor.close()
     return teachers
 
 
-def drop_table():
-    mycursor.execute('DROP TABLE Teachers')
+async def drop_table():
+    mycursor, db = await the_data_base()
+    await mycursor.execute('DROP TABLE Teachers')
+    await db.commit()
+    await mycursor.close()
 
 
-def add_cid_id(channel_id: int, message_id: int):
-    if len(show_config()) > 0:
-        mycursor.execute(f"UPDATE CID SET channel_id = {channel_id}, message_id = {message_id} WHERE message_id = message_id")
-        db.commit()
+async def add_cid_id(channel_id: int, message_id: int):
+    mycursor, db = await the_data_base()
+    config = await show_config()
+    if len(config) > 0:
+        await mycursor.execute(
+            f"UPDATE CID SET channel_id = {channel_id}, message_id = {message_id} WHERE message_id = message_id")
+        await db.commit()
+        await mycursor.close()
     else:
-        mycursor.execute(f"INSERT INTO CID VALUES ({channel_id}, {message_id})")
-        db.commit()
+        await mycursor.execute(f"INSERT INTO CID VALUES ({channel_id}, {message_id})")
+        await db.commit()
+        await mycursor.close()
 
 
-def remove_cid_id():
-    mycursor.execute(f"DELETE FROM CID WHERE channel_id = channel_id")
-    db.commit()
+async def remove_cid_id():
+    mycursor, db = await the_data_base()
+    await mycursor.execute(f"DELETE FROM CID WHERE channel_id = channel_id")
+    await db.commit()
+    await mycursor.close()
 
 
-def show_config():
-    mycursor.execute('SELECT * FROM CID')
-    ids = []
-    for x in mycursor:
-        ids.append(x)
+async def show_config():
+    mycursor, db = await the_data_base()
+    await mycursor.execute('SELECT * FROM CID')
+    ids = await mycursor.fetchall()
+    await mycursor.close()
     return ids
 
 
-def drop_table_cid():
+async def drop_table_cid():
+    mycursor, db = await the_data_base()
     mycursor.execute("DROP TABLE CID")
+    await db.commit()
+    await mycursor.close()
 
 
-def add_the_event(id: int, event: str, day: str, time: str):
-    mycursor.execute(f"INSERT INTO Events (id, event, day, time) VALUES (%s, %s, %s, %s)", (id, event, day, time))
-    db.commit()
+async def add_the_event(id: int, event: str, day: str, time: str):
+    mycursor, db = await the_data_base()
+    await mycursor.execute(f"INSERT INTO Events (id, event, day, time) VALUES (%s, %s, %s, %s)", (id, event, day, time))
+    await db.commit()
+    await mycursor.close()
 
 
-def show_events():
-    mycursor.execute('SELECT * FROM Events ORDER BY id')
-    events = []
-    for x in mycursor:
-        events.append(x)
+async def show_events():
+    mycursor, db = await the_data_base()
+    await mycursor.execute('SELECT * FROM Events ORDER BY id')
+    events = await mycursor.fetchall()
+    await mycursor.close()
     return events
 
 
-def remove_the_event(id: int):
-    mycursor.execute(f'DELETE FROM Events WHERE id = {id}')
-    db.commit()
-    events = show_events()
+async def remove_the_event(id: int):
+    mycursor, db = await the_data_base()
+    await mycursor.execute(f'DELETE FROM Events WHERE id = {id}')
+    await db.commit()
+    events = await show_events()
     count = 0
     for event in events:
         count += 1
-        mycursor.execute(f"UPDATE Events SET id = {count} WHERE id = {event[0]}")
-        db.commit()
+        await mycursor.execute(f"UPDATE Events SET id = {count} WHERE id = {event[0]}")
+        await db.commit()
+    await mycursor.close()
 
 
-def edit_event_name(id: int, name: str):
-    mycursor.execute(f"UPDATE Events SET event = '{name}' WHERE id = {id}")
-    db.commit()
+async def edit_event_name(id: int, name: str):
+    mycursor, db = await the_data_base()
+    await mycursor.execute(f"UPDATE Events SET event = '{name}' WHERE id = {id}")
+    await db.commit()
+    await mycursor.close()
 
 
-def edit_event_day(id: int, day: str):
-    mycursor.execute(f"UPDATE Events SET day = '{day}' WHERE id = {id}")
-    db.commit()
+async def edit_event_day(id: int, day: str):
+    mycursor, db = await the_data_base()
+    await mycursor.execute(f"UPDATE Events SET day = '{day}' WHERE id = {id}")
+    await db.commit()
+    await mycursor.close()
 
 
-def edit_event_time(id: int, time: str):
-    mycursor.execute(f"UPDATE Events SET time = '{time}' WHERE id = {id}")
-    db.commit()
+async def edit_event_time(id: int, time: str):
+    mycursor, db = await the_data_base()
+    await mycursor.execute(f"UPDATE Events SET time = '{time}' WHERE id = {id}")
+    await db.commit()
+    await mycursor.close()
 
 
 def check_x(something):
@@ -243,11 +335,8 @@ def check_clr(something):
             clr = (255, 0, 0)
 
     elif len(something) == 4:
-        clr = (199,21,133)
+        clr = (199, 21, 133)
 
     return clr
 
-#create_table()
-#drop_table_cid()
-#create_table_cid()
-#create_table_event()
+
