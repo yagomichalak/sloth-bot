@@ -1321,7 +1321,8 @@ async def nclass(ctx, teacher: discord.Member, language, day, time, *desc: str):
                           description=f":bust_in_silhouette: **Teacher:** {teacher.mention}\n:tongue: **Language:** {language.title()}\n:high_brightness: **Day:** {day.title()}\n:timer: **Time:** {time.title()}\n:scroll: **Class Description:** {desc}\n`RSVP with ✅`",
                           colour=discord.Colour.green(), timestamp=ctx.message.created_at)
     embed.set_thumbnail(url=teacher.avatar_url)
-    the_class = await ctx.send(content=":busts_in_silhouette: **Attendees:**```->```", embed=embed)
+    the_channel = discord.utils.get(ctx.guild.channels, id=announce_channel)
+    the_class = await the_channel.send(content=":busts_in_silhouette: **Attendees:**```->```", embed=embed)
     await the_class.add_reaction('✅')
     await add_class_announcement(teacher.id, the_class.id)
 
