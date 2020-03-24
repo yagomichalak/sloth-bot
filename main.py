@@ -122,7 +122,7 @@ async def on_raw_reaction_add(overload):
                     '<:flag_smi:490116718241513472> ': 'sámi'}],
         'celtic': [{'native': 687654028905021584, 'studying': 688532738810183692}, {'🇮🇪': 'celtic'}],
         'romance': [{'native': 687654128905748743, 'fluent': 688071741448519708, 'studying': 688532923401371649},
-                    {'🇫🇷': 'french', '🇪🇸': 'spanish', '🇧🇷': 'portuguese', '🇮🇹': 'italian', '🇷🇴': 'romanian',
+                    {'🇫🇷': 'french', '🇪🇸': 'spanish','🇵🇹': 'portuguese_pt', '🇧🇷': 'portuguese_br', '🇮🇹': 'italian', '🇷🇴': 'romanian',
                      '<:flag_cat:635441691419082773>': 'catalan', '<:flag_gal:490116682417963008> ': 'galician',
                      '<:flag_rm:490116699190722570>': 'latin'}],
         'baltic': [{'native': 687654156852264978, 'fluent': 688072044243714095, 'studying': 688532873312993340},
