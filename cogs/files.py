@@ -18,7 +18,7 @@ class Files(commands.Cog):
     async def gif(self, ctx, name: str = None):
         await ctx.message.delete()
         try:
-            with open(f'../gif/{name}.gif', 'rb') as pic:
+            with open(f'./gif/{name}.gif', 'rb') as pic:
                 await ctx.send(file=discord.File(pic))
         except FileNotFoundError:
             return await ctx.send("**File not found!**")
@@ -28,7 +28,7 @@ class Files(commands.Cog):
     async def png(self, ctx, name: str = None):
         await ctx.message.delete()
         try:
-            await ctx.send(file=discord.File(f'../png/{name}.png'))
+            await ctx.send(file=discord.File(f'./png/{name}.png'))
         except FileNotFoundError:
             return await ctx.send("**File not found!**")
 
@@ -40,7 +40,7 @@ class Files(commands.Cog):
             return await ctx.send('**Please, specify an extension!**')
         elif type.lower() != "png" and type.lower() != "gif":
             return await ctx.send('**Extension not supported!**')
-        arr = os.listdir(f'../{type}')
+        arr = os.listdir(f'./{type}')
         temp = []
         for a in arr:
             if type.lower() == "png":
