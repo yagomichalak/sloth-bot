@@ -66,7 +66,7 @@ class Tools(commands.Cog):
         if voice_client is None:
             voicechannel = discord.utils.get(ctx.guild.channels, id=voice.channel.id)
             vc = await voicechannel.connect()
-            vc.play(discord.FFmpegPCMAudio(f"tts/{temp}.mp3"), after=lambda e: self.client.loop.create_task(leave(ctx, 'the bot')))
+            vc.play(discord.FFmpegPCMAudio(f"tts/{temp}.mp3"), after=lambda e: self.client.loop.create_task(leave(self, ctx, 'the bot')))
 
         else:
             await ctx.send("**I'm already in a voice channel!**")
