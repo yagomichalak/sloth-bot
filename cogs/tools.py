@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 import asyncio
+import os
 
 
 class Tools(commands.Cog):
@@ -26,6 +27,33 @@ class Tools(commands.Cog):
             await msg.edit(content='**Done!**')
         else:
             await ctx.send('Invalid parameters!')
+            
+    @commands.command()
+    @commands.has_permissions(administrator=True)
+    async def reproduce(self, ctx, audio: str = None):
+        await ctx.message.delete()
+        voice = ctx.message.author.voice
+        voice_client = ctx.message.guild.voice_client
+        if not audio:
+            return await ctx.send("**Inform an audio to play!**")
+
+        arr = os.listdir(f'tts')
+        for a in arr:
+            if audio.lower() == a[:-4]:
+                temp = a[:-4]
+                break
+        else:
+            return await ctx.send("**No audios with that name were found!**")
+
+        if voice is None:
+            return await ctx.send("**You're not in a voice channel**")
+        if voice_client is None:
+            voicechannel = discord.utils.get(ctx.guild.channels, id=voice.channel.id)
+            vc = await voicechannel.connect()
+            vc.play(discord.FFmpegPCMAudio(f"tts/{temp}.mp3"), after=lambda e: client.loop.create_task(leave(ctx, 'the bot')))
+
+        else:
+            await ctx.send("**I'm already in a voice channel!**")
 
 
 def setup(client):
