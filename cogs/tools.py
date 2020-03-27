@@ -34,7 +34,6 @@ class Tools(commands.Cog):
     async def leave(self, ctx, bot: str =  None):
         guild = ctx.message.guild
         voice_client = guild.voice_client
-        print(bot)
 
         if voice_client:
             await voice_client.disconnect()
@@ -43,6 +42,7 @@ class Tools(commands.Cog):
             await ctx.send('**Disconnected!**')
         else:
             await ctx.send("**I'm not even in a channel, lol!**")
+            
             
     @commands.command()
     @commands.has_permissions(administrator=True)
@@ -66,7 +66,7 @@ class Tools(commands.Cog):
         if voice_client is None:
             voicechannel = discord.utils.get(ctx.guild.channels, id=voice.channel.id)
             vc = await voicechannel.connect()
-            vc.play(discord.FFmpegPCMAudio(f"tts/{temp}.mp3"), after=lambda e: client.loop.create_task(leave(ctx, 'the bot')))
+            vc.play(discord.FFmpegPCMAudio(f"tts/{temp}.mp3"), after=lambda e: client.loop.create_task(leave(self, ctx, 'the bot')))
 
         else:
             await ctx.send("**I'm already in a voice channel!**")
