@@ -27,6 +27,22 @@ class Tools(commands.Cog):
             await msg.edit(content='**Done!**')
         else:
             await ctx.send('Invalid parameters!')
+    
+    # Bot leaves
+    @commands.command()
+    @commands.has_permissions(administrator=True)
+    async def leave(self, ctx, bot: str =  None):
+        guild = ctx.message.guild
+        voice_client = guild.voice_client
+        print(bot)
+
+        if voice_client:
+            await voice_client.disconnect()
+            if bot == 'the bot':
+                return
+            await ctx.send('**Disconnected!**')
+        else:
+            await ctx.send("**I'm not even in a channel, lol!**")
             
     @commands.command()
     @commands.has_permissions(administrator=True)
