@@ -185,8 +185,8 @@ class Music(commands.Cog):
 
     __slots__ = ('bot', 'players')
 
-    def __init__(self, client):
-        self.bot = client
+    def __init__(self, bot):
+        self.bot = bot
         self.players = {}
 
     async def cleanup(self, guild):
@@ -418,5 +418,5 @@ class Music(commands.Cog):
         await self.cleanup(ctx.guild)
 
 
-def setup(client):
-    client.add_cog(Music(client))
+def setup(bot):
+    bot.add_cog(Music(bot))
