@@ -30,7 +30,7 @@ def read_token():
 token = read_token()
 
 # Making the client variable
-client = commands.Bot(command_prefix='!')
+client = commands.Bot(command_prefix='z!')
 
 
 # Tells when the bot is online
