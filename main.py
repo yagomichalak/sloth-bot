@@ -15,7 +15,7 @@ moderation_log_channel_id = 675745413760024595
 lesson_log_channel_id = 679043911225966608
 lesson_category_id = 562019326295670806
 clock_voice_channel_id = 687783432222277695
-announcement_channel_id = 562019353583681536
+announcement_channel_id = 689918515129352213
 report_channel_id = 685832739517366340
 report_log_channel_id = 683693966016774168
 
