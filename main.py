@@ -103,7 +103,7 @@ async def on_raw_reaction_add(overload):
     info = []
 
     # Language rooms
-    x = 679333977705676830
+    x = 695491104417513552
     y = 683987207065042944
     z = 688037387561205824
 
@@ -217,7 +217,7 @@ async def on_raw_reaction_remove(overload):
     message = 688391033829982209
 
     # Language rooms
-    x = 679333977705676830
+    x = 695491104417513552
     y = 683987207065042944
     z = 688037387561205824
 
