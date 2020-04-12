@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 import asyncio
 
-mod_log_id = 675745413760024595
+mod_log_id = 562195805272932372
 muted_role_id = 537763763982434304
 
 
