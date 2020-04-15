@@ -8,6 +8,7 @@ from pydrive.drive import GoogleDrive
 import os
 
 shop_channel_id = 695975820744851507
+afk_channel_id = 581993624569643048
 
 gauth = GoogleAuth()
 # gauth.LocalWebserverAuth()
@@ -75,7 +76,7 @@ class SlothCurrency(commands.Cog):
         if not before.channel:
             return await self.update_user_server_timestamp(member.id, the_time)
 
-        if not after.channel:
+        if not after.channel and not before.channel.id == afk_channel_id:
             old_time = user_info[0][3]
             addition = the_time - old_time
             await self.update_user_server_time(member.id, addition)
