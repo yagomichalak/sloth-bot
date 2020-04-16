@@ -78,6 +78,21 @@ class Communication(commands.Cog):
         msg = ctx.message.content.split('!announce', 1)
         await announce_channel.send(msg[1])
 
+    @commands.command()
+    @commands.has_permissions(administrator=True)
+    async def dm(self, ctx, member: discord.Member = None, *, message=None):
+        await ctx.message.delete()
+        if not message:
+            return await ctx.send("**Inform a message to send!**", delete_after=3)
+        elif not member:
+            return await ctx.send("**Inform a member!**", delete_after=3)
+
+        check_member = discord.utils.get(ctx.guild.members, id=member.id)
+        if check_member:
+            await member.send(message)
+        else:
+            await ctx.send(f"**Member: {member} not found!", delete_after=3)
+
 
 def setup(client):
     client.add_cog(Communication(client))
