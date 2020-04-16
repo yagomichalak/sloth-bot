@@ -405,7 +405,7 @@ class SlothCurrency(commands.Cog):
 
     @commands.command()
     @commands.has_permissions(administrator=True)
-    async def register_item(self, ctx, mid: int = None, reactf=None, image_name: str = None, item_type: str = None,
+    async def register_item(self, ctx, mid: discord.Message = None, reactf=None, image_name: str = None, item_type: str = None,
                             item_price: int = None, *, item_name: str = None):
         # print(reactf)
         if not mid:
@@ -434,7 +434,8 @@ class SlothCurrency(commands.Cog):
             else:
                 return await ctx.send("**Specify the item name!**", delete_after=3)
 
-        await self.insert_registered_item(mid, reactf, image_name, item_type, item_price, item_name)
+        await self.insert_registered_item(mid.id, reactf, image_name, item_type, item_price, item_name)
+        await mid.add_reaction(reactf)
         return await ctx.send(f"**Item __{item_name.title()}__ successfully registered!**", delete_after=3)
 
     async def insert_registered_item(self, mid: int, reactf, image_name: str, item_type: str, item_price: int,
@@ -681,7 +682,7 @@ class SlothCurrency(commands.Cog):
                         embed.add_field(name=f"Name: {file['title']}", value=f"ID: {file['id']}", inline=False)
                         print(
                             f"\033[34mItem name:\033[m \033[33m{file['title']:<35}\033[m | \033[34mID: \033[m\033[33m{file['id']}\033[m")
-                    return await ctx.send(embed=embed, delete_after=10)
+                    return await ctx.send(embed=embed)
             else:
                 return await ctx.send("**Category not found!**", delete_after=3)
 
@@ -806,6 +807,7 @@ class SlothCurrency(commands.Cog):
         cmsg, message_times = await self.convert_messages(member_id, user_message)
         ctime, time_times = await self.convert_time(member_id, user_time)
         embed = discord.Embed(title="Exchange", colour=discord.Colour.dark_green(), timestamp=ctx.message.created_at)
+        embed.set_author(name=ctx.author, url=ctx.author.avatar_url)
         if not cmsg == ctime == 0:
             if cmsg > 0:
                 embed.add_field(name="__**Messages:**__",
@@ -845,13 +847,23 @@ class SlothCurrency(commands.Cog):
 
     @commands.command()
     @commands.has_permissions(administrator=True)
-    async def add_message(self, ctx, add_message: int):
-        await self.update_user_server_messages(ctx.author.id, add_message)
+    async def add_message(self, ctx, member: discord.Member = None, add_message: int= None):
+        if not add_message:
+            return await ctx.send(f"**Inform an amount of messages to add!**", delete_after=3)
+        if not member:
+            member = ctx.author
+        await self.update_user_server_messages(member.id, add_message)
+        return await ctx.send(f"Added {add_message} messages to {member}")
 
     @commands.command()
     @commands.has_permissions(administrator=True)
-    async def add_time(self, ctx, add_time: int):
-        await self.update_user_server_time(ctx.author.id, add_time)
+    async def add_time(self, ctx, member: discord.Member = None, add_time: int = None):
+        if not add_time:
+            return await ctx.send(f"**Inform an amount of seconds to add!**", delete_after=3)
+        if not member:
+            member = ctx.author
+        await self.update_user_server_time(member.id, add_time)
+        return await ctx.send(f"Added {add_time} seconds to {member}")
 
 
 def setup(client):
