@@ -34,9 +34,8 @@ class SlothReputation(commands.Cog):
                 await self.update_user_xp_time(user.id, time_xp)
                 await self.update_user_xp(user.id, 5)
                 return await self.level_up(user)
-            return
         else:
-            return await self.insert_user(user.id, 5, 1, time_xp, 0, time_xp - 61)
+            return await self.insert_user(user.id, 5, 1, time_xp, 0, time_xp - 36001)
 
     async def level_up(self, user):
         epoch = datetime.utcfromtimestamp(0)
@@ -44,31 +43,16 @@ class SlothReputation(commands.Cog):
         the_user = await self.get_specific_user(user.id)
         lvl_end = int(the_user[0][1] ** (1 / 5))
         if the_user[0][2] < lvl_end:
-            await self.update_user_xp_time(user.id, time_xp)
             await self.update_user_money(user.id, 10)
             await self.update_user_lvl(user.id)
             await self.update_user_score_points(user.id, 100)
             channel = discord.utils.get(user.guild.channels, id=commands_channel_id)
             return await channel.send(f"**{user.mention} has leveled up to lvl {the_user[0][2] + 1}! <:zslothrich:701157794686042183> Here's 5łł! <:zslothrich:701157794686042183>**")
 
-    @commands.has_permissions(administrator=True)
-    @commands.command()
-    async def clear_level(self, ctx, member: discord.Member = None):
-        if not member:
-            return await ctx.send('Inform a user')
-
-        users = await self.get_users()
-        for user in users:
-            if member.id == (user[0]):
-                await self.clear_user_lvl(user[0])
-                return await ctx.send(f"{member.mention}'s level cleared!")
-        else:
-            await ctx.send('User not found')
 
     @commands.command()
     async def level(self, ctx):
-        table_exist = await self.check_table_exist()
-        if not table_exist:
+        if not await self.check_table_exist():
             return await ctx.send("**This command may be on maintenance!**", delete_after=3)
         user = await self.get_specific_user(ctx.author.id)
         if not user:
@@ -129,7 +113,7 @@ class SlothReputation(commands.Cog):
 
         sub_time = time_xp - user[0][5]
         cooldown = 36000
-        if sub_time >= cooldown:
+        if int(sub_time) >= int(cooldown):
             await self.update_user_rep_time(ctx.author.id, time_xp)
             await self.update_user_money(ctx.author.id, 5)
             await self.update_user_money(member.id, 5)
