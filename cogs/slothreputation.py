@@ -105,15 +105,13 @@ class SlothReputation(commands.Cog):
         if not target_user:
             return await ctx.send("**This member is not on the leaderboard yet!**", delete_after=3)
 
-        await self.update_user_score_points(ctx.author.id, 100)
-        await self.update_user_score_points(member.id, 100)
-
         epoch = datetime.utcfromtimestamp(0)
         time_xp = (datetime.utcnow() - epoch).total_seconds()
-
         sub_time = time_xp - user[0][5]
         cooldown = 36000
         if int(sub_time) >= int(cooldown):
+            await self.update_user_score_points(ctx.author.id, 100)
+            await self.update_user_score_points(member.id, 100)
             await self.update_user_rep_time(ctx.author.id, time_xp)
             await self.update_user_money(ctx.author.id, 5)
             await self.update_user_money(member.id, 5)
