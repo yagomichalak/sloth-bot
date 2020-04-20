@@ -519,7 +519,7 @@ class SlothCurrency(commands.Cog):
         else:
             epoch = datetime.utcfromtimestamp(0)
             the_time = (datetime.utcnow() - epoch).total_seconds()
-            await self.insert_user_currency(member.id, the_time)
+            await self.insert_user_currency(member.id, the_time - 61)
             user_found = await self.get_user_currency(member.id)
             bank_embed.add_field(name="__**Your balance:**__", value=f"**{user_found[0][1]}łł**", inline=False)
 
@@ -800,6 +800,11 @@ class SlothCurrency(commands.Cog):
         user_info = await self.get_user_activity_info(ctx.author.id)
         if not user_info:
             return await ctx.send("**You have nothing to exchange!**", delete_after=3)
+        user_found = await self.get_user_currency(ctx.author.id)
+        if not user_found:
+            epoch = datetime.utcfromtimestamp(0)
+            the_time = (datetime.utcnow() - epoch).total_seconds()
+            await self.insert_user_currency(ctx.author.id, the_time - 61)
 
         user_message = user_info[0][1]
         user_time = user_info[0][2]
