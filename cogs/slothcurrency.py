@@ -86,12 +86,14 @@ class SlothCurrency(commands.Cog):
         # Checks if it wasn't a bot's reaction
         if payload.member.bot:
             return
-
-        guild = self.client.get_guild(payload.guild_id)
-        channel = discord.utils.get(guild.channels, id=payload.channel_id)
-        msg = await channel.fetch_message(payload.message_id)
-        member = discord.utils.get(guild.members, id=payload.user_id)
-        await msg.remove_reaction(payload.emoji.name, member)        
+        
+        # Takes off the reaction in the shop channel
+        if payload.channel_id == shop_channel_id:
+            guild = self.client.get_guild(payload.guild_id)
+            channel = discord.utils.get(guild.channels, id=payload.channel_id)
+        
+            msg = await channel.fetch_message(payload.message_id)
+            await msg.remove_reaction(payload.emoji.name, payload.member)        
 
         # Checks if it was a reaction within the shop's channel
         if payload.channel_id != shop_channel_id:
