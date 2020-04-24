@@ -7,7 +7,7 @@ from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
 import os
 
-shop_channels = [695975820744851507, 702911629725139074, 702911832150638684]
+shop_channels = [695975820744851507, 702911629725139074, 702911832150638684, 702914308677304330]
 afk_channel_id = 581993624569643048
 
 gauth = GoogleAuth()
