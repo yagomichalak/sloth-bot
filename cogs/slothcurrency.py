@@ -7,7 +7,7 @@ from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
 import os
 
-shop_channel_id = 695975820744851507
+shop_channels = [695975820744851507, 702911629725139074, 702911832150638684]
 afk_channel_id = 581993624569643048
 
 gauth = GoogleAuth()
@@ -88,7 +88,7 @@ class SlothCurrency(commands.Cog):
             return
         
         # Takes off the reaction in the shop channel
-        if payload.channel_id == shop_channel_id:
+        if payload.channel_id in shop_channels:
             guild = self.client.get_guild(payload.guild_id)
             channel = discord.utils.get(guild.channels, id=payload.channel_id)
         
@@ -96,7 +96,7 @@ class SlothCurrency(commands.Cog):
             await msg.remove_reaction(payload.emoji.name, payload.member)        
 
         # Checks if it was a reaction within the shop's channel
-        if payload.channel_id != shop_channel_id:
+        if not payload.channel_id in shop_channels:
             return
 
         epoch = datetime.utcfromtimestamp(0)
