@@ -34,7 +34,7 @@ class ChatterSloth(commands.Cog):
         if message.author.bot:
             return
         if message.channel.id == chat_room_id:
-            if message.content[3:].startswith(str(self.client.user.mention)[2:]):
+            if message.content[3:].startswith(str(self.client.user.mention)[2:]) or message.content[2:].startswith(str(self.client.user.mention)[2:]):
                 if len(message.content.split()) < 2:
                     return await message.channel.send('**?**')
 
