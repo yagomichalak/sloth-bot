@@ -6,6 +6,7 @@ attrs==19.3.0
 certifi==2019.11.28
 cffi==1.14.0
 chardet==3.0.4
+chatbotAI==0.2.1.1
 Click==7.0
 cryptography==2.8
 cymem==2.0.3
@@ -48,6 +49,7 @@ requests==2.23.0
 six==1.14.0
 update-checker==0.16
 urllib3==1.25.8
+wikipedia==1.4.0
 websocket-client==0.57.0
 websockets==8.1
 Werkzeug==0.16.0
