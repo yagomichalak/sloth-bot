@@ -228,7 +228,7 @@ class Moderation(commands.Cog):
     @commands.has_permissions(administrator=True)
     async def softban(self, ctx, member: discord.Member = None, *, reason=None):
         '''
-        Bans and unbans member from the server; deleting their messages from the last 7 seven days.
+        Bans and unbans a member from the server; deleting their messages from the last 7 seven days.
         :param member: The @ or ID of the user to softban.
         :param reason: The reason for softbanning the user. (Optional)
         '''
