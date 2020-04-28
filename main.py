@@ -99,7 +99,6 @@ async def on_raw_reaction_add(overload):
     rid = overload.message_id
 
     # Create room message id
-    message = 688391033829982209
     info = []
 
     # Language rooms
@@ -146,16 +145,6 @@ async def on_raw_reaction_add(overload):
                         {'<:flag1:490116752567697410>': 'esperanto', '🤖': 'programming'}]
     }
 
-    # Create room dm message
-    if overload.message_id == message:
-        if str(overload.emoji) == '⚙️':
-            with open('texts/random/create_room.txt', 'r', encoding='utf-8') as f:
-                text = f.readlines()
-                text = ''.join(text)
-
-            embed = discord.Embed(description=text, colour=discord.Colour.dark_green())
-            return await user.send(embed=embed)
-
     # Class announcement
     if overload.channel_id == announcement_channel_id:
         announcements = await show_class_announcements()
@@ -176,6 +165,7 @@ async def on_raw_reaction_add(overload):
                     await msg.edit(content=f"```-> {attendees}```")
                     await teacher.send(f'**{user}** is coming to your class!')
         return
+
     if overload.channel_id == x or overload.channel_id == y or overload.channel_id == z:
         for branch in languages:
             # Get the language equivalent to the reacted emoji
@@ -212,9 +202,6 @@ async def on_raw_reaction_remove(overload):
     user_emoji = overload.emoji
     rid = overload.message_id
     info = []
-
-    # Create room message id
-    message = 688391033829982209
 
     # Language rooms
     x = 695491104417513552
@@ -312,18 +299,11 @@ async def on_command_error(ctx, error):
         await ctx.send('Please, inform all parameters!')
 
 
-# Teachers status update
+# Members status update
 @tasks.loop(seconds=10)
 async def change_status():
-    teachers = await show_teachers()
-    len_teachers = len(teachers)
-    if len_teachers == 1:
-        await client.change_presence(
-            activity=discord.Activity(type=discord.ActivityType.watching, name=f'{len_teachers} teacher.'))
-    else:
-        await client.change_presence(
-            activity=discord.Activity(type=discord.ActivityType.watching, name=f'{len_teachers} teachers.'))
-
+    guild = client.get_guild(server_id)
+    await client.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=f'{len(guild.members)} members.'))
 
 @tasks.loop(seconds=60)
 async def update_timezones():
@@ -352,42 +332,9 @@ async def on_voice_state_update(member, before, after):
         return
 
     mod_log = client.get_channel(moderation_log_channel_id)
-    lesson_log = client.get_channel(lesson_log_channel_id)
     if after.channel is not None:
         # Switched between voice channels
         if before.channel is not None:
-            # Switched between channels in the lessons category. (Switched)
-            if teacher_role in member.roles and after.channel.category_id == lesson_category_id and before.channel.category_id == lesson_category_id:
-                embed = discord.Embed(
-                    description=f'**{member}** switched between voice channels: {before.channel.name} - {after.channel.name}',
-                    colour=discord.Colour.dark_green(), timestamp=datetime.utcnow())
-                embed.add_field(name='Channels', value=f'{before.channel.name} - {after.channel.name}', inline=False)
-                embed.add_field(name='ID',
-                                value=f'```py\nUser = {member.id}\nPrevious Channel = {before.channel.id}\nCurrent Channel = {after.channel.id}```')
-                embed.set_footer(text=f"Guild name: {member.guild.name}")
-                embed.set_author(name=member, icon_url=member.avatar_url)
-                await lesson_log.send(embed=embed)
-
-            # Switched between channels, considering that the former is not in the lesson category and the latter is. (Joined)
-            elif teacher_role in member.roles and after.channel.category_id == lesson_category_id and before.channel.category_id != lesson_category_id:
-                embed = discord.Embed(description=f'**{member}** joined voice channel: {after.channel.name}',
-                                      colour=discord.Colour.green(), timestamp=datetime.utcnow())
-                embed.add_field(name='Channel', value=f'{after.channel.name}', inline=False)
-                embed.add_field(name='ID', value=f'```py\nUser = {member.id}\nChannel = {after.channel.id}```')
-                embed.set_footer(text=f"Guild name: {member.guild.name}")
-                embed.set_author(name=member, icon_url=member.avatar_url)
-                await lesson_log.send(embed=embed)
-
-            # Switched between channels, considering that the former is in the lesson category and the latter is not. (Left)
-            elif teacher_role in member.roles and after.channel.category_id != lesson_category_id and before.channel.category_id == lesson_category_id:
-                embed = discord.Embed(description=f'**{member}** left voice channel: {before.channel.name}',
-                                      colour=discord.Colour.red(), timestamp=datetime.utcnow())
-                embed.add_field(name='Channel', value=f'{before.channel.name}', inline=False)
-                embed.add_field(name='ID', value=f'```py\nUser = {member.id}\nChannel = {before.channel.id}```')
-                embed.set_footer(text=f"Guild name: {member.guild.name}")
-                embed.set_author(name=member, icon_url=member.avatar_url)
-                await lesson_log.send(embed=embed)
-
             if mod_role in member.roles:
                 embed = discord.Embed(
                     description=f'**{member}** switched between voice channels: {before.channel.name} - {after.channel.name}',
@@ -400,14 +347,6 @@ async def on_voice_state_update(member, before, after):
                 await mod_log.send(embed=embed)
         # Entered a voice channel
         else:
-            if teacher_role in member.roles and after.channel.category_id == lesson_category_id:
-                embed = discord.Embed(description=f'**{member}** joined voice channel: {after.channel.name}',
-                                      colour=discord.Colour.green(), timestamp=datetime.utcnow())
-                embed.add_field(name='Channel', value=f'{after.channel.name}', inline=False)
-                embed.add_field(name='ID', value=f'```py\nUser = {member.id}\nChannel = {after.channel.id}```')
-                embed.set_footer(text=f"Guild name: {member.guild.name}")
-                embed.set_author(name=member, icon_url=member.avatar_url)
-                await lesson_log.send(embed=embed)
 
             if mod_role in member.roles:
                 embed = discord.Embed(description=f'**{member}** joined voice channel: {after.channel.name}',
@@ -420,14 +359,6 @@ async def on_voice_state_update(member, before, after):
 
     # Left voice channel
     elif after.channel is None:
-        if teacher_role in member.roles and before.channel.category_id == lesson_category_id:
-            embed = discord.Embed(description=f'**{member}** left voice channel: {before.channel.name}',
-                                  colour=discord.Colour.red(), timestamp=datetime.utcnow())
-            embed.add_field(name='Channel', value=f'{before.channel.name}', inline=False)
-            embed.add_field(name='ID', value=f'```py\nUser = {member.id}\nChannel = {before.channel.id}```')
-            embed.set_footer(text=f"Guild name: {member.guild.name}")
-            embed.set_author(name=member, icon_url=member.avatar_url)
-            await lesson_log.send(embed=embed)
 
         if mod_role in member.roles:
             embed = discord.Embed(description=f'**{member}** left voice channel: {before.channel.name}',
