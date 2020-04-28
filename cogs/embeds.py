@@ -24,36 +24,6 @@ class Embeds(commands.Cog):
         embed = discord.Embed(description=msg[1], colour=discord.Colour.dark_green())
         await ctx.send(embed=embed)
 
-    # Calendar commands
-    @commands.command()
-    async def class_cmds(self, ctx):
-        embed = discord.Embed(title="Calendar's class command list", description="Some useful class commands",
-                              colour=discord.Colour.dark_green())
-        embed.add_field(name='(Admin+) !add_class [language] [teacher] [day] [time] [type]', value='Adds a new class.',
-                        inline=False)
-        embed.add_field(name='(Admin+) !remove_class [id]', value='Removes an existent class.', inline=False)
-        embed.add_field(name='(Admin+) !update_language [id] [new_language]',
-                        value='Updates the language of an existent class.', inline=False)
-        embed.add_field(name='(Admin+) !update_name [id] [new_name]', value='Updates the name of an existent class.',
-                        inline=False)
-        embed.add_field(name='(Admin+) !update_day [id] [new_day]', value='Updates the day of an existent class.',
-                        inline=False)
-        embed.add_field(name='(Admin+) !update_time [id] [new_time]', value='Updates the time of an existent class.',
-                        inline=False)
-        embed.add_field(name='(Admin+) !update_type [id] [new_type]', value='Updates the type of an existent class.',
-                        inline=False)
-        embed.add_field(name='!teachers', value='Tells the amount of scheduled teachers.', inline=False)
-        embed.add_field(name='!show [id]', value='Shows a specific class.', inline=False)
-        embed.add_field(name='!classes', value='Shows all the available classes.', inline=False)
-        embed.add_field(name='!fclasses', value='Shows all available classes one at a time.', inline=False)
-        embed.add_field(name="!class_cmds", value="Shows this.", inline=False)
-        embed.set_author(name='DNK',
-                         icon_url='https://cdn.discordapp.com/avatars/550057247456100353/e3e2a56379f6457066a630c0eb68d34e.png?size=256')
-        embed.set_footer(text=ctx.author.guild.name)
-        embed.set_thumbnail(
-            url='https://cdn.discordapp.com/attachments/673592568268980244/673685902312341509/a_0fc103e90b7fcbea53f42dd59d17e920.gif')
-        await ctx.send(embed=embed)
-
     @commands.command()
     async def event_cmds(self, ctx):
         embed = discord.Embed(title="Calendar's event command list", description="Some useful event commands",
