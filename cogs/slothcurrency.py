@@ -883,7 +883,7 @@ class SlothCurrency(commands.Cog):
     async def transfer(self, ctx, member: discord.Member = None, money: int = None):
         if not member:
             return await ctx.send('**Inform the member!**', delete_after=3)
-        elif not member.id == ctx.author.id:
+        elif member.id == ctx.author.id:
             return await ctx.send("**You can't transfer money to yourself!**", delete_after=3)
         elif not money:
             return await ctx.send('**Inform the amount of money to trasnfer!**', delete_after=3)
