@@ -1,6 +1,5 @@
 import discord
 from discord.ext import commands
-from mysqldb import *
 from mysqldb2 import *
 from datetime import datetime
 
@@ -446,7 +445,7 @@ class TeacherFeedback(commands.Cog):
         await ctx.message.delete()
         if await self.check_table_exist():
             return await ctx.send(f"**The table __TeacherFeedback__ already exists!**", delete_after=5)
-        mycursor, db = await the_data_base()
+        mycursor, db = await the_data_base4()
         await mycursor.execute(f"CREATE TABLE TeacherFeedback (teacher_id bigint, class_id int NOT NULL AUTO_INCREMENT PRIMARY KEY, txt_id bigint, vc_id bigint, language VARCHAR(20), class_type VARCHAR(13), vc_timestamp bigint DEFAULT NULL, vc_time bigint, members bigint, class_desc VARCHAR(100), save_class VARCHAR(3))")
         await db.commit()
         await mycursor.close()
@@ -458,7 +457,7 @@ class TeacherFeedback(commands.Cog):
         await ctx.message.delete()
         if not await self.check_table_exist():
             return await ctx.send(f"**The table __TeacherFeedback__ does not exist!**", delete_after=5)
-        mycursor, db = await the_data_base()
+        mycursor, db = await the_data_base4()
         await mycursor.execute(f"DROP TABLE TeacherFeedback")
         await db.commit()
         await mycursor.close()
@@ -470,7 +469,7 @@ class TeacherFeedback(commands.Cog):
         await ctx.message.delete()
         if not await self.check_table_exist():
             return await ctx.send("**Table __TeacherFeedback__ doesn't exist yet!**", delete_after=5)
-        mycursor, db = await the_data_base()
+        mycursor, db = await the_data_base4()
         await mycursor.execute('SELECT * FROM TeacherFeedback')
         teachers = await mycursor.fetchall()
         for teacher in teachers:
@@ -481,7 +480,7 @@ class TeacherFeedback(commands.Cog):
 
 
     async def check_table_exist(self):
-        mycursor, db = await the_data_base()
+        mycursor, db = await the_data_base4()
         await mycursor.execute(f"SHOW TABLE STATUS LIKE 'TeacherFeedback'")
         table_info = await mycursor.fetchall()
         await mycursor.close()
@@ -492,7 +491,7 @@ class TeacherFeedback(commands.Cog):
             return True
 
     async def insert_teacher_class(self, teacher_id: int, txt_id: int, vc_id: int, language: str, class_type: str, vc_timestamp: int, class_desc: str, save_class: str):
-        mycursor, db = await the_data_base()
+        mycursor, db = await the_data_base4()
         await mycursor.execute(
             f"INSERT INTO TeacherFeedback (teacher_id, txt_id, vc_id, language, class_type, vc_timestamp, vc_time, members, class_desc, save_class) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (teacher_id, txt_id, vc_id, language, class_type, vc_timestamp, 0, 1, class_desc, save_class))
         await db.commit()
@@ -500,35 +499,35 @@ class TeacherFeedback(commands.Cog):
 
 
     async def get_teacher_class_info(self, teacher_id: int, vc_id: int):
-        mycursor, db = await the_data_base()
+        mycursor, db = await the_data_base4()
         await mycursor.execute(f"SELECT * FROM TeacherFeedback WHERE teacher_id = {teacher_id} and vc_id = {vc_id}")
         teacher_class = await mycursor.fetchall()
         return teacher_class
 
 
     async def user_get_teacher_class(self, vc_id: int):
-        mycursor, db = await the_data_base()
+        mycursor, db = await the_data_base4()
         await mycursor.execute(f"SELECT * FROM TeacherFeedback WHERE vc_id = {vc_id}")
         teacher_class = await mycursor.fetchall()
         return teacher_class
 
 
     async def get_specific_student(self, student_id: int, teacher_id: int, class_id: int):
-        mycursor, db = await the_data_base()
+        mycursor, db = await the_data_base4()
         await mycursor.execute(f"SELECT * FROM StudentFeedback WHERE teacher_id = {teacher_id} and class_id = {class_id} and student_id = {student_id}")
         student_info = await mycursor.fetchall()
         return student_info
 
 
     async def get_teacher_all_classes(self, teacher_id: int):
-        mycursor, db = await the_data_base()
+        mycursor, db = await the_data_base4()
         await mycursor.execute(f"SELECT * FROM TeacherFeedback WHERE teacher_id = {teacher_id}")
         teacher_classes = await mycursor.fetchall()
         return teacher_classes
 
 
     async def get_len_table(self):
-        mycursor, db = await the_data_base()
+        mycursor, db = await the_data_base4()
         await mycursor.execute(f"SELECT COUNT(*) FROM TeacherFeedback")
         lentable = await mycursor.fetchall()
         await mycursor.close()
@@ -536,26 +535,26 @@ class TeacherFeedback(commands.Cog):
 
 
     async def update_teacher_times(self, teacher_id: int, class_id: int, class_duration: int, new_timestamp = None):
-        mycursor, db = await the_data_base()
+        mycursor, db = await the_data_base4()
         await mycursor.execute(f"UPDATE TeacherFeedback SET vc_timestamp = {new_timestamp}, vc_time = vc_time + {class_duration} WHERE teacher_id = {teacher_id} and class_id = {class_id}")
         await db.commit()
         await mycursor.close()
 
 
     async def update_teacher_members(self, teacher_id: int, class_id: int, new_members: int):
-        mycursor, db = await the_data_base()
+        mycursor, db = await the_data_base4()
         await mycursor.execute(f"UPDATE TeacherFeedback SET members = {new_members} WHERE teacher_id = {teacher_id} and class_id = {class_id}")
         await db.commit()
         await mycursor.close()
 
     async def clear_saved_class(self, teacher_id: int, class_id: int):
-        mycursor, db = await the_data_base()
+        mycursor, db = await the_data_base4()
         await mycursor.execute(f"UPDATE TeacherFeedback SET members = 1, vc_time = 0, vc_timestamp = NULL, txt_id = 0, vc_id = 0 WHERE teacher_id = {teacher_id} and class_id = {class_id}")
         await db.commit()
         await mycursor.close()
 
     async def remove_temp_class(self, teacher_id: int, class_id: int):
-        mycursor, db = await the_data_base()
+        mycursor, db = await the_data_base4()
         await mycursor.execute(f"DELETE FROM TeacherFeedback WHERE teacher_id = {teacher_id} and class_id = {class_id}")
         await db.commit()
         await mycursor.close()
@@ -564,7 +563,7 @@ class TeacherFeedback(commands.Cog):
     @commands.command()
     @commands.has_permissions(administrator=True)
     async def show_classes(self, ctx):
-        mycursor, db = await the_data_base()
+        mycursor, db = await the_data_base4()
         await mycursor.execute(f"SELECT * FROM TeacherFeedback")
         all_classes = await mycursor.fetchall()
         return await ctx.send(all_classes)
@@ -576,7 +575,7 @@ class TeacherFeedback(commands.Cog):
         await ctx.message.delete()
         if await self.check_table_student_exist():
             return await ctx.send(f"**The table __StudentFeedback__ already exists!**", delete_after=5)
-        mycursor, db = await the_data_base()
+        mycursor, db = await the_data_base4()
         await mycursor.execute(f"CREATE TABLE StudentFeedback (student_id bigint, class_id int, teacher_id bigint, messages bigint, time bigint, vc_timestamp bigint DEFAULT NULL, channel_id bigint)")
         await db.commit()
         await mycursor.close()
@@ -588,7 +587,7 @@ class TeacherFeedback(commands.Cog):
         await ctx.message.delete()
         if not await self.check_table_student_exist():
             return await ctx.send(f"**The table __StudentFeedback__ does not exist!**", delete_after=5)
-        mycursor, db = await the_data_base()
+        mycursor, db = await the_data_base4()
         await mycursor.execute(f"DROP TABLE StudentFeedback")
         await db.commit()
         await mycursor.close()
@@ -600,7 +599,7 @@ class TeacherFeedback(commands.Cog):
         await ctx.message.delete()
         if not await self.check_table_student_exist():
             return await ctx.send("**The table __StudentFeedback__ doesn't exist yet!**", delete_after=5)
-        mycursor, db = await the_data_base()
+        mycursor, db = await the_data_base4()
         await mycursor.execute('SELECT * FROM StudentFeedback')
         teachers = await mycursor.fetchall()
         for teacher in teachers:
@@ -611,7 +610,7 @@ class TeacherFeedback(commands.Cog):
 
 
     async def get_all_users_feedback(self, teacher_id: int, class_id: int):
-        mycursor, db = await the_data_base()
+        mycursor, db = await the_data_base4()
         await mycursor.execute(f"SELECT * FROM StudentFeedback WHERE teacher_id = {teacher_id} and class_id = {class_id}")
         users_feedback = await mycursor.fetchall()
         await mycursor.close()
@@ -619,7 +618,7 @@ class TeacherFeedback(commands.Cog):
 
 
     async def update_student_times(self, class_id: int, teacher_id: int, time = None):
-        mycursor, db = await the_data_base()
+        mycursor, db = await the_data_base4()
         students = await self.get_all_users_feedback(teacher_id, class_id)
         for student in students:
             if student[5]:
@@ -632,38 +631,38 @@ class TeacherFeedback(commands.Cog):
         await mycursor.close()
 
     async def update_student_times2(self, class_id: int, teacher_id: int, new_timestamp: int):
-        mycursor, db = await the_data_base()
+        mycursor, db = await the_data_base4()
         await mycursor.execute(f"UPDATE StudentFeedback SET vc_timestamp = {new_timestamp} WHERE teacher_id = {teacher_id} and class_id = {class_id}")
         await db.commit()
         await mycursor.close()
 
     async def update_specific_student(self, student_id: int, teacher_id: int, class_id: int, duration: int):
-        mycursor, db = await the_data_base()
+        mycursor, db = await the_data_base4()
         await mycursor.execute(f"UPDATE StudentFeedback SET vc_timestamp = NULL, time = time + {duration} WHERE teacher_id = {teacher_id} and class_id = {class_id} and student_id = {student_id}")
         await db.commit()
         await mycursor.close()
 
     async def update_specific_student2(self, student_id: int, teacher_id: int, class_id: int, new_timestamp):
-        mycursor, db = await the_data_base()
+        mycursor, db = await the_data_base4()
         await mycursor.execute(f"UPDATE StudentFeedback SET vc_timestamp = {new_timestamp} WHERE teacher_id = {teacher_id} and class_id = {class_id} and student_id = {student_id}")
         await db.commit()
         await mycursor.close()
 
     async def insert_user_into_class(self, student_id: int, class_id: int, teacher_id: int, channel_id: int, vc_timestamp: int = None):
-        mycursor, db = await the_data_base()
+        mycursor, db = await the_data_base4()
         await mycursor.execute("INSERT INTO StudentFeedback (student_id, class_id, teacher_id, messages, time, vc_timestamp, channel_id) VALUES (%s, %s, %s, %s, %s, %s, %s)", (student_id, class_id, teacher_id, 0, 0, vc_timestamp, channel_id))
         await db.commit()
         await mycursor.close()
 
 
     async def clear_specific_class_students(self, class_id: int, teacher_id: int):
-        mycursor, db = await the_data_base()
+        mycursor, db = await the_data_base4()
         await mycursor.execute(f"DELETE FROM StudentFeedback WHERE class_id = {class_id} and teacher_id = {teacher_id}")
         await db.commit()
         await mycursor.close()
 
     async def is_member_in_class(self, student_id: int, teacher_id: int, class_id: int):
-        mycursor, db = await the_data_base()
+        mycursor, db = await the_data_base4()
         await mycursor.execute(f"SELECT * FROM StudentFeedback WHERE class_id = {class_id} and teacher_id = {teacher_id} and student_id = {student_id}")
         student = await mycursor.fetchall()
         await mycursor.close()
@@ -673,7 +672,7 @@ class TeacherFeedback(commands.Cog):
             return False
 
     async def check_table_student_exist(self):
-        mycursor, db = await the_data_base()
+        mycursor, db = await the_data_base4()
         await mycursor.execute(f"SHOW TABLE STATUS LIKE 'StudentFeedback'")
         table_info = await mycursor.fetchall()
         await mycursor.close()
@@ -686,21 +685,21 @@ class TeacherFeedback(commands.Cog):
     @commands.command()
     @commands.has_permissions(administrator=True)
     async def get_all_users(self, ctx):
-        mycursor, db = await the_data_base()
+        mycursor, db = await the_data_base4()
         await mycursor.execute(f"SELECT * FROM StudentFeedback")
         users_feedback = await mycursor.fetchall()
         await mycursor.close()
         return await ctx.send(users_feedback)
 
     async def get_specific_user(self, student_id: int):
-        mycursor, db = await the_data_base()
+        mycursor, db = await the_data_base4()
         await mycursor.execute(f"SELECT * FROM StudentFeedback WHERE student_id = {student_id}")
         student_info = await mycursor.fetchall()
         await mycursor.close()
         return student_info
 
     async def update_student_messages(self, student_id: int, class_id: int):
-        mycursor, db = await the_data_base()
+        mycursor, db = await the_data_base4()
         await mycursor.execute(f"UPDATE StudentFeedback SET messages = messages + 1 WHERE student_id = {student_id} and class_id = {class_id}")
         await db.commit()
         await mycursor.close()
@@ -788,7 +787,7 @@ class TeacherFeedback(commands.Cog):
     @commands.command()
     @commands.has_permissions(administrator=True)
     async def change_queries(self, ctx):
-        mycursor, db = await the_data_base()
+        mycursor, db = await the_data_base4()
         await mycursor.execute("select user, max_questions from user")
         something = await mycursor.fetchall()
         await mycursor.close()
@@ -808,7 +807,7 @@ class TeacherFeedback(commands.Cog):
         teacher_role = discord.utils.get(ctx.guild.roles, id=teacher_role_id)
         if not teacher_role in teacher.roles:
             return await ctx.send(f"**{teacher} is not even a teacher!**", delete_after=5)
-        mycursor, db = await the_data_base()
+        mycursor, db = await the_data_base4()
         await mycursor.execute(f"DELETE FROM TeacherFeedback WHERE teacher_id = {teacher.id}")
         await db.commit()
         await mycursor.close()
@@ -832,7 +831,7 @@ class TeacherFeedback(commands.Cog):
         if not teacher_role in teacher.roles:
             return await ctx.send(f"**{teacher} is not even a teacher!**", delete_after=5)
 
-        mycursor, db = await the_data_base()
+        mycursor, db = await the_data_base4()
         await mycursor.execute(f"DELETE FROM TeacherFeedback WHERE teacher_id = {teacher.id} and class_id = {class_id}")
         await db.commit()
         await mycursor.close()
