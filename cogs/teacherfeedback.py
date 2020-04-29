@@ -418,7 +418,7 @@ class TeacherFeedback(commands.Cog):
                     teacher_class = await self.get_teacher_class_info(member.id, before.channel.id)
                     m, s = divmod(teacher_class[0][7], 60)
                     h, m = divmod(m, 60)
-                    class_embed = discord.Embed(title=f"__{teacher_class[0][4].title()} Class__", description=teacher_class[0][9], colour=discord.Colour.green(), timestamp=datetime.utcnow())
+                    class_embed = discord.Embed(title=f"__{teacher_class[0][4].title()} Class__", description=teacher_class[0][9], colour=member.colour, timestamp=datetime.utcnow())
                     class_embed.add_field(name=f"__**Duration:**__", value=f"{h:d} hours, {m:02d} minutes and {s:02d} seconds", inline=False)
                     class_embed.add_field(name=f"__**Joined:**__", value=f"{teacher_class[0][8]} members.", inline=False)
                     class_embed.add_field(name=f"__**Type of class:**__", value=f"{teacher_class[0][5].title()}.", inline=False)
@@ -433,8 +433,6 @@ class TeacherFeedback(commands.Cog):
                         # Deletes the class
                         await self.remove_temp_class(teacher_class[0][0], teacher_class[0][1])
 
-                    if teacher_class[0][3] >= 1800:
-                        await self.update_money(teacher_class[0][0], 25)
                     await self.ask_class_feedback(teacher_class[0][0], users_feedback, member.guild, teacher_class[0][4], teacher_class[0][5])
                 else:
                     await text_channel.send("**Class not ended!**")
@@ -769,7 +767,7 @@ class TeacherFeedback(commands.Cog):
                 done_embed = discord.Embed(title="__**DONE!**__", colour=discord.Colour.green())
                 await simple.edit(embed=done_embed, delete_after=3)
                 if users_to_reward:
-                    the_reward_embed = discord.Embed(title="__**Class Activity Reward**__", description=f"The following people got rewarded for participating and being active in {teacher.mention}'s __{language}__ class", colour=discord.Colour.green())
+                    the_reward_embed = discord.Embed(title="__**Class Activity Reward**__", description=f"The following people got rewarded for participating and being active in {teacher.mention}'s __{language}__ class!\n__Teacher__ **+25łł**; __students__ **+10łł**", colour=discord.Colour.green())
                     the_reward_embed.set_footer(text=guild.name, icon_url=guild.icon_url)
                     the_reward_embed.set_thumbnail(url=teacher.avatar_url)
                     the_reward_embed.set_author(name=teacher, icon_url=teacher.avatar_url)
@@ -780,18 +778,11 @@ class TeacherFeedback(commands.Cog):
                         if await self.user_in_currency(member.id):
                             await self.update_money(member.id, 10)
 
+                    if await self.user_in_currency(teacher.id):
+                        await self.update_money(teacher.id, 25)
+
                     commands_channel = discord.utils.get(guild.channels, id=bot_commands_channel_id)
                     return await commands_channel.send(embed=the_reward_embed)
-
-
-    @commands.command()
-    @commands.has_permissions(administrator=True)
-    async def change_queries(self, ctx):
-        mycursor, db = await the_data_base4()
-        await mycursor.execute("select user, max_questions from user")
-        something = await mycursor.fetchall()
-        await mycursor.close()
-        return await ctx.send(something)
 
 
     @commands.command()
