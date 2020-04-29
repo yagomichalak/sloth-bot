@@ -6,6 +6,7 @@ from chatbot import Chat, register_call
 chat_room_id = 703968197988188170
 template_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),"../chatbotTemplate","chatbottemplate.template")
 chat=Chat(template_file_path)
+allowed_roles = [474774889778380820, 574265899801116673, 497522510212890655, 588752954266222602]
 
 @register_call("whoIs")
 def who_is(query, session_id="general"):
@@ -33,18 +34,22 @@ class ChatterSloth(commands.Cog):
     async def on_message(self, message):
         if message.author.bot:
             return
-        if message.channel.id == chat_room_id:
-            if message.content[3:].startswith(str(self.client.user.mention)[2:]) or message.content[2:].startswith(str(self.client.user.mention)[2:]):
-                if len(message.content.split()) < 2:
-                    return await message.channel.send('**?**')
-
-                msg = message.content.split(f'{self.client.user.mention[2:]}', 1)
-                msg = msg[1].strip()
-                await self.chatbot(message.channel, msg)
+        if message.content[3:].startswith(str(self.client.user.mention)[2:]) or message.content[2:].startswith(str(self.client.user.mention)[2:]):
+            for arole in allowed_roles:
+                the_role = discord.utils.get(message.guild.roles, id=arole)
+                if the_role in message.author.roles:
+                    break
             else:
-                await message.delete()
+                return
 
+            if len(message.content.split()) < 2:
+                return await message.channel.send('**?**')
 
+            msg = message.content.split(f'{self.client.user.mention[2:]}', 1)
+            msg = msg[1].strip()
+            await self.chatbot(message.channel, msg)
+
+    
     async def chatbot(self, channel, message):
         result = chat.respond(message)
         if (len(result) <= 2048):
