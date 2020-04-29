@@ -43,7 +43,7 @@ class Moderation(commands.Cog):
             general_embed.set_author(name=f'{member} has been warned', icon_url=member.avatar_url)
             await ctx.send(embed=general_embed)
             # Moderation log embed
-            moderation_log = ctx.utils.get(ctx.guild.channels, id=mod_log_id)
+            moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
             embed = discord.Embed(title='__**Warning**__', colour=discord.Colour.dark_gold(),
                                   timestamp=ctx.message.created_at)
             embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nId: {member.id}```',
@@ -137,7 +137,7 @@ class Moderation(commands.Cog):
                 general_embed.set_author(name=f'{member} has been kicked', icon_url=member.avatar_url)
                 await ctx.send(embed=general_embed)
                 # Moderation log embed
-                moderation_log = ctx.utils.get(ctx.guild.channels, id=mod_log_id)
+                moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
                 embed = discord.Embed(title='__**Kick**__', colour=discord.Colour.magenta(),
                                       timestamp=ctx.message.created_at)
                 embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nId: {member.id}```',
@@ -171,7 +171,7 @@ class Moderation(commands.Cog):
                 general_embed.set_author(name=f'{member} has been banned', icon_url=member.avatar_url)
                 await ctx.send(embed=general_embed)
                 # Moderation log embed
-                moderation_log = ctx.utils.get(ctx.guild.channels, id=mod_log_id)
+                moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
                 embed = discord.Embed(title='__**Banishment**__', colour=discord.Colour.dark_red(),
                                       timestamp=ctx.message.created_at)
                 embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nId: {member.id}```',
@@ -210,7 +210,7 @@ class Moderation(commands.Cog):
                 general_embed.set_author(name=f'{user} has been unbanned', icon_url=user.avatar_url)
                 await ctx.send(embed=general_embed)
                 # Moderation log embed
-                moderation_log = ctx.utils.get(ctx.guild.channels, id=mod_log_id)
+                moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
                 embed = discord.Embed(title='__**Unbanishment**__', colour=discord.Colour.red(),
                                       timestamp=ctx.message.created_at)
                 embed.add_field(name='User info:', value=f'```Name: {user.display_name}\nId: {user.id}```',
@@ -247,7 +247,7 @@ class Moderation(commands.Cog):
                 general_embed.set_author(name=f'{member} has been softbanned', icon_url=member.avatar_url)
                 await ctx.send(embed=general_embed)
                 # Moderation log embed
-                moderation_log = ctx.utils.get(ctx.guild.channels, id=mod_log_id)
+                moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
                 embed = discord.Embed(title='__**SoftBanishment**__', colour=discord.Colour.dark_purple(),
                                       timestamp=ctx.message.created_at)
                 embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nId: {member.id}```',
