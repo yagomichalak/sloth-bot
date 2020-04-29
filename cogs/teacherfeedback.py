@@ -739,7 +739,7 @@ class TeacherFeedback(commands.Cog):
                     h, m = divmod(m, 60)
                     member = discord.utils.get(guild.members, id=active_users[class_index][0])
                     reward_embed = discord.Embed(
-                        title=f"*[{class_index+1}/{len(active_users)}] Reward __{member}__?**",
+                        title=f"**[{class_index+1}/{len(active_users)}] Reward __{member}__?**",
                         description=f"**Sent:** {active_users[class_index][3]} messages.\n**Have been:** {h:d} hours, {m:02d} minutes and {s:02d} seconds in the voice channel.", colour=discord.Colour.green())
                     reward_embed.set_thumbnail(url=member.avatar_url)
                     reward_embed.set_author(name=member.id)
