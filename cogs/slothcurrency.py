@@ -879,6 +879,30 @@ class SlothCurrency(commands.Cog):
         await self.update_user_server_time(member.id, add_time)
         return await ctx.send(f"Added {add_time} seconds to {member}")
 
+    @commands.command()
+    async def transfer(self, ctx, member: discord.Member = None, money: int = None):
+        if not member:
+            return await ctx.send('**Inform the member!**', delete_after=3)
+        elif not member.id == ctx.author.id:
+            return await ctx.send("**You can't transfer money to yourself!**", delete_after=3)
+        elif not money:
+            return await ctx.send('**Inform the amount of money to trasnfer!**', delete_after=3)
+        elif not int(money) > 0:
+            return await ctx.send('**Inform value bigger than 0!**', delete_after=3)
+
+        the_user = await self.get_user_currency(ctx.author.id)
+        target_user = await self.get_user_currency(member.id)
+        if not the_user:
+            return await ctx.send("**You don't have a bank account yet, type z!bank to open your account!**", delete_after=10)
+        elif not target_user:
+            return await ctx.send(f"**{member} does not have a bank account yet!**", delete_after=5)
+
+        if the_user[0][1] >= int(money):
+            await self.update_user_money(member.id, money)
+            await self.update_user_money(ctx.author.id, -money)
+            await ctx.send(f"**{ctx.author.mention} transferred {money}łł to {member.mention}!**")
+        else:
+            await ctx.send(f"You don't have {money}łł!")
 
 def setup(client):
     client.add_cog(SlothCurrency(client))
