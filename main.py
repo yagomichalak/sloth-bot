@@ -298,6 +298,9 @@ async def on_command_error(ctx, error):
     if isinstance(error, commands.MissingRequiredArgument):
         await ctx.send('Please, inform all parameters!')
 
+    if isinstance(error, commands.CommandOnCooldown):
+        await ctx.send(error)
+
 
 # Members status update
 @tasks.loop(seconds=10)

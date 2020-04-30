@@ -47,6 +47,7 @@ class Social(commands.Cog):
 
     # Sends a random post from the meme subreddit
     @commands.command()
+    @commands.cooldown(1, 5, type=commands.BucketType.user)
     async def meme(self, ctx):
         '''
         Gets a random meme from Reddit.

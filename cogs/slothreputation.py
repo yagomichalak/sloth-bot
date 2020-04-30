@@ -60,7 +60,7 @@ class SlothReputation(commands.Cog):
 
         await ctx.message.delete()
         embed = discord.Embed(title="Rank", description=f"__**Level:**__ {user[0][2]}\n__**EXP:**__ {user[0][1]} / {((user[0][2]+1)**5)}.",
-                              colour=discord.Colour.dark_green())
+                              colour=ctx.author.color)
         embed.set_footer(text=f"{ctx.author}", icon_url=ctx.author.avatar_url)
         return await ctx.send(content=None, embed=embed)
 

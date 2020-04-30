@@ -520,7 +520,7 @@ class SlothCurrency(commands.Cog):
             member = ctx.author
 
         user_found = await self.get_user_currency(member.id)
-        bank_embed = discord.Embed(title=f"{member.name}'s bank", colour=discord.Colour.dark_green(),
+        bank_embed = discord.Embed(title=f"{member.name}'s bank", colour=member.color,
                                    timestamp=ctx.message.created_at)
         bank_embed.set_thumbnail(url=member.avatar_url)
         if len(user_found) != 0:
@@ -784,7 +784,7 @@ class SlothCurrency(commands.Cog):
 
         m, s = divmod(user_info[0][2], 60)
         h, m = divmod(m, 60)
-        embed = discord.Embed(title=f"{member.name}'s Status", colour=discord.Colour.dark_green(),
+        embed = discord.Embed(title=f"{member.name}'s Status", colour=member.color,
                               timestamp=ctx.message.created_at)
         embed.add_field(name=f"__**Messages sent:**__", value=f"{user_info[0][1]}", inline=False)
         embed.add_field(name=f"__**Time spent on voice channels:**__",
@@ -820,7 +820,7 @@ class SlothCurrency(commands.Cog):
         member_id = ctx.author.id
         cmsg, message_times = await self.convert_messages(member_id, user_message)
         ctime, time_times = await self.convert_time(member_id, user_time)
-        embed = discord.Embed(title="Exchange", colour=discord.Colour.dark_green(), timestamp=ctx.message.created_at)
+        embed = discord.Embed(title="Exchange", colour=member.color, timestamp=ctx.message.created_at)
         embed.set_author(name=ctx.author, url=ctx.author.avatar_url)
         if not cmsg == ctime == 0:
             if cmsg > 0:
