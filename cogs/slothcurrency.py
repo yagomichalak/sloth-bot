@@ -150,7 +150,7 @@ class SlothCurrency(commands.Cog):
 
         inventory = discord.Embed(title=f"{member.name}'s Inventory",
                                   description="All of your items gathered in one place.",
-                                  colour=discord.Color.dark_green(), timestamp=ctx.message.created_at)
+                                  colour=member.color, timestamp=ctx.message.created_at)
         inventory.set_footer(text=ctx.guild.name, icon_url=ctx.guild.icon_url)
         inventory.set_thumbnail(url=member.avatar_url)
         for item in user_items:

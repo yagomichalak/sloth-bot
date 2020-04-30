@@ -11,6 +11,7 @@ create_classroom_category_id = 562019326295670806
 class_history_channel_id = 704429055239258153
 reward_channel_id = 704428903682408498
 bot_commands_channel_id = 562019654017744904
+preference_role_id = 562035467055529995
 
 class TeacherFeedback(commands.Cog):
 
@@ -203,13 +204,14 @@ class TeacherFeedback(commands.Cog):
                                 the_category_test = discord.utils.get(member.guild.categories, id=create_classroom_category_id)
                                 # Creating text channel
                                 teacher_role = discord.utils.get(member.guild.roles, id=teacher_role_id)
+                                preference_role = discord.utils.get(member.guild.roles, id=preference_role_id)
                                 native_role = discord.utils.get(member.guild.roles, name=f"Native {all_teacher_classes[class_index][4].title()}")
                                 fluent_role = discord.utils.get(member.guild.roles, name=f"Fluent {all_teacher_classes[class_index][4].title()}")
                                 studying_role = discord.utils.get(member.guild.roles, name=f"Studying {all_teacher_classes[class_index][4].title()}")
                                 if native_role and fluent_role and studying_role:
                                     overwrites = {
                                         member.guild.default_role: discord.PermissionOverwrite(read_messages=False, send_messages=False),
-                                        teacher_role: discord.PermissionOverwrite(read_messages=True, send_messages=True, manage_messages=True, mute_members=True, embed_links=True, connect=True),
+                                        teacher_role: discord.PermissionOverwrite(read_messages=True, send_messages=True, manage_messages=True, mute_members=True, embed_links=True, connect=True), preference_role: discord.PermissionOverwrite(read_messages=True, send_messages=False, connect=False),
                                         native_role: discord.PermissionOverwrite(read_messages=True, send_messages=False, connect=False),
                                         fluent_role: discord.PermissionOverwrite(read_messages=True, send_messages=True),
                                         studying_role: discord.PermissionOverwrite(read_messages=True, send_messages=True)
@@ -217,7 +219,7 @@ class TeacherFeedback(commands.Cog):
                                 else:
                                     overwrites = {
                                         member.guild.default_role: discord.PermissionOverwrite(read_messages=False, send_messages=False),
-                                        teacher_role: discord.PermissionOverwrite(read_messages=True, send_messages=True, manage_messages=True, mute_members=True, embed_links=True, connect=True),
+                                        teacher_role: discord.PermissionOverwrite(read_messages=True, send_messages=True, manage_messages=True, mute_members=True, embed_links=True, connect=True), preference_role: discord.PermissionOverwrite(read_messages=True, send_messages=False, connect=False)
                                     }
                                 text_channel = await the_category_test.create_text_channel(
                                     name=f"{all_teacher_classes[class_index][4].title()} Classroom", overwrites=overwrites)
@@ -342,6 +344,7 @@ class TeacherFeedback(commands.Cog):
                 # (Creating rooms)
                 the_category_test = discord.utils.get(member.guild.categories, id=create_classroom_category_id)
                 teacher_role = discord.utils.get(member.guild.roles, id=teacher_role_id)
+                preference_role = discord.utils.get(member.guild.roles, id=preference_role_id)
                 native_role = discord.utils.get(member.guild.roles,
                                                 name=f"Native {class_language.title()}")
                 fluent_role = discord.utils.get(member.guild.roles,
@@ -355,6 +358,7 @@ class TeacherFeedback(commands.Cog):
                         teacher_role: discord.PermissionOverwrite(read_messages=True, send_messages=True,
                                                                   manage_messages=True, mute_members=True,
                                                                   embed_links=True),
+                        preference_role: discord.PermissionOverwrite(read_messages=True, send_messages=False, connect=False),
                         native_role: discord.PermissionOverwrite(read_messages=True, send_messages=False,
                                                                  connect=False),
                         fluent_role: discord.PermissionOverwrite(read_messages=True, send_messages=True),
@@ -367,6 +371,7 @@ class TeacherFeedback(commands.Cog):
                         teacher_role: discord.PermissionOverwrite(read_messages=True, send_messages=True,
                                                                   manage_messages=True, mute_members=True,
                                                                   embed_links=True),
+                        preference_role: discord.PermissionOverwrite(read_messages=True, send_messages=False, connect=False)
                     }
                 # Creating text channel
                 text_channel = await the_category_test.create_text_channel(name=f"{class_language.title()} Classroom", overwrites=overwrites)
