@@ -17,7 +17,7 @@ class NClassManagement(commands.Cog):
     # Add classes
     @commands.command()
     @commands.has_permissions(kick_members=True)
-    async def nclass(self, ctx, teacher: discord.Member, language, day, time, *desc: str):
+    async def nclass(self, ctx, teacher: discord.Member, language, day, time, role: discord.Role, *desc: str):
         await ctx.message.delete()
         if len(desc) == 0:
             desc = 'Unspecified'
@@ -29,7 +29,8 @@ class NClassManagement(commands.Cog):
                               colour=discord.Colour.green(), timestamp=ctx.message.created_at)
         embed.set_thumbnail(url=teacher.avatar_url)
         the_channel = discord.utils.get(ctx.guild.channels, id=announce_channel)
-        the_class = await the_channel.send(content=":busts_in_silhouette: **Attendees:**```->```", embed=embed)
+        the_class = await the_channel.send(content=f"{teacher.mention}, {role.mention}", embed=embed)
+        await the_class.edit(content=":busts_in_silhouette: **Attendees:**```->```", embed=embed)
         await the_class.add_reaction('✅')
         await add_class_announcement(teacher.id, the_class.id)
 
