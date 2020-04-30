@@ -820,7 +820,7 @@ class SlothCurrency(commands.Cog):
         member_id = ctx.author.id
         cmsg, message_times = await self.convert_messages(member_id, user_message)
         ctime, time_times = await self.convert_time(member_id, user_time)
-        embed = discord.Embed(title="Exchange", colour=member.color, timestamp=ctx.message.created_at)
+        embed = discord.Embed(title="Exchange", colour=ctx.author.color, timestamp=ctx.message.created_at)
         embed.set_author(name=ctx.author, url=ctx.author.avatar_url)
         if not cmsg == ctime == 0:
             if cmsg > 0:
