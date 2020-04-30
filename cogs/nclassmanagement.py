@@ -16,7 +16,7 @@ class NClassManagement(commands.Cog):
 
     # Add classes
     @commands.command()
-    @commands.has_permissions(administrator=True)
+    @commands.has_permissions(kick_members=True)
     async def nclass(self, ctx, teacher: discord.Member, language, day, time, *desc: str):
         await ctx.message.delete()
         if len(desc) == 0:
@@ -34,7 +34,7 @@ class NClassManagement(commands.Cog):
         await add_class_announcement(teacher.id, the_class.id)
 
     @commands.command()
-    @commands.has_permissions(administrator=True)
+    @commands.has_permissions(kick_members=True)
     async def show_announ(self, ctx):
         await ctx.message.delete()
         announcements = await show_class_announcements()
@@ -49,7 +49,7 @@ class NClassManagement(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.command()
-    @commands.has_permissions(administrator=True)
+    @commands.has_permissions(kick_members=True)
     async def del_announ(self, ctx, class_id: int = None):
         await ctx.message.delete()
         if not class_id:
