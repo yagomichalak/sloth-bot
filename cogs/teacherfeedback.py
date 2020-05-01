@@ -2,7 +2,6 @@ import discord
 from discord.ext import commands
 from mysqldb2 import *
 from datetime import datetime
-import asyncio
 
 teacher_role_id = 507298235766013981
 create_classroom_id = 704430199298850907
@@ -487,7 +486,6 @@ class TeacherFeedback(commands.Cog):
                     await text_channel.send("**Class ended!**")
                     await voice_channel.delete()
                     await text_channel.delete()
-                    await asyncio.sleep(5)
                     users_feedback = await self.get_all_users_feedback(teacher_class[0][0], teacher_class[0][1])
                     await self.clear_specific_class_students(teacher_class[0][1], teacher_class[0][0])
                     history_channel = discord.utils.get(member.guild.channels, id=class_history_channel_id)
