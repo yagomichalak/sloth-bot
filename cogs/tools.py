@@ -71,6 +71,27 @@ class Tools(commands.Cog):
         else:
             await ctx.send("**I'm already in a voice channel!**")
 
+    @commands.command()
+    @commands.cooldown(1, 5, type=commands.BucketType.guild)
+    async def tts(self, ctx, language: str = None, *, message: str = None):
+        await ctx.message.delete()
+        if not language:
+            return await ctx.send("**Please, inform a language!**", delete_after=5)
+        elif not message:
+            return await ctx.send("**Please, inform a message!**", delete_after=5)
+
+        voice = ctx.message.author.voice
+        voice_client = ctx.message.guild.voice_client
+
+        tts = gTTS(text=message, lang=language)
+        tts.save(f'tts/audio.mp3')
+        if voice is None:
+            return await ctx.send("**You're not in a voice channel**")
+        if voice_client is None:
+            voicechannel = discord.utils.get(ctx.guild.channels, id=voice.channel.id)
+            vc = await voicechannel.connect()
+            vc.play(discord.FFmpegPCMAudio(f"tts/audio.mp3"), after=lambda e: self.client.loop.create_task(self.leave(ctx, 'the bot')))
+
 
 def setup(client):
     client.add_cog(Tools(client))
