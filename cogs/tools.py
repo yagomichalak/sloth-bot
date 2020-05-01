@@ -2,8 +2,7 @@ import discord
 from discord.ext import commands
 import asyncio
 from gtts import gTTS
-import os
-
+allowed_roles = [474774889778380820, 574265899801116673, 497522510212890655, 588752954266222602]
 
 class Tools(commands.Cog):
 
@@ -32,48 +31,20 @@ class Tools(commands.Cog):
     # Bot leaves
     @commands.command()
     @commands.has_permissions(administrator=True)
-    async def leave(self, ctx, bot: str =  None):
+    async def leave(self, ctx):
         guild = ctx.message.guild
         voice_client = guild.voice_client
 
         if voice_client:
             await voice_client.disconnect()
-            if bot == 'the bot':
-                return
             await ctx.send('**Disconnected!**')
         else:
             await ctx.send("**I'm not even in a channel, lol!**")
-            
-            
-    @commands.command()
-    @commands.has_permissions(administrator=True)
-    async def reproduce(self, ctx, audio: str = None):
-        await ctx.message.delete()
-        voice = ctx.message.author.voice
-        voice_client = ctx.message.guild.voice_client
-        if not audio:
-            return await ctx.send("**Inform an audio to play!**")
 
-        arr = os.listdir(f'tts')
-        for a in arr:
-            if audio.lower() == a[:-4]:
-                temp = a[:-4]
-                break
-        else:
-            return await ctx.send("**No audios with that name were found!**")
-
-        if voice is None:
-            return await ctx.send("**You're not in a voice channel**")
-        if voice_client is None:
-            voicechannel = discord.utils.get(ctx.guild.channels, id=voice.channel.id)
-            vc = await voicechannel.connect()
-            vc.play(discord.FFmpegPCMAudio(f"tts/{temp}.mp3"), after=lambda e: self.client.loop.create_task(self.leave(ctx, 'the bot')))
-
-        else:
-            await ctx.send("**I'm already in a voice channel!**")
 
     @commands.command()
     @commands.cooldown(1, 5, type=commands.BucketType.guild)
+    @commands.has_any_role(*allowed_roles)
     async def tts(self, ctx, language: str = None, *, message: str = None):
         await ctx.message.delete()
         if not language:
@@ -88,10 +59,13 @@ class Tools(commands.Cog):
         tts.save(f'tts/audio.mp3')
         if voice is None:
             return await ctx.send("**You're not in a voice channel**")
+        voicechannel = discord.utils.get(ctx.guild.channels, id=voice.channel.id)
         if voice_client is None:
-            voicechannel = discord.utils.get(ctx.guild.channels, id=voice.channel.id)
             vc = await voicechannel.connect()
-            vc.play(discord.FFmpegPCMAudio(f"tts/audio.mp3"), after=lambda e: self.client.loop.create_task(self.leave(ctx, 'the bot')))
+            #vc.play(discord.FFmpegPCMAudio(f"tts/audio.mp3"), after=lambda e: self.client.loop.create_task(self.leave(ctx)))
+            vc.play(discord.FFmpegPCMAudio(f"tts/audio.mp3"))
+        else:
+            await voicechannel.play(discord.FFmpegPCMAudio(f"tts/audio.mp3"))
 
 
 def setup(client):

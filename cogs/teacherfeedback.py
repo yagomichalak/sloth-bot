@@ -486,6 +486,7 @@ class TeacherFeedback(commands.Cog):
                     await text_channel.send("**Class ended!**")
                     await voice_channel.delete()
                     await text_channel.delete()
+                    await asyncio.sleep(5)
                     users_feedback = await self.get_all_users_feedback(teacher_class[0][0], teacher_class[0][1])
                     await self.clear_specific_class_students(teacher_class[0][1], teacher_class[0][0])
                     history_channel = discord.utils.get(member.guild.channels, id=class_history_channel_id)
