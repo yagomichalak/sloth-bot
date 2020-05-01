@@ -18,6 +18,7 @@ clock_voice_channel_id = 687783432222277695
 announcement_channel_id = 689918515129352213
 report_channel_id = 685832739517366340
 report_log_channel_id = 683693966016774168
+admin_commands_channel_id = 562019472257318943
 
 
 def read_token():
@@ -39,6 +40,25 @@ async def on_ready():
     change_status.start()
     update_timezones.start()
     print('Bot is ready!')
+
+
+@client.event
+async def on_member_remove(member):
+    roles = [role for role in member.roles]
+    channel = discord.utils.get(member.guild.channels, id=admin_commands_channel_id)
+    embed = discord.Embed(title=member.name, description=f"User has left the server.", colour=discord.Colour.dark_red())
+    embed.set_thumbnail(url=member.avatar_url)
+    embed.set_author(name=f"User Info: {member}")
+    embed.add_field(name="ID:", value=member.id, inline=False)
+    embed.add_field(name="Guild name:", value=member.display_name, inline=False)
+    embed.add_field(name="Created at:", value=member.created_at.strftime("%a, %d %B %y, %I %M %p UTC"), inline=False)
+    embed.add_field(name="Joined at:", value=member.joined_at.strftime("%a, %d %B %y, %I %M %p UTC"), inline=False)
+    embed.add_field(name="Left at:", value=datetime.utcnow().strftime("%a, %d %B %y, %I %M %p UTC"), inline=False)
+    embed.add_field(name=f"Roles: {len(roles)}", value=" ".join([role.mention for role in roles]), inline=False)
+    embed.add_field(name="Top role:", value=member.top_role.mention, inline=False)
+    embed.add_field(name="Bot?", value=member.bot)
+    cosmos = discord.utils.get(member.guild.members, id=user_cosmos_id)
+    await channel.send(content=f"{cosmos.mention}", embed=embed)
 
 
 @client.event
@@ -299,6 +319,8 @@ async def on_command_error(ctx, error):
         await ctx.send('Please, inform all parameters!')
 
     if isinstance(error, commands.CommandOnCooldown):
+        await ctx.send(error)
+    if isinstance(error, commands.MissingAnyRole):
         await ctx.send(error)
 
 
