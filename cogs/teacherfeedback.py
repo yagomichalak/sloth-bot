@@ -829,7 +829,7 @@ class TeacherFeedback(commands.Cog):
                 reward_embed.set_footer(text=teacher.guild.name, icon_url=teacher.guild.icon_url)
                 await simple.edit(embed=reward_embed)
 
-                reaction, user = await self.client.wait_for('reaction_add',timeout=60.0, check=check_reward_react)
+                reaction, user = await self.client.wait_for('reaction_add', timeout=60.0, check=check_reward_react)
 
                 if str(reaction.emoji) == "✅":
                     await simple.remove_reaction(reaction.emoji, teacher)
