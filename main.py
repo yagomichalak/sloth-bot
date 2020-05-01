@@ -313,7 +313,7 @@ async def update_timezones():
     gid = server_id  # Guild id
     guild = client.get_guild(gid)
     time_now = datetime.now()
-    timezones = {'Etc/GMT-1': [clock_voice_channel_id, 'CET']}
+    timezones = {'Etc/GMT-2': [clock_voice_channel_id, 'CET']}
 
     for tz in timezones:
         tzone = timezone(tz)
