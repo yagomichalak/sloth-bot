@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 from mysqldb2 import *
 from datetime import datetime
+import asyncio
 
 teacher_role_id = 507298235766013981
 create_classroom_id = 704430199298850907
