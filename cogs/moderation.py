@@ -90,7 +90,7 @@ class Moderation(commands.Cog):
     # Unmutes a member
     @commands.command()
     @commands.has_permissions(kick_members=True)
-    async def unmute(self, ctx, member: discord.Member = None, *, reason=None):
+    async def unmute(self, ctx, member: discord.Member = None):
         '''
         Unmutes a member.
         :param member: The @ or the ID of the user to unmute.
@@ -102,18 +102,16 @@ class Moderation(commands.Cog):
         if role in member.roles:
             await member.remove_roles(role)
             # General embed
-            general_embed = discord.Embed(description=f'**Reason:** {reason}', colour=discord.Colour.light_grey(),
+            general_embed = discord.Embed(colour=discord.Colour.light_grey(),
                                           timestamp=ctx.message.created_at)
             general_embed.set_author(name=f'{member} has been unmuted', icon_url=member.avatar_url)
             await ctx.send(embed=general_embed)
             # Moderation log embed
             moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
-            embed = discord.Embed(title='__**Mute**__', colour=discord.Colour.light_grey(),
+            embed = discord.Embed(title='__**Unmute**__', colour=discord.Colour.light_grey(),
                                   timestamp=ctx.message.created_at)
             embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nId: {member.id}```',
                             inline=False)
-            embed.add_field(name='Reason:', value=f'```{reason}```')
-
             embed.set_author(name=member)
             embed.set_thumbnail(url=member.avatar_url)
             embed.set_footer(text=f"Unmuted by {ctx.author}", icon_url=ctx.author.avatar_url)
@@ -148,7 +146,7 @@ class Moderation(commands.Cog):
             await ctx.send(embed=general_embed)
             # Moderation log embed
             moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
-            embed = discord.Embed(title='__**Mute**__', colour=discord.Colour.lighter_grey(),
+            embed = discord.Embed(title='__**Tempmute**__', colour=discord.Colour.lighter_grey(),
                                   timestamp=ctx.message.created_at)
             embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nId: {member.id}```',
                             inline=False)

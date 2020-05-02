@@ -68,20 +68,18 @@ async def on_message(message):
         if 'Direct Message' not in str(message.channel):
             if message.channel.id == report_channel_id:
                 await message.delete()
-                member = discord.utils.get(message.author.guild.members, id=message.author.id)
-                gid = server_id  # Guild id
                 cid = report_log_channel_id  # Report log's channel id
-                guild = client.get_guild(gid)
-                moderators = discord.utils.get(guild.roles, id=moderator_role_id)
-                cosmos = discord.utils.get(guild.members, id=user_cosmos_id)
-                the_channel = discord.utils.get(guild.channels, id=cid)
+                moderators = discord.utils.get(message.author.guild.roles, id=moderator_role_id)
+                cosmos = discord.utils.get(message.author.guild.members, id=user_cosmos_id)
+                the_channel = discord.utils.get(message.author.guild.channels, id=cid)
                 report = message.content
 
                 # Report embed
-                embed_report = discord.Embed(description=report, colour=discord.Colour.green(),
+                embed_report = discord.Embed(description=f"**Report sent by:** {message.author.mention}\n{report}", colour=discord.Colour.green(),
                                              timestamp=message.created_at)
-                embed_report.set_author(name=f'{message.author.mention} | ID: {message.author.id}',
-                                        icon_url=message.author.avatar_url)
+                #embed_report.set_author(name=message.author,icon_url=message.author.avatar_url)
+                embed_report.set_thumbnail(url=message.author.avatar_url)
+                #embed_report.set_footer(icon_url=message.author.avatar_url)
 
                 await the_channel.send(f'{moderators.mention}, {cosmos.mention}')
                 await the_channel.send(embed=embed_report)
