@@ -65,7 +65,8 @@ class Tools(commands.Cog):
             #vc.play(discord.FFmpegPCMAudio(f"tts/audio.mp3"), after=lambda e: self.client.loop.create_task(self.leave(ctx)))
             vc.play(discord.FFmpegPCMAudio(f"tts/audio.mp3"))
         else:
-            await voicechannel.play(discord.FFmpegPCMAudio(f"tts/audio.mp3"))
+            vc = await voicechannel.connect()
+            await vc.play(discord.FFmpegPCMAudio(f"tts/audio.mp3"))
 
 
 def setup(client):
