@@ -56,7 +56,7 @@ class Moderation(commands.Cog):
 
     @commands.command()
     @commands.has_permissions(kick_members=True)
-    async def mute(self, ctx, member: discord.Member = None):
+    async def mute(self, ctx, member: discord.Member = None, *, reason = None):
         '''
         Mutes a member.
         :param member: The @ or the ID of the user to mute.
@@ -67,14 +67,30 @@ class Moderation(commands.Cog):
             return await ctx.send("**Please, specify a member!**", delete_after=3)
         if role not in member.roles:
             await member.add_roles(role)
-            await ctx.send("**Member muted!**")
+            # General embed
+            general_embed = discord.Embed(description=f'**Reason:** {reason}', colour=discord.Colour.dark_grey(), timestamp=ctx.message.created_at)
+            general_embed.set_author(name=f'{member} has been muted', icon_url=member.avatar_url)
+            await ctx.send(embed=general_embed)
+            # Moderation log embed
+            moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
+            embed = discord.Embed(title='__**Mute**__', colour=discord.Colour.dark_grey(),
+                                  timestamp=ctx.message.created_at)
+            embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nId: {member.id}```',
+                            inline=False)
+            embed.add_field(name='Reason:', value=f'```{reason}```')
+
+            embed.set_author(name=member)
+            embed.set_thumbnail(url=member.avatar_url)
+            embed.set_footer(text=f"Muted by {ctx.author}", icon_url=ctx.author.avatar_url)
+            await moderation_log.send(embed=embed)
+        
         else:
-            await ctx.send('**The member is already muted!**')
+            await ctx.send(f'**{member} is already muted!**', delete_after=5)
 
     # Unmutes a member
     @commands.command()
     @commands.has_permissions(kick_members=True)
-    async def unmute(self, ctx, member: discord.Member = None):
+    async def unmute(self, ctx, member: discord.Member = None, *, reason=None):
         '''
         Unmutes a member.
         :param member: The @ or the ID of the user to unmute.
@@ -85,14 +101,31 @@ class Moderation(commands.Cog):
             return await ctx.send("**Please, specify a member!**", delete_after=3)
         if role in member.roles:
             await member.remove_roles(role)
-            await ctx.send("**Member unmuted!**")
+            # General embed
+            general_embed = discord.Embed(description=f'**Reason:** {reason}', colour=discord.Colour.light_grey(),
+                                          timestamp=ctx.message.created_at)
+            general_embed.set_author(name=f'{member} has been unmuted', icon_url=member.avatar_url)
+            await ctx.send(embed=general_embed)
+            # Moderation log embed
+            moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
+            embed = discord.Embed(title='__**Mute**__', colour=discord.Colour.light_grey(),
+                                  timestamp=ctx.message.created_at)
+            embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nId: {member.id}```',
+                            inline=False)
+            embed.add_field(name='Reason:', value=f'```{reason}```')
+
+            embed.set_author(name=member)
+            embed.set_thumbnail(url=member.avatar_url)
+            embed.set_footer(text=f"Unmuted by {ctx.author}", icon_url=ctx.author.avatar_url)
+            await moderation_log.send(embed=embed)
+
         else:
-            await ctx.send("**The member is not even muted!**", delete_after=3)
+            await ctx.send(f'**{member} is not even muted!**', delete_after=5)
 
     # Mutes a member temporarily
     @commands.command()
     @commands.has_permissions(kick_members=True)
-    async def tempmute(self, ctx, member: discord.Member = None, minutes: int = 5):
+    async def tempmute(self, ctx, member: discord.Member = None, minutes: int = 5, *, reason =  None):
         '''
         Mutes a member for a determined amount of time.
         :param member: The @ or the ID of the user to tempmute.
@@ -108,13 +141,31 @@ class Moderation(commands.Cog):
             return await ctx.send("**Please, specify a member!**", delete_after=3)
         if role not in member.roles:
             await member.add_roles(role)
-            await ctx.send(f"**{member} was tempmuted for {minutes} minutes!**")
+            # General embed
+            general_embed = discord.Embed(description=f'**Reason:** {reason}', colour=discord.Colour.lighter_grey(),
+                                          timestamp=ctx.message.created_at)
+            general_embed.set_author(name=f'{member} has been tempmuted', icon_url=member.avatar_url)
+            await ctx.send(embed=general_embed)
+            # Moderation log embed
+            moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
+            embed = discord.Embed(title='__**Mute**__', colour=discord.Colour.lighter_grey(),
+                                  timestamp=ctx.message.created_at)
+            embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nId: {member.id}```',
+                            inline=False)
+            embed.add_field(name='Reason:', value=f'```{reason}```')
+            embed.set_author(name=member)
+            embed.set_thumbnail(url=member.avatar_url)
+            embed.set_footer(text=f"Tempmuted by {ctx.author}", icon_url=ctx.author.avatar_url)
+            await moderation_log.send(embed=embed)
+            # After a while
             await asyncio.sleep(seconds)
             await member.remove_roles(role)
-            await ctx.send(f'**{member} was unmuted!**')
+            general_embed = discord.Embed(colour=discord.Colour.lighter_grey(),
+                                          timestamp=ctx.message.created_at)
+            general_embed.set_author(name=f'{member} is no longer tempmuted', icon_url=member.avatar_url)
+            await ctx.send(embed=general_embed)
         else:
-            await ctx.send('**The member is already muted!**', delete_after=3)
-
+            await ctx.send(f'**{member} is not even muted!**', delete_after=5)
     @commands.command()
     @commands.has_permissions(kick_members=True)
     async def kick(self, ctx, member: discord.Member = None, *, reason=None):

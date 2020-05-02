@@ -257,12 +257,14 @@ class TeacherFeedback(commands.Cog):
                                                                                             view_channel=True,
                                                                                             embed_links=True)
 
+                                cemoji = '🗣️' if all_teacher_classes[class_index][5].title() == 'Pronunciation' else '📖'
+
                                 text_channel = await the_category_test.create_text_channel(
-                                    name=f"{all_teacher_classes[class_index][4].title()} Classroom",
+                                    name=f"{cemoji} {all_teacher_classes[class_index][4].title()} Classroom",
                                     overwrites=overwrites)
                                 # Creating voice channel
                                 voice_channel = await the_category_test.create_voice_channel(
-                                    name=f"{all_teacher_classes[class_index][4].title()} Classroom", user_limit=None,
+                                    name=f"{cemoji} {all_teacher_classes[class_index][4].title()} Classroom", user_limit=None,
                                     overwrites=overwrites)
                                 try:
                                     await member.move_to(voice_channel)
@@ -432,11 +434,13 @@ class TeacherFeedback(commands.Cog):
                                                                             speak=True, view_channel=True,
                                                                             embed_links=True)
 
+                cemoji = '🗣️' if class_type.title() == 'Pronunciation' else '📖'
+
                 # Creating text channel
-                text_channel = await the_category_test.create_text_channel(name=f"{class_language.title()} Classroom",
+                text_channel = await the_category_test.create_text_channel(name=f"{cemoji} {class_language.title()} Classroom",
                                                                            overwrites=overwrites)
                 # Creating voice channel
-                voice_channel = await the_category_test.create_voice_channel(name=f"{class_language.title()} Classroom",
+                voice_channel = await the_category_test.create_voice_channel(name=f"{cemoji} {class_language.title()} Classroom",
                                                                              user_limit=None, overwrites=overwrites)
                 try:
                     await member.move_to(voice_channel)
