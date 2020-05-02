@@ -216,51 +216,47 @@ class TeacherFeedback(commands.Cog):
                                                                 name=f"Fluent {all_teacher_classes[class_index][4].title()}")
                                 studying_role = discord.utils.get(member.guild.roles,
                                                                   name=f"Studying {all_teacher_classes[class_index][4].title()}")
-                                if native_role and fluent_role and studying_role:
-                                    overwrites = {
-                                        member.guild.default_role: discord.PermissionOverwrite(read_messages=False,
-                                                                                               send_messages=False,
-                                                                                               connect=False,
-                                                                                               speak=False,
-                                                                                               view_channel=False),
-                                        teacher_role: discord.PermissionOverwrite(read_messages=True,
-                                                                                  send_messages=True,
-                                                                                  manage_messages=True,
-                                                                                  mute_members=True, embed_links=True,
-                                                                                  connect=True, speak=True,
-                                                                                  view_channel=True),
-                                        preference_role: discord.PermissionOverwrite(read_messages=True,
-                                                                                     send_messages=False, connect=False,
-                                                                                     view_channel=True),
-                                        native_role: discord.PermissionOverwrite(read_messages=True,
-                                                                                 send_messages=False, connect=False,
-                                                                                 speak=False, view_channel=True,
-                                                                                 embed_links=False),
-                                        fluent_role: discord.PermissionOverwrite(read_messages=True, send_messages=True,
-                                                                                 connect=True, speak=True,
-                                                                                 view_channel=True, embed_links=True),
-                                        studying_role: discord.PermissionOverwrite(read_messages=True,
-                                                                                   send_messages=True, connect=True,
-                                                                                   speak=True, view_channel=True,
-                                                                                   embed_links=True)
-                                    }
-                                else:
-                                    overwrites = {
-                                        member.guild.default_role: discord.PermissionOverwrite(read_messages=False,
-                                                                                               send_messages=False,
-                                                                                               connect=False,
-                                                                                               speak=False,
-                                                                                               view_channel=False),
-                                        teacher_role: discord.PermissionOverwrite(read_messages=True,
-                                                                                  send_messages=True,
-                                                                                  manage_messages=True,
-                                                                                  mute_members=True, embed_links=True,
-                                                                                  connect=True, speak=True,
-                                                                                  view_channel=True),
-                                        preference_role: discord.PermissionOverwrite(read_messages=True,
-                                                                                     send_messages=False, connect=False,
-                                                                                     view_channel=True)
-                                    }
+                                overwrites = {}
+                                overwrites[member.guild.default_role] = discord.PermissionOverwrite(read_messages=False,
+                                                                                                    send_messages=False,
+                                                                                                    connect=False,
+                                                                                                    speak=False,
+                                                                                                    view_channel=False)
+                                overwrites[teacher_role] = discord.PermissionOverwrite(read_messages=True,
+                                                                                       send_messages=True,
+                                                                                       manage_messages=True,
+                                                                                       mute_members=True,
+                                                                                       embed_links=True, connect=True,
+                                                                                       speak=True,
+                                                                                       view_channel=True)
+                                overwrites[preference_role] = discord.PermissionOverwrite(read_messages=True,
+                                                                                          send_messages=False,
+                                                                                          connect=False,
+                                                                                          view_channel=True)
+
+                                if native_role:
+                                    overwrites[native_role] = discord.PermissionOverwrite(read_messages=True,
+                                                                                          send_messages=False,
+                                                                                          connect=False,
+                                                                                          speak=False,
+                                                                                          view_channel=True,
+                                                                                          embed_links=False)
+
+                                if fluent_role:
+                                    overwrites[fluent_role] = discord.PermissionOverwrite(read_messages=True,
+                                                                                          send_messages=True,
+                                                                                          connect=True,
+                                                                                          speak=True, view_channel=True,
+                                                                                          embed_links=True)
+
+                                if studying_role:
+                                    overwrites[studying_role] = discord.PermissionOverwrite(read_messages=True,
+                                                                                            send_messages=True,
+                                                                                            connect=True,
+                                                                                            speak=True,
+                                                                                            view_channel=True,
+                                                                                            embed_links=True)
+
                                 text_channel = await the_category_test.create_text_channel(
                                     name=f"{all_teacher_classes[class_index][4].title()} Classroom",
                                     overwrites=overwrites)
@@ -406,36 +402,36 @@ class TeacherFeedback(commands.Cog):
                                                 name=f"Fluent {class_language.title()}")
                 studying_role = discord.utils.get(member.guild.roles,
                                                   name=f"Studying {class_language.title()}")
-                if native_role and fluent_role and studying_role:
-                    overwrites = {
-                        member.guild.default_role: discord.PermissionOverwrite(read_messages=False, send_messages=False,
-                                                                               connect=False, speak=False,
-                                                                               view_channel=False),
-                        teacher_role: discord.PermissionOverwrite(read_messages=True, send_messages=True,
-                                                                  manage_messages=True, mute_members=True,
-                                                                  embed_links=True, connect=True, speak=True,
-                                                                  view_channel=True),
-                        preference_role: discord.PermissionOverwrite(read_messages=True, send_messages=False,
-                                                                     connect=False, view_channel=True),
-                        native_role: discord.PermissionOverwrite(read_messages=True, send_messages=False, connect=False,
-                                                                 speak=False, view_channel=True, embed_links=False),
-                        fluent_role: discord.PermissionOverwrite(read_messages=True, send_messages=True, connect=True,
-                                                                 speak=True, view_channel=True, embed_links=True),
-                        studying_role: discord.PermissionOverwrite(read_messages=True, send_messages=True, connect=True,
-                                                                   speak=True, view_channel=True, embed_links=True)
-                    }
-                else:
-                    overwrites = {
-                        member.guild.default_role: discord.PermissionOverwrite(read_messages=False, send_messages=False,
-                                                                               connect=False, speak=False,
-                                                                               view_channel=False),
-                        teacher_role: discord.PermissionOverwrite(read_messages=True, send_messages=True,
-                                                                  manage_messages=True, mute_members=True,
-                                                                  embed_links=True, connect=True, speak=True,
-                                                                  view_channel=True),
-                        preference_role: discord.PermissionOverwrite(read_messages=True, send_messages=False,
-                                                                     connect=False, view_channel=True)
-                    }
+                overwrites = {}
+                overwrites[member.guild.default_role] = discord.PermissionOverwrite(read_messages=False,
+                                                                                    send_messages=False,
+                                                                                    connect=False, speak=False,
+                                                                                    view_channel=False)
+                overwrites[teacher_role] = discord.PermissionOverwrite(read_messages=True, send_messages=True,
+                                                                       manage_messages=True, mute_members=True,
+                                                                       embed_links=True, connect=True, speak=True,
+                                                                       view_channel=True)
+                overwrites[preference_role] = discord.PermissionOverwrite(read_messages=True, send_messages=False,
+                                                                          connect=False, view_channel=True)
+
+                if native_role:
+                    overwrites[native_role] = discord.PermissionOverwrite(read_messages=True, send_messages=False,
+                                                                          connect=False,
+                                                                          speak=False, view_channel=True,
+                                                                          embed_links=False)
+
+                if fluent_role:
+                    overwrites[fluent_role] = discord.PermissionOverwrite(read_messages=True, send_messages=True,
+                                                                          connect=True,
+                                                                          speak=True, view_channel=True,
+                                                                          embed_links=True)
+
+                if studying_role:
+                    overwrites[studying_role] = discord.PermissionOverwrite(read_messages=True, send_messages=True,
+                                                                            connect=True,
+                                                                            speak=True, view_channel=True,
+                                                                            embed_links=True)
+
                 # Creating text channel
                 text_channel = await the_category_test.create_text_channel(name=f"{class_language.title()} Classroom",
                                                                            overwrites=overwrites)
