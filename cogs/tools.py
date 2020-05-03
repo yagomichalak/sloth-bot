@@ -72,7 +72,6 @@ class Tools(commands.Cog):
 
 
     @commands.command()
-    @commands.has_any_role(*allowed_roles)
     async def tr(self, ctx, language: str = None, *, message: str = None):
         '''
         Translates a message into another language.
