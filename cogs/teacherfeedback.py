@@ -257,14 +257,16 @@ class TeacherFeedback(commands.Cog):
                                                                                             view_channel=True,
                                                                                             embed_links=True)
 
-                                cemoji = '🗣️' if all_teacher_classes[class_index][5].title() == 'Pronunciation' else '📖'
+                                cemoji = '🗣️' if all_teacher_classes[class_index][
+                                                      5].title() == 'Pronunciation' else '📖'
 
                                 text_channel = await the_category_test.create_text_channel(
                                     name=f"{cemoji} {all_teacher_classes[class_index][4].title()} Classroom",
                                     overwrites=overwrites)
                                 # Creating voice channel
                                 voice_channel = await the_category_test.create_voice_channel(
-                                    name=f"{cemoji} {all_teacher_classes[class_index][4].title()} Classroom", user_limit=None,
+                                    name=f"{cemoji} {all_teacher_classes[class_index][4].title()} Classroom",
+                                    user_limit=None,
                                     overwrites=overwrites)
                                 try:
                                     await member.move_to(voice_channel)
@@ -437,11 +439,13 @@ class TeacherFeedback(commands.Cog):
                 cemoji = '🗣️' if class_type.title() == 'Pronunciation' else '📖'
 
                 # Creating text channel
-                text_channel = await the_category_test.create_text_channel(name=f"{cemoji} {class_language.title()} Classroom",
-                                                                           overwrites=overwrites)
+                text_channel = await the_category_test.create_text_channel(
+                    name=f"{cemoji} {class_language.title()} Classroom",
+                    overwrites=overwrites)
                 # Creating voice channel
-                voice_channel = await the_category_test.create_voice_channel(name=f"{cemoji} {class_language.title()} Classroom",
-                                                                             user_limit=None, overwrites=overwrites)
+                voice_channel = await the_category_test.create_voice_channel(
+                    name=f"{cemoji} {class_language.title()} Classroom",
+                    user_limit=None, overwrites=overwrites)
                 try:
                     await member.move_to(voice_channel)
                 except discord.errors.HTTPException:
@@ -475,7 +479,8 @@ class TeacherFeedback(commands.Cog):
                     class_duration = the_time - teacher_class[0][6]
                 else:
                     class_duration = 0
-                await self.update_teacher_times(member.id, teacher_class[0][1], class_duration, teacher_class[0][6])
+                #await self.update_teacher_times(member.id, teacher_class[0][1], class_duration, teacher_class[0][6])
+                await self.update_teacher_times2(member.id, teacher_class[0][1], class_duration)
                 await self.update_student_times(teacher_class[0][1], member.id, the_time)
 
                 def check(reaction, user):
@@ -490,7 +495,7 @@ class TeacherFeedback(commands.Cog):
                     users_feedback = await self.get_all_users_feedback(teacher_class[0][0], teacher_class[0][1])
                     await self.clear_specific_class_students(teacher_class[0][1], teacher_class[0][0])
                     history_channel = discord.utils.get(member.guild.channels, id=class_history_channel_id)
-                    new_teacher_class = await self.get_teacher_class_info(teacher_class[0][0], before.channel.id)
+                    new_teacher_class = await self.get_teacher_class_info(member.id, before.channel.id)
                     m, s = divmod(new_teacher_class[0][7], 60)
                     h, m = divmod(m, 60)
                     class_embed = discord.Embed(title=f"__{new_teacher_class[0][4].title()} Class__",
@@ -614,6 +619,13 @@ class TeacherFeedback(commands.Cog):
         mycursor, db = await the_data_base4()
         await mycursor.execute(
             f"UPDATE TeacherFeedback SET vc_timestamp = {new_timestamp}, vc_time = vc_time + {class_duration} WHERE teacher_id = {teacher_id} and class_id = {class_id}")
+        await db.commit()
+        await mycursor.close()
+
+    async def update_teacher_times2(self, teacher_id: int, class_id: int, class_duration: int):
+        mycursor, db = await the_data_base4()
+        await mycursor.execute(
+            f"UPDATE TeacherFeedback SET vc_timestamp = NULL, vc_time = vc_time + {class_duration} WHERE teacher_id = {teacher_id} and class_id = {class_id}")
         await db.commit()
         await mycursor.close()
 
