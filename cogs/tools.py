@@ -2,6 +2,8 @@ import discord
 from discord.ext import commands
 import asyncio
 from gtts import gTTS
+from googletrans import Translator
+
 allowed_roles = [474774889778380820, 574265899801116673, 497522510212890655, 588752954266222602]
 
 class Tools(commands.Cog):
@@ -31,12 +33,14 @@ class Tools(commands.Cog):
     # Bot leaves
     @commands.command()
     @commands.has_permissions(administrator=True)
-    async def leave(self, ctx):
+    async def leave(self, ctx, scrt = None):
         guild = ctx.message.guild
         voice_client = guild.voice_client
 
         if voice_client:
             await voice_client.disconnect()
+            if scrt == 'the bot':
+                return
             await ctx.send('**Disconnected!**')
         else:
             await ctx.send("**I'm not even in a channel, lol!**")
@@ -62,11 +66,34 @@ class Tools(commands.Cog):
         voicechannel = discord.utils.get(ctx.guild.channels, id=voice.channel.id)
         if voice_client is None:
             vc = await voicechannel.connect()
-            vc.play(discord.FFmpegPCMAudio(f"tts/audio.mp3"), after=lambda e: self.client.loop.create_task(self.leave(ctx)))
-            #vc.play(discord.FFmpegPCMAudio(f"tts/audio.mp3"))
+            vc.play(discord.FFmpegPCMAudio(f"tts/audio.mp3"), after=lambda e: self.client.loop.create_task(self.leave(ctx, 'the bot')))
         else:
             return await ctx.send("**I'm already in a voice channel!**", delete_after=5)
 
+
+    @commands.command()
+    @commands.has_any_role(*allowed_roles)
+    async def tr(self, ctx, language: str = None, *, message: str = None):
+        '''
+        Translates a message into another language.
+        :param language: The language to translate the message to.
+        :param message: The message to translate.
+        :return: A translated message.
+        '''
+        await ctx.message.delete()
+        if not language:
+            return await ctx.send("**Please, inform a language!**", delete_after=5)
+        elif not message:
+            return await ctx.send("**Please, inform a message to translate!**", delete_after=5)
+        trans = Translator()
+        try:
+            translation = trans.translate(f'{message}', dest=f'{language}')
+        except ValueError:
+            return await ctx.send("**Invalid parameter for 'language'!**", delete_after=5)
+        embed = discord.Embed(title="__Sloth Translator__",
+                              description=f"**Translated from `{translation.src}` to `{translation.dest}`**\n\n{translation.text}",
+                              colour=ctx.author.color, timestamp=ctx.message.created_at)
+        await ctx.send(embed=embed)
 
 def setup(client):
     client.add_cog(Tools(client))
