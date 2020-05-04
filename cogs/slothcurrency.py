@@ -596,17 +596,16 @@ class SlothCurrency(commands.Cog):
         hand = Image.open(await self.get_user_specific_type_item(member.id, 'hand'))
         hud = Image.open(await self.get_user_specific_type_item(member.id, 'hud'))
         badge = Image.open(await self.get_user_specific_type_item(member.id, 'badge'))
-        try:
-            pfp = await self.get_user_pfp(member)
-        except Exception:
-            pass
+        pfp = await self.get_user_pfp(member)
         background.paste(sloth, (32, -10), sloth)
         background.paste(body, (32, -10), body)
         background.paste(hand, (32, -10), hand)
         background.paste(hud, (1, -10), hud)
         background.paste(badge, (1, -10), badge)
-        if pfp:
+        try:
             background.paste(pfp, (202, -7), pfp)
+        except Exception:
+            pass
         draw = ImageDraw.Draw(background)
         draw.text((310, 0), f"{member}", (255, 255, 255), font=small)
         draw.text((80, 525), f"{user_info[0][1]}", (255, 255, 255), font=small)
