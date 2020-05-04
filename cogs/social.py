@@ -22,6 +22,11 @@ class Social(commands.Cog):
     # Shows all the info about a user
     @commands.command()
     async def userinfo(self, ctx, member: discord.Member = None):
+        '''
+        Shows all the information about a member.
+        :param member: The member to show the info.
+        :return: An embedded message with the user's information
+        '''
         member = ctx.author if not member else member
         roles = [role for role in member.roles]
 

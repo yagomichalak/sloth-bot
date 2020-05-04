@@ -37,6 +37,9 @@ drive = GoogleDrive(gauth)
 
 
 class SlothCurrency(commands.Cog):
+    '''
+    Sloth Currency commands.
+    '''
 
     def __init__(self, client):
         self.client = client
@@ -133,6 +136,11 @@ class SlothCurrency(commands.Cog):
     @commands.command()
     @commands.has_permissions(administrator=True)
     async def react(self, ctx, mid: discord.Message = None, reaction=None):
+        '''
+        Makes the bot react onto a message.
+        :param mid: The message ID.
+        :param reaction: The reaction to add.
+        '''
         await ctx.message.delete()
         if not reaction:
             return await ctx.send("**Inform a reaction!**", delete_after=3)
@@ -142,6 +150,10 @@ class SlothCurrency(commands.Cog):
 
     @commands.command()
     async def inventory(self, ctx, member: discord.Member = None):
+        '''
+        Shows the member's item inventory.
+        :param member: The member to show.
+        '''
         await ctx.message.delete()
         if not member:
             member = discord.utils.get(ctx.guild.members, id=ctx.author.id)
@@ -159,6 +171,10 @@ class SlothCurrency(commands.Cog):
 
     @commands.command()
     async def equip(self, ctx, *, item_name: str = None):
+        '''
+        Equips an item.
+        :param item_name: The item to equip.
+        '''
         await ctx.message.delete()
         if not item_name:
             return await ctx.send("**Inform an item to equip!**", delete_after=3)
@@ -176,6 +192,10 @@ class SlothCurrency(commands.Cog):
 
     @commands.command()
     async def unequip(self, ctx, *, item_name: str = None):
+        '''
+        Unequips an item.
+        :param item_name: The item to unequip
+        '''
         await ctx.message.delete()
         if not item_name:
             return await ctx.send("**Inform an item to unequip!**", delete_after=3)
@@ -230,6 +250,11 @@ class SlothCurrency(commands.Cog):
     @commands.command()
     @commands.has_permissions(administrator=True)
     async def add_member(self, ctx, member: discord.Member = None, *, item_name: str = None):
+        '''
+        Gives a member an item.
+        :param member: The member to give the item.
+        :param item_name: The name of the item.
+        '''
         if not member:
             return await ctx.send("**Inform a member!**", delete_after=3)
 
@@ -249,7 +274,12 @@ class SlothCurrency(commands.Cog):
 
     @commands.command()
     @commands.has_permissions(administrator=True)
-    async def remove_member(self, ctx, member: discord.Member = None, *, item_name: str = None):
+    async def remove_member_item(self, ctx, member: discord.Member = None, *, item_name: str = None):
+        '''
+        Removes an item from the member.
+        :param member: The member to remove the item.
+        :param item_name: The name of the item.
+        '''
         if not member:
             return await ctx.send("**Inform a member!**", delete_after=3)
 
@@ -371,6 +401,9 @@ class SlothCurrency(commands.Cog):
     @commands.command()
     @commands.has_permissions(administrator=True)
     async def show_registered(self, ctx):
+        '''
+        Shows all the registered items in the shop.
+        '''
         await ctx.message.delete()
         mycursor, db = await the_data_base2()
         await mycursor.execute("SELECT * FROM RegisteredItems")
@@ -401,6 +434,10 @@ class SlothCurrency(commands.Cog):
     @commands.command()
     @commands.has_permissions(administrator=True)
     async def remove_registered_item(self, ctx, *, item_name: str = None):
+        '''
+        Removes a registered item from the shop system.
+        :param item_name: The name of the item to remove.
+        '''
         await ctx.message.delete()
         if not item_name:
             return await ctx.send("**Inform an item name!**", delete_after=3)
@@ -515,6 +552,10 @@ class SlothCurrency(commands.Cog):
 
     @commands.command()
     async def bank(self, ctx, member: discord.Message = None):
+        '''
+        Shows the member's bank account
+        :param member: The member to show.
+        '''
         await ctx.message.delete()
         if not member:
             member = ctx.author
@@ -536,6 +577,10 @@ class SlothCurrency(commands.Cog):
 
     @commands.command()
     async def profile(self, ctx, member: discord.Member = None):
+        '''
+        Shows the member's profile with their custom sloth.
+        :param member: The member to see the profile. (Optional)
+        '''
         await ctx.message.delete()
         if not member:
             member = ctx.author
@@ -564,6 +609,11 @@ class SlothCurrency(commands.Cog):
     @commands.command()
     @commands.has_permissions(administrator=True)
     async def add_money(self, ctx, member: discord.Member = None, money: int = None):
+        '''
+        Adds money to a member.
+        :param member: The member to add money to.
+        :param money: The amount of money to add.
+        '''
         if not member:
             return await ctx.send("**Inform a member!**", delete_after=3)
         elif not money:
@@ -623,6 +673,9 @@ class SlothCurrency(commands.Cog):
     @commands.command()
     @commands.has_permissions(administrator=True)
     async def download_update(self, ctx=None):
+        '''
+        Downloads all shop images from the Google Drive.
+        '''
         if ctx:
             await ctx.message.delete()
         '''
@@ -664,6 +717,11 @@ class SlothCurrency(commands.Cog):
     @commands.command()
     @commands.has_permissions(administrator=True)
     async def list_folder(self, ctx, image_suffix: str = None, item_name: str = None):
+        '''
+        Lists a folder from the Google Drive.
+        :param image_suffix: The image/folder category.
+
+        '''
         await ctx.message.delete()
         all_folders = {"background": "1V8l391o3-vsF9H2Jv24lDmy8e2erlHyI",
                        "sloth": "16DB_lNrnrmvxu2E7RGu01rQGQk7z-zRy",
@@ -768,6 +826,10 @@ class SlothCurrency(commands.Cog):
 
     @commands.command()
     async def status(self, ctx, member: discord.Member = None):
+        '''
+        Shows the member's time and message status.
+        :param member: The member to show the status. (Optional)
+        '''
         await ctx.message.delete()
         if not member:
             member = ctx.author
@@ -805,6 +867,9 @@ class SlothCurrency(commands.Cog):
 
     @commands.command()
     async def exchange(self, ctx):
+        '''
+        Exchange your status into leaves (łł)
+        '''
         await ctx.message.delete()
         user_info = await self.get_user_activity_info(ctx.author.id)
         if not user_info:
@@ -862,6 +927,11 @@ class SlothCurrency(commands.Cog):
     @commands.command()
     @commands.has_permissions(administrator=True)
     async def add_message(self, ctx, member: discord.Member = None, add_message: int= None):
+        '''
+        Adds messages to the member's status.
+        :param member: The member to add the messages to.
+        :param add_message: The amount of messages to add.
+        '''
         if not add_message:
             return await ctx.send(f"**Inform an amount of messages to add!**", delete_after=3)
         if not member:
@@ -872,6 +942,11 @@ class SlothCurrency(commands.Cog):
     @commands.command()
     @commands.has_permissions(administrator=True)
     async def add_time(self, ctx, member: discord.Member = None, add_time: int = None):
+        '''
+        Adds time to the member's status.
+        :param member: The member to add time to.
+        :param add_time: The amount of time to add. (in secs)
+        '''
         if not add_time:
             return await ctx.send(f"**Inform an amount of seconds to add!**", delete_after=3)
         if not member:
@@ -881,6 +956,11 @@ class SlothCurrency(commands.Cog):
 
     @commands.command()
     async def transfer(self, ctx, member: discord.Member = None, money: int = None):
+        '''
+        Transfers money from one member to another member.
+        :param member: The member to transfer the money to.
+        :param money: The amount of money to transfer.
+        '''
         if not member:
             return await ctx.send('**Inform the member!**', delete_after=3)
         elif member.id == ctx.author.id:

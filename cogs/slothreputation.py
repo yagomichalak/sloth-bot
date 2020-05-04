@@ -7,6 +7,9 @@ commands_channel_id = 562019654017744904
 
 
 class SlothReputation(commands.Cog):
+    '''
+    Reputation commands
+    '''
 
     def __init__(self, client):
         self.client = client
@@ -52,6 +55,9 @@ class SlothReputation(commands.Cog):
 
     @commands.command()
     async def level(self, ctx):
+        '''
+        Shows the user's level and experience points.
+        '''
         if not await self.check_table_exist():
             return await ctx.send("**This command may be on maintenance!**", delete_after=3)
         user = await self.get_specific_user(ctx.author.id)
@@ -59,13 +65,16 @@ class SlothReputation(commands.Cog):
             return await self.level(ctx)
 
         await ctx.message.delete()
-        embed = discord.Embed(title="Rank", description=f"__**Level:**__ {user[0][2]}\n__**EXP:**__ {user[0][1]} / {((user[0][2]+1)**5)}.",
+        embed = discord.Embed(title="Info", description=f"__**Level:**__ {user[0][2]}\n__**EXP:**__ {user[0][1]} / {((user[0][2]+1)**5)}.",
                               colour=ctx.author.color)
         embed.set_footer(text=f"{ctx.author}", icon_url=ctx.author.avatar_url)
         return await ctx.send(content=None, embed=embed)
 
     @commands.command()
     async def score(self, ctx):
+        '''
+        Shows the top ten members in the reputation leaderboard.
+        '''
         await ctx.message.delete()
         if not await self.check_table_exist():
             return await ctx.send("**This command may be on maintenance!**", delete_after=3)
@@ -74,7 +83,7 @@ class SlothReputation(commands.Cog):
         leaderboard = discord.Embed(title="__The Language Sloth's Leaderboard__", colour=discord.Colour.dark_green(),
                                     timestamp=ctx.message.created_at)
         user_score = await self.get_specific_user(ctx.author.id)
-        leaderboard.set_footer(text=f"Your score: {user_score[0][4]}")
+        leaderboard.set_footer(text=f"Your score: {user_score[0][4]}", icon_url=ctx.author.avatar_url)
         leaderboard.set_thumbnail(
             url='https://cdn.discordapp.com/attachments/562019489642709022/676564604087697439/ezgif.com-gif-maker_1.gif')
         for i, sm in enumerate(sorted_members):
@@ -87,6 +96,10 @@ class SlothReputation(commands.Cog):
 
     @commands.command()
     async def rep(self, ctx, member: discord.Member = None):
+        '''
+        Gives someone reputation points.
+        :param member: The member to give the reputation.
+        '''
         if not member:
             await ctx.message.delete()
             return await ctx.send(f"**Inform a member to rep to!**", delete_after=3)
