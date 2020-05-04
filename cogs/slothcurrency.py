@@ -6,6 +6,7 @@ from PIL import Image, ImageDraw, ImageFont
 from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
 import os
+import requests
 
 shop_channels = [695975820744851507, 702911629725139074, 702911832150638684, 702914308677304330]
 afk_channel_id = 581993624569643048
@@ -600,6 +601,7 @@ class SlothCurrency(commands.Cog):
         background.paste(hand, (32, -10), hand)
         background.paste(hud, (1, -10), hud)
         background.paste(badge, (1, -10), badge)
+        pfp = await self.get_user_pfp(ctx)
         draw = ImageDraw.Draw(background)
         draw.text((310, 0), f"{member}", (255, 255, 255), font=small)
         draw.text((80, 525), f"{user_info[0][1]}", (255, 255, 255), font=small)
@@ -983,6 +985,37 @@ class SlothCurrency(commands.Cog):
             await ctx.send(f"**{ctx.author.mention} transferred {money}łł to {member.mention}!**")
         else:
             await ctx.send(f"You don't have {money}łł!")
+
+    async def get_user_pfp(self, ctx):
+        im = Image.open(requests.get(ctx.message.author.avatar_url, stream=True).raw)
+
+        thumb_width = 57
+
+        def crop_center(pil_img, crop_width, crop_height):
+            img_width, img_height = pil_img.size
+            return pil_img.crop(((img_width - crop_width) // 2,
+                                 (img_height - crop_height) // 2,
+                                 (img_width + crop_width) // 2,
+                                 (img_height + crop_height) // 2))
+
+        def crop_max_square(pil_img):
+            return crop_center(pil_img, min(pil_img.size), min(pil_img.size))
+
+        def mask_circle_transparent(pil_img, blur_radius, offset=0):
+            offset = blur_radius * 2 + offset
+            mask = Image.new("L", pil_img.size, 0)
+            draw = ImageDraw.Draw(mask)
+            draw.ellipse((offset, offset, pil_img.size[0] - offset, pil_img.size[1] - offset), fill=255)
+
+            result = pil_img.copy()
+            result.putalpha(mask)
+
+            return result
+
+        im_square = crop_max_square(im).resize((thumb_width, thumb_width), Image.LANCZOS)
+        im_thumb = mask_circle_transparent(im_square, 4)
+        return im_thumb
+
 
 def setup(client):
     client.add_cog(SlothCurrency(client))
