@@ -596,7 +596,7 @@ class SlothCurrency(commands.Cog):
         hand = Image.open(await self.get_user_specific_type_item(member.id, 'hand'))
         hud = Image.open(await self.get_user_specific_type_item(member.id, 'hud'))
         badge = Image.open(await self.get_user_specific_type_item(member.id, 'badge'))
-        pfp = await self.get_user_pfp(ctx)
+        pfp = await self.get_user_pfp(member)
         background.paste(sloth, (32, -10), sloth)
         background.paste(body, (32, -10), body)
         background.paste(hand, (32, -10), hand)
@@ -987,8 +987,8 @@ class SlothCurrency(commands.Cog):
         else:
             await ctx.send(f"You don't have {money}łł!")
 
-    async def get_user_pfp(self, ctx):
-        im = Image.open(requests.get(ctx.message.author.avatar_url, stream=True).raw)
+    async def get_user_pfp(self, member):
+        im = Image.open(requests.get(member.avatar_url, stream=True).raw)
 
         thumb_width = 57
 
