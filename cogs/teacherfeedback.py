@@ -498,19 +498,20 @@ class TeacherFeedback(commands.Cog):
                     new_teacher_class = await self.get_teacher_class_info(member.id, before.channel.id)
                     m, s = divmod(new_teacher_class[0][7], 60)
                     h, m = divmod(m, 60)
-                    class_embed = discord.Embed(title=f"__{new_teacher_class[0][4].title()} Class__",
-                                                description=new_teacher_class[0][9], colour=member.colour,
-                                                timestamp=datetime.utcnow())
-                    class_embed.add_field(name=f"__**Duration:**__",
-                                          value=f"{h:d} hours, {m:02d} minutes and {s:02d} seconds", inline=False)
-                    class_embed.add_field(name=f"__**Joined:**__", value=f"{new_teacher_class[0][8]} members.",
-                                          inline=False)
-                    class_embed.add_field(name=f"__**Type of class:**__", value=f"{new_teacher_class[0][5].title()}.",
-                                          inline=False)
-                    class_embed.set_thumbnail(url=member.avatar_url)
-                    class_embed.set_author(name=member.name, url=member.avatar_url)
-                    class_embed.set_footer(text='Class Report', icon_url=self.client.user.avatar_url)
-                    await history_channel.send(embed=class_embed)
+                    if new_teacher_class[0][7] >= 600:
+                        class_embed = discord.Embed(title=f"__{new_teacher_class[0][4].title()} Class__",
+                                                    description=new_teacher_class[0][9], colour=member.colour,
+                                                    timestamp=datetime.utcnow())
+                        class_embed.add_field(name=f"__**Duration:**__",
+                                              value=f"{h:d} hours, {m:02d} minutes and {s:02d} seconds", inline=False)
+                        class_embed.add_field(name=f"__**Joined:**__", value=f"{new_teacher_class[0][8]} members.",
+                                              inline=False)
+                        class_embed.add_field(name=f"__**Type of class:**__", value=f"{new_teacher_class[0][5].title()}.",
+                                              inline=False)
+                        class_embed.set_thumbnail(url=member.avatar_url)
+                        class_embed.set_author(name=member.name, url=member.avatar_url)
+                        class_embed.set_footer(text='Class Report', icon_url=self.client.user.avatar_url)
+                        await history_channel.send(embed=class_embed)
                     if new_teacher_class[0][10] == 'Yes':
                         await self.clear_saved_class(new_teacher_class[0][0], new_teacher_class[0][1])
 

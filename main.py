@@ -3,6 +3,7 @@ from discord.ext import commands, tasks
 from mysqldb import *
 from datetime import datetime
 import os
+from itertools import cycle
 import pytz
 from pytz import timezone
 
@@ -19,7 +20,17 @@ announcement_channel_id = 689918515129352213
 report_channel_id = 685832739517366340
 report_log_channel_id = 683693966016774168
 admin_commands_channel_id = 562019472257318943
-
+patreon_role_id = 706635884090359899
+#colors = cycle([(255, 0, 0), (255, 127, 0), (255, 255, 0), (0, 255, 0), (0, 0, 255), (75, 0, 130), (143, 0, 255)])
+shades_of_pink = cycle([(252, 15, 192), (255, 0, 255), (248, 24, 148),
+              (224, 17, 95), (246, 74, 138), (236, 85, 120),
+              (255, 11, 255), (227, 49, 99), (253, 185, 200),
+              (222, 111, 161), (255, 166, 201), (251, 163, 183),
+              (255, 0, 144), (251, 96, 127), (255, 102, 204),
+              (241, 156, 187), (251, 174, 210), (249, 135, 197),
+              (255, 105, 180), (254, 91, 172), (245, 195, 194),
+              (223, 82, 134), (254, 127, 156), (253, 171, 159)
+              ])
 
 def read_token():
     with open('token.txt', 'r') as f:
@@ -38,9 +49,16 @@ client = commands.Bot(command_prefix='z!')
 @client.event
 async def on_ready():
     change_status.start()
+    change_color.start()
     update_timezones.start()
     print('Bot is ready!')
 
+@tasks.loop(seconds=60)
+async def change_color():
+    guild = client.get_guild(server_id)
+    patreon = discord.utils.get(guild.roles, id=patreon_role_id)
+    r, g, b = next(shades_of_pink)
+    await patreon.edit(colour=discord.Colour.from_rgb(r, g, b))
 
 @client.event
 async def on_member_remove(member):

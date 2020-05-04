@@ -7,6 +7,9 @@ from googletrans import Translator
 allowed_roles = [474774889778380820, 574265899801116673, 497522510212890655, 588752954266222602]
 
 class Tools(commands.Cog):
+    '''
+    Some useful tool commands.
+    '''
 
     def __init__(self, client):
         self.client = client
@@ -19,6 +22,10 @@ class Tools(commands.Cog):
     @commands.command()
     @commands.has_permissions(administrator=True)
     async def count(self, ctx, amount=0):
+        '''
+        Countsdown by a given number
+        :param amount: The start point.
+        '''
         await ctx.message.delete()
         if amount > 0:
             msg = await ctx.send(f'**{amount}**')
@@ -34,6 +41,9 @@ class Tools(commands.Cog):
     @commands.command()
     @commands.has_permissions(administrator=True)
     async def leave(self, ctx, scrt = None):
+        '''
+        Makes the bot leave the voice channel.
+        '''
         guild = ctx.message.guild
         voice_client = guild.voice_client
 
@@ -50,6 +60,11 @@ class Tools(commands.Cog):
     @commands.cooldown(1, 5, type=commands.BucketType.guild)
     @commands.has_any_role(*allowed_roles)
     async def tts(self, ctx, language: str = None, *, message: str = None):
+        '''
+        Reproduces a Text-to-Speech message in the voice channel.
+        :param language: The language of the message.
+        :param message: The message to reproduce.
+        '''
         await ctx.message.delete()
         if not language:
             return await ctx.send("**Please, inform a language!**", delete_after=5)
@@ -92,7 +107,15 @@ class Tools(commands.Cog):
         embed = discord.Embed(title="__Sloth Translator__",
                               description=f"**Translated from `{translation.src}` to `{translation.dest}`**\n\n{translation.text}",
                               colour=ctx.author.color, timestamp=ctx.message.created_at)
+        embed.set_author(name=ctx.author, icon_url=ctx.author.avatar_url)
         await ctx.send(embed=embed)
+
+    @commands.command()
+    async def ping(self, ctx):
+        '''
+        Show the latency.
+        '''
+        await ctx.send(f"**:ping_pong: Pong! {round(self.client.latency * 1000)}ms.**")
 
 def setup(client):
     client.add_cog(Tools(client))
