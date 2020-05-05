@@ -10,6 +10,7 @@ import requests
 
 shop_channels = [695975820744851507, 702911629725139074, 702911832150638684, 702914308677304330]
 afk_channel_id = 581993624569643048
+booster_role_id = 588752954266222602
 
 gauth = GoogleAuth()
 # gauth.LocalWebserverAuth()
@@ -602,6 +603,10 @@ class SlothCurrency(commands.Cog):
         background.paste(hand, (32, -10), hand)
         background.paste(hud, (1, -10), hud)
         background.paste(badge, (1, -10), badge)
+        booster_role = discord.utils.get(ctx.guild.roles, id=booster_role_id)
+        if booster_role in member.roles:
+            badge = Image.open("custom/badges/nitroboost.png")
+            background.paste(badge, (10, 0), badge)
         try:
             background.paste(pfp, (202, -7), pfp)
         except Exception:
