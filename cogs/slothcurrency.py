@@ -1018,8 +1018,8 @@ class SlothCurrency(commands.Cog):
 
         im_square = crop_max_square(im).resize((thumb_width, thumb_width), Image.LANCZOS)
         im_thumb = mask_circle_transparent(im_square, 4)
-        return im_thumb
         #im_thumb.save('png/user_pfp.png', 'png', quality=90)
+        return im_thumb
 
 
 def setup(client):
