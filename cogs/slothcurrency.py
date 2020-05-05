@@ -605,8 +605,8 @@ class SlothCurrency(commands.Cog):
         background.paste(badge, (1, -10), badge)
         booster_role = discord.utils.get(ctx.guild.roles, id=booster_role_id)
         if booster_role in member.roles:
-            badge = Image.open("custom/badges/nitroboost.png")
-            background.paste(badge, (10, 0), badge)
+            badge2 = Image.open("sloth_custom_images/badge/nitroboost.png")
+            background.paste(badge2, (10, 0), badge2)
         try:
             background.paste(pfp, (202, -7), pfp)
         except Exception:
