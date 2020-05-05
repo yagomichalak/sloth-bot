@@ -596,7 +596,8 @@ class SlothCurrency(commands.Cog):
         hand = Image.open(await self.get_user_specific_type_item(member.id, 'hand'))
         hud = Image.open(await self.get_user_specific_type_item(member.id, 'hud'))
         badge = Image.open(await self.get_user_specific_type_item(member.id, 'badge'))
-        pfp = await self.get_user_pfp(member)
+        await self.get_user_pfp(member)
+        pfp = Image.open('png/user_pfp.png')
         background.paste(sloth, (32, -10), sloth)
         background.paste(body, (32, -10), body)
         background.paste(hand, (32, -10), hand)
@@ -1018,7 +1019,7 @@ class SlothCurrency(commands.Cog):
 
         im_square = crop_max_square(im).resize((thumb_width, thumb_width), Image.LANCZOS)
         im_thumb = mask_circle_transparent(im_square, 4)
-        return im_thumb
+        im_thumb.save('png/user_pfp.png', 'png', quality=90)
 
 
 def setup(client):
