@@ -11,6 +11,7 @@ import requests
 shop_channels = [695975820744851507, 702911629725139074, 702911832150638684, 702914308677304330]
 afk_channel_id = 581993624569643048
 booster_role_id = 588752954266222602
+level_badges = {'level_10': 10}
 
 gauth = GoogleAuth()
 # gauth.LocalWebserverAuth()
@@ -596,21 +597,33 @@ class SlothCurrency(commands.Cog):
         body = Image.open(await self.get_user_specific_type_item(member.id, 'body'))
         hand = Image.open(await self.get_user_specific_type_item(member.id, 'hand'))
         hud = Image.open(await self.get_user_specific_type_item(member.id, 'hud'))
-        badge = Image.open(await self.get_user_specific_type_item(member.id, 'badge'))
+        #badge = Image.open(await self.get_user_specific_type_item(member.id, 'badge'))
         pfp = await self.get_user_pfp(member)
         background.paste(sloth, (32, -10), sloth)
         background.paste(body, (32, -10), body)
         background.paste(hand, (32, -10), hand)
         background.paste(hud, (1, -10), hud)
-        background.paste(badge, (1, -10), badge)
+        #background.paste(badge, (1, -10), badge)
         booster_role = discord.utils.get(ctx.guild.roles, id=booster_role_id)
+        # Checks if user is a booster
         if booster_role in member.roles:
             badge2 = Image.open("sloth_custom_images/badge/nitroboost.png")
             background.paste(badge2, (10, 0), badge2)
+
+        # Checks if the user has a level badge
+        user_level = await self.get_specific_user(member.id)
+        for key, value in reversed(list(level_badges.items())):
+            if user_level[0][2] >= value:
+                level_badge = Image.open(f"sloth_custom_images/badge/{key}.png")
+                background.paste(level_badge, (65, 0), level_badge)
+                break
+
+        # Tries to print the user's profile picture
         try:
             background.paste(pfp, (202, -7), pfp)
         except Exception:
             pass
+
         draw = ImageDraw.Draw(background)
         draw.text((310, 0), f"{member}", (255, 255, 255), font=small)
         draw.text((80, 525), f"{user_info[0][1]}", (255, 255, 255), font=small)
@@ -1025,7 +1038,13 @@ class SlothCurrency(commands.Cog):
         im_thumb = mask_circle_transparent(im_square, 4)
         #im_thumb.save('png/user_pfp.png', 'png', quality=90)
         return im_thumb
-
+    
+    async def get_specific_user(self, user_id: int):
+        mycursor, db = await the_data_base3()
+        await mycursor.execute(f"SELECT * FROM MembersScore WHERE user_id = {user_id}")
+        member = await mycursor.fetchall()
+        await mycursor.close()
+        return member
 
 def setup(client):
     client.add_cog(SlothCurrency(client))
