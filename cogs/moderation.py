@@ -68,7 +68,7 @@ class Moderation(commands.Cog):
             return await ctx.send("**Please, specify a member!**", delete_after=3)
         if role not in member.roles:
             if role not in member.roles:
-                for mr in member.roles[1:]:
+                for mr in member.roles:
                     try:
                         await member.remove_roles(mr)
                         await self.insert_in_muted(member.id, mr.id)
