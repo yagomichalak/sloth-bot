@@ -113,7 +113,10 @@ class Moderation(commands.Cog):
                 if user_roles:
                     for mrole in user_roles:
                         the_role = discord.utils.get(member.guild.roles, id=mrole[1])
-                        await member.add_roles(the_role)
+                        try:
+                            await member.add_roles(the_role)
+                        except Exception:
+                            pass
                         await self.remove_role_from_system(member.id, the_role.id)
             await member.remove_roles(role)
             # General embed
@@ -184,7 +187,10 @@ class Moderation(commands.Cog):
                 if user_roles:
                     for mrole in user_roles:
                         the_role = discord.utils.get(member.guild.roles, id=mrole[1])
-                        await member.add_roles(the_role)
+                        try:
+                            await member.add_roles(the_role)
+                        except Exception:
+                            pass
                         await self.remove_role_from_system(member.id, the_role.id)
             await member.remove_roles(role)
             general_embed = discord.Embed(colour=discord.Colour.lighter_grey(),
