@@ -604,8 +604,8 @@ class SlothCurrency(commands.Cog):
         background.paste(hand, (32, -10), hand)
         background.paste(hud, (1, -10), hud)
         #background.paste(badge, (1, -10), badge)
-        booster_role = discord.utils.get(ctx.guild.roles, id=booster_role_id)
         # Checks if user is a booster
+        booster_role = discord.utils.get(ctx.guild.roles, id=booster_role_id)
         if booster_role in member.roles:
             badge2 = Image.open("sloth_custom_images/badge/nitroboost.png")
             background.paste(badge2, (10, 0), badge2)
@@ -617,6 +617,8 @@ class SlothCurrency(commands.Cog):
                 level_badge = Image.open(f"sloth_custom_images/badge/{key}.png")
                 background.paste(level_badge, (65, 0), level_badge)
                 break
+        else:
+            pass
 
         # Tries to print the user's profile picture
         try:
