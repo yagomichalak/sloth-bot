@@ -471,16 +471,11 @@ class TeacherFeedback(commands.Cog):
                     f"**{member.mention}, I saw you left your classroom, did you finish your class?**")
                 await fd_msg.add_reaction('✅')
                 await fd_msg.add_reaction('❌')
-
                 # Updates the timestamp and the duration of the class as soon as the teacher leaves the voice channel
                 epoch = datetime.utcfromtimestamp(0)
                 the_time = (datetime.utcnow() - epoch).total_seconds()
-                if teacher_class[0][6]:
-                    class_duration = the_time - teacher_class[0][6]
-                else:
-                    class_duration = 0
                 #await self.update_teacher_times(member.id, teacher_class[0][1], class_duration, teacher_class[0][6])
-                await self.update_teacher_times2(member.id, teacher_class[0][1], class_duration)
+                await self.update_teacher_times2(member.id, teacher_class[0][1], the_time, voice_channel.id)
                 await self.update_student_times(teacher_class[0][1], member.id, the_time)
 
                 def check(reaction, user):
@@ -623,8 +618,13 @@ class TeacherFeedback(commands.Cog):
         await db.commit()
         await mycursor.close()
 
-    async def update_teacher_times2(self, teacher_id: int, class_id: int, class_duration: int):
+    async def update_teacher_times2(self, teacher_id: int, class_id: int, the_time: int, vc_id: int):
         mycursor, db = await the_data_base4()
+        teacher_class = await self.get_teacher_class_info(teacher_id, vc_id)
+        if teacher_class[0][6]:
+            class_duration = the_time - teacher_class[0][6]
+        else:
+            class_duration = 0
         await mycursor.execute(
             f"UPDATE TeacherFeedback SET vc_timestamp = NULL, vc_time = vc_time + {class_duration} WHERE teacher_id = {teacher_id} and class_id = {class_id}")
         await db.commit()
