@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 import asyncio
+from mysqldb2 import the_data_base3
 
 mod_log_id = 562195805272932372
 muted_role_id = 537763763982434304
@@ -66,6 +67,10 @@ class Moderation(commands.Cog):
         if not member:
             return await ctx.send("**Please, specify a member!**", delete_after=3)
         if role not in member.roles:
+            if role not in member.roles:
+                for mr in member.roles[1:]:
+                    await member.remove_roles(mr)
+                    await self.insert_in_muted(member.id, mr.id)
             await member.add_roles(role)
             # General embed
             general_embed = discord.Embed(description=f'**Reason:** {reason}', colour=discord.Colour.dark_grey(), timestamp=ctx.message.created_at)
@@ -100,6 +105,12 @@ class Moderation(commands.Cog):
         if not member:
             return await ctx.send("**Please, specify a member!**", delete_after=3)
         if role in member.roles:
+            if role in member.roles:
+                user_roles = await self.get_muted_roles(member.id)
+                if user_roles:
+                    for mrole in user_roles:
+                        the_role = discord.utils.get(member.guild.roles, id=mrole[1])
+                        await member.add_roles(the_role)
             await member.remove_roles(role)
             # General embed
             general_embed = discord.Embed(colour=discord.Colour.light_grey(),
@@ -138,6 +149,10 @@ class Moderation(commands.Cog):
         if not member:
             return await ctx.send("**Please, specify a member!**", delete_after=3)
         if role not in member.roles:
+            if role not in member.roles:
+                for mr in member.roles[1:]:
+                    await member.remove_roles(mr)
+                    await self.insert_in_muted(member.id, mr.id)
             await member.add_roles(role)
             # General embed
             general_embed = discord.Embed(description=f'**Reason:** {reason}', colour=discord.Colour.lighter_grey(),
@@ -157,6 +172,12 @@ class Moderation(commands.Cog):
             await moderation_log.send(embed=embed)
             # After a while
             await asyncio.sleep(seconds)
+            if role in member.roles:
+                user_roles = await self.get_muted_roles(member.id)
+                if user_roles:
+                    for mrole in user_roles:
+                        the_role = discord.utils.get(member.guild.roles, id=mrole[1])
+                        await member.add_roles(the_role)
             await member.remove_roles(role)
             general_embed = discord.Embed(colour=discord.Colour.lighter_grey(),
                                           timestamp=ctx.message.created_at)
@@ -307,6 +328,30 @@ class Moderation(commands.Cog):
                 embed.set_footer(text=f"SoftBanned by {ctx.author}", icon_url=ctx.author.avatar_url)
                 await moderation_log.send(embed=embed)
 
+    async def insert_in_muted(self, user_id: int, role_id: int):
+        mycursor, db = await the_data_base3()
+        await mycursor.execute(f"INSERT INTO mutedmember (user_id, role_id) VALUES (%s, %s)", (user_id, role_id))
+        await db.commit()
+        await mycursor.close()
+
+    async def get_muted_roles(self, user_id: int):
+        mycursor, db = await the_data_base3()
+        await mycursor.execute(f"SELECT * FROM mutedmember WHERE user_id = {user_id}")
+        user_roles = await mycursor.fetchall()
+        await mycursor.close()
+        return user_roles
+
+    @commands.command()
+    @commands.has_permissions(administrator=True)
+    async def reset_table_mutedmember(self, ctx):
+        await ctx.message.delete()
+        mycursor, db = await the_data_base3()
+        await mycursor.execute("DROP TABLE mutedmember")
+        await db.commit()
+        await mycursor.execute("CREATE TABLE mutedmember (user_id bigint, role_id bigint)")
+        await db.commit()
+        await mycursor.close()
+        return await ctx.send("**Table __mutedmember__ reset!**", delete_after=3)
 
 def setup(client):
     client.add_cog(Moderation(client))
