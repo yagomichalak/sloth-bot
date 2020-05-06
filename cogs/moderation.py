@@ -108,16 +108,15 @@ class Moderation(commands.Cog):
         if not member:
             return await ctx.send("**Please, specify a member!**", delete_after=3)
         if role in member.roles:
-            if role in member.roles:
-                user_roles = await self.get_muted_roles(member.id)
-                if user_roles:
-                    for mrole in user_roles:
-                        the_role = discord.utils.get(member.guild.roles, id=mrole[1])
-                        try:
-                            await member.add_roles(the_role)
-                        except Exception:
-                            pass
+            user_roles = await self.get_muted_roles(member.id)
+            if user_roles:
+                for mrole in user_roles:
+                    the_role = discord.utils.get(member.guild.roles, id=mrole[1])
+                    try:
+                        await member.add_roles(the_role)
                         await self.remove_role_from_system(member.id, the_role.id)
+                    except Exception:
+                        pass
             await member.remove_roles(role)
             # General embed
             general_embed = discord.Embed(colour=discord.Colour.light_grey(),
@@ -156,13 +155,12 @@ class Moderation(commands.Cog):
         if not member:
             return await ctx.send("**Please, specify a member!**", delete_after=3)
         if role not in member.roles:
-            if role not in member.roles:
-                for mr in member.roles[1:]:
-                    try:
-                        await member.remove_roles(mr)
-                        await self.insert_in_muted(member.id, mr.id)
-                    except Exception:
-                        pass
+            for mr in member.roles[1:]:
+                try:
+                    await member.remove_roles(mr)
+                    await self.insert_in_muted(member.id, mr.id)
+                except Exception:
+                    pass
             await member.add_roles(role)
             # General embed
             general_embed = discord.Embed(description=f'**Reason:** {reason}', colour=discord.Colour.lighter_grey(),
@@ -189,10 +187,10 @@ class Moderation(commands.Cog):
                         the_role = discord.utils.get(member.guild.roles, id=mrole[1])
                         try:
                             await member.add_roles(the_role)
+                            await self.remove_role_from_system(member.id, the_role.id)
                         except Exception:
                             pass
-                        await self.remove_role_from_system(member.id, the_role.id)
-            await member.remove_roles(role)
+                await member.remove_roles(role)
             general_embed = discord.Embed(colour=discord.Colour.lighter_grey(),
                                           timestamp=ctx.message.created_at)
             general_embed.set_author(name=f'{member} is no longer tempmuted', icon_url=member.avatar_url)
@@ -357,7 +355,7 @@ class Moderation(commands.Cog):
 
     async def remove_role_from_system(self, user_id: int, role_id: int):
         mycursor, db = await the_data_base3()
-        await mycursor.execute(f"REMOVE FROM mutedmember WHERE user_id = {user_id} and role_id = {role_id}")
+        await mycursor.execute(f"DELETE FROM mutedmember WHERE user_id = {user_id} and role_id = {role_id}")
         await db.commit()
         await mycursor.close()
 
