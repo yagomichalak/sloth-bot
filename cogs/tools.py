@@ -117,5 +117,34 @@ class Tools(commands.Cog):
         '''
         await ctx.send(f"**:ping_pong: Pong! {round(self.client.latency * 1000)}ms.**")
 
+
+    @commands.command()
+    async def math(self, ctx, v1 = None, oper: str = None, v2 = None):
+        await ctx.message.delete()
+        if not v1:
+            return await ctx.send("**Inform the values to calculate!**", delete_after=3)
+        elif not oper:
+            return await ctx.send("**Inform the operator to calculate!**", delete_after=3)
+        elif not v2:
+            return await ctx.send("**Inform the second value to calculate!**", delete_after=3)
+
+        try:
+            v1 = float(v1)
+            v2 = float(v2)
+        except ValueError:
+            return await ctx.send("**Invalid value parameter!**", delete_after=3)
+
+
+        operators = {'+': (lambda x,y: x+y), "plus": (lambda x,y: x+y), '-': (lambda x,y: x-y), "minus": (lambda x,y: x-y),
+                     '*': (lambda x,y: x*y), "times": (lambda x,y: x*y), "x": (lambda x,y: x*y), '/': (lambda x,y: x/y),
+                     '//': (lambda x, y: x//y), "%": (lambda x,y: x%y), }
+        if not oper.lower() in operators.keys():
+            return await ctx.send("**Invalid operator!**", delete_after=3)
+
+
+        embed = discord.Embed(title="__Math__", description=f"`{v1}` **{oper}** `{v2}` **=** `{operators[oper](v1,v2)}`", colour=ctx.author.color, timestamp=ctx.message.created_at)
+        embed.set_author(name=ctx.author, icon_url=ctx.author.avatar_url)
+        return await ctx.send(embed=embed)
+
 def setup(client):
     client.add_cog(Tools(client))

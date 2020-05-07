@@ -517,7 +517,7 @@ class SlothCurrency(commands.Cog):
     async def create_table_user_currency(self, ctx):
         await ctx.message.delete()
         mycursor, db = await the_data_base2()
-        await mycursor.execute("CREATE TABLE UserCurrency (user_id bigint, user_money bigint, last_purchase_ts bigint)")
+        await mycursor.execute("CREATE TABLE UserCurrency (user_id bigint, user_money bigint, last_purchase_ts bigint, user_classes bigint default 0, user_class_reward bigint default 0, user_hosted bigint default 0)")
         await db.commit()
         await mycursor.close()
         return await ctx.send("**Table *UserCurrency* created!**", delete_after=3)
@@ -539,7 +539,7 @@ class SlothCurrency(commands.Cog):
         mycursor, db = await the_data_base2()
         await mycursor.execute("DROP TABLE UserCurrency")
         await db.commit()
-        await mycursor.execute("CREATE TABLE UserCurrency (user_id bigint, user_money bigint, last_purchase_ts bigint)")
+        await mycursor.execute("CREATE TABLE UserCurrency (user_id bigint, user_money bigint, last_purchase_ts bigint, user_classes bigint default 0, user_class_reward bigint default 0, user_hosted bigint default 0)")
         await db.commit()
         await mycursor.close()
         return await ctx.send("**Table *UserCurrency* reseted!**", delete_after=3)
@@ -694,7 +694,6 @@ class SlothCurrency(commands.Cog):
         await db.commit()
         await mycursor.close()
 
-
     # Google Drive commands
     @commands.command()
     @commands.has_permissions(administrator=True)
@@ -836,6 +835,7 @@ class SlothCurrency(commands.Cog):
         await mycursor.execute(f"UPDATE UserServerActivity SET user_timestamp = {new_ts} WHERE user_id = {user_id}")
         await db.commit()
         await mycursor.close()
+
 
     @commands.command()
     @commands.has_permissions(administrator=True)

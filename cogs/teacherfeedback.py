@@ -811,6 +811,11 @@ class TeacherFeedback(commands.Cog):
             elif class_type.title() == 'Grammar':
                 active_users = [uf for uf in users_feedback if uf[3] >= 10]
 
+        for uf in users_feedback:
+            if await self.user_in_currency(uf[0]):
+                await self.update_user_classes(uf[0])
+
+
         if not active_users:
             return
         if reward_channel:
@@ -879,9 +884,11 @@ class TeacherFeedback(commands.Cog):
                     the_reward_embed.add_field(name="**-**", value=f"**{member.mention};**", inline=True)
                     if await self.user_in_currency(member.id):
                         await self.update_money(member.id, 10)
+                        await self.update_user_class_reward(active_users[class_index][0])
 
                 if await self.user_in_currency(teacher.id):
                     await self.update_money(teacher.id, 25)
+                    await self.update_user_hosted(teacher.id)
 
                 commands_channel = discord.utils.get(guild.channels, id=bot_commands_channel_id)
                 return await commands_channel.send(embed=the_reward_embed)
@@ -945,6 +952,23 @@ class TeacherFeedback(commands.Cog):
         else:
             return False
 
+    async def update_user_classes(self, user_id: int):
+        mycursor, db = await the_data_base2()
+        await mycursor.execute(f"UPDATE UserCurrency SET user_classes = user_classes + 1 WHERE user_id = {user_id}")
+        await db.commit()
+        await mycursor.close()
+
+    async def update_user_class_reward(self, user_id: int):
+        mycursor, db = await the_data_base2()
+        await mycursor.execute(f"UPDATE UserCurrency SET user_class_reward = user_class_reward + 1 WHERE user_id = {user_id}")
+        await db.commit()
+        await mycursor.close()
+
+    async def update_user_hosted(self, teacher_id: int):
+        mycursor, db = await the_data_base2()
+        await mycursor.execute(f"UPDATE UserCurrency SET user_hosted = user_hosted + 1 WHERE user_id = {teacher_id}")
+        await db.commit()
+        await mycursor.close()
 
 def setup(client):
     client.add_cog(TeacherFeedback(client))

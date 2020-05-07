@@ -54,20 +54,38 @@ class SlothReputation(commands.Cog):
 
 
     @commands.command()
-    async def level(self, ctx):
+    async def info(self, ctx, member: discord.Member = None):
         '''
         Shows the user's level and experience points.
         '''
         if not await self.check_table_exist():
             return await ctx.send("**This command may be on maintenance!**", delete_after=3)
-        user = await self.get_specific_user(ctx.author.id)
+
+        if not member:
+            member = ctx.author
+
+        user = await self.get_specific_user(member.id)
         if not user:
-            return await self.level(ctx)
+            return await self.info(ctx)
+
+        ucur = await self.get_user_currency(member.id)
+        if not ucur:
+            if ctx.author.id == member.id:
+                epoch = datetime.utcfromtimestamp(0)
+                the_time = (datetime.utcnow() - epoch).total_seconds()
+                await self.insert_user_currency(member.id, the_time)
+                ucur = await self.get_user_currency(member.id)
+            else:
+                return await ctx.send(f"**{member} doesn't have an account yet!**", delete_after=3)
 
         await ctx.message.delete()
-        embed = discord.Embed(title="Info", description=f"__**Level:**__ {user[0][2]}\n__**EXP:**__ {user[0][1]} / {((user[0][2]+1)**5)}.",
-                              colour=ctx.author.color)
-        embed.set_footer(text=f"{ctx.author}", icon_url=ctx.author.avatar_url)
+        embed = discord.Embed(title="Info", colour=member.color, timestamp=ctx.message.created_at)
+        embed.add_field(name="__**Level**__", value=f"{user[0][2]}.", inline=True)
+        embed.add_field(name="__**EXP**__", value=f"{user[0][1]} / {((user[0][2]+1)**5)}.", inline=True)
+        embed.add_field(name="__**Participated in**__", value=f"{ucur[0][3]} classes.", inline=True)
+        embed.add_field(name="__**Rewarded in**__", value=f"{ucur[0][4]} classes.", inline=True)
+        embed.add_field(name="__**Hosted**__", value=f"{ucur[0][5]} classes.", inline=True)
+        embed.set_footer(text=f"{member}", icon_url=member.avatar_url)
         return await ctx.send(content=None, embed=embed)
 
     @commands.command()
@@ -257,6 +275,18 @@ class SlothReputation(commands.Cog):
         else:
             return True
 
+    async def get_user_currency(self, user_id: int):
+        mycursor, db = await the_data_base2()
+        await mycursor.execute(f"SELECT * FROM UserCurrency WHERE user_id = {user_id}")
+        user_currency = await mycursor.fetchall()
+        await mycursor.close()
+        return user_currency
 
+    async def insert_user_currency(self, user_id: int, the_time: int):
+        mycursor, db = await the_data_base2()
+        await mycursor.execute("INSERT INTO UserCurrency (user_id, user_money, last_purchase_ts) VALUES (%s, %s, %s)",
+                               (user_id, 0, the_time))
+        await db.commit()
+        await mycursor.close()
 def setup(client):
     client.add_cog(SlothReputation(client))
