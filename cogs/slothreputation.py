@@ -73,18 +73,20 @@ class SlothReputation(commands.Cog):
             if ctx.author.id == member.id:
                 epoch = datetime.utcfromtimestamp(0)
                 the_time = (datetime.utcnow() - epoch).total_seconds()
-                await self.insert_user_currency(member.id, the_time)
+                await self.insert_user_currency(member.id, the_time - 61)
                 ucur = await self.get_user_currency(member.id)
             else:
                 return await ctx.send(f"**{member} doesn't have an account yet!**", delete_after=3)
 
         await ctx.message.delete()
-        embed = discord.Embed(title="Info", colour=member.color, timestamp=ctx.message.created_at)
+        embed = discord.Embed(title="__Info__", colour=member.color, timestamp=ctx.message.created_at)
         embed.add_field(name="__**Level**__", value=f"{user[0][2]}.", inline=True)
         embed.add_field(name="__**EXP**__", value=f"{user[0][1]} / {((user[0][2]+1)**5)}.", inline=True)
+        embed.add_field(name="__**Balance**__", value=f"{ucur[0][2]}łł", inline=False)
         embed.add_field(name="__**Participated in**__", value=f"{ucur[0][3]} classes.", inline=False)
         embed.add_field(name="__**Rewarded in**__", value=f"{ucur[0][4]} classes.", inline=True)
         embed.add_field(name="__**Hosted**__", value=f"{ucur[0][5]} classes.", inline=True)
+        embed.set_thumbnail(url=member.avatar_url)
         embed.set_footer(text=f"{member}", icon_url=member.avatar_url)
         return await ctx.send(content=None, embed=embed)
 
