@@ -553,30 +553,6 @@ class SlothCurrency(commands.Cog):
         users = await mycursor.fetchall()
         return await ctx.send(users)
 
-    @commands.command()
-    async def bank(self, ctx, member: discord.Message = None):
-        '''
-        Shows the member's bank account
-        :param member: The member to show.
-        '''
-        await ctx.message.delete()
-        if not member:
-            member = ctx.author
-
-        user_found = await self.get_user_currency(member.id)
-        bank_embed = discord.Embed(title=f"{member.name}'s bank", colour=member.color,
-                                   timestamp=ctx.message.created_at)
-        bank_embed.set_thumbnail(url=member.avatar_url)
-        if len(user_found) != 0:
-            bank_embed.add_field(name="__**Your balance:**__", value=f"**{user_found[0][1]}łł**", inline=False)
-        else:
-            epoch = datetime.utcfromtimestamp(0)
-            the_time = (datetime.utcnow() - epoch).total_seconds()
-            await self.insert_user_currency(member.id, the_time - 61)
-            user_found = await self.get_user_currency(member.id)
-            bank_embed.add_field(name="__**Your balance:**__", value=f"**{user_found[0][1]}łł**", inline=False)
-
-        return await ctx.send(embed=bank_embed)
 
     @commands.command()
     async def profile(self, ctx, member: discord.Member = None):
@@ -590,7 +566,14 @@ class SlothCurrency(commands.Cog):
 
         user_info = await self.get_user_currency(member.id)
         if not user_info:
-            return await ctx.send("**You don't have a profile yet!**", delete_after=3)
+            if ctx.author.id == member.id:
+                epoch = datetime.utcfromtimestamp(0)
+                the_time = (datetime.utcnow() - epoch).total_seconds()
+                await self.insert_user_currency(member.id, the_time - 61)
+                user_info = await self.get_user_currency(member.id)
+        else:
+            return await ctx.send(f"**{member} doesn't have a profile yet!**", delete_after=3)
+
         small = ImageFont.truetype("built titling sb.ttf", 45)
         background = Image.open(await self.get_user_specific_type_item(member.id, 'background'))
         sloth = Image.open(await self.get_user_specific_type_item(member.id, 'sloth'))
