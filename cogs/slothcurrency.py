@@ -571,8 +571,8 @@ class SlothCurrency(commands.Cog):
                 the_time = (datetime.utcnow() - epoch).total_seconds()
                 await self.insert_user_currency(member.id, the_time - 61)
                 user_info = await self.get_user_currency(member.id)
-        else:
-            return await ctx.send(f"**{member} doesn't have a profile yet!**", delete_after=3)
+            else:
+                return await ctx.send(f"**{member} doesn't have a profile yet!**", delete_after=3)
 
         small = ImageFont.truetype("built titling sb.ttf", 45)
         background = Image.open(await self.get_user_specific_type_item(member.id, 'background'))
