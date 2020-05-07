@@ -82,7 +82,7 @@ class SlothReputation(commands.Cog):
         embed = discord.Embed(title="__Info__", colour=member.color, timestamp=ctx.message.created_at)
         embed.add_field(name="__**Level**__", value=f"{user[0][2]}.", inline=True)
         embed.add_field(name="__**EXP**__", value=f"{user[0][1]} / {((user[0][2]+1)**5)}.", inline=True)
-        embed.add_field(name="__**Balance**__", value=f"{ucur[0][1]}łł", inline=False)
+        embed.add_field(name="__**Balance**__", value=f"{ucur[0][1]}łł", inline=True)
         embed.add_field(name="__**Participated in**__", value=f"{ucur[0][3]} classes.", inline=True)
         embed.add_field(name="__**Rewarded in**__", value=f"{ucur[0][4]} classes.", inline=True)
         embed.add_field(name="__**Hosted**__", value=f"{ucur[0][5]} classes.", inline=True)
