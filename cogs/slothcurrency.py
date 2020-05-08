@@ -579,6 +579,8 @@ class SlothCurrency(commands.Cog):
         sloth = Image.open(await self.get_user_specific_type_item(member.id, 'sloth'))
         body = Image.open(await self.get_user_specific_type_item(member.id, 'body'))
         hand = Image.open(await self.get_user_specific_type_item(member.id, 'hand'))
+        foot = Image.open(await self.get_user_specific_type_item(member.id, 'foot'))
+        head = Image.open(await self.get_user_specific_type_item(member.id, 'head'))
         hud = Image.open(await self.get_user_specific_type_item(member.id, 'hud'))
         #badge = Image.open(await self.get_user_specific_type_item(member.id, 'badge'))
         pfp = await self.get_user_pfp(member)
@@ -586,6 +588,8 @@ class SlothCurrency(commands.Cog):
         background.paste(body, (32, -10), body)
         background.paste(hand, (32, -10), hand)
         background.paste(hud, (1, -10), hud)
+        background.paste(foot, (32, -10), foot)
+        background.paste(head, (32, -10), head)
         #background.paste(badge, (1, -10), badge)
         # Checks if user is a booster
         booster_role = discord.utils.get(ctx.guild.roles, id=booster_role_id)
@@ -696,9 +700,12 @@ class SlothCurrency(commands.Cog):
                        "body": "1jYvG3vhL32-A0qDYn6lEG6fk_GKYDXD7",
                        "hand": "1ggW3SDVzTSY5b8ybPimCsRWGSCaOBM8d",
                        "hud": "1-U6oOphdMNMPhPAjRJxJ2E6KIzIbewEh",
-                       "badge": "1k8NRfwwLzIY5ALK5bUObAcrKr_eUlfjd"}
+                       "badge": "1k8NRfwwLzIY5ALK5bUObAcrKr_eUlfjd",
+                       "foot": "1Frfra1tQ49dKM6Dg4DIbrfYbtXadv9zj",
+                       "head": "1Y9kSOayw4NDehbqfmvPXKZLrXnIjeblP"
+                       }
 
-        categories = ['background', 'sloth', 'body', 'hand', 'hud', 'badge']
+        categories = ['background', 'sloth', 'body', 'hand', 'hud', 'badge', 'foot', 'head']
         for category in categories:
             try:
                 os.makedirs(f'./sloth_custom_images/{category}')
@@ -736,7 +743,9 @@ class SlothCurrency(commands.Cog):
                        "body": "1jYvG3vhL32-A0qDYn6lEG6fk_GKYDXD7",
                        "hand": "1ggW3SDVzTSY5b8ybPimCsRWGSCaOBM8d",
                        "hud": "1-U6oOphdMNMPhPAjRJxJ2E6KIzIbewEh",
-                       "badge": "1k8NRfwwLzIY5ALK5bUObAcrKr_eUlfjd"}
+                       "badge": "1k8NRfwwLzIY5ALK5bUObAcrKr_eUlfjd",
+                       "foot": "1Frfra1tQ49dKM6Dg4DIbrfYbtXadv9zj",
+                       "head": "1Y9kSOayw4NDehbqfmvPXKZLrXnIjeblP"}
 
         if not image_suffix:
             for folder, folder_id in all_folders.items():
