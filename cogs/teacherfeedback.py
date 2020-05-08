@@ -884,7 +884,7 @@ class TeacherFeedback(commands.Cog):
                     the_reward_embed.add_field(name="**-**", value=f"**{member.mention};**", inline=True)
                     if await self.user_in_currency(member.id):
                         await self.update_money(member.id, 10)
-                        await self.update_user_class_reward(active_users[class_index][0])
+                        await self.update_user_class_reward(ru)
 
                 if await self.user_in_currency(teacher.id):
                     await self.update_money(teacher.id, 25)
