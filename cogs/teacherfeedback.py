@@ -811,13 +811,13 @@ class TeacherFeedback(commands.Cog):
             elif class_type.title() == 'Grammar':
                 active_users = [uf for uf in users_feedback if uf[3] >= 10]
 
-        for uf in users_feedback:
+        if not active_users:
+            return
+        
+        for uf in active_users:
             if await self.user_in_currency(uf[0]):
                 await self.update_user_classes(uf[0])
 
-
-        if not active_users:
-            return
         if reward_channel:
             teacher = discord.utils.get(guild.members, id=teacher_id)
             simple_embed = discord.Embed(title=f"All {teacher.name}'s students", description="**LOADING...**",
