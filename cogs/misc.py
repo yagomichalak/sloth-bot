@@ -108,9 +108,9 @@ class Misc(commands.Cog):
         if user_secs[0][6]:
             sub_time = the_time - user_secs[0][6]
             if sub_time >= 7200:
-                await SlothCurrency.update_user_lotto_ts(ctx, ctx.author.id, the_time + 7200)
+                await SlothCurrency.update_user_lotto_ts(ctx, ctx.author.id, the_time)
             else:
-                m, s = divmod(int(sub_time), 60)
+                m, s = divmod(int(the_time) - int(sub_time), 60)
                 h, m = divmod(m, 60)
                 if h > 0:
                     return await ctx.send(f"**You're on cooldown, try again in {h:d} hours, {m:02d} minutes and {s:02d} seconds.**", delete_after=5)
@@ -123,7 +123,7 @@ class Misc(commands.Cog):
                         f"**You're on cooldown, try again in {s:02d} seconds.**",
                         delete_after=5)
         else:
-            await SlothCurrency.update_user_lotto_ts(ctx, ctx.author.id, the_time + 7200)
+            await SlothCurrency.update_user_lotto_ts(ctx, ctx.author.id, the_time)
 
         author = ctx.author
         numbers = []
