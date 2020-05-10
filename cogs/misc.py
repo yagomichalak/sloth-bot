@@ -120,7 +120,7 @@ class Misc(commands.Cog):
                         delete_after=5)
                 else:
                     return await ctx.send(
-                        f"**You're on cooldown, try again in{s:02d} seconds.**",
+                        f"**You're on cooldown, try again in {s:02d} seconds.**",
                         delete_after=5)
         else:
             await SlothCurrency.update_user_lotto_ts(ctx, ctx.author.id, the_time)
@@ -132,7 +132,7 @@ class Misc(commands.Cog):
 
         string_numbers = [str(i) for i in numbers]
         if g1 == numbers[0] and g2 == numbers[1] and g3 == numbers[2]:
-            await ctx.send(f'**{author.mention} You won! Congratulations on winning the lottery with the numbers ({g1}, {g2},{g3})!**')
+            await ctx.send(f'**{author.mention} You won! Congratulations on winning the lottery with the numbers ({g1}, {g2},{g3})!🍃+100łł!**')
             if not await SlothCurrency.get_user_currency(ctx, ctx.author.id):
                 epoch = datetime.utcfromtimestamp(0)
                 the_time = (datetime.utcnow() - epoch).total_seconds()
