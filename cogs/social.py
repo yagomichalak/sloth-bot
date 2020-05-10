@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 import praw
 import random
+import aiohttp
 
 reddit = praw.Reddit(client_id='Ph3swv14_OMx7w',  # client id
                      client_secret='tmDpbL1xeJAoIrroDH0yS_lf4sU',  # my client secret
@@ -18,6 +19,28 @@ class Social(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         print('Social cog is ready!')
+
+    @commands.command(aliases=['si', 'server'])
+    async def serverinfo(self, ctx):
+        '''Get server info'''
+        await ctx.message.delete()
+        guild = ctx.guild
+        guild_age = (ctx.message.created_at - guild.created_at).days
+        created_at = f"Server created on {guild.created_at.strftime('%b %d %Y at %H:%M')}. That\'s over {guild_age} days ago!"
+        color = discord.Color.green()
+
+        em = discord.Embed(description=created_at, color=color)
+        em.add_field(name='Online Members',
+                     value=len({m.id for m in guild.members if m.status is not discord.Status.offline}))
+        em.add_field(name='Total Members', value=len(guild.members))
+        em.add_field(name='Text Channels', value=len(guild.text_channels))
+        em.add_field(name='Voice Channels', value=len(guild.voice_channels))
+        em.add_field(name='Roles', value=len(guild.roles))
+        em.add_field(name='Owner', value=guild.owner)
+
+        em.set_thumbnail(url=None or guild.icon_url)
+        em.set_author(name=guild.name, icon_url=None or guild.icon_url)
+        await ctx.send(embed=em)
 
     # Shows all the info about a user
     @commands.command()
@@ -69,5 +92,21 @@ class Social(commands.Cog):
         await ctx.send(embed=meme_embed)
 
 
+    @commands.command(aliases=['xkcd', 'comic'])
+    async def randomcomic(self, ctx):
+        '''Get a comic from xkcd.'''
+        async with aiohttp.ClientSession() as session:
+            async with session.get(f'http://xkcd.com/info.0.json') as resp:
+                data = await resp.json()
+                currentcomic = data['num']
+        rand = randint(0, currentcomic)  # max = current comic
+        async with aiohttp.ClientSession() as session:
+            async with session.get(f'http://xkcd.com/{rand}/info.0.json') as resp:
+                data = await resp.json()
+        em = discord.Embed(color=discord.Color.green())
+        em.title = f"XKCD Number {data['num']}- \"{data['title']}\""
+        em.set_footer(text=f"Published on {data['month']}/{data['day']}/{data['year']}")
+        em.set_image(url=data['img'])
+        await ctx.send(embed=em)
 def setup(client):
     client.add_cog(Social(client))
