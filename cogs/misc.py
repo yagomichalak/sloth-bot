@@ -93,7 +93,7 @@ class Misc(commands.Cog):
             return await ctx.send("**All guesses must be integers!**", delete_after=3)
 
         for n in [g1, g2, g3]:
-            if not int(n) > 0 and int(n) <= 5:
+            if not int(n) > 0 and not int(n) <= 5:
                 await self.client.get_command('lottery').reset_cooldown(ctx)
                 return await ctx.send(f"**Each number must be between 1-5!**", delete_after=3)
 
