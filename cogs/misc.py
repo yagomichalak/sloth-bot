@@ -92,10 +92,9 @@ class Misc(commands.Cog):
             await self.client.get_command('lottery').reset_cooldown(ctx)
             return await ctx.send("**All guesses must be integers!**", delete_after=3)
         else:
-            for n in [g1, g2, g3]:
-                if not n > 0 <= 5:
-                    await self.client.get_command('lottery').reset_cooldown(ctx)
-                    return await ctx.send(f"**Each number must be between 1-5!**", delete_after=3)
+            if not g1 > 0 <= 5 or not g2 > 0 <= 5 or not g3 > 0 <= 5:
+                await self.client.get_command('lottery').reset_cooldown(ctx)
+                return await ctx.send(f"**Each number must be between 1-5!**", delete_after=3)
 
         # Check if user is not on cooldown
         user_secs = await SlothCurrency.get_user_currency(ctx, ctx.author.id)
