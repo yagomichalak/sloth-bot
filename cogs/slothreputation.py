@@ -45,11 +45,11 @@ class SlothReputation(commands.Cog):
         the_user = await self.get_specific_user(user.id)
         lvl_end = int(the_user[0][1] ** (1 / 5))
         if the_user[0][2] < lvl_end:
-            await self.update_user_money(user.id, (the_user[0][2] + 1) * 10)
+            await self.update_user_money(user.id, (the_user[0][2] + 1) * 5)
             await self.update_user_lvl(user.id)
             await self.update_user_score_points(user.id, 100)
             channel = discord.utils.get(user.guild.channels, id=commands_channel_id)
-            return await channel.send(f"**{user.mention} has leveled up to lvl {the_user[0][2] + 1}! <:zslothrich:701157794686042183> Here's {(the_user[0][2] + 1) * 10}łł! <:zslothrich:701157794686042183>**")
+            return await channel.send(f"**{user.mention} has leveled up to lvl {the_user[0][2] + 1}! <:zslothrich:701157794686042183> Here's {(the_user[0][2] + 1) * 5}łł! <:zslothrich:701157794686042183>**")
 
 
     @commands.command()
