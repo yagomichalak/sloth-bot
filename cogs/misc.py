@@ -110,7 +110,7 @@ class Misc(commands.Cog):
             if sub_time >= 7200:
                 await SlothCurrency.update_user_lotto_ts(ctx, ctx.author.id, the_time)
             else:
-                m, s = divmod(sub_time, 60)
+                m, s = divmod(int(sub_time), 60)
                 h, m = divmod(m, 60)
                 if h > 0:
                     return await ctx.send(f"**You're on cooldown, try again in {h:d} hours, {m:02d} minutes and {s:02d} seconds.**", delete_after=5)
@@ -134,9 +134,8 @@ class Misc(commands.Cog):
         if g1 == numbers[0] and g2 == numbers[1] and g3 == numbers[2]:
             await ctx.send(f'**{author.mention} You won! Congratulations on winning the lottery with the numbers ({g1}, {g2},{g3})!🍃+100łł!**')
             if not await SlothCurrency.get_user_currency(ctx, ctx.author.id):
-                epoch = datetime.utcfromtimestamp(0)
-                the_time = (datetime.utcnow() - epoch).total_seconds()
-                await SlothCurrency.insert_user_currency(ctx, ctx.author.id, the_time)
+
+                await SlothCurrency.insert_user_currency(ctx, ctx.author.id, the_time - 61)
             await SlothCurrency.update_user_money(ctx, ctx.author.id, 100)
 
         else:
