@@ -517,7 +517,7 @@ class SlothCurrency(commands.Cog):
     async def create_table_user_currency(self, ctx):
         await ctx.message.delete()
         mycursor, db = await the_data_base2()
-        await mycursor.execute("CREATE TABLE UserCurrency (user_id bigint, user_money bigint, last_purchase_ts bigint, user_classes bigint default 0, user_class_reward bigint default 0, user_hosted bigint default 0)")
+        await mycursor.execute("CREATE TABLE UserCurrency (user_id bigint, user_money bigint, last_purchase_ts bigint, user_classes bigint default 0, user_class_reward bigint default 0, user_hosted bigint default 0, user_lotto bigint default null)")
         await db.commit()
         await mycursor.close()
         return await ctx.send("**Table *UserCurrency* created!**", delete_after=3)
@@ -539,7 +539,7 @@ class SlothCurrency(commands.Cog):
         mycursor, db = await the_data_base2()
         await mycursor.execute("DROP TABLE UserCurrency")
         await db.commit()
-        await mycursor.execute("CREATE TABLE UserCurrency (user_id bigint, user_money bigint, last_purchase_ts bigint, user_classes bigint default 0, user_class_reward bigint default 0, user_hosted bigint default 0)")
+        await mycursor.execute("CREATE TABLE UserCurrency (user_id bigint, user_money bigint, last_purchase_ts bigint, user_classes bigint default 0, user_class_reward bigint default 0, user_hosted bigint default 0, user_lotto bigint default null)")
         await db.commit()
         await mycursor.close()
         return await ctx.send("**Table *UserCurrency* reseted!**", delete_after=3)
@@ -586,10 +586,10 @@ class SlothCurrency(commands.Cog):
         pfp = await self.get_user_pfp(member)
         background.paste(sloth, (32, -10), sloth)
         background.paste(body, (32, -10), body)
+        background.paste(head, (32, -10), head)
+        background.paste(foot, (32, -10), foot)
         background.paste(hand, (32, -10), hand)
         background.paste(hud, (1, -10), hud)
-        background.paste(foot, (32, -10), foot)
-        background.paste(head, (32, -10), head)
         #background.paste(badge, (1, -10), badge)
         # Checks if user is a booster
         booster_role = discord.utils.get(ctx.guild.roles, id=booster_role_id)
@@ -678,6 +678,12 @@ class SlothCurrency(commands.Cog):
     async def update_user_purchase_ts(self, user_id: int, the_time: int):
         mycursor, db = await the_data_base2()
         await mycursor.execute(f"UPDATE UserCurrency SET last_purchase_ts = {the_time} WHERE user_id = {user_id}")
+        await db.commit()
+        await mycursor.close()
+
+    async def update_user_lotto_ts(self, user_id: int, the_time: int):
+        mycursor, db = await the_data_base2()
+        await mycursor.execute(f"UPDATE UserCurrency SET user_lotto = {the_time} WHERE user_id = {user_id}")
         await db.commit()
         await mycursor.close()
 
