@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 import praw
-import random
+from random import randint
 import aiohttp
 
 reddit = praw.Reddit(client_id='Ph3swv14_OMx7w',  # client id
@@ -81,7 +81,7 @@ class Social(commands.Cog):
         Gets a random meme from Reddit.
         '''
         memes_submissions = reddit.subreddit('memes').hot()
-        post_to_pick = random.randint(1, 50)
+        post_to_pick = randint(1, 50)
         for i in range(0, post_to_pick):
             submissions = next(x for x in memes_submissions if not x.stickied)
 

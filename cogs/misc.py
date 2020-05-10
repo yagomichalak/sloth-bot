@@ -93,7 +93,7 @@ class Misc(commands.Cog):
             return await ctx.send("**All guesses must be integers!**", delete_after=3)
 
         for n in [g1, g2, g3]:
-            if not n > 0 and n <= 5:
+            if not int(n) > 0 and n <= 5:
                 await self.client.get_command('lottery').reset_cooldown(ctx)
                 return await ctx.send(f"**Each number must be between 1-5!**", delete_after=3)
 
@@ -107,10 +107,10 @@ class Misc(commands.Cog):
 
         if user_secs[0][6]:
             sub_time = the_time - user_secs[0][6]
-            if sub_time >= 7200:
+            if sub_time >= 1200:
                 await SlothCurrency.update_user_lotto_ts(ctx, ctx.author.id, the_time)
             else:
-                m, s = divmod(7200 - int(sub_time), 60)
+                m, s = divmod(1200 - int(sub_time), 60)
                 h, m = divmod(m, 60)
                 if h > 0:
                     return await ctx.send(f"**You're on cooldown, try again in {h:d} hours, {m:02d} minutes and {s:02d} seconds.**", delete_after=5)
