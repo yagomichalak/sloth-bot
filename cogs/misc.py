@@ -89,11 +89,11 @@ class Misc(commands.Cog):
             g2 = int(g2)
             g3 = int(g3)
         except ValueError:
-            await self.client.get_command('lottery').reset_cooldown(ctx)
+            self.client.get_command('lottery').reset_cooldown(ctx)
             return await ctx.send("**All guesses must be integers!**", delete_after=3)
         else:
             if not g1 > 0 <= 5 or not g2 > 0 <= 5 or not g3 > 0 <= 5:
-                await self.client.get_command('lottery').reset_cooldown(ctx)
+                self.client.get_command('lottery').reset_cooldown(ctx)
                 return await ctx.send(f"**Each number must be between 1-5!**", delete_after=3)
 
         # Check if user is not on cooldown
