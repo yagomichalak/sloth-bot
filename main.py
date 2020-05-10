@@ -60,6 +60,32 @@ async def change_color():
     r, g, b = next(shades_of_pink)
     await patreon.edit(colour=discord.Colour.from_rgb(r, g, b))
 
+    @commands.Cog.listener()
+    async def on_member_update(before, after):
+        roles = before.roles
+        roles2 = after.roles
+        if len(roles2) < len(roles):
+            return
+
+        new_role = None
+
+        for r2 in roles2:
+            if r2 not in roles:
+                new_role = r2
+                break
+
+        patreon_roles = {
+            706635763802046505: [f"**Thank you! {after.mention} for joining the `Sloth Nation`!**", "**Hey! Thank you for helping our community, you will now receive :leaves: 2500 ŁŁ monthly, you'll have access to exclusive content from our events.**"],
+            706635836954902620: [f"**Wowie! {after.mention} joined the `Sloth Nappers`!  :zslothsleepyuwu:**", "**Hey! Thank you for helping our community! You will be contacted by an Admin soon!**"],
+            706635884090359899: [f"**Hype! {after.mention} is now the highest rank, `Sloth Explorer`!  :zslothvcool: **", "**Hey! Thank you for helping our community! You will be contacted by an Admin soon!**"]}
+
+        if new_role:
+            for pr in patreon_roles.keys():
+                if new_role.id == pr:
+                    announ = discord.utils.get(before.guild.channels, id=announcement_channel_id)
+                    await announ.send(patreon_roles[pr][0])
+                    return await after.send(patreon_roles[pr][1])
+
 @client.event
 async def on_member_remove(member):
     roles = [role for role in member.roles]
