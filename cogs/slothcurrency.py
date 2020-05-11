@@ -51,6 +51,7 @@ class SlothCurrency(commands.Cog):
     async def on_ready(self):
         print("SlothCurrency cog is online!")
         await self.download_update()
+        #await self.text_download_update()
 
     @commands.Cog.listener()
     async def on_message(self, message):
@@ -735,11 +736,54 @@ class SlothCurrency(commands.Cog):
         if ctx:
             return await ctx.send("**Download update is done!**", delete_after=5)
 
+    # Google Drive commands
+    async def text_download_update(self, ctx=None):
+        '''
+        Downloads all texts from the GoogleDrive and stores in the bot's folder
+        '''
+        if ctx:
+            await ctx.message.delete()
+        all_text_folders = {"turkic": "1A9rKufw30sJMdDbOa7zzobV2vblxc0UP",
+                            "uralic": "1lFOmnjSNE1zfxabjai5xQSgqOrjo3h0t",
+                            "unafiliated": "1bjYU4-oTRhnMDLiboCCkQecQ64FVx39C",
+                            "iranian": "18kvxdgyAWbNA9oEpzxGVkEF0JiSPSj4U",
+                            "celtic": "1djjTF6UrXWHI5-q7B_juqmtNvRC7-Rvf",
+                            "baltic": "15crfEoB-LQSavwVgU7elO-BqqvtrGO-W",
+                            "germanic": "1szJMzbF7hRk7BwicUTSi-_lnvlDVt99j",
+                            "slavic": "1ntr2NclwgQjhULH9wwrnRSezdsyvG3g2",
+                            "random": "1_gBiliWPrCj5cLpChQfg9QRnj8skQVHM",
+                            "asian": "1xXJLWXD3l31gpfKaC1oBLGaX5EMVFZ3u",
+                            "semitic": "12TKyqHLNhY4VohFWpgN6FjtPQPGNuuNK",
+                            "romance": "1n-E6RbHnAm9jzavnN50txHj3Qezz0T1Y",
+                            "indian": "1k1xv0uDgfxBhVOOgCiTK0GVbJ_Oz6OtC"
+                            }
+
+        text_categories = ["turkic", "uralic", "unafiliated", "iranian", "celtic", "baltic", "germanic", "slavic",
+                           "random", "asian", "semitic", "romance", "indian"]
+        for t_category in text_categories:
+            try:
+                os.makedirs(f'./texts/{t_category}')
+                print(f"{t_category} folder made!")
+            except FileExistsError:
+                pass
+
+        for folder, folder_id in all_text_folders.items():
+            files = drive.ListFile({'q': "'%s' in parents and trashed=false" % folder_id}).GetList()
+            download_path = f'./texts/{folder}'
+            for file in files:
+                isFile = os.path.isfile(f"{download_path}/{file['title']}")
+                if not isFile:
+                    output_file = os.path.join(download_path, file['title'])
+                    temp_file = drive.CreateFile({'id': file['id']})
+                    temp_file.GetContentFile(output_file)
+        if ctx:
+            return await ctx.send("**Download update is done!**")
+
     @commands.command()
     @commands.has_permissions(administrator=True)
     async def list_folder(self, ctx, image_suffix: str = None, item_name: str = None):
         '''
-        Lists a folder from the Google Drive.
+        Lists a shop image folder from Google Drive.
         :param image_suffix: The image/folder category.
 
         '''
