@@ -48,16 +48,13 @@ class Communication(commands.Cog):
 
         general_channel = discord.utils.get(ctx.guild.channels, id=general_voice_chat_id)
         await general_channel.send(
-            f'''{member.mention}, remember to Assign your Native language in  <#679333977705676830>, click in the flag that best represents your native language!
-    This way you will have full access to the server and its voice channels!
-    Enjoy!!''')
-        await general_channel.send(f'''Welcome to the Language Sloth {member.mention}!
-        This is a community of people who are practicing and studying languages from all around the world! While you're here, you will also make tons of new friends! There is a lot to do here in the server but there are some things you should do to start off.
+            f'''__**Welcome to the Language Sloth**__!
+This is a community of people who are practicing and studying languages from all around the world! While you're here, you will also make tons of new friends! There is a lot to do here in the server but there are some things you should do to start off. 
 
-        1. Make sure you go check out the <#688967996512665655> and the informations page. These rules are very important and are taken seriously here on the server.
-        2. After you have finished reading those, you can assign yourself some roles at <#679333977705676830> <#683987207065042944> <#688037387561205824> and <#562019509477703697>! These roles will give you access to different voice and text channels!
+1. Make sure you go check out the <#<#688967996512665655> and the informations page. These rules are very important and are taken seriously here on the server.
+2. After you have finished reading those, you can assign yourself some roles at <#679333977705676830> <#683987207065042944> <#688037387561205824> and <#562019509477703697>! These roles will give you access to different voice and text channels! To choose your role click on the flag that best represents your native language.
 
-        If you have any questions feel free to ask! And if you experience any type of problem make sure you let a staff member know right away!''')
+If you have any questions feel free to ask! And if you experience any type of problem make sure you let a staff member know right away''')
 
     # Pretends that a role has been given to an user by the bot
     @commands.command()
