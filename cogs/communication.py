@@ -40,7 +40,7 @@ class Communication(commands.Cog):
 
     # Welcomes an user by telling them to assign a role
     @commands.command()
-    @commands.has_permissions(administrator=True)
+    @commands.has_any_role(474774889778380820, 574265899801116673, 699296718705000559)
     async def welcome(self, ctx, member: discord.Member = None):
         await ctx.message.delete()
         if not member:
@@ -51,17 +51,24 @@ class Communication(commands.Cog):
             f'''{member.mention}, remember to Assign your Native language in  <#679333977705676830>, click in the flag that best represents your native language!
     This way you will have full access to the server and its voice channels!
     Enjoy!!''')
+        await general_channel.send(f'''Welcome to the Language Sloth {member.mention}!
+        This is a community of people who are practicing and studying languages from all around the world! While you're here, you will also make tons of new friends! There is a lot to do here in the server but there are some things you should do to start off.
+
+        1. Make sure you go check out the <#688967996512665655> and the informations page. These rules are very important and are taken seriously here on the server.
+        2. After you have finished reading those, you can assign yourself some roles at <#679333977705676830> <#683987207065042944> <#688037387561205824> and <#562019509477703697>! These roles will give you access to different voice and text channels!
+
+        If you have any questions feel free to ask! And if you experience any type of problem make sure you let a staff member know right away!''')
 
     # Pretends that a role has been given to an user by the bot
     @commands.command()
-    @commands.has_permissions(administrator=True)
+    @commands.has_any_role(474774889778380820, 574265899801116673, 699296718705000559)
     async def auto(self, ctx, member: discord.Member = None, text: str = None):
         await ctx.message.delete()
         if not text:
-            return await ctx.send('Inform the parameters!')
+            return await ctx.send('**Inform the parameters!**', delete_after=3)
 
         elif not member:
-            return await ctx.send('Inform a member!')
+            return await ctx.send('**Inform a member!**', delete_after=3)
 
         general_channel = discord.utils.get(ctx.guild.channels, id=general_voice_chat_id)
         await general_channel.send(
