@@ -21,6 +21,7 @@ report_channel_id = 685832739517366340
 report_log_channel_id = 683693966016774168
 admin_commands_channel_id = 562019472257318943
 patreon_role_id = 706635884090359899
+announ_announ_channel_id = 562019353583681536
 #colors = cycle([(255, 0, 0), (255, 127, 0), (255, 255, 0), (0, 255, 0), (0, 0, 255), (75, 0, 130), (143, 0, 255)])
 shades_of_pink = cycle([(252, 15, 192), (255, 0, 255), (248, 24, 148),
               (224, 17, 95), (246, 74, 138), (236, 85, 120),
@@ -82,7 +83,7 @@ async def on_member_update(before, after):
     if new_role:
         for pr in patreon_roles.keys():
             if new_role.id == pr:
-                announ = discord.utils.get(before.guild.channels, id=announcement_channel_id)
+                announ = discord.utils.get(before.guild.channels, id=announ_announ_channel_id)
                 await announ.send(patreon_roles[pr][0])
                 return await after.send(patreon_roles[pr][1])
 
