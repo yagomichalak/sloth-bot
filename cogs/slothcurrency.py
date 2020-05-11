@@ -737,6 +737,8 @@ class SlothCurrency(commands.Cog):
             return await ctx.send("**Download update is done!**", delete_after=5)
 
     # Google Drive commands
+    @commands.command()
+    @commands.has_permissions(administrator=True)
     async def text_download_update(self, ctx=None):
         '''
         Downloads all texts from the GoogleDrive and stores in the bot's folder

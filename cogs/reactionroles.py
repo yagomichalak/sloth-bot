@@ -42,7 +42,7 @@ class ReactionRoles(commands.Cog):
 
     @commands.command()
     @commands.has_permissions(administrator=True)
-    async def register_text(self, ctx, mid: discord.Message = None, react=None, category: str = None, file_name: str = None):
+    async def register_text(self, ctx, mid: discord.Message = None, react: str = None, category: str = None, file_name: str = None):
         await ctx.message.delete()
         if not mid:
             return await ctx.send("**Inform a message ID!**", delete_after=3)
