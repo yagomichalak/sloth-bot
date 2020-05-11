@@ -356,15 +356,15 @@ async def on_raw_reaction_remove(overload):
 @client.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.MissingPermissions):
-        await ctx.send("You can't do that!")
+        await ctx.send("You can't do that!", delete_after=3)
 
     if isinstance(error, commands.MissingRequiredArgument):
-        await ctx.send('Please, inform all parameters!')
+        await ctx.send('Please, inform all parameters!', delete_after=3)
 
     if isinstance(error, commands.CommandOnCooldown):
-        await ctx.send(error)
+        await ctx.send(error, delete_after=3)
     if isinstance(error, commands.MissingAnyRole):
-        await ctx.send(error)
+        await ctx.send(error, delete_after=3)
 
 
 # Members status update
