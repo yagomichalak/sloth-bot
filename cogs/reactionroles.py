@@ -31,7 +31,7 @@ class ReactionRoles(commands.Cog):
 
         message_texts = await self.get_message_texts(overload.message_id)
         if message_texts:
-            await user.send(f"**Good job! {mt[1]}**")
+            await user.send(f"**Good job! {message_texts[0][1]}**")
             for mt in message_texts:          
                 if str(mt[1]) == str(overload.emoji):
                     with open(f"./texts/{mt[2]}/{mt[3]}", 'r', encoding='utf-8') as f:
@@ -45,7 +45,7 @@ class ReactionRoles(commands.Cog):
 
     @commands.command()
     @commands.has_permissions(administrator=True)
-    async def register_text(self, ctx, mid: discord.Message = None, reactf = None, category: str = None, file_name: str = None):
+    async def register_text(self, ctx, mid: discord.Message = None, reactf: discord.Reaction = None, category: str = None, file_name: str = None):
         await ctx.message.delete()
         if not mid:
             return await ctx.send("**Inform a message ID!**", delete_after=3)
