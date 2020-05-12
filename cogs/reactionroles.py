@@ -22,7 +22,7 @@ class ReactionRoles(commands.Cog):
         if user.bot:
             return
 
-        # Language rooms
+        #Language rooms
         language_rooms = [679333977705676830, 683987207065042944, 688037387561205824]
 
 
