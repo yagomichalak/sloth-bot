@@ -55,6 +55,7 @@ class ReactionRoles(commands.Cog):
         elif not file_name:
             return await ctx.send("**Inform the file name!**", delete_after=3)
 
+        reactf = f":{reactf}:"
         await self.insert_registered_text(mid.id, reactf, category.lower(), file_name)
         await mid.add_reaction(reactf)
         return await ctx.send(f"**File `{file_name}` successfully registered!**", delete_after=3)
