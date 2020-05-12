@@ -32,7 +32,7 @@ class ReactionRoles(commands.Cog):
         message_texts = await self.get_message_texts(payload.message_id)
         if message_texts:
             for mt in message_texts:          
-                if str(mt[1]) == str(payload.emoji):
+                if str(mt[1]) == str(payload.emoji.name):
                     with open(f"./texts/{mt[2]}/{mt[3]}", 'r', encoding='utf-8') as f:
                         text = f.readlines()
                         text = ''.join(text)
@@ -55,7 +55,7 @@ class ReactionRoles(commands.Cog):
         elif not file_name:
             return await ctx.send("**Inform the file name!**", delete_after=3)
 
-        reactf = f":{reactf}:"
+        reactf = reactf
         await self.insert_registered_text(mid.id, reactf, category.lower(), file_name)
         await mid.add_reaction(reactf)
         return await ctx.send(f"**File `{file_name}` successfully registered!**", delete_after=3)
