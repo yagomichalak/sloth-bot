@@ -1,0 +1,154 @@
+import discord
+from discord.ext import commands, tasks
+from mysqldb2 import *
+from datetime import datetime
+from pytz import timezone
+from PIL import Image, ImageFont, ImageDraw
+
+bots_and_commands_channel_id = 562019654017744904
+select_your_language_channel_id = 695491104417513552
+
+class Analytics(commands.Cog):
+
+    def __init__(self, client):
+        self.client = client
+
+    @commands.Cog.listener()
+    async def on_ready(self):
+        print("Analytics cog is online!")
+        self.check_midnight.start()
+
+
+    @tasks.loop(minutes=1)
+    async def check_midnight(self):
+        time_now = datetime.now()
+        tzone = timezone("CET")
+        date_and_time = time_now.astimezone(tzone)
+        hour = date_and_time.strftime('%H:%M')
+        day = date_and_time.strftime('%d')
+        if await self.check_relatory_time(hour):
+            await self.update_day(day)
+            channel = self.client.get_channel(bots_and_commands_channel_id)
+            members = channel.guild.members
+            info = await self.get_info()
+            online_members = [om for om in members if str(om.status) == "online"]
+            small = ImageFont.truetype("built titling sb.ttf", 45)
+            analytics = Image.open("analytics.png")
+            draw = ImageDraw.Draw(analytics)
+            draw.text((410, 205), f"{info[0][0]}", (0, 0, 0), font=small)
+            draw.text((410, 265), f"{info[0][1]}", (0, 0, 0), font=small)
+            draw.text((410, 325), f"{info[0][2]}", (0, 0, 0), font=small)
+            draw.text((410, 385), f"{len(members)}", (0, 0, 0), font=small)
+            draw.text((410, 445), f"{len(online_members)}", (0, 0, 0), font=small)
+            analytics.save('analytics_result.png', 'png', quality=90)
+            await channel.send(file=discord.File('analytics_result.png'))
+            return await self.reset_table_sloth_analytics()
+
+
+    @commands.Cog.listener()
+    async def on_member_join(self, member):
+        channel = discord.utils.get(member.guild.channels, id=select_your_language_channel_id)
+        await channel.send(f'''Hello {member.mention} ! Scroll up and choose your Native Language by clicking in the flag that best represents it!
+:zarrowup: :zarrowup: :zarrowup: :zarrowup: :zarrowup: :zarrowup: :zarrowup: :zarrowup:''', delete_after=120)
+        await self.update_joined()
+
+    @commands.Cog.listener()
+    async def on_member_remove(self, member):
+        return await self.update_left()
+
+    @commands.Cog.listener()
+    async def on_message(self, message):
+        return await self.update_messages()
+
+    # Table UserCurrency
+    @commands.command()
+    @commands.has_permissions(administrator=True)
+    async def create_table_sloth_analytics(self, ctx):
+        await ctx.message.delete()
+        mycursor, db = await the_data_base3()
+        await mycursor.execute(
+            f"CREATE TABLE SlothAnalytics (m_joined int default 0, m_left int default 0, messages_sent int default 0, day_now VARCHAR(2))")
+        await db.commit()
+        time_now = datetime.now()
+        tzone = timezone("CET")
+        date_and_time = time_now.astimezone(tzone)
+        day = date_and_time.strftime('%d')
+        await mycursor.execute("INSERT INTO SlothAnalytics (day_now) VALUES (%s)", (day))
+        await db.commit()
+        await mycursor.close()
+        return await ctx.send("**Table *SlothAnalytics* created!**", delete_after=3)
+
+    @commands.command()
+    @commands.has_permissions(administrator=True)
+    async def drop_table_sloth_analytics(self, ctx):
+        await ctx.message.delete()
+        mycursor, db = await the_data_base3()
+        await mycursor.execute("DROP TABLE SlothAnalytics")
+        await db.commit()
+        await mycursor.close()
+        return await ctx.send("**Table *SlothAnalytics* dropped!**", delete_after=3)
+
+    @commands.command()
+    @commands.has_permissions(administrator=True)
+    async def reset_table_sloth_analytics(self, ctx = None):
+        if ctx:
+            await ctx.message.delete()
+        mycursor, db = await the_data_base3()
+        await mycursor.execute("DROP TABLE SlothAnalytics")
+        await db.commit()
+        await mycursor.execute(
+            "CREATE TABLE SlothAnalytics (m_joined int, m_left int, messages_sent int, day_now VARCHAR(2))")
+        await db.commit()
+        time_now = datetime.now()
+        tzone = timezone("CET")
+        date_and_time = time_now.astimezone(tzone)
+        day = date_and_time.strftime('%d')
+        await mycursor.execute("INSERT INTO SlothAnalytics (day_now) VALUES (%s)", (day))
+        await db.commit()
+        await mycursor.close()
+        if ctx:
+            return await ctx.send("**Table *SlothAnalytics* reseted!**", delete_after=3)
+
+    async def update_joined(self):
+        mycursor, db = await the_data_base3()
+        await mycursor.execute("UPDATE SlothAnalytics SET m_joined = m_joined + 1")
+        await db.commit()
+        await mycursor.close()
+
+    async def update_left(self):
+        mycursor, db = await the_data_base3()
+        await mycursor.execute("UPDATE SlothAnalytics SET m_left = m_left + 1")
+        await db.commit()
+        await mycursor.close()
+
+    async def update_messages(self):
+        mycursor, db = await the_data_base3()
+        await mycursor.execute("UPDATE SlothAnalytics SET sent_messages = sent_messages + 1")
+        await db.commit()
+        await mycursor.close()
+
+    async def update_day(self, day: str):
+        mycursor, db = await the_data_base3()
+        await mycursor.execute(f"UPDATE SlothAnalytics SET day_now = '{day}'")
+        await db.commit()
+        await mycursor.close()
+
+    async def check_relatory_time(self, time_now: str):
+        mycursor, db = await the_data_base3()
+        await mycursor.execute("SELECT * from SlothAnalytics")
+        info = await mycursor.fetchall()
+        if info[0][3] != time_now:
+            return True
+        else:
+            return False
+
+    async def get_info(self):
+        mycursor, db = await the_data_base3()
+        await mycursor.execute("SELECT * from SlothAnalytics")
+        info = await mycursor.fetchall()
+        await mycursor.close()
+        return info
+
+
+def setup(client):
+    client.add_cog(Analytics(client))
