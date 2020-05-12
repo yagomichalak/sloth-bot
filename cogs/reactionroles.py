@@ -29,15 +29,17 @@ class ReactionRoles(commands.Cog):
         if not overload.channel_id in language_rooms:
             return
 
-        message_texts = await self.get_message_texts(overload.message_id, str(overload.emoji))
+        message_texts = await self.get_message_texts(overload.message_id)
         if message_texts:
-            with open(f"texts/{message_texts[0][2]}/{message_texts[0][3]}", 'r', encoding='utf-8') as f:
-                text = f.readlines()
-                text = ''.join(text)
-            embed = discord.Embed(title='', description=text, colour=discord.Colour.dark_green())
-            embed.set_footer(text=f"Guild name: {guild.name}")
-            embed.set_author(name=user, icon_url=user.avatar_url)
-            return await user.send(embed=embed)
+            for mt in message_texts:
+                if str(mt[1]) == str(overload.emoji):
+                    with open(f"texts/{message_texts[2]}/{message_texts[3]}", 'r', encoding='utf-8') as f:
+                        text = f.readlines()
+                        text = ''.join(text)
+                    embed = discord.Embed(title='', description=text, colour=discord.Colour.dark_green())
+                    embed.set_footer(text=f"Guild name: {guild.name}")
+                    embed.set_author(name=user, icon_url=user.avatar_url)
+                    return await user.send(embed=embed)
 
 
     @commands.command()
@@ -115,9 +117,9 @@ class ReactionRoles(commands.Cog):
         else:
             return False
 
-    async def get_message_texts(self, mid: int, reaction):
+    async def get_message_texts(self, mid: int):
         mycursor, db = await the_data_base3()
-        await mycursor.execute(f"SELECT * FROM RegisteredText WHERE message_id = {mid} and reaction = '{reaction}'")
+        await mycursor.execute(f"SELECT * FROM RegisteredText WHERE message_id = {mid}")
         texts = await mycursor.fetchall()
         await mycursor.close()
         return texts
