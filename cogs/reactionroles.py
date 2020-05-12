@@ -33,7 +33,7 @@ class ReactionRoles(commands.Cog):
         if message_texts:
             for mt in message_texts:
                 if str(mt[1]) == str(overload.emoji):
-                    with open(f"texts/{message_texts[2]}/{message_texts[3]}", 'r', encoding='utf-8') as f:
+                    with open(f"texts/{mt[2]}/{mt[3]}", 'r', encoding='utf-8') as f:
                         text = f.readlines()
                         text = ''.join(text)
                     embed = discord.Embed(title='', description=text, colour=discord.Colour.dark_green())
