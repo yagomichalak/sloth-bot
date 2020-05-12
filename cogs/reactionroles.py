@@ -31,7 +31,8 @@ class ReactionRoles(commands.Cog):
 
         message_texts = await self.get_message_texts(overload.message_id)
         if message_texts:
-            for mt in message_texts:
+            await user.send("**Good job!**")
+            for mt in message_texts:          
                 if str(mt[1]) == str(overload.emoji):
                     with open(f"./texts/{mt[2]}/{mt[3]}", 'r', encoding='utf-8') as f:
                         text = f.readlines()
