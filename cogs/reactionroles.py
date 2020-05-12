@@ -29,7 +29,7 @@ class ReactionRoles(commands.Cog):
         if not overload.channel_id in language_rooms:
             return
 
-        message_texts = await self.get_message_texts(overload.message_id, overload.emoji)
+        message_texts = await self.get_message_texts(overload.message_id, str(overload.emoji))
         if message_texts:
             with open(f"texts/{message_texts[0][2]}/{message_texts[0][3]}", 'r', encoding='utf-8') as f:
                 text = f.readlines()
@@ -42,19 +42,19 @@ class ReactionRoles(commands.Cog):
 
     @commands.command()
     @commands.has_permissions(administrator=True)
-    async def register_text(self, ctx, mid: discord.Message = None, react = None, category: str = None, file_name: str = None):
+    async def register_text(self, ctx, mid: discord.Message = None, reactf = None, category: str = None, file_name: str = None):
         await ctx.message.delete()
         if not mid:
             return await ctx.send("**Inform a message ID!**", delete_after=3)
-        elif not react:
+        elif not reactf:
             return await ctx.send("**Inform a reaction!**", delete_after=3)
         elif not category:
             return await ctx.send("**Inform a category!**", delete_after=3)
         elif not file_name:
             return await ctx.send("**Inform the file name!**", delete_after=3)
 
-        await self.insert_registered_text(mid.id, react, category.lower(), file_name)
-        await mid.add_reaction(react)
+        await self.insert_registered_text(mid.id, reactf, category.lower(), file_name)
+        await mid.add_reaction(reactf)
         return await ctx.send(f"**File `{file_name}` successfully registered!**", delete_after=3)
 
     # Table UserCurrency
@@ -64,7 +64,7 @@ class ReactionRoles(commands.Cog):
         await ctx.message.delete()
         mycursor, db = await the_data_base3()
         await mycursor.execute(
-            "CREATE TABLE RegisteredText (message_id bigint, reaction VARCHAR(50), category VARCHAR(20), file_name VARCHAR(50))")
+            "CREATE TABLE RegisteredText (message_id bigint, reaction_ref VARCHAR(50), category VARCHAR(20), file_name VARCHAR(50))")
         await db.commit()
         await mycursor.close()
         return await ctx.send("**Table *RegisteredText* created!**", delete_after=3)
@@ -87,15 +87,15 @@ class ReactionRoles(commands.Cog):
         await mycursor.execute("DROP TABLE RegisteredText")
         await db.commit()
         await mycursor.execute(
-            "CREATE TABLE RegisteredText (message_id bigint, reaction VARCHAR(50), category VARCHAR(20), file_name VARCHAR(50))")
+            "CREATE TABLE RegisteredText (message_id bigint, reaction_ref VARCHAR(50), category VARCHAR(20), file_name VARCHAR(50))")
         await db.commit()
         await mycursor.close()
         return await ctx.send("**Table *RegisteredText* reseted!**", delete_after=3)
 
 
-    async def insert_registered_text(self, mid: int, react, category: str, file_name: str):
+    async def insert_registered_text(self, mid: int, reactf, category: str, file_name: str):
         mycursor, db = await the_data_base3()
-        await mycursor.execute("INSERT INTO RegisteredText (message_id, reaction, category, file_name) VALUES (%s, %s, %s, %s)", (mid, react, category, file_name))
+        await mycursor.execute("INSERT INTO RegisteredText (message_id, reaction_ref, category, file_name) VALUES (%s, %s, %s, %s)", (mid, reactf, category, file_name))
         await db.commit()
         await mycursor.close()
 
