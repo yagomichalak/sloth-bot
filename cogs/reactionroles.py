@@ -23,7 +23,7 @@ class ReactionRoles(commands.Cog):
             return
 
         # Language rooms
-        language_rooms = [695491104417513552, 683987207065042944, 688037387561205824]
+        language_rooms = [679333977705676830, 683987207065042944, 688037387561205824]
 
 
         if not overload.channel_id in language_rooms:
