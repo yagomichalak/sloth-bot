@@ -12,11 +12,11 @@ class Analytics(commands.Cog):
 
     def __init__(self, client):
         self.client = client
+        self.check_midnight.start()
 
     @commands.Cog.listener()
     async def on_ready(self):
         print("Analytics cog is online!")
-        self.check_midnight.start()
 
 
     @tasks.loop(minutes=1)
@@ -60,6 +60,13 @@ class Analytics(commands.Cog):
     async def on_message(self, message):
         return await self.update_messages()
 
+
+    @commands.command()
+    @commands.has_permissions(administrator=True)
+    async def stop_task(self, ctx):
+        await ctx.message.delete()
+        self.check_midnight.stop()
+        return await ctx.send("**Analytics task has been stopped!**", delete_after=3)
     # Table UserCurrency
     @commands.command()
     @commands.has_permissions(administrator=True)
