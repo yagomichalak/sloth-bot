@@ -104,7 +104,7 @@ class Analytics(commands.Cog):
         await mycursor.execute("DROP TABLE SlothAnalytics")
         await db.commit()
         await mycursor.execute(
-            "CREATE TABLE SlothAnalytics (m_joined int, m_left int, messages_sent int, day_now VARCHAR(2))")
+            "CREATE TABLE SlothAnalytics (m_joined int default 0, m_left int default 0, messages_sent int default 0, day_now VARCHAR(2))")
         await db.commit()
         time_now = datetime.now()
         tzone = timezone("CET")
