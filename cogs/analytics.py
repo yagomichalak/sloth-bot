@@ -137,7 +137,7 @@ class Analytics(commands.Cog):
         mycursor, db = await the_data_base3()
         await mycursor.execute("SELECT * from SlothAnalytics")
         info = await mycursor.fetchall()
-        if info[0][3] != time_now:
+        if str(info[0][3]) != str(time_now):
             return True
         else:
             return False
