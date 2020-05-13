@@ -130,7 +130,7 @@ class Analytics(commands.Cog):
 
     async def update_messages(self):
         mycursor, db = await the_data_base3()
-        await mycursor.execute("UPDATE SlothAnalytics SET sent_messages = sent_messages + 1")
+        await mycursor.execute("UPDATE SlothAnalytics SET messages_sent = messages_sent + 1")
         await db.commit()
         await mycursor.close()
 
