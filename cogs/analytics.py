@@ -26,7 +26,7 @@ class Analytics(commands.Cog):
         date_and_time = time_now.astimezone(tzone)
         hour = date_and_time.strftime('%H:%M')
         day = date_and_time.strftime('%d')
-        if await self.check_relatory_time(hour):
+        if await self.check_relatory_time(day):
             await self.update_day(day)
             channel = self.client.get_channel(bots_and_commands_channel_id)
             members = channel.guild.members
