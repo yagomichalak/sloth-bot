@@ -49,7 +49,7 @@ class Analytics(commands.Cog):
     async def on_member_join(self, member):
         channel = discord.utils.get(member.guild.channels, id=select_your_language_channel_id)
         await channel.send(f'''Hello {member.mention} ! Scroll up and choose your Native Language by clicking in the flag that best represents it!
-:zarrowup: :zarrowup: :zarrowup: :zarrowup: :zarrowup: :zarrowup: :zarrowup: :zarrowup:''', delete_after=120)
+<:zarrowup:688222444292669449> <:zarrowup:688222444292669449> <:zarrowup:688222444292669449> <:zarrowup:688222444292669449> <:zarrowup:688222444292669449> <:zarrowup:688222444292669449> <:zarrowup:688222444292669449> <:zarrowup:688222444292669449>''', delete_after=120)
         await self.update_joined()
 
     @commands.Cog.listener()
