@@ -585,37 +585,37 @@ class SlothCurrency(commands.Cog):
         hud = Image.open(await self.get_user_specific_type_item(member.id, 'hud'))
         #badge = Image.open(await self.get_user_specific_type_item(member.id, 'badge'))
         pfp = await self.get_user_pfp(member)
-        background.paste(sloth, (32, -10), sloth)
-        background.paste(body, (32, -10), body)
-        background.paste(head, (32, -10), head)
-        background.paste(foot, (32, -10), foot)
-        background.paste(hand, (32, -10), hand)
-        background.paste(hud, (1, -10), hud)
+        background.paste(sloth, (0, 0), sloth)
+        background.paste(body, (0, 0), body)
+        background.paste(head, (0, 0), head)
+        background.paste(foot, (0, 0), foot)
+        background.paste(hand, (0, 0), hand)
+        background.paste(hud, (0, 0), hud)
         #background.paste(badge, (1, -10), badge)
         # Checks if user is a booster
         booster_role = discord.utils.get(ctx.guild.roles, id=booster_role_id)
         if booster_role in member.roles:
             badge2 = Image.open("sloth_custom_images/badge/nitroboost.png")
-            background.paste(badge2, (10, 0), badge2)
+            background.paste(badge2, (10, 5), badge2)
 
         # Checks if the user has a level badge
         user_level = await self.get_specific_user(member.id)
         for key, value in reversed(list(level_badges.items())):
             if user_level[0][2] >= value:
                 level_badge = Image.open(f"sloth_custom_images/badge/{key}.png")
-                background.paste(level_badge, (65, 0), level_badge)
+                background.paste(level_badge, (65, 5), level_badge)
                 break
         else:
             pass
 
         # Tries to print the user's profile picture
         try:
-            background.paste(pfp, (202, -7), pfp)
+            background.paste(pfp, (201, 2), pfp)
         except Exception:
             pass
 
         draw = ImageDraw.Draw(background)
-        draw.text((310, 0), f"{member}", (255, 255, 255), font=small)
+        draw.text((310, 5), f"{member}", (255, 255, 255), font=small)
         draw.text((80, 525), f"{user_info[0][1]}", (255, 255, 255), font=small)
         background.save('profile.png', 'png', quality=90)
         return await ctx.send(file=discord.File('profile.png'))
@@ -1057,7 +1057,7 @@ class SlothCurrency(commands.Cog):
     async def get_user_pfp(self, member):
         im = Image.open(requests.get(member.avatar_url, stream=True).raw)
 
-        thumb_width = 57
+        thumb_width = 59
 
         def crop_center(pil_img, crop_width, crop_height):
             img_width, img_height = pil_img.size
