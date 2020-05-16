@@ -3,14 +3,14 @@ from discord.ext import commands
 from mysqldb2 import *
 from datetime import datetime
 
-create_room_vc_id = 710506029208698923
-create_room_cat_id = 710505892713332757
-teacher_role_id = 710526156763299932
-cc_channel_id = 710505970601689149
-preference_role_id = 711231895744151613
-class_history_channel_id = 710505920978747432
-bot_commands_channel_id = 710506076277047326
-reward_channel_id = 710505943716069437
+create_room_vc_id = 704430199298850907
+create_room_cat_id = 562019326295670806
+teacher_role_id = 507298235766013981
+cc_channel_id = 704429237725167756
+preference_role_id = 562035467055529995
+class_history_channel_id = 704429055239258153
+bot_commands_channel_id = 562019654017744904
+reward_channel_id = 704428903682408498
 
 class CreateClassroom(commands.Cog):
 
