@@ -3,820 +3,250 @@ from discord.ext import commands
 from mysqldb2 import *
 from datetime import datetime
 
-teacher_role_id = 507298235766013981
-create_classroom_id = 704430199298850907
-feedback_channel_id = 704429237725167756
-create_classroom_category_id = 562019326295670806
-class_history_channel_id = 704429055239258153
-reward_channel_id = 704428903682408498
-bot_commands_channel_id = 562019654017744904
-preference_role_id = 562035467055529995
+create_room_vc_id = 710506029208698923
+create_room_cat_id = 710505892713332757
+teacher_role_id = 710526156763299932
+cc_channel_id = 710505970601689149
+preference_role_id = 711231895744151613
+class_history_channel_id = 710505920978747432
+bot_commands_channel_id = 710506076277047326
+reward_channel_id = 710505943716069437
 
-
-class TeacherFeedback(commands.Cog):
+class CreateClassroom(commands.Cog):
 
     def __init__(self, client):
         self.client = client
 
+
     @commands.Cog.listener()
     async def on_ready(self):
-        print('TeacherFeedback cog is online!')
+        print("CreateClassroom cog is online!")
+
 
     @commands.Cog.listener()
     async def on_message(self, message):
+        mc = message.channel
+        mca = message.channel.category
+        member = message.author
+
         if message.author.bot:
             return
 
-        if not message.channel.category.id == create_classroom_category_id:
+        # Checks if channel is in the CreateClassroom category
+        if mca and mca.id != create_room_cat_id:
             return
 
-        user_is_student = await self.get_specific_user(message.author.id)
-        if user_is_student:
-            for user_class in user_is_student:
-                if user_class[6] == message.channel.id:
-                    return await self.update_student_messages(message.author.id, user_class[1])
+        # Checks if the channel is an active class
+        the_class = await self.get_active_class_by_txt(mc.id)
+        if the_class and not the_class[0][0] == member.id:
+            # Checks if user is an active student
+            if await self.check_student_by_vc(member.id, the_class[0][2]):
+                await self.update_student_messages(member.id, the_class[0][2])
+
 
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):
-        if member.bot:
+        bc = before.channel
+        ac = after.channel
+        bca = before.channel.category if bc else None
+        aca = after.channel.category if ac else None
+
+        #print(f"\033[31mBefore channel\033[m: {bc}")
+        #print(f"\033[31mBefore category\033[m: {bca}")
+        #print(f"\033[33mAfter channel\033[m: {ac}")
+        #print(f"\033[33mAfter category\033[m: {aca}")
+        #print('\033[34m=-\033[m'*12)
+
+        #Checking if it's in the CreateClassroom category
+        if bca and bca.id != create_room_cat_id or aca and aca.id != create_room_cat_id:
             return
-        if after.channel:
-            user_get_class = await self.user_get_teacher_class(after.channel.id)
-            if user_get_class and user_get_class[0][0] != member.id:
-                if user_get_class[0][3]:
-                    class_channel = discord.utils.get(member.guild.channels, id=user_get_class[0][3])
-                    if class_channel:
-                        if len(class_channel.members) > user_get_class[0][8]:
-                            await self.update_teacher_members(user_get_class[0][0], user_get_class[0][1],
-                                                              len(class_channel.members))
 
-                        # Check if the teacher is in the voice channel
-                        voice_channel = discord.utils.get(member.guild.channels, id=user_get_class[0][3])
-                        the_teacher = discord.utils.get(member.guild.members, id=user_get_class[0][0])
-                        teacher_in_vc = the_teacher in voice_channel.members
+        teacher_role = discord.utils.get(member.guild.roles, id=teacher_role_id)
 
-                        member_in_class = await self.is_member_in_class(member.id, user_get_class[0][0],
-                                                                        user_get_class[0][1])
+        # Checks if joining a VC
+        if ac:
+            # Checks if joining the CreateClassroom vc
+            if ac.id == create_room_vc_id:
+                # Checks if it's a teacher
+                if teacher_role in member.roles:
+                    # Checks if it has an active class
+                    teacher_class = await self.get_active_class_by_teacher(member.id)
+                    if teacher_class:
+                        the_vc_channel = discord.utils.get(member.guild.channels, id=teacher_class[0][2])
+                        await member.move_to(the_vc_channel)
+                        # Update everyone's timestamp
                         epoch = datetime.utcfromtimestamp(0)
                         the_time = (datetime.utcnow() - epoch).total_seconds()
-                        if member_in_class:
-                            if teacher_in_vc:
-                                await self.update_specific_student2(member.id, user_get_class[0][0],
-                                                                    user_get_class[0][1], the_time)
+                        await self.update_teacher_ts(member.id, int(the_time))
+                        await self.update_all_students_ts(member.id, int(the_time))
+
+                    else:
+                        # Checks if the teacher has a saved class
+                        saved_classes = await self.get_saved_class(member.id)
+
+                        # If yes
+                        if saved_classes:
+                            # Load a saved class?
+                            create_new = await self.ask_if_saved(member)
+                            if not create_new:
+                                return
+
+                            if create_new == 'No':
+                                # Show saved classes
+                                await self.show_saved_classes(member, saved_classes)
+
+                            # Then it'll create a new one
                             else:
-                                await self.update_specific_student(member.id, user_get_class[0][0],
-                                                                   user_get_class[0][1], 0)
-                        else:
-                            if teacher_in_vc:
-                                await self.insert_user_into_class(member.id, user_get_class[0][1], user_get_class[0][0],
-                                                                  user_get_class[0][2], the_time)
-                            else:
-                                await self.insert_user_into_class(member.id, user_get_class[0][1], user_get_class[0][0],
-                                                                  user_get_class[0][2])
-
-            elif before.channel and await self.user_get_teacher_class(before.channel.id):
-                class_info = await self.user_get_teacher_class(before.channel.id)
-                if class_info[0][3]:
-                    channel = discord.utils.get(member.guild.channels, id=class_info[0][3])
-                    if channel:
-                        member_in_class = await self.is_member_in_class(member.id, class_info[0][0],
-                                                                        class_info[0][1])
-                        if member_in_class:
-                            epoch = datetime.utcfromtimestamp(0)
-                            the_time = (datetime.utcnow() - epoch).total_seconds()
-                            student_info = await self.get_specific_student(member.id, class_info[0][0],
-                                                                           class_info[0][1])
-                            if student_info[0][5]:
-                                duration = the_time - student_info[0][5]
-                            else:
-                                duration = 0
-                            await self.update_specific_student(member.id, class_info[0][0], class_info[0][1], duration)
-
-        elif await self.user_get_teacher_class(before.channel.id):
-            class_info = await self.user_get_teacher_class(before.channel.id)
-            if class_info[0][3]:
-                channel = discord.utils.get(member.guild.channels, id=class_info[0][3])
-                if channel:
-                    member_in_class = await self.is_member_in_class(member.id, class_info[0][0], class_info[0][1])
-                    if member_in_class:
-                        epoch = datetime.utcfromtimestamp(0)
-                        the_time = (datetime.utcnow() - epoch).total_seconds()
-                        student_info = await self.get_specific_student(member.id, class_info[0][0], class_info[0][1])
-                        if student_info[0][5]:
-                            duration = the_time - student_info[0][5]
-                        else:
-                            duration = 0
-                        await self.update_specific_student(member.id, class_info[0][0], class_info[0][1], duration)
-
-        if after.channel and after.channel.category and after.channel.category.id == create_classroom_category_id or before.channel and before.channel.category and before.channel.category.id == create_classroom_category_id:
-            the_teacher_role = discord.utils.get(member.guild.roles, id=teacher_role_id)
-            if not the_teacher_role in member.roles:
-                return
-
-            teacher_class = None
-            if before.channel:
-                teacher_class = await self.get_teacher_class_info(member.id, before.channel.id)
-
-            if after.channel:
-                teacher_class = await self.get_teacher_class_info(member.id, after.channel.id)
-                if teacher_class:
-                    epoch = datetime.utcfromtimestamp(0)
-                    the_time = (datetime.utcnow() - epoch).total_seconds()
-                    await self.update_teacher_times(member.id, teacher_class[0][1], 0, the_time)
-                    await self.update_student_times2(teacher_class[0][1], member.id, the_time)
-
-            # Joins a vc
-            if after.channel and after.channel.id == create_classroom_id:
-
-                all_teacher_classes = await self.get_teacher_all_classes(member.id)
-
-                def check_yes_no(m):
-                    value = m.content
-                    author = m.author
-                    if m.channel == feedback_channel:
-                        if value.title() in ['Yes', 'No'] and author == member:
-                            return True
-                        elif not value.title() in ['Yes', 'No'] and author == member:
-                            self.client.loop.create_task(
-                                feedback_channel.send('**Inform a valid answer! (Yes / No)**', delete_after=5))
-
-                feedback_channel = discord.utils.get(member.guild.channels, id=feedback_channel_id)
-                # Checks if the teacher has saved classes
-                if all_teacher_classes:
-                    # Question 1 - New class
-                    await feedback_channel.send(
-                        f"**{member.mention}, create a new class? If not, you will load a saved class.**")
-
-                    try:
-                        class_new = await self.client.wait_for('message', timeout=60.0, check=check_yes_no)
-                        class_new = class_new.content
-                    except asyncio.TimeoutError:
-                        timeout = discord.Embed(title='Timeout',
-                                                description='You took too long to answer the questions, try again later.',
-                                                colour=discord.Colour.dark_red())
-                        return await feedback_channel.send(embed=timeout)
-
-                    if class_new.title() == 'No':
-                        simple_embed = discord.Embed(title=f"All {member.name}'s", description="**LOADING...**",
-                                                     colour=discord.Colour.green())
-                        simple_embed.set_thumbnail(url=member.guild.icon_url)
-                        simple_embed.set_footer(text=member.guild.name, icon_url=member.guild.icon_url)
-                        simple = await feedback_channel.send(embed=simple_embed)
-                        class_index = 0
-
-                        if len(all_teacher_classes) > 1:
-                            await simple.add_reaction('⬅️')
-
-                        await simple.add_reaction('✅')
-                        await simple.add_reaction('❌')
-
-                        if len(all_teacher_classes) > 1:
-                            await simple.add_reaction('➡️')
-
-                        def check_react(reaction, user):
-                            if len(all_teacher_classes) > 1:
-                                if user == member and str(reaction.emoji) in ['⬅️', '✅', '❌', '➡️']:
-                                    return True
-                            else:
-                                if user == member and str(reaction.emoji) in ['✅', '❌']:
-                                    return True
-
-                        while True:
-                            embed = discord.Embed(
-                                title=f"__**{all_teacher_classes[class_index][4]} - #{all_teacher_classes[class_index][1]}**__",
-                                description=all_teacher_classes[class_index][9], colour=discord.Colour.green())
-                            embed.add_field(name=f"__**Type:**__", value=all_teacher_classes[class_index][5],
-                                            inline=True)
-                            embed.set_thumbnail(url=member.avatar_url)
-                            embed.set_author(name=member)
-                            embed.set_footer(text=member.guild.name, icon_url=member.guild.icon_url)
-                            await simple.edit(embed=embed)
-
-                            try:
-                                reaction, user = await self.client.wait_for('reaction_add', timeout=60,
-                                                                            check=check_react)
-                            except asyncio.TimeoutError:
-                                timeout = discord.Embed(title='Timeout',
-                                                        description='You took too long to select a class, try again later.',
-                                                        colour=discord.Colour.dark_red())
-                                return await feedback_channel.send(embed=timeout)
-
-                            if str(reaction.emoji) == "✅":
-                                await simple.remove_reaction(reaction.emoji, member)
-                                await feedback_channel.send("**Class selected!**")
-                                # (Creating rooms)
-                                the_category_test = discord.utils.get(member.guild.categories,
-                                                                      id=create_classroom_category_id)
-                                # Creating text channel
-                                teacher_role = discord.utils.get(member.guild.roles, id=teacher_role_id)
-                                preference_role = discord.utils.get(member.guild.roles, id=preference_role_id)
-                                native_role = discord.utils.get(member.guild.roles,
-                                                                name=f"Native {all_teacher_classes[class_index][4].title()}")
-                                fluent_role = discord.utils.get(member.guild.roles,
-                                                                name=f"Fluent {all_teacher_classes[class_index][4].title()}")
-                                studying_role = discord.utils.get(member.guild.roles,
-                                                                  name=f"Studying {all_teacher_classes[class_index][4].title()}")
-                                overwrites = {}
-                                overwrites[member.guild.default_role] = discord.PermissionOverwrite(read_messages=False,
-                                                                                                    send_messages=False,
-                                                                                                    connect=False,
-                                                                                                    speak=False,
-                                                                                                    view_channel=False)
-                                overwrites[teacher_role] = discord.PermissionOverwrite(read_messages=True,
-                                                                                       send_messages=True,
-                                                                                       manage_messages=True,
-                                                                                       mute_members=True,
-                                                                                       embed_links=True, connect=True,
-                                                                                       speak=True,
-                                                                                       view_channel=True)
-                                overwrites[preference_role] = discord.PermissionOverwrite(read_messages=True,
-                                                                                          send_messages=False,
-                                                                                          connect=False,
-                                                                                          view_channel=True)
-
-                                if native_role:
-                                    overwrites[native_role] = discord.PermissionOverwrite(read_messages=True,
-                                                                                          send_messages=False,
-                                                                                          connect=False,
-                                                                                          speak=False,
-                                                                                          view_channel=True,
-                                                                                          embed_links=False)
-
-                                if fluent_role:
-                                    overwrites[fluent_role] = discord.PermissionOverwrite(read_messages=True,
-                                                                                          send_messages=True,
-                                                                                          connect=True,
-                                                                                          speak=True, view_channel=True,
-                                                                                          embed_links=True)
-
-                                if studying_role:
-                                    overwrites[studying_role] = discord.PermissionOverwrite(read_messages=True,
-                                                                                            send_messages=True,
-                                                                                            connect=True,
-                                                                                            speak=True,
-                                                                                            view_channel=True,
-                                                                                            embed_links=True)
-
-                                cemoji = '🗣️' if all_teacher_classes[class_index][
-                                                      5].title() == 'Pronunciation' else '📖'
-
-                                text_channel = await the_category_test.create_text_channel(
-                                    name=f"{cemoji} {all_teacher_classes[class_index][4].title()} Classroom",
-                                    overwrites=overwrites)
-                                # Creating voice channel
-                                voice_channel = await the_category_test.create_voice_channel(
-                                    name=f"{cemoji} {all_teacher_classes[class_index][4].title()} Classroom",
-                                    user_limit=None,
-                                    overwrites=overwrites)
-                                try:
-                                    await member.move_to(voice_channel)
-                                except discord.errors.HTTPException:
-                                    await feedback_channel.send(
-                                        f"**{member.mention}, you cannot be moved, nor finish the configurations because you are not in a Voice-Channel!**")
-                                    await text_channel.delete()
-                                    return await voice_channel.delete()
-
+                                # Creates a new class
+                                class_info = await self.ask_creation_questions(member)
+                                if not class_info:
+                                    return
                                 epoch = datetime.utcfromtimestamp(0)
                                 the_time = (datetime.utcnow() - epoch).total_seconds()
-                                await self.insert_teacher_class(member.id, text_channel.id, voice_channel.id,
-                                                                all_teacher_classes[class_index][4],
-                                                                all_teacher_classes[class_index][5], the_time,
-                                                                all_teacher_classes[class_index][9], 'No')
-                                return await text_channel.send(f"**{member.mention}, this is your text channel!**")
+                                cc_channel = discord.utils.get(member.guild.channels, id=cc_channel_id)
+                                class_ids = await self.create_class(member, cc_channel, class_info[0], class_info[1])
+                                await self.insert_active_class(member.id, class_ids[0], class_ids[1], class_info[0],
+                                                               class_info[1], int(the_time), class_info[2])
 
-                            elif str(reaction.emoji) == '❌':
-                                await simple.remove_reaction(reaction.emoji, member)
-                                return await feedback_channel.send("**Class selection has been cancelled!**")
-                            elif str(reaction.emoji) == "➡️":
-                                await simple.remove_reaction(reaction.emoji, member)
-                                if class_index < (len(all_teacher_classes) - 1):
-                                    class_index += 1
-                                continue
-                            elif str(reaction.emoji) == "⬅️":
-                                await simple.remove_reaction(reaction.emoji, member)
-                                if class_index > 0:
-                                    class_index -= 1
-                                continue
+                        # If not
+                        else:
+                            # Creates a new class
+                            class_info = await self.ask_creation_questions(member)
+                            if not class_info:
+                                return
+                            epoch = datetime.utcfromtimestamp(0)
+                            the_time = (datetime.utcnow() - epoch).total_seconds()
+                            cc_channel = discord.utils.get(member.guild.channels, id=cc_channel_id)
+                            class_ids = await self.create_class(member, cc_channel, class_info[0], class_info[1])
+                            await self.insert_active_class(member.id, class_ids[0], class_ids[1], class_info[0].title(), class_info[1], int(the_time), class_info[2])
 
-                # Question 2 - Language
-                if not all_teacher_classes:
-                    await feedback_channel.send(
-                        f"**{member.mention}, type the language that you are gonna teach in the class.\n(None = Don't want to create a class)**")
-                else:
-                    await feedback_channel.send(
-                        "**Type the language that you are gonna teach in the class.\n(None = Don't want to create a class)**")
+            # It's in an active class
+            else:
+                # Gets the teacher's info
+                the_class = await self.get_active_class_by_vc(ac.id)
+                # Check if the vc is a class, if not, return
+                if not the_class:
+                    return
 
-                def check_language(m):
-                    value = m.content
-                    author = m.author
-                    if m.channel == feedback_channel:
-                        if len(value) <= 20 and author == member:
-                            return True
-                        elif not len(value) <= 20 and author == member:
-                            self.client.loop.create_task(
-                                feedback_channel.send('**Inform a shorter name! (Max = 20 characters)**',
-                                                      delete_after=5))
-
-                try:
-                    class_language = await self.client.wait_for('message', timeout=60.0, check=check_language)
-                    class_language = class_language.content
-                except asyncio.TimeoutError:
-                    timeout = discord.Embed(title='Timeout',
-                                            description='You took too long to answer the questions, try again later.',
-                                            colour=discord.Colour.dark_red())
-                    return await feedback_channel.send(embed=timeout)
-
-                if class_language.title() == 'None':
-                    return await feedback_channel.send(f"**{member}, not creating a room then!**")
-
-                # Question 3 - Type
-                await feedback_channel.send(f"**What is the type of your class? (Pronunciation / Grammar)**")
-
-                def check_type(m):
-                    value = m.content
-                    author = m.author
-                    if m.channel == feedback_channel:
-                        if len(value) <= 13 and author == member and value.title() in ['Pronunciation', 'Grammar']:
-                            return True
-                        elif len(value) <= 13 and author == member and not value.title() in ['Pronunciation',
-                                                                                             'Grammar']:
-                            self.client.loop.create_task(
-                                feedback_channel.send('**Type a valid answer! (Pronunciation / Grammar)**',
-                                                      delete_after=5))
-                        elif not len(value) <= 13 and author == member:
-                            self.client.loop.create_task(
-                                feedback_channel.send('**Inform a shorter name! (Max = 13 characters)**',
-                                                      delete_after=5))
-
-                try:
-                    class_type = await self.client.wait_for('message', timeout=60.0, check=check_type)
-                    class_type = class_type.content
-                except asyncio.TimeoutError:
-                    timeout = discord.Embed(title='Timeout',
-                                            description='You took too long to answer the questions, try again later.',
-                                            colour=discord.Colour.dark_red())
-                    return await feedback_channel.send(embed=timeout)
-
-                # Question 4 - Description
-                await feedback_channel.send(f"**What's the description of the class?**")
-
-                def check_description(m):
-                    value = m.content
-                    author = m.author
-                    if m.channel == feedback_channel:
-                        if len(value) <= 100 and author == member:
-                            return True
-                        elif len(value) > 100 and author == member:
-                            self.client.loop.create_task(
-                                feedback_channel.send(f"**Inform a shorter description! (Max = 100 characters)**",
-                                                      delete_after=5))
-
-                try:
-                    class_desc = await self.client.wait_for('message', timeout=60.0, check=check_description)
-                    class_desc = class_desc.content
-                except asyncio.TimeoutError:
-                    timeout = discord.Embed(title='Timeout',
-                                            description='You took too long to answer the questions, try again later.',
-                                            colour=discord.Colour.dark_red())
-                    return await feedback_channel.send(embed=timeout)
-
-                # Question 4 - Description
-
-                await feedback_channel.send(
-                    f"**Do you wanna save the configurations of this class to use them in the next time?**")
-
-                try:
-                    save_class = await self.client.wait_for('message', timeout=60.0, check=check_yes_no)
-                    save_class = save_class.content
-                except asyncio.TimeoutError:
-                    timeout = discord.Embed(title='Timeout',
-                                            description='You took too long to answer the questions, try again later.',
-                                            colour=discord.Colour.dark_red())
-                    return await feedback_channel.send(embed=timeout)
-
-                await feedback_channel.send(f"__**Language:**__ {class_language} | __**Type:**__ {class_type}")
-
-                # (Creating rooms)
-                the_category_test = discord.utils.get(member.guild.categories, id=create_classroom_category_id)
-                teacher_role = discord.utils.get(member.guild.roles, id=teacher_role_id)
-                preference_role = discord.utils.get(member.guild.roles, id=preference_role_id)
-                native_role = discord.utils.get(member.guild.roles,
-                                                name=f"Native {class_language.title()}")
-                fluent_role = discord.utils.get(member.guild.roles,
-                                                name=f"Fluent {class_language.title()}")
-                studying_role = discord.utils.get(member.guild.roles,
-                                                  name=f"Studying {class_language.title()}")
-                overwrites = {}
-                overwrites[member.guild.default_role] = discord.PermissionOverwrite(read_messages=False,
-                                                                                    send_messages=False,
-                                                                                    connect=False, speak=False,
-                                                                                    view_channel=False)
-                overwrites[teacher_role] = discord.PermissionOverwrite(read_messages=True, send_messages=True,
-                                                                       manage_messages=True, mute_members=True,
-                                                                       embed_links=True, connect=True, speak=True,
-                                                                       view_channel=True)
-                overwrites[preference_role] = discord.PermissionOverwrite(read_messages=True, send_messages=False,
-                                                                          connect=False, view_channel=True)
-
-                if native_role:
-                    overwrites[native_role] = discord.PermissionOverwrite(read_messages=True, send_messages=False,
-                                                                          connect=False,
-                                                                          speak=False, view_channel=True,
-                                                                          embed_links=False)
-
-                if fluent_role:
-                    overwrites[fluent_role] = discord.PermissionOverwrite(read_messages=True, send_messages=True,
-                                                                          connect=True,
-                                                                          speak=True, view_channel=True,
-                                                                          embed_links=True)
-
-                if studying_role:
-                    overwrites[studying_role] = discord.PermissionOverwrite(read_messages=True, send_messages=True,
-                                                                            connect=True,
-                                                                            speak=True, view_channel=True,
-                                                                            embed_links=True)
-
-                cemoji = '🗣️' if class_type.title() == 'Pronunciation' else '📖'
-
-                # Creating text channel
-                text_channel = await the_category_test.create_text_channel(
-                    name=f"{cemoji} {class_language.title()} Classroom",
-                    overwrites=overwrites)
-                # Creating voice channel
-                voice_channel = await the_category_test.create_voice_channel(
-                    name=f"{cemoji} {class_language.title()} Classroom",
-                    user_limit=None, overwrites=overwrites)
-                try:
-                    await member.move_to(voice_channel)
-                except discord.errors.HTTPException:
-                    await feedback_channel.send(
-                        f"**{member.mention}, you cannot be moved, nor finish the configurations because you are not in a Voice-Channel!**")
-                    await text_channel.delete()
-                    return await voice_channel.delete()
-
-                await text_channel.send(f"**{member.mention}, this is your text channel!**")
-                # Saving temporary class info in the database
+                # Get the current timestamp
                 epoch = datetime.utcfromtimestamp(0)
                 the_time = (datetime.utcnow() - epoch).total_seconds()
-                await self.insert_teacher_class(member.id, text_channel.id, voice_channel.id, class_language,
-                                                class_type, the_time, class_desc, save_class.title())
 
-            # Leaves a vc
-            elif not after.channel and teacher_class and before.channel.id == teacher_class[0][
-                3] or after.channel and teacher_class and after.channel.id != teacher_class[0][
-                3] and before.channel and before.channel.id == teacher_class[0][3]:
-                text_channel = discord.utils.get(member.guild.channels, id=teacher_class[0][2])
-                voice_channel = discord.utils.get(member.guild.channels, id=teacher_class[0][3])
+                active_student = await self.get_student(member.id, the_class[0][0])
+                # Check if it's an active student
+                if active_student:
+                    # Check if teacher is in the class
+                    the_teacher = discord.utils.get(member.guild.members, id=the_class[0][0])
+                    if the_teacher in ac.members:
+                        # Update user's ts
+                        await self.update_student_ts(member.id, int(the_time), the_teacher.id)
+
+                else:
+                    # Check if teacher is in the class
+                    the_teacher = discord.utils.get(member.guild.members, id=the_class[0][0])
+                    if the_teacher in ac.members:
+                        # Insert user in the class with ts
+                        await self.insert_student_w_ts(member.id, int(the_time), the_teacher.id, ac.id)
+
+                    else:
+                        # Insert user in the class with None
+                        await self.insert_student_w_none(member.id, the_teacher.id, ac.id)
+
+        # Check if leaving a VC
+        elif bc:
+            # Get the current timestamp
+            epoch = datetime.utcfromtimestamp(0)
+            the_time = (datetime.utcnow() - epoch).total_seconds()
+
+            # Check if it's an active teacher
+            teacher_class = await self.get_active_class_by_teacher(member.id)
+            if teacher_class:
+                # Updates all users' and the teacher's time and timestamps
+                await self.update_teacher_time(member.id, int(the_time))
+                await self.update_all_students_time(member.id, int(the_time))
+                # Asks the teacher if they wanna end the class
+                text_channel = discord.utils.get(member.guild.channels, id=teacher_class[0][1])
+                voice_channel = discord.utils.get(member.guild.channels, id=teacher_class[0][2])
                 fd_msg = await text_channel.send(
                     f"**{member.mention}, I saw you left your classroom, did you finish your class?**")
                 await fd_msg.add_reaction('✅')
                 await fd_msg.add_reaction('❌')
-                # Updates the timestamp and the duration of the class as soon as the teacher leaves the voice channel
-                epoch = datetime.utcfromtimestamp(0)
-                the_time = (datetime.utcnow() - epoch).total_seconds()
-                #await self.update_teacher_times(member.id, teacher_class[0][1], class_duration, teacher_class[0][6])
-                await self.update_teacher_times2(member.id, teacher_class[0][1], the_time, voice_channel.id)
-                await self.update_student_times(teacher_class[0][1], member.id, the_time)
 
                 def check(reaction, user):
                     return user == member and str(reaction.emoji) in '✅❌'
 
+                teacher_class = await self.get_active_class_by_teacher(member.id)
+                print(teacher_class[0][6])
                 reaction, user = await self.client.wait_for('reaction_add', check=check)
                 if str(reaction.emoji) == "✅":
                     await text_channel.send("**Class ended!**")
                     await voice_channel.delete()
                     await text_channel.delete()
-                    await asyncio.sleep(5)
-                    users_feedback = await self.get_all_users_feedback(teacher_class[0][0], teacher_class[0][1])
-                    await self.clear_specific_class_students(teacher_class[0][1], teacher_class[0][0])
+                    #await asyncio.sleep(5)
+                    # Gets all students and deletes the class from the system
+                    users_feedback = await self.get_all_students(member.id)
+                    print(users_feedback)
+                    await self.delete_active_class(member.id)
+                    await self.delete_active_students(member.id)
+
+                    # teacher, txt_id, vc_id, language, class_type, vc_timestamp, vc_time, members, class_desc)
+                    # Makes a class history report
                     history_channel = discord.utils.get(member.guild.channels, id=class_history_channel_id)
-                    new_teacher_class = await self.get_teacher_class_info(member.id, before.channel.id)
-                    m, s = divmod(new_teacher_class[0][7], 60)
+                    m, s = divmod(teacher_class[0][6], 60)
                     h, m = divmod(m, 60)
-                    if new_teacher_class[0][7] >= 600:
-                        class_embed = discord.Embed(title=f"__{new_teacher_class[0][4].title()} Class__",
-                                                    description=new_teacher_class[0][9], colour=member.colour,
+                    print(teacher_class[0][6])
+                    if teacher_class[0][6] >= 360:
+                        class_embed = discord.Embed(title=f"__{teacher_class[0][3].title()} Class__",
+                                                    description=teacher_class[0][8], colour=member.colour,
                                                     timestamp=datetime.utcnow())
                         class_embed.add_field(name=f"__**Duration:**__",
                                               value=f"{h:d} hours, {m:02d} minutes and {s:02d} seconds", inline=False)
-                        class_embed.add_field(name=f"__**Joined:**__", value=f"{new_teacher_class[0][8]} members.",
+                        class_embed.add_field(name=f"__**Joined:**__", value=f"{teacher_class[0][7]} members.",
                                               inline=False)
-                        class_embed.add_field(name=f"__**Type of class:**__", value=f"{new_teacher_class[0][5].title()}.",
+                        class_embed.add_field(name=f"__**Type of class:**__", value=f"{teacher_class[0][4].title()}.",
                                               inline=False)
                         class_embed.set_thumbnail(url=member.avatar_url)
                         class_embed.set_author(name=member.name, url=member.avatar_url)
                         class_embed.set_footer(text='Class Report', icon_url=self.client.user.avatar_url)
                         await history_channel.send(embed=class_embed)
-                    if new_teacher_class[0][10] == 'Yes':
-                        await self.clear_saved_class(new_teacher_class[0][0], new_teacher_class[0][1])
 
-                    else:
-                        # Deletes the class
-                        await self.remove_temp_class(new_teacher_class[0][0], new_teacher_class[0][1])
-
-                    await self.ask_class_feedback(new_teacher_class[0][0], users_feedback, member.guild,
-                                                  new_teacher_class[0][4], new_teacher_class[0][5])
+                    #teacher_id, users_feedback, guild, language, class_type
+                    await self.ask_class_feedback(member.id, users_feedback, member.guild,
+                                                  teacher_class[0][3], teacher_class[0][4])
                 else:
                     await text_channel.send("**Class not ended!**")
 
-    @commands.command()
-    @commands.has_permissions(administrator=True)
-    async def create_table_teacher_feedback(self, ctx):
-        await ctx.message.delete()
-        if await self.check_table_exist():
-            return await ctx.send(f"**The table __TeacherFeedback__ already exists!**", delete_after=5)
-        mycursor, db = await the_data_base4()
-        await mycursor.execute(
-            f"CREATE TABLE TeacherFeedback (teacher_id bigint, class_id int NOT NULL AUTO_INCREMENT PRIMARY KEY, txt_id bigint, vc_id bigint, language VARCHAR(20), class_type VARCHAR(13), vc_timestamp bigint DEFAULT NULL, vc_time bigint, members bigint, class_desc VARCHAR(100), save_class VARCHAR(3))")
-        await db.commit()
-        await mycursor.close()
-        return await ctx.send("**Table __TeacherFeedback__ created!**", delete_after=5)
-
-    @commands.command()
-    @commands.has_permissions(administrator=True)
-    async def drop_table_teacher_feedback(self, ctx):
-        await ctx.message.delete()
-        if not await self.check_table_exist():
-            return await ctx.send(f"**The table __TeacherFeedback__ does not exist!**", delete_after=5)
-        mycursor, db = await the_data_base4()
-        await mycursor.execute(f"DROP TABLE TeacherFeedback")
-        await db.commit()
-        await mycursor.close()
-        await ctx.send("**Table __TeacherFeedback__ dropped!**", delete_after=5)
-
-    @commands.command()
-    @commands.has_permissions(administrator=True)
-    async def reset_table_teacher_feedback(self, ctx=None):
-        await ctx.message.delete()
-        if not await self.check_table_exist():
-            return await ctx.send("**Table __TeacherFeedback__ doesn't exist yet!**", delete_after=5)
-        mycursor, db = await the_data_base4()
-        await mycursor.execute('SELECT * FROM TeacherFeedback')
-        teachers = await mycursor.fetchall()
-        for teacher in teachers:
-            await mycursor.execute(f"DELETE FROM TeacherFeedback WHERE teacher_id = {teacher[0]}")
-            await db.commit()
-        await mycursor.close()
-        return await ctx.send("**Table __TeacherFeedback__ has been reset!**", delete_after=5)
-
-    async def check_table_exist(self):
-        mycursor, db = await the_data_base4()
-        await mycursor.execute(f"SHOW TABLE STATUS LIKE 'TeacherFeedback'")
-        table_info = await mycursor.fetchall()
-        await mycursor.close()
-        if len(table_info) == 0:
-            return False
-
-        else:
-            return True
-
-    async def insert_teacher_class(self, teacher_id: int, txt_id: int, vc_id: int, language: str, class_type: str,
-                                   vc_timestamp: int, class_desc: str, save_class: str):
-        mycursor, db = await the_data_base4()
-        await mycursor.execute(
-            f"INSERT INTO TeacherFeedback (teacher_id, txt_id, vc_id, language, class_type, vc_timestamp, vc_time, members, class_desc, save_class) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-            (teacher_id, txt_id, vc_id, language, class_type, vc_timestamp, 0, 1, class_desc, save_class))
-        await db.commit()
-        await mycursor.close()
-
-    async def get_teacher_class_info(self, teacher_id: int, vc_id: int):
-        mycursor, db = await the_data_base4()
-        await mycursor.execute(f"SELECT * FROM TeacherFeedback WHERE teacher_id = {teacher_id} and vc_id = {vc_id}")
-        teacher_class = await mycursor.fetchall()
-        return teacher_class
-
-    async def user_get_teacher_class(self, vc_id: int):
-        mycursor, db = await the_data_base4()
-        await mycursor.execute(f"SELECT * FROM TeacherFeedback WHERE vc_id = {vc_id}")
-        teacher_class = await mycursor.fetchall()
-        return teacher_class
-
-    async def get_specific_student(self, student_id: int, teacher_id: int, class_id: int):
-        mycursor, db = await the_data_base4()
-        await mycursor.execute(
-            f"SELECT * FROM StudentFeedback WHERE teacher_id = {teacher_id} and class_id = {class_id} and student_id = {student_id}")
-        student_info = await mycursor.fetchall()
-        return student_info
-
-    async def get_teacher_all_classes(self, teacher_id: int):
-        mycursor, db = await the_data_base4()
-        await mycursor.execute(f"SELECT * FROM TeacherFeedback WHERE teacher_id = {teacher_id}")
-        teacher_classes = await mycursor.fetchall()
-        return teacher_classes
-
-    async def get_len_table(self):
-        mycursor, db = await the_data_base4()
-        await mycursor.execute(f"SELECT COUNT(*) FROM TeacherFeedback")
-        lentable = await mycursor.fetchall()
-        await mycursor.close()
-        return lentable[0][0]
-
-    async def update_teacher_times(self, teacher_id: int, class_id: int, class_duration: int, new_timestamp=None):
-        mycursor, db = await the_data_base4()
-        await mycursor.execute(
-            f"UPDATE TeacherFeedback SET vc_timestamp = {new_timestamp}, vc_time = vc_time + {class_duration} WHERE teacher_id = {teacher_id} and class_id = {class_id}")
-        await db.commit()
-        await mycursor.close()
-
-    async def update_teacher_times2(self, teacher_id: int, class_id: int, the_time: int, vc_id: int):
-        mycursor, db = await the_data_base4()
-        teacher_class = await self.get_teacher_class_info(teacher_id, vc_id)
-        if teacher_class[0][6]:
-            class_duration = the_time - teacher_class[0][6]
-        else:
-            class_duration = 0
-        await mycursor.execute(
-            f"UPDATE TeacherFeedback SET vc_timestamp = NULL, vc_time = vc_time + {class_duration} WHERE teacher_id = {teacher_id} and class_id = {class_id}")
-        await db.commit()
-        await mycursor.close()
-
-    async def update_teacher_members(self, teacher_id: int, class_id: int, new_members: int):
-        mycursor, db = await the_data_base4()
-        await mycursor.execute(
-            f"UPDATE TeacherFeedback SET members = {new_members} WHERE teacher_id = {teacher_id} and class_id = {class_id}")
-        await db.commit()
-        await mycursor.close()
-
-    async def clear_saved_class(self, teacher_id: int, class_id: int):
-        mycursor, db = await the_data_base4()
-        await mycursor.execute(
-            f"UPDATE TeacherFeedback SET members = 1, vc_time = 0, vc_timestamp = NULL, txt_id = 0, vc_id = 0 WHERE teacher_id = {teacher_id} and class_id = {class_id}")
-        await db.commit()
-        await mycursor.close()
-
-    async def remove_temp_class(self, teacher_id: int, class_id: int):
-        mycursor, db = await the_data_base4()
-        await mycursor.execute(f"DELETE FROM TeacherFeedback WHERE teacher_id = {teacher_id} and class_id = {class_id}")
-        await db.commit()
-        await mycursor.close()
-
-    @commands.command()
-    @commands.has_permissions(administrator=True)
-    async def show_classes(self, ctx):
-        mycursor, db = await the_data_base4()
-        await mycursor.execute(f"SELECT * FROM TeacherFeedback")
-        all_classes = await mycursor.fetchall()
-        return await ctx.send(all_classes)
-
-    # StudentFeedback table
-    @commands.command()
-    @commands.has_permissions(administrator=True)
-    async def create_table_student_feedback(self, ctx):
-        await ctx.message.delete()
-        if await self.check_table_student_exist():
-            return await ctx.send(f"**The table __StudentFeedback__ already exists!**", delete_after=5)
-        mycursor, db = await the_data_base4()
-        await mycursor.execute(
-            f"CREATE TABLE StudentFeedback (student_id bigint, class_id int, teacher_id bigint, messages bigint, time bigint, vc_timestamp bigint DEFAULT NULL, channel_id bigint)")
-        await db.commit()
-        await mycursor.close()
-        return await ctx.send("**Table __StudentFeedback__ created!**", delete_after=5)
-
-    @commands.command()
-    @commands.has_permissions(administrator=True)
-    async def drop_table_student_feedback(self, ctx):
-        await ctx.message.delete()
-        if not await self.check_table_student_exist():
-            return await ctx.send(f"**The table __StudentFeedback__ does not exist!**", delete_after=5)
-        mycursor, db = await the_data_base4()
-        await mycursor.execute(f"DROP TABLE StudentFeedback")
-        await db.commit()
-        await mycursor.close()
-        await ctx.send("**Table __StudentFeedback__ dropped!**", delete_after=5)
-
-    @commands.command()
-    @commands.has_permissions(administrator=True)
-    async def reset_table_student_feedback(self, ctx=None):
-        await ctx.message.delete()
-        if not await self.check_table_student_exist():
-            return await ctx.send("**The table __StudentFeedback__ doesn't exist yet!**", delete_after=5)
-        mycursor, db = await the_data_base4()
-        await mycursor.execute('SELECT * FROM StudentFeedback')
-        teachers = await mycursor.fetchall()
-        for teacher in teachers:
-            await mycursor.execute(f"DELETE FROM StudentFeedback WHERE student_id = {teacher[0]}")
-            await db.commit()
-        await mycursor.close()
-        return await ctx.send("**Table __StudentFeedback__ has been reset!**", delete_after=5)
-
-    async def get_all_users_feedback(self, teacher_id: int, class_id: int):
-        mycursor, db = await the_data_base4()
-        await mycursor.execute(
-            f"SELECT * FROM StudentFeedback WHERE teacher_id = {teacher_id} and class_id = {class_id}")
-        users_feedback = await mycursor.fetchall()
-        await mycursor.close()
-        return users_feedback
-
-    async def update_student_times(self, class_id: int, teacher_id: int, time=None):
-        mycursor, db = await the_data_base4()
-        students = await self.get_all_users_feedback(teacher_id, class_id)
-        for student in students:
-            if student[5]:
-                class_duration = time - student[5]
+            # So it's a student
             else:
-                class_duration = 0
+                # Check if it was a classroom
+                class_room = await self.get_active_class_by_vc(bc.id)
+                if class_room:
+                    # Check if teacher is in the classroom
+                    the_teacher = discord.utils.get(member.guild.members, id=class_room[0][0])
+                    if the_teacher in bc.members:
+                        # Get student's old timestamp
+                        student_info = await self.get_student(member.id, the_teacher.id)
+                        # Update the student's time
+                        await self.update_student_time(member.id, class_room[0][0], int(the_time), student_info[0][2])
 
-            await mycursor.execute(
-                f"UPDATE StudentFeedback SET vc_timestamp = NULL, time = time + {class_duration} WHERE teacher_id = {teacher_id} and student_id = {student[0]} and class_id = {class_id}")
-            await db.commit()
-        await mycursor.close()
-
-    async def update_student_times2(self, class_id: int, teacher_id: int, new_timestamp: int):
-        mycursor, db = await the_data_base4()
-        await mycursor.execute(
-            f"UPDATE StudentFeedback SET vc_timestamp = {new_timestamp} WHERE teacher_id = {teacher_id} and class_id = {class_id}")
-        await db.commit()
-        await mycursor.close()
-
-    async def update_specific_student(self, student_id: int, teacher_id: int, class_id: int, duration: int):
-        mycursor, db = await the_data_base4()
-        await mycursor.execute(
-            f"UPDATE StudentFeedback SET vc_timestamp = NULL, time = time + {duration} WHERE teacher_id = {teacher_id} and class_id = {class_id} and student_id = {student_id}")
-        await db.commit()
-        await mycursor.close()
-
-    async def update_specific_student2(self, student_id: int, teacher_id: int, class_id: int, new_timestamp):
-        mycursor, db = await the_data_base4()
-        await mycursor.execute(
-            f"UPDATE StudentFeedback SET vc_timestamp = {new_timestamp} WHERE teacher_id = {teacher_id} and class_id = {class_id} and student_id = {student_id}")
-        await db.commit()
-        await mycursor.close()
-
-    async def insert_user_into_class(self, student_id: int, class_id: int, teacher_id: int, channel_id: int,
-                                     vc_timestamp: int = None):
-        mycursor, db = await the_data_base4()
-        await mycursor.execute(
-            "INSERT INTO StudentFeedback (student_id, class_id, teacher_id, messages, time, vc_timestamp, channel_id) VALUES (%s, %s, %s, %s, %s, %s, %s)",
-            (student_id, class_id, teacher_id, 0, 0, vc_timestamp, channel_id))
-        await db.commit()
-        await mycursor.close()
-
-    async def clear_specific_class_students(self, class_id: int, teacher_id: int):
-        mycursor, db = await the_data_base4()
-        await mycursor.execute(f"DELETE FROM StudentFeedback WHERE class_id = {class_id} and teacher_id = {teacher_id}")
-        await db.commit()
-        await mycursor.close()
-
-    async def is_member_in_class(self, student_id: int, teacher_id: int, class_id: int):
-        mycursor, db = await the_data_base4()
-        await mycursor.execute(
-            f"SELECT * FROM StudentFeedback WHERE class_id = {class_id} and teacher_id = {teacher_id} and student_id = {student_id}")
-        student = await mycursor.fetchall()
-        await mycursor.close()
-        if student:
-            return True
-        else:
-            return False
-
-    async def check_table_student_exist(self):
-        mycursor, db = await the_data_base4()
-        await mycursor.execute(f"SHOW TABLE STATUS LIKE 'StudentFeedback'")
-        table_info = await mycursor.fetchall()
-        await mycursor.close()
-        if len(table_info) == 0:
-            return False
-
-        else:
-            return True
-
-    @commands.command()
-    @commands.has_permissions(administrator=True)
-    async def get_all_users(self, ctx):
-        mycursor, db = await the_data_base4()
-        await mycursor.execute(f"SELECT * FROM StudentFeedback")
-        users_feedback = await mycursor.fetchall()
-        await mycursor.close()
-        return await ctx.send(users_feedback)
-
-    async def get_specific_user(self, student_id: int):
-        mycursor, db = await the_data_base4()
-        await mycursor.execute(f"SELECT * FROM StudentFeedback WHERE student_id = {student_id}")
-        student_info = await mycursor.fetchall()
-        await mycursor.close()
-        return student_info
-
-    async def update_student_messages(self, student_id: int, class_id: int):
-        mycursor, db = await the_data_base4()
-        await mycursor.execute(
-            f"UPDATE StudentFeedback SET messages = messages + 1 WHERE student_id = {student_id} and class_id = {class_id}")
-        await db.commit()
-        await mycursor.close()
+    # General commands
 
     async def ask_class_feedback(self, teacher_id, users_feedback, guild, language, class_type):
         reward_channel = discord.utils.get(guild.channels, id=reward_channel_id)
         active_users = []
         if users_feedback:
             if class_type.title() == 'Pronunciation':
-                active_users = [uf for uf in users_feedback if uf[4] >= 1800]
+                active_users = [uf for uf in users_feedback if uf[3] >= 1800]
             elif class_type.title() == 'Grammar':
-                active_users = [uf for uf in users_feedback if uf[3] >= 10]
+                active_users = [uf for uf in users_feedback if uf[1] >= 10]
 
         if not active_users:
             return
-        
+        print(active_users)
         for uf in active_users:
             if await self.user_in_currency(uf[0]):
                 await self.update_user_classes(uf[0])
+                #print('\033[33muser classes updated\033[m')
 
         if reward_channel:
             teacher = discord.utils.get(guild.members, id=teacher_id)
@@ -836,12 +266,12 @@ class TeacherFeedback(commands.Cog):
                     return True
 
             while True:
-                m, s = divmod(active_users[class_index][4], 60)
+                m, s = divmod(active_users[class_index][3], 60)
                 h, m = divmod(m, 60)
                 member = discord.utils.get(guild.members, id=active_users[class_index][0])
                 reward_embed = discord.Embed(
                     title=f"**[{class_index + 1}/{len(active_users)}] Reward __{member}__?**",
-                    description=f"**Sent:** {active_users[class_index][3]} messages.\n**Have been:** {h:d} hours, {m:02d} minutes and {s:02d} seconds in the voice channel.",
+                    description=f"**Sent:** {active_users[class_index][1]} messages.\n**Have been:** {h:d} hours, {m:02d} minutes and {s:02d} seconds in the voice channel.",
                     colour=discord.Colour.green())
                 reward_embed.set_thumbnail(url=member.avatar_url)
                 reward_embed.set_author(name=member.id)
@@ -885,63 +315,640 @@ class TeacherFeedback(commands.Cog):
                     if await self.user_in_currency(member.id):
                         await self.update_money(member.id, 10)
                         await self.update_user_class_reward(ru)
+                        #print('\033[33muser money updated\033[m')
+                        #print('\033[33muser rewarded class updated\033[m')
 
                 if await self.user_in_currency(teacher.id):
                     await self.update_money(teacher.id, 25)
                     await self.update_user_hosted(teacher.id)
+                    #print('\033[33mteacher money updated\033[m')
+                    #print('\033[33mteacher hosted updated\033[m')
 
                 commands_channel = discord.utils.get(guild.channels, id=bot_commands_channel_id)
                 return await commands_channel.send(embed=the_reward_embed)
 
+    async def get_channel_perms(self, member, language):
+        teacher_role = discord.utils.get(member.guild.roles, id=teacher_role_id)
+        preference_role = discord.utils.get(member.guild.roles, id=preference_role_id)
+        native_role = discord.utils.get(member.guild.roles,
+                                        name=f"Native {language.title()}")
+        fluent_role = discord.utils.get(member.guild.roles,
+                                        name=f"Fluent {language.title()}")
+        studying_role = discord.utils.get(member.guild.roles,
+                                          name=f"Studying {language.title()}")
+        overwrites = {}
+        overwrites[member.guild.default_role] = discord.PermissionOverwrite(read_messages=False,
+                                                                            send_messages=False,
+                                                                            connect=False,
+                                                                            speak=False,
+                                                                            view_channel=False)
+        overwrites[teacher_role] = discord.PermissionOverwrite(read_messages=True,
+                                                               send_messages=True,
+                                                               manage_messages=True,
+                                                               mute_members=True,
+                                                               embed_links=True, connect=True,
+                                                               speak=True,
+                                                               view_channel=True)
+        overwrites[preference_role] = discord.PermissionOverwrite(read_messages=True,
+                                                                  send_messages=False,
+                                                                  connect=False,
+                                                                  view_channel=True)
+
+        if native_role:
+            overwrites[native_role] = discord.PermissionOverwrite(read_messages=True,
+                                                                  send_messages=False,
+                                                                  connect=False,
+                                                                  speak=False,
+                                                                  view_channel=True,
+                                                                  embed_links=False)
+
+        if fluent_role:
+            overwrites[fluent_role] = discord.PermissionOverwrite(read_messages=True,
+                                                                  send_messages=True,
+                                                                  connect=True,
+                                                                  speak=True, view_channel=True,
+                                                                  embed_links=True)
+
+        if studying_role:
+            overwrites[studying_role] = discord.PermissionOverwrite(read_messages=True,
+                                                                    send_messages=True,
+                                                                    connect=True,
+                                                                    speak=True,
+                                                                    view_channel=True,
+                                                                    embed_links=True)
+
+        return overwrites
+
+    async def show_saved_classes(self, member, saved_classes):
+        cc_channel = discord.utils.get(member.guild.channels, id=cc_channel_id)
+
+        simple_embed = discord.Embed(title=f"All {member.name}'s", description="**LOADING...**",
+                                     colour=discord.Colour.green())
+        simple_embed.set_thumbnail(url=member.guild.icon_url)
+        simple_embed.set_footer(text=member.guild.name, icon_url=member.guild.icon_url)
+        simple = await cc_channel.send(embed=simple_embed)
+        class_index = 0
+
+        if len(saved_classes) > 1:
+            await simple.add_reaction('⬅️')
+
+        await simple.add_reaction('✅')
+        await simple.add_reaction('❌')
+
+        if len(saved_classes) > 1:
+            await simple.add_reaction('➡️')
+
+        def check_react(reaction, user):
+            if len(saved_classes) > 1:
+                if user == member and str(reaction.emoji) in ['⬅️', '✅', '❌', '➡️']:
+                    return True
+            else:
+                if user == member and str(reaction.emoji) in ['✅', '❌']:
+                    return True
+
+        while True:
+            embed = discord.Embed(
+                title=f"__**{saved_classes[class_index][1]} - ({class_index+1}/{len(saved_classes)})**__",
+                description=saved_classes[class_index][3], colour=discord.Colour.green())
+            embed.add_field(name=f"__**Type:**__", value=saved_classes[class_index][2],
+                            inline=True)
+            embed.set_thumbnail(url=member.avatar_url)
+            embed.set_author(name=member)
+            embed.set_footer(text=member.guild.name, icon_url=member.guild.icon_url)
+            await simple.edit(embed=embed)
+
+            try:
+                reaction, user = await self.client.wait_for('reaction_add', timeout=60,
+                                                            check=check_react)
+            except asyncio.TimeoutError:
+                timeout = discord.Embed(title='Timeout',
+                                        description=f"{member}, you took too long to select a class, try again later.",
+                                        colour=discord.Colour.dark_red())
+                return await cc_channel.send(embed=timeout)
+
+            if str(reaction.emoji) == "✅":
+                await simple.remove_reaction(reaction.emoji, member)
+                await cc_channel.send(f"**Class (__{saved_classes[class_index][1].title()}__ | __{saved_classes[class_index][2].title()}__) selected!**")
+                create_class = await self.create_class(member, cc_channel, saved_classes[class_index][1].title(), saved_classes[class_index][2].title())
+                # teacher_id, txt_id, vc_id, language, class_type, vc_timestamp, vc_time, members, class_desc
+                # teacher_id, language, class_type, class_desc
+                epoch = datetime.utcfromtimestamp(0)
+                the_time = (datetime.utcnow() - epoch).total_seconds()
+                return await self.insert_active_class(member.id, create_class[0], create_class[1], saved_classes[class_index][1].title(), saved_classes[class_index][2].title(), int(the_time), saved_classes[class_index][3])
+
+            elif str(reaction.emoji) == '❌':
+                await simple.remove_reaction(reaction.emoji, member)
+                return await cc_channel.send(f"**{member}, class selection has been cancelled!**")
+            elif str(reaction.emoji) == "➡️":
+                await simple.remove_reaction(reaction.emoji, member)
+                if class_index < (len(saved_classes) - 1):
+                    class_index += 1
+                continue
+            elif str(reaction.emoji) == "⬅️":
+                await simple.remove_reaction(reaction.emoji, member)
+                if class_index > 0:
+                    class_index -= 1
+                continue
+
+    async def ask_if_saved(self, member):
+
+        cc_channel = discord.utils.get(member.guild.channels, id=cc_channel_id)
+
+        def check_yes_no(m):
+            value = m.content
+            author = m.author
+            if m.channel == cc_channel:
+                if value.title() in ['Yes', 'No'] and author == member:
+                    return True
+                elif not value.title() in ['Yes', 'No'] and author == member:
+                    self.client.loop.create_task(
+                        cc_channel.send(f'**{member}, inform a valid answer! (Yes / No)**', delete_after=5))
+
+        await cc_channel.send(
+            f"**{member.mention}, create a new class? If not, you will load a saved class.**")
+
+        try:
+            class_new = await self.client.wait_for('message', timeout=60.0, check=check_yes_no)
+            class_new = class_new.content
+        except asyncio.TimeoutError:
+            timeout = discord.Embed(title='Timeout',
+                                    description=f'{member}, you took too long to answer the questions, try again later.',
+                                    colour=discord.Colour.dark_red())
+            await cc_channel.send(embed=timeout)
+            return False
+
+        if class_new.title() == "Yes":
+            return 'Yes'
+        else:
+            return 'No'
+
+    async def ask_creation_questions(self, member):
+        cc_channel = discord.utils.get(member.guild.channels, id=cc_channel_id)
+
+        def check_yes_no(m):
+            value = m.content
+            author = m.author
+            if m.channel == cc_channel:
+                if value.title() in ['Yes', 'No'] and author == member:
+                    return True
+                elif not value.title() in ['Yes', 'No'] and author == member:
+                    self.client.loop.create_task(
+                        cc_channel.send(f'**{member}, inform a valid answer! (Yes / No)**', delete_after=5))
+
+
+        # Question 1 - Language
+        await cc_channel.send(f"**{member.mention}, type the language that you are gonna teach in the class.\n(None = Don't want to create a class)**")
+
+        def check_language(m):
+            value = m.content
+            author = m.author
+            if m.channel == cc_channel:
+                if len(value) <= 20 and author == member:
+                    return True
+                elif not len(value) <= 20 and author == member:
+                    self.client.loop.create_task(
+                        cc_channel.send(f"**{member}, inform a shorter name! (Max = 20 characters)**",
+                                              delete_after=5))
+
+        try:
+            class_language = await self.client.wait_for('message', timeout=60.0, check=check_language)
+            class_language = class_language.content
+        except asyncio.TimeoutError:
+            timeout = discord.Embed(title='Timeout',
+                                    description=f"{member}, you took too long to answer the questions, try again later.",
+                                    colour=discord.Colour.dark_red())
+            await cc_channel.send(embed=timeout)
+            return False
+
+        if class_language.title() == 'None':
+            await cc_channel.send(f"**{member}, not creating a room then!**")
+            return False
+
+        # Question 2 - Type
+        await cc_channel.send(f"**{member}, what is the type of your class? (Pronunciation / Grammar)**")
+
+        def check_type(m):
+            value = m.content
+            author = m.author
+            if m.channel == cc_channel:
+                if len(value) <= 13 and author == member and value.title() in ['Pronunciation', 'Grammar']:
+                    return True
+                elif len(value) <= 13 and author == member and not value.title() in ['Pronunciation',
+                                                                                     'Grammar']:
+                    self.client.loop.create_task(
+                        cc_channel.send(f"**{member}, type a valid answer! (Pronunciation / Grammar)**",
+                                              delete_after=5))
+                elif not len(value) <= 13 and author == member:
+                    self.client.loop.create_task(
+                        cc_channel.send(f"**{member}, inform a shorter name! (Max = 13 characters)**",
+                                              delete_after=5))
+
+        try:
+            class_type = await self.client.wait_for('message', timeout=60.0, check=check_type)
+            class_type = class_type.content
+        except asyncio.TimeoutError:
+            timeout = discord.Embed(title='Timeout',
+                                    description=f"{member}, you took too long to answer the questions, try again later.",
+                                    colour=discord.Colour.dark_red())
+            await cc_channel.send(embed=timeout)
+            return False
+
+            # Question 3 - Description
+        await cc_channel.send(f"**{member}, what's the description of the class?**")
+
+        def check_description(m):
+            value = m.content
+            author = m.author
+            if m.channel == cc_channel:
+                if len(value) <= 100 and author == member:
+                    return True
+                elif len(value) > 100 and author == member:
+                    self.client.loop.create_task(
+                        cc_channel.send(f"**{member}, inform a shorter description! (Max = 100 characters)**",
+                                              delete_after=5))
+
+        try:
+            class_desc = await self.client.wait_for('message', timeout=60.0, check=check_description)
+            class_desc = class_desc.content
+        except asyncio.TimeoutError:
+            timeout = discord.Embed(title='Timeout',
+                                    description=f"{member}, you took too long to answer the questions, try again later.",
+                                    colour=discord.Colour.dark_red())
+            await cc_channel.send(embed=timeout)
+            return False
+
+        # Question 4 - Description
+
+        await cc_channel.send(
+            f"**{member}, do you wanna save the configurations of this class to use them in the next time?**")
+
+        try:
+            save_class = await self.client.wait_for('message', timeout=60.0, check=check_yes_no)
+            save_class = save_class.content
+            if save_class.title() == 'Yes':
+                await self.insert_saved_class(member.id, class_language, class_type, class_desc)
+
+        except asyncio.TimeoutError:
+            timeout = discord.Embed(title='Timeout',
+                                    description=f"{member}, you took too long to answer the questions, try again later.",
+                                    colour=discord.Colour.dark_red())
+            await cc_channel.send(embed=timeout)
+            return False
+
+        else:
+            return class_language, class_type, class_desc
+
+
+    async def create_class(self, member, cc_channel, language, class_type):
+        # (Creating rooms)
+        the_category_test = discord.utils.get(member.guild.categories, id=create_room_cat_id)
+        # Creating text channel
+        overwrites = await self.get_channel_perms(member, language)
+
+        cemoji = '🗣️' if class_type == 'Pronunciation' else '📖'
+
+        text_channel = await the_category_test.create_text_channel(
+            name=f"{cemoji} {language} Classroom",
+            overwrites=overwrites)
+        # Creating voice channel
+        voice_channel = await the_category_test.create_voice_channel(
+            name=f"{cemoji} {language.title()} Classroom",
+            user_limit=None,
+            overwrites=overwrites)
+        try:
+            await member.move_to(voice_channel)
+        except discord.errors.HTTPException:
+            await cc_channel.send(
+                f"**{member}, you cannot be moved, because you are not in a Voice-Channel, nonetheless the configurations were saved!**")
+            await text_channel.delete()
+            return await voice_channel.delete()
+
+        await text_channel.send(f"**{member.mention}, this is your text channel!**")
+        return text_channel.id, voice_channel.id
+
+    # Database commands
+
+    #Saved classes table
     @commands.command()
     @commands.has_permissions(administrator=True)
-    async def reset_teacher_classes(self, ctx, teacher: discord.Member = None):
+    async def create_table_saved_classes(self, ctx):
         await ctx.message.delete()
-        if not teacher:
-            return await ctx.send("**Inform a teacher to reset!**", delete_after=3)
-
-        if not await self.check_table_exist():
-            return await ctx.send("**This command may be on maintenance!**", delete_after=3)
-
-        teacher_role = discord.utils.get(ctx.guild.roles, id=teacher_role_id)
-        if not teacher_role in teacher.roles:
-            return await ctx.send(f"**{teacher} is not even a teacher!**", delete_after=5)
+        if await self.check_table_saved_classes_exists():
+            return await ctx.send(f"**The table __SavedClasses__ already exists!**", delete_after=5)
         mycursor, db = await the_data_base4()
-        await mycursor.execute(f"DELETE FROM TeacherFeedback WHERE teacher_id = {teacher.id}")
+        await mycursor.execute(
+            f"CREATE TABLE SavedClasses (teacher_id bigint, language VARCHAR(20), class_type VARCHAR(13), class_desc VARCHAR(100))")
         await db.commit()
         await mycursor.close()
-        return await ctx.send(f"**Teacher __{teacher}__ has been successfully reset!**", delete_after=5)
+        return await ctx.send("**Table __SavedClasses__ created!**", delete_after=5)
 
     @commands.command()
     @commands.has_permissions(administrator=True)
-    async def delete_teacher_class(self, ctx, teacher: discord.Member = None, class_id: int = None):
+    async def drop_table_saved_classes(self, ctx):
         await ctx.message.delete()
-        if not teacher:
-            return await ctx.send("**Inform a teacher to reset!**", delete_after=3)
-
-        elif not class_id:
-            return await ctx.send("**Inform a class id to delete!**", delete_after=3)
-
-        if not await self.check_table_exist():
-            return await ctx.send("**This command may be on maintenance!**", delete_after=3)
-
-        teacher_role = discord.utils.get(ctx.guild.roles, id=teacher_role_id)
-        if not teacher_role in teacher.roles:
-            return await ctx.send(f"**{teacher} is not even a teacher!**", delete_after=5)
-
+        if not await self.check_table_saved_classes_exists():
+            return await ctx.send(f"**The table __SavedClasses__ does not exist!**", delete_after=5)
         mycursor, db = await the_data_base4()
-        await mycursor.execute(f"DELETE FROM TeacherFeedback WHERE teacher_id = {teacher.id} and class_id = {class_id}")
+        await mycursor.execute(f"DROP TABLE SavedClasses")
         await db.commit()
         await mycursor.close()
-        return await ctx.send(f"**__{teacher}__'s class with the id {class_id}# has been successfully deleted!**",
-                              delete_after=5)
+        await ctx.send("**Table __SavedClasses__ dropped!**", delete_after=5)
 
-    async def update_money(self, user_id: int, money: int):
-        mycursor, db = await the_data_base2()
-        await mycursor.execute(f"UPDATE UserCurrency SET user_money = user_money + {money} WHERE user_id = {user_id}")
+    @commands.command()
+    @commands.has_permissions(administrator=True)
+    async def reset_table_saved_classes(self, ctx=None):
+        await ctx.message.delete()
+        if not await self.check_table_saved_classes_exists():
+            return await ctx.send("**Table __SavedClasses__ doesn't exist yet!**", delete_after=5)
+        mycursor, db = await the_data_base4()
+        await mycursor.execute('SELECT * FROM SavedClasses')
+        teachers = await mycursor.fetchall()
+        for teacher in teachers:
+            await mycursor.execute(f"DELETE FROM SavedClasses WHERE teacher_id = {teacher[0]}")
+            await db.commit()
+        await mycursor.close()
+        return await ctx.send("**Table __SavedClasses__ has been reset!**", delete_after=5)
+
+    async def check_table_saved_classes_exists(self):
+        mycursor, db = await the_data_base4()
+        await mycursor.execute(f"SHOW TABLE STATUS LIKE 'SavedClasses'")
+        table_info = await mycursor.fetchall()
+        await mycursor.close()
+        if len(table_info) == 0:
+            return False
+
+        else:
+            return True
+
+    # Get
+    async def get_saved_class(self, teacher_id: int):
+        mycursor, db = await the_data_base4()
+        await mycursor.execute(f"SELECT * FROM SavedClasses WHERE teacher_id = {teacher_id}")
+        the_classes = await mycursor.fetchall()
+        await mycursor.close()
+        return the_classes
+
+    # Insert
+    async def insert_saved_class(self, teacher_id: int, language: str, class_type: str, class_desc: str):
+        mycursor, db = await the_data_base4()
+        await mycursor.execute("INSERT INTO SavedClasses (teacher_id, language, class_type, class_desc) VALUES (%s, %s, %s, %s)", (teacher_id, language, class_type, class_desc))
         await db.commit()
         await mycursor.close()
 
+
+    # Active classes table
+    @commands.command()
+    @commands.has_permissions(administrator=True)
+    async def create_table_active_classes(self, ctx):
+        await ctx.message.delete()
+        if await self.check_table_active_classes_exists():
+            return await ctx.send(f"**The table __ActiveClasses__ already exists!**", delete_after=5)
+        mycursor, db = await the_data_base4()
+        await mycursor.execute(
+            f"CREATE TABLE ActiveClasses (teacher_id bigint, txt_id bigint, vc_id bigint, language VARCHAR(20), class_type VARCHAR(13), vc_timestamp bigint, vc_time bigint DEFAULT 0, members bigint DEFAULT 1, class_desc VARCHAR(100))")
+        await db.commit()
+        await mycursor.close()
+        return await ctx.send("**Table __ActiveClasses__ created!**", delete_after=5)
+
+    @commands.command()
+    @commands.has_permissions(administrator=True)
+    async def drop_table_active_classes(self, ctx):
+        await ctx.message.delete()
+        if not await self.check_table_active_classes_exists():
+            return await ctx.send(f"**The table __ActiveClasses__ does not exist!**", delete_after=5)
+        mycursor, db = await the_data_base4()
+        await mycursor.execute(f"DROP TABLE ActiveClasses")
+        await db.commit()
+        await mycursor.close()
+        await ctx.send("**Table __ActiveClasses__ dropped!**", delete_after=5)
+
+    @commands.command()
+    @commands.has_permissions(administrator=True)
+    async def reset_table_active_classes(self, ctx=None):
+        await ctx.message.delete()
+        if not await self.check_table_active_classes_exists():
+            return await ctx.send("**Table __ActiveClasses__ doesn't exist yet!**", delete_after=5)
+        mycursor, db = await the_data_base4()
+        await mycursor.execute('SELECT * FROM ActiveClasses')
+        teachers = await mycursor.fetchall()
+        for teacher in teachers:
+            await mycursor.execute(f"DELETE FROM ActiveClasses WHERE teacher_id = {teacher[0]}")
+            await db.commit()
+        await mycursor.close()
+        return await ctx.send("**Table __ActiveClasses__ has been reset!**", delete_after=5)
+
+    async def check_table_active_classes_exists(self):
+        mycursor, db = await the_data_base4()
+        await mycursor.execute(f"SHOW TABLE STATUS LIKE 'ActiveClasses'")
+        table_info = await mycursor.fetchall()
+        await mycursor.close()
+        if len(table_info) == 0:
+            return False
+
+        else:
+            return True
+
+    # Get
+    async def get_active_class_by_teacher(self, teacher_id: int):
+        mycursor, db = await the_data_base4()
+        await mycursor.execute(f"SELECT * FROM ActiveClasses WHERE teacher_id = {teacher_id}")
+        the_class = await mycursor.fetchall()
+        await mycursor.close()
+        return the_class
+
+    async def get_active_class_by_vc(self, vc_id: int):
+        mycursor, db = await the_data_base4()
+        await mycursor.execute(f"SELECT * FROM ActiveClasses WHERE vc_id = {vc_id}")
+        the_class = await mycursor.fetchall()
+        await mycursor.close()
+        return the_class
+
+    async def get_active_class_by_txt(self, txt_id: int):
+        mycursor, db = await the_data_base4()
+        await mycursor.execute(f"SELECT * FROM ActiveClasses WHERE txt_id = {txt_id}")
+        the_class = await mycursor.fetchall()
+        await mycursor.close()
+        return the_class
+
+    # Check
+    async def check_active_class_by_teacher(self, teacher_id: int):
+        mycursor, db = await the_data_base4()
+        await mycursor.execute(f"SELECT * FROM ActiveClasses WHERE teacher_id = {teacher_id}")
+        the_class = await mycursor.fetchall()
+        await mycursor.close()
+        if the_class:
+            return True
+        else:
+            return False
+
+    # Insert
+    async def insert_active_class(self, teacher_id: int, txt_id: int, vc_id: int, language: str, class_type: str, the_time: int, class_desc: str):
+        mycursor, db = await the_data_base4()
+        await mycursor.execute("INSERT INTO ActiveClasses (teacher_id, txt_id, vc_id, language, class_type, vc_timestamp, class_desc) VALUES (%s, %s, %s, %s, %s, %s, %s)", (teacher_id, txt_id, vc_id, language, class_type, the_time, class_desc))
+        await db.commit()
+        await mycursor.close()
+
+    # Update
+    async def update_teacher_time(self, teacher_id: int, the_time: int):
+        mycursor, db = await the_data_base4()
+        await mycursor.execute(f"UPDATE ActiveClasses SET vc_time = vc_time + ({the_time} - vc_timestamp), vc_timestamp = NULL WHERE teacher_id = {teacher_id}")
+        await db.commit()
+        await mycursor.close()
+
+    async def update_teacher_ts(self, teacher_id: int, the_time: int):
+        mycursor, db = await the_data_base4()
+        await mycursor.execute(f"UPDATE ActiveClasses SET vc_timestamp = {the_time} WHERE teacher_id = {teacher_id}")
+        await db.commit()
+        await mycursor.close()
+
+
+    # Delete
+    async def delete_active_class(self, teacher_id: int):
+        mycursor, db = await the_data_base4()
+        await mycursor.execute(f"DELETE FROM ActiveClasses WHERE teacher_id = {teacher_id}")
+        await db.commit()
+        await mycursor.close()
+
+    # Students table
+    @commands.command()
+    @commands.has_permissions(administrator=True)
+    async def create_table_students(self, ctx):
+        await ctx.message.delete()
+        if await self.check_table_students():
+            return await ctx.send(f"**The table __Students__ already exists!**", delete_after=5)
+        mycursor, db = await the_data_base4()
+        await mycursor.execute(
+            f"CREATE TABLE Students (student_id bigint, student_messages int default 0, student_ts bigint default NULL, student_time bigint default 0, teacher_id bigint, vc_id bigint)")
+        await db.commit()
+        await mycursor.close()
+        return await ctx.send("**Table __Students__ created!**", delete_after=5)
+
+    @commands.command()
+    @commands.has_permissions(administrator=True)
+    async def drop_table_students(self, ctx):
+        await ctx.message.delete()
+        if not await self.check_table_students():
+            return await ctx.send(f"**The table __Students__ does not exist!**", delete_after=5)
+        mycursor, db = await the_data_base4()
+        await mycursor.execute(f"DROP TABLE Students")
+        await db.commit()
+        await mycursor.close()
+        await ctx.send("**Table __Students__ dropped!**", delete_after=5)
+
+    @commands.command()
+    @commands.has_permissions(administrator=True)
+    async def reset_table_students(self, ctx=None):
+        await ctx.message.delete()
+        if not await self.check_table_students():
+            return await ctx.send("**Table __Students__ doesn't exist yet!**", delete_after=5)
+        mycursor, db = await the_data_base4()
+        await mycursor.execute('SELECT * FROM Students')
+        teachers = await mycursor.fetchall()
+        for teacher in teachers:
+            await mycursor.execute(f"DELETE FROM Students WHERE teacher_id = {teacher[0]}")
+            await db.commit()
+        await mycursor.close()
+        return await ctx.send("**Table __Students__ has been reset!**", delete_after=5)
+
+    async def check_table_students(self):
+        mycursor, db = await the_data_base4()
+        await mycursor.execute(f"SHOW TABLE STATUS LIKE 'Students'")
+        table_info = await mycursor.fetchall()
+        await mycursor.close()
+        if len(table_info) == 0:
+            return False
+
+        else:
+            return True
+
+    # Get (student)
+    async def get_student(self, student_id: int, teacher_id: int):
+        mycursor, db = await the_data_base4()
+        await mycursor.execute(f"SELECT * FROM Students WHERE student_id = {student_id} and teacher_id = {teacher_id}")
+        the_student = await mycursor.fetchall()
+        await mycursor.close()
+        return the_student
+
+    async def get_all_students(self, teacher_id: int):
+        mycursor, db = await the_data_base4()
+        await mycursor.execute(f"SELECT * FROM Students WHERE teacher_id = {teacher_id}")
+        the_students = await mycursor.fetchall()
+        await mycursor.close()
+        return the_students
+
+    # Insert (student)
+    async def insert_student_w_ts(self, student_id: int, the_time: int, teacher_id: int, vc_id: int):
+        mycursor, db = await the_data_base4()
+        await mycursor.execute("INSERT INTO Students (student_id, student_ts, teacher_id, vc_id) VALUES (%s, %s, %s, %s)", (student_id, the_time, teacher_id, vc_id))
+        await db.commit()
+        await mycursor.close()
+
+    async def insert_student_w_none(self, student_id: int, teacher_id: int, vc_id: int):
+        mycursor, db = await the_data_base4()
+        await mycursor.execute("INSERT INTO Students (student_id, teacher_id, vc_id) VALUES (%s, %s, %s, %s)", (student_id, teacher_id, vc_id))
+        await db.commit()
+        await mycursor.close()
+
+    # Update (student)
+    async def update_student_ts(self, student_id: int, the_time: int, teacher_id: int):
+        mycursor, db = await the_data_base4()
+        await mycursor.execute(f"UPDATE Students SET student_ts = {the_time} WHERE student_id = {student_id} and teacher_id = {teacher_id}")
+        await db.commit()
+        await mycursor.close()
+
+    async def update_student_ts_none(self, student_id: int, teacher_id: int):
+        mycursor, db = await the_data_base4()
+        await mycursor.execute(f"UPDATE Students SET student_ts = null WHERE student_id = {student_id} and teacher_id = {teacher_id}")
+        await db.commit()
+        await mycursor.close()
+
+    async def update_all_students_ts(self, teacher_id: int, the_time: int):
+        mycursor, db = await the_data_base4()
+        await mycursor.execute(f"UPDATE Students SET student_ts = {the_time} WHERE teacher_id = {teacher_id}")
+        await db.commit()
+        await mycursor.close()
+
+
+    async def update_all_students_time(self, teacher_id: int, the_time: int):
+        mycursor, db = await the_data_base4()
+        await mycursor.execute(f"UPDATE Students SET student_time = student_time + ({the_time} - student_ts), student_ts = NULL WHERE teacher_id = {teacher_id}")
+        await db.commit()
+        await mycursor.close()
+
+    async def update_student_time(self, student_id: int, teacher_id: int, the_time: int, old_ts: int):
+        addition = the_time - old_ts
+        mycursor, db = await the_data_base4()
+        await mycursor.execute(f"UPDATE Students SET students_ts = NULL, student_time = student_time + {addition} WHERE student_id = {student_id} and teacher_id = {teacher_id}")
+        await db.commit()
+        await mycursor.close()
+
+    async def update_student_messages(self, student_id: int, vc_id: int):
+        mycursor, db = await the_data_base4()
+        await mycursor.execute(f"UPDATE Students SET student_messages = student_messages + 1 WHERE student_id = {student_id} and vc_id = {vc_id}")
+        await db.commit()
+        await mycursor.close()
+
+    # Check
+    async def check_student_by_vc(self, student_id: int, vc_id: int):
+        mycursor, db = await the_data_base4()
+        await mycursor.execute(f"SELECT * FROM Students WHERE student_id = {student_id} and vc_id = {vc_id}")
+        the_student = await mycursor.fetchall()
+        await mycursor.close()
+        if the_student:
+            return True
+        else:
+            return False
+
+    # Delete
+    async def delete_active_students(self, teacher_id: int):
+        mycursor, db = await the_data_base4()
+        await mycursor.execute(f"DELETE FROM Students WHERE teacher_id = {teacher_id}")
+        await db.commit()
+        await mycursor.close()
+
+    # Other tables
+
+    # General
     async def user_in_currency(self, user_id: int):
         mycursor, db = await the_data_base2()
         await mycursor.execute(f"SELECT * FROM UserCurrency WHERE user_id = {user_id}")
@@ -951,6 +958,13 @@ class TeacherFeedback(commands.Cog):
             return True
         else:
             return False
+
+    # Update
+    async def update_money(self, user_id: int, money: int):
+        mycursor, db = await the_data_base2()
+        await mycursor.execute(f"UPDATE UserCurrency SET user_money = user_money + {money} WHERE user_id = {user_id}")
+        await db.commit()
+        await mycursor.close()
 
     async def update_user_classes(self, user_id: int):
         mycursor, db = await the_data_base2()
@@ -971,4 +985,4 @@ class TeacherFeedback(commands.Cog):
         await mycursor.close()
 
 def setup(client):
-    client.add_cog(TeacherFeedback(client))
+    client.add_cog(CreateClassroom(client))
