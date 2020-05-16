@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 from mysqldb2 import *
 from datetime import datetime
+import asyncio
 
 create_room_vc_id = 704430199298850907
 create_room_cat_id = 562019326295670806
@@ -182,7 +183,7 @@ class CreateClassroom(commands.Cog):
                     await text_channel.send("**Class ended!**")
                     await voice_channel.delete()
                     await text_channel.delete()
-                    #await asyncio.sleep(5)
+                    await asyncio.sleep(5)
                     # Gets all students and deletes the class from the system
                     users_feedback = await self.get_all_students(member.id)
                     print(users_feedback)
@@ -195,7 +196,7 @@ class CreateClassroom(commands.Cog):
                     m, s = divmod(teacher_class[0][6], 60)
                     h, m = divmod(m, 60)
                     print(teacher_class[0][6])
-                    if teacher_class[0][6] >= 360:
+                    if int(teacher_class[0][6]) >= 600:
                         class_embed = discord.Embed(title=f"__{teacher_class[0][3].title()} Class__",
                                                     description=teacher_class[0][8], colour=member.colour,
                                                     timestamp=datetime.utcnow())
@@ -231,7 +232,7 @@ class CreateClassroom(commands.Cog):
 
     # General commands
 
-    async def ask_class_feedback(self, teacher_id, users_feedback, guild, language, class_type):
+    async def ask_class_feedback(self, teacher_id: int, users_feedback, guild, language, class_type):
         reward_channel = discord.utils.get(guild.channels, id=reward_channel_id)
         active_users = []
         if users_feedback:
@@ -242,7 +243,7 @@ class CreateClassroom(commands.Cog):
 
         if not active_users:
             return
-        print(active_users)
+        #print(active_users)
         for uf in active_users:
             if await self.user_in_currency(uf[0]):
                 await self.update_user_classes(uf[0])
