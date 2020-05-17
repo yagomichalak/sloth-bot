@@ -138,6 +138,7 @@ class CreateClassroom(commands.Cog):
                 if active_student:
                     # Check if teacher is in the class
                     the_teacher = discord.utils.get(member.guild.members, id=the_class[0][0])
+                    await self.update_teacher_members(the_teacher.id)
                     if the_teacher in ac.members:
                         # Update user's ts
                         await self.update_student_ts(member.id, int(the_time), the_teacher.id)
@@ -799,6 +800,12 @@ class CreateClassroom(commands.Cog):
     async def update_teacher_ts(self, teacher_id: int, the_time: int):
         mycursor, db = await the_data_base4()
         await mycursor.execute(f"UPDATE ActiveClasses SET vc_timestamp = {the_time} WHERE teacher_id = {teacher_id}")
+        await db.commit()
+        await mycursor.close()
+
+    async def update_teacher_members(self, teacher_id: int):
+        mycursor, db = await the_data_base4()
+        await mycursor.execute(f"UPDATE ActiveClasses SET members = members + 1 WHERE teacher_id = {teacher_id}")
         await db.commit()
         await mycursor.close()
 
