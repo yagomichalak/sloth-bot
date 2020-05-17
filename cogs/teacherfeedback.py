@@ -121,6 +121,14 @@ class CreateClassroom(commands.Cog):
                             class_ids = await self.create_class(member, cc_channel, class_info[0], class_info[1])
                             await self.insert_active_class(member.id, class_ids[0], class_ids[1], class_info[0].title(), class_info[1], int(the_time), class_info[2])
 
+
+            elif ac.id != create_room_vc_id and await self.get_active_class_by_teacher_and_vc(member.id, ac.id):
+                # Update everyone's timestamp
+                epoch = datetime.utcfromtimestamp(0)
+                the_time = (datetime.utcnow() - epoch).total_seconds()
+                await self.update_teacher_ts(member.id, int(the_time))
+                await self.update_all_students_ts(member.id, int(the_time))
+
             # It's in an active class
             else:
                 # Gets the teacher's info
@@ -771,6 +779,15 @@ class CreateClassroom(commands.Cog):
         the_class = await mycursor.fetchall()
         await mycursor.close()
         return the_class
+
+    async def get_active_class_by_teacher_and_vc(self, teacher_id: int, vc_id: int):
+        mycursor, db = await the_data_base4()
+        await mycursor.execute(f"SELECT * FROM ActiveClasses WHERE teacher_id = {teacher_id} and vc_id = {vc_id}")
+        the_class = await mycursor.fetchall()
+        if the_class:
+            return True
+        else:
+            return False
 
     # Check
     async def check_active_class_by_teacher(self, teacher_id: int):
