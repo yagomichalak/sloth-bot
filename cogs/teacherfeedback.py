@@ -122,6 +122,7 @@ class CreateClassroom(commands.Cog):
                             await self.insert_active_class(member.id, class_ids[0], class_ids[1], class_info[0].title(), class_info[1], int(the_time), class_info[2])
 
 
+            # Check if teacher is rejoining their class
             elif ac.id != create_room_vc_id and await self.get_active_class_by_teacher_and_vc(member.id, ac.id):
                 # Update everyone's timestamp
                 epoch = datetime.utcfromtimestamp(0)
@@ -943,7 +944,7 @@ class CreateClassroom(commands.Cog):
     async def update_student_time(self, student_id: int, teacher_id: int, the_time: int, old_ts: int):
         addition = the_time - old_ts
         mycursor, db = await the_data_base4()
-        await mycursor.execute(f"UPDATE Students SET students_ts = NULL, student_time = student_time + {addition} WHERE student_id = {student_id} and teacher_id = {teacher_id}")
+        await mycursor.execute(f"UPDATE Students SET student_time = student_time + {addition}, student_ts = NULL WHERE student_id = {student_id} and teacher_id = {teacher_id}")
         await db.commit()
         await mycursor.close()
 
