@@ -164,7 +164,7 @@ class CreateClassroom(commands.Cog):
                         await self.insert_student_w_none(member.id, the_teacher.id, ac.id)
 
         # Check if leaving a VC
-        elif bc:
+        if bc:
             # Get the current timestamp
             epoch = datetime.utcfromtimestamp(0)
             the_time = (datetime.utcnow() - epoch).total_seconds()
