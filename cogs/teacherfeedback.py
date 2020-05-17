@@ -138,7 +138,6 @@ class CreateClassroom(commands.Cog):
                 if active_student:
                     # Check if teacher is in the class
                     the_teacher = discord.utils.get(member.guild.members, id=the_class[0][0])
-                    await self.update_teacher_members(the_teacher.id)
                     if the_teacher in ac.members:
                         # Update user's ts
                         await self.update_student_ts(member.id, int(the_time), the_teacher.id)
