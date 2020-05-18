@@ -58,6 +58,17 @@ class CreateClassroom(commands.Cog):
         #print(f"\033[33mAfter category\033[m: {aca}")
         #print('\033[34m=-\033[m'*12)
 
+        # Before voice state
+        bsm = before.self_mute
+        bsd = before.self_deaf
+        bss = before.self_stream
+        # After voice state
+        asm = after.self_mute
+        asd = after.self_deaf
+        ass = after.self_stream
+
+        #print(bsm == asm and bsd == asd and bss == ass)
+
         #Checking if it's in the CreateClassroom category
         if bca and bca.id != create_room_cat_id or aca and aca.id != create_room_cat_id:
             return
@@ -65,7 +76,7 @@ class CreateClassroom(commands.Cog):
         teacher_role = discord.utils.get(member.guild.roles, id=teacher_role_id)
 
         # Checks if joining a VC
-        if ac:
+        if ac and bsm == asm and bsd == asd and bss == ass:
             # Checks if joining the CreateClassroom vc
             if ac.id == create_room_vc_id:
                 # Checks if it's a teacher
@@ -164,7 +175,7 @@ class CreateClassroom(commands.Cog):
                         await self.insert_student_w_none(member.id, the_teacher.id, ac.id)
 
         # Check if leaving a VC
-        elif bc:
+        elif bc and bsm == asm and bsd == asd and bss == ass:
             # Get the current timestamp
             epoch = datetime.utcfromtimestamp(0)
             the_time = (datetime.utcnow() - epoch).total_seconds()
