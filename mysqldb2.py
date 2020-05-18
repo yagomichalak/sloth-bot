@@ -39,3 +39,15 @@ async def the_data_base4():
 
     mycursor = await db.cursor()
     return mycursor, db
+
+loop4 = asyncio.get_event_loop()
+
+#mysql://b099278b0c0dc8:540f47f3@us-cdbr-iron-east-01.cleardb.net/heroku_290c2b59c3d17a2?reconnect=true
+async def the_data_base5():
+    db = await aiomysql.connect(host='us-cdbr-iron-east-01.cleardb.net',
+                                user='b099278b0c0dc8',
+                                password='540f47f3',
+                                db='heroku_290c2b59c3d17a2', loop=loop4)
+
+    mycursor = await db.cursor()
+    return mycursor, db
