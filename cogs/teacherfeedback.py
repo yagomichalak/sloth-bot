@@ -233,7 +233,7 @@ class CreateClassroom(commands.Cog):
                         await history_channel.send(embed=class_embed)
 
                     #teacher_id, users_feedback, guild, language, class_type
-                    await self.ask_class_feedback(member.id, users_feedback, member.guild,
+                    await self.ask_class_feedback(teacher_class[0][0], users_feedback, member.guild,
                                                   teacher_class[0][3], teacher_class[0][4])
                 else:
                     await text_channel.send("**Class not ended!**")
