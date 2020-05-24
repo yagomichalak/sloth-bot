@@ -233,6 +233,7 @@ class CreateClassroom(commands.Cog):
                         await history_channel.send(embed=class_embed)
 
                     #teacher_id, users_feedback, guild, language, class_type
+                    #teacher_id, txt_id, vc_id, language, class_type, vc_timestamp, vc_time, members, class_desc
                     await self.ask_class_feedback(teacher_class[0][0], users_feedback, member.guild,
                                                   teacher_class[0][3], teacher_class[0][4])
                 else:
@@ -262,6 +263,7 @@ class CreateClassroom(commands.Cog):
             elif class_type.title() == 'Grammar':
                 active_users = [uf for uf in users_feedback if uf[1] >= 10]
 
+        # student_id, student_messages, student_ts, student_time, teacher_id, vc_id
         if not active_users:
             return
         #print(active_users)
@@ -274,8 +276,8 @@ class CreateClassroom(commands.Cog):
             teacher = discord.utils.get(guild.members, id=teacher_id)
             simple_embed = discord.Embed(title=f"All {teacher.name}'s students", description="**LOADING...**",
                                          colour=discord.Colour.green())
-            simple_embed.set_thumbnail(url=teacher.guild.icon_url)
-            simple_embed.set_footer(text=teacher.guild.name, icon_url=teacher.guild.icon_url)
+            simple_embed.set_thumbnail(url=guild.icon_url)
+            simple_embed.set_footer(text=guild.name, icon_url=guild.icon_url)
             simple = await reward_channel.send(content=teacher.mention, embed=simple_embed)
             class_index = 0
             users_to_reward = []
@@ -284,20 +286,24 @@ class CreateClassroom(commands.Cog):
             await simple.add_reaction('❌')
 
             def check_reward_react(reaction, user):
-                if user == teacher and str(reaction.emoji) in ['✅', '❌']:
+                if int(user.id()) == int(teacher.id) and str(reaction.emoji) in ['✅', '❌']:
                     return True
 
             while True:
-                m, s = divmod(active_users[class_index][3], 60)
+                m, s = divmod(int(active_users[class_index][3]), 60)
                 h, m = divmod(m, 60)
-                member = discord.utils.get(guild.members, id=active_users[class_index][0])
+                member = discord.utils.get(guild.members, id=int(active_users[class_index][0]))
+                if not member:
+                    class_index += 1
+                    continue
+
                 reward_embed = discord.Embed(
                     title=f"**[{class_index + 1}/{len(active_users)}] Reward __{member}__?**",
                     description=f"**Sent:** {active_users[class_index][1]} messages.\n**Have been:** {h:d} hours, {m:02d} minutes and {s:02d} seconds in the voice channel.",
                     colour=discord.Colour.green())
                 reward_embed.set_thumbnail(url=member.avatar_url)
-                reward_embed.set_author(name=member.id)
-                reward_embed.set_footer(text=teacher.guild.name, icon_url=teacher.guild.icon_url)
+                reward_embed.set_author(name=f"ID: {member.id}")
+                reward_embed.set_footer(text=guild.name, icon_url=guild.icon_url)
                 await simple.edit(embed=reward_embed)
 
                 reaction, user = await self.client.wait_for('reaction_add', check=check_reward_react)
