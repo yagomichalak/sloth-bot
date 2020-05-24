@@ -340,6 +340,43 @@ class Moderation(commands.Cog):
                 embed.set_footer(text=f"SoftBanned by {ctx.author}", icon_url=ctx.author.avatar_url)
                 await moderation_log.send(embed=embed)
 
+    @commands.command()
+    @commands.has_permissions(administrator=True)
+    async def hackban(self, ctx, user_id: int = None, *, reason=None):
+        '''
+        Bans a user that is currently not in the server.
+        Only accepts user IDs.
+        :param user_id: Member ID
+        :param reason: The reason for hackbanning the user. (Optional)
+        '''
+        await ctx.message.delete()
+        if not user_id:
+            return await ctx.send("**Inform the user id!**", delete_after=3)
+        member = discord.Object(id=user_id)
+        if not member:
+            return await ctx.send("**Invalid user id!**", delete_after=3)
+        try:
+            await ctx.guild.ban(member, reason=reason)
+            # General embed
+            general_embed = discord.Embed(description=f'**Reason:** {reason}', colour=discord.Colour.dark_teal(),
+                                          timestamp=ctx.message.created_at)
+            general_embed.set_author(name=f'{self.client.get_user(user_id)} has been hackbanned')
+            await ctx.send(embed=general_embed)
+
+            # Moderation log embed
+            moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
+            embed = discord.Embed(title='__**HackBanishment**__', colour=discord.Colour.dark_teal(),
+                                  timestamp=ctx.message.created_at)
+            embed.add_field(name='User info:', value=f'```Name: {self.client.get_user(user_id)}\nId: {member.id}```',
+                            inline=False)
+            embed.add_field(name='Reason:', value=f'```{reason}```')
+
+            embed.set_author(name=self.client.get_user(user_id))
+            embed.set_footer(text=f"HackBanned by {ctx.author}", icon_url=ctx.author.avatar_url)
+            await moderation_log.send(embed=embed)
+        except discord.errors.NotFound:
+            return await ctx.send("**Invalid user id!**", delete_after=3)
+
     async def insert_in_muted(self, user_id: int, role_id: int):
         mycursor, db = await the_data_base3()
         await mycursor.execute(f"INSERT INTO mutedmember (user_id, role_id) VALUES (%s, %s)", (user_id, role_id))
