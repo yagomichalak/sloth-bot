@@ -18,7 +18,7 @@ class NClassManagement(commands.Cog):
         self.check_new_announcements.start()
 
 
-    @task.loop(seconds=60)
+    @tasks.loop(seconds=60)
     async def check_new_announcements(self):
         if not await self.check_table_app_teachers_exists():
             return
