@@ -1,7 +1,7 @@
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 from mysqldb import *
-from mysqldb2 import the_data_base5, task
+from mysqldb2 import the_data_base5
 from datetime import datetime
 
 announce_channel = 689918515129352213
