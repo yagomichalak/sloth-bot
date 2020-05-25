@@ -1,9 +1,11 @@
 import discord
 from discord.ext import commands
 from mysqldb import *
+from mysqldb2 import the_data_base5, task
+from datetime import datetime
 
 announce_channel = 689918515129352213
-
+server_id = 459195345419763713
 
 class NClassManagement(commands.Cog):
 
@@ -14,22 +16,102 @@ class NClassManagement(commands.Cog):
     async def on_ready(self):
         print('NClassManagement cog is ready!')
 
+
+    @task.loop(seconds=60):
+    async def check_new_announcements(self):
+        if not await self.check_table_app_teachers_exists():
+            return
+
+        new_announcements = await self.get_new_announcements()
+        if new_announcements:
+            for na in new_announcements:
+                await self.nclass(teacher=na[0], language=na[1], day=na[2], time=na[3], type=na[4])
+                await self.delete_new_announcement(teacher=na[0], language=na[1], day=na[2], time=na[3], type=na[4])
+
+
+    @commands.command()
+    @commands.has_permissions(administrator=True)
+    async def create_table_app_teachers(self, ctx):
+        await ctx.message.delete()
+        if await self.check_table_app_teachers_exists():
+            return await ctx.send(f"**The table AppTeachers already exists!**", delete_after=3)
+        mycursor, db = await the_data_base5()
+        await mycursor.execute(
+            "CREATE TABLE AppTeachers (teacher_id bigint, t_language varchar(22), t_day varchar(26), t_time varchar(15), t_type(13))")
+        await db.commit()
+        await mycursor.close()
+        await ctx.send("**Table AppTeachers created!**", delete_after=3)
+
+    @commands.command()
+    @commands.has_permissions(administrator=True)
+    async def drop_table_app_teachers(self, ctx):
+        await ctx.message.delete()
+        if not await self.check_table_app_teachers_exists():
+            return await ctx.send(f"\t# - The table AppTeachers does not exist!")
+        mycursor, db = await the_data_base5()
+        await mycursor.execute("DROP TABLE AppTeachers")
+        await db.commit()
+        await mycursor.close()
+        await ctx.send("**Table AppTeachers dropped!**", delete_after=3)
+
+    @commands.command()
+    @commands.has_permissions(administrator=True)
+    async def reset_table_app_teachers(self, ctx=None):
+        if ctx:
+            await ctx.message.delete()
+        if not await self.check_table_app_teachers_exists():
+            return await ctx.send("**Table AppTeachers doesn't exist yet!**", delete_after=3)
+        mycursor, db = await the_data_base5()
+        await mycursor.execute("DELETE FROM AppTeachers")
+        await db.commit()
+        await mycursor.close()
+        if ctx:
+            await ctx.send("**Table AppTeachers reset!**", delete_after=3)
+
+    async def delete_new_announcement(teacher_id: int, language: str, day: str, time: str, type: str):
+        mycursor, db = await the_data_base5()
+        await mycursor.execute(f"DELETE FROM AppTeachers WHERE teacher_id = {teacher_id} and t_language = '{language}' and t_day = '{day}' and t_time = '{time}' and t_type = '{type}'")
+        await db.commit()
+        await mycursor.close()
+    
+
+    async def check_table_app_teachers_exists(self):
+        mycursor, db = await the_data_base5()
+        await mycursor.execute(f"SHOW TABLE STATUS LIKE 'AppTeachers'")
+        table_info = await mycursor.fetchall()
+        await mycursor.close()
+        if len(table_info) == 0:
+            return False
+
+        else:
+            return True    
+
     # Add classes
     @commands.command()
     @commands.has_permissions(kick_members=True)
-    async def nclass(self, ctx, teacher: discord.Member, language, day, time, role: discord.Role, *desc: str):
-        await ctx.message.delete()
-        if len(desc) == 0:
-            desc = 'Unspecified'
-        else:
-            desc = ' '.join(desc)
+    async def nclass(self, ctx = None, teacher: discord.Member = None, language: str = None, day: str = None, time: str = None):
+        if ctx:
+            await ctx.message.delete()
+            if not teacher:
+                return await ctx.send("**Inform the teacher @ or ID!", delete_after=3)
+            elif not language:
+                return await ctx.send("**Inform a language!**", delete_after=3)
+            elif not day:
+                return await ctx.send("**Inform a day!**", delete_after=3)
+            elif not time:
+                return await ctx.send("**Inform the time!**", delete_after=3)
 
+        guild = self.client.get_guild(server_id)
         embed = discord.Embed(title='Upcoming Class',
-                              description=f":bust_in_silhouette: **Teacher:** {teacher.mention}\n:tongue: **Language:** {language.title()}\n:high_brightness: **Day:** {day.title()}\n:timer: **Time:** {time.upper()}\n:scroll: **Class Description:** {desc}\n`RSVP with ✅`",
-                              colour=discord.Colour.green(), timestamp=ctx.message.created_at)
+                              description=f":bust_in_silhouette: **Teacher:** {teacher.mention}\n:tongue: **Language:** {language.title()}\n:high_brightness: **Day:** {day.title()}\n:timer: **Time:** {time.upper()}\n:scroll: **Class Description:** Class for {language.title()} learners.\n`RSVP with ✅`",
+                              colour=discord.Colour.green(), timestamp=datetime.utcnow())
         embed.set_thumbnail(url=teacher.avatar_url)
-        the_channel = discord.utils.get(ctx.guild.channels, id=announce_channel)
-        the_class = await the_channel.send(content=f"{teacher.mention}, {role.mention}", embed=embed)
+        the_channel = discord.utils.get(guild.channels, id=announce_channel)
+        role = discord.utils.get(guild.roles, name=f"Studying {language.title()}")
+        if role:
+            the_class = await the_channel.send(content=f"{teacher.mention}, {role.mention}", embed=embed)
+        else:
+            the_class = await the_channel.send(content=f"{teacher.mention}", embed=embed)
         await the_class.edit(content=":busts_in_silhouette: **Attendees:**```->```", embed=embed)
         await the_class.add_reaction('✅')
         await add_class_announcement(teacher.id, the_class.id)
