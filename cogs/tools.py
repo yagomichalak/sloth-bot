@@ -176,7 +176,7 @@ class Tools(commands.Cog):
 
     @commands.command()
     @commands.has_permissions(administrator=True)
-    async def reset_table_the_teachers(self, ctx = None):
+    async def reset_table_the_teachers(self, ctx=None):
         if ctx:
             await ctx.message.delete()
         if not await self.check_table_the_teachers_exists():
@@ -200,7 +200,7 @@ class Tools(commands.Cog):
         teacher_role = discord.utils.get(ctx.guild.roles, id=teacher_role_id)
         teachers = [t for t in ctx.guild.members if teacher_role in t.roles]
         for t in teachers:
-            await mycursor.execute("INSERT INTO TheTeachers (teacher_id, teacher_name) VALUES (%s, %s)", (t.id, t.name))
+            await mycursor.execute("INSERT INTO TheTeachers (teacher_id, teacher_name) VALUES (%s, %s)", (t.id, t))
         await db.commit()
         await mycursor.close()
         return await ctx.send("**All teachers have been registered!**", delete_after=3)
