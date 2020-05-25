@@ -15,9 +15,10 @@ class NClassManagement(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         print('NClassManagement cog is ready!')
+        self.check_new_announcements.start()
 
 
-    @task.loop(seconds=60):
+    @task.loop(seconds=60)
     async def check_new_announcements(self):
         if not await self.check_table_app_teachers_exists():
             return
@@ -26,7 +27,7 @@ class NClassManagement(commands.Cog):
         if new_announcements:
             for na in new_announcements:
                 await self.nclass(teacher=na[0], language=na[1], day=na[2], time=na[3], type=na[4])
-                await self.delete_new_announcement(teacher=na[0], language=na[1], day=na[2], time=na[3], type=na[4])
+                await self.delete_new_announcement(teacher_id=na[0], language=na[1], day=na[2], time=na[3], type=na[4])
 
 
     @commands.command()
@@ -68,11 +69,18 @@ class NClassManagement(commands.Cog):
         if ctx:
             await ctx.send("**Table AppTeachers reset!**", delete_after=3)
 
-    async def delete_new_announcement(teacher_id: int, language: str, day: str, time: str, type: str):
+    async def delete_new_announcement(self, teacher_id: int, language: str, day: str, time: str, type: str):
         mycursor, db = await the_data_base5()
         await mycursor.execute(f"DELETE FROM AppTeachers WHERE teacher_id = {teacher_id} and t_language = '{language}' and t_day = '{day}' and t_time = '{time}' and t_type = '{type}'")
         await db.commit()
         await mycursor.close()
+
+    async def get_new_announcements(self):
+        mycursor, db = await the_data_base5()
+        await mycursor.execute("SELECT * FROM AppTeachers")
+        new_announcements = await mycursor.fetchall()
+        await mycursor.close()
+        return new_announcements
     
 
     async def check_table_app_teachers_exists(self):
