@@ -200,7 +200,7 @@ class Tools(commands.Cog):
         teacher_role = discord.utils.get(ctx.guild.roles, id=teacher_role_id)
         teachers = [t for t in ctx.guild.members if teacher_role in t.roles]
         for t in teachers:
-            await mycursor.execute("INSERT INTO TheTeachers (teacher_id, teacher_name) VALUES (%s, %s)", (t.id, t))
+            await mycursor.execute("INSERT INTO TheTeachers (teacher_id, teacher_name) VALUES (%s, %s)", (t.id, f"{t.name}#{t.discriminator}"))
         await db.commit()
         await mycursor.close()
         return await ctx.send("**All teachers have been registered!**", delete_after=3)
