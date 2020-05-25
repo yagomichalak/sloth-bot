@@ -3,8 +3,11 @@ from discord.ext import commands
 import asyncio
 from gtts import gTTS
 from googletrans import Translator
+from mysqldb2 import the_data_base5
 
 allowed_roles = [474774889778380820, 574265899801116673, 497522510212890655, 588752954266222602]
+teacher_role_id = 507298235766013981
+
 
 class Tools(commands.Cog):
     '''
@@ -36,11 +39,11 @@ class Tools(commands.Cog):
             await msg.edit(content='**Done!**')
         else:
             await ctx.send('Invalid parameters!')
-    
+
     # Bot leaves
     @commands.command()
     @commands.has_permissions(administrator=True)
-    async def leave(self, ctx, scrt = None):
+    async def leave(self, ctx, scrt=None):
         '''
         Makes the bot leave the voice channel.
         '''
@@ -54,7 +57,6 @@ class Tools(commands.Cog):
             await ctx.send('**Disconnected!**')
         else:
             await ctx.send("**I'm not even in a channel, lol!**")
-
 
     @commands.command()
     @commands.cooldown(1, 5, type=commands.BucketType.guild)
@@ -81,10 +83,10 @@ class Tools(commands.Cog):
         voicechannel = discord.utils.get(ctx.guild.channels, id=voice.channel.id)
         if voice_client is None:
             vc = await voicechannel.connect()
-            vc.play(discord.FFmpegPCMAudio(f"tts/audio.mp3"), after=lambda e: self.client.loop.create_task(self.leave(ctx, 'the bot')))
+            vc.play(discord.FFmpegPCMAudio(f"tts/audio.mp3"),
+                    after=lambda e: self.client.loop.create_task(self.leave(ctx, 'the bot')))
         else:
             return await ctx.send("**I'm already in a voice channel!**", delete_after=5)
-
 
     @commands.command()
     async def tr(self, ctx, language: str = None, *, message: str = None):
@@ -117,9 +119,8 @@ class Tools(commands.Cog):
         '''
         await ctx.send(f"**:ping_pong: Pong! {round(self.client.latency * 1000)}ms.**")
 
-
     @commands.command()
-    async def math(self, ctx, v1 = None, oper: str = None, v2 = None):
+    async def math(self, ctx, v1=None, oper: str = None, v2=None):
         await ctx.message.delete()
         if not v1:
             return await ctx.send("**Inform the values to calculate!**", delete_after=3)
@@ -134,17 +135,80 @@ class Tools(commands.Cog):
         except ValueError:
             return await ctx.send("**Invalid value parameter!**", delete_after=3)
 
-
-        operators = {'+': (lambda x,y: x+y), "plus": (lambda x,y: x+y), '-': (lambda x,y: x-y), "minus": (lambda x,y: x-y),
-                     '*': (lambda x,y: x*y), "times": (lambda x,y: x*y), "x": (lambda x,y: x*y), '/': (lambda x,y: x/y),
-                     '//': (lambda x, y: x//y), "%": (lambda x,y: x%y), }
+        operators = {'+': (lambda x, y: x + y), "plus": (lambda x, y: x + y), '-': (lambda x, y: x - y),
+                     "minus": (lambda x, y: x - y),
+                     '*': (lambda x, y: x * y), "times": (lambda x, y: x * y), "x": (lambda x, y: x * y),
+                     '/': (lambda x, y: x / y),
+                     '//': (lambda x, y: x // y), "%": (lambda x, y: x % y), }
         if not oper.lower() in operators.keys():
             return await ctx.send("**Invalid operator!**", delete_after=3)
 
-
-        embed = discord.Embed(title="__Math__", description=f"`{v1}` **{oper}** `{v2}` **=** `{operators[oper](v1,v2)}`", colour=ctx.author.color, timestamp=ctx.message.created_at)
+        embed = discord.Embed(title="__Math__",
+                              description=f"`{v1}` **{oper}** `{v2}` **=** `{operators[oper](v1, v2)}`",
+                              colour=ctx.author.color, timestamp=ctx.message.created_at)
         embed.set_author(name=ctx.author, icon_url=ctx.author.avatar_url)
         return await ctx.send(embed=embed)
+
+    @commands.command()
+    @commands.has_permissions(administrator=True)
+    async def create_table_the_teachers(self, ctx):
+        if await self.check_table_the_teachers_exists():
+            return await ctx.send(f"**The table TheTeachers already exists!**", delete_after=3)
+        mycursor, db = await the_data_base5()
+        await mycursor.execute(
+            "CREATE TABLE TheTeachers (teacher_id bigint default null, teacher_name varchar(50) default null)")
+        await db.commit()
+        await mycursor.close()
+        await ctx.send("**Table TheTeachers created!**", delete_after=3)
+
+    @commands.command()
+    @commands.has_permissions(administrator=True)
+    async def drop_table_TheTeachers(self, ctx):
+        if not await self.check_table_the_teachers_exists():
+            return await ctx.send(f"\t# - The table TheTeachers does not exist!")
+        mycursor, db = await the_data_base5()
+        await mycursor.execute("DROP TABLE TheTeachers")
+        await db.commit()
+        await mycursor.close()
+        await ctx.send("**Table TheTeachers dropped!**", delete_after=3)
+
+    @commands.command()
+    @commands.has_permissions(administrator=True)
+    async def reset_table_the_teachers(self, ctx):
+        if not await self.check_table_the_teachers_exists():
+            return await ctx.send("**Table TheTeachers doesn't exist yet!**", delete_after=3)
+        mycursor, db = await the_data_base5()
+        await mycursor.execute("DELETE FROM TheTeachers")
+        await db.commit()
+        await mycursor.close()
+        await ctx.send("**Table TheTeachers reset!**", delete_after=3)
+
+
+    @commands.command()
+    @commands.has_permissions(administrator=True)
+    async def register_teachers(self, ctx):
+        if not await self.check_table_the_teachers_exists():
+            return await ctx.send("**Table TheTeachers doesn't exist yet!**", delete_after=3)
+        mycursor, db = await the_data_base5()
+        teacher_role = discord.utils.get(ctx.guild.roles, id=teacher_role_id)
+        teachers = [t for t in ctx.guild.members if teacher_role in t.roles]
+        for t in teachers:
+            await mycursor.execute("INSERT INTO TheTeachers (teacher_id, teacher_name) VALUES (%s, %s)", (t.id, t.name))
+        await db.commit()
+        await mycursor.close()
+        return await ctx.send("**All teachers have been registered!**", delete_after=3)
+
+    async def check_table_the_teachers_exists(self):
+        mycursor, db = await the_data_base5()
+        await mycursor.execute(f"SHOW TABLE STATUS LIKE 'TheTeachers'")
+        table_info = await mycursor.fetchall()
+        await mycursor.close()
+        if len(table_info) == 0:
+            return False
+
+        else:
+            return True
+
 
 def setup(client):
     client.add_cog(Tools(client))
