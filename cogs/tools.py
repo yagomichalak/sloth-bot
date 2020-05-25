@@ -152,6 +152,7 @@ class Tools(commands.Cog):
     @commands.command()
     @commands.has_permissions(administrator=True)
     async def create_table_the_teachers(self, ctx):
+        await ctx.message.delete()
         if await self.check_table_the_teachers_exists():
             return await ctx.send(f"**The table TheTeachers already exists!**", delete_after=3)
         mycursor, db = await the_data_base5()
@@ -163,7 +164,8 @@ class Tools(commands.Cog):
 
     @commands.command()
     @commands.has_permissions(administrator=True)
-    async def drop_table_TheTeachers(self, ctx):
+    async def drop_table_the_teachers(self, ctx):
+        await ctx.message.delete()
         if not await self.check_table_the_teachers_exists():
             return await ctx.send(f"\t# - The table TheTeachers does not exist!")
         mycursor, db = await the_data_base5()
@@ -174,21 +176,26 @@ class Tools(commands.Cog):
 
     @commands.command()
     @commands.has_permissions(administrator=True)
-    async def reset_table_the_teachers(self, ctx):
+    async def reset_table_the_teachers(self, ctx = None):
+        if ctx:
+            await ctx.message.delete()
         if not await self.check_table_the_teachers_exists():
             return await ctx.send("**Table TheTeachers doesn't exist yet!**", delete_after=3)
         mycursor, db = await the_data_base5()
         await mycursor.execute("DELETE FROM TheTeachers")
         await db.commit()
         await mycursor.close()
-        await ctx.send("**Table TheTeachers reset!**", delete_after=3)
+        if ctx:
+            await ctx.send("**Table TheTeachers reset!**", delete_after=3)
 
 
     @commands.command()
     @commands.has_permissions(administrator=True)
     async def register_teachers(self, ctx):
+        await ctx.message.delete()
         if not await self.check_table_the_teachers_exists():
             return await ctx.send("**Table TheTeachers doesn't exist yet!**", delete_after=3)
+        await self.reset_table_the_teachers()
         mycursor, db = await the_data_base5()
         teacher_role = discord.utils.get(ctx.guild.roles, id=teacher_role_id)
         teachers = [t for t in ctx.guild.members if teacher_role in t.roles]
