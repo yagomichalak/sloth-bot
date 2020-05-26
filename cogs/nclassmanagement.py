@@ -38,7 +38,7 @@ class NClassManagement(commands.Cog):
             return await ctx.send(f"**The table AppTeachers already exists!**", delete_after=3)
         mycursor, db = await the_data_base5()
         await mycursor.execute(
-            "CREATE TABLE AppTeachers (teacher_id bigint, t_language varchar(22), t_day varchar(26), t_time varchar(15), t_type(13))")
+            "CREATE TABLE AppTeachers (teacher_id bigint, t_language varchar(22), t_day varchar(26), t_time varchar(15), t_type varchar(13))")
         await db.commit()
         await mycursor.close()
         await ctx.send("**Table AppTeachers created!**", delete_after=3)
