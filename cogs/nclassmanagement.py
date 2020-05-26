@@ -97,7 +97,7 @@ class NClassManagement(commands.Cog):
     # Add classes
     @commands.command()
     @commands.has_permissions(kick_members=True)
-    async def nclass(self, ctx = None, teacher: discord.Member = None, language: str = None, day: str = None, time: str = None):
+    async def nclass(self, ctx = None, teacher: discord.Member = None, language: str = None, day: str = None, time: str = None, type: str = None):
         if ctx:
             await ctx.message.delete()
             if not teacher:
@@ -111,7 +111,7 @@ class NClassManagement(commands.Cog):
 
         guild = self.client.get_guild(server_id)
         embed = discord.Embed(title='Upcoming Class',
-                              description=f":bust_in_silhouette: **Teacher:** {teacher.mention}\n:tongue: **Language:** {language.title()}\n:high_brightness: **Day:** {day.title()}\n:timer: **Time:** {time.upper()}\n:scroll: **Class Description:** Class for {language.title()} learners.\n`RSVP with ✅`",
+                              description=f":bust_in_silhouette: **Teacher:** {teacher.mention}\n:tongue: **Language:** {language.title()}\n:high_brightness: **Day:** {day.title()}\n:timer: **Time:** {time.upper()}\n:scroll: **Class Description:** {type.title()} class for {language.title()} learners.\n`RSVP with ✅`",
                               colour=discord.Colour.green(), timestamp=datetime.utcnow())
         embed.set_thumbnail(url=teacher.avatar_url)
         the_channel = discord.utils.get(guild.channels, id=announce_channel)
