@@ -26,7 +26,9 @@ class NClassManagement(commands.Cog):
         new_announcements = await self.get_new_announcements()
         if new_announcements:
             for na in new_announcements:
-                await self.nclass(ctx=None, teacher=na[0], language=na[1], day=na[2], time=na[3], type=na[4])
+                guild = self.client.get_guild(server_id)
+                member = discord.utils.get(guild.members, id=na[0])
+                await self.nclass(ctx=None, teacher=member, language=na[1], day=na[2], time=na[3], type=na[4])
                 await self.delete_new_announcement(teacher_id=na[0], language=na[1], day=na[2], time=na[3], type=na[4])
 
 
