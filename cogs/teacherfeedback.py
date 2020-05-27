@@ -286,13 +286,13 @@ class CreateClassroom(commands.Cog):
             await simple.add_reaction('❌')
 
             def check_reward_react(reaction, user):
-                if int(user.id) == int(teacher.id) and str(reaction.emoji) in ['✅', '❌']:
+                if user == teacher and str(reaction.emoji) in ['✅', '❌']:
                     return True
 
             while True:
-                m, s = divmod(int(active_users[class_index][3]), 60)
+                m, s = divmod(active_users[class_index][3], 60)
                 h, m = divmod(m, 60)
-                member = discord.utils.get(guild.members, id=int(active_users[class_index][0]))
+                member = discord.utils.get(guild.members, id=active_users[class_index][0])
                 if not member:
                     class_index += 1
                     continue
