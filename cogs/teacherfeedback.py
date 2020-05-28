@@ -286,7 +286,7 @@ class CreateClassroom(commands.Cog):
             await simple.add_reaction('❌')
 
             def check_reward_react(reaction, user):
-                if user == teacher and str(reaction.emoji) in ['✅', '❌']:
+                if user.id == teacher.id and str(reaction.emoji) in ['✅', '❌']:
                     return True
 
             while True:
