@@ -957,7 +957,7 @@ class CreateClassroom(commands.Cog):
 
     async def update_all_students_time(self, teacher_id: int, the_time: int):
         mycursor, db = await the_data_base4()
-        await mycursor.execute(f"UPDATE Students SET student_time = student_time + ({the_time} - student_ts), student_ts = NULL WHERE teacher_id = {teacher_id}")
+        await mycursor.execute(f"UPDATE Students SET student_time = student_time + ({the_time} - student_ts), student_ts = NULL WHERE teacher_id = {teacher_id} and student_ts is not NULL")
         await db.commit()
         await mycursor.close()
 
