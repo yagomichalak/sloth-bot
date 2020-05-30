@@ -294,8 +294,11 @@ class CreateClassroom(commands.Cog):
                 h, m = divmod(m, 60)
                 member = discord.utils.get(guild.members, id=active_users[class_index][0])
                 if not member:
-                    class_index += 1
-                    continue
+                    if class_index < (len(active_users) - 1)
+                        class_index += 1
+                        continue
+                    else:
+                        break
 
                 reward_embed = discord.Embed(
                     title=f"**[{class_index + 1}/{len(active_users)}] Reward __{member}__?**",
