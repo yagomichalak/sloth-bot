@@ -24,7 +24,7 @@ class Moderation(commands.Cog):
         if await self.get_muted_roles(member.id):
             muted_role = discord.utils.get(member.guild.roles, id=muted_role_id)
             await member.add_roles(muted_role)
-            general = discord.get.utils(member.guild.channels, id=general_channel)
+            general = discord.utils.get(member.guild.channels, id=general_channel)
             await general.send(f"**Stop right there, {member.mention}! ✋ You were muted, left and rejoined the server, but that won't work!**")
     
 
