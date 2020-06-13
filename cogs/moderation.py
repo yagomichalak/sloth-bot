@@ -5,7 +5,7 @@ from mysqldb2 import the_data_base3
 
 mod_log_id = 562195805272932372
 muted_role_id = 537763763982434304
-
+general_channel = 562019539135627276
 
 class Moderation(commands.Cog):
 
@@ -15,6 +15,18 @@ class Moderation(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         print('Moderation cog is ready!')
+
+    @commands.Cog.listener()
+    async def on_member_join(self, member):
+        if member.bot:
+            return
+
+        if await self.get_muted_roles(member.id):
+            muted_role = discord.utils.get(member.guild.roles, id=muted_role_id)
+            await member.add_roles(muted_role)
+            general = discord.get.utils(member.guild.channels, id=general_channel)
+            await general.send(f"**Stop right there, {member.mention}! ✋ You were muted, left and rejoined the server, but that won't work!**")
+    
 
     # Purge command
     @commands.command()
@@ -395,6 +407,8 @@ class Moderation(commands.Cog):
         await mycursor.execute(f"DELETE FROM mutedmember WHERE user_id = {user_id} and role_id = {role_id}")
         await db.commit()
         await mycursor.close()
+
+
 
 
     @commands.command()
