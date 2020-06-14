@@ -230,8 +230,7 @@ class Tools(commands.Cog):
             cogs_desc = ''
             for x in self.client.cogs:
                 cog_doc = self.client.cogs[x].__doc__
-                if cog_doc:
-                    cogs_desc += (f"{x}\n")
+                cogs_desc += (f"{x}\n")
             halp.add_field(name='__Cogs__',value=cogs_desc[0:len(cogs_desc)-1],inline=False)
 
             cmds_desc = ''
