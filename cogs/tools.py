@@ -224,7 +224,7 @@ class Tools(commands.Cog):
         if not co:
             halp = discord.Embed(title="Cog Listing and Uncategorized Commands.",
             description="```Use !help *cog* or !help *command* to find out more about them!\n```",
-            color=discord.Color.dark_green(),
+            color=discord.Color.green(),
             timestamp=ctx.message.created_at)
 
             cogs_desc = ''
@@ -246,12 +246,12 @@ class Tools(commands.Cog):
 
         # Checks if it's a command
         if command := self.client.get_command(co):
-            command_embed = discord.Embed(title=f"__Command:__ {command.name}", description=f"__**Description:**__\n```{command.help}```", color=discord.Color.dark_green(), timestamp=ctx.message.created_at)
+            command_embed = discord.Embed(title=f"__Command:__ {command.name}", description=f"__**Description:**__\n```{command.help}```", color=discord.Color.green(), timestamp=ctx.message.created_at)
             await ctx.send(embed=command_embed)
 
         # Checks if it's a cog
         elif cog := self.client.get_cog(co):
-            cog_embed = discord.Embed(title=f"__Cog:__ {cog.qualified_name}", description=f"__**Description:**__\n```{cog.description}```", color=discord.Color.dark_green(), timestamp=ctx.message.created_at)        
+            cog_embed = discord.Embed(title=f"__Cog:__ {cog.qualified_name}", description=f"__**Description:**__\n```{cog.description}```", color=discord.Color.green(), timestamp=ctx.message.created_at)        
             for c in cog.get_commands():
                 if not c.hidden:
                     cog_embed.add_field(name=c.name,value=c.help,inline=False)
