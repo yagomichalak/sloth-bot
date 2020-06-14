@@ -216,6 +216,52 @@ class Tools(commands.Cog):
         else:
             return True
 
+    @commands.command()
+    async def help(self, ctx, co: str = None) -> None:
+        '''Provides a description of all commands and cogs.
+        :param co: The cog or the command that you want to see. (Optional)
+        '''
+        if not co:
+            halp = discord.Embed(title="Cog Listing and Uncategorized Commands.",
+            description="```Use !help *cog* or !help *command* to find out more about them!\n```",
+            color=discord.Color.dark_green(),
+            timestamp=ctx.message.created_at)
+
+            cogs_desc = ''
+            for x in self.client.cogs:
+                if cog_doc := self.client.cogs[x].__doc__:
+                    cogs_desc += (f"{x}\n")
+            halp.add_field(name='__Cogs__',value=cogs_desc[0:len(cogs_desc)-1],inline=False)
+
+            cmds_desc = ''
+            for y in self.client.walk_commands():
+                if not y.cog_name and not y.hidden:
+                    if y.help:
+                        cmds_desc += (f"{y.name} - `{y.help}`"+'\n')
+                    else:
+                        cmds_desc += (f"{y.name}"+'\n')
+            halp.add_field(name='__Uncatergorized Commands__',value=cmds_desc[0:len(cmds_desc)-1],inline=False)
+            return await ctx.send('',embed=halp)
+
+
+        # Checks if it's a command
+        if command := self.client.get_command(co):
+            command_embed = discord.Embed(title=f"__Command:__ {command.name}", description=f"__**Description:**__\n```{command.help}```", color=discord.Color.dark_green(), timestamp=ctx.message.created_at)
+            await ctx.send(embed=command_embed)
+
+        # Checks if it's a cog
+        elif cog := self.client.get_cog(co):
+            cog_embed = discord.Embed(title=f"__Cog:__ {cog.qualified_name}", description=f"__**Description:**__\n```{cog.description}```", color=discord.Color.dark_green(), timestamp=ctx.message.created_at)        
+            for c in cog.get_commands():
+                if not c.hidden:
+                    cog_embed.add_field(name=c.name,value=c.help,inline=False)
+
+            await ctx.send(embed=cog_embed)
+
+        # Otherwise, it's an invalid parameter (Not found)
+        else:
+            await ctx.send(f"**Invalid parameter! `{co}` is neither a command nor a cog!**")
+
 
 def setup(client):
     client.add_cog(Tools(client))
