@@ -217,7 +217,7 @@ class Tools(commands.Cog):
             return True
 
     @commands.command()
-    async def help(self, ctx, co: str = None) -> None:
+    async def help(self, ctx, co: str = None):
         '''Provides a description of all commands and cogs.
         :param co: The cog or the command that you want to see. (Optional)
         '''
