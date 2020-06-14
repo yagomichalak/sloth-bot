@@ -44,6 +44,7 @@ token = read_token()
 
 # Making the client variable
 client = commands.Bot(command_prefix='z!')
+client.remove_command('help')
 
 
 # Tells when the bot is online
