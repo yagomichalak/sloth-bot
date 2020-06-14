@@ -247,12 +247,12 @@ class Tools(commands.Cog):
 
         # Checks if it's a command
         command = self.client.get_command(co)
+        cog = self.client.get_cog(co)
         if command:
             command_embed = discord.Embed(title=f"__Command:__ {command.name}", description=f"__**Description:**__\n```{command.help}```", color=discord.Color.green(), timestamp=ctx.message.created_at)
             await ctx.send(embed=command_embed)
 
         # Checks if it's a cog
-        cog = self.client.get_cog(co)
         elif cog:
             cog_embed = discord.Embed(title=f"__Cog:__ {cog.qualified_name}", description=f"__**Description:**__\n```{cog.description}```", color=discord.Color.green(), timestamp=ctx.message.created_at)
             for c in cog.get_commands():
