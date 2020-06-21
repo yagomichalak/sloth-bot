@@ -6,6 +6,7 @@ from mysqldb2 import the_data_base3
 mod_log_id = 562195805272932372
 muted_role_id = 537763763982434304
 general_channel = 562019539135627276
+last_deleted_message = []
 
 class Moderation(commands.Cog):
 
@@ -27,6 +28,24 @@ class Moderation(commands.Cog):
             general = discord.utils.get(member.guild.channels, id=general_channel)
             await general.send(f"**Stop right there, {member.mention}! ✋ You were muted, left and rejoined the server, but that won't work!**")
     
+    @commands.Cog.listener()
+    async def on_message_delete(self, message):
+        last_deleted_message.clear()
+        last_deleted_message.append(message)
+
+    @commands.command()
+    async def snipe(self, ctx):
+        '''
+        Snipes the last deleted message.
+        '''
+        message = last_deleted_message
+        if message:
+            message = message[0]
+            embed = discord.Embed(title="Snipped", description=f"**>>** {message.content}", color=message.author.color, timestamp=message.created_at)
+            embed.set_author(name=message.author,url=message.author.avatar_url, icon_url=message.author.avatar_url)
+            await ctx.send(embed=embed)
+        else:
+            await ctx.send("**I couldn't snipe any messages!**")
 
     # Purge command
     @commands.command()
