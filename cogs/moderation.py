@@ -30,6 +30,8 @@ class Moderation(commands.Cog):
     
     @commands.Cog.listener()
     async def on_message_delete(self, message):
+        if message.author.bot:
+            return
         last_deleted_message.clear()
         last_deleted_message.append(message)
 
