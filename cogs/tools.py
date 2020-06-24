@@ -232,11 +232,10 @@ class Tools(commands.Cog):
             color=discord.Color.green(),
             timestamp=ctx.message.created_at)
 
-            cogs_desc = ''
+            cogs_desc = []
             for x in self.client.cogs:
-                cog_doc = self.client.cogs[x].__doc__
-                cogs_desc += (f"{x}\n")
-            halp.add_field(name='__Cogs__',value=cogs_desc[0:len(cogs_desc)-1],inline=False)
+                cogs_desc.append(x)
+            halp.add_field(name='__Cogs__',value=f"**>** {', '.join(cogs_desc)}",inline=False)
 
             cmds_desc = ''
             for y in self.client.walk_commands():
