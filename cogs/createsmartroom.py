@@ -648,7 +648,7 @@ class CreateSmartRoom(commands.Cog):
 		user_galaxy = await self.get_galaxy_txt(ctx.author.id, ctx.channel.category.id)
 		if user_galaxy:
 			user_category = discord.utils.get(ctx.guild.categories, id=user_galaxy[0][1])
-			for room in all_rooms:
+			for room in user_galaxy:
 				for i in range(2, 6):
 					# id, cat, vc, txt1, txt2, txt3, ts
 					channel = self.client.get_channel(room[i])
