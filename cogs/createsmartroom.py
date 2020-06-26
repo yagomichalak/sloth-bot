@@ -503,7 +503,7 @@ class CreateSmartRoom(commands.Cog):
 			return await ctx.send("**Table __PremiumVc__ already exists!**")
 
 		mycursor, db = await the_data_base5()
-		await mycursor.execute("CREATE TABLE PremiumVc (user_id INT, user_vc INT, user_txt INT)")
+		await mycursor.execute("CREATE TABLE PremiumVc (user_id BIGINT, user_vc BIGINT, user_txt BIGINT)")
 		await db.commit()
 		await mycursor.close()
 		return await ctx.send("**Table __PremiumVc__ created!**")
@@ -570,7 +570,7 @@ class CreateSmartRoom(commands.Cog):
 			return await ctx.send("**Table __GalaxyVc__ already exists!**")
 
 		mycursor, db = await the_data_base5()
-		await mycursor.execute("CREATE TABLE GalaxyVc (user_id INT, user_cat INT, user_vc INT, user_txt1 INT, user_txt2 INT, user_txt3 INT, user_ts INT)")
+		await mycursor.execute("CREATE TABLE GalaxyVc (user_id BIGINT, user_cat BIGINT, user_vc BIGINT, user_txt1 BIGINT, user_txt2 BIGINT, user_txt3 BIGINT, user_ts BIGINT)")
 		await db.commit()
 		await mycursor.close()
 		return await ctx.send("**Table __GalaxyVc__ created!**")
