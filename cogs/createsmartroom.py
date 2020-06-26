@@ -645,7 +645,7 @@ class CreateSmartRoom(commands.Cog):
 		if not member:
 			return await ctx.send("**Inform a member to allow!**")
 
-		user_galaxy = await self.get_galaxy_txt(ctx.author.id, ctx.channel.id)
+		user_galaxy = await self.get_galaxy_txt(ctx.author.id, ctx.channel.category.id)
 		if user_galaxy:
 			user_category = discord.utils.get(ctx.guild.categories, id=user_galaxy[0][1])
 			await user_category.set_permissions(
