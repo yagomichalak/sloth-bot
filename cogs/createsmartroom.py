@@ -648,9 +648,19 @@ class CreateSmartRoom(commands.Cog):
 		user_galaxy = await self.get_galaxy_txt(ctx.author.id, ctx.channel.category.id)
 		if user_galaxy:
 			user_category = discord.utils.get(ctx.guild.categories, id=user_galaxy[0][1])
+			for room in all_rooms:
+				for i in range(2, 6):
+					# id, cat, vc, txt1, txt2, txt3, ts
+					channel = self.client.get_channel(room[i])
+					try:
+						await channel.set_permissions(
+				member, read_messages=True, send_messages=True, connect=True, speak=True, view_channel=True)
+					except Exception:
+						pass
 			await user_category.set_permissions(
 				member, read_messages=True, send_messages=True, connect=True, speak=True, view_channel=True)
 			return await ctx.send(f"**{member.mention} has been allowed!**")
+
 
 		await ctx.send("**This is not your room, so you cannot allow someone in it!**")
 
