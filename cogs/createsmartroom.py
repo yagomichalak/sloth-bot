@@ -40,7 +40,7 @@ class CreateSmartRoom(commands.Cog):
 					pass
 
 			member = self.client.get_user(room[0])
-			category = discord.utils.get(member.guild.categories, id=room[1])
+			category = discord.utils.get(channel.guild.categories, id=room[1])
 			try:
 				await category.delete()
 			except Exception:
@@ -625,7 +625,7 @@ class CreateSmartRoom(commands.Cog):
 
 	async def get_all_galaxy_rooms(self, the_time: int):
 		mycursor, db = await the_data_base5()
-		await mycursor.execute(f"SELECT * FROM GalaxyVc WHERE {the_time} - user_ts >= 50400")
+		await mycursor.execute(f"SELECT * FROM GalaxyVc WHERE {the_time} - user_ts >= 1209600")
 		rooms = await mycursor.fetchall()
 		await mycursor.close()
 		return rooms
