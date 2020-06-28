@@ -25,28 +25,6 @@ class Embeds(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.command()
-    async def event_cmds(self, ctx):
-        embed = discord.Embed(title="Calendar's event command list", description="Some useful event commands",
-                              colour=discord.Colour.dark_green())
-        embed.add_field(name='(Admin+) !add_event [event] [day] [time]', value='Adds a new event.', inline=False)
-        embed.add_field(name='(Admin+) !remove_event [id]', value='Removes an existent event.', inline=False)
-        embed.add_field(name='(Admin+) !update_event_name [id] [new_name]',
-                        value='Updates the name of an existent event.',
-                        inline=False)
-        embed.add_field(name='(Admin+) !update_event_day [id] [new_day]', value='Updates the day of an existent event.',
-                        inline=False)
-        embed.add_field(name='(Admin+) !update_event_time [id] [new_time]',
-                        value='Updates the time of an existent event.',
-                        inline=False)
-        embed.add_field(name="!event_cmds", value="Shows this.", inline=False)
-        embed.set_author(name='DNK',
-                         icon_url='https://cdn.discordapp.com/avatars/550057247456100353/e3e2a56379f6457066a630c0eb68d34e.png?size=256')
-        embed.set_footer(text=ctx.author.guild.name)
-        embed.set_thumbnail(
-            url='https://cdn.discordapp.com/attachments/673592568268980244/673685902312341509/a_0fc103e90b7fcbea53f42dd59d17e920.gif')
-        await ctx.send(embed=embed)
-
-    @commands.command()
     @commands.has_permissions(administrator=True)
     async def embed_melly(self, ctx):
         await ctx.message.delete()
