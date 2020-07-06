@@ -77,7 +77,7 @@ class ReportSupport(commands.Cog):
 			guild.default_role: discord.PermissionOverwrite(
 				read_messages=False, send_messages=False, connect=False, view_channel=False),
 			member: discord.PermissionOverwrite(
-				read_messages=True, send_messages=True, connect=False, view_channel=True)
+				read_messages=True, send_messages=True, connect=False, view_channel=True),
 			moderator: discord.PermissionOverwrite(
 				read_messages=True, send_messages=True, connect=False, view_channel=True, manage_messages=True)
 			}
