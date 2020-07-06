@@ -5,7 +5,6 @@ import asyncio
 from extra.useful_variables import list_of_commands
 
 reportsupport_channel_id = 729454413290143774
-report_someone_cat_id = 562019311783510039
 dnk_id = 647452832852869120
 case_cat_id = 562939721253126146
 
@@ -28,7 +27,7 @@ class ReportSupport(commands.Cog):
 		# Checks if the reaction was in the RepportSupport channel
 		channel = self.client.get_channel(payload.channel_id)
 		print(channel)
-		if not channel or str(channel).startswith('Direct Message with') or not channel.category or channel.category.id != reportsupport_channel_id:
+		if not channel or str(channel).startswith('Direct Message with')  or channel.id != reportsupport_channel_id:
 			return
 
 		# Deletes the reaction
@@ -56,7 +55,7 @@ class ReportSupport(commands.Cog):
 			await member.send(f"**You can apply for being a teacher by filling out this form:**\n{link}")
 		elif mid == 729456191733760030 and str(emoji) == '🤖':
 			# Order a bot
-			dnk = self.client.get_user(647452832852869120)
+			dnk = self.client.get_user(dnk_id)
 			embed = discord.Embed(title="New possible order!", 
 				description=f"{member.mention} wants to order something from you!", 
 				color=member.color)
@@ -72,7 +71,7 @@ class ReportSupport(commands.Cog):
 			# Report someone
 			case_cat = discord.utils.get(guild.categories, id=case_cat_id)
 			counter = await self.get_case_number()
-			await guild.create_text_channel(name=f"case-{counter[0][0]}", category=case_cat_id)
+			await guild.create_text_channel(name=f"case-{counter[0][0]}", category=case_cat)
 			await self.increase_case_number()
 			await self.insert_user_open_channel(member.id, channel.id)
 
