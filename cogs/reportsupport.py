@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 from mysqldb2 import the_data_base3
 import asyncio
-from data.useful_variables import list_of_commands
+from extra.useful_variables import list_of_commands
 
 reportsupport_channel_id = 729454413290143774
 report_someone_cat_id = 562019311783510039
