@@ -107,7 +107,7 @@ async def on_member_remove(member):
     await channel.send(content=f"{cosmos.mention}", embed=embed)
 
 
-@client.event
+'''@client.event
 async def on_message(message):
     if message.author.bot:
         return
@@ -131,7 +131,7 @@ async def on_message(message):
             await the_channel.send(f'{moderators.mention}, {cosmos.mention}')
             await the_channel.send(embed=embed_report)
 
-    await client.process_commands(message)
+    await client.process_commands(message)'''
 
 
 # Delete messages log
