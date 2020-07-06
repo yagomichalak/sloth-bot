@@ -33,7 +33,7 @@ class ReportSupport(commands.Cog):
 
 		# Deletes the reaction
 		msg = await channel.fetch_message(payload.message_id)
-		await msg.remove_reaction(payload.emoji.name, payload.member)
+		await msg.remove_reaction(payload.emoji, payload.member)
 
 		# Checks if the member does not have kick_member permissions (not from the staff)
 		member = payload.member
@@ -81,7 +81,8 @@ class ReportSupport(commands.Cog):
 			moderator: discord.PermissionOverwrite(
 				read_messages=True, send_messages=True, connect=False, view_channel=True, manage_messages=True)
 			}
-			await guild.create_text_channel(name=f"case-{counter[0][0]}", category=case_cat, overwrites=overwrites)
+			channel = await guild.create_text_channel(name=f"case-{counter[0][0]}", category=case_cat, overwrites=overwrites)
+			await channel.send(f"{member.mention}, {moderator.mention}")
 			await self.increase_case_number()
 			await self.insert_user_open_channel(member.id, channel.id)
 
@@ -242,9 +243,10 @@ class ReportSupport(commands.Cog):
 				timestamp=ctx.message.created_at)
 			confirmation = await ctx.send(content=ctx.author.mention, embed=embed)
 			await confirmation.add_reaction('✅')
+			await confirmation.add_reaction('❌')
 			try:
-				reaction, user = await self.client.loop.create_task('reaction_add', timeout=20, 
-					check=lambda r, u: u == ctx.author and r.message.channel == ctx.channel and str(r.emoji) == '✅')
+				reaction, user = await self.client.wait_for('reaction_add', timeout=20, 
+					check=lambda r, u: u == ctx.author and r.message.channel == ctx.channel and str(r.emoji) in ['✅', '❌'])
 			except asyncio.TimeoutError:
 				embed = discord.Embed(title="Confirmation",
 				description="You took too long to answer the question; not deleting it!",
@@ -252,10 +254,15 @@ class ReportSupport(commands.Cog):
 				timestamp=ctx.message.created_at)
 				return await confirmation.edit(content=ctx.author.mention, embed=embed)
 			else:
-				embed.description = f"**Channel {ctx.channel.mention} is being deleted...**"
-				await confirmation.edit(content=ctx.author.mention, embed=embed)
-				await asyncio.sleep(3)
-				await channel.delete()
+				if str(reaction.emoji) == '✅':
+					embed.description = f"**Channel {ctx.channel.mention} is being deleted...**"
+					await confirmation.edit(content=ctx.author.mention, embed=embed)
+					await asyncio.sleep(3)
+					await channel.delete()
+					await self.remove_user_open_channel(member.id)
+				else:
+					embed.description = "Not deleting it!"
+					await confirmation.edit(content='', embed=embed)
 		else:
 			await ctx.send(f"**What do you think that you are doing? You cannot delete this channel, {ctx.author.mention}!")
 
