@@ -26,7 +26,7 @@ class ReportSupport(commands.Cog):
 
 		# Checks if the reaction was in the RepportSupport channel
 		channel = self.client.get_channel(payload.channel_id)
-		print(channel)
+		#print(channel)
 		if not channel or str(channel).startswith('Direct Message with')  or channel.id != reportsupport_channel_id:
 			return
 
@@ -75,7 +75,7 @@ class ReportSupport(commands.Cog):
 			await self.increase_case_number()
 			await self.insert_user_open_channel(member.id, channel.id)
 
-	async def member_has_open_channel(member_id: int):
+	async def member_has_open_channel(self, member_id: int):
 		mycursor, db = await the_data_base3()
 		await mycursor.execute(f"SELECT * FROM OpenChannels WHERE user_id = {member_id}")
 		user = await mycursor.fetchall()
