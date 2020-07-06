@@ -61,8 +61,8 @@ class ReportSupport(commands.Cog):
 				color=member.color)
 			embed.set_thumbnail(url=member.avatar_url)
 			await dnk.send(embed=embed)
-			await self.dnk_embed(member)
 			await member.send("**DNK is going to DM you as soon as possible!**")
+			await self.dnk_embed(member)
 		elif mid == 729458094194688060 and str(emoji) == '❤️':
 			# Support us on Patreon
 			await member.send(f"**Support us on Patreon!**\nhttps://www.patreon.com/Languagesloth")
