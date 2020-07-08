@@ -48,18 +48,21 @@ class Tools(commands.Cog):
     # Bot leaves
     @commands.command()
     @commands.has_permissions(administrator=True)
-    async def leave(self, ctx, scrt=None):
+    async def leave(self, ctx):
         '''
         Makes the bot leave the voice channel.
         '''
         guild = ctx.message.guild
         voice_client = guild.voice_client
+        user_voice = ctx.message.author.voice
+        #voice_client: discord.VoiceClient = discord.utils.get(self.client.voice_clients, guild=ctx.guild)
 
         if voice_client:
-            await voice_client.disconnect()
-            if scrt == 'the bot':
-                return
-            await ctx.send('**Disconnected!**')
+            if user_voice.channel == voice_client.channel:
+                await voice_client.disconnect()
+                await ctx.send('**Disconnected!**')
+            else:
+                await ctx.send("**You're not in the bot's voice channel!**")
         else:
             await ctx.send("**I'm not even in a channel, lol!**")
 
@@ -81,17 +84,28 @@ class Tools(commands.Cog):
         voice = ctx.message.author.voice
         voice_client = ctx.message.guild.voice_client
 
-        tts = gTTS(text=message, lang=language)
-        tts.save(f'tts/audio.mp3')
+
+        # Checks if the user is in a voice channel
         if voice is None:
             return await ctx.send("**You're not in a voice channel**")
-        voicechannel = discord.utils.get(ctx.guild.channels, id=voice.channel.id)
-        if voice_client is None:
-            vc = await voicechannel.connect()
-            vc.play(discord.FFmpegPCMAudio(f"tts/audio.mp3"),
-                    after=lambda e: self.client.loop.create_task(self.leave(ctx, 'the bot')))
+        voice_client: discord.VoiceClient = discord.utils.get(self.client.voice_clients, guild=ctx.guild)
+
+        # Checks if the bot is in a voice channel
+        if not voice_client:
+            await voice.channel.connect()
+            voice_client: discord.VoiceClient = discord.utils.get(self.client.voice_clients, guild=ctx.guild)
+
+        # Checks if the bot is in the same voice channel that the user
         else:
-            return await ctx.send("**I'm already in a voice channel!**", delete_after=5)
+            if voice.channel == voice_client.channel:
+                # Plays the song
+                if not voice_client.is_playing():
+                    tts = gTTS(text=message, lang=language)
+                    tts.save(f'tts/audio.mp3')
+                    audio_source = discord.FFmpegPCMAudio('tts/audio.mp3')
+                    voice_client.play(audio_source, after=lambda e: print('finished playing the tts!'))
+            else:
+                await ctx.send("**The bot is in a different voice channel!**")
 
     @commands.command()
     async def tr(self, ctx, language: str = None, *, message: str = None):
