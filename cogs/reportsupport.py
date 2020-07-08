@@ -264,7 +264,7 @@ class ReportSupport(commands.Cog):
 					embed.description = "Not deleting it!"
 					await confirmation.edit(content='', embed=embed)
 		else:
-			await ctx.send(f"**What do you think that you are doing? You cannot delete this channel, {ctx.author.mention}!")
+			await ctx.send(f"**What do you think that you are doing? You cannot delete this channel, {ctx.author.mention}!**")
 
 
 	async def dnk_embed(self, member):
@@ -285,7 +285,7 @@ class ReportSupport(commands.Cog):
 
 			try:
 				reaction, user = await self.client.wait_for('reaction_add',
-					timeout=20,
+					timeout=60,
 					check=lambda r, u: u == member and str(r.message.channel) == str(the_msg.channel) and str(r.emoji) in ['⬅️', '➡️'])
 			except asyncio.TimeoutError:
 				await the_msg.remove_reaction('⬅️', self.client.user)
