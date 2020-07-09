@@ -82,9 +82,11 @@ class ReportSupport(commands.Cog):
 				read_messages=True, send_messages=True, connect=False, view_channel=True, manage_messages=True)
 			}
 			channel = await guild.create_text_channel(name=f"case-{counter[0][0]}", category=case_cat, overwrites=overwrites)
-			await channel.send(f"{member.mention}, {moderator.mention}")
-			await self.increase_case_number()
 			await self.insert_user_open_channel(member.id, channel.id)
+			await self.increase_case_number()
+			embed = discord.Embed(title="Report Support!", description="Please, try to explain what happened and who do you wanna report.",
+				color=discord.Color.red())
+			await channel.send(content=f"{member.mention}, {moderator.mention}", embed=embed)
 
 	async def member_has_open_channel(self, member_id: int):
 		mycursor, db = await the_data_base3()
