@@ -215,7 +215,6 @@ class ReportSupport(commands.Cog):
 		await mycursor.execute(f"INSERT INTO OpenChannels (user_id, channel_id) VALUES (%s, %s)", (member_id, channel_id))
 		await db.commit()
 		await mycursor.close()
-		return user
 
 	async def remove_user_open_channel(self, member_id: int):
 		mycursor, db = await the_data_base3()
