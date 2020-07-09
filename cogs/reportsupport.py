@@ -74,15 +74,14 @@ class ReportSupport(commands.Cog):
 			case_cat = discord.utils.get(guild.categories, id=case_cat_id)
 			counter = await self.get_case_number()
 			moderator = discord.utils.get(guild.roles, id=moderator_role_id)
-			overwrites = {
-			guild.default_role: discord.PermissionOverwrite(
-				read_messages=False, send_messages=False, connect=False, view_channel=False),
+			overwrites = {guild.default_role: discord.PermissionOverwrite(
+				read_messages=False, send_messages=False, connect=False, view_channel=False), 
 			member: discord.PermissionOverwrite(
-				read_messages=True, send_messages=True, connect=False, view_channel=True),
+				read_messages=True, send_messages=True, connect=False, view_channel=True), 
 			moderator: discord.PermissionOverwrite(
-				read_messages=True, send_messages=True, connect=False, view_channel=True, manage_messages=True)
-			}
-			the_channel = await case_cat.create_text_channel(name=f"case {counter[0][0]}")
+				read_messages=True, send_messages=True, connect=False, view_channel=True, manage_messages=True)}
+			the_channel = await case_cat.create_text_channel(name=f"case-{counter[0][0]}")
+			print('created!')
 			await self.insert_user_open_channel(member.id, the_channel.id)
 			await self.increase_case_number()
 			embed = discord.Embed(title="Report Support!", description=f"Please, {member.mention}, try to explain what happened and who you wanna report.",
