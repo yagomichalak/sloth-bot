@@ -190,6 +190,8 @@ async def on_command_error(ctx, error):
     if isinstance(error, commands.MissingAnyRole):
         await ctx.send(error, delete_after=3)
 
+    print(error)
+
 
 # Members status update
 @tasks.loop(seconds=10)
