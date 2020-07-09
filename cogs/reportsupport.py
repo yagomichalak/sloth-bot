@@ -82,14 +82,14 @@ class ReportSupport(commands.Cog):
 			moderator: discord.PermissionOverwrite(
 				read_messages=True, send_messages=True, connect=False, view_channel=True, manage_messages=True)
 			}
-			channel = await guild.create_text_channel(name=f"case {counter[0][0]}", category=case_cat)
-			await self.insert_user_open_channel(member.id, channel.id)
+			the_channel = await case_cat.create_text_channel(name=f"case {counter[0][0]}")
+			await self.insert_user_open_channel(member.id, the_channel.id)
 			await self.increase_case_number()
 			embed = discord.Embed(title="Report Support!", description=f"Please, {member.mention}, try to explain what happened and who you wanna report.",
 				color=discord.Color.red())
-			await channel.send(content=f"{member.mention}, {moderator.mention}", embed=embed)
+			await the_channel.send(content=f"{member.mention}, {moderator.mention}", embed=embed)
 			try:
-				await channel.edit(overwrites=overwrites)
+				await the_channel.edit(overwrites=overwrites)
 			except Exception:
 				pass
 
