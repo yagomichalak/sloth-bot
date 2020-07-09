@@ -80,7 +80,7 @@ class ReportSupport(commands.Cog):
 				read_messages=True, send_messages=True, connect=False, view_channel=True), 
 			moderator: discord.PermissionOverwrite(
 				read_messages=True, send_messages=True, connect=False, view_channel=True, manage_messages=True)}
-			the_channel = await case_cat.create_text_channel(name=f"case-{counter[0][0]}")
+			the_channel = await guild.create_text_channel(name=f"case-{counter[0][0]}", category=case_cat)
 			print('created!')
 			await self.insert_user_open_channel(member.id, the_channel.id)
 			await self.increase_case_number()
