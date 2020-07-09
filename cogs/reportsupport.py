@@ -46,9 +46,6 @@ class ReportSupport(commands.Cog):
 		mid = payload.message_id
 		emoji = payload.emoji
 		guild = self.client.get_guild(payload.guild_id)
-		if await self.member_has_open_channel(member.id):
-			embed = discord.Embed(title="Error!", description="**You already has an open channel!**", color=discord.Color.red())
-			return await member.send(embed=embed)
 
 		if mid == 729455417742327879 and str(emoji) == '✅':
 			# Apply to be a teacher
@@ -69,6 +66,10 @@ class ReportSupport(commands.Cog):
 			await member.send(f"**Support us on Patreon!**\nhttps://www.patreon.com/Languagesloth")
 
 		elif mid == 729458598966460426 and str(emoji) == '<:ban:593407893248802817>' and not perms.kick_members:
+			if await self.member_has_open_channel(member.id):
+				embed = discord.Embed(title="Error!", description="**You already has an open channel!**", color=discord.Color.red())
+				return await member.send(embed=embed)
+
 			# Report someone
 			case_cat = discord.utils.get(guild.categories, id=case_cat_id)
 			counter = await self.get_case_number()
@@ -81,7 +82,9 @@ class ReportSupport(commands.Cog):
 			moderator: discord.PermissionOverwrite(
 				read_messages=True, send_messages=True, connect=False, view_channel=True, manage_messages=True)
 			}
-			channel = await guild.create_text_channel(name=f"case-{counter[0][0]}", category=case_cat, overwrites=overwrites)
+			print(member.id)
+			channel = await guild.create_text_channel(name=f"case-{counter[0][0]}", overwrites=overwrites, category=case_cat)
+			print(channel.id)
 			await self.insert_user_open_channel(member.id, channel.id)
 			await self.increase_case_number()
 			embed = discord.Embed(title="Report Support!", description="Please, try to explain what happened and who do you wanna report.",
