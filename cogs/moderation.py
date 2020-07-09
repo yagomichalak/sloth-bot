@@ -178,6 +178,7 @@ class Moderation(commands.Cog):
         Mutes a member for a determined amount of time.
         :param member: The @ or the ID of the user to tempmute.
         :param minutes: The amount of minutes that the user will be muted.
+        :param reason: The reason for the tempmute.
         '''
         await ctx.message.delete()
         if minutes == 0:
