@@ -264,7 +264,7 @@ class SlothCurrency(commands.Cog):
     @commands.has_permissions(administrator=True)
     async def add_member(self, ctx, member: discord.Member = None, *, item_name: str = None):
         '''
-        Gives a member an item.
+        (ADM) Gives a member an item.
         :param member: The member to give the item.
         :param item_name: The name of the item.
         '''
@@ -289,7 +289,7 @@ class SlothCurrency(commands.Cog):
     @commands.has_permissions(administrator=True)
     async def remove_member_item(self, ctx, member: discord.Member = None, *, item_name: str = None):
         '''
-        Removes an item from the member.
+        (ADM) Removes an item from the member.
         :param member: The member to remove the item.
         :param item_name: The name of the item.
         '''
@@ -651,7 +651,7 @@ class SlothCurrency(commands.Cog):
     @commands.has_permissions(administrator=True)
     async def add_money(self, ctx, member: discord.Member = None, money: int = None):
         '''
-        Adds money to a member.
+        (ADM) Adds money to a member.
         :param member: The member to add money to.
         :param money: The amount of money to add.
         '''
