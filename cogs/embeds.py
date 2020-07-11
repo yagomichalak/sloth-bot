@@ -3,6 +3,9 @@ from discord.ext import commands
 
 
 class Embeds(commands.Cog):
+    '''
+    A cog related to embedded messages.
+    '''
 
     def __init__(self, client):
         self.client = client
@@ -16,6 +19,9 @@ class Embeds(commands.Cog):
     @commands.command()
     @commands.has_permissions(administrator=True)
     async def embed(self, ctx):
+        '''
+        (ADM) Sends an embedded message.
+        '''
         await ctx.message.delete()
         if len(ctx.message.content.split()) < 2:
             return await ctx.send('You must inform all parameters!')
@@ -27,6 +33,9 @@ class Embeds(commands.Cog):
     @commands.command()
     @commands.has_permissions(administrator=True)
     async def embed_melly(self, ctx):
+        '''
+        (ADM) Sends Melly's moderator card.
+        '''
         await ctx.message.delete()
         embed = discord.Embed(description="**Staff Card**", colour=5833416, timestamp=ctx.message.created_at)
         embed.add_field(name="👤 Username : WonderfulMelly®💊🇺🇸🎭🇪🇦#3737",
@@ -49,6 +58,9 @@ class Embeds(commands.Cog):
     @commands.command()
     @commands.has_permissions(administrator=True)
     async def embed_jacob(self, ctx):
+        '''
+        (ADM) Sends Jacob's moderator card.
+        '''
         await ctx.message.delete()
         embed = discord.Embed(description="**Staff Card**", colour=5833416, timestamp=ctx.message.created_at)
         embed.add_field(name="👤 Username : Jacob#7638",
@@ -71,6 +83,9 @@ class Embeds(commands.Cog):
     @commands.command()
     @commands.has_permissions(administrator=True)
     async def embed_rules(self, ctx):
+        '''
+        (ADM) Sends an embedded message containing all rules in it.
+        '''
         await ctx.message.delete()
         embed = discord.Embed(title="Discord’s Terms of Service and Community Guidelines",
                               description="Rules Of The Server", url='https://discordapp.com/guidelines',
@@ -118,6 +133,9 @@ class Embeds(commands.Cog):
     @commands.command()
     @commands.has_permissions(administrator=True)
     async def embed_join_us(self, ctx):
+        '''
+        (ADM) Sends the join-us embedded message.
+        '''
         await ctx.message.delete()
         embed = discord.Embed(title="Join our Staff!",
                               description="```We depend on people like you to keep this community running, and any help is welcome. if you feel like you would like to contribute apply to any of the positions below: ```",

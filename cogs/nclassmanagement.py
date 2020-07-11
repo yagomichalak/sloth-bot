@@ -8,6 +8,9 @@ announce_channel = 689918515129352213
 server_id = 459195345419763713
 
 class NClassManagement(commands.Cog):
+    '''
+    Commands related to the management of class announcements.
+    '''
 
     def __init__(self, client):
         self.client = client
@@ -32,9 +35,12 @@ class NClassManagement(commands.Cog):
                 await self.delete_new_announcement(teacher_id=na[0], language=na[1], day=na[2], time=na[3], type=na[4])
 
 
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
     async def create_table_app_teachers(self, ctx):
+        '''
+        (ADM) Creates the AppTeachers table.
+        '''
         await ctx.message.delete()
         if await self.check_table_app_teachers_exists():
             return await ctx.send(f"**The table AppTeachers already exists!**", delete_after=3)
@@ -45,9 +51,12 @@ class NClassManagement(commands.Cog):
         await mycursor.close()
         await ctx.send("**Table AppTeachers created!**", delete_after=3)
 
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
     async def drop_table_app_teachers(self, ctx):
+        '''
+        (ADM) Drops the AppTeachers table.
+        '''
         await ctx.message.delete()
         if not await self.check_table_app_teachers_exists():
             return await ctx.send(f"\t# - The table AppTeachers does not exist!")
@@ -57,9 +66,12 @@ class NClassManagement(commands.Cog):
         await mycursor.close()
         await ctx.send("**Table AppTeachers dropped!**", delete_after=3)
 
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
     async def reset_table_app_teachers(self, ctx=None):
+        '''
+        (ADM) Resets the AppTeachers table.
+        '''
         if ctx:
             await ctx.message.delete()
         if not await self.check_table_app_teachers_exists():
@@ -100,6 +112,14 @@ class NClassManagement(commands.Cog):
     @commands.command()
     @commands.has_permissions(kick_members=True)
     async def nclass(self, ctx = None, teacher: discord.Member = None, language: str = None, day: str = None, time: str = None, type: str = None):
+        '''
+        (MOD) Announces a new class in the class-announcement channel.
+        :param teacher: The teacher that is will give the class.
+        :param language: The language that will be taught in the class.
+        :param day: The day of the class.
+        :param time: The time at which the class will happen.
+        :param type: The type of class; pronunciation, grammar.
+        '''        
         if ctx:
             await ctx.message.delete()
             if not teacher:
@@ -129,6 +149,9 @@ class NClassManagement(commands.Cog):
     @commands.command()
     @commands.has_permissions(kick_members=True)
     async def show_announ(self, ctx):
+        '''
+        (MOD) Shows all announcements that are in the system.
+        '''
         await ctx.message.delete()
         announcements = await show_class_announcements()
         if len(announcements) > 0:
@@ -144,6 +167,10 @@ class NClassManagement(commands.Cog):
     @commands.command()
     @commands.has_permissions(kick_members=True)
     async def del_announ(self, ctx, class_id: int = None):
+        '''
+        (MOD) Deletes a given announcement from the system.
+        :param class_id: The ID of the class to delete.
+        '''
         await ctx.message.delete()
         if not class_id:
             return await ctx.send("**Inform the class id!**")
@@ -159,6 +186,9 @@ class NClassManagement(commands.Cog):
     @commands.command()
     @commands.has_permissions(administrator=True)
     async def delall_announs(self, ctx):
+        '''
+        (ADM) Deletes all announcements from the system.
+        '''
         await ctx.message.delete()
         await remove_all_class_announcements()
         return await ctx.send("**All class announcements deleted!**")

@@ -14,6 +14,9 @@ bot_commands_channel_id = 562019654017744904
 reward_channel_id = 704428903682408498
 
 class CreateClassroom(commands.Cog):
+    '''
+    Commands related to the class creation system.
+    '''
 
     def __init__(self, client):
         self.client = client
@@ -660,9 +663,12 @@ class CreateClassroom(commands.Cog):
     # Database commands
 
     #Saved classes table
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
     async def create_table_saved_classes(self, ctx):
+        '''
+        (ADM) Creates the SavedClasses table.
+        '''
         await ctx.message.delete()
         if await self.check_table_saved_classes_exists():
             return await ctx.send(f"**The table __SavedClasses__ already exists!**", delete_after=5)
@@ -673,9 +679,12 @@ class CreateClassroom(commands.Cog):
         await mycursor.close()
         return await ctx.send("**Table __SavedClasses__ created!**", delete_after=5)
 
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
     async def drop_table_saved_classes(self, ctx):
+        '''
+        (ADM) Drops the SavedClasses table.
+        '''
         await ctx.message.delete()
         if not await self.check_table_saved_classes_exists():
             return await ctx.send(f"**The table __SavedClasses__ does not exist!**", delete_after=5)
@@ -685,9 +694,12 @@ class CreateClassroom(commands.Cog):
         await mycursor.close()
         await ctx.send("**Table __SavedClasses__ dropped!**", delete_after=5)
 
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
     async def reset_table_saved_classes(self, ctx=None):
+        '''
+        (ADM) Resets the SavedClasses table.
+        '''
         await ctx.message.delete()
         if not await self.check_table_saved_classes_exists():
             return await ctx.send("**Table __SavedClasses__ doesn't exist yet!**", delete_after=5)
@@ -728,9 +740,12 @@ class CreateClassroom(commands.Cog):
 
 
     # Active classes table
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
     async def create_table_active_classes(self, ctx):
+        '''
+        (ADM) Creates the ActiveClass table.
+        '''
         await ctx.message.delete()
         if await self.check_table_active_classes_exists():
             return await ctx.send(f"**The table __ActiveClasses__ already exists!**", delete_after=5)
@@ -741,9 +756,12 @@ class CreateClassroom(commands.Cog):
         await mycursor.close()
         return await ctx.send("**Table __ActiveClasses__ created!**", delete_after=5)
 
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
     async def drop_table_active_classes(self, ctx):
+        '''
+        (ADM) Drops the ActiveClass table.
+        '''
         await ctx.message.delete()
         if not await self.check_table_active_classes_exists():
             return await ctx.send(f"**The table __ActiveClasses__ does not exist!**", delete_after=5)
@@ -753,9 +771,12 @@ class CreateClassroom(commands.Cog):
         await mycursor.close()
         await ctx.send("**Table __ActiveClasses__ dropped!**", delete_after=5)
 
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
     async def reset_table_active_classes(self, ctx=None):
+        '''
+        (ADM) Resets the ActiveClass table.
+        '''
         await ctx.message.delete()
         if not await self.check_table_active_classes_exists():
             return await ctx.send("**Table __ActiveClasses__ doesn't exist yet!**", delete_after=5)
@@ -856,9 +877,12 @@ class CreateClassroom(commands.Cog):
         await mycursor.close()
 
     # Students table
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
     async def create_table_students(self, ctx):
+        '''
+        (ADM) Creates the Students table.
+        '''
         await ctx.message.delete()
         if await self.check_table_students():
             return await ctx.send(f"**The table __Students__ already exists!**", delete_after=5)
@@ -869,9 +893,12 @@ class CreateClassroom(commands.Cog):
         await mycursor.close()
         return await ctx.send("**Table __Students__ created!**", delete_after=5)
 
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
     async def drop_table_students(self, ctx):
+        '''
+        (ADM) Drops the Students table.
+        '''
         await ctx.message.delete()
         if not await self.check_table_students():
             return await ctx.send(f"**The table __Students__ does not exist!**", delete_after=5)
@@ -881,9 +908,12 @@ class CreateClassroom(commands.Cog):
         await mycursor.close()
         await ctx.send("**Table __Students__ dropped!**", delete_after=5)
 
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
     async def reset_table_students(self, ctx=None):
+        '''
+        (ADM) Resets the Students table.
+        '''
         await ctx.message.delete()
         if not await self.check_table_students():
             return await ctx.send("**Table __Students__ doesn't exist yet!**", delete_after=5)

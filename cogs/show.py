@@ -15,6 +15,9 @@ rules = [
 
 
 class Show(commands.Cog):
+    '''
+    Commands involving showing some information related to the server.
+    '''
 
     def __init__(self, client):
         self.client = client
@@ -26,6 +29,9 @@ class Show(commands.Cog):
     # Shows how many members there are in the server
     @commands.command()
     async def members(self, ctx):
+        '''
+        Shows how many members there are in the server (including bots).
+        '''
         await ctx.message.delete()
         all_users = ctx.guild.members
         await ctx.send(f'{len(all_users)} members!')
@@ -33,6 +39,10 @@ class Show(commands.Cog):
     # Shows the specific rule
     @commands.command()
     async def rule(self, ctx, numb: int = None):
+        '''
+        Shows a specific server rule.
+        :param numb: The number of the rule to show.
+        '''
         await ctx.message.delete()
         if not numb:
             return await ctx.send('**Invalid parameter!**')

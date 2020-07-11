@@ -4,6 +4,9 @@ import os
 
 
 class Files(commands.Cog):
+    '''
+    File related commands; showing, sending files.
+    '''
 
     def __init__(self, client):
         self.client = client
@@ -16,6 +19,10 @@ class Files(commands.Cog):
     @commands.command()
     @commands.has_permissions(administrator=True)
     async def gif(self, ctx, name: str = None):
+        '''
+        (ADM) Sends a gif from the bot's gif folder.
+        :param name: The name of the gif file.
+        '''
         await ctx.message.delete()
         try:
             with open(f'./gif/{name}.gif', 'rb') as pic:
@@ -26,6 +33,10 @@ class Files(commands.Cog):
     @commands.command()
     @commands.has_permissions(administrator=True)
     async def png(self, ctx, name: str = None):
+        '''
+        (ADM) Sends a png from the bot's png folder.
+        :param name: The name of the png file.
+        '''
         await ctx.message.delete()
         try:
             await ctx.send(file=discord.File(f'./png/{name}.png'))
@@ -35,6 +46,10 @@ class Files(commands.Cog):
     @commands.command()
     @commands.has_permissions(administrator=True)
     async def files(self, ctx, type: str = None):
+        '''
+        (ADM) Shows all files of a given extension from the bot's folders.
+        :param type: The type of file to list.
+        '''
         await ctx.message.delete()
         if not type:
             return await ctx.send('**Please, specify an extension!**')

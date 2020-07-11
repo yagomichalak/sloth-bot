@@ -31,7 +31,7 @@ class Tools(commands.Cog):
     @commands.has_permissions(administrator=True)
     async def count(self, ctx, amount=0):
         '''
-        Countsdown by a given number
+        (ADM) Countsdown by a given number
         :param amount: The start point.
         '''
         await ctx.message.delete()
@@ -47,10 +47,10 @@ class Tools(commands.Cog):
 
     # Bot leaves
     @commands.command()
-    @commands.has_permissions(administrator=True)
+    @commands.has_permissions(kick_members=True)
     async def leave(self, ctx):
         '''
-        Makes the bot leave the voice channel.
+        (MOD) Makes the bot leave the voice channel.
         '''
         guild = ctx.message.guild
         voice_client = guild.voice_client
@@ -71,7 +71,7 @@ class Tools(commands.Cog):
     @commands.has_any_role(*allowed_roles)
     async def tts(self, ctx, language: str = None, *, message: str = None):
         '''
-        Reproduces a Text-to-Speech message in the voice channel.
+        (BOOSTER) Reproduces a Text-to-Speech message in the voice channel.
         :param language: The language of the message.
         :param message: The message to reproduce.
         '''
@@ -140,6 +140,12 @@ class Tools(commands.Cog):
 
     @commands.command()
     async def math(self, ctx, v1=None, oper: str = None, v2=None):
+        '''
+        Calculates something.
+        :param v1: The value 1.
+        :param oper: The operation/operator.
+        :param v2: The value 2.
+        '''
         await ctx.message.delete()
         if not v1:
             return await ctx.send("**Inform the values to calculate!**", delete_after=3)
@@ -168,9 +174,12 @@ class Tools(commands.Cog):
         embed.set_author(name=ctx.author, icon_url=ctx.author.avatar_url)
         return await ctx.send(embed=embed)
 
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
     async def create_table_the_teachers(self, ctx):
+        '''
+        (ADM) Creates the TheTeachers table.
+        '''
         await ctx.message.delete()
         if await self.check_table_the_teachers_exists():
             return await ctx.send(f"**The table TheTeachers already exists!**", delete_after=3)
@@ -181,9 +190,12 @@ class Tools(commands.Cog):
         await mycursor.close()
         await ctx.send("**Table TheTeachers created!**", delete_after=3)
 
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
     async def drop_table_the_teachers(self, ctx):
+        '''
+        (ADM) Drops the TheTeachers table.
+        '''
         await ctx.message.delete()
         if not await self.check_table_the_teachers_exists():
             return await ctx.send(f"\t# - The table TheTeachers does not exist!")
@@ -193,9 +205,12 @@ class Tools(commands.Cog):
         await mycursor.close()
         await ctx.send("**Table TheTeachers dropped!**", delete_after=3)
 
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
     async def reset_table_the_teachers(self, ctx=None):
+        '''
+        (ADM) Resets the TheTeachers table.
+        '''
         if ctx:
             await ctx.message.delete()
         if not await self.check_table_the_teachers_exists():
@@ -211,6 +226,9 @@ class Tools(commands.Cog):
     @commands.command()
     @commands.has_permissions(administrator=True)
     async def register_teachers(self, ctx):
+        '''
+        (ADM) Register all teachers in the sloth's desktop app.
+        '''
         await ctx.message.delete()
         if not await self.check_table_the_teachers_exists():
             return await ctx.send("**Table TheTeachers doesn't exist yet!**", delete_after=3)
@@ -236,57 +254,10 @@ class Tools(commands.Cog):
             return True
 
     @commands.command()
-    async def help(self, ctx, co: str = None):
-        '''Provides a description of all commands and cogs.
-        :param co: The cog or the command that you want to see. (Optional)
-        '''
-        if not co:
-            halp = discord.Embed(title="Cog Listing and Uncategorized Commands.",
-            description="```Use !help *cog* or !help *command* to find out more about them!\n```",
-            color=discord.Color.green(),
-            timestamp=ctx.message.created_at)
-
-            cogs_desc = []
-            for x in self.client.cogs:
-                cogs_desc.append(x)
-            halp.add_field(name='__Cogs__',value=f"**>** {', '.join(cogs_desc)}",inline=False)
-
-            cmds_desc = ''
-            for y in self.client.walk_commands():
-                if not y.cog_name and not y.hidden:
-                    if y.help:
-                        cmds_desc += (f"{y.name} - `{y.help}`"+'\n')
-                    else:
-                        cmds_desc += (f"{y.name}"+'\n')
-            halp.add_field(name='__Uncatergorized Commands__',value=cmds_desc[0:len(cmds_desc)-1],inline=False)
-            return await ctx.send('',embed=halp)
-
-
-        # Checks if it's a command
-        command = self.client.get_command(co)
-        cog = self.client.get_cog(co)
-        if command:
-            command_embed = discord.Embed(title=f"__Command:__ {command.name}", description=f"__**Description:**__\n```{command.help}```", color=discord.Color.green(), timestamp=ctx.message.created_at)
-            await ctx.send(embed=command_embed)
-
-        # Checks if it's a cog
-        elif cog:
-            cog_embed = discord.Embed(title=f"__Cog:__ {cog.qualified_name}", description=f"__**Description:**__\n```{cog.description}```", color=discord.Color.green(), timestamp=ctx.message.created_at)
-            for c in cog.get_commands():
-                if not c.hidden:
-                    cog_embed.add_field(name=c.name,value=c.help,inline=False)
-
-            await ctx.send(embed=cog_embed)
-
-        # Otherwise, it's an invalid parameter (Not found)
-        else:
-            await ctx.send(f"**Invalid parameter! `{co}` is neither a command nor a cog!**")
-
-    @commands.command()
     @commands.has_permissions(administrator=True)
     async def eval(self, ctx, *, body = None):
         '''
-        Executes a given command from Python onto Discord.
+        (ADM) Executes a given command from Python onto Discord.
         :param body: The body of the command.
         '''
         await ctx.message.delete()

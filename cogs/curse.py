@@ -4,6 +4,9 @@ from mysqldb import *
 
 server_id = 459195345419763713
 class CurseMember(commands.Cog):
+    '''
+    A cog related to the 'curse a member' feature.
+    '''
     
     def __init__(self, client):
         self.client = client
@@ -52,6 +55,10 @@ class CurseMember(commands.Cog):
     @commands.command()
     @commands.has_permissions(administrator=True)
     async def curse(self, ctx, member: discord.Member = None):
+        '''
+        (ADM) Curses someone by playing an earrape song whenever they join a voice channel.
+        :param member: The member to curse.
+        '''
         await ctx.message.delete()
         if not member:
             return await ctx.send("**Inform a member to curse!**", delete_after=3)
@@ -70,6 +77,10 @@ class CurseMember(commands.Cog):
     @commands.command()
     @commands.has_permissions(administrator=True)
     async def uncurse(self, ctx):
+        '''
+        (ADM) Unurses someone.
+        :param member: The member to uncurse.
+        '''
         await ctx.message.delete()
 
         await self.is_connected(ctx)
@@ -91,9 +102,12 @@ class CurseMember(commands.Cog):
         await mycursor.close()
 
     
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
     async def create_table_cursed_member(self, ctx):
+        '''
+        (ADM) Creates the CursedMember table.
+        '''
         await ctx.message.delete()
         mycursor, db = await the_data_base()
         await mycursor.execute("CREATE TABLE CursedMember (user_id bigint)")
@@ -102,9 +116,12 @@ class CurseMember(commands.Cog):
         return await ctx.send("**Table CursedMember was created!**", delete_after=3)
     
     
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
     async def drop_table_cursed_member(self, ctx):
+        '''
+        (ADM) Drops the CursedMember table.
+        '''
         await ctx.message.delete()
         mycursor, db = await the_data_base()
         await mycursor.execute("DROP TABLE CursedMember")
@@ -113,9 +130,12 @@ class CurseMember(commands.Cog):
         return await ctx.send("**Table CursedMember was dropped!**", delete_after=3)
         
         
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
     async def reset_table_cursed_member(self, ctx):
+        '''
+        (ADM) Resets the CursedMember table.
+        '''
         await ctx.message.delete()
         mycursor, db = await the_data_base()
         await mycursor.execute("DROP TABLE CursedMember")
