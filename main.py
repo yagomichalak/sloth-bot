@@ -291,6 +291,9 @@ async def on_voice_state_update(member, before, after):
 start_time = datetime.utcnow()
 @client.command()
 async def uptime(ctx: commands.Context):
+    '''
+    Shows for how much time the bot is online.
+    '''
     now = datetime.utcnow() # Timestamp of when uptime function is run
     delta = now - start_time
     hours, remainder = divmod(int(delta.total_seconds()), 3600)
@@ -307,8 +310,55 @@ async def uptime(ctx: commands.Context):
     uptime_stamp = time_format.format(d=days, h=hours, m=minutes, s=seconds)
     await ctx.send(f"I've been online for {uptime_stamp}")
 
-
 @client.command()
+async def help(self, ctx, co: str = None):
+    '''
+    Provides a description of all commands and cogs.
+    :param co: The cog or the command that you want to see. (Optional)
+    '''
+    if not co:
+        halp = discord.Embed(title="Cog Listing and Uncategorized Commands.",
+        description="```Use o!help *cog* or help *command* to find out more about them!\n(BTW, the Cog Name Must Be in Title Case, Just Like this Sentence.\nEx: z!help SlothCurrency)```",
+        color=discord.Color.green(),
+        timestamp=ctx.message.created_at)
+
+        cogs_desc = []
+        for x in client.cogs:
+            cogs_desc.append(x)
+        halp.add_field(name='__Cogs__',value=f"**>** {'**,** '.join(cogs_desc)}",inline=False)
+
+        cmds_desc = ''
+        for y in client.walk_commands():
+            if not y.cog_name and not y.hidden:
+                if y.help:
+                    cmds_desc += (f"{y.name} - `{y.help}`"+'\n')
+                else:
+                    cmds_desc += (f"{y.name}"+'\n')
+        halp.add_field(name='__Uncatergorized Commands__',value=cmds_desc[0:len(cmds_desc)-1],inline=False)
+        return await ctx.send('',embed=halp)
+
+
+    # Checks if it's a command
+    command = client.get_command(co)
+    cog = client.get_cog(co)
+    if command:
+        command_embed = discord.Embed(title=f"__Command:__ {command.name}", description=f"__**Description:**__\n```{command.help}```", color=discord.Color.green(), timestamp=ctx.message.created_at)
+        await ctx.send(embed=command_embed)
+
+    # Checks if it's a cog
+    elif cog:
+        cog_embed = discord.Embed(title=f"__Cog:__ {cog.qualified_name}", description=f"__**Description:**__\n```{cog.description}```", color=discord.Color.green(), timestamp=ctx.message.created_at)
+        for c in cog.get_commands():
+            if not c.hidden:
+                cog_embed.add_field(name=c.name,value=c.help,inline=False)
+
+        await ctx.send(embed=cog_embed)
+
+    # Otherwise, it's an invalid parameter (Not found)
+    else:
+        await ctx.send(f"**Invalid parameter! `{co}` is neither a command nor a cog!**")
+
+@client.command(hidden=True)
 @commands.has_permissions(administrator=True)
 async def load(ctx, extension: str = None):
     '''
@@ -321,7 +371,7 @@ async def load(ctx, extension: str = None):
     return await ctx.send(f"**{extension} loaded!**", delete_after=3)
 
 
-@client.command()
+@client.command(hidden=True)
 @commands.has_permissions(administrator=True)
 async def unload(ctx, extension: str = None):
     '''
@@ -334,7 +384,7 @@ async def unload(ctx, extension: str = None):
     return await ctx.send(f"**{extension} unloaded!**", delete_after=3)
 
 
-@client.command()
+@client.command(hidden=True)
 @commands.has_permissions(administrator=True)
 async def reload(ctx, extension: str = None):
     '''

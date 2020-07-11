@@ -7,6 +7,9 @@ import aiohttp
 
 
 class Misc(commands.Cog):
+    '''
+    Miscellaneous related commands.
+    '''
 
     def __init__(self, client):
         self.client = client

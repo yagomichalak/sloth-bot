@@ -9,6 +9,9 @@ guild_id = 459195345419763713
 
 
 class ModActivity(commands.Cog):
+    '''
+    A cog related to the Moderators' activity.
+    '''
 
     def __init__(self, client):
         self.client = client
@@ -112,6 +115,9 @@ class ModActivity(commands.Cog):
     @commands.has_permissions(administrator=True)
     @commands.command()
     async def modrep(self, ctx):
+        '''
+        (ADM) Shows all the moderators and their statuses in an embedded message.
+        '''
         mycursor, db = await the_data_base()
         await mycursor.execute('SELECT * FROM ModActivity')
         mods = await mycursor.fetchall()
@@ -160,17 +166,23 @@ class ModActivity(commands.Cog):
             return await resp.delete()
 
     # Database commands
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
     async def create_mod_table(self, ctx):
+        '''
+        (ADM) Creates the ModActivity table.
+        '''
         mycursor, db = await the_data_base()
         await mycursor.execute(
             'CREATE TABLE ModActivity (mod_id bigint, time bigint, timestamp bigint default null, messages int)')
         await mycursor.close()
 
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
     async def drop_table_mods(self, ctx):
+        '''
+        (ADM) Drops the ModActivity table.
+        '''
         mycursor, db = await the_data_base()
         await mycursor.execute('DROP TABLE ModActivity')
         await mycursor.close()

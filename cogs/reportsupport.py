@@ -10,6 +10,9 @@ case_cat_id = 562939721253126146
 moderator_role_id = 497522510212890655
 
 class ReportSupport(commands.Cog):
+	'''
+	A cog related to the system of reports and some other things.
+	'''
 
 	def __init__(self, client):
 		self.client = client
@@ -99,9 +102,12 @@ class ReportSupport(commands.Cog):
 		await mycursor.close()
 		return user
 
-	@commands.command()
+	@commands.command(hidden=True)
 	@commands.has_permissions(administrator=True)
 	async def create_table_case_counter(self, ctx):
+		'''
+		(ADM) Creates the CaseCounter table.
+		'''
 		await ctx.message.delete()
 		if await self.table_case_counter_exists():
 			return await ctx.send("**Table __CaseCounter__ already exists!**", delete_after=3)
@@ -113,9 +119,12 @@ class ReportSupport(commands.Cog):
 		await mycursor.close()
 		await ctx.send("**Table __CaseCounter__ created!**", delete_after=3)
 
-	@commands.command()
+	@commands.command(hidden=True)
 	@commands.has_permissions(administrator=True)
 	async def drop_table_case_counter(self, ctx):
+		'''
+		(ADM) Drops the CaseCounter table.
+		'''
 		await ctx.message.delete()
 		if not await self.table_case_counter_exists():
 			return await ctx.send("**Table __CaseCounter__ doesn't exist!**", delete_after=3)
@@ -126,9 +135,12 @@ class ReportSupport(commands.Cog):
 		await mycursor.close()
 		return await ctx.send("**Table __CaseCounter__ dropped!**", delete_after=3)
 
-	@commands.command()
+	@commands.command(hidden=True)
 	@commands.has_permissions(administrator=True)
 	async def reset_table_case_counter(self, ctx):
+		'''
+		(ADM) Resets the CaseCounter table.
+		'''
 		await ctx.message.delete()
 		if not await self.table_case_counter_exists():
 			return await ctx.send("**Table __CaseCounter__ doesn't exist yet!**", delete_after=3)
@@ -151,9 +163,12 @@ class ReportSupport(commands.Cog):
 		    return True 
 
 
-	@commands.command()
+	@commands.command(hidden=True)
 	@commands.has_permissions(administrator=True)
 	async def create_table_open_channels(self, ctx):
+		'''
+		(ADM) Creates the OpenChannels table.
+		'''
 		await ctx.message.delete()
 		if await self.table_open_channels_exists():
 			return await ctx.send("**Table __OpenChannels__ already exists!**", delete_after=3)
@@ -164,9 +179,12 @@ class ReportSupport(commands.Cog):
 		await mycursor.close()
 		await ctx.send("**Table __OpenChannels__ created!**", delete_after=3)
 
-	@commands.command()
+	@commands.command(hidden=True)
 	@commands.has_permissions(administrator=True)
 	async def drop_table_open_channels(self, ctx):
+		'''
+		(ADM) Drops the OpenChannels table.
+		'''
 		await ctx.message.delete()
 		if not await self.table_open_channels_exists():
 			return await ctx.send("**Table __OpenChannels__ doesn't exist!**", delete_after=3)
@@ -177,9 +195,12 @@ class ReportSupport(commands.Cog):
 		await mycursor.close()
 		return await ctx.send("**Table __OpenChannels__ dropped!**", delete_after=3)
 
-	@commands.command()
+	@commands.command(hidden=True)
 	@commands.has_permissions(administrator=True)
 	async def reset_table_open_channels(self, ctx):
+		'''
+		(ADM) Resets the OpenChannels table.
+		'''
 		await ctx.message.delete()
 		if not await self.table_open_channels_exists():
 			return await ctx.send("**Table __OpenChannels__ doesn't exist yet!**", delete_after=3)
@@ -237,7 +258,7 @@ class ReportSupport(commands.Cog):
 	@commands.has_permissions(kick_members=True)
 	async def close_channel(self, ctx):
 		'''
-		Closes a Case-Channel.
+		(MOD) Closes a Case-Channel.
 		'''
 		user_channel = await self.get_case_channel(ctx.channel.id)
 		if user_channel:

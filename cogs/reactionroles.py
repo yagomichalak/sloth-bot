@@ -4,6 +4,9 @@ from cogs.slothcurrency import SlothCurrency
 from mysqldb2 import *
 
 class ReactionRoles(commands.Cog):
+    '''
+    A cog related to the reaction-role menu.
+    '''
 
     def __init__(self, client):
         self.client = client
@@ -45,6 +48,13 @@ class ReactionRoles(commands.Cog):
     @commands.command()
     @commands.has_permissions(administrator=True)
     async def register_text(self, ctx, mid: discord.Message = None, reactf: str = None, category: str = None, file_name: str = None):
+        '''
+        (ADM) Register and links a .txt from the bot's folder into a message.
+        :param mid: The message ID to link the .txt to.
+        :param reactf: The reaction to trigger the mailing of that .txt.
+        :param category: The language category of the file.
+        :param file_name: The full name of the .txt file.
+        '''
         await ctx.message.delete()
         if not mid:
             return await ctx.send("**Inform a message ID!**", delete_after=3)
@@ -61,9 +71,12 @@ class ReactionRoles(commands.Cog):
         return await ctx.send(f"**File `{file_name}` successfully registered!**", delete_after=3)
 
     # Table UserCurrency
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
     async def create_table_registered_text(self, ctx):
+        '''
+        (ADM) Creates the RegisteredText table.
+        '''
         await ctx.message.delete()
         mycursor, db = await the_data_base3()
         await mycursor.execute(
@@ -72,9 +85,12 @@ class ReactionRoles(commands.Cog):
         await mycursor.close()
         return await ctx.send("**Table *RegisteredText* created!**", delete_after=3)
 
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
     async def drop_table_registered_text(self, ctx):
+        '''
+        (ADM) Drops the RegisteredText table.
+        '''
         await ctx.message.delete()
         mycursor, db = await the_data_base3()
         await mycursor.execute("DROP TABLE RegisteredText")
@@ -82,9 +98,12 @@ class ReactionRoles(commands.Cog):
         await mycursor.close()
         return await ctx.send("**Table *RegisteredText* dropped!**", delete_after=3)
 
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
     async def reset_table_registered_text(self, ctx):
+        '''
+        (ADM) Resets the RegisteredText table.
+        '''
         await ctx.message.delete()
         mycursor, db = await the_data_base3()
         await mycursor.execute("DROP TABLE RegisteredText")
@@ -128,6 +147,10 @@ class ReactionRoles(commands.Cog):
     @commands.command()
     @commands.has_permissions(administrator=True)
     async def clear_image_texts(self, ctx, mid: discord.Message = None):
+        '''
+        (ADM) Clears all texts that were linked into a specific message.
+        :param mid: The message ID to unlink the texts from.
+        '''
         await ctx.message.delete()
         if not mid:
             return await ctx.send("**Inform a message ID to clear!**", delete_after=3)

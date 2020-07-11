@@ -12,6 +12,9 @@ reddit = praw.Reddit(client_id='Ph3swv14_OMx7w',  # client id
 
 
 class Social(commands.Cog):
+    '''
+    Social related commands.
+    '''
 
     def __init__(self, client):
         self.client = client
@@ -22,7 +25,9 @@ class Social(commands.Cog):
 
     @commands.command(aliases=['si', 'server'])
     async def serverinfo(self, ctx):
-        '''Get server info'''
+        '''
+        Shows some information about the server.
+        '''
         await ctx.message.delete()
         guild = ctx.guild
         guild_age = (ctx.message.created_at - guild.created_at).days
@@ -79,6 +84,7 @@ class Social(commands.Cog):
     async def meme(self, ctx):
         '''
         Gets a random meme from Reddit.
+        (cooldown = 5 secs)
         '''
         memes_submissions = reddit.subreddit('memes').hot()
         post_to_pick = randint(1, 50)
@@ -108,5 +114,7 @@ class Social(commands.Cog):
         em.set_footer(text=f"Published on {data['month']}/{data['day']}/{data['year']}")
         em.set_image(url=data['img'])
         await ctx.send(embed=em)
+
+        
 def setup(client):
     client.add_cog(Social(client))

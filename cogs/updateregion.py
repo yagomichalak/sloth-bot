@@ -7,6 +7,9 @@ server_id = 459195345419763713
 bot_and_commands_channel_id = 562019654017744904
 
 class UpdateRegion(commands.Cog):
+    '''
+    A cog related to the automatic region update feature.
+    '''
 
     def __init__(self, client):
         self.client = client
