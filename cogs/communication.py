@@ -6,6 +6,9 @@ announcement_channel_id = 562019353583681536
 
 
 class Communication(commands.Cog):
+    '''
+    A cog related to communication commands.
+    '''
 
     def __init__(self, client):
         self.client = client
@@ -18,6 +21,9 @@ class Communication(commands.Cog):
     @commands.command()
     @commands.has_permissions(administrator=True)
     async def say(self, ctx):
+        '''
+        (ADM) Makes the bot say something.
+        '''
         await ctx.message.delete()
         if len(ctx.message.content.split()) < 2:
             return await ctx.send('You must inform all parameters!')
@@ -29,6 +35,10 @@ class Communication(commands.Cog):
     @commands.command()
     @commands.has_permissions(administrator=True)
     async def spy(self, ctx, cid):
+        '''
+        (ADM) Makes the bot send a message to a given channel.
+        :param cid: The ID of the channel.
+        '''
         await ctx.message.delete()
         if len(ctx.message.content.split()) < 3:
             return await ctx.send('You must inform all parameters!')
@@ -42,6 +52,10 @@ class Communication(commands.Cog):
     @commands.command()
     @commands.has_any_role(474774889778380820, 574265899801116673, 699296718705000559)
     async def welcome(self, ctx, member: discord.Member = None):
+        '''
+        (WELCOMER) Welcomes a user.
+        :param member: The member to welcome.
+        '''
         await ctx.message.delete()
         if not member:
             return await ctx.send('Inform a member!')
@@ -59,21 +73,29 @@ If you have any questions feel free to ask! And if you experience any type of pr
     # Pretends that a role has been given to an user by the bot
     @commands.command()
     @commands.has_any_role(474774889778380820, 574265899801116673, 699296718705000559)
-    async def auto(self, ctx, member: discord.Member = None, text: str = None):
+    async def auto(self, ctx, member: discord.Member = None, language: str = None):
+        '''
+        (WELCOMER) Makes the bot send an 'automatic' message to someone.
+        :param member: The member:
+        :param  language: The language.
+        '''
         await ctx.message.delete()
-        if not text:
-            return await ctx.send('**Inform the parameters!**', delete_after=3)
+        if not language:
+            return await ctx.send('**Inform a language!**', delete_after=3)
 
         elif not member:
             return await ctx.send('**Inform a member!**', delete_after=3)
 
         general_channel = discord.utils.get(ctx.guild.channels, id=general_voice_chat_id)
         await general_channel.send(
-            f'''{member.mention} - Hey! since you didn't assign your native language I went ahead and assigned it for you automatically based on my best guess of what is your native language, I came to the conclusion that it is {text.title()}.  If I'm incorrect please let me know!''')
+            f'''{member.mention} - Hey! since you didn't assign your native language I went ahead and assigned it for you automatically based on my best guess of what is your native language, I came to the conclusion that it is {language.title()}.  If I'm incorrect please let me know!''')
 
     @commands.command()
     @commands.has_permissions(administrator=True)
     async def announce(self, ctx):
+        '''
+        (ADM) Announces a message in the announcements channel using the bot.
+        '''
         await ctx.message.delete()
         if len(ctx.message.content.split()) < 2:
             return await ctx.send('You must inform all parameters!')
@@ -85,6 +107,11 @@ If you have any questions feel free to ask! And if you experience any type of pr
     @commands.command()
     @commands.has_permissions(administrator=True)
     async def dm(self, ctx, member: discord.Member = None, *, message=None):
+        '''
+        (ADM) Sends a Direct Message to someone.
+        :param member: The member to send the message to.
+        :param message: The message to send.
+        '''
         await ctx.message.delete()
         if not message:
             return await ctx.send("**Inform a message to send!**", delete_after=3)

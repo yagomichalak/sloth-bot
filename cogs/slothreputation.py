@@ -163,8 +163,11 @@ class SlothReputation(commands.Cog):
     # Database commands
 
     @commands.has_permissions(administrator=True)
-    @commands.command()
+    @commands.command(hidden=True)
     async def create_table_member_score(self, ctx):
+        '''
+        (ADM) Creates the MembersScore table.
+        '''
         await ctx.message.delete()
         mycursor, db = await the_data_base3()
         await mycursor.execute(
@@ -173,8 +176,11 @@ class SlothReputation(commands.Cog):
         await ctx.send("**Table *MembersScore* created!**", delete_after=3)
 
     @commands.has_permissions(administrator=True)
-    @commands.command()
+    @commands.command(hidden=True)
     async def drop_table_member_score(self, ctx):
+        '''
+        (ADM) Drops the MembersScore table.
+        '''
         await ctx.message.delete()
         mycursor, db = await the_data_base3()
         await mycursor.execute("DROP TABLE MembersScore")
@@ -183,8 +189,11 @@ class SlothReputation(commands.Cog):
         await ctx.send("**Table *MembersScore* dropped!**", delete_after=3)
 
     @commands.has_permissions(administrator=True)
-    @commands.command()
+    @commands.command(hidden=True)
     async def reset_table_member_score(self, ctx):
+        '''
+        (ADM) Resets the MembersScore table.
+        '''
         await ctx.message.delete()
         mycursor, db = await the_data_base3()
         await mycursor.execute("DROP TABLE MembersScore")
@@ -289,5 +298,7 @@ class SlothReputation(commands.Cog):
                                (user_id, 0, the_time))
         await db.commit()
         await mycursor.close()
+
+        
 def setup(client):
     client.add_cog(SlothReputation(client))

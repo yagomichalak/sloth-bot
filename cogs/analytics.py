@@ -9,6 +9,9 @@ bots_and_commands_channel_id = 562019654017744904
 select_your_language_channel_id = 695491104417513552
 
 class Analytics(commands.Cog):
+    '''
+    A cog related to the analytics of the server.
+    '''
 
     def __init__(self, client):
         self.client = client
@@ -61,16 +64,20 @@ class Analytics(commands.Cog):
         return await self.update_messages()
 
 
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
     async def stop_task(self, ctx):
         await ctx.message.delete()
         self.check_midnight.stop()
         return await ctx.send("**Analytics task has been stopped!**", delete_after=3)
+        
     # Table UserCurrency
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
     async def create_table_sloth_analytics(self, ctx):
+        '''
+        (ADM) Creates the SlothAnalytics table.
+        '''
         await ctx.message.delete()
         mycursor, db = await the_data_base3()
         await mycursor.execute(
@@ -85,9 +92,12 @@ class Analytics(commands.Cog):
         await mycursor.close()
         return await ctx.send("**Table *SlothAnalytics* created!**", delete_after=3)
 
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
     async def drop_table_sloth_analytics(self, ctx):
+        '''
+        (ADM) Drops the SlothAnalytics table.
+        '''
         await ctx.message.delete()
         mycursor, db = await the_data_base3()
         await mycursor.execute("DROP TABLE SlothAnalytics")
@@ -95,9 +105,12 @@ class Analytics(commands.Cog):
         await mycursor.close()
         return await ctx.send("**Table *SlothAnalytics* dropped!**", delete_after=3)
 
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
     async def reset_table_sloth_analytics(self, ctx = None):
+        '''
+        (ADM) Resets the SlothAnalytics table.
+        '''
         if ctx:
             await ctx.message.delete()
         mycursor, db = await the_data_base3()

@@ -9,6 +9,9 @@ general_channel = 562019539135627276
 last_deleted_message = []
 
 class Moderation(commands.Cog):
+    '''
+    Moderation related commands.
+    '''
 
     def __init__(self, client):
         self.client = client
@@ -54,7 +57,7 @@ class Moderation(commands.Cog):
     @commands.has_permissions(manage_messages=True)
     async def purge(self, ctx, amount=0):
         '''
-        Purges messages.
+        (MOD) Purges messages.
         :param amount: The amount of messages to purge.
         '''
         await ctx.channel.purge(limit=amount + 1)
@@ -64,7 +67,7 @@ class Moderation(commands.Cog):
     @commands.has_permissions(kick_members=True)
     async def warn(self, ctx, member: discord.Member = None, *, reason=None):
         '''
-        Warns a member.
+        (MOD) Warns a member.
         :param member: The @ or ID of the user to warn.
         :param reason: The reason for warning the user. (Optional)
         '''
@@ -92,8 +95,9 @@ class Moderation(commands.Cog):
     @commands.has_permissions(kick_members=True)
     async def mute(self, ctx, member: discord.Member = None, *, reason = None):
         '''
-        Mutes a member.
+        (MOD) Mutes a member.
         :param member: The @ or the ID of the user to mute.
+        :param reason: The reason for the mute.
         '''
         await ctx.message.delete()
         role = discord.utils.get(ctx.guild.roles, id=muted_role_id)
@@ -133,7 +137,7 @@ class Moderation(commands.Cog):
     @commands.has_permissions(kick_members=True)
     async def unmute(self, ctx, member: discord.Member = None):
         '''
-        Unmutes a member.
+        (MOD) Unmutes a member.
         :param member: The @ or the ID of the user to unmute.
         '''
         await ctx.message.delete()
@@ -175,7 +179,7 @@ class Moderation(commands.Cog):
     @commands.has_permissions(kick_members=True)
     async def tempmute(self, ctx, member: discord.Member = None, minutes: int = 5, *, reason =  None):
         '''
-        Mutes a member for a determined amount of time.
+        (MOD) Mutes a member for a determined amount of time.
         :param member: The @ or the ID of the user to tempmute.
         :param minutes: The amount of minutes that the user will be muted.
         :param reason: The reason for the tempmute.
@@ -235,7 +239,7 @@ class Moderation(commands.Cog):
     @commands.has_permissions(kick_members=True)
     async def kick(self, ctx, member: discord.Member = None, *, reason=None):
         '''
-        Kicks a member from the server.
+        (MOD) Kicks a member from the server.
         :param member: The @ or ID of the user to kick.
         :param reason: The reason for kicking the user. (Optional)
         '''
@@ -269,7 +273,7 @@ class Moderation(commands.Cog):
     @commands.has_permissions(administrator=True)
     async def ban(self, ctx, member: discord.Member = None, *, reason=None):
         '''
-        Bans a member from the server.
+        (ADM) Bans a member from the server.
         :param member: The @ or ID of the user to ban.
         :param reason: The reason for banning the user. (Optional)
         '''
@@ -303,7 +307,7 @@ class Moderation(commands.Cog):
     @commands.has_permissions(administrator=True)
     async def unban(self, ctx, *, member=None):
         '''
-        Unbans a member from the server.
+        (ADM) Unbans a member from the server.
         :param member: The full nickname and # of the user to unban.
         '''
         await ctx.message.delete()
@@ -344,7 +348,7 @@ class Moderation(commands.Cog):
     @commands.has_permissions(administrator=True)
     async def softban(self, ctx, member: discord.Member = None, *, reason=None):
         '''
-        Bans and unbans a member from the server; deleting their messages from the last 7 seven days.
+        (ADM) Bans and unbans a member from the server; deleting their messages from the last 7 seven days.
         :param member: The @ or ID of the user to softban.
         :param reason: The reason for softbanning the user. (Optional)
         '''
@@ -378,7 +382,7 @@ class Moderation(commands.Cog):
     @commands.has_permissions(administrator=True)
     async def hackban(self, ctx, user_id: int = None, *, reason=None):
         '''
-        Bans a user that is currently not in the server.
+        (ADM) Bans a user that is currently not in the server.
         Only accepts user IDs.
         :param user_id: Member ID
         :param reason: The reason for hackbanning the user. (Optional)
@@ -433,9 +437,12 @@ class Moderation(commands.Cog):
 
 
 
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
     async def reset_table_mutedmember(self, ctx):
+        '''
+        (ADM) Resets the MutedMember table.
+        '''
         await ctx.message.delete()
         mycursor, db = await the_data_base3()
         await mycursor.execute("DROP TABLE mutedmember")

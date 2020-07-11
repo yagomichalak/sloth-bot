@@ -141,7 +141,7 @@ class SlothCurrency(commands.Cog):
     @commands.has_permissions(administrator=True)
     async def react(self, ctx, mid: discord.Message = None, reaction=None):
         '''
-        Makes the bot react onto a message.
+        (ADM) Makes the bot react onto a message.
         :param mid: The message ID.
         :param reaction: The reaction to add.
         '''
@@ -217,9 +217,12 @@ class SlothCurrency(commands.Cog):
             return await ctx.send(f"**You don't have an item named __{item_name.title()}__!**", delete_after=3)
 
     # Database commands
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
     async def create_table_user_items(self, ctx):
+        '''
+        (ADM) Creates the UserItems table.
+        '''
         await ctx.message.delete()
         mycursor, db = await the_data_base2()
         await mycursor.execute(
@@ -229,8 +232,11 @@ class SlothCurrency(commands.Cog):
         return await ctx.send("**Table *UserItems* created!**", delete_after=3)
 
     @commands.has_permissions(administrator=True)
-    @commands.command()
+    @commands.command(hidden=True)
     async def drop_table_user_items(self, ctx):
+        '''
+        (ADM) Drops the UserItems table.
+        '''
         await ctx.message.delete()
         mycursor, db = await the_data_base2()
         await mycursor.execute("DROP TABLE UserItems")
@@ -238,9 +244,12 @@ class SlothCurrency(commands.Cog):
         await mycursor.close()
         return await ctx.send("**Table *UserItems* dropped!**", delete_after=3)
 
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
     async def reset_table_user_items(self, ctx):
+        '''
+        (ADM) Resets the UserItems table.
+        '''
         await ctx.message.delete()
         mycursor, db = await the_data_base2()
         await mycursor.execute("DROP TABLE UserItems")
@@ -368,9 +377,12 @@ class SlothCurrency(commands.Cog):
         return item_system
 
     # Register Items
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
     async def create_table_register_items(self, ctx):
+        '''
+        (ADM) Creates the RegisteredItems table.
+        '''
         await ctx.message.delete()
         mycursor, db = await the_data_base2()
         await mycursor.execute(
@@ -379,9 +391,12 @@ class SlothCurrency(commands.Cog):
         await mycursor.close()
         return await ctx.send("**Table *RegisteredItems* created!**", delete_after=3)
 
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
     async def drop_table_register_items(self, ctx):
+        '''
+        (ADM) Drops the RegisteredItems table.
+        '''
         await ctx.message.delete()
         mycursor, db = await the_data_base2()
         await mycursor.execute(f"DROP TABLE RegisteredItems")
@@ -389,9 +404,12 @@ class SlothCurrency(commands.Cog):
         await mycursor.close()
         return await ctx.send("**Table *RegisteredItems* dropped!**", delete_after=3)
 
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
     async def reset_table_register_items(self, ctx):
+        '''
+        (ADM) Resets the RegisteredItems table.
+        '''
         await ctx.message.delete()
         mycursor, db = await the_data_base2()
         await mycursor.execute("DROP TABLE RegisteredItems")
@@ -406,7 +424,7 @@ class SlothCurrency(commands.Cog):
     @commands.has_permissions(administrator=True)
     async def show_registered(self, ctx):
         '''
-        Shows all the registered items in the shop.
+        (ADM) Shows all the registered items in the shop.
         '''
         await ctx.message.delete()
         mycursor, db = await the_data_base2()
@@ -439,7 +457,7 @@ class SlothCurrency(commands.Cog):
     @commands.has_permissions(administrator=True)
     async def remove_registered_item(self, ctx, *, item_name: str = None):
         '''
-        Removes a registered item from the shop system.
+        (ADM) Removes a registered item from the shop system.
         :param item_name: The name of the item to remove.
         '''
         await ctx.message.delete()
@@ -455,8 +473,17 @@ class SlothCurrency(commands.Cog):
 
     @commands.command()
     @commands.has_permissions(administrator=True)
-    async def register_item(self, ctx, mid: discord.Message = None, reactf=None, image_name: str = None, item_type: str = None,
-                            item_price: int = None, *, item_name: str = None):
+    async def register_item(self, ctx, mid: discord.Message = None, reactf=None, image_name: str = None, item_type: str = None, item_price: int = None, *, item_name: str = None):
+        '''
+        (ADM) Registers an item to the sloth shop.
+        :param mid: The message ID of the image from which people will buy the item.
+        :param reactf: The reaction that will trigger the buying process of that item.
+        :param image_name: The name of the image item that will be shown in the user's inventory.
+        :param item_type: The type of item; head, hand, body, bg...
+        :param item_price: The price of the item
+        :param item_name: The origin name of the image item that is in the system.
+        '''
+
         # print(reactf)
         if not mid:
             return await ctx.send("**Specify the message id!**", delete_after=3)
@@ -513,9 +540,12 @@ class SlothCurrency(commands.Cog):
             return False
 
     # Table UserCurrency
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
     async def create_table_user_currency(self, ctx):
+        '''
+        (ADM) Creates the UserCurrency table.
+        '''
         await ctx.message.delete()
         mycursor, db = await the_data_base2()
         await mycursor.execute("CREATE TABLE UserCurrency (user_id bigint, user_money bigint, last_purchase_ts bigint, user_classes bigint default 0, user_class_reward bigint default 0, user_hosted bigint default 0, user_lotto bigint default null)")
@@ -523,9 +553,12 @@ class SlothCurrency(commands.Cog):
         await mycursor.close()
         return await ctx.send("**Table *UserCurrency* created!**", delete_after=3)
 
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
     async def drop_table_user_currency(self, ctx):
+        '''
+        (ADM) Drops the UserCurrency table.
+        '''
         await ctx.message.delete()
         mycursor, db = await the_data_base2()
         await mycursor.execute("DROP TABLE UserCurrency")
@@ -533,9 +566,12 @@ class SlothCurrency(commands.Cog):
         await mycursor.close()
         return await ctx.send("**Table *UserCurrency* dropped!**", delete_after=3)
 
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
     async def reset_table_user_currency(self, ctx):
+        '''
+        (ADM) Resets the UserCurrency table.
+        '''
         await ctx.message.delete()
         mycursor, db = await the_data_base2()
         await mycursor.execute("DROP TABLE UserCurrency")
@@ -544,15 +580,6 @@ class SlothCurrency(commands.Cog):
         await db.commit()
         await mycursor.close()
         return await ctx.send("**Table *UserCurrency* reseted!**", delete_after=3)
-
-    @commands.command()
-    @commands.has_permissions(administrator=True)
-    async def show_user_currency(self, ctx):
-        await ctx.message.delete()
-        mycursor, db = await the_data_base2()
-        await mycursor.execute("SELECT * FROM UserCurrency")
-        users = await mycursor.fetchall()
-        return await ctx.send(users)
 
 
     @commands.command()
@@ -693,7 +720,7 @@ class SlothCurrency(commands.Cog):
     @commands.has_permissions(administrator=True)
     async def download_update(self, ctx=None):
         '''
-        Downloads all shop images from the Google Drive.
+        (ADM) Downloads all shop images from the Google Drive.
         '''
         if ctx:
             await ctx.message.delete()
@@ -741,7 +768,7 @@ class SlothCurrency(commands.Cog):
     @commands.has_permissions(administrator=True)
     async def text_download_update(self, ctx=None):
         '''
-        Downloads all texts from the GoogleDrive and stores in the bot's folder
+        (ADM) Downloads all texts from the GoogleDrive and stores in the bot's folder
         '''
         if ctx:
             await ctx.message.delete()
@@ -785,7 +812,7 @@ class SlothCurrency(commands.Cog):
     @commands.has_permissions(administrator=True)
     async def list_folder(self, ctx, image_suffix: str = None, item_name: str = None):
         '''
-        Lists a shop image folder from Google Drive.
+        (ADM) Lists a shop image folder from Google Drive.
         :param image_suffix: The image/folder category.
 
         '''
@@ -824,9 +851,12 @@ class SlothCurrency(commands.Cog):
 
     # UserServerActivity
 
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
     async def create_table_server_activity(self, ctx):
+        '''
+        (ADM) Creates the UserServerActivity table.
+        '''
         await ctx.message.delete()
         mycursor, db = await the_data_base2()
         await mycursor.execute(
@@ -835,9 +865,12 @@ class SlothCurrency(commands.Cog):
         await mycursor.close()
         return await ctx.send("**Table *UserServerActivity* created!**", delete_after=3)
 
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
     async def drop_table_server_activity(self, ctx):
+        '''
+        (ADM) Drops the UserServerActivity table.
+        '''
         await ctx.message.delete()
         mycursor, db = await the_data_base2()
         await mycursor.execute("DROP TABLE UserServerActivity")
@@ -881,9 +914,12 @@ class SlothCurrency(commands.Cog):
         await mycursor.close()
 
 
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
     async def reset_table_server_activity(self, ctx):
+        '''
+        (ADM) Resets the UserServerActivity table.
+        '''
         await ctx.message.delete()
         mycursor, db = await the_data_base2()
         await mycursor.execute("DROP TABLE UserServerActivity")
@@ -998,7 +1034,7 @@ class SlothCurrency(commands.Cog):
     @commands.has_permissions(administrator=True)
     async def add_message(self, ctx, member: discord.Member = None, add_message: int= None):
         '''
-        Adds messages to the member's status.
+        (ADM) Adds messages to the member's status.
         :param member: The member to add the messages to.
         :param add_message: The amount of messages to add.
         '''
@@ -1013,7 +1049,7 @@ class SlothCurrency(commands.Cog):
     @commands.has_permissions(administrator=True)
     async def add_time(self, ctx, member: discord.Member = None, add_time: int = None):
         '''
-        Adds time to the member's status.
+        (ADM) Adds time to the member's status.
         :param member: The member to add time to.
         :param add_time: The amount of time to add. (in secs)
         '''

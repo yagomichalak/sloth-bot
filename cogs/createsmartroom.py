@@ -9,7 +9,9 @@ from mysqldb import the_data_base
 from mysqldb2 import the_data_base5
 
 class CreateSmartRoom(commands.Cog):
-
+	'''
+	A cog related to the creation of a custom voice channel.
+	'''
 
 	def __init__(self, client):
 		self.client = client
@@ -496,9 +498,12 @@ class CreateSmartRoom(commands.Cog):
 	# Database commands
 
 	# Premium related functions
-	@commands.command()
+	@commands.command(hidden=True)
 	@commands.has_permissions(administrator=True)
 	async def create_table_premium_vc(self, ctx):
+		'''
+		(ADM) Creates the PremiumVc table.
+		'''
 		if await self.table_premium_vc_exists():
 			return await ctx.send("**Table __PremiumVc__ already exists!**")
 
@@ -508,9 +513,12 @@ class CreateSmartRoom(commands.Cog):
 		await mycursor.close()
 		return await ctx.send("**Table __PremiumVc__ created!**")
 
-	@commands.command()
+	@commands.command(hidden=True)
 	@commands.has_permissions(administrator=True)
 	async def drop_table_premium_vc(self, ctx):
+		'''
+		(ADM) Drops the PremiumVc table.
+		'''
 		if not await self.table_premium_vc_exists():
 			return await ctx.send("**Table __PremiumVc__ doesn't exist!**")
 
@@ -520,9 +528,12 @@ class CreateSmartRoom(commands.Cog):
 		await mycursor.close()
 		return await ctx.send("**Table __PremiumVc__ dropped!**")
 
-	@commands.command()
+	@commands.command(hidden=True)
 	@commands.has_permissions(administrator=True)
 	async def reset_table_premium_vc(self, ctx):
+		'''
+		(ADM) Resets the PremiumVc table.
+		'''
 		if not await self.table_premium_vc_exists():
 			return await ctx.send("**Table __PremiumVc__ doesn't exist yet!**")
 
@@ -563,9 +574,12 @@ class CreateSmartRoom(commands.Cog):
 		await mycursor.close()
 
 	# Galaxy related functions
-	@commands.command()
+	@commands.command(hidden=True)
 	@commands.has_permissions(administrator=True)
 	async def create_table_galaxy_vc(self, ctx):
+		'''
+		(ADM) Creates the GalaxyVc table.
+		'''
 		if await self.table_galaxy_vc_exists():
 			return await ctx.send("**Table __GalaxyVc__ already exists!**")
 
@@ -575,9 +589,12 @@ class CreateSmartRoom(commands.Cog):
 		await mycursor.close()
 		return await ctx.send("**Table __GalaxyVc__ created!**")
 
-	@commands.command()
+	@commands.command(hidden=True)
 	@commands.has_permissions(administrator=True)
 	async def drop_table_galaxy_vc(self, ctx):
+		'''
+		(ADM) Drops the GalaxyVc table.
+		'''
 		if not await self.table_galaxy_vc_exists():
 			return await ctx.send("**Table __GalaxyVc__ doesn't exist!**")
 
@@ -590,6 +607,9 @@ class CreateSmartRoom(commands.Cog):
 	@commands.command()
 	@commands.has_permissions(administrator=True)
 	async def reset_table_galaxy_vc(self, ctx):
+		'''
+		(ADM) Resets the GalaxyVc table.
+		'''
 		if not await self.table_galaxy_vc_exists():
 			return await ctx.send("**Table __GalaxyVc__ doesn't exist yet!**")
 
@@ -706,8 +726,11 @@ class CreateSmartRoom(commands.Cog):
 		await mycursor.close()
 
 	@commands.has_permissions(administrator=True)
-	@commands.command()
+	@commands.command(hidden=True)
 	async def create_table_user_vc_ts(self, ctx):
+		'''
+		(ADM) Creates the UserVcstamp table.
+		'''
 		await ctx.message.delete()
 		if await self.table_user_vc_ts_exists():
 			return await ctx.send("**Table __UserVCstamp__ already exists!**")
@@ -718,8 +741,11 @@ class CreateSmartRoom(commands.Cog):
 		return await ctx.send("**Table __UserVCstamp__ created!**", delete_after=5)
 
 	@commands.has_permissions(administrator=True)
-	@commands.command()
+	@commands.command(hidden=True)
 	async def drop_table_user_vc_ts(self, ctx):
+		'''
+		(ADM) Drops the UserVcstamp table.
+		'''
 		await ctx.message.delete()
 		if not await self.table_user_vc_ts_exists():
 			return await ctx.send("**Table __UserVCstamp__ doesn't exist!**")
@@ -730,8 +756,11 @@ class CreateSmartRoom(commands.Cog):
 		return await ctx.send("**Table __UserVCstamp__ dropped!**", delete_after=5)
 
 	@commands.has_permissions(administrator=True)
-	@commands.command()
+	@commands.command(hidden=True)
 	async def reset_table_user_vc_ts(self, ctx):
+		'''
+		(ADM) Resets the UserVcstamp table.
+		'''
 		await ctx.message.delete()
 		if not await self.table_user_vc_ts_exists():
 			return await ctx.send("**Table __UserVCstamp__ doesn't exist yet!**")
