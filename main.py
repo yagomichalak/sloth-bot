@@ -311,7 +311,7 @@ async def uptime(ctx: commands.Context):
     await ctx.send(f"I've been online for {uptime_stamp}")
 
 @client.command()
-async def help(self, ctx, co: str = None):
+async def help(ctx, co: str = None):
     '''
     Provides a description of all commands and cogs.
     :param co: The cog or the command that you want to see. (Optional)
