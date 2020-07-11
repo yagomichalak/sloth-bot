@@ -318,7 +318,7 @@ async def help(ctx, co: str = None):
     '''
     if not co:
         halp = discord.Embed(title="Cog Listing and Uncategorized Commands.",
-        description="```Use o!help *cog* or help *command* to find out more about them!\n(BTW, the Cog Name Must Be in Title Case, Just Like this Sentence.\nEx: z!help SlothCurrency)```",
+        description="```Use o!help *cog* or help *command* to find out more about them!\n(BTW, the Cog Name Must Be in Title Case, Just Like this Sentence).\nEx: z!help SlothCurrency```",
         color=discord.Color.green(),
         timestamp=ctx.message.created_at)
 
