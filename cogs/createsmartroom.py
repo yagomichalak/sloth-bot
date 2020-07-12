@@ -42,13 +42,15 @@ class CreateSmartRoom(commands.Cog):
 					pass
 
 			member = self.client.get_user(room[0])
-			category = discord.utils.get(channel.guild.categories, id=room[1])
 			try:
+				category = discord.utils.get(channel.guild.categories, id=room[1])
 				await category.delete()
 			except Exception:
 				pass
-
-			await member.send(f"**Hey! Your rooms expired so they got deleted!**")
+			else:
+				await member.send(f"**Hey! Your rooms expired so they got deleted!**")
+			finally:
+				await self.delete_galaxy_vc(member.id, room[2])
 
 
 	@commands.Cog.listener()
