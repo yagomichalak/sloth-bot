@@ -55,7 +55,7 @@ async def on_ready():
     update_timezones.start()
     print('Bot is ready!')
 
-@tasks.loop(seconds=120)
+@tasks.loop(seconds=65)
 async def change_color():
     guild = client.get_guild(server_id)
     patreon = discord.utils.get(guild.roles, id=patreon_role_id)
