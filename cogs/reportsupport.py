@@ -83,17 +83,17 @@ class ReportSupport(commands.Cog):
 				read_messages=True, send_messages=True, connect=False, view_channel=True), 
 			moderator: discord.PermissionOverwrite(
 				read_messages=True, send_messages=True, connect=False, view_channel=True, manage_messages=True)}
-			the_channel = await guild.create_text_channel(name=f"case-{counter[0][0]}", category=case_cat)
+			the_channel = await guild.create_text_channel(name=f"case-{counter[0][0]}", category=case_cat, overwrites=overwrites)
 			print('created!')
 			await self.insert_user_open_channel(member.id, the_channel.id)
 			await self.increase_case_number()
 			embed = discord.Embed(title="Report Support!", description=f"Please, {member.mention}, try to explain what happened and who you wanna report.",
 				color=discord.Color.red())
 			await the_channel.send(content=f"{member.mention}, {moderator.mention}", embed=embed)
-			try:
-				await the_channel.edit(overwrites=overwrites)
-			except Exception:
-				pass
+			# try:
+			# 	await the_channel.edit(overwrites=overwrites)
+			# except Exception:
+			# 	pass
 
 	async def member_has_open_channel(self, member_id: int):
 		mycursor, db = await the_data_base3()
