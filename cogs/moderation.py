@@ -2,11 +2,13 @@ import discord
 from discord.ext import commands
 import asyncio
 from mysqldb2 import the_data_base3
+from datetime import datetime
 
 mod_log_id = 562195805272932372
 muted_role_id = 537763763982434304
 general_channel = 562019539135627276
 last_deleted_message = []
+moderator_channel_id = 
 
 class Moderation(commands.Cog):
     '''
@@ -24,6 +26,17 @@ class Moderation(commands.Cog):
     async def on_member_join(self, member):
         if member.bot:
             return
+
+        # User timestamp
+        the_time = member.created_at
+        timestamp = datetime.timestamp(the_time)
+        # Actual timestamp
+        time_now = datetime.time(datetime.utcnow())
+        account_age = round((time_now - timestamp)/86400)
+        if account_age <= 2:
+            moderator_channel = discord.utils.get(member.guild.channels, id=moderator_channel_id)
+            moderator_channel.send(f"🔴 Alert! Possible fake account: {member.mention} joined the server. Account was just created.\nAccount age: {account_age} day(s)!")
+
 
         if await self.get_muted_roles(member.id):
             muted_role = discord.utils.get(member.guild.roles, id=muted_role_id)
