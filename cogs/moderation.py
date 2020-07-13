@@ -35,7 +35,7 @@ class Moderation(commands.Cog):
         account_age = round((time_now - timestamp)/86400)
         if account_age <= 2:
             moderator_channel = discord.utils.get(member.guild.channels, id=moderator_channel_id)
-            moderator_channel.send(f"🔴 Alert! Possible fake account: {member.mention} joined the server. Account was just created.\nAccount age: {account_age} day(s)!")
+            await moderator_channel.send(f"🔴 Alert! Possible fake account: {member.mention} joined the server. Account was just created.\nAccount age: {account_age} day(s)!")
 
 
         if await self.get_muted_roles(member.id):
