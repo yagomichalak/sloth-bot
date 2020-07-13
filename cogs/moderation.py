@@ -8,7 +8,7 @@ mod_log_id = 562195805272932372
 muted_role_id = 537763763982434304
 general_channel = 562019539135627276
 last_deleted_message = []
-moderator_channel_id = 
+moderator_channel_id = 583723215382380557
 
 class Moderation(commands.Cog):
     '''
