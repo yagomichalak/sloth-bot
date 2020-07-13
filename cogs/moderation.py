@@ -31,7 +31,7 @@ class Moderation(commands.Cog):
         the_time = member.created_at
         timestamp = datetime.timestamp(the_time)
         # Actual timestamp
-        time_now = datetime.time(datetime.utcnow())
+        time_now = datetime.timestamp(datetime.utcnow())
         account_age = round((time_now - timestamp)/86400)
         if account_age <= 2:
             moderator_channel = discord.utils.get(member.guild.channels, id=moderator_channel_id)
