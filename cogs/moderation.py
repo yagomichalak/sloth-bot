@@ -8,7 +8,7 @@ mod_log_id = 562195805272932372
 muted_role_id = 537763763982434304
 general_channel = 562019539135627276
 last_deleted_message = []
-moderator_channel_id = 583723215382380557
+suspect_channel_id = 732691690514546709
 
 class Moderation(commands.Cog):
     '''
@@ -34,8 +34,8 @@ class Moderation(commands.Cog):
         time_now = datetime.timestamp(datetime.utcnow())
         account_age = round((time_now - timestamp)/86400)
         if account_age <= 2:
-            moderator_channel = discord.utils.get(member.guild.channels, id=moderator_channel_id)
-            await moderator_channel.send(f"🔴 Alert! Possible fake account: {member.mention} joined the server. Account was just created.\nAccount age: {account_age} day(s)!")
+            suspect_channel = discord.utils.get(member.guild.channels, id=suspect_channel_id)
+            await suspect_channel.send(f"🔴 Alert! Possible fake account: {member.mention} joined the server. Account was just created.\nAccount age: {account_age} day(s)!")
 
 
         if await self.get_muted_roles(member.id):
