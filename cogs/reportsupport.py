@@ -324,8 +324,6 @@ class ReportSupport(commands.Cog):
 				# 	timeout=60,
 				# 	check=lambda r, u: u == member and str(r.message.channel) == str(the_msg.channel) and str(r.emoji) in ['⬅️', '➡️'])
 			except asyncio.TimeoutError:
-				for task in pending_tasks:
-        			task.cancel()
 				await the_msg.remove_reaction('⬅️', self.client.user)
 				await the_msg.remove_reaction('➡️', self.client.user)
 
