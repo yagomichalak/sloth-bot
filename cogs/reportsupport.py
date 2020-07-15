@@ -295,7 +295,7 @@ class ReportSupport(commands.Cog):
 
 	async def dnk_embed(self, member):
 		def check(r, u):
-			return u == member and str(r.message.channel) == str(the_msg.channel) and str(r.emoji) in ['⬅️', '➡️']
+			return u == member and str(r.message.id) == str(the_msg.id) and str(r.emoji) in ['⬅️', '➡️']
 
 		command_index = 0
 		initial_embed = discord.Embed(title="__Table of Commands and their Prices__",
@@ -313,19 +313,23 @@ class ReportSupport(commands.Cog):
 			await the_msg.edit(embed=embed)
 
 			try:
-				pending_tasks = [self.client.wait_for('reaction_add', timeout=60, check=check),
-				self.client.wait_for('reaction_remove', timeout=60, check=check)]
-				done_tasks, pending_tasks = await asyncio.wait(pending_tasks, return_when=asyncio.FIRST_COMPLETED)
+				pending_tasks = [self.client.wait_for('reaction_add', check=check),
+				self.client.wait_for('reaction_remove', check=check)]
+				done_tasks, pending_tasks = await asyncio.wait(pending_tasks, timeout=60, return_when=asyncio.FIRST_COMPLETED)
+				if not done_tasks:
+					raise asyncio.TimeoutError
+
 				for task in pending_tasks:
 					task.cancel()
-				for task in done_tasks: 
-					reaction, user = await task
-					
+				
 			except asyncio.TimeoutError:
 				await the_msg.remove_reaction('⬅️', self.client.user)
 				await the_msg.remove_reaction('➡️', self.client.user)
+				break
 
 			else:
+				for task in done_tasks: 
+					reaction, user = await task
 				if str(reaction.emoji) == "➡️":
 				    #await the_msg.remove_reaction(reaction.emoji, member)
 				    if command_index < (len(list_of_commands) - 1):
