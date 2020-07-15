@@ -320,10 +320,10 @@ class ReportSupport(commands.Cog):
 					task.cancel()
 				for task in done_tasks: 
 					reaction, user = await task
-				# reaction, user = await self.client.wait_for('reaction_add',
-				# 	timeout=60,
-				# 	check=lambda r, u: u == member and str(r.message.channel) == str(the_msg.channel) and str(r.emoji) in ['⬅️', '➡️'])
+					
 			except asyncio.TimeoutError:
+				for task in pending_tasks:
+					task.cancel()
 				await the_msg.remove_reaction('⬅️', self.client.user)
 				await the_msg.remove_reaction('➡️', self.client.user)
 
