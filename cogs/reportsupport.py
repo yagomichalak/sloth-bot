@@ -322,8 +322,6 @@ class ReportSupport(commands.Cog):
 					reaction, user = await task
 					
 			except asyncio.TimeoutError:
-				for task in pending_tasks:
-					task.cancel()
 				await the_msg.remove_reaction('⬅️', self.client.user)
 				await the_msg.remove_reaction('➡️', self.client.user)
 
