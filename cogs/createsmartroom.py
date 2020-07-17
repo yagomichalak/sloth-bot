@@ -606,7 +606,7 @@ class CreateSmartRoom(commands.Cog):
 		await mycursor.close()
 		return await ctx.send("**Table __GalaxyVc__ dropped!**")
 
-	@commands.command()
+	@commands.command(hidden=True)
 	@commands.has_permissions(administrator=True)
 	async def reset_table_galaxy_vc(self, ctx):
 		'''

@@ -96,16 +96,15 @@ class Tools(commands.Cog):
             voice_client: discord.VoiceClient = discord.utils.get(self.client.voice_clients, guild=ctx.guild)
 
         # Checks if the bot is in the same voice channel that the user
+        if voice.channel == voice_client.channel:
+            # Plays the song
+            if not voice_client.is_playing():
+                tts = gTTS(text=message, lang=language)
+                tts.save(f'tts/audio.mp3')
+                audio_source = discord.FFmpegPCMAudio('tts/audio.mp3')
+                voice_client.play(audio_source, after=lambda e: print('finished playing the tts!'))
         else:
-            if voice.channel == voice_client.channel:
-                # Plays the song
-                if not voice_client.is_playing():
-                    tts = gTTS(text=message, lang=language)
-                    tts.save(f'tts/audio.mp3')
-                    audio_source = discord.FFmpegPCMAudio('tts/audio.mp3')
-                    voice_client.play(audio_source, after=lambda e: print('finished playing the tts!'))
-            else:
-                await ctx.send("**The bot is in a different voice channel!**")
+            await ctx.send("**The bot is in a different voice channel!**")
 
     @commands.command()
     async def tr(self, ctx, language: str = None, *, message: str = None):
