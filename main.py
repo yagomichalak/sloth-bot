@@ -326,11 +326,12 @@ async def help(ctx, cmd: str = None):
         for cog in client.cogs:
             cog = client.get_cog(cog)
             commands = [c.name for c in cog.get_commands() if not c.hidden]
-            embed.add_field(
-                name=f"__{cog.qualified_name}__", 
-                value=f"`Commands:` {', '.join(commands)}", 
-                inline=False
-                )
+            if commands:
+                embed.add_field(
+                    name=f"__{cog.qualified_name}__", 
+                    value=f"`Commands:` {', '.join(commands)}", 
+                    inline=False
+                    )
 
         cmds = []
         for y in client.walk_commands():
