@@ -346,7 +346,7 @@ async def help(ctx, cmd: str = None):
         # Checks if it's a command
         if command := client.get_command(cmd.lower()):
             command_embed = discord.Embed(title=f"__Command:__ {command.name}", description=f"__**Description:**__\n```{command.help}```", color=ctx.author.color, timestamp=ctx.message.created_at)
-            await ctx.send(embed=command_embed)
+            return await ctx.send(embed=command_embed)
 
         # Checks if it's a cog
         for cog in client.cogs:
@@ -359,9 +359,9 @@ async def help(ctx, cmd: str = None):
 
                 return await ctx.send(embed=cog_embed)
 
-      # Otherwise, it's an invalid parameter (Not found)
-      else:
-        await ctx.send(f"**Invalid parameter! `{cmd}` is neither a command nor a cog!**")
+        # Otherwise, it's an invalid parameter (Not found)
+        else:
+            await ctx.send(f"**Invalid parameter! `{cmd}` is neither a command nor a cog!**")
 
 @client.command(hidden=True)
 @commands.has_permissions(administrator=True)
