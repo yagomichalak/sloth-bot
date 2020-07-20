@@ -131,7 +131,7 @@ If you have any questions feel free to ask! And if you experience any type of pr
         :param member: The member to send the message to.
         :param message: The message to send.
         '''
-        if member.author.id != 647452832852869120:
+        if ctx.author.id != 647452832852869120:
             return
 
         if not message:
