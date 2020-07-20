@@ -115,9 +115,9 @@ async def on_message(message):
         if message.author.id == 512404174957314083:
             dnk = client.get_user(647452832852869120)
             msg = message.content
-            embed_report = discord.Embed(description=f"**Msg sent by:** {message.author.mention}\n{msg}", colour=message.author.color,
+            embed = discord.Embed(description=f"**Msg sent by:** {message.author.mention}\n{msg}", colour=message.author.color,
                                          timestamp=message.created_at)
-            embed_report.set_thumbnail(url=message.author.avatar_url)
+            embed.set_thumbnail(url=message.author.avatar_url)
             await dnk.send(embed=embed)
 
     await client.process_commands(message)
