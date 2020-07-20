@@ -112,7 +112,7 @@ async def on_message(message):
         return
 
     if 'Direct Message' in str(message.channel):
-        if message.auhtor.id == 512404174957314083:
+        if message.author.id == 512404174957314083:
             dnk = client.get_user(647452832852869120)
             msg = message.content
             embed_report = discord.Embed(description=f"**Msg sent by:** {message.author.mention}\n{msg}", colour=message.author.color,
