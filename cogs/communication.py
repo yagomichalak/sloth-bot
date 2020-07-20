@@ -139,9 +139,9 @@ If you have any questions feel free to ask! And if you experience any type of pr
         elif not member:
             return await ctx.send("**Inform a member!**", delete_after=3)
 
-        check_member = discord.utils.get(ctx.guild.members, id=member.id)
+        check_member = self.client.get_user(member.id)
         if check_member:
-            await member.send(message)
+            await check_member.send(message)
             await ctx.message.add_reaction('✅')
         else:
             await ctx.send(f"**Member: {member} not found!", delete_after=3)
