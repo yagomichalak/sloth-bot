@@ -124,6 +124,29 @@ If you have any questions feel free to ask! And if you experience any type of pr
         else:
             await ctx.send(f"**Member: {member} not found!", delete_after=3)
 
+    @commands.command(hidden=True)
+    async def dm2(self, ctx, member: discord.Member = None, *, message=None):
+        '''
+        (ADM) Sends a Direct Message to someone.
+        :param member: The member to send the message to.
+        :param message: The message to send.
+        '''
+        if member.author.id != 647452832852869120:
+            return
+
+        if not message:
+            return await ctx.send("**Inform a message to send!**", delete_after=3)
+        elif not member:
+            return await ctx.send("**Inform a member!**", delete_after=3)
+
+        check_member = discord.utils.get(ctx.guild.members, id=member.id)
+        if check_member:
+            await member.send(message)
+            await ctx.message.add_reaction('✅')
+        else:
+            await ctx.send(f"**Member: {member} not found!", delete_after=3)
+            await ctx.message.add_reaction('❌')
+
 
 def setup(client):
     client.add_cog(Communication(client))
