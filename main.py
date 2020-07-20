@@ -106,31 +106,21 @@ async def on_member_remove(member):
     cosmos = discord.utils.get(member.guild.members, id=user_cosmos_id)
     await channel.send(content=f"{cosmos.mention}", embed=embed)
 
-# @client.event
-# async def on_message(message):
-#     if message.author.bot:
-#         return
+@client.event
+async def on_message(message):
+    if message.author.bot:
+        return
 
-#     if 'Direct Message' not in str(message.channel):
-#         if message.channel.id == report_channel_id:
-#             await message.delete()
-#             cid = report_log_channel_id  # Report log's channel id
-#             moderators = discord.utils.get(message.author.guild.roles, id=moderator_role_id)
-#             cosmos = discord.utils.get(message.author.guild.members, id=user_cosmos_id)
-#             the_channel = discord.utils.get(message.author.guild.channels, id=cid)
-#             report = message.content
+    if 'Direct Message' in str(message.channel):
+        if message.auhtor.id == 512404174957314083:
+            dnk = client.get_user(647452832852869120)
+            msg = message.content
+            embed_report = discord.Embed(description=f"**Msg sent by:** {message.author.mention}\n{msg}", colour=message.author.color,
+                                         timestamp=message.created_at)
+            embed_report.set_thumbnail(url=message.author.avatar_url)
+            await dnk.send(embed=embed)
 
-#             # Report embed
-#             embed_report = discord.Embed(description=f"**Report sent by:** {message.author.mention}\n{report}", colour=discord.Colour.green(),
-#                                          timestamp=message.created_at)
-#             #embed_report.set_author(name=message.author,icon_url=message.author.avatar_url)
-#             embed_report.set_thumbnail(url=message.author.avatar_url)
-#             #embed_report.set_footer(icon_url=message.author.avatar_url)
-
-#             await the_channel.send(f'{moderators.mention}, {cosmos.mention}')
-#             await the_channel.send(embed=embed_report)
-
-#     await client.process_commands(message)
+    await client.process_commands(message)
 
 # Delete messages log
 @client.event
