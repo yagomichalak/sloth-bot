@@ -17,7 +17,7 @@ language_regions = {
 "Native Celtic": "eu-west",
 "Native French": "eu-west",
 "Native Spanish": "eu-west",
-"Native Portuguese": "brazil",
+"Native Portuguese": "us-east",
 "Native Italian": "eu-central",
 "Native Romanian": "eu-central",
 "Native Catalan": "eu-central",
