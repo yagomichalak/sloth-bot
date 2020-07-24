@@ -8,6 +8,7 @@ reportsupport_channel_id = 729454413290143774
 dnk_id = 647452832852869120
 case_cat_id = 562939721253126146
 moderator_role_id = 497522510212890655
+cosmos_id = 423829836537135108
 
 class ReportSupport(commands.Cog):
 	'''
@@ -77,6 +78,7 @@ class ReportSupport(commands.Cog):
 			case_cat = discord.utils.get(guild.categories, id=case_cat_id)
 			counter = await self.get_case_number()
 			moderator = discord.utils.get(guild.roles, id=moderator_role_id)
+			cosmos = discord.utils.get(guild.members, id=cosmos_id)
 			overwrites = {guild.default_role: discord.PermissionOverwrite(
 				read_messages=False, send_messages=False, connect=False, view_channel=False), 
 			member: discord.PermissionOverwrite(
@@ -89,7 +91,7 @@ class ReportSupport(commands.Cog):
 			await self.increase_case_number()
 			embed = discord.Embed(title="Report Support!", description=f"Please, {member.mention}, try to explain what happened and who you wanna report.",
 				color=discord.Color.red())
-			await the_channel.send(content=f"{member.mention}, {moderator.mention}", embed=embed)
+			await the_channel.send(content=f"{member.mention}, {moderator.mention}, {cosmos.mention}", embed=embed)
 			# try:
 			# 	await the_channel.edit(overwrites=overwrites)
 			# except Exception:
