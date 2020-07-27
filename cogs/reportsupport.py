@@ -89,7 +89,7 @@ class ReportSupport(commands.Cog):
 			print('created!')
 			await self.insert_user_open_channel(member.id, the_channel.id)
 			await self.increase_case_number()
-			embed = discord.Embed(title="Report Support!", description=f"Please, {member.mention}, try to explain what happened and who you wanna report.",
+			embed = discord.Embed(title="Report Support!", description=f"Please, {member.mention}, try to explain what happened and who you want to report.",
 				color=discord.Color.red())
 			await the_channel.send(content=f"{member.mention}, {moderator.mention}, {cosmos.mention}", embed=embed)
 			# try:
