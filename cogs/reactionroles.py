@@ -80,7 +80,7 @@ class ReactionRoles(commands.Cog):
         await ctx.message.delete()
         mycursor, db = await the_data_base3()
         await mycursor.execute(
-            "CREATE TABLE RegisteredText (message_id bigint, reaction_ref VARCHAR(50), category VARCHAR(20), file_name VARCHAR(50))")
+            "CREATE TABLE RegisteredText (message_id bigint, reaction_ref VARCHAR(50), category VARCHAR(20), file_name VARCHAR(50) DEFAULT CHARSET=utf8mb4)")
         await db.commit()
         await mycursor.close()
         return await ctx.send("**Table *RegisteredText* created!**", delete_after=3)
@@ -106,10 +106,7 @@ class ReactionRoles(commands.Cog):
         '''
         await ctx.message.delete()
         mycursor, db = await the_data_base3()
-        await mycursor.execute("DROP TABLE RegisteredText")
-        await db.commit()
-        await mycursor.execute(
-            "CREATE TABLE RegisteredText (message_id bigint, reaction_ref VARCHAR(50), category VARCHAR(20), file_name VARCHAR(50))")
+        await mycursor.execute("DELETE FROM RegisteredText")
         await db.commit()
         await mycursor.close()
         return await ctx.send("**Table *RegisteredText* reseted!**", delete_after=3)
