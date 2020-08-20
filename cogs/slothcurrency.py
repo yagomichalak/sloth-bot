@@ -992,6 +992,7 @@ class SlothCurrency(commands.Cog):
         cmsg, message_times = self.convert_messages(member_id, user_message)
         ctime, time_times = self.convert_time(member_id, user_time)
 
+        print('goodgood')
 
         await self.update_user_server_messages(member_id, -message_times * 50)
         await self.update_user_money(member_id, cmsg)
