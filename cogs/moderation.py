@@ -117,14 +117,14 @@ class Moderation(commands.Cog):
         if not member:
             return await ctx.send("**Please, specify a member!**", delete_after=3)
         if role not in member.roles:
-            if role not in member.roles:
-                for mr in member.roles:
+            await member.add_roles(role)
+            for mr in member.roles:
+                if mr.id != role.id:
                     try:
                         await member.remove_roles(mr)
                         await self.insert_in_muted(member.id, mr.id)
                     except Exception:
                         pass
-            await member.add_roles(role)
             # General embed
             general_embed = discord.Embed(description=f'**Reason:** {reason}', colour=discord.Colour.dark_grey(), timestamp=ctx.message.created_at)
             general_embed.set_author(name=f'{member} has been muted', icon_url=member.avatar_url)
@@ -206,13 +206,15 @@ class Moderation(commands.Cog):
         if not member:
             return await ctx.send("**Please, specify a member!**", delete_after=3)
         if role not in member.roles:
-            for mr in member.roles[1:]:
-                try:
-                    await member.remove_roles(mr)
-                    await self.insert_in_muted(member.id, mr.id)
-                except Exception:
-                    pass
             await member.add_roles(role)
+            for mr in member.roles:
+                if mr.id != role.id:
+                    try:
+                        await member.remove_roles(mr)
+                        await self.insert_in_muted(member.id, mr.id)
+                    except Exception:
+                        pass
+            
             # General embed
             general_embed = discord.Embed(description=f'**Reason:** {reason}', colour=discord.Colour.lighter_grey(),
                                           timestamp=ctx.message.created_at)

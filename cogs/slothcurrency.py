@@ -989,8 +989,17 @@ class SlothCurrency(commands.Cog):
         user_message = user_info[0][1]
         user_time = user_info[0][2]
         member_id = ctx.author.id
-        cmsg, message_times = await self.convert_messages(member_id, user_message)
-        ctime, time_times = await self.convert_time(member_id, user_time)
+        cmsg, message_times = self.convert_messages(member_id, user_message)
+        ctime, time_times = self.convert_time(member_id, user_time)
+
+
+        await self.update_user_server_messages(member_id, -message_times * 50)
+        await self.update_user_money(member_id, cmsg)
+
+        await self.update_user_server_time(member_id, -time_times * 1800)
+        await self.update_user_money(member_id, ctime)
+
+
         embed = discord.Embed(title="Exchange", colour=ctx.author.color, timestamp=ctx.message.created_at)
         embed.set_author(name=ctx.author, url=ctx.author.avatar_url)
         if not cmsg == ctime == 0:
@@ -1004,31 +1013,33 @@ class SlothCurrency(commands.Cog):
         else:
             return await ctx.send("**You have nothing to exchange!**", delete_after=3)
 
-    async def convert_messages(self, member_id, user_message: int, money: int = 0, times: int = 0):
+    def convert_messages(self, member_id, user_message: int, money: int = 0, times: int = 0):
         messages_left = user_message
         exchanged_money = money
-        if user_message >= 50:
-            times += 1
-            messages_left -= 50
-            exchanged_money += 3
-            return await self.convert_messages(member_id, messages_left, exchanged_money, times)
-        else:
-            await self.update_user_server_messages(member_id, -times * 50)
-            await self.update_user_money(member_id, exchanged_money)
-            return exchanged_money, times
+        while True:
+            if user_message >= 50:
+                times += 1
+                messages_left -= 50
+                exchanged_money += 3
+                #return await self.convert_messages(member_id, messages_left, exchanged_money, times)
+            else:
+                #await self.update_user_server_messages(member_id, -times * 50)
+                #await self.update_user_money(member_id, exchanged_money)
+                return exchanged_money, times
 
-    async def convert_time(self, member_id, user_time: int, money: int = 0, times: int = 0):
+    def convert_time(self, member_id, user_time: int, money: int = 0, times: int = 0):
         time_left = user_time
         exchanged_money = money
-        if time_left >= 1800:
-            times += 1
-            time_left -= 1800
-            exchanged_money += 3
-            return await self.convert_time(member_id, time_left, exchanged_money, times)
-        else:
-            await self.update_user_server_time(member_id, -times * 1800)
-            await self.update_user_money(member_id, exchanged_money)
-            return exchanged_money, times
+        while True:
+            if time_left >= 1800:
+                times += 1
+                time_left -= 1800
+                exchanged_money += 3
+                #return await self.convert_time(member_id, time_left, exchanged_money, times)
+            else:
+                #await self.update_user_server_time(member_id, -times * 1800)
+                #await self.update_user_money(member_id, exchanged_money)
+                return exchanged_money, times
 
     @commands.command()
     @commands.has_permissions(administrator=True)
