@@ -989,8 +989,9 @@ class SlothCurrency(commands.Cog):
         user_message = user_info[0][1]
         user_time = user_info[0][2]
         member_id = ctx.author.id
-        cmsg, message_times = await self.convert_messages(member_id, user_message)
-        ctime, time_times = await self.convert_time(member_id, user_time)
+        async with ctx.typing():
+            cmsg, message_times = await self.convert_messages(member_id, user_message)
+            ctime, time_times = await self.convert_time(member_id, user_time)
 
         #await self.update_user_server_messages(member_id, -message_times * 50)
         #await self.update_user_money(member_id, cmsg)
@@ -1019,7 +1020,8 @@ class SlothCurrency(commands.Cog):
             times += 1
             messages_left -= 50
             exchanged_money += 3
-            return await self.convert_messages(member_id, messages_left, exchanged_money, times)
+            await asyncio.sleep(0)
+            #return await self.convert_messages(member_id, messages_left, exchanged_money, times)
         else:
             await self.update_user_server_messages(member_id, -times * 50)
             await self.update_user_money(member_id, exchanged_money)
@@ -1032,7 +1034,8 @@ class SlothCurrency(commands.Cog):
             times += 1
             time_left -= 1800
             exchanged_money += 3
-            return await self.convert_time(member_id, time_left, exchanged_money, times)
+            await asyncio.sleep(0)
+            #return await self.convert_time(member_id, time_left, exchanged_money, times)
         else:
             await self.update_user_server_time(member_id, -times * 1800)
             await self.update_user_money(member_id, exchanged_money)
