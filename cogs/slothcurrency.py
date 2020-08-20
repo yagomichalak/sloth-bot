@@ -1014,11 +1014,12 @@ class SlothCurrency(commands.Cog):
         else:
             return await ctx.send("**You have nothing to exchange!**", delete_after=3)
 
-    async def convert_messages(self, member_id, user_message: int, money: int = 0, times: int = 0):
+    async def convert_messages(self, member_id, user_message: int):
         messages_left = user_message
-        exchanged_money = money
+        exchanged_money = times = 0
+
         while True:
-            if user_message >= 50:
+            if messages_left >= 50:
                 times += 1
                 messages_left -= 50
                 exchanged_money += 3
@@ -1030,9 +1031,10 @@ class SlothCurrency(commands.Cog):
                 await self.update_user_money(member_id, exchanged_money)
                 return exchanged_money, times
 
-    async def convert_time(self, member_id, user_time: int, money: int = 0, times: int = 0):
+    async def convert_time(self, member_id, user_time: int):
         time_left = user_time
-        exchanged_money = money
+        exchanged_money = times = 0
+
         while True:
             if time_left >= 1800:
                 times += 1
