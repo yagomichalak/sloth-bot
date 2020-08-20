@@ -1017,30 +1017,34 @@ class SlothCurrency(commands.Cog):
     async def convert_messages(self, member_id, user_message: int, money: int = 0, times: int = 0):
         messages_left = user_message
         exchanged_money = money
-        if user_message >= 50:
-            times += 1
-            messages_left -= 50
-            exchanged_money += 3
-            await asyncio.sleep(0)
-            #return await self.convert_messages(member_id, messages_left, exchanged_money, times)
-        else:
-            await self.update_user_server_messages(member_id, -times * 50)
-            await self.update_user_money(member_id, exchanged_money)
-            return exchanged_money, times
+        while True:
+            if user_message >= 50:
+                times += 1
+                messages_left -= 50
+                exchanged_money += 3
+                await asyncio.sleep(0)
+                continue
+                #return await self.convert_messages(member_id, messages_left, exchanged_money, times)
+            else:
+                await self.update_user_server_messages(member_id, -times * 50)
+                await self.update_user_money(member_id, exchanged_money)
+                return exchanged_money, times
 
     async def convert_time(self, member_id, user_time: int, money: int = 0, times: int = 0):
         time_left = user_time
         exchanged_money = money
-        if time_left >= 1800:
-            times += 1
-            time_left -= 1800
-            exchanged_money += 3
-            await asyncio.sleep(0)
-            #return await self.convert_time(member_id, time_left, exchanged_money, times)
-        else:
-            await self.update_user_server_time(member_id, -times * 1800)
-            await self.update_user_money(member_id, exchanged_money)
-            return exchanged_money, times
+        while True:
+            if time_left >= 1800:
+                times += 1
+                time_left -= 1800
+                exchanged_money += 3
+                await asyncio.sleep(0)
+                continue
+                #return await self.convert_time(member_id, time_left, exchanged_money, times)
+            else:
+                await self.update_user_server_time(member_id, -times * 1800)
+                await self.update_user_money(member_id, exchanged_money)
+                return exchanged_money, times
 
     @commands.command()
     @commands.has_permissions(administrator=True)
