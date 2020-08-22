@@ -19,7 +19,7 @@ class UpdateRegion(commands.Cog):
         print("UpdateRegion cog is online!")
         self.change_region.start()
 
-    @tasks.loop(minutes=60)
+    @tasks.loop(hours=3)
     async def change_region(self):
         guild = self.client.get_guild(server_id)
         everything = []
