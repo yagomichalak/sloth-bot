@@ -553,7 +553,7 @@ class Moderation(commands.Cog):
         else:
             return True
 
-    async def insert_user_warn(self, user_id: int, reason: str = None, timestamp: int, perpetrator: int):
+    async def insert_user_warn(self, user_id: int, reason, timestamp: int, perpetrator: int):
         '''
         Insert a warning into the system.
         '''
