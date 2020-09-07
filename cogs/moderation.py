@@ -466,7 +466,7 @@ class Moderation(commands.Cog):
         '''
         (ADM) Resets the MutedMember table.
         '''
-        if not self.check_table_mutedmember_exists():
+        if not await self.check_table_mutedmember_exists():
             return await ctx.send("**Table __MutedMember__ doesn't exist yet**")
 
         await ctx.message.delete()
