@@ -3,6 +3,7 @@ from discord.ext import commands
 import asyncio
 from mysqldb2 import the_data_base3
 from datetime import datetime
+import time
 
 mod_log_id = 562195805272932372
 muted_role_id = 537763763982434304
@@ -103,6 +104,11 @@ class Moderation(commands.Cog):
             embed.set_thumbnail(url=member.avatar_url)
             embed.set_footer(text=f"Warned by {ctx.author}", icon_url=ctx.author.avatar_url)
             await moderation_log.send(embed=embed)
+            current_ts = time.time()
+            await self.insert_user_warn(member.id, reason, current_ts, ctx.author.id)
+            user_warns = await self.get_user_warns(member.id)
+            if len(user_warns) >= 3:
+                await self.mute(ctx, member, reason)
 
     @commands.command()
     @commands.has_permissions(kick_members=True)
@@ -112,7 +118,11 @@ class Moderation(commands.Cog):
         :param member: The @ or the ID of the user to mute.
         :param reason: The reason for the mute.
         '''
-        await ctx.message.delete()
+        try:
+            await ctx.message.delete()
+        except:
+            pass
+
         role = discord.utils.get(ctx.guild.roles, id=muted_role_id)
         if not member:
             return await ctx.send("**Please, specify a member!**", delete_after=3)
@@ -450,23 +460,214 @@ class Moderation(commands.Cog):
         await mycursor.close()
 
 
-
-
     @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
     async def reset_table_mutedmember(self, ctx):
         '''
         (ADM) Resets the MutedMember table.
         '''
+        if not self.check_table_mutedmember_exists()
+            return await ctx.send("**Table __MutedMember__ doesn't exist yet**")
+
         await ctx.message.delete()
         mycursor, db = await the_data_base3()
-        await mycursor.execute("DROP TABLE mutedmember")
-        await db.commit()
-        await mycursor.execute("CREATE TABLE mutedmember (user_id bigint, role_id bigint)")
+        await mycursor.execute("DELETE FROM mutedmember")
+        #await mycursor.execute("CREATE TABLE mutedmember (user_id bigint, role_id bigint)")
         await db.commit()
         await mycursor.close()
         return await ctx.send("**Table __mutedmember__ reset!**", delete_after=3)
 
+    @commands.command(hidden=True)
+    @commands.has_permissions(administrator=True)
+    async def create_table_warns(self, ctx):
+        '''
+        (ADM) Creates the UserWarns table
+        '''
+        if self.check_table_warns_exists():
+            return await ctx.send("**Table __UserWarns__ already exists!**")
+        
+        await ctx.message.delete()
+        mycursor, db = await the_data_base3()
+        await mycursor.execute("CREATE TABLE UserWarns (user_id bigint, warn_reason VARCHAR(100), warn_timestamp bigint, warn_id bigint auto_increment, perpetrator bigint)")
+        await db.commit()
+        await mycursor.close()
+        return await ctx.send("**Table __UserWarns__ created!**", delete_after=3)
+
+
+    @commands.command(hidden=True)
+    @commands.has_permissions(administrator=True)
+    async def drop_table_warns(self, ctx):
+        '''
+        (ADM) Creates the UserWarns table
+        '''
+        if not self.check_table_warns_exists():
+            return await ctx.send("**Table __UserWarns__ doesn't exist!**")
+        await ctx.message.delete()
+        mycursor, db = await the_data_base3()
+        await mycursor.execute("DROP TABLE UserWarns")
+        await db.commit()
+        await mycursor.close()
+        return await ctx.send("**Table __UserWarns__ created!**", delete_after=3)
+
+    @commands.command(hidden=True)
+    @commands.has_permissions(administrator=True)
+    async def reset_table_warns(self, ctx):
+        '''
+        (ADM) Creates the UserWarns table
+        '''
+        if not self.check_table_warns_exists():
+            return await ctx.send("**Table __UserWarns__ doesn't exist yet!**")
+
+        await ctx.message.delete()
+        mycursor, db = await the_data_base3()
+        await mycursor.execute("DELETE FROM UserWarns")
+        await db.commit()
+        await mycursor.close()
+        return await ctx.send("**Table __UserWarns__ created!**", delete_after=3)
+
+    async def check_table_warns_exists(self):
+        '''
+        Checks if the UserWarns table exists
+        '''
+        mycursor, db = await the_data_base3()
+        await mycursor.execute(f"SHOW TABLE STATUS LIKE 'UserWarns'")
+        table_info = await mycursor.fetchall()
+        await mycursor.close()
+        if len(table_info) == 0:
+            return False
+
+        else:
+            return True
+
+    async def check_table_mutedmember_exists(self):
+        '''
+        Checks if the MutedMember table exists
+        '''
+        mycursor, db = await the_data_base3()
+        await mycursor.execute(f"SHOW TABLE STATUS LIKE 'MutedMember'")
+        table_info = await mycursor.fetchall()
+        await mycursor.close()
+        if len(table_info) == 0:
+            return False
+
+        else:
+            return True
+
+    async def insert_user_warn(self, user_id: int, reason: str = None, timestamp: int, perpetrator: int):
+        '''
+        Insert a warning into the system.
+        '''
+        mycursor, db = await the_data_base3()
+        await mycursor.execute(f"INSERT INTO UserWarns (user_id, warn_reason, warn_timestamp, perpetrator) VALUES (%s, %s, %s, %s)", (user_id, reason, timestamp, perpetrator))
+        await db.commit()
+        await mycursor.close()
+
+    async def get_user_warn_by_warn_id(self, warn_id: int):
+        '''
+        Gets a specific warning by ID.
+        '''
+        mycursor, db = await the_data_base3()
+        await mycursor.execute(f"SELECT * FROM UserWarns WHERE warn_id = {warn_id}")
+        user_warns = await mycursor.fetchall()
+        return user_warns
+
+    async def get_user_warns(self, user_id: int):
+        '''
+        Gets all warnings from a user.
+        '''
+        mycursor, db = await the_data_base3()
+        await mycursor.execute(f"SELECT * FROM UserWarns WHERE user_id = {user_id}")
+        user_warns = await mycursor.fetchall()
+        await mycursor.close()
+        return user_warns
+
+    async def remove_user_warning(self, warn_id: int):
+        '''
+        Removes a specifc warning by ID.
+        '''
+        mycursor, db = await the_data_base3()
+        await mycursor.execute(f"DELETE FROM UserWarns WHERE warn_id = {wanr_id}")
+        await db.commit()
+        await mycursor.close()
+
+    async def remove_user_warnings(self, user_id: int):
+        '''
+        Deletes all warnings from a user by their ID.
+        '''
+        mycursor, db = await the_data_base3()
+        await mycursor.execute(f"DELETE FROM UserWarns WHERE user_id = {user_id}")
+        await db.commit()
+        await mycursor.close()
+    
+
+    @commands.command()
+    @commands.has_permissions(administrator=True)
+    async def remove_warning(self, ctx, warn_id: int = None):
+        '''
+        (ADM) Removes a specific warn by ID.
+        :param warn_id: The warn ID.
+        '''
+        if not warn_id:
+            return await ctx.send("**Inform the warn ID!**")
+
+        user_warns = await self.get_user_warn_by_warn_id(warn_id)
+        if user_warns:
+            await self.remove_user_warning(warn_id)
+            member = discord.utils.get(ctx.guild.members, id=user_warns[0])
+            await ctx.send(f"**Removed warn with ID `{warn_id}` for {member}")
+        else:
+            await ctx.send(f"**Warn with ID `{warn_id}` was not found!**")
+
+    @commands.command()
+    @commands.has_permissions(kick_members=True)
+    async def remove_warnings(self, ctx, member: discord.Member = None):
+        '''
+        (MOD) Removes all warnings for a specific user.
+        :param member: The member to get the warns from.
+        '''
+        if not member:
+            return await ctx.send("**Inform a member!**")
+        
+        user_warns = await self.get_user_warns(member.id)
+        if not user_warns:
+            return await ctx.send(f"**{member.mention} doesn't have any existent warnings!**")
+
+        await self.remove_user_warnings(member.id)
+        return await ctx.send(f"**Removed all warnings for {member.mention}!**")
+        
+        
+    @commands.command()
+    @commands.has_permissions(administrator=True)
+    async def show_warnings(self, ctx, member: discord.Member = None):
+        '''
+        Shows all warnings for a specific user.
+        :param member: The member to show the warnings from.
+        '''
+        if not member:
+            return await ctx.send("**Inform a member!**")
+        
+        user_warns = await self.get_user_warns(member.id)
+        if not user_warns:
+            return await ctx.send(f"**{member.mention} doesn't have any existent warnings!**")
+        
+        embed = discord.Embed(
+            title=f"Warnings for {member}",
+            color=member.color,
+            url=member.avatar_url,
+            timestamp=ctx.message.created_at)
+        
+        embed.set_thumbnail(url=member.avatar_url)
+        embed.set_footer(text=f"Requested by: {ctx.author}", icon_url=ctx.author.avatar_url)
+        
+        for warn in warns:
+            warn_date = datetime.fromtimestamp(warn[2]).strftime('%d/%m/%Y at %H:%M:%S')
+            perpetrator = discord.utils.get(ctx.guild.members, id=user_warns[4])
+            embed.add_field(
+                name=f"Warn ID: {warn[3]}", 
+                value=f"**Warned on {warn_date} by {perpetrator}\n**Reason:** {warn[1]}", 
+                inline=True)
+
+        await ctx.send(embed=embed)
 
 def setup(client):
     client.add_cog(Moderation(client))
