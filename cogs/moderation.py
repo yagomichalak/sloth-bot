@@ -466,7 +466,7 @@ class Moderation(commands.Cog):
         '''
         (ADM) Resets the MutedMember table.
         '''
-        if not self.check_table_mutedmember_exists()
+        if not self.check_table_mutedmember_exists():
             return await ctx.send("**Table __MutedMember__ doesn't exist yet**")
 
         await ctx.message.delete()
@@ -614,7 +614,7 @@ class Moderation(commands.Cog):
         if user_warns:
             await self.remove_user_warning(warn_id)
             member = discord.utils.get(ctx.guild.members, id=user_warns[0])
-            await ctx.send(f"**Removed warn with ID `{warn_id}` for {member}")
+            await ctx.send(f"**Removed warn with ID `{warn_id}` for {member}**")
         else:
             await ctx.send(f"**Warn with ID `{warn_id}` was not found!**")
 
@@ -659,7 +659,7 @@ class Moderation(commands.Cog):
         embed.set_thumbnail(url=member.avatar_url)
         embed.set_footer(text=f"Requested by: {ctx.author}", icon_url=ctx.author.avatar_url)
         
-        for warn in warns:
+        for warn in user_warns:
             warn_date = datetime.fromtimestamp(warn[2]).strftime('%d/%m/%Y at %H:%M:%S')
             perpetrator = discord.utils.get(ctx.guild.members, id=user_warns[4])
             embed.add_field(
