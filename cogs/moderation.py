@@ -586,7 +586,7 @@ class Moderation(commands.Cog):
         Removes a specifc warning by ID.
         '''
         mycursor, db = await the_data_base3()
-        await mycursor.execute(f"DELETE FROM UserWarns WHERE warn_id = {wanr_id}")
+        await mycursor.execute(f"DELETE FROM UserWarns WHERE warn_id = {warn_id}")
         await db.commit()
         await mycursor.close()
 
