@@ -483,7 +483,7 @@ class Moderation(commands.Cog):
         '''
         (ADM) Creates the UserWarns table
         '''
-        if self.check_table_warns_exists():
+        if await self.check_table_warns_exists():
             return await ctx.send("**Table __UserWarns__ already exists!**")
         
         await ctx.message.delete()
@@ -500,7 +500,7 @@ class Moderation(commands.Cog):
         '''
         (ADM) Creates the UserWarns table
         '''
-        if not self.check_table_warns_exists():
+        if not await self.check_table_warns_exists():
             return await ctx.send("**Table __UserWarns__ doesn't exist!**")
         await ctx.message.delete()
         mycursor, db = await the_data_base3()
@@ -515,7 +515,7 @@ class Moderation(commands.Cog):
         '''
         (ADM) Creates the UserWarns table
         '''
-        if not self.check_table_warns_exists():
+        if not await self.check_table_warns_exists():
             return await ctx.send("**Table __UserWarns__ doesn't exist yet!**")
 
         await ctx.message.delete()
