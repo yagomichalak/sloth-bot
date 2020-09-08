@@ -663,7 +663,7 @@ class Moderation(commands.Cog):
 			perpetrator = discord.utils.get(ctx.guild.members, id=warn[4])
 			embed.add_field(
 				name=f"Warn ID: {warn[3]}", 
-				value=f"```apache\nWarned on {warn_date}\nBy {perpetrator}\n**Reason:** {warn[1]}```", 
+				value=f"```apache\nWarned on {warn_date}\nBy {perpetrator}\nReason: {warn[1]}```", 
 				inline=True)
 
 		await ctx.send(embed=embed)
