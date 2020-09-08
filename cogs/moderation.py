@@ -108,7 +108,7 @@ class Moderation(commands.Cog):
 			await self.insert_user_warn(member.id, reason, current_ts, ctx.author.id)
 			user_warns = await self.get_user_warns(member.id)
 			if len(user_warns) >= 3:
-				await self.mute(ctx, member, reason)
+				await self.mute(member, reason)
 
 	@commands.command()
 	@commands.has_permissions(kick_members=True)
