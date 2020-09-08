@@ -613,7 +613,7 @@ class Moderation(commands.Cog):
 		user_warns = await self.get_user_warn_by_warn_id(warn_id)
 		if user_warns:
 			await self.remove_user_warning(warn_id)
-			member = discord.utils.get(ctx.guild.members, id=user_warns[0])
+			member = discord.utils.get(ctx.guild.members, id=user_warns[0][0])
 			await ctx.send(f"**Removed warn with ID `{warn_id}` for {member}**")
 		else:
 			await ctx.send(f"**Warn with ID `{warn_id}` was not found!**")
