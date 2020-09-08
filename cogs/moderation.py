@@ -488,7 +488,7 @@ class Moderation(commands.Cog):
         
         await ctx.message.delete()
         mycursor, db = await the_data_base3()
-        await mycursor.execute("CREATE TABLE UserWarns (user_id bigint, warn_reason VARCHAR(100), warn_timestamp bigint, warn_id bigint auto_increment, perpetrator bigint)")
+        await mycursor.execute("CREATE TABLE UserWarns (user_id bigint, warn_reason VARCHAR(100), warn_timestamp bigint, warn_id bigint auto_increment, perpetrator bigint, PRIMARY KEY (warn_id))")
         await db.commit()
         await mycursor.close()
         return await ctx.send("**Table __UserWarns__ created!**", delete_after=3)
@@ -661,7 +661,7 @@ class Moderation(commands.Cog):
         
         for warn in user_warns:
             warn_date = datetime.fromtimestamp(warn[2]).strftime('%d/%m/%Y at %H:%M:%S')
-            perpetrator = discord.utils.get(ctx.guild.members, id=user_warns[4])
+            perpetrator = discord.utils.get(ctx.guild.members, id=warn[4])
             embed.add_field(
                 name=f"Warn ID: {warn[3]}", 
                 value=f"**Warned on {warn_date} by {perpetrator}\n**Reason:** {warn[1]}", 
