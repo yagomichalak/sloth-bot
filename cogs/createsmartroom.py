@@ -62,10 +62,13 @@ class CreateSmartRoom(commands.Cog):
 					user_voice_channel = discord.utils.get(member.guild.channels, id=before.channel.id)
 					len_users = len(user_voice_channel.members)
 					if len_users == 0 and user_voice_channel.id != self.vc_id:
-						txt_channel = await self.get_premium_vc(member.id, user_voice_channel.id)
-						if txt_channel:
-							the_txt = discord.utils.get(member.guild.channels, id=txt_channel[0][2])
-							await the_txt.delete()
+						try:
+							txt_channel = await self.get_premium_vc(member.id, user_voice_channel.id)
+							if txt_channel:
+								the_txt = discord.utils.get(member.guild.channels, id=txt_channel[0][2])
+								await the_txt.delete()
+						except Exception:
+							pass
 						await user_voice_channel.delete()
 
 		# Checks if the user is joining the create a room VC
