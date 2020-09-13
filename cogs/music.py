@@ -1,17 +1,3 @@
-"""
-Please understand Music bots are complex, and that even this basic example can be daunting to a beginner.
-For this reason it's highly advised you familiarize yourself with discord.py, python and asyncio, BEFORE
-you attempt to write a music bot.
-This example makes use of: Python 3.6
-For a more basic voice example please read:
-    https://github.com/Rapptz/discord.py/blob/rewrite/examples/basic_voice.py
-This is a very basic playlist example, which allows per guild playback of unique queues.
-The commands implement very basic logic for basic usage. But allow for expansion. It would be advisable to implement
-your own permissions and usage logic for commands.
-e.g You might like to implement a vote before skipping the song or only allow admins to stop the player.
-Music bots require lots of work, and tuning. Goodluck.
-If you find any bugs feel free to ping me on discord. @Eviee#0666
-"""
 import discord
 from discord.ext import commands
 
