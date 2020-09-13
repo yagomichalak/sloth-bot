@@ -45,7 +45,7 @@ shades_of_pink = cycle([(252, 15, 192), (255, 0, 255), (248, 24, 148),
 # Making the client variable
 client = commands.Bot(command_prefix='z!')
 client.remove_command('help')
-
+token = os.getenv('TOKEN')
 
 # Tells when the bot is online
 @client.event
@@ -399,4 +399,4 @@ for filename in os.listdir('./cogs'):
     if filename.endswith('.py'):
         client.load_extension(f'cogs.{filename[:-3]}')
 
-client.run(os.getenv('TOKEN'))
+client.run(token)
