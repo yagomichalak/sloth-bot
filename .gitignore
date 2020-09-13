@@ -1,0 +1,6 @@
+.env
+client_secrets.json
+credentials.json
+mycreds.txt
+mysqldb.py
+mysqldb2.py
