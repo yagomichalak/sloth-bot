@@ -12,6 +12,7 @@ preference_role_id = 562035467055529995
 class_history_channel_id = 704429055239258153
 bot_commands_channel_id = 562019654017744904
 reward_channel_id = 704428903682408498
+mod_role_id = 497522510212890655 
 
 class CreateClassroom(commands.Cog):
     '''
@@ -370,6 +371,8 @@ class CreateClassroom(commands.Cog):
                                         name=f"Fluent {language.title()}")
         studying_role = discord.utils.get(member.guild.roles,
                                           name=f"Studying {language.title()}")
+        mod_role = discord.utils.get(member.guild.roles, id=mod_role_id)
+
         overwrites = {}
         overwrites[member.guild.default_role] = discord.PermissionOverwrite(read_messages=False,
                                                                             send_messages=False,
@@ -383,6 +386,14 @@ class CreateClassroom(commands.Cog):
                                                                embed_links=True, connect=True,
                                                                speak=True,
                                                                view_channel=True)
+        overwrites[mod_role] = discord.PermissionOverwrite(read_messages=True,
+                                                           send_message=True,
+                                                           manage_messages=True,
+                                                           mute_members=True,
+                                                           embed_links=True,
+                                                           connect=True,
+                                                           speak=True,
+                                                           view_channel=True)
         overwrites[preference_role] = discord.PermissionOverwrite(read_messages=True,
                                                                   send_messages=False,
                                                                   connect=False,
