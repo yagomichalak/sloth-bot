@@ -327,6 +327,24 @@ class Moderation(commands.Cog):
 				embed.set_footer(text=f"Banned by {ctx.author}", icon_url=ctx.author.avatar_url)
 				await moderation_log.send(embed=embed)
 
+	# Bans a member
+	@commands.command()
+	@commands.has_permissions(administrator=True)
+	async def fban(self, ctx, member: discord.Member = None, *, reason=None):
+		'''
+		(ADM) Bansn't a member from the server.
+		:param member: The @ or ID of the user to ban.
+		:param reason: The reason for banning the user. (Optional)
+		'''
+		await ctx.message.delete()
+		if not member:
+			await ctx.send('**Please, specify a member!**', delete_after=3)
+		else:
+			# General embed
+			general_embed = discord.Embed(description=f'**Reason:** {reason}', colour=discord.Colour.dark_red())
+			general_embed.set_author(name=f'{member} has been banned', icon_url=member.avatar_url)
+			await ctx.send(embed=general_embed)
+
 	# Unbans a member
 	@commands.command()
 	@commands.has_permissions(administrator=True)
