@@ -32,31 +32,6 @@ class Embeds(commands.Cog):
 
     @commands.command()
     @commands.has_permissions(administrator=True)
-    async def embed_melly(self, ctx):
-        '''
-        (ADM) Sends Melly's moderator card.
-        '''
-        await ctx.message.delete()
-        embed = discord.Embed(description="**Staff Card**", colour=5833416, timestamp=ctx.message.created_at)
-        embed.add_field(name="👤 Username : WonderfulMelly®💊🇺🇸🎭🇪🇦#3737",
-                        value="Hey, I'm Melly and you can always count on me, I'll do everything in my power to help you the best way possible :3",
-                        inline=False)
-        embed.add_field(name="👮‍Moderator",
-                        value="My main task is to ensure that people who violate any rules put in place in this server be penalized and make sure the server is a safe, healthy environment.",
-                        inline=False)
-        embed.add_field(name="👅 Languages", value="➖", inline=True)
-        embed.add_field(name="➖", value=":flag_es:**Spanish** 🔹🔹🔹", inline=True)
-        embed.add_field(name="➖", value=":flag_us:**English** 🔹🔹", inline=True)
-        embed.set_footer(text='Cosmos',
-                         icon_url='https://cdn.discordapp.com/avatars/423829836537135108/da15dea5017edf5567e531fc6b97f935.jpg?size=2048')
-        embed.set_thumbnail(
-            url='https://cdn.discordapp.com/avatars/465287657023471616/7d20d6fc9ba34ad77f856525b03a912f.jpg?size=2048')
-        embed.set_author(name='The Language Sloth', url='https://discordapp.com',
-                         icon_url='https://cdn.discordapp.com/attachments/562019489642709022/676564604087697439/ezgif.com-gif-maker_1.gif')
-        await ctx.send(embed=embed)
-
-    @commands.command()
-    @commands.has_permissions(administrator=True)
     async def embed_jacob(self, ctx):
         '''
         (ADM) Sends Jacob's moderator card.
