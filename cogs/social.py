@@ -3,10 +3,11 @@ from discord.ext import commands
 import praw
 from random import randint
 import aiohttp
+import os
 
-reddit = praw.Reddit(client_id='Ph3swv14_OMx7w',  # client id
-                     client_secret='tmDpbL1xeJAoIrroDH0yS_lf4sU',  # my client secret
-                     user_agent='prawautomate123',  # my user agent. It can be anything
+reddit = praw.Reddit(client_id=os.getenv('REDDIT_CLIENT_ID'),  # client id
+                     client_secret=os.getenv('REDDIT_CLIENT_SECRET'),  # my client secret
+                     user_agent=os.getenv('USER_AGENT'),  # my user agent. It can be anything
                      username='',  # Not needed
                      password='')  # Not needed
 

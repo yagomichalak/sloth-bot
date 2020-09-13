@@ -33,14 +33,14 @@ shades_of_pink = cycle([(252, 15, 192), (255, 0, 255), (248, 24, 148),
               (223, 82, 134), (254, 127, 156), (253, 171, 159)
               ])
 
-def read_token():
-    with open('token.txt', 'r') as f:
-        lines = f.readlines()
-        return lines[0].strip()
+# def read_token():
+#     with open('token.txt', 'r') as f:
+#         lines = f.readlines()
+#         return lines[0].strip()
 
 
-# Reading the bot's token
-token = read_token()
+# # Reading the bot's token
+# token = read_token()
 
 # Making the client variable
 client = commands.Bot(command_prefix='z!')
@@ -399,4 +399,4 @@ for filename in os.listdir('./cogs'):
     if filename.endswith('.py'):
         client.load_extension(f'cogs.{filename[:-3]}')
 
-client.run(token)
+client.run(os.getenv('TOKEN'))
