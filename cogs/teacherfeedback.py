@@ -365,13 +365,13 @@ class CreateClassroom(commands.Cog):
     async def get_channel_perms(self, member, language):
         teacher_role = discord.utils.get(member.guild.roles, id=teacher_role_id)
         preference_role = discord.utils.get(member.guild.roles, id=preference_role_id)
+        mod_role = discord.utils.get(member.guild.roles, id=mod_role_id)
         native_role = discord.utils.get(member.guild.roles,
                                         name=f"Native {language.title()}")
         fluent_role = discord.utils.get(member.guild.roles,
                                         name=f"Fluent {language.title()}")
         studying_role = discord.utils.get(member.guild.roles,
                                           name=f"Studying {language.title()}")
-        mod_role = discord.utils.get(member.guild.roles, id=mod_role_id)
 
         overwrites = {}
         overwrites[member.guild.default_role] = discord.PermissionOverwrite(read_messages=False,
@@ -387,7 +387,7 @@ class CreateClassroom(commands.Cog):
                                                                speak=True,
                                                                view_channel=True)
         overwrites[mod_role] = discord.PermissionOverwrite(read_messages=True,
-                                                           send_message=True,
+                                                           send_messages=True,
                                                            manage_messages=True,
                                                            mute_members=True,
                                                            embed_links=True,
