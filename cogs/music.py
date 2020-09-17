@@ -217,6 +217,7 @@ class Music(commands.Cog):
         return player
 
     @commands.command(name='connect', aliases=['join', 'summon'])
+    @commands.has_permissions(kick_members=True)
     async def connect_(self, ctx, *, channel: discord.VoiceChannel = None):
         """Connect to voice.
         Parameters
@@ -250,6 +251,7 @@ class Music(commands.Cog):
         await ctx.send(f'Connected to: **{channel}**', delete_after=20)
 
     @commands.command(name='play', aliases=['sing'])
+    @commands.has_permissions(kick_members=True)
     async def play_(self, ctx, *, search: str):
         """Request a song and add it to the queue.
         This command attempts to join a valid voice channel if the bot is not already in one.
@@ -275,6 +277,7 @@ class Music(commands.Cog):
         await player.queue.put(source)
 
     @commands.command(name='pause')
+    @commands.has_permissions(kick_members=True)
     async def pause_(self, ctx):
         """Pause the currently playing song."""
         vc = ctx.voice_client
@@ -288,6 +291,7 @@ class Music(commands.Cog):
         await ctx.send(f'**`{ctx.author}`**: Paused the song!')
 
     @commands.command(name='resume')
+    @commands.has_permissions(kick_members=True)
     async def resume_(self, ctx):
         """Resume the currently paused song."""
         vc = ctx.voice_client
@@ -301,6 +305,7 @@ class Music(commands.Cog):
         await ctx.send(f'**`{ctx.author}`**: Resumed the song!')
 
     @commands.command(name='skip')
+    @commands.has_permissions(kick_members=True)
     async def skip_(self, ctx):
         """Skip the song."""
         vc = ctx.voice_client
@@ -326,6 +331,7 @@ class Music(commands.Cog):
         #                   f'permissions are not enough to use this command.')
 
     @commands.command(name='queue', aliases=['q', 'playlist'])
+    @commands.has_permissions(kick_members=True)
     async def queue_info(self, ctx):
         """Retrieve a basic queue of upcoming songs."""
         vc = ctx.voice_client
@@ -346,6 +352,7 @@ class Music(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.command(name='now_playing', aliases=['np', 'current', 'currentsong', 'playing'])
+    @commands.has_permissions(kick_members=True)
     async def now_playing_(self, ctx):
         """Display information about the currently playing song."""
         vc = ctx.voice_client
@@ -367,6 +374,7 @@ class Music(commands.Cog):
                                    f'requested by `{vc.source.requester}`')
 
     @commands.command(name='volume', aliases=['vol'])
+    @commands.has_permissions(kick_members=True)
     async def change_volume(self, ctx, *, vol: float):
         """Change the player volume.
         Parameters
@@ -391,6 +399,7 @@ class Music(commands.Cog):
         await ctx.send(f'**`{ctx.author}`**: Set the volume to **{vol}%**')
 
     @commands.command(name='stop')
+    @commands.has_permissions(kick_members=True)
     async def stop_(self, ctx):
         """Stop the currently playing song and destroy the player.
         !Warning!
