@@ -1,7 +1,0 @@
-.env
-.idea
-mycreds.txt
-mysqldb.py
-mysqldb2.py
-credentials.json
-client_secrets.json
