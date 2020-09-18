@@ -30,7 +30,10 @@ class Moderation(commands.Cog):
 
 		if 'discord.gg/' in str(message.content).lower():
 			ctx = await self.client.get_context(message)
-			return await self.mute(ctx=ctx, member=message.author, reason="Invite Advertisement.")
+			perms = ctx.channel.permissions_for(ctx.author)
+			if not perms.kick_members:
+				return await self.mute(ctx=ctx, member=message.author, reason="Invite Advertisement.")
+				
 
 
 	@commands.Cog.listener()
