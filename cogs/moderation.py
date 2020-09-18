@@ -24,6 +24,16 @@ class Moderation(commands.Cog):
 		print('Moderation cog is ready!')
 
 	@commands.Cog.listener()
+	async def on_message(self, message):
+		if message.author.bot:
+			return
+
+		if 'discord.gg/' in str(message.content).lower():
+			ctx = await self.client.get_context(message)
+			return await self.mute(ctx=ctx, member=message.author, reason="Invite Advertisement.")
+
+
+	@commands.Cog.listener()
 	async def on_member_join(self, member):
 		if member.bot:
 			return
