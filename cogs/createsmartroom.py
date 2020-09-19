@@ -66,8 +66,8 @@ class CreateSmartRoom(commands.Cog):
 							premium_channels = await self.get_premium_vc(member.id, user_voice_channel.id)
 							if premium_channels:
 								the_txt = discord.utils.get(member.guild.channels, id=premium_channels[0][2])
-								await the_txt.delete()
 								await self.delete_premium_vc(premium_channels[0][0], premium_channels[0][1])
+								await the_txt.delete()
 						except Exception:
 							pass
 						await user_voice_channel.delete()
