@@ -103,8 +103,8 @@ async def on_member_remove(member):
     embed.add_field(name=f"Roles: {len(roles)}", value=" ".join([role.mention for role in roles]), inline=False)
     embed.add_field(name="Top role:", value=member.top_role.mention, inline=False)
     embed.add_field(name="Bot?", value=member.bot)
-    cosmos = discord.utils.get(member.guild.members, id=user_cosmos_id)
-    await channel.send(content=f"{cosmos.mention}", embed=embed)
+    #cosmos = discord.utils.get(member.guild.members, id=user_cosmos_id)
+    await channel.send(embed=embed)
 
 @client.event
 async def on_message(message):
