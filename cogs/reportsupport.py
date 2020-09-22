@@ -206,7 +206,7 @@ class ReportSupport(commands.Cog):
 			await self.cache[member.id] = time.time()
 		else:
 			await member.send("**Let's do it again then! If you want to cancel your application, let it timeout!**")
-			return await self.send_applicaiton(member)
+			return await self.send_application(member)
 
 
 
