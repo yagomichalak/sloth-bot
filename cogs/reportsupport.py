@@ -3,12 +3,12 @@ from discord.ext import commands
 from mysqldb2 import the_data_base3
 import asyncio
 from extra.useful_variables import list_of_commands
+import time
 
 reportsupport_channel_id = 729454413290143774
 dnk_id = 647452832852869120
 case_cat_id = 562939721253126146
 moderator_role_id = 497522510212890655
-cosmos_id = 423829836537135108
 
 class ReportSupport(commands.Cog):
 	'''
@@ -17,6 +17,9 @@ class ReportSupport(commands.Cog):
 
 	def __init__(self, client):
 		self.client = client
+		self.app_channel_id = 672827061479538714
+		self.cosmos_id = 423829836537135108
+		self.cache = {}
 
 	@commands.Cog.listener()
 	async def on_ready(self):
@@ -26,13 +29,16 @@ class ReportSupport(commands.Cog):
 	@commands.Cog.listener()
 	async def on_raw_reaction_add(self, payload):
 		# Checks if it wasn't a bot's reaction
+		if not payload.guild_id:
+			return
+
 		if not payload.member or payload.member.bot:
 			return
 
 		# Checks if the reaction was in the RepportSupport channel
 		channel = self.client.get_channel(payload.channel_id)
 		#print(channel)
-		if not channel or str(channel).startswith('Direct Message with')  or channel.id != reportsupport_channel_id:
+		if not channel or str(channel).startswith('Direct Message with') or channel.id != reportsupport_channel_id:
 			return
 
 		# Deletes the reaction
@@ -53,8 +59,17 @@ class ReportSupport(commands.Cog):
 
 		if mid == 729455417742327879 and str(emoji) == '✅':
 			# Apply to be a teacher
-			link = "https://docs.google.com/forms/d/1H-rzl9AKgfH1WuKN7nYAW-xJx411Q4-HxfPXuPUFQXs/viewform?edit_requested=true"
-			await member.send(f"**You can apply for being a teacher by filling out this form:**\n{link}")
+			#link = "https://docs.google.com/forms/d/1H-rzl9AKgfH1WuKN7nYAW-xJx411Q4-HxfPXuPUFQXs/viewform?edit_requested=true"
+			#await member.send(f"**You can apply for being a teacher by filling out this form:**\n{link}")
+			member_ts = self.cache.get(member.id)
+			time_now = time.time()
+			if member_ts:
+				sub = time_now - member_ts
+				if sub <= 1800:
+					return await member.send(
+						f"**You are on cooldown to apply, try again in {(1800-sub)/60:.1f} minutes**")
+			await self.send_application(member)
+
 		elif mid == 729456191733760030 and str(emoji) == '🤖':
 			# Order a bot
 			dnk = self.client.get_user(dnk_id)
@@ -78,7 +93,7 @@ class ReportSupport(commands.Cog):
 			case_cat = discord.utils.get(guild.categories, id=case_cat_id)
 			counter = await self.get_case_number()
 			moderator = discord.utils.get(guild.roles, id=moderator_role_id)
-			cosmos = discord.utils.get(guild.members, id=cosmos_id)
+			cosmos = discord.utils.get(guild.members, id=self.cosmos_id)
 			overwrites = {guild.default_role: discord.PermissionOverwrite(
 				read_messages=False, send_messages=False, connect=False, view_channel=False), 
 			member: discord.PermissionOverwrite(
@@ -92,10 +107,129 @@ class ReportSupport(commands.Cog):
 			embed = discord.Embed(title="Report Support!", description=f"Please, {member.mention}, try to explain what happened and who you want to report.",
 				color=discord.Color.red())
 			await the_channel.send(content=f"{member.mention}, {moderator.mention}, {cosmos.mention}", embed=embed)
-			# try:
-			# 	await the_channel.edit(overwrites=overwrites)
-			# except Exception:
-			# 	pass
+
+	async def send_application(self, member):
+
+		def msg_check(message):
+			if message.author == member and not message.guild:
+				if len(message.content) <= 100:
+					return True
+				else:
+					self.client.loop.create_task(member.send("**Your answer must be within 100 characters**"))
+			else:
+				return False
+
+		embed = discord.Embed(title=f"__Teacher Application__")
+		embed.set_footer(text=f"by {member}", icon_url=member.avatar_url)
+
+		embed.description = '''
+		- Hello, there you've reacted to apply to become a teacher.
+		To apply please answer to these following questions with One message at a time
+		Question one:
+		What language are you applying to teach?'''
+		q1 = await member.send(embed=embed)
+		a1 = await self.get_message(member, msg_check)
+		if not a1:
+			return
+
+		embed.description = '''
+		- Why do you want to teach that language on the language sloth? 
+		Please answer with one message.'''
+		q2 = await member.send(embed=embed)
+		a2 = await self.get_message(member, msg_check)
+		if not a2:
+			return
+		
+		embed.description = '''
+		- On The Language Sloth, our classes happen once a week at the same time weekly. 
+		Please let us know when would be the best time for you to teach,
+		E.A: Thursdays 3 pm CET, you can specify your timezone.
+		Again remember to answer with one message.'''
+		q3 = await member.send(embed=embed)
+		a3 = await self.get_message(member, msg_check)
+		if not a3:
+			return
+
+		embed.description = '''
+		-Let's talk about your English level, how do you consider your English level? 
+		Are you able to teach lessons in English? 
+		Please answer using one message only'''
+		q4 = await member.send(embed=embed)
+		a4 = await self.get_message(member, msg_check)
+		if not a4:
+			return
+
+		embed.description = '''- Have you ever taught people before?'''
+		q5 = await member.send(embed=embed)
+		a5 = await self.get_message(member, msg_check)
+		if not a5:
+			return
+
+		# Get user's native roles
+		user_native_roles = []
+		for role in member.roles:
+			if str(role.name).lower().startswith('native'):
+				user_native_roles.append(role.name.title())
+
+		# Application result
+		app = f"""```ini\n[Username]: {member} ({member.id})
+		[Joined the server]: {member.joined_at.strftime("%a, %d %B %y, %I %M %p UTC")}
+		[Applying to teach]: {a1.title()}
+		[Native roles]: {', '.join(user_native_roles)}
+		[Motivation for teaching]: {a2.capitalize()}
+		[Applying to teach on]: {a3.upper()}
+		[English level]: {a4.capitalize()}
+		[Experience teaching]: {a5.capitalize()}```""".replace('  ', '')
+		await member.send(app)
+		embed.description = '''
+		Are you sure you want to apply this? :white_check_mark: to send and :x: to Cancel
+		'''
+		app_conf = await member.send(embed=embed)
+		await app_conf.add_reaction('✅')
+		await app_conf.add_reaction('❌')
+
+		# Waits for reaction confirmation
+		def check_reaction(r, u):
+			return u.id == member.id and not r.message.guild and str(r.emoji) in ['✅', '❌']
+
+
+		r = await self.get_reaction(member, check_reaction)
+		if r is None:
+			return
+
+		if r == '✅':
+			embed.description = "**Application successfully made, please be pacient now!**"
+			await member.send(embed=embed)
+			app_channel = await self.client.fetch_channel(self.app_channel_id)
+			cosmos = discord.utils.get(app_channel.guild.members, id=self.cosmos_id)
+			await app_channel.send(content=f"{cosmos.mention}\n{app}")
+			await self.cache[member.id] = time.time()
+		else:
+			await member.send("**Let's do it again then! If you want to cancel your application, let it timeout!**")
+			return await self.send_applicaiton(member)
+
+
+
+	async def get_message(self, member, check):
+		try:
+			message = await self.client.wait_for('message', timeout=240, 
+			check=check)
+		except asyncio.TimeoutError:
+			await member.send("**Timeout! Try again.**")
+			return None
+		else:
+			content = message.content
+			return content
+
+	async def get_reaction(self, member, check):
+		try:
+			reaction, user = await self.client.wait_for('reaction_add', 
+			timeout=120, check=check)
+		except asyncio.TimeoutError:
+			await member.send("**Timeout! Try again.**")
+			return None
+		else:
+			return str(reaction.emoji)
 
 	async def member_has_open_channel(self, member_id: int):
 		mycursor, db = await the_data_base3()
@@ -160,9 +294,9 @@ class ReportSupport(commands.Cog):
 		table_info = await mycursor.fetchall()
 		await mycursor.close()
 		if len(table_info) == 0:
-		    return False
+			return False
 		else:
-		    return True 
+			return True 
 
 
 	@commands.command(hidden=True)
@@ -220,9 +354,9 @@ class ReportSupport(commands.Cog):
 		table_info = await mycursor.fetchall()
 		await mycursor.close()
 		if len(table_info) == 0:
-		    return False
+			return False
 		else:
-		    return True 
+			return True 
 
 	async def get_case_number(self):
 		mycursor, db = await the_data_base3()
@@ -333,15 +467,15 @@ class ReportSupport(commands.Cog):
 				for task in done_tasks: 
 					reaction, user = await task
 				if str(reaction.emoji) == "➡️":
-				    #await the_msg.remove_reaction(reaction.emoji, member)
-				    if command_index < (len(list_of_commands) - 1):
-				        command_index += 1
-				    continue
+					#await the_msg.remove_reaction(reaction.emoji, member)
+					if command_index < (len(list_of_commands) - 1):
+						command_index += 1
+					continue
 				elif str(reaction.emoji) == "⬅️":
-				    #await the_msg.remove_reaction(reaction.emoji, member)
-				    if command_index > 0:
-				        command_index -= 1
-				    continue
+					#await the_msg.remove_reaction(reaction.emoji, member)
+					if command_index > 0:
+						command_index -= 1
+					continue
 
 def setup(client):
 	client.add_cog(ReportSupport(client))
