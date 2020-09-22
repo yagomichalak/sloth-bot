@@ -195,7 +195,7 @@ class ReportSupport(commands.Cog):
 			await member.send(embed=embed)
 			app_channel = await self.client.fetch_channel(self.app_channel_id)
 			cosmos = discord.utils.get(app_channel.guild.members, id=self.cosmos_id)
-			await app_channel.send(content=f"{cosmos.mention}\n{app}")
+			await app_channel.send(content=f"{cosmos.mention}, {member.mention}\n{app}")
 			self.cache[member.id] = time.time()
 		else:
 			await member.send("**Let's do it again then! If you want to cancel your application, let it timeout!**")
