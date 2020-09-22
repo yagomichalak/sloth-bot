@@ -191,7 +191,7 @@ class ReportSupport(commands.Cog):
 			return
 
 		if r == '✅':
-			embed.description = "**Application successfully made, please be pacient now!**"
+			embed.description = "**Application successfully made, please be patient now!**"
 			await member.send(embed=embed)
 			app_channel = await self.client.fetch_channel(self.app_channel_id)
 			cosmos = discord.utils.get(app_channel.guild.members, id=self.cosmos_id)
