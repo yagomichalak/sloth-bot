@@ -1109,7 +1109,12 @@ class SlothCurrency(commands.Cog):
             await ctx.send(f"You don't have {money}łł!")
 
     async def get_user_pfp(self, member):
-        im = Image.open(requests.get(member.avatar_url, stream=True).raw)
+        #im = Image.open(requests.get(member.avatar_url, stream=True).raw)
+        async with self.session.get(str(member.avatar_url)) as response:
+            image_bytes = await response.content.read()
+            with BytesIO(image_bytes) as pfp:
+                image = Image.open(pfp)
+                im = image.convert('RGBA')
 
         thumb_width = 59
 
