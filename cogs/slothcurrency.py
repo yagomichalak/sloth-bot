@@ -49,6 +49,7 @@ class SlothCurrency(commands.Cog):
 
     def __init__(self, client):
         self.client = client
+        self.session = aiohttp.ClientSession()
 
     @commands.Cog.listener()
     async def on_ready(self):
