@@ -6,8 +6,10 @@ from PIL import Image, ImageDraw, ImageFont
 from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
 import os
-import requests
+#import requests
 import asyncio
+import aiohttp
+from io import BytesIO
 
 shop_channels = [695975820744851507, 702911629725139074, 702911832150638684, 702914308677304330, 709000588792430602, 709038291453870080]
 afk_channel_id = 581993624569643048
