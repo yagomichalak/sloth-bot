@@ -43,7 +43,8 @@ shades_of_pink = cycle([(252, 15, 192), (255, 0, 255), (248, 24, 148),
 # token = read_token()
 
 # Making the client variable
-client = commands.Bot(command_prefix='z!')
+intents = discord.Intents().all()
+client = commands.Bot(command_prefix='z!', intents=intents)
 client.remove_command('help')
 token = os.getenv('TOKEN')
 
