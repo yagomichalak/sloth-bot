@@ -20,6 +20,7 @@ class ReportSupport(commands.Cog):
 		self.app_channel_id = 672827061479538714
 		self.cosmos_id = 423829836537135108
 		self.cache = {}
+		self.report_cache = {}
 
 	@commands.Cog.listener()
 	async def on_ready(self):
@@ -85,28 +86,16 @@ class ReportSupport(commands.Cog):
 			await member.send(f"**Support us on Patreon!**\nhttps://www.patreon.com/Languagesloth")
 
 		elif mid == 729458598966460426 and str(emoji) == '<:ban:593407893248802817>' and not perms.kick_members:
-			if await self.member_has_open_channel(member.id):
-				embed = discord.Embed(title="Error!", description="**You already has an open channel!**", color=discord.Color.red())
-				return await member.send(embed=embed)
+			member_ts = self.report_cache.get(member.id)
+			time_now = time.time()
+			if member_ts:
+				sub = time_now - member_ts
+				if sub <= 240:
+					return await member.send(
+						f"**You are on cooldown to report, try again in {round(240-sub)} seconds**")
 
-			# Report someone
-			case_cat = discord.utils.get(guild.categories, id=case_cat_id)
-			counter = await self.get_case_number()
-			moderator = discord.utils.get(guild.roles, id=moderator_role_id)
-			cosmos = discord.utils.get(guild.members, id=self.cosmos_id)
-			overwrites = {guild.default_role: discord.PermissionOverwrite(
-				read_messages=False, send_messages=False, connect=False, view_channel=False), 
-			member: discord.PermissionOverwrite(
-				read_messages=True, send_messages=True, connect=False, view_channel=True), 
-			moderator: discord.PermissionOverwrite(
-				read_messages=True, send_messages=True, connect=False, view_channel=True, manage_messages=True)}
-			the_channel = await guild.create_text_channel(name=f"case-{counter[0][0]}", category=case_cat, overwrites=overwrites)
-			print('created!')
-			await self.insert_user_open_channel(member.id, the_channel.id)
-			await self.increase_case_number()
-			embed = discord.Embed(title="Report Support!", description=f"Please, {member.mention}, try to explain what happened and who you want to report.",
-				color=discord.Color.red())
-			await the_channel.send(content=f"{member.mention}, {moderator.mention}, {cosmos.mention}", embed=embed)
+			self.report_cache[member.id] = time.time()
+			await self.select_report(member, guild)
 
 	async def send_application(self, member):
 
@@ -201,6 +190,121 @@ class ReportSupport(commands.Cog):
 			await member.send("**Let's do it again then! If you want to cancel your application, let it timeout!**")
 			return await self.send_application(member)
 
+
+	# Report methods
+	async def select_report(self, member, guild):
+
+		# Ask what they want to do [Report someone, general help, missclick]
+		react_list = ['1️⃣','2️⃣','3️⃣', '❌']
+
+		report_embed = discord.Embed(
+			title="What kind of report would you like to start?")
+		report_embed.description = '''
+		1️⃣ Report another user for breaking the rules.
+
+		2️⃣ I need help with the server in general.
+
+		3️⃣ I need to change some roles and I can't.
+
+		❌ Cancel, I missclicked.'''
+		msg = await member.send(embed=report_embed)
+
+		for react in react_list:
+			await msg.add_reaction(react)
+
+		try:
+			r, _ = await self.client.wait_for(
+				'reaction_add', 
+				timeout=240, 
+				check=lambda r, u: u.id == member.id and r.emoji in react_list \
+					and r.message.id == msg.id
+			)
+		except asyncio.TimeoutError:
+			timeout_embed = discord.Embed(
+				title="Timeout", 
+				description='**Try again!**',
+				color=discord.Color.red())
+			await member.send(embed=timeout_embed)
+			
+		else:
+			emoji = str(r.emoji)
+			if emoji == '1️⃣':
+				# Report another user for breaking the rules
+				return await self.report_someone(member, guild)
+			elif emoji == '2️⃣':
+				# I need help with the server in general
+				message = f"Please, {member.mention}, try to explain what kind of help you want relate to the server."
+				return await self.generic_help(member, guild, 'server help', message)
+			elif emoji == '3️⃣':
+				# I need to change some roles and I can't
+				message = f"Please, {member.mention}, inform us what roles you want, and if you spotted a specific problem with the reaction-role selection."
+				return await self.generic_help(member, guild, 'role help', message)
+			elif emoji == '❌':
+				# Cancel, I misclicked
+				return await member.send("**All right, cya!**")
+
+
+
+	#- Report someone
+	async def report_someone(self, member, guild):
+					
+		if await self.member_has_open_channel(member.id):
+			embed = discord.Embed(title="Error!", description="**You already have an open channel!**", color=discord.Color.red())
+			return await member.send(embed=embed)
+
+		# Report someone
+		case_cat = discord.utils.get(guild.categories, id=case_cat_id)
+		counter = await self.get_case_number()
+		moderator = discord.utils.get(guild.roles, id=moderator_role_id)
+		cosmos = discord.utils.get(guild.members, id=self.cosmos_id)
+		cosmos = member
+		overwrites = {guild.default_role: discord.PermissionOverwrite(
+			read_messages=False, send_messages=False, connect=False, view_channel=False), 
+		member: discord.PermissionOverwrite(
+			read_messages=True, send_messages=True, connect=False, view_channel=True), 
+		moderator: discord.PermissionOverwrite(
+			read_messages=True, send_messages=True, connect=False, view_channel=True, manage_messages=True)}
+		the_channel = await guild.create_text_channel(name=f"case-{counter[0][0]}", category=case_cat, overwrites=overwrites)
+		#print('created!')
+		created_embed = discord.Embed(
+			title="Report room created!", 
+			description=f"**Go to {the_channel.mention}!**", 
+			color=discord.Color.green())
+		await member.send(embed=created_embed)
+		await self.insert_user_open_channel(member.id, the_channel.id)
+		await self.increase_case_number()
+		embed = discord.Embed(title="Report Support!", description=f"Please, {member.mention}, try to explain what happened and who you want to report.",
+			color=discord.Color.red())
+		await the_channel.send(content=f"{member.mention}, {moderator.mention}, {cosmos.mention}", embed=embed)
+
+	#- Report someone
+	async def generic_help(self, member, guild, type_help, message):
+					
+		if await self.member_has_open_channel(member.id):
+			embed = discord.Embed(title="Error!", description="**You already have an open channel!**", color=discord.Color.red())
+			return await member.send(embed=embed)
+
+		# General help
+		case_cat = discord.utils.get(guild.categories, id=case_cat_id)
+		moderator = discord.utils.get(guild.roles, id=moderator_role_id)
+		overwrites = {guild.default_role: discord.PermissionOverwrite(
+			read_messages=False, send_messages=False, connect=False, view_channel=False), 
+		member: discord.PermissionOverwrite(
+			read_messages=True, send_messages=True, connect=False, view_channel=True), 
+		moderator: discord.PermissionOverwrite(
+			read_messages=True, send_messages=True, connect=False, view_channel=True, manage_messages=True)}
+		the_channel = await guild.create_text_channel(name=f"{'-'.join(type_help.split())}", category=case_cat, overwrites=overwrites)
+		#print('created!')
+		created_embed = discord.Embed(
+			title=f"Room for `{type_help}` created!", 
+			description=f"**Go to {the_channel.mention}!**", 
+			color=discord.Color.green())
+		await member.send(embed=created_embed)
+		await self.insert_user_open_channel(member.id, the_channel.id)
+		embed = discord.Embed(title=f"{type_help.title()}!", 
+		description=f"{message}",
+			color=discord.Color.red())
+		await the_channel.send(content=f"{member.mention}, {moderator.mention}", embed=embed)
 
 
 	async def get_message(self, member, check):
@@ -414,7 +518,7 @@ class ReportSupport(commands.Cog):
 					await confirmation.edit(content=ctx.author.mention, embed=embed)
 					await asyncio.sleep(3)
 					await channel.delete()
-					await self.remove_user_open_channel(member.id)
+					await self.remove_user_open_channel(ctx.author.id)
 				else:
 					embed.description = "Not deleting it!"
 					await confirmation.edit(content='', embed=embed)
