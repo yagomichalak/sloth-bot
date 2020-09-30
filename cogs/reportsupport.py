@@ -257,7 +257,6 @@ class ReportSupport(commands.Cog):
 		counter = await self.get_case_number()
 		moderator = discord.utils.get(guild.roles, id=moderator_role_id)
 		cosmos = discord.utils.get(guild.members, id=self.cosmos_id)
-		cosmos = member
 		overwrites = {guild.default_role: discord.PermissionOverwrite(
 			read_messages=False, send_messages=False, connect=False, view_channel=False), 
 		member: discord.PermissionOverwrite(
@@ -518,7 +517,7 @@ class ReportSupport(commands.Cog):
 					await confirmation.edit(content=ctx.author.mention, embed=embed)
 					await asyncio.sleep(3)
 					await channel.delete()
-					await self.remove_user_open_channel(ctx.author.id)
+					await self.remove_user_open_channel(user_channel[0][0])
 				else:
 					embed.description = "Not deleting it!"
 					await confirmation.edit(content='', embed=embed)
