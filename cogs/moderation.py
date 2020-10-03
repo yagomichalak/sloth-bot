@@ -73,7 +73,7 @@ class Moderation(commands.Cog):
 		message = last_deleted_message
 		if message:
 			message = message[0]
-			embed = discord.Embed(title="Snipped", description=f"**>>** {message.content}", color=message.author.color, timestamp=message.created_at)
+			embed = discord.Embed(title="Sniped", description=f"**>>** {message.content}", color=message.author.color, timestamp=message.created_at)
 			embed.set_author(name=message.author,url=message.author.avatar_url, icon_url=message.author.avatar_url)
 			await ctx.send(embed=embed)
 		else:

@@ -154,6 +154,12 @@ class ReportSupport(commands.Cog):
 		if not a5:
 			return
 
+		embed.description = '''- Inform a short description for you class.'''
+		q6 = await member.send(embed=embed)
+		a6 = await self.get_message(member, msg_check)
+		if not a6:
+			return
+
 		# Get user's native roles
 		user_native_roles = []
 		for role in member.roles:
@@ -161,7 +167,7 @@ class ReportSupport(commands.Cog):
 				user_native_roles.append(role.name.title())
 
 		# Application result
-		app = f"""```ini\n[Username]: {member} ({member.id})\n[Joined the server]: {member.joined_at.strftime("%a, %d %B %y, %I %M %p UTC")}\n[Applying to teach]: {a1.title()}\n[Native roles]: {', '.join(user_native_roles)}\n[Motivation for teaching]: {a2.capitalize()}\n[Applying to teach on]: {a3.upper()}\n[English level]: {a4.capitalize()}\n[Experience teaching]: {a5.capitalize()}```"""
+		app = f"""```ini\n[Username]: {member} ({member.id})\n[Joined the server]: {member.joined_at.strftime("%a, %d %B %y, %I %M %p UTC")}\n[Applying to teach]: {a1.title()}\n[Native roles]: {', '.join(user_native_roles)}\n[Motivation for teaching]: {a2.capitalize()}\n[Applying to teach on]: {a3.upper()}\n[English level]: {a4.capitalize()}\n[Experience teaching]: {a5.capitalize()}\n[Description]:{a6.capitalize()}```"""
 		await member.send(app)
 		embed.description = '''
 		Are you sure you want to apply this? :white_check_mark: to send and :x: to Cancel
@@ -233,7 +239,7 @@ class ReportSupport(commands.Cog):
 				return await self.report_someone(member, guild)
 			elif emoji == '2️⃣':
 				# I need help with the server in general
-				message = f"Please, {member.mention}, try to explain what kind of help you want relate to the server."
+				message = f"Please, {member.mention}, try to explain what kind of help you want related to the server."
 				return await self.generic_help(member, guild, 'server help', message)
 			elif emoji == '3️⃣':
 				# I need to change some roles and I can't
