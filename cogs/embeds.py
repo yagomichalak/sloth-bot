@@ -56,6 +56,7 @@ class Embeds(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.command()
+    @commands.has_permissions(kick_members=True)
     async def embed_rules(self, ctx):
         '''
         (ADM) Sends an embedded message containing all rules in it.
