@@ -25,16 +25,45 @@ class Moderation(commands.Cog):
 
 	@commands.Cog.listener()
 	async def on_message(self, message):
+		if not message.guild:
+			return
+
 		if message.author.bot:
 			return
 
-		if 'discord.gg/' in str(message.content).lower():
+		# Invite tracker
+		msg = str(message.content)
+		if 'discord.gg/' in msg.lower():
 			ctx = await self.client.get_context(message)
 			perms = ctx.channel.permissions_for(ctx.author)
 			if not perms.kick_members:
-				return await self.mute(ctx=ctx, member=message.author, reason="Invite Advertisement.")
+				is_from_guild = await self.check_invite_guild(msg, message.guild)
+				if not is_from_guild:
+					return await self.mute(ctx=ctx, member=message.author, reason="Invite Advertisement.")
 				
+	async def check_invite_guild(self, msg, guild):
+		'''
+		Checks whether it's a guild invite or not
+		'''
 
+		invite = 'discord.gg/'
+		start_index = msg.index(invite)
+		end_index = start_index + 11
+		for c in msg[end_index:]:
+			if c == ' ':
+				break
+
+			invite += c
+
+		#print(f'{invite}')
+		inv_code = discord.utils.resolve_invite(invite)
+		#print(f'{inv_code}')
+		guild_inv = discord.utils.get(await guild.invites(), code=inv_code)
+		#print(f'{guild_inv}')
+		if guild_inv:
+			return True
+		else:
+			return False
 
 	@commands.Cog.listener()
 	async def on_member_join(self, member):
