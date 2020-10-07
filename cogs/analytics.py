@@ -36,7 +36,7 @@ class Analytics(commands.Cog):
             info = await self.get_info()
             online_members = [om for om in members if str(om.status) == "online"]
             small = ImageFont.truetype("built titling sb.ttf", 45)
-            analytics = Image.open("analytics2.png")
+            analytics = Image.open("analytics2.png").resize((500, 600))
             draw = ImageDraw.Draw(analytics)
             draw.text((140, 270), f"{info[0][0]}", (255, 255, 255), font=small)
             draw.text((140, 335), f"{info[0][1]}", (255, 255, 255), font=small)
