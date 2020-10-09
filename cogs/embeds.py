@@ -17,7 +17,7 @@ class Embeds(commands.Cog):
 
     # Sends an embedded message
     @commands.command()
-    @commands.has_permissions(administrator=True)
+    @commands.has_permissions(kick_members=True)
     async def embed(self, ctx):
         '''
         (ADM) Sends an embedded message.
