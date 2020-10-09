@@ -19,7 +19,7 @@ class Communication(commands.Cog):
 
     # Says something by using the bot
     @commands.command()
-    @commands.has_permissions(administrator=True)
+    @commands.has_permissions(kick_members=True)
     async def say(self, ctx):
         '''
         (ADM) Makes the bot say something.
