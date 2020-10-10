@@ -95,6 +95,7 @@ class Moderation(commands.Cog):
 		last_deleted_message.append(message)
 
 	@commands.command()
+	@commands.has_permissions(kick_members=True)
 	async def snipe(self, ctx):
 		'''
 		Snipes the last deleted message.
