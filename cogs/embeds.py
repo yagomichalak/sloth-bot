@@ -67,12 +67,12 @@ class Embeds(commands.Cog):
                               colour=1406210,
                               timestamp=ctx.message.created_at)
         embed.add_field(name="#1 No NSFW",
-                        value="Do not post or talk about NSFW content in text or voice chat. This server is a safe for work, that is except in",
+                        value="Do not post or talk about NSFW content in text or voice chat. This server is a safe for work",
                         inline=False)
         embed.add_field(name="#2 Respect at all times.", value="Be respectful of all members, especially Staff.",
                         inline=False)
         embed.add_field(name="#3 Avoid Controversy",
-                        value="Avoid topics such as: Politics,Religion,Self-Harm or anything considered controversial anywhere on the server except on the **Debate Club**",
+                        value="Avoid topics such as: Politics,Religion,Self-Harm or anything considered controversial anywhere in the server except in the **Debate Club**",
                         inline=False)
         embed.add_field(name="#4 No Advertising",
                         value="Do not advertise your server or other communities without express consent from an Owner of this server.",
@@ -80,18 +80,18 @@ class Embeds(commands.Cog):
         embed.add_field(name="#5 No Doxing", value="Do not share others' personal information without their consent.",
                         inline=False)
         embed.add_field(name="#6 No Spamming",
-                        value="Do not flood or spam the text chat. Do not tag native roles repeatedly without a reason.",
+                        value="Do not flood or spam the text chat. Do not staff members repeatedly without a reason.",
                         inline=False)
         embed.add_field(name="#7 No Earrape",
                         value="No ear rape or mic spam. If you have a loud background, go on push-to-talk or mute.",
                         inline=False)
         embed.add_field(name="#8 Resolve your own disputes",
-                        value="Try to settle disputes personally. You may mute or block a user. If you cannot resolve the issue, contact staff in <#685832739517366340>",
+                        value="Try to settle disputes personally. You may mute or block a user. If you cannot resolve the issue, contact staff in <#729454413290143774>",
                         inline=False)
         embed.add_field(name="#9 Do not impersonate others", value="Do not impersonate users or member of the staff",
                         inline=False)
         embed.add_field(name="#10 No Begging",
-                        value="No asking to be granted roles/moderator roles, you may apply in <#671788773733826628> but begging the staff repeatedly and irritatingly will result in warnings or even ban.",
+                        value="No asking to be granted roles/moderator roles, you may apply by accessing the link in <#562019353583681536> but begging the staff repeatedly and irritatingly will result in warnings or even ban.",
                         inline=False)
         embed.add_field(name="<:zzSloth:686237376510689327>", value="Have fun!", inline=True)
         embed.add_field(name="<:zzSloth:686237376510689327>", value="Check our lessons!", inline=True)
@@ -125,10 +125,10 @@ class Embeds(commands.Cog):
         embed.add_field(name="All positions are unsalaried, for professional enquiry please get in touch.",
                         value="```Other available positions !```", inline=False)
         embed.add_field(name=":musical_note:  Karaoke Night Organizer",
-                        value="We are looking for someone to take over the **Karaoke Night** event, A 40 minute per week event that would unite people in a voice chat to sing karaoke.You would have to organize and screenshare karaoke songs on a given day of the week. To anyone interested in this position please contact **Cosmos#7757** privately.",
+                        value="We are looking for someone to take over the **Karaoke Night** event, A 40 minute per week event that would unite people in a voice chat to sing karaoke.You would have to organize and screenshare karaoke songs on a given day of the week. To anyone interested in this position please contact <@423829836537135108> privately.",
                         inline=False)
         embed.add_field(name=":speaking_head: Moderator in the Debate Club",
-                        value="We are searching for someone willing to moderate debates impartially once a week, Must have command of the English language and over 17 years old.",
+                        value="We are searching for someone willing to moderate debates impartially once a week, Must have command of the English language and over 16 years old.",
                         inline=False)
         embed.add_field(name="Apply now!", value="Or Later?", inline=True)
         embed.add_field(name="Apply Tomorrow!", value="Or after tomorrow?", inline=True)
