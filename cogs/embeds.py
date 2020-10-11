@@ -20,7 +20,7 @@ class Embeds(commands.Cog):
     @commands.has_permissions(kick_members=True)
     async def embed(self, ctx):
         '''
-        (ADM) Sends an embedded message.
+        (MOD) Sends an embedded message.
         '''
         await ctx.message.delete()
         if len(ctx.message.content.split()) < 2:
@@ -59,7 +59,7 @@ class Embeds(commands.Cog):
     @commands.has_permissions(kick_members=True)
     async def embed_rules(self, ctx):
         '''
-        (ADM) Sends an embedded message containing all rules in it.
+        (MOD) Sends an embedded message containing all rules in it.
         '''
         await ctx.message.delete()
         embed = discord.Embed(title="Discord’s Terms of Service and Community Guidelines",
@@ -67,12 +67,12 @@ class Embeds(commands.Cog):
                               colour=1406210,
                               timestamp=ctx.message.created_at)
         embed.add_field(name="#1 No NSFW",
-                        value="Do not post or talk about NSFW content in text or voice chat. This server is a safe for work",
+                        value="Do not post or talk about NSFW content in text or voice chat. This server is a safe for work.",
                         inline=False)
         embed.add_field(name="#2 Respect at all times.", value="Be respectful of all members, especially Staff.",
                         inline=False)
         embed.add_field(name="#3 Avoid Controversy",
-                        value="Avoid topics such as: Politics,Religion,Self-Harm or anything considered controversial anywhere in the server except in the **Debate Club**",
+                        value="Avoid topics such as: Politics,Religion,Self-Harm or anything considered controversial anywhere in the server except in the **Debate Club**.",
                         inline=False)
         embed.add_field(name="#4 No Advertising",
                         value="Do not advertise your server or other communities without express consent from an Owner of this server.",
@@ -86,9 +86,9 @@ class Embeds(commands.Cog):
                         value="No ear rape or mic spam. If you have a loud background, go on push-to-talk or mute.",
                         inline=False)
         embed.add_field(name="#8 Resolve your own disputes",
-                        value="Try to settle disputes personally. You may mute or block a user. If you cannot resolve the issue, contact staff in <#729454413290143774>",
+                        value="Try to settle disputes personally. You may mute or block a user. If you cannot resolve the issue, contact staff in <#729454413290143774>.",
                         inline=False)
-        embed.add_field(name="#9 Do not impersonate others", value="Do not impersonate users or member of the staff",
+        embed.add_field(name="#9 Do not impersonate others", value="Do not impersonate users or member of the staff.",
                         inline=False)
         embed.add_field(name="#10 No Begging",
                         value="No asking to be granted roles/moderator roles, you may apply by accessing the link in <#562019353583681536> but begging the staff repeatedly and irritatingly will result in warnings or even ban.",
