@@ -120,11 +120,28 @@ class Moderation(commands.Cog):
 		await ctx.channel.purge(limit=amount + 1)
 
 	@commands.command()
-	@commands.has_permissions(administrator=True)
+	@commands.has_permissions(kick_members=True)
 	async def clear(self, ctx):
 		'''
-		(ADM) Clears the whole channel.
+		(MOD) Clears the whole channel.
 		'''
+
+		special_channels = {
+	      656730447857975296: 'https://cdn.discordapp.com/attachments/746478846466981938/748605295122448534/Muted.png',
+	      764698902376480818:'''**Would you like to ask us a question about the server? Ask them there!**
+	`Questions will be answered and deleted immediately.`''',
+	      764698926925217792:'''**Would you like to suggest a feature for the server? Please follow this template to submit your feature request**
+
+	**Suggestion:**
+	`A short idea name/description`
+
+	**Explanation:**
+	`Explain the feature in detail and including reasons why you would like this feature to be implemented.`''',
+		}
+
+		if ctx.channel.id not in special_channels.keys():
+			return await ctx.send("**You cannot do that here!**")
+
 		embed = discord.Embed(
 		  title="Confirmation",
 		  description="Clear the whole channel, **are you sure?**",
@@ -153,19 +170,6 @@ class Moderation(commands.Cog):
 				embed.description = "Clearing whole channel..."
 				await msg.edit(embed=embed)
 				await asyncio.sleep(1)
-	 
-		special_channels = {
-	      656730447857975296: 'https://cdn.discordapp.com/attachments/746478846466981938/748605295122448534/Muted.png',
-	      764698902376480818:'''**Would you like to ask us a question about the server? Ask them there!**
-	`Questions will be answered and deleted immediately.`''',
-	      764698926925217792:'''**Would you like to suggest a feature for the server? Please follow this template to submit your feature request**
-
-	**Suggestion:**
-	`A short idea name/description`
-
-	**Explanation:**
-	`Explain the feature in detail and including reasons why you would like this feature to be implemented.`''',
-		}
 
 		while True:
 			msgs = await ctx.channel.history().flatten()
