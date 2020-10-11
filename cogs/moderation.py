@@ -98,7 +98,7 @@ class Moderation(commands.Cog):
 	@commands.has_permissions(kick_members=True)
 	async def snipe(self, ctx):
 		'''
-		Snipes the last deleted message.
+		(MOD) Snipes the last deleted message.
 		'''
 		message = last_deleted_message
 		if message:
@@ -118,6 +118,67 @@ class Moderation(commands.Cog):
 		:param amount: The amount of messages to purge.
 		'''
 		await ctx.channel.purge(limit=amount + 1)
+
+ 	@commands.command()
+ 	@commands.has_permissions(administrator=True)
+	async def clear(self, ctx):
+		'''
+		(ADM) Clears the whole channel.
+		'''
+		embed = discord.Embed(
+		  title="Confirmation",
+		  description="Clear the whole channel, **are you sure?**",
+		  color=discord.Color.green(),
+		  timestamp=ctx.message.created_at)
+		msg = await ctx.send(embed=embed)
+
+		await msg.add_reaction('✅')
+		await msg.add_reaction('❌')
+
+		def check(r, u):
+		  return r.message.id == msg.id and u.id == ctx.author.id and str(r.emoji) in ['✅', '❌']
+
+		try:
+		  r, _ = await self.client.wait_for('reaction_add', timeout=60, check=check)
+		  r = str(r.emoji)
+		except asyncio.TimeoutError:
+		  embed.description = '**Timeout!**'
+		  return await msg.edit(embed=embed)
+
+		else:
+		  if r == '❌':
+		    embed.description = "Good, not doing it then! ❌"
+		    return await msg.edit(embed=embed)
+		  else:
+		    embed.description = "Clearing whole channel..."
+		    await msg.edit(embed=embed)
+		    await asyncio.sleep(1)
+	 
+	    special_channels = {
+	      764698779315470356: 'https://cdn.discordapp.com/attachments/746478846466981938/748605295122448534/Muted.png',
+	      764698902376480818:'''**Would you like to ask us a question about the server? Ask them there!**
+	`Questions will be answered and deleted immediately.`''',
+	      764698926925217792:'''**Would you like to suggest a feature for the server? Please follow this template to submit your feature request**
+
+	**Suggestion:**
+	`A short idea name/description`
+
+	**Explanation:**
+	`Explain the feature in detail and including reasons why you would like this feature to be implemented.`''',
+	    }
+
+	    while True:
+	      msgs = await ctx.channel.history().flatten()
+	      if (lenmsg := len(msgs)) > 0:
+	        print(lenmsg)
+	        await ctx.channel.purge(limit=lenmsg)
+	      else:
+	        print('b')
+	        break
+
+	    if smessage := special_channels.get(ctx.channel.id):
+	      await ctx.send(smessage)
+
 
 	# Warns a member
 	@commands.command()
