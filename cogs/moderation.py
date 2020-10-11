@@ -155,7 +155,7 @@ class Moderation(commands.Cog):
 				await asyncio.sleep(1)
 	 
 		special_channels = {
-	      764698779315470356: 'https://cdn.discordapp.com/attachments/746478846466981938/748605295122448534/Muted.png',
+	      656730447857975296: 'https://cdn.discordapp.com/attachments/746478846466981938/748605295122448534/Muted.png',
 	      764698902376480818:'''**Would you like to ask us a question about the server? Ask them there!**
 	`Questions will be answered and deleted immediately.`''',
 	      764698926925217792:'''**Would you like to suggest a feature for the server? Please follow this template to submit your feature request**
