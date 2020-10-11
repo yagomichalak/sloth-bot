@@ -119,8 +119,8 @@ class Moderation(commands.Cog):
 		'''
 		await ctx.channel.purge(limit=amount + 1)
 
- 	@commands.command()
- 	@commands.has_permissions(administrator=True)
+	@commands.command()
+	@commands.has_permissions(administrator=True)
 	async def clear(self, ctx):
 		'''
 		(ADM) Clears the whole channel.
@@ -136,25 +136,25 @@ class Moderation(commands.Cog):
 		await msg.add_reaction('❌')
 
 		def check(r, u):
-		  return r.message.id == msg.id and u.id == ctx.author.id and str(r.emoji) in ['✅', '❌']
+			return r.message.id == msg.id and u.id == ctx.author.id and str(r.emoji) in ['✅', '❌']
 
 		try:
-		  r, _ = await self.client.wait_for('reaction_add', timeout=60, check=check)
-		  r = str(r.emoji)
+			r, _ = await self.client.wait_for('reaction_add', timeout=60, check=check)
+			r = str(r.emoji)
 		except asyncio.TimeoutError:
-		  embed.description = '**Timeout!**'
-		  return await msg.edit(embed=embed)
+			embed.description = '**Timeout!**'
+			return await msg.edit(embed=embed)
 
 		else:
-		  if r == '❌':
-		    embed.description = "Good, not doing it then! ❌"
-		    return await msg.edit(embed=embed)
-		  else:
-		    embed.description = "Clearing whole channel..."
-		    await msg.edit(embed=embed)
-		    await asyncio.sleep(1)
+			if r == '❌':
+				embed.description = "Good, not doing it then! ❌"
+				return await msg.edit(embed=embed)
+			else:
+				embed.description = "Clearing whole channel..."
+				await msg.edit(embed=embed)
+				await asyncio.sleep(1)
 	 
-	    special_channels = {
+		special_channels = {
 	      764698779315470356: 'https://cdn.discordapp.com/attachments/746478846466981938/748605295122448534/Muted.png',
 	      764698902376480818:'''**Would you like to ask us a question about the server? Ask them there!**
 	`Questions will be answered and deleted immediately.`''',
@@ -165,19 +165,18 @@ class Moderation(commands.Cog):
 
 	**Explanation:**
 	`Explain the feature in detail and including reasons why you would like this feature to be implemented.`''',
-	    }
+		}
 
-	    while True:
-	      msgs = await ctx.channel.history().flatten()
-	      if (lenmsg := len(msgs)) > 0:
-	        print(lenmsg)
-	        await ctx.channel.purge(limit=lenmsg)
-	      else:
-	        print('b')
-	        break
+		while True:
+			msgs = await ctx.channel.history().flatten()
+			if (lenmsg := len(msgs)) > 0:
+				print(lenmsg)
+				await ctx.channel.purge(limit=lenmsg)
+			else:
+				break
 
-	    if smessage := special_channels.get(ctx.channel.id):
-	      await ctx.send(smessage)
+		if smessage := special_channels.get(ctx.channel.id):
+			await ctx.send(smessage)
 
 
 	# Warns a member
