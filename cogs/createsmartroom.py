@@ -31,6 +31,21 @@ class CreateSmartRoom(commands.Cog):
 
 		epoch = datetime.utcfromtimestamp(0)
 		the_time = (datetime.utcnow() - epoch).total_seconds()
+
+		# Looks for rooms that are soon going to be deleted (Danger zone)
+		danger_rooms = await self.get_all_galaxy_rooms_in_danger_zone(the_time)
+		for droom in danger_rooms:
+			member = self.client.get_user(droom[0])
+			embed = discord.Embed(
+				title="__Galaxy Rooms in Danger Zone__",
+				description="Your Galaxy rooms will be deleted within two days, in case you wanna keep them," +
+				" consider renewing them for `350łł` by using the **z!pay_rent** command in any of your rooms!",
+				color=discord.Color.red())
+			await member.send(embed=embed)
+			await self.user_notified_yes(member.id)
+
+
+		# Looks for expired rooms to delete
 		all_rooms = await self.get_all_galaxy_rooms(the_time)
 		for room in all_rooms:
 			for i in range(2, 6):
@@ -590,7 +605,7 @@ class CreateSmartRoom(commands.Cog):
 			return await ctx.send("**Table __GalaxyVc__ already exists!**")
 
 		mycursor, db = await the_data_base5()
-		await mycursor.execute("CREATE TABLE GalaxyVc (user_id BIGINT, user_cat BIGINT, user_vc BIGINT, user_txt1 BIGINT, user_txt2 BIGINT, user_txt3 BIGINT, user_ts BIGINT)")
+		await mycursor.execute("CREATE TABLE GalaxyVc (user_id BIGINT, user_cat BIGINT, user_vc BIGINT, user_txt1 BIGINT, user_txt2 BIGINT, user_txt3 BIGINT, user_ts BIGINT, user_notified VARCHAR(3) default 'no')")
 		await db.commit()
 		await mycursor.close()
 		return await ctx.send("**Table __GalaxyVc__ created!**")
@@ -786,6 +801,102 @@ class CreateSmartRoom(commands.Cog):
 
 		else:
 			return True
+
+
+	# Other useful commands
+	@commands.command(aliases=['creation', 'expiration'])
+	async def galaxy_info(self, ctx):
+		'''
+		Shows the creation and expiration time of the user's Galaxy Rooms.
+		'''
+		user_galaxy = await self.get_galaxy_txt(ctx.author.id, ctx.channel.category.id)
+		if not user_galaxy:
+			return await ctx.send("**You cannot run this command outside your rooms, in case you have them!**")
+
+		user_ts = user_galaxy[0][6]
+		epoch = datetime.utcfromtimestamp(0)
+		the_time = (datetime.utcnow() - epoch).total_seconds()
+		deadline = user_ts + 1209600
+
+		embed = discord.Embed(
+			title=f"__{ctx.author.name}'s Rooms' Info__",
+			description=f'''**Created at:** {datetime.utcfromtimestamp(user_ts)}
+			**Expected expiration:** {datetime.utcfromtimestamp(deadline)}\n''',
+			color=ctx.author.color,
+			timestamp=ctx.message.created_at)
+		
+		embed.set_thumbnail(url=ctx.author.avatar_url)
+		embed.set_footer(text="Requested")
+
+		seconds_left = deadline - the_time
+		if seconds_left >= 86400:
+			embed.description += f"**Time left:** {round(seconds_left/3600/24)} days left"
+		elif seconds_left >= 3600:
+			embed.description += f"**Time left:** {round(seconds_left/3600)} hours left"
+		elif seconds_left  >= 60:
+			embed.description += f"**Time left:** {round(seconds_left/60)} minutes left"
+		else:
+			embed.description += f"**Time left:** {round(seconds_left)} seconds left"
+
+		await ctx.send(embed=embed)
+
+	@commands.command(aliases=['rent'])
+	async def pay_rent(self, ctx):
+		'''
+		Delays the user's Galaxy Rooms deletion by 14 days for 350łł.
+		'''
+		if not ctx.guild:
+			return await ctx.send("**Don't use it here!**")
+			
+		user_galaxy = await self.get_galaxy_txt(ctx.author.id, ctx.channel.category.id)
+		if not user_galaxy:
+			return await ctx.send("**You cannot run this command outside your rooms, in case you have them!**")
+
+		user_ts = user_galaxy[0][6]
+		epoch = datetime.utcfromtimestamp(0)
+		the_time = (datetime.utcnow() - epoch).total_seconds()
+		seconds_left = (user_ts + 1209600) - the_time
+
+		# Checks rooms deletion time
+		if seconds_left > 172800:
+			return await ctx.send("**You can only renew your rooms at least 2 days before their deletion time.**")
+
+		#Checks if the user has money for it (350łł)		
+		user_currency = await SlothCurrency.get_user_currency(member, member.id)
+		if user_currency[0][1] >= 350:
+			await SlothCurrency.update_user_money(member, member.id, -350)
+		else:
+			return await ctx.send("**You don't have enough money to renew your rooms!!**")
+
+		await self.increment_galaxy_ts(ctx.author.id, 1209600)
+		await self.user_notified_no(ctx.author.id)
+		await ctx.send(f"**{ctx.author.mention}, Galaxy Rooms renewed!**")
+
+	async def increment_galaxy_ts(self, user_id: int, addition: int):
+		mycursor, db = await the_data_base5()
+		await mycursor.execute("UPDATE GalaxyVc SET user_ts = user_ts + %s WHERE user_id = %s", (addition, user_id))
+		await db.commit()
+		await mycursor.close()
+
+	async def get_all_galaxy_rooms_in_danger_zone(self, the_time):
+		mycursor, db = await the_data_base5()
+		await mycursor.execute("SELECT * FROM GalaxyVc WHERE (user_ts + 1209600) - %s <= 172800 and user_notified = 'no'", (the_time,))
+		danger_rooms = await mycursor.fetchall()
+		await mycursor.close()
+		return  danger_rooms
+
+	async def user_notified_yes(self, user_id: int):
+		mycursor, db = await the_data_base5()
+		await mycursor.execute("UPDATE GalaxyVc SET user_notified = 'yes' WHERE user_id = %s", (user_id,))
+		await db.commit()
+		await mycursor.close()
+
+	async def user_notified_no(self, user_id: int):
+		mycursor, db = await the_data_base5()
+		await mycursor.execute("UPDATE GalaxyVc SET user_notified = 'no' WHERE user_id = %s", (user_id,))
+		await db.commit()
+		await mycursor.close()
+
 
 def setup(client):
 	client.add_cog(CreateSmartRoom(client))
