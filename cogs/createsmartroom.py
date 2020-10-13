@@ -411,6 +411,12 @@ class CreateSmartRoom(commands.Cog):
 
 		# Confirm configurations
 		if str(reaction.emoji) == '✅':
+
+			# Checks if user already has galaxy rooms
+			has_galaxy = await self.has_galaxy_rooms(member.id)
+			if has_galaxy:
+				return await member.send("**You already have a Galaxy category, you can't create more than one!**")
+
 			# Checks if the user has money (350łł)
 			user_currency = await SlothCurrency.get_user_currency(member, member.id)
 			if user_currency:
@@ -896,6 +902,16 @@ class CreateSmartRoom(commands.Cog):
 		await mycursor.execute("UPDATE GalaxyVc SET user_notified = 'no' WHERE user_id = %s", (user_id,))
 		await db.commit()
 		await mycursor.close()
+
+	async def has_galaxy_rooms(self, user_id: int):
+		mycursor, db = await the_data_base5()
+		await mycursor.execute("SELECT * FROM GalaxyVc WHERE user_id = %s", (user_id,))
+		user_rooms = await mycursor.fetchall()
+		await mycursor.close()
+		if user_rooms:
+			return True
+		else:
+			return False
 
 
 def setup(client):
