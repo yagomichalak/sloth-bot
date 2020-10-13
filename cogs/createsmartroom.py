@@ -864,7 +864,7 @@ class CreateSmartRoom(commands.Cog):
 		#Checks if the user has money for it (350łł)		
 		user_currency = await SlothCurrency.get_user_currency(ctx.author, ctx.author.id)
 		if user_currency[0][1] >= 350:
-			await SlothCurrency.update_user_money(member, member.id, -350)
+			await SlothCurrency.update_user_money(ctx.author, ctx.author.id, -350)
 		else:
 			return await ctx.send("**You don't have enough money to renew your rooms!!**")
 
