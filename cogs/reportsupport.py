@@ -56,7 +56,10 @@ class ReportSupport(commands.Cog):
 
 			elif emoji == '❌':
 				# Tries to delete the teacher app from the db, in case it is registered
-				return await self.delete_teacher_app(payload.message_id)
+				await self.delete_teacher_app(payload.message_id)
+				app_channel = self.client.get_channel(self.app_channel_id)
+				app_msg = await app_channel.fetch_message(payload.message_id)
+				return await app_msg.add_reaction('🔏')
 
 
 		# Checks if the reaction was in the RepportSupport channel
@@ -214,6 +217,7 @@ class ReportSupport(commands.Cog):
 			cosmos = discord.utils.get(app_channel.guild.members, id=self.cosmos_id)
 			app = await app_channel.send(content=f"{cosmos.mention}, {member.mention}\n{app}")
 			await app.add_reaction('✅')
+			await app.add_reaction('❌')
 			self.cache[member.id] = time.time()
 			# Saves in the database
 			await self.save_teacher_app(app.id, member.id)
