@@ -41,8 +41,12 @@ class CreateSmartRoom(commands.Cog):
 				description="Your Galaxy rooms will be deleted within two days, in case you wanna keep them," +
 				" consider renewing them for `350łł` by using the **z!pay_rent** command in any of your rooms!",
 				color=discord.Color.red())
-			await member.send(embed=embed)
-			await self.user_notified_yes(member.id)
+			try:
+				await member.send(embed=embed)
+				await self.user_notified_yes(member.id)
+			except Exception:
+				pass
+
 
 
 		# Looks for expired rooms to delete
@@ -65,7 +69,7 @@ class CreateSmartRoom(commands.Cog):
 			else:
 				await member.send(f"**Hey! Your rooms expired so they got deleted!**")
 			finally:
-				await self.delete_galaxy_vc(member.id, room[2])
+				await self.delete_galaxy_vc(room[0], room[2])
 
 
 	@commands.Cog.listener()
