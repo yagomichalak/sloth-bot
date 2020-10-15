@@ -22,6 +22,9 @@ class ReactionRoles(commands.Cog):
         guild = self.client.get_guild(payload.guild_id)
         user = discord.utils.get(guild.members, id=payload.user_id)
 
+        if not guild:
+            return
+            
         if user.bot:
             return
 
