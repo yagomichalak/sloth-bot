@@ -43,7 +43,7 @@ class ReportSupport(commands.Cog):
 		guild = self.client.get_guild(payload.guild_id)
 
 		# Checks if it's in the applications channel
-		if payload.channel_id != self.app_channel_id:
+		if payload.channel_id == self.app_channel_id:
 			emoji = str(payload.emoji)
 			if emoji == '✅':
 				# Gets the teacher app and does the magic
