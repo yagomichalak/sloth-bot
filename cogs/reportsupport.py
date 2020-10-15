@@ -703,7 +703,7 @@ class ReportSupport(commands.Cog):
 	async def get_teacher_app_by_message(self, message_id: int) -> List[str]:
 		""" Gets a teacher application from the database by providing a message id. """
 		
-		mycursor, db = await self.the_data_base5()
+		mycursor, db = await the_data_base5()
 		await mycursor.execute("SELECT * FROM TeacherApplication WHERE message_id = %s", (message_id,))
 		teacher_app = await mycursor.fetchall()
 		await mycursor.close()
@@ -712,7 +712,7 @@ class ReportSupport(commands.Cog):
 	async def get_teacher_app_by_channel(self, channel_id: int) -> List[str]:
 		""" Gets a teacher application from the database by providing a channel id. """
 		
-		mycursor, db = await self.the_data_base5()
+		mycursor, db = await the_data_base5()
 		await mycursor.execute("SELECT * FROM TeacherApplication WHERE txt_id = %s", (channel_id,))
 		teacher_app = await mycursor.fetchall()
 		await mycursor.close()
@@ -722,7 +722,7 @@ class ReportSupport(commands.Cog):
 	async def save_teacher_app(self, message_id: int, teacher_id: int) -> None:
 		""" Saves a teacher application into the database. """
 		
-		mycursor, db = await self.the_data_base5()
+		mycursor, db = await the_data_base5()
 		await mycursor.execute('''
 			INSERT INTO TeacherApplication (message_id, teacher_id)
 			VALUES (%s, %s)''', (message_id, teacher_id)
@@ -734,7 +734,7 @@ class ReportSupport(commands.Cog):
 	async def update_teacher_application(self, teacher_id: int, txt_id: int, vc_id: int) -> None:
 		""" Updates the teacher's application; adding the txt and vc ids into it. """
 
-		mycursor, db = await self.the_data_base5()
+		mycursor, db = await the_data_base5()
 		await mycursor.execute('''UPDATE TeacherApplication SET 
 			channel_open = 'yes', txt_id = %s, vc_id = %s
 			WHERE teacher_id = %s''', (txt_id, vc_id, teacher_id)
@@ -746,7 +746,7 @@ class ReportSupport(commands.Cog):
 	async def delete_teacher_app(self, message_id: int) -> None:
 		""" Deletes a teacher application from the database. """
 
-		mycursor, db = await self.the_data_base5()
+		mycursor, db = await the_data_base5()
 		await mycursor.execute("DELETE FROM TeacherApplication WHERE message_id = %s", (message_id,))
 		await db.commit()
 		await mycursor.close()
@@ -757,7 +757,7 @@ class ReportSupport(commands.Cog):
 	async def create_table_teacher_application(self, ctx) -> None:
 		""" (ADM) Creates the TeacherApplication table. """
 
-		mycursor, db = await self.the_data_base5()
+		mycursor, db = await the_data_base5()
 		if await self.table_teacher_application_exists():
 			return await ctx.send("**Table `TeacherApplication` already exists!**")
 
@@ -774,7 +774,7 @@ class ReportSupport(commands.Cog):
 	async def drop_table_teacher_application(self, ctx) -> None:
 		""" (ADM) Drops the TeacherApplication table. """
 
-		mycursor, db = await self.the_data_base5()
+		mycursor, db = await the_data_base5()
 		if not await self.table_teacher_application_exists():
 			return await ctx.send("**Table `TeacherApplication` doesn't exist!**")
 
@@ -789,7 +789,7 @@ class ReportSupport(commands.Cog):
 	async def reset_table_teacher_application(self, ctx) -> None:
 		""" (ADM) Resets the TeacherApplication table. """
 
-		mycursor, db = await self.the_data_base5()
+		mycursor, db = await the_data_base5()
 		if not await self.table_teacher_application_exists():
 			return await ctx.send("**Table `TeacherApplication` doesn't exist yet!**")
 
@@ -801,7 +801,7 @@ class ReportSupport(commands.Cog):
 	async def table_teacher_application_exists(self) -> bool:
 		""" Checks whether the TeacherApplication table exists. """
 
-		mycursor, db = await self.the_data_base5()
+		mycursor, db = await the_data_base5()
 		await mycursor.execute("SHOW TABLE STATUS LIKE 'TeacherApplication'")
 		exists = await mycursor.fetchall()
 		await mycursor.close()
