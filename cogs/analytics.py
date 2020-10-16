@@ -37,7 +37,7 @@ class Analytics(commands.Cog):
             channel = self.client.get_channel(bots_and_commands_channel_id)
             members = len(channel.guild.members)
             info = await self.get_info()
-            online_members = len([om for om in members if str(om.status) == "online"])
+            online_members = len([om for om in channel.guild.members if str(om.status) == "online"])
             small = ImageFont.truetype("built titling sb.ttf", 45)
             analytics = Image.open("analytics2.png").resize((500, 600))
             draw = ImageDraw.Draw(analytics)
