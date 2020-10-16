@@ -629,7 +629,7 @@ class ReportSupport(commands.Cog):
 		overwrites: Dict = {guild.default_role: discord.PermissionOverwrite(
 			read_messages=False, send_messages=False, connect=False, view_channel=False), 
 		teacher: discord.PermissionOverwrite(
-			read_messages=True, send_messages=True, connect=False, view_channel=True), 
+			read_messages=True, send_messages=True, connect=True, view_channel=True), 
 		}
 		#moderator: discord.PermissionOverwrite(read_messages=True, send_messages=True, connect=False, view_channel=True, manage_messages=True)
 		txt_channel = await guild.create_text_channel(name=f"{teacher.name}'s-interview", category=app_cat, overwrites=overwrites)

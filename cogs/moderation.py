@@ -402,37 +402,106 @@ class Moderation(commands.Cog):
 
 	# Bans a member
 	@commands.command()
-	@commands.has_permissions(administrator=True)
-	async def ban(self, ctx, member: discord.Member = None, *, reason=None):
+	@commands.has_permissions(kick_members=True)
+	async def ban(self, ctx, member: discord.Member = None, *, reason=None) -> None:
 		'''
-		(ADM) Bans a member from the server.
+		(ModTeam/ADM) Bans a member from the server.
 		:param member: The @ or ID of the user to ban.
 		:param reason: The reason for banning the user. (Optional)
 		'''
 		await ctx.message.delete()
 		if not member:
-			await ctx.send('**Please, specify a member!**', delete_after=3)
+			return await ctx.send('**Please, specify a member!**', delete_after=3)
+
+
+		channel = ctx.channel
+		author = ctx.author
+
+		perpetrators = []
+		confirmations = {}
+
+		perms = channel.permissions_for(author)
+
+		if perms.kick_members and not perms.administrator:
+			confirmations[author.id] = author.name
+			mod_ban_embed = discord.Embed(
+				title=f"Ban Request ({len(confirmations)}/3) → (2mins)",
+				description=f'''
+				{author.mention} wants to ban {member.mention}, it requires more 2 moderator ✅ reactions for it!
+				```Reason: {reason}```''', 
+				colour=discord.Colour.dark_red(), timestamp=ctx.message.created_at)
+			mod_ban_embed.set_author(name=f'{member} is going to Brazil...', icon_url=member.avatar_url)
+			msg = await ctx.send(embed=mod_ban_embed)
+			await msg.add_reaction('✅')
+			# Prompts for 3 moderator reactions
+			def check_mod(r, u):
+				if u.bot:
+					return False
+				if r.message.id != msg.id:
+					return
+
+				if str(r.emoji) == '✅':
+					perms = channel.permissions_for(u)
+					if perms.kick_members:
+						confirmations[u.id] = u
+						return True
+					else:
+						self.client.loop.create_task(
+							msg.remove_reaction('✅', u)
+							)
+						return False
+
+				else:
+					self.client.loop.create_task(
+						msg.remove_reaction(r.emoji, u)
+						)
+					return False
+
+			while True:
+				try:
+					r, _ = await self.client.wait_for('reaction_add', timeout=120, check=check_mod)
+				except asyncio.TimeoutError:
+					mod_ban_embed.description = f'Timeout, {member} is not getting banned!'
+					await msg.remove_reaction('✅', self.client.user)
+					return await msg.edit(embed=mod_ban_embed)
+				else:
+					mod_ban_embed.title = f"Ban Request ({len(confirmations)}/3) → (2mins)"
+					await msg.edit(embed=mod_ban_embed)
+					if len(confirmations) < 3:
+						continue
+					else:
+						break
+
+		# Checks if it was a moderator ban request or just a normal ban
+		if len(confirmations) <= 1:
+			perpetrators = ctx.author
+			icon = ctx.author.avatar_url
 		else:
-			try:
-				await member.ban(delete_message_days=7, reason=reason)
-			except Exception:
-				await ctx.send('**You cannot do that!**', delete_after=3)
-			else:
-				# General embed
-				general_embed = discord.Embed(description=f'**Reason:** {reason}', colour=discord.Colour.dark_red())
-				general_embed.set_author(name=f'{member} has been banned', icon_url=member.avatar_url)
-				await ctx.send(embed=general_embed)
-				# Moderation log embed
-				moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
-				embed = discord.Embed(title='__**Banishment**__', colour=discord.Colour.dark_red(),
-									  timestamp=ctx.message.created_at)
-				embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nId: {member.id}```',
-								inline=False)
-				embed.add_field(name='Reason:', value=f'```{reason}```')
-				embed.set_author(name=member)
-				embed.set_thumbnail(url=member.avatar_url)
-				embed.set_footer(text=f"Banned by {ctx.author}", icon_url=ctx.author.avatar_url)
-				await moderation_log.send(embed=embed)
+			perpetrators = confirmations.values()
+			icon = ctx.guild.icon_url
+
+		# Bans and logs
+		try:
+			await member.ban(delete_message_days=7, reason=reason)
+		except Exception:
+			await ctx.send('**You cannot do that!**', delete_after=3)
+		else:
+			# General embed
+			general_embed = discord.Embed(description=f'**Reason:** {reason}', colour=discord.Colour.dark_red())
+			general_embed.set_author(name=f'{member} has been banned', icon_url=member.avatar_url)
+			await ctx.send(embed=general_embed)
+			# Moderation log embed
+			moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
+			embed = discord.Embed(title='__**Banishment**__', colour=discord.Colour.dark_red(),
+								  timestamp=ctx.message.created_at)
+			embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nId: {member.id}```',
+							inline=False)
+			embed.add_field(name='Reason:', value=f'```{reason}```')
+			embed.set_author(name=member)
+			embed.set_thumbnail(url=member.avatar_url)
+			embed.set_footer(text=f"Banned by {perpetrators}", icon_url=icon)
+			await moderation_log.send(embed=embed)
+
 
 	# Bans a member
 	@commands.command()
