@@ -83,7 +83,7 @@ class Analytics(commands.Cog):
         mycursor, db = await the_data_base3()
         await mycursor.execute('''
             INSERT INTO DataBumps (
-            joined, left, messages, members, online)
+            m_joined, m_left, messages, members, online)
             VALUES (%s, %s, %s, %s, %s, %s)''', (joined, left, messages, members, online, complete_date))
         await db.commit()
         await mycursor.close()
@@ -199,7 +199,7 @@ class Analytics(commands.Cog):
         mycursor, db = await the_data_base3()
         await mycursor.execute('''
             CREATE TABLE DataBumps (
-            joined BIGINT, left BIGINT, messages BIGINT, members BIGINT, online BIGINT, complete_date VARCHAR(11)
+            m_joined BIGINT, m_left BIGINT, messages BIGINT, members BIGINT, online BIGINT, complete_date VARCHAR(11)
             )''')
         await db.commit()
         await mycursor.close()
