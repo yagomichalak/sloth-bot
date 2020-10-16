@@ -4,6 +4,7 @@ from mysqldb2 import *
 from datetime import datetime
 from pytz import timezone
 from PIL import Image, ImageFont, ImageDraw
+from typing import List, Union
 
 bots_and_commands_channel_id = 562019654017744904
 select_your_language_channel_id = 695491104417513552
@@ -13,24 +14,24 @@ class Analytics(commands.Cog):
     A cog related to the analytics of the server.
     '''
 
-    def __init__(self, client):
+    def __init__(self, client) -> None:
         self.client = client
-        self.dnk_id = 647452832852869120
+        self.dnk_id: int = 647452832852869120
         self.check_midnight.start()
 
     @commands.Cog.listener()
-    async def on_ready(self):
+    async def on_ready(self) -> None:
         print("Analytics cog is online!")
 
 
     @tasks.loop(minutes=1)
-    async def check_midnight(self):
+    async def check_midnight(self) -> None:
         time_now = datetime.now()
         tzone = timezone("CET")
         date_and_time = time_now.astimezone(tzone)
         hour = date_and_time.strftime('%H:%M')
         day = date_and_time.strftime('%d')
-        complete_date = date_and_time.strftime('%d/%m')
+        complete_date = date_and_time.strftime('%d/%m/%Y')
         if await self.check_relatory_time(day):
             await self.update_day(day)
             channel = self.client.get_channel(bots_and_commands_channel_id)
@@ -54,27 +55,29 @@ class Analytics(commands.Cog):
 
 
     @commands.Cog.listener()
-    async def on_member_join(self, member):
+    async def on_member_join(self, member) -> None:
         channel = discord.utils.get(member.guild.channels, id=select_your_language_channel_id)
         await channel.send(f'''Hello {member.mention} ! Scroll up and choose your Native Language by clicking in the flag that best represents it!
 <:zarrowup:688222444292669449> <:zarrowup:688222444292669449> <:zarrowup:688222444292669449> <:zarrowup:688222444292669449> <:zarrowup:688222444292669449> <:zarrowup:688222444292669449> <:zarrowup:688222444292669449> <:zarrowup:688222444292669449>''', delete_after=120)
         await self.update_joined()
 
     @commands.Cog.listener()
-    async def on_member_remove(self, member):
+    async def on_member_remove(self, member) -> None:
         return await self.update_left()
 
     @commands.Cog.listener()
-    async def on_message(self, message):
+    async def on_message(self, message) -> None:
+        if not message.guild:
+            return
         return await self.update_messages()
 
 
-    # @commands.command(hidden=True)
-    # @commands.has_permissions(administrator=True)
-    # async def stop_task(self, ctx):
-    #     await ctx.message.delete()
-    #     self.check_midnight.stop()
-    #     return await ctx.send("**Analytics task has been stopped!**", delete_after=3)
+    @commands.command(hidden=True)
+    @commands.has_permissions(administrator=True)
+    async def stop_task(self, ctx) -> None:
+        await ctx.message.delete()
+        self.check_midnight.stop()
+        return await ctx.send("**Analytics task has been stopped!**", delete_after=3)
         
     async def bump_data(self, joined: int, left: int, messages: int, members: int, online: int, complete_date: str) -> None:
         '''
@@ -83,7 +86,7 @@ class Analytics(commands.Cog):
         mycursor, db = await the_data_base3()
         await mycursor.execute('''
             INSERT INTO DataBumps (
-            m_joined, m_left, messages, members, online)
+            m_joined, m_left, messages, members, online, complete_date)
             VALUES (%s, %s, %s, %s, %s, %s)''', (joined, left, messages, members, online, complete_date))
         await db.commit()
         await mycursor.close()
@@ -91,7 +94,7 @@ class Analytics(commands.Cog):
     # Table UserCurrency
     @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
-    async def create_table_sloth_analytics(self, ctx):
+    async def create_table_sloth_analytics(self, ctx) -> None:
         '''
         (ADM) Creates the SlothAnalytics table.
         '''
@@ -111,7 +114,7 @@ class Analytics(commands.Cog):
 
     @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
-    async def drop_table_sloth_analytics(self, ctx):
+    async def drop_table_sloth_analytics(self, ctx) -> None:
         '''
         (ADM) Drops the SlothAnalytics table.
         '''
@@ -124,7 +127,7 @@ class Analytics(commands.Cog):
 
     @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
-    async def reset_table_sloth_analytics(self, ctx = None):
+    async def reset_table_sloth_analytics(self, ctx = None) -> None:
         '''
         (ADM) Resets the SlothAnalytics table.
         '''
@@ -143,31 +146,31 @@ class Analytics(commands.Cog):
         if ctx:
             return await ctx.send("**Table *SlothAnalytics* reseted!**", delete_after=3)
 
-    async def update_joined(self):
+    async def update_joined(self) -> None:
         mycursor, db = await the_data_base3()
         await mycursor.execute("UPDATE SlothAnalytics SET m_joined = m_joined + 1")
         await db.commit()
         await mycursor.close()
 
-    async def update_left(self):
+    async def update_left(self) -> None:
         mycursor, db = await the_data_base3()
         await mycursor.execute("UPDATE SlothAnalytics SET m_left = m_left + 1")
         await db.commit()
         await mycursor.close()
 
-    async def update_messages(self):
+    async def update_messages(self) -> None:
         mycursor, db = await the_data_base3()
         await mycursor.execute("UPDATE SlothAnalytics SET messages_sent = messages_sent + 1")
         await db.commit()
         await mycursor.close()
 
-    async def update_day(self, day: str):
+    async def update_day(self, day: str) -> None:
         mycursor, db = await the_data_base3()
         await mycursor.execute(f"UPDATE SlothAnalytics SET day_now = '{day}'")
         await db.commit()
         await mycursor.close()
 
-    async def check_relatory_time(self, time_now: str):
+    async def check_relatory_time(self, time_now: str) -> None:
         mycursor, db = await the_data_base3()
         await mycursor.execute("SELECT * from SlothAnalytics")
         info = await mycursor.fetchall()
@@ -176,7 +179,7 @@ class Analytics(commands.Cog):
         else:
             return False
 
-    async def get_info(self):
+    async def get_info(self) -> List[int]:
         mycursor, db = await the_data_base3()
         await mycursor.execute("SELECT * from SlothAnalytics")
         info = await mycursor.fetchall()

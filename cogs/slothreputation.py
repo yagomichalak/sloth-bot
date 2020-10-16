@@ -21,6 +21,9 @@ class SlothReputation(commands.Cog):
     # In-game commands
     @commands.Cog.listener()
     async def on_message(self, message):
+        if not message.guild:
+            return
+            
         if message.author.bot:
             return
         elif not await self.check_table_exist():

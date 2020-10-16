@@ -22,6 +22,8 @@ class ModActivity(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message):
+        if not message.guild:
+            return
         if message.author.bot:
             return
         guild = self.client.get_guild(guild_id)
