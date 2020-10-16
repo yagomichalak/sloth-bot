@@ -443,7 +443,7 @@ class Moderation(commands.Cog):
 				if str(r.emoji) == '✅':
 					perms = channel.permissions_for(u)
 					if perms.kick_members:
-						confirmations[u.id] = u
+						confirmations[u.id] = u.name
 						return True
 					else:
 						self.client.loop.create_task(
