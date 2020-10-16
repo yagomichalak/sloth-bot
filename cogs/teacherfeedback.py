@@ -30,6 +30,9 @@ class CreateClassroom(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message):
+        if not message.guild:
+            return
+            
         mc = message.channel
         mca = message.channel.category
         member = message.author

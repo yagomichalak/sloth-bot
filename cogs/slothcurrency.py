@@ -59,6 +59,9 @@ class SlothCurrency(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message):
+        if not message.guild:
+            return
+
         if message.author.bot:
             return
         if not await self.check_table_exist():
@@ -93,7 +96,10 @@ class SlothCurrency(commands.Cog):
             await self.update_user_server_time(member.id, addition)
 
     @commands.Cog.listener()
-    async def on_raw_reaction_add(self, payload):        
+    async def on_raw_reaction_add(self, payload):
+        if not payload.guild_id:
+            return
+
         # Checks if it wasn't a bot's reaction
         if payload.member.bot:
             return
@@ -136,6 +142,8 @@ class SlothCurrency(commands.Cog):
 
     @commands.Cog.listener()
     async def on_raw_reaction_remove(self, payload):
+        if not payload.guild_id:
+            return
         member = discord.utils.get(self.client.get_guild(payload.guild_id).members, id=payload.user_id)
         if member.bot:
             return

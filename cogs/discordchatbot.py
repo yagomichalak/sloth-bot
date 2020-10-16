@@ -35,6 +35,9 @@ class ChatterSloth(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message):
+        if not message.guild:
+            return
+            
         if message.author.bot:
             return
         if message.content[3:].startswith(str(self.client.user.mention)[2:]) or message.content[2:].startswith(str(self.client.user.mention)[2:]):
