@@ -12,7 +12,7 @@ user_cosmos_id = 423829836537135108
 server_id = 459195345419763713
 moderator_role_id = 497522510212890655
 teacher_role_id = 507298235766013981
-moderation_log_channel_id = 675745413760024595
+moderation_log_channel_id = 704867714971336734
 lesson_log_channel_id = 679043911225966608
 lesson_category_id = 562019326295670806
 clock_voice_channel_id = 687783432222277695
@@ -65,6 +65,9 @@ async def change_color():
 
 @client.event
 async def on_member_update(before, after):
+    if not after.guild:
+        return
+
     roles = before.roles
     roles2 = after.roles
     if len(roles2) < len(roles):
@@ -109,6 +112,9 @@ async def on_member_remove(member):
 
 @client.event
 async def on_message(message):
+    if not message.guild:
+        return
+
     if message.author.bot:
         return
 
@@ -126,6 +132,9 @@ async def on_message(message):
 # Delete messages log
 @client.event
 async def on_raw_message_delete(payload):
+    if not payload.guild_id:
+        return
+
     if payload.channel_id == announcement_channel_id:
         announcements = await show_class_announcements()
         for ann in announcements:
@@ -137,6 +146,9 @@ async def on_raw_message_delete(payload):
 async def on_raw_reaction_add(overload):
     guild = client.get_guild(overload.guild_id)
     user = discord.utils.get(guild.members, id=overload.user_id)
+
+    if not guild:
+        return
 
     if user.bot:
         return
@@ -167,6 +179,9 @@ async def on_raw_reaction_add(overload):
 async def on_raw_reaction_remove(overload):
     guild = client.get_guild(overload.guild_id)
     user = discord.utils.get(guild.members, id=overload.user_id)
+
+    if not guild:
+        return
 
     # User reaction info
     if overload.channel_id == announcement_channel_id:
@@ -231,9 +246,14 @@ async def update_timezones():
         await the_vc.edit(name=f'{timezones[tz][1]} - {date_and_time_in_text}')
 
 
-# Joins VC log
+# Joins VC log #########
 @client.event
 async def on_voice_state_update(member, before, after):
+    # No longer being used
+    
+    return 
+    if not member.guild:
+        return
     mod_role = discord.utils.get(member.guild.roles, id=moderator_role_id)
     teacher_role = discord.utils.get(member.guild.roles, id=teacher_role_id)
     if mod_role not in member.roles and teacher_role not in member.roles:

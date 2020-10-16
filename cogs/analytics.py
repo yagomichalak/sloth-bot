@@ -4,10 +4,11 @@ from mysqldb2 import *
 from datetime import datetime
 from pytz import timezone
 from PIL import Image, ImageFont, ImageDraw
-from typing import List, Union
+from typing import List
 
 bots_and_commands_channel_id = 562019654017744904
 select_your_language_channel_id = 695491104417513552
+
 
 class Analytics(commands.Cog):
     '''
@@ -23,42 +24,41 @@ class Analytics(commands.Cog):
     async def on_ready(self) -> None:
         print("Analytics cog is online!")
 
-
     @tasks.loop(minutes=1)
     async def check_midnight(self) -> None:
         time_now = datetime.now()
         tzone = timezone("CET")
         date_and_time = time_now.astimezone(tzone)
-        hour = date_and_time.strftime('%H:%M')
+        # hour = date_and_time.strftime('%H:%M')
         day = date_and_time.strftime('%d')
-        complete_date = date_and_time.strftime('%d/%m/%Y')
         if await self.check_relatory_time(day):
             await self.update_day(day)
             channel = self.client.get_channel(bots_and_commands_channel_id)
-            members = len(channel.guild.members)
+            members = channel.guild.members
             info = await self.get_info()
-            online_members = len([om for om in channel.guild.members if str(om.status) == "online"])
+            online_members = [om for om in members if str(om.status) == "online"]
             small = ImageFont.truetype("built titling sb.ttf", 45)
             analytics = Image.open("analytics2.png").resize((500, 600))
             draw = ImageDraw.Draw(analytics)
             draw.text((140, 270), f"{info[0][0]}", (255, 255, 255), font=small)
             draw.text((140, 335), f"{info[0][1]}", (255, 255, 255), font=small)
             draw.text((140, 395), f"{info[0][2]}", (255, 255, 255), font=small)
-            draw.text((140, 460), f"{members}", (255, 255, 255), font=small)
-            draw.text((140, 520), f"{online_members}", (255, 255, 255), font=small)
+            draw.text((140, 460), f"{len(members)}", (255, 255, 255), font=small)
+            draw.text((140, 520), f"{len(online_members)}", (255, 255, 255), font=small)
             analytics.save('analytics_result.png', 'png', quality=90)
             await channel.send(file=discord.File('analytics_result.png'))
 
             await self.reset_table_sloth_analytics()
-            return await self.bump_data(info[0][0], info[0][1], info[0][1], members, online_members, complete_date)
-
-
+            complete_date = date_and_time.strftime('%d/%m/%Y')
+            return await self.bump_data(info[0][0], info[0][1], info[0][1], len(members), len(online_members), complete_date)
 
     @commands.Cog.listener()
     async def on_member_join(self, member) -> None:
         channel = discord.utils.get(member.guild.channels, id=select_your_language_channel_id)
-        await channel.send(f'''Hello {member.mention} ! Scroll up and choose your Native Language by clicking in the flag that best represents it!
-<:zarrowup:688222444292669449> <:zarrowup:688222444292669449> <:zarrowup:688222444292669449> <:zarrowup:688222444292669449> <:zarrowup:688222444292669449> <:zarrowup:688222444292669449> <:zarrowup:688222444292669449> <:zarrowup:688222444292669449>''', delete_after=120)
+        await channel.send(
+            f'''Hello {member.mention} ! Scroll up and choose your Native Language by clicking in the flag that best represents it!
+<:zarrowup:688222444292669449> <:zarrowup:688222444292669449> <:zarrowup:688222444292669449> <:zarrowup:688222444292669449> <:zarrowup:688222444292669449> <:zarrowup:688222444292669449> <:zarrowup:688222444292669449> <:zarrowup:688222444292669449>''',
+            delete_after=120)
         await self.update_joined()
 
     @commands.Cog.listener()
@@ -69,8 +69,8 @@ class Analytics(commands.Cog):
     async def on_message(self, message) -> None:
         if not message.guild:
             return
-        return await self.update_messages()
 
+        return await self.update_messages()
 
     @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
@@ -78,8 +78,9 @@ class Analytics(commands.Cog):
         await ctx.message.delete()
         self.check_midnight.stop()
         return await ctx.send("**Analytics task has been stopped!**", delete_after=3)
-        
-    async def bump_data(self, joined: int, left: int, messages: int, members: int, online: int, complete_date: str) -> None:
+
+    async def bump_data(self, joined: int, left: int, messages: int, members: int, online: int,
+                        complete_date: str) -> None:
         '''
         Bumps the data from the given day to the database.
         '''
@@ -127,7 +128,7 @@ class Analytics(commands.Cog):
 
     @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
-    async def reset_table_sloth_analytics(self, ctx = None) -> None:
+    async def reset_table_sloth_analytics(self, ctx=None) -> None:
         '''
         (ADM) Resets the SlothAnalytics table.
         '''
@@ -135,7 +136,7 @@ class Analytics(commands.Cog):
             await ctx.message.delete()
         mycursor, db = await the_data_base3()
         await mycursor.execute("DELETE FROM SlothAnalytics")
-        # await db.commit()
+        await db.commit()  # IDK
         time_now = datetime.now()
         tzone = timezone("CET")
         date_and_time = time_now.astimezone(tzone)
@@ -144,7 +145,7 @@ class Analytics(commands.Cog):
         await db.commit()
         await mycursor.close()
         if ctx:
-            return await ctx.send("**Table *SlothAnalytics* reseted!**", delete_after=3)
+            return await ctx.send("**Table *SlothAnalytics* reset!**", delete_after=3)
 
     async def update_joined(self) -> None:
         mycursor, db = await the_data_base3()
@@ -242,7 +243,6 @@ class Analytics(commands.Cog):
         await db.commit()
         await mycursor.close()
         await ctx.send("**Table `DataBumps` reset!**")
-
 
     async def table_data_bumps_exists(self) -> bool:
         """ Checks whether the DataBumps table exists. """
