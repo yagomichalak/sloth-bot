@@ -248,10 +248,10 @@ class Analytics(commands.Cog):
         await mycursor.execute("SHOW TABLE STATUS LIKE 'DataBumps'")
         exists = await mycursor.fetchall()
         await mycursor.close()
-        if len(exists) > 0:
-            return True
-        else:
+        if len(exists) == 0:
             return False
+        else:
+            return True
 
 
 def setup(client):
