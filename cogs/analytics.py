@@ -80,7 +80,7 @@ class Analytics(commands.Cog):
         '''
         Bumps the data from the given day to the database.
         '''
-        mycursor, db = await self.the_data_base3()
+        mycursor, db = await the_data_base3()
         await mycursor.execute('''
             INSERT INTO DataBumps (
             joined, left, messages, members, online)
@@ -192,7 +192,7 @@ class Analytics(commands.Cog):
         if ctx.author.id != self.dnk_id:
             return await ctx.send("**You're not DNK!**")
 
-        if self.table_data_bumps_exists():
+        if await self.table_data_bumps_exists():
             return await ctx.send("**The table `DataBumps` already exists!**")
 
         await ctx.message.delete()
@@ -212,7 +212,7 @@ class Analytics(commands.Cog):
         if ctx.author.id != self.dnk_id:
             return await ctx.send("**You're not DNK!**")
 
-        if not self.table_data_bumps_exists():
+        if not await self.table_data_bumps_exists():
             return await ctx.send("**The table `DataBumps` doesn't exist!**")
 
         await ctx.message.delete()
@@ -230,7 +230,7 @@ class Analytics(commands.Cog):
         if ctx.author.id != self.dnk_id:
             return await ctx.send("**You're not DNK!**")
 
-        if not self.table_data_bumps_exists():
+        if not await self.table_data_bumps_exists():
             return await ctx.send("**The table `DataBumps` doesn't exist yet!**")
 
         await ctx.message.delete()
@@ -244,7 +244,7 @@ class Analytics(commands.Cog):
     async def table_data_bumps_exists(self) -> bool:
         """ Checks whether the DataBumps table exists. """
 
-        mycursor, db = await self.the_data_base3()
+        mycursor, db = await the_data_base3()
         await mycursor.execute("SHOW TABLE STATUS LIKE 'DataBumps'")
         exists = await mycursor.fetchall()
         await mycursor.close()
