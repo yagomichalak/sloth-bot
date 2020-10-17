@@ -51,7 +51,7 @@ class Analytics(commands.Cog):
 
             await self.reset_table_sloth_analytics()
             complete_date = date_and_time.strftime('%d/%m/%Y')
-            await self.bump_data(info[0][0], info[0][1], info[0][1], len(members), len(online_members), str(complete_date))
+            await self.bump_data(info[0][0], info[0][1], info[0][2], len(members), len(online_members), str(complete_date))
 
     @commands.Cog.listener()
     async def on_member_join(self, member) -> None:
