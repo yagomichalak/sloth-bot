@@ -8,6 +8,7 @@ from typing import List
 
 bots_and_commands_channel_id = 562019654017744904
 select_your_language_channel_id = 695491104417513552
+guild_id = 459195345419763713
 
 
 class Analytics(commands.Cog):
@@ -33,8 +34,11 @@ class Analytics(commands.Cog):
         day = date_and_time.strftime('%d')
         if await self.check_relatory_time(day):
             await self.update_day(day)
-            channel = self.client.get_channel(bots_and_commands_channel_id)
-            members = channel.guild.members
+            # channel = self.client.get_channel(bots_and_commands_channel_id)
+            guild = await self.client.fetch_guild(guild_id)
+            channel = await self.client.fetch_channel(bots_and_commands_channel_id)
+            # members = channel.guild.members
+            members = guild.members
             info = await self.get_info()
             online_members = [om for om in members if str(om.status) == "online"]
             small = ImageFont.truetype("built titling sb.ttf", 45)
@@ -50,7 +54,7 @@ class Analytics(commands.Cog):
 
             await self.reset_table_sloth_analytics()
             complete_date = date_and_time.strftime('%d/%m/%Y')
-            return await self.bump_data(info[0][0], info[0][1], info[0][1], len(members), len(online_members), complete_date)
+            await self.bump_data(info[0][0], info[0][1], info[0][1], len(members), len(online_members), str(complete_date))
 
     @commands.Cog.listener()
     async def on_member_join(self, member) -> None:
@@ -171,7 +175,7 @@ class Analytics(commands.Cog):
         await db.commit()
         await mycursor.close()
 
-    async def check_relatory_time(self, time_now: str) -> None:
+    async def check_relatory_time(self, time_now: str) -> bool:
         mycursor, db = await the_data_base3()
         await mycursor.execute("SELECT * from SlothAnalytics")
         info = await mycursor.fetchall()
