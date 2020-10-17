@@ -8,7 +8,6 @@ from typing import List
 
 bots_and_commands_channel_id = 562019654017744904
 select_your_language_channel_id = 695491104417513552
-guild_id = 459195345419763713
 
 
 class Analytics(commands.Cog):
@@ -19,11 +18,11 @@ class Analytics(commands.Cog):
     def __init__(self, client) -> None:
         self.client = client
         self.dnk_id: int = 647452832852869120
-        self.check_midnight.start()
 
     @commands.Cog.listener()
     async def on_ready(self) -> None:
         print("Analytics cog is online!")
+        self.check_midnight.start()
 
     @tasks.loop(minutes=1)
     async def check_midnight(self) -> None:
@@ -34,11 +33,9 @@ class Analytics(commands.Cog):
         day = date_and_time.strftime('%d')
         if await self.check_relatory_time(day):
             await self.update_day(day)
-            # channel = self.client.get_channel(bots_and_commands_channel_id)
-            guild = await self.client.fetch_guild(guild_id)
-            channel = await self.client.fetch_channel(bots_and_commands_channel_id)
-            # members = channel.guild.members
-            members = guild.members
+            # channel = await self.client.fetch_channel(bots_and_commands_channel_id)
+            channel = self.client.get_channel(bots_and_commands_channel_id)
+            members = channel.guild.members
             info = await self.get_info()
             online_members = [om for om in members if str(om.status) == "online"]
             small = ImageFont.truetype("built titling sb.ttf", 45)
