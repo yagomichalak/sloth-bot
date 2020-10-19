@@ -3,6 +3,8 @@ from discord.ext import commands
 from mysqldb2 import *
 from datetime import datetime
 import asyncio
+from typing import Dict
+import time
 
 create_room_vc_id = 704430199298850907
 create_room_cat_id = 562019326295670806
@@ -21,6 +23,7 @@ class CreateClassroom(commands.Cog):
 
     def __init__(self, client):
         self.client = client
+        self.teacher_cache: Dict = {}
 
 
     @commands.Cog.listener()
@@ -100,6 +103,16 @@ class CreateClassroom(commands.Cog):
                         await self.update_all_students_ts(member.id, int(the_time))
 
                     else:
+                        # Checks if user is on cooldown for the questions
+                        member_ts = self.teacher_cache.get(member.id)
+                        time_now = time.time()
+                        if member_ts:
+                            sub = time_now - member_ts
+                            if sub <= 60:
+                                return
+
+                        self.teacher_cache[member.id] = time_now
+
                         # Checks if the teacher has a saved class
                         saved_classes = await self.get_saved_class(member.id)
 
