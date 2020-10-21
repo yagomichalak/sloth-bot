@@ -1,0 +1,37 @@
+{
+    "1": {
+        "default.png": [
+            "default"
+        ]
+    },
+    "2": {
+        "british_english.png": [
+            "british english",
+            "british",
+            "uk"
+        ]
+    },
+    "3": {
+        "american_english.png": [
+            "american english",
+            "american",
+            "english"
+        ]
+    },
+    "4": {
+        "spanish.png": [
+            "spanish", 
+            "european spanish"
+        ]
+    },
+    "5": {
+        "romanian.png": [
+            "romanian"
+        ]
+    },
+    "5": {
+        "korean.png": [
+            "korean"
+        ]
+    }
+}
