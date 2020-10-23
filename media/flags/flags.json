@@ -1,37 +1,1018 @@
 {
-    "1": {
-        "default.png": [
-            "default"
-        ]
-    },
-    "2": {
-        "british_english.png": [
-            "british english",
-            "british",
-            "uk"
-        ]
-    },
-    "3": {
-        "american_english.png": [
-            "american english",
-            "american",
-            "english"
-        ]
-    },
-    "4": {
-        "spanish.png": [
-            "spanish", 
-            "european spanish"
-        ]
-    },
-    "5": {
-        "romanian.png": [
-            "romanian"
-        ]
-    },
-    "5": {
-        "korean.png": [
-            "korean"
-        ]
-    }
+ "1": {
+  "default.png": [
+   "default"
+  ]
+ },
+ "2": {
+  "ad.png": [
+   "andorran catalan", "andoran spanish",
+   "andoran french"
+  ]
+ },
+ "3": {
+  "ae.png": [
+   "emirati arabic"
+  ]
+ },
+ "4": {
+  "af.png": [
+   "pashto", "persian", "dari"
+  ] 
+ },
+ "5": {
+  "ag.png": [
+   "antiguan spanish", "barbudan spanish",
+   "antiguan english", "barbudan english"
+  ]
+ },
+ "6": {
+  "al.png": [
+   "albanian"
+  ]
+ },
+ "7": {
+  "am.png": [
+   "armenian", "armenian russian"
+  ]
+ },
+ "8": {
+  "ao.png": [
+   "angolan portuguese"
+  ]
+ },
+ "9": {
+  "ar.png": [
+   "argentine spanish", "argentinian spanish",
+   "argentinean spanish"
+  ]
+ },
+ "10": {
+  "at.png": [
+   "austrian german", "austro-bavarian"
+  ]
+ },
+ "11": {
+  "au.png": [
+   "australian english"
+  ]
+ },
+ "12": {
+  "aw.png": [
+   "aruban dutch", "papiamento", "papiamentu",
+   "aruban papiamento", "aruban papiamentu",
+   "aruban english"
+  ]
+ },
+ "13": {
+  "ax.png": [
+   "swedish", "åland", "ålander swedish",
+   "ålandish", "ålandic"
+  ]
+ },
+ "14": {
+  "az.png": [
+   "azerbaijani", "azeri"
+  ]
+ },
+ "15": {
+  "ba.png": [
+   "bosnian", "bosnian serbian",
+   "bosnian croatian"
+  ]
+ },
+ "16": {
+  "bb.png": [
+   "barbadian creole", "barbadian english",
+   "bajan creole"
+  ]
+ },
+ "17": {
+  "bd.png": [
+   "bengali"
+  ]
+ },
+ "18": {
+  "be.png": [
+   "belgian french", "belgian dutch",
+   "belgian german", "flemish"
+  ]
+ },
+ "19": {
+  "bf.png": [
+   "burkinabe french", "dyula", "jula", "dioula",
+   "fula", "burkinabe fulfulde", "mossi", "burkinabé"
+  ]
+ },
+ "20": {
+  "bg.png": [
+   "bulgarian"
+  ]
+ },
+ "21": {
+  "bh.png": [
+   "bahrani arabic"
+  ]
+ },
+ "22": {
+  "bi.png": [
+   "burundian french", "burundian english",
+   "kirundi", "burundian swahili"
+  ]
+ },
+ "23": {
+  "bj.png": [
+   "beninese french"
+  ]
+ },
+ "24": {
+  "bl.png": [
+   "barthélemois french"
+  ]
+ },
+ "25": {
+  "bn.png": [
+   "bruneian malay", "malaccan"
+  ]
+ },
+ "26": {
+  "bo.png": [
+   "bolivian spanish"
+  ]
+ },
+ "27": {
+  "bq.png": [
+   "bonairean papiamentu", "bonairean papiamento", 
+   "bonairean dutch", "bonairean english",
+
+   "st. eustatian papiamentu", "st. eustatian papiamento",
+   "st. eustatian dutch", "st. eustatian english",
+   "st. eustatian spanish",
+
+   "st. statian papiamentu", "st. statian papiamento",
+   "st. statian dutch", "st. statian english",
+   "st. statian spanish",
+
+   "sabean english", "sabean dutch"
+
+  ]
+ },
+ "28": {
+  "br.png": [
+   "brazilian portuguese"
+  ]
+ },
+ "30": {
+  "bs.png": [
+   "bahamian english"
+  ]
+ },
+ "31": {
+  "bt.png": [
+   "bhutanese nepali", "dzongkha", "tshangla"
+  ]
+ },
+ "33": {
+  "bw.png": [
+   "tswana english"
+  ]
+ },
+ "34": {
+  "by.png": [
+   "belarusian" 
+  ]
+ },
+ "35": { 
+  "bz.png": [
+   "belizean english"
+  ]
+ },
+ "36": {
+  "ca.png": [
+   "canadian english", "canadian french"
+  ]
+ },
+ "37": {
+  "ch.png": [
+   "swiss german", "swiss italian", "swiss french",
+   "romansh"
+  ]
+ },
+ "38": {
+  "ci.png": [
+   "ivorian french"
+  ]
+ },
+ "39": {
+  "cl.png": [
+   "chilean spanish"
+  ]
+ },
+ "40": {
+  "cm.png": [
+   "cameroonian english", "cameroonian french"
+  ]
+ },
+ "41": {
+  "cn.png": [
+   "chinese", "mandarin", "fuzhounese"
+  ]
+ },
+ "42": {
+  "co.png": [
+   "colombian spanish"
+  ]
+ },
+ "43": {
+  "cornish.png": [
+   "cornish"
+  ]
+ },
+ "44": {
+  "cr.png": [
+   "costa rican spanish"
+  ]
+ },
+ "45": {
+  "cu.png": [
+   "cuban spanish"
+  ]
+ },
+ "46": {
+  "cv.png": [
+   "cabo verdean portuguese", "cabo verdean portuguese"
+  ]
+ },
+ "47": {
+  "cw.png": [
+   "curaçaoan dutch", "curaçaoan papiamento",
+   "curaçaoan papiamentu", "curaçaoan english"
+  ]
+ }, 
+ "48": {
+  "cz.png": [
+   "czech"
+  ]
+ },
+ "49": {
+  "de.png": [
+   "german", "high german", "low german"
+  ]
+ },
+ "50": {
+  "dj.png": [
+   "djiboutian french", "djiboutian arabic"
+  ]
+ },
+ "51": {
+  "dk.png": [
+   "danish"
+  ]
+ },
+ "52": {
+  "dm.png": [
+   "dominican english",
+   "dominican french creole"
+  ]
+ },
+ "53": {
+  "do.png": [
+   "dominican republic spanish", "dominican spanish"
+  ]
+ },
+ "54": {
+  "dz.png": [
+   "algerian arabic", "algerian french", "algerian berber"
+  ]
+ },
+ "55": {
+  "ec.png": [
+   "ecuadorian spanish"
+  ]
+ },
+ "56": {
+  "ee.png": [
+   "estonian", "estonian russian" 
+  ]
+ },
+ "57": {
+  "eg.png": [
+   "egyptian arabic", "modern arabic",
+   "modern standard arabic"
+  ]
+ },
+ "58": {
+  "eh.png": [
+   "western saharan arabic", "western saharan spanish"
+  ]
+ },
+ "59": {
+  "es.png": [
+   "spanish" 
+  ]
+ },
+ "60": {
+  "et.png": [
+   "amharic", "ethiopian amharic"
+  ]
+ },
+ "61": {
+  "fi.png": [
+   "finnish", "finnish swedish"
+  ]
+ },
+ "62": {
+  "fo.png": [
+   "faroese", "faroese danish"
+  ]
+ },
+ "63": {
+  "fr.png": [
+   "french", "occitan"
+  ]
+ },
+ "64": {
+  "gb eng.png": [
+   "english"
+  ]
+ },
+ "65": {
+  "gb sct.png": [
+   "scottish gaelic", "scottish", "gaelic"
+  ]
+ },
+ "66": {
+  "gb wls.png": [
+   "welsh"
+  ]
+ },
+ "67": { 
+  "gb.png": [
+   "british english"
+  ]
+ },
+ "68": {
+  "ge.png": [
+   "georgian"
+  ]
+ },
+ "69": {
+  "gh.png": [
+   "ghanaian english", "twi"
+  ]
+ },
+ "70": {
+  "gl.png": [
+   "greenlandic", "south greenlandic",
+   "west greenlandic", "east greenlandic",
+   "thule", "greenlandic danish"
+  ]
+ },
+ "71": {
+  "gm.png": [
+   "gambian english", "mandinka", "wolof"
+  ]
+ },
+ "72": {
+  "gn.png": [
+   "guinean french", "guinean fula", "susu",
+   "kissi", "guinean kpelle"
+  ]
+ },
+ "73": {
+  "gr.png": [
+   "greek"
+  ]
+ },
+ "74": {
+  "gt.png": [
+   "guatemalan spanish"
+  ]
+ },
+ "75": {
+  "hk.png": [
+   "cantonese"
+  ]
+ },
+ "76": {
+  "hr.png": [
+   "croatian", "croatian serbian"
+
+  ]
+ },
+ "77": {
+  "hu.png": [
+   "hungarian"
+  ]
+ },
+ "78": {
+  "id.png": [
+   "indonesian"
+  ]
+ },
+ "79": {
+  "ie.png": [
+   "irish", "irish english"
+  ]
+ },
+ "80": {
+  "il.png": [
+   "hebrew"
+  ]
+ },
+ "81": {
+  "im.png": [
+   "manx", "manx english", "anglo-manx"
+  ]
+ },
+ "82": {
+  "in.png": [
+   "hindi", "indian urdu", "indian english",
+   "indian bengali", "indian tamil", "urdu",
+   "tamil"
+  ]
+ },
+ "83": {
+  "iq.png": [
+   "iraqi arabic"
+  ]
+ },
+ "84": {
+  "ir.png": [
+   "iranian azeri", "iranian persian",
+   "kurdish", "iranian arabic", "mazandarani"
+  ]
+ },
+ "85": {
+  "is.png": [
+   "icelandic"
+  ]
+ },
+ "86": {
+  "it.png": [
+   "italian", "tuscan", "piedmontese", "lombard", 
+   "venetian", "sardinian", "neapolitan",
+   "romanesco", "calabrese", "pugliese", "romagnol",
+   "friulian"
+  ]
+ },
+ "87": {
+  "jm.png": [
+   "jamaican english", "jamaican patois", "patois",
+   "patwa", "jamaican creole"
+  ]
+ },
+ "88": {
+  "jo.png": [
+   "jordanian arabic"
+  ]
+ },
+ "89": {
+  "jp.png": [
+   "japanese"
+  ]
+ },
+ "90": {
+  "ke.png": [
+   "kenyan swahili"
+  ]
+ },
+ "91": {
+  "kg.png": [
+   "kyrgyz", "kyrgyz russian"
+  ]
+ },
+ "92": {
+  "kh.png": [
+   "khmer"
+  ]
+ },
+ "93": {
+  "ki.png": [
+   "kiribati", "gilbertese", "i-kiribati english",
+   "kiribati english"
+  ]
+ },
+ "94": {
+  "km.png": [
+   "comorian", "comorian french", "comorian arabic"
+  ]
+ },
+ "95": {
+  "kn.png": [
+    "kittitian english", "nevisian english", "saint kitts creole",
+    "nevisian english", "kittitian english"
+  ]
+ },
+ "97": {
+  "kp.png": [
+   "north korean"
+  ]
+ },
+ "98": {
+  "kr.png": [
+    "korean", "south korean"
+  ]
+ },
+ "99": {
+  "kw.png": [
+   "kuwaiti arabic", "kuwaiti english"
+  ]
+ },
+ "100": {
+  "kz.png": [
+   "kazakh", "kazakh russian"
+  ]
+ },
+ "101": {
+  "la.png": [
+   "lao", "laotian"
+  ]
+ },
+ "102": {
+  "lb.png": [
+   "lebanese arabic", "lebanese english",
+   "lebanese french"
+  ]
+ },
+ "103": {
+  "li.png": [
+   "liechtensteiner german"
+  ]
+ },
+ "104": {
+  "lk.png": [
+   "sinhalese", "sinhala", "sinhalese tamil"
+  ]
+ },
+ "105": {
+  "lr.png": [
+   "liberian english", "liberian kpelle", "bassa",
+   "grebo", "dan", "kru", "mano", "loma", "mandingo"
+  ]
+ },
+ "106": {
+  "ls.png": [
+   "basotho english", "southern sotho"
+  ]
+ },
+ "107": {
+  "lt.png": [
+   "lithuanian"
+  ]
+ },
+ "108": {
+  "lu.png": [
+   "luxembourgish", "luxembourgish french",
+   "luxembourgish german"
+  ]
+ },
+ "109": {
+  "lv.png": [
+   "latvian"
+  ]
+ },
+ "110": {
+  "ly.png": [
+   "libyan arabic"
+  ]
+ },
+ "111": {
+  "ma.png": [
+   "moroccan arabic"
+  ]
+ },
+ "112": {
+  "mc.png": [
+   "monégasque monacan french", "monacan french",
+   "monégasque french"
+  ]
+ },
+ "113": {
+  "md.png": [
+   "moldovan romanian", "gagauz"
+  ]
+ },
+ "114": {
+  "me.png": [
+   "montenegrin", "montenegrin bosnian",
+   "montenegrin croatian", "montenegrin serbian",
+   "montenegrin albanian"
+  ]
+ },
+ "116": {
+  "mk.png": [
+   "macedonian", "macedonian albanian"
+  ]
+ },
+ "117": {
+  "ml.png": [
+   "malian french", "bamanankan", "bomu", "bozo"
+  ]
+ },
+ "118": {
+  "mm.png": [
+   "burmese"
+  ]
+ },
+ "119": {
+  "mn.png": [
+   "mongolian", "oirat", "buryat"
+  ]
+ },
+ "120": {
+  "mo.png": [
+   "macau chinese", "macau cantonese", 
+   "macau portuguese"
+  ]
+ },
+ "121": {
+  "mp.png": [
+   "chamorro", "carolinian",
+   "northern mariana english"
+  ]
+ },
+ "122": {
+  "mr.png": [
+   "mauritanian arabic"
+  ]
+ },
+ "123": {
+  "mt.png": [
+   "maltese", "maltese english"
+  ]
+ },
+ "124": {
+  "mu.png": [
+   "mauritian english", "mauritian creole",
+   "mauritian french"
+
+  ]
+ },
+ "125": {
+  "mv.png": [
+   "dhivehi", "malé", "mulaku", "huvadhu",
+   "maliku", "haddhumathee", "addu"
+  ]
+ },
+ "126": {
+  "mw.png": [
+   "malawian english"
+  ]
+ },
+ "127": {
+  "mx.png": [
+   "mexican spanish", "american spanish",
+   "mixtec", "nahuatl", "yucatec maya"
+  ]
+ },
+ "128": {
+  "my.png": [
+   "malay"
+  ]
+ },
+ "129": {
+  "mz.png": [
+   "mozambican portuguese"
+  ]
+ },
+ "130": {
+  "na.png": [
+   "namibian english"
+  ]
+ },
+ "131": {
+  "navajo.png": [
+   "navajo"
+  ]
+ },
+ "132": {
+  "nc.png": [
+   "new caledonian french"
+  ]
+ },
+ "133": {
+  "ne.png": [
+   "nigerien french", "nigerien arabic", "nigerien hausa",
+   "djerma", "fulani", "manga", "zarma", "tuareg"
+  ]
+ },
+ "134": {
+  "nf.png": [
+   "norfuk", "norfolkian english",
+   "norfolk island english"
+  ]
+ },
+ "135": {
+  "ng.png": [
+   "nigerian english", "nigerian hausa", "yoruba",
+   "igbo", "nigerian fulfulde", "ibibio", "kanuri",
+   "tiv"
+  ]
+ },
+ "136": {
+  "ni.png": [
+   "nicaraguan spanish"
+  ]
+ },
+ "137": {
+  "nl.png": [
+   "dutch", "frisian"
+  ]
+ },
+ "138": {
+  "no.png": [
+   "norwegian", "bokmål", "nynorsk"
+  ]
+ },
+ "139": {
+  "np.png": [
+   "nepali", "khas-kura", "khas kura", "gorkhali",
+   "maithili"
+  ]
+ },
+ "140": {
+  "om.png": [
+   "omani arabic", "omani hadari arabic"
+  ]
+ },
+ "141": {
+  "pa.png": [
+   "panamanian spanish"
+  ]
+ },
+ "142": {
+  "pe.png": [
+   "peruvian spanish", "aymara"
+  ]
+ },
+ "143": {
+  "pf.png": [
+   "french folynesian french"
+  ]
+ },
+ "144": {
+  "pg.png": [
+   "tok pisin", "hiri motu",
+   "papua new guinean english"
+  ]
+ },
+ "145": {
+  "ph.png": [
+   "filipino", "tagalog", "philippine english"
+  ]
+ },
+ "146": {
+  "pk.png": [
+   "pakistani urdu", "pakistani english"
+  ]
+ },
+ "147": {
+  "pl.png": [
+   "polish"
+  ]
+ },
+ "148": {
+  "pr.png": [
+   "puerto rican spanish", "puerto rican english"
+  ]
+ },
+ "149": {
+  "ps.png": [
+   "palestinian arabic"
+  ]
+ },
+ "150": {
+  "pt.png": [
+   "portuguese", "european portuguese",
+   "portuguese portuguese"
+  ]
+ },
+ "151": {
+  "py.png": [
+   "paraguayan guaraní", "paraguayan guarani",
+   "paraguayan spanish"
+  ]
+ },
+ "152": {
+  "qa.png": [
+   "qatari arabic"
+  ]
+ },
+ "153": {
+  "ro.png": [
+   "romanian"
+  ]
+ },
+ "154": {
+  "roman.png": [
+   "roman", "latin"
+  ]
+ },
+ "155": {
+  "rs.png": [
+   "serbian", "serbian croatian"
+  ]
+ },
+ "156": {
+  "ru.png": [
+   "russian", "tatar"
+  ]
+ },
+ "157": {
+  "sa.png": [
+   "saudi arabian"
+  ]
+ },
+ "158": {
+  "sd.png": [
+   "sudanese arabic", "sudanese english"
+  ]
+ },
+ "159": {
+  "se.png": [
+   "swedish", "south swedish", "götamål",
+   "svealand swedish", "norrland", "gutnish"
+  ]
+ },
+ "160": {
+  "sg.png": [
+    "tamil", "singaporean malay", "singaporean english", 
+    "singaporean tamil", "singaporean chinese", 
+    "singaporean mandarin chinese"
+  ]
+ },
+ "161": {
+  "si.png": [
+    "slovenian"
+  ]
+ },
+ "162": {
+  "sicily.png": [
+   "sicilian"
+  ]
+ },
+ "163": {
+  "sk.png": [
+   "slovak"
+  ]
+ },
+ "164": {
+  "sm.png": [
+   "sammarinese italian"
+  ]
+ },
+ "165": {
+  "sn.png": [
+   "senegalese french"
+  ]
+ },
+ "166": {
+  "so.png": [
+   "somali", "somali arabic", "swahili",
+   "somali swahili"
+  ]
+ },
+ "168": {
+  "sr.png": [
+   "surinamese dutch"
+  ]
+ },
+ "169": {
+  "ss.png": [
+   "south sudanese english"
+  ]
+ },
+ "170": {
+  "sv.png": [
+   "salvadoran spanish"
+  ]
+ },
+ "171": {
+  "sx.png": [
+    "st. martinois english", "st. martinois dutch ", 
+    "st. maarteener english", "st. maartener dutch"
+  ]
+ },
+ "172": {
+  "sy.png": [
+   "syrian arabic"
+  ]
+ },
+ "173": {
+  "td.png": [
+   "chadian French", "chadian arabic"
+  ]
+ },
+ "174": {
+  "tg.png": [
+   "togolese french", "ewe"
+  ]
+ },
+ "175": {
+  "th.png": [
+   "thai", "northern thai", "central thai", 
+   "southern thai", "isan"
+  ]
+ },
+ "176": {
+  "tj.png": [
+   "tajiki"
+  ]
+ },
+ "177": {
+  "tk.png": [
+   "tokelau", "tokelauan english"
+  ]
+ },
+ "178": {
+  "tn.png": [
+   "tunisian arabic", "darija", "tunisian berber"
+  ]
+ },
+ "179": {
+  "tr.png": [
+   "turkish"
+  ]
+ },
+ "180": {
+  "tw.png": [
+   "taiwanese chinese", "taiwanese", "taiwanese hokkien", 
+   "hakka"
+  ]
+ },
+ "181": {
+  "tz.png": [
+   "tanzanian english", "tanzanian swahili"
+  ]
+ },
+ "182": {
+  "ug.png": [
+   "ugandan english", "ugandan swahili"
+  ]
+ },
+ "184": {
+  "us.png": [
+   "american english"
+  ]
+ },
+ "185": {
+  "uy.png": [
+   "uruguayan spanish"
+  ]
+ },
+ "186": {
+  "uz.png": [
+   "uzbek"
+  ]
+ },
+ "187": {
+  "va.png": [
+   "vatican italian", "vatican latin",
+   "vaticanian italian", "vaticanian latin"
+  ]
+ },
+ "188": {
+  "ve.png": [
+   "venezuelan spanish"
+  ]
+ },
+ "189": {
+  "vn.png": [
+   "vietnamese"
+  ]
+ },
+ "190": {
+  "xk.png": [
+   "kosovan albanian", "kosovan serbian"
+  ]
+ },
+ "191": {
+  "ye.png": [
+   "yemeni arabic"
+  ]
+ },
+ "192": {
+  "za.png": [
+   "afrikaans", "african english", "venda",
+   "zulu", "xhosa", "northern sotho",
+   "african southern sotho", "tswana", "tsonga",
+   "swati", "ndebele", "african tswana",
+   "african xhosa"
+  ]
+ },
+ "193": {
+  "zm.png": [
+   "bemba", "nyanja", "lozi", "kaonde", "luvale",
+   "lunda", "zambian english", "tonga"
+  ]
+ },
+ "194": {
+  "zw.png": [
+   "zimbabwean english", "zimbabwean venda",
+   "zimbabwean tsonga", "zimbabwean tswana",
+   "chewa", "zimbabwean xhosa",
+   "southern zimbabwean sotho", "shona"
+  ]
+ }
 }
