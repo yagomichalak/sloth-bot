@@ -8,19 +8,22 @@ import aiohttp
 from io import BytesIO
 import shutil
 import json
+import asyncio
 from zipfile import ZipFile
+from typing import Dict, List, Union
 
 
 class TeacherAPI(commands.Cog):
 	""" (WIP) A category for using The Language Sloth's teacher's API, 
 	and some other useful commands related to it. """
-
 	def __init__(self, client) -> None:
 		""" Cog initializer """
 
 		self.client = client
-		self.session = aiohttp.ClientSession()
 		self.teacher_role_id: int = 507298235766013981
+		self.session = aiohttp.ClientSession(loop=client.loop)
+		self.classes_channel_id: int = 689918515129352213
+		self.website_link: str = 'https://languagesloth.herokuapp.com/api/teachers/?format=json'
 
 
 	@commands.Cog.listener()
@@ -111,9 +114,13 @@ class TeacherAPI(commands.Cog):
 		try:
 			assert teacher, await ctx.send(f"**Please, {author.mention}, inform the `teacher`!**")
 			assert description, await ctx.send(f"**Please, {author.mention}, inform the `description`!**")
+			assert len(description) < 75, await ctx.send(f"**Please, {author.mention}, the `description` must be under 76 characters!**")
 			assert language, await ctx.send(f"**Please, {author.mention}, inform the `language`!**")
+			assert len(language) < 80, await ctx.send(f"**Please, {author.mention}, the `language` must be under 31 characters!**")
 			assert weekday, await ctx.send(f"**Please, {author.mention}, inform the `weekday`!**")
+			assert len(weekday) < 9, await ctx.send(f"**Please, {author.mention}, the `weekday` must be under 10 characters!**")
 			assert time, await ctx.send(f"**Please, {author.mention}, inform the `time`!**")
+			assert len(weekday) < 25, await ctx.send(f"**Please, {author.mention}, the `time` must be under 25 characters!**")
 		except AssertionError as e:
 			return
 
@@ -141,8 +148,8 @@ class TeacherAPI(commands.Cog):
 		background.paste(icon, (438, 102), icon)
 		background.paste(template, (0, 0), template)
 
-		# Writing the text
-		draw = ImageDraw.Draw(background)
+		# Writing the text  (0 196, 187) | (5, 66, 39)
+		draw = ImageDraw.Draw(background) 
 		await self.paste_text(draw, (230, 100), teacher_name, (0, 196, 187), small, (5, 66, 39))
 		await self.paste_text(draw, (230, 136), language.title(), (0, 196, 187), small, (5, 66, 39))
 		await self.paste_text(draw, (230, 172), weekday, (0, 196, 187), small, (5, 66, 39))
@@ -160,8 +167,6 @@ class TeacherAPI(commands.Cog):
 		await ctx.send(file=discord.File(saved_path))
 		os.remove(saved_path)
 
-
-	#
 	@commands.command(aliases=['epfp'])
 	@commands.has_permissions(administrator=True)
 	async def export_profile_picutres(self, ctx) -> None:
@@ -231,6 +236,69 @@ class TeacherAPI(commands.Cog):
 		# If not found, returns the default one
 		else:
 			return './media/flags/default.png'
+
+
+	@commands.command(aliases=['uc'])
+	@commands.has_permissions(administrator=True)
+	async def update_classes(self, ctx):
+		""" Update the teachers' classes, by requesting new cards from
+		the server's website """
+
+		async with ctx.typing():
+			try:
+				async with self.session.get(self.website_link) as response:
+					data = json.loads(await response.read())
+					
+			except Exception as e:
+				await ctx.send("**No!**")
+			else:
+
+				# Checks whether new cards were fetched from the website
+				if not data:
+					return await ctx.send("**No are available cards to update!**")
+
+				# Clears the classes channel
+				await self.clear_classes_channel(ctx.guild)
+				sorted_weekdays = await self.sort_weekdays(data)
+
+				for day, classes in sorted_weekdays.items():
+					print(f"{day=}")
+					await ctx.send(embed=discord.Embed(
+						title=day,
+						color=discord.Color.green()))
+					for teacher_class in classes:
+						await ctx.send(teacher_class)
+						await asyncio.sleep(0.5)
+
+
+	async def clear_classes_channel(self, guild: discord.Guild) -> None:
+		""" Clears all messages from the classes channel. """
+
+		channel = discord.utils.get(guild.channels, id=self.classes_channel_id)
+		while True:
+			msgs = await channel.history().flatten()
+			if (lenmsg := len(msgs)) > 0:
+				await channel.purge(limit=lenmsg)
+			else:
+				break
+
+	async def sort_weekdays(self, data: List[Dict[str, Union[int, str]]]) -> Dict[str, List[str]]:
+		""" Sorts the given data by the days of the week. """
+
+		weekdays: Dict[str, List[str]] = {
+			'Sunday': [], 
+			'Monday': [], 
+			'Tuesday': [], 
+			'Wednesday': [], 
+			'Thursday': [], 
+			'Friday': [], 
+			'Saturday': [],
+		}
+
+		for teacher_class in data:
+			weekdays[teacher_class['weekday']].append(teacher_class['image'])
+
+		return weekdays
 
 
 def setup(client) -> None:
