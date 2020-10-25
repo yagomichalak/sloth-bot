@@ -260,7 +260,7 @@ class TeacherAPI(commands.Cog):
 				# Clears the classes channel
 				await self.clear_classes_channel(ctx.guild)
 				sorted_weekdays = await self.sort_weekdays(data)
-				channel = discord.utils.get(guild.channels, id=self.classes_channel_id)
+				channel = discord.utils.get(ctx.guild.channels, id=self.classes_channel_id)
 				for day, classes in sorted_weekdays.items():
 					print(f"{day=}")
 					await ctx.send(embed=discord.Embed(
