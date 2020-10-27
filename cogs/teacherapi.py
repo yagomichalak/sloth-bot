@@ -263,7 +263,7 @@ class TeacherAPI(commands.Cog):
 				channel = discord.utils.get(ctx.guild.channels, id=self.classes_channel_id)
 				for day, classes in sorted_weekdays.items():
 					print(f"{day=}")
-					await ctx.send(embed=discord.Embed(
+					await channel.send(embed=discord.Embed(
 						title=day,
 						color=discord.Color.green()))
 					for teacher_class in classes:

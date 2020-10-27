@@ -112,13 +112,11 @@ async def on_member_remove(member):
 
 @client.event
 async def on_message(message):
-    if not message.guild:
-        return
 
     if message.author.bot:
         return
 
-    if 'Direct Message' in str(message.channel):
+    if not message.guild:
         if message.author.id == 512404174957314083:
             dnk = client.get_user(647452832852869120)
             msg = message.content
@@ -236,7 +234,7 @@ async def update_timezones():
     gid = server_id  # Guild id
     guild = client.get_guild(gid)
     time_now = datetime.now()
-    timezones = {'Etc/GMT-2': [clock_voice_channel_id, 'CET']}
+    timezones = {'Etc/GMT-1': [clock_voice_channel_id, 'CET']}
 
     for tz in timezones:
         tzone = timezone(tz)
