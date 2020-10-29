@@ -20,11 +20,10 @@ class ReactionRoles(commands.Cog):
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload):
         guild = self.client.get_guild(payload.guild_id)
-        user = discord.utils.get(guild.members, id=payload.user_id)
-
         if not guild:
             return
             
+        user = discord.utils.get(guild.members, id=payload.user_id)
         if user.bot:
             return
 

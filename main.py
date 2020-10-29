@@ -143,11 +143,10 @@ async def on_raw_message_delete(payload):
 @client.event
 async def on_raw_reaction_add(overload):
     guild = client.get_guild(overload.guild_id)
-    user = discord.utils.get(guild.members, id=overload.user_id)
-
     if not guild:
         return
 
+    user = discord.utils.get(guild.members, id=overload.user_id)
     if user.bot:
         return
 
