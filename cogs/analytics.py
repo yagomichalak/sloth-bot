@@ -27,7 +27,8 @@ class Analytics(commands.Cog):
     @tasks.loop(minutes=1)
     async def check_midnight(self) -> None:
         time_now = datetime.now()
-        tzone = timezone("CET")
+        # tzone = timezone("CET")
+        tzone = timezone("Etc/GMT-1")
         date_and_time = time_now.astimezone(tzone)
         # hour = date_and_time.strftime('%H:%M')
         day = date_and_time.strftime('%d')
