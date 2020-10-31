@@ -110,7 +110,7 @@ class ReportSupport(commands.Cog):
 			# Support us on Patreon
 			await member.send(f"**Support us on Patreon!**\nhttps://www.patreon.com/Languagesloth")
 
-		elif mid == 729458598966460426 and str(emoji) == '<:ban:593407893248802817>' and not perms.kick_members:
+		elif mid == 729458598966460426 and str(emoji) == '<:ban:593407893248802817>' and not perms.administrator:
 			member_ts = self.report_cache.get(member.id)
 			time_now = time.time()
 			if member_ts:
