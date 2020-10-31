@@ -23,7 +23,8 @@ class TeacherAPI(commands.Cog):
 		self.teacher_role_id: int = 507298235766013981
 		self.session = aiohttp.ClientSession(loop=client.loop)
 		self.classes_channel_id: int = 689918515129352213
-		self.website_link: str = 'https://languagesloth.herokuapp.com/api/teachers/?format=json'
+		# self.website_link: str = 'https://languagesloth.herokuapp.com/api/teachers/?format=json'
+		self.website_link: str = 'http://193.70.127.179/api/teachers/?format=json'
 
 
 	@commands.Cog.listener()
