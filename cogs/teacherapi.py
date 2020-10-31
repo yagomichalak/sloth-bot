@@ -91,8 +91,7 @@ class TeacherAPI(commands.Cog):
 			with BytesIO(image_bytes) as pfp:
 				image = Image.open(pfp)
 				width, height = image.size
-				if width > 128 or height > 128:
-					image = image.resize((128, 128))
+				image = image.resize((128, 128))
 
 				im = image.convert('RGBA')
 				return im
