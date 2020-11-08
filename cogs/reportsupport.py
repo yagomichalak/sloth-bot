@@ -678,7 +678,7 @@ class ReportSupport(commands.Cog):
 			title=f"{teacher.name}'s Interview",
 			description=f'''
 			Hello, {teacher.mention}, we have received and reviewed your teacher application. In order to set up your lesson and explain how our system works we have to schedule a voice conversation with you. 
-			When would be the best time to talk to one our staff?''',
+			When would be the best time to talk to one of our staff?''',
 			color=teacher.color)
 		await txt_channel.send(content=f"{cosmos.mention}, {teacher.mention}", embed=app_embed)
 
