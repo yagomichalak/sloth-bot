@@ -154,7 +154,7 @@ class ReportSupport(commands.Cog):
 			color=member.color
 		)
 
-		terms = await member.send(embed=embed)
+		terms = await member.send(embed=terms_embed)
 		await terms.add_reaction('✅')
 		await terms.add_reaction('❌')
 
