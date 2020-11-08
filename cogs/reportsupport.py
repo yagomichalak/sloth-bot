@@ -151,7 +151,7 @@ class ReportSupport(commands.Cog):
 			》Must prepare their own material weekly
 
 			``` ✅ To agree with our terms```""",
-			color=ctx.author.color
+			color=member.color
 		)
 
 		terms = await member.send(embed=embed)
