@@ -133,6 +133,40 @@ class ReportSupport(commands.Cog):
 			else:
 				return False
 
+		def check_reaction(r, u):
+			return u.id == member.id and not r.message.guild and str(r.emoji) in ['✅', '❌']
+
+		terms_embed = discord.Embed(
+			title="Terms of Application",
+			description="""Hello there!
+			Thank you for applying for teaching here,
+			Before you can formally start applying to teach in The Language Sloth, there are a couple things we would like you to know. The Language Sloth is a free of charge language learning platform which is meant to be accessible and open for anyone who is interested in languages from any background. We do not charge for any kind of service, nor do we pay for any services for starting teachers. We are a community that shares the same interest: Languages.
+			We do not require professional teaching skills, anyone can teach their native language, however, we have a set numbers of requirements for our teachers
+			Entry requirements:
+
+			》Must be at least 16 years of age
+			》Must have at least a conversational level of English
+			》Must have clear microphone audio
+			》Must commit 40 minutes per week
+			》Must prepare their own material weekly
+
+			``` ✅ To agree with our terms```""",
+			color=ctx.author.color
+		)
+
+		terms = await member.send(embed=embed)
+		await terms.add_reaction('✅')
+		await terms.add_reaction('❌')
+
+		# Waits for reaction confirmation to the terms of application
+		terms_r = await self.get_reaction(member, check_reaction)
+
+		if terms_r is None:
+			return
+
+		if terms_r != '✅':
+			return
+
 		embed = discord.Embed(title=f"__Teacher Application__")
 		embed.set_footer(text=f"by {member}", icon_url=member.avatar_url)
 
@@ -208,10 +242,6 @@ class ReportSupport(commands.Cog):
 		await app_conf.add_reaction('❌')
 
 		# Waits for reaction confirmation
-		def check_reaction(r, u):
-			return u.id == member.id and not r.message.guild and str(r.emoji) in ['✅', '❌']
-
-
 		r = await self.get_reaction(member, check_reaction)
 		if r is None:
 			return
