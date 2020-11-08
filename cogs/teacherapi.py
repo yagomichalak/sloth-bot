@@ -244,23 +244,23 @@ class TeacherAPI(commands.Cog):
 		""" Update the teachers' classes, by requesting new cards from
 		the server's website """
 
-		async with ctx.typing():
+		channel = discord.utils.get(ctx.guild.channels, id=self.classes_channel_id)
+		async with channel.typing():
 			try:
 				async with self.session.get(self.website_link) as response:
 					data = json.loads(await response.read())
 					
 			except Exception as e:
-				await ctx.send("**No!**")
+				await channel.send("**No!**")
 			else:
 
 				# Checks whether new cards were fetched from the website
 				if not data:
-					return await ctx.send("**No are available cards to update!**")
+					return await channel.send("**No cards available to update!**")
 
 				# Clears the classes channel
 				await self.clear_classes_channel(ctx.guild)
 				sorted_weekdays = await self.sort_weekdays(data)
-				channel = discord.utils.get(ctx.guild.channels, id=self.classes_channel_id)
 				for day, classes in sorted_weekdays.items():
 					print(f"{day=}")
 					await channel.send(embed=discord.Embed(
