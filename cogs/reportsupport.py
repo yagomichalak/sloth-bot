@@ -11,6 +11,7 @@ dnk_id = 647452832852869120
 case_cat_id = 562939721253126146
 moderator_role_id = 497522510212890655
 admin_role_id = 574265899801116673
+muffin_id = 572131308663472155
 
 class ReportSupport(commands.Cog):
 	'''
@@ -660,12 +661,15 @@ class ReportSupport(commands.Cog):
 		#moderator = discord.utils.get(guild.roles, id=moderator_role_id)
 		cosmos = discord.utils.get(guild.members, id=self.cosmos_id)
 		admin = discord.utils.get(guild.roles, id=admin_role_id)
+		muffin = discord.utils.get(guild.members, id=muffin_id)
 
 		# Creates channels
 		overwrites: Dict = {guild.default_role: discord.PermissionOverwrite(
 			read_messages=False, send_messages=False, connect=False, view_channel=False), 
 		teacher: discord.PermissionOverwrite(
-			read_messages=True, send_messages=True, connect=True, view_channel=True), 
+			read_messages=True, send_messages=True, connect=True, view_channel=True),
+		muffin: discord.PermissionOverwrite(
+			read_messages=True, send_messages=True, connect=True, view_channel=True),
 		}
 		#moderator: discord.PermissionOverwrite(read_messages=True, send_messages=True, connect=False, view_channel=True, manage_messages=True)
 		txt_channel = await guild.create_text_channel(name=f"{teacher.name}'s-interview", category=app_cat, overwrites=overwrites)
@@ -680,7 +684,7 @@ class ReportSupport(commands.Cog):
 			Hello, {teacher.mention}, we have received and reviewed your teacher application. In order to set up your lesson and explain how our system works we have to schedule a voice conversation with you. 
 			When would be the best time to talk to one of our staff?''',
 			color=teacher.color)
-		await txt_channel.send(content=f"{cosmos.mention}, {teacher.mention}", embed=app_embed)
+		await txt_channel.send(content=f"{cosmos.mention}, {muffin.mention}, {teacher.mention}", embed=app_embed)
 
 
 	# In-game commands
