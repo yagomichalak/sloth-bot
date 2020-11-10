@@ -57,10 +57,17 @@ class ReportSupport(commands.Cog):
 
 			elif emoji == '❌':
 				# Tries to delete the teacher app from the db, in case it is registered
-				await self.delete_teacher_app(payload.message_id)
-				app_channel = self.client.get_channel(self.app_channel_id)
-				app_msg = await app_channel.fetch_message(payload.message_id)
-				return await app_msg.add_reaction('🔏')
+				teacher_app = await self.get_teacher_app_by_message(payload.message_id)
+				if teacher_app:
+					await self.delete_teacher_app(payload.message_id)
+					app_channel = self.client.get_channel(self.app_channel_id)
+					app_msg = await app_channel.fetch_message(payload.message_id)
+					await app_msg.add_reaction('🔏')
+					teacher = discord.utils.get(guild.members, id=teacher_app[0][1])
+					if teacher:
+						msg = "**Teacher Application**\nOur staff has avaluated your teacher application and has come to the conclusion that we are not in need of this lesson."
+						await member.send(embed=discord.Embed(description=msg))
+				return
 
 
 		# Checks if the reaction was in the RepportSupport channel
