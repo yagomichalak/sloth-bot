@@ -58,7 +58,7 @@ class ReportSupport(commands.Cog):
 			elif emoji == '❌':
 				# Tries to delete the teacher app from the db, in case it is registered
 				teacher_app = await self.get_teacher_app_by_message(payload.message_id)
-				if teacher_app:
+				if teacher_app and teacher_app[0][2] == 'no':
 					await self.delete_teacher_app(payload.message_id)
 					app_channel = self.client.get_channel(self.app_channel_id)
 					app_msg = await app_channel.fetch_message(payload.message_id)
