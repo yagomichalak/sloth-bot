@@ -798,7 +798,7 @@ class Moderation(commands.Cog):
 	@commands.has_permissions(kick_members=True)
 	async def remove_warning(self, ctx, warn_id: int = None):
 		'''
-		(ADM) Removes a specific warn by ID.
+		(MOD) Removes a specific warn by ID.
 		:param warn_id: The warn ID.
 		'''
 		if not warn_id:
