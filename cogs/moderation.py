@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 import asyncio
-from mysqldb2 import the_data_base3
+from mysqldb import *
 from datetime import datetime
 import time
 
@@ -635,20 +635,20 @@ class Moderation(commands.Cog):
 			return await ctx.send("**Invalid user id!**", delete_after=3)
 
 	async def insert_in_muted(self, user_id: int, role_id: int):
-		mycursor, db = await the_data_base3()
+		mycursor, db = await the_database()
 		await mycursor.execute(f"INSERT INTO mutedmember (user_id, role_id) VALUES (%s, %s)", (user_id, role_id))
 		await db.commit()
 		await mycursor.close()
 
 	async def get_muted_roles(self, user_id: int):
-		mycursor, db = await the_data_base3()
+		mycursor, db = await the_database()
 		await mycursor.execute(f"SELECT * FROM mutedmember WHERE user_id = {user_id}")
 		user_roles = await mycursor.fetchall()
 		await mycursor.close()
 		return user_roles
 
 	async def remove_role_from_system(self, user_id: int, role_id: int):
-		mycursor, db = await the_data_base3()
+		mycursor, db = await the_database()
 		await mycursor.execute(f"DELETE FROM mutedmember WHERE user_id = {user_id} and role_id = {role_id}")
 		await db.commit()
 		await mycursor.close()
@@ -664,7 +664,7 @@ class Moderation(commands.Cog):
 			return await ctx.send("**Table __MutedMember__ doesn't exist yet**")
 
 		await ctx.message.delete()
-		mycursor, db = await the_data_base3()
+		mycursor, db = await the_database()
 		await mycursor.execute("DELETE FROM mutedmember")
 		#await mycursor.execute("CREATE TABLE mutedmember (user_id bigint, role_id bigint)")
 		await db.commit()
@@ -681,7 +681,7 @@ class Moderation(commands.Cog):
 			return await ctx.send("**Table __UserWarns__ already exists!**")
 		
 		await ctx.message.delete()
-		mycursor, db = await the_data_base3()
+		mycursor, db = await the_database()
 		await mycursor.execute("CREATE TABLE UserWarns (user_id bigint, warn_reason VARCHAR(100), warn_timestamp bigint, warn_id bigint auto_increment, perpetrator bigint, PRIMARY KEY (warn_id))")
 		await db.commit()
 		await mycursor.close()
@@ -697,7 +697,7 @@ class Moderation(commands.Cog):
 		if not await self.check_table_warns_exists():
 			return await ctx.send("**Table __UserWarns__ doesn't exist!**")
 		await ctx.message.delete()
-		mycursor, db = await the_data_base3()
+		mycursor, db = await the_database()
 		await mycursor.execute("DROP TABLE UserWarns")
 		await db.commit()
 		await mycursor.close()
@@ -713,7 +713,7 @@ class Moderation(commands.Cog):
 			return await ctx.send("**Table __UserWarns__ doesn't exist yet!**")
 
 		await ctx.message.delete()
-		mycursor, db = await the_data_base3()
+		mycursor, db = await the_database()
 		await mycursor.execute("DELETE FROM UserWarns")
 		await db.commit()
 		await mycursor.close()
@@ -723,7 +723,7 @@ class Moderation(commands.Cog):
 		'''
 		Checks if the UserWarns table exists
 		'''
-		mycursor, db = await the_data_base3()
+		mycursor, db = await the_database()
 		await mycursor.execute(f"SHOW TABLE STATUS LIKE 'UserWarns'")
 		table_info = await mycursor.fetchall()
 		await mycursor.close()
@@ -737,7 +737,7 @@ class Moderation(commands.Cog):
 		'''
 		Checks if the MutedMember table exists
 		'''
-		mycursor, db = await the_data_base3()
+		mycursor, db = await the_database()
 		await mycursor.execute(f"SHOW TABLE STATUS LIKE 'MutedMember'")
 		table_info = await mycursor.fetchall()
 		await mycursor.close()
@@ -751,7 +751,7 @@ class Moderation(commands.Cog):
 		'''
 		Insert a warning into the system.
 		'''
-		mycursor, db = await the_data_base3()
+		mycursor, db = await the_database()
 		await mycursor.execute(f"INSERT INTO UserWarns (user_id, warn_reason, warn_timestamp, perpetrator) VALUES (%s, %s, %s, %s)", (user_id, reason, timestamp, perpetrator))
 		await db.commit()
 		await mycursor.close()
@@ -760,7 +760,7 @@ class Moderation(commands.Cog):
 		'''
 		Gets a specific warning by ID.
 		'''
-		mycursor, db = await the_data_base3()
+		mycursor, db = await the_database()
 		await mycursor.execute(f"SELECT * FROM UserWarns WHERE warn_id = {warn_id}")
 		user_warns = await mycursor.fetchall()
 		return user_warns
@@ -769,7 +769,7 @@ class Moderation(commands.Cog):
 		'''
 		Gets all warnings from a user.
 		'''
-		mycursor, db = await the_data_base3()
+		mycursor, db = await the_database()
 		await mycursor.execute(f"SELECT * FROM UserWarns WHERE user_id = {user_id}")
 		user_warns = await mycursor.fetchall()
 		await mycursor.close()
@@ -779,7 +779,7 @@ class Moderation(commands.Cog):
 		'''
 		Removes a specifc warning by ID.
 		'''
-		mycursor, db = await the_data_base3()
+		mycursor, db = await the_database()
 		await mycursor.execute(f"DELETE FROM UserWarns WHERE warn_id = {warn_id}")
 		await db.commit()
 		await mycursor.close()
@@ -788,7 +788,7 @@ class Moderation(commands.Cog):
 		'''
 		Deletes all warnings from a user by their ID.
 		'''
-		mycursor, db = await the_data_base3()
+		mycursor, db = await the_database()
 		await mycursor.execute(f"DELETE FROM UserWarns WHERE user_id = {user_id}")
 		await db.commit()
 		await mycursor.close()
