@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 from cogs.slothcurrency import SlothCurrency
-from mysqldb2 import *
+from mysqldb import *
 
 class ReactionRoles(commands.Cog):
     '''
@@ -80,7 +80,7 @@ class ReactionRoles(commands.Cog):
         (ADM) Creates the RegisteredText table.
         '''
         await ctx.message.delete()
-        mycursor, db = await the_data_base3()
+        mycursor, db = await the_database()
         await mycursor.execute(
             "CREATE TABLE RegisteredText (message_id bigint, reaction_ref VARCHAR(50), category VARCHAR(20), file_name VARCHAR(50)) DEFAULT CHARSET=utf8mb4")
         await db.commit()
@@ -94,7 +94,7 @@ class ReactionRoles(commands.Cog):
         (ADM) Drops the RegisteredText table.
         '''
         await ctx.message.delete()
-        mycursor, db = await the_data_base3()
+        mycursor, db = await the_database()
         await mycursor.execute("DROP TABLE RegisteredText")
         await db.commit()
         await mycursor.close()
@@ -107,7 +107,7 @@ class ReactionRoles(commands.Cog):
         (ADM) Resets the RegisteredText table.
         '''
         await ctx.message.delete()
-        mycursor, db = await the_data_base3()
+        mycursor, db = await the_database()
         await mycursor.execute("DELETE FROM RegisteredText")
         await db.commit()
         await mycursor.close()
@@ -115,19 +115,19 @@ class ReactionRoles(commands.Cog):
 
 
     async def insert_registered_text(self, mid: int, reactf: str, category: str, file_name: str):
-        mycursor, db = await the_data_base3()
+        mycursor, db = await the_database()
         await mycursor.execute("INSERT INTO RegisteredText (message_id, reaction_ref, category, file_name) VALUES (%s, %s, %s, %s)", (mid, reactf, category, file_name))
         await db.commit()
         await mycursor.close()
 
     async def remove_specific_image_texts(self, mid: int):
-        mycursor, db = await the_data_base3()
+        mycursor, db = await the_database()
         await mycursor.execute(f"DELETE FROM RegisteredText WHERE message_id = {mid}")
         await db.commit()
         await mycursor.close()
 
     async def there_are_texts(self, mid: int):
-        mycursor, db = await the_data_base3()
+        mycursor, db = await the_database()
         await mycursor.execute(f"SELECT * FROM RegisteredText WHERE message_id = {mid}")
         texts = await mycursor.fetchall()
         await mycursor.close()
@@ -137,7 +137,7 @@ class ReactionRoles(commands.Cog):
             return False
 
     async def get_message_texts(self, mid: int):
-        mycursor, db = await the_data_base3()
+        mycursor, db = await the_database()
         await mycursor.execute(f"SELECT * FROM RegisteredText WHERE message_id = {mid}")
         texts = await mycursor.fetchall()
         await mycursor.close()

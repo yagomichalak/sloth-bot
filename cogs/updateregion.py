@@ -1,6 +1,5 @@
 import discord
 from discord.ext import commands, tasks
-from mysqldb2 import *
 from extra.native_regions import language_regions
 
 server_id = 459195345419763713

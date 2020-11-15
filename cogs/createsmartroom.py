@@ -5,8 +5,7 @@ import asyncio
 from PIL import Image, ImageFont, ImageDraw
 import os
 from cogs.slothcurrency import SlothCurrency
-from mysqldb import the_data_base
-from mysqldb2 import the_data_base5
+from mysqldb import *
 
 class CreateSmartRoom(commands.Cog):
 	'''
@@ -538,7 +537,7 @@ class CreateSmartRoom(commands.Cog):
 		if await self.table_premium_vc_exists():
 			return await ctx.send("**Table __PremiumVc__ already exists!**")
 
-		mycursor, db = await the_data_base5()
+		mycursor, db = await the_database()
 		await mycursor.execute("CREATE TABLE PremiumVc (user_id BIGINT, user_vc BIGINT, user_txt BIGINT)")
 		await db.commit()
 		await mycursor.close()
@@ -553,7 +552,7 @@ class CreateSmartRoom(commands.Cog):
 		if not await self.table_premium_vc_exists():
 			return await ctx.send("**Table __PremiumVc__ doesn't exist!**")
 
-		mycursor, db = await the_data_base5()
+		mycursor, db = await the_database()
 		await mycursor.execute("DROP TABLE PremiumVc")
 		await db.commit()
 		await mycursor.close()
@@ -568,14 +567,14 @@ class CreateSmartRoom(commands.Cog):
 		if not await self.table_premium_vc_exists():
 			return await ctx.send("**Table __PremiumVc__ doesn't exist yet!**")
 
-		mycursor, db = await the_data_base5()
+		mycursor, db = await the_database()
 		await mycursor.execute("DELETE FROM PremiumVc")
 		await db.commit()
 		await mycursor.close()
 		return await ctx.send("**Table __PremiumVc__ reset!**")
 
 	async def table_premium_vc_exists(self):
-		mycursor, db = await the_data_base5()
+		mycursor, db = await the_database()
 		await mycursor.execute(f"SHOW TABLE STATUS LIKE 'PremiumVc'")
 		table_info = await mycursor.fetchall()
 		await mycursor.close()
@@ -586,20 +585,20 @@ class CreateSmartRoom(commands.Cog):
 			return True
 
 	async def insert_premium_vc(self, user_id: int, user_vc: int, user_txt: int):
-		mycursor, db = await the_data_base5()
+		mycursor, db = await the_database()
 		await mycursor.execute("INSERT INTO PremiumVc (user_id, user_vc, user_txt) VALUES (%s, %s, %s)", (user_id, user_vc, user_txt))
 		await db.commit()
 		await mycursor.close()
 
 	async def get_premium_vc(self, user_id: int, user_vc: int):
-		mycursor, db = await the_data_base5()
+		mycursor, db = await the_database()
 		await mycursor.execute(f"SELECT * FROM PremiumVc WHERE user_id = {user_id} and user_vc = {user_vc}")
 		premium_vc = await mycursor.fetchall()
 		await mycursor.close()
 		return premium_vc
 
 	async def delete_premium_vc(self, user_id: int, user_vc: int):
-		mycursor, db = await the_data_base5()
+		mycursor, db = await the_database()
 		await mycursor.execute(f"DELETE FROM PremiumVc WHERE user_id = {user_id} and user_vc = {user_vc}")
 		await db.commit()
 		await mycursor.close()
@@ -614,7 +613,7 @@ class CreateSmartRoom(commands.Cog):
 		if await self.table_galaxy_vc_exists():
 			return await ctx.send("**Table __GalaxyVc__ already exists!**")
 
-		mycursor, db = await the_data_base5()
+		mycursor, db = await the_database()
 		await mycursor.execute("CREATE TABLE GalaxyVc (user_id BIGINT, user_cat BIGINT, user_vc BIGINT, user_txt1 BIGINT, user_txt2 BIGINT, user_txt3 BIGINT, user_ts BIGINT, user_notified VARCHAR(3) default 'no')")
 		await db.commit()
 		await mycursor.close()
@@ -629,7 +628,7 @@ class CreateSmartRoom(commands.Cog):
 		if not await self.table_galaxy_vc_exists():
 			return await ctx.send("**Table __GalaxyVc__ doesn't exist!**")
 
-		mycursor, db = await the_data_base5()
+		mycursor, db = await the_database()
 		await mycursor.execute("DROP TABLE GalaxyVc")
 		await db.commit()
 		await mycursor.close()
@@ -644,14 +643,14 @@ class CreateSmartRoom(commands.Cog):
 		if not await self.table_galaxy_vc_exists():
 			return await ctx.send("**Table __GalaxyVc__ doesn't exist yet!**")
 
-		mycursor, db = await the_data_base5()
+		mycursor, db = await the_database()
 		await mycursor.execute("DELETE FROM GalaxyVc")
 		await db.commit()
 		await mycursor.close()
 		return await ctx.send("**Table __GalaxyVc__ reset!**")
 
 	async def table_galaxy_vc_exists(self):
-		mycursor, db = await the_data_base5()
+		mycursor, db = await the_database()
 		await mycursor.execute(f"SHOW TABLE STATUS LIKE 'GalaxyVc'")
 		table_info = await mycursor.fetchall()
 		await mycursor.close()
@@ -662,27 +661,27 @@ class CreateSmartRoom(commands.Cog):
 			return True
 
 	async def insert_galaxy_vc(self, user_id: int, user_cat: int, user_vc: int, user_txt1: int, user_txt2: int, user_txt3: int, user_ts: int):
-		mycursor, db = await the_data_base5()
+		mycursor, db = await the_database()
 		await mycursor.execute("INSERT INTO GalaxyVc (user_id, user_cat, user_vc, user_txt1, user_txt2, user_txt3, user_ts) VALUES (%s, %s, %s, %s, %s, %s, %s)", (user_id, user_cat, user_vc, user_txt1, user_txt2, user_txt3, user_ts))
 		await db.commit()
 		await mycursor.close()
 
 	async def get_galaxy_txt(self, user_id: int, user_cat: int):
-		mycursor, db = await the_data_base5()
+		mycursor, db = await the_database()
 		await mycursor.execute(f"SELECT * FROM GalaxyVc WHERE user_id = {user_id} and user_cat = {user_cat}")
 		premium_vc = await mycursor.fetchall()
 		await mycursor.close()
 		return premium_vc
 
 	async def get_all_galaxy_rooms(self, the_time: int):
-		mycursor, db = await the_data_base5()
+		mycursor, db = await the_database()
 		await mycursor.execute(f"SELECT * FROM GalaxyVc WHERE {the_time} - user_ts >= 1209600")
 		rooms = await mycursor.fetchall()
 		await mycursor.close()
 		return rooms
 
 	async def delete_galaxy_vc(self, user_id: int, user_vc: int):
-		mycursor, db = await the_data_base5()
+		mycursor, db = await the_database()
 		await mycursor.execute(f"DELETE FROM GalaxyVc WHERE user_id = {user_id} and user_vc = {user_vc}")
 		await db.commit()
 		await mycursor.close()
@@ -734,7 +733,7 @@ class CreateSmartRoom(commands.Cog):
 		await ctx.send("**This is not your room, so you cannot forbid someone from it!**")
 
 	async def get_user_vc_timestamp(self, user_id: int, the_time: int):
-		mycursor, db = await the_data_base()
+		mycursor, db = await the_database()
 		await mycursor.execute(f'SELECT * FROM UserVCstamp WHERE user_id = {user_id}')
 		user = await mycursor.fetchall()
 		await mycursor.close()
@@ -745,13 +744,13 @@ class CreateSmartRoom(commands.Cog):
 		return user[0][1]
 
 	async def insert_user_vc(self, user_id: int, the_time: int):
-		mycursor, db = await the_data_base()
+		mycursor, db = await the_database()
 		await mycursor.execute("INSERT INTO UserVCstamp (user_id, user_vc_ts) VALUES (%s, %s)", (user_id, the_time - 61))
 		await db.commit()
 		await mycursor.close()
 
 	async def update_user_vc_ts(self, user_id: int, new_ts: int):
-		mycursor, db = await the_data_base()
+		mycursor, db = await the_database()
 		await mycursor.execute(f"UPDATE UserVCstamp SET user_vc_ts = {new_ts} WHERE user_id = {user_id}")
 		await db.commit()
 		await mycursor.close()
@@ -765,7 +764,7 @@ class CreateSmartRoom(commands.Cog):
 		await ctx.message.delete()
 		if await self.table_user_vc_ts_exists():
 			return await ctx.send("**Table __UserVCstamp__ already exists!**")
-		mycursor, db = await the_data_base()
+		mycursor, db = await the_database()
 		await mycursor.execute("CREATE TABLE UserVCstamp (user_id bigint, user_vc_ts bigint)")
 		await db.commit()
 		await mycursor.close()
@@ -780,7 +779,7 @@ class CreateSmartRoom(commands.Cog):
 		await ctx.message.delete()
 		if not await self.table_user_vc_ts_exists():
 			return await ctx.send("**Table __UserVCstamp__ doesn't exist!**")
-		mycursor, db = await the_data_base()
+		mycursor, db = await the_database()
 		await mycursor.execute("DROP TABLE UserVCstamp")
 		await db.commit()
 		await mycursor.close()
@@ -795,14 +794,14 @@ class CreateSmartRoom(commands.Cog):
 		await ctx.message.delete()
 		if not await self.table_user_vc_ts_exists():
 			return await ctx.send("**Table __UserVCstamp__ doesn't exist yet!**")
-		mycursor, db = await the_data_base5()
+		mycursor, db = await the_database()
 		await mycursor.execute("DELETE FROM UserVCstamp")
 		await db.commit()
 		await mycursor.close()
 		return await ctx.send("**Table __UserVCstamp__ reset!**", delete_after=5)
 
 	async def table_user_vc_ts_exists(self):
-		mycursor, db = await the_data_base5()
+		mycursor, db = await the_database()
 		await mycursor.execute(f"SHOW TABLE STATUS LIKE 'UserVCstamp'")
 		table_info = await mycursor.fetchall()
 		await mycursor.close()
@@ -883,32 +882,32 @@ class CreateSmartRoom(commands.Cog):
 		await ctx.send(f"**{ctx.author.mention}, Galaxy Rooms renewed!**")
 
 	async def increment_galaxy_ts(self, user_id: int, addition: int):
-		mycursor, db = await the_data_base5()
+		mycursor, db = await the_database()
 		await mycursor.execute("UPDATE GalaxyVc SET user_ts = user_ts + %s WHERE user_id = %s", (addition, user_id))
 		await db.commit()
 		await mycursor.close()
 
 	async def get_all_galaxy_rooms_in_danger_zone(self, the_time):
-		mycursor, db = await the_data_base5()
+		mycursor, db = await the_database()
 		await mycursor.execute("SELECT * FROM GalaxyVc WHERE (user_ts + 1209600) - %s <= 172800 and user_notified = 'no'", (the_time,))
 		danger_rooms = await mycursor.fetchall()
 		await mycursor.close()
 		return  danger_rooms
 
 	async def user_notified_yes(self, user_id: int):
-		mycursor, db = await the_data_base5()
+		mycursor, db = await the_database()
 		await mycursor.execute("UPDATE GalaxyVc SET user_notified = 'yes' WHERE user_id = %s", (user_id,))
 		await db.commit()
 		await mycursor.close()
 
 	async def user_notified_no(self, user_id: int):
-		mycursor, db = await the_data_base5()
+		mycursor, db = await the_database()
 		await mycursor.execute("UPDATE GalaxyVc SET user_notified = 'no' WHERE user_id = %s", (user_id,))
 		await db.commit()
 		await mycursor.close()
 
 	async def has_galaxy_rooms(self, user_id: int):
-		mycursor, db = await the_data_base5()
+		mycursor, db = await the_database()
 		await mycursor.execute("SELECT * FROM GalaxyVc WHERE user_id = %s", (user_id,))
 		user_rooms = await mycursor.fetchall()
 		await mycursor.close()

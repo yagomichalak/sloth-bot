@@ -6,6 +6,8 @@ import os
 from itertools import cycle
 import pytz
 from pytz import timezone
+from dotenv import load_dotenv
+load_dotenv()
 
 # IDs
 user_cosmos_id = 423829836537135108
@@ -43,7 +45,7 @@ shades_of_pink = cycle([(252, 15, 192), (255, 0, 255), (248, 24, 148),
 # token = read_token()
 
 # Making the client variable
-intents = discord.Intents().all()
+intents = discord.Intents.all()
 client = commands.Bot(command_prefix='z!', intents=intents)
 client.remove_command('help')
 token = os.getenv('TOKEN')

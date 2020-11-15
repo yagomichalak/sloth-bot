@@ -55,7 +55,7 @@ class ModActivity(commands.Cog):
             await self.add_time_moderator(member.id, addition)
 
     async def update_moderator(self, mod_id: int):
-        mycursor, db = await the_data_base()
+        mycursor, db = await the_database()
         epoch = datetime.utcfromtimestamp(0)
         new_ts = (datetime.utcnow() - epoch).total_seconds()
         await mycursor.execute(f'UPDATE ModActivity SET timestamp = {int(new_ts)} WHERE mod_id = {mod_id}')
@@ -63,14 +63,14 @@ class ModActivity(commands.Cog):
         await mycursor.close()
 
     async def add_time_moderator(self, mod_id: int, addition: int):
-        mycursor, db = await the_data_base()
+        mycursor, db = await the_database()
         await mycursor.execute(f'UPDATE ModActivity SET time = time + {addition} WHERE mod_id = {mod_id}')
         await db.commit()
         await self.update_moderator(mod_id)
         await mycursor.close()
 
     async def get_moderator_current_timestamp(self, mod_id: int, old_ts: int):
-        mycursor, db = await the_data_base()
+        mycursor, db = await the_database()
         await mycursor.execute(f'SELECT * FROM ModActivity WHERE mod_id = {mod_id}')
         mod = await mycursor.fetchall()
         await mycursor.close()
@@ -84,14 +84,14 @@ class ModActivity(commands.Cog):
             return old_ts
 
     async def insert_moderator(self, mod_id: int, old_ts: int):
-        mycursor, db = await the_data_base()
+        mycursor, db = await the_database()
         await mycursor.execute("INSERT INTO ModActivity (mod_id, time, timestamp, messages) VALUES (%s, %s, %s, %s)",
                                (mod_id, 0, old_ts, 0))
         await db.commit()
         await mycursor.close()
 
     async def get_moderator_current_messages(self, mod_id: int):
-        mycursor, db = await the_data_base()
+        mycursor, db = await the_database()
         await mycursor.execute(f'SELECT * FROM ModActivity WHERE mod_id = {mod_id}')
         mod = await mycursor.fetchall()
         await mycursor.close()
@@ -102,14 +102,14 @@ class ModActivity(commands.Cog):
         return mod[0][3]
 
     async def insert_moderator_message(self, mod_id: int):
-        mycursor, db = await the_data_base()
+        mycursor, db = await the_database()
         await mycursor.execute("INSERT INTO ModActivity (mod_id, time, timestamp, messages) VALUES (%s, %s, %s, %s)",
                                (mod_id, 0, None, 1))
         await db.commit()
         await mycursor.close()
 
     async def update_moderator_message(self, mod_id: int):
-        mycursor, db = await the_data_base()
+        mycursor, db = await the_database()
         await mycursor.execute(f'UPDATE ModActivity SET messages = messages+1 WHERE mod_id = {mod_id}')
         await db.commit()
         await mycursor.close()
@@ -120,7 +120,7 @@ class ModActivity(commands.Cog):
         '''
         (ADM) Shows all the moderators and their statuses in an embedded message.
         '''
-        mycursor, db = await the_data_base()
+        mycursor, db = await the_database()
         await mycursor.execute('SELECT * FROM ModActivity')
         mods = await mycursor.fetchall()
         await mycursor.close()
@@ -174,7 +174,7 @@ class ModActivity(commands.Cog):
         '''
         (ADM) Creates the ModActivity table.
         '''
-        mycursor, db = await the_data_base()
+        mycursor, db = await the_database()
         await mycursor.execute(
             'CREATE TABLE ModActivity (mod_id bigint, time bigint, timestamp bigint default null, messages int)')
         await mycursor.close()
@@ -185,7 +185,7 @@ class ModActivity(commands.Cog):
         '''
         (ADM) Drops the ModActivity table.
         '''
-        mycursor, db = await the_data_base()
+        mycursor, db = await the_database()
         await mycursor.execute('DROP TABLE ModActivity')
         await mycursor.close()
 
