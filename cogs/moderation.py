@@ -4,6 +4,7 @@ import asyncio
 from mysqldb import *
 from datetime import datetime
 import time
+from typing import List, Union
 
 mod_log_id = 562195805272932372
 muted_role_id = 537763763982434304
@@ -55,11 +56,8 @@ class Moderation(commands.Cog):
 
 			invite += c
 
-		#print(f'{invite}')
 		inv_code = discord.utils.resolve_invite(invite)
-		#print(f'{inv_code}')
 		guild_inv = discord.utils.get(await guild.invites(), code=inv_code)
-		#print(f'{guild_inv}')
 		if guild_inv:
 			return True
 		else:
@@ -128,9 +126,9 @@ class Moderation(commands.Cog):
 
 		special_channels = {
 	      656730447857975296: 'https://cdn.discordapp.com/attachments/746478846466981938/748605295122448534/Muted.png',
-	      764698902376480818:'''**Would you like to ask us a question about the server? Ask them there!**
+	      685228300674924648:'''**Would you like to ask us a question about the server? Ask them there!**
 	`Questions will be answered and deleted immediately.`''',
-	      764698926925217792:'''**Would you like to suggest a feature for the server? Please follow this template to submit your feature request**
+	      664150749047029796:'''**Would you like to suggest a feature for the server? Please follow this template to submit your feature request**
 
 	**Suggestion:**
 	`A short idea name/description`
@@ -211,9 +209,15 @@ class Moderation(commands.Cog):
 			embed.set_thumbnail(url=member.avatar_url)
 			embed.set_footer(text=f"Warned by {ctx.author}", icon_url=ctx.author.avatar_url)
 			await moderation_log.send(embed=embed)
-			current_ts = time.time()
-			await self.insert_user_warn(member.id, reason, current_ts, ctx.author.id)
-			user_warns = await self.get_user_warns(member.id)
+			# Inserts a infraction into the database
+			epoch = datetime.utcfromtimestamp(0)
+			current_ts = (datetime.utcnow() - epoch).total_seconds()
+			await self.insert_user_infraction(
+				user_id=member.id, infr_type="warn", reason=reason, 
+				timestamp=current_ts , perpetrator=ctx.author.id)
+
+			user_infractions = await self.get_user_infractions(member.id)
+			user_warns = [w for w in user_infractions if w[1] == 'warn']
 			if len(user_warns) >= 3:
 				await self.mute(ctx=ctx, member=member, reason=reason)
 
@@ -258,6 +262,12 @@ class Moderation(commands.Cog):
 			embed.set_thumbnail(url=member.avatar_url)
 			embed.set_footer(text=f"Muted by {ctx.author}", icon_url=ctx.author.avatar_url)
 			await moderation_log.send(embed=embed)
+			# Inserts a infraction into the database
+			epoch = datetime.utcfromtimestamp(0)
+			current_ts = (datetime.utcnow() - epoch).total_seconds()
+			await self.insert_user_infraction(
+				user_id=member.id, infr_type="mute", reason=reason, 
+				timestamp=current_ts , perpetrator=ctx.author.id)
 		
 		else:
 			await ctx.send(f'**{member} is already muted!**', delete_after=5)
@@ -365,6 +375,12 @@ class Moderation(commands.Cog):
 										  timestamp=ctx.message.created_at)
 			general_embed.set_author(name=f'{member} is no longer tempmuted', icon_url=member.avatar_url)
 			await ctx.send(embed=general_embed)
+			# Inserts a infraction into the database
+			epoch = datetime.utcfromtimestamp(0)
+			current_ts = (datetime.utcnow() - epoch).total_seconds()
+			await self.insert_user_infraction(
+				user_id=member.id, infr_type="mute", reason=reason, 
+				timestamp=current_ts , perpetrator=ctx.author.id)
 		else:
 			await ctx.send(f'**{member} is not even muted!**', delete_after=5)
 	@commands.command()
@@ -399,6 +415,12 @@ class Moderation(commands.Cog):
 				embed.set_thumbnail(url=member.avatar_url)
 				embed.set_footer(text=f"Kicked by {ctx.author}", icon_url=ctx.author.avatar_url)
 				await moderation_log.send(embed=embed)
+				# Inserts a infraction into the database
+				epoch = datetime.utcfromtimestamp(0)
+				current_ts = (datetime.utcnow() - epoch).total_seconds()
+				await self.insert_user_infraction(
+					user_id=member.id, infr_type="kick", reason=reason, 
+					timestamp=current_ts , perpetrator=ctx.author.id)
 
 	# Bans a member
 	@commands.command()
@@ -501,6 +523,12 @@ class Moderation(commands.Cog):
 			embed.set_thumbnail(url=member.avatar_url)
 			embed.set_footer(text=f"Banned by {perpetrators}", icon_url=icon)
 			await moderation_log.send(embed=embed)
+			# Inserts a infraction into the database
+			epoch = datetime.utcfromtimestamp(0)
+			current_ts = (datetime.utcnow() - epoch).total_seconds()
+			await self.insert_user_infraction(
+				user_id=member.id, infr_type="ban", reason=reason, 
+				timestamp=current_ts , perpetrator=ctx.author.id)
 
 
 	# Bans a member
@@ -596,16 +624,23 @@ class Moderation(commands.Cog):
 				embed.set_thumbnail(url=member.avatar_url)
 				embed.set_footer(text=f"SoftBanned by {ctx.author}", icon_url=ctx.author.avatar_url)
 				await moderation_log.send(embed=embed)
+				# Inserts a infraction into the database
+				epoch = datetime.utcfromtimestamp(0)
+				current_ts = (datetime.utcnow() - epoch).total_seconds()
+				await self.insert_user_infraction(
+					user_id=member.id, infr_type="softban", reason=reason, 
+					timestamp=current_ts , perpetrator=ctx.author.id)
 
 	@commands.command()
 	@commands.has_permissions(administrator=True)
 	async def hackban(self, ctx, user_id: int = None, *, reason=None):
-		'''
+		"""
 		(ADM) Bans a user that is currently not in the server.
 		Only accepts user IDs.
 		:param user_id: Member ID
 		:param reason: The reason for hackbanning the user. (Optional)
-		'''
+		"""
+
 		await ctx.message.delete()
 		if not user_id:
 			return await ctx.send("**Inform the user id!**", delete_after=3)
@@ -631,6 +666,14 @@ class Moderation(commands.Cog):
 			embed.set_author(name=self.client.get_user(user_id))
 			embed.set_footer(text=f"HackBanned by {ctx.author}", icon_url=ctx.author.avatar_url)
 			await moderation_log.send(embed=embed)
+
+			# Inserts a infraction into the database
+			epoch = datetime.utcfromtimestamp(0)
+			current_ts = (datetime.utcnow() - epoch).total_seconds()
+			await self.insert_user_infraction(
+				user_id=member.id, infr_type="hackban", reason=reason, 
+				timestamp=current_ts , perpetrator=ctx.author.id)
+
 		except discord.errors.NotFound:
 			return await ctx.send("**Invalid user id!**", delete_after=3)
 
@@ -653,7 +696,6 @@ class Moderation(commands.Cog):
 		await db.commit()
 		await mycursor.close()
 
-
 	@commands.command(hidden=True)
 	@commands.has_permissions(administrator=True)
 	async def reset_table_mutedmember(self, ctx):
@@ -666,72 +708,9 @@ class Moderation(commands.Cog):
 		await ctx.message.delete()
 		mycursor, db = await the_database()
 		await mycursor.execute("DELETE FROM mutedmember")
-		#await mycursor.execute("CREATE TABLE mutedmember (user_id bigint, role_id bigint)")
 		await db.commit()
 		await mycursor.close()
 		return await ctx.send("**Table __mutedmember__ reset!**", delete_after=3)
-
-	@commands.command(hidden=True)
-	@commands.has_permissions(administrator=True)
-	async def create_table_warns(self, ctx):
-		'''
-		(ADM) Creates the UserWarns table
-		'''
-		if await self.check_table_warns_exists():
-			return await ctx.send("**Table __UserWarns__ already exists!**")
-		
-		await ctx.message.delete()
-		mycursor, db = await the_database()
-		await mycursor.execute("CREATE TABLE UserWarns (user_id bigint, warn_reason VARCHAR(100), warn_timestamp bigint, warn_id bigint auto_increment, perpetrator bigint, PRIMARY KEY (warn_id))")
-		await db.commit()
-		await mycursor.close()
-		return await ctx.send("**Table __UserWarns__ created!**", delete_after=3)
-
-
-	@commands.command(hidden=True)
-	@commands.has_permissions(administrator=True)
-	async def drop_table_warns(self, ctx):
-		'''
-		(ADM) Creates the UserWarns table
-		'''
-		if not await self.check_table_warns_exists():
-			return await ctx.send("**Table __UserWarns__ doesn't exist!**")
-		await ctx.message.delete()
-		mycursor, db = await the_database()
-		await mycursor.execute("DROP TABLE UserWarns")
-		await db.commit()
-		await mycursor.close()
-		return await ctx.send("**Table __UserWarns__ created!**", delete_after=3)
-
-	@commands.command(hidden=True)
-	@commands.has_permissions(administrator=True)
-	async def reset_table_warns(self, ctx):
-		'''
-		(ADM) Creates the UserWarns table
-		'''
-		if not await self.check_table_warns_exists():
-			return await ctx.send("**Table __UserWarns__ doesn't exist yet!**")
-
-		await ctx.message.delete()
-		mycursor, db = await the_database()
-		await mycursor.execute("DELETE FROM UserWarns")
-		await db.commit()
-		await mycursor.close()
-		return await ctx.send("**Table __UserWarns__ created!**", delete_after=3)
-
-	async def check_table_warns_exists(self):
-		'''
-		Checks if the UserWarns table exists
-		'''
-		mycursor, db = await the_database()
-		await mycursor.execute(f"SHOW TABLE STATUS LIKE 'UserWarns'")
-		table_info = await mycursor.fetchall()
-		await mycursor.close()
-		if len(table_info) == 0:
-			return False
-
-		else:
-			return True
 
 	async def check_table_mutedmember_exists(self):
 		'''
@@ -746,121 +725,203 @@ class Moderation(commands.Cog):
 
 		else:
 			return True
+		
 
-	async def insert_user_warn(self, user_id: int, reason, timestamp: int, perpetrator: int):
-		'''
-		Insert a warning into the system.
-		'''
-		mycursor, db = await the_database()
-		await mycursor.execute(f"INSERT INTO UserWarns (user_id, warn_reason, warn_timestamp, perpetrator) VALUES (%s, %s, %s, %s)", (user_id, reason, timestamp, perpetrator))
-		await db.commit()
-		await mycursor.close()
-
-	async def get_user_warn_by_warn_id(self, warn_id: int):
-		'''
-		Gets a specific warning by ID.
-		'''
-		mycursor, db = await the_database()
-		await mycursor.execute(f"SELECT * FROM UserWarns WHERE warn_id = {warn_id}")
-		user_warns = await mycursor.fetchall()
-		return user_warns
-
-	async def get_user_warns(self, user_id: int):
-		'''
-		Gets all warnings from a user.
-		'''
-		mycursor, db = await the_database()
-		await mycursor.execute(f"SELECT * FROM UserWarns WHERE user_id = {user_id}")
-		user_warns = await mycursor.fetchall()
-		await mycursor.close()
-		return user_warns
-
-	async def remove_user_warning(self, warn_id: int):
-		'''
-		Removes a specifc warning by ID.
-		'''
-		mycursor, db = await the_database()
-		await mycursor.execute(f"DELETE FROM UserWarns WHERE warn_id = {warn_id}")
-		await db.commit()
-		await mycursor.close()
-
-	async def remove_user_warnings(self, user_id: int):
-		'''
-		Deletes all warnings from a user by their ID.
-		'''
-		mycursor, db = await the_database()
-		await mycursor.execute(f"DELETE FROM UserWarns WHERE user_id = {user_id}")
-		await db.commit()
-		await mycursor.close()
-	
-
-	@commands.command()
+	# Infraction methods
+	@commands.command(aliases=['infr', 'show_warnings', 'sw', 'show_bans', 'sb', 'show_muted', 'sm'])
 	@commands.has_permissions(kick_members=True)
-	async def remove_warning(self, ctx, warn_id: int = None):
+	async def infractions(self, ctx, member: discord.Member = None) -> None:
 		'''
-		(MOD) Removes a specific warn by ID.
-		:param warn_id: The warn ID.
+		Shows all infractions of a specific user.
+		:param member: The member to show the infractions from.
 		'''
-		if not warn_id:
-			return await ctx.send("**Inform the warn ID!**")
-
-		user_warns = await self.get_user_warn_by_warn_id(warn_id)
-		if user_warns:
-			await self.remove_user_warning(warn_id)
-			member = discord.utils.get(ctx.guild.members, id=user_warns[0][0])
-			await ctx.send(f"**Removed warn with ID `{warn_id}` for {member}**")
+		if not member:
+			return await ctx.send("**Inform a member!**")
+		
+		# Try to get user infractions
+		if user_infractions := await self.get_user_infractions(member.id):
+			warns = len([w for w in user_infractions if w[1] == 'warn'])
+			mutes = len([m for m in user_infractions if m[1] == 'mute'])
+			kicks = len([k for k in user_infractions if k[1] == 'kick'])
+			bans = len([b for b in user_infractions if b[1] == 'ban'])
+			softbans = len([sb for sb in user_infractions if sb[1] == 'softban'])
+			hackbans = len([hb for hb in user_infractions if hb[1] == 'hackban'])
 		else:
-			await ctx.send(f"**Warn with ID `{warn_id}` was not found!**")
+			return await ctx.send(f"**{member.mention} doesn't have any existent infractions!**")
 
-	@commands.command()
-	@commands.has_permissions(kick_members=True)
-	async def remove_warnings(self, ctx, member: discord.Member = None):
-		'''
-		(MOD) Removes all warnings for a specific user.
-		:param member: The member to get the warns from.
-		'''
-		if not member:
-			return await ctx.send("**Inform a member!**")
-		
-		user_warns = await self.get_user_warns(member.id)
-		if not user_warns:
-			return await ctx.send(f"**{member.mention} doesn't have any existent warnings!**")
-
-		await self.remove_user_warnings(member.id)
-		return await ctx.send(f"**Removed all warnings for {member.mention}!**")
-		
-		
-	@commands.command()
-	@commands.has_permissions(kick_members=True)
-	async def show_warnings(self, ctx, member: discord.Member = None):
-		'''
-		Shows all warnings for a specific user.
-		:param member: The member to show the warnings from.
-		'''
-		if not member:
-			return await ctx.send("**Inform a member!**")
-		
-		user_warns = await self.get_user_warns(member.id)
-		if not user_warns:
-			return await ctx.send(f"**{member.mention} doesn't have any existent warnings!**")
-		
+		# Makes the initial embed with their amount of infractions
 		embed = discord.Embed(
-			title=f"Warnings for {member}",
+			title=f"Infractions for {member}",
+			description=f"```ini\n[Warns]: {warns} | [Mutes]: {mutes} | [Kicks]: {kicks}\n[Bans]: {bans} | [Softbans]: {softbans} | [Hackbans]: {hackbans}```",
 			color=member.color,
 			timestamp=ctx.message.created_at)
-		
 		embed.set_thumbnail(url=member.avatar_url)
 		embed.set_footer(text=f"Requested by: {ctx.author}", icon_url=ctx.author.avatar_url)
-		
-		for warn in user_warns:
-			warn_date = datetime.fromtimestamp(warn[2]).strftime('%Y/%m/%d at %H:%M:%S')
-			perpetrator = discord.utils.get(ctx.guild.members, id=warn[4])
-			embed.add_field(
-				name=f"Warn ID: {warn[3]}", 
-				value=f"```apache\nWarned on {warn_date}\nBy {perpetrator}\nReason: {warn[1]}```", 
-				inline=True)
 
+		# Loops through each infraction and adds a field to the embedded message
+		## 0-user_id, 1-infraction_type, 2-infraction_reason, 3-infraction_ts, 4-infraction_id, 5-perpetrator
+		for infr in user_infractions:
+			if (infr_type := infr[1]) in ['mute', 'warn']:
+				infr_date = datetime.fromtimestamp(infr[3]).strftime('%Y/%m/%d at %H:%M:%S')
+				perpetrator = discord.utils.get(ctx.guild.members, id=infr[5])
+				embed.add_field(
+					name=f"{infr_type} ID: {infr[4]}", 
+					value=f"```apache\nGiven on {infr_date}\nBy {perpetrator}\nReason: {infr[2]}```", 
+					inline=True)
+
+		# Shows the infractions
 		await ctx.send(embed=embed)
+
+	# Database methods
+
+	async def insert_user_infraction(self, user_id: int, infr_type: str, reason: str, timestamp: int, perpetrator: int) -> None:
+		""" Insert a warning into the system. """
+
+		mycursor, db = await the_database()
+		await mycursor.execute("""
+			INSERT INTO UserInfractions (
+			user_id, infraction_type, infraction_reason, 
+			infraction_ts, perpetrator)
+			VALUES (%s, %s, %s, %s, %s)""", 
+			(user_id, infr_type, reason, timestamp, perpetrator))
+		await db.commit()
+		await mycursor.close()
+
+
+	async def get_user_infractions(self, user_id: int) -> List[List[Union[str, int]]]:
+		""" Gets all infractions from a user. """
+
+		mycursor, db = await the_database()
+		await mycursor.execute(f"SELECT * FROM UserInfractions WHERE user_id = {user_id}")
+		user_infractions = await mycursor.fetchall()
+		await mycursor.close()
+		return user_infractions
+
+
+	async def get_user_infraction_by_infraction_id(self, infraction_id: int) -> List[List[Union[str, int]]]:
+		""" Gets a specific infraction by ID. """
+
+		mycursor, db = await the_database()
+		await mycursor.execute(f"SELECT * FROM UserInfractions WHERE infraction_id = {infraction_id}")
+		user_infractions = await mycursor.fetchall()
+		await mycursor.close()
+		return user_infractions
+
+	async def remove_user_infraction(self, infraction_id: int) -> None:
+		""" Removes a specific infraction by ID. """
+
+		mycursor, db = await the_database()
+		await mycursor.execute("DELETE FROM UserInfractions WHERE infraction_id = %s", (infraction_id,))
+		await db.commit()
+		await mycursor.close()
+
+	async def remove_user_infractions(self, user_id: int) -> None:
+		""" Removes all infractions of a user by ID. """
+
+		mycursor, db = await the_database()
+		await mycursor.execute("DELETE FROM UserInfractions WHERE user_id = %s", (user_id,))
+		await db.commit()
+		await mycursor.close()
+
+	@commands.command(aliases=['ri', 'remove_warn', 'remove_warning'])
+	@commands.has_permissions(kick_members=True)
+	async def remove_infraction(self, ctx, infr_id: int = None):
+		"""
+		(MOD) Removes a specific infraction by ID.
+		:param infr_id: The infraction ID.
+		"""
+
+		if not infr_id:
+			return await ctx.send("**Inform the infraction ID!**")
+
+		if user_infractions := await self.get_user_infraction_by_infraction_id(infr_id):
+			await self.remove_user_infraction(infr_id)
+			member = discord.utils.get(ctx.guild.members, id=user_infractions[0][0])
+			await ctx.send(f"**Removed infraction with ID `{infr_id}` for {member}**")
+		else:
+			await ctx.send(f"**Infraction with ID `{infr_id}` was not found!**")
+
+	@commands.command(aliases=['ris', 'remove_warns', 'remove_warnings'])
+	@commands.has_permissions(kick_members=True)
+	async def remove_infractions(self, ctx, member: discord.Member = None):
+		"""
+		(MOD) Removes all infractions for a specific user.
+		:param member: The member to get the warns from.
+		"""
+
+		if not member:
+			return await ctx.send("**Inform a member!**")
+		
+		if user_infractions := await self.get_user_infractions(member.id):
+			await self.remove_user_infractions(member.id)
+			await ctx.send(f"**Removed all infractions for {member.mention}!**")
+		else:
+			await ctx.send(f"**{member.mention} doesn't have any existent infractions!**")
+
+	@commands.command(hidden=True)
+	@commands.has_permissions(administrator=True)
+	async def create_table_user_infractions(self, ctx) -> None:
+		""" (ADM) Creates the UserInfractions table. """
+
+		if await self.check_table_user_infractions():
+			return await ctx.send("**Table __UserInfractions__ already exists!**")
+		
+		await ctx.message.delete()
+		mycursor, db = await the_database()
+		await mycursor.execute("""CREATE TABLE UserInfractions (
+			user_id BIGINT NOT NULL, 
+			infraction_type VARCHAR(7) NOT NULL, 
+			infraction_reason VARCHAR(100) DEFAULT NULL, 
+			infraction_ts BIGINT NOT NULL, 
+			infraction_id BIGINT NOT NULL AUTO_INCREMENT, 
+			perpetrator BIGINT NOT NULL, 
+			PRIMARY KEY(infraction_id)
+			)""")
+		await db.commit()
+		await mycursor.close()
+		return await ctx.send("**Table __UserInfractions__ created!**", delete_after=3)
+
+	@commands.command(hidden=True)
+	@commands.has_permissions(administrator=True)
+	async def drop_table_user_infractions(self, ctx) -> None:
+		""" (ADM) Creates the UserInfractions table """
+		if not await self.check_table_user_infractions():
+			return await ctx.send("**Table __UserInfractions__ doesn't exist!**")
+		await ctx.message.delete()
+		mycursor, db = await the_database()
+		await mycursor.execute("DROP TABLE UserInfractions")
+		await db.commit()
+		await mycursor.close()
+		return await ctx.send("**Table __UserInfractions__ dropped!**", delete_after=3)
+
+	@commands.command(hidden=True)
+	@commands.has_permissions(administrator=True)
+	async def reset_table_user_infractions(self, ctx) -> None:
+		""" (ADM) Creates the UserInfractions table """
+
+		if not await self.check_table_user_infractions():
+			return await ctx.send("**Table __UserInfractions__ doesn't exist yet!**")
+
+		await ctx.message.delete()
+		mycursor, db = await the_database()
+		await mycursor.execute("DELETE FROM UserInfractions")
+		await db.commit()
+		await mycursor.close()
+		return await ctx.send("**Table __UserInfractions__ reset!**", delete_after=3)
+
+	async def check_table_user_infractions(self) -> None:
+		""" Checks if the UserInfractions table exists """
+
+		mycursor, db = await the_database()
+		await mycursor.execute(f"SHOW TABLE STATUS LIKE 'UserInfractions'")
+		table_info = await mycursor.fetchall()
+		await mycursor.close()
+		if len(table_info) == 0:
+			return False
+
+		else:
+			return True
+
 
 def setup(client):
 	client.add_cog(Moderation(client))
