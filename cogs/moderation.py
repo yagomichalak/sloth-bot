@@ -172,7 +172,6 @@ class Moderation(commands.Cog):
 		while True:
 			msgs = await ctx.channel.history().flatten()
 			if (lenmsg := len(msgs)) > 0:
-				print(lenmsg)
 				await ctx.channel.purge(limit=lenmsg)
 			else:
 				break
@@ -213,7 +212,7 @@ class Moderation(commands.Cog):
 			epoch = datetime.utcfromtimestamp(0)
 			current_ts = (datetime.utcnow() - epoch).total_seconds()
 			await self.insert_user_infraction(
-				user_id=member.id, infr_type="warn", reason=reason, 
+				user_id=member.id, infr_type="warn", reason=reason,
 				timestamp=current_ts , perpetrator=ctx.author.id)
 
 			user_infractions = await self.get_user_infractions(member.id)
@@ -780,9 +779,9 @@ class Moderation(commands.Cog):
 		mycursor, db = await the_database()
 		await mycursor.execute("""
 			INSERT INTO UserInfractions (
-			user_id, infraction_type, infraction_reason, 
+			user_id, infraction_type, infraction_reason,
 			infraction_ts, perpetrator)
-			VALUES (%s, %s, %s, %s, %s)""", 
+			VALUES (%s, %s, %s, %s, %s)""",
 			(user_id, infr_type, reason, timestamp, perpetrator))
 		await db.commit()
 		await mycursor.close()
