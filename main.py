@@ -10,20 +10,16 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # IDs
-user_cosmos_id = 423829836537135108
-server_id = 459195345419763713
-moderator_role_id = 497522510212890655
-teacher_role_id = 507298235766013981
-moderation_log_channel_id = 704867714971336734
-lesson_log_channel_id = 679043911225966608
-lesson_category_id = 562019326295670806
-clock_voice_channel_id = 687783432222277695
-announcement_channel_id = 689918515129352213
-report_channel_id = 685832739517366340
-report_log_channel_id = 683693966016774168
-admin_commands_channel_id = 562019472257318943
-patreon_role_id = 706635884090359899
-announ_announ_channel_id = 562019353583681536
+user_cosmos_id = int(os.getenv('COSMOS_ID'))
+server_id = int(os.getenv('SERVER_ID'))
+moderator_role_id = int(os.getenv('MOD_ROLE_ID'))
+teacher_role_id = int(os.getenv('TEACHER_ROLE_ID'))
+moderation_log_channel_id = int(os.getenv('MOD_LOG_CHANNEL_ID'))
+lesson_category_id = int(os.getenv('LESSON_CAT_ID'))
+clock_voice_channel_id = int(os.getenv('CLOCK_VC_ID'))
+admin_commands_channel_id = int(os.getenv('ADMIN_COMMANDS_CHANNEL_ID'))
+patreon_role_id = int(os.getenv('SLOTH_EXPLORER_ROLE_ID'))
+announ_announ_channel_id = int(os.getenv('ANNOUNCEMENT_CHANNEL_ID'))
 #colors = cycle([(255, 0, 0), (255, 127, 0), (255, 255, 0), (0, 255, 0), (0, 0, 255), (75, 0, 130), (143, 0, 255)])
 shades_of_pink = cycle([(252, 15, 192), (255, 0, 255), (248, 24, 148),
               (224, 17, 95), (246, 74, 138), (236, 85, 120),
@@ -34,15 +30,6 @@ shades_of_pink = cycle([(252, 15, 192), (255, 0, 255), (248, 24, 148),
               (255, 105, 180), (254, 91, 172), (245, 195, 194),
               (223, 82, 134), (254, 127, 156), (253, 171, 159)
               ])
-
-# def read_token():
-#     with open('token.txt', 'r') as f:
-#         lines = f.readlines()
-#         return lines[0].strip()
-
-
-# # Reading the bot's token
-# token = read_token()
 
 # Making the client variable
 intents = discord.Intents.all()
@@ -83,9 +70,9 @@ async def on_member_update(before, after):
             break
 
     patreon_roles = {
-        706635763802046505: [f"**Thank you! {after.mention} for joining the `Sloth Nation`!**", "**Hey! Thank you for helping our community, you will now receive :leaves: 2500 ŁŁ monthly, you'll have access to exclusive content from our events.**"],
-        706635836954902620: [f"**Wowie! {after.mention} joined the `Sloth Nappers`!  :zslothsleepyuwu:**", "**Hey! Thank you for helping our community! You will be contacted by an Admin soon!**"],
-        706635884090359899: [f"**Hype! {after.mention} is now the highest rank, `Sloth Explorer`!  :zslothvcool: **", "**Hey! Thank you for helping our community! You will be contacted by an Admin soon!**"]}
+        int(os.getenv('SLOTH_NATION_ROLE_ID')): [f"**Thank you! {after.mention} for joining the `Sloth Nation`!**", "**Hey! Thank you for helping our community, you will now receive :leaves: 2500 ŁŁ monthly, you'll have access to exclusive content from our events.**"],
+        int(os.getenv('SLOTH_NAPPER_ROLE_ID')): [f"**Wowie! {after.mention} joined the `Sloth Nappers`!  :zslothsleepyuwu:**", "**Hey! Thank you for helping our community! You will be contacted by an Admin soon!**"],
+        int(os.getenv('SLOTH_EXPLORER_ROLE_ID')): [f"**Hype! {after.mention} is now the highest rank, `Sloth Explorer`!  :zslothvcool: **", "**Hey! Thank you for helping our community! You will be contacted by an Admin soon!**"]}
 
     if new_role:
         for pr in patreon_roles.keys():

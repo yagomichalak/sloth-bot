@@ -1,9 +1,10 @@
 import discord
 from discord.ext import commands, tasks
 from extra.native_regions import language_regions
+import os
 
-server_id = 459195345419763713
-bot_and_commands_channel_id = 562019654017744904
+server_id = int(os.getenv('SERVER_ID'))
+bot_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
 
 class UpdateRegion(commands.Cog):
     '''

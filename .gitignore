@@ -3,6 +3,8 @@ venv
 .idea
 mycreds.txt
 mysqldb.py
-mysqldb2.py
 credentials.json
 client_secrets.json
+sloth_custom_images/
+texts/
+images/

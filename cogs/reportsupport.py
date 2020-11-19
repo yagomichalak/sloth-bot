@@ -5,13 +5,14 @@ import asyncio
 from extra.useful_variables import list_of_commands
 import time
 from typing import List, Dict
+import os
 
-reportsupport_channel_id = 729454413290143774
-dnk_id = 647452832852869120
-case_cat_id = 562939721253126146
-moderator_role_id = 497522510212890655
-admin_role_id = 574265899801116673
-muffin_id = 572131308663472155
+reportsupport_channel_id = int(os.getenv('REPORT_CHANNEL_ID'))
+dnk_id = int(os.getenv('DNK_ID'))
+case_cat_id = int(os.getenv('CASE_CAT_ID'))
+moderator_role_id = int(os.getenv('MOD_ROLE_ID'))
+admin_role_id = int(os.getenv('ADMIN_ROLE_ID'))
+muffin_id = int(os.getenv('MUFFIN_ID'))
 
 class ReportSupport(commands.Cog):
 	'''
@@ -20,12 +21,12 @@ class ReportSupport(commands.Cog):
 
 	def __init__(self, client) -> None:
 		self.client = client
-		self.cosmos_id: int = 423829836537135108
+		self.cosmos_id: int = int(os.getenv('COSMOS_ID'))
 		self.cache = {}
 		self.report_cache = {}
 		# Teacher application attributes
-		self.app_channel_id: int = 672827061479538714
-		self.app_cat_id: int = 760114016898121758
+		self.app_channel_id: int = int(os.getenv('APPLICATION_CHANNEL_ID'))
+		self.app_cat_id: int = int(os.getenv('APPLICATION_CAT_ID'))
 
 	@commands.Cog.listener()
 	async def on_ready(self) -> None:
@@ -91,7 +92,7 @@ class ReportSupport(commands.Cog):
 		mid = payload.message_id
 		emoji = payload.emoji
 
-		if mid == 729455417742327879 and str(emoji) == '✅':
+		if mid == int(os.getenv('APPLY_TEACHER_MESSAGE_ID')) and str(emoji) == '✅':
 			# Apply to be a teacher
 			#link = "https://docs.google.com/forms/d/1H-rzl9AKgfH1WuKN7nYAW-xJx411Q4-HxfPXuPUFQXs/viewform?edit_requested=true"
 			#await member.send(f"**You can apply for being a teacher by filling out this form:**\n{link}")
@@ -104,7 +105,7 @@ class ReportSupport(commands.Cog):
 						f"**You are on cooldown to apply, try again in {(1800-sub)/60:.1f} minutes**")
 			await self.send_application(member)
 
-		elif mid == 729456191733760030 and str(emoji) == '🤖':
+		elif mid == int(os.getenv('ORDER_BOT_MESSAGE_ID')) and str(emoji) == '🤖':
 			# Order a bot
 			dnk = self.client.get_user(dnk_id)
 			embed = discord.Embed(title="New possible order!", 
@@ -114,11 +115,12 @@ class ReportSupport(commands.Cog):
 			await dnk.send(embed=embed)
 			await member.send("**DNK is going to DM you as soon as possible!**")
 			await self.dnk_embed(member)
-		elif mid == 729458094194688060 and str(emoji) == '❤️':
+			
+		elif mid == int(os.getenv('SUPPORT_PATREON_MESSAGE_ID')) and str(emoji) == '❤️':
 			# Support us on Patreon
 			await member.send(f"**Support us on Patreon!**\nhttps://www.patreon.com/Languagesloth")
 
-		elif mid == 729458598966460426 and str(emoji) == '<:ban:593407893248802817>' and not perms.administrator:
+		elif mid == int(os.getenv('REPORT_MESSAGE_ID')) and str(emoji) == '<:ban:593407893248802817>' and not perms.administrator:
 			member_ts = self.report_cache.get(member.id)
 			time_now = time.time()
 			if member_ts:

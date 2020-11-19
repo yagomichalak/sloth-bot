@@ -2,8 +2,9 @@ import discord
 from discord.ext import commands
 from mysqldb import *
 from datetime import datetime
+import os
 
-commands_channel_id = 562019654017744904
+commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
 
 
 class SlothReputation(commands.Cog):

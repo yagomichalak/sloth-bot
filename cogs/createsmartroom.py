@@ -14,8 +14,8 @@ class CreateSmartRoom(commands.Cog):
 
 	def __init__(self, client):
 		self.client = client
-		self.vc_id = 693180716258689074
-		self.cat_id = 693180588919750778
+		self.vc_id = int(os.getenv('CREATE_SMART_ROOM_VC_ID'))
+		self.cat_id = int(os.getenv('CREATE_SMART_ROOM_CAT_ID'))
 
 	@commands.Cog.listener()
 	async def on_ready(self):

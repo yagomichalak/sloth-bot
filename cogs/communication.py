@@ -1,8 +1,9 @@
 import discord
 from discord.ext import commands
+import os
 
-general_voice_chat_id = 562019539135627276
-announcement_channel_id = 562019353583681536
+general_voice_chat_id = int(os.getenv('GENERAL_VOICE_CHANNEL_ID'))
+announcement_channel_id = int(os.getenv('ANNOUNCEMENT_CHANNEL_ID'))
 
 
 class Communication(commands.Cog):
@@ -123,29 +124,6 @@ If you have any questions feel free to ask! And if you experience any type of pr
             await member.send(message)
         else:
             await ctx.send(f"**Member: {member} not found!", delete_after=3)
-
-    @commands.command(hidden=True)
-    async def dm2(self, ctx, member: discord.Member = None, *, message=None):
-        '''
-        (ADM) Sends a Direct Message to someone.
-        :param member: The member to send the message to.
-        :param message: The message to send.
-        '''
-        if ctx.author.id != 647452832852869120:
-            return
-
-        if not message:
-            return await ctx.send("**Inform a message to send!**", delete_after=3)
-        elif not member:
-            return await ctx.send("**Inform a member!**", delete_after=3)
-
-        check_member = self.client.get_user(member.id)
-        if check_member:
-            await check_member.send(message)
-            await ctx.message.add_reaction('✅')
-        else:
-            await ctx.send(f"**Member: {member} not found!", delete_after=3)
-            await ctx.message.add_reaction('❌')
 
 
 def setup(client):

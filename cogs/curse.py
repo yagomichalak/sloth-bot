@@ -1,8 +1,10 @@
 import discord
 from discord.ext import commands
 from mysqldb import *
+import os
 
-server_id = 459195345419763713
+server_id = int(os.getenv('SERVER_ID'))
+
 class CurseMember(commands.Cog):
     '''
     A cog related to the 'curse a member' feature.

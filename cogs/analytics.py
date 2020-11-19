@@ -5,9 +5,10 @@ from datetime import datetime
 from pytz import timezone
 from PIL import Image, ImageFont, ImageDraw
 from typing import List
+import os
 
-bots_and_commands_channel_id = 562019654017744904
-select_your_language_channel_id = 695491104417513552
+bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
+select_your_language_channel_id = int(os.getenv('SELECT_YOUR_LANGUAGE_CHANNEL_ID'))
 
 
 class Analytics(commands.Cog):
@@ -17,7 +18,7 @@ class Analytics(commands.Cog):
 
     def __init__(self, client) -> None:
         self.client = client
-        self.dnk_id: int = 647452832852869120
+        self.dnk_id: int = int(os.getenv('DNK_ID'))
 
     @commands.Cog.listener()
     async def on_ready(self) -> None:
@@ -40,7 +41,7 @@ class Analytics(commands.Cog):
             info = await self.get_info()
             online_members = [om for om in members if str(om.status) == "online"]
             small = ImageFont.truetype("built titling sb.ttf", 45)
-            analytics = Image.open("analytics2.png").resize((500, 600))
+            analytics = Image.open("/png/analytics.png").resize((500, 600))
             draw = ImageDraw.Draw(analytics)
             draw.text((140, 270), f"{info[0][0]}", (255, 255, 255), font=small)
             draw.text((140, 335), f"{info[0][1]}", (255, 255, 255), font=small)

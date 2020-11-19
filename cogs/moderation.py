@@ -5,12 +5,13 @@ from mysqldb import *
 from datetime import datetime
 import time
 from typing import List, Union
+import os
 
-mod_log_id = 562195805272932372
-muted_role_id = 537763763982434304
-general_channel = 562019539135627276
+mod_log_id = int(os.getenv('MOD_LOG_CHANNEL_ID'))
+muted_role_id = int(os.getenv('MUTED_ROLE_ID'))
+general_channel = int(os.getenv('GENERAL_CHANNEL_ID'))
 last_deleted_message = []
-suspect_channel_id = 732691690514546709
+suspect_channel_id = int(os.getenv('SUSPECT_CHANNEL_ID'))
 
 class Moderation(commands.Cog):
 	'''
@@ -110,12 +111,30 @@ class Moderation(commands.Cog):
 	# Purge command
 	@commands.command()
 	@commands.has_permissions(manage_messages=True)
-	async def purge(self, ctx, amount=0):
+	async def purge(self, ctx, amount=0, member: discord.Member = None):
 		'''
 		(MOD) Purges messages.
 		:param amount: The amount of messages to purge.
 		'''
-		await ctx.channel.purge(limit=amount + 1)
+
+		await ctx.message.delete()
+		# global deleted
+		deleted = 0
+		if member:
+			channel = ctx.channel
+			msgs = list(filter(
+				lambda m: m.author.id == member.id, 
+				await channel.history(limit=200).flatten()
+			))
+			for _ in range(amount):
+				await msgs.pop(0).delete()
+				deleted += 1
+
+			await ctx.send(f"**`{deleted}` messages deleted for `{member}`**",
+				delete_after=5)
+			
+		else:
+			await ctx.channel.purge(limit=amount)
 
 	@commands.command()
 	@commands.has_permissions(kick_members=True)
@@ -125,10 +144,10 @@ class Moderation(commands.Cog):
 		'''
 
 		special_channels = {
-	      656730447857975296: 'https://cdn.discordapp.com/attachments/746478846466981938/748605295122448534/Muted.png',
-	      685228300674924648:'''**Would you like to ask us a question about the server? Ask them there!**
+	      int(os.getenv('MUTED_CHANNEL_ID')): 'https://cdn.discordapp.com/attachments/746478846466981938/748605295122448534/Muted.png',
+	      int(os.getenv('QUESTION_CHANNEL_ID')): '''**Would you like to ask us a question about the server? Ask them there!**
 	`Questions will be answered and deleted immediately.`''',
-	      664150749047029796:'''**Would you like to suggest a feature for the server? Please follow this template to submit your feature request**
+	      int(os.getenv('SUGGESTION_CHANNEL_ID')): '''**Would you like to suggest a feature for the server? Please follow this template to submit your feature request**
 
 	**Suggestion:**
 	`A short idea name/description`
