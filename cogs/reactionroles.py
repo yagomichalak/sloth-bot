@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 from cogs.slothcurrency import SlothCurrency
 from mysqldb import *
+import os
 
 class ReactionRoles(commands.Cog):
     '''
@@ -28,7 +29,7 @@ class ReactionRoles(commands.Cog):
             return
 
         #Language rooms
-        language_rooms = [679333977705676830, 683987207065042944, 688037387561205824]
+        language_rooms = [int(os.getenv('NATIVE_LANGUAGE_CHANNEL_ID')), int(os.getenv('FLUENT_LANGUAGE_CHANNEL_ID')), int(os.getenv('STUDYING_LANGUAGE_CHANNEL_ID'))]
 
 
         if not payload.channel_id in language_rooms:

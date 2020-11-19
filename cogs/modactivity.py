@@ -3,9 +3,10 @@ from discord.ext import commands
 from datetime import datetime
 from mysqldb import *
 import asyncio
+import os
 
-mod_role_id = 497522510212890655
-guild_id = 459195345419763713
+mod_role_id = int(os.getenv('MOD_ROLE_ID'))
+guild_id = int(os.getenv('SERVER_ID'))
 
 
 class ModActivity(commands.Cog):

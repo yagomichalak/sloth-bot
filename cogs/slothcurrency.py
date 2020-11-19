@@ -11,9 +11,14 @@ import asyncio
 import aiohttp
 from io import BytesIO
 
-shop_channels = [695975820744851507, 702911629725139074, 702911832150638684, 702914308677304330, 709000588792430602, 709038291453870080, 706640587767676948]
-afk_channel_id = 581993624569643048
-booster_role_id = 588752954266222602
+shop_channels = [
+int(os.getenv('BACKGROUND_ITEMS_CHANNEL_ID')), int(os.getenv('HAND_ITEMS_CHANNEL_ID')), 
+int(os.getenv('CLOTHES_ITEMS_CHANNEL_ID')), int(os.getenv('LIMITED_EDITION_ITEMS_CHANNEL_ID')), 
+int(os.getenv('HEAD_ITEMS_CHANNEL_ID')), int(os.getenv('LEG_ITEMS_CHANNEL_ID')), 
+int(os.getenv('PATREONS_CHANNEL_ID'))
+]
+afk_channel_id = int(os.getenv('AFK_CHANNEL_ID'))
+booster_role_id = int(os.getenv('BOOSTER_ROLE_ID'))
 level_badges = {'level_10': 10}
 
 gauth = GoogleAuth()
@@ -54,7 +59,7 @@ class SlothCurrency(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         print("SlothCurrency cog is online!")
-        await self.download_update()
+        # await self.download_update()
         #await self.text_download_update()
 
     @commands.Cog.listener()
@@ -730,17 +735,20 @@ class SlothCurrency(commands.Cog):
     # Google Drive commands
     @commands.command()
     @commands.has_permissions(administrator=True)
-    async def download_update(self, ctx=None):
-        '''
+    async def download_update(self, ctx=None, rall: str = 'no'):
+        """
         (ADM) Downloads all shop images from the Google Drive.
-        '''
+        """
         if ctx:
             await ctx.message.delete()
-        '''
-        Downloads all shop images from the GoogleDrive and stores in the bot's folder
-        :param ctx:
-        :return:
-        '''
+
+
+        if rall.lower() == 'yes':
+            try:
+                os.removedirs('./sloth_custom_images')
+            except Exception:
+                pass
+                
         all_folders = {"background": "1V8l391o3-vsF9H2Jv24lDmy8e2erlHyI",
                        "sloth": "16DB_lNrnrmvxu2E7RGu01rQGQk7z-zRy",
                        "body": "1jYvG3vhL32-A0qDYn6lEG6fk_GKYDXD7",
@@ -767,9 +775,12 @@ class SlothCurrency(commands.Cog):
                 # print(isFile)
                 if not isFile:
                     # print(f"\033[34mItem name:\033[m \033[33m{file['title']:<35}\033[m | \033[34mID: \033[m\033[33m{file['id']}\033[m")
-                    output_file = os.path.join(download_path, file['title'])
-                    temp_file = drive.CreateFile({'id': file['id']})
-                    temp_file.GetContentFile(output_file)
+                    try:
+                        output_file = os.path.join(download_path, file['title'])
+                        temp_file = drive.CreateFile({'id': file['id']})
+                        temp_file.GetContentFile(output_file)
+                    except:
+                        pass
                     # print(f"File '{file['title']}' downloaded!")
 
         if ctx:
@@ -778,12 +789,17 @@ class SlothCurrency(commands.Cog):
     # Google Drive commands
     @commands.command()
     @commands.has_permissions(administrator=True)
-    async def text_download_update(self, ctx=None):
+    async def text_download_update(self, ctx=None, rall: str = 'no'):
         '''
         (ADM) Downloads all texts from the GoogleDrive and stores in the bot's folder
         '''
-        if ctx:
-            await ctx.message.delete()
+
+        if rall.lower() == 'yes':
+            try:
+                os.removedirs('./texts')
+            except Exception:
+                pass
+
         all_text_folders = {"turkic": "1A9rKufw30sJMdDbOa7zzobV2vblxc0UP",
                             "uralic": "1lFOmnjSNE1zfxabjai5xQSgqOrjo3h0t",
                             "unafiliated": "1bjYU4-oTRhnMDLiboCCkQecQ64FVx39C",
@@ -814,9 +830,12 @@ class SlothCurrency(commands.Cog):
             for file in files:
                 isFile = os.path.isfile(f"{download_path}/{file['title']}")
                 if not isFile:
-                    output_file = os.path.join(download_path, file['title'])
-                    temp_file = drive.CreateFile({'id': file['id']})
-                    temp_file.GetContentFile(output_file)
+                    try:
+                        output_file = os.path.join(download_path, file['title'])
+                        temp_file = drive.CreateFile({'id': file['id']})
+                        temp_file.GetContentFile(output_file)
+                    except:
+                        pass
         if ctx:
             return await ctx.send("**Download update is done!**")
 

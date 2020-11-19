@@ -9,9 +9,13 @@ import io
 import textwrap
 import traceback
 from contextlib import redirect_stdout
+import os
 
-allowed_roles = [474774889778380820, 574265899801116673, 497522510212890655, 588752954266222602]
-teacher_role_id = 507298235766013981
+allowed_roles = [
+int(os.getenv('OWNER_ROLE_ID')), int(os.getenv('ADMIN_ROLE_ID')),
+int(os.getenv('MOD_ROLE_ID')), int(os.getenv('SLOTH_LOVERS_ROLE_ID'))
+]
+teacher_role_id = int(os.getenv('TEACHER_ROLE_ID'))
 
 
 class Tools(commands.Cog):

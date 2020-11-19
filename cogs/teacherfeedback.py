@@ -5,16 +5,17 @@ from datetime import datetime
 import asyncio
 from typing import Dict
 import time
+import os
 
-create_room_vc_id = 704430199298850907
-create_room_cat_id = 562019326295670806
-teacher_role_id = 507298235766013981
-cc_channel_id = 704429237725167756
-preference_role_id = 562035467055529995
-class_history_channel_id = 704429055239258153
-bot_commands_channel_id = 562019654017744904
-reward_channel_id = 704428903682408498
-mod_role_id = 497522510212890655 
+create_room_vc_id = int(os.getenv('CREATE_SMART_CLASSROOM_VC_ID'))
+create_room_cat_id = int(os.getenv('CREATE_ROOM_CAT_ID'))
+teacher_role_id = int(os.getenv('TEACHER_ROLE_ID'))
+cc_channel_id = int(os.getenv('CREATE_CLASSROOM_CHANNEL_ID'))
+preference_role_id = int(os.getenv('PREFERENCE_ROLE_ID'))
+class_history_channel_id = int(os.getenv('MOD_ROLE_ID'))
+bot_commands_channel_id = int(os.getenv('CLASS_HISTORY_CHANNEL_ID'))
+reward_channel_id = int(os.getenv('REWARD_CHANNEL_ID'))
+mod_role_id = int(os.getenv('MOD_ROLE_ID'))
 
 class CreateClassroom(commands.Cog):
     '''
