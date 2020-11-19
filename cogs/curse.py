@@ -98,10 +98,11 @@ class CurseMember(commands.Cog):
             await voice_client.disconnect()
 
     async def insert_cursed_member(self, user_id: int):
-        mycursor, db = await the_database()
-        await mycursor.execute("INSERT INTO CursedMember (user_id) VALUES (%s)", (user_id))
-        await db.commit()
-        await mycursor.close()
+        async with the_database().acquire() as con:
+            async with con.acquire() as db:
+                async with db.cursor() as mycursor:
+                    await mycursor.execute("INSERT INTO CursedMember (user_id) VALUES (%s)", (user_id))
+                    await db.commit()
 
     
     @commands.command(hidden=True)
@@ -111,10 +112,12 @@ class CurseMember(commands.Cog):
         (ADM) Creates the CursedMember table.
         '''
         await ctx.message.delete()
-        mycursor, db = await the_database()
-        await mycursor.execute("CREATE TABLE CursedMember (user_id bigint)")
-        await db.commit()
-        await mycursor.close()
+        async with the_database().acquire() as con:
+            async with con.acquire() as db:
+                async with db.cursor() as mycursor:
+                    await mycursor.execute("CREATE TABLE CursedMember (user_id bigint)")
+                    await db.commit()
+
         return await ctx.send("**Table CursedMember was created!**", delete_after=3)
     
     
@@ -125,10 +128,12 @@ class CurseMember(commands.Cog):
         (ADM) Drops the CursedMember table.
         '''
         await ctx.message.delete()
-        mycursor, db = await the_database()
-        await mycursor.execute("DROP TABLE CursedMember")
-        await db.commit()
-        await mycursor.close()
+        async with the_database().acquire() as con:
+            async with con.acquire() as db:
+                async with db.cursor() as mycursor:
+                    await mycursor.execute("DROP TABLE CursedMember")
+                    await db.commit()
+
         return await ctx.send("**Table CursedMember was dropped!**", delete_after=3)
         
         
@@ -139,32 +144,34 @@ class CurseMember(commands.Cog):
         (ADM) Resets the CursedMember table.
         '''
         await ctx.message.delete()
-        mycursor, db = await the_database()
-        await mycursor.execute("DROP TABLE CursedMember")
-        await db.commit()
-        await mycursor.execute("CREATE TABLE CursedMember (user_id bigint)")
-        await db.commit()
-        await mycursor.close()
+        async with the_database().acquire() as con:
+            async with con.acquire() as db:
+                async with db.cursor() as mycursor:
+                    await mycursor.execute("DELETE FROM CursedMember")
+                    await db.commit()
+
         return await ctx.send("**Table CursedMember was reseted!**", delete_after=3)
     
     
     async def get_cursed_member(self, user_id: int):
-        mycursor, db = await the_database()
-        await mycursor.execute(f"SELECT * FROM CursedMember WHERE user_id = {user_id}")
-        cm = await mycursor.fetchall()
-        return cm
+        async with the_database().acquire() as con:
+            async with con.acquire() as db:
+                async with db.cursor() as mycursor:
+                    await mycursor.execute(f"SELECT * FROM CursedMember WHERE user_id = {user_id}")
+                    cm = await mycursor.fetchall()
+                    return cm
 
-    async def delete_cursed_member(self):
-        mycursor, db = await the_database()
-        await mycursor.execute(f"SELECT * FROM CursedMember")
-        cm = await mycursor.fetchall()
-        if cm:
-            cm = cm[0]
-            await mycursor.execute(f"DELETE FROM CursedMember WHERE user_id = {cm[0]}")
-            await db.commit()
-            await mycursor.close()
-            return True
-        await mycursor.close()
+    async def delete_cursed_member(self) -> bool:
+        async with the_database().acquire() as con:
+            async with con.acquire() as db:
+                async with db.cursor() as mycursor:
+                    await mycursor.execute(f"SELECT * FROM CursedMember")
+                    cm = await mycursor.fetchall()
+                    if cm:
+                        cm = cm[0]
+                        await mycursor.execute(f"DELETE FROM CursedMember WHERE user_id = {cm[0]}")
+                        await db.commit()
+                        return True
     
     
 def setup(client):

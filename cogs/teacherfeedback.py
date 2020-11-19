@@ -12,8 +12,8 @@ create_room_cat_id = int(os.getenv('CREATE_ROOM_CAT_ID'))
 teacher_role_id = int(os.getenv('TEACHER_ROLE_ID'))
 cc_channel_id = int(os.getenv('CREATE_CLASSROOM_CHANNEL_ID'))
 preference_role_id = int(os.getenv('PREFERENCE_ROLE_ID'))
-class_history_channel_id = int(os.getenv('MOD_ROLE_ID'))
-bot_commands_channel_id = int(os.getenv('CLASS_HISTORY_CHANNEL_ID'))
+class_history_channel_id = int(os.getenv('CLASS_HISTORY_CHANNEL_ID'))
+bot_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
 reward_channel_id = int(os.getenv('REWARD_CHANNEL_ID'))
 mod_role_id = int(os.getenv('MOD_ROLE_ID'))
 
@@ -700,11 +700,12 @@ class CreateClassroom(commands.Cog):
         await ctx.message.delete()
         if await self.check_table_saved_classes_exists():
             return await ctx.send(f"**The table __SavedClasses__ already exists!**", delete_after=5)
-        mycursor, db = await the_database()
-        await mycursor.execute(
-            f"CREATE TABLE SavedClasses (teacher_id bigint, language VARCHAR(20), class_type VARCHAR(13), class_desc VARCHAR(100))")
-        await db.commit()
-        await mycursor.close()
+        async with the_database() as con:
+            async with con.acquire() as db:
+                async with db.cursor() as mycursor:
+                    await mycursor.execute(
+                        f"CREATE TABLE SavedClasses (teacher_id bigint, language VARCHAR(20), class_type VARCHAR(13), class_desc VARCHAR(100))")
+                    await db.commit()
         return await ctx.send("**Table __SavedClasses__ created!**", delete_after=5)
 
     @commands.command(hidden=True)
@@ -716,10 +717,11 @@ class CreateClassroom(commands.Cog):
         await ctx.message.delete()
         if not await self.check_table_saved_classes_exists():
             return await ctx.send(f"**The table __SavedClasses__ does not exist!**", delete_after=5)
-        mycursor, db = await the_database()
-        await mycursor.execute(f"DROP TABLE SavedClasses")
-        await db.commit()
-        await mycursor.close()
+        async with the_database() as con:
+            async with con.acquire() as db:
+                async with db.cursor() as mycursor:
+                    await mycursor.execute(f"DROP TABLE SavedClasses")
+                    await db.commit()
         await ctx.send("**Table __SavedClasses__ dropped!**", delete_after=5)
 
     @commands.command(hidden=True)
@@ -731,40 +733,43 @@ class CreateClassroom(commands.Cog):
         await ctx.message.delete()
         if not await self.check_table_saved_classes_exists():
             return await ctx.send("**Table __SavedClasses__ doesn't exist yet!**", delete_after=5)
-        mycursor, db = await the_database()
-        await mycursor.execute('SELECT * FROM SavedClasses')
-        teachers = await mycursor.fetchall()
-        for teacher in teachers:
-            await mycursor.execute(f"DELETE FROM SavedClasses WHERE teacher_id = {teacher[0]}")
-            await db.commit()
-        await mycursor.close()
+        async with the_database() as con:
+            async with con.acquire() as db:
+                async with db.cursor() as mycursor:
+                    await mycursor.execute("DELETE FROM SavedClasses")
+                    await db.commit()
+
         return await ctx.send("**Table __SavedClasses__ has been reset!**", delete_after=5)
 
-    async def check_table_saved_classes_exists(self):
-        mycursor, db = await the_database()
-        await mycursor.execute(f"SHOW TABLE STATUS LIKE 'SavedClasses'")
-        table_info = await mycursor.fetchall()
-        await mycursor.close()
-        if len(table_info) == 0:
-            return False
+    async def check_table_saved_classes_exists(self) -> bool:
+        async with the_database() as con:
+            async with con.acquire() as db:
+                async with db.cursor() as mycursor:
+                    await mycursor.execute(f"SHOW TABLE STATUS LIKE 'SavedClasses'")
+                    table_info = await mycursor.fetchall()
 
-        else:
-            return True
+                    if len(table_info) == 0:
+                        return False
+
+                    else:
+                        return True
 
     # Get
     async def get_saved_class(self, teacher_id: int):
-        mycursor, db = await the_database()
-        await mycursor.execute(f"SELECT * FROM SavedClasses WHERE teacher_id = {teacher_id}")
-        the_classes = await mycursor.fetchall()
-        await mycursor.close()
-        return the_classes
+        async with the_database() as con:
+            async with con.acquire() as db:
+                async with db.cursor() as mycursor:
+                    await mycursor.execute(f"SELECT * FROM SavedClasses WHERE teacher_id = {teacher_id}")
+                    the_classes = await mycursor.fetchall()
+                    return the_classes
 
     # Insert
     async def insert_saved_class(self, teacher_id: int, language: str, class_type: str, class_desc: str):
-        mycursor, db = await the_database()
-        await mycursor.execute("INSERT INTO SavedClasses (teacher_id, language, class_type, class_desc) VALUES (%s, %s, %s, %s)", (teacher_id, language, class_type, class_desc))
-        await db.commit()
-        await mycursor.close()
+        async with the_database() as con:
+            async with con.acquire() as db:
+                async with db.cursor() as mycursor:
+                    await mycursor.execute("INSERT INTO SavedClasses (teacher_id, language, class_type, class_desc) VALUES (%s, %s, %s, %s)", (teacher_id, language, class_type, class_desc))
+                    await db.commit()
 
 
     # Active classes table
@@ -777,11 +782,12 @@ class CreateClassroom(commands.Cog):
         await ctx.message.delete()
         if await self.check_table_active_classes_exists():
             return await ctx.send(f"**The table __ActiveClasses__ already exists!**", delete_after=5)
-        mycursor, db = await the_database()
-        await mycursor.execute(
-            f"CREATE TABLE ActiveClasses (teacher_id bigint, txt_id bigint, vc_id bigint, language VARCHAR(20), class_type VARCHAR(13), vc_timestamp bigint, vc_time bigint DEFAULT 0, members bigint DEFAULT 1, class_desc VARCHAR(100))")
-        await db.commit()
-        await mycursor.close()
+        async with the_database() as con:
+            async with con.acquire() as db:
+                async with db.cursor() as mycursor:
+                    await mycursor.execute(
+                        f"CREATE TABLE ActiveClasses (teacher_id bigint, txt_id bigint, vc_id bigint, language VARCHAR(20), class_type VARCHAR(13), vc_timestamp bigint, vc_time bigint DEFAULT 0, members bigint DEFAULT 1, class_desc VARCHAR(100))")
+                    await db.commit()
         return await ctx.send("**Table __ActiveClasses__ created!**", delete_after=5)
 
     @commands.command(hidden=True)
@@ -793,10 +799,12 @@ class CreateClassroom(commands.Cog):
         await ctx.message.delete()
         if not await self.check_table_active_classes_exists():
             return await ctx.send(f"**The table __ActiveClasses__ does not exist!**", delete_after=5)
-        mycursor, db = await the_database()
-        await mycursor.execute(f"DROP TABLE ActiveClasses")
-        await db.commit()
-        await mycursor.close()
+        async with the_database() as con:
+            async with con.acquire() as db:
+                async with db.cursor() as mycursor:
+                    await mycursor.execute(f"DROP TABLE ActiveClasses")
+                    await db.commit()
+
         await ctx.send("**Table __ActiveClasses__ dropped!**", delete_after=5)
 
     @commands.command(hidden=True)
@@ -808,101 +816,111 @@ class CreateClassroom(commands.Cog):
         await ctx.message.delete()
         if not await self.check_table_active_classes_exists():
             return await ctx.send("**Table __ActiveClasses__ doesn't exist yet!**", delete_after=5)
-        mycursor, db = await the_database()
-        await mycursor.execute('SELECT * FROM ActiveClasses')
-        teachers = await mycursor.fetchall()
-        for teacher in teachers:
-            await mycursor.execute(f"DELETE FROM ActiveClasses WHERE teacher_id = {teacher[0]}")
-            await db.commit()
-        await mycursor.close()
+        async with the_database() as con:
+            async with con.acquire() as db:
+                async with db.cursor() as mycursor:
+                    await mycursor.execute("DELETE FROM ActiveClasses")
+                    await db.commit()
         return await ctx.send("**Table __ActiveClasses__ has been reset!**", delete_after=5)
 
-    async def check_table_active_classes_exists(self):
-        mycursor, db = await the_database()
-        await mycursor.execute(f"SHOW TABLE STATUS LIKE 'ActiveClasses'")
-        table_info = await mycursor.fetchall()
-        await mycursor.close()
-        if len(table_info) == 0:
-            return False
+    async def check_table_active_classes_exists(self) -> bool:
+        async with the_database() as con:
+            async with con.acquire() as db:
+                async with db.cursor() as mycursor:
+                    await mycursor.execute(f"SHOW TABLE STATUS LIKE 'ActiveClasses'")
+                    table_info = await mycursor.fetchall()
+                    if len(table_info) == 0:
+                        return False
 
-        else:
-            return True
+                    else:
+                        return True
 
     # Get
     async def get_active_class_by_teacher(self, teacher_id: int):
-        mycursor, db = await the_database()
-        await mycursor.execute(f"SELECT * FROM ActiveClasses WHERE teacher_id = {teacher_id}")
-        the_class = await mycursor.fetchall()
-        await mycursor.close()
-        return the_class
+        async with the_database() as con:
+            async with con.acquire() as db:
+                async with db.cursor() as mycursor:
+                    await mycursor.execute(f"SELECT * FROM ActiveClasses WHERE teacher_id = {teacher_id}")
+                    the_class = await mycursor.fetchall()
+                    return the_class
 
     async def get_active_class_by_vc(self, vc_id: int):
-        mycursor, db = await the_database()
-        await mycursor.execute(f"SELECT * FROM ActiveClasses WHERE vc_id = {vc_id}")
-        the_class = await mycursor.fetchall()
-        await mycursor.close()
-        return the_class
+        async with the_database() as con:
+            async with con.acquire() as db:
+                async with db.cursor() as mycursor:
+                    await mycursor.execute(f"SELECT * FROM ActiveClasses WHERE vc_id = {vc_id}")
+                    the_class = await mycursor.fetchall()
+                    return the_class
 
     async def get_active_class_by_txt(self, txt_id: int):
-        mycursor, db = await the_database()
-        await mycursor.execute(f"SELECT * FROM ActiveClasses WHERE txt_id = {txt_id}")
-        the_class = await mycursor.fetchall()
-        await mycursor.close()
-        return the_class
+        async with the_database() as con:
+            async with con.acquire() as db:
+                async with db.cursor() as mycursor:
+                    await mycursor.execute(f"SELECT * FROM ActiveClasses WHERE txt_id = {txt_id}")
+                    the_class = await mycursor.fetchall()
+                    return the_class
 
-    async def get_active_class_by_teacher_and_vc(self, teacher_id: int, vc_id: int):
-        mycursor, db = await the_database()
-        await mycursor.execute(f"SELECT * FROM ActiveClasses WHERE teacher_id = {teacher_id} and vc_id = {vc_id}")
-        the_class = await mycursor.fetchall()
-        if the_class:
-            return True
-        else:
-            return False
+    async def get_active_class_by_teacher_and_vc(self, teacher_id: int, vc_id: int) -> bool:
+        async with the_database() as con:
+            async with con.acquire() as db:
+                async with db.cursor() as mycursor:
+                    await mycursor.execute(f"SELECT * FROM ActiveClasses WHERE teacher_id = {teacher_id} and vc_id = {vc_id}")
+                    the_class = await mycursor.fetchall()
+                    if the_class:
+                        return True
+                    else:
+                        return False
 
     # Check
-    async def check_active_class_by_teacher(self, teacher_id: int):
-        mycursor, db = await the_database()
-        await mycursor.execute(f"SELECT * FROM ActiveClasses WHERE teacher_id = {teacher_id}")
-        the_class = await mycursor.fetchall()
-        await mycursor.close()
-        if the_class:
-            return True
-        else:
-            return False
+    async def check_active_class_by_teacher(self, teacher_id: int) -> bool:
+        async with the_database() as con:
+            async with con.acquire() as db:
+                async with db.cursor() as mycursor:
+                    await mycursor.execute(f"SELECT * FROM ActiveClasses WHERE teacher_id = {teacher_id}")
+                    the_class = await mycursor.fetchall()
+                    if the_class:
+                        return True
+                    else:
+                        return False
 
     # Insert
     async def insert_active_class(self, teacher_id: int, txt_id: int, vc_id: int, language: str, class_type: str, the_time: int, class_desc: str):
-        mycursor, db = await the_database()
-        await mycursor.execute("INSERT INTO ActiveClasses (teacher_id, txt_id, vc_id, language, class_type, vc_timestamp, class_desc) VALUES (%s, %s, %s, %s, %s, %s, %s)", (teacher_id, txt_id, vc_id, language, class_type, the_time, class_desc))
-        await db.commit()
-        await mycursor.close()
+        async with the_database() as con:
+            async with con.acquire() as db:
+                async with db.cursor() as mycursor:
+                    await mycursor.execute("INSERT INTO ActiveClasses (teacher_id, txt_id, vc_id, language, class_type, vc_timestamp, class_desc) VALUES (%s, %s, %s, %s, %s, %s, %s)", (teacher_id, txt_id, vc_id, language, class_type, the_time, class_desc))
+                    await db.commit()
 
     # Update
     async def update_teacher_time(self, teacher_id: int, the_time: int):
-        mycursor, db = await the_database()
-        await mycursor.execute(f"UPDATE ActiveClasses SET vc_time = vc_time + ({the_time} - vc_timestamp), vc_timestamp = NULL WHERE teacher_id = {teacher_id}")
-        await db.commit()
-        await mycursor.close()
+        async with the_database() as con:
+            async with con.acquire() as db:
+                async with db.cursor() as mycursor:
+                    await mycursor.execute(f"UPDATE ActiveClasses SET vc_time = vc_time + ({the_time} - vc_timestamp), vc_timestamp = NULL WHERE teacher_id = {teacher_id}")
+                    await db.commit()
 
     async def update_teacher_ts(self, teacher_id: int, the_time: int):
-        mycursor, db = await the_database()
-        await mycursor.execute(f"UPDATE ActiveClasses SET vc_timestamp = {the_time} WHERE teacher_id = {teacher_id}")
-        await db.commit()
-        await mycursor.close()
+        async with the_database() as con:
+            async with con.acquire() as db:
+                async with db.cursor() as mycursor:
+                    await mycursor.execute(f"UPDATE ActiveClasses SET vc_timestamp = {the_time} WHERE teacher_id = {teacher_id}")
+                    await db.commit()
 
     async def update_teacher_members(self, teacher_id: int):
-        mycursor, db = await the_database()
-        await mycursor.execute(f"UPDATE ActiveClasses SET members = members + 1 WHERE teacher_id = {teacher_id}")
-        await db.commit()
-        await mycursor.close()
+        async with the_database() as con:
+            async with con.acquire() as db:
+                async with db.cursor() as mycursor:
+                    await mycursor.execute(f"UPDATE ActiveClasses SET members = members + 1 WHERE teacher_id = {teacher_id}")
+                    await db.commit()
 
 
     # Delete
     async def delete_active_class(self, teacher_id: int):
-        mycursor, db = await the_database()
-        await mycursor.execute(f"DELETE FROM ActiveClasses WHERE teacher_id = {teacher_id}")
-        await db.commit()
-        await mycursor.close()
+        async with the_database() as con:
+            async with con.acquire() as db:
+                async with db.cursor() as mycursor:
+                    await mycursor.execute(f"DELETE FROM ActiveClasses WHERE teacher_id = {teacher_id}")
+                    await db.commit()
 
     # Students table
     @commands.command(hidden=True)
@@ -914,11 +932,12 @@ class CreateClassroom(commands.Cog):
         await ctx.message.delete()
         if await self.check_table_students():
             return await ctx.send(f"**The table __Students__ already exists!**", delete_after=5)
-        mycursor, db = await the_database()
-        await mycursor.execute(
-            f"CREATE TABLE Students (student_id bigint, student_messages int default 0, student_ts bigint default NULL, student_time bigint default 0, teacher_id bigint, vc_id bigint)")
-        await db.commit()
-        await mycursor.close()
+        async with the_database() as con:
+            async with con.acquire() as db:
+                async with db.cursor() as mycursor:
+                    await mycursor.execute(
+                        f"CREATE TABLE Students (student_id bigint, student_messages int default 0, student_ts bigint default NULL, student_time bigint default 0, teacher_id bigint, vc_id bigint)")
+                    await db.commit()
         return await ctx.send("**Table __Students__ created!**", delete_after=5)
 
     @commands.command(hidden=True)
@@ -930,10 +949,11 @@ class CreateClassroom(commands.Cog):
         await ctx.message.delete()
         if not await self.check_table_students():
             return await ctx.send(f"**The table __Students__ does not exist!**", delete_after=5)
-        mycursor, db = await the_database()
-        await mycursor.execute(f"DROP TABLE Students")
-        await db.commit()
-        await mycursor.close()
+        async with the_database() as con:
+            async with con.acquire() as db:
+                async with db.cursor() as mycursor:
+                    await mycursor.execute(f"DROP TABLE Students")
+                    await db.commit()
         await ctx.send("**Table __Students__ dropped!**", delete_after=5)
 
     @commands.command(hidden=True)
@@ -945,148 +965,164 @@ class CreateClassroom(commands.Cog):
         await ctx.message.delete()
         if not await self.check_table_students():
             return await ctx.send("**Table __Students__ doesn't exist yet!**", delete_after=5)
-        mycursor, db = await the_database()
-        await mycursor.execute('SELECT * FROM Students')
-        teachers = await mycursor.fetchall()
-        for teacher in teachers:
-            await mycursor.execute(f"DELETE FROM Students WHERE teacher_id = {teacher[0]}")
-            await db.commit()
-        await mycursor.close()
+        async with the_database() as con:
+            async with con.acquire() as db:
+                async with db.cursor() as mycursor:
+                    await mycursor.execute("DELETE FROM Students")
+                    await db.commit()
         return await ctx.send("**Table __Students__ has been reset!**", delete_after=5)
 
-    async def check_table_students(self):
-        mycursor, db = await the_database()
-        await mycursor.execute(f"SHOW TABLE STATUS LIKE 'Students'")
-        table_info = await mycursor.fetchall()
-        await mycursor.close()
-        if len(table_info) == 0:
-            return False
+    async def check_table_students(self) -> bool:
+        async with the_database() as con:
+            async with con.acquire() as db:
+                async with db.cursor() as mycursor:
+                    await mycursor.execute(f"SHOW TABLE STATUS LIKE 'Students'")
+                    table_info = await mycursor.fetchall()
+                    if len(table_info) == 0:
+                        return False
 
-        else:
-            return True
+                    else:
+                        return True
 
     # Get (student)
     async def get_student(self, student_id: int, teacher_id: int):
-        mycursor, db = await the_database()
-        await mycursor.execute(f"SELECT * FROM Students WHERE student_id = {student_id} and teacher_id = {teacher_id}")
-        the_student = await mycursor.fetchall()
-        await mycursor.close()
-        return the_student
+        async with the_database() as con:
+            async with con.acquire() as db:
+                async with db.cursor() as mycursor:
+                    await mycursor.execute(f"SELECT * FROM Students WHERE student_id = {student_id} and teacher_id = {teacher_id}")
+                    the_student = await mycursor.fetchall()
+                    return the_student
 
     async def get_all_students(self, teacher_id: int):
-        mycursor, db = await the_database()
-        await mycursor.execute(f"SELECT * FROM Students WHERE teacher_id = {teacher_id}")
-        the_students = await mycursor.fetchall()
-        await mycursor.close()
-        return the_students
+        async with the_database() as con:
+            async with con.acquire() as db:
+                async with db.cursor() as mycursor:
+                    await mycursor.execute(f"SELECT * FROM Students WHERE teacher_id = {teacher_id}")
+                    the_students = await mycursor.fetchall()
+                    return the_students
 
     # Insert (student)
     async def insert_student_w_ts(self, student_id: int, the_time: int, teacher_id: int, vc_id: int):
-        mycursor, db = await the_database()
-        await mycursor.execute("INSERT INTO Students (student_id, student_ts, teacher_id, vc_id) VALUES (%s, %s, %s, %s)", (student_id, the_time, teacher_id, vc_id))
-        await db.commit()
-        await mycursor.close()
+        async with the_database() as con:
+            async with con.acquire() as db:
+                async with db.cursor() as mycursor:
+                    await mycursor.execute("INSERT INTO Students (student_id, student_ts, teacher_id, vc_id) VALUES (%s, %s, %s, %s)", (student_id, the_time, teacher_id, vc_id))
+                    await db.commit()
 
     async def insert_student_w_none(self, student_id: int, teacher_id: int, vc_id: int):
-        mycursor, db = await the_database()
-        await mycursor.execute("INSERT INTO Students (student_id, teacher_id, vc_id) VALUES (%s, %s, %s, %s)", (student_id, teacher_id, vc_id))
-        await db.commit()
-        await mycursor.close()
+        async with the_database() as con:
+            async with con.acquire() as db:
+                async with db.cursor() as mycursor:
+                    await mycursor.execute("INSERT INTO Students (student_id, teacher_id, vc_id) VALUES (%s, %s, %s, %s)", (student_id, teacher_id, vc_id))
+                    await db.commit()
 
     # Update (student)
     async def update_student_ts(self, student_id: int, the_time: int, teacher_id: int):
-        mycursor, db = await the_database()
-        await mycursor.execute(f"UPDATE Students SET student_ts = {the_time} WHERE student_id = {student_id} and teacher_id = {teacher_id}")
-        await db.commit()
-        await mycursor.close()
+        async with the_database() as con:
+            async with con.acquire() as db:
+                async with db.cursor() as mycursor:
+                    await mycursor.execute(f"UPDATE Students SET student_ts = {the_time} WHERE student_id = {student_id} and teacher_id = {teacher_id}")
+                    await db.commit()
 
     async def update_student_ts_none(self, student_id: int, teacher_id: int):
-        mycursor, db = await the_database()
-        await mycursor.execute(f"UPDATE Students SET student_ts = null WHERE student_id = {student_id} and teacher_id = {teacher_id}")
-        await db.commit()
-        await mycursor.close()
+        async with the_database() as con:
+            async with con.acquire() as db:
+                async with db.cursor() as mycursor:
+                    await mycursor.execute(f"UPDATE Students SET student_ts = null WHERE student_id = {student_id} and teacher_id = {teacher_id}")
+                    await db.commit()
 
     async def update_all_students_ts(self, teacher_id: int, the_time: int):
-        mycursor, db = await the_database()
-        await mycursor.execute(f"UPDATE Students SET student_ts = {the_time} WHERE teacher_id = {teacher_id}")
-        await db.commit()
-        await mycursor.close()
+        async with the_database() as con:
+            async with con.acquire() as db:
+                async with db.cursor() as mycursor:
+                    await mycursor.execute(f"UPDATE Students SET student_ts = {the_time} WHERE teacher_id = {teacher_id}")
+                    await db.commit()
 
 
     async def update_all_students_time(self, teacher_id: int, the_time: int):
-        mycursor, db = await the_database()
-        await mycursor.execute(f"UPDATE Students SET student_time = student_time + ({the_time} - student_ts), student_ts = NULL WHERE teacher_id = {teacher_id} and student_ts is not NULL")
-        await db.commit()
-        await mycursor.close()
+        async with the_database() as con:
+            async with con.acquire() as db:
+                async with db.cursor() as mycursor:
+                    await mycursor.execute(f"UPDATE Students SET student_time = student_time + ({the_time} - student_ts), student_ts = NULL WHERE teacher_id = {teacher_id} and student_ts is not NULL")
+                    await db.commit()
 
     async def update_student_time(self, student_id: int, teacher_id: int, the_time: int, old_ts: int):
         addition = the_time - old_ts
-        mycursor, db = await the_database()
-        await mycursor.execute(f"UPDATE Students SET student_time = student_time + {addition}, student_ts = NULL WHERE student_id = {student_id} and teacher_id = {teacher_id}")
-        await db.commit()
-        await mycursor.close()
+        async with the_database() as con:
+            async with con.acquire() as db:
+                async with db.cursor() as mycursor:
+                    await mycursor.execute(f"UPDATE Students SET student_time = student_time + {addition}, student_ts = NULL WHERE student_id = {student_id} and teacher_id = {teacher_id}")
+                    await db.commit()
 
     async def update_student_messages(self, student_id: int, vc_id: int):
-        mycursor, db = await the_database()
-        await mycursor.execute(f"UPDATE Students SET student_messages = student_messages + 1 WHERE student_id = {student_id} and vc_id = {vc_id}")
-        await db.commit()
-        await mycursor.close()
+        async with the_database() as con:
+            async with con.acquire() as db:
+                async with db.cursor() as mycursor:
+                    await mycursor.execute(f"UPDATE Students SET student_messages = student_messages + 1 WHERE student_id = {student_id} and vc_id = {vc_id}")
+                    await db.commit()
 
     # Check
-    async def check_student_by_vc(self, student_id: int, vc_id: int):
-        mycursor, db = await the_database()
-        await mycursor.execute(f"SELECT * FROM Students WHERE student_id = {student_id} and vc_id = {vc_id}")
-        the_student = await mycursor.fetchall()
-        await mycursor.close()
-        if the_student:
-            return True
-        else:
-            return False
+    async def check_student_by_vc(self, student_id: int, vc_id: int) -> bool:
+        async with the_database() as con:
+            async with con.acquire() as db:
+                async with db.cursor() as mycursor:
+                    await mycursor.execute(f"SELECT * FROM Students WHERE student_id = {student_id} and vc_id = {vc_id}")
+                    the_student = await mycursor.fetchall()
+                    if the_student:
+                        return True
+                    else:
+                        return False
 
     # Delete
     async def delete_active_students(self, teacher_id: int):
-        mycursor, db = await the_database()
-        await mycursor.execute(f"DELETE FROM Students WHERE teacher_id = {teacher_id}")
-        await db.commit()
-        await mycursor.close()
+        async with the_database() as con:
+            async with con.acquire() as db:
+                async with db.cursor() as mycursor:
+                    await mycursor.execute(f"DELETE FROM Students WHERE teacher_id = {teacher_id}")
+                    await db.commit()
 
     # Other tables
 
     # General
-    async def user_in_currency(self, user_id: int):
-        mycursor, db = await the_database()
-        await mycursor.execute(f"SELECT * FROM UserCurrency WHERE user_id = {user_id}")
-        user_currency = await mycursor.fetchall()
-        await mycursor.close()
-        if user_currency:
-            return True
-        else:
-            return False
+    async def user_in_currency(self, user_id: int) -> bool:
+        async with the_database() as con:
+            async with con.acquire() as db:
+                async with db.cursor() as mycursor:
+                    await mycursor.execute(f"SELECT * FROM UserCurrency WHERE user_id = {user_id}")
+                    user_currency = await mycursor.fetchall()
+                    if user_currency:
+                        return True
+                    else:
+                        return False
 
     # Update
     async def update_money(self, user_id: int, money: int):
-        mycursor, db = await the_database()
-        await mycursor.execute(f"UPDATE UserCurrency SET user_money = user_money + {money} WHERE user_id = {user_id}")
-        await db.commit()
-        await mycursor.close()
+        async with the_database() as con:
+            async with con.acquire() as db:
+                async with db.cursor() as mycursor:
+                    await mycursor.execute(f"UPDATE UserCurrency SET user_money = user_money + {money} WHERE user_id = {user_id}")
+                    await db.commit()
 
     async def update_user_classes(self, user_id: int):
-        mycursor, db = await the_database()
-        await mycursor.execute(f"UPDATE UserCurrency SET user_classes = user_classes + 1 WHERE user_id = {user_id}")
-        await db.commit()
-        await mycursor.close()
+        async with the_database() as con:
+            async with con.acquire() as db:
+                async with db.cursor() as mycursor:
+                    await mycursor.execute(f"UPDATE UserCurrency SET user_classes = user_classes + 1 WHERE user_id = {user_id}")
+                    await db.commit()
 
     async def update_user_class_reward(self, user_id: int):
-        mycursor, db = await the_database()
-        await mycursor.execute(f"UPDATE UserCurrency SET user_class_reward = user_class_reward + 1 WHERE user_id = {user_id}")
-        await db.commit()
-        await mycursor.close()
+        async with the_database() as con:
+            async with con.acquire() as db:
+                async with db.cursor() as mycursor:
+                    await mycursor.execute(f"UPDATE UserCurrency SET user_class_reward = user_class_reward + 1 WHERE user_id = {user_id}")
+                    await db.commit()
 
     async def update_user_hosted(self, teacher_id: int):
-        mycursor, db = await the_database()
-        await mycursor.execute(f"UPDATE UserCurrency SET user_hosted = user_hosted + 1 WHERE user_id = {teacher_id}")
-        await db.commit()
-        await mycursor.close()
+        async with the_database() as con:
+            async with con.acquire() as db:
+                async with db.cursor() as mycursor:
+                    await mycursor.execute(f"UPDATE UserCurrency SET user_hosted = user_hosted + 1 WHERE user_id = {teacher_id}")
+                    await db.commit()
 
 def setup(client):
     client.add_cog(CreateClassroom(client))

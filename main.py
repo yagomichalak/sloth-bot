@@ -1,6 +1,5 @@
 import discord
 from discord.ext import commands, tasks
-from mysqldb import *
 from datetime import datetime
 import os
 from itertools import cycle

@@ -81,11 +81,13 @@ class ReactionRoles(commands.Cog):
         (ADM) Creates the RegisteredText table.
         '''
         await ctx.message.delete()
-        mycursor, db = await the_database()
-        await mycursor.execute(
-            "CREATE TABLE RegisteredText (message_id bigint, reaction_ref VARCHAR(50), category VARCHAR(20), file_name VARCHAR(50)) DEFAULT CHARSET=utf8mb4")
-        await db.commit()
-        await mycursor.close()
+        async with the_database().acquire() as con:
+            async with con.acquire() as db:
+                async with db.cursor() as mycursor:
+                    await mycursor.execute(
+                        "CREATE TABLE RegisteredText (message_id bigint, reaction_ref VARCHAR(50), category VARCHAR(20), file_name VARCHAR(50)) DEFAULT CHARSET=utf8mb4")
+                    await db.commit()
+
         return await ctx.send("**Table *RegisteredText* created!**", delete_after=3)
 
     @commands.command(hidden=True)
@@ -95,10 +97,12 @@ class ReactionRoles(commands.Cog):
         (ADM) Drops the RegisteredText table.
         '''
         await ctx.message.delete()
-        mycursor, db = await the_database()
-        await mycursor.execute("DROP TABLE RegisteredText")
-        await db.commit()
-        await mycursor.close()
+        async with the_database().acquire() as con:
+            async with con.acquire() as db:
+                async with db.cursor() as mycursor:
+                    await mycursor.execute("DROP TABLE RegisteredText")
+                    await db.commit()
+
         return await ctx.send("**Table *RegisteredText* dropped!**", delete_after=3)
 
     @commands.command(hidden=True)
@@ -108,41 +112,48 @@ class ReactionRoles(commands.Cog):
         (ADM) Resets the RegisteredText table.
         '''
         await ctx.message.delete()
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM RegisteredText")
-        await db.commit()
-        await mycursor.close()
+        async with the_database().acquire() as con:
+            async with con.acquire() as db:
+                async with db.cursor() as mycursor:
+                    await mycursor.execute("DELETE FROM RegisteredText")
+                    await db.commit()
+
         return await ctx.send("**Table *RegisteredText* reseted!**", delete_after=3)
 
 
     async def insert_registered_text(self, mid: int, reactf: str, category: str, file_name: str):
-        mycursor, db = await the_database()
-        await mycursor.execute("INSERT INTO RegisteredText (message_id, reaction_ref, category, file_name) VALUES (%s, %s, %s, %s)", (mid, reactf, category, file_name))
-        await db.commit()
-        await mycursor.close()
+        async with the_database().acquire() as con:
+            async with con.acquire() as db:
+                async with db.cursor() as mycursor:
+                    await mycursor.execute("INSERT INTO RegisteredText (message_id, reaction_ref, category, file_name) VALUES (%s, %s, %s, %s)", (mid, reactf, category, file_name))
+                    await db.commit()
 
     async def remove_specific_image_texts(self, mid: int):
-        mycursor, db = await the_database()
-        await mycursor.execute(f"DELETE FROM RegisteredText WHERE message_id = {mid}")
-        await db.commit()
-        await mycursor.close()
+        async with the_database().acquire() as con:
+            async with con.acquire() as db:
+                async with db.cursor() as mycursor:
+                    await mycursor.execute(f"DELETE FROM RegisteredText WHERE message_id = {mid}")
+                    await db.commit()
 
-    async def there_are_texts(self, mid: int):
-        mycursor, db = await the_database()
-        await mycursor.execute(f"SELECT * FROM RegisteredText WHERE message_id = {mid}")
-        texts = await mycursor.fetchall()
-        await mycursor.close()
-        if len(texts) > 0:
-            return True
-        else:
-            return False
+    async def there_are_texts(self, mid: int) -> bool:
+        async with the_database().acquire() as con:
+            async with con.acquire() as db:
+                async with db.cursor() as mycursor:
+                    await mycursor.execute(f"SELECT * FROM RegisteredText WHERE message_id = {mid}")
+                    texts = await mycursor.fetchall()
+
+                    if len(texts) > 0:
+                        return True
+                    else:
+                        return False
 
     async def get_message_texts(self, mid: int):
-        mycursor, db = await the_database()
-        await mycursor.execute(f"SELECT * FROM RegisteredText WHERE message_id = {mid}")
-        texts = await mycursor.fetchall()
-        await mycursor.close()
-        return texts
+        async with the_database().acquire() as con:
+            async with con.acquire() as db:
+                async with db.cursor() as mycursor:
+                    await mycursor.execute(f"SELECT * FROM RegisteredText WHERE message_id = {mid}")
+                    texts = await mycursor.fetchall()
+                    return texts
 
     @commands.command()
     @commands.has_permissions(administrator=True)
