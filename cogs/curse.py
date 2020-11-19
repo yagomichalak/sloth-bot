@@ -98,7 +98,7 @@ class CurseMember(commands.Cog):
             await voice_client.disconnect()
 
     async def insert_cursed_member(self, user_id: int):
-        async with the_database().acquire() as con:
+        async with the_database() as con:
             async with con.acquire() as db:
                 async with db.cursor() as mycursor:
                     await mycursor.execute("INSERT INTO CursedMember (user_id) VALUES (%s)", (user_id))
@@ -112,7 +112,7 @@ class CurseMember(commands.Cog):
         (ADM) Creates the CursedMember table.
         '''
         await ctx.message.delete()
-        async with the_database().acquire() as con:
+        async with the_database() as con:
             async with con.acquire() as db:
                 async with db.cursor() as mycursor:
                     await mycursor.execute("CREATE TABLE CursedMember (user_id bigint)")
@@ -128,7 +128,7 @@ class CurseMember(commands.Cog):
         (ADM) Drops the CursedMember table.
         '''
         await ctx.message.delete()
-        async with the_database().acquire() as con:
+        async with the_database() as con:
             async with con.acquire() as db:
                 async with db.cursor() as mycursor:
                     await mycursor.execute("DROP TABLE CursedMember")
@@ -144,7 +144,7 @@ class CurseMember(commands.Cog):
         (ADM) Resets the CursedMember table.
         '''
         await ctx.message.delete()
-        async with the_database().acquire() as con:
+        async with the_database() as con:
             async with con.acquire() as db:
                 async with db.cursor() as mycursor:
                     await mycursor.execute("DELETE FROM CursedMember")
@@ -154,7 +154,7 @@ class CurseMember(commands.Cog):
     
     
     async def get_cursed_member(self, user_id: int):
-        async with the_database().acquire() as con:
+        async with the_database() as con:
             async with con.acquire() as db:
                 async with db.cursor() as mycursor:
                     await mycursor.execute(f"SELECT * FROM CursedMember WHERE user_id = {user_id}")
@@ -162,7 +162,7 @@ class CurseMember(commands.Cog):
                     return cm
 
     async def delete_cursed_member(self) -> bool:
-        async with the_database().acquire() as con:
+        async with the_database() as con:
             async with con.acquire() as db:
                 async with db.cursor() as mycursor:
                     await mycursor.execute(f"SELECT * FROM CursedMember")

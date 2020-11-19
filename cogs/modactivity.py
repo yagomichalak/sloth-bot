@@ -56,7 +56,7 @@ class ModActivity(commands.Cog):
             await self.add_time_moderator(member.id, addition)
 
     async def update_moderator(self, mod_id: int):
-        async with the_database().acquire() as con:
+        async with the_database() as con:
             async with con.acquire() as db:
                 async with db.cursor() as mycursor:
                     epoch = datetime.utcfromtimestamp(0)
@@ -65,7 +65,7 @@ class ModActivity(commands.Cog):
                     await db.commit()
 
     async def add_time_moderator(self, mod_id: int, addition: int):
-        async with the_database().acquire() as con:
+        async with the_database() as con:
             async with con.acquire() as db:
                 async with db.cursor() as mycursor:
                     await mycursor.execute(f'UPDATE ModActivity SET time = time + {addition} WHERE mod_id = {mod_id}')
@@ -73,7 +73,7 @@ class ModActivity(commands.Cog):
                     await self.update_moderator(mod_id)
 
     async def get_moderator_current_timestamp(self, mod_id: int, old_ts: int):
-        async with the_database().acquire() as con:
+        async with the_database() as con:
             async with con.acquire() as db:
                 async with db.cursor() as mycursor:
                     await mycursor.execute(f'SELECT * FROM ModActivity WHERE mod_id = {mod_id}')
@@ -89,7 +89,7 @@ class ModActivity(commands.Cog):
                         return old_ts
 
     async def insert_moderator(self, mod_id: int, old_ts: int):
-        async with the_database().acquire() as con:
+        async with the_database() as con:
             async with con.acquire() as db:
                 async with db.cursor() as mycursor:
                     await mycursor.execute("INSERT INTO ModActivity (mod_id, time, timestamp, messages) VALUES (%s, %s, %s, %s)",
@@ -97,7 +97,7 @@ class ModActivity(commands.Cog):
                     await db.commit()
 
     async def get_moderator_current_messages(self, mod_id: int):
-        async with the_database().acquire() as con:
+        async with the_database() as con:
             async with con.acquire() as db:
                 async with db.cursor() as mycursor:
                     await mycursor.execute(f'SELECT * FROM ModActivity WHERE mod_id = {mod_id}')
@@ -110,7 +110,7 @@ class ModActivity(commands.Cog):
                     return mod[0][3]
 
     async def insert_moderator_message(self, mod_id: int):
-        async with the_database().acquire() as con:
+        async with the_database() as con:
             async with con.acquire() as db:
                 async with db.cursor() as mycursor:
                     await mycursor.execute("INSERT INTO ModActivity (mod_id, time, timestamp, messages) VALUES (%s, %s, %s, %s)",
@@ -118,7 +118,7 @@ class ModActivity(commands.Cog):
                     await db.commit()
 
     async def update_moderator_message(self, mod_id: int):
-        async with the_database().acquire() as con:
+        async with the_database() as con:
             async with con.acquire() as db:
                 async with db.cursor() as mycursor:
                     await mycursor.execute(f'UPDATE ModActivity SET messages = messages+1 WHERE mod_id = {mod_id}')
@@ -130,7 +130,7 @@ class ModActivity(commands.Cog):
         '''
         (ADM) Shows all the moderators and their statuses in an embedded message.
         '''
-        async with the_database().acquire() as con:
+        async with the_database() as con:
             async with con.acquire() as db:
                 async with db.cursor() as mycursor:
                     await mycursor.execute('SELECT * FROM ModActivity')
@@ -186,7 +186,7 @@ class ModActivity(commands.Cog):
         '''
         (ADM) Creates the ModActivity table.
         '''
-        async with the_database().acquire() as con:
+        async with the_database() as con:
             async with con.acquire() as db:
                 async with db.cursor() as mycursor:
                     await mycursor.execute(
@@ -198,7 +198,7 @@ class ModActivity(commands.Cog):
         '''
         (ADM) Drops the ModActivity table.
         '''
-        async with the_database().acquire() as con:
+        async with the_database() as con:
             async with con.acquire() as db:
                 async with db.cursor() as mycursor:
                     await mycursor.execute('DROP TABLE ModActivity')
