@@ -17,7 +17,7 @@ class UpdateRegion(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         print("UpdateRegion cog is online!")
-        self.change_region.start()
+        #self.change_region.start()
 
     @tasks.loop(hours=3)
     async def change_region(self):

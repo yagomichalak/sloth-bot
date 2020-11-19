@@ -410,11 +410,12 @@ class ReportSupport(commands.Cog):
 			return str(reaction.emoji)
 
 	async def member_has_open_channel(self, member_id: int):
-		mycursor, db = await the_database()
-		await mycursor.execute(f"SELECT * FROM OpenChannels WHERE user_id = {member_id}")
-		user = await mycursor.fetchall()
-		await mycursor.close()
-		return user
+		async with the_database() as con:
+			async with con.acquire() as db:
+				async with db.cursor() as mycursor:
+					await mycursor.execute(f"SELECT * FROM OpenChannels WHERE user_id = {member_id}")
+					user = await mycursor.fetchall()
+					return user
 
 	@commands.command(hidden=True)
 	@commands.has_permissions(administrator=True)
@@ -426,11 +427,13 @@ class ReportSupport(commands.Cog):
 		if await self.table_case_counter_exists():
 			return await ctx.send("**Table __CaseCounter__ already exists!**", delete_after=3)
 
-		mycursor, db = await the_database()
-		await mycursor.execute("CREATE TABLE CaseCounter (case_number bigint default 0)")
-		await mycursor.execute("INSERT INTO CaseCounter (case_number) VALUES (0)")
-		await db.commit()
-		await mycursor.close()
+		async with the_database() as con:
+			async with con.acquire() as db:
+				async with db.cursor() as mycursor:
+					await mycursor.execute("CREATE TABLE CaseCounter (case_number bigint default 0)")
+					await mycursor.execute("INSERT INTO CaseCounter (case_number) VALUES (0)")
+					await db.commit()
+
 		await ctx.send("**Table __CaseCounter__ created!**", delete_after=3)
 
 	@commands.command(hidden=True)
@@ -443,10 +446,12 @@ class ReportSupport(commands.Cog):
 		if not await self.table_case_counter_exists():
 			return await ctx.send("**Table __CaseCounter__ doesn't exist!**", delete_after=3)
 
-		mycursor, db = await the_database()
-		await mycursor.execute("DROP TABLE CaseCounter")
-		await db.commit()
-		await mycursor.close()
+		async with the_database() as con:
+			async with con.acquire() as db:
+				async with db.cursor() as mycursor:
+					await mycursor.execute("DROP TABLE CaseCounter")
+					await db.commit()
+
 		return await ctx.send("**Table __CaseCounter__ dropped!**", delete_after=3)
 
 	@commands.command(hidden=True)
@@ -459,22 +464,25 @@ class ReportSupport(commands.Cog):
 		if not await self.table_case_counter_exists():
 			return await ctx.send("**Table __CaseCounter__ doesn't exist yet!**", delete_after=3)
 
-		mycursor, db = await the_database()
-		await mycursor.execute("DELETE FROM CaseCounter")
-		await mycursor.execute("INSERT INTO CaseCounter (case_number) VALUES (0)")
-		await db.commit()
-		await mycursor.close()
+		async with the_database() as con:
+			async with con.acquire() as db:
+				async with db.cursor() as mycursor:
+					await mycursor.execute("DELETE FROM CaseCounter")
+					await mycursor.execute("INSERT INTO CaseCounter (case_number) VALUES (0)")
+					await db.commit()
+
 		return await ctx.send("**Table __CaseCounter__ reset!**", delete_after=3)
 
-	async def table_case_counter_exists(self):
-		mycursor, db = await the_database()
-		await mycursor.execute(f"SHOW TABLE STATUS LIKE 'CaseCounter'")
-		table_info = await mycursor.fetchall()
-		await mycursor.close()
-		if len(table_info) == 0:
-			return False
-		else:
-			return True 
+	async def table_case_counter_exists(self) -> bool:
+		async with the_database() as con:
+			async with con.acquire() as db:
+				async with db.cursor() as mycursor:
+					await mycursor.execute(f"SHOW TABLE STATUS LIKE 'CaseCounter'")
+					table_info = await mycursor.fetchall()
+					if len(table_info) == 0:
+						return False
+					else:
+						return True 
 
 
 	@commands.command(hidden=True)
@@ -487,10 +495,12 @@ class ReportSupport(commands.Cog):
 		if await self.table_open_channels_exists():
 			return await ctx.send("**Table __OpenChannels__ already exists!**", delete_after=3)
 
-		mycursor, db = await the_database()
-		await mycursor.execute("CREATE TABLE OpenChannels (user_id bigint, channel_id bigint)")
-		await db.commit()
-		await mycursor.close()
+		async with the_database() as con:
+			async with con.acquire() as db:
+				async with db.cursor() as mycursor:
+					await mycursor.execute("CREATE TABLE OpenChannels (user_id bigint, channel_id bigint)")
+					await db.commit()
+
 		await ctx.send("**Table __OpenChannels__ created!**", delete_after=3)
 
 	@commands.command(hidden=True)
@@ -503,10 +513,12 @@ class ReportSupport(commands.Cog):
 		if not await self.table_open_channels_exists():
 			return await ctx.send("**Table __OpenChannels__ doesn't exist!**", delete_after=3)
 
-		mycursor, db = await the_database()
-		await mycursor.execute("DROP TABLE OpenChannels")
-		await db.commit()
-		await mycursor.close()
+		async with the_database() as con:
+			async with con.acquire() as db:
+				async with db.cursor() as mycursor:
+					await mycursor.execute("DROP TABLE OpenChannels")
+					await db.commit()
+
 		return await ctx.send("**Table __OpenChannels__ dropped!**", delete_after=3)
 
 	@commands.command(hidden=True)
@@ -519,54 +531,63 @@ class ReportSupport(commands.Cog):
 		if not await self.table_open_channels_exists():
 			return await ctx.send("**Table __OpenChannels__ doesn't exist yet!**", delete_after=3)
 
-		mycursor, db = await the_database()
-		await mycursor.execute("DELETE FROM OpenChannels")
-		await db.commit()
-		await mycursor.close()
+		async with the_database() as con:
+			async with con.acquire() as db:
+				async with db.cursor() as mycursor:
+					await mycursor.execute("DELETE FROM OpenChannels")
+					await db.commit()
+
 		return await ctx.send("**Table __OpenChannels__ reset!**", delete_after=3)
 
 
-	async def table_open_channels_exists(self):
-		mycursor, db = await the_database()
-		await mycursor.execute(f"SHOW TABLE STATUS LIKE 'OpenChannels'")
-		table_info = await mycursor.fetchall()
-		await mycursor.close()
-		if len(table_info) == 0:
-			return False
-		else:
-			return True 
+	async def table_open_channels_exists(self) -> bool:
+		async with the_database() as con:
+			async with con.acquire() as db:
+				async with db.cursor() as mycursor:
+					await mycursor.execute(f"SHOW TABLE STATUS LIKE 'OpenChannels'")
+					table_info = await mycursor.fetchall()
+
+					if len(table_info) == 0:
+						return False
+					else:
+						return True 
 
 	async def get_case_number(self):
-		mycursor, db = await the_database()
-		await mycursor.execute(f"SELECT * FROM CaseCounter")
-		counter = await mycursor.fetchall()
-		await mycursor.close()
-		return counter
+		async with the_database() as con:
+			async with con.acquire() as db:
+				async with db.cursor() as mycursor:
+					await mycursor.execute(f"SELECT * FROM CaseCounter")
+					counter = await mycursor.fetchall()
+					return counter
 
 	async def increase_case_number(self):
-		mycursor, db = await the_database()
-		await mycursor.execute(f"UPDATE CaseCounter SET case_number = case_number + 1")
-		await db.commit()
-		await mycursor.close()
+		async with the_database() as con:
+			async with con.acquire() as db:
+				async with db.cursor() as mycursor:
+					await mycursor.execute(f"UPDATE CaseCounter SET case_number = case_number + 1")
+					await db.commit()
 
 	async def insert_user_open_channel(self, member_id: int, channel_id: int):
-		mycursor, db = await the_database()
-		await mycursor.execute(f"INSERT INTO OpenChannels (user_id, channel_id) VALUES (%s, %s)", (member_id, channel_id))
-		await db.commit()
-		await mycursor.close()
+		async with the_database() as con:
+			async with con.acquire() as db:
+				async with db.cursor() as mycursor:
+					await mycursor.execute(f"INSERT INTO OpenChannels (user_id, channel_id) VALUES (%s, %s)", (member_id, channel_id))
+					await db.commit()
 
 	async def remove_user_open_channel(self, member_id: int):
-		mycursor, db = await the_database()
-		await mycursor.execute(f"DELETE FROM OpenChannels WHERE user_id = {member_id}")
-		await db.commit()
-		await mycursor.close()
+		async with the_database() as con:
+			async with con.acquire() as db:
+				async with db.cursor() as mycursor:
+					await mycursor.execute(f"DELETE FROM OpenChannels WHERE user_id = {member_id}")
+					await db.commit()
 
 	async def get_case_channel(self, channel_id: int):
-		mycursor, db = await the_database()
-		await mycursor.execute(f"SELECT * FROM OpenChannels WHERE channel_id = {channel_id}")
-		channel = await mycursor.fetchall()
-		await mycursor.close()
-		return channel
+		async with the_database() as con:
+			async with con.acquire() as db:
+				async with db.cursor() as mycursor:
+					await mycursor.execute(f"SELECT * FROM OpenChannels WHERE channel_id = {channel_id}")
+					channel = await mycursor.fetchall()
+					return channel
 
 	@commands.command()
 	@commands.has_permissions(kick_members=True)
@@ -756,53 +777,58 @@ class ReportSupport(commands.Cog):
 	async def get_teacher_app_by_message(self, message_id: int) -> List[str]:
 		""" Gets a teacher application from the database by providing a message id. """
 		
-		mycursor, db = await the_database()
-		await mycursor.execute("SELECT * FROM TeacherApplication WHERE message_id = %s", (message_id,))
-		teacher_app = await mycursor.fetchall()
-		await mycursor.close()
-		return teacher_app
+		async with the_database() as con:
+			async with con.acquire() as db:
+				async with db.cursor() as mycursor:
+					await mycursor.execute("SELECT * FROM TeacherApplication WHERE message_id = %s", (message_id,))
+					teacher_app = await mycursor.fetchall()
+					return teacher_app
 
 	async def get_teacher_app_by_channel(self, channel_id: int) -> List[str]:
 		""" Gets a teacher application from the database by providing a channel id. """
 		
-		mycursor, db = await the_database()
-		await mycursor.execute("SELECT * FROM TeacherApplication WHERE txt_id = %s", (channel_id,))
-		teacher_app = await mycursor.fetchall()
-		await mycursor.close()
-		return teacher_app
+		async with the_database() as con:
+			async with con.acquire() as db:
+				async with db.cursor() as mycursor:
+					await mycursor.execute("SELECT * FROM TeacherApplication WHERE txt_id = %s", (channel_id,))
+					teacher_app = await mycursor.fetchall()
+					return teacher_app
 
 
 	async def save_teacher_app(self, message_id: int, teacher_id: int) -> None:
 		""" Saves a teacher application into the database. """
 		
-		mycursor, db = await the_database()
-		await mycursor.execute('''
-			INSERT INTO TeacherApplication (message_id, teacher_id)
-			VALUES (%s, %s)''', (message_id, teacher_id)
-			)
-		await db.commit()
-		await mycursor.close()
+		async with the_database() as con:
+			async with con.acquire() as db:
+				async with db.cursor() as mycursor:
+					await mycursor.execute('''
+						INSERT INTO TeacherApplication (message_id, teacher_id)
+						VALUES (%s, %s)''', (message_id, teacher_id)
+						)
+					await db.commit()
 
 
 	async def update_teacher_application(self, teacher_id: int, txt_id: int, vc_id: int) -> None:
 		""" Updates the teacher's application; adding the txt and vc ids into it. """
 
-		mycursor, db = await the_database()
-		await mycursor.execute('''UPDATE TeacherApplication SET 
-			channel_open = 'yes', txt_id = %s, vc_id = %s
-			WHERE teacher_id = %s''', (txt_id, vc_id, teacher_id)
-			)
-		await db.commit()
-		await mycursor.close()
+		async with the_database() as con:
+			async with con.acquire() as db:
+				async with db.cursor() as mycursor:
+					await mycursor.execute('''UPDATE TeacherApplication SET 
+						channel_open = 'yes', txt_id = %s, vc_id = %s
+						WHERE teacher_id = %s''', (txt_id, vc_id, teacher_id)
+						)
+					await db.commit()
 
 
 	async def delete_teacher_app(self, message_id: int) -> None:
 		""" Deletes a teacher application from the database. """
 
-		mycursor, db = await the_database()
-		await mycursor.execute("DELETE FROM TeacherApplication WHERE message_id = %s", (message_id,))
-		await db.commit()
-		await mycursor.close()
+		async with the_database() as con:
+			async with con.acquire() as db:
+				async with db.cursor() as mycursor:
+					await mycursor.execute("DELETE FROM TeacherApplication WHERE message_id = %s", (message_id,))
+					await db.commit()
 
 	# Database ADM commands
 	@commands.command(hidden=True)
@@ -810,16 +836,18 @@ class ReportSupport(commands.Cog):
 	async def create_table_teacher_application(self, ctx) -> None:
 		""" (ADM) Creates the TeacherApplication table. """
 
-		mycursor, db = await the_database()
 		if await self.table_teacher_application_exists():
 			return await ctx.send("**Table `TeacherApplication` already exists!**")
 
-		await mycursor.execute('''CREATE TABLE TeacherApplication (
-			message_id BIGINT, teacher_id BIGINT, channel_open VARCHAR(3) default 'no',
-			txt_id BIGINT default null, vc_id BIGINT default null)''')
+		async with the_database() as con:
+			async with con.acquire() as db:
+				async with db.cursor() as mycursor:
+					await mycursor.execute('''CREATE TABLE TeacherApplication (
+						message_id BIGINT, teacher_id BIGINT, channel_open VARCHAR(3) default 'no',
+						txt_id BIGINT default null, vc_id BIGINT default null)''')
 
-		await db.commit()
-		await mycursor.close()
+					await db.commit()
+
 		await ctx.send("**Table `TeacherApplication` created!**")
 
 	@commands.command(hidden=True)
@@ -827,13 +855,15 @@ class ReportSupport(commands.Cog):
 	async def drop_table_teacher_application(self, ctx) -> None:
 		""" (ADM) Drops the TeacherApplication table. """
 
-		mycursor, db = await the_database()
 		if not await self.table_teacher_application_exists():
 			return await ctx.send("**Table `TeacherApplication` doesn't exist!**")
 
-		await mycursor.execute("DROP TABLE TeacherApplication")
-		await db.commit()
-		await mycursor.close()
+		async with the_database() as con:
+			async with con.acquire() as db:
+				async with db.cursor() as mycursor:
+					await mycursor.execute("DROP TABLE TeacherApplication")
+					await db.commit()
+
 		await ctx.send("**Table `TeacherApplication` dropped!**")
 
 
@@ -842,26 +872,30 @@ class ReportSupport(commands.Cog):
 	async def reset_table_teacher_application(self, ctx) -> None:
 		""" (ADM) Resets the TeacherApplication table. """
 
-		mycursor, db = await the_database()
 		if not await self.table_teacher_application_exists():
 			return await ctx.send("**Table `TeacherApplication` doesn't exist yet!**")
 
-		await mycursor.execute("DELETE FROM TeacherApplication")
-		await db.commit()
-		await mycursor.close()
+		async with the_database() as con:
+			async with con.acquire() as db:
+				async with db.cursor() as mycursor:
+					await mycursor.execute("DELETE FROM TeacherApplication")
+					await db.commit()
+
 		await ctx.send("**Table `TeacherApplication` reset!**")
 
 	async def table_teacher_application_exists(self) -> bool:
 		""" Checks whether the TeacherApplication table exists. """
 
-		mycursor, db = await the_database()
-		await mycursor.execute("SHOW TABLE STATUS LIKE 'TeacherApplication'")
-		exists = await mycursor.fetchall()
-		await mycursor.close()
-		if len(exists):
-			return True
-		else:
-			return False
+		async with the_database() as con:
+			async with con.acquire() as db:
+				async with db.cursor() as mycursor:
+					await mycursor.execute("SHOW TABLE STATUS LIKE 'TeacherApplication'")
+					exists = await mycursor.fetchall()
+
+					if len(exists):
+						return True
+					else:
+						return False
 
 
 

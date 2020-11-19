@@ -3,7 +3,6 @@ from discord.ext import commands
 import asyncio
 from gtts import gTTS
 from googletrans import Translator
-from mysqldb import *
 import inspect
 import io
 import textwrap
@@ -177,84 +176,6 @@ class Tools(commands.Cog):
         embed.set_author(name=ctx.author, icon_url=ctx.author.avatar_url)
         return await ctx.send(embed=embed)
 
-    @commands.command(hidden=True)
-    @commands.has_permissions(administrator=True)
-    async def create_table_the_teachers(self, ctx):
-        '''
-        (ADM) Creates the TheTeachers table.
-        '''
-        await ctx.message.delete()
-        if await self.check_table_the_teachers_exists():
-            return await ctx.send(f"**The table TheTeachers already exists!**", delete_after=3)
-        mycursor, db = await the_database()
-        await mycursor.execute(
-            "CREATE TABLE TheTeachers (teacher_id bigint default null, teacher_name varchar(50) default null)")
-        await db.commit()
-        await mycursor.close()
-        await ctx.send("**Table TheTeachers created!**", delete_after=3)
-
-    @commands.command(hidden=True)
-    @commands.has_permissions(administrator=True)
-    async def drop_table_the_teachers(self, ctx):
-        '''
-        (ADM) Drops the TheTeachers table.
-        '''
-        await ctx.message.delete()
-        if not await self.check_table_the_teachers_exists():
-            return await ctx.send(f"\t# - The table TheTeachers does not exist!")
-        mycursor, db = await the_database()
-        await mycursor.execute("DROP TABLE TheTeachers")
-        await db.commit()
-        await mycursor.close()
-        await ctx.send("**Table TheTeachers dropped!**", delete_after=3)
-
-    @commands.command(hidden=True)
-    @commands.has_permissions(administrator=True)
-    async def reset_table_the_teachers(self, ctx=None):
-        '''
-        (ADM) Resets the TheTeachers table.
-        '''
-        if ctx:
-            await ctx.message.delete()
-        if not await self.check_table_the_teachers_exists():
-            return await ctx.send("**Table TheTeachers doesn't exist yet!**", delete_after=3)
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM TheTeachers")
-        await db.commit()
-        await mycursor.close()
-        if ctx:
-            await ctx.send("**Table TheTeachers reset!**", delete_after=3)
-
-
-    @commands.command()
-    @commands.has_permissions(administrator=True)
-    async def register_teachers(self, ctx):
-        '''
-        (ADM) Register all teachers in the sloth's desktop app.
-        '''
-        await ctx.message.delete()
-        if not await self.check_table_the_teachers_exists():
-            return await ctx.send("**Table TheTeachers doesn't exist yet!**", delete_after=3)
-        await self.reset_table_the_teachers()
-        mycursor, db = await the_database()
-        teacher_role = discord.utils.get(ctx.guild.roles, id=teacher_role_id)
-        teachers = [t for t in ctx.guild.members if teacher_role in t.roles]
-        for t in teachers:
-            await mycursor.execute("INSERT INTO TheTeachers (teacher_id, teacher_name) VALUES (%s, %s)", (t.id, f"{t.name}#{t.discriminator}"))
-        await db.commit()
-        await mycursor.close()
-        return await ctx.send("**All teachers have been registered!**", delete_after=3)
-
-    async def check_table_the_teachers_exists(self):
-        mycursor, db = await the_database()
-        await mycursor.execute(f"SHOW TABLE STATUS LIKE 'TheTeachers'")
-        table_info = await mycursor.fetchall()
-        await mycursor.close()
-        if len(table_info) == 0:
-            return False
-
-        else:
-            return True
 
     @commands.command()
     @commands.has_permissions(administrator=True)
