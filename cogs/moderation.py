@@ -697,14 +697,14 @@ class Moderation(commands.Cog):
 			return await ctx.send("**Invalid user id!**", delete_after=3)
 
 	async def insert_in_muted(self, user_id: int, role_id: int):
-		async with the_database().acquire() as con:
+		async with the_database() as con:
 			async with con.acquire() as db:
 				async with db.cursor() as mycursor:
 					await mycursor.execute(f"INSERT INTO mutedmember (user_id, role_id) VALUES (%s, %s)", (user_id, role_id))
 					await db.commit()
 
 	async def get_muted_roles(self, user_id: int):
-		async with the_database().acquire() as con:
+		async with the_database() as con:
 			async with con.acquire() as db:
 				async with db.cursor() as mycursor:
 					await mycursor.execute(f"SELECT * FROM mutedmember WHERE user_id = {user_id}")
@@ -712,7 +712,7 @@ class Moderation(commands.Cog):
 					return user_roles
 
 	async def remove_role_from_system(self, user_id: int, role_id: int):
-		async with the_database().acquire() as con:
+		async with the_database() as con:
 			async with con.acquire() as db:
 				async with db.cursor() as mycursor:
 					await mycursor.execute(f"DELETE FROM mutedmember WHERE user_id = {user_id} and role_id = {role_id}")
@@ -728,7 +728,7 @@ class Moderation(commands.Cog):
 			return await ctx.send("**Table __MutedMember__ doesn't exist yet**")
 
 		await ctx.message.delete()
-		async with the_database().acquire() as con:
+		async with the_database() as con:
 			async with con.acquire() as db:
 				async with db.cursor() as mycursor:
 					await mycursor.execute("DELETE FROM mutedmember")
@@ -740,7 +740,7 @@ class Moderation(commands.Cog):
 		'''
 		Checks if the MutedMember table exists
 		'''
-		async with the_database().acquire() as con:
+		async with the_database() as con:
 			async with con.acquire() as db:
 				async with db.cursor() as mycursor:
 					await mycursor.execute(f"SHOW TABLE STATUS LIKE 'MutedMember'")
@@ -803,7 +803,7 @@ class Moderation(commands.Cog):
 	async def insert_user_infraction(self, user_id: int, infr_type: str, reason: str, timestamp: int, perpetrator: int) -> None:
 		""" Insert a warning into the system. """
 
-		async with the_database().acquire() as con:
+		async with the_database() as con:
 			async with con.acquire() as db:
 				async with db.cursor() as mycursor:
 					await mycursor.execute("""
@@ -818,7 +818,7 @@ class Moderation(commands.Cog):
 	async def get_user_infractions(self, user_id: int) -> List[List[Union[str, int]]]:
 		""" Gets all infractions from a user. """
 
-		async with the_database().acquire() as con:
+		async with the_database() as con:
 			async with con.acquire() as db:
 				async with db.cursor() as mycursor:
 					await mycursor.execute(f"SELECT * FROM UserInfractions WHERE user_id = {user_id}")
@@ -829,7 +829,7 @@ class Moderation(commands.Cog):
 	async def get_user_infraction_by_infraction_id(self, infraction_id: int) -> List[List[Union[str, int]]]:
 		""" Gets a specific infraction by ID. """
 
-		async with the_database().acquire() as con:
+		async with the_database() as con:
 			async with con.acquire() as db:
 				async with db.cursor() as mycursor:
 					await mycursor.execute(f"SELECT * FROM UserInfractions WHERE infraction_id = {infraction_id}")
@@ -839,7 +839,7 @@ class Moderation(commands.Cog):
 	async def remove_user_infraction(self, infraction_id: int) -> None:
 		""" Removes a specific infraction by ID. """
 
-		async with the_database().acquire() as con:
+		async with the_database() as con:
 			async with con.acquire() as db:
 				async with db.cursor() as mycursor:
 					await mycursor.execute("DELETE FROM UserInfractions WHERE infraction_id = %s", (infraction_id,))
@@ -848,7 +848,7 @@ class Moderation(commands.Cog):
 	async def remove_user_infractions(self, user_id: int) -> None:
 		""" Removes all infractions of a user by ID. """
 
-		async with the_database().acquire() as con:
+		async with the_database() as con:
 			async with con.acquire() as db:
 				async with db.cursor() as mycursor:
 					await mycursor.execute("DELETE FROM UserInfractions WHERE user_id = %s", (user_id,))
@@ -898,7 +898,7 @@ class Moderation(commands.Cog):
 			return await ctx.send("**Table __UserInfractions__ already exists!**")
 		
 		await ctx.message.delete()
-		async with the_database().acquire() as con:
+		async with the_database() as con:
 			async with con.acquire() as db:
 				async with db.cursor() as mycursor:
 					await mycursor.execute("""CREATE TABLE UserInfractions (
@@ -921,7 +921,7 @@ class Moderation(commands.Cog):
 		if not await self.check_table_user_infractions():
 			return await ctx.send("**Table __UserInfractions__ doesn't exist!**")
 		await ctx.message.delete()
-		async with the_database().acquire() as con:
+		async with the_database() as con:
 			async with con.acquire() as db:
 				async with db.cursor() as mycursor:
 					await mycursor.execute("DROP TABLE UserInfractions")
@@ -938,7 +938,7 @@ class Moderation(commands.Cog):
 			return await ctx.send("**Table __UserInfractions__ doesn't exist yet!**")
 
 		await ctx.message.delete()
-		async with the_database().acquire() as con:
+		async with the_database() as con:
 			async with con.acquire() as db:
 				async with db.cursor() as mycursor:
 					await mycursor.execute("DELETE FROM UserInfractions")
@@ -949,7 +949,7 @@ class Moderation(commands.Cog):
 	async def check_table_user_infractions(self) -> bool:
 		""" Checks if the UserInfractions table exists """
 
-		async with the_database().acquire() as con:
+		async with the_database() as con:
 			async with con.acquire() as db:
 				async with db.cursor() as mycursor:
 					await mycursor.execute(f"SHOW TABLE STATUS LIKE 'UserInfractions'")

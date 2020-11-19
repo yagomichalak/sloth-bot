@@ -81,7 +81,7 @@ class ReactionRoles(commands.Cog):
         (ADM) Creates the RegisteredText table.
         '''
         await ctx.message.delete()
-        async with the_database().acquire() as con:
+        async with the_database() as con:
             async with con.acquire() as db:
                 async with db.cursor() as mycursor:
                     await mycursor.execute(
@@ -97,7 +97,7 @@ class ReactionRoles(commands.Cog):
         (ADM) Drops the RegisteredText table.
         '''
         await ctx.message.delete()
-        async with the_database().acquire() as con:
+        async with the_database() as con:
             async with con.acquire() as db:
                 async with db.cursor() as mycursor:
                     await mycursor.execute("DROP TABLE RegisteredText")
@@ -112,7 +112,7 @@ class ReactionRoles(commands.Cog):
         (ADM) Resets the RegisteredText table.
         '''
         await ctx.message.delete()
-        async with the_database().acquire() as con:
+        async with the_database() as con:
             async with con.acquire() as db:
                 async with db.cursor() as mycursor:
                     await mycursor.execute("DELETE FROM RegisteredText")
@@ -122,21 +122,21 @@ class ReactionRoles(commands.Cog):
 
 
     async def insert_registered_text(self, mid: int, reactf: str, category: str, file_name: str):
-        async with the_database().acquire() as con:
+        async with the_database() as con:
             async with con.acquire() as db:
                 async with db.cursor() as mycursor:
                     await mycursor.execute("INSERT INTO RegisteredText (message_id, reaction_ref, category, file_name) VALUES (%s, %s, %s, %s)", (mid, reactf, category, file_name))
                     await db.commit()
 
     async def remove_specific_image_texts(self, mid: int):
-        async with the_database().acquire() as con:
+        async with the_database() as con:
             async with con.acquire() as db:
                 async with db.cursor() as mycursor:
                     await mycursor.execute(f"DELETE FROM RegisteredText WHERE message_id = {mid}")
                     await db.commit()
 
     async def there_are_texts(self, mid: int) -> bool:
-        async with the_database().acquire() as con:
+        async with the_database() as con:
             async with con.acquire() as db:
                 async with db.cursor() as mycursor:
                     await mycursor.execute(f"SELECT * FROM RegisteredText WHERE message_id = {mid}")
@@ -148,7 +148,7 @@ class ReactionRoles(commands.Cog):
                         return False
 
     async def get_message_texts(self, mid: int):
-        async with the_database().acquire() as con:
+        async with the_database() as con:
             async with con.acquire() as db:
                 async with db.cursor() as mycursor:
                     await mycursor.execute(f"SELECT * FROM RegisteredText WHERE message_id = {mid}")
