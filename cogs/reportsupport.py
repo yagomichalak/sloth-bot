@@ -53,8 +53,10 @@ class ReportSupport(commands.Cog):
 				if not teacher_app:
 					return
 
-				# Creates an interview room with the teacher and sends their application there (you can z!close there)
-				return await self.create_interview_room(guild, teacher_app)
+				# Checks if the person has not an open interview channel already
+				if teacher_app[0][2] == 'no':
+					# Creates an interview room with the teacher and sends their application there (you can z!close there)
+					return await self.create_interview_room(guild, teacher_app)
 
 			elif emoji == '❌':
 				# Tries to delete the teacher app from the db, in case it is registered
