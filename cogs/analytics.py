@@ -28,20 +28,18 @@ class Analytics(commands.Cog):
     @tasks.loop(minutes=1)
     async def check_midnight(self) -> None:
         time_now = datetime.now()
-        # tzone = timezone("CET")
         tzone = timezone("Etc/GMT-1")
         date_and_time = time_now.astimezone(tzone)
-        # hour = date_and_time.strftime('%H:%M')
         day = date_and_time.strftime('%d')
+
         if await self.check_relatory_time(day):
             await self.update_day(day)
-            # channel = await self.client.fetch_channel(bots_and_commands_channel_id)
             channel = self.client.get_channel(bots_and_commands_channel_id)
             members = channel.guild.members
             info = await self.get_info()
             online_members = [om for om in members if str(om.status) == "online"]
             small = ImageFont.truetype("built titling sb.ttf", 45)
-            analytics = Image.open("/png/analytics.png").resize((500, 600))
+            analytics = Image.open("./png/analytics.png").resize((500, 600))
             draw = ImageDraw.Draw(analytics)
             draw.text((140, 270), f"{info[0][0]}", (255, 255, 255), font=small)
             draw.text((140, 335), f"{info[0][1]}", (255, 255, 255), font=small)
