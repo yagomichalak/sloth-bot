@@ -835,23 +835,10 @@ class SlothCurrency(commands.Cog):
             except Exception:
                 pass
 
-        all_text_folders = {"turkic": "1A9rKufw30sJMdDbOa7zzobV2vblxc0UP",
-                            "uralic": "1lFOmnjSNE1zfxabjai5xQSgqOrjo3h0t",
-                            "unafiliated": "1bjYU4-oTRhnMDLiboCCkQecQ64FVx39C",
-                            "iranian": "18kvxdgyAWbNA9oEpzxGVkEF0JiSPSj4U",
-                            "celtic": "1djjTF6UrXWHI5-q7B_juqmtNvRC7-Rvf",
-                            "baltic": "15crfEoB-LQSavwVgU7elO-BqqvtrGO-W",
-                            "germanic": "1szJMzbF7hRk7BwicUTSi-_lnvlDVt99j",
-                            "slavic": "1ntr2NclwgQjhULH9wwrnRSezdsyvG3g2",
-                            "random": "1_gBiliWPrCj5cLpChQfg9QRnj8skQVHM",
-                            "asian": "1xXJLWXD3l31gpfKaC1oBLGaX5EMVFZ3u",
-                            "semitic": "12TKyqHLNhY4VohFWpgN6FjtPQPGNuuNK",
-                            "romance": "1n-E6RbHnAm9jzavnN50txHj3Qezz0T1Y",
-                            "indian": "1k1xv0uDgfxBhVOOgCiTK0GVbJ_Oz6OtC"
-                            }
+        all_text_folders = {"languages": "1_gBiliWPrCj5cLpChQfg9QRnj8skQVHM"}
 
-        text_categories = ["turkic", "uralic", "unafiliated", "iranian", "celtic", "baltic", "germanic", "slavic",
-                           "random", "asian", "semitic", "romance", "indian"]
+        text_categories = ["languages"]
+        
         for t_category in text_categories:
             try:
                 os.makedirs(f'./texts/{t_category}')
