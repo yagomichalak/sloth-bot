@@ -46,8 +46,8 @@ class Analytics(commands.Cog):
             draw.text((140, 395), f"{info[0][2]}", (255, 255, 255), font=small)
             draw.text((140, 460), f"{len(members)}", (255, 255, 255), font=small)
             draw.text((140, 520), f"{len(online_members)}", (255, 255, 255), font=small)
-            analytics.save('analytics_result.png', 'png', quality=90)
-            await channel.send(file=discord.File('analytics_result.png'))
+            analytics.save('./png/analytics_result.png', 'png', quality=90)
+            await channel.send(file=discord.File('./png/analytics_result.png'))
 
             await self.reset_table_sloth_analytics()
             complete_date = date_and_time.strftime('%d/%m/%Y')
