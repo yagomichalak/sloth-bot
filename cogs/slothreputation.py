@@ -173,11 +173,11 @@ class SlothReputation(commands.Cog):
         (ADM) Creates the MembersScore table.
         '''
         await ctx.message.delete()
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute(
-                        "CREATE TABLE MembersScore (user_id bigint, user_xp bigint, user_lvl int, user_xp_time int, score_points bigint, rep_time bigint)")
+        mycursor, db = await the_database()
+        await mycursor.execute(
+            "CREATE TABLE MembersScore (user_id bigint, user_xp bigint, user_lvl int, user_xp_time int, score_points bigint, rep_time bigint)")
+        await db.commit()
+        await mycursor.close()
                 
         await ctx.send("**Table *MembersScore* created!**", delete_after=3)
 
@@ -188,11 +188,10 @@ class SlothReputation(commands.Cog):
         (ADM) Drops the MembersScore table.
         '''
         await ctx.message.delete()
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute("DROP TABLE MembersScore")
-                    await db.commit()
+        mycursor, db = await the_database()
+        await mycursor.execute("DROP TABLE MembersScore")
+        await db.commit()
+        await mycursor.close()
 
         await ctx.send("**Table *MembersScore* dropped!**", delete_after=3)
 
@@ -203,125 +202,107 @@ class SlothReputation(commands.Cog):
         (ADM) Resets the MembersScore table.
         '''
         await ctx.message.delete()
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute("DROP TABLE MembersScore")
-                    await db.commit()
-                    await mycursor.execute(
-                        "CREATE TABLE MembersScore (user_id bigint, user_xp bigint, user_lvl int, user_xp_time int, score_points bigint, rep_time bigint)")
-                    await db.commit()
+        mycursor, db = await the_database()
+        await mycursor.execute("DELETE FROM MembersScore")
+        await db.commit()
+        await mycursor.close()
 
         await ctx.send("**Table *MembersScore* reseted!**", delete_after=3)
 
     async def insert_user(self, id: int, xp: int, lvl: int, xp_time: int, score_points: int, rep_time: int):
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute(
-                        f"INSERT INTO MembersScore VALUES({id}, {xp}, {lvl}, {xp_time}, {score_points}, {rep_time})")
-                    await db.commit()
+        mycursor, db = await the_database()
+        await mycursor.execute(
+            f"INSERT INTO MembersScore VALUES({id}, {xp}, {lvl}, {xp_time}, {score_points}, {rep_time})")
+        await db.commit()
+        await mycursor.close()
 
     async def update_user_xp(self, id: int, xp: int):
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute(f"UPDATE MembersScore SET user_xp = user_xp+{xp} WHERE user_id = {id}")
-                    await db.commit()
+        mycursor, db = await the_database()
+        await mycursor.execute(f"UPDATE MembersScore SET user_xp = user_xp+{xp} WHERE user_id = {id}")
+        await db.commit()
+        await mycursor.close()
 
     async def update_user_lvl(self, id: int):
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute(f"UPDATE MembersScore set user_lvl = user_lvl+1 WHERE user_id = {id}")
-                    await db.commit()
+        mycursor, db = await the_database()
+        await mycursor.execute(f"UPDATE MembersScore set user_lvl = user_lvl+1 WHERE user_id = {id}")
+        await db.commit()
+        await mycursor.close()
 
 
     async def update_user_xp_time(self, id: int, time: int):
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute(f"UPDATE MembersScore SET user_xp_time = {time} WHERE user_id = {id}")
-                    await db.commit()
+        mycursor, db = await the_database()
+        await mycursor.execute(f"UPDATE MembersScore SET user_xp_time = {time} WHERE user_id = {id}")
+        await db.commit()
+        await mycursor.close()
 
     async def update_user_money(self, user_id: int, money: int):
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute(f"UPDATE UserCurrency SET user_money = user_money + {money} WHERE user_id = {user_id}")
-                    await db.commit()
+        mycursor, db = await the_database()
+        await mycursor.execute(f"UPDATE UserCurrency SET user_money = user_money + {money} WHERE user_id = {user_id}")
+        await db.commit()
+        await mycursor.close()
 
     async def update_user_score_points(self, user_id: int, score_points: int):
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute(
-                        f"UPDATE MembersScore SET score_points = score_points + {score_points} WHERE user_id = {user_id}")
-                    await db.commit()
+        mycursor, db = await the_database()
+        await mycursor.execute(
+            f"UPDATE MembersScore SET score_points = score_points + {score_points} WHERE user_id = {user_id}")
+        await db.commit()
+        await mycursor.close()
 
     async def update_user_rep_time(self, user_id: int, rep_time: int):
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute(f"UPDATE MembersScore SET rep_time = {rep_time} WHERE user_id = {user_id}")
-                    await db.commit()
+        mycursor, db = await the_database()
+        await mycursor.execute(f"UPDATE MembersScore SET rep_time = {rep_time} WHERE user_id = {user_id}")
+        await db.commit()
+        await mycursor.close()
 
     async def get_users(self):
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute("SELECT * FROM MembersScore")
-                    members = await mycursor.fetchall()
-                    return members
+        mycursor, db = await the_database()
+        await mycursor.execute("SELECT * FROM MembersScore")
+        members = await mycursor.fetchall()
+        await mycursor.close()
+        return members
 
     async def get_specific_user(self, user_id: int):
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute(f"SELECT * FROM MembersScore WHERE user_id = {user_id}")
-                    member = await mycursor.fetchall()
-                    return member
+        mycursor, db = await the_database()
+        await mycursor.execute(f"SELECT * FROM MembersScore WHERE user_id = {user_id}")
+        member = await mycursor.fetchall()
+        await mycursor.close()
+        return member
 
     async def remove_user(self, id: int):
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute(f"DELETE FROM MembersScore WHERE user_id = {id}")
-                    await db.commit()
+        mycursor, db = await the_database()
+        await mycursor.execute(f"DELETE FROM MembersScore WHERE user_id = {id}")
+        await db.commit()
+        await mycursor.close()
 
     async def clear_user_lvl(self, id: int):
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute(f"UPDATE MembersScore SET user_xp = 0, user_lvl = 1 WHERE user_id = {id}")
-                    await db.commit()
+        mycursor, db = await the_database()
+        await mycursor.execute(f"UPDATE MembersScore SET user_xp = 0, user_lvl = 1 WHERE user_id = {id}")
+        await db.commit()
+        await mycursor.close()
 
     async def check_table_exist(self) -> bool:
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute(f"SHOW TABLE STATUS LIKE 'MembersScore'")
-                    table_info = await mycursor.fetchall()
-                    if len(table_info) == 0:
-                        return False
-                    else:
-                        return True
+        mycursor, db = await the_database()
+        await mycursor.execute(f"SHOW TABLE STATUS LIKE 'MembersScore'")
+        table_info = await mycursor.fetchall()
+        await mycursor.close()
+        if len(table_info) == 0:
+            return False
+        else:
+            return True
 
     async def get_user_currency(self, user_id: int):
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute(f"SELECT * FROM UserCurrency WHERE user_id = {user_id}")
-                    user_currency = await mycursor.fetchall()
-                    return user_currency
+        mycursor, db = await the_database()
+        await mycursor.execute(f"SELECT * FROM UserCurrency WHERE user_id = {user_id}")
+        user_currency = await mycursor.fetchall()
+        await mycursor.close()
+        return user_currency
 
     async def insert_user_currency(self, user_id: int, the_time: int):
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute("INSERT INTO UserCurrency (user_id, user_money, last_purchase_ts) VALUES (%s, %s, %s)",
-                                           (user_id, 0, the_time))
-                    await db.commit()
+        mycursor, db = await the_database()
+        await mycursor.execute("INSERT INTO UserCurrency (user_id, user_money, last_purchase_ts) VALUES (%s, %s, %s)",
+                               (user_id, 0, the_time))
+        await db.commit()
+        await mycursor.close()
 
         
 def setup(client):
