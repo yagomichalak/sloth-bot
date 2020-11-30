@@ -7,6 +7,7 @@ from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
 import os
 #import requests
+import shutil
 import asyncio
 import aiohttp
 from io import BytesIO
@@ -241,12 +242,11 @@ class SlothCurrency(commands.Cog):
         (ADM) Creates the UserItems table.
         '''
         await ctx.message.delete()
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute(
-                        "CREATE TABLE UserItems (user_id bigint, item_name VARCHAR(30), enable VARCHAR(10), item_type VARCHAR(10))")
-                    await db.commit()
+        mycursor, db = await the_database()
+        await mycursor.execute(
+            "CREATE TABLE UserItems (user_id bigint, item_name VARCHAR(30), enable VARCHAR(10), item_type VARCHAR(10))")
+        await db.commit()
+        await mycursor.close()
 
         return await ctx.send("**Table *UserItems* created!**", delete_after=3)
 
@@ -257,11 +257,10 @@ class SlothCurrency(commands.Cog):
         (ADM) Drops the UserItems table.
         '''
         await ctx.message.delete()
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute("DROP TABLE UserItems")
-                    await db.commit()
+        mycursor, db = await the_database()
+        await mycursor.execute("DROP TABLE UserItems")
+        await db.commit()
+        await mycursor.close()
 
         return await ctx.send("**Table *UserItems* dropped!**", delete_after=3)
 
@@ -272,11 +271,10 @@ class SlothCurrency(commands.Cog):
         (ADM) Resets the UserItems table.
         '''
         await ctx.message.delete()
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute("DELETE FROM UserItems")
-                    await db.commit()
+        mycursor, db = await the_database()
+        await mycursor.execute("DELETE FROM UserItems")
+        await db.commit()
+        await mycursor.close()
 
         return await ctx.send("**Table *UserItems* reseted!**", delete_after=3)
 
@@ -327,86 +325,79 @@ class SlothCurrency(commands.Cog):
             return await ctx.send(f"**{member.name} doesn't have that item!**", delete_after=3)
 
     async def insert_user_item(self, user_id: int, item_name: str, enable: str, item_type: str):
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute("INSERT INTO UserItems (user_id, item_name, enable, item_type) VALUES (%s, %s, %s, %s)",
-                                           (user_id, item_name.title(), enable, item_type.lower()))
-                    await db.commit()
+        mycursor, db = await the_database()
+        await mycursor.execute("INSERT INTO UserItems (user_id, item_name, enable, item_type) VALUES (%s, %s, %s, %s)",
+                               (user_id, item_name.title(), enable, item_type.lower()))
+        await db.commit()
+        await mycursor.close()
 
 
     async def remove_user_item(self, user_id: int, item_name: str):
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute(f"DELETE FROM UserItems WHERE item_name = '{item_name}' and user_id = {user_id}")
-                    await db.commit()
+        mycursor, db = await the_database()
+        await mycursor.execute(f"DELETE FROM UserItems WHERE item_name = '{item_name}' and user_id = {user_id}")
+        await db.commit()
+        await mycursor.close()
 
     async def update_user_item_info(self, user_id: int, item_name: str, enable: str):
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute(
-                        f"UPDATE UserItems SET enable = '{enable}' WHERE user_id = {user_id} and item_name = '{item_name}'")
-                    await db.commit()
+        mycursor, db = await the_database()
+        await mycursor.execute(
+            f"UPDATE UserItems SET enable = '{enable}' WHERE user_id = {user_id} and item_name = '{item_name}'")
+        await db.commit()
+        await mycursor.close()
 
 
     async def get_user_items(self, user_id: int):
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute(f"SELECT * FROM UserItems WHERE user_id = {user_id} ORDER BY user_id")
-                    item_system = await mycursor.fetchall()
-                    return item_system
+        mycursor, db = await the_database()
+        await mycursor.execute(f"SELECT * FROM UserItems WHERE user_id = {user_id} ORDER BY user_id")
+        item_system = await mycursor.fetchall()
+        await mycursor.close()
+        return item_system
 
     async def get_user_specific_type_item(self, user_id, item_type):
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute(
-                        f"SELECT * FROM UserItems WHERE user_id = {user_id} and item_type = '{item_type}' and enable = 'equipped'")
-                    spec_type_items = await mycursor.fetchall()
-                    if len(spec_type_items) != 0:
-                        registered_item = await self.get_specific_register_item(spec_type_items[0][1])
-                        return f'./sloth_custom_images/{item_type}/{registered_item[0][0]}'
-                    else:
-                        default_item = f'./sloth_custom_images/{item_type}/base_{item_type}.png'
-                        return default_item
+        mycursor, db = await the_database()
+        await mycursor.execute(
+            f"SELECT * FROM UserItems WHERE user_id = {user_id} and item_type = '{item_type}' and enable = 'equipped'")
+        spec_type_items = await mycursor.fetchall()
+        await mycursor.close()
+
+        if len(spec_type_items) != 0:
+            registered_item = await self.get_specific_register_item(spec_type_items[0][1])
+            return f'./sloth_custom_images/{item_type}/{registered_item[0][0]}'
+        else:
+            default_item = f'./sloth_custom_images/{item_type}/base_{item_type}.png'
+            return default_item
 
     async def check_user_can_equip(self, user_id, item_name: str) -> bool:
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    item_type = await self.get_specific_register_item(item_name)
-                    await mycursor.execute(
-                        f"SELECT * FROM UserItems WHERE user_id = {user_id} and item_type = '{item_type[0][1]}' and enable = 'equipped'")
-                    equipped_item = await mycursor.fetchall()
+        mycursor, db = await the_database()
+        item_type = await self.get_specific_register_item(item_name)
+        await mycursor.execute(
+            f"SELECT * FROM UserItems WHERE user_id = {user_id} and item_type = '{item_type[0][1]}' and enable = 'equipped'")
+        equipped_item = await mycursor.fetchall()
+        await mycursor.close()
 
-                    if len(equipped_item) != 0 and len(item_type) != 0:
-                        return False
-                    else:
-                        return True
+        if len(equipped_item) != 0 and len(item_type) != 0:
+            return False
+        else:
+            return True
 
     async def check_user_can_unequip(self, user_id, item_name: str) -> bool:
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute(
-                        f"SELECT * FROM UserItems WHERE user_id = {user_id} and item_name = '{item_name.lower()}' and enable = 'unequipped'")
-                    unequipped_item = await mycursor.fetchall()
+        mycursor, db = await the_database()
+        await mycursor.execute(
+            f"SELECT * FROM UserItems WHERE user_id = {user_id} and item_name = '{item_name.lower()}' and enable = 'unequipped'")
+        unequipped_item = await mycursor.fetchall()
+        await mycursor.close()
 
-                    if len(unequipped_item) != 0:
-                        return False
-                    else:
-                        return True
+        if len(unequipped_item) != 0:
+            return False
+        else:
+            return True
 
     async def get_user_specific_item(self, user_id: int, item_name: str):
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute(f"SELECT * FROM UserItems WHERE user_id = {user_id} and item_name = '{item_name}'")
-                    item_system = await mycursor.fetchall()
-                    return item_system
+        mycursor, db = await the_database()
+        await mycursor.execute(f"SELECT * FROM UserItems WHERE user_id = {user_id} and item_name = '{item_name}'")
+        item_system = await mycursor.fetchall()
+        await mycursor.close()
+        return item_system
 
     # Register Items
     @commands.command(hidden=True)
@@ -416,12 +407,11 @@ class SlothCurrency(commands.Cog):
         (ADM) Creates the RegisteredItems table.
         '''
         await ctx.message.delete()
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute(
-                        "CREATE TABLE RegisteredItems (image_name VARCHAR(50),item_type VARCHAR(10), item_name VARCHAR(30), item_price int, message_ref bigint, reaction_ref VARCHAR(50))")
-                    await db.commit()
+        mycursor, db = await the_database()
+        await mycursor.execute(
+            "CREATE TABLE RegisteredItems (image_name VARCHAR(50),item_type VARCHAR(10), item_name VARCHAR(30), item_price int, message_ref bigint, reaction_ref VARCHAR(50))")
+        await db.commit()
+        await mycursor.close()
 
         return await ctx.send("**Table *RegisteredItems* created!**", delete_after=3)
 
@@ -432,11 +422,10 @@ class SlothCurrency(commands.Cog):
         (ADM) Drops the RegisteredItems table.
         '''
         await ctx.message.delete()
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute(f"DROP TABLE RegisteredItems")
-                    await db.commit()
+        mycursor, db = await the_database()
+        await mycursor.execute(f"DROP TABLE RegisteredItems")
+        await db.commit()
+        await mycursor.close()
 
         return await ctx.send("**Table *RegisteredItems* dropped!**", delete_after=3)
 
@@ -447,11 +436,10 @@ class SlothCurrency(commands.Cog):
         (ADM) Resets the RegisteredItems table.
         '''
         await ctx.message.delete()
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute("DELETE FROM RegisteredItems")
-                    await db.commit()
+        mycursor, db = await the_database()
+        await mycursor.execute("DELETE FROM RegisteredItems")
+        await db.commit()
+        await mycursor.close()
 
         return await ctx.send("**Table *RegisteredItems* reseted!**", delete_after=3)
 
@@ -462,35 +450,32 @@ class SlothCurrency(commands.Cog):
         (ADM) Shows all the registered items in the shop.
         '''
         await ctx.message.delete()
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute("SELECT * FROM RegisteredItems")
-                    registered_items = await mycursor.fetchall()
+        mycursor, db = await the_database()
+        await mycursor.execute("SELECT * FROM RegisteredItems")
+        registered_items = await mycursor.fetchall()
+        await mycursor.close()
 
-                    embed = discord.Embed(title="Registered Items", description="All registered items and their info",
-                                          colour=discord.Colour.dark_green(), timestamp=ctx.message.created_at)
-                    for ri in registered_items:
-                        embed.add_field(name=f"{ri[2]}",
-                                        value=f"**File:** {ri[0]} | **Type:** {ri[1]} | **Price:** {ri[3]}łł | **Reaction:** {ri[5]} |**Message ID:** {ri[4]}",
-                                        inline=False)
-                    return await ctx.send(embed=embed)
+        embed = discord.Embed(title="Registered Items", description="All registered items and their info",
+                              colour=discord.Colour.dark_green(), timestamp=ctx.message.created_at)
+        for ri in registered_items:
+            embed.add_field(name=f"{ri[2]}",
+                            value=f"**File:** {ri[0]} | **Type:** {ri[1]} | **Price:** {ri[3]}łł | **Reaction:** {ri[5]} |**Message ID:** {ri[4]}",
+                            inline=False)
+        return await ctx.send(embed=embed)
 
     async def get_registered_items(self):
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute("SELECT * FROM RegisteredItems")
-                    registered_items = await mycursor.fetchall()
-                    return registered_items
+        mycursor, db = await the_database()
+        await mycursor.execute("SELECT * FROM RegisteredItems")
+        registered_items = await mycursor.fetchall()
+        await mycursor.close()
+        return registered_items
 
     async def get_specific_register_item(self, item_name: str):
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute(f"SELECT * FROM RegisteredItems WHERE item_name = '{item_name}'")
-                    item = await mycursor.fetchall()
-                    return item
+        mycursor, db = await the_database()
+        await mycursor.execute(f"SELECT * FROM RegisteredItems WHERE item_name = '{item_name}'")
+        item = await mycursor.fetchall()
+        await mycursor.close()
+        return item
 
     @commands.command()
     @commands.has_permissions(administrator=True)
@@ -556,20 +541,18 @@ class SlothCurrency(commands.Cog):
 
     async def insert_registered_item(self, mid: int, reactf, image_name: str, item_type: str, item_price: int,
                                      item_name: str):
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute(
-                        "INSERT INTO RegisteredItems (image_name, item_type, item_name, item_price, message_ref, reaction_ref) VALUES (%s, %s, %s, %s, %s, %s)",
-                        (image_name, item_type.lower(), item_name.title(), item_price, mid, reactf))
-                    await db.commit()
+        mycursor, db = await the_database()
+        await mycursor.execute(
+            "INSERT INTO RegisteredItems (image_name, item_type, item_name, item_price, message_ref, reaction_ref) VALUES (%s, %s, %s, %s, %s, %s)",
+            (image_name, item_type.lower(), item_name.title(), item_price, mid, reactf))
+        await db.commit()
+        await mycursor.close()
 
     async def delete_registered_item(self, item_name: str):
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute(f"DELETE FROM RegisteredItems WHERE item_name = '{item_name}'")
-                    await db.commit()
+        mycursor, db = await the_database()
+        await mycursor.execute(f"DELETE FROM RegisteredItems WHERE item_name = '{item_name}'")
+        await db.commit()
+        await mycursor.close()
 
     async def check_user_have_item(self, user_id: int, item_name: str):
 
@@ -588,11 +571,10 @@ class SlothCurrency(commands.Cog):
         (ADM) Creates the UserCurrency table.
         '''
         await ctx.message.delete()
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute("CREATE TABLE UserCurrency (user_id bigint, user_money bigint, last_purchase_ts bigint, user_classes bigint default 0, user_class_reward bigint default 0, user_hosted bigint default 0, user_lotto bigint default null)")
-                    await db.commit()
+        mycursor, db = await the_database()
+        await mycursor.execute("CREATE TABLE UserCurrency (user_id bigint, user_money bigint, last_purchase_ts bigint, user_classes bigint default 0, user_class_reward bigint default 0, user_hosted bigint default 0, user_lotto bigint default null)")
+        await db.commit()
+        await mycursor.close()
 
         return await ctx.send("**Table *UserCurrency* created!**", delete_after=3)
 
@@ -603,11 +585,10 @@ class SlothCurrency(commands.Cog):
         (ADM) Drops the UserCurrency table.
         '''
         await ctx.message.delete()
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute("DROP TABLE UserCurrency")
-                    await db.commit()
+        mycursor, db = await the_database()
+        await mycursor.execute("DROP TABLE UserCurrency")
+        await db.commit()
+        await mycursor.close()
 
         return await ctx.send("**Table *UserCurrency* dropped!**", delete_after=3)
 
@@ -618,11 +599,10 @@ class SlothCurrency(commands.Cog):
         (ADM) Resets the UserCurrency table.
         '''
         await ctx.message.delete()
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute("DELETE FROM UserCurrency")
-                    await db.commit()
+        mycursor, db = await the_database()
+        await mycursor.execute("DELETE FROM UserCurrency")
+        await db.commit()
+        await mycursor.close()
 
         return await ctx.send("**Table *UserCurrency* reseted!**", delete_after=3)
 
@@ -709,63 +689,58 @@ class SlothCurrency(commands.Cog):
         return await ctx.send(f"**{money} added to {member.name}'s bank account!**", delete_after=5)
 
     async def get_user_currency(self, user_id: int):
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute(f"SELECT * FROM UserCurrency WHERE user_id = {user_id}")
-                    user_currency = await mycursor.fetchall()
-                    return user_currency
+        mycursor, db = await the_database()
+        await mycursor.execute(f"SELECT * FROM UserCurrency WHERE user_id = {user_id}")
+        user_currency = await mycursor.fetchall()
+        await mycursor.close()
+        return user_currency
 
     async def try_to_buy_item(self, user_id: int, item_type: str, item_name: str, to_pay: int, guild_id: int,
                               the_time: int):
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute(f"SELECT * FROM UserCurrency WHERE user_id = {user_id}")
-                    user_info = await mycursor.fetchall()
-                    member = discord.utils.get(self.client.get_guild(guild_id).members, id=user_id)
-                    if user_info[0][1] >= to_pay:
-                        await self.insert_user_item(user_id, item_name, 'unequipped', item_type)
-                        await self.update_user_money(user_id, - to_pay)
-                        await self.update_user_purchase_ts(member.id, the_time)
-                        shop_embed = discord.Embed(title="Shop Communication",
-                                                   description=f"**You just bought a __{item_name}__!**",
-                                                   colour=discord.Color.green(), timestamp=datetime.utcnow())
-                        await member.send(embed=shop_embed)
-                    else:
-                        shop_embed = discord.Embed(title="Shop Communication",
-                                                   description=f"**You don't have money for that! You need more `{to_pay - user_info[0][1]}łł` in order to buy it!**",
-                                                   colour=discord.Color.green(), timestamp=datetime.utcnow())
-                        return await member.send(embed=shop_embed)
+        mycursor, db = await the_database()
+        await mycursor.execute(f"SELECT * FROM UserCurrency WHERE user_id = {user_id}")
+        user_info = await mycursor.fetchall()
+        await mycursor.close()
+
+        member = discord.utils.get(self.client.get_guild(guild_id).members, id=user_id)
+        if user_info[0][1] >= to_pay:
+            await self.insert_user_item(user_id, item_name, 'unequipped', item_type)
+            await self.update_user_money(user_id, - to_pay)
+            await self.update_user_purchase_ts(member.id, the_time)
+            shop_embed = discord.Embed(title="Shop Communication",
+                                       description=f"**You just bought a __{item_name}__!**",
+                                       colour=discord.Color.green(), timestamp=datetime.utcnow())
+            await member.send(embed=shop_embed)
+        else:
+            shop_embed = discord.Embed(title="Shop Communication",
+                                       description=f"**You don't have money for that! You need more `{to_pay - user_info[0][1]}łł` in order to buy it!**",
+                                       colour=discord.Color.green(), timestamp=datetime.utcnow())
+            return await member.send(embed=shop_embed)
 
     async def insert_user_currency(self, user_id: int, the_time: int):
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute("INSERT INTO UserCurrency (user_id, user_money, last_purchase_ts) VALUES (%s, %s, %s)",
-                                           (user_id, 0, the_time))
-                    await db.commit()
+        mycursor, db = await the_database()
+        await mycursor.execute("INSERT INTO UserCurrency (user_id, user_money, last_purchase_ts) VALUES (%s, %s, %s)",
+                               (user_id, 0, the_time))
+        await db.commit()
+        await mycursor.close()
 
     async def update_user_money(self, user_id: int, money: int):
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute(f"UPDATE UserCurrency SET user_money = user_money + {money} WHERE user_id = {user_id}")
-                    await db.commit()
+        mycursor, db = await the_database()
+        await mycursor.execute(f"UPDATE UserCurrency SET user_money = user_money + {money} WHERE user_id = {user_id}")
+        await db.commit()
+        await mycursor.close()
 
     async def update_user_purchase_ts(self, user_id: int, the_time: int):
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute(f"UPDATE UserCurrency SET last_purchase_ts = {the_time} WHERE user_id = {user_id}")
-                    await db.commit()
+        mycursor, db = await the_database()
+        await mycursor.execute(f"UPDATE UserCurrency SET last_purchase_ts = {the_time} WHERE user_id = {user_id}")
+        await db.commit()
+        await mycursor.close()
 
     async def update_user_lotto_ts(self, user_id: int, the_time: int):
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute(f"UPDATE UserCurrency SET user_lotto = {the_time} WHERE user_id = {user_id}")
-                    await db.commit()
+        mycursor, db = await the_database()
+        await mycursor.execute(f"UPDATE UserCurrency SET user_lotto = {the_time} WHERE user_id = {user_id}")
+        await db.commit()
+        await mycursor.close()
 
     # Google Drive commands
     @commands.command()
@@ -780,7 +755,8 @@ class SlothCurrency(commands.Cog):
 
         if rall.lower() == 'yes':
             try:
-                os.removedirs('./sloth_custom_images')
+                # os.removedirs('./sloth_custom_images')
+                shutil.rmtree('./sloth_custom_images')
             except Exception:
                 pass
                 
@@ -828,11 +804,10 @@ class SlothCurrency(commands.Cog):
         '''
         (ADM) Downloads all texts from the GoogleDrive and stores in the bot's folder
         '''
-
         if rall.lower() == 'yes':
             try:
-                os.removedirs('./texts')
-            except Exception:
+                shutil.rmtree('./texts')
+            except Exception as e:
                 pass
 
         all_text_folders = {"languages": "1_gBiliWPrCj5cLpChQfg9QRnj8skQVHM"}
@@ -911,12 +886,11 @@ class SlothCurrency(commands.Cog):
         (ADM) Creates the UserServerActivity table.
         '''
         await ctx.message.delete()
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute(
-                        "CREATE TABLE UserServerActivity (user_id bigint, user_messages bigint, user_time bigint, user_timestamp bigint DEFAULT NULL)")
-                    await db.commit()
+        mycursor, db = await the_database()
+        await mycursor.execute(
+            "CREATE TABLE UserServerActivity (user_id bigint, user_messages bigint, user_time bigint, user_timestamp bigint DEFAULT NULL)")
+        await db.commit()
+        await mycursor.close()
 
         return await ctx.send("**Table *UserServerActivity* created!**", delete_after=3)
 
@@ -927,53 +901,47 @@ class SlothCurrency(commands.Cog):
         (ADM) Drops the UserServerActivity table.
         '''
         await ctx.message.delete()
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute("DROP TABLE UserServerActivity")
-                    await db.commit()
+        mycursor, db = await the_database()
+        await mycursor.execute("DROP TABLE UserServerActivity")
+        await db.commit()
+        await mycursor.close()
 
         return await ctx.send("**Table *UserServerActivity* dropped!**", delete_after=3)
 
     async def insert_user_server_activity(self, user_id: int, add_msg: int, new_ts: int = None):
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute(
-                        "INSERT INTO UserServerActivity (user_id, user_messages, user_time, user_timestamp) VALUES (%s, %s, %s, %s)",
-                        (user_id, add_msg, 0, new_ts))
-                    await db.commit()
+        mycursor, db = await the_database()
+        await mycursor.execute(
+            "INSERT INTO UserServerActivity (user_id, user_messages, user_time, user_timestamp) VALUES (%s, %s, %s, %s)",
+            (user_id, add_msg, 0, new_ts))
+        await db.commit()
+        await mycursor.close()
 
     async def get_user_activity_info(self, user_id: int):
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute(f"SELECT * FROM UserServerActivity WHERE user_id = {user_id}")
-                    user_info = await mycursor.fetchall()
-                    return user_info
+        mycursor, db = await the_database()
+        await mycursor.execute(f"SELECT * FROM UserServerActivity WHERE user_id = {user_id}")
+        user_info = await mycursor.fetchall()
+        await mycursor.close()
+        return user_info
 
     async def update_user_server_messages(self, user_id: int, add_msg: int):
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute(
-                        f"UPDATE UserServerActivity SET user_messages = user_messages + {add_msg} WHERE user_id = {user_id}")
-                    await db.commit()
+        mycursor, db = await the_database()
+        await mycursor.execute(
+            f"UPDATE UserServerActivity SET user_messages = user_messages + {add_msg} WHERE user_id = {user_id}")
+        await db.commit()
+        await mycursor.close()
 
     async def update_user_server_time(self, user_id: int, add_time: int):
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute(
-                        f"UPDATE UserServerActivity SET user_time = user_time + {add_time} WHERE user_id = {user_id}")
-                    await db.commit()
+        mycursor, db = await the_database()
+        await mycursor.execute(
+            f"UPDATE UserServerActivity SET user_time = user_time + {add_time} WHERE user_id = {user_id}")
+        await db.commit()
+        await mycursor.close()
 
     async def update_user_server_timestamp(self, user_id: int, new_ts: int):
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute(f"UPDATE UserServerActivity SET user_timestamp = {new_ts} WHERE user_id = {user_id}")
-                    await db.commit()
+        mycursor, db = await the_database()
+        await mycursor.execute(f"UPDATE UserServerActivity SET user_timestamp = {new_ts} WHERE user_id = {user_id}")
+        await db.commit()
+        await mycursor.close()
 
 
     @commands.command(hidden=True)
@@ -983,11 +951,10 @@ class SlothCurrency(commands.Cog):
         (ADM) Resets the UserServerActivity table.
         '''
         await ctx.message.delete()
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute("DELETE FROM UserServerActivity")
-                    await db.commit()
+        mycursor, db = await the_database()
+        await mycursor.execute("DELETE FROM UserServerActivity")
+        await db.commit()
+        await mycursor.close()
         return await ctx.send("**Table *UserServerActivity* reseted!**", delete_after=3)
 
     @commands.command()
@@ -1021,16 +988,16 @@ class SlothCurrency(commands.Cog):
         return await ctx.send(embed=embed)
 
     async def check_table_exist(self) -> bool:
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute(f"SHOW TABLE STATUS LIKE 'UserServerActivity'")
-                    table_info = await mycursor.fetchall()
-                    if len(table_info) == 0:
-                        return False
+        mycursor, db = await the_database()
+        await mycursor.execute("SHOW TABLE STATUS LIKE 'UserServerActivity'")
+        table_info = await mycursor.fetchall()
+        await mycursor.close()
 
-                    else:
-                        return True
+        if len(table_info) == 0:
+            return False
+
+        else:
+            return True
 
     @commands.command()
     async def exchange(self, ctx):
@@ -1205,12 +1172,11 @@ class SlothCurrency(commands.Cog):
         return im_thumb
     
     async def get_specific_user(self, user_id: int):
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute(f"SELECT * FROM MembersScore WHERE user_id = {user_id}")
-                    member = await mycursor.fetchall()
-                    return member
+        mycursor, db = await the_database()
+        await mycursor.execute(f"SELECT * FROM MembersScore WHERE user_id = {user_id}")
+        member = await mycursor.fetchall()
+        await mycursor.close()
+        return member
 
 def setup(client):
     client.add_cog(SlothCurrency(client))

@@ -85,14 +85,13 @@ class Analytics(commands.Cog):
         '''
         Bumps the data from the given day to the database.
         '''
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute('''
-                        INSERT INTO DataBumps (
-                        m_joined, m_left, messages, members, online, complete_date)
-                        VALUES (%s, %s, %s, %s, %s, %s)''', (joined, left, messages, members, online, complete_date))
-                    await db.commit()
+        mycursor, db = await the_database()
+        await mycursor.execute('''
+            INSERT INTO DataBumps (
+            m_joined, m_left, messages, members, online, complete_date)
+            VALUES (%s, %s, %s, %s, %s, %s)''', (joined, left, messages, members, online, complete_date))
+        await db.commit()
+        await mycursor.close()
 
     # Table UserCurrency
     @commands.command(hidden=True)
@@ -102,18 +101,17 @@ class Analytics(commands.Cog):
         (ADM) Creates the SlothAnalytics table.
         '''
         await ctx.message.delete()
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute(
-                        f"CREATE TABLE SlothAnalytics (m_joined int default 0, m_left int default 0, messages_sent int default 0, day_now VARCHAR(2))")
-                    await db.commit()
-                    time_now = datetime.now()
-                    tzone = timezone("CET")
-                    date_and_time = time_now.astimezone(tzone)
-                    day = date_and_time.strftime('%d')
-                    await mycursor.execute("INSERT INTO SlothAnalytics (day_now) VALUES (%s)", (day))
-                    await db.commit()
+        mycursor, db = await the_database()
+        await mycursor.execute(
+            f"CREATE TABLE SlothAnalytics (m_joined int default 0, m_left int default 0, messages_sent int default 0, day_now VARCHAR(2))")
+        await db.commit()
+        time_now = datetime.now()
+        tzone = timezone("CET")
+        date_and_time = time_now.astimezone(tzone)
+        day = date_and_time.strftime('%d')
+        await mycursor.execute("INSERT INTO SlothAnalytics (day_now) VALUES (%s)", (day))
+        await db.commit()
+        await mycursor.close()
         return await ctx.send("**Table *SlothAnalytics* created!**", delete_after=3)
 
     @commands.command(hidden=True)
@@ -123,11 +121,10 @@ class Analytics(commands.Cog):
         (ADM) Drops the SlothAnalytics table.
         '''
         await ctx.message.delete()
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute("DROP TABLE SlothAnalytics")
-                    await db.commit()
+        mycursor, db = await the_database()
+        await mycursor.execute("DROP TABLE SlothAnalytics")
+        await db.commit()
+        await mycursor.close()
         return await ctx.send("**Table *SlothAnalytics* dropped!**", delete_after=3)
 
     @commands.command(hidden=True)
@@ -138,66 +135,59 @@ class Analytics(commands.Cog):
         '''
         if ctx:
             await ctx.message.delete()
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute("DELETE FROM SlothAnalytics")
-                    await db.commit()  # IDK
-                    time_now = datetime.now()
-                    tzone = timezone("CET")
-                    date_and_time = time_now.astimezone(tzone)
-                    day = date_and_time.strftime('%d')
-                    await mycursor.execute("INSERT INTO SlothAnalytics (day_now) VALUES (%s)", (day))
-                    await db.commit()
+        mycursor, db = await the_database()
+        await mycursor.execute("DELETE FROM SlothAnalytics")
+        await db.commit()  # IDK
+        time_now = datetime.now()
+        tzone = timezone("CET")
+        date_and_time = time_now.astimezone(tzone)
+        day = date_and_time.strftime('%d')
+        await mycursor.execute("INSERT INTO SlothAnalytics (day_now) VALUES (%s)", (day))
+        await db.commit()
+        await mycursor.close()
         if ctx:
             return await ctx.send("**Table *SlothAnalytics* reset!**", delete_after=3)
 
     async def update_joined(self) -> None:
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute("UPDATE SlothAnalytics SET m_joined = m_joined + 1")
-                    await db.commit()
+        mycursor, db = await the_database()
+        await mycursor.execute("UPDATE SlothAnalytics SET m_joined = m_joined + 1")
+        await db.commit()
+        await mycursor.close()
 
     async def update_left(self) -> None:
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute("UPDATE SlothAnalytics SET m_left = m_left + 1")
-                    await db.commit()
+        mycursor, db = await the_database()
+        await mycursor.execute("UPDATE SlothAnalytics SET m_left = m_left + 1")
+        await db.commit()
+        await mycursor.close()
 
     async def update_messages(self) -> None:
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute("UPDATE SlothAnalytics SET messages_sent = messages_sent + 1")
-                    await db.commit()
+        mycursor, db = await the_database()
+        await mycursor.execute("UPDATE SlothAnalytics SET messages_sent = messages_sent + 1")
+        await db.commit()
+        await mycursor.close()
 
     async def update_day(self, day: str) -> None:
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute(f"UPDATE SlothAnalytics SET day_now = '{day}'")
-                    await db.commit()
+        mycursor, db = await the_database()
+        await mycursor.execute(f"UPDATE SlothAnalytics SET day_now = '{day}'")
+        await db.commit()
+        await mycursor.close()
 
     async def check_relatory_time(self, time_now: str) -> bool:
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute("SELECT * from SlothAnalytics")
-                    info = await mycursor.fetchall()
-                    if str(info[0][3]) != str(time_now):
-                        return True
-                    else:
-                        return False
+        mycursor, db = await the_database()
+        await mycursor.execute("SELECT * from SlothAnalytics")
+        info = await mycursor.fetchall()
+        await mycursor.close()
+        if str(info[0][3]) != str(time_now):
+            return True
+        else:
+            return False
 
     async def get_info(self) -> List[int]:
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute("SELECT * from SlothAnalytics")
-                    info = await mycursor.fetchall()
-                    return info
+        mycursor, db = await the_database()
+        await mycursor.execute("SELECT * from SlothAnalytics")
+        info = await mycursor.fetchall()
+        await mycursor.close()
+        return info
 
     # Table UserCurrency
     @commands.command(hidden=True)
@@ -212,14 +202,13 @@ class Analytics(commands.Cog):
             return await ctx.send("**The table `DataBumps` already exists!**")
 
         await ctx.message.delete()
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute('''
-                        CREATE TABLE DataBumps (
-                        m_joined BIGINT, m_left BIGINT, messages BIGINT, members BIGINT, online BIGINT, complete_date VARCHAR(11)
-                        )''')
-                    await db.commit()
+        mycursor, db = await the_database()
+        await mycursor.execute('''
+            CREATE TABLE DataBumps (
+            m_joined BIGINT, m_left BIGINT, messages BIGINT, members BIGINT, online BIGINT, complete_date VARCHAR(11)
+            )''')
+        await db.commit()
+        await mycursor.close()
         return await ctx.send("**Table `DataBumps` created!**")
 
     @commands.command(hidden=True)
@@ -233,11 +222,10 @@ class Analytics(commands.Cog):
             return await ctx.send("**The table `DataBumps` doesn't exist!**")
 
         await ctx.message.delete()
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute("DROP TABLE DataBumps")
-                    await db.commit()
+        mycursor, db = await the_database()
+        await mycursor.execute("DROP TABLE DataBumps")
+        await db.commit()
+        await mycursor.close()
         return await ctx.send("**Table `DataBumps` dropped!**")
 
     @commands.command(hidden=True)
@@ -252,25 +240,23 @@ class Analytics(commands.Cog):
             return await ctx.send("**The table `DataBumps` doesn't exist yet!**")
 
         await ctx.message.delete()
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute("DELETE FROM DataBumps")
-                    await db.commit()
+        mycursor, db = await the_database()
+        await mycursor.execute("DELETE FROM DataBumps")
+        await db.commit()
+        await mycursor.close()
         await ctx.send("**Table `DataBumps` reset!**")
 
     async def table_data_bumps_exists(self) -> bool:
         """ Checks whether the DataBumps table exists. """
 
-        async with the_database() as con:
-            async with con.acquire() as db:
-                async with db.cursor() as mycursor:
-                    await mycursor.execute("SHOW TABLE STATUS LIKE 'DataBumps'")
-                    exists = await mycursor.fetchall()
-                    if len(exists) == 0:
-                        return False
-                    else:
-                        return True
+        mycursor, db = await the_database()
+        await mycursor.execute("SHOW TABLE STATUS LIKE 'DataBumps'")
+        exists = await mycursor.fetchall()
+        await mycursor.close()
+        if len(exists) == 0:
+            return False
+        else:
+            return True
 
 
 def setup(client):
