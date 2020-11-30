@@ -1,6 +1,5 @@
 venv
 .env
-.idea
 mycreds.txt
 mysqldb.py
 credentials.json
