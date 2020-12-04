@@ -4,7 +4,7 @@ from discord.ext import commands
 rules = [
     "Do not post or talk about NSFW content in text or voice chat. This server is a safe for work.",
     "Be respectful of all members, especially Staff.",
-    "Avoid topics such as: Politics,Religion,Self-Harm or anything considered controversial anywhere in the server except in the **Debate Club**.",
+    "Avoid topics such as: Politics, Religion, Transphobia, Self-Harm or anything considered controversial anywhere in the server except in the **Debate Club**.",
     "Do not advertise your server or other communities without express consent from an Owner of this server.",
     "Do not share others' personal information without their consent.",
     "Do not flood or spam the text chat. Do not staff members repeatedly without a reason.",
