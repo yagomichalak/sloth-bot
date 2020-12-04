@@ -48,7 +48,7 @@ class Embeds(commands.Cog):
         embed.add_field(name="#2 Respect at all times.", value="Be respectful of all members, especially Staff.",
                         inline=False)
         embed.add_field(name="#3 Avoid Controversy",
-                        value="Avoid topics such as: Politics,Religion,Self-Harm or anything considered controversial anywhere in the server except in the **Debate Club**.",
+                        value="Avoid topics such as: Politics, Religion, Transphobia, Self-Harm or anything considered controversial anywhere in the server except in the **Debate Club**.",
                         inline=False)
         embed.add_field(name="#4 No Advertising",
                         value="Do not advertise your server or other communities without express consent from an Owner of this server.",
