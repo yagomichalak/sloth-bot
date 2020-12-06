@@ -24,7 +24,7 @@ class TeacherAPI(commands.Cog):
 		self.session = aiohttp.ClientSession(loop=client.loop)
 		self.classes_channel_id: int = int(os.getenv('CLASSES_CHANNEL_ID'))
 		# self.website_link: str = 'https://languagesloth.herokuapp.com/api/teachers/?format=json'
-		self.website_link: str = 'http://193.70.127.179/api/teachers/?format=json'
+		self.website_link: str = 'http://www.thelanguagesloth.com/api/teachers/?format=json'
 
 
 	@commands.Cog.listener()
