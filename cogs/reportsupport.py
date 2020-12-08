@@ -225,7 +225,7 @@ class ReportSupport(commands.Cog):
 		if not a5:
 			return
 
-		embed.description = '''- Inform a short description for you class.'''
+		embed.description = '''- Inform a short description for your class.'''
 		q6 = await member.send(embed=embed)
 		a6 = await self.get_message(member, msg_check)
 		if not a6:
