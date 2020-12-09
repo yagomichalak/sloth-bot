@@ -63,7 +63,6 @@ class Show(commands.Cog):
 
         member = ctx.author
 
-        group_by += 's'.title()
         mycursor, db = await the_database()
         await mycursor.execute("""
             SELECT 
