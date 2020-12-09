@@ -402,6 +402,7 @@ class CreateClassroom(commands.Cog):
                                                                mute_members=True,
                                                                embed_links=True, connect=True,
                                                                speak=True,
+                                                               move_members=True,
                                                                view_channel=True)
         overwrites[mod_role] = discord.PermissionOverwrite(read_messages=True,
                                                            send_messages=True,
@@ -410,6 +411,7 @@ class CreateClassroom(commands.Cog):
                                                            embed_links=True,
                                                            connect=True,
                                                            speak=True,
+                                                           move_members=True,
                                                            view_channel=True)
         overwrites[preference_role] = discord.PermissionOverwrite(read_messages=True,
                                                                   send_messages=False,
