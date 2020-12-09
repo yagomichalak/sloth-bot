@@ -80,10 +80,10 @@ class Show(commands.Cog):
         embed = discord.Embed(
             title="__Server's Monthly Statuses__",
             description="**N**: Month counting;\n"\
-            +"**Date**: The day of the month that the bot started registering server statuses;\n"\
-            +"**Joins**: The total of users who joined the server in the month;\n"\
-            +"**FtRec**: First record of total members of the month;\n"\
-            +"**LtRec**: Last record of total members of the month.",
+            +"**Date**: Months respective to the data;\n"\
+            +"**Joins**: Number of users who joined in the month;\n"\
+            +"**FtRec**: Total members in the first day of the month;\n"\
+            +"**LtRec**: Total members in the last day of the month.",
             color=member.color,
             timestamp=ctx.message.created_at,
             url="http://thelanguagesloth.com"
