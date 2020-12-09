@@ -81,15 +81,15 @@ class Show(commands.Cog):
             title="__Server's Monthly Statuses__",
             description="**N**: Month counting;\n"\
             +"**Date**: Months respective to the data;\n"\
-            +"**Joins**: Number of users who joined in the month;\n"\
-            +"**FtRec**: Total members in the first day of the month;\n"\
-            +"**LtRec**: Total members in the last day of the month.",
+            +"**Joins**: New members;\n"\
+            +"**First**: Total members in the first day of the month;\n"\
+            +"**Last**: Total members in the last day of the month.",
             color=member.color,
             timestamp=ctx.message.created_at,
             url="http://thelanguagesloth.com"
         )
 
-        temp_text1 = f"{'N':>2} | {'Date':<4} | {'Joins':^5} | {'FtRec':>5} | {'LtRec':>5}"
+        temp_text1 = f"{'N':>2} | {'Date':<4} | {'Joins':^5} | {'First':>5} | {'Last':>5}"
 
         embed.add_field(
             name=f"{'='*35}",
