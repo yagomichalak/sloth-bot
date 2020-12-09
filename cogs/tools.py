@@ -296,7 +296,7 @@ class Tools(commands.Cog):
         """ Magnets all users who are in the voice channel into a single channel. """
 
         vcs = ctx.guild.voice_channels
-        all_members = [m.name for vc in vcs for m in vc.members]
+        all_members = [m for vc in vcs for m in vc.members]
 
         # Checks user's channel state
         user_state = ctx.author.voice
