@@ -118,6 +118,11 @@ class Moderation(commands.Cog):
 		:param member: The member from whom to purge the messages. (Optional)
 		'''
 
+		perms = ctx.channel.permissions_for(ctx.author)
+		if not perms.administrator:
+			if amount >= 30:
+				return await ctx.send(f"**You cannot delete more than `30` messages at a time, {ctx.author.mention}!**")
+
 		await ctx.message.delete()
 		# global deleted
 		deleted = 0
