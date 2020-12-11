@@ -311,24 +311,30 @@ class CreateClassroom(commands.Cog):
                     return True
 
             while True:
-                m, s = divmod(active_users[class_index][3], 60)
-                h, m = divmod(m, 60)
-                member = discord.utils.get(guild.members, id=active_users[class_index][0])
-                if not member:
-                    if class_index < (len(active_users) - 1):
-                        class_index += 1
-                        continue
-                    else:
-                        break
+                try:
+                    m, s = divmod(active_users[class_index][3], 60)
+                    h, m = divmod(m, 60)
+                    member = discord.utils.get(guild.members, id=active_users[class_index][0])
+                    if not member:
+                        if class_index < (len(active_users) - 1):
+                            class_index += 1
+                            continue
+                        else:
+                            break
 
-                reward_embed = discord.Embed(
-                    title=f"**[{class_index + 1}/{len(active_users)}] Reward __{member}__?**",
-                    description=f"**Sent:** {active_users[class_index][1]} messages.\n**Have been:** {h:d} hours, {m:02d} minutes and {s:02d} seconds in the voice channel.",
-                    colour=discord.Colour.green())
-                reward_embed.set_thumbnail(url=member.avatar_url)
-                reward_embed.set_author(name=f"ID: {member.id}")
-                reward_embed.set_footer(text=guild.name, icon_url=guild.icon_url)
-                await simple.edit(embed=reward_embed)
+                    reward_embed = discord.Embed(
+                        title=f"**[{class_index + 1}/{len(active_users)}] Reward __{member}__?**",
+                        description=f"**Sent:** {active_users[class_index][1]} messages.\n**Have been:** {h:d} hours, {m:02d} minutes and {s:02d} seconds in the voice channel.",
+                        colour=discord.Colour.green())
+                    reward_embed.set_thumbnail(url=member.avatar_url)
+                    reward_embed.set_author(name=f"ID: {member.id}")
+                    reward_embed.set_footer(text=guild.name, icon_url=guild.icon_url)
+                    await simple.edit(embed=reward_embed)
+                except Exception as e:
+                    print("=====class=problem====")
+                    print(e)
+                    print("=====class=problem====")
+                    continue
 
                 reaction, user = await self.client.wait_for('reaction_add', check=check_reward_react)
 
