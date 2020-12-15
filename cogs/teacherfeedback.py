@@ -3,9 +3,10 @@ from discord.ext import commands
 from mysqldb import *
 from datetime import datetime
 import asyncio
-from typing import Dict
+from typing import Dict, List, Union, Any
 import time
 import os
+from pprint import pprint
 
 create_room_vc_id = int(os.getenv('CREATE_SMART_CLASSROOM_VC_ID'))
 create_room_cat_id = int(os.getenv('CREATE_ROOM_CAT_ID'))
@@ -27,9 +28,54 @@ class CreateClassroom(commands.Cog):
         self.teacher_cache: Dict = {}
 
 
+
     @commands.Cog.listener()
     async def on_ready(self):
         print("CreateClassroom cog is online!")
+
+    @commands.Cog.listener()
+    async def on_raw_reaction_add(self, payload) -> None:
+        # Checks whether it wasn't a bot's reaction
+        if not payload.guild_id:
+            return
+
+        # Checks whether it's a DM reaction or bot reaction
+        if not payload.member or payload.member.bot:
+            return
+
+        # Checks whether it was a reaction in the rewards channel
+        if payload.channel_id != reward_channel_id:
+            return
+
+
+        guild = self.client.get_guild(payload.guild_id)
+
+        # Checks if it's a reward message
+        user, lenactive = await self.get_waiting_reward_student(payload.user_id, payload.message_id)
+        if user:
+            emoji = str(payload.emoji)
+            channel = discord.utils.get(guild.channels, id=reward_channel_id)
+            msg = await channel.fetch_message(payload.message_id)
+            await msg.remove_reaction(payload.emoji.name, payload.member)
+            if emoji == '✅':
+                # Adds user to RewardAcceptedStudents table
+                await self.add_student_rewarded(user)
+                await self.remove_waiting_reward_student(user[0], user[1], user[4])
+                # print('removed1:', user[1])
+                await asyncio.sleep(0.5)
+                user, lenactive = await self.get_waiting_reward_student(payload.user_id, payload.message_id)
+                await self.show_user_feedback(msg=msg, guild=guild, user=user, lenactive=lenactive, teacher=payload.member)
+            else:
+                await self.remove_waiting_reward_student(msg_id=user[0], user_id=user[1], teacher_id=user[4])
+                # print('removed2:', user[1])
+                await asyncio.sleep(0.5)
+                user, lenactive = await self.get_waiting_reward_student(payload.user_id, payload.message_id)
+                return await self.show_user_feedback(msg=msg, guild=guild, user=user, lenactive=lenactive, teacher=payload.member)
+            
+        else:
+            # print('Not in the system anymore, for some reason...')
+            pass
+
 
 
     @commands.Cog.listener()
@@ -219,7 +265,7 @@ class CreateClassroom(commands.Cog):
                     return user == member and str(reaction.emoji) in '✅❌'
 
                 teacher_class = await self.get_active_class_by_teacher(member.id)
-                print(teacher_class[0][6])
+                # print(teacher_class[0][6])
                 reaction, user = await self.client.wait_for('reaction_add', check=check)
                 if str(reaction.emoji) == "✅":
                     await text_channel.send("**Class ended!**")
@@ -228,7 +274,7 @@ class CreateClassroom(commands.Cog):
                     await asyncio.sleep(5)
                     # Gets all students and deletes the class from the system
                     users_feedback = await self.get_all_students(member.id)
-                    print(users_feedback)
+                    # print(users_feedback)
                     await self.delete_active_class(member.id)
                     await self.delete_active_students(member.id)
 
@@ -237,7 +283,7 @@ class CreateClassroom(commands.Cog):
                     history_channel = discord.utils.get(member.guild.channels, id=class_history_channel_id)
                     m, s = divmod(teacher_class[0][6], 60)
                     h, m = divmod(m, 60)
-                    print(teacher_class[0][6])
+                    # print(teacher_class[0][6])
                     if int(teacher_class[0][6]) >= 600:
                         class_embed = discord.Embed(title=f"__{teacher_class[0][3].title()} Class__",
                                                     description=teacher_class[0][8], colour=member.colour,
@@ -255,8 +301,28 @@ class CreateClassroom(commands.Cog):
 
                     #teacher_id, users_feedback, guild, language, class_type
                     #teacher_id, txt_id, vc_id, language, class_type, vc_timestamp, vc_time, members, class_desc
-                    await self.ask_class_feedback(teacher_class[0][0], users_feedback, member.guild,
-                                                  teacher_class[0][3], teacher_class[0][4])
+
+
+
+                    #await self.show_user_feedback(teacher_class[0][0], users_feedback, member.guild,
+                     #                             teacher_class[0][3], teacher_class[0][4])
+                    guild = member.guild
+                    teacher = discord.utils.get(guild.members, id=member.id)
+                    simple_embed = discord.Embed(title=f"All {teacher.name}'s students", description="**LOADING...**",
+                                                 colour=discord.Colour.green())
+                    simple_embed.set_thumbnail(url=guild.icon_url)
+                    simple_embed.set_footer(text=guild.name, icon_url=guild.icon_url)
+                    reward_channel = discord.utils.get(guild.channels, id=reward_channel_id)
+                    simple = await reward_channel.send(content=teacher.mention, embed=simple_embed)
+                    await simple.add_reaction('✅')
+                    await simple.add_reaction('❌')
+                    await self.save_class_feedback(msg=simple,
+                        teacher=member, users_feedback=users_feedback, 
+                        class_type=teacher_class[0][4], language=teacher_class[0][3], guild=guild
+                    )
+                    # user, lenactive = await self.get_waiting_reward_student(teacher_id=teacher_class[0][0], msg_id=simple.id)
+                    # await self.show_user_feedback(
+                    #     msg=simple, guild=guild, user=user, lenactive=lenactive)
                 else:
                     await text_channel.send("**Class not ended!**")
 
@@ -275,7 +341,11 @@ class CreateClassroom(commands.Cog):
 
     # General commands
 
-    async def ask_class_feedback(self, teacher_id: int, users_feedback, guild, language, class_type):
+    async def save_class_feedback(self, msg, teacher, users_feedback, class_type, language, guild) -> None:
+        """ Saves all users that filled the class' requirements. """
+
+
+        # Checks the class' requirements based on the type of the class (Grammar, Pronunciation)
         reward_channel = discord.utils.get(guild.channels, id=reward_channel_id)
         active_users = []
         if users_feedback:
@@ -284,106 +354,176 @@ class CreateClassroom(commands.Cog):
             elif class_type.title() == 'Grammar':
                 active_users = [uf for uf in users_feedback if uf[1] >= 10]
 
-        # student_id, student_messages, student_ts, student_time, teacher_id, vc_id
-        if not active_users:
-            return
-        #print(active_users)
-        for uf in active_users:
-            if await self.user_in_currency(uf[0]):
-                await self.update_user_classes(uf[0])
-                #print('\033[33muser classes updated\033[m')
 
-        if reward_channel:
-            teacher = discord.utils.get(guild.members, id=teacher_id)
-            simple_embed = discord.Embed(title=f"All {teacher.name}'s students", description="**LOADING...**",
-                                         colour=discord.Colour.green())
-            simple_embed.set_thumbnail(url=guild.icon_url)
-            simple_embed.set_footer(text=guild.name, icon_url=guild.icon_url)
-            simple = await reward_channel.send(content=teacher.mention, embed=simple_embed)
-            class_index = 0
-            users_to_reward = []
+        mycursor, db = await the_database()
 
-            await simple.add_reaction('✅')
-            await simple.add_reaction('❌')
+        sql = """INSERT INTO RewardStudents (
+            reward_message, student_id, student_messages, 
+            student_time, teacher_id, class_type, 
+            language)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)"""
 
-            def check_reward_react(reaction, user):
-                if user.id == teacher.id and str(reaction.emoji) in ['✅', '❌']:
-                    return True
+        formated_active_users = [
+            (msg.id, u[0], u[1], u[3], teacher.id, class_type, language) for u in active_users
+        ]
 
-            while True:
-                try:
-                    m, s = divmod(active_users[class_index][3], 60)
-                    h, m = divmod(m, 60)
-                    member = discord.utils.get(guild.members, id=active_users[class_index][0])
-                    if not member:
-                        if class_index < (len(active_users) - 1):
-                            class_index += 1
-                            continue
-                        else:
-                            break
+        # pprint(formated_active_users)
 
-                    reward_embed = discord.Embed(
-                        title=f"**[{class_index + 1}/{len(active_users)}] Reward __{member}__?**",
-                        description=f"**Sent:** {active_users[class_index][1]} messages.\n**Have been:** {h:d} hours, {m:02d} minutes and {s:02d} seconds in the voice channel.",
-                        colour=discord.Colour.green())
-                    reward_embed.set_thumbnail(url=member.avatar_url)
-                    reward_embed.set_author(name=f"ID: {member.id}")
-                    reward_embed.set_footer(text=guild.name, icon_url=guild.icon_url)
-                    await simple.edit(embed=reward_embed)
-                except Exception as e:
-                    print("=====class=problem====")
-                    print(e)
-                    print("=====class=problem====")
-                    continue
+        await mycursor.executemany(sql, formated_active_users)
+        await db.commit()
+        await mycursor.close()
 
-                reaction, user = await self.client.wait_for('reaction_add', check=check_reward_react)
+        user, lenactive = await self.get_waiting_reward_student(teacher.id, msg.id)
+        # print('Let us start the first show_user_feedback!!!!!!!!')
+        await self.show_user_feedback(msg=msg, guild=guild, user=user, lenactive=lenactive, teacher=teacher)
+        # print("**Nice!**")
 
-                if str(reaction.emoji) == "✅":
-                    await simple.remove_reaction(reaction.emoji, teacher)
-                    users_to_reward.append(active_users[class_index][0])
-                    # rewards the user
-                    if class_index < (len(active_users) - 1):
-                        class_index += 1
-                        continue
-                    else:
-                        break
-                elif str(reaction.emoji) == '❌':
-                    await simple.remove_reaction(reaction.emoji, teacher)
-                    if class_index < (len(active_users) - 1):
-                        class_index += 1
-                        # doesn't reward the user
-                        continue
-                    else:
-                        break
+    
+    async def add_student_rewarded(self, user: List[Union[int, str]]):
+        """ Saves a user to be rewarded later on.
+        :param user: The user to be saved. """
 
+        # print("# - Saving user...")
+
+        mycursor, db = await the_database()
+        await mycursor.execute("""
+            INSERT INTO RewardAcceptedStudents (teacher_id, student_id, language, class_type, msg_id)
+            VALUES (%s, %s, %s, %s, %s)""", (user[4], user[1], user[6], user[5], user[0]))
+        await db.commit()
+        await mycursor.close()
+
+    async def delete_rewarded_users(self, msg_id: int) -> None:
+        """ Deletes a class rewarding message by message ID:
+        :param msg_id: The message ID with which to delete. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("DELETE FROM RewardAcceptedStudents WHERE msg_id = %s", (msg_id,))
+        await db.commit()
+        await mycursor.close()
+
+    async def get_waiting_reward_student(self, user_id: int, msg_id: int) -> List[Union[str, int]]:
+
+        mycursor, db = await the_database()
+
+        await mycursor.execute("SELECT * FROM RewardStudents WHERE reward_message = %s and teacher_id = %s", (msg_id, user_id))
+        users = await mycursor.fetchall()
+        await mycursor.close()
+        if users:
+            return users[0], len(users)
+        else:
+            return users, len(users)
+
+    async def get_reward_accepted_students(self, msg_id: int) -> List[List[Union[int, str]]]:
+        """ Gets the reward students for a specific reward message.
+        :param msg_id: The ID of the message to look for. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("SELECT student_id, language, class_type, msg_id FROM RewardAcceptedStudents WHERE msg_id = %s", (msg_id,))
+        users = await mycursor.fetchall()
+        await mycursor.close()
+        # print("USEEEEERS", users)
+        return users
+
+    async def remove_waiting_reward_student(self, msg_id: int, user_id: int, teacher_id: int) -> None:
+
+        mycursor, db = await the_database()
+
+        await mycursor.execute("DELETE FROM RewardStudents WHERE reward_message = %s and teacher_id = %s and student_id = %s", (msg_id, teacher_id, user_id))
+        await db.commit()
+        await mycursor.close()
+
+
+    async def show_user_feedback(self, msg, guild, user, lenactive, teacher: discord.Member) -> None:
+
+        if not user:
+            # print("The end! Let's reward everyone!1")
             done_embed = discord.Embed(title="__**DONE!**__", colour=discord.Colour.green())
-            await simple.edit(embed=done_embed, delete_after=3)
-            if users_to_reward:
-                the_reward_embed = discord.Embed(title="__**Class Activity Reward**__",
-                                                 description=f"The following people got rewarded for participating and being active in {teacher.mention}'s __{language}__ class!\n__Teacher__ **+25łł**; __students__ **+10łł**",
-                                                 colour=discord.Colour.green())
-                the_reward_embed.set_footer(text=guild.name, icon_url=guild.icon_url)
-                the_reward_embed.set_thumbnail(url=teacher.avatar_url)
-                the_reward_embed.set_author(name=teacher, icon_url=teacher.avatar_url)
-                the_reward_embed.set_image(
-                    url="https://cdn.discordapp.com/attachments/668049600871006208/704406592400916510/emote.png")
-                for ru in users_to_reward:
-                    member = discord.utils.get(guild.members, id=ru)
-                    the_reward_embed.add_field(name="**-**", value=f"**{member.mention};**", inline=True)
+            await msg.edit(embed=done_embed, delete_after=3)
+            users = await self.get_reward_accepted_students(msg.id)
+            if users:
+                return await self.reward_accepted_students(teacher, users)
+            else:
+                return
+
+        member = discord.utils.get(guild.members, id=user[1])
+
+        if not member:
+            await self.remove_waiting_reward_student(msg_id=user[0], user_id=user[1], teacher_id=user[4])
+            # print('removed:', user[1])
+            await asyncio.sleep(0.5)
+            user, lenactive = await self.get_waiting_reward_student(user[4], user[0])
+            if user:
+                # print('another loop')
+                return await self.show_user_feedback(msg=msg, guild=guild, user=user, lenactive=lenactive, teacher=teacher)
+            else:
+                # print("The end! Let's reward everyone!2")
+                # return await self.reward_accepted_students()
+                done_embed = discord.Embed(title="__**DONE!**__", colour=discord.Colour.green())
+                await msg.edit(embed=done_embed, delete_after=3)
+                users = await self,get_reward_accepted_students(msg.id)
+                if users:
+                    return await self.reward_accepted_students(teacher, users)
+                else:
+                    return
+
+        # print('USER==========ahahhahahah', user)
+
+        m, s = divmod(user[3], 60)
+        h, m = divmod(m, 60)
+
+        reward_embed = discord.Embed(
+            title=f"**[{lenactive} to go] Reward __{member}__?**",
+            description=f"**Sent:** {user[2]} messages.\n**Have been:** {h:d} hours, {m:02d} minutes and {s:02d} seconds in the voice channel.",
+            colour=discord.Colour.green())
+        reward_embed.set_thumbnail(url=member.avatar_url)
+        reward_embed.set_author(name=f"ID: {member.id}")
+        reward_embed.set_footer(text=guild.name, icon_url=guild.icon_url)
+        await msg.edit(embed=reward_embed)
+
+    async def reward_accepted_students(self, teacher: discord.Member, users_to_reward: List[int]):
+        """ Rewards all users that got accepted by the teacher.
+        :param teacher:  The teacher of that class
+        :param users_to_reward: A list of users who got accepted to be rewarded. """
+
+        language = users_to_reward[0][1]
+        class_type = users_to_reward[0][2]
+        msg_id = users_to_reward[0][3]
+
+        if users_to_reward:
+            the_reward_embed = discord.Embed(
+                title="__**Class Activity Reward**__",
+                description=f"The following people got rewarded for participating and being active in {teacher.mention}'s __{language}__ {class_type} class!\n__Teacher__ **+25łł**; __students__ **+10łł**",
+                colour=discord.Colour.green())
+            the_reward_embed.set_footer(text=teacher.guild.name, icon_url=teacher.guild.icon_url)
+            the_reward_embed.set_thumbnail(url=teacher.avatar_url)
+            the_reward_embed.set_author(name=teacher, icon_url=teacher.avatar_url)
+            the_reward_embed.set_image(
+                url="https://cdn.discordapp.com/attachments/668049600871006208/704406592400916510/emote.png")
+
+            rewarded_members_text = []
+            for ru in users_to_reward:
+                try:
+                    member = discord.utils.get(teacher.guild.members, id=ru[0])
+                
                     if await self.user_in_currency(member.id):
                         await self.update_money(member.id, 10)
-                        await self.update_user_class_reward(ru)
-                        #print('\033[33muser money updated\033[m')
-                        #print('\033[33muser rewarded class updated\033[m')
+                        await self.update_user_class_reward(ru[0])
+                        rewarded_members_text.append(f"{member.mention}")
+                except:
+                    pass
 
-                if await self.user_in_currency(teacher.id):
+            the_reward_embed.add_field(name="__**Rewarded members**__", value=', '.join(rewarded_members_text), inline=True)
+
+            if await self.user_in_currency(teacher.id):
+                try:
                     await self.update_money(teacher.id, 25)
                     await self.update_user_hosted(teacher.id)
-                    #print('\033[33mteacher money updated\033[m')
-                    #print('\033[33mteacher hosted updated\033[m')
+                except:
+                    pass
 
-                commands_channel = discord.utils.get(guild.channels, id=bot_commands_channel_id)
-                return await commands_channel.send(embed=the_reward_embed)
+            commands_channel = discord.utils.get(teacher.guild.channels, id=bot_commands_channel_id)
+            await commands_channel.send(embed=the_reward_embed)
+            return await self.delete_rewarded_users(msg_id)
 
     async def get_channel_perms(self, member, language):
         teacher_role = discord.utils.get(member.guild.roles, id=teacher_role_id)
