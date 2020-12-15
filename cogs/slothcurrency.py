@@ -409,7 +409,7 @@ class SlothCurrency(commands.Cog):
         await ctx.message.delete()
         mycursor, db = await the_database()
         await mycursor.execute(
-            "CREATE TABLE RegisteredItems (image_name VARCHAR(50),item_type VARCHAR(10), item_name VARCHAR(30), item_price int, message_ref bigint, reaction_ref VARCHAR(50))")
+            "CREATE TABLE RegisteredItems (image_name VARCHAR(50),item_type VARCHAR(10), item_name VARCHAR(30), item_price int, message_ref bigint, reaction_ref VARCHAR(50)) DEFAULT CHARSET utf8mb4")
         await db.commit()
         await mycursor.close()
 
