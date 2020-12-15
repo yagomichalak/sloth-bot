@@ -162,11 +162,10 @@ class ModActivity(commands.Cog):
             return await timeout.delete()
         else:
             if str(reaction.emoji) == "✅":
-                await self.drop_table_mods(ctx)
-                await self.create_mod_table(ctx)
-                resp = await ctx.send("**Log reseted!**")
+                await self.reset_table_mods(ctx)
+                resp = await ctx.send("**Log reset!**")
             else:
-                resp = await ctx.send("**Not reseted!**")
+                resp = await ctx.send("**Not reset!**")
             await the_msg.delete()
             await asyncio.sleep(2)
             return await resp.delete()
@@ -192,6 +191,16 @@ class ModActivity(commands.Cog):
         '''
         mycursor, db = await the_database()
         await mycursor.execute('DROP TABLE ModActivity')
+        await db.commit()
+        await mycursor.close()
+
+    @commands.command(hidden=True)
+    @commands.has_permissions(administrator=True)
+    async def reset_table_mods(self, ctx):
+        """ (ADM) Resets the ModActivity table. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("DELETE FROM ModActivity")
         await db.commit()
         await mycursor.close()
 
