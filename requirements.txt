@@ -1,5 +1,6 @@
-aiohttp==3.7.3
-aiomysql==0.0.20
+discord.py==1.5.1
+aiohttp==3.6.3
+aiomysql==0.0.21
 discord==1.0.1
 googletrans==3.0.0
 gtts==2.2.1
