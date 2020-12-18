@@ -24,8 +24,7 @@ class TeacherAPI(commands.Cog):
 		self.teacher_role_id: int = int(os.getenv('TEACHER_ROLE_ID'))
 		self.session = aiohttp.ClientSession(loop=client.loop)
 		self.classes_channel_id: int = int(os.getenv('CLASSES_CHANNEL_ID'))
-		# self.website_link: str = 'https://languagesloth.herokuapp.com/api/teachers/?format=json'
-		self.website_link: str = 'https://www.thelanguagesloth.com/api/teachers/?format=json'
+		self.website_link: str = 'https://www.thelanguagesloth.com'
 
 
 	@commands.Cog.listener()
@@ -248,7 +247,7 @@ class TeacherAPI(commands.Cog):
 		channel = discord.utils.get(ctx.guild.channels, id=self.classes_channel_id)
 		async with channel.typing():
 			try:
-				async with self.session.get(self.website_link) as response:
+				async with self.session.get(f"{self.website_link}/api/teachers/?format=json") as response:
 					data = json.loads(await response.read())
 					
 			except Exception as e:
@@ -302,6 +301,24 @@ class TeacherAPI(commands.Cog):
 
 		return weekdays
 
+
+	@commands.command(aliases=['schedule', 'scheduled', 'scheduled classes', 'cls'])
+	@command.cooldown(1, 5, commands.BucketType.user)
+	async def classes(self, ctx) -> None:
+		""" Tells how many classes are scheduled in the website/server. """
+
+		req = f"{self.website_link}/class"
+		async with self.session.get(req) as response:
+			if response.status != 200:
+				return await ctx.send("**Something went wrong with it, try again later!**")
+
+			data = json.loads(await response.read())
+			embed = discord.Embed(
+				title="",
+				description=f"**We currently have `{len(data)}` scheduled classes!**",
+				url=req)
+
+			await ctx.send(embed=embed)
 
 def setup(client) -> None:
 	client.add_cog(TeacherAPI(client))
