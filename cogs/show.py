@@ -1,18 +1,9 @@
 import discord
 from discord.ext import commands
 from mysqldb import the_database
-
-rules = [
-    "Do not post or talk about NSFW content in text or voice chat. This server is a safe for work.",
-    "Be respectful of all members, especially Staff.",
-    "Avoid topics such as: Politics, Religion, Transphobia, Self-Harm or anything considered controversial anywhere in the server except in the **Debate Club**.",
-    "Do not advertise your server or other communities without express consent from an Owner of this server.",
-    "Do not share others' personal information without their consent.",
-    "Do not flood or spam the text chat. Do not staff members repeatedly without a reason.",
-    "No ear rape or mic spam. If you have a loud background, go on push-to-talk or mute.",
-    "Try to settle disputes personally. You may mute or block a user. If you cannot resolve the issue, contact staff in <#729454413290143774>.",
-    "Do not impersonate users or member of the staff.",
-    "No asking to be granted roles/moderator roles, you may apply by accessing the link in <#562019353583681536> but begging the staff repeatedly and irritatingly will result in warnings or even ban."]
+from extra.useful_variables import rules
+import os
+allowed_roles = [int(os.getenv('OWNER_ROLE_ID')), int(os.getenv('ADMIN_ROLE_ID')), int(os.getenv('MOD_ROLE_ID'))]
 
 
 class Show(commands.Cog):
@@ -45,15 +36,46 @@ class Show(commands.Cog):
         :param numb: The number of the rule to show.
         '''
         await ctx.message.delete()
-        if not numb:
+        if numb is None:
             return await ctx.send('**Invalid parameter!**')
-        if numb > 10 or numb <= 0:
-            return await ctx.send('**Paremeter out of range!**')
 
-        embed = discord.Embed(title=f'Rule - {numb}#', description=f"{rules[numb - 1]}",
+        if numb > len(rules) or numb <= 0:
+            return await ctx.send(f'**Inform a rule from `1-{len(rules)}` rules!**')
+
+        rule_index = list(rules)[numb - 1]
+        embed = discord.Embed(title=f'Rule - {numb}# {rule_index}', description=rules[rule_index],
                               colour=discord.Colour.dark_green())
         embed.set_footer(text=ctx.author.guild.name)
         await ctx.send(embed=embed)
+
+    @commands.command()
+    @commands.has_any_role(*allowed_roles)
+    async def rules(self, ctx):
+        '''
+        (MOD) Sends an embedded message containing all rules in it.
+        '''
+        await ctx.message.delete()
+        embed = discord.Embed(title="Discord’s Terms of Service and Community Guidelines",
+                              description="Rules Of The Server", url='https://discordapp.com/guidelines',
+                              colour=1406210,
+                              timestamp=ctx.message.created_at)
+        i = 1
+        for rule, rule_value in rules.items():
+            embed.add_field(name=f"{i} - {rule}", value=rule_value, inline=False)        
+            i += 1
+
+        embed.add_field(name="<:zzSloth:686237376510689327>", value="Have fun!", inline=True)
+        embed.add_field(name="<:zzSloth:686237376510689327>", value="Check our lessons!", inline=True)
+        embed.set_footer(text='Cosmos',
+                         icon_url='https://cdn.discordapp.com/avatars/423829836537135108/da15dea5017edf5567e531fc6b97f935.jpg?size=2048')
+        embed.set_thumbnail(
+            url='https://cdn.discordapp.com/attachments/562019489642709022/676564604087697439/ezgif.com-gif-maker_1.gif')
+        embed.set_author(name='The Language Sloth', url='https://discordapp.com',
+                         icon_url='https://cdn.discordapp.com/attachments/562019489642709022/676564604087697439/ezgif.com-gif-maker_1.gif')
+        await ctx.send(
+            content="Hello, **The Language Sloth** is a public Discord server for people all across the globe to meet ,learn languages and exchange cultures. here are our rules of conduct.",
+            embed=embed)
+
 
     @commands.command(aliases=['ss'])
     @commands.has_permissions()
