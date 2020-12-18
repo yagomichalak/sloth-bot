@@ -10,10 +10,12 @@ import traceback
 from contextlib import redirect_stdout
 import os
 
-allowed_roles = [
-int(os.getenv('OWNER_ROLE_ID')), int(os.getenv('ADMIN_ROLE_ID')),
-int(os.getenv('MOD_ROLE_ID')), int(os.getenv('SLOTH_LOVERS_ROLE_ID'))
-]
+
+mod_role_id=int(os.getenv('MOD_ROLE_ID'))
+admin_role_id=int(os.getenv('ADMIN_ROLE_ID'))
+owner_role_id=int(os.getenv('OWNER_ROLE_ID'))
+
+allowed_roles = [owner_role_id, admin_role_id, mod_role_id, int(os.getenv('SLOTH_LOVERS_ROLE_ID'))]
 teacher_role_id = int(os.getenv('TEACHER_ROLE_ID'))
 
 
@@ -50,7 +52,7 @@ class Tools(commands.Cog):
 
     # Bot leaves
     @commands.command()
-    @commands.has_permissions(kick_members=True)
+    @commands.has_any_role([mod_role_id, admin_role_id, owner_role_id])
     async def leave(self, ctx):
         '''
         (MOD) Makes the bot leave the voice channel.
