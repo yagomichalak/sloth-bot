@@ -52,7 +52,7 @@ class Tools(commands.Cog):
 
     # Bot leaves
     @commands.command()
-    @commands.has_any_role([mod_role_id, admin_role_id, owner_role_id])
+    @commands.has_any_role(*[mod_role_id, admin_role_id, owner_role_id])
     async def leave(self, ctx):
         '''
         (MOD) Makes the bot leave the voice channel.
@@ -289,6 +289,29 @@ class Tools(commands.Cog):
         vcs = ctx.guild.voice_channels
         all_members = [m.name for vc in vcs for m in vc.members]
         await ctx.send(f"**`{len(all_members)}` members are in a vc atm!**")
+
+
+    @commands.command()
+    @commands.has_any_role(*allowed_roles)
+    async def vc(self, ctx, member: discord.Member = None) -> None:
+        """ Tells where the given member is at (voice channel). 
+        :param member: The member you are looking for. """
+
+        if not member:
+            return await ctx.send(f"**Please, inform a member, {ctx.author.mention}!**")
+
+        member_state = member.voice
+        if channel := member_state and member_state.channel:
+            msg = f"**{member.mention} is in the `{channel.name}` voice channel.**"
+            try:
+                invite = await channel.create_invite()
+            except:
+                pass
+            else:
+                msg += f" **Here's a quick invite:** {invite}"
+            await ctx.send(msg)
+        else:
+            await ctx.send(f"**{member.mention} is not in a VC!**")
         
 
     @commands.command(hidden=True)

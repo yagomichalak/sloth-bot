@@ -41,3 +41,40 @@ list_of_commands = [
 '''
 I'm open to new ideas, in other words, if you want a custom command designed specially for your server, having database access or not, you tell me how you want it to be done and if it's doable, I'll do it.''']
 ]
+
+
+rules = {
+    "Do not post or talk about NSFW content in text or voice chat. This server is a safe for work.",
+    "Be respectful of all members, especially Staff.",
+    "Avoid topics such as: Politics, Religion, Transphobia, Self-Harm or anything considered controversial anywhere in the server except in the **Debate Club**.",
+    "Do not advertise your server or other communities without express consent from an Owner of this server.",
+    "Do not share others' personal information without their consent.",
+    "Do not flood or spam the text chat. Do not staff members repeatedly without a reason.",
+    "No ear rape or mic spam. If you have a loud background, go on push-to-talk or mute.",
+    "Try to settle disputes personally. You may mute or block a user. If you cannot resolve the issue, contact staff in <#729454413290143774>.",
+    "Do not impersonate users or member of the staff.",
+    "No asking to be granted roles/moderator roles, you may apply by accessing the link in <#562019353583681536> but begging the staff repeatedly and irritatingly will result in warnings or even ban."}
+
+
+rules = {
+    "No NSFW": "The Language Sloth is an educational community. For this reason, NSFW content will not be tolerated in either VCs or text channels. Pornographic, violent, foul, offensive, or even politically charged content/conversations are to be avoided, as they will result in punishment.",
+
+    "Respectful Conduct": "Being intentionally disrespectful, following people, harassing over dms and using foul language are not allowed here, specially the Staff of this server.",
+
+    "Avoid Controversy": "The following topics are not permitted on the server: Politics, Religion,Gender identity/Sexual orientation, Self-Harm or anything considered controversial. The only place where these topics are acceptable is Debate Club.",
+
+    "No Advertising": "Advertising Discord servers or self-promoting via dm spam or voice channels without permission from our staff will result in immediate ban. If you would like to get permission, get in touch with our staff.",
+
+    "No Doxing": "Do not share others' personal information without their consent.",
+
+    "No Spamming": """Do not flood or spam text channels.
+Do not spam react in messages.
+Do not ping staff members repeatedly without a reason.
+Do not mic spam/earrape in voice channels
+Any of the above infractions may result in server mute or ban at the discretion of the admins/mods.""",
+
+    "Do not impersonate others": "Do not impersonate other users or members of the staff.",
+
+    "No Begging": "No asking to be granted roles/moderator roles. You may apply for these positions by accessing the link in #🌟announcements🌟 but repeatedly begging the staff may result in warnings or ban."
+
+}
