@@ -303,7 +303,7 @@ class TeacherAPI(commands.Cog):
 
 
 	@commands.command(aliases=['schedule', 'scheduled', 'scheduled classes', 'cls'])
-	@command.cooldown(1, 5, commands.BucketType.user)
+	@commands.cooldown(1, 5, commands.BucketType.user)
 	async def classes(self, ctx) -> None:
 		""" Tells how many classes are scheduled in the website/server. """
 
