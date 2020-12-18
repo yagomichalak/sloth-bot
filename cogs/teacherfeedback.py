@@ -504,11 +504,10 @@ class CreateClassroom(commands.Cog):
             for ru in users_to_reward:
                 try:
                     member = discord.utils.get(teacher.guild.members, id=ru[0])
-                
+                    rewarded_members_text.append(f"{member.mention}")
                     if await self.user_in_currency(member.id):
                         await self.update_money(member.id, 10)
                         await self.update_user_class_reward(ru[0])
-                        rewarded_members_text.append(f"{member.mention}")
                 except:
                     pass
 
