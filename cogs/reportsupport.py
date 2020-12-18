@@ -14,6 +14,10 @@ moderator_role_id = int(os.getenv('MOD_ROLE_ID'))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID'))
 muffin_id = int(os.getenv('MUFFIN_ID'))
 
+allowed_roles = [
+int(os.getenv('OWNER_ROLE_ID')), admin_role_id,
+moderator_role_id]
+
 class ReportSupport(commands.Cog):
 	'''
 	A cog related to the system of reports and some other things.
@@ -578,7 +582,7 @@ class ReportSupport(commands.Cog):
 		return channel
 
 	@commands.command()
-	@commands.has_permissions(kick_members=True)
+	@commands.has_any_role(*allowed_roles)
 	async def close_channel(self, ctx):
 		'''
 		(MOD) Closes a Case-Channel.
