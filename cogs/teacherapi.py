@@ -314,7 +314,7 @@ class TeacherAPI(commands.Cog):
 
 			data = json.loads(await response.read())
 			embed = discord.Embed(
-				title="",
+				title="Scheduled Classes",
 				description=f"**We currently have `{len(data)}` scheduled classes!**",
 				url=req)
 
