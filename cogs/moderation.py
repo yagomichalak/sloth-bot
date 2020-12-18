@@ -40,7 +40,7 @@ class Moderation(commands.Cog):
 		if 'discord.gg/' in msg.lower():
 			ctx = await self.client.get_context(message)
 			perms = ctx.channel.permissions_for(ctx.author)
-			if not perms.administrator or mod_role_id not in [r.id for r in ctx.author.roles]:
+			if not perms.administrator and mod_role_id not in [r.id for r in ctx.author.roles]:
 				is_from_guild = await self.check_invite_guild(msg, message.guild)
 				if not is_from_guild:
 					return await self.mute(ctx=ctx, member=message.author, reason="Invite Advertisement.")
