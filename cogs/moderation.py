@@ -12,6 +12,11 @@ muted_role_id = int(os.getenv('MUTED_ROLE_ID'))
 general_channel = int(os.getenv('GENERAL_CHANNEL_ID'))
 last_deleted_message = []
 suspect_channel_id = int(os.getenv('SUSPECT_CHANNEL_ID'))
+mod_role_id = int(os.getenv('MOD_ROLE_ID'))
+allowed_roles = [
+	int(os.getenv('OWNER_ROLE_ID')), int(os.getenv('ADMIN_ROLE_ID')),
+	mod_role_id, int(os.getenv('SLOTH_LOVERS_ROLE_ID'))
+]
 
 class Moderation(commands.Cog):
 	'''
@@ -38,7 +43,7 @@ class Moderation(commands.Cog):
 		if 'discord.gg/' in msg.lower():
 			ctx = await self.client.get_context(message)
 			perms = ctx.channel.permissions_for(ctx.author)
-			if not perms.kick_members:
+			if not mod_role_id not in [r.id for r in ctx.author.roles]:
 				is_from_guild = await self.check_invite_guild(msg, message.guild)
 				if not is_from_guild:
 					return await self.mute(ctx=ctx, member=message.author, reason="Invite Advertisement.")
@@ -94,7 +99,7 @@ class Moderation(commands.Cog):
 		last_deleted_message.append(message)
 
 	@commands.command()
-	@commands.has_permissions(kick_members=True)
+	@commands.has_any_role(*allowed_roles)
 	async def snipe(self, ctx):
 		'''
 		(MOD) Snipes the last deleted message.
@@ -143,7 +148,7 @@ class Moderation(commands.Cog):
 			await ctx.channel.purge(limit=amount)
 
 	@commands.command()
-	@commands.has_permissions(kick_members=True)
+	@commands.has_any_role(*allowed_roles)
 	async def clear(self, ctx):
 		'''
 		(MOD) Clears the whole channel.
@@ -207,7 +212,7 @@ class Moderation(commands.Cog):
 
 	# Warns a member
 	@commands.command()
-	@commands.has_permissions(kick_members=True)
+	@commands.has_any_role(*allowed_roles)
 	async def warn(self, ctx, member: discord.Member = None, *, reason=None):
 		'''
 		(MOD) Warns a member.
@@ -246,7 +251,7 @@ class Moderation(commands.Cog):
 				await self.mute(ctx=ctx, member=member, reason=reason)
 
 	@commands.command()
-	@commands.has_permissions(kick_members=True)
+	@commands.has_any_role(*allowed_roles)
 	async def mute(self, ctx, member: discord.Member = None, *, reason = None):
 		'''
 		(MOD) Mutes a member.
@@ -298,7 +303,7 @@ class Moderation(commands.Cog):
 
 	# Unmutes a member
 	@commands.command()
-	@commands.has_permissions(kick_members=True)
+	@commands.has_any_role(*allowed_roles)
 	async def unmute(self, ctx, member: discord.Member = None):
 		'''
 		(MOD) Unmutes a member.
@@ -340,7 +345,7 @@ class Moderation(commands.Cog):
 
 	# Mutes a member temporarily
 	@commands.command()
-	@commands.has_permissions(kick_members=True)
+	@commands.has_any_role(*allowed_roles)
 	async def tempmute(self, ctx, member: discord.Member = None, minutes: int = 5, *, reason =  None):
 		'''
 		(MOD) Mutes a member for a determined amount of time.
@@ -408,7 +413,7 @@ class Moderation(commands.Cog):
 		else:
 			await ctx.send(f'**{member} is not even muted!**', delete_after=5)
 	@commands.command()
-	@commands.has_permissions(kick_members=True)
+	@commands.has_any_role(*allowed_roles)
 	async def kick(self, ctx, member: discord.Member = None, *, reason=None):
 		'''
 		(MOD) Kicks a member from the server.
@@ -448,7 +453,7 @@ class Moderation(commands.Cog):
 
 	# Bans a member
 	@commands.command()
-	@commands.has_permissions(kick_members=True)
+	@commands.has_any_role(*allowed_roles)
 	async def ban(self, ctx, member: discord.Member = None, *, reason=None) -> None:
 		'''
 		(ModTeam/ADM) Bans a member from the server.
@@ -468,7 +473,7 @@ class Moderation(commands.Cog):
 
 		perms = channel.permissions_for(author)
 
-		if perms.kick_members and not perms.administrator:
+		if not perms.administrator:
 			confirmations[author.id] = author.name
 			mod_ban_embed = discord.Embed(
 				title=f"Ban Request ({len(confirmations)}/3) → (2mins)",
@@ -488,7 +493,7 @@ class Moderation(commands.Cog):
 
 				if str(r.emoji) == '✅':
 					perms = channel.permissions_for(u)
-					if perms.kick_members:
+					if mod_role_id in [r.id for r in u.roles]:
 						confirmations[u.id] = u.name
 						return True
 					else:
@@ -755,7 +760,7 @@ class Moderation(commands.Cog):
 
 	# Infraction methods
 	@commands.command(aliases=['infr', 'show_warnings', 'sw', 'show_bans', 'sb', 'show_muted', 'sm'])
-	@commands.has_permissions(kick_members=True)
+	@commands.has_any_role(*allowed_roles)
 	async def infractions(self, ctx, member: discord.Member = None) -> None:
 		'''
 		Shows all infractions of a specific user.
@@ -850,7 +855,7 @@ class Moderation(commands.Cog):
 		await mycursor.close()
 
 	@commands.command(aliases=['ri', 'remove_warn', 'remove_warning'])
-	@commands.has_permissions(kick_members=True)
+	@commands.has_any_role(*allowed_roles)
 	async def remove_infraction(self, ctx, infr_id: int = None):
 		"""
 		(MOD) Removes a specific infraction by ID.
@@ -868,7 +873,7 @@ class Moderation(commands.Cog):
 			await ctx.send(f"**Infraction with ID `{infr_id}` was not found!**")
 
 	@commands.command(aliases=['ris', 'remove_warns', 'remove_warnings'])
-	@commands.has_permissions(kick_members=True)
+	@commands.has_any_role(*allowed_roles)
 	async def remove_infractions(self, ctx, member: discord.Member = None):
 		"""
 		(MOD) Removes all infractions for a specific user.
