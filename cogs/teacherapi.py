@@ -307,7 +307,7 @@ class TeacherAPI(commands.Cog):
 	async def classes(self, ctx) -> None:
 		""" Tells how many classes are scheduled in the website/server. """
 
-		req = f"{self.website_link}/class"
+		req = f"{self.website_link}/api/teachers/?format=json"
 		async with self.session.get(req) as response:
 			if response.status != 200:
 				return await ctx.send("**Something went wrong with it, try again later!**")
@@ -316,7 +316,7 @@ class TeacherAPI(commands.Cog):
 			embed = discord.Embed(
 				title="Scheduled Classes",
 				description=f"**We currently have `{len(data)}` scheduled classes!**",
-				url=req)
+				url=f"{self.website_link}/class")
 
 			await ctx.send(embed=embed)
 
