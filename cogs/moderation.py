@@ -13,7 +13,7 @@ general_channel = int(os.getenv('GENERAL_CHANNEL_ID'))
 last_deleted_message = []
 suspect_channel_id = int(os.getenv('SUSPECT_CHANNEL_ID'))
 mod_role_id = int(os.getenv('MOD_ROLE_ID'))
-allowed_roles = [int(os.getenv('OWNER_ROLE_ID')), int(os.getenv('ADMIN_ROLE_ID')),]
+allowed_roles = [int(os.getenv('OWNER_ROLE_ID')), int(os.getenv('ADMIN_ROLE_ID')), mod_role_id]
 
 class Moderation(commands.Cog):
 	'''
@@ -40,7 +40,7 @@ class Moderation(commands.Cog):
 		if 'discord.gg/' in msg.lower():
 			ctx = await self.client.get_context(message)
 			perms = ctx.channel.permissions_for(ctx.author)
-			if not mod_role_id not in [r.id for r in ctx.author.roles]:
+			if not perms.administrator or mod_role_id not in [r.id for r in ctx.author.roles]:
 				is_from_guild = await self.check_invite_guild(msg, message.guild)
 				if not is_from_guild:
 					return await self.mute(ctx=ctx, member=message.author, reason="Invite Advertisement.")

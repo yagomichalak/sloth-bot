@@ -1,5 +1,8 @@
 import discord
 from discord.ext import commands
+import os
+
+allowed_roles = [int(os.getenv('OWNER_ROLE_ID')), int(os.getenv('ADMIN_ROLE_ID')), int(os.getenv('MOD_ROLE_ID'))]
 
 
 class Embeds(commands.Cog):
@@ -17,7 +20,7 @@ class Embeds(commands.Cog):
 
     # Sends an embedded message
     @commands.command()
-    @commands.has_permissions(kick_members=True)
+    @commands.has_any_role(*allowed_roles)
     async def embed(self, ctx):
         '''
         (MOD) Sends an embedded message.

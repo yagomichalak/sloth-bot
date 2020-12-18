@@ -4,7 +4,8 @@ import os
 
 general_voice_chat_id = int(os.getenv('GENERAL_VOICE_CHANNEL_ID'))
 announcement_channel_id = int(os.getenv('ANNOUNCEMENT_CHANNEL_ID'))
-
+mod_role_id = int(os.getenv('MOD_ROLE_ID'))
+allowed_roles = [int(os.getenv('OWNER_ROLE_ID')), int(os.getenv('ADMIN_ROLE_ID')), mod_role_id]
 
 class Communication(commands.Cog):
     '''
@@ -20,7 +21,7 @@ class Communication(commands.Cog):
 
     # Says something by using the bot
     @commands.command()
-    @commands.has_permissions(kick_members=True)
+    @commands.has_any_role(*allowed_roles)
     async def say(self, ctx):
         '''
         (ADM) Makes the bot say something.

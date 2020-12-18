@@ -12,6 +12,7 @@ import asyncio
 from zipfile import ZipFile
 from typing import Dict, List, Union
 
+allowed_roles = [int(os.getenv('OWNER_ROLE_ID')), int(os.getenv('ADMIN_ROLE_ID')), int(os.getenv('MOD_ROLE_ID'))]
 
 class TeacherAPI(commands.Cog):
 	""" (WIP) A category for using The Language Sloth's teacher's API, 
@@ -24,7 +25,7 @@ class TeacherAPI(commands.Cog):
 		self.session = aiohttp.ClientSession(loop=client.loop)
 		self.classes_channel_id: int = int(os.getenv('CLASSES_CHANNEL_ID'))
 		# self.website_link: str = 'https://languagesloth.herokuapp.com/api/teachers/?format=json'
-		self.website_link: str = 'http://www.thelanguagesloth.com/api/teachers/?format=json'
+		self.website_link: str = 'https://www.thelanguagesloth.com/api/teachers/?format=json'
 
 
 	@commands.Cog.listener()
@@ -98,7 +99,7 @@ class TeacherAPI(commands.Cog):
 
 
 	@commands.command(aliases=['mc', 'card'])
-	@commands.has_permissions(kick_members=True)
+	@commands.has_any_role(*allowed_roles)
 	async def make_card(self, ctx, teacher: discord.Member = None, language: str = None, description: str = None, weekday: str = None, time: str = None) -> None:
 		""" Makes a teacher card with their class information.
 		:param teacher: The teacher for whom to make the card.
