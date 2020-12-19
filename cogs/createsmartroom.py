@@ -81,7 +81,7 @@ class CreateSmartRoom(commands.Cog):
 					len_users = len(user_voice_channel.members)
 					if len_users == 0 and user_voice_channel.id != self.vc_id:
 						try:
-							premium_channels = await self.get_premium_vc(member.id, user_voice_channel.id)
+							premium_channels = await self.get_premium_vc(user_voice_channel.id)
 							if premium_channels:
 								the_txt = discord.utils.get(member.guild.channels, id=premium_channels[0][2])
 								await self.delete_premium_vc(premium_channels[0][0], premium_channels[0][1])
@@ -594,9 +594,9 @@ class CreateSmartRoom(commands.Cog):
 		await db.commit()
 		await mycursor.close()
 
-	async def get_premium_vc(self, user_id: int, user_vc: int):
+	async def get_premium_vc(self, user_vc: int):
 		mycursor, db = await the_database()
-		await mycursor.execute(f"SELECT * FROM PremiumVc WHERE user_id = {user_id} and user_vc = {user_vc}")
+		await mycursor.execute("SELECT * FROM PremiumVc WHERE user_vc = %s", (user_vc,))
 		premium_vc = await mycursor.fetchall()
 		await mycursor.close()
 		return premium_vc
