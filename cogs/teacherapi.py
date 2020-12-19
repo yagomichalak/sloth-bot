@@ -11,6 +11,7 @@ import json
 import asyncio
 from zipfile import ZipFile
 from typing import Dict, List, Union
+from mysqldb import the_django_database
 
 allowed_roles = [int(os.getenv('OWNER_ROLE_ID')), int(os.getenv('ADMIN_ROLE_ID')), int(os.getenv('MOD_ROLE_ID'))]
 
@@ -319,6 +320,120 @@ class TeacherAPI(commands.Cog):
 				url=f"{self.website_link}/class")
 
 			await ctx.send(embed=embed)
+
+	@commands.command(aliases=['pt'])
+	@commands.has_permissions(administrator=True)
+	async def promote_teacher(self, ctx, member: discord.Member = None) -> None:
+		""" Promotes a member to a teacher.
+		:param member: The member that is gonna be promoted. """
+
+		if not member:
+			return await ctx.send("**Please, inform a member to promote to a teacher!**")
+
+		teacher_role = discord.utils.get(ctx.guild.roles, id=self.teacher_role_id)
+		if not teacher_role in member.roles:
+			try:
+				await member.add_roles(teacher_role)
+			except:
+				pass
+
+		teacher_state = await self._get_teacher_state(member.id)
+		if teacher_state is None:
+			return await ctx.send(f"**{member.mention} hasn't logged-in on the website yet!**")
+		elif teacher_state:
+			return await ctx.send(f"**{member.mention} is already a teacher on the website!**")
+
+		await self._change_teacher_state(member.id, 1)
+		teacher_embed = discord.Embed(
+			title=f"__Promoted!__",
+			description=f"{member.mention} has been `promoted` to a teacher! " \
+			+ f"Click [here]({self.website_link}/profile) to access your profile.",
+			color=member.color,
+			timestamp=ctx.message.created_at,
+			url=self.website_link
+			)
+
+		await ctx.send(embed=teacher_embed)
+
+	@commands.command(aliases=['dt'])
+	@commands.has_permissions(administrator=True)
+	async def demote_teacher(self, ctx, member: discord.Member = None) -> None:
+		""" Demotes a teacher to a regular user.
+		:param member: The teacher that is gonna be demoted. """
+
+		if not member:
+			return await ctx.send("**Please, inform a member to demote to a regular user!**")
+
+		teacher_role = discord.utils.get(ctx.guild.roles, id=self.teacher_role_id)
+		if teacher_role in member.roles:
+			try:
+				await member.remove_roles(teacher_role)
+			except:
+				pass
+
+		teacher_state = await self._get_teacher_state(member.id)
+		if teacher_state is None:
+			return await ctx.send(f"**{member.mention} hasn't logged-in on the website yet!**")
+		elif not teacher_state:
+			return await ctx.send(f"**{member.mention} is not even a teacher on the website!**")
+
+		await self._change_teacher_state(member.id, 0)
+		teacher_embed = discord.Embed(
+			title=f"__Demoted!__",
+			description=f"{member.mention} has been `demoted` to a regular user!",
+			color=member.color,
+			timestamp=ctx.message.created_at,
+			url=self.website_link
+			)
+
+		await ctx.send(embed=teacher_embed)
+
+	async def _change_teacher_state(self, member_id: int, state: int) -> None:
+		""" Changes the current state of a given member in the website. 
+		:param member_id: The ID of the member that you are changing it.
+		:param state: The state to which you are gonna set the to (0=False/1=True). """
+
+		mycursor, db = await the_django_database()
+		await mycursor.execute("UPDATE discordlogin_discorduser SET teacher = %s WHERE id = %s", (state, member_id))
+		await db.commit()
+		await mycursor.close()
+
+	async def _get_teacher_state(self, member_id: int) -> bool:
+		""" Gets the member current state from the website. 
+		:param member_id: The ID of the member that you are checking it. """
+
+		mycursor, db = await the_django_database()
+		await mycursor.execute("SELECT teacher FROM discordlogin_discorduser WHERE id = %s", (member_id,))
+		teacher = await mycursor.fetchone()
+		await mycursor.close()
+		print('Teacher State: ', teacher)
+		if teacher is None:
+			return None
+		elif teacher[0] == 1:
+			return True
+		else:
+			return False
+
+	@commands.command(aliases=['check_teacher', 'teacher', 'it'])
+	@commands.has_any_role(*allowed_roles)
+	async def is_teacher(self, ctx, member: discord.Member = None) -> None:
+		""" Checks whether the given member is a teacher.
+		:param member: The member that you wanna check it. """
+
+		if not member:
+			return await ctx.send("**Inform the the member to check whether they're a teacher!**")
+
+
+		teacher_role = discord.utils.get(ctx.guild.roles, id=self.teacher_role_id)
+		teacher_state = await self._get_teacher_state(member.id)
+		teacher_embed = discord.Embed(
+			title=f"__Is {member} as teacher__",
+			description=f"**In the server:** `{teacher_role in member.roles}`!\n**On the website:** `{teacher_state is True}`!",
+			color=member.color,
+			timestamp=ctx.message.created_at
+		)
+
+		await ctx.send(embed=teacher_embed)
 
 def setup(client) -> None:
 	client.add_cog(TeacherAPI(client))
