@@ -427,7 +427,7 @@ class TeacherAPI(commands.Cog):
 		teacher_role = discord.utils.get(ctx.guild.roles, id=self.teacher_role_id)
 		teacher_state = await self._get_teacher_state(member.id)
 		teacher_embed = discord.Embed(
-			title=f"__Is {member} as teacher__",
+			title=f"__Is {member} a teacher__",
 			description=f"**In the server:** `{teacher_role in member.roles}`!\n**On the website:** `{teacher_state is True}`!",
 			color=member.color,
 			timestamp=ctx.message.created_at

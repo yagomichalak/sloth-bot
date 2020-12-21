@@ -114,6 +114,9 @@ async def on_command_error(ctx, error):
     if isinstance(error, commands.MissingAnyRole):
         await ctx.send(error, delete_after=3)
 
+    if isinstance(error, commands.ChannelNotFound):
+        await ctx.send("**Channel not found!**")
+
     print('='*10)
     print(f"ERROR: {error} | Class: {error.__class__} | Cause: {error.__cause__}")
     print('='*10)
