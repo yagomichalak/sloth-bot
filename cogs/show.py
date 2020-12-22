@@ -3,6 +3,9 @@ from discord.ext import commands
 from mysqldb import the_database
 from extra.useful_variables import rules
 import os
+import subprocess
+import sys
+
 allowed_roles = [int(os.getenv('OWNER_ROLE_ID')), int(os.getenv('ADMIN_ROLE_ID')), int(os.getenv('MOD_ROLE_ID'))]
 
 
@@ -27,6 +30,48 @@ class Show(commands.Cog):
         await ctx.message.delete()
         all_users = ctx.guild.members
         await ctx.send(f'{len(all_users)} members!')
+
+
+    @commands.command()
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def about(self, ctx) -> None:
+        """ Shows some information about the bot itself. """
+
+        embed = discord.Embed(
+            title=f"__About ({self.client.user})__",
+            description=f"The {self.client.user} bot is an all-in-one bot designed specially for `The Language Sloth` server. " \
+            + "It has many different commands and features to best satisfy our needs in this server, and it's continuously being improved.",
+            color=ctx.author.color,
+            timestamp=ctx.message.created_at,
+            url='https://thelanguagesloth.com/bots/sloth/'
+        )
+
+        lines = subprocess.getstatusoutput('find . -name "*.py" -not -path "./venv*" | xargs wc -l')
+        lines = lines[1].split()[-2] if lines else 0
+
+        embed.add_field(
+            name="__Lines__",
+            value=f"```apache\n{lines} lines of code. (Python)```",
+            inline=True)
+        embed.add_field(
+            name="__Commands__",
+            value=f"```apache\n{len([_ for _ in self.client.walk_commands()])} commands.```",
+            inline=True)
+        embed.add_field(
+            name="__Categories__",
+            value=f"```apache\n{len(self.client.cogs)} categories.```",
+            inline=True)
+        embed.add_field(name="__Operating System__",
+            value=f'```apache\nThe bot is running and being hosted on a "{sys.platform}" machine.```',
+            inline=True)
+
+        embed.set_author(name='DNK#6725', url='https://discord.gg/languages', 
+            icon_url='https://cdn.discordapp.com/attachments/719020754858934294/720289112040669284/DNK_icon.png')
+        embed.set_thumbnail(url=self.client.user.avatar_url)
+        embed.set_footer(text=ctx.guild, icon_url=ctx.guild.icon_url)
+        await ctx.send(embed=embed)
+
+
 
     # Shows the specific rule
     @commands.command()
