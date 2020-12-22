@@ -145,7 +145,7 @@ class VoiceChannelActivity(commands.Cog):
 		await mycursor.close()
 
 	@tasks.loop(seconds=60)
-	async def check_old_record_deletion_time(self, limit_hours: int = 3) -> None:
+	async def check_old_record_deletion_time(self, limit_hours: int = 6) -> None:
 		""" Checks whether it's time to delete old records.
 		:param limit_hours: The limit of hours that the DB needs to store,
 		PS: If the number of registered hours in the DB is exceeded, the oldest records will be deleted,
