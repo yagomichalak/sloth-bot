@@ -4,13 +4,18 @@ from mysqldb import the_database
 from typing import List, Tuple, Union, Any
 from datetime import datetime
 from pytz import timezone
+import os
+
+allowed_roles = [int(os.getenv('OWNER_ROLE_ID')), int(os.getenv('ADMIN_ROLE_ID')), int(os.getenv('MOD_ROLE_ID'))]
 
 class VoiceChannelActivity(commands.Cog):
+	""" Category for the users' voice channel activities. """
 
 	def __init__(self, client) -> None:
+		""" Cog's initializing method. """
+
 		self.client = client
 		self.server_id = 777886754761605140
-		# self.
 
 
 	@commands.Cog.listener()
@@ -45,6 +50,7 @@ class VoiceChannelActivity(commands.Cog):
 
 	@tasks.loop(seconds=60)
 	async def calculate(self) -> None:
+		""" Calculates all members that are in a voice channel. """
 
 		tzone = timezone('Etc/GMT-1')
 		date_and_time = datetime.now().astimezone(tzone)
@@ -77,7 +83,7 @@ class VoiceChannelActivity(commands.Cog):
 			CREATE TABLE VoiceChannelActivity (
 				the_time TIME NOT NULL, channel_id BIGINT NOT NULL,
 				channel_name VARCHAR(50) NOT NULL, member_id BIGINT NOT NULL,
-				member_name VARCHAR(50) NOT NULL)
+				member_name VARCHAR(50) NOT NULL) DEFAULT CHARSET utf8mb4
 		""")
 		await db.commit()
 		await mycursor.close()
@@ -184,7 +190,11 @@ class VoiceChannelActivity(commands.Cog):
 		return records
 
 	@commands.command(aliases=['whowas', 'ww', 'whoWas', 'whowere', 'who_were', 'whoWere'])
+	@commands.has_any_role(*allowed_roles)
 	async def who_was(self, ctx, channel: discord.VoiceChannel = None, time: str = None) -> None:
+		""" Shows in which members were in the given voice channel at the given time:
+		:param channel: The channel you want to check.
+		:param time: The time. """
 
 		if not channel:
 			return await ctx.send("**Hey, inform a channel to fetch users from!**")
@@ -207,7 +217,11 @@ class VoiceChannelActivity(commands.Cog):
 		await ctx.send(embed=embed)
 
 	@commands.command(aliases=['waswhere', 'was'])
+	@commands.has_any_role(*allowed_roles)
 	async def was_where(self, ctx, member: discord.Member = None, time: str = None) -> None:
+		""" Shows in which voice channel a specific user was at a given time:
+		:param member: The member you want to check.
+		:param time: The time. """
 
 		if not member:
 			return await ctx.send("**Hey, inform a channel to fetch users from!**")
