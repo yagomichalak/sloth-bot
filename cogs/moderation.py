@@ -265,6 +265,7 @@ class Moderation(commands.Cog):
 			return await ctx.send("**Please, specify a member!**", delete_after=3)
 		if role not in member.roles:
 			await member.add_roles(role)
+			await member.move_to(None)
 			for mr in member.roles:
 				if mr.id != role.id:
 					try:
@@ -360,6 +361,7 @@ class Moderation(commands.Cog):
 			return await ctx.send("**Please, specify a member!**", delete_after=3)
 		if role not in member.roles:
 			await member.add_roles(role)
+			await member.move_to(None)
 			for mr in member.roles:
 				if mr.id != role.id:
 					try:
