@@ -22,7 +22,7 @@ class VoiceChannelActivity(commands.Cog):
 	async def on_ready(self) -> None:
 		""" Tells when the cog is ready to use. """
 
-		self.calculate.start()
+		#self.calculate.start()
 		self.check_old_record_deletion_time.start()
 
 		print('VoiceChannelActivity cog is online!')
@@ -159,40 +159,191 @@ class VoiceChannelActivity(commands.Cog):
 			await mycursor.execute("DELETE FROM VoiceChannelActivity WHERE HOUR(the_time) = %s", (hours.pop(0),))
 			await db.commit()
 
-	async def get_hour_record_by_channel(self, channel_id: int, time: str) -> List[List[Union[datetime, str, int]]]:
+	# async def get_hour_record_by_channel2(self, channel_id: int, time: str) -> List[List[Union[datetime, str, int]]]:
+	# 	""" Gets all user records at a given hour and channel.
+	# 	:param channel_id: The ID of the channel to which you are filtering.
+	# 	:param time: The time to which you are filtering the search. """
+
+	# 	mycursor, db = await the_database()
+	# 	if len(time) < 3:
+	# 		await mycursor.execute("SELECT DISTINCT HOUR(the_time), member_name, member_id FROM VoiceChannelActivity WHERE channel_id = %s and HOUR(the_time) = %s", (channel_id, time))
+	# 	else:
+	# 		await mycursor.execute("SELECT DISTINCT the_time, member_name, member_id FROM VoiceChannelActivity WHERE channel_id = %s and the_time = %s", (channel_id, time))
+
+	# 	records = await mycursor.fetchall()
+	# 	await mycursor.close()
+	# 	return records
+
+	# async def get_user_record_by_time2(self, member_id: int, time: str) -> List[Union[int, str]]:
+	# 	""" Gets user records by the given hour. 
+	# 	:param member_id: The ID of the member from whom you want to fetch information.
+	# 	:param time: The time at around the user that you are looking for has to have information. """
+
+	# 	mycursor, db = await the_database()
+	# 	if len(time) < 3:
+	# 		await mycursor.execute("SELECT DISTINCT HOUR(the_time), channel_id, channel_name,  member_id from VoiceChannelActivity WHERE HOUR(the_time) = %s and member_id = %s", (time, member_id))
+	# 	else:
+	# 		await mycursor.execute("SELECT DISTINCT the_time, channel_id, channel_name, member_id from VoiceChannelActivity WHERE the_time = %s and member_id = %s", (time, member_id))
+
+	# 	records = await mycursor.fetchall()
+	# 	await mycursor.close()
+	# 	return records
+
+	async def get_hour_record_by_channel(self, channel: discord.TextChannel, time: str, time2: str = None) -> List[List[Union[datetime, str, int]]]:
 		""" Gets all user records at a given hour and channel.
 		:param channel_id: The ID of the channel to which you are filtering.
 		:param time: The time to which you are filtering the search. """
 
 		mycursor, db = await the_database()
+		text = ''
+
 		if len(time) < 3:
-			await mycursor.execute("SELECT DISTINCT HOUR(the_time), member_name, member_id FROM VoiceChannelActivity WHERE channel_id = %s and HOUR(the_time) = %s", (channel_id, time))
+			time = datetime.strptime(time, '%H')
+
+			# Checks whether user provided two values
+			if time2:
+				print('Provided 2 values!')
+				time2 = datetime.strptime(time2, '%H')
+				await mycursor.execute("""
+					SELECT DISTINCT HOUR(the_time), member_name, member_id 
+					FROM VoiceChannelActivity WHERE channel_id = %s AND HOUR(the_time) BETWEEN %s AND %s""", 
+					(channel.id, time.hour, time2.hour))
+
+				text = f"Users between `{time.hour}:00` and `{time2.hour}:59` in `{channel}`:"
+			else:
+				print('Provided 1 value!')
+				await mycursor.execute("""
+					SELECT DISTINCT HOUR(the_time), member_name, member_id 
+					FROM VoiceChannelActivity WHERE channel_id = %s AND HOUR(the_time) = %s""", 
+					(channel.id, time.hour))
+
+				text = f"Users between `{time.hour}:00` and `{time.hour}:59` in `{channel}`:"
+
 		else:
-			await mycursor.execute("SELECT DISTINCT the_time, member_name, member_id FROM VoiceChannelActivity WHERE channel_id = %s and the_time = %s", (channel_id, time))
+			time = datetime.strptime(time, '%H:%M')
+
+			# Checks whether two values were passed
+			if time2:
+				time2 = datetime.strptime(time2, '%H:%M')
+				the_time1 = f"{time.hour}:{time.minute}"
+				the_time2 = f"{time2.hour}:{time2.minute}"
+
+				text = f"Users between `{the_time1}` and `{the_time2}` in `{channel}`:"
+
+				await mycursor.execute("""
+					SELECT DISTINCT the_time, member_name, member_id 
+					FROM VoiceChannelActivity WHERE channel_id = %s AND the_time BETWEEN %s AND %s""", 
+					(channel.id, the_time1, the_time2))
+
+			# If not, assumes the second value
+			else:
+				if time.minute >= 0 and time.minute <= 29:
+					the_time1 = f"{time.hour}:00"
+					the_time2 = f"{time.hour}:29"
+				else:
+					the_time1 = f"{time.hour}:30"
+					the_time2 = f"{time.hour}:59"
+
+				text = f"Users between `{the_time1}` and `{the_time2}` in `{channel}`:"
+				await mycursor.execute("""
+					SELECT DISTINCT the_time, member_name, member_id 
+					FROM VoiceChannelActivity WHERE channel_id = %s AND the_time BETWEEN %s AND %s""", 
+					(channel.id, the_time1, the_time2))
 
 		records = await mycursor.fetchall()
 		await mycursor.close()
-		return records
+		return records, time, text
 
-	async def get_user_record_by_time(self, member_id: int, time: str) -> List[Union[int, str]]:
+	async def get_user_record_by_time(self, member: discord.Member, time: str, time2: str = None) -> List[Union[int, str]]:
 		""" Gets user records by the given hour. 
-		:param member_id: The ID of the member from whom you want to fetch information.
+		:param member: The member from whom you want to fetch information.
 		:param time: The time at around the user that you are looking for has to have information. """
 
 		mycursor, db = await the_database()
+
+		text = ''
+		# If in format (HOUR)
 		if len(time) < 3:
-			await mycursor.execute("SELECT DISTINCT HOUR(the_time), channel_id, channel_name,  member_id from VoiceChannelActivity WHERE HOUR(the_time) = %s and member_id = %s", (time, member_id))
+			time = datetime.strptime(time, '%H')
+			# Checks whether user provided two values
+			if time2:
+				print('Provided 2 values!')
+				time2 = datetime.strptime(time2, '%H')
+				await mycursor.execute("""
+					SELECT DISTINCT HOUR(the_time), channel_id, channel_name,  member_id 
+					FROM VoiceChannelActivity WHERE HOUR(the_time) BETWEEN %s AND %s AND member_id = %s""", 
+					(time.hour, time2.hour, member.id))
+
+				text = f"User between `{time.hour}` and `{time2.hour}` was in:"
+
+			# If not, gets all values from that hour.
+			else:
+				print('Provided 1 value!')
+				await mycursor.execute("""
+					SELECT DISTINCT HOUR(the_time), channel_id, channel_name,  member_id 
+					FROM VoiceChannelActivity WHERE HOUR(the_time) = %s AND member_id = %s""", 
+					(time.hour, member.id))
+
+				text = f"User between `{time.hour}` and `{time.hour}` was in:"
+
 		else:
-			await mycursor.execute("SELECT DISTINCT the_time, channel_id, channel_name, member_id from VoiceChannelActivity WHERE the_time = %s and member_id = %s", (time, member_id))
+			# If in format (HOUR:MINUTE)
+			time = datetime.strptime(time, '%H:%M')
+
+			# Checks whether user provided two values
+			if time2:
+				time2 = datetime.strptime(time2, '%H:%M')
+				the_time1 = f"{time.hour}:{time.minute}"
+				the_time2 = f"{time2.hour}:{time2.minute}"
+
+
+				await mycursor.execute("""
+					SELECT DISTINCT the_time, channel_id, channel_name, member_id 
+					FROM VoiceChannelActivity 
+					WHERE the_time BETWEEN %s AND %s AND member_id = %s""", 
+					(the_time1, the_time2, member.id))
+
+				text = f"{member} between `{the_time1}` and `{the_time2}` was in:"
+
+			# If not, gets values from either (HOUR:00 - HOUR:29) or (HOUR:30 - HOUR:59)
+			else:
+				# If it's between HOUR:00 and HOUR:29
+				if time.minute >= 0 and time.minute <= 29:
+					the_time1 = f"{time.hour}:00"
+					the_time2 = f"{time.hour}:29"
+					text = f"{member} between `{the_time1}` and `{the_time2}` was in:"
+
+				# If it's between HOUR:30 and HOUR:30
+				else:
+					the_time1 = f"{time.hour}:30"
+					the_time2 = f"{time.hour}:59"
+					text = f"{member} between `{the_time1}` and `{the_time2}` was in:"
+
+				await mycursor.execute("""
+					SELECT DISTINCT the_time, channel_id, channel_name, member_id 
+					FROM VoiceChannelActivity 
+					WHERE the_time BETWEEN %s AND %s AND member_id = %s""", 
+					(the_time1, the_time2, member.id))
 
 		records = await mycursor.fetchall()
 		await mycursor.close()
-		return records
+		print('Nice!!!')
+		return records, time, text
 
-	@commands.command(aliases=['whowas', 'ww', 'whoWas', 'whowere', 'who_were', 'whoWere'])
+	async def format_time(self, time: str) -> str:
+		""" Formats the time if needed. 
+		:param time: The time you want to format. """
+
+		formated_time = time
+		if len(time) == 3 and time[2] == ':':
+			formated_time = time.replace(':', '')
+
+		return formated_time
+
+	@commands.command(aliases=['wj', 'whojoined', 'whoj'])
 	@commands.has_any_role(*allowed_roles)
-	async def who_was(self, ctx, channel: discord.VoiceChannel = None, time: str = None) -> None:
-		""" Shows in which members were in the given voice channel at the given time:
+	async def who_joined(self, ctx, channel: discord.VoiceChannel = None, time: str = None, time2: str = None) -> None:
+		""" Shows which members were in the given voice channel at the given time:
 		:param channel: The channel you want to check.
 		:param time: The time. """
 
@@ -202,15 +353,18 @@ class VoiceChannelActivity(commands.Cog):
 		if not time:
 			return await ctx.send("**Yo, inform a time!**")
 
-		records = await self.get_hour_record_by_channel(channel.id, time)
+
+		time = await self.format_time(time)
+		time2 = await self.format_time(time2) if time2 else None
+
+		records, ftime, text = await self.get_hour_record_by_channel(channel, time, time2)
 		if not records:
-			return await ctx.send("**Nothing found for the given time!**")
+			return await ctx.send("**Nothing found for the given channel and/or time!**")
 
-
-		users = [m.mention if (m := discord.utils.get(ctx.guild.members, id=member[2])) else member[1] for member in records]
+		users = set([m.mention if (m := discord.utils.get(ctx.guild.members, id=member[2])) else member[1] for member in records])
 
 		embed = discord.Embed(
-			title=f"Users at around `{records[0][0]}` in the `{channel}` VC:",
+			title=text,
 			description=f"{', '.join(users)}"
 			)
 
@@ -218,7 +372,7 @@ class VoiceChannelActivity(commands.Cog):
 
 	@commands.command(aliases=['waswhere', 'was'])
 	@commands.has_any_role(*allowed_roles)
-	async def was_where(self, ctx, member: discord.Member = None, time: str = None) -> None:
+	async def was_where(self, ctx, member: discord.Member = None, time: str = None, time2: str = None) -> None:
 		""" Shows in which voice channel a specific user was at a given time:
 		:param member: The member you want to check.
 		:param time: The time. """
@@ -229,13 +383,24 @@ class VoiceChannelActivity(commands.Cog):
 		if time is None:
 			return await ctx.send("**Yo, inform a time!**")
 
-		records = await self.get_user_record_by_time(member.id, time)
+		time = await self.format_time(time)
+		time2 = await self.format_time(time2) if time2 else None
+
+		print('Time1', time)
+		print('Time2', time2)
+
+		records, ftime, text = await self.get_user_record_by_time(member, time, time2)
+		print('Records', records)
+		print('Ftime', ftime)
+
 		if not records:
 			return await ctx.send("**Nothing found for the given time and/or member!**")
 
-		channels = [c.mention if (c := discord.utils.get(ctx.guild.channels, id=channel[1])) else channel[2] for channel in records]
+		channels = set([c.mention if (c := discord.utils.get(ctx.guild.channels, id=channel[1])) else channel[2] for channel in records])
+
+
 		embed = discord.Embed(
-			title=f"`{member}` at around `{time}` was in:",
+			title=text,
 			description=f"{', '.join(channels)}"
 			)
 

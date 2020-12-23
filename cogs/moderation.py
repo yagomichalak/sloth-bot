@@ -492,7 +492,7 @@ class Moderation(commands.Cog):
 
 				if str(r.emoji) == '✅':
 					perms = channel.permissions_for(u)
-					if mod_role_id in [r.id for r in u.roles]:
+					if mod_role_id in [r.id for r in u.roles] or perms.administrator:
 						confirmations[u.id] = u.name
 						return True
 					else:
