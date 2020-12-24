@@ -25,7 +25,9 @@ class TeacherAPI(commands.Cog):
 		self.teacher_role_id: int = int(os.getenv('TEACHER_ROLE_ID'))
 		self.session = aiohttp.ClientSession(loop=client.loop)
 		self.classes_channel_id: int = int(os.getenv('CLASSES_CHANNEL_ID'))
-		self.website_link: str = 'https://www.thelanguagesloth.com'
+		# self.website_link: str = 'https://www.thelanguagesloth.com'
+		self.website_link: str = 'http://127.0.0.1:8000'
+		self.django_website_root =  os.getenv('DJANGO_WEBSITE_ROOT')
 
 
 	@commands.Cog.listener()
@@ -175,10 +177,7 @@ class TeacherAPI(commands.Cog):
 
 		path = 'media/icons/'
 		guild = ctx.guild
-		# print(ctx.author.roles)
 		teacher_role = discord.utils.get(guild.roles, id=self.teacher_role_id)
-		# print(teacher_role)
-		# print(teacher_role in ctx.author.roles)
 		teachers = [m for m in guild.members if teacher_role in m.roles]
 		teacher_names = []
 
@@ -203,7 +202,6 @@ class TeacherAPI(commands.Cog):
 		with ZipFile('media/temporary/teacher_icons.zip', 'w') as zip:
 			for file in os.listdir(path):
 				full_path = os.path.join(path, file)
-				print(full_path)
 				zip.write(full_path, file)
 
 
@@ -263,7 +261,6 @@ class TeacherAPI(commands.Cog):
 				await self.clear_classes_channel(ctx.guild)
 				sorted_weekdays = await self.sort_weekdays(data)
 				for day, classes in sorted_weekdays.items():
-					print(f"{day=}")
 					await channel.send(embed=discord.Embed(
 						title=day,
 						color=discord.Color.green()))
@@ -406,7 +403,6 @@ class TeacherAPI(commands.Cog):
 		await mycursor.execute("SELECT teacher FROM discordlogin_discorduser WHERE id = %s", (member_id,))
 		teacher = await mycursor.fetchone()
 		await mycursor.close()
-		print('Teacher State: ', teacher)
 		if teacher is None:
 			return None
 		elif teacher[0] == 1:
@@ -434,6 +430,149 @@ class TeacherAPI(commands.Cog):
 		)
 
 		await ctx.send(embed=teacher_embed)
+
+
+	async def get_teacher_cards(self, user_id: int) -> List[List[Union[int, str]]]:
+		""" Gets all cards from a given teacher.
+		:param user_id: The ID of the teacher. """
+
+		mycursor, db = await the_django_database()
+		await mycursor.execute("SELECT * FROM teacherclass_teacherclass WHERE owner_id = %s", (user_id,))
+		data = await mycursor.fetchall()
+		await mycursor.close()
+		return data
+
+
+	@commands.command(aliases=['see_cards', 'stc'])
+	@commands.cooldown(1, 10, commands.BucketType.user)
+	async def see_teacher_cards(self, ctx, teacher: discord.Member = None):
+		""" Shows cards for a given user.
+		:param teacher: The teacher from whom you want to see the cards. """
+
+		if not teacher:
+			return await ctx.send("**Please, inform a teacher!**")
+
+		data = await self.get_teacher_cards(teacher.id)
+		if not data:
+			return await ctx.send("**No cards found for the given user!**")
+
+		embed = discord.Embed()
+
+		index = 0
+		msg = await ctx.send(embed=discord.Embed(title="loading..."))
+		await asyncio.sleep(0.5)
+		await msg.add_reaction('⬅️')
+		await msg.add_reaction('➡️')
+		await msg.add_reaction('🛑')
+
+
+		while True:
+			current = data[index]
+			embed.clear_fields()
+			embed.title=f"Showing cards ({index+1}/{len(data)})"
+			embed.description=f"**User:** {teacher.mention}"
+			embed.color = ctx.author.color
+
+			embed.add_field(
+				name="__Class Info__",
+				value=f"**ID:** {current[0]}\n**Language:** {current[1]}\n**Description:** {current[2]}\n" \
+				+ f"**Day:** {current[5]} at {current[6]}\n**Type:** {current[7]}",
+				inline=True
+			)
+			image_path = f"{self.website_link}/{current[3].replace('../', '')}"
+			embed.set_image(url=image_path)
+
+			await msg.edit(embed=embed)
+			try:
+				r, u = await self.client.wait_for('reaction_add', timeout=60,
+					check=lambda r, u: u.id == ctx.author.id and msg.id == r.message.id and str(r.emoji) in ['⬅️', '➡️', '🛑']
+				)
+			except asyncio.TimeoutError:
+				await msg.remove_reaction('⬅️', self.client.user)
+				await msg.remove_reaction('➡️', self.client.user)
+				await msg.remove_reaction('🛑', self.client.user)
+				return
+
+			else:
+				if str(r.emoji) == '➡️':
+					await msg.remove_reaction(r, u)
+					if index + 1 < len(data):
+						index += 1
+					continue
+				elif str(r.emoji) == '⬅️':
+					await msg.remove_reaction(r, u)
+					if index > 0:
+					  index -= 1
+					continue  
+				elif str(r.emoji) == '🛑':
+					await msg.remove_reaction('⬅️', self.client.user)
+					await msg.remove_reaction('➡️', self.client.user)
+					await msg.remove_reaction('🛑', self.client.user)
+					await msg.remove_reaction('🛑', u)
+
+	async def _delete_teacher_cards(self, user_id: int) -> None:
+		""" Deletes all cards from a given teacher.
+		:param user_id: The ID of the teacher from which to delete the cards. """
+
+
+		mycursor, db = await the_django_database()
+		await mycursor.execute("DELETE FROM teacherclass_teacherclass WHERE owner_id = %s", (user_id,))
+		await db.commit()
+		await mycursor.close()
+
+	@commands.command(aliases=['delete_cards', 'dtc'])
+	@commands.has_permissions(administrator=True)
+	async def delete_teacher_cards(self, ctx, user_id: int = None) -> None:
+		""" Deletes all cards from a given teacher from the database.
+		:param user_id: The ID of the user from whom to get the cards. 
+		PS: Always use user IDs, since the member could have left the server. """
+
+		if not user_id:
+			return await ctx.send("**Please, inform a user ID!**")
+		
+		cards = await self.get_teacher_cards(user_id)
+		if not cards:
+			return await ctx.send("**No cards found for the given user!**")
+
+		member = self.client.get_user(user_id)
+		teacher =  member if member else user_id
+
+		embed = discord.Embed(
+			title=f"Teacher `{teacher}`",
+			description=f"The teacher has `{len(cards)}` cards, do you want to delete them?",
+			color=ctx.author.color,
+			timestamp=ctx.message.created_at,
+		)
+
+		msg = await ctx.send(embed=embed)
+		await msg.add_reaction('✅')
+		await msg.add_reaction('❌')
+		try:
+			r, u = await self.client.wait_for('reaction_add', timeout=60,
+				check=lambda r, u: u.id == ctx.author.id and r.message.id == msg.id and str(r.emoji) in ['✅', '❌'])
+
+		except asyncio.TimeoutError:
+			await msg.remove_reaction('✅', self.client.user)
+			await msg.remove_reaction('❌', self.client.user)
+
+		else:
+			if str(r.emoji) == '✅':
+				await self._delete_teacher_cards(user_id)
+				for card in cards:
+					card_path = f"{self.django_website_root}/{card[3].replace('../', '')}"
+					if os.path.exists(card_path):
+						try:
+							os.remove(card_path)
+						except:
+							pass
+
+				await ctx.send(f"**Cards successfully deleted for `{teacher}`!**")
+			else:
+				await ctx.send("**Not deleting them then!**")
+
+			await msg.remove_reaction('⬅️', u)
+			await msg.remove_reaction('➡️', u)
+
 
 def setup(client) -> None:
 	client.add_cog(TeacherAPI(client))

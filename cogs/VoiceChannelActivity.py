@@ -209,7 +209,7 @@ class VoiceChannelActivity(commands.Cog):
 					FROM VoiceChannelActivity WHERE channel_id = %s AND HOUR(the_time) BETWEEN %s AND %s""", 
 					(channel.id, time.hour, time2.hour))
 
-				text = f"Users between `{time.hour}:00` and `{time2.hour}:59` in `{channel}`:"
+				text = f"Users who joined `{channel}` between `{time.hour}:00` and `{time2.hour}:59`:"
 			else:
 				print('Provided 1 value!')
 				await mycursor.execute("""
@@ -217,7 +217,7 @@ class VoiceChannelActivity(commands.Cog):
 					FROM VoiceChannelActivity WHERE channel_id = %s AND HOUR(the_time) = %s""", 
 					(channel.id, time.hour))
 
-				text = f"Users between `{time.hour}:00` and `{time.hour}:59` in `{channel}`:"
+				text = f"Users who joined `{channel}` between `{time.hour}:00` and `{time.hour}:59`:"
 
 		else:
 			time = datetime.strptime(time, '%H:%M')
@@ -228,7 +228,7 @@ class VoiceChannelActivity(commands.Cog):
 				the_time1 = f"{time.hour}:{time.minute}"
 				the_time2 = f"{time2.hour}:{time2.minute}"
 
-				text = f"Users between `{the_time1}` and `{the_time2}` in `{channel}`:"
+				text = f"Users who joined `{channel}` between `{the_time1}` and `{the_time2}`:"
 
 				await mycursor.execute("""
 					SELECT DISTINCT the_time, member_name, member_id 
@@ -244,7 +244,7 @@ class VoiceChannelActivity(commands.Cog):
 					the_time1 = f"{time.hour}:30"
 					the_time2 = f"{time.hour}:59"
 
-				text = f"Users between `{the_time1}` and `{the_time2}` in `{channel}`:"
+				text = f"Users who joined `{channel}` between `{the_time1}` and `{the_time2}`:"
 				await mycursor.execute("""
 					SELECT DISTINCT the_time, member_name, member_id 
 					FROM VoiceChannelActivity WHERE channel_id = %s AND the_time BETWEEN %s AND %s""", 
@@ -370,9 +370,9 @@ class VoiceChannelActivity(commands.Cog):
 
 		await ctx.send(embed=embed)
 
-	@commands.command(aliases=['waswhere', 'was'])
+	@commands.command(aliases=['wherejoined', 'joined_where'])
 	@commands.has_any_role(*allowed_roles)
-	async def was_where(self, ctx, member: discord.Member = None, time: str = None, time2: str = None) -> None:
+	async def where_joined(self, ctx, member: discord.Member = None, time: str = None, time2: str = None) -> None:
 		""" Shows in which voice channel a specific user was at a given time:
 		:param member: The member you want to check.
 		:param time: The time. """
