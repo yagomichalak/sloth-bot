@@ -350,21 +350,22 @@ class Analytics(commands.Cog):
         return pr_list
 
 
-    async def get_current_day_and_future_day(self, days: int) -> str:
+    async def get_current_day_and_future_day(self, date: datetime, days: int) -> str:
         """ Gets the current day and the future day, by incrementing X days to the current day.
         :param days: The amount of days to be incremented. """
 
         tzone = timezone('Etc/GMT-1')
-        current_date_and_time = datetime.now().astimezone(tzone)
-        future_date_and_time = current_date_and_time + timedelta(days=days)
+        # current_date_and_time = datetime.now().astimezone(tzone)
+        date = datetime.strptime(date, '%d/%m/%Y')
+        future_date_and_time = date + timedelta(days=days)
 
-        current_day = current_date_and_time.strftime('%d/%m/%Y')
+        last_day = date.strftime('%d/%m/%Y')
         future_day = future_date_and_time.strftime('%d/%m/%Y')
         # print(current_day)
         # print(future_day)
-        return current_day, future_day
+        return last_day, future_day
 
-    async def predict_total_members(self, present: int, future: int, pr: float) -> int:
+    async def predict_total_members(self, date: datetime, present: int, future: int, pr: float) -> int:
         """ Predicts the total of members in days. 
         :param present: The current value.
         :param future: The goal value. 
@@ -385,10 +386,10 @@ class Analytics(commands.Cog):
             # print(f"Present+PR: {round(compound)}")
             # print('-'*20)
 
-        today, future_day = await self.get_current_day_and_future_day(count)
+        last_day, future_day = await self.get_current_day_and_future_day(date=date, days=count)
         # message = await self.make_message(present=present, today=today, future=futre, future_day=future_day, count=int)
         # return f"""{present} ({today})\n↓ in {count} days!\n{future} ({future_day})"""
-        line1 = f"{'Present:':<8} {present} members. Date: ({today})"
+        line1 = f"{'Present:':<8} {present} members. Date: ({last_day})"
         line2 = f"|↓ in {count} day(s) ↓|"
         line3 = f"{'Future:':<8} {future} members. Date: ({future_day})"
         return f"{line1}\n{line2:^39}\n{line3}"
@@ -397,10 +398,10 @@ class Analytics(commands.Cog):
         """ Gets the last record of total members. """
 
         mycursor, db = await the_database()
-        await mycursor.execute("SELECT members FROM DataBumps ORDER BY members DESC LIMIT 1")
+        await mycursor.execute("SELECT members, complete_date FROM DataBumps ORDER BY members DESC LIMIT 1")
         last_record = await mycursor.fetchone()
         await mycursor.close()
-        return last_record[0]
+        return last_record[0], last_record[1]
 
 
 
@@ -416,12 +417,12 @@ class Analytics(commands.Cog):
         # await calculate_monthly()
         pr_list = await self.calculate_daily()
         pr_average = sum(pr_list)/ len(pr_list)
-        last_record = await self.get_last_members_record()
+        last_record, complete_date = await self.get_last_members_record()
 
         if last_record >= future:
             return await ctx.send("**It looks like the server already reached that number!**")
         prediction = await self.predict_total_members(
-            present=last_record, future=future, pr=pr_average
+            date=complete_date, present=last_record, future=future, pr=pr_average
         )
 
         embed = discord.Embed(
