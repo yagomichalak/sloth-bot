@@ -1,11 +1,15 @@
 import discord
 from discord.ext import commands, tasks
 from mysqldb import *
-from datetime import datetime
+from datetime import datetime, timedelta
 from pytz import timezone
 from PIL import Image, ImageFont, ImageDraw
 from typing import List
 import os
+import asyncio
+from mysqldb import the_database
+
+
 
 bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
 select_your_language_channel_id = int(os.getenv('SELECT_YOUR_LANGUAGE_CHANNEL_ID'))
@@ -257,6 +261,183 @@ class Analytics(commands.Cog):
             return False
         else:
             return True
+
+    #==========================================#
+
+
+    async def get_monthly_total(self) -> List[int]:
+        """ Gets all monthly total of members. """
+
+        mycursor, db = await the_database()
+
+        await mycursor.execute("""
+            SELECT Month(STR_TO_DATE(complete_date, '%d/%m/%Y')) AS Months, 
+                (SUM(m_joined) - SUM(m_left)) AS 'Totals Joinings', 
+                COUNT(*) AS 'Records',
+                MAX(members) AS 'Members at the End' 
+            FROM DataBumps 
+            GROUP BY Months;
+        """)
+
+        months = await mycursor.fetchall()
+        months = list(map(lambda e: e[3], months))
+        await mycursor.close()
+        # pprint(months)
+        return months
+
+    async def get_daily_total(self) -> List[int]:
+        """ Gets all daily total of members. """
+
+        mycursor, db = await the_database()
+
+        await mycursor.execute("""
+            SELECT STR_TO_DATE(complete_date, '%d/%m/%Y') AS Days, 
+                (SUM(m_joined) - SUM(m_left)) AS 'Totals Joinings', 
+                COUNT(*) AS 'Records',
+                members AS 'Members at the End' 
+            FROM DataBumps 
+            GROUP BY Days;
+        """)
+
+        months = await mycursor.fetchall()
+        months = list(map(lambda e: e[3], months))
+        await mycursor.close()
+        # pprint(months)
+        return months
+
+
+    async def growth_percentage(self, present: int, past: int) -> float:
+        """ Gets the growth percentage of a value compared to another one.
+        :param present: The current value.
+        :param past: The old value to which you wanna compare. """
+
+        # PR = Percent Rate
+        pr = ((present - past) / past) * 100
+        return pr
+
+    async def calculate_monthly(self) -> List[float]:
+        """ Calculates, shows and returns the growth percentage rate of all months. """
+
+        pr_list: List[float] = []
+        total_month_members = await self.get_monthly_total()
+        # print('='*45)
+        for i, month in enumerate(total_month_members):
+            first_line = f"Month: {i+1} | Total Members: {month}"
+            # print(f"{first_line:^45}")
+            if i != 0 and (i-1) % 2 == 0 and (i-1) < len(total_month_members):
+                pr = await self.growth_percentage(total_month_members[i], total_month_members[i-1])
+                pr_list.append(pr)
+                # print(f'\tGrowth increase: {pr:.2f}% ({total_month_members[i-1]} → {total_month_members[i]})')
+                # print('='*45)
+
+        return pr_list
+
+    async def calculate_daily(self) -> List[float]:
+        """ Calculates, shows and returns the growth percentage rate of all days. """
+
+        pr_list: List[float] = []
+        total_day_members = await self.get_daily_total()
+        # print('='*45)
+        for i, day in enumerate(total_day_members):
+            first_line = f"Day: {i+1} | Total Members: {day}"
+            # print(f"{first_line:^45}")
+            if i != 0 and (i-1) % 2 == 0 and (i-1) < len(total_day_members):
+                pr = await self.growth_percentage(total_day_members[i], total_day_members[i-1])
+                pr_list.append(pr)
+                # print(f'\tGrowth increase: {pr:.2f}% ({total_day_members[i-1]} → {total_day_members[i]})')
+                # print('='*45)
+
+        return pr_list
+
+
+    async def get_current_day_and_future_day(self, days: int) -> str:
+        """ Gets the current day and the future day, by incrementing X days to the current day.
+        :param days: The amount of days to be incremented. """
+
+        tzone = timezone('Etc/GMT-1')
+        current_date_and_time = datetime.now().astimezone(tzone)
+        future_date_and_time = current_date_and_time + timedelta(days=days)
+
+        current_day = current_date_and_time.strftime('%d/%m/%Y')
+        future_day = future_date_and_time.strftime('%d/%m/%Y')
+        # print(current_day)
+        # print(future_day)
+        return current_day, future_day
+
+    async def predict_total_members(self, present: int, future: int, pr: float) -> int:
+        """ Predicts the total of members in days. 
+        :param present: The current value.
+        :param future: The goal value. 
+        :param the percentage growth rate. """
+
+        count = 0
+        compound = present
+        # print('-'*20)
+        while True:
+
+            if compound >= future:
+                break
+
+            count += 1
+            
+            # print(f"Present: {round(compound)}")
+            compound += (compound * pr)/100
+            # print(f"Present+PR: {round(compound)}")
+            # print('-'*20)
+
+        today, future_day = await self.get_current_day_and_future_day(count)
+        # message = await self.make_message(present=present, today=today, future=futre, future_day=future_day, count=int)
+        # return f"""{present} ({today})\n↓ in {count} days!\n{future} ({future_day})"""
+        line1 = f"{'Present:':<8} {present} members. Date: ({today})"
+        line2 = f"|↓ in {count} day(s) ↓|"
+        line3 = f"{'Future:':<8} {future} members. Date: ({future_day})"
+        return f"{line1}\n{line2:^39}\n{line3}"
+
+    async def get_last_members_record(self) -> int:
+        """ Gets the last record of total members. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("SELECT members FROM DataBumps ORDER BY members DESC LIMIT 1")
+        last_record = await mycursor.fetchone()
+        await mycursor.close()
+        return last_record[0]
+
+
+
+    @commands.command()
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def when(self, ctx, future: int = None) -> None:
+        """ Estimates and predicts when the server will hit the given amount of members.
+        :param future: The goal value. """
+
+        if not future:
+            return await ctx.send("**Please, inform a future value (goal value)!**")
+
+        # await calculate_monthly()
+        pr_list = await self.calculate_daily()
+        pr_average = sum(pr_list)/ len(pr_list)
+        last_record = await self.get_last_members_record()
+
+        if last_record >= future:
+            return await ctx.send("**It looks like the server already reached that number!**")
+        prediction = await self.predict_total_members(
+            present=last_record, future=future, pr=pr_average
+        )
+
+        embed = discord.Embed(
+            title="Future Value Esimation",
+            description=f"Considering an average Growth Percentage Rate of `{round(pr_average, 2)}%`",
+            color=ctx.author.color,
+            timestamp=ctx.message.created_at
+        )
+
+        embed.add_field(
+            name="="*59,
+            value=f"```apache\n{prediction}```**{'='*59}**"
+        )
+
+        await ctx.send(embed=embed)
+
 
 
 def setup(client):

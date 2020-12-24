@@ -479,8 +479,7 @@ class TeacherAPI(commands.Cog):
 				+ f"**Day:** {current[5]} at {current[6]}\n**Type:** {current[7]}",
 				inline=True
 			)
-			image_path = f"{self.website_link}/{current[3].replace('../', '')}"
-			print(image_path)
+			image_path = f"{self.website_link}/{current[3].replace('../', '').replace(' ', '%20')}"
 			try:
 				embed.set_image(url=image_path)
 			except:
