@@ -414,6 +414,9 @@ class Analytics(commands.Cog):
         if not future:
             return await ctx.send("**Please, inform a future value (goal value)!**")
 
+        if len(future) > 6:
+            return await ctx.send("**Don't try to troll!**")
+
         # await calculate_monthly()
         pr_list = await self.calculate_daily()
         pr_average = sum(pr_list)/ len(pr_list)
