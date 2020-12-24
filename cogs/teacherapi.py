@@ -480,7 +480,11 @@ class TeacherAPI(commands.Cog):
 				inline=True
 			)
 			image_path = f"{self.website_link}/{current[3].replace('../', '')}"
-			embed.set_image(url=image_path)
+			print(image_path)
+			try:
+				embed.set_image(url=image_path)
+			except:
+				pass
 
 			await msg.edit(embed=embed)
 			try:
