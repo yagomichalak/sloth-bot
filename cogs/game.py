@@ -158,13 +158,13 @@ class Game(commands.Cog):
 		elif (x, y) == (destiny_x, destiny_y):
 			moved = None
 
-		if (item_x+xadd, item_y+yadd) == (destiny_x, destiny_y):
+		if moved and (item_x+xadd, item_y+yadd) == (destiny_x, destiny_y):
 			moved = True
 			gg = True
 
 		return inserted, moved, gg
 
-	async def remove_message_reaction(self, msg) -> None:
+	async def remove_message_reaction(self, msg, member: discord.Member) -> None:
 		""" Removes arrow reactions from a given message:
 		:param msg: The message from which you want to remove the reactions. """
 
@@ -172,6 +172,13 @@ class Game(commands.Cog):
 		await msg.remove_reaction('➡️', self.client.user)
 		await msg.remove_reaction('⬇️', self.client.user)
 		await msg.remove_reaction('⬆️', self.client.user)
+		await msg.remove_reaction('🏳️', self.client.user)
+		await msg.remove_reaction('⬅️', member)
+		await msg.remove_reaction('➡️', member)
+		await msg.remove_reaction('⬇️', member)
+		await msg.remove_reaction('⬆️', member)
+		await msg.remove_reaction('🏳️', member)
+
 
 	@commands.command()
 	@commands.cooldown(1, 3600, commands.BucketType.user)
@@ -198,6 +205,7 @@ class Game(commands.Cog):
 		await msg.add_reaction('➡️')
 		await msg.add_reaction('⬇️')
 		await msg.add_reaction('⬆️')
+		await msg.add_reaction('🏳️')
 
 		while True:
 
@@ -208,15 +216,16 @@ class Game(commands.Cog):
 				embed.title = "__wy`GRA`łeś/aś!__"
 				embed.color = discord.Color.green()
 				await msg.edit(content="**GG, you won!**", embed=embed)
-				return await self.remove_message_reaction(msg)
+				self.client.get_command('start').reset_cooldown(ctx)
+				return await self.remove_message_reaction(msg, ctx.author)
 
 			try:
 				r, u = await self.client.wait_for('reaction_add', timeout=60,
 					check=lambda r, u: u.id == member.id and r.message.id == msg.id \
-					and str(r.emoji) in ['⬅️', '➡️', '⬇️', '⬆️']
+					and str(r.emoji) in ['⬅️', '➡️', '⬇️', '⬆️', '🏳️']
 				)
 			except asyncio.TimeoutError:
-				await self.remove_message_reaction(msg)
+				await self.remove_message_reaction(msg, ctx.author)
 				embed.title += ' (Timeout)'
 				embed.color = discord.Color.red()
 				self.client.get_command('start').reset_cooldown(ctx)
@@ -251,6 +260,11 @@ class Game(commands.Cog):
 						inserted, moved, gg = await self.check_player_collision(inserted, x, y-1, 0, -1, emj, columns, rows)
 						if moved is not None:
 							y -= 1
+				elif emj == '🏳️':
+					embed.color = discord.Color.orange()
+					await msg.edit(content="**Noob!** 🏳️", embed=embed)
+					self.client.get_command('start').reset_cooldown(ctx)
+					return await self.remove_message_reaction(msg, ctx.author)
 
 				square, inserted = await self.make_game_square(inserted=inserted, columns=columns, rows=rows, player_x=x, player_y=y)
 
