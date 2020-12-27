@@ -51,11 +51,11 @@ class VoiceChannelActivity(commands.Cog):
 	@tasks.loop(seconds=60)
 	async def calculate(self) -> None:
 		""" Calculates all members that are in a voice channel. """
-
 		tzone = timezone('Etc/GMT-1')
 		date_and_time = datetime.now().astimezone(tzone)
 		the_time = date_and_time.strftime('%H:%M')
 
+		print(f'Calculate VC at {the_time}')
 		guild = self.client.get_guild(self.server_id)
 		channels = [c for c in guild.voice_channels]
 
