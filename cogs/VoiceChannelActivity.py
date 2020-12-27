@@ -22,7 +22,7 @@ class VoiceChannelActivity(commands.Cog):
 	async def on_ready(self) -> None:
 		""" Tells when the cog is ready to use. """
 
-		#self.calculate.start()
+		self.calculate.start()
 		self.check_old_record_deletion_time.start()
 
 		print('VoiceChannelActivity cog is online!')
@@ -67,7 +67,7 @@ class VoiceChannelActivity(commands.Cog):
 				all_channel_members.append(channel_members)
 
 		if all_channel_members:
-			await self.insert_first_row(channel_members)
+			await self.insert_first_row(all_channel_members)
 
 
 	@commands.command(hidden=True)
@@ -145,7 +145,7 @@ class VoiceChannelActivity(commands.Cog):
 		await mycursor.close()
 
 	@tasks.loop(seconds=60)
-	async def check_old_record_deletion_time(self, limit_hours: int = 6) -> None:
+	async def check_old_record_deletion_time(self, limit_hours: int = 3) -> None:
 		""" Checks whether it's time to delete old records.
 		:param limit_hours: The limit of hours that the DB needs to store,
 		PS: If the number of registered hours in the DB is exceeded, the oldest records will be deleted,
