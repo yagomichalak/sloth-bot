@@ -19,6 +19,7 @@ clock_voice_channel_id = int(os.getenv('CLOCK_VC_ID'))
 admin_commands_channel_id = int(os.getenv('ADMIN_COMMANDS_CHANNEL_ID'))
 patreon_role_id = int(os.getenv('SLOTH_EXPLORER_ROLE_ID'))
 announ_announ_channel_id = int(os.getenv('ANNOUNCEMENT_CHANNEL_ID'))
+error_log_channel_id = int(os.getenv('ERROR_LOG_CHANNEL_ID'))
 #colors = cycle([(255, 0, 0), (255, 127, 0), (255, 255, 0), (0, 255, 0), (0, 0, 255), (75, 0, 130), (143, 0, 255)])
 shades_of_pink = cycle([(252, 15, 192), (255, 0, 255), (248, 24, 148),
 			  (224, 17, 95), (246, 74, 138), (236, 85, 120),
@@ -120,6 +121,11 @@ async def on_command_error(ctx, error):
 	print('='*10)
 	print(f"ERROR: {error} | Class: {error.__class__} | Cause: {error.__cause__}")
 	print('='*10)
+	error_log = client.get_channel(error_log_channel_id)
+	if error_log:
+		await error_log.send('='*10)
+		await error_log.send(f"ERROR: {error} | Class: {error.__class__} | Cause: {error.__cause__}")
+		await error_log.send('='*10)
 
 
 # Members status update
