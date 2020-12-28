@@ -233,13 +233,6 @@ class EmbedManagement(commands.Cog):
 
 		member = ctx.author
 
-		options = [
-		'author', 'description', 'footer',
-		'thumbnail', 'image', 'timestamp',
-		'color', 'title', 'field', 
-		'all'
-		]
-
 		options = {
 			'author': 'EmbedAuthor', 'description': 'EmbedDescription',
 			'footer': 'EmbedFooter', 'thumbnail': 'EmbedThumbnail',
@@ -773,7 +766,6 @@ class EmbedManagement(commands.Cog):
 				description=f"{member.mention}, do you confirm this action to be done to `{value}`?",
 				color=discord.Color.orange(),
 				timestamp=ctx.message.created_at,
-				url=member.guild.icon_url
 				)
 			msg = await ctx.send(embed=embed)
 			embed.set_footer(text="60 seconds to answer!", icon_url=member.guild.icon_url)
@@ -837,7 +829,8 @@ class SortEmbed:
 		""" Class initializing method. 
 		:param fields: A dictionary containing data that needs to be sorted. """
 
-		self.fields = fields
+		# self.fields = fields
+		dict.__init__(self, fields=fields)
 
 
 	async def sort_embed_fields(self) -> discord.Embed:
