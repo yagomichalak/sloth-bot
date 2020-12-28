@@ -22,7 +22,7 @@ class Embeds(commands.Cog):
     # Sends an embedded message
     @commands.command()
     @commands.has_any_role(*allowed_roles)
-    async def embed(self, ctx):
+    async def emb(self, ctx):
         '''
         (MOD) Sends an embedded message.
         '''
