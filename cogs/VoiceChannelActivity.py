@@ -66,6 +66,7 @@ class VoiceChannelActivity(commands.Cog):
 				channel_members = [(the_time, channel.id, channel.name, m.id, m.name) for m in channel.members]
 				all_channel_members.append(channel_members)
 
+		all_channel_members = [m for c in all_channel_members for m in c]
 		if all_channel_members:
 			await self.insert_first_row(all_channel_members)
 
