@@ -808,7 +808,7 @@ class EmbedManagement(commands.Cog):
 				return False
 
 	@commands.command()
-	async def info(self, ctx) -> None:
+	async def embed_info(self, ctx) -> None:
 		""" Shows an embedded message containing a description of the embed system. """
 
 		def read_text() -> str:
