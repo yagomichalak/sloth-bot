@@ -137,7 +137,7 @@ class EmbedManagement(commands.Cog):
 	# In-Discord methods / commands
 
 	@commands.group()
-	@commands.has_any_role(**allowed_roles)
+	@commands.has_any_role(*allowed_roles)
 	async def embed(self, ctx) -> None:
 		""" Embeds a message."""
 
