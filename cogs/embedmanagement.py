@@ -829,8 +829,7 @@ class SortEmbed:
 		""" Class initializing method. 
 		:param fields: A dictionary containing data that needs to be sorted. """
 
-		# self.fields = fields
-		dict.__init__(self, fields=fields)
+		self.fields = fields
 
 
 	async def sort_embed_fields(self) -> discord.Embed:

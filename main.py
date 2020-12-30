@@ -121,11 +121,11 @@ async def on_command_error(ctx, error):
 	print('='*10)
 	print(f"ERROR: {error} | Class: {error.__class__} | Cause: {error.__cause__}")
 	print('='*10)
-	error_log = client.get_channel(error_log_channel_id)
-	if error_log:
-		await error_log.send('='*10)
-		await error_log.send(f"ERROR: {error} | Class: {error.__class__} | Cause: {error.__cause__}")
-		await error_log.send('='*10)
+	# error_log = client.get_channel(error_log_channel_id)
+	# if error_log:
+	# 	await error_log.send('='*10)
+	# 	await error_log.send(f"ERROR: {error} | Class: {error.__class__} | Cause: {error.__cause__}")
+	# 	await error_log.send('='*10)
 
 
 # Members status update
