@@ -140,10 +140,10 @@ async def update_timezones():
 	timezones = {'Etc/GMT-1': [clock_voice_channel_id, 'CET']}
 
 	for tz in timezones:
+		the_vc = client.get_channel(timezones[tz][0])
 		tzone = timezone(tz)
 		date_and_time = time_now.astimezone(tzone)
 		date_and_time_in_text = date_and_time.strftime('%H:%M')
-		the_vc = client.get_channel(timezones[tz][0])
 		print(the_vc)
 		await the_vc.edit(name=f'{timezones[tz][1]} - {date_and_time_in_text}')
 
