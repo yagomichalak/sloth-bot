@@ -136,8 +136,6 @@ async def change_status():
 
 @tasks.loop(seconds=60)
 async def update_timezones():
-	gid = server_id  # Guild id
-	guild = client.get_guild(gid)
 	time_now = datetime.now()
 	timezones = {'Etc/GMT-1': [clock_voice_channel_id, 'CET']}
 
@@ -145,7 +143,8 @@ async def update_timezones():
 		tzone = timezone(tz)
 		date_and_time = time_now.astimezone(tzone)
 		date_and_time_in_text = date_and_time.strftime('%H:%M')
-		the_vc = discord.utils.get(guild.channels, id=timezones[tz][0])
+		the_vc = client.get_channel(timezones[tz][0])
+		print(the_vc)
 		await the_vc.edit(name=f'{timezones[tz][1]} - {date_and_time_in_text}')
 
 
