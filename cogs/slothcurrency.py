@@ -204,9 +204,7 @@ class SlothCurrency(commands.Cog):
         user_items = await self.get_user_items(ctx.author.id)
         for item in user_items:
             if str(item[1]) == item_name.title():
-                print('The item')
                 if await self.check_user_can_equip(ctx.author.id, item_name.title()):
-                    print('sa')
                     await self.update_user_item_info(ctx.author.id, item_name, 'equipped')
                     return await ctx.send(f"**{ctx.author.mention} equipped __{item_name.title()}__!**", delete_after=3)
                 else:
@@ -372,12 +370,10 @@ class SlothCurrency(commands.Cog):
     async def check_user_can_equip(self, user_id, item_name: str) -> bool:
         mycursor, db = await the_database()
         item_type = await self.get_specific_register_item(item_name)
-        print(item_type)
         await mycursor.execute(
             f"SELECT * FROM UserItems WHERE user_id = {user_id} and item_type = '{item_type[0][1]}' and enable = 'equipped'")
         equipped_item = await mycursor.fetchall()
         await mycursor.close()
-        print('oioi')
 
         if len(equipped_item) != 0 and len(item_type) != 0:
             return False
