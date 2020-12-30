@@ -350,19 +350,17 @@ class Analytics(commands.Cog):
 		return pr_list
 
 
-	async def get_current_day_and_future_day(self, days: int) -> str:
+	async def get_current_day_and_future_day(self, days: int, hours: int) -> str:
 		""" Gets the current day and the future day, by incrementing X days to the current day.
-		:param days: The amount of days to be incremented. """
+		:param days: The amount of days to be incremented. 
+		:param hours: The amount of hours to be incremented. """
 
 		tzone = timezone('Etc/GMT-1')
-		date = datetime.now().astimezone(tzone)
-		# date = datetime.strptime(date, '%d/%m/%Y')
-		future_date_and_time = date + timedelta(days=days)
+		current_date_and_time = datetime.now().astimezone(tzone)
+		future_date_and_time = current_date_and_time + timedelta(days=days, hours=hours)
 
-		last_day = date.strftime('%d/%m/%Y')
-		future_day = future_date_and_time.strftime('%d/%m/%Y')
-		# print(current_day)
-		# print(future_day)
+		last_day = current_date_and_time.strftime('%d/%m/%Y at %H')
+		future_day = future_date_and_time.strftime('%d/%m/%Y at %H')
 		return last_day, future_day
 
 	async def predict_total_members(self, present: int, future: int, pr: float) -> int:
@@ -372,27 +370,53 @@ class Analytics(commands.Cog):
 		:param the percentage growth rate. """
 
 		count = 0
-		compound = present
+		hours = 0
+		current_compound = temp_value = present
 		# print('-'*20)
-		while True:
+		tzone = timezone('Etc/GMT-1')
+		td = datetime.now().astimezone(tzone)
 
-			if compound >= future:
+
+		while True:
+			
+			# PR (Percentage Rate)
+			pr_compound = (current_compound * pr) / 100
+
+			# Sum of PR and current compound
+			sum_both = current_compound + pr_compound
+
+			# Sees whether the sum of PR and current value are >= the future value
+			if sum_both >= future:
+				pr_divided = pr_compound / 24
+				remaining_hours = 24
+				if td.hour != 0 and count == 0:
+					remaining_hours = 24 - td.hour
+
+				# Divides the remaining PR by 24 hours
+				remaining_pr = pr_compound / 24
+
+				# Loops through each remaining hour of that day, so the data is hour-precise
+				for _ in range(remaining_hours):
+					sum_remaining = current_compound + remaining_pr
+					current_compound = sum_remaining
+					hours += 1
+
+					# If the current compound is >= the future value, break the loop
+					if sum_remaining >= future:
+						break
+
 				break
 
+			# If none of the conditions are satisfied, starts another iteration of another looping
+			current_compound = sum_both
 			count += 1
 			
-			# print(f"Present: {round(compound)}")
-			compound += (compound * pr)/100
-			# print(f"Present+PR: {round(compound)}")
-			# print('-'*20)
 
-		last_day, future_day = await self.get_current_day_and_future_day(days=count)
-		# message = await self.make_message(present=present, today=today, future=futre, future_day=future_day, count=int)
-		# return f"""{present} ({today})\n↓ in {count} days!\n{future} ({future_day})"""
+		last_day, future_day = await self.get_current_day_and_future_day(count, hours)
 		line1 = f"{'Present:':<8} {present} members. Date: ({last_day})"
-		line2 = f"|↓ in {count} day(s) ↓|"
+		line2 = f"|↓ in {count} day(s) and {hours} hours ↓|"
 		line3 = f"{'Future:':<8} {future} members. Date: ({future_day})"
-		return f"{line1}\n{line2:^39}\n{line3}"
+		return f"{line1}\n{line2:^48}\n{line3}"
 
 	async def get_last_members_record(self) -> int:
 		""" Gets the last record of total members. """
@@ -420,6 +444,8 @@ class Analytics(commands.Cog):
 		# await calculate_monthly()
 		pr_list = await self.calculate_daily()
 		pr_average = sum(pr_list)/ len(pr_list)
+		if pr_average <= 0:
+			return await ctx.send(f"**I'm afraid I can't calculate it, because you have a negative PR of `{round(pr_average, 2)}%`**")
 		# last_record = await self.get_last_members_record()
 		last_record = len(ctx.guild.members)
 
@@ -430,7 +456,7 @@ class Analytics(commands.Cog):
 		)
 
 		embed = discord.Embed(
-			title="Future Value Esimation",
+			title="Future Value Estimation",
 			description=f"Considering an average Growth Percentage Rate of `{round(pr_average, 2)}%`",
 			color=ctx.author.color,
 			timestamp=ctx.message.created_at
