@@ -138,7 +138,7 @@ class Show(commands.Cog):
             members AS 'First Member Record of the Month',
             MAX(members) AS 'Last Member Record of the Month'
             FROM DataBumps
-            GROUP BY MONTH(Months)
+            GROUP BY YEAR(Months), MONTH(Months)
             """)
 
         months = await mycursor.fetchall()
