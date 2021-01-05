@@ -189,6 +189,19 @@ class CreateSmartRoom(commands.Cog):
 
 		# Confirm configurations
 		if str(reaction.emoji) == '✅':
+
+			# Checks if the user has money for it (5łł)
+			user_currency = await SlothCurrency.get_user_currency(member, member.id)
+			if user_currency:
+				if user_currency[0][1] >= 5:
+					await SlothCurrency.update_user_money(member, member.id, -5)
+				else:
+					return await member.send("**You don't have enough money to buy this service!**")
+
+			else:
+				return await member.send("**You don't even have an account yet!**")
+
+
 			# Gets the CreateSmartRoom category, creates the VC and tries to move the user to there
 			the_category_test = discord.utils.get(member.guild.categories, id=self.cat_id)
 			creation = await the_category_test.create_voice_channel(name=f"{name}", user_limit=limit)
@@ -392,22 +405,22 @@ class CreateSmartRoom(commands.Cog):
 		if txt2_name is None:
 			return
 
-		# Gets the name of the text channel 3
-		msg6 = await member.send(file=discord.File('./images/smart_vc/galaxy/3 select text chat 3.png'))
-		bot_msg = msg6
-		txt3_name = await self.get_response(member, check_cat_or_txt_name)
+		# # Gets the name of the text channel 3
+		# msg6 = await member.send(file=discord.File('./images/smart_vc/galaxy/3 select text chat 3.png'))
+		# bot_msg = msg6
+		# txt3_name = await self.get_response(member, check_cat_or_txt_name)
 
-		if txt3_name is None:
-			return
+		# if txt3_name is None:
+		# 	return
 
 		# Makes the preview image
 		#member_id, cat_name, txt1, txt2, txt3, vc, size
-		await self.make_preview_galaxy(member.id, category_name, txt1_name, txt2_name, txt3_name, vc_name, limit)
+		await self.make_preview_galaxy(member.id, category_name, txt1_name, txt2_name, vc_name, limit)
 		# Gets the configuration confirmation
-		msg7 = await member.send(file=discord.File(f'./images/smart_vc/user_previews/{member.id}.png'))
-		await msg7.add_reaction('✅')
-		await msg7.add_reaction('❌')
-		bot_msg = msg7
+		msg6 = await member.send(file=discord.File(f'./images/smart_vc/user_previews/{member.id}.png'))
+		await msg6.add_reaction('✅')
+		await msg6.add_reaction('❌')
+		bot_msg = msg6
 		reaction, user = await self.get_reaction_response(member, check_confirm)
 		if reaction is None:
 			return
@@ -420,11 +433,11 @@ class CreateSmartRoom(commands.Cog):
 			if has_galaxy:
 				return await member.send("**You already have a Galaxy category, you can't create more than one!**")
 
-			# Checks if the user has money (350łł)
+			# Checks if the user has money (1000łł)
 			user_currency = await SlothCurrency.get_user_currency(member, member.id)
 			if user_currency:
-				if user_currency[0][1] >= 350:
-					await SlothCurrency.update_user_money(member, member.id, -350)
+				if user_currency[0][1] >= 1000:
+					await SlothCurrency.update_user_money(member, member.id, -1000)
 				else:
 					return await member.send("**You don't have enough money to buy this service!**")
 
@@ -442,11 +455,11 @@ class CreateSmartRoom(commands.Cog):
 			vc_creation = await category_created.create_voice_channel(name=f"{vc_name}", user_limit=limit)
 			txt_creation1 = await category_created.create_text_channel(name=f"{txt1_name}")
 			txt_creation2 = await category_created.create_text_channel(name=f"{txt2_name}")
-			txt_creation3 = await category_created.create_text_channel(name=f"{txt3_name}")
+			# txt_creation3 = await category_created.create_text_channel(name=f"{txt3_name}")
 			# Inserts the channels in the database
 			epoch = datetime.utcfromtimestamp(0)
 			the_time = (datetime.utcnow() - epoch).total_seconds()
-			await self.insert_galaxy_vc(member.id, category_created.id, vc_creation.id, txt_creation1.id, txt_creation2.id, txt_creation3.id, the_time)
+			await self.insert_galaxy_vc(member.id, category_created.id, vc_creation.id, txt_creation1.id, txt_creation2.id, the_time)
 			await member.send(file=discord.File('./images/smart_vc/created.png'))
 			try:
 				await member.move_to(vc_creation)
@@ -513,13 +526,13 @@ class CreateSmartRoom(commands.Cog):
 		if int(size) != 0:
 			await self.overwrite_image_with_image(member_id, (405, 955), f'./images/smart_vc/sizes/voice channel ({size}).png')
 
-	async def make_preview_galaxy(self, member_id, cat_name, txt1, txt2, txt3, vc, size):
+	async def make_preview_galaxy(self, member_id, cat_name, txt1, txt2, vc, size):
 		preview_template = './images/smart_vc/galaxy/3 preview2.png'
 		color = (132, 142, 142)
 		await self.overwrite_image(member_id, cat_name, (545, 670), color, preview_template)
 		await self.overwrite_image(member_id, txt1.lower(), (585, 745), color, f'./images/smart_vc/user_previews/{member_id}.png')
 		await self.overwrite_image(member_id, txt2.lower(), (585, 835), color, f'./images/smart_vc/user_previews/{member_id}.png')
-		await self.overwrite_image(member_id, txt3.lower(), (585, 930), color, f'./images/smart_vc/user_previews/{member_id}.png')
+		# await self.overwrite_image(member_id, txt3.lower(), (585, 930), color, f'./images/smart_vc/user_previews/{member_id}.png')
 		await self.overwrite_image(member_id, vc, (585, 1020), color, f'./images/smart_vc/user_previews/{member_id}.png')
 		if int(size) != 0:
 			await self.overwrite_image_with_image(member_id, (405, 1015), f'./images/smart_vc/sizes/voice channel ({size}).png')
@@ -618,7 +631,7 @@ class CreateSmartRoom(commands.Cog):
 			return await ctx.send("**Table __GalaxyVc__ already exists!**")
 
 		mycursor, db = await the_database()
-		await mycursor.execute("CREATE TABLE GalaxyVc (user_id BIGINT, user_cat BIGINT, user_vc BIGINT, user_txt1 BIGINT, user_txt2 BIGINT, user_txt3 BIGINT, user_ts BIGINT, user_notified VARCHAR(3) default 'no')")
+		await mycursor.execute("CREATE TABLE GalaxyVc (user_id BIGINT, user_cat BIGINT, user_vc BIGINT, user_txt1 BIGINT, user_txt2 BIGINT, user_txt3 BIGINT DEFAULT NULL, user_ts BIGINT, user_notified VARCHAR(3) default 'no')")
 		await db.commit()
 		await mycursor.close()
 
@@ -668,9 +681,9 @@ class CreateSmartRoom(commands.Cog):
 		else:
 			return True
 
-	async def insert_galaxy_vc(self, user_id: int, user_cat: int, user_vc: int, user_txt1: int, user_txt2: int, user_txt3: int, user_ts: int):
+	async def insert_galaxy_vc(self, user_id: int, user_cat: int, user_vc: int, user_txt1: int, user_txt2: int, user_ts: int):
 		mycursor, db = await the_database()
-		await mycursor.execute("INSERT INTO GalaxyVc (user_id, user_cat, user_vc, user_txt1, user_txt2, user_txt3, user_ts) VALUES (%s, %s, %s, %s, %s, %s, %s)", (user_id, user_cat, user_vc, user_txt1, user_txt2, user_txt3, user_ts))
+		await mycursor.execute("INSERT INTO GalaxyVc (user_id, user_cat, user_vc, user_txt1, user_txt2, user_ts) VALUES (%s, %s, %s, %s, %s, %s)", (user_id, user_cat, user_vc, user_txt1, user_txt2, user_ts))
 		await db.commit()
 		await mycursor.close()
 
@@ -760,7 +773,7 @@ class CreateSmartRoom(commands.Cog):
 
 	async def update_user_vc_ts(self, user_id: int, new_ts: int):
 		mycursor, db = await the_database()
-		await mycursor.execute(f"UPDATE UserVCstamp SET user_vc_ts = {new_ts} WHERE user_id = {user_id}")
+		await mycursor.execute("UPDATE UserVCstamp SET user_vc_ts = %s WHERE user_id = %s", (new_ts, user_id))
 		await db.commit()
 		await mycursor.close()
 
