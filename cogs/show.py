@@ -123,7 +123,6 @@ class Show(commands.Cog):
 
 
     @commands.command(aliases=['ss'])
-    @commands.has_permissions()
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def server_status(self, ctx) -> None:
         """ Shows some server statuses. """
