@@ -529,13 +529,12 @@ class CreateSmartRoom(commands.Cog):
 	async def make_preview_galaxy(self, member_id, cat_name, txt1, txt2, vc, size):
 		preview_template = './images/smart_vc/galaxy/3 preview2.png'
 		color = (132, 142, 142)
-		await self.overwrite_image(member_id, cat_name, (545, 670), color, preview_template)
-		await self.overwrite_image(member_id, txt1.lower(), (585, 745), color, f'./images/smart_vc/user_previews/{member_id}.png')
-		await self.overwrite_image(member_id, txt2.lower(), (585, 835), color, f'./images/smart_vc/user_previews/{member_id}.png')
-		# await self.overwrite_image(member_id, txt3.lower(), (585, 930), color, f'./images/smart_vc/user_previews/{member_id}.png')
-		await self.overwrite_image(member_id, vc, (585, 1020), color, f'./images/smart_vc/user_previews/{member_id}.png')
+		await self.overwrite_image(member_id, cat_name, (545, 700), color, preview_template)
+		await self.overwrite_image(member_id, txt1.lower(), (585, 780), color, f'./images/smart_vc/user_previews/{member_id}.png')
+		await self.overwrite_image(member_id, txt2.lower(), (585, 870), color, f'./images/smart_vc/user_previews/{member_id}.png')
+		await self.overwrite_image(member_id, vc, (585, 970), color, f'./images/smart_vc/user_previews/{member_id}.png')
 		if int(size) != 0:
-			await self.overwrite_image_with_image(member_id, (405, 1015), f'./images/smart_vc/sizes/voice channel ({size}).png')
+			await self.overwrite_image_with_image(member_id, (405, 975), f'./images/smart_vc/sizes/voice channel ({size}).png')
 
 
 	# Database commands
