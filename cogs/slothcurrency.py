@@ -631,9 +631,13 @@ class SlothCurrency(commands.Cog):
             else:
                 return await ctx.send(f"**{member} doesn't have an account yet!**", delete_after=3)
 
+        if user_info[0][7].lower() == 'default':
+            return await ctx.send(f"**{member} has a default Sloth class, I cannot show their profile!**")
+
         small = ImageFont.truetype("built titling sb.ttf", 45)
         background = Image.open(await self.get_user_specific_type_item(member.id, 'background'))
-        sloth = Image.open(await self.get_user_specific_type_item(member.id, 'sloth'))
+        # sloth = Image.open(await self.get_user_specific_type_item(member.id, 'sloth'))
+        sloth = Image.open(f"./sloth_custom_images/sloth/{user_info[0][7].title()}.png")
         body = Image.open(await self.get_user_specific_type_item(member.id, 'body'))
         hand = Image.open(await self.get_user_specific_type_item(member.id, 'hand'))
         foot = Image.open(await self.get_user_specific_type_item(member.id, 'foot'))

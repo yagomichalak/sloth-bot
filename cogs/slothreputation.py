@@ -92,6 +92,7 @@ class SlothReputation(commands.Cog):
         embed.add_field(name="__**Participated in**__", value=f"{ucur[0][3]} classes.", inline=True)
         embed.add_field(name="__**Rewarded in**__", value=f"{ucur[0][4]} classes.", inline=True)
         embed.add_field(name="__**Hosted**__", value=f"{ucur[0][5]} classes.", inline=True)
+        embed.add_field(name="__**Sloth CLass**__", value=ucur[0][7], inline=True)
         embed.set_thumbnail(url=member.avatar_url)
         embed.set_footer(text=f"{member}", icon_url=member.avatar_url)
         return await ctx.send(content=None, embed=embed)
