@@ -75,7 +75,8 @@ class SlothCurrency(commands.Cog):
 
         user_info = await self.get_user_activity_info(message.author.id)
         if not user_info:
-            return await self.insert_user_server_activity(message.author.id, 1)
+            # return await self.insert_user_server_activity(message.author.id, 1)
+            return
 
         await self.update_user_server_messages(message.author.id, 1)
 
@@ -91,7 +92,8 @@ class SlothCurrency(commands.Cog):
 
         user_info = await self.get_user_activity_info(member.id)
         if not user_info:
-            return await self.insert_user_server_activity(member.id, 0, the_time)
+            # return await self.insert_user_server_activity(member.id, 0, the_time)
+            return
 
         if not before.channel:
             return await self.update_user_server_timestamp(member.id, the_time)
@@ -126,7 +128,8 @@ class SlothCurrency(commands.Cog):
         the_time = (datetime.utcnow() - epoch).total_seconds()
         user = await self.get_user_currency(payload.user_id)
         if not user:
-            await self.insert_user_currency(payload.user_id, the_time - 61)
+            return await payload.member.send(embed=discord.Embed(description="**You don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one!**"))
+            # await self.insert_user_currency(payload.user_id, the_time - 61)
 
         old_time = await self.get_user_currency(payload.member.id)
         if not the_time - old_time[0][2] >= 60:
@@ -146,13 +149,13 @@ class SlothCurrency(commands.Cog):
                         return await self.try_to_buy_item(payload.user_id, ri[1], ri[2], ri[3], payload.guild_id,
                                                           the_time)
 
-    @commands.Cog.listener()
-    async def on_raw_reaction_remove(self, payload):
-        if not payload.guild_id:
-            return
-        member = discord.utils.get(self.client.get_guild(payload.guild_id).members, id=payload.user_id)
-        if member.bot:
-            return
+    # @commands.Cog.listener()
+    # async def on_raw_reaction_remove(self, payload):
+    #     if not payload.guild_id:
+    #         return
+    #     member = discord.utils.get(self.client.get_guild(payload.guild_id).members, id=payload.user_id)
+    #     if member.bot:
+    #         return
 
     # In-game commands
     @commands.command()
@@ -620,12 +623,13 @@ class SlothCurrency(commands.Cog):
         user_info = await self.get_user_currency(member.id)
         if not user_info:
             if ctx.author.id == member.id:
-                epoch = datetime.utcfromtimestamp(0)
-                the_time = (datetime.utcnow() - epoch).total_seconds()
-                await self.insert_user_currency(member.id, the_time - 61)
-                user_info = await self.get_user_currency(member.id)
+                return await ctx.send(embed=discord.Embed(description="**You don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one!**"))
+                # epoch = datetime.utcfromtimestamp(0)
+                # the_time = (datetime.utcnow() - epoch).total_seconds()
+                # await self.insert_user_currency(member.id, the_time - 61)
+                # user_info = await self.get_user_currency(member.id)
             else:
-                return await ctx.send(f"**{member} doesn't have a profile yet!**", delete_after=3)
+                return await ctx.send(f"**{member} doesn't have an account yet!**", delete_after=3)
 
         small = ImageFont.truetype("built titling sb.ttf", 45)
         background = Image.open(await self.get_user_specific_type_item(member.id, 'background'))
@@ -1124,7 +1128,7 @@ class SlothCurrency(commands.Cog):
         the_user = await self.get_user_currency(ctx.author.id)
         target_user = await self.get_user_currency(member.id)
         if not the_user:
-            return await ctx.send("**You don't have a bank account yet, type z!bank to open your account!**", delete_after=10)
+            return await ctx.send(embed=discord.Embed(description="**You don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one!**"))
         elif not target_user:
             return await ctx.send(f"**{member} does not have a bank account yet!**", delete_after=5)
 

@@ -42,8 +42,8 @@ class SlothReputation(commands.Cog):
                 await self.update_user_xp_time(user.id, time_xp)
                 await self.update_user_xp(user.id, 5)
                 return await self.level_up(user)
-        else:
-            return await self.insert_user(user.id, 5, 1, time_xp, 0, time_xp - 36001)
+        # else:
+        #     return await self.insert_user(user.id, 5, 1, time_xp, 0, time_xp - 36001)
 
     async def level_up(self, user):
         epoch = datetime.utcfromtimestamp(0)
@@ -70,15 +70,17 @@ class SlothReputation(commands.Cog):
 
         user = await self.get_specific_user(member.id)
         if not user:
-            return await self.info(ctx)
+            return await ctx.send(embed=discord.Embed(description="**You don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one!**"))
+            # return await self.info(ctx)
 
         ucur = await self.get_user_currency(member.id)
         if not ucur:
             if ctx.author.id == member.id:
-                epoch = datetime.utcfromtimestamp(0)
-                the_time = (datetime.utcnow() - epoch).total_seconds()
-                await self.insert_user_currency(member.id, the_time - 61)
-                ucur = await self.get_user_currency(member.id)
+                return await ctx.send(embed=discord.Embed(description="**You don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one!**"))
+                # epoch = datetime.utcfromtimestamp(0)
+                # the_time = (datetime.utcnow() - epoch).total_seconds()
+                # await self.insert_user_currency(member.id, the_time - 61)
+                # ucur = await self.get_user_currency(member.id)
             else:
                 return await ctx.send(f"**{member} doesn't have an account yet!**", delete_after=3)
 
