@@ -199,7 +199,7 @@ class CreateSmartRoom(commands.Cog):
 					return await member.send("**You don't have enough money to buy this service!**")
 
 			else:
-				return await member.send("**You don't even have an account yet!**")
+				return await member.send(embed=discord.Embed(description="**You don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one!**"))
 
 
 			# Gets the CreateSmartRoom category, creates the VC and tries to move the user to there
@@ -293,7 +293,7 @@ class CreateSmartRoom(commands.Cog):
 					return await member.send("**You don't have enough money to buy this service!**")
 
 			else:
-				return await member.send("**You don't even have an account yet!**")
+				return await member.send(embed=discord.Embed(description="**You don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one!**"))
 			# Gets the CreateSmartRoom category, creates the VC and text channel and tries to move the user to there
 			the_category_test = discord.utils.get(member.guild.categories, id=self.cat_id)
 			creation = await the_category_test.create_voice_channel(name=f"{name}", user_limit=limit)
@@ -442,7 +442,7 @@ class CreateSmartRoom(commands.Cog):
 					return await member.send("**You don't have enough money to buy this service!**")
 
 			else:
-				return await member.send("**You don't even have an account yet!**")
+				return await member.send(embed=discord.Embed(description="**You don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one!**"))
 			# Gets the CreateSmartRoom category, creates the VC and text channel and tries to move the user to there
 			overwrites = {
 			member.guild.default_role: discord.PermissionOverwrite(

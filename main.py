@@ -5,6 +5,7 @@ import os
 from itertools import cycle
 import pytz
 from pytz import timezone
+from extra.customerrors import MissingRequiredSlothClass
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -106,17 +107,20 @@ async def on_command_error(ctx, error):
 	if isinstance(error, commands.MissingPermissions):
 		await ctx.send("You can't do that!", delete_after=3)
 
-	if isinstance(error, commands.MissingRequiredArgument):
+	elif isinstance(error, commands.MissingRequiredArgument):
 		await ctx.send('Please, inform all parameters!', delete_after=3)
 
-	if isinstance(error, commands.CommandOnCooldown):
+	elif isinstance(error, commands.CommandOnCooldown):
 		await ctx.send(error, delete_after=3)
 		
-	if isinstance(error, commands.MissingAnyRole):
+	elif isinstance(error, commands.MissingAnyRole):
 		await ctx.send(error, delete_after=3)
 
-	if isinstance(error, commands.ChannelNotFound):
+	elif isinstance(error, commands.ChannelNotFound):
 		await ctx.send("**Channel not found!**")
+
+	elif isinstance(error, MissingRequiredSlothClass):
+		await ctx.send(f"**{error.error_message}: `{error.required_class.title()}`**")
 
 	print('='*10)
 	print(f"ERROR: {error} | Class: {error.__class__} | Cause: {error.__cause__}")
