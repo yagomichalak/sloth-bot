@@ -241,6 +241,10 @@ class Moderation(commands.Cog):
 			await self.insert_user_infraction(
 				user_id=member.id, infr_type="warn", reason=reason,
 				timestamp=current_ts , perpetrator=ctx.author.id)
+			try:
+				await member.send(embed=general_embed)
+			except:
+				pass
 
 			user_infractions = await self.get_user_infractions(member.id)
 			user_warns = [w for w in user_infractions if w[1] == 'warn']
@@ -295,6 +299,10 @@ class Moderation(commands.Cog):
 			await self.insert_user_infraction(
 				user_id=member.id, infr_type="mute", reason=reason, 
 				timestamp=current_ts , perpetrator=ctx.author.id)
+			try:
+				await member.send(embed=general_embed)
+			except:
+				pass
 		
 		else:
 			await ctx.send(f'**{member} is already muted!**', delete_after=5)
@@ -337,6 +345,10 @@ class Moderation(commands.Cog):
 			embed.set_thumbnail(url=member.avatar_url)
 			embed.set_footer(text=f"Unmuted by {ctx.author}", icon_url=ctx.author.avatar_url)
 			await moderation_log.send(embed=embed)
+			try:
+				await member.send(embed=general_embed)
+			except:
+				pass
 
 		else:
 			await ctx.send(f'**{member} is not even muted!**', delete_after=5)
@@ -409,6 +421,10 @@ class Moderation(commands.Cog):
 			await self.insert_user_infraction(
 				user_id=member.id, infr_type="mute", reason=reason, 
 				timestamp=current_ts , perpetrator=ctx.author.id)
+			try:
+				await member.send(embed=general_embed)
+			except:
+				pass
 		else:
 			await ctx.send(f'**{member} is not even muted!**', delete_after=5)
 	@commands.command()
@@ -449,6 +465,10 @@ class Moderation(commands.Cog):
 				await self.insert_user_infraction(
 					user_id=member.id, infr_type="kick", reason=reason, 
 					timestamp=current_ts , perpetrator=ctx.author.id)
+				try:
+					await member.send(embed=general_embed)
+				except:
+					pass
 
 	# Bans a member
 	@commands.command()
@@ -557,6 +577,10 @@ class Moderation(commands.Cog):
 			await self.insert_user_infraction(
 				user_id=member.id, infr_type="ban", reason=reason, 
 				timestamp=current_ts , perpetrator=ctx.author.id)
+			try:
+				await member.send(embed=general_embed)
+			except:
+				pass
 
 
 	# Bans a member
@@ -614,6 +638,10 @@ class Moderation(commands.Cog):
 				embed.set_thumbnail(url=user.avatar_url)
 				embed.set_footer(text=f"Unbanned by {ctx.author}", icon_url=ctx.author.avatar_url)
 				await moderation_log.send(embed=embed)
+				try:
+					await user.send(embed=general_embed)
+				except:
+					pass
 				return
 		else:
 			await ctx.send('**Member not found!**', delete_after=3)
@@ -658,6 +686,10 @@ class Moderation(commands.Cog):
 				await self.insert_user_infraction(
 					user_id=member.id, infr_type="softban", reason=reason, 
 					timestamp=current_ts , perpetrator=ctx.author.id)
+				try:
+					await member.send(embed=general_embed)
+				except:
+					pass
 
 	@commands.command()
 	@commands.has_permissions(administrator=True)
@@ -701,6 +733,10 @@ class Moderation(commands.Cog):
 			await self.insert_user_infraction(
 				user_id=member.id, infr_type="hackban", reason=reason, 
 				timestamp=current_ts , perpetrator=ctx.author.id)
+			try:
+				await member.send(embed=general_embed)
+			except:
+				pass
 
 		except discord.errors.NotFound:
 			return await ctx.send("**Invalid user id!**", delete_after=3)
