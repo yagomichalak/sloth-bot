@@ -25,9 +25,11 @@ class SlothClass(commands.Cog):
 
 		mycursor, db = await the_database()
 		await mycursor.execute("""
-		    SELECT sloth_class, COUNT(sloth_class) FROM UserCurrency 
+		    SELECT sloth_class, COUNT(sloth_class) AS sloth_count
+		    FROM UserCurrency 
 		    WHERE sloth_class != 'default'
 		    GROUP BY sloth_class
+		    ORDER BY sloth_count DESC
 		    """)
 
 		sloth_classes = await mycursor.fetchall()
