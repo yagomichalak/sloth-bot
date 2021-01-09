@@ -18,6 +18,31 @@ class SlothClass(commands.Cog):
 
 		print("SlothClass cog is online")
 
+
+	@commands.command(aliases=['sloth_class'])
+	@commands.cooldown(1, 5, commands.BucketType.user)
+	async def sloth_classes(self, ctx) -> None:
+
+		mycursor, db = await the_database()
+		await mycursor.execute("""
+		    SELECT sloth_class, COUNT(sloth_class) FROM UserCurrency 
+		    WHERE sloth_class != 'default'
+		    GROUP BY sloth_class
+		    """)
+
+		sloth_classes = await mycursor.fetchall()
+		await mycursor.close()
+		sloth_classes = [f"[Class]: {sc[0]:<10} | [Count]: {sc[1]}\n" for sc in sloth_classes]
+		embed = discord.Embed(
+		    title="__Sloth Classes__",
+		    description=f"```ini\n{''.join(sloth_classes)}```",
+		    color=ctx.author.color,
+		    timestamp=ctx.message.created_at,
+		    url='https://thelanguagesloth.com/profile/slothclass'
+		)
+
+		await ctx.send(embed=embed)
+
 	def user_is_class(command_class):
 		""" Checks whether the user has the required Sloth Class to run the command. 
 		:param command_class: The Sloth Class required to run that command. """
