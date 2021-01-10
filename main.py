@@ -5,7 +5,7 @@ import os
 from itertools import cycle
 import pytz
 from pytz import timezone
-from extra.customerrors import MissingRequiredSlothClass
+from extra.customerrors import MissingRequiredSlothClass, ActionSkillOnCooldown
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -121,6 +121,18 @@ async def on_command_error(ctx, error):
 
 	elif isinstance(error, MissingRequiredSlothClass):
 		await ctx.send(f"**{error.error_message}: `{error.required_class.title()}`**")
+
+	elif isinstance(error, ActionSkillOnCooldown):
+
+		m, s = divmod(int(86400) - int(error.try_after), 60)
+		h, m = divmod(m, 60)
+		print(m, s, h)
+		if h > 0:
+			await ctx.send(f"**You can use your skill again in {h:d} hours, {m:02d} minutes and {s:02d} seconds!**")
+		elif m > 0:
+			await ctx.send(f"**You can use your skill again in {m:02d} minutes and {s:02d} seconds!**")
+		elif s > 0:
+			await ctx.send(f"**You can use your skill again in {s:02d} seconds!**")
 
 	print('='*10)
 	print(f"ERROR: {error} | Class: {error.__class__} | Cause: {error.__cause__}")
