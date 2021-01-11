@@ -223,6 +223,8 @@ class SlothClass(commands.Cog):
 		return commands.check(real_check)
 
 
+
+
 	@commands.command()
 	@skill_on_cooldown()
 	@user_is_class('warrior')
@@ -276,7 +278,7 @@ class SlothClass(commands.Cog):
 		if await self.is_user_protected(target.id):
 			return await ctx.send(f"**{target.mention} is already protected, {ctx.author.mention}!**")
 
-		confirmed = await ConfirmSkill(f"**Are you sure you want to use your skill, to protect {target.mention}?**").prompt(ctx)
+		confirmed = await ConfirmSkill(f"**{ctx.author.mention}, are you sure you want to use your skill, to protect {target.mention}?**").prompt(ctx)
 		if confirmed:
 			current_timestamp = await self.get_timestamp()
 			await self.insert_skill_action(
@@ -313,6 +315,10 @@ class SlothClass(commands.Cog):
 		if await self.is_user_protected(target.id):
 			return await ctx.send(f"**{attacker.mention}, you cannot steal from {target.mention}, because they are protected against attacks!**")
 
+		confirmed = await ConfirmSkill(f"**{attacker.mention}, are you sure you want to steal from {target.mention}?**").prompt(ctx)
+		if not confirmed:
+			return await ctx.send("**Not stealing from anyone, then!**")
+
 		current_timestamp = await self.get_timestamp()
 
 		embed = discord.Embed(
@@ -340,10 +346,48 @@ class SlothClass(commands.Cog):
 	@commands.command()
 	@skill_on_cooldown()
 	@user_is_class('munk')
-	async def soul_search(self, ctx) -> None:
-		""" A command for Munks. """
+	async def munk(self, ctx, target: discord.Member = None) -> None:
+		""" Converts a user into a real Munk. 
+		:param target: The person you want to convert to a Munk. """
 
-		return await ctx.send("**Command not ready yet!**")
+		attacker = ctx.author
+		if not target:
+			return await ctx.send(f"**Please, choose a member to use the `Munk` skill, {attacker.mention}!**")
+
+		if attacker.id == target.id:
+			return await ctx.send(f"**You cannot convert yourself, since you are already a `Munk`, {attacker.mention}!**")
+
+		if target.display_name.strip().title().endswith('Munk'):
+			return await ctx.send(f"**{target.mention} is already a `Munk`, {attacker.mention}!**")
+
+		if not await self.get_user_currency(target.id):
+			return await ctx.send(f"**You cannot convert someone who doesn't have an account, {attacker.mention}!**")
+
+		if await self.is_user_protected(target.id):
+			return await ctx.send(f"**{attacker.mention}, you cannot convert {target.mention} into a `Munk`, because they are protected against attacks!**")
+
+		confirmed = await ConfirmSkill(f"**{attacker.mention}, are you sure you want to convert {target.mention} into a `Munk`?**").prompt(ctx)
+		if not confirmed:
+			return await ctx.send("**Not converting them, then!**")
+
+		try:
+			await target.edit(nick=f"{target.display_name} Munk")
+			current_timestamp = await self.get_timestamp()
+			# Don't need to store it, since it is forever
+			# await self.insert_skill_action(
+			# 	user_id=attacker.id, skill_type="munk", skill_timestamp=current_timestamp, 
+			# 	target_id=target.id, channel_id=ctx.channel.id
+			# )
+			await self.update_user_action_skill_ts(attacker.id, current_timestamp)
+			divine_protection_embed = await self.get_munk_embed(
+				channel=ctx.channel, perpetrator_id=ctx.author.id, target_id=target.id)
+			await ctx.send(embed=divine_protection_embed)
+		except Exception as e:
+			pritn(e)
+			return await ctx.send(f"**Something went wrong and your `Munk` skill failed, {attacker.mention}!**")
+
+		else:
+			return await ctx.send(f"**{target.mention} has been converted into a `Munk`, thanks to {attacker.mention}!**")
 
 	@commands.command(hidden=True)
 	@commands.has_permissions(administrator=True)
@@ -485,6 +529,7 @@ class SlothClass(commands.Cog):
 		return user
 
 	@commands.command()
+	@commands.has_permissions(administrator=True)
 	async def get_ts(self, ctx) -> None:
 		timestamp = await self.get_timestamp()
 		await ctx.send(timestamp)
@@ -583,7 +628,8 @@ class SlothClass(commands.Cog):
 		return steal_embed
 
 	async def get_divine_protection_embed(self, channel, perpetrator_id: int, target_id: int) -> discord.Embed:
-		""" Makes an embedded message for a steal action. 
+		""" Makes an embedded message for a divine protection action.
+		:param channel: The context channel.
 		:param perpetrator_id: The ID of the perpetrator of the divine protection.
 		:param target_id: The ID of the target member that is gonna be protected. """
 
@@ -601,6 +647,26 @@ class SlothClass(commands.Cog):
 
 		return steal_embed
 
+	async def get_munk_embed(self, channel, perpetrator_id: int, target_id: int) -> discord.Embed:
+		""" Makes an embedded message for a munk action. 
+		:param channel: The context channel.
+		:param perpetrator_id: The ID of the perpetrator of the divine protection.
+		:param target_id: The ID of the target member that is gonna be protected. """
+
+		timestamp = await self.get_timestamp()
+
+		steal_embed = discord.Embed(
+			title="A Munk Convertion has been delightfully performed!",
+			timestamp=datetime.utcfromtimestamp(timestamp)
+		)
+		steal_embed.description=f"🐿️ <@{perpetrator_id}> converted <@{target_id}> into a `Munk`! 🐿️"
+		steal_embed.color=discord.Color.green()
+
+		steal_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Munk.png")
+		steal_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon_url)
+
+		return steal_embed
+
 	async def is_user_protected(self, user_id: int) -> bool:
 		""" Checks whether user is protected.
 		:param user_id: The ID of the user to check it. """
@@ -612,6 +678,49 @@ class SlothClass(commands.Cog):
 		return user_protected is not None and user_protected[0]
 
 
+	@commands.command(aliases=['my_skills'])
+	@commands.cooldown(1, 5, commands.BucketType.user)
+	async def skills(self, ctx):
+		""" Shows all skills for the user's Sloth class. """
+
+
+		user = await self.get_user_currency(ctx.author.id)
+		if not user:
+			return await ctx.send(embed=discord.Embed(description="**You don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one!**"))
+		if user[7] == 'default':
+			return await ctx.send(embed=discord.Embed(description="**You don't have a default Sloth class. Click [here](https://thelanguagesloth.com/profile/slothclass) to choose one!**"))
+
+		cmds = []
+		for c in ctx.cog.get_commands():
+			try:
+				if c.hidden:
+					continue
+				elif c.parent:
+					continue
+				elif not c.checks:
+					continue
+				elif not [check for check in c.checks if check.__qualname__ == 'SlothClass.user_is_class.<locals>.real_check']:
+					continue
+
+				await c.can_run(ctx)
+				cmds.append(c)
+			except commands.CommandError:
+				continue
+			except Exception as e:
+				print(e)
+				continue
+
+		cmds = list(map(lambda c: c.qualified_name, cmds))
+		skills_embed = discord.Embed(
+			title=f"__Available Skills for__: `{user[7]}`",
+			description=f"```apache\nSkills: {', '.join(cmds)}```",
+			color=ctx.author.color,
+			timestamp=ctx.message.created_at
+		)
+		skills_embed.set_author(name=ctx.author, icon_url=ctx.author.avatar_url)
+		skills_embed.set_thumbnail(url=f"https://thelanguagesloth.com/media/sloth_classes/{user[7]}.png")
+		skills_embed.set_footer(text=ctx.guild, icon_url=ctx.guild.icon_url)
+		await ctx.send(embed=skills_embed)
 
 def setup(client) -> None:
 	""" Cog's setup function. """
