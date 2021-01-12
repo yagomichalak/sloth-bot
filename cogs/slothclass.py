@@ -32,6 +32,7 @@ class SlothClass(commands.Cog):
 
 		await self.try_to_run(self.check_steals)
 		await self.try_to_run(self.check_protections)
+		await self.try_to_run(self.check_transmutations)
 
 
 	async def try_to_run(self, func):
@@ -100,6 +101,27 @@ class SlothClass(commands.Cog):
 				embed=discord.Embed(
 					description=f"**<@{dp[3]}>'s `Divine Protection` from <@{dp[0]}> just expired!**",
 					color=discord.Color.red()))
+
+	async def check_transmutations(self) -> None:
+
+		""" Check on-going transmutations and their expiration time. """
+
+		transmutations = await self.get_expired_transmutations()
+		for tm in transmutations:
+			print(tm)
+			await self.delete_skill_action_by_target_id(tm[3])
+
+			channel = self.client.get_channel(tm[5])
+			if not channel:
+				channel = self.bots_txt
+			
+
+			await channel.send(
+				content=f"<@{tm[0]}>", 
+				embed=discord.Embed(
+					description=f"**<@{tm[3]}>'s `Transmutation` has just expired! 🐩→💥→🦥**",
+					color=discord.Color.red()))
+
 
 	@commands.Cog.listener()
 	async def on_raw_reaction_add(self, payload) -> None:
@@ -191,7 +213,8 @@ class SlothClass(commands.Cog):
 			user_sloth_class = await get_user_sloth_class(ctx.author.id)
 			if user_sloth_class and user_sloth_class.lower() == command_class:
 				return True
-			raise MissingRequiredSlothClass(required_class=command_class, error_message="You don't have the required Sloth Class to run this command!")
+			raise MissingRequiredSlothClass(
+				required_class=command_class, error_message="You don't have the required Sloth Class to run this command!")
 		return commands.check(real_check)
 
 	def skill_on_cooldown():
@@ -240,7 +263,30 @@ class SlothClass(commands.Cog):
 	async def transmutation(self, ctx) -> None:
 		""" A command for Metamorphs. """
 
-		return await ctx.send("**Command not ready yet!**")
+
+		member = ctx.author
+
+		if await self.is_transmutated(member.id):
+			return await ctx.send(f"**You are already transmutated, {member.mention}!**")
+
+		confirmed = await ConfirmSkill(f"**{member.mention}, are you sure you want to transmutate yourself into a diffrent form for 1 hour?**").prompt(ctx)
+		if not confirmed:
+			return await ctx.send(f"**{member.mention}, not transmutating, then!**")
+
+		timestamp = await self.get_timestamp()
+		await self.insert_skill_action(
+			user_id=member.id, skill_type="transmutation",
+			skill_timestamp=timestamp, target_id=member.id,
+			channel_id=ctx.channel.id
+		)
+		await self.update_user_action_skill_ts(member.id, timestamp)
+
+		transmutation_embed = await self.get_transmutation_embed(channel=ctx.channel, perpetrator_id=ctx.author.id)
+		await ctx.send(embed=transmutation_embed)
+
+
+
+
 
 	@commands.command()
 	@skill_on_cooldown()
@@ -379,15 +425,15 @@ class SlothClass(commands.Cog):
 			# 	target_id=target.id, channel_id=ctx.channel.id
 			# )
 			await self.update_user_action_skill_ts(attacker.id, current_timestamp)
-			divine_protection_embed = await self.get_munk_embed(
+			munk_embed = await self.get_munk_embed(
 				channel=ctx.channel, perpetrator_id=ctx.author.id, target_id=target.id)
-			await ctx.send(embed=divine_protection_embed)
+			msg = await ctx.send(embed=munk_embed)
 		except Exception as e:
 			pritn(e)
 			return await ctx.send(f"**Something went wrong and your `Munk` skill failed, {attacker.mention}!**")
 
 		else:
-			return await ctx.send(f"**{target.mention} has been converted into a `Munk`, thanks to {attacker.mention}!**")
+			await msg.edit(content=f"<@{target.id}>")
 
 	@commands.command(hidden=True)
 	@commands.has_permissions(administrator=True)
@@ -518,6 +564,19 @@ class SlothClass(commands.Cog):
 		await mycursor.close()
 		return divine_protections
 
+	async def get_expired_transmutations(self) -> None:
+		""" Gets expired transmutation skill actions. """
+
+		the_time = await self.get_timestamp()
+		mycursor, db = await the_database()
+		await mycursor.execute("""
+			SELECT * FROM SlothSkills 
+			WHERE skill_type = 'transmutation' AND (%s - skill_timestamp) >= 3600
+			""", (the_time,))
+		transmutations = await mycursor.fetchall()
+		await mycursor.close()
+		return transmutations
+
 	async def get_user_currency(self, user_id: int) -> Union[List[Union[str, int]], bool]:
 		""" Gets the user currency. 
 		:param user_id: The ID of the user to get. """
@@ -635,17 +694,17 @@ class SlothClass(commands.Cog):
 
 		timestamp = await self.get_timestamp()
 
-		steal_embed = discord.Embed(
+		divine_embed = discord.Embed(
 			title="A Divine Protection has been executed!",
 			timestamp=datetime.utcfromtimestamp(timestamp)
 		)
-		steal_embed.description=f"🛡️ <@{perpetrator_id}> protected <@{target_id}> from attacks for 24 hours! 🛡️"
-		steal_embed.color=discord.Color.green()
+		divine_embed.description=f"🛡️ <@{perpetrator_id}> protected <@{target_id}> from attacks for 24 hours! 🛡️"
+		divine_embed.color=discord.Color.green()
 
-		steal_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Seraph.png")
-		steal_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon_url)
+		divine_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Seraph.png")
+		divine_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon_url)
 
-		return steal_embed
+		return divine_embed
 
 	async def get_munk_embed(self, channel, perpetrator_id: int, target_id: int) -> discord.Embed:
 		""" Makes an embedded message for a munk action. 
@@ -655,17 +714,36 @@ class SlothClass(commands.Cog):
 
 		timestamp = await self.get_timestamp()
 
-		steal_embed = discord.Embed(
+		munk_embed = discord.Embed(
 			title="A Munk Convertion has been delightfully performed!",
 			timestamp=datetime.utcfromtimestamp(timestamp)
 		)
-		steal_embed.description=f"🐿️ <@{perpetrator_id}> converted <@{target_id}> into a `Munk`! 🐿️"
-		steal_embed.color=discord.Color.green()
+		munk_embed.description=f"🐿️ <@{perpetrator_id}> converted <@{target_id}> into a `Munk`! 🐿️"
+		munk_embed.color=discord.Color.green()
 
-		steal_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Munk.png")
-		steal_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon_url)
+		munk_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Munk.png")
+		munk_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon_url)
 
-		return steal_embed
+		return munk_embed
+
+	async def get_transmutation_embed(self, channel, perpetrator_id: int) -> discord.Embed:
+		""" Makes an embedded message for a transmutation action. 
+		:param channel: The context channel.
+		:param perpetrator_id: The ID of the perpetrator of the divine protection. """
+
+		timestamp = await self.get_timestamp()
+
+		transmutation_embed = discord.Embed(
+			title="A Transmutation just happened in front of everyone's eyes!",
+			timestamp=datetime.utcfromtimestamp(timestamp)
+		)
+		transmutation_embed.description=f"**<@{perpetrator_id}> transmutated themselves into something else! 🦥→💥→🐩**"
+		transmutation_embed.color=discord.Color.green()
+
+		transmutation_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Metamorph.png")
+		transmutation_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon_url)
+
+		return transmutation_embed
 
 	async def is_user_protected(self, user_id: int) -> bool:
 		""" Checks whether user is protected.
@@ -676,6 +754,17 @@ class SlothClass(commands.Cog):
 		user_protected = await mycursor.fetchone()
 		await mycursor.close()
 		return user_protected is not None and user_protected[0]
+
+
+	async def is_transmutated(self, user_id: int) -> bool:
+		""" Checks whether user is transmutated.
+		:param user_id: The ID of the user to check it. """
+
+		mycursor, db = await the_database()
+		await mycursor.execute("SELECT COUNT(*) FROM SlothSkills WHERE user_id = %s AND skill_type = 'transmutation'", (user_id,))
+		user_transmutated = await mycursor.fetchone()
+		await mycursor.close()
+		return user_transmutated[0]
 
 
 	@commands.command(aliases=['my_skills'])

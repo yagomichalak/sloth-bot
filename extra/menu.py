@@ -12,7 +12,7 @@ class ConfirmSkill(menus.Menu):
 		self.msg = msg
 		self.result = None
 
-	async def send_initial_message(self, ctx, channel):
+	async def send_initial_message(self, ctx, channel) -> discord.Message:
 		""" Sends the initial message. """
 
 		self.sent_msg = await channel.send(embed=discord.Embed(description=self.msg, color=discord.Color.orange()))
@@ -72,3 +72,30 @@ class ConfirmSkill(menus.Menu):
 
 		await self.start(ctx, wait=True)
 		return self.result
+
+
+
+class InventoryLoop(menus.ListPageSource):
+	""" A class for iterating through inventory items. """
+
+	def __init__(self, data):
+		super().__init__(data, per_page=6)
+
+	async def format_page(self, menu, entries) -> discord.Embed:
+		""" Formats the inventory for each page. """
+
+		offset = menu.current_page * self.per_page
+
+		embed = discord.Embed(
+			title="__Inventory Items__",
+			description="All your items gathered in one place.",
+			color=menu.ctx.author.color,
+			timestamp=menu.ctx.message.created_at
+		)
+		embed.set_thumbnail(url=menu.ctx.author.avatar_url)
+
+		for i, v in enumerate(entries, start=offset):
+			embed.add_field(name=f"{i+1}. {v[1]}", value=f"**State:** `{v[2]}`\n**Kind:** `{v[3]}`", inline=True)
+			embed.set_footer(text=f"({i+1}-{i+1+6} of {len(self.entries)})")
+
+		return embed
