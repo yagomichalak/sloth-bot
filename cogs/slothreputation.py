@@ -5,6 +5,7 @@ from mysqldb import *
 from datetime import datetime
 import os
 from typing import List
+from extra.menu import ConfirmSkill
 
 commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
 
@@ -109,15 +110,31 @@ class SlothReputation(commands.Cog):
         embed.add_field(name="🛡️ __**Protected:**__", value=f"{True if ucur[0][10] else False}", inline=True)
         m, s = divmod(user_info[0][2], 60)
         h, m = divmod(m, 60)
-        embed.add_field(name=f"⌨️ __**Messages sent:**__", value=f"{user_info[0][1]}", inline=True)
-        embed.add_field(name=f"🗣️ __**Time in Voice Channels:**__",
-                        value=f"{h:d} hours, {m:02d} minutes and {s:02d} seconds", inline=True)
+        embed.add_field(name=f"💰 __**Exchangeable Activity:**__", value=f"{h:d} hours, {m:02d} minutes and {user_info[0][1]} messages.", inline=True)
 
         embed.add_field(name=f"🏆 __**Leaderboard Info:**__", value=f"{position[1]}. pts | #{position[0]}", inline=True)
         embed.set_thumbnail(url=member.avatar_url)
         embed.set_author(name=member, icon_url=member.avatar_url, url=member.avatar_url)
         embed.set_footer(text=ctx.guild, icon_url=ctx.guild.icon_url)
-        return await ctx.send(content=None, embed=embed)
+        info_msg = await ctx.send(embed=embed)
+        if ctx.author.id != member.id:
+            return
+
+        try:
+            await info_msg.add_reaction('💰')
+            r, u = await self.client.wait_for('reaction_add', timeout=60, 
+                check=lambda r, u: u.id == ctx.author.id and r.message.id == info_msg.id and str(r.emoji) == '💰'
+                )
+        except asyncio.TimeoutError:
+            return await info_msg.remove_reaction(self.client.user, '💰')
+        else:
+            confirmed = await ConfirmSkill(f"**{member.mention}, are you sure you want to exchange your {h:d} hours, {m:02d} minutes and {user_info[0][1]} messages?**").prompt(ctx)
+            if confirmed:
+                SlothCurrency = self.client.get_cog('SlothCurrency')
+                await SlothCurrency.exchange(ctx)
+            else:
+                await ctx.send(f"**{ctx.author.mention}, not exchanging, then!**")
+
 
     @commands.command()
     async def score(self, ctx):

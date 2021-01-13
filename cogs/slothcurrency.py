@@ -998,12 +998,10 @@ class SlothCurrency(commands.Cog):
         else:
             return True
 
-    @commands.command()
     async def exchange(self, ctx):
-        '''
-        Exchange your status into leaves (łł)
-        '''
-        await ctx.message.delete()
+
+        """ Exchange your status into leaves (łł) """
+
         user_info = await self.get_user_activity_info(ctx.author.id)
         if not user_info:
             return await ctx.send("**You have nothing to exchange!**", delete_after=3)
@@ -1020,11 +1018,6 @@ class SlothCurrency(commands.Cog):
             cmsg, message_times = await self.convert_messages(member_id, user_message)
             ctime, time_times = await self.convert_time(member_id, user_time)
 
-        #await self.update_user_server_messages(member_id, -message_times * 50)
-        #await self.update_user_money(member_id, cmsg)
-
-        #await self.update_user_server_time(member_id, -time_times * 1800)
-        #await self.update_user_money(member_id, ctime)
 
 
         embed = discord.Embed(title="Exchange", colour=ctx.author.color, timestamp=ctx.message.created_at)

@@ -14,6 +14,8 @@ moderator_role_id = int(os.getenv('MOD_ROLE_ID'))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID'))
 muffin_id = int(os.getenv('MUFFIN_ID'))
 
+staff_vc_id = int(os.getenv('STAFF_VC_ID'))
+
 allowed_roles = [
 int(os.getenv('OWNER_ROLE_ID')), admin_role_id,
 moderator_role_id]
@@ -126,7 +128,8 @@ class ReportSupport(commands.Cog):
 			# Support us on Patreon
 			await member.send(f"**Support us on Patreon!**\nhttps://www.patreon.com/Languagesloth")
 
-		elif mid == int(os.getenv('REPORT_MESSAGE_ID')) and str(emoji) == '<:ban:593407893248802817>' and not perms.administrator:
+		# elif mid == int(os.getenv('REPORT_MESSAGE_ID')) and str(emoji) == '<:ban:593407893248802817>' and not perms.administrator:
+		elif mid == int(os.getenv('REPORT_MESSAGE_ID')) and str(emoji) == '‼️':
 			member_ts = self.report_cache.get(member.id)
 			time_now = time.time()
 			if member_ts:
@@ -137,6 +140,7 @@ class ReportSupport(commands.Cog):
 
 			self.report_cache[member.id] = time.time()
 			await self.select_report(member, guild)
+			
 
 	async def send_application(self, member):
 
@@ -318,15 +322,32 @@ class ReportSupport(commands.Cog):
 			emoji = str(r.emoji)
 			if emoji == '1️⃣':
 				# Report another user for breaking the rules
-				return await self.report_someone(member, guild)
+				try:
+					await self.report_someone(member, guild)
+				except:
+					pass
+					
+				else:
+					return await self.audio(member, 'server_help')
+
 			elif emoji == '2️⃣':
 				# I need help with the server in general
 				message = f"Please, {member.mention}, try to explain what kind of help you want related to the server."
-				return await self.generic_help(member, guild, 'server help', message)
+				try:
+					await self.generic_help(member, guild, 'server help', message)
+				except:
+					pass
+				else:
+					return await self.audio(member, 'general_help')
 			elif emoji == '3️⃣':
 				# I need to change some roles and I can't
 				message = f"Please, {member.mention}, inform us what roles you want, and if you spotted a specific problem with the reaction-role selection."
-				return await self.generic_help(member, guild, 'role help', message)
+				try:
+					await self.generic_help(member, guild, 'role help', message)
+				except:
+					pass
+				else:
+					return await self.audio(member, 'role_help')
 			elif emoji == '❌':
 				# Cancel, I misclicked
 				return await member.send("**All right, cya!**")
@@ -351,18 +372,23 @@ class ReportSupport(commands.Cog):
 			read_messages=True, send_messages=True, connect=False, view_channel=True), 
 		moderator: discord.PermissionOverwrite(
 			read_messages=True, send_messages=True, connect=False, view_channel=True, manage_messages=True)}
-		the_channel = await guild.create_text_channel(name=f"case-{counter[0][0]}", category=case_cat, overwrites=overwrites)
-		#print('created!')
-		created_embed = discord.Embed(
-			title="Report room created!", 
-			description=f"**Go to {the_channel.mention}!**", 
-			color=discord.Color.green())
-		await member.send(embed=created_embed)
-		await self.insert_user_open_channel(member.id, the_channel.id)
-		await self.increase_case_number()
-		embed = discord.Embed(title="Report Support!", description=f"Please, {member.mention}, try to explain what happened and who you want to report.",
-			color=discord.Color.red())
-		await the_channel.send(content=f"{member.mention}, {moderator.mention}, {cosmos.mention}", embed=embed)
+		try:
+			the_channel = await guild.create_text_channel(name=f"case-{counter[0][0]}", category=case_cat, overwrites=overwrites)
+		except:
+			await member.send("**Something went wrong with it, please contact an admin!**")
+			raise Exception
+		else:
+			#print('created!')
+			created_embed = discord.Embed(
+				title="Report room created!", 
+				description=f"**Go to {the_channel.mention}!**", 
+				color=discord.Color.green())
+			await member.send(embed=created_embed)
+			await self.insert_user_open_channel(member.id, the_channel.id)
+			await self.increase_case_number()
+			embed = discord.Embed(title="Report Support!", description=f"Please, {member.mention}, try to explain what happened and who you want to report.",
+				color=discord.Color.red())
+			await the_channel.send(content=f"{member.mention}, {moderator.mention}, {cosmos.mention}", embed=embed)
 
 	#- Report someone
 	async def generic_help(self, member, guild, type_help, message):
@@ -380,18 +406,23 @@ class ReportSupport(commands.Cog):
 			read_messages=True, send_messages=True, connect=False, view_channel=True), 
 		moderator: discord.PermissionOverwrite(
 			read_messages=True, send_messages=True, connect=False, view_channel=True, manage_messages=True)}
-		the_channel = await guild.create_text_channel(name=f"{'-'.join(type_help.split())}", category=case_cat, overwrites=overwrites)
-		#print('created!')
-		created_embed = discord.Embed(
-			title=f"Room for `{type_help}` created!", 
-			description=f"**Go to {the_channel.mention}!**", 
-			color=discord.Color.green())
-		await member.send(embed=created_embed)
-		await self.insert_user_open_channel(member.id, the_channel.id)
-		embed = discord.Embed(title=f"{type_help.title()}!", 
-		description=f"{message}",
-			color=discord.Color.red())
-		await the_channel.send(content=f"{member.mention}, {moderator.mention}", embed=embed)
+		try:
+			the_channel = await guild.create_text_channel(name=f"{'-'.join(type_help.split())}", category=case_cat, overwrites=overwrites)
+		except:
+			await member.send("**Something went wrong with it, please contact an admin!**")
+			raise Exception
+		else:
+			#print('created!')
+			created_embed = discord.Embed(
+				title=f"Room for `{type_help}` created!", 
+				description=f"**Go to {the_channel.mention}!**", 
+				color=discord.Color.green())
+			await member.send(embed=created_embed)
+			await self.insert_user_open_channel(member.id, the_channel.id)
+			embed = discord.Embed(title=f"{type_help.title()}!", 
+			description=f"{message}",
+				color=discord.Color.red())
+			await the_channel.send(content=f"{member.mention}, {moderator.mention}", embed=embed)
 
 
 	async def get_message(self, member, check):
@@ -880,6 +911,41 @@ class ReportSupport(commands.Cog):
 		else:
 			return False
 
+
+	async def audio(self, member: discord.Member, audio_name: str) -> None:
+		# Resolves bot's channel state
+
+
+		staff_vc = self.client.get_channel(staff_vc_id)
+		bot_state = member.guild.voice_client
+
+
+		print('user_channel', staff_vc)
+		print('bot', bot_state)
+		try:
+			if bot_state and bot_state.channel and bot_state.channel != staff_vc:
+				print('if')
+				await bot_state.disconnect()
+				await bot_state.move_to(staff_vc)
+			elif not bot_state:
+				print('elif')
+				voicechannel = discord.utils.get(member.guild.channels, id=staff_vc.id)
+				vc = await voicechannel.connect()
+
+			await asyncio.sleep(2)
+			voice_client: discord.VoiceClient = discord.utils.get(self.client.voice_clients, guild=member.guild)
+			print('voice_client', voice_client)
+			# Plays / and they don't stop commin' /
+			if voice_client and not voice_client.is_playing():
+				print('hehe')
+				audio_source = discord.FFmpegPCMAudio(f'tts/{audio_name}.mp3')
+				voice_client.play(audio_source, after=lambda e: print("Finished Warning Staff!"))
+			else:
+				print('couldnt play it!')               
+
+		except Exception as e:
+			print(e)
+			return await ctx.send("**Something went wrong, I'll stop here!**")
 
 
 def setup(client):
