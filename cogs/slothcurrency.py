@@ -653,12 +653,13 @@ class SlothCurrency(commands.Cog):
         background = Image.open(await self.get_user_specific_type_item(member.id, 'background'))
         # sloth = Image.open(await self.get_user_specific_type_item(member.id, 'sloth'))
 
-        SlothClass = self.client.get_cog('SlothClass')
-        sloth = None
-        if await SlothClass.is_transmutated(member.id):
-            sloth = Image.open(f"./sloth_custom_images/sloth/transmutated_sloth.png")#.resize((800, 600), Image.LANCZOS)
-        else:
-            sloth = Image.open(f"./sloth_custom_images/sloth/{user_info[0][7].title()}.png")
+        # SlothClass = self.client.get_cog('SlothClass')
+        # sloth = None
+        # if await SlothClass.is_transmutated(member.id):
+        #     sloth = Image.open(f"./sloth_custom_images/sloth/transmutated_sloth.png")
+        # else:
+        #     sloth = Image.open(f"./sloth_custom_images/sloth/{user_info[0][7].title()}.png")
+        sloth = Image.open(f"./sloth_custom_images/sloth/{user_info[0][7].title()}.png")
         body = Image.open(await self.get_user_specific_type_item(member.id, 'body'))
         hand = Image.open(await self.get_user_specific_type_item(member.id, 'hand'))
         foot = Image.open(await self.get_user_specific_type_item(member.id, 'foot'))
