@@ -986,36 +986,6 @@ class SlothCurrency(commands.Cog):
         await mycursor.close()
         return await ctx.send("**Table *UserServerActivity* reseted!**", delete_after=3)
 
-    @commands.command()
-    async def status(self, ctx, member: discord.Member = None):
-        '''
-        Shows the member's time and message status.
-        :param member: The member to show the status. (Optional)
-        '''
-        await ctx.message.delete()
-        if not member:
-            member = ctx.author
-
-        if not await self.check_table_exist():
-            return await ctx.send("**It looks like this command is on maintenance!**", delete_after=3)
-
-        user_info = await self.get_user_activity_info(member.id)
-        if not user_info and member.id == ctx.author.id:
-            # await self.insert_user_server_activity(member.id, 1)
-            return self.status(ctx, member)
-        elif not user_info and not member.id == ctx.author.id:
-            return await ctx.send("**Member not found in the system!**", delete_after=3)
-
-        m, s = divmod(user_info[0][2], 60)
-        h, m = divmod(m, 60)
-        embed = discord.Embed(title=f"{member.name}'s Status", colour=member.color,
-                              timestamp=ctx.message.created_at)
-        embed.add_field(name=f"__**Messages sent:**__", value=f"{user_info[0][1]}", inline=False)
-        embed.add_field(name=f"__**Time spent on voice channels:**__",
-                        value=f"{h:d} hours, {m:02d} minutes and {s:02d} seconds", inline=False)
-        embed.set_thumbnail(url=member.avatar_url)
-        return await ctx.send(embed=embed)
-
     async def check_table_exist(self) -> bool:
         mycursor, db = await the_database()
         await mycursor.execute("SHOW TABLE STATUS LIKE 'UserServerActivity'")
