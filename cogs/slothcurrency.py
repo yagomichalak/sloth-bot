@@ -77,8 +77,7 @@ class SlothCurrency(commands.Cog):
 
         user_info = await self.get_user_activity_info(message.author.id)
         if not user_info:
-            # return await self.insert_user_server_activity(message.author.id, 1)
-            return
+            return await self.insert_user_server_activity(message.author.id, 1)
 
         await self.update_user_server_messages(message.author.id, 1)
 
@@ -94,8 +93,7 @@ class SlothCurrency(commands.Cog):
 
         user_info = await self.get_user_activity_info(member.id)
         if not user_info:
-            # return await self.insert_user_server_activity(member.id, 0, the_time)
-            return
+            return await self.insert_user_server_activity(member.id, 0, the_time)
 
         if not before.channel:
             return await self.update_user_server_timestamp(member.id, the_time)
@@ -647,13 +645,15 @@ class SlothCurrency(commands.Cog):
                 return await ctx.send(f"**{member} doesn't have an account yet!**", delete_after=3)
 
         if user_info[0][7].lower() == 'default':
-            return await ctx.send(f"**{member} has a default Sloth class, I cannot show their profile!**")
+            if ctx.author.id == member.id:
+                return await ctx.send(embed=discord.Embed(description=f"**{member.mention}, you have a default Slot class. Click [here](https://thelanguagesloth.com/profile/slothclass) to choose one!**"))
+            else:
+                return await ctx.send(f"**{member} has a default Sloth class, I cannot show their profile!**")
 
         small = ImageFont.truetype("built titling sb.ttf", 45)
         background = Image.open(await self.get_user_specific_type_item(member.id, 'background'))
-        # sloth = Image.open(await self.get_user_specific_type_item(member.id, 'sloth'))
 
-        # SlothClass = self.client.get_cog('SlothClass')
+        SlothClass = self.client.get_cog('SlothClass')
         # sloth = None
         # if await SlothClass.is_transmutated(member.id):
         #     sloth = Image.open(f"./sloth_custom_images/sloth/transmutated_sloth.png")
@@ -1005,7 +1005,8 @@ class SlothCurrency(commands.Cog):
 
         user_info = await self.get_user_activity_info(ctx.author.id)
         if not user_info:
-            return await ctx.send("**You have nothing to exchange!**", delete_after=3)
+            return await ctx.send("**You have nothing to exchange!**")
+            
         user_found = await self.get_user_currency(ctx.author.id)
         if not user_found:
             epoch = datetime.utcfromtimestamp(0)
@@ -1032,7 +1033,7 @@ class SlothCurrency(commands.Cog):
                                 value=f"Exchanged `{(time_times * 1800) / 60}` minutes for `{ctime}`łł;", inline=False)
             return await ctx.send(embed=embed)
         else:
-            return await ctx.send("**You have nothing to exchange!**", delete_after=3)
+            return await ctx.send("**You have nothing to exchange!**")
 
     async def convert_messages(self, member_id, user_message: int):
         messages_left = user_message

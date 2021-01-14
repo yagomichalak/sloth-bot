@@ -314,10 +314,10 @@ class Tools(commands.Cog):
             await ctx.send(f"**{member.mention} is not in a VC!**")
         
 
-    @commands.command(hidden=True)
+    @commands.command(aliases=['mag'], hidden=True)
     @commands.cooldown(1, 300, commands.BucketType.guild)
     @commands.has_permissions(administrator=True)
-    async def mag(self, ctx) -> None:
+    async def magnet(self, ctx) -> None:
         """ Magnets all users who are in the voice channel into a single channel. """
 
         vcs = ctx.guild.voice_channels
@@ -361,13 +361,16 @@ class Tools(commands.Cog):
         else:
             # Moves all members who are in the voice channel to the context channel.
             print('here we go')
+            magneted_members = 0
             for member in all_members:
                 try:
                     await member.move_to(user_state.channel)
                 except:
                     pass
+                else:
+                    magneted_members += 1
             else:
-                await ctx.send(f"**They stopped comming, but we've gathered {len(all_members)} members!**")
+                await ctx.send(f"**They stopped comming, but we've gathered `{magneted_members}/{len(all_members)}` members!**")
 
 
 
