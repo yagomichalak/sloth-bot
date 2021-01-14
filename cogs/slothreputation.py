@@ -59,7 +59,7 @@ class SlothReputation(commands.Cog):
             return await channel.send(f"**{user.mention} has leveled up to lvl {the_user[0][2] + 1}! <:zslothrich:701157794686042183> Here's {(the_user[0][2] + 1) * 5}łł! <:zslothrich:701157794686042183>**")
 
 
-    @commands.command(aliases=['status'])
+    @commands.command(aliases=['status', 'exchange', 'level', 'exp', 'xp', 'money', 'balance'])
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def info(self, ctx, member: discord.Member = None):
         '''
@@ -126,7 +126,7 @@ class SlothReputation(commands.Cog):
                 check=lambda r, u: u.id == ctx.author.id and r.message.id == info_msg.id and str(r.emoji) == '💰'
                 )
         except asyncio.TimeoutError:
-            return await info_msg.remove_reaction(self.client.user, '💰')
+            return await info_msg.remove_reaction('💰', self.client.user)
         else:
             confirmed = await ConfirmSkill(f"**{member.mention}, are you sure you want to exchange your {h:d} hours, {m:02d} minutes and {user_info[0][1]} messages?**").prompt(ctx)
             if confirmed:
@@ -136,13 +136,13 @@ class SlothReputation(commands.Cog):
                 await ctx.send(f"**{ctx.author.mention}, not exchanging, then!**")
 
 
-    @commands.command()
+    @commands.command(aliases=['leaderboard', 'lb', 'scoreboard'])
     async def score(self, ctx):
         """ Shows the top ten members in the reputation leaderboard. """
 
         await ctx.message.delete()
         if not await self.check_table_exist():
-            return await ctx.send("**This command may be on maintenance!**", delete_after=3)
+            return await ctx.send("**This command may be on maintenance!**")
 
         # users = await self.get_users()
         top_ten_users = await self.get_top_ten_users()
@@ -189,7 +189,10 @@ class SlothReputation(commands.Cog):
 
         target_user = await self.get_specific_user(member.id)
         if not target_user:
-            return await ctx.send("**This member is not on the leaderboard yet!**", delete_after=3)
+            if ctx.author.id == member.id:
+                return await ctx.send(embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one!**"))
+            else:
+                return await ctx.send("**This member is not on the leaderboard yet!**", delete_after=3)
 
         epoch = datetime.utcfromtimestamp(0)
         time_xp = (datetime.utcnow() - epoch).total_seconds()
