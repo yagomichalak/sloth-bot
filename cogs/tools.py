@@ -9,6 +9,7 @@ import textwrap
 import traceback
 from contextlib import redirect_stdout
 import os
+from extra.menu import ConfirmSkill
 
 
 mod_role_id=int(os.getenv('MOD_ROLE_ID'))
@@ -326,33 +327,34 @@ class Tools(commands.Cog):
         # Checks user's channel state
         user_state = ctx.author.voice
         if not user_state:
+            self.client.get_command('magnet').reset_cooldown(ctx)
             return await ctx.send("**You are not in a vc!**")
+
+        confirm = await ConfirmSkill(f"{ctx.author.mention}, you sure you want to magnet everyone into `{user_state.channel}`?").prompt(ctx)
+        if not confirm:
+            self.client.get_command('magnet').reset_cooldown(ctx)
+            return await ctx.send("**Not doing it, then!**")
 
         # Resolves bot's channel state
         bot_state = ctx.author.guild.voice_client
 
-        print('user_channel', user_state)
-        print('bot', bot_state)
         try:
             if bot_state and bot_state.channel and bot_state.channel != user_state.channel:
-                print('if')
                 await bot_state.disconnect()
                 await bot_state.move_to(user_state.channel)
             elif not bot_state:
-                print('elif')
                 voicechannel = discord.utils.get(ctx.author.guild.channels, id=user_state.channel.id)
                 vc = await voicechannel.connect()
 
             await asyncio.sleep(2)
             voice_client: discord.VoiceClient = discord.utils.get(self.client.voice_clients, guild=ctx.guild)
-            print('voice_client', voice_client)
+
             # Plays / and they don't stop commin' /
             if voice_client and not voice_client.is_playing():
-                print('hehe')
                 audio_source = discord.FFmpegPCMAudio('best_audio.mp3')
                 voice_client.play(audio_source, after=lambda e: print("Finished trolling people!"))
             else:
-                print('couldnt play it!')               
+                pass     
 
         except Exception as e:
             print(e)
@@ -360,7 +362,6 @@ class Tools(commands.Cog):
         
         else:
             # Moves all members who are in the voice channel to the context channel.
-            print('here we go')
             magneted_members = 0
             for member in all_members:
                 try:

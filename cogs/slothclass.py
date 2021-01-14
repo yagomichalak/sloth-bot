@@ -687,7 +687,7 @@ class SlothClass(commands.Cog):
 	@commands.command(aliases=['rsc'])
 	@commands.has_permissions(administrator=True)
 	async def reset_skill_cooldown(self, ctx, member: discord.Member = None) -> None:
-		""" Resets the action skill cooldown of the given member. 
+		""" (ADMIN) Resets the action skill cooldown of the given member. 
 		:param member: The member to reset the cooldown (default = author). """
 
 		if not member:
