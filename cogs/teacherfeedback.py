@@ -7,6 +7,7 @@ from typing import Dict, List, Union, Any
 import time
 import os
 from pprint import pprint
+from extra.useful_variables import different_class_roles
 
 create_room_vc_id = int(os.getenv('CREATE_SMART_CLASSROOM_VC_ID'))
 create_room_cat_id = int(os.getenv('CREATE_ROOM_CAT_ID'))
@@ -183,7 +184,7 @@ class CreateClassroom(commands.Cog):
                                 epoch = datetime.utcfromtimestamp(0)
                                 the_time = (datetime.utcnow() - epoch).total_seconds()
                                 cc_channel = discord.utils.get(member.guild.channels, id=cc_channel_id)
-                                class_ids = await self.create_class(member, cc_channel, class_info[0], class_info[1])
+                                class_ids = await self.create_class(member, cc_channel, class_info[0], class_info[1], class_info[2])
                                 await self.insert_active_class(member.id, class_ids[0], class_ids[1], class_info[0],
                                                                class_info[1], int(the_time), class_info[2])
 
@@ -196,7 +197,7 @@ class CreateClassroom(commands.Cog):
                             epoch = datetime.utcfromtimestamp(0)
                             the_time = (datetime.utcnow() - epoch).total_seconds()
                             cc_channel = discord.utils.get(member.guild.channels, id=cc_channel_id)
-                            class_ids = await self.create_class(member, cc_channel, class_info[0], class_info[1])
+                            class_ids = await self.create_class(member, cc_channel, class_info[0], class_info[1], class_info[2])
                             await self.insert_active_class(member.id, class_ids[0], class_ids[1], class_info[0].title(), class_info[1], int(the_time), class_info[2])
 
 
@@ -524,67 +525,75 @@ class CreateClassroom(commands.Cog):
             await commands_channel.send(embed=the_reward_embed)
             return await self.delete_rewarded_users(msg_id)
 
+    async def get_custom_role_name(self, custom_roles: Dict[str, List[str]], language: str) -> Union[str, bool]:
+        # Loops through the dictionary searching for the custom role name
+
+            try:
+                for key, row in custom_roles.items():
+                    for alias in row:
+                        # print(alias)
+                        if language.lower() == alias:
+                            return key
+                # If not found, returns False
+                else:
+                    return False
+            except Exception as e:
+                return False
+
     async def get_channel_perms(self, member, language):
         teacher_role = discord.utils.get(member.guild.roles, id=teacher_role_id)
         preference_role = discord.utils.get(member.guild.roles, id=preference_role_id)
         mod_role = discord.utils.get(member.guild.roles, id=mod_role_id)
-        native_role = discord.utils.get(member.guild.roles,
-                                        name=f"Native {language.title()}")
-        fluent_role = discord.utils.get(member.guild.roles,
-                                        name=f"Fluent {language.title()}")
-        studying_role = discord.utils.get(member.guild.roles,
-                                          name=f"Studying {language.title()}")
 
         overwrites = {}
-        overwrites[member.guild.default_role] = discord.PermissionOverwrite(read_messages=False,
-                                                                            send_messages=False,
-                                                                            connect=False,
-                                                                            speak=False,
-                                                                            view_channel=False)
-        overwrites[teacher_role] = discord.PermissionOverwrite(read_messages=True,
-                                                               send_messages=True,
-                                                               manage_messages=True,
-                                                               mute_members=True,
-                                                               embed_links=True, connect=True,
-                                                               speak=True,
-                                                               move_members=True,
-                                                               view_channel=True)
-        overwrites[mod_role] = discord.PermissionOverwrite(read_messages=True,
-                                                           send_messages=True,
-                                                           manage_messages=True,
-                                                           mute_members=True,
-                                                           embed_links=True,
-                                                           connect=True,
-                                                           speak=True,
-                                                           move_members=True,
-                                                           view_channel=True)
-        overwrites[preference_role] = discord.PermissionOverwrite(read_messages=True,
-                                                                  send_messages=False,
-                                                                  connect=False,
-                                                                  view_channel=True)
+        # Checks whether it is a language that has no native, fluent, studying pattern
+        if custom_role_name := await self.get_custom_role_name(different_class_roles, language.lower().strip()):
+            custom_role = discord.utils.get(member.guild.roles,
+                name=custom_role_name.title())
+            overwrites[custom_role] = discord.PermissionOverwrite(
+                read_messages=True, send_messages=True, connect=True,
+                speak=True, view_channel=True, embed_links=True)
+        else:
+            native_role = discord.utils.get(
+                member.guild.roles, name=f"Native {language.title()}")
 
-        if native_role:
-            overwrites[native_role] = discord.PermissionOverwrite(read_messages=True,
-                                                                  send_messages=False,
-                                                                  connect=False,
-                                                                  speak=False,
-                                                                  view_channel=True,
-                                                                  embed_links=False)
+            fluent_role = discord.utils.get(
+                member.guild.roles, name=f"Fluent {language.title()}")
 
-        if fluent_role:
-            overwrites[fluent_role] = discord.PermissionOverwrite(read_messages=True,
-                                                                  send_messages=True,
-                                                                  connect=True,
-                                                                  speak=True, view_channel=True,
-                                                                  embed_links=True)
+            studying_role = discord.utils.get(
+                member.guild.roles, name=f"Studying {language.title()}")
 
-        if studying_role:
-            overwrites[studying_role] = discord.PermissionOverwrite(read_messages=True,
-                                                                    send_messages=True,
-                                                                    connect=True,
-                                                                    speak=True,
-                                                                    view_channel=True,
-                                                                    embed_links=True)
+            if native_role:
+                overwrites[native_role] = discord.PermissionOverwrite(
+                read_messages=True, send_messages=False, connect=False,
+                speak=False, view_channel=True, embed_links=False)
+
+            if fluent_role:
+                overwrites[fluent_role] = discord.PermissionOverwrite(
+                    read_messages=True, send_messages=True, connect=True,
+                    speak=True, view_channel=True, embed_links=True)
+
+            if studying_role:
+                overwrites[studying_role] = discord.PermissionOverwrite(
+                    read_messages=True, send_messages=True, connect=True,
+                    speak=True, view_channel=True, embed_links=True)
+
+        overwrites[member.guild.default_role] = discord.PermissionOverwrite(
+            read_messages=False, send_messages=False, connect=False, 
+            speak=False, view_channel=False)
+
+        overwrites[teacher_role] = discord.PermissionOverwrite(
+            read_messages=True, send_messages=True, manage_messages=True, 
+            mute_members=True, embed_links=True, connect=True, 
+            speak=True, move_members=True, view_channel=True)
+
+        overwrites[mod_role] = discord.PermissionOverwrite(
+            read_messages=True, send_messages=True, manage_messages=True, 
+            mute_members=True, embed_links=True, connect=True,
+            speak=True, move_members=True, view_channel=True)
+
+        overwrites[preference_role] = discord.PermissionOverwrite(
+            read_messages=True, send_messages=False, connect=False, view_channel=True)
 
         return overwrites
 
@@ -638,7 +647,7 @@ class CreateClassroom(commands.Cog):
             if str(reaction.emoji) == "✅":
                 await simple.remove_reaction(reaction.emoji, member)
                 await cc_channel.send(f"**Class (__{saved_classes[class_index][1].title()}__ | __{saved_classes[class_index][2].title()}__) selected!**")
-                create_class = await self.create_class(member, cc_channel, saved_classes[class_index][1].title(), saved_classes[class_index][2].title())
+                create_class = await self.create_class(member, cc_channel, saved_classes[class_index][1].title(), saved_classes[class_index][2].title(), saved_classes[class_index][3])
                 # teacher_id, txt_id, vc_id, language, class_type, vc_timestamp, vc_time, members, class_desc
                 # teacher_id, language, class_type, class_desc
                 epoch = datetime.utcfromtimestamp(0)
@@ -808,16 +817,16 @@ class CreateClassroom(commands.Cog):
             return class_language, class_type, class_desc
 
 
-    async def create_class(self, member, cc_channel, language, class_type):
+    async def create_class(self, member, cc_channel, language, class_type, desc):
         # (Creating rooms)
         the_category_test = discord.utils.get(member.guild.categories, id=create_room_cat_id)
         # Creating text channel
         overwrites = await self.get_channel_perms(member, language)
 
         cemoji = '🗣️' if class_type == 'Pronunciation' else '📖'
-
         text_channel = await the_category_test.create_text_channel(
             name=f"{cemoji} {language} Classroom",
+            topic=desc,
             overwrites=overwrites)
         # Creating voice channel
         voice_channel = await the_category_test.create_voice_channel(
