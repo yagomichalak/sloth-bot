@@ -300,30 +300,20 @@ class CreateClassroom(commands.Cog):
                         class_embed.set_footer(text='Class Report', icon_url=self.client.user.avatar_url)
                         await history_channel.send(embed=class_embed)
 
-                    #teacher_id, users_feedback, guild, language, class_type
-                    #teacher_id, txt_id, vc_id, language, class_type, vc_timestamp, vc_time, members, class_desc
-
-
-
-                    #await self.show_user_feedback(teacher_class[0][0], users_feedback, member.guild,
-                     #                             teacher_class[0][3], teacher_class[0][4])
-                    guild = member.guild
-                    teacher = discord.utils.get(guild.members, id=member.id)
-                    simple_embed = discord.Embed(title=f"All {teacher.name}'s students", description="**LOADING...**",
-                                                 colour=discord.Colour.green())
-                    simple_embed.set_thumbnail(url=guild.icon_url)
-                    simple_embed.set_footer(text=guild.name, icon_url=guild.icon_url)
-                    reward_channel = discord.utils.get(guild.channels, id=reward_channel_id)
-                    simple = await reward_channel.send(content=teacher.mention, embed=simple_embed)
-                    await simple.add_reaction('✅')
-                    await simple.add_reaction('❌')
-                    await self.save_class_feedback(msg=simple,
-                        teacher=member, users_feedback=users_feedback, 
-                        class_type=teacher_class[0][4], language=teacher_class[0][3], guild=guild
-                    )
-                    # user, lenactive = await self.get_waiting_reward_student(teacher_id=teacher_class[0][0], msg_id=simple.id)
-                    # await self.show_user_feedback(
-                    #     msg=simple, guild=guild, user=user, lenactive=lenactive)
+                        guild = member.guild
+                        teacher = discord.utils.get(guild.members, id=member.id)
+                        simple_embed = discord.Embed(title=f"All {teacher.name}'s students", description="**LOADING...**",
+                                                     colour=discord.Colour.green())
+                        simple_embed.set_thumbnail(url=guild.icon_url)
+                        simple_embed.set_footer(text=guild.name, icon_url=guild.icon_url)
+                        reward_channel = discord.utils.get(guild.channels, id=reward_channel_id)
+                        simple = await reward_channel.send(content=teacher.mention, embed=simple_embed)
+                        await simple.add_reaction('✅')
+                        await simple.add_reaction('❌')
+                        await self.save_class_feedback(msg=simple,
+                            teacher=member, users_feedback=users_feedback, 
+                            class_type=teacher_class[0][4], language=teacher_class[0][3], guild=guild
+                        )
                 else:
                     await text_channel.send("**Class not ended!**")
 

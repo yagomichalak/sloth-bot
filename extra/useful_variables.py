@@ -69,10 +69,10 @@ Any of the above infractions may result in server mute or ban at the discretion 
 different_class_roles = {
     "programming": [
         "python", "html", "html and css",
-        "html & css","c#", "csharp", "c++", "c", 
-        "c plus plus", "css", "mysql", "apache", "javascript", 
+        "html & css","c#", "csharp", "c++", "c",
+        "c plus plus", "css", "mysql", "apache", "javascript",
         "js", "cobol", "java", "go", "golang", "fluter",
-        "typescript", "ts", "js and ts", "lua"
+        "typescript", "ts", "js and ts", "lua",
         "javascript and typescript", "sql", "programming",
         "computer science", "cs50", "cs"
     ]
