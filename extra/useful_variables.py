@@ -44,19 +44,6 @@ I'm open to new ideas, in other words, if you want a custom command designed spe
 
 
 rules = {
-    "Do not post or talk about NSFW content in text or voice chat. This server is a safe for work.",
-    "Be respectful of all members, especially Staff.",
-    "Avoid topics such as: Politics, Religion, Transphobia, Self-Harm or anything considered controversial anywhere in the server except in the **Debate Club**.",
-    "Do not advertise your server or other communities without express consent from an Owner of this server.",
-    "Do not share others' personal information without their consent.",
-    "Do not flood or spam the text chat. Do not staff members repeatedly without a reason.",
-    "No ear rape or mic spam. If you have a loud background, go on push-to-talk or mute.",
-    "Try to settle disputes personally. You may mute or block a user. If you cannot resolve the issue, contact staff in <#729454413290143774>.",
-    "Do not impersonate users or member of the staff.",
-    "No asking to be granted roles/moderator roles, you may apply by accessing the link in <#562019353583681536> but begging the staff repeatedly and irritatingly will result in warnings or even ban."}
-
-
-rules = {
     "No NSFW": "The Language Sloth is an educational community. For this reason, NSFW content will not be tolerated in either VCs or text channels. Pornographic, violent, foul, offensive, or even politically charged content/conversations are to be avoided, as they will result in punishment.",
 
     "Respectful Conduct": "Being intentionally disrespectful, following people, harassing over dms and using foul language are not allowed here, specially the Staff of this server.",
@@ -77,4 +64,16 @@ Any of the above infractions may result in server mute or ban at the discretion 
 
     "No Begging": "No asking to be granted roles/moderator roles. You may apply for these positions by accessing the link in #🌟announcements🌟 but repeatedly begging the staff may result in warnings or ban."
 
+}
+
+different_class_roles = {
+    "programming": [
+        "python", "html", "html and css",
+        "html & css","c#", "csharp", "c++", "c", 
+        "c plus plus", "css", "mysql", "apache", "javascript", 
+        "js", "cobol", "java", "go", "golang", "fluter",
+        "typescript", "ts", "js and ts", "lua"
+        "javascript and typescript", "sql", "programming",
+        "computer science", "cs50", "cs"
+    ]
 }
