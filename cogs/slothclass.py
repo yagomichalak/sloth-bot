@@ -18,6 +18,14 @@ class SlothClass(commands.Cog):
 		""" Class initializing method. """
 
 		self.client = client
+		self.safe_categories = [
+			int(os.getenv('LESSON_CAT_ID')),
+			int(os.getenv('CASE_CAT_ID')),
+			int(os.getenv('EVENTS_CAT_ID')),
+			int(os.getenv('DEBATE_CAT_ID')),
+			int(os.getenv('CULTURE_CAT_ID')),
+			int(os.getenv('APPLICATION_CAT_ID'))
+		]
 
 	@commands.Cog.listener()
 	async def on_ready(self) -> None:
@@ -250,7 +258,7 @@ class SlothClass(commands.Cog):
 		return await ctx.send("**Command not ready yet!**")
 
 		if ctx.channel.id != bots_and_commands_channel_id:
-			return await ctx.send(f"**{ctx.author.mention}, ou can only use this command in {self.txt.mention}!**")
+			return await ctx.send(f"**{ctx.author.mention}, ou can only use this command in {self.bots_txt.mention}!**")
 
 		return await ctx.send("**Command not ready yet!**")
 
@@ -261,10 +269,10 @@ class SlothClass(commands.Cog):
 	async def transmutation(self, ctx) -> None:
 		""" A command for Metamorphs. """
 
-		return await ctx.send("**Command not ready yet!**")
+		# return await ctx.send("**Command not ready yet!**")
 
 		if ctx.channel.id != bots_and_commands_channel_id:
-			return await ctx.send(f"**{ctx.author.mention}, ou can only use this command in {self.txt.mention}!**")
+			return await ctx.send(f"**{ctx.author.mention}, ou can only use this command in {self.bots_txt.mention}!**")
 
 		member = ctx.author
 
@@ -293,15 +301,55 @@ class SlothClass(commands.Cog):
 	@commands.command(aliases=['ma'])
 	@skill_on_cooldown()
 	@user_is_class('agares')
-	async def magical_armor(self, ctx) -> None:
+	async def magic_pull(self, ctx, target: discord.Member = None) -> None:
 		""" A command for Agares. """
 
-		return await ctx.send("**Command not ready yet!**")
+		# return await ctx.send("**Command not ready yet!**")
+		attacker = ctx.author
 
 		if ctx.channel.id != bots_and_commands_channel_id:
-			return await ctx.send(f"**{ctx.author.mention}, ou can only use this command in {self.txt.mention}!**")
+			return await ctx.send(f"**{attacker.mention}, ou can only use this command in {self.bots_txt.mention}!**")
 
-		return await ctx.send("**Command not ready yet!**")
+		attacker_state = attacker.voice
+		if not attacker_state or not (attacker_vc := attacker_state.channel):
+			return await ctx.send(f"**{attacker.mention}, you first need to be in a voice channel to magic pull someone!**")
+
+		if not target:
+			return await ctx.send(f"**Please, inform a target member, {attacker.mention}!**")
+
+		if attacker.id == target.id:
+			return await ctx.send(f"**{attacker.mention}, you cannot magic pull yourself!**")
+
+		if target.bot:
+			return await ctx.send(f"**{attacker.mention}, you cannot magic pull a bot!**")
+
+		target_state = target.voice
+
+		if not target_state or not (target_vc := target_state.channel):
+			return await ctx.send(f"**{attacker.mention}, you cannot magic pull {target.mention}, because they are not in a voice channel!!**")
+
+		if target_vc.category and target_vc.category.id in self.safe_categories:
+			return await ctx.send(
+				f"**{attacker.mention}, you can't magic pull {target.mention} from `{target_vc}`, because it's a safe channel.**")
+
+		if await self.is_user_protected(target.id):
+			return await ctx.send(f"**{attacker.mention}, {target.mention} is protected, you can't magic pull them!**")
+
+		try:
+			await target.move_to(attacker_vc)
+		except Exception as e:
+			print(e)
+			await ctx.send(
+				f"**{attacker.mention}, for some reason I couldn't magic pull {target.mention} from `{target_vc}` to `{attacker_vc}`**")
+		else:
+			# Puts the attacker's skill on cooldown
+			current_ts = await self.get_timestamp()
+			await self.update_user_action_skill_ts(attacker.id, current_ts)
+			# Sends embedded message into the channel
+			magic_pull_embed = await self.get_magic_pull_embed(
+				channel=ctx.channel, perpetrator_id=attacker.id, target_id=target.id,
+				t_before_vc=target_vc, t_after_vc=attacker_vc)
+			await ctx.send(content=target.mention, embed=magic_pull_embed)
 
 	@commands.command(aliases=['eb', 'energy', 'boost'])
 	@skill_on_cooldown()
@@ -312,7 +360,7 @@ class SlothClass(commands.Cog):
 		return await ctx.send("**Command not ready yet!**")
 
 		if ctx.channel.id != bots_and_commands_channel_id:
-			return await ctx.send(f"**{ctx.author.mention}, ou can only use this command in {self.txt.mention}!**")
+			return await ctx.send(f"**{ctx.author.mention}, ou can only use this command in {self.bots_txt.mention}!**")
 
 		return await ctx.send("**Command not ready yet!**")
 
@@ -325,7 +373,7 @@ class SlothClass(commands.Cog):
 		return await ctx.send("**Command not ready yet!**")
 
 		if ctx.channel.id != bots_and_commands_channel_id:
-			return await ctx.send(f"**{ctx.author.mention}, ou can only use this command in {self.txt.mention}!**")
+			return await ctx.send(f"**{ctx.author.mention}, ou can only use this command in {self.bots_txt.mention}!**")
 
 		return await ctx.send("**Command not ready yet!**")
 
@@ -338,7 +386,7 @@ class SlothClass(commands.Cog):
 		return await ctx.send("**Command not ready yet!**")
 
 		if ctx.channel.id != bots_and_commands_channel_id:
-			return await ctx.send(f"**{ctx.author.mention}, ou can only use this command in {self.txt.mention}!**")
+			return await ctx.send(f"**{ctx.author.mention}, ou can only use this command in {self.bots_txt.mention}!**")
 
 		if not target:
 			target = ctx.author
@@ -371,7 +419,7 @@ class SlothClass(commands.Cog):
 		return await ctx.send("**Command not ready yet!**")
 
 		if ctx.channel.id != bots_and_commands_channel_id:
-			return await ctx.send(f"**{ctx.author.mention}, ou can only use this command in {self.txt.mention}!**")
+			return await ctx.send(f"**{ctx.author.mention}, ou can only use this command in {self.bots_txt.mention}!**")
 
 		attacker = ctx.author
 		if not target:
@@ -424,7 +472,7 @@ class SlothClass(commands.Cog):
 		return await ctx.send("**Command not ready yet!**")
 
 		if ctx.channel.id != bots_and_commands_channel_id:
-			return await ctx.send(f"**{ctx.author.mention}, ou can only use this command in {self.txt.mention}!**")
+			return await ctx.send(f"**{ctx.author.mention}, ou can only use this command in {self.bots_txt.mention}!**")
 
 		attacker = ctx.author
 		if not target:
@@ -698,7 +746,11 @@ class SlothClass(commands.Cog):
 
 
 	async def get_steal_embed(self, channel, attacker_id: int, target_id: int, attack_succeeded: bool = False) -> discord.Embed:
-		""" Makes an embedded message for a steal action. """
+		""" Makes an embedded message for a steal action.
+		:param channel: The context channel.
+		:param perpetrator_id: The ID of the perpetrator of the stealing.
+		:param target_id: The ID of the target member who is beeing stolen from. 
+		:param attack_succeed: Whether the attack succeeded or not. """
 
 		timestamp = await self.get_timestamp()
 
@@ -741,7 +793,7 @@ class SlothClass(commands.Cog):
 	async def get_munk_embed(self, channel, perpetrator_id: int, target_id: int) -> discord.Embed:
 		""" Makes an embedded message for a munk action. 
 		:param channel: The context channel.
-		:param perpetrator_id: The ID of the perpetrator of the divine protection.
+		:param perpetrator_id: The ID of the perpetrator of the munk skill.
 		:param target_id: The ID of the target member that is gonna be protected. """
 
 		timestamp = await self.get_timestamp()
@@ -761,7 +813,7 @@ class SlothClass(commands.Cog):
 	async def get_transmutation_embed(self, channel, perpetrator_id: int) -> discord.Embed:
 		""" Makes an embedded message for a transmutation action. 
 		:param channel: The context channel.
-		:param perpetrator_id: The ID of the perpetrator of the divine protection. """
+		:param perpetrator_id: The ID of the perpetrator of the transmutation. """
 
 		timestamp = await self.get_timestamp()
 
@@ -776,6 +828,26 @@ class SlothClass(commands.Cog):
 		transmutation_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon_url)
 
 		return transmutation_embed
+
+	async def get_magic_pull_embed(self, channel, perpetrator_id: int, target_id: int, t_before_vc: discord.VoiceChannel, t_after_vc: discord.VoiceChannel) -> discord.Embed:
+		""" Makes an embedded message for a magic pull action. 
+		:param channel: The context channel.
+		:param perpetrator_id: The ID of the perpetrator of the magic pulling. 
+		:param target_id: The ID of the target of the magic pulling. """
+
+		timestamp = await self.get_timestamp()
+
+		magic_pull_embed = discord.Embed(
+			title="A Magic Pull has been Successfully Pulled Off!",
+			timestamp=datetime.utcfromtimestamp(timestamp)
+		)
+		magic_pull_embed.description=f"**<@{perpetrator_id}> magic pulled <@{target_id}> from `{t_before_vc}` to `{t_after_vc}`!**"
+		magic_pull_embed.color=discord.Color.green()
+
+		magic_pull_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Agares.png")
+		magic_pull_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon_url)
+
+		return magic_pull_embed
 
 	async def is_user_protected(self, user_id: int) -> bool:
 		""" Checks whether user is protected.
