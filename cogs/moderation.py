@@ -535,9 +535,9 @@ class Moderation(commands.Cog):
 					await msg.remove_reaction('✅', self.client.user)
 					return await msg.edit(embed=mod_ban_embed)
 				else:
-					mod_ban_embed.title = f"Ban Request ({len(confirmations)}/3) → (2mins)"
+					mod_ban_embed.title = f"Ban Request ({len(confirmations)}/5) → (2mins)"
 					await msg.edit(embed=mod_ban_embed)
-					if len(confirmations) < 3:
+					if len(confirmations) < 5:
 						continue
 					else:
 						break
