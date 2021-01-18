@@ -164,7 +164,6 @@ class Show(commands.Cog):
         )
 
         temp_text2 = ''
-        # the_months = {1: '',2: '',3: '',4: '',5: '',6: '',7: '',8: '',9: '',10: '',11: '',12: ''}
         for i, month in enumerate(months):
             the_month = month[0].strftime('%b')
             temp_text2 += f"{i+1:>2} | {the_month:<4} | {month[1]:^5} | {month[2]:>5} | {month[3]:>5}\n"

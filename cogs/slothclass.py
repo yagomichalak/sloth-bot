@@ -42,7 +42,6 @@ class SlothClass(commands.Cog):
 		await self.try_to_run(self.check_protections)
 		await self.try_to_run(self.check_transmutations)
 
-
 	async def try_to_run(self, func):
 		""" Tries to run a function/method and ignore failures. """
 
@@ -50,7 +49,6 @@ class SlothClass(commands.Cog):
 			await func()
 		except:
 			pass
-
 
 	# @tasks.loop(minutes=1)
 	async def check_steals(self) -> None:
@@ -85,7 +83,6 @@ class SlothClass(commands.Cog):
 			except Exception as e:
 				print(e)
 				pass
-
 
 	async def check_protections(self) -> None:
 		""" Check on-going protections and their expiration time. """
@@ -122,7 +119,6 @@ class SlothClass(commands.Cog):
 				embed=discord.Embed(
 					description=f"**<@{tm[3]}>'s `Transmutation` has just expired! 🐩→💥→🦥**",
 					color=discord.Color.red()))
-
 
 	@commands.Cog.listener()
 	async def on_raw_reaction_add(self, payload) -> None:
@@ -161,8 +157,6 @@ class SlothClass(commands.Cog):
 					embed=discord.Embed(
 						description=f"**{payload.member.mention} defended themselves against <@{skill_action[0]}>'s stealing, good luck next time!**",
 						color=discord.Color.green()))
-
-
 
 	@commands.command(aliases=['sloth_class', 'slothclasses'])
 	@commands.cooldown(1, 5, commands.BucketType.user)
@@ -246,9 +240,6 @@ class SlothClass(commands.Cog):
 
 		return commands.check(real_check)
 
-
-
-
 	@commands.command()
 	@skill_on_cooldown()
 	@user_is_class('warrior')
@@ -269,7 +260,7 @@ class SlothClass(commands.Cog):
 	async def transmutation(self, ctx) -> None:
 		""" A command for Metamorphs. """
 
-		# return await ctx.send("**Command not ready yet!**")
+		return await ctx.send("**Command not ready yet!**")
 
 		if ctx.channel.id != bots_and_commands_channel_id:
 			return await ctx.send(f"**{ctx.author.mention}, ou can only use this command in {self.bots_txt.mention}!**")
@@ -294,17 +285,13 @@ class SlothClass(commands.Cog):
 		transmutation_embed = await self.get_transmutation_embed(channel=ctx.channel, perpetrator_id=ctx.author.id)
 		await ctx.send(embed=transmutation_embed)
 
-
-
-
-
 	@commands.command(aliases=['ma'])
 	@skill_on_cooldown()
 	@user_is_class('agares')
 	async def magic_pull(self, ctx, target: discord.Member = None) -> None:
 		""" A command for Agares. """
 
-		# return await ctx.send("**Command not ready yet!**")
+		return await ctx.send("**Command not ready yet!**")
 		attacker = ctx.author
 
 		if ctx.channel.id != bots_and_commands_channel_id:
@@ -859,7 +846,6 @@ class SlothClass(commands.Cog):
 		await mycursor.close()
 		return user_protected is not None and user_protected[0]
 
-
 	async def is_transmutated(self, user_id: int) -> bool:
 		""" Checks whether user is transmutated.
 		:param user_id: The ID of the user to check it. """
@@ -869,7 +855,6 @@ class SlothClass(commands.Cog):
 		user_transmutated = await mycursor.fetchone()
 		await mycursor.close()
 		return user_transmutated[0]
-
 
 	@commands.command(aliases=['my_skills'])
 	@commands.cooldown(1, 5, commands.BucketType.user)
