@@ -495,9 +495,9 @@ class Moderation(commands.Cog):
 		if not perms.administrator:
 			confirmations[author.id] = author.name
 			mod_ban_embed = discord.Embed(
-				title=f"Ban Request ({len(confirmations)}/3) → (2mins)",
+				title=f"Ban Request ({len(confirmations)}/5) → (2mins)",
 				description=f'''
-				{author.mention} wants to ban {member.mention}, it requires 2 more moderator ✅ reactions for it!
+				{author.mention} wants to ban {member.mention}, it requires 4 more moderator ✅ reactions for it!
 				```Reason: {reason}```''', 
 				colour=discord.Colour.dark_red(), timestamp=ctx.message.created_at)
 			mod_ban_embed.set_author(name=f'{member} is going to Brazil...', icon_url=member.avatar_url)
