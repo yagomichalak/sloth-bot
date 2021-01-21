@@ -1,5 +1,7 @@
 import discord
-from discord.ext import menus
+from discord.ext import commands, menus
+from typing import Union, List
+import asyncio
 
 class ConfirmSkill(menus.Menu):
 	""" Class related to confirmation skill actions. """
@@ -99,3 +101,89 @@ class InventoryLoop(menus.ListPageSource):
 			embed.set_footer(text=f"({i+1}-{i+1+6} of {len(self.entries)})")
 
 		return embed
+
+class OpenShopLoop(menus.ListPageSource):
+	""" A class for iterating through inventory items. """
+
+	def __init__(self, data):
+		super().__init__(data, per_page=6)
+
+	async def format_page(self, menu, entries) -> discord.Embed:
+		""" Formats the inventory for each page. """
+
+		offset = menu.current_page * self.per_page
+
+		embed = discord.Embed(
+			title="__Sloth Class Shop Items__",
+			description="All available shop items.\n**To buy a potion, use: `z!buy_potion @member`**",
+			color=menu.ctx.author.color,
+			timestamp=menu.ctx.message.created_at
+		)
+		embed.set_author(name=menu.ctx.author, icon_url=menu.ctx.author.avatar_url)
+
+		for i, v in enumerate(entries, start=offset):
+			embed.add_field(name=f"{i+1}.", value=f"**Merchant:** <@{v[0]}>\n**Item Price:** `{v[7]}`", inline=True)
+			embed.set_footer(text=f"({i+1}-{i+6} of {len(self.entries)})")
+
+		return embed
+
+
+async def prompt_message(client, member: discord.Member, channel: discord.TextChannel, limit: int = 100) -> str:
+	def msg_check(message):
+		if message.author == member and not message.guild:
+			if len(message.content) <= limit:
+				return True
+			else:
+				client.loop.create_task(channel.send(f"**Your answer must be within {limit} characters**"))
+		else:
+			return False
+	try:
+		message = await client.wait_for('message', timeout=240, 
+		check=msg_check)
+	except asyncio.TimeoutError:
+		await channel.send("**Timeout! Try again.**")
+		return None
+	else:
+		content = message.content
+		return content
+
+
+async def prompt_number(client, ctx: commands.Context, the_msg: discord.Message, member: discord.Member, limit: int = 1000) -> Union[int, None]:
+	""" Prompts the user for a number.
+	:param ctx: The context.
+	:param member: The member that is gonna be prompted. """
+
+
+	def check(m) -> bool:
+		if m.author.id == member.id and msg.channel.id == m.channel.id:
+			if len(m.content.strip()) <= len(str(limit)):
+				if m.content.strip().isdigit():
+					if int(m.content.strip()) > 0 and int(m.content.strip()) <= limit:
+						return True
+					else:
+						client.loop.create_task(ctx.send(f"**The number has to be between 1-{limit}, {member.mention}!**"))	
+						return False
+				else:
+					client.loop.create_task(ctx.send(f"**The number `MUST` be an integer value, {member.mention}!**"))	
+					return False
+			else:
+				client.loop.create_task(ctx.send(f"**The number has a maximum lenght of 2, {member.mention}!**"))
+				return False
+
+		else:
+			return False
+
+
+	msg = await ctx.send(embed=discord.Embed(
+		description=the_msg, 
+		color=member.color, 
+		timestamp=ctx.message.created_at))
+
+	try:
+		m = await client.wait_for('message', timeout=60, check=check)
+		content = m.content
+	except asyncio.TimeoutError:
+		await msg.edit(content="**Timeout!**")
+		return None
+	else:
+		return int(content)
