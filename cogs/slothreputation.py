@@ -108,6 +108,7 @@ class SlothReputation(commands.Cog):
         embed.add_field(name="🧑‍🏫 __**Hosted:**__", value=f"{ucur[0][5]} classes.", inline=True)
         embed.add_field(name="🕵️ __**Sloth Class:**__", value=ucur[0][7], inline=True)
         embed.add_field(name="🛡️ __**Protected:**__", value=f"{True if ucur[0][10] else False}", inline=True)
+        embed.add_field(name="🍯 __**Has Potion:**__", value=f"{True if ucur[0][11] else False}", inline=True)
         m, s = divmod(user_info[0][2], 60)
         h, m = divmod(m, 60)
         embed.add_field(name=f"💰 __**Exchangeable Activity:**__", value=f"{h:d} hours, {m:02d} minutes and {user_info[0][1]} messages.", inline=True)
