@@ -105,16 +105,17 @@ async def on_member_remove(member):
 @client.event
 async def on_command_error(ctx, error):
 	if isinstance(error, commands.MissingPermissions):
-		await ctx.send("You can't do that!", delete_after=3)
+		await ctx.send("You can't do that!")
 
 	elif isinstance(error, commands.MissingRequiredArgument):
-		await ctx.send('Please, inform all parameters!', delete_after=3)
+		await ctx.send('Please, inform all parameters!')
 
 	elif isinstance(error, commands.CommandOnCooldown):
-		await ctx.send(error, delete_after=3)
+		await ctx.send(error)
 		
 	elif isinstance(error, commands.MissingAnyRole):
-		await ctx.send(error, delete_after=3)
+		role_names = [f"**{str(discord.utils.get(ctx.guild.roles, id=role_id))}**" for role_id in error.missing_roles]
+		await ctx.send(f"You are missing at least one of the required roles: {', '.join(role_names)}")
 
 	elif isinstance(error, commands.ChannelNotFound):
 		await ctx.send("**Channel not found!**")

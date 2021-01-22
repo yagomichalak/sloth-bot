@@ -375,7 +375,7 @@ class SlothClass(commands.Cog):
 	async def open_shop(self, ctx) -> None:
 		""" A command for Merchants. """
 
-		# return await ctx.send("**Command not ready yet!**")
+		return await ctx.send("**Command not ready yet!**")
 
 		if ctx.channel.id != bots_and_commands_channel_id:
 			return await ctx.send(f"**{ctx.author.mention}, ou can only use this command in {self.bots_txt.mention}!**")
