@@ -566,7 +566,7 @@ class SlothClass(commands.Cog):
 				user_id BIGINT NOT NULL, skill_type VARCHAR(30) NOT NULL,
 				skill_timestamp BIGINT NOT NULL, target_id BIGINT DEFAULT NULL,
 				message_id BIGINT DEFAULT NULL, channel_id BIGINT DEFAULT NULL,
-				emoji VARCHAR(50) DEFAULT NULL, PRICE INT DEFAULT 0;
+				emoji VARCHAR(50) DEFAULT NULL, PRICE INT DEFAULT 0
 			) DEFAULT CHARSET=utf8mb4""")
 		await db.commit()
 		await mycursor.close()
