@@ -374,6 +374,5 @@ class Tools(commands.Cog):
                 await ctx.send(f"**They stopped comming, but we've gathered `{magneted_members}/{len(all_members)}` members!**")
 
 
-
 def setup(client):
     client.add_cog(Tools(client))
