@@ -628,8 +628,6 @@ class SlothClass(commands.Cog):
 		""" Converts a user into a real Munk. 
 		:param target: The person you want to convert to a Munk. """
 
-		return await ctx.send("**Command not ready yet!**")
-
 		if ctx.channel.id != bots_and_commands_channel_id:
 			return await ctx.send(f"**{ctx.author.mention}, ou can only use this command in {self.bots_txt.mention}!**")
 
