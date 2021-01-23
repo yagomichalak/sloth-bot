@@ -303,7 +303,7 @@ class SlothClass(commands.Cog):
 		attacker = ctx.author
 
 		if ctx.channel.id != bots_and_commands_channel_id:
-			return await ctx.send(f"**{attacker.mention}, ou can only use this command in {self.bots_txt.mention}!**")
+			return await ctx.send(f"**{attacker.mention}, you can only use this command in {self.bots_txt.mention}!**")
 
 		if await self.is_user_knocked_out(attacker.id):
 			return await ctx.send(f"**{attacker.mention}, you can't use your skill, because you are knocked-out!**")
@@ -351,7 +351,7 @@ class SlothClass(commands.Cog):
 		""" A command for Metamorphs. """
 
 		if ctx.channel.id != bots_and_commands_channel_id:
-			return await ctx.send(f"**{ctx.author.mention}, ou can only use this command in {self.bots_txt.mention}!**")
+			return await ctx.send(f"**{ctx.author.mention}, you can only use this command in {self.bots_txt.mention}!**")
 
 		member = ctx.author
 
@@ -385,7 +385,7 @@ class SlothClass(commands.Cog):
 		attacker = ctx.author
 
 		if ctx.channel.id != bots_and_commands_channel_id:
-			return await ctx.send(f"**{attacker.mention}, ou can only use this command in {self.bots_txt.mention}!**")
+			return await ctx.send(f"**{attacker.mention}, you can only use this command in {self.bots_txt.mention}!**")
 
 		if await self.is_user_knocked_out(attacker.id):
 			return await ctx.send(f"**{attacker.mention}, you can't use your skill, because you are knocked-out!**")
@@ -442,7 +442,7 @@ class SlothClass(commands.Cog):
 		attacker = ctx.author
 
 		if ctx.channel.id != bots_and_commands_channel_id:
-			return await ctx.send(f"**{attacker.mention}, ou can only use this command in {self.bots_txt.mention}!**")
+			return await ctx.send(f"**{attacker.mention}, you can only use this command in {self.bots_txt.mention}!**")
 
 		if await self.is_user_knocked_out(attacker.id):
 			return await ctx.send(f"**{attacker.mention}, you can't use your skill, because you are knocked-out!**")
@@ -493,7 +493,7 @@ class SlothClass(commands.Cog):
 		""" A command for Merchants. """
 
 		if ctx.channel.id != bots_and_commands_channel_id:
-			return await ctx.send(f"**{ctx.author.mention}, ou can only use this command in {self.bots_txt.mention}!**")
+			return await ctx.send(f"**{ctx.author.mention}, you can only use this command in {self.bots_txt.mention}!**")
 
 		member = ctx.author
 
@@ -504,7 +504,7 @@ class SlothClass(commands.Cog):
 			return await ctx.send(f"**{member.mention}, you already have an item in your shop!**")
 
 
-		item_price = await prompt_number(self.client, ctx, f"**{member.mention}, for how much do you want to sell your changing-Sloth-class potion for?**", member)
+		item_price = await prompt_number(self.client, ctx, f"**{member.mention}, for how much do you want to sell your changing-Sloth-class potion?**", member)
 		if item_price is None:
 			return
 
@@ -541,7 +541,7 @@ class SlothClass(commands.Cog):
 		""" A command for Seraphs. """
 
 		if ctx.channel.id != bots_and_commands_channel_id:
-			return await ctx.send(f"**{ctx.author.mention}, ou can only use this command in {self.bots_txt.mention}!**")
+			return await ctx.send(f"**{ctx.author.mention}, you can only use this command in {self.bots_txt.mention}!**")
 
 		if await self.is_user_knocked_out(ctx.author.id):
 			return await ctx.send(f"**{ctx.author.mention}, you can't use your skill, because you are knocked-out!**")
@@ -575,7 +575,7 @@ class SlothClass(commands.Cog):
 		:param target: The member from whom you want to steal. """
 
 		if ctx.channel.id != bots_and_commands_channel_id:
-			return await ctx.send(f"**{ctx.author.mention}, ou can only use this command in {self.bots_txt.mention}!**")
+			return await ctx.send(f"**{ctx.author.mention}, you can only use this command in {self.bots_txt.mention}!**")
 
 		attacker = ctx.author
 
@@ -629,7 +629,7 @@ class SlothClass(commands.Cog):
 		:param target: The person you want to convert to a Munk. """
 
 		if ctx.channel.id != bots_and_commands_channel_id:
-			return await ctx.send(f"**{ctx.author.mention}, ou can only use this command in {self.bots_txt.mention}!**")
+			return await ctx.send(f"**{ctx.author.mention}, you can only use this command in {self.bots_txt.mention}!**")
 
 		attacker = ctx.author
 
@@ -1313,6 +1313,9 @@ class SlothClass(commands.Cog):
 
 		else:
 			confirm = await ConfirmSkill(f"**{buyer.mention}, are you sure you want to buy a `changing-Sloth-class potion` for `{merchant_item[7]}łł`?**").prompt(ctx)
+			if not confirm:
+				return await ctx.send(f"**Not buying it, then, {buyer.mention}!**")
+
 			try:
 				# Updates both buyer and seller's money
 				await self.update_user_money(buyer.id, - merchant_item[7])
