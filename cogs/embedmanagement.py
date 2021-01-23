@@ -600,8 +600,8 @@ class EmbedManagement(commands.Cog):
 		if not text:
 			return await ctx.send(f"**Please, inform a `text` for the footer field, {member.mention}!**")
 
-		if len(text) > 30:
-			return await ctx.send(f"**Please, inform a `text` witihin 1-30 characters, {member.mention}!**")
+		if len(text) > 50:
+			return await ctx.send(f"**Please, inform a `text` witihin 1-50 characters, {member.mention}!**")
 
 		if not await self.embed_exists(embed_name):
 			return await ctx.send(f"**Embed `{embed_name}` doesn't exist, {member.mention}!**")
