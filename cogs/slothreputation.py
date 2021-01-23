@@ -57,13 +57,11 @@ class SlothReputation(commands.Cog):
             channel = discord.utils.get(user.guild.channels, id=commands_channel_id)
             return await channel.send(f"**{user.mention} has leveled up to lvl {the_user[0][2] + 1}! <:zslothrich:701157794686042183> Here's {(the_user[0][2] + 1) * 5}łł! <:zslothrich:701157794686042183>**")
 
-
     @commands.command(aliases=['status', 'exchange', 'level', 'exp', 'xp', 'money', 'balance'])
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def info(self, ctx, member: discord.Member = None):
-        '''
-        Shows the user's level and experience points.
-        '''
+        """ Shows the user's level and experience points. """
+
         if not await self.check_table_exist():
             return await ctx.send("**This command may be on maintenance!**")
 
@@ -85,6 +83,10 @@ class SlothReputation(commands.Cog):
                 return await ctx.send(embed=discord.Embed(description="**You don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one!**"))
             else:
                 return await ctx.send(f"**{member} doesn't have an account yet!**")
+
+        if ucur[0][12]:
+            SlothCurrency = self.client.get_cog('SlothCurrency')
+            return await SlothCurrency.send_hacked_image(ctx, member)
 
         all_users = await self.get_all_users_by_score_points()
         position = [[i+1, u[4]] for i, u in enumerate(all_users) if u[0] == member.id]
@@ -108,6 +110,9 @@ class SlothReputation(commands.Cog):
         embed.add_field(name="🕵️ __**Sloth Class:**__", value=ucur[0][7], inline=True)
         embed.add_field(name="🛡️ __**Protected:**__", value=f"{True if ucur[0][10] else False}", inline=True)
         embed.add_field(name="🍯 __**Has Potion:**__", value=f"{True if ucur[0][11] else False}", inline=True)
+        embed.add_field(name="<a:hackerman:652303204809179161> __**Hacked:**__", value=f"{True if ucur[0][12] else False}", inline=True)
+        # embed.add_field(name="<a:hackerman:802354539184259082> __**Hacked:**__", value=f"{True if ucur[0][12] else False}", inline=True)
+        embed.add_field(name="😵 __**Knocked Out:**__", value=f"{True if ucur[0][13] else False}", inline=True)
         m, s = divmod(user_info[0][2], 60)
         h, m = divmod(m, 60)
         embed.add_field(name=f"💰 __**Exchangeable Activity:**__", value=f"{h:d} hours, {m:02d} minutes and {user_info[0][1]} messages.", inline=True)
