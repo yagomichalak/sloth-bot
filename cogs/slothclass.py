@@ -668,7 +668,7 @@ class SlothClass(commands.Cog):
 				channel=ctx.channel, perpetrator_id=ctx.author.id, target_id=target.id)
 			msg = await ctx.send(embed=munk_embed)
 		except Exception as e:
-			pritn(e)
+			print(e)
 			return await ctx.send(f"**Something went wrong and your `Munk` skill failed, {attacker.mention}!**")
 
 		else:
