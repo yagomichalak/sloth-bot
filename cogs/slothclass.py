@@ -1283,9 +1283,9 @@ class SlothClass(commands.Cog):
 			the_menu = menus.MenuPages(source=OpenShopLoop(potions), clear_reactions_after=True)
 			await the_menu.start(ctx)
 		else:
-			return await ctx.send(f"**There are not items in the `Sloth class shop` yet, {ctx.author.mention}!**")
+			return await ctx.send(f"**There are no items in the `Sloth class shop` yet, {ctx.author.mention}!**")
 
-	@commands.command(aliases=['bp'])
+	@commands.command(aliases=['bp', 'buy'])
 	@commands.cooldown(1, 5, commands.BucketType.user)
 	async def buy_potion(self, ctx, member: discord.Member = None) -> None:
 		""" Buys a changing-Sloth-class potion from a Merchant. """
