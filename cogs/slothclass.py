@@ -42,6 +42,8 @@ class SlothClass(commands.Cog):
 		await self.try_to_run(self.check_protections)
 		await self.try_to_run(self.check_transmutations)
 		await self.try_to_run(self.check_open_shop_items)
+		await self.try_to_run(self.check_hacks)
+		await self.try_to_run(self.check_knock_outs)
 
 	async def try_to_run(self, func):
 		""" Tries to run a function/method and ignore failures. """
@@ -51,7 +53,6 @@ class SlothClass(commands.Cog):
 		except:
 			pass
 
-	# @tasks.loop(minutes=1)
 	async def check_steals(self) -> None:
 		""" Check on-going steals and their expiration time. """
 		
@@ -136,6 +137,41 @@ class SlothClass(commands.Cog):
 				content=f"<@{tm[0]}>",
 				embed=discord.Embed(
 					description=f"**<@{tm[3]}>'s `changing-Sloth-class potion` has just expired! Then it's been removed from the `Sloth class shop`! 🍯**",
+					color=discord.Color.red()))
+
+	async def check_hacks(self) -> None:
+
+		""" Check on-going hacks and their expiration time. """
+
+		hacks = await self.get_expired_hacks()
+		for h in hacks:
+			await self.delete_skill_action_by_target_id_and_skill_type(h[3], 'hack')
+			await self.update_user_is_hacked(h[3], 0)
+
+			channel = self.bots_txt
+		
+			await channel.send(
+				content=f"<@{h[0]}>",
+				embed=discord.Embed(
+					description=f"**<@{h[3]}> updated his firewall so <@{h[0]}>'s hacking has no effect anymore! 💻**",
+					color=discord.Color.red()))
+
+
+	async def check_knock_outs(self) -> None:
+
+		""" Check on-going knock-outs and their expiration time. """
+
+		knock_outs = await self.get_expired_knock_outs()
+		for ko in knock_outs:
+			await self.delete_skill_action_by_target_id_and_skill_type(ko[3], 'hit')
+			await self.update_user_is_knocked_out(ko[3], 0)
+
+			channel = self.bots_txt
+		
+			await channel.send(
+				content=f"<@{ko[0]}>",
+				embed=discord.Embed(
+					description=f"**<@{ko[3]}> got better from <@{ko[0]}>'s knock-out! 🤕**",
 					color=discord.Color.red()))
 
 	@commands.Cog.listener()
@@ -258,19 +294,55 @@ class SlothClass(commands.Cog):
 
 		return commands.check(real_check)
 
-	@commands.command()
+	@commands.command(aliases=['ko', 'knock-out', 'knock_out', 'knock'])
 	@skill_on_cooldown()
 	@user_is_class('warrior')
-	async def claw(self, ctx) -> None:
+	async def hit(self, ctx, target: discord.Member = None) -> None:
 		""" A command for Warriors. """
 
-		return await ctx.send("**Command not ready yet!**")
+		attacker = ctx.author
 
 		if ctx.channel.id != bots_and_commands_channel_id:
-			return await ctx.send(f"**{ctx.author.mention}, ou can only use this command in {self.bots_txt.mention}!**")
+			return await ctx.send(f"**{attacker.mention}, ou can only use this command in {self.bots_txt.mention}!**")
 
-		return await ctx.send("**Command not ready yet!**")
+		if await self.is_user_knocked_out(attacker.id):
+			return await ctx.send(f"**{attacker.mention}, you can't use your skill, because you are knocked-out!**")
 
+		if not target:
+			return await ctx.send(f"**Please, inform a target member, {attacker.mention}!**")
+
+		# if attacker.id == target.id:
+		# 	return await ctx.send(f"**{attacker.mention}, you cannot knock yourself out!**")
+
+		if target.bot:
+			return await ctx.send(f"**{attacker.mention}, you cannot knock out a bot!**")
+
+		if await self.is_user_protected(target.id):
+			return await ctx.send(f"**{attacker.mention}, {target.mention} is protected, you can't knock them out!**")
+
+		if await self.is_user_knocked_out(target.id):
+			return await ctx.send(f"**{attacker.mention}, {target.mention} is already knocked out!**")
+
+
+		confirmed = await ConfirmSkill(f"**{attacker.mention}, are you sure you want to knock {target.mention} out?**").prompt(ctx)
+		if not confirmed:
+			return await ctx.send("**Not knocking them out, then!**")
+
+		try:
+			current_timestamp = await self.get_timestamp()
+			# Don't need to store it, since it is forever
+			await self.update_user_is_knocked_out(target.id, 1)
+			await self.insert_skill_action(
+				user_id=attacker.id, skill_type="hit", skill_timestamp=current_timestamp,
+				target_id=target.id, channel_id=ctx.channel.id
+			)
+			await self.update_user_action_skill_ts(attacker.id, current_timestamp)
+			hit_embed = await self.get_hit_embed(
+				channel=ctx.channel, perpetrator_id=attacker.id, target_id=target.id)
+			msg = await ctx.send(embed=hit_embed)
+		except Exception as e:
+			pritn(e)
+			return await ctx.send(f"**Something went wrong and your `Hit` skill failed, {attacker.mention}!**")
 
 	@commands.command(aliases=['transmutate', 'trans'])
 	@skill_on_cooldown()
@@ -278,12 +350,13 @@ class SlothClass(commands.Cog):
 	async def transmutation(self, ctx) -> None:
 		""" A command for Metamorphs. """
 
-		return await ctx.send("**Command not ready yet!**")
-
 		if ctx.channel.id != bots_and_commands_channel_id:
 			return await ctx.send(f"**{ctx.author.mention}, ou can only use this command in {self.bots_txt.mention}!**")
 
 		member = ctx.author
+
+		if await self.is_user_knocked_out(member.id):
+			return await ctx.send(f"**{member.mention}, you can't use your skill, because you are knocked-out!**")
 
 		if await self.is_transmutated(member.id):
 			return await ctx.send(f"**You are already transmutated, {member.mention}!**")
@@ -309,11 +382,13 @@ class SlothClass(commands.Cog):
 	async def magic_pull(self, ctx, target: discord.Member = None) -> None:
 		""" A command for Agares. """
 
-		return await ctx.send("**Command not ready yet!**")
 		attacker = ctx.author
 
 		if ctx.channel.id != bots_and_commands_channel_id:
 			return await ctx.send(f"**{attacker.mention}, ou can only use this command in {self.bots_txt.mention}!**")
+
+		if await self.is_user_knocked_out(attacker.id):
+			return await ctx.send(f"**{attacker.mention}, you can't use your skill, because you are knocked-out!**")
 
 		attacker_state = attacker.voice
 		if not attacker_state or not (attacker_vc := attacker_state.channel):
@@ -359,15 +434,57 @@ class SlothClass(commands.Cog):
 	@commands.command(aliases=['eb', 'energy', 'boost'])
 	@skill_on_cooldown()
 	@user_is_class('cybersloth')
-	async def energy_boost(self, ctx) -> None:
+	async def hack(self, ctx, target: discord.Member = None) -> None:
 		""" A command for Cybersloths. """
 
-		return await ctx.send("**Command not ready yet!**")
+		# return await ctx.send("**Command not ready yet!**")
+
+		attacker = ctx.author
 
 		if ctx.channel.id != bots_and_commands_channel_id:
-			return await ctx.send(f"**{ctx.author.mention}, ou can only use this command in {self.bots_txt.mention}!**")
+			return await ctx.send(f"**{attacker.mention}, ou can only use this command in {self.bots_txt.mention}!**")
 
-		return await ctx.send("**Command not ready yet!**")
+		if await self.is_user_knocked_out(attacker.id):
+			return await ctx.send(f"**{attacker.mention}, you can't use your skill, because you are knocked-out!**")
+
+		if not target:
+			return await ctx.send(f"**Please, inform a target member, {attacker.mention}!**")
+
+		if attacker.id == target.id:
+			return await ctx.send(f"**{attacker.mention}, you cannot hack yourself!**")
+
+		if target.bot:
+			return await ctx.send(f"**{attacker.mention}, you cannot hack a bot!**")
+
+		if not await self.get_user_currency(target.id):
+			return await ctx.send(f"**You cannot hack someone who doesn't have an account, {attacker.mention}!**")
+
+		if await self.is_user_protected(target.id):
+			return await ctx.send(f"**{attacker.mention}, {target.mention} is protected, you can't hack them!**")
+
+		if await self.is_user_hacked(target.id):
+			return await ctx.send(f"**{attacker.mention}, {target.mention} is already hacked!**")
+
+
+		confirmed = await ConfirmSkill(f"**{attacker.mention}, are you sure you want to hack {target.mention}?**").prompt(ctx)
+		if not confirmed:
+			return await ctx.send("**Not hack them, then!**")
+
+		try:
+			current_timestamp = await self.get_timestamp()
+			# Don't need to store it, since it is forever
+			await self.update_user_is_hacked(target.id, 1)
+			await self.insert_skill_action(
+				user_id=attacker.id, skill_type="hack", skill_timestamp=current_timestamp,
+				target_id=target.id, channel_id=ctx.channel.id
+			)
+			await self.update_user_action_skill_ts(attacker.id, current_timestamp)
+			hack_embed = await self.get_hack_embed(
+				channel=ctx.channel, perpetrator_id=attacker.id, target_id=target.id)
+			msg = await ctx.send(embed=hack_embed)
+		except Exception as e:
+			print(e)
+			return await ctx.send(f"**Something went wrong and your `Hack` skill failed, {attacker.mention}!**")
 
 	@commands.command(aliases=['os', 'open', 'shop'])
 	@skill_on_cooldown()
@@ -375,12 +492,14 @@ class SlothClass(commands.Cog):
 	async def open_shop(self, ctx) -> None:
 		""" A command for Merchants. """
 
-		return await ctx.send("**Command not ready yet!**")
-
 		if ctx.channel.id != bots_and_commands_channel_id:
 			return await ctx.send(f"**{ctx.author.mention}, ou can only use this command in {self.bots_txt.mention}!**")
 
 		member = ctx.author
+
+		if await self.is_user_knocked_out(member.id):
+			return await ctx.send(f"**{member.mention}, you can't use your skill, because you are knocked-out!**")
+
 		if (shopitem := await self.get_skill_action_by_user_id(member.id)):
 			return await ctx.send(f"**{member.mention}, you already have an item in your shop!**")
 
@@ -415,17 +534,17 @@ class SlothClass(commands.Cog):
 		else:
 			return await ctx.send(f"**Not doing it, then, {member.mention}!**")
 
-
 	@commands.command(aliases=['dp', 'divine', 'protection'])
 	@skill_on_cooldown()
 	@user_is_class('seraph')
 	async def divine_protection(self, ctx, target: discord.Member = None) -> None:
 		""" A command for Seraphs. """
 
-		return await ctx.send("**Command not ready yet!**")
-
 		if ctx.channel.id != bots_and_commands_channel_id:
 			return await ctx.send(f"**{ctx.author.mention}, ou can only use this command in {self.bots_txt.mention}!**")
+
+		if await self.is_user_knocked_out(ctx.author.id):
+			return await ctx.send(f"**{ctx.author.mention}, you can't use your skill, because you are knocked-out!**")
 
 		if not target:
 			target = ctx.author
@@ -455,12 +574,14 @@ class SlothClass(commands.Cog):
 		""" A command for Prawlers. 
 		:param target: The member from whom you want to steal. """
 
-		return await ctx.send("**Command not ready yet!**")
-
 		if ctx.channel.id != bots_and_commands_channel_id:
 			return await ctx.send(f"**{ctx.author.mention}, ou can only use this command in {self.bots_txt.mention}!**")
 
 		attacker = ctx.author
+
+		if await self.is_user_knocked_out(attacker.id):
+			return await ctx.send(f"**{attacker.mention}, you can't use your skill, because you are knocked-out!**")
+
 		if not target:
 			return await ctx.send(f"**Inform a member to steal, {attacker.mention}!**")
 
@@ -500,7 +621,6 @@ class SlothClass(commands.Cog):
 			await steal.add_reaction('🛡️')
 			await steal.edit(content=f"<@{target.id}>")
 
-
 	@commands.command()
 	@skill_on_cooldown()
 	@user_is_class('munk')
@@ -514,6 +634,10 @@ class SlothClass(commands.Cog):
 			return await ctx.send(f"**{ctx.author.mention}, ou can only use this command in {self.bots_txt.mention}!**")
 
 		attacker = ctx.author
+
+		if await self.is_user_knocked_out(attacker.id):
+			return await ctx.send(f"**{attacker.mention}, you can't use your skill, because you are knocked-out!**")
+
 		if not target:
 			return await ctx.send(f"**Please, choose a member to use the `Munk` skill, {attacker.mention}!**")
 
@@ -638,6 +762,17 @@ class SlothClass(commands.Cog):
 		await mycursor.close()
 		return skill_action
 
+	async def get_skill_action_by_target_id_and_skill_type(self, target_id: int, skill_type: str) -> Union[List[Union[int, str]], bool]:
+		""" Gets a skill action by target ID and skill type.
+		:param target_id: The target ID with which to get the skill action. 
+		:param skill_type: The skill type of the skill action. """
+
+		mycursor, db = await the_database()
+		await mycursor.execute("SELECT * FROM SlothSkills WHERE target_id = %s and skill_type = %s", (target_id, skill_type))
+		skill_action = await mycursor.fetchone()
+		await mycursor.close()
+		return skill_action
+
 	async def get_skill_action_by_reaction_context(self, message_id: int, target_id: int) -> Union[List[Union[int, str]], bool]:
 		""" Gets a skill action by reaction context.
 		:param message_id: The ID of the message of the skill action.
@@ -718,6 +853,31 @@ class SlothClass(commands.Cog):
 		await mycursor.close()
 		return transmutations
 
+	async def get_expired_hacks(self) -> None:
+		""" Gets expired hack skill actions. """
+
+		the_time = await self.get_timestamp()
+		mycursor, db = await the_database()
+		await mycursor.execute("""
+			SELECT * FROM SlothSkills 
+			WHERE skill_type = 'hack' AND (%s - skill_timestamp) >= 86400
+			""", (the_time,))
+		hacks = await mycursor.fetchall()
+		await mycursor.close()
+		return hacks
+
+	async def get_expired_knock_outs(self) -> None:
+		""" Gets expired knock-out skill actions. """
+
+		the_time = await self.get_timestamp()
+		mycursor, db = await the_database()
+		await mycursor.execute("""
+			SELECT * FROM SlothSkills 
+			WHERE skill_type = 'hit' AND (%s - skill_timestamp) >= 86400
+			""", (the_time,))
+		knock_outs = await mycursor.fetchall()
+		await mycursor.close()
+		return knock_outs
 
 	async def get_user_currency(self, user_id: int) -> Union[List[Union[str, int]], bool]:
 		""" Gets the user currency. 
@@ -807,6 +967,26 @@ class SlothClass(commands.Cog):
 		await db.commit()
 		await mycursor.close()
 
+	async def update_user_is_hacked(self, user_id: int, hacked: int) -> None:
+		""" Updates the user's protected state.
+		:param user_id: The ID of the member to update. 
+		:param hacked: Whether it's gonna be set to true or false. """
+
+		mycursor, db = await the_database()
+		await mycursor.execute("UPDATE UserCurrency SET hacked = %s WHERE user_id = %s", (hacked, user_id))
+		await db.commit()
+		await mycursor.close()
+
+	async def update_user_is_knocked_out(self, user_id: int, is_it: int) -> None:
+		""" Updates the user's protected state.
+		:param user_id: The ID of the member to update. 
+		:param is_it: Whether it's gonna be set to true or false. """
+
+		mycursor, db = await the_database()
+		await mycursor.execute("UPDATE UserCurrency SET knocked_out = %s WHERE user_id = %s", (is_it, user_id))
+		await db.commit()
+		await mycursor.close()
+
 	async def reset_user_action_skill_cooldown(self, user_id: int) -> None:
 		""" Resets the user's action skill cooldown. 
 		:param user_id: The ID of the user to reet the cooldown. """
@@ -827,7 +1007,6 @@ class SlothClass(commands.Cog):
 
 		await self.reset_user_action_skill_cooldown(member.id)
 		return await ctx.send(f"**Action skill cooldown reset for {member.mention}!**")
-
 
 	async def get_steal_embed(self, channel, attacker_id: int, target_id: int, attack_succeeded: bool = False) -> discord.Embed:
 		""" Makes an embedded message for a steal action.
@@ -933,7 +1112,7 @@ class SlothClass(commands.Cog):
 
 		return magic_pull_embed
 
-	async def get_open_shop_embed(self, channel, perpetrator_id: int, price: int,) -> discord.Embed:
+	async def get_open_shop_embed(self, channel, perpetrator_id: int, price: int) -> discord.Embed:
 		""" Makes an embedded message for a magic pull action. 
 		:param channel: The context channel.
 		:param perpetrator_id: The ID of the perpetrator of the magic pulling. 
@@ -941,17 +1120,58 @@ class SlothClass(commands.Cog):
 
 		timestamp = await self.get_timestamp()
 
-		magic_pull_embed = discord.Embed(
+		open_shop_embed = discord.Embed(
 			title="A Merchant item has been put into the `Sloth Class Shop`!",
 			timestamp=datetime.utcfromtimestamp(timestamp)
 		)
-		magic_pull_embed.description=f"**<@{perpetrator_id}> put a `changing-Sloth-class potion` into the Sloth class shop, for the price of `{price}łł`!** 🍯"
-		magic_pull_embed.color=discord.Color.green()
+		open_shop_embed.description=f"**<@{perpetrator_id}> put a `changing-Sloth-class potion` into the Sloth class shop, for the price of `{price}łł`!** 🍯"
+		open_shop_embed.color=discord.Color.green()
 
-		magic_pull_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Merchant.png")
-		magic_pull_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon_url)
+		open_shop_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Merchant.png")
+		open_shop_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon_url)
 
-		return magic_pull_embed
+		return open_shop_embed
+
+	async def get_hit_embed(self, channel, perpetrator_id: int, target_id: int) -> discord.Embed:
+		""" Makes an embedded message for a knock-out action.
+		:param channel: The context channel.
+		:param perpetrator_id: The ID of the perpetrator of the knock-out.
+		:param target_id: The ID of the target of the knock-out. """
+
+		timestamp = await self.get_timestamp()
+
+		hit_embed = discord.Embed(
+			title="Someone was Knocked Out!",
+			timestamp=datetime.utcfromtimestamp(timestamp)
+		)
+		hit_embed.description=f"**<@{perpetrator_id}> knocked <@{target_id}> out!** 😵"
+		hit_embed.color=discord.Color.green()
+
+		hit_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Warrior.png")
+		hit_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon_url)
+
+		return hit_embed
+
+	async def get_hack_embed(self, channel: discord.TextChannel, perpetrator_id: int, target_id: int,) -> discord.Embed:
+		""" Makes an embedded message for a hacking skill action.
+		:param channel: The context channel.
+		:param perpetrator_id: The ID of the perpetrator of the hacking.
+		:param target_id: The ID of the target of the hacking. """
+
+		timestamp = await self.get_timestamp()
+
+		hack_embed = discord.Embed(
+			title="Someone just got Hacked and lost Control of Everything!",
+			timestamp=datetime.utcfromtimestamp(timestamp)
+		)
+		hack_embed.description=f"**<@{perpetrator_id}> hacked <@{target_id}>!** <a:hackerman:652303204809179161>"
+		# hack_embed.description=f"**<@{perpetrator_id}> hacked <@{attacker_id}>!** <a:hackerman:802354539184259082>"
+		hack_embed.color=discord.Color.green()
+
+		hack_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Cybersloth.png")
+		hack_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon_url)
+
+		return hack_embed
 
 	async def is_user_protected(self, user_id: int) -> bool:
 		""" Checks whether user is protected.
@@ -973,6 +1193,25 @@ class SlothClass(commands.Cog):
 		await mycursor.close()
 		return user_transmutated[0]
 
+	async def is_user_hacked(self, user_id: int) -> bool:
+		""" Checks whether user is hacked.
+		:param user_id: The ID of the user to check it. """
+
+		mycursor, db = await the_database()
+		await mycursor.execute("SELECT hacked FROM UserCurrency WHERE user_id = %s", (user_id,))
+		user_hacked = await mycursor.fetchone()
+		await mycursor.close()
+		return user_hacked is not None and user_hacked[0]
+
+	async def is_user_knocked_out(self, user_id: int) -> bool:
+		""" Checks whether user is knocked out.
+		:param user_id: The ID of the user to check it. """
+
+		mycursor, db = await the_database()
+		await mycursor.execute("SELECT knocked_out FROM UserCurrency WHERE user_id = %s", (user_id,))
+		user_knocked_out = await mycursor.fetchone()
+		await mycursor.close()
+		return user_knocked_out is not None and user_knocked_out[0]
 
 	async def get_open_shop_items(self) -> List[List[Union[str, int]]]:
 		""" Gets all open shop items. """
@@ -1026,7 +1265,6 @@ class SlothClass(commands.Cog):
 		skills_embed.set_thumbnail(url=f"https://thelanguagesloth.com/media/sloth_classes/{user[7]}.png")
 		skills_embed.set_footer(text=ctx.guild, icon_url=ctx.guild.icon_url)
 		await ctx.send(embed=skills_embed)
-
 
 	@commands.command()
 	@commands.cooldown(1, 5, commands.BucketType.user)
@@ -1100,7 +1338,6 @@ class SlothClass(commands.Cog):
 					color=discord.Color.green(),
 					timestamp=ctx.message.created_at
 					))
-
 
 def setup(client) -> None:
 	""" Cog's setup function. """

@@ -587,7 +587,8 @@ class SlothCurrency(commands.Cog):
             user_id bigint, user_money bigint, last_purchase_ts bigint, 
             user_classes bigint default 0, user_class_reward bigint default 0, user_hosted bigint default 0, 
             user_lotto bigint default null, sloth_class varchar(30) default 'default', change_class_ts bigint default 0,
-            last_skill_ts bigint default 0, protected tinyint(1) default 0, has_potion tinyint(1) default 0)
+            last_skill_ts bigint default 0, protected tinyint(1) default 0, has_potion tinyint(1) default 0,
+            hacked tinyint(1) default 0, knocked_out tinyint(1) default 0)
             """)
         await db.commit()
         await mycursor.close()
@@ -623,13 +624,38 @@ class SlothCurrency(commands.Cog):
         return await ctx.send("**Table *UserCurrency* reseted!**", delete_after=3)
 
 
+    async def send_hacked_image(self, ctx: commands.Context, member: discord.Member) -> None:
+        """ Makes and sends a hacked image. 
+        :param ctx: The context. 
+        :param member: The member who was hacked. """
+
+        SlothClass = self.client.get_cog('SlothClass')
+
+        try:
+            # Gets original skill action and the attacker
+            skill_action = await SlothClass.get_skill_action_by_target_id_and_skill_type(member.id, 'hack')
+            hacker = self.client.get_user(skill_action[0])
+            # Makes the Hacked image and saves it
+            big = ImageFont.truetype("built titling sb.ttf", 80)
+            background = Image.open('sloth_custom_images/background/hacked.png').convert('RGBA')
+            draw = ImageDraw.Draw(background)
+            draw.text((350, 300), f"Hacked by {hacker}", font=big, fill=(0, 0, 0))
+            file_path = f'media/temporary/hacked_{member.id}.png'
+            background.save(file_path, 'png', quality=90)
+        except Exception as e:
+            print(e)
+            return await ctx.send(f"**{ctx.author.mention}, something went wrong with it!**")
+        else:
+            await ctx.send(file=discord.File(file_path))
+            # await asyncio.sleep(0.5)
+            return os.remove(file_path)
+
+
     @commands.command()
     async def profile(self, ctx, member: discord.Member = None):
-        '''
-        Shows the member's profile with their custom sloth.
-        :param member: The member to see the profile. (Optional)
-        '''
-        await ctx.message.delete()
+        """ Shows the member's profile with their custom sloth.
+        :param member: The member to see the profile. (Optional) """
+
         if not member:
             member = ctx.author
 
@@ -637,10 +663,6 @@ class SlothCurrency(commands.Cog):
         if not user_info:
             if ctx.author.id == member.id:
                 return await ctx.send(embed=discord.Embed(description="**You don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one!**"))
-                # epoch = datetime.utcfromtimestamp(0)
-                # the_time = (datetime.utcnow() - epoch).total_seconds()
-                # await self.insert_user_currency(member.id, the_time - 61)
-                # user_info = await self.get_user_currency(member.id)
             else:
                 return await ctx.send(f"**{member} doesn't have an account yet!**", delete_after=3)
 
@@ -650,16 +672,24 @@ class SlothCurrency(commands.Cog):
             else:
                 return await ctx.send(f"**{member} has a default Sloth class, I cannot show their profile!**")
 
+        SlothClass = self.client.get_cog('SlothClass')
+
+        # Checks whether user is hacked
+        if user_info[0][12]:
+            return await self.send_hacked_image(ctx, member)
+
+
         small = ImageFont.truetype("built titling sb.ttf", 45)
         background = Image.open(await self.get_user_specific_type_item(member.id, 'background'))
 
-        SlothClass = self.client.get_cog('SlothClass')
-        # sloth = None
-        # if await SlothClass.is_transmutated(member.id):
-        #     sloth = Image.open(f"./sloth_custom_images/sloth/transmutated_sloth.png")
-        # else:
-        #     sloth = Image.open(f"./sloth_custom_images/sloth/{user_info[0][7].title()}.png")
-        sloth = Image.open(f"./sloth_custom_images/sloth/{user_info[0][7].title()}.png")
+        # Checks whether user is transmutated
+        sloth = None
+        if await SlothClass.is_transmutated(member.id):
+            sloth = Image.open(f"./sloth_custom_images/sloth/transmutated_sloth.png")
+        else:
+            sloth = Image.open(f"./sloth_custom_images/sloth/{user_info[0][7].title()}.png")
+
+        # sloth = Image.open(f"./sloth_custom_images/sloth/{user_info[0][7].title()}.png")
         body = Image.open(await self.get_user_specific_type_item(member.id, 'body'))
         hand = Image.open(await self.get_user_specific_type_item(member.id, 'hand'))
         foot = Image.open(await self.get_user_specific_type_item(member.id, 'foot'))
@@ -699,8 +729,11 @@ class SlothCurrency(commands.Cog):
         draw = ImageDraw.Draw(background)
         draw.text((310, 5), f"{member}", (255, 255, 255), font=small)
         draw.text((80, 525), f"{user_info[0][1]}", (255, 255, 255), font=small)
-        background.save('profile.png', 'png', quality=90)
-        return await ctx.send(file=discord.File('profile.png'))
+        file_path = f'media/temporary/profile_{member.id}.png'
+        background.save(file_path, 'png', quality=90)
+        await ctx.send(file=discord.File(file_path))
+        return os.remove(file_path)
+
 
     @commands.command()
     @commands.has_permissions(administrator=True)
