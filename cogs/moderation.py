@@ -266,14 +266,14 @@ class Moderation(commands.Cog):
 
 		role = discord.utils.get(ctx.guild.roles, id=muted_role_id)
 		if not member:
-			return await ctx.send("**Please, specify a member!**", delete_after=3)
+			return await ctx.send("**Please, specify a member!**")
 		if role not in member.roles:
 			await member.add_roles(role)
 			await member.move_to(None)
 			for mr in member.roles:
 				if mr.id != role.id:
 					try:
-						await member.remove_roles(mr)
+						await member.remove_roles(mr, atomic=True)
 						await self.insert_in_muted(member.id, mr.id)
 					except Exception:
 						pass
@@ -305,7 +305,7 @@ class Moderation(commands.Cog):
 				pass
 		
 		else:
-			await ctx.send(f'**{member} is already muted!**', delete_after=5)
+			await ctx.send(f'**{member} is already muted!**')
 
 	# Unmutes a member
 	@commands.command()
@@ -325,7 +325,7 @@ class Moderation(commands.Cog):
 				for mrole in user_roles:
 					the_role = discord.utils.get(member.guild.roles, id=mrole[1])
 					try:
-						await member.add_roles(the_role)
+						await member.add_roles(the_role, atomic=True)
 						await self.remove_role_from_system(member.id, the_role.id)
 					except Exception:
 						pass
@@ -377,7 +377,7 @@ class Moderation(commands.Cog):
 			for mr in member.roles:
 				if mr.id != role.id:
 					try:
-						await member.remove_roles(mr)
+						await member.remove_roles(mr, atomic=True)
 						await self.insert_in_muted(member.id, mr.id)
 					except Exception:
 						pass
