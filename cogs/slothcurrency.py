@@ -11,8 +11,12 @@ import shutil
 import asyncio
 import aiohttp
 from io import BytesIO
+import glob
 
 from extra.menu import InventoryLoop
+from typing import List
+
+from extra.useful_variables import level_badges, flag_badges
 
 shop_channels = [
 int(os.getenv('BACKGROUND_ITEMS_CHANNEL_ID')), int(os.getenv('HAND_ITEMS_CHANNEL_ID')), 
@@ -22,7 +26,7 @@ int(os.getenv('PATREONS_CHANNEL_ID'))
 ]
 afk_channel_id = int(os.getenv('AFK_CHANNEL_ID'))
 booster_role_id = int(os.getenv('BOOSTER_ROLE_ID'))
-level_badges = {'level_10': 10}
+
 
 gauth = GoogleAuth()
 # gauth.LocalWebserverAuth()
@@ -650,6 +654,15 @@ class SlothCurrency(commands.Cog):
             # await asyncio.sleep(0.5)
             return os.remove(file_path)
 
+    async def get_member_public_flags(self, member: discord.Member) -> List[str]:
+        """ Gets the member's public flags. 
+        :param member: The member to get the flags from. """
+
+        public_flags = member.public_flags.all()
+        public_flag_names = list(map(lambda pf: pf.name, public_flags))
+        return public_flag_names
+
+        
 
     @commands.command()
     async def profile(self, ctx, member: discord.Member = None):
@@ -679,6 +692,7 @@ class SlothCurrency(commands.Cog):
             return await self.send_hacked_image(ctx, member)
 
 
+
         small = ImageFont.truetype("built titling sb.ttf", 45)
         background = Image.open(await self.get_user_specific_type_item(member.id, 'background'))
 
@@ -703,22 +717,34 @@ class SlothCurrency(commands.Cog):
         background.paste(foot, (0, 0), foot)
         background.paste(hand, (0, 0), hand)
         background.paste(hud, (0, 0), hud)
-        #background.paste(badge, (1, -10), badge)
+
         # Checks if user is a booster
         booster_role = discord.utils.get(ctx.guild.roles, id=booster_role_id)
         if booster_role in member.roles:
-            badge2 = Image.open("sloth_custom_images/badge/nitroboost.png")
-            background.paste(badge2, (10, 5), badge2)
+            if flag_badge := flag_badges.get('discord_server_booster'):
+                file_path = f"./sloth_custom_images/badge/{flag_badge[0]}"
+                if os.path.isfile(file_path):
+                    booster_badge = Image.open(file_path).resize((50, 50)).convert('RGBA')
+                    background.paste(booster_badge, flag_badge[1], booster_badge)
 
-        # Checks if the user has a level badge
+        # Pastes all flag badges that the user has
+        flags = await self.get_member_public_flags(member)
+        for flag in flags:
+            if flag_badge := flag_badges.get(flag):
+                file_path = f"./sloth_custom_images/badge/{flag_badge[0]}"
+                if os.path.isfile(file_path):
+                    flag_image = Image.open(file_path).resize((50, 50)).convert('RGBA')
+                    background.paste(flag_image, flag_badge[1], flag_image)
+
+        # Checks whether user has level badges
         user_level = await self.get_specific_user(member.id)
         for key, value in reversed(list(level_badges.items())):
-            if user_level[0][2] >= value:
-                level_badge = Image.open(f"sloth_custom_images/badge/{key}.png")
-                background.paste(level_badge, (65, 5), level_badge)
-                break
-        else:
-            pass
+            if user_level[0][2] >= key:
+                file_path = f"sloth_custom_images/badge/{value[0]}.png"
+                if os.path.isfile(file_path):
+                    level_badge = Image.open(file_path)
+                    background.paste(level_badge, value[1], level_badge)
+                    break
 
         # Tries to print the user's profile picture
         try:
@@ -727,7 +753,7 @@ class SlothCurrency(commands.Cog):
             pass
 
         draw = ImageDraw.Draw(background)
-        draw.text((310, 5), f"{member}", (255, 255, 255), font=small)
+        draw.text((310, 5), f"{str(member)[:10]}", (255, 255, 255), font=small)
         draw.text((80, 525), f"{user_info[0][1]}", (255, 255, 255), font=small)
         file_path = f'media/temporary/profile_{member.id}.png'
         background.save(file_path, 'png', quality=90)

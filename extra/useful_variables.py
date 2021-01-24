@@ -77,3 +77,22 @@ different_class_roles = {
         "computer science", "cs50", "cs"
     ]
 }
+
+
+level_badges = {
+    10: ['level_10', (5, 10)],
+    15: ['level_15', (60, 10)],
+    20: ['level_20', (110, 10)],
+    25: ['level_25', (160, 10)],
+}
+flag_badges = {
+    "discord_server_booster": ['badge_server_booster.png', (255, 10)],
+    "nitro_booster": ['badge_nitro.png', (490, 10)],
+    "early_supporter": ['badge_early_supporter.png', (545, 10)],
+    "hypesquad_brilliance": ['badge_hypesquad_brilliance.png', (595, 10)],
+    "hypesquad_balance": ['badge_hypesquad_balance.png', (595, 10)],
+    "hypesquad_bravery": ['badge_hypesquad_bravery.png', (595, 10)],
+    "verified_bot_developer": ['badge_bot_dev.png', (645, 10)],
+    "partner": ['badge_discord_partnered.png', (695, 10)],
+    "staff": ['badge_discord_partnered.png', (745, 10)],
+}

@@ -468,7 +468,7 @@ class SlothClass(commands.Cog):
 
 		confirmed = await ConfirmSkill(f"**{attacker.mention}, are you sure you want to hack {target.mention}?**").prompt(ctx)
 		if not confirmed:
-			return await ctx.send("**Not hack them, then!**")
+			return await ctx.send("**Not hacking them, then!**")
 
 		try:
 			current_timestamp = await self.get_timestamp()
