@@ -191,7 +191,7 @@ class SlothClass(commands.Cog):
 			emoji = str(payload.emoji)
 
 			# Checks whether it's a steal
-			if skill_action[6] == '🛡️':
+			if skill_action[6] == '🛡️' and emoji == '🛡️':
 
 				await self.delete_skill_action_by_message_id(payload.message_id)
 				channel = self.client.get_channel(skill_action[5])
