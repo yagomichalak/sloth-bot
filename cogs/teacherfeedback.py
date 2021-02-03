@@ -120,10 +120,12 @@ class CreateClassroom(commands.Cog):
         bsm = before.self_mute
         bsd = before.self_deaf
         bss = before.self_stream
+        bsv = before.self_video
         # After voice state
         asm = after.self_mute
         asd = after.self_deaf
         ass = after.self_stream
+        asv = after.self_video
 
         #print(bsm == asm and bsd == asd and bss == ass)
 
@@ -134,7 +136,7 @@ class CreateClassroom(commands.Cog):
         teacher_role = discord.utils.get(member.guild.roles, id=teacher_role_id)
 
         # Checks if joining a VC
-        if ac and bsm == asm and bsd == asd and bss == ass:
+        if ac and bsm == asm and bsd == asd and bss == ass and bsv == asv:
             # Checks if joining the CreateClassroom vc
             if ac.id == create_room_vc_id:
                 # Checks if it's a teacher
@@ -243,7 +245,7 @@ class CreateClassroom(commands.Cog):
                         await self.insert_student_w_none(member.id, the_teacher.id, ac.id)
 
         # Check if leaving a VC
-        elif bc and bsm == asm and bsd == asd and bss == ass:
+        elif bc and bsm == asm and bsd == asd and bss == ass and bsv == asv:
             # Get the current timestamp
             epoch = datetime.utcfromtimestamp(0)
             the_time = (datetime.utcnow() - epoch).total_seconds()
