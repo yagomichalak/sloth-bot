@@ -75,6 +75,9 @@ different_class_roles = {
         "typescript", "ts", "js and ts", "lua",
         "javascript and typescript", "sql", "programming",
         "computer science", "cs50", "cs"
+    ],
+    "studying conlangs": [
+        "esperanto"
     ]
 }
 
