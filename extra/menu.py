@@ -187,3 +187,18 @@ async def prompt_number(client, ctx: commands.Context, the_msg: discord.Message,
 		return None
 	else:
 		return int(content)
+
+
+class InroleLooping(menus.ListPageSource):
+	def __init__(self, members):
+		super().__init__(members, per_page=15)
+
+	async def format_page(self, menu, entries):
+		start = menu.current_page * self.per_page
+		embed = discord.Embed(
+			description=f'\n'.join(f"`{i+1}` - **{v}**" for i, v in enumerate(entries, start=start))
+			)
+		for i, v in enumerate(entries, start=start):
+			embed.set_footer(text=f"({i+1}-{i+6} of {len(self.entries)})")
+
+		return embed

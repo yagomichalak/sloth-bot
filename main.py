@@ -117,6 +117,9 @@ async def on_command_error(ctx, error):
 		role_names = [f"**{str(discord.utils.get(ctx.guild.roles, id=role_id))}**" for role_id in error.missing_roles]
 		await ctx.send(f"You are missing at least one of the required roles: {', '.join(role_names)}")
 
+	elif isinstance(error, commands.errors.RoleNotFound):
+		await ctx.send(f"**{error}**")
+
 	elif isinstance(error, commands.ChannelNotFound):
 		await ctx.send("**Channel not found!**")
 
