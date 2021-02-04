@@ -49,7 +49,10 @@ class Tools(commands.Cog):
                 str(m) for m in ctx.guild.members if role in m.roles
             ]
             if members:
-                pages = menus.MenuPages(source=InroleLooping(members), clear_reactions_after=True)
+                additional = {
+                    'role': role
+                }
+                pages = menus.MenuPages(source=InroleLooping(members, **additional), clear_reactions_after=True)
                 await pages.start(ctx)
             else:
                 return await ctx.send(f"**No one has this role, {member.mention}!**")
