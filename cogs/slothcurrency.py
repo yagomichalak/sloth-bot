@@ -189,21 +189,12 @@ class SlothCurrency(commands.Cog):
 
         user_items = await self.get_user_items(member.id)
 
-        # inventory = discord.Embed(title=f"{member.name}'s Inventory",
-        #                           description="All of your items gathered in one place.",
-        #                           colour=member.color, timestamp=ctx.message.created_at)
-        # inventory.set_footer(text=ctx.guild.name, icon_url=ctx.guild.icon_url)
-        # inventory.set_thumbnail(url=member.avatar_url)
         if not user_items:
             return await ctx.send(f"**You don't have items to show, {ctx.author.mention}!**")
 
         the_menu = menus.MenuPages(source=InventoryLoop(user_items), clear_reactions_after=True)
         await the_menu.start(ctx)
 
-
-        # for item in user_items:
-        #     inventory.add_field(name=f"**{item[1]}**", value=f"**{item[2]}**", inline=True)
-        # return await ctx.send(embed=inventory)
 
     @commands.command()
     async def equip(self, ctx, *, item_name: str = None):

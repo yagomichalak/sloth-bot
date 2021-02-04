@@ -1,5 +1,5 @@
 import discord
-from discord.ext import commands
+from discord.ext import commands, menus
 import asyncio
 from gtts import gTTS
 from googletrans import Translator
@@ -9,7 +9,7 @@ import textwrap
 import traceback
 from contextlib import redirect_stdout
 import os
-from extra.menu import ConfirmSkill
+from extra.menu import ConfirmSkill, InroleLooping
 
 
 mod_role_id=int(os.getenv('MOD_ROLE_ID'))
@@ -31,6 +31,32 @@ class Tools(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         print('Tools cog is ready!')
+
+
+    @commands.command()
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def inrole(self, ctx, *, role: discord.Role = None) -> None:
+        """ Shows everyone who have that role in the server.
+        :param role: The role you want to check. """
+
+        member = ctx.author
+
+        if not role:
+            return await ctx.send(f"**Please, inform a role, {member.mention}!**")
+
+        if role:
+            members = [
+                str(m) for m in ctx.guild.members if role in m.roles
+            ]
+            if members:
+                pages = menus.MenuPages(source=InroleLooping(members), clear_reactions_after=True)
+                await pages.start(ctx)
+            else:
+                return await ctx.send(f"**No one has this role, {member.mention}!**")
+
+        else:
+            return await ctx.send(f"**No role with that name was found!**")
+
 
     # Countsdown from a given number
     @commands.command()
