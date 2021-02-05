@@ -128,7 +128,9 @@ class ReportSupport(commands.Cog):
 			# Support us on Patreon
 			await member.send(f"**Support us on Patreon!**\nhttps://www.patreon.com/Languagesloth")
 
-		elif mid == int(os.getenv('REPORT_MESSAGE_ID')) and str(emoji) == '<:ban:593407893248802817>' and not perms.administrator:
+		# elif mid == int(os.getenv('REPORT_MESSAGE_ID')) and str(emoji) == '<:ban:593407893248802817>' and not perms.administrator:
+		elif mid == int(os.getenv('REPORT_MESSAGE_ID')):
+
 			member_ts = self.report_cache.get(member.id)
 			time_now = time.time()
 			if member_ts:
@@ -387,7 +389,10 @@ class ReportSupport(commands.Cog):
 			await self.increase_case_number()
 			embed = discord.Embed(title="Report Support!", description=f"Please, {member.mention}, try to explain what happened and who you want to report.",
 				color=discord.Color.red())
-			await the_channel.send(content=f"{member.mention}, {moderator.mention}, {cosmos.mention}", embed=embed)
+			message = await the_channel.send(content=f"{member.mention}, {moderator.mention}, {cosmos.mention}", embed=embed)
+			ctx = await self.client.get_context(message)
+			return await self.client.get_cog('Tools').vc(ctx=ctx, member=member)
+			
 
 	#- Report someone
 	async def generic_help(self, member, guild, type_help, message):
