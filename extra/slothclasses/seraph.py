@@ -18,6 +18,7 @@ class Seraph(Player):
 	@commands.command(aliases=['dp', 'divine', 'protection'])
 	@Player.skill_on_cooldown()
 	@Player.user_is_class('seraph')
+	@Player.skill_mark()
 	async def divine_protection(self, ctx, target: discord.Member = None) -> None:
 		""" A command for Seraphs. """
 
@@ -54,7 +55,6 @@ class Seraph(Player):
 		
 		divine_protections = await self.get_expired_protections()
 		for dp in divine_protections:
-			print(dp)
 			await self.update_user_protected(dp[3], 0)
 			await self.delete_skill_action_by_target_id_and_skill_type(dp[3], 'divine_protection')
 

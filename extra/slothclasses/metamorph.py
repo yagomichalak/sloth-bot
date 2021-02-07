@@ -19,6 +19,7 @@ class Metamorph(Player):
 	@commands.command(aliases=['transmutate', 'trans'])
 	@Player.skill_on_cooldown()
 	@Player.user_is_class('metamorph')
+	@Player.skill_mark()
 	async def transmutation(self, ctx) -> None:
 		""" A command for Metamorphs. """
 

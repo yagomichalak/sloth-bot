@@ -13,6 +13,7 @@ class Agares(Player):
 	def __init__(self, client) -> None:
 		self.client = client
 		# self.bots_txt = await self.client.fetch_channel(bots_and_commands_channel_id)
+
 		self.safe_categories = [
 			int(os.getenv('LESSON_CAT_ID')),
 			int(os.getenv('CASE_CAT_ID')),
@@ -26,6 +27,7 @@ class Agares(Player):
 	@commands.command(aliases=['ma'])
 	@Player.skill_on_cooldown()
 	@Player.user_is_class('agares')
+	@Player.skill_mark()
 	async def magic_pull(self, ctx, target: discord.Member = None) -> None:
 		""" A command for Agares. """
 

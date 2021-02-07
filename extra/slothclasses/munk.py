@@ -17,6 +17,7 @@ class Munk(Player):
 	@commands.command()
 	@Player.skill_on_cooldown()
 	@Player.user_is_class('munk')
+	@Player.skill_mark()
 	async def munk(self, ctx, target: discord.Member = None) -> None:
 		""" Converts a user into a real Munk. 
 		:param target: The person you want to convert to a Munk. """
