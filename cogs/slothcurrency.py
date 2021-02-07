@@ -1161,7 +1161,7 @@ class SlothCurrency(commands.Cog):
         elif member.id == ctx.author.id:
             return await ctx.send("**You can't transfer money to yourself!**", delete_after=3)
         elif not money:
-            return await ctx.send('**Inform the amount of money to trasnfer!**', delete_after=3)
+            return await ctx.send('**Inform the amount of money to transfer!**', delete_after=3)
         elif not int(money) > 0:
             return await ctx.send('**Inform value bigger than 0!**', delete_after=3)
 
