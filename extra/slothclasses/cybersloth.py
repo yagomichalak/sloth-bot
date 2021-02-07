@@ -17,6 +17,7 @@ class Cybersloth(Player):
 	@commands.command(aliases=['eb', 'energy', 'boost'])
 	@Player.skill_on_cooldown()
 	@Player.user_is_class('cybersloth')
+	@Player.skill_mark()
 	async def hack(self, ctx, target: discord.Member = None) -> None:
 		""" A command for Cybersloths. """
 

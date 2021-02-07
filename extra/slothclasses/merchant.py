@@ -20,6 +20,7 @@ class Merchant(Player):
 	@commands.command(aliases=['os', 'open', 'shop'])
 	@Player.skill_on_cooldown()
 	@Player.user_is_class('merchant')
+	@Player.skill_mark()
 	async def open_shop(self, ctx) -> None:
 		""" A command for Merchants. """
 

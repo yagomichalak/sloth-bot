@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands, tasks, menus
 from mysqldb import the_database
-from typing import Union, List, Any
+from typing import Union, List, Any, Dict
 from extra.customerrors import MissingRequiredSlothClass, ActionSkillOnCooldown
 from extra.menu import ConfirmSkill, prompt_message, prompt_number
 from datetime import datetime
@@ -9,28 +9,29 @@ from pytz import timezone
 import os
 
 from extra.slothclasses import agares, cybersloth, merchant, metamorph, munk, prawler, seraph, warrior
-classes = [
-	agares.Agares, cybersloth.Cybersloth, 
-	merchant.Merchant, metamorph.Metamorph,
-	munk.Munk, prawler.Prawler,
-	seraph.Seraph, warrior.Warrior
-]
+classes: Dict[str, Any] = {
+	'agares': agares.Agares, 'cybersloth': cybersloth.Cybersloth, 
+	'merchant': merchant.Merchant, 'metamorph': metamorph.Metamorph,
+	'munk': munk.Munk, 'prawler': prawler.Prawler,
+	'seraph': seraph.Seraph, 'warrior': warrior.Warrior
+}
 
 bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
-# bots_and_commands_channel_id = 777886760994471986
 
-class SlothClass(*classes):
+class SlothClass(*classes.values()):
 	""" A category for the Sloth Class system. """
 
 	def __init__(self, client) -> None:
 		""" Class initializing method. """
 
 		self.client = client
+		super(SlothClass, self).__init__(client)
 
 
 	@commands.Cog.listener()
 	async def on_ready(self) -> None:
 		""" Tells when the cog is ready to use. """
+
 		self.bots_txt = await self.client.fetch_channel(bots_and_commands_channel_id)
 		self.check_skill_actions.start()
 		print("SlothClass cog is online")
@@ -178,27 +179,29 @@ class SlothClass(*classes):
 		if user[7] == 'default':
 			return await ctx.send(embed=discord.Embed(description="**You don't have a default Sloth class. Click [here](https://thelanguagesloth.com/profile/slothclass) to choose one!**"))
 
-		cmds = []
-		for c in ctx.cog.get_commands():
-			try:
-				if c.hidden:
-					continue
-				elif c.parent:
-					continue
-				elif not c.checks:
-					continue
-				elif not [check for check in c.checks if check.__qualname__ == 'SlothClass.user_is_class.<locals>.real_check']:
-					continue
+		the_class = classes.get(user[7].lower())
+		class_commands = the_class.__dict__['__cog_commands__']
 
+		cmds = []
+		for c in class_commands:
+			if c.hidden:
+				continue
+			elif c.parent:
+				continue
+			elif not c.checks:
+				continue
+			elif not [check for check in c.checks if check.__qualname__ == 'Player.skill_mark.<locals>.real_check']:
+				continue
+
+			try:
 				await c.can_run(ctx)
-				cmds.append(c)
-			except commands.CommandError:
+				cmds.append(f"{c.qualified_name} [Ready to use]")
+			except commands.CommandError as e:
+				cmds.append(f"{c.qualified_name} [On cooldown]")
 				continue
 			except Exception as e:
-				print(e)
 				continue
 
-		cmds = list(map(lambda c: c.qualified_name, cmds))
 		skills_embed = discord.Embed(
 			title=f"__Available Skills for__: `{user[7]}`",
 			description=f"```apache\nSkills: {', '.join(cmds)}```",

@@ -57,6 +57,7 @@ class Prawler(Player):
 	@commands.command(aliases=['stl', 'rob'])
 	@Player.skill_on_cooldown()
 	@Player.user_is_class('prawler')
+	@Player.skill_mark()
 	async def steal(self, ctx, target: discord.Member = None) -> None:
 		""" A command for Prawlers. 
 		:param target: The member from whom you want to steal. """

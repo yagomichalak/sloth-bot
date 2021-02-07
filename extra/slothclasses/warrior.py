@@ -19,6 +19,7 @@ class Warrior(Player):
 	@commands.command(aliases=['ko', 'knock-out', 'knock_out', 'knock'])
 	@Player.skill_on_cooldown()
 	@Player.user_is_class('warrior')
+	@Player.skill_mark()
 	async def hit(self, ctx, target: discord.Member = None) -> None:
 		""" A command for Warriors. """
 

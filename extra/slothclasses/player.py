@@ -13,13 +13,13 @@ bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
 class Player(commands.Cog):
 
 	def __init__(self, client) -> None:
-		print('oi')
+		print('testtest')
 		self.client = client
 
 
 	@commands.Cog.listener()
 	async def on_ready(self) -> None:
-		print('ok')
+		print('am i ready????')
 		self.bots_txt = await self.client.fetch_channel(bots_and_commands_channel_id)
 
 
@@ -78,6 +78,15 @@ class Player(commands.Cog):
 			raise ActionSkillOnCooldown(try_after=cooldown_in_seconds, error_message="Action skill on cooldown!")
 
 		return commands.check(real_check)
+
+	def skill_mark():
+		""" Makes a command be considered a skill command. """
+
+		async def real_check(ctx):
+			""" Performs the real check. """
+			return True
+		return commands.check(real_check)
+
 
 	# Is user EFFECT
 
