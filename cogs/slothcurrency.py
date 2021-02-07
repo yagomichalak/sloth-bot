@@ -672,7 +672,7 @@ class SlothCurrency(commands.Cog):
 
         if user_info[0][7].lower() == 'default':
             if ctx.author.id == member.id:
-                return await ctx.send(embed=discord.Embed(description=f"**{member.mention}, you have a default Slot class. Click [here](https://thelanguagesloth.com/profile/slothclass) to choose one!**"))
+                return await ctx.send(embed=discord.Embed(description=f"**{member.mention}, you have a default Sloth class. Click [here](https://thelanguagesloth.com/profile/slothclass) to choose one!**"))
             else:
                 return await ctx.send(f"**{member} has a default Sloth class, I cannot show their profile!**")
 
