@@ -128,8 +128,8 @@ class ReportSupport(commands.Cog):
 			# Support us on Patreon
 			await member.send(f"**Support us on Patreon!**\nhttps://www.patreon.com/Languagesloth")
 
-		# elif mid == int(os.getenv('REPORT_MESSAGE_ID')) and str(emoji) == '<:ban:593407893248802817>' and not perms.administrator:
-		elif mid == int(os.getenv('REPORT_MESSAGE_ID')):
+		elif mid == int(os.getenv('REPORT_MESSAGE_ID')) and str(emoji) == '<:ban:593407893248802817>' and not perms.administrator:
+		# elif mid == int(os.getenv('REPORT_MESSAGE_ID')):
 
 			member_ts = self.report_cache.get(member.id)
 			time_now = time.time()

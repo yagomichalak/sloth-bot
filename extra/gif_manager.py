@@ -82,28 +82,30 @@ class GIF:
 
 if __name__ == '__main__':
 
-    profile = Image.open('../profile.png').convert('RGBA')
-    gif = GIF(image=profile, frame_duration=40)
+    ## Puts a single effect onto an image ##
 
-    path = '../media/effects'
-    effect = 'fidget_spinner'
-    full_path = f"{path}/{effect}"
+    # profile = Image.open('../profile.png').convert('RGBA')
+    # gif = GIF(image=profile, frame_duration=40)
 
-    if os.path.isdir(full_path):
-        for i in range(len(glob.glob('../media/effects/fidget_spinner/*.png'))):
+    # path = '../media/effects'
+    # effect = 'fidget_spinner'
+    # full_path = f"{path}/{effect}"
 
-            base = gif.new_frame()
-            frame = Image.open(f"{full_path}/{effect}_{i+1}.png").resize((150, 150)).convert('RGBA')
+    # if os.path.isdir(full_path):
+    #     for i in range(len(glob.glob('../media/effects/fidget_spinner/*.png'))):
 
-            base.paste(frame, (218, 222), frame)
-            gif.add_frame(base)
+    #         base = gif.new_frame()
+    #         frame = Image.open(f"{full_path}/{effect}_{i+1}.png").resize((150, 150)).convert('RGBA')
 
-        else:
+    #         base.paste(frame, (218, 222), frame)
+    #         gif.add_frame(base)
 
-            gif.export('../temp_profile.gif')
-            print('Finished!')
+    #     else:
 
+    #         gif.export('../temp_profile.gif')
+    #         print('Finished!')
 
+    #=========================================================#
 
 
     # profile = Image.open('../test.png').convert('RGBA')
@@ -128,3 +130,68 @@ if __name__ == '__main__':
     #     path="./media/effects/fidget_spinner/fidget_spinner/*.png",
     #     output="./media/effects/fidget_spinner/fidget_spinner"
     # )
+
+    #=========================================================#
+    #==========Adds=multiple=effects=onto=an=image============#
+    #=========================================================#
+    from itertools import cycle
+
+    profile = Image.open('../profile.png').convert('RGBA')
+    gif = GIF(image=profile, frame_duration=40)
+
+    path = '../media/effects'
+    all_effects = {
+        'fidget_spinner': {'frames': [], 'cords': (218, 222), 'resize': (150, 150)}, 
+        'star': {'frames': [], 'cords': (150, 10), 'resize': (50, 50)}
+    }
+    # Gets all frames of each effect and resize them properly, respectively.
+    for effect in all_effects:
+        full_path = f"{path}/{effect}"
+        # Checks whether the effect folder exists
+        if os.path.isdir(full_path):
+            # Gets all frame images from the folder
+            for i in range(len(glob.glob(f"{full_path}/*.png"))):
+                frame = Image.open(f"{full_path}/{effect}_{i+1}.png")
+                # Checs whether frame has to be resized
+                if all_effects[effect]['resize']:
+                    frame = frame.resize(all_effects[effect]['resize']).convert('RGBA')
+                # Appends to its respective frame list
+                all_effects[effect]['frames'].append(frame)
+
+
+    # Loops through the frames based on the amount of frames of the longest effect.
+    longest_gif = max([len(frames['frames']) for frames in all_effects.values()])
+    
+    for efx in all_effects.keys():
+        all_effects[efx]['frames'] = cycle(all_effects[efx]['frames'])
+
+
+    for i in range(longest_gif):
+        print(i+1)
+        # Gets a frame of each effect in each iteration of the loop
+        base = gif.new_frame()
+        for efx, value in all_effects.items():
+            # print(all_effects[efx]['cords'])
+            cords = all_effects[efx]['cords']
+            frame = next(all_effects[efx]['frames'])
+            print(efx, frame)
+            base.paste(frame, cords, frame)
+            gif.add_frame(base)
+        print()
+
+        if i >= 400:
+            break
+    else:
+        gif.export('../double.gif')
+        print('Finished!')
+
+
+    # base = gif.new_frame()
+
+    # frame = Image.open(f"{full_path}/{effect}_{i+1}.png").resize((150, 150)).convert('RGBA')
+    # base.paste(frame, (218, 222), frame)
+    # gif.add_frame(base)
+
+
+    # gif.export('../temp_profile.gif')
+    # print('Finished!')
