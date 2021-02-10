@@ -67,6 +67,18 @@ class Warrior(Player):
 			print(e)
 			return await ctx.send(f"**Something went wrong and your `Hit` skill failed, {attacker.mention}!**")
 
+
+	@commands.command(aliases=['crush', 'break'])
+	@Player.skill_two_on_cooldown()
+	@Player.user_is_class('warrior')
+	@Player.not_ready()
+	async def smash(self, ctx, target: discord.Member = None) -> None:
+		""" Has a 20% change of breaking someone's Divine Protection shield. 
+		:param target: The target who you are trying to smash the protection. """
+
+		pass
+
+
 	async def check_knock_outs(self) -> None:
 
 		""" Check on-going knock-outs and their expiration time. """

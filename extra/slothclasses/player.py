@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 
-from extra.customerrors import MissingRequiredSlothClass, ActionSkillOnCooldown
+from extra.customerrors import MissingRequiredSlothClass, ActionSkillOnCooldown, CommandNotReady
 
 from mysqldb import the_database
 from typing import Union, List
@@ -79,12 +79,50 @@ class Player(commands.Cog):
 
 		return commands.check(real_check)
 
+	def skill_two_on_cooldown(seconds: int = 86400):
+		""" Checks whether the user's action skill is on cooldown. """
+
+		async def get_user_action_skill_ts(user_id: int) -> Union[str, bool]:
+			""" Gets the user's last action skill timestamp from the database.
+			:param user_id: The ID of the user to get the action skill timestamp. """
+
+			mycursor, db = await the_database()
+			await mycursor.execute("SELECT last_skill_two_ts FROM UserCurrency WHERE user_id = %s", (user_id,))
+			last_skill_ts = await mycursor.fetchone()
+			await mycursor.close()
+			if last_skill_ts:
+				return last_skill_ts[0]
+			else:
+				return None
+
+		async def real_check(ctx):
+			""" Perfoms the real check. """
+
+			last_skill_ts = await get_user_action_skill_ts(ctx.author.id)
+			current_time = ctx.message.created_at
+			cooldown_in_seconds = (current_time - datetime.utcfromtimestamp(last_skill_ts)).total_seconds()
+			if cooldown_in_seconds >= seconds:
+				return True
+			raise ActionSkillOnCooldown(try_after=cooldown_in_seconds, error_message="Action skill on cooldown!")
+
+		return commands.check(real_check)
+
 	def skill_mark():
 		""" Makes a command be considered a skill command. """
 
 		async def real_check(ctx):
 			""" Performs the real check. """
 			return True
+		return commands.check(real_check)
+
+
+	def not_ready():
+		""" Makes a command not be usable. """
+
+		async def real_check(ctx):
+			""" Performs the real check. """
+			raise CommandNotReady()
+
 		return commands.check(real_check)
 
 
@@ -340,6 +378,16 @@ class Player(commands.Cog):
 
 		mycursor, db = await the_database()
 		await mycursor.execute("UPDATE UserCurrency SET last_skill_ts = %s WHERE user_id = %s", (current_ts, user_id))
+		await db.commit()
+		await mycursor.close()
+
+	async def update_user_action_skill_two_ts(self, user_id: int, current_ts: int) -> None:
+		""" Updates the user's last action skill two timestamp.
+		:param user_id: The ID of the member to update. 
+		:param current_ts: The timestamp to update to. """
+
+		mycursor, db = await the_database()
+		await mycursor.execute("UPDATE UserCurrency SET last_skill_two_ts = %s WHERE user_id = %s", (current_ts, user_id))
 		await db.commit()
 		await mycursor.close()
 

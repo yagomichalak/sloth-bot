@@ -68,6 +68,19 @@ class Metamorph(Player):
 					color=discord.Color.red()))
 
 
+	@commands.command(aliases=['clone'])
+	@Player.skill_two_on_cooldown()
+	@Player.user_is_class('metamorph')
+	@Player.skill_mark()
+	@Player.not_ready()
+	async def impersonate(self, ctx, target: discord.Member = None) -> None:
+		""" Becomes someone else; gets someone else's items and clothes temporarily. 
+		:param target: The person who you want to impersonate. """
+
+
+		pass
+
+
 	async def get_transmutation_embed(self, channel, perpetrator_id: int) -> discord.Embed:
 		""" Makes an embedded message for a transmutation action. 
 		:param channel: The context channel.

@@ -111,6 +111,21 @@ class Prawler(Player):
 
 
 
+
+	@commands.command()
+	@Player.skill_two_on_cooldown()
+	@Player.user_is_class('prawler')
+	@Player.skill_mark()
+	@Player.not_ready()
+	async def sharpen(self, ctx) -> None:
+		""" Sharpen one's blade so when stealing from someone, 
+		it has a 35% chance of doubling the stolen money and stealing it from them as a bonus (if they have the money). 
+		The blade can be sharpened up to 5 times. """
+
+		pass
+
+
+
 	async def check_steals(self) -> None:
 		""" Check on-going steals and their expiration time. """
 		

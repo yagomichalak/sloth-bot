@@ -50,6 +50,17 @@ class Seraph(Player):
 			await ctx.send("**Not protecting anyone, then!**")
 
 
+	@commands.command()
+	@Player.skill_two_on_cooldown()
+	@Player.user_is_class('seraph')
+	@Player.not_ready()
+	async def reinforce(self, ctx) -> None:
+		""" Gets a 20% chance of reinforcing all of their protected people's Divine Protection shield, 
+		by making it last for one more day and a 10% chance of getting a protection for themselves too 
+		(in case they don't have one already). """
+
+		pass
+
 	async def check_protections(self) -> None:
 		""" Check on-going protections and their expiration time. """
 		
