@@ -145,6 +145,16 @@ class Merchant(Player):
 					))
 
 
+	@commands.command()
+	@Player.skill_two_on_cooldown()
+	@Player.user_is_class('merchant')
+	@Player.skill_mark()
+	@Player.not_ready()
+	async def package(self, ctx) -> None:
+		""" Buys a package from Dark Sloth Web and has a 15% chance of getting any equippable item from the Leaf Shop. """
+		
+		pass
+
 	async def check_open_shop_items(self) -> None:
 
 		""" Check on-going open-shop items and their expiration time. """

@@ -21,8 +21,6 @@ class Cybersloth(Player):
 	async def hack(self, ctx, target: discord.Member = None) -> None:
 		""" A command for Cybersloths. """
 
-		# return await ctx.send("**Command not ready yet!**")
-
 		attacker = ctx.author
 
 		if ctx.channel.id != bots_and_commands_channel_id:
@@ -69,6 +67,19 @@ class Cybersloth(Player):
 		except Exception as e:
 			print(e)
 			return await ctx.send(f"**Something went wrong and your `Hack` skill failed, {attacker.mention}!**")
+
+	@commands.command()
+	@Player.skill_two_on_cooldown()
+	@Player.user_is_class('cybersloth')
+	@Player.skill_mark()
+	@Player.not_ready()
+	async def wire(self, ctx, target: discord.Member = None) -> None:
+		""" Wires someone so if they buy a potion or transfer money to someone, 
+		it siphons off up to 35% of the value amount. 
+		:param target: The person who you want to wire. """
+
+		pass
+
 
 
 	async def check_hacks(self) -> None:

@@ -181,7 +181,7 @@ class SlothClass(*classes.values()):
 
 		the_class = classes.get(user[7].lower())
 		class_commands = the_class.__dict__['__cog_commands__']
-
+		prefix = self.client.command_prefix
 		cmds = []
 		for c in class_commands:
 			if c.hidden:
@@ -193,21 +193,27 @@ class SlothClass(*classes.values()):
 			elif not [check for check in c.checks if check.__qualname__ == 'Player.skill_mark.<locals>.real_check']:
 				continue
 
-			try:
-				await c.can_run(ctx)
-				cmds.append(f"{c.qualified_name} [Ready to use]")
-			except commands.CommandError as e:
-				cmds.append(f"{c.qualified_name} [On cooldown]")
-				continue
-			except Exception as e:
-				continue
 
+			if 'Player.not_ready.<locals>.real_check' in [check.__qualname__ for check in c.checks]:
+				cmds.append(f"{prefix}{c.qualified_name:<15} [Not ready]")
+			else:
+				try:
+					await c.can_run(ctx)
+					cmds.append(f"{prefix}{c.qualified_name:<15} [Ready to use]")
+				except commands.CommandError as e:
+					cmds.append(f"{prefix}{c.qualified_name:<15} [On cooldown]")
+					continue
+				except Exception as e:
+					continue
+
+		cmds_text = '\n'.join(cmds)
 		skills_embed = discord.Embed(
 			title=f"__Available Skills for__: `{user[7]}`",
-			description=f"```apache\nSkills: {', '.join(cmds)}```",
+			# description=f"```apache\nSkills: ```",
 			color=ctx.author.color,
 			timestamp=ctx.message.created_at
 		)
+		skills_embed.add_field(name="__Skills__:", value=f"```apache\n{cmds_text}```")
 		skills_embed.set_author(name=ctx.author, icon_url=ctx.author.avatar_url)
 		skills_embed.set_thumbnail(url=f"https://thelanguagesloth.com/media/sloth_classes/{user[7]}.png")
 		skills_embed.set_footer(text=ctx.guild, icon_url=ctx.guild.icon_url)

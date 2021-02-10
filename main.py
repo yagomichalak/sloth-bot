@@ -5,7 +5,7 @@ import os
 from itertools import cycle
 import pytz
 from pytz import timezone
-from extra.customerrors import MissingRequiredSlothClass, ActionSkillOnCooldown
+from extra.customerrors import MissingRequiredSlothClass, ActionSkillOnCooldown, CommandNotReady
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -125,6 +125,9 @@ async def on_command_error(ctx, error):
 
 	elif isinstance(error, MissingRequiredSlothClass):
 		await ctx.send(f"**{error.error_message}: `{error.required_class.title()}`**")
+
+	elif isinstance(error, CommandNotReady):
+		await ctx.send("**This command is either under construction or on maintenance!**")
 
 	elif isinstance(error, ActionSkillOnCooldown):
 
