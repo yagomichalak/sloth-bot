@@ -195,13 +195,13 @@ class SlothClass(*classes.values()):
 
 
 			if 'Player.not_ready.<locals>.real_check' in [check.__qualname__ for check in c.checks]:
-				cmds.append(f"{prefix}{c.qualified_name:<15} [Not ready]")
+				cmds.append(f"{prefix}{c.qualified_name:<18} [Not ready]")
 			else:
 				try:
 					await c.can_run(ctx)
-					cmds.append(f"{prefix}{c.qualified_name:<15} [Ready to use]")
+					cmds.append(f"{prefix}{c.qualified_name:<18} [Ready to use]")
 				except commands.CommandError as e:
-					cmds.append(f"{prefix}{c.qualified_name:<15} [On cooldown]")
+					cmds.append(f"{prefix}{c.qualified_name:<18} [On cooldown]")
 					continue
 				except Exception as e:
 					continue

@@ -86,6 +86,8 @@ class Prawler(Player):
 		if not confirmed:
 			return await ctx.send("**Not stealing from anyone, then!**")
 
+		await self.check_cooldown(user_id=attacker.id, skill_number=1)
+
 		current_timestamp = await self.get_timestamp()
 
 		embed = discord.Embed(

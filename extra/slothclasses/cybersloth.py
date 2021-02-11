@@ -52,6 +52,9 @@ class Cybersloth(Player):
 		if not confirmed:
 			return await ctx.send("**Not hacking them, then!**")
 
+
+		await self.check_cooldown(user_id=attacker.id, skill_number=1)
+		
 		try:
 			current_timestamp = await self.get_timestamp()
 			# Don't need to store it, since it is forever

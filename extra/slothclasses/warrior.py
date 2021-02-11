@@ -5,6 +5,7 @@ from mysqldb import the_database
 from extra.menu import ConfirmSkill
 import os
 from datetime import datetime
+import random
 
 bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
 
@@ -51,6 +52,9 @@ class Warrior(Player):
 		if not confirmed:
 			return await ctx.send("**Not knocking them out, then!**")
 
+
+		await self.check_cooldown(user_id=attacker.id, skill_number=1)
+
 		try:
 			current_timestamp = await self.get_timestamp()
 			# Don't need to store it, since it is forever
@@ -74,10 +78,68 @@ class Warrior(Player):
 	@Player.skill_mark()
 	@Player.not_ready()
 	async def smash(self, ctx, target: discord.Member = None) -> None:
-		""" Has a 20% change of breaking someone's Divine Protection shield. 
+		""" Has a 35% change of breaking someone's Divine Protection shield. 
 		:param target: The target who you are trying to smash the protection. """
 
-		pass
+		
+		attacker = ctx.author
+
+		if ctx.channel.id != bots_and_commands_channel_id:
+			return await ctx.send(f"**{attacker.mention}, you can only use this command in {self.bots_txt.mention}!**")
+
+		if await self.is_user_knocked_out(attacker.id):
+			return await ctx.send(f"**{attacker.mention}, you can't use your skill, because you are knocked-out!**")
+
+		if not target:
+			return await ctx.send(f"**Please, inform a target member, {attacker.mention}!**")
+
+		if attacker.id == target.id:
+			return await ctx.send(f"**{attacker.mention}, you cannot do it on yourself!**")
+
+		if target.bot:
+			return await ctx.send(f"**{attacker.mention}, you cannot do it on a bot!**")
+
+		if not await self.get_user_currency(target.id):
+			return await ctx.send(f"**You cannot do it on someone who doesn't have an account, {attacker.mention}!**")
+
+		if not await self.is_user_protected(target.id):
+			return await ctx.send(f"**{attacker.mention}, {target.mention} doesn't have a protection!**")
+
+		user = await self.get_user_currency(perpetrator.id)
+		if not user[1] >= 50:
+			return await ctx.send(f"**You don't have `50łł` to use this skill, {attacker.mention}!**")
+			
+		confirmed = await ConfirmSkill(f"**{attacker.mention}, are you sure you want to smash {target.mention}'s Divine Protection shield for `50łł`?**").prompt(ctx)
+		if not confirmed:
+			return await ctx.send("**Not hacking them, then!**")
+
+
+
+
+		await self.check_cooldown(user_id=attacker.id, skill_number=2)
+
+		current_timestamp = await self.get_timestamp()
+		# Upate user's money 
+		await self.update_user_money(attacker.id, -50)
+		# # Update attacker's second skill timestamp
+		await self.update_user_action_skill_two_ts(user_id=attacker.id, current_ts=current_timestamp)
+
+		# Calculates chance of smashing someone's Divine Protection shield
+		if random.random() <= 0.35:
+			try:
+				await self.update_user_protected(target.id, 0)
+				await self.delete_skill_action_by_target_id_and_skill_type(target.id, 'divine_protection')
+			except Exception as e:
+				print(e)
+				await ctx.send(f"**For some reason I couldn't smash their protection shield, {attacker.mention}!**")
+
+			else:
+				smash_embed = await self.get_smash_embed(
+				channel=ctx.channel, perpetrator_id=attacker.id, target_id=target.id)
+				await ctx.send(embed=smash_embed)
+		else:
+			await ctx.send(f"**You had a `35%` chance of smashing {target.mention}'s Divine Protection shield, but you missed it, {attacker.mention}!**")
+
 
 
 	async def check_knock_outs(self) -> None:
@@ -129,3 +191,23 @@ class Warrior(Player):
 		hit_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon_url)
 
 		return hit_embed
+
+	async def get_smash_embed(self, channel, perpetrator_id: int, target_id: int) -> discord.Embed:
+		""" Makes an embedded message for a smash action.
+		:param channel: The context channel.
+		:param perpetrator_id: The ID of the perpetrator of the smash action.
+		:param target_id: The ID of the target of the smash action. """
+
+		timestamp = await self.get_timestamp()
+
+		smash_embed = discord.Embed(
+			title="Someone just got Vulnerable!",
+			timestamp=datetime.utcfromtimestamp(timestamp)
+		)
+		smash_embed.description=f"**<@{perpetrator_id}> smashed <@{target_id}>'s' Divine Protection shield; it's gone!** 🚫"
+		smash_embed.color=discord.Color.green()
+
+		smash_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Warrior.png")
+		smash_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon_url)
+
+		return smash_embed
