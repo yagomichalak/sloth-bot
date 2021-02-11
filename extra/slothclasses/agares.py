@@ -84,7 +84,7 @@ class Agares(Player):
 	@Player.skill_two_on_cooldown()
 	@Player.user_is_class('agares')
 	@Player.skill_mark()
-	@Player.not_ready()
+	# @Player.not_ready()
 	async def recharge(self, ctx, target: discord.Member = None) -> None:
 		""" Recharges someone's first skill by removing its cooldown.
 		:param target: The target person who you want to recharge the skill for. """
@@ -110,6 +110,8 @@ class Agares(Player):
 		confirm = await ConfirmSkill(f"**Are you sure you to reset {target.mention}'s first skill cooldown, {perpetrator.mention}?**").prompt(ctx)
 		if not confirm:
 			return await ctx.send(f"**Not resetting it, then!**")
+
+		await self.check_cooldown(user_id=perpetrator.id, skill_number=2)
 
 		try:
 			await self.reset_user_action_skill_cooldown(target.id)

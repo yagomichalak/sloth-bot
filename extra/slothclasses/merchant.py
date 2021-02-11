@@ -42,6 +42,8 @@ class Merchant(Player):
 
 		confirm = await ConfirmSkill(f"**{member.mention}, are you sure you want to spend 50łł to put an item in your shop with the price of `{item_price}`łł ?**").prompt(ctx)
 		if confirm:
+			await self.check_cooldown(user_id=member.id, skill_number=1)
+
 			user_currency = await self.get_user_currency(member.id)
 			if user_currency[1] >= 50:
 				await self.update_user_money(member.id, -50)
@@ -97,7 +99,7 @@ class Merchant(Player):
 			return await ctx.send(f"**Please, inform a `Merchant`, {buyer.mention}!**")
 
 
-		if not (merchant_item := await self.get_skill_action_by_user_id(member.id)):
+		if not (merchant_item := await self.get_potion_skill_action_by_user_id(member.id)):
 			return await ctx.send(
 				f"**{member} is either not a `Merchant` or they don't have a potion available for purchase, {buyer.mention}!**")
 
@@ -119,6 +121,9 @@ class Merchant(Player):
 			confirm = await ConfirmSkill(f"**{buyer.mention}, are you sure you want to buy a `changing-Sloth-class potion` for `{merchant_item[7]}łł`?**").prompt(ctx)
 			if not confirm:
 				return await ctx.send(f"**Not buying it, then, {buyer.mention}!**")
+
+			if not await self.get_potion_skill_action_by_user_id(member.id):
+				return await ctx.send(f"**{member.mention} doesn't have a potion available for purchase, {buyer.mention}!**")
 
 			try:
 				# Updates both buyer and seller's money
@@ -187,6 +192,16 @@ class Merchant(Player):
 
 
 	# ========== Get ===========
+
+	async def get_potion_skill_action_by_user_id(self, user_id: int) -> Union[List[Union[int, str]], bool]:
+		""" Gets a potion skill action by reaction context.
+		:param user_id: The ID of the user of the skill action. """
+
+		mycursor, db = await the_database()
+		await mycursor.execute("SELECT * FROM SlothSkills WHERE user_id = %s AND skill_type = 'potion'", (user_id,))
+		skill_action = await mycursor.fetchone()
+		await mycursor.close()
+		return skill_action
 
 
 	async def get_open_shop_items(self) -> List[List[Union[str, int]]]:

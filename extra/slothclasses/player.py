@@ -51,6 +51,25 @@ class Player(commands.Cog):
 				required_class=command_class, error_message="You don't have the required Sloth Class to run this command!")
 		return commands.check(real_check)
 
+
+	async def check_cooldown(self, user_id, skill_number: int, seconds: int = 86400)-> bool:
+		""" Checks whether user skill is on cooldown (method). 
+		:param user_id: The ID of the user who to check it"""
+
+		last_skill_ts = None
+		if skill_number == 1:
+			last_skill_ts = await self.get_user_action_skill_ts(user_id=user_id, skill_number=skill_number)
+		if skill_number == 2:
+			last_skill_ts = await self.get_user_action_skill_ts(user_id=user_id, skill_number=skill_number)
+
+		# current_time = ctx.message.created_at
+		current_time = datetime.utcnow()
+
+		cooldown_in_seconds = (current_time - datetime.utcfromtimestamp(last_skill_ts)).total_seconds()
+		if cooldown_in_seconds >= seconds:
+			return True
+		raise ActionSkillOnCooldown(try_after=cooldown_in_seconds, error_message="Action skill on cooldown!")
+
 	def skill_on_cooldown():
 		""" Checks whether the user's action skill is on cooldown. """
 
@@ -211,6 +230,18 @@ class Player(commands.Cog):
 		await mycursor.close()
 		return skill_action
 
+
+	async def get_skill_action_by_user_id_and_skill_type(self, user_id: int, skill_type: str) -> Union[List[Union[int, str]], bool]:
+		""" Gets a skill action by user ID and skill type.
+		:param user_id: The user ID with which to get the skill action. 
+		:param skill_type: The skill type of the skill action. """
+
+		mycursor, db = await the_database()
+		await mycursor.execute("SELECT * FROM SlothSkills WHERE user_id = %s and skill_type = %s", (user_id, skill_type))
+		skill_actions = await mycursor.fetchall()
+		await mycursor.close()
+		return skill_actions
+
 	async def get_skill_action_by_reaction_context(self, message_id: int, target_id: int) -> Union[List[Union[int, str]], bool]:
 		""" Gets a skill action by reaction context.
 		:param message_id: The ID of the message of the skill action.
@@ -222,15 +253,23 @@ class Player(commands.Cog):
 		await mycursor.close()
 		return skill_action
 
-	async def get_skill_action_by_user_id(self, user_id: int) -> Union[List[Union[int, str]], bool]:
-		""" Gets a skill action by reaction context.
-		:param user_id: The ID of the user of the skill action. """
+	async def get_user_action_skill_ts(self, user_id: int, skill_number: int = 1) -> Union[str, bool]:
+		""" Gets the user's last action skill timestamp from the database.
+		:param user_id: The ID of the user to get the action skill timestamp. 
+		:param skill_number: The number of the skill, ex: 1 for skill 1. """
 
 		mycursor, db = await the_database()
-		await mycursor.execute("SELECT * FROM SlothSkills WHERE user_id = %s AND skill_type = 'potion'", (user_id,))
-		skill_action = await mycursor.fetchone()
+		if skill_number == 1:
+			await mycursor.execute("SELECT last_skill_ts FROM UserCurrency WHERE user_id = %s", (user_id,))
+		elif skill_number == 2:
+			await mycursor.execute("SELECT last_skill_two_ts FROM UserCurrency WHERE user_id = %s", (user_id,))
+
+		last_skill_ts = await mycursor.fetchone()
 		await mycursor.close()
-		return skill_action
+		if last_skill_ts:
+			return last_skill_ts[0]
+		else:
+			return None
 
 	async def get_timestamp(self) -> int:
 		""" Gets the current timestamp. """
@@ -251,19 +290,6 @@ class Player(commands.Cog):
 		steals = await mycursor.fetchall()
 		await mycursor.close()
 		return steals
-
-	async def get_expired_protections(self) -> None:
-		""" Gets expired divine protection skill actions. """
-
-		the_time = await self.get_timestamp()
-		mycursor, db = await the_database()
-		await mycursor.execute("""
-			SELECT * FROM SlothSkills 
-			WHERE skill_type = 'divine_protection' AND (%s - skill_timestamp) >= 86400
-			""", (the_time,))
-		divine_protections = await mycursor.fetchall()
-		await mycursor.close()
-		return divine_protections
 
 	async def get_expired_transmutations(self) -> None:
 		""" Gets expired transmutation skill actions. """
@@ -399,9 +425,5 @@ class Player(commands.Cog):
 		await mycursor.execute("UPDATE UserCurrency SET last_skill_ts = 0 WHERE user_id = %s", (user_id,))
 		await db.commit()
 		await mycursor.close()
-
-
-
-
 
 

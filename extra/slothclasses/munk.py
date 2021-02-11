@@ -49,6 +49,8 @@ class Munk(Player):
 		if not confirmed:
 			return await ctx.send("**Not converting them, then!**")
 
+		await self.check_cooldown(user_id=attacker.id, skill_number=1)
+
 		try:
 			await target.edit(nick=f"{target.display_name} Munk")
 			current_timestamp = await self.get_timestamp()
