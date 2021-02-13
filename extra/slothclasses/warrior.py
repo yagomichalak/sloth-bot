@@ -41,6 +41,13 @@ class Warrior(Player):
 		if target.bot:
 			return await ctx.send(f"**{attacker.mention}, you cannot knock out a bot!**")
 
+		target_currency = await self.get_user_currency(target.id)
+		if not target_currency:
+			return await ctx.send(f"**You cannot knock out someone who doesn't have an account, {attacker.mention}!**")
+
+		if target_currency[7] == 'default':
+			return await ctx.send(f"**You cannot knock out someone who has a `default` Sloth class, {attacker.mention}!**")
+
 		if await self.is_user_protected(target.id):
 			return await ctx.send(f"**{attacker.mention}, {target.mention} is protected, you can't knock them out!**")
 
@@ -73,7 +80,7 @@ class Warrior(Player):
 
 
 	@commands.command(aliases=['crush', 'break'])
-	@Player.skill_two_on_cooldown()
+	@Player.skill_on_cooldown(skill_number=2)
 	@Player.user_is_class('warrior')
 	@Player.skill_mark()
 	@Player.not_ready()
@@ -99,8 +106,12 @@ class Warrior(Player):
 		if target.bot:
 			return await ctx.send(f"**{attacker.mention}, you cannot do it on a bot!**")
 
-		if not await self.get_user_currency(target.id):
+		target_currency = await self.get_user_currency(target.id)
+		if not target_currency:
 			return await ctx.send(f"**You cannot do it on someone who doesn't have an account, {attacker.mention}!**")
+
+		if target_currency[7] == 'default':
+			return await ctx.send(f"**You cannot do it on someone who has a `default` Sloth class, {attacker.mention}!**")
 
 		if not await self.is_user_protected(target.id):
 			return await ctx.send(f"**{attacker.mention}, {target.mention} doesn't have a protection!**")

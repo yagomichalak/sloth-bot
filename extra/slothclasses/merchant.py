@@ -151,7 +151,7 @@ class Merchant(Player):
 
 
 	@commands.command()
-	@Player.skill_two_on_cooldown()
+	@Player.skill_on_cooldown(skill_number=2)
 	@Player.user_is_class('merchant')
 	@Player.skill_mark()
 	@Player.not_ready()

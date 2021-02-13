@@ -177,7 +177,7 @@ class SlothClass(*classes.values()):
 		if not user:
 			return await ctx.send(embed=discord.Embed(description="**You don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one!**"))
 		if user[7] == 'default':
-			return await ctx.send(embed=discord.Embed(description="**You don't have a default Sloth class. Click [here](https://thelanguagesloth.com/profile/slothclass) to choose one!**"))
+			return await ctx.send(embed=discord.Embed(description="**You have a default Sloth class. Click [here](https://thelanguagesloth.com/profile/slothclass) to choose one!**"))
 
 		the_class = classes.get(user[7].lower())
 		class_commands = the_class.__dict__['__cog_commands__']
