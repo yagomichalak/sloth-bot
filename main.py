@@ -130,11 +130,12 @@ async def on_command_error(ctx, error):
 		await ctx.send("**This command is either under construction or on maintenance!**")
 
 	elif isinstance(error, ActionSkillOnCooldown):
-
-		m, s = divmod(int(86400) - int(error.try_after), 60)
+		m, s = divmod(error.cooldown - int(error.try_after), 60)
 		h, m = divmod(m, 60)
-		print(m, s, h)
-		if h > 0:
+		d, h = divmod(h, 24)
+		if d > 0:
+			await ctx.send(f"**You can use your skill again in {d:d} days, {h:d} hours, {m:02d} minutes and {s:02d} seconds!**")
+		elif h > 0:
 			await ctx.send(f"**You can use your skill again in {h:d} hours, {m:02d} minutes and {s:02d} seconds!**")
 		elif m > 0:
 			await ctx.send(f"**You can use your skill again in {m:02d} minutes and {s:02d} seconds!**")

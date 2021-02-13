@@ -69,7 +69,7 @@ class Metamorph(Player):
 
 
 	@commands.command(aliases=['clone'])
-	@Player.skill_two_on_cooldown()
+	@Player.skill_on_cooldown(skill_number=2)
 	@Player.user_is_class('metamorph')
 	@Player.skill_mark()
 	@Player.not_ready()

@@ -32,6 +32,13 @@ class Seraph(Player):
 		if not target:
 			target = ctx.author
 
+		target_currency = await self.get_user_currency(target.id)
+		if not target_currency:
+			return await ctx.send(f"**You cannot protect someone who doesn't have an account, {ctx.author.mention}!**")
+
+		if target_currency[7] == 'default':
+			return await ctx.send(f"**You cannot protect someone who has a `default` Sloth class, {ctx.author.mention}!**")
+
 		if await self.is_user_protected(target.id):
 			return await ctx.send(f"**{target.mention} is already protected, {ctx.author.mention}!**")
 
@@ -54,7 +61,7 @@ class Seraph(Player):
 
 
 	@commands.command()
-	@Player.skill_two_on_cooldown()
+	@Player.skill_on_cooldown(skill_number=2)
 	@Player.user_is_class('seraph')
 	@Player.skill_mark()
 	@Player.not_ready()

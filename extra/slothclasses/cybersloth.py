@@ -38,8 +38,12 @@ class Cybersloth(Player):
 		if target.bot:
 			return await ctx.send(f"**{attacker.mention}, you cannot hack a bot!**")
 
-		if not await self.get_user_currency(target.id):
+		target_currency = await self.get_user_currency(target.id)
+		if not target_currency:
 			return await ctx.send(f"**You cannot hack someone who doesn't have an account, {attacker.mention}!**")
+
+		if target_currency[7] == 'default':
+			return await ctx.send(f"**You cannot hack someone who has a `default` Sloth class, {attacker.mention}!**")
 
 		if await self.is_user_protected(target.id):
 			return await ctx.send(f"**{attacker.mention}, {target.mention} is protected, you can't hack them!**")
@@ -72,7 +76,7 @@ class Cybersloth(Player):
 			return await ctx.send(f"**Something went wrong and your `Hack` skill failed, {attacker.mention}!**")
 
 	@commands.command()
-	@Player.skill_two_on_cooldown()
+	@Player.skill_on_cooldown(skill_number=2)
 	@Player.user_is_class('cybersloth')
 	@Player.skill_mark()
 	@Player.not_ready()

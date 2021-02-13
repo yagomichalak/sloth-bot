@@ -39,8 +39,12 @@ class Munk(Player):
 		if target.display_name.strip().title().endswith('Munk'):
 			return await ctx.send(f"**{target.mention} is already a `Munk`, {attacker.mention}!**")
 
-		if not await self.get_user_currency(target.id):
+		target_currency = await self.get_user_currency(target.id)
+		if not target_currency:
 			return await ctx.send(f"**You cannot convert someone who doesn't have an account, {attacker.mention}!**")
+
+		if target_currency[7] == 'default':
+			return await ctx.send(f"**You cannot convert someone who has a `default` Sloth class, {attacker.mention}!**")
 
 		if await self.is_user_protected(target.id):
 			return await ctx.send(f"**{attacker.mention}, you cannot convert {target.mention} into a `Munk`, because they are protected against attacks!**")

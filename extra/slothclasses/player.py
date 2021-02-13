@@ -56,11 +56,7 @@ class Player(commands.Cog):
 		""" Checks whether user skill is on cooldown (method). 
 		:param user_id: The ID of the user who to check it"""
 
-		last_skill_ts = None
-		if skill_number == 1:
-			last_skill_ts = await self.get_user_action_skill_ts(user_id=user_id, skill_number=skill_number)
-		if skill_number == 2:
-			last_skill_ts = await self.get_user_action_skill_ts(user_id=user_id, skill_number=skill_number)
+		last_skill_ts = await self.get_user_action_skill_ts(user_id=user_id, skill_number=skill_number)
 
 		# current_time = ctx.message.created_at
 		current_time = datetime.utcnow()
@@ -70,59 +66,24 @@ class Player(commands.Cog):
 			return True
 		raise ActionSkillOnCooldown(try_after=cooldown_in_seconds, error_message="Action skill on cooldown!")
 
-	def skill_on_cooldown():
+	def skill_on_cooldown(skill_number: int = 1, seconds: int = 86400):
 		""" Checks whether the user's action skill is on cooldown. """
-
-		async def get_user_action_skill_ts(user_id: int) -> Union[str, bool]:
-			""" Gets the user's last action skill timestamp from the database.
-			:param user_id: The ID of the user to get the action skill timestamp. """
-
-			mycursor, db = await the_database()
-			await mycursor.execute("SELECT last_skill_ts FROM UserCurrency WHERE user_id = %s", (user_id,))
-			last_skill_ts = await mycursor.fetchone()
-			await mycursor.close()
-			if last_skill_ts:
-				return last_skill_ts[0]
-			else:
-				return None
 
 		async def real_check(ctx):
 			""" Perfoms the real check. """
 
-			last_skill_ts = await get_user_action_skill_ts(ctx.author.id)
-			current_time = ctx.message.created_at
-			cooldown_in_seconds = (current_time - datetime.utcfromtimestamp(last_skill_ts)).total_seconds()
-			if cooldown_in_seconds >= 86400:
-				return True
-			raise ActionSkillOnCooldown(try_after=cooldown_in_seconds, error_message="Action skill on cooldown!")
+			last_skill_ts = await Player.get_user_action_skill_ts(Player, user_id=ctx.author.id, skill_number=skill_number)
+			# current_time = ctx.message.created_at
+			# cooldown_in_seconds = (current_time - datetime.utcfromtimestamp(last_skill_ts)).total_seconds()
 
-		return commands.check(real_check)
-
-	def skill_two_on_cooldown(seconds: int = 86400):
-		""" Checks whether the user's action skill is on cooldown. """
-
-		async def get_user_action_skill_ts(user_id: int) -> Union[str, bool]:
-			""" Gets the user's last action skill timestamp from the database.
-			:param user_id: The ID of the user to get the action skill timestamp. """
-
-			mycursor, db = await the_database()
-			await mycursor.execute("SELECT last_skill_two_ts FROM UserCurrency WHERE user_id = %s", (user_id,))
-			last_skill_ts = await mycursor.fetchone()
-			await mycursor.close()
-			if last_skill_ts:
-				return last_skill_ts[0]
-			else:
-				return None
-
-		async def real_check(ctx):
-			""" Perfoms the real check. """
-
-			last_skill_ts = await get_user_action_skill_ts(ctx.author.id)
-			current_time = ctx.message.created_at
-			cooldown_in_seconds = (current_time - datetime.utcfromtimestamp(last_skill_ts)).total_seconds()
+			epoch = datetime.utcfromtimestamp(0)
+			current_time = (datetime.utcnow() - epoch).total_seconds()
+			cooldown_in_seconds = current_time - last_skill_ts
+			print(cooldown_in_seconds)
 			if cooldown_in_seconds >= seconds:
 				return True
-			raise ActionSkillOnCooldown(try_after=cooldown_in_seconds, error_message="Action skill on cooldown!")
+			raise ActionSkillOnCooldown(
+				try_after=cooldown_in_seconds, error_message="Action skill on cooldown!", cooldown=seconds)
 
 		return commands.check(real_check)
 
@@ -277,19 +238,6 @@ class Player(commands.Cog):
 		epoch = datetime.utcfromtimestamp(0)
 		the_time = (datetime.utcnow() - epoch).total_seconds()
 		return the_time
-
-	async def get_expired_steals(self) -> List[List[Union[str, int]]]:
-		""" Gets expired steal skill actions. """
-
-		the_time = await self.get_timestamp()
-		mycursor, db = await the_database()
-		await mycursor.execute("""
-			SELECT * FROM SlothSkills 
-			WHERE skill_type = 'steal' AND (%s - skill_timestamp) >= 2400
-			""", (the_time,))
-		steals = await mycursor.fetchall()
-		await mycursor.close()
-		return steals
 
 	async def get_expired_transmutations(self) -> None:
 		""" Gets expired transmutation skill actions. """
