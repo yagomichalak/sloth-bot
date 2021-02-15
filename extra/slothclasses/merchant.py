@@ -32,7 +32,7 @@ class Merchant(Player):
 		if await self.is_user_knocked_out(member.id):
 			return await ctx.send(f"**{member.mention}, you can't use your skill, because you are knocked-out!**")
 
-		if (shopitem := await self.get_skill_action_by_user_id(member.id)):
+		if (shopitem := await self.get_skill_action_by_user_id_and_skill_type(member.id, 'potion')):
 			return await ctx.send(f"**{member.mention}, you already have an item in your shop!**")
 
 
