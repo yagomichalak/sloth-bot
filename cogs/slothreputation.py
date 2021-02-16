@@ -147,7 +147,6 @@ class SlothReputation(commands.Cog):
     async def score(self, ctx):
         """ Shows the top ten members in the reputation leaderboard. """
 
-        await ctx.message.delete()
         if not await self.check_table_exist():
             return await ctx.send("**This command may be on maintenance!**")
 
@@ -169,6 +168,34 @@ class SlothReputation(commands.Cog):
         for i, sm in enumerate(top_ten_users):
             member = discord.utils.get(ctx.guild.members, id=sm[0])
             leaderboard.add_field(name=f"[{i + 1}]# - __**{member}**__", value=f"__**Score:**__ `{sm[4]}`",
+                                  inline=False)
+            if i + 1 == 10:
+                break
+        return await ctx.send(embed=leaderboard)
+
+
+    @commands.command(aliases=['level_board', 'levelboard', 'levels'])
+    async def level_score(self, ctx):
+        """ Shows the top ten members in the level leaderboard. """
+
+        # users = await self.get_users()
+        top_ten_users = await self.get_top_ten_xp_users()
+        # sorted_members = sorted(users, key=lambda tup: tup[4], reverse=True)
+        leaderboard = discord.Embed(title="__The Language Sloth's Level Ranking Leaderboard__", colour=discord.Colour.dark_green(),
+                                    timestamp=ctx.message.created_at)
+        # user_score = await self.get_specific_user(ctx.author.id)
+        # user_score = await self.get_user_score_position(ctx.author.id)
+        all_users = await self.get_all_users_by_xp()
+        position = [[i+1, u[1]] for i, u in enumerate(all_users) if u[0] == ctx.author.id]
+        position = [it for subpos in position for it in subpos] if position else ['??', 0]
+
+        leaderboard.set_footer(text=f"Your level: {position[1]} | #{position[0]}", icon_url=ctx.author.avatar_url)
+        leaderboard.set_thumbnail(url=ctx.guild.icon_url)
+
+        # Embeds each one of the top ten users.
+        for i, sm in enumerate(top_ten_users):
+            member = discord.utils.get(ctx.guild.members, id=sm[0])
+            leaderboard.add_field(name=f"[{i + 1}]# - __**{member}**__", value=f"__**Level:**__ `{sm[2]}` | __**XP:**__ `{sm[1]}`",
                                   inline=False)
             if i + 1 == 10:
                 break
@@ -330,6 +357,15 @@ class SlothReputation(commands.Cog):
         await mycursor.close()
         return top_ten_members
 
+    async def get_top_ten_xp_users(self) -> List[List[int]]:
+        """ Gets the top ten users in the experience points. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("SELECT * FROM MembersScore ORDER BY user_xp DESC LIMIT 10")
+        top_ten_members = await mycursor.fetchall()
+        await mycursor.close()
+        return top_ten_members
+
     async def get_specific_user(self, user_id: int):
         mycursor, db = await the_database()
         await mycursor.execute(f"SELECT * FROM MembersScore WHERE user_id = {user_id}")
@@ -378,6 +414,15 @@ class SlothReputation(commands.Cog):
 
         mycursor, db = await the_database()
         await mycursor.execute("SELECT * FROM MembersScore ORDER BY score_points DESC")
+        users = await mycursor.fetchall()
+        await mycursor.close()
+        return users
+
+    async def get_all_users_by_xp(self) -> List[List[int]]:
+        """ Gets all users from the MembersScore table ordered by score points. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("SELECT * FROM MembersScore ORDER BY user_xp DESC")
         users = await mycursor.fetchall()
         await mycursor.close()
         return users
