@@ -6,6 +6,7 @@ from extra.menu import ConfirmSkill, prompt_number, OpenShopLoop
 import os
 from typing import List, Union
 from datetime import datetime
+import random
 
 bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
 
@@ -182,9 +183,52 @@ class Merchant(Player):
 	@Player.skill_mark()
 	@Player.not_ready()
 	async def package(self, ctx) -> None:
-		""" Buys a package from Dark Sloth Web and has a 15% chance of getting any equippable item from the Leaf Shop. """
+		""" Buys a package from Dark Sloth Web and has a 35% chance of getting any equippable item from the Leaf Shop. """
 		
-		pass
+		merchant = ctx.author
+
+		if ctx.channel.id != bots_and_commands_channel_id:
+			return await ctx.send(f"**{merchant.mention}, you can only use this command in {self.bots_txt.mention}!**")
+
+		if await self.is_user_knocked_out(merchant.id):
+			return await ctx.send(f"**{merchant.mention}, you can't use your skill, because you are knocked-out!**")
+
+		confirm = await ConfirmSkill(f"**{merchant.mention}, are you sure you want to spend `50łł` to put get a random package from the Dark Sloth Web?**").prompt(ctx)
+		if not confirm:
+			return await ctx.send(f"**Not buying it, then!**")
+
+		await self.check_cooldown(user_id=merchant.id, skill_number=2)
+
+		# Checks whether user has money
+		user_currency = await self.get_user_currency(merchant.id)
+		if user_currency[1] >= 50:
+			await self.update_user_money(merchant.id, -50)
+		else:
+			return await ctx.send(f"**{merchant.mention}, you don't have `50łł`!**")
+
+		current_timestamp = await self.get_timestamp()
+		await self.update_user_action_skill_two_ts(merchant.id, current_timestamp)
+
+		if random.random() <= 0.35:
+			SlothCurrency = self.client.get_cog('SlothCurrency')
+			registered_items = await SlothCurrency.get_registered_items()
+			random_item = random.choice(registered_items)
+
+			# Checks whether user already has the item
+			user_has_item = await SlothCurrency.check_user_have_item(user_id=merchant.id, item_name=random_item[2])
+			if user_has_item:
+				# Gives the user the price of the item
+				await self.update_user_money(merchant.id, random_item[3])
+				await ctx.send(f"**{merchant.mention}, you already have the `{random_item[2]}` item, so you got it worth of leaves instead; `{random_item[3]}łł`**")
+
+			else:
+				# Gives the user the item
+				await SlothCurrency.insert_user_item(merchant.id, random_item[2], 'unequipped', random_item[1])
+				await ctx.send(f"**{merchant.mention}, you just got the `{random_item[2]}` item, which is worth `{random_item[3]}łł`**")
+
+		else:
+			await ctx.send(f"**{merchant.mention}, you had a `35%` chance of getting something from the Dark Sloth Web, it happened that today wasn't your day!**")
+
 
 	async def check_open_shop_items(self) -> None:
 
