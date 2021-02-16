@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands, menus
 from mysqldb import *
 from datetime import datetime
+import random
 from PIL import Image, ImageDraw, ImageFont
 from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
@@ -584,7 +585,7 @@ class SlothCurrency(commands.Cog):
             user_lotto bigint default null, sloth_class varchar(30) default 'default', change_class_ts bigint default 0,
             last_skill_ts bigint default 0, protected tinyint(1) default 0, has_potion tinyint(1) default 0,
             hacked tinyint(1) default 0, knocked_out tinyint(1) default 0), last_skill_two_ts bigint default 0,
-            skills_used int default 0
+            skills_used int default 0, wired tinyint(1) default 0
             """)
         await db.commit()
         await mycursor.close()
@@ -1173,10 +1174,34 @@ class SlothCurrency(commands.Cog):
         elif not target_user:
             return await ctx.send(f"**{member} does not have a bank account yet!**", delete_after=5)
 
+
         if the_user[0][1] >= int(money):
-            await self.update_user_money(member.id, money)
-            await self.update_user_money(ctx.author.id, -money)
-            await ctx.send(f"**{ctx.author.mention} transferred {money}łł to {member.mention}!**")
+            SlothClass = self.client.get_cog('SlothClass')
+            if wired_user := await SlothClass.get_skill_action_by_target_id_and_skill_type(
+                target_id=ctx.author.id, skill_type='wire'):
+
+                siphon_percentage = 35
+                cybersloth_money = round((money*siphon_percentage)/100)
+                target_money = money - cybersloth_money
+                await self.update_user_money(member.id, target_money)
+                await self.update_user_money(ctx.author.id, -money)
+                await self.update_user_money(wired_user[0], cybersloth_money)
+                await ctx.send(
+                    content=f"{ctx.author.mention}, {member.mention}, <@{wired_user[0]}>",
+                    embed=discord.Embed(
+                        title="__Intercepted Transfer__",
+                        description=
+                        f"{ctx.author.mention} tried to transfer `{money}łł` to {member.mention}, " +
+                        f"but <@{wired_user[0]}> siphoned off `{siphon_percentage}%` of it; `{cybersloth_money}łł`! " +
+                        f"So {member.mention} actually got `{target_money}łł`!",
+                        color=ctx.author.color,
+                        timestamp=ctx.message.created_at)
+                )
+
+            else:
+                await self.update_user_money(member.id, money)
+                await self.update_user_money(ctx.author.id, -money)
+                await ctx.send(f"**{ctx.author.mention} transferred {money}łł to {member.mention}!**")
         else:
             await ctx.send(f"You don't have {money}łł!")
 

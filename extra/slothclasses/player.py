@@ -139,6 +139,17 @@ class Player(commands.Cog):
 		await mycursor.close()
 		return user_hacked is not None and user_hacked[0]
 
+
+	async def is_user_wired(self, user_id: int) -> bool:
+		""" Checks whether user is wired.
+		:param user_id: The ID of the user to check it. """
+
+		mycursor, db = await the_database()
+		await mycursor.execute("SELECT wired FROM UserCurrency WHERE user_id = %s", (user_id,))
+		user_wired = await mycursor.fetchone()
+		await mycursor.close()
+		return user_wired is not None and user_wired[0]
+
 	async def is_user_knocked_out(self, user_id: int) -> bool:
 		""" Checks whether user is knocked out.
 		:param user_id: The ID of the user to check it. """
@@ -266,7 +277,7 @@ class Player(commands.Cog):
 		return transmutations
 
 	async def get_expired_hacks(self) -> None:
-		""" Gets expired hack skill actions. """
+		""" Gets expired hacks skill actions. """
 
 		the_time = await self.get_timestamp()
 		mycursor, db = await the_database()
@@ -277,6 +288,19 @@ class Player(commands.Cog):
 		hacks = await mycursor.fetchall()
 		await mycursor.close()
 		return hacks
+
+	async def get_expired_wires(self) -> None:
+		""" Gets expired wires skill actions. """
+
+		the_time = await self.get_timestamp()
+		mycursor, db = await the_database()
+		await mycursor.execute("""
+			SELECT * FROM SlothSkills 
+			WHERE skill_type = 'wire' AND (%s - skill_timestamp) >= 86400
+			""", (the_time,))
+		wires = await mycursor.fetchall()
+		await mycursor.close()
+		return wires
 
 	async def get_expired_knock_outs(self) -> None:
 		""" Gets expired knock-out skill actions. """
