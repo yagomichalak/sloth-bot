@@ -35,12 +35,11 @@ class Merchant(Player):
 		if (shopitem := await self.get_skill_action_by_user_id_and_skill_type(member.id, 'potion')):
 			return await ctx.send(f"**{member.mention}, you already have an item in your shop!**")
 
-
 		item_price = await prompt_number(self.client, ctx, f"**{member.mention}, for how much do you want to sell your changing-Sloth-class potion?**", member)
 		if item_price is None:
 			return
 
-		confirm = await ConfirmSkill(f"**{member.mention}, are you sure you want to spend 50łł to put an item in your shop with the price of `{item_price}`łł ?**").prompt(ctx)
+		confirm = await ConfirmSkill(f"**{member.mention}, are you sure you want to spend `50łł` to put an item in your shop with the price of `{item_price}`łł ?**").prompt(ctx)
 		if confirm:
 			await self.check_cooldown(user_id=member.id, skill_number=1)
 
@@ -126,9 +125,36 @@ class Merchant(Player):
 				return await ctx.send(f"**{member.mention} doesn't have a potion available for purchase, {buyer.mention}!**")
 
 			try:
-				# Updates both buyer and seller's money
-				await self.update_user_money(buyer.id, - merchant_item[7])
-				await self.update_user_money(member.id, merchant_item[7])
+				if wired_user := await self.get_skill_action_by_target_id_and_skill_type(
+					target_id=member.id, skill_type='wire'):
+
+					siphon_percentage = 35
+					cybersloth_money = round((merchant_item[7]*siphon_percentage)/100)
+					target_money = merchant_item[7] - cybersloth_money
+					await self.update_user_money(member.id, target_money)
+					await self.update_user_money(buyer.id, -merchant_item[7])
+					await self.update_user_money(wired_user[0], cybersloth_money)
+					cybersloth = self.client.get_user(wired_user[0])
+					siphon_embed = discord.Embed(
+							title="__Intercepted Purchase__",
+							description=
+							f"{buyer.mention} bought a `changing-Sloth-class potion` from {member.mention} for `{merchant_item[7]}łł`, " +
+							f"but {cybersloth.mention if cybersloth else str(cybersloth)} siphoned off `{siphon_percentage}%` of the price; `{cybersloth_money}łł`! " +
+							f"So the Merhcant {member.mention} actually got `{target_money}łł`!",
+							color=buyer.color,
+							timestamp=ctx.message.created_at)
+					if cybersloth:
+						siphon_embed.set_thumbnail(url=cybersloth.avatar_url)
+
+					await ctx.send(
+						content=f"{buyer.mention}, {member.mention}, <@{wired_user[0]}>",
+						embed=siphon_embed)
+
+				else:	                        
+					# Updates both buyer and seller's money
+					await self.update_user_money(buyer.id, - merchant_item[7])
+					await self.update_user_money(member.id, merchant_item[7])
+
 				# Gives the buyer their potion and removes the potion from the store
 				await self.update_user_has_potion(buyer.id, 1)
 				await self.delete_skill_action_by_target_id_and_skill_type(member.id, 'potion')
