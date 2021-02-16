@@ -193,7 +193,7 @@ class Merchant(Player):
 		if await self.is_user_knocked_out(merchant.id):
 			return await ctx.send(f"**{merchant.mention}, you can't use your skill, because you are knocked-out!**")
 
-		confirm = await ConfirmSkill(f"**{merchant.mention}, are you sure you want to spend `50łł` to put get a random package from the Dark Sloth Web?**").prompt(ctx)
+		confirm = await ConfirmSkill(f"**{merchant.mention}, are you sure you want to spend `50łł` to get a random package from the Dark Sloth Web?**").prompt(ctx)
 		if not confirm:
 			return await ctx.send(f"**Not buying it, then!**")
 
