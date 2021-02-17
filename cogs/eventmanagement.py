@@ -181,7 +181,7 @@ class EventManagement(commands.Cog):
 		if await self.get_event_room_by_user_id(ctx.author.id):
 			return await ctx.send(f"**{ctx.author.mention}, you already have an event room going on!**")
 
-		confirm = await ConfirmSkill("Do you want to create a `Karaoke Night`?").prompt(ctx)
+		confirm = await ConfirmSkill("Do you want to create a `Culture Night`?").prompt(ctx)
 		if not confirm:
 			return await ctx.send("**Not creating it then!**")
 
