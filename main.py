@@ -1,12 +1,15 @@
-import discord
-from discord.ext import commands, tasks
-from datetime import datetime
-import os
-from itertools import cycle
 import pytz
+import discord
 from pytz import timezone
-from extra.customerrors import MissingRequiredSlothClass, ActionSkillOnCooldown, CommandNotReady
 from dotenv import load_dotenv
+from discord.ext import commands, tasks
+
+import os
+from datetime import datetime
+from itertools import cycle
+
+from extra.customerrors import MissingRequiredSlothClass, ActionSkillOnCooldown, CommandNotReady
+
 load_dotenv()
 
 # IDs
@@ -34,8 +37,8 @@ shades_of_pink = cycle([(252, 15, 192), (255, 0, 255), (248, 24, 148),
 
 # Making the client variable
 intents = discord.Intents.all()
-client = commands.Bot(command_prefix='z!', intents=intents)
-client.remove_command('help')
+client = commands.Bot(command_prefix='z!', intents=intents, help_command=None)
+
 token = os.getenv('TOKEN')
 
 # Tells when the bot is online
