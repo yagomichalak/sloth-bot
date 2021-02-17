@@ -115,17 +115,17 @@ If you have any questions feel free to ask! And if you experience any type of pr
         :param message: The message to send.
         '''
         await ctx.message.delete()
+
         if not message:
             return await ctx.send("**Inform a message to send!**", delete_after=3)
-        elif not member:
+
+        if not member:
             return await ctx.send("**Inform a member!**", delete_after=3)
 
-        check_member = discord.utils.get(ctx.guild.members, id=member.id)
+        check_member = ctx.guild.get_member(member.id)
         if check_member:
-            await member.send(message)
-        else:
-            await ctx.send(f"**Member: {member} not found!", delete_after=3)
-
+            return await member.send(message)
+        await ctx.send(f"**Member: {member} not found!", delete_after=3)
 
 def setup(client):
     client.add_cog(Communication(client))
