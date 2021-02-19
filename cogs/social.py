@@ -80,23 +80,23 @@ class Social(commands.Cog):
         await ctx.send(embed=embed)
 
     # Sends a random post from the meme subreddit
-    @commands.command()
-    @commands.cooldown(1, 5, type=commands.BucketType.user)
-    async def meme(self, ctx):
-        '''
-        Gets a random meme from Reddit.
-        (cooldown = 5 secs)
-        '''
-        memes_submissions = reddit.subreddit('memes').hot()
-        post_to_pick = randint(1, 50)
-        for i in range(0, post_to_pick):
-            submissions = next(x for x in memes_submissions if not x.stickied)
+    # @commands.command()
+    # @commands.cooldown(1, 5, type=commands.BucketType.user)
+    # async def meme(self, ctx):
+    #     '''
+    #     Gets a random meme from Reddit.
+    #     (cooldown = 5 secs)
+    #     '''
+    #     memes_submissions = reddit.subreddit('memes').hot()
+    #     post_to_pick = randint(1, 50)
+    #     for i in range(0, post_to_pick):
+    #         submissions = next(x for x in memes_submissions if not x.stickied)
 
 
-        meme_embed = discord.Embed(title="__**Meme**__", colour=ctx.author.colour, timestamp=ctx.message.created_at)
-        meme_embed.set_image(url=submissions.url)
-        meme_embed.set_author(name=ctx.author, icon_url=ctx.author.avatar_url)
-        await ctx.send(embed=meme_embed)
+    #     meme_embed = discord.Embed(title="__**Meme**__", colour=ctx.author.colour, timestamp=ctx.message.created_at)
+    #     meme_embed.set_image(url=submissions.url)
+    #     meme_embed.set_author(name=ctx.author, icon_url=ctx.author.avatar_url)
+    #     await ctx.send(embed=meme_embed)
 
 
     @commands.command(aliases=['xkcd', 'comic'])
