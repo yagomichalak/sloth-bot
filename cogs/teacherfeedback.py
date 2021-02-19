@@ -20,6 +20,7 @@ bot_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
 reward_channel_id = int(os.getenv('REWARD_CHANNEL_ID'))
 mod_role_id = int(os.getenv('MOD_ROLE_ID'))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID'))
+sloth_explorer_role_id = int(os.getenv('SLOTH_EXPLORER_ROLE_ID'))
 
 class CreateClassroom(commands.Cog):
     '''
@@ -549,6 +550,7 @@ class CreateClassroom(commands.Cog):
         teacher_role = discord.utils.get(member.guild.roles, id=teacher_role_id)
         preference_role = discord.utils.get(member.guild.roles, id=preference_role_id)
         mod_role = discord.utils.get(member.guild.roles, id=mod_role_id)
+        sloth_explorer_role = discord.utils.get(member.guild.roles, id=sloth_explorer_role_id)
 
         overwrites = {}
         # Checks whether it is a language that has no native, fluent, studying pattern
@@ -599,6 +601,10 @@ class CreateClassroom(commands.Cog):
 
         overwrites[preference_role] = discord.PermissionOverwrite(
             read_messages=True, send_messages=False, connect=False, view_channel=True)
+
+        overwrites[sloth_explorer_role] = discord.PermissionOverwrite(
+                    read_messages=True, send_messages=True, connect=True,
+                    speak=True, view_channel=True, embed_links=True)
 
         return overwrites
 
