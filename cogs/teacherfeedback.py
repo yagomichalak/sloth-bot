@@ -359,7 +359,7 @@ class CreateClassroom(commands.Cog):
             if class_type.title() == 'Pronunciation':
                 active_users = [uf for uf in users_feedback if uf[3] >= 1800]
             elif class_type.title() == 'Grammar':
-                active_users = [uf for uf in users_feedback if uf[1] >= 10]
+                active_users = [uf for uf in users_feedback if uf[1] >= 5]
 
 
         mycursor, db = await the_database()
