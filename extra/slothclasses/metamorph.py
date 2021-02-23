@@ -45,6 +45,8 @@ class Metamorph(Player):
 			channel_id=ctx.channel.id
 		)
 		await self.update_user_action_skill_ts(member.id, timestamp)
+		# Updates user's skills used counter
+		await self.update_user_skills_used(user_id=attacker.id)
 
 		transmutation_embed = await self.get_transmutation_embed(channel=ctx.channel, perpetrator_id=ctx.author.id)
 		await ctx.send(embed=transmutation_embed)
@@ -78,6 +80,8 @@ class Metamorph(Player):
 		:param target: The person who you want to impersonate. """
 
 
+		# # Updates user's skills used counter
+		# await self.update_user_skills_used(user_id=attacker.id)
 		pass
 
 

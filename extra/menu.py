@@ -6,18 +6,19 @@ import asyncio
 class ConfirmSkill(menus.Menu):
 	""" Class related to confirmation skill actions. """
 
-	def __init__(self, msg):
+	def __init__(self, msg, content: str = None):
 		""" Class initializing method that inherits the parent's initializer. """
 
 		super().__init__(timeout=60, delete_message_after=False, clear_reactions_after=True)
 
+		self.content = content
 		self.msg = msg
 		self.result = None
 
 	async def send_initial_message(self, ctx, channel) -> discord.Message:
 		""" Sends the initial message. """
 
-		self.sent_msg = await channel.send(embed=discord.Embed(description=self.msg, color=discord.Color.orange()))
+		self.sent_msg = await channel.send(content=self.content, embed=discord.Embed(description=self.msg, color=discord.Color.orange()))
 		return self.sent_msg
 
 	async def finalize(self, timed_out) -> None:

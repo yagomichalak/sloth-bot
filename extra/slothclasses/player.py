@@ -389,6 +389,16 @@ class Player(commands.Cog):
 		await db.commit()
 		await mycursor.close()
 
+	async def update_user_skills_used(self, user_id: int, addition: int = 1) -> None:
+		""" Updates the user's skills used counter.
+		:param user_id: The ID of the user.
+		:param addition: What will be added to the user's current number of skills used. (Can be negative numbers)"""
+
+		mycursor, db = await the_database()
+		await mycursor.execute("UPDATE UserCurrency SET skills_used = skills_used + %s WHERE user_id = %s", (addition, user_id))
+		await db.commit()
+		await mycursor.close()
+
 	async def reset_user_action_skill_cooldown(self, user_id: int) -> None:
 		""" Resets the user's action skill cooldown. 
 		:param user_id: The ID of the user to reet the cooldown. """

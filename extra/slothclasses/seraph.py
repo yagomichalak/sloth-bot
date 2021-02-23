@@ -53,6 +53,8 @@ class Seraph(Player):
 			)
 			await self.update_user_protected(target.id, 1)
 			await self.update_user_action_skill_ts(ctx.author.id, current_timestamp)
+			# Updates user's skills used counter
+			await self.update_user_skills_used(user_id=ctx.author.id)
 			divine_protection_embed = await self.get_divine_protection_embed(
 				channel=ctx.channel, perpetrator_id=ctx.author.id, target_id=target.id)
 			await ctx.send(embed=divine_protection_embed)
@@ -101,8 +103,10 @@ class Seraph(Player):
 
 		# Upate user's money 
 		await self.update_user_money(perpetrator.id, -50)
-		# # Update perpetrator's second skill timestamp
+		# Update perpetrator's second skill timestamp
 		await self.update_user_action_skill_two_ts(user_id=perpetrator.id, current_ts=current_timestamp)
+		# Updates user's skills used counter
+		await self.update_user_skills_used(user_id=perpetrator.id)
 
 		# Calculates chance (35%) of reinforcing the shields of the targets
 		n1 = random.random()
@@ -111,7 +115,6 @@ class Seraph(Player):
 			try:
 				# Update active Divine Protection shields' time (+1 day)
 				await self.reinforce_shields(perpetrator_id=perpetrator.id)
-
 			except Exception as e:
 				print(e)
 				await ctx.send(f"**For some reason I couldn't reinforce the shield(s), {perpetrator.mention}!**")

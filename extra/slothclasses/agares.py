@@ -81,6 +81,8 @@ class Agares(Player):
 			# Puts the attacker's skill on cooldown
 			current_ts = await self.get_timestamp()
 			await self.update_user_action_skill_ts(attacker.id, current_ts)
+			# Updates user's skills used counter
+			await self.update_user_skills_used(user_id=attacker.id)
 			# Sends embedded message into the channel
 			magic_pull_embed = await self.get_magic_pull_embed(
 				channel=ctx.channel, perpetrator_id=attacker.id, target_id=target.id,
@@ -133,6 +135,8 @@ class Agares(Player):
 			# Puts the perpetrator's skill on cooldown
 			current_ts = await self.get_timestamp()
 			await self.update_user_action_skill_two_ts(perpetrator.id, current_ts)
+			# Updates user's skills used counter
+			await self.update_user_skills_used(user_id=perpetrator.id)
 			# Sends embedded message into the channel
 			recharge_embed = await self.get_recharge_embed(
 				channel=ctx.channel, perpetrator_id=perpetrator.id, target_id=target.id)
