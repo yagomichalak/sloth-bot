@@ -109,6 +109,8 @@ class Prawler(Player):
 				target_id=target.id, message_id=steal.id, channel_id=steal.channel.id, emoji="🛡️"
 			)
 			await self.update_user_action_skill_ts(attacker.id, current_timestamp)
+			# Updates user's skills used counter
+			await self.update_user_skills_used(user_id=attacker.id)
 		except Exception as e:
 			print(e)
 			await steal.delete()
@@ -164,6 +166,8 @@ class Prawler(Player):
 			current_ts = await self.get_timestamp()
 			await self.update_user_action_skill_two_ts(user_id=perpetrator.id, current_ts=current_ts)
 			await self.increments_user_sharpness_stack(user_id=perpetrator.id, increment=1)
+			# Updates user's skills used counter
+			await self.update_user_skills_used(user_id=perpetrator.id)
 
 		except Exception as e:
 			print(e)

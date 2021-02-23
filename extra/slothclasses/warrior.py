@@ -71,6 +71,9 @@ class Warrior(Player):
 				target_id=target.id, channel_id=ctx.channel.id
 			)
 			await self.update_user_action_skill_ts(attacker.id, current_timestamp)
+			# Updates user's skills used counter
+			await self.update_user_skills_used(user_id=attacker.id)
+
 			hit_embed = await self.get_hit_embed(
 				channel=ctx.channel, perpetrator_id=attacker.id, target_id=target.id)
 			msg = await ctx.send(embed=hit_embed)
@@ -125,8 +128,6 @@ class Warrior(Player):
 			return await ctx.send("**Not hacking them, then!**")
 
 
-
-
 		await self.check_cooldown(user_id=attacker.id, skill_number=2)
 
 		current_timestamp = await self.get_timestamp()
@@ -134,6 +135,8 @@ class Warrior(Player):
 		await self.update_user_money(attacker.id, -50)
 		# # Update attacker's second skill timestamp
 		await self.update_user_action_skill_two_ts(user_id=attacker.id, current_ts=current_timestamp)
+		# Updates user's skills used counter
+		await self.update_user_skills_used(user_id=attacker.id)
 
 		# Calculates chance of smashing someone's Divine Protection shield
 		if random.random() <= 0.35:

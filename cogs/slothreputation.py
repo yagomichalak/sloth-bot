@@ -120,6 +120,13 @@ class SlothReputation(commands.Cog):
         embed.add_field(name=f"💰 __**Exchangeable Activity:**__", value=f"{h:d} hours, {m:02d} minutes and {user_info[0][1]} messages.", inline=True)
 
         embed.add_field(name=f"🏆 __**Leaderboard Info:**__", value=f"{position[1]}. pts | #{position[0]}", inline=True)
+
+        embed.add_field(name="🧮 __**Skills Used:**__", value=f"{ucur[0][15]} skills.")
+
+        user_tribe = await self.client.get_cog('SlothClass').get_tribe_info_by_name(name=ucur[0][18])
+
+        embed.add_field(name="🏕️ __**Tribe:**__", value=f"[{user_tribe['name']}]({user_tribe['link']}) ({user_tribe['two_emojis']})", inline=True)
+
         embed.set_thumbnail(url=member.avatar_url)
         embed.set_author(name=member, icon_url=member.avatar_url, url=member.avatar_url)
         embed.set_footer(text=ctx.guild, icon_url=ctx.guild.icon_url)
@@ -195,7 +202,7 @@ class SlothReputation(commands.Cog):
         # Embeds each one of the top ten users.
         for i, sm in enumerate(top_ten_users):
             member = discord.utils.get(ctx.guild.members, id=sm[0])
-            leaderboard.add_field(name=f"[{i + 1}]# - __**{member}**__", value=f"__**Level:**__ `{sm[2]}` | __**XP:**__ `{sm[1]}`",
+            leaderboard.add_field(name=f"[{i + 1}]# - __**{member}**__", value=f"__**Level:**__ `{sm[1]}` | __**XP:**__ `{sm[1]}`",
                                   inline=False)
             if i + 1 == 10:
                 break

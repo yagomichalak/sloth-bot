@@ -57,6 +57,8 @@ class Merchant(Player):
 					target_id=member.id, channel_id=ctx.channel.id, price=item_price
 				)
 				await self.update_user_action_skill_ts(member.id, current_timestamp)
+				# Updates user's skills used counter
+				await self.update_user_skills_used(user_id=member.id)
 				open_shop_embed = await self.get_open_shop_embed(
 					channel=ctx.channel, perpetrator_id=member.id, price=item_price)
 				await ctx.send(embed=open_shop_embed)
@@ -208,6 +210,8 @@ class Merchant(Player):
 
 		current_timestamp = await self.get_timestamp()
 		await self.update_user_action_skill_two_ts(merchant.id, current_timestamp)
+		# Updates user's skills used counter
+		await self.update_user_skills_used(user_id=merchant.id)
 
 		if random.random() <= 0.35:
 			SlothCurrency = self.client.get_cog('SlothCurrency')

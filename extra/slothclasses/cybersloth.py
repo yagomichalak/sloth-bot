@@ -68,6 +68,8 @@ class Cybersloth(Player):
 				target_id=target.id, channel_id=ctx.channel.id
 			)
 			await self.update_user_action_skill_ts(attacker.id, current_timestamp)
+			# Updates user's skills used counter
+			await self.update_user_skills_used(user_id=attacker.id)
 			hack_embed = await self.get_hack_embed(
 				channel=ctx.channel, perpetrator_id=attacker.id, target_id=target.id)
 			msg = await ctx.send(embed=hack_embed)
@@ -131,7 +133,8 @@ class Cybersloth(Player):
 				target_id=target.id, channel_id=ctx.channel.id
 			)
 			await self.update_user_action_skill_two_ts(attacker.id, current_timestamp)
-
+			# Updates user's skills used counter
+			await self.update_user_skills_used(user_id=attacker.id)
 			
 		except Exception as e:
 			print(e)
