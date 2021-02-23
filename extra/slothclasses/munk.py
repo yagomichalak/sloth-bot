@@ -209,7 +209,7 @@ class Munk(Player):
 			return await ctx.send(f"You need to inform an image URL within 200 characters, {requester.mention}!**")
 
 		user_tribe = await self.get_tribe_info_by_user_id(user_id=requester.id)
-		if not user_tribe:
+		if not user_tribe['name']:
 			return await ctx.send(f"**You don't even have a tribe, you cannot request it, {request.mention}!**")
 
 		confirm = await ConfirmSkill(content=requester.mention, 
@@ -237,14 +237,14 @@ class Munk(Player):
 
 		inviter = ctx.author
 		user_tribe = await self.get_tribe_info_by_user_id(user_id=inviter.id)
-		if not user_tribe:
+		if not user_tribe['name']:
 			return await ctx.send(f"**You don't have a tribe, {inviter.mention}**!")
 
 		if not member:
 			return await ctx.send(f"**Please, inform a member to invite to your tribe, {inviter.mention}!**")
 
-		# if inviter.id == member.id:
-		# 	return await ctx.send(f"**You cannot invite yourself into your own tribe, {inviter.mention}!**")
+		if inviter.id == member.id:
+			return await ctx.send(f"**You cannot invite yourself into your own tribe, {inviter.mention}!**")
 
 		confirm = await ConfirmSkill(f"Are you sure you want to invite, {member.mention} to `{user_tribe['name']}`?").prompt(ctx)
 		if not confirm:
@@ -288,7 +288,7 @@ class Munk(Player):
 
 		expeller = ctx.author
 		user_tribe = await self.get_tribe_info_by_user_id(user_id=expeller.id)
-		if not user_tribe:
+		if not user_tribe['name']:
 			return await ctx.send(f"**You don't have a tribe, {expeller.mention}**!")
 
 		if not member:
