@@ -246,9 +246,35 @@ class Munk(Player):
 
 		return tribe_info
 
+	async def get_tribe_members(self, tribe_owner_id: int = None, tribe_name: str = None) -> Dict[str, List[int]]:
+		""" Gets a list of IDs of members of a particular tribe.
+		:param tribe_owner_id: The ID of the owner of the tribe (Optional).
+		:param tribe_name: The name of the tribe. (Optional).
+		Ps: At least one of the parameters has to be provided. """
+
+		mycursor, db = await the_database()
+
+		tribe_members: Dict[str, List[int]] = {}
+
+		if tribe_owner_id:
+			await mycursor.execute("SELECT tribe_name FROM UserTribe WHERE user_id = %s", (tribe_owner_id,))
+			tribe = await mycursor.fetchone()
+			await mycursor.execute("SELECT user_id FROM UserCurrency WHERE tribe = %s", (tribe[0],))
+			tribe_members = await mycursor.fetchall()
+
+		elif tribe_name:
+			await mycursor.execute("SELECT user_id FROM UserCurrency WHERE tribe = %s", (tribe_name,))
+			tribe_members = list(map(lambda mid: mid[0], await mycursor.fetchall()))
+
+		await mycursor.close()
+
+		return tribe_members
+
+
+
 
 	@commands.command(aliases=['request_logo', 'ask_thumbnail', 'ask_logo'])
-	# @commands.cooldown(1, 3600, commands.BucketType.user)
+	@commands.cooldown(1, 3600, commands.BucketType.user)
 	async def request_thumbnail(self, ctx, image_url: str = None) -> None:
 		""" Request a thumbnail for your tribe.
 		:param image_url: The URL link of the thumbnail image. """
@@ -359,6 +385,62 @@ class Munk(Player):
 		else:
 			await ctx.send(f"**{member.mention} refused your invitation to join `{user_tribe['name']}`, {inviter.mention}!**")
 
+
+	@commands.command()	
+	# @commands.cooldown(1, 10, commands.BucketType.user)
+	async def tribe(self, ctx, *, name: str = None) -> None:
+		""" Shows some information about a tribe.
+		If not provided a tribe name, it will check the one the user is in. 
+		:param name: The tribe name. """
+
+
+		member = ctx.author
+		
+		tribe = None
+		if name:
+			tribe = await self.get_tribe_info_by_name(name)
+		else:
+			user_currency = await self.get_user_currency(member.id)
+			if not user_currency or not user_currency[18]:
+				return await ctx.send(
+					f"**You didn't provide any tribe name and you're not in a tribe either, {member.mention}!**")
+	
+
+			tribe = await self.get_tribe_info_by_name(user_currency[18])
+
+		if not tribe['name']:
+			return await ctx.send(f"**No tribes with that name were found, {member.mention}!**")
+
+
+		tribe_owner = self.client.get_user(tribe['owner_id'])
+
+		tribe_embed = discord.Embed(
+			title=f"{tribe['name']} ({tribe['two_emojis']})",
+			description=tribe['description'],
+			color=tribe_owner.color if tribe_owner else member.color,
+			timestamp=ctx.message.created_at,
+			url=tribe['link']
+			)
+
+		if tribe['thumbnail']:
+			tribe_embed.set_thumbnail(url=tribe['thumbnail'])
+		if tribe_owner:
+			tribe_embed.set_author(name=f"Owner: {tribe_owner}", icon_url=tribe_owner.avatar_url, url=tribe_owner.avatar_url)
+
+		tribe_embed.set_footer(text=f"Requested by {member}", icon_url=member.avatar_url)
+
+		tribe_members = await self.get_tribe_members(tribe_name=tribe['name'])
+
+		tribe_owner =  self.client.get_user(tribe['owner_id'])
+
+		all_members = list(map(lambda mid: f"<@{mid}>", tribe_members))
+		tribe_embed.add_field(name="__Members:__", value=', '.join(all_members), inline=False)
+
+
+
+		await ctx.send(embed=tribe_embed)
+
+
 	@commands.command(aliases=['expel', 'kick_out', 'can_i_show_you_the_door?'])
 	@commands.cooldown(1, 10, commands.BucketType.user)
 	async def kickout(self, ctx, member: discord.Member = None) -> None:
@@ -422,6 +504,13 @@ class Munk(Player):
 		await mycursor.execute("""
 			UPDATE tribe_tribe SET tribe_thumbnail = %s 
 			WHERE owner_id = %s AND tribe_name = %s""", (link, user_id, tribe_name))
+		await db.commit()
+		await mycursor.close()
+
+		mycursor, db = await the_database()
+		await mycursor.execute("""
+			UPDATE UserTribe SET tribe_thumbnail = %s 
+			WHERE user_id = %s AND tribe_name = %s""", (link, user_id, tribe_name))
 		await db.commit()
 		await mycursor.close()
 
