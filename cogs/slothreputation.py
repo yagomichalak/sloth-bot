@@ -84,8 +84,9 @@ class SlothReputation(commands.Cog):
             else:
                 return await ctx.send(f"**{member} doesn't have an account yet!**")
 
+        SlothCurrency = self.client.get_cog('SlothCurrency')
+
         if ucur[0][12]:
-            SlothCurrency = self.client.get_cog('SlothCurrency')
             return await SlothCurrency.send_hacked_image(ctx, member)
 
         all_users = await self.get_all_users_by_score_points()
@@ -93,7 +94,7 @@ class SlothReputation(commands.Cog):
         position = [it for subpos in position for it in subpos] if position else ['??', 0]
 
         # Gets user Server Activity info, such as messages sent and time in voice channels
-        user_info = await self.client.get_cog('SlothCurrency').get_user_activity_info(member.id)
+        user_info = await SlothCurrency.get_user_activity_info(member.id)
         if not user_info and member.id == ctx.author.id:
             return await ctx.send(f"**For some reason you are not in the system, {ctx.author.mention}! Try again**")
 
@@ -123,9 +124,14 @@ class SlothReputation(commands.Cog):
 
         embed.add_field(name="🧮 __**Skills Used:**__", value=f"{ucur[0][15]} skills.")
 
-        user_tribe = await self.client.get_cog('SlothClass').get_tribe_info_by_name(name=ucur[0][18])
 
-        embed.add_field(name="🏕️ __**Tribe:**__", value=f"[{user_tribe['name']}]({user_tribe['link']}) ({user_tribe['two_emojis']})", inline=True)
+        SlothClass = self.client.get_cog('SlothClass')
+        # Gets tribe information for the given user
+        if user_tribe := await SlothClass.get_tribe_info_by_user_id(user_id=member.id):
+            embed.add_field(name="🏕️ __**Tribe:**__", value=f"[{user_tribe['name']}]({user_tribe['link']}) ({user_tribe['two_emojis']}) 👑", inline=True)
+        else:
+            user_tribe = await SlothClass.get_tribe_info_by_name(name=ucur[0][18])
+            embed.add_field(name="🏕️ __**Tribe:**__", value=f"[{user_tribe['name']}]({user_tribe['link']}) ({user_tribe['two_emojis']})", inline=True)
 
         embed.set_thumbnail(url=member.avatar_url)
         embed.set_author(name=member, icon_url=member.avatar_url, url=member.avatar_url)
