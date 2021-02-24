@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 from .player import Player
-from mysqldb import the_database
+from mysqldb import the_database, the_django_database
 from extra.menu import ConfirmSkill
 import os
 from datetime import datetime
@@ -9,11 +9,69 @@ from typing import List, Union, Dict, Any
 import asyncio
 
 bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
+approve_thumbnail_channel_id = int(os.getenv('APPROVE_THUMBNAIL_CHANNEL_ID'))
 
 class Munk(Player):
 
 	def __init__(self, client) -> None:
 		self.client = client
+
+
+	@commands.Cog.listener()
+	async def on_raw_reaction_add(self, payload) -> None:
+		""" Checks reactions related to skill actions. """
+
+		# Checks if it wasn't a bot's reaction
+		if not payload.guild_id:
+			return
+
+		# Checks whether it's a valid member and not a bot
+		if not payload.member or payload.member.bot:
+			return
+
+		if payload.channel_id != approve_thumbnail_channel_id:
+			return
+
+		skill_action = await self.get_skill_action_by_message_id_and_skill_type(message_id=payload.message_id, skill_type='thumbnail_request')
+		if skill_action is not None:
+			emoji = str(payload.emoji)
+
+			# Checks whether it's a steal
+			if emoji == '✅':
+
+				await self.delete_skill_action_by_message_id(payload.message_id)
+				channel = self.client.get_channel(skill_action[5])
+
+				message = await channel.fetch_message(skill_action[4])
+				if message:
+					tribe = await self.get_tribe_info_by_user_id(user_id=skill_action[0])
+					message_embed = discord.Embed(
+						title="Thumbnail Approved!",
+						description=f"**<@{payload.user_id}>, approved your tribe `{tribe['name']}`'s thumbnail/logo, <@{skill_action[0]}>!**",
+						color = discord.Color.green(),
+						url=tribe['link']
+					)
+					message_embed.set_image(url=skill_action[8])
+					await self.bots_txt.send(content=f"<@{skill_action[0]}>", embed=message_embed)
+					await message.delete()
+					await self.update_tribe_thumbnail(user_id=skill_action[0], tribe_name=tribe['name'],link=skill_action[8])
+
+			elif emoji == '❌':
+
+				await self.delete_skill_action_by_message_id(payload.message_id)
+				channel = self.client.get_channel(skill_action[5])
+				message = await channel.fetch_message(skill_action[4])
+				if message:
+					tribe = await self.get_tribe_info_by_user_id(user_id=skill_action[0])
+					message_embed = discord.Embed(
+						title="Thumbnail Refused!",
+						description=f"**<@{payload.user_id}>, refused your tribe `{tribe['name']}`'s thumbnail/logo, <@{skill_action[0]}>!**",
+						color = discord.Color.red(),
+						url=tribe['link']
+					)
+					message_embed.set_image(url=skill_action[8])
+					await self.bots_txt.send(content=f"<@{skill_action[0]}>", embed=message_embed)
+					await message.delete()
 
 
 	@commands.command()
@@ -189,15 +247,16 @@ class Munk(Player):
 		return tribe_info
 
 
-
-
 	@commands.command(aliases=['request_logo', 'ask_thumbnail', 'ask_logo'])
-	@commands.cooldown(1, 3600, commands.BucketType.user)
+	# @commands.cooldown(1, 3600, commands.BucketType.user)
 	async def request_thumbnail(self, ctx, image_url: str = None) -> None:
 		""" Request a thumbnail for your tribe.
 		:param image_url: The URL link of the thumbnail image. """
 
 		requester = ctx.author
+
+		if ctx.channel.id != bots_and_commands_channel_id:
+			return await ctx.send(f"**{ctx.author.mention}, you can only use this command in {self.bots_txt.mention}!**")
 
 		if not image_url:
 			return await ctx.send(f"You need to inform an image URL, {requester.mention}!**")
@@ -210,19 +269,35 @@ class Munk(Player):
 
 		user_tribe = await self.get_tribe_info_by_user_id(user_id=requester.id)
 		if not user_tribe['name']:
-			return await ctx.send(f"**You don't even have a tribe, you cannot request it, {request.mention}!**")
+			return await ctx.send(f"**You don't even have a tribe, you cannot request it, {requester.mention}!**")
 
 		confirm = await ConfirmSkill(content=requester.mention, 
-			msg=f"**Are you sure you want to request [this]({image_url}) to be `{user_tribe['name']}`'s thumbnail/logo?**")
+			msg=f"**Are you sure you want to request [this]({image_url}) to be `{user_tribe['name']}`'s thumbnail/logo?**").prompt(ctx)
 		if confirm:
 			# Sends message to a moderation-clearance room
-			room = None
+			room = self.client.get_channel(approve_thumbnail_channel_id)
 			request_embed = discord.Embed(
 				title="__Thumbnail Request__",
-				description=f"{requester.mention} is requesting the image below to be their tribe's (`{user_tribe['name']}`) thumbnail/logo. Use z!approve_thumbnail"
-				)
+				description=f"{requester.mention} is requesting the image below to be their tribe's (`{user_tribe['name']}`) thumbnail/logo.",
+				color=requester.color,
+				timestamp=ctx.message.created_at
+			)
 			request_embed.set_image(url=image_url)
-			await room.send(embed=request_embed)
+			request_msg = await room.send(embed=request_embed)
+
+			# Don't need to store it, since it is forever
+			current_timestamp = await self.get_timestamp()
+
+			await self.insert_skill_action(
+				user_id=requester.id, skill_type="thumbnail_request", skill_timestamp=current_timestamp, 
+				target_id=requester.id, channel_id=room.id, message_id=request_msg.id,
+				content=image_url
+			)
+
+			await request_msg.add_reaction('✅')
+			await request_msg.add_reaction('❌')
+
+			await ctx.send(f"**Request sent, {ctx.author.mention}!**")
 
 		else:
 			await ctx.send(f"**Not doing requesting it, then, {requester.mention}!**")
@@ -236,6 +311,10 @@ class Munk(Player):
 		:param member: The member to invite. """
 
 		inviter = ctx.author
+
+		if ctx.channel.id != bots_and_commands_channel_id:
+			return await ctx.send(f"**{inviter.mention}, you can only use this command in {self.bots_txt.mention}!**")
+
 		user_tribe = await self.get_tribe_info_by_user_id(user_id=inviter.id)
 		if not user_tribe['name']:
 			return await ctx.send(f"**You don't have a tribe, {inviter.mention}**!")
@@ -287,6 +366,10 @@ class Munk(Player):
 		:param member: The member to expel. """
 
 		expeller = ctx.author
+
+		if ctx.channel.id != bots_and_commands_channel_id:
+			return await ctx.send(f"**{expeller.mention}, you can only use this command in {self.bots_txt.mention}!**")
+
 		user_tribe = await self.get_tribe_info_by_user_id(user_id=expeller.id)
 		if not user_tribe['name']:
 			return await ctx.send(f"**You don't have a tribe, {expeller.mention}**!")
@@ -294,8 +377,8 @@ class Munk(Player):
 		if not member:
 			return await ctx.send(f"**Please, inform a member to invite to your tribe, {expeller.mention}!**")
 
-		# if expeller.id == member.id:
-		# 	return await ctx.send(f"**You cannot kick yourself out of your own tribe, {expeller.mention}!**")
+		if expeller.id == member.id:
+			return await ctx.send(f"**You cannot kick yourself out of your own tribe, {expeller.mention}!**")
 
 		confirm = await ConfirmSkill(f"Are you sure you want to kick, {member.mention} to `{user_tribe['name']}`?").prompt(ctx)
 		if not confirm:
@@ -325,6 +408,20 @@ class Munk(Player):
 
 		mycursor, db = await the_database()
 		await mycursor.execute("UPDATE UserCurrency SET tribe = %s WHERE user_id = %s", (tribe_name, user_id))
+		await db.commit()
+		await mycursor.close()
+
+
+	async def update_tribe_thumbnail(self, user_id: int, tribe_name: str, link: str = None) -> None:
+		""" Updates someone's tribe thumbnail link.
+		:param user_id: The ID of the tribe's owner.
+		:param tribe_name: The name of the tribe.
+		:param link: The link that the tribe's thumbnail will be set to. """
+
+		mycursor, db = await the_django_database()
+		await mycursor.execute("""
+			UPDATE tribe_tribe SET tribe_thumbnail = %s 
+			WHERE owner_id = %s AND tribe_name = %s""", (link, user_id, tribe_name))
 		await db.commit()
 		await mycursor.close()
 

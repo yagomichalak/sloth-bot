@@ -3,7 +3,7 @@ from discord.ext import commands
 
 from extra.customerrors import MissingRequiredSlothClass, ActionSkillOnCooldown, CommandNotReady
 
-from mysqldb import the_database
+from mysqldb import the_database, the_django_database
 from typing import Union, List
 from datetime import datetime
 import os
@@ -163,19 +163,20 @@ class Player(commands.Cog):
 
 
 
-	async def insert_skill_action(self, user_id: int, skill_type: str, skill_timestamp: int, target_id: int = None, message_id: int = None, channel_id: int = None, emoji: str = None, price: int = 0) -> None:
+	async def insert_skill_action(self, user_id: int, skill_type: str, skill_timestamp: int, target_id: int = None, message_id: int = None, channel_id: int = None, emoji: str = None, price: int = 0, content: str = None) -> None:
 		""" Inserts a skill action into the database, if needed.
 		:param user_id: The ID of the perpetrator of the skill action.
 		:param skill_type: The type of the skill action.
 		:param skill_timestamp: The timestamp of the skill action.
 		:param target_id: The ID of the target member of the skill action. 
 		:param message_id: The ID of the message related to the action, if there's any. 
-		:param price: The price of the item or something, if it is for sale. """
+		:param price: The price of the item or something, if it is for sale. 
+		:param content: The content of the skill, if any. """
 
 		mycursor, db = await the_database()
 		await mycursor.execute("""
-			INSERT INTO SlothSkills (user_id, skill_type, skill_timestamp, target_id, message_id, channel_id, emoji, price) 
-			VALUES (%s, %s, %s, %s, %s, %s, %s, %s)""", (user_id, skill_type, skill_timestamp, target_id, message_id, channel_id, emoji, price))
+			INSERT INTO SlothSkills (user_id, skill_type, skill_timestamp, target_id, message_id, channel_id, emoji, price, content) 
+			VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)""", (user_id, skill_type, skill_timestamp, target_id, message_id, channel_id, emoji, price, content))
 		await db.commit()
 		await mycursor.close()
 
@@ -187,6 +188,17 @@ class Player(commands.Cog):
 
 		mycursor, db = await the_database()
 		await mycursor.execute("SELECT * FROM SlothSkills WHERE message_id = %s", (message_id,))
+		skill_action = await mycursor.fetchone()
+		await mycursor.close()
+		return skill_action
+
+	async def get_skill_action_by_message_id_and_skill_type(self, message_id: int, skill_type: str) -> Union[List[Union[int, str]], bool]:
+		""" Gets a skill action by message ID and skill type.
+		:param message_id: The ID with which to get the skill action. 
+		:param skill_type: The skill type of the skill action. """
+
+		mycursor, db = await the_database()
+		await mycursor.execute("SELECT * FROM SlothSkills WHERE message_id = %s AND skill_type = %s", (message_id, skill_type))
 		skill_action = await mycursor.fetchone()
 		await mycursor.close()
 		return skill_action
