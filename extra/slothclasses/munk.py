@@ -462,14 +462,14 @@ class Munk(Player):
 			return await ctx.send(f"**You don't have a tribe, {expeller.mention}**!")
 
 		if not member:
-			return await ctx.send(f"**Please, inform a member to invite to your tribe, {expeller.mention}!**")
+			return await ctx.send(f"**Please, inform a member to kick from your tribe, {expeller.mention}!**")
 
 		if expeller.id == member.id:
 			return await ctx.send(f"**You cannot kick yourself out of your own tribe, {expeller.mention}!**")
 
 		confirm = await ConfirmSkill(f"Are you sure you want to kick, {member.mention} from `{user_tribe['name']}`?").prompt(ctx)
 		if not confirm:
-			return await ctx.send("**Not inviting them, then!**")
+			return await ctx.send("**Not kicking them, then!**")
 
 
 		# Checks whether user is already in a tribe.
@@ -490,6 +490,45 @@ class Munk(Player):
 			await ctx.send(f"**Something went wrong with it, {expeller.mention}!**")
 		else:
 			await ctx.send(f"**You successfully kicked {member.mention} out of `{user_tribe['name']}`, {expeller.mention}!**")
+
+
+	@commands.command()
+	@commands.cooldown(1, 10, commands.BucketType.user)
+	async def leave_tribe(self, ctx) -> None:
+		""" Leaves the tribe the user is in. """
+
+		member = ctx.author
+
+		if ctx.channel.id != bots_and_commands_channel_id:
+			return await ctx.send(f"**{member.mention}, you can only use this command in {self.bots_txt.mention}!**")
+
+		user_currency = await self.get_user_currency(user_id=member.id)
+		if not user_currency[18]:
+			return await ctx.send(f"**You are not in a tribe, {member.mention}**!")
+
+		user_tribe = await self.get_tribe_info_by_name(user_currency[18])
+
+		if member.id == user_tribe['owner_id']:
+			return await ctx.send(f"**You cannot leave your own tribe, {member.mention}!**")
+
+		confirm = await ConfirmSkill(f"Are you sure you want to leave `{user_tribe['name']}`, {member.mention}?").prompt(ctx)
+		if not confirm:
+			return await ctx.send("**Not leaving it, then!**")
+
+
+		# Updates user tribe status and nickname
+
+		try:
+			await self.update_someones_tribe(user_id=member.id, tribe_name=None)
+			try:
+				await self.update_tribe_name(member=member, two_emojis=user_tribe['two_emojis'], joining=False)
+			except:
+				pass
+		except Exception as e:
+			print(e)
+			await ctx.send(f"**Something went wrong with it, {member.mention}!**")
+		else:
+			await ctx.send(f"**You successfully left `{user_tribe['name']}`, {member.mention}!**")
 
 
 	async def update_someones_tribe(self, user_id: int, tribe_name: str = None) -> None:
