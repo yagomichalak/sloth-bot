@@ -47,6 +47,7 @@ class SlothClass(*classes.values()):
 		await self.try_to_run(self.check_hacks)
 		await self.try_to_run(self.check_knock_outs)
 		await self.try_to_run(self.check_wires)
+		await self.try_to_run(self.check_tribe_creations)
 
 	async def try_to_run(self, func):
 		""" Tries to run a function/method and ignore failures. """

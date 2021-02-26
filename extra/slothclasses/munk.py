@@ -373,6 +373,11 @@ class Munk(Player):
 			if not user_currency[18]:
 				try:
 					await self.update_someones_tribe(user_id=member.id, tribe_name=user_tribe['name'])
+					try:
+						await self.update_tribe_name(member=member, two_emojis=user_tribe['two_emojis'], joining=True)
+					except:
+						pass
+
 				except Exception as e:
 					print(e)
 					await ctx.send(f"**Something went wrong with it, {member.mention}, {inviter.mention}!**")
@@ -387,7 +392,7 @@ class Munk(Player):
 
 
 	@commands.command()	
-	# @commands.cooldown(1, 10, commands.BucketType.user)
+	@commands.cooldown(1, 10, commands.BucketType.user)
 	async def tribe(self, ctx, *, name: str = None) -> None:
 		""" Shows some information about a tribe.
 		If not provided a tribe name, it will check the one the user is in. 
@@ -462,7 +467,7 @@ class Munk(Player):
 		if expeller.id == member.id:
 			return await ctx.send(f"**You cannot kick yourself out of your own tribe, {expeller.mention}!**")
 
-		confirm = await ConfirmSkill(f"Are you sure you want to kick, {member.mention} to `{user_tribe['name']}`?").prompt(ctx)
+		confirm = await ConfirmSkill(f"Are you sure you want to kick, {member.mention} from `{user_tribe['name']}`?").prompt(ctx)
 		if not confirm:
 			return await ctx.send("**Not inviting them, then!**")
 
@@ -476,6 +481,10 @@ class Munk(Player):
 
 		try:
 			await self.update_someones_tribe(user_id=member.id, tribe_name=None)
+			try:
+				await self.update_tribe_name(member=member, two_emojis=user_tribe['two_emojis'], joining=False)
+			except:
+				pass
 		except Exception as e:
 			print(e)
 			await ctx.send(f"**Something went wrong with it, {expeller.mention}!**")
@@ -513,6 +522,47 @@ class Munk(Player):
 			WHERE user_id = %s AND tribe_name = %s""", (link, user_id, tribe_name))
 		await db.commit()
 		await mycursor.close()
+
+
+	async def update_tribe_name(self, member: int, two_emojis: str, joining: bool) -> None:
+		""" Updates someone's nickname so it has their tribe's two-emoji combination identifier. 
+		:param member: The member whose nickname is gonna be updated.
+		:param two_emojis: The two-emoji combination identifier. 
+		:param joining: Whether the user is joining the tribe. """
+
+		dname = member.display_name
+
+		if joining:
+
+			# Checks whether member is Munked
+			if dname.endswith('Munk'):
+				await member.edit(nick=f"{dname.strip()[:-4]} {two_emojis} Munk".strip())
+			else:
+				await member.edit(nick=f"{dname.strip()} {two_emojis}".strip())
+
+		else:
+
+			nick = ' '.join(map(lambda p: p.strip(), dname.rsplit(two_emojis, 1)))
+			if nick != dname:
+				await member.edit(nick=nick)
+
+
+	async def check_tribe_creations(self) -> None:
+		""" Check on-going steals and their expiration time. """
+		
+		creations = await self.get_skill_actions_by_skill_type('tribe_creation')
+		guild = self.client.get_guild(int(os.getenv('SERVER_ID')))
+		for creation in creations:
+			try:
+				# Removes skill action from the database
+				await self.delete_skill_action_by_target_id_and_skill_type(target_id=creation[0], skill_type='tribe_creation')
+				member = discord.utils.get(guild.members, id=creation[0])
+				try:
+					await self.update_tribe_name(member=member, two_emojis=creation[6], joining=True)
+				except:
+					pass
+			except:
+				pass
 
 
 	@commands.command(hidden=True)
