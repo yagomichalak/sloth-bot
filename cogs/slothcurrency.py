@@ -585,7 +585,8 @@ class SlothCurrency(commands.Cog):
             user_lotto bigint default null, sloth_class varchar(30) default 'default', change_class_ts bigint default 0,
             last_skill_ts bigint default 0, protected tinyint(1) default 0, has_potion tinyint(1) default 0,
             hacked tinyint(1) default 0, knocked_out tinyint(1) default 0), last_skill_two_ts bigint default 0,
-            skills_used int default 0, wired tinyint(1) default 0, tribe varchar(50) default null
+            skills_used int default 0, wired tinyint(1) default 0, tribe varchar(50) default null,
+            frogified tinyint(1) default 0
             """)
         await db.commit()
         await mycursor.close()

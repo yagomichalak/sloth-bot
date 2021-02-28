@@ -115,6 +115,7 @@ class SlothReputation(commands.Cog):
         # embed.add_field(name="<a:hackerman:802354539184259082> __**Hacked:**__", value=f"{True if ucur[0][12] else False}", inline=True)
         embed.add_field(name="😵 __**Knocked Out:**__", value=f"{True if ucur[0][13] else False}", inline=True)
         embed.add_field(name="🔌 __**Wired:**__", value=f"{True if ucur[0][17] else False}", inline=True)
+        embed.add_field(name="🐸 __**Frogified:**__", value=f"{True if ucur[0][19] else False}", inline=True)
         embed.add_field(name="🔪 __**Knife Sharpness Stack:**__", value=f"{ucur[0][16]}/5", inline=True)
         m, s = divmod(user_info[0][2], 60)
         h, m = divmod(m, 60)
@@ -202,13 +203,13 @@ class SlothReputation(commands.Cog):
         position = [[i+1, u[1]] for i, u in enumerate(all_users) if u[0] == ctx.author.id]
         position = [it for subpos in position for it in subpos] if position else ['??', 0]
 
-        leaderboard.set_footer(text=f"Your level: {position[1]} | #{position[0]}", icon_url=ctx.author.avatar_url)
+        leaderboard.set_footer(text=f"Your XP: {position[1]} | #{position[0]}", icon_url=ctx.author.avatar_url)
         leaderboard.set_thumbnail(url=ctx.guild.icon_url)
 
         # Embeds each one of the top ten users.
         for i, sm in enumerate(top_ten_users):
             member = discord.utils.get(ctx.guild.members, id=sm[0])
-            leaderboard.add_field(name=f"[{i + 1}]# - __**{member}**__", value=f"__**Level:**__ `{sm[1]}` | __**XP:**__ `{sm[1]}`",
+            leaderboard.add_field(name=f"[{i + 1}]# - __**{member}**__", value=f"__**Level:**__ `{sm[2]}` | __**XP:**__ `{sm[1]}`",
                                   inline=False)
             if i + 1 == 10:
                 break
