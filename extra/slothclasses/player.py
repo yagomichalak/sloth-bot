@@ -108,6 +108,41 @@ class Player(commands.Cog):
 
 	# Is user EFFECT
 
+	async def get_user_effects(self, user_id: int) -> List[str]:
+		""" Gets the effects that the user is under. """
+
+		effects = []
+
+		if await self.is_user_protected(user_id=user_id):
+			effects.append('protected')
+
+		if await self.is_transmutated(user_id=user_id):
+			effects.append('transmutated')
+
+		if await self.is_user_hacked(user_id=user_id):
+			effects.append('hacked')
+
+		if await self.is_user_wired(user_id=user_id):
+			effects.append('wired')
+
+		if await self.is_user_knocked_out(user_id=user_id):
+			effects.append('knocked_out')
+
+		if await self.is_user_knocked_out(user_id=user_id):
+			effects.append('knocked_out')
+
+
+		if await self.is_user_frogified(user_id=user_id):
+			effects.append('frogified')
+
+
+		return effects
+
+
+
+
+
+
 
 	async def is_user_protected(self, user_id: int) -> bool:
 		""" Checks whether user is protected.
@@ -159,6 +194,17 @@ class Player(commands.Cog):
 		user_knocked_out = await mycursor.fetchone()
 		await mycursor.close()
 		return user_knocked_out is not None and user_knocked_out[0]
+
+
+	async def is_user_frogified(self, user_id: int) -> bool:
+		""" Checks whether user is frogified out.
+		:param user_id: The ID of the user to check it. """
+
+		mycursor, db = await the_database()
+		await mycursor.execute("SELECT frogified FROM UserCurrency WHERE user_id = %s", (user_id,))
+		user_frogified = await mycursor.fetchone()
+		await mycursor.close()
+		return user_frogified is not None and user_frogified[0]
 
 
 
@@ -294,6 +340,19 @@ class Player(commands.Cog):
 		transmutations = await mycursor.fetchall()
 		await mycursor.close()
 		return transmutations
+
+	async def get_expired_frogifies(self) -> None:
+		""" Gets expired frogify skill actions. """
+
+		the_time = await self.get_timestamp()
+		mycursor, db = await the_database()
+		await mycursor.execute("""
+			SELECT * FROM SlothSkills 
+			WHERE skill_type = 'frogify' AND (%s - skill_timestamp) >= 86400
+			""", (the_time,))
+		frogifies = await mycursor.fetchall()
+		await mycursor.close()
+		return frogifies
 
 	async def get_expired_open_shop_items(self) -> None:
 		""" Gets expired transmutation skill actions. """
