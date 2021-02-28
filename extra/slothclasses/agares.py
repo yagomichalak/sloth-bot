@@ -90,10 +90,11 @@ class Agares(Player):
 			await ctx.send(content=target.mention, embed=magic_pull_embed)
 
 	@commands.command()
+	@Player.skills_used(requirement=5)
 	@Player.skill_on_cooldown(skill_number=2)
 	@Player.user_is_class('agares')
 	@Player.skill_mark()
-	@Player.not_ready()
+	# @Player.not_ready()
 	async def recharge(self, ctx, target: discord.Member = None) -> None:
 		""" Recharges someone's first skill by removing its cooldown.
 		:param target: The target person who you want to recharge the skill for. """

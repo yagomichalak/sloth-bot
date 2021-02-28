@@ -78,10 +78,11 @@ class Cybersloth(Player):
 			return await ctx.send(f"**Something went wrong and your `Hack` skill failed, {attacker.mention}!**")
 
 	@commands.command()
+	@Player.skills_used(requirement=5)
 	@Player.skill_on_cooldown(skill_number=2)
 	@Player.user_is_class('cybersloth')
 	@Player.skill_mark()
-	@Player.not_ready()
+	# @Player.not_ready()
 	async def wire(self, ctx, target: discord.Member = None) -> None:
 		""" Wires someone so if they buy a potion or transfer money to someone, 
 		it siphons off up to 35% of the value amount. 

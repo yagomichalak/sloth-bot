@@ -115,7 +115,7 @@ class SlothReputation(commands.Cog):
         # embed.add_field(name="<a:hackerman:802354539184259082> __**Hacked:**__", value=f"{True if ucur[0][12] else False}", inline=True)
         embed.add_field(name="😵 __**Knocked Out:**__", value=f"{True if ucur[0][13] else False}", inline=True)
         embed.add_field(name="🔌 __**Wired:**__", value=f"{True if ucur[0][17] else False}", inline=True)
-        embed.add_field(name="🐸 __**Frogified:**__", value=f"{True if ucur[0][19] else False}", inline=True)
+        embed.add_field(name="🐸 __**Frogged:**__", value=f"{True if ucur[0][19] else False}", inline=True)
         embed.add_field(name="🔪 __**Knife Sharpness Stack:**__", value=f"{ucur[0][16]}/5", inline=True)
         m, s = divmod(user_info[0][2], 60)
         h, m = divmod(m, 60)

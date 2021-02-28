@@ -63,10 +63,11 @@ class Seraph(Player):
 
 
 	@commands.command()
+	@Player.skills_used(requirement=5)
 	@Player.skill_on_cooldown(skill_number=2)
 	@Player.user_is_class('seraph')
 	@Player.skill_mark()
-	@Player.not_ready()
+	# @Player.not_ready()
 	async def reinforce(self, ctx) -> None:
 		""" Gets a 35% chance of reinforcing all of their protected people's Divine Protection shield, 
 		by making it last for one more day and a 20% chance of getting a protection for themselves too 

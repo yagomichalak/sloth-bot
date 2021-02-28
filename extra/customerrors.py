@@ -18,3 +18,9 @@ class ActionSkillOnCooldown(commands.CheckFailure):
 
 
 class CommandNotReady(commands.CheckFailure): pass
+
+
+class SkillsUsedRequirement(commands.CheckFailure): 
+
+	def __init__(self, error_message: str) -> None:
+		self.error_message = error_message

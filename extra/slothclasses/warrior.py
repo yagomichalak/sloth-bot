@@ -83,10 +83,11 @@ class Warrior(Player):
 
 
 	@commands.command(aliases=['crush', 'break'])
+	@Player.skills_used(requirement=5)
 	@Player.skill_on_cooldown(skill_number=2)
 	@Player.user_is_class('warrior')
 	@Player.skill_mark()
-	@Player.not_ready()
+	# @Player.not_ready()
 	async def smash(self, ctx, target: discord.Member = None) -> None:
 		""" Has a 35% change of breaking someone's Divine Protection shield. 
 		:param target: The target who you are trying to smash the protection. """

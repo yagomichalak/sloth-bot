@@ -38,6 +38,8 @@ class Metamorph(Player):
 		if not confirmed:
 			return await ctx.send(f"**{member.mention}, not transmutating, then!**")
 
+		await self.check_cooldown(user_id=member.id, skill_number=1)
+
 		timestamp = await self.get_timestamp()
 		await self.insert_skill_action(
 			user_id=member.id, skill_type="transmutation",
@@ -46,7 +48,7 @@ class Metamorph(Player):
 		)
 		await self.update_user_action_skill_ts(member.id, timestamp)
 		# Updates user's skills used counter
-		await self.update_user_skills_used(user_id=attacker.id)
+		await self.update_user_skills_used(user_id=member.id)
 
 		transmutation_embed = await self.get_transmutation_embed(channel=ctx.channel, perpetrator_id=ctx.author.id)
 		await ctx.send(embed=transmutation_embed)
@@ -70,36 +72,35 @@ class Metamorph(Player):
 					color=discord.Color.red()))
 
 
-	async def check_frogifies(self) -> None:
+	async def check_frogs(self) -> None:
 
-		""" Check on-going frogifies and their expiration time. """
+		""" Check on-going frogs and their expiration time. """
 
-		frogifies = await self.get_expired_frogifies()
-		for ff in frogifies:
-			await self.delete_skill_action_by_target_id_and_skill_type(ff[3], 'frogify')
-			await self.update_user_frogified(ff[3], 0)
+		frogs = await self.get_expired_frogs()
+		print(frogs)
+		for f in frogs:
+			await self.delete_skill_action_by_target_id_and_skill_type(ff[3], 'frog')
+			await self.update_user_frogified(f[3], 0)
 
 			channel = self.bots_txt
 
 			await channel.send(
 				content=f"<@{ff[0]}>", 
 				embed=discord.Embed(
-					description=f"**<@{ff[3]}>'s `Frogify` has just expired! 🐸→💥→🦥**",
+					description=f"**<@{ff[3]}>'s `Frog` has just expired! 🐸→💥→🦥**",
 					color=discord.Color.red()))
 
 
-	@commands.command(aliases=['dnk'])
+	@commands.command(aliases=['frogify', 'dnk'])
+	@Player.skills_used(requirement=5)
 	@Player.skill_on_cooldown(skill_number=2)
 	@Player.user_is_class('metamorph')
 	@Player.skill_mark()
-	@Player.not_ready()
-	async def frogify(self, ctx, target: discord.Member = None) -> None:
+	# @Player.not_ready()
+	async def frog(self, ctx, target: discord.Member = None) -> None:
 		""" Makes someone a frog temporarily. 
-		:param target: The person who you want to frogify. """
+		:param target: The person who you want to frog. """
 
-
-		# # Updates user's skills used counter
-		# await self.update_user_skills_used(user_id=attacker.id)
 		
 		if ctx.channel.id != bots_and_commands_channel_id:
 			return await ctx.send(f"**{ctx.author.mention}, you can only use this command in {self.bots_txt.mention}!**")
@@ -107,35 +108,34 @@ class Metamorph(Player):
 		attacker = ctx.author
 
 		if not target:
-			return await ctx.send(f"**Please, inform a target to frogify, {attacker.mention}!**")
+			return await ctx.send(f"**Please, inform a target to frog, {attacker.mention}!**")
 
 		if target.id == attacker.id:
-			return await ctx.send(f"**You cannot frogify yourself, {attacker.mention}!**")
+			return await ctx.send(f"**You cannot frog yourself, {attacker.mention}!**")
 
 		attacker_effects = await self.get_user_effects(user_id=attacker.id)
 
 		if 'knocked_out' in attacker_effects:
 			return await ctx.send(f"**{attacker.mention}, you can't use your skill, because you are knocked-out!**")
 
-		if 'transmutated' in attacker_effects:
-			return await ctx.send(f"**You are already transmutated, {attacker.mention}!**")
-
 
 		target_effects = await self.get_user_effects(user_id=target.id)
 
-		if 'frogified' in target_effects:
-			return await ctx.send(f"**{target.mention} is already frogified, {attacker.mention}!**")
+		if 'frogged' in target_effects:
+			return await ctx.send(f"**{target.mention} is already frogged, {attacker.mention}!**")
 
 		if 'protected' in target_effects:
 			return await ctx.send(f"**{target.mention} is protected against threats, {attacker.mention}!**")
 
-		confirmed = await ConfirmSkill(f"**{attacker.mention}, are you sure you want to frogify {target.mention}?**").prompt(ctx)
+		confirmed = await ConfirmSkill(f"**{attacker.mention}, are you sure you want to frog {target.mention}?**").prompt(ctx)
 		if not confirmed:
-			return await ctx.send(f"**{attacker.mention}, not frogifying them, then!**")
+			return await ctx.send(f"**{attacker.mention}, not frogging them, then!**")
+
+		await self.check_cooldown(user_id=attacker.id, skill_number=2)
 
 		timestamp = await self.get_timestamp()
 		await self.insert_skill_action(
-			user_id=attacker.id, skill_type="frogify",
+			user_id=attacker.id, skill_type="frog",
 			skill_timestamp=timestamp, target_id=target.id,
 			channel_id=ctx.channel.id
 		)
@@ -144,13 +144,13 @@ class Metamorph(Player):
 			# Updates user's skills used counter
 			await self.update_user_skills_used(user_id=attacker.id)
 
-			await self.update_user_frogified(target.id, 1)
+			await self.update_user_frogged(target.id, 1)
 		except Exception as e:
 			print(e)
 			await ctx.send(f"**Something went wrong with it, {attacker.mention}!**")
 		else:
-			frogify_embed = await self.get_frogify_embed(channel=ctx.channel, attacker_id=attacker.id, target_id=target.id)
-			await ctx.send(embed=frogify_embed)
+			frogged_embed = await self.get_frogged_embed(channel=ctx.channel, attacker_id=attacker.id, target_id=target.id)
+			await ctx.send(embed=frogged_embed)
 
 
 	async def get_transmutation_embed(self, channel, perpetrator_id: int) -> discord.Embed:
@@ -173,8 +173,8 @@ class Metamorph(Player):
 		return transmutation_embed
 
 
-	async def get_frogify_embed(self, channel, attacker_id: int, target_id: int) -> discord.Embed:
-		""" Makes an embedded message for a frogify action. 
+	async def get_frogged_embed(self, channel, attacker_id: int, target_id: int) -> discord.Embed:
+		""" Makes an embedded message for a frog action. 
 		:param channel: The context channel.
 		:param attacker_id: The ID of the attacker.
 		:param target_id: The ID of the target. """
@@ -185,7 +185,7 @@ class Metamorph(Player):
 			title="A Prince(ss) rolled back Time!",
 			timestamp=datetime.utcfromtimestamp(timestamp)
 		)
-		transmutation_embed.description=f"**<@{attacker_id}> frogified <@{target_id}>!  🦥→💥→🐸**"
+		transmutation_embed.description=f"**<@{attacker_id}> frogged <@{target_id}>!  🦥→💥→🐸**"
 		transmutation_embed.color=discord.Color.green()
 
 		transmutation_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Metamorph.png")
@@ -194,12 +194,12 @@ class Metamorph(Player):
 		return transmutation_embed
 
 
-	async def update_user_frogified(self, user_id: int, frogified: int) -> None:
-		""" Updates the user's frogify state.
+	async def update_user_frogged(self, user_id: int, frogged: int) -> None:
+		""" Updates the user's frog state.
 		:param user_id: The ID of the member to update. 
-		:param frogify: Whether it's gonna be set to true or false. """
+		:param frog: Whether it's gonna be set to true or false. """
 
 		mycursor, db = await the_database()
-		await mycursor.execute("UPDATE UserCurrency SET frogified = %s WHERE user_id = %s", (frogified, user_id))
+		await mycursor.execute("UPDATE UserCurrency SET frogged = %s WHERE user_id = %s", (frogged, user_id))
 		await db.commit()
 		await mycursor.close()

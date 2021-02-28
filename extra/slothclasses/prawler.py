@@ -124,10 +124,11 @@ class Prawler(Player):
 
 
 	@commands.command()
+	@Player.skills_used(requirement=5)
 	@Player.skill_on_cooldown(skill_number=2, seconds=2592000)
 	@Player.user_is_class('prawler')
 	@Player.skill_mark()
-	@Player.not_ready()
+	# @Player.not_ready()
 	async def sharpen(self, ctx) -> None:
 		""" Sharpen one's blade so when stealing from someone, 
 		it has a 35% chance of doubling the stolen money and stealing it from them as a bonus (if they have the money). 
