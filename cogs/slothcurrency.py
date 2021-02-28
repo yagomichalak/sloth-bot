@@ -586,7 +586,7 @@ class SlothCurrency(commands.Cog):
             last_skill_ts bigint default 0, protected tinyint(1) default 0, has_potion tinyint(1) default 0,
             hacked tinyint(1) default 0, knocked_out tinyint(1) default 0), last_skill_two_ts bigint default 0,
             skills_used int default 0, wired tinyint(1) default 0, tribe varchar(50) default null,
-            frogified tinyint(1) default 0
+            frogged tinyint(1) default 0
             """)
         await db.commit()
         await mycursor.close()
@@ -648,6 +648,40 @@ class SlothCurrency(commands.Cog):
             # await asyncio.sleep(0.5)
             return os.remove(file_path)
 
+
+    async def send_frogged_image(self, ctx: commands.Context, member: discord.Member, knocked_out: bool = False) -> None:
+        """ Makes and sends a frogged image. 
+        :param ctx: The context. 
+        :param member: The member who was frogged. 
+        :param knocked_out: Whether the user is knocked out"""
+
+        SlothClass = self.client.get_cog('SlothClass')
+
+        try:
+            # Gets original skill action and the attacker
+            skill_action = await SlothClass.get_skill_action_by_target_id_and_skill_type(member.id, 'frog')
+            hacker = self.client.get_user(skill_action[0])
+            # Makes the Hacked image and saves it
+            big = ImageFont.truetype("built titling sb.ttf", 80)
+            background = None
+
+            if knocked_out:
+                background = Image.open('sloth_custom_images/background/frogged_ko.png').convert('RGBA')
+            else:
+                background = Image.open('sloth_custom_images/background/frogged.png').convert('RGBA')
+
+            draw = ImageDraw.Draw(background)
+            draw.text((170, 170), f"{hacker}", font=big, fill=(39, 126, 205))
+            file_path = f'media/temporary/frogged_{member.id}.png'
+            background.save(file_path, 'png', quality=90)
+        except Exception as e:
+            print(e)
+            return await ctx.send(f"**{ctx.author.mention}, something went wrong with it!**")
+        else:
+            await ctx.send(file=discord.File(file_path))
+            # await asyncio.sleep(0.5)
+            return os.remove(file_path)
+
     async def get_member_public_flags(self, member: discord.Member) -> List[str]:
         """ Gets the member's public flags. 
         :param member: The member to get the flags from. """
@@ -684,6 +718,9 @@ class SlothCurrency(commands.Cog):
         # Checks whether user is hacked
         if user_info[0][12]:
             return await self.send_hacked_image(ctx, member)
+
+        if user_info[0][19]:
+            return await self.send_frogged_image(ctx, member, user_info[0][13])
 
 
 

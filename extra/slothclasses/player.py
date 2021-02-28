@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 
-from extra.customerrors import MissingRequiredSlothClass, ActionSkillOnCooldown, CommandNotReady
+from extra.customerrors import MissingRequiredSlothClass, ActionSkillOnCooldown, CommandNotReady, SkillsUsedRequirement
 
 from mysqldb import the_database, the_django_database
 from typing import Union, List
@@ -79,7 +79,6 @@ class Player(commands.Cog):
 			epoch = datetime.utcfromtimestamp(0)
 			current_time = (datetime.utcnow() - epoch).total_seconds()
 			cooldown_in_seconds = current_time - last_skill_ts
-			print(cooldown_in_seconds)
 			if cooldown_in_seconds >= seconds:
 				return True
 			raise ActionSkillOnCooldown(
@@ -106,6 +105,23 @@ class Player(commands.Cog):
 		return commands.check(real_check)
 
 
+	def skills_used(requirement: int):
+		""" Checks whether the user's action skill is on cooldown. """
+
+		async def real_check(ctx):
+			""" Perfoms the real check. """
+
+			user_currency = await Player.get_user_currency(Player, user_id=ctx.author.id)
+
+			if user_currency[15] >= requirement:
+				return True
+
+			raise SkillsUsedRequirement(
+				error_message=f"You must have `{requirement}` skills used in order to use this skill, {ctx.author.mention}!")
+
+		return commands.check(real_check)
+
+
 	# Is user EFFECT
 
 	async def get_user_effects(self, user_id: int) -> List[str]:
@@ -128,12 +144,8 @@ class Player(commands.Cog):
 		if await self.is_user_knocked_out(user_id=user_id):
 			effects.append('knocked_out')
 
-		if await self.is_user_knocked_out(user_id=user_id):
-			effects.append('knocked_out')
-
-
-		if await self.is_user_frogified(user_id=user_id):
-			effects.append('frogified')
+		if await self.is_user_frogged(user_id=user_id):
+			effects.append('frogged')
 
 
 		return effects
@@ -196,15 +208,15 @@ class Player(commands.Cog):
 		return user_knocked_out is not None and user_knocked_out[0]
 
 
-	async def is_user_frogified(self, user_id: int) -> bool:
-		""" Checks whether user is frogified out.
+	async def is_user_frogged(self, user_id: int) -> bool:
+		""" Checks whether user is frogged.
 		:param user_id: The ID of the user to check it. """
 
 		mycursor, db = await the_database()
-		await mycursor.execute("SELECT frogified FROM UserCurrency WHERE user_id = %s", (user_id,))
-		user_frogified = await mycursor.fetchone()
+		await mycursor.execute("SELECT frogged FROM UserCurrency WHERE user_id = %s", (user_id,))
+		user_frogged = await mycursor.fetchone()
 		await mycursor.close()
-		return user_frogified is not None and user_frogified[0]
+		return user_frogged is not None and user_frogged[0]
 
 
 
@@ -341,18 +353,18 @@ class Player(commands.Cog):
 		await mycursor.close()
 		return transmutations
 
-	async def get_expired_frogifies(self) -> None:
-		""" Gets expired frogify skill actions. """
+	async def get_expired_frogs(self) -> None:
+		""" Gets expired frog skill actions. """
 
 		the_time = await self.get_timestamp()
 		mycursor, db = await the_database()
 		await mycursor.execute("""
 			SELECT * FROM SlothSkills 
-			WHERE skill_type = 'frogify' AND (%s - skill_timestamp) >= 86400
+			WHERE skill_type = 'frog' AND (%s - skill_timestamp) >= 86400
 			""", (the_time,))
-		frogifies = await mycursor.fetchall()
+		frogs = await mycursor.fetchall()
 		await mycursor.close()
-		return frogifies
+		return frogs
 
 	async def get_expired_open_shop_items(self) -> None:
 		""" Gets expired transmutation skill actions. """

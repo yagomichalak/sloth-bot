@@ -8,7 +8,7 @@ import os
 from datetime import datetime
 from itertools import cycle
 
-from extra.customerrors import MissingRequiredSlothClass, ActionSkillOnCooldown, CommandNotReady
+from extra.customerrors import MissingRequiredSlothClass, ActionSkillOnCooldown, CommandNotReady, SkillsUsedRequirement
 
 load_dotenv()
 
@@ -131,6 +131,9 @@ async def on_command_error(ctx, error):
 
 	elif isinstance(error, CommandNotReady):
 		await ctx.send("**This command is either under construction or on maintenance!**")
+
+	elif isinstance(error, SkillsUsedRequirement):
+		await ctx.send(f"**{error.error_message}**")
 
 	elif isinstance(error, ActionSkillOnCooldown):
 		m, s = divmod(error.cooldown - int(error.try_after), 60)

@@ -180,10 +180,11 @@ class Merchant(Player):
 
 
 	@commands.command()
+	@Player.skills_used(requirement=5)
 	@Player.skill_on_cooldown(skill_number=2)
 	@Player.user_is_class('merchant')
 	@Player.skill_mark()
-	@Player.not_ready()
+	# @Player.not_ready()
 	async def package(self, ctx) -> None:
 		""" Buys a package from Dark Sloth Web and has a 35% chance of getting any equippable item from the Leaf Shop. """
 		
