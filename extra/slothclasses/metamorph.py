@@ -92,7 +92,7 @@ class Metamorph(Player):
 	@Player.skill_on_cooldown(skill_number=2)
 	@Player.user_is_class('metamorph')
 	@Player.skill_mark()
-	# @Player.not_ready()
+	@Player.not_ready()
 	async def frogify(self, ctx, target: discord.Member = None) -> None:
 		""" Makes someone a frog temporarily. 
 		:param target: The person who you want to frogify. """

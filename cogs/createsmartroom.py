@@ -139,7 +139,7 @@ class CreateSmartRoom(commands.Cog):
 			author = m.author
 			if value.isnumeric() and author == member and m.channel == bot_msg.channel:
 				value = int(value)
-				if value >= 0 and value <= 10:
+				if value >= 0 and value <= 10 and value != 1:
 					return True
 				else:
 					self.client.loop.create_task(member.send(file=discord.File('./images/smart_vc/basic/1 incorrect.png')))
@@ -234,7 +234,7 @@ class CreateSmartRoom(commands.Cog):
 			author = m.author
 			if value.isnumeric() and author == member and m.channel == bot_msg.channel:
 				value = int(value)
-				if value >= 0 and value <= 25:
+				if value >= 0 and value <= 25 and value != 1:
 					return True
 				else:
 					self.client.loop.create_task(member.send(file=discord.File('./images/smart_vc/premium/incorrect.png')))
@@ -333,10 +333,10 @@ class CreateSmartRoom(commands.Cog):
 			author = m.author
 			if value.isnumeric() and author == member and m.channel == bot_msg.channel:
 				value = int(value)
-				if value >= 0 and value <= 25:
+				if value >= 0 and value <= 25 and value != 1:
 					return True
 				else:
-					self.client.loop.create_task(member.send('**Please, a number between 1 and 25!**'))
+					self.client.loop.create_task(member.send('**Please, a number between 0 and 25 and different than 1!**'))
 			elif not value.isnumeric() and author == member and m.channel == bot_msg.channel:
 				self.client.loop.create_task(member.send('**Inform a valid value!**'))
 
