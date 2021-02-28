@@ -78,6 +78,9 @@ different_class_roles = {
     ],
     "studying conlangs": [
         "esperanto"
+    ],
+    "studying indian languages": [
+        "hindi", "urdu"
     ]
 }
 
