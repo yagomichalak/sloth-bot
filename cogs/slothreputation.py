@@ -128,7 +128,8 @@ class SlothReputation(commands.Cog):
 
         SlothClass = self.client.get_cog('SlothClass')
         # Gets tribe information for the given user
-        if user_tribe['name'] := await SlothClass.get_tribe_info_by_user_id(user_id=member.id):
+        user_tribe = await SlothClass.get_tribe_info_by_user_id(user_id=member.id)
+        if user_tribe['name']:
             embed.add_field(name="🏕️ __**Tribe:**__", value=f"[{user_tribe['name']}]({user_tribe['link']}) ({user_tribe['two_emojis']}) 👑", inline=True)
         else:
             user_tribe = await SlothClass.get_tribe_info_by_name(name=ucur[0][18])
