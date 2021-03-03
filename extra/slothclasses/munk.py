@@ -208,7 +208,7 @@ class Munk(Player):
 				'two_emojis': tribe[3],
 				'thumbnail': tribe[4],
 				'form': tribe[5],
-				'link': f"https://thelanguagesloth.com/{tribe[6]}/"
+				'link': f"https://thelanguagesloth.com/tribes/{tribe[6]}/"
 			}
 
 		return tribe_info
@@ -241,7 +241,7 @@ class Munk(Player):
 				'two_emojis': tribe[3],
 				'thumbnail': tribe[4],
 				'form': tribe[5],
-				'link': f"https://thelanguagesloth.com/{tribe[6]}/"
+				'link': f"https://thelanguagesloth.com/tribes/{tribe[6]}/"
 			}
 
 		return tribe_info
