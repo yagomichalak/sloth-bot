@@ -77,7 +77,6 @@ class Metamorph(Player):
 		""" Check on-going frogs and their expiration time. """
 
 		frogs = await self.get_expired_frogs()
-		print(frogs)
 		for f in frogs:
 			await self.delete_skill_action_by_target_id_and_skill_type(ff[3], 'frog')
 			await self.update_user_frogified(f[3], 0)

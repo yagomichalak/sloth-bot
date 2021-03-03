@@ -84,15 +84,18 @@ class SlothReputation(commands.Cog):
             else:
                 return await ctx.send(f"**{member} doesn't have an account yet!**")
 
+
+        
         SlothCurrency = self.client.get_cog('SlothCurrency')
 
         if ucur[0][12]:
             return await SlothCurrency.send_hacked_image(ctx, member)
 
+        
         all_users = await self.get_all_users_by_score_points()
         position = [[i+1, u[4]] for i, u in enumerate(all_users) if u[0] == member.id]
         position = [it for subpos in position for it in subpos] if position else ['??', 0]
-
+        
         # Gets user Server Activity info, such as messages sent and time in voice channels
         user_info = await SlothCurrency.get_user_activity_info(member.id)
         if not user_info and member.id == ctx.author.id:
@@ -101,32 +104,42 @@ class SlothReputation(commands.Cog):
         elif not user_info and not member.id == ctx.author.id:
             return await ctx.send("**Member not found in the system!**")
 
+
+        SlothClass = self.client.get_cog('SlothClass')
+        effects = await SlothClass.get_user_effects(user_id=member.id)
+
+        def has_effect(effect: str):
+            if effect in effects:
+                return effects[effect]
+
+            return False
+
         embed = discord.Embed(title="__All Information__", colour=member.color, timestamp=ctx.message.created_at)
         embed.add_field(name="📊 __**Level:**__", value=f"{user[0][2]}.", inline=True)
         embed.add_field(name="🔮 __**EXP:**__", value=f"{user[0][1]} / {((user[0][2]+1)**5)}.", inline=True)
         embed.add_field(name="🍃 __**Balance:**__", value=f"{ucur[0][1]}łł", inline=True)
+
         embed.add_field(name="🧑‍🎓 __**Participated in:**__", value=f"{ucur[0][3]} classes.", inline=True)
         embed.add_field(name="🌟 __**Rewarded in:**__", value=f"{ucur[0][4]} classes.", inline=True)
         embed.add_field(name="🧑‍🏫 __**Hosted:**__", value=f"{ucur[0][5]} classes.", inline=True)
-        embed.add_field(name="🕵️ __**Sloth Class:**__", value=ucur[0][7], inline=True)
-        embed.add_field(name="🛡️ __**Protected:**__", value=f"{True if ucur[0][10] else False}", inline=True)
-        embed.add_field(name="🍯 __**Has Potion:**__", value=f"{True if ucur[0][11] else False}", inline=True)
+
         # embed.add_field(name="<a:hackerman:652303204809179161> __**Hacked:**__", value=f"{True if ucur[0][12] else False}", inline=True)
         # embed.add_field(name="<a:hackerman:802354539184259082> __**Hacked:**__", value=f"{True if ucur[0][12] else False}", inline=True)
-        embed.add_field(name="😵 __**Knocked Out:**__", value=f"{True if ucur[0][13] else False}", inline=True)
-        embed.add_field(name="🔌 __**Wired:**__", value=f"{True if ucur[0][17] else False}", inline=True)
-        embed.add_field(name="🐸 __**Frogged:**__", value=f"{True if ucur[0][19] else False}", inline=True)
+        embed.add_field(name="🕵️ __**Sloth Class:**__", value=ucur[0][7], inline=True)
+        embed.add_field(name="🍯 __**Has Potion:**__", value=f"{True if ucur[0][11] else False}", inline=True)
+        embed.add_field(name="🛡️ __**Protected:**__", value=f"{has_effect('protected')}", inline=True)
+        embed.add_field(name="😵 __**Knocked Out:**__", value=f"{has_effect('knocked_out')}", inline=True)
+        embed.add_field(name="🔌 __**Wired:**__", value=f"{has_effect('wired')}", inline=True)
+        embed.add_field(name="🐸 __**Frogged:**__", value=f"{has_effect('frogged')}", inline=True)
         embed.add_field(name="🔪 __**Knife Sharpness Stack:**__", value=f"{ucur[0][16]}/5", inline=True)
         m, s = divmod(user_info[0][2], 60)
         h, m = divmod(m, 60)
+
         embed.add_field(name=f"💰 __**Exchangeable Activity:**__", value=f"{h:d} hours, {m:02d} minutes and {user_info[0][1]} messages.", inline=True)
-
         embed.add_field(name=f"🏆 __**Leaderboard Info:**__", value=f"{position[1]}. pts | #{position[0]}", inline=True)
-
         embed.add_field(name="🧮 __**Skills Used:**__", value=f"{ucur[0][15]} skills.")
 
 
-        SlothClass = self.client.get_cog('SlothClass')
         # Gets tribe information for the given user
         user_tribe = await SlothClass.get_tribe_info_by_user_id(user_id=member.id)
         if user_tribe['name']:

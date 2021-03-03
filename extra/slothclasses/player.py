@@ -127,25 +127,52 @@ class Player(commands.Cog):
 	async def get_user_effects(self, user_id: int) -> List[str]:
 		""" Gets the effects that the user is under. """
 
-		effects = []
+		# effects = []
+
+		effects = {}
+		now = await self.get_timestamp()
+
+		def calculate(now, then):
+			m, s = divmod(int(then) - int(now), 60)
+			h, m = divmod(m, 60)
+			d, h = divmod(h, 24)
+
+			msg = ""
+
+			if d > 0:
+				msg = f"Ends in `{d:d}d`, `{h:d}h`, `{m:02d}m` & `{s:02d}s`"
+			elif h > 0:
+				msg = f"Ends in `{h:d}h`, `{m:02d}m` & `{s:02d}s`"
+			elif m > 0:
+				msg = f"Ends in `{m:02d}m` & `{s:02d}s`"
+			elif s > 0:
+				msg = f"Ends in `{s:02d}s`"
+
+			return msg
 
 		if await self.is_user_protected(user_id=user_id):
-			effects.append('protected')
+			then = await self.get_skill_action_by_target_id_and_skill_type(target_id=user_id, skill_type='divine_protection')
+			effects['protected'] = calculate(now=now, then=then[2]) if then else 'Ends in ??'
 
 		if await self.is_transmutated(user_id=user_id):
-			effects.append('transmutated')
+			then = await self.get_skill_action_by_target_id_and_skill_type(target_id=user_id, skill_type='transmutation')
+			effects['transmutated'] = calculate(now=now, then=then[2]) if then else 'Ends in ??'
 
 		if await self.is_user_hacked(user_id=user_id):
-			effects.append('hacked')
+			then = await self.get_skill_action_by_target_id_and_skill_type(target_id=user_id, skill_type='hack')
+			effects['hacked'] = calculate(now=now, then=then[2]) if then else 'Ends in ??'
 
 		if await self.is_user_wired(user_id=user_id):
-			effects.append('wired')
+			then = await self.get_skill_action_by_target_id_and_skill_type(target_id=user_id, skill_type='wire')
+			effects['wired'] = calculate(now=now, then=then[2]) if then else 'Ends in ??'
 
 		if await self.is_user_knocked_out(user_id=user_id):
-			effects.append('knocked_out')
+			then = await self.get_skill_action_by_target_id_and_skill_type(target_id=user_id, skill_type='knock_out')
+			effects['knocked_out'] = calculate(now=now, then=then[2]) if then else 'Ends in ??'
 
 		if await self.is_user_frogged(user_id=user_id):
-			effects.append('frogged')
+			then = await self.get_skill_action_by_target_id_and_skill_type(target_id=user_id, skill_type='frog')
+			effects['frogged'] = calculate(now=now, then=then[2]) if then else 'Ends in ??'
 
 
 		return effects
