@@ -93,7 +93,7 @@ class Seraph(Player):
 
 		# Confirms the use of the skill
 		confirm = await ConfirmSkill(
-			f"Are you sure you want to reinforce `{len(shields)}` active Divine Protection shields for `50łł`, {perpetrator.mention}?**").prompt(ctx)
+			f"**Are you sure you want to reinforce `{len(shields)}` active Divine Protection shields for `50łł`, {perpetrator.mention}?**").prompt(ctx)
 		# User confirmed the use the skill
 		if not confirm:
 			return await ctx.send(f"**Not reinforcing them, then, {perpetrator.mention}!**")

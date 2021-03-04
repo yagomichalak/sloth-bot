@@ -133,9 +133,12 @@ class Player(commands.Cog):
 		now = await self.get_timestamp()
 
 		def calculate(now, then):
-			m, s = divmod(int(then) - int(now), 60)
+			# - int(now)
+			m, s = divmod((int(then) - int(now)), 60)
 			h, m = divmod(m, 60)
 			d, h = divmod(h, 24)
+
+			d += 1
 
 			msg = ""
 
