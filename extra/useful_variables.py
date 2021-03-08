@@ -80,8 +80,8 @@ different_class_roles = {
         "esperanto"
     ],
     "studying indian languages": [
-        "hindi", "urdu"
-    ]
+        "hindi", "urdu", "bengali"
+    ],
 }
 
 
