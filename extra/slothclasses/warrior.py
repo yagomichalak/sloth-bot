@@ -120,7 +120,7 @@ class Warrior(Player):
 		if not await self.is_user_protected(target.id):
 			return await ctx.send(f"**{attacker.mention}, {target.mention} doesn't have a protection!**")
 
-		user = await self.get_user_currency(perpetrator.id)
+		user = await self.get_user_currency(attacker.id)
 		if not user[1] >= 50:
 			return await ctx.send(f"**You don't have `50łł` to use this skill, {attacker.mention}!**")
 			
