@@ -208,3 +208,24 @@ class InroleLooping(menus.ListPageSource):
 
 
 		return embed
+
+
+class SwitchTribePages(menus.ListPageSource):
+	""" A class for switching tribe pages. """
+
+	def __init__(self, data, **kwargs):
+		""" Class initializing method. """
+
+		super().__init__(data, per_page=15)
+		self.tribe = kwargs.get('tribe')
+		self.change_embed = kwargs.get('change_embed')
+
+
+	async def format_page(self, menu, entries):
+		""" Formats each page. """
+
+		offset = menu.current_page * self.per_page
+		return await self.change_embed(
+			ctx=menu.ctx, tribe=self.tribe, entries=entries, offset=offset+1, lentries=len(self.entries)
+			)
+

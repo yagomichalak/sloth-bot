@@ -46,7 +46,7 @@ class Tools(commands.Cog):
 
         if role:
             members = [
-                str(m) for m in ctx.guild.members if role in m.roles
+                m.mention for m in ctx.guild.members if role in m.roles
             ]
             if members:
                 additional = {
