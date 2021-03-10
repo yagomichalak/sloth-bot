@@ -1,8 +1,8 @@
 import discord
-from discord.ext import commands
+from discord.ext import commands, menus
 from .player import Player
 from mysqldb import the_database, the_django_database
-from extra.menu import ConfirmSkill
+from extra.menu import ConfirmSkill, SwitchTribePages
 import os
 from datetime import datetime
 from typing import List, Union, Dict, Any
@@ -423,13 +423,32 @@ class Munk(Player):
 			return await ctx.send(f"**No tribes with that name were found, {member.mention}!**")
 
 
-		tribe_owner = self.client.get_user(tribe['owner_id'])
+		# Gets all tribe members
+		tribe_members = await self.get_tribe_members(tribe_name=tribe['name'])
 
+		all_members = list(map(lambda mid: f"<@{mid}>", tribe_members))
+
+		# Additional data:
+		additional = {
+			'tribe': tribe,
+			'change_embed': self._make_tribe_embed
+		}
+
+		# print('1= TRRRIIIIIBE', tribe)
+		pages = menus.MenuPages(source=SwitchTribePages(all_members, **additional), clear_reactions_after=True)
+		await pages.start(ctx)
+
+
+	async def _make_tribe_embed(self, ctx: commands.Context, tribe: Dict[str, Union[str, int]], entries: int, offset: int, lentries: int) -> discord.Embed:
+
+		# print('2= TRRRIIIIIBE', tribe)
+
+		tribe_owner = self.client.get_user(tribe['owner_id'])
 		tribe_embed = discord.Embed(
 			title=f"{tribe['name']} ({tribe['two_emojis']})",
 			description=tribe['description'],
-			color=tribe_owner.color if tribe_owner else member.color,
 			timestamp=ctx.message.created_at,
+			color=ctx.author.color,
 			url=tribe['link']
 			)
 
@@ -438,18 +457,15 @@ class Munk(Player):
 		if tribe_owner:
 			tribe_embed.set_author(name=f"Owner: {tribe_owner}", icon_url=tribe_owner.avatar_url, url=tribe_owner.avatar_url)
 
-		tribe_embed.set_footer(text=f"Requested by {member}", icon_url=member.avatar_url)
+		# tribe_embed.set_footer(text=f"Requested by {ctx.author}", icon_url=ctx.author.avatar_url)
 
-		tribe_members = await self.get_tribe_members(tribe_name=tribe['name'])
+		tribe_embed.add_field(name="__Members:__", value=', '.join(entries), inline=False)
 
-		tribe_owner =  self.client.get_user(tribe['owner_id'])
-
-		all_members = list(map(lambda mid: f"<@{mid}>", tribe_members))
-		tribe_embed.add_field(name="__Members:__", value=', '.join(all_members), inline=False)
+		for i, v in enumerate(entries, start=offset):
+			tribe_embed.set_footer(text=f"({i} of {lentries})")
 
 
-
-		await ctx.send(embed=tribe_embed)
+		return tribe_embed
 
 
 	@commands.command(aliases=['expel', 'kick_out', 'can_i_show_you_the_door?'])
