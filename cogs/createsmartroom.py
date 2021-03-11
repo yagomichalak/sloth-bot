@@ -715,6 +715,9 @@ class CreateSmartRoom(commands.Cog):
 		if not member:
 			return await ctx.send("**Inform a member to allow!**")
 
+		if member.id == ctx.author.id:
+			return await ctx.send(f"**You cannot allow yourself!**")
+
 		user_galaxy = await self.get_galaxy_txt(ctx.author.id, ctx.channel.category.id)
 		if user_galaxy:
 			user_category = discord.utils.get(ctx.guild.categories, id=user_galaxy[0][1])
@@ -742,6 +745,9 @@ class CreateSmartRoom(commands.Cog):
 		'''
 		if not member:
 			return await ctx.send("**Inform a member to forbid!**")
+
+		if member.id == ctx.author.id:
+			return await ctx.send(f"**You cannot forbid yourself!**")
 
 		user_galaxy = await self.get_galaxy_txt(ctx.author.id, ctx.channel.category.id)
 		if user_galaxy:
