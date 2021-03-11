@@ -3,6 +3,7 @@ from discord.ext import commands
 from mysqldb import *
 import asyncio
 from extra.useful_variables import list_of_commands
+from extra.menu import ConfirmSkill
 import time
 from typing import List, Dict
 import os
@@ -128,8 +129,8 @@ class ReportSupport(commands.Cog):
 			# Support us on Patreon
 			await member.send(f"**Support us on Patreon!**\nhttps://www.patreon.com/Languagesloth")
 
-		elif mid == int(os.getenv('REPORT_MESSAGE_ID')) and str(emoji) == '<:ban:593407893248802817>' and not perms.administrator:
-		# elif mid == int(os.getenv('REPORT_MESSAGE_ID')):
+		# elif mid == int(os.getenv('REPORT_MESSAGE_ID')) and str(emoji) == '<:ban:593407893248802817>' and not perms.administrator:
+		elif mid == int(os.getenv('REPORT_MESSAGE_ID')):
 
 			member_ts = self.report_cache.get(member.id)
 			time_now = time.time()
@@ -324,7 +325,9 @@ class ReportSupport(commands.Cog):
 			if emoji == '1️⃣':
 				# Report another user for breaking the rules
 				try:
-					await self.report_someone(member, guild)
+					exists = await self.report_someone(member, guild)
+					if exists is False:
+						return
 				except:
 					pass
 					
@@ -335,7 +338,9 @@ class ReportSupport(commands.Cog):
 				# I need help with the server in general
 				message = f"Please, {member.mention}, try to explain what kind of help you want related to the server."
 				try:
-					await self.generic_help(member, guild, 'server help', message)
+					exists = await self.generic_help(member, guild, 'server help', message)
+					if exists is False:
+						return
 				except:
 					pass
 				else:
@@ -344,7 +349,9 @@ class ReportSupport(commands.Cog):
 				# I need to change some roles and I can't
 				message = f"Please, {member.mention}, inform us what roles you want, and if you spotted a specific problem with the reaction-role selection."
 				try:
-					await self.generic_help(member, guild, 'role help', message)
+					exists = await self.generic_help(member, guild, 'role help', message)
+					if exists is False:
+						return
 				except:
 					pass
 				else:
@@ -360,7 +367,8 @@ class ReportSupport(commands.Cog):
 					
 		if await self.member_has_open_channel(member.id):
 			embed = discord.Embed(title="Error!", description="**You already have an open channel!**", color=discord.Color.red())
-			return await member.send(embed=embed)
+			await member.send(embed=embed)
+			return False
 
 		# Report someone
 		case_cat = discord.utils.get(guild.categories, id=case_cat_id)
@@ -399,7 +407,8 @@ class ReportSupport(commands.Cog):
 					
 		if await self.member_has_open_channel(member.id):
 			embed = discord.Embed(title="Error!", description="**You already have an open channel!**", color=discord.Color.red())
-			return await member.send(embed=embed)
+			await member.send(embed=embed)
+			return False
 
 		# General help
 		case_cat = discord.utils.get(guild.categories, id=case_cat_id)
@@ -615,6 +624,69 @@ class ReportSupport(commands.Cog):
 		channel = await mycursor.fetchall()
 		await mycursor.close()
 		return channel
+
+
+
+	@commands.command(aliases=['permit_case', 'allow_case', 'witness', 'aw'])
+	@commands.has_any_role(*allowed_roles)
+	async def allow_witness(self, ctx, member: discord.Member = None):
+		""" Allows a witness to join a case channel.
+		:param member: The member to allow. """
+
+		if not member:
+			return await ctx.send("**Inform a witness to allow!**")
+
+
+		user_channel = await self.get_case_channel(ctx.channel.id)
+		if user_channel:
+
+			confirm = await ConfirmSkill(f"**Are you sure you want to allow {member.mention} as a witness in this case channel, {ctx.author.mention}?**").prompt(ctx)
+			if not confirm:
+				return await ctx.send(f"**Not allowing them, then!**")
+
+			channel = discord.utils.get(ctx.guild.channels, id=user_channel[0][1])
+			try:
+				await channel.set_permissions(
+					member, read_messages=True, send_messages=True, connect=True, speak=True, view_channel=True)
+			except Exception:
+				pass
+
+			return await ctx.send(f"**{member.mention} has been allowed here!**")
+
+
+		else:
+			await ctx.send(f"**This is not a case channel, {ctx.author.mention}!**")
+
+
+	@commands.command(aliases=['forbid_case', 'fw'])
+	@commands.has_any_role(*allowed_roles)
+	async def forbid_witness(self, ctx, member: discord.Member = None):
+		""" Forbids a witness from a case channel.
+		:param member: The member to forbid. """
+
+		if not member:
+			return await ctx.send("**Inform a witness to forbid!**")
+
+
+		user_channel = await self.get_case_channel(ctx.channel.id)
+		if user_channel:
+			
+			confirm = await ConfirmSkill(f"**Are you sure you want to forbid {member.mention} from being a witness in this case channel, {ctx.author.mention}?**").prompt(ctx)
+			if not confirm:
+				return await ctx.send(f"**Not forbidding them, then!**")
+
+			channel = discord.utils.get(ctx.guild.channels, id=user_channel[0][1])
+			try:
+				await channel.set_permissions(
+					member, read_messages=False, send_messages=False, connect=False, speak=False, view_channel=False)
+			except Exception:
+				pass
+
+			return await ctx.send(f"**{member.mention} has been forbidden here!**")
+
+
+		else:
+			await ctx.send(f"**This is not a case channel, {ctx.author.mention}!**")
 
 	@commands.command()
 	@commands.has_any_role(*allowed_roles)
