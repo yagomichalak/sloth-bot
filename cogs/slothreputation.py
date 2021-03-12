@@ -110,7 +110,7 @@ class SlothReputation(commands.Cog):
 
         def has_effect(effect: str):
             if effect in effects:
-                return effects[effect]
+                return effects[effect]['cooldown']
 
             return False
 
