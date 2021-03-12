@@ -155,27 +155,52 @@ class Player(commands.Cog):
 
 		if await self.is_user_protected(user_id=user_id):
 			then = await self.get_skill_action_by_target_id_and_skill_type(target_id=user_id, skill_type='divine_protection')
-			effects['protected'] = calculate(now=now, then=then[2]) if then else 'Ends in ??'
+			effects['protected'] = {}
+			effects['protected']['cooldown'] = calculate(now=now, then=then[2]) if then else 'Ends in ??'
+			effects['protected']['frames'] = []
+			effects['protected']['cords'] = (0, 0)
+			effects['protected']['resize'] = None
 
 		if await self.is_transmutated(user_id=user_id):
 			then = await self.get_skill_action_by_target_id_and_skill_type(target_id=user_id, skill_type='transmutation')
-			effects['transmutated'] = calculate(now=now, then=then[2]) if then else 'Ends in ??'
+			effects['transmutated'] = {}
+			effects['transmutated']['cooldown'] = calculate(now=now, then=then[2]) if then else 'Ends in ??'
+			effects['transmutated']['frames'] = []
+			effects['transmutated']['cords'] = (0, 0)
+			effects['transmutated']['resize'] = None
+			effects['transmutated']['has_gif'] = True
 
 		if await self.is_user_hacked(user_id=user_id):
 			then = await self.get_skill_action_by_target_id_and_skill_type(target_id=user_id, skill_type='hack')
-			effects['hacked'] = calculate(now=now, then=then[2]) if then else 'Ends in ??'
+			effects['hacked'] = {}
+			effects['hacked']['cooldown'] = calculate(now=now, then=then[2]) if then else 'Ends in ??'
+			effects['hacked']['frames'] = []
+			effects['hacked']['cords'] = (0, 0)
+			effects['hacked']['resize'] = None
 
 		if await self.is_user_wired(user_id=user_id):
 			then = await self.get_skill_action_by_target_id_and_skill_type(target_id=user_id, skill_type='wire')
-			effects['wired'] = calculate(now=now, then=then[2]) if then else 'Ends in ??'
+			effects['wired'] = {}
+			effects['wired']['cooldown'] = calculate(now=now, then=then[2]) if then else 'Ends in ??'
+			effects['wired']['frames'] = []
+			effects['wired']['cords'] = (0, 0)
+			effects['wired']['resize'] = None
 
 		if await self.is_user_knocked_out(user_id=user_id):
 			then = await self.get_skill_action_by_target_id_and_skill_type(target_id=user_id, skill_type='knock_out')
-			effects['knocked_out'] = calculate(now=now, then=then[2]) if then else 'Ends in ??'
+			effects['knocked_out'] = {}
+			effects['knocked_out']['cooldown'] = calculate(now=now, then=then[2]) if then else 'Ends in ??'
+			effects['knocked_out']['frames'] = []
+			effects['knocked_out']['cords'] = (0, 0)
+			effects['knocked_out']['resize'] = None
 
 		if await self.is_user_frogged(user_id=user_id):
 			then = await self.get_skill_action_by_target_id_and_skill_type(target_id=user_id, skill_type='frog')
-			effects['frogged'] = calculate(now=now, then=then[2]) if then else 'Ends in ??'
+			effects['frogged'] = {}
+			effects['frogged']['cooldown'] = calculate(now=now, then=then[2]) if then else 'Ends in ??'
+			effects['frogged']['frames'] = []
+			effects['frogged']['cords'] = (0, 0)
+			effects['frogged']['resize'] = None
 
 
 		return effects
