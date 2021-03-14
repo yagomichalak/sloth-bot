@@ -800,24 +800,27 @@ class SlothCurrency(commands.Cog):
 		background.save(file_path, 'png', quality=90)
 
 		all_effects = {key:value for (key, value) in effects.items() if value.get('has_gif')}
-
-		if all_effects:
-			try:
-				gif_file_path = await self.make_gif_image(member_id=member.id, file_path=file_path, all_effects=all_effects)
-				await ctx.send(file=discord.File(gif_file_path))
-			except Exception as e:
-				# print(e)
-				pass
-			finally:
-				os.remove(file_path)
-				os.remove(gif_file_path)
-		else:
-			try:
-				await ctx.send(file=discord.File(file_path))
-			except:
-				pass
-			finally:
-				os.remove(file_path)
+		async with ctx.typing():
+			if all_effects:
+				try:
+					gif_file_path = await self.make_gif_image(member_id=member.id, file_path=file_path, all_effects=all_effects)
+					# print('sending')
+					await ctx.send(file=discord.File(gif_file_path))
+					# print('sent')
+				except Exception as e:
+					print(e)
+					pass
+				finally:
+					# pass
+					os.remove(file_path)
+					os.remove(gif_file_path)
+			else:
+				try:
+					await ctx.send(file=discord.File(file_path))
+				except:
+					pass
+				finally:
+					os.remove(file_path)
 
 
 	async def make_gif_image(self, member_id: int, file_path: str, all_effects: Dict[str, Dict[str, Union[List[str], Tuple[int]]]]) -> None:
@@ -857,6 +860,7 @@ class SlothCurrency(commands.Cog):
 				# print(i+1)
 				# Gets a frame of each effect in each iteration of the loop
 				base = gif.new_frame()
+				await asyncio.sleep(0)
 				for efx, value in all_effects.items():
 					# print(all_effects[efx]['cords'])
 					cords = all_effects[efx]['cords']
@@ -867,6 +871,7 @@ class SlothCurrency(commands.Cog):
 				# print()
 
 				if i >= 400:
+					# print('nah')
 					break
 
 			else:
@@ -879,6 +884,7 @@ class SlothCurrency(commands.Cog):
 			print(e)
 			pass
 		finally:
+			# print('returning...')
 			return gif_file_path
 
 
