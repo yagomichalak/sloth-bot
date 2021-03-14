@@ -136,8 +136,7 @@ if __name__ == '__main__':
     #==========Adds=multiple=effects=onto=an=image============#
     #=========================================================#
     
-
-    async def make_gifs(effe) -> None:
+    def smth():
         profile = Image.open('../profile.png').convert('RGBA')
         gif = GIF(image=profile, frame_duration=40)
 
@@ -145,19 +144,23 @@ if __name__ == '__main__':
         all_effects = {
             'fidget_spinner': {'frames': [], 'cords': (218, 222), 'resize': (150, 150)}, 
             'star': {'frames': [], 'cords': (150, 10), 'resize': (50, 50)},
-            'transmutation': {'frames': [], 'cords': (0, 0), 'resize': None}
+            'transmutated': {'frames': [], 'cords': (0, 0), 'resize': None},
+            'protected': {'frames': [], 'cords': (0, 0), 'resize': None}
         }
         # Gets all frames of each effect and resize them properly, respectively.
         for effect in all_effects:
+            # print('a')
             full_path = f"{path}/{effect}"
             # Checks whether the effect folder exists
             if os.path.isdir(full_path):
                 # Gets all frame images from the folder
                 for i in range(len(glob.glob(f"{full_path}/*.png"))):
-                    frame = Image.open(f"{full_path}/{effect}_{i+1}.png")
-                    # Checs whether frame has to be resized
+                # for i in range(73):
+                    frame = Image.open(f"{full_path}/{effect}_{i+1}.png")#.rotate(-(i*5))
+                    # Checks whether frame has to be resized
                     if all_effects[effect]['resize']:
                         frame = frame.resize(all_effects[effect]['resize']).convert('RGBA')
+
                     # Appends to its respective frame list
                     all_effects[effect]['frames'].append(frame)
 
@@ -188,6 +191,27 @@ if __name__ == '__main__':
             gif.export('../double.gif')
             print('Finished!')
 
+    # smth()
+    def get_frames():
+
+
+
+
+        for i in range(74):
+            # background = profile.copy()
+            print(i)
+            background = Image.open("../sloth_custom_images/foot/base_foot.png")
+            frame = Image.open(f"../media/effects/protected/protected_1.png")
+            # print(i)
+            # frame = Image.open(f"{full_path}/{effect}_{1}.png").rotate(-(i*5))
+            # Checks whether frame has to be resized
+            frame = frame.resize((400, 400)).convert('RGBA')
+            frame = frame.rotate(-(i*5))
+            background.paste(frame, (200, 150))
+            background.save(f'../media/effects/knocked_out/protected_{i+1}.png', 'png', quality=90)
+
+    # get_frames()
+            
 
     # base = gif.new_frame()
 

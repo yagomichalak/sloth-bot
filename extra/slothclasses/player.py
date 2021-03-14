@@ -160,6 +160,7 @@ class Player(commands.Cog):
 			effects['protected']['frames'] = []
 			effects['protected']['cords'] = (0, 0)
 			effects['protected']['resize'] = None
+			effects['protected']['has_gif'] = True
 
 		if await self.is_transmutated(user_id=user_id):
 			then = await self.get_skill_action_by_target_id_and_skill_type(target_id=user_id, skill_type='transmutation')
