@@ -812,6 +812,7 @@ class SlothCurrency(commands.Cog):
 					pass
 				finally:
 					# pass
+					await asyncio.sleep(2)
 					os.remove(file_path)
 					os.remove(gif_file_path)
 			else:
