@@ -554,8 +554,9 @@ class CreateClassroom(commands.Cog):
         lesson_management_role = discord.utils.get(member.guild.roles, id=lesson_management_role_id)
         sloth_explorer_role = discord.utils.get(member.guild.roles, id=sloth_explorer_role_id)
 
-        print(language)
+        # print(language)
         overwrites = {}
+        custom_role = None
         # Checks whether it is a language that has no native, fluent, studying pattern
         if custom_role_name := await self.get_custom_role_name(different_class_roles, language.lower().strip()):
             custom_role = discord.utils.get(member.guild.roles,
@@ -570,8 +571,8 @@ class CreateClassroom(commands.Cog):
             language = custom_role_name
 
 
-        print(language)
-        print(custom_role)
+        # print(language)
+        # print(custom_role)
         native_role = discord.utils.get(
             member.guild.roles, name=f"Native {language.title()}")
 
