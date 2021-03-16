@@ -13,7 +13,7 @@ dnk_id = int(os.getenv('DNK_ID'))
 case_cat_id = int(os.getenv('CASE_CAT_ID'))
 moderator_role_id = int(os.getenv('MOD_ROLE_ID'))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID'))
-muffin_id = int(os.getenv('MUFFIN_ID'))
+lesson_management_role_id = int(os.getenv('LESSON_MANAGEMENT_ROLE_ID'))
 
 staff_vc_id = int(os.getenv('STAFF_VC_ID'))
 
@@ -790,14 +790,14 @@ class ReportSupport(commands.Cog):
 		#moderator = discord.utils.get(guild.roles, id=moderator_role_id)
 		cosmos = discord.utils.get(guild.members, id=self.cosmos_id)
 		admin = discord.utils.get(guild.roles, id=admin_role_id)
-		muffin = discord.utils.get(guild.members, id=muffin_id)
+		lesson_management = discord.utils.get(guild.roles, id=lesson_management_role_id)
 
 		# Creates channels
 		overwrites: Dict = {guild.default_role: discord.PermissionOverwrite(
 			read_messages=False, send_messages=False, connect=False, view_channel=False), 
 		teacher: discord.PermissionOverwrite(
 			read_messages=True, send_messages=True, connect=True, view_channel=True),
-		muffin: discord.PermissionOverwrite(
+		lesson_management: discord.PermissionOverwrite(
 			read_messages=True, send_messages=True, connect=True, view_channel=True),
 		}
 		#moderator: discord.PermissionOverwrite(read_messages=True, send_messages=True, connect=False, view_channel=True, manage_messages=True)
@@ -813,7 +813,7 @@ class ReportSupport(commands.Cog):
 			Hello, {teacher.mention}, we have received and reviewed your teacher application. In order to set up your lesson and explain how our system works we have to schedule a voice conversation with you. 
 			When would be the best time to talk to one of our staff?''',
 			color=teacher.color)
-		await txt_channel.send(content=f"{cosmos.mention}, {muffin.mention}, {teacher.mention}", embed=app_embed)
+		await txt_channel.send(content=f"{cosmos.mention}, {lesson_management.mention}, {teacher.mention}", embed=app_embed)
 
 
 	# In-game commands
