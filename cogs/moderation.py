@@ -249,6 +249,7 @@ class Moderation(commands.Cog):
 			user_infractions = await self.get_user_infractions(member.id)
 			user_warns = [w for w in user_infractions if w[1] == 'warn']
 			if len(user_warns) >= 3:
+				ctx.author = self.client.user
 				await self.mute(ctx=ctx, member=member, reason=reason)
 
 	@commands.command()
@@ -547,7 +548,7 @@ class Moderation(commands.Cog):
 			perpetrators = ctx.author
 			icon = ctx.author.avatar_url
 		else:
-			perpetrators = confirmations.values()
+			perpetrators = ', '.join(confirmations.values())
 			icon = ctx.guild.icon_url
 
 		# Bans and logs
