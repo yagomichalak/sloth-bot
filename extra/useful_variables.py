@@ -76,12 +76,15 @@ different_class_roles = {
         "javascript and typescript", "sql", "programming",
         "computer science", "cs50", "cs"
     ],
-    "studying conlangs": [
+    "conlangs": [
         "esperanto"
     ],
-    "studying indian languages": [
+    "indian languages": [
         "hindi", "urdu", "bengali"
     ],
+    "balkan languages": [
+        "croatian", "serbian", "bosnian"
+    ]
 }
 
 
