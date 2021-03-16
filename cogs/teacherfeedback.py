@@ -556,23 +556,23 @@ class CreateClassroom(commands.Cog):
 
         # print(language)
         overwrites = {}
-        custom_role = None
+        # custom_role = None
         # Checks whether it is a language that has no native, fluent, studying pattern
         if custom_role_name := await self.get_custom_role_name(different_class_roles, language.lower().strip()):
             custom_role = discord.utils.get(member.guild.roles,
                 name=custom_role_name.title())
 
-        if custom_role:
-            language = custom_role.name
-            overwrites[custom_role] = discord.PermissionOverwrite(
-                read_messages=True, send_messages=True, connect=True,
-                speak=True, view_channel=True, embed_links=True)
-        else:
-            language = custom_role_name
+            if custom_role:
+                language = custom_role.name
+                overwrites[custom_role] = discord.PermissionOverwrite(
+                    read_messages=True, send_messages=True, connect=True,
+                    speak=True, view_channel=True, embed_links=True)
+            else:
+                language = custom_role_name
 
 
-        # print(language)
-        # print(custom_role)
+            # print(language)
+            # print(custom_role)
         native_role = discord.utils.get(
             member.guild.roles, name=f"Native {language.title()}")
 
