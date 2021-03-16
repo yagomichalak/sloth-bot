@@ -36,9 +36,12 @@ class VoiceChannelActivity(commands.Cog):
 		if before.self_mute != after.self_mute: return
 		if before.self_deaf != after.self_deaf: return
 		if before.self_stream != after.self_stream: return
-		if before.self_deaf != after.self_deaf: return
+		if before.self_video != after.self_video: return
+
 		if before.mute != after.mute: return
 		if before.deaf != after.deaf: return
+
+
 		if channel := after.channel:
 
 			tzone = timezone('Etc/GMT-1')
