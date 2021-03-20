@@ -447,7 +447,7 @@ class SlothReputation(commands.Cog):
         return users
 
     async def get_all_users_by_xp(self) -> List[List[int]]:
-        """ Gets all users from the MembersScore table ordered by score points. """
+        """ Gets all users from the MembersScore table ordered by XP. """
 
         mycursor, db = await the_database()
         await mycursor.execute("SELECT * FROM MembersScore ORDER BY user_xp DESC")

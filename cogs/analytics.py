@@ -107,7 +107,7 @@ class Analytics(commands.Cog):
 		await ctx.message.delete()
 		mycursor, db = await the_database()
 		await mycursor.execute(
-			f"CREATE TABLE SlothAnalytics (m_joined int default 0, m_left int default 0, messages_sent int default 0, day_now VARCHAR(2))")
+			"CREATE TABLE SlothAnalytics (m_joined int default 0, m_left int default 0, messages_sent int default 0, day_now VARCHAR(2))")
 		await db.commit()
 		time_now = datetime.now()
 		tzone = timezone("CET")
