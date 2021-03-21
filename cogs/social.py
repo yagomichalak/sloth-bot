@@ -4,6 +4,7 @@ import praw
 from random import randint
 import aiohttp
 import os
+from datetime import datetime
 
 reddit = praw.Reddit(client_id=os.getenv('REDDIT_CLIENT_ID'),  # client id
                      client_secret=os.getenv('REDDIT_CLIENT_SECRET'),  # my client secret
@@ -11,6 +12,10 @@ reddit = praw.Reddit(client_id=os.getenv('REDDIT_CLIENT_ID'),  # client id
                      username='',  # Not needed
                      password='')  # Not needed
 
+
+mod_role_id = int(os.getenv('MOD_ROLE_ID'))
+admin_role_id = int(os.getenv('ADMIN_ROLE_ID'))
+teacher_role_id = int(os.getenv('TEACHER_ROLE_ID'))
 
 class Social(commands.Cog):
     '''
@@ -24,28 +29,119 @@ class Social(commands.Cog):
     async def on_ready(self):
         print('Social cog is ready!')
 
+    # @commands.command(aliases=['si', 'server'])
+    # async def serverinfo(self, ctx):
+    #     '''
+    #     Shows some information about the server.
+    #     '''
+    #     await ctx.message.delete()
+    #     guild = ctx.guild
+    #     guild_age = (ctx.message.created_at - guild.created_at).days
+    #     created_at = f"Server created on {guild.created_at.strftime('%b %d %Y at %H:%M')}. That\'s over {guild_age} days ago!"
+    #     color = discord.Color.green()
+
+    #     em = discord.Embed(description=created_at, color=color)
+    #     em.add_field(name='Online Members',
+    #                  value=len({m.id for m in guild.members if m.status is not discord.Status.offline}))
+    #     em.add_field(name='Total Members', value=len(guild.members))
+    #     em.add_field(name='Text Channels', value=len(guild.text_channels))
+    #     em.add_field(name='Voice Channels', value=len(guild.voice_channels))
+    #     em.add_field(name='Roles', value=len(guild.roles))
+    #     em.add_field(name='Owner', value=guild.owner)
+
+    #     em.set_thumbnail(url=None or guild.icon_url)
+    #     em.set_author(name=guild.name, icon_url=None or guild.icon_url)
+    #     await ctx.send(embed=em)
+
+    @staticmethod
+    async def sort_time(guild: discord.Guild, at: datetime) -> str:
+
+        member_age = (datetime.utcnow() - at).total_seconds()
+        uage = {
+            "years": 0,
+            "months": 0,
+            "days": 0,
+            "hours": 0,
+            "minutes": 0,
+            "seconds": 0
+        }
+
+        text_list = []
+
+
+        if (years := round(member_age / 31536000)) > 0:
+            text_list.append(f"{years} years")
+            member_age -= 31536000 * years
+            # uage['years'] = years
+
+        if (months := round(member_age / 2628288)) > 0:
+            text_list.append(f"{months} months")
+            member_age -= 2628288 * months
+            # uage['months'] = months
+
+        if not years and not months and (days := round(member_age / 86400)) > 0:
+            text_list.append(f"{days} days")
+            member_age -= 86400 * days
+            # uage['days'] = days
+
+        if not years and not months and not days and (hours := round(member_age / 3600)) > 0:
+            text_list.append(f"{hours} hours")
+            member_age -= 3600 * hours
+
+            # uage['hours'] = hours
+
+        if not years and not months and not days and not hours and (minutes := round(member_age / 60)) > 0:
+            text_list.append(f"{minutes} minutes")
+            member_age -= 60 * minutes
+            # uage['minutes'] = minutes
+
+
+
+        text = ' and '.join(text_list)
+        text += ' ago'
+        return text
+
     @commands.command(aliases=['si', 'server'])
-    async def serverinfo(self, ctx):
-        '''
-        Shows some information about the server.
-        '''
-        await ctx.message.delete()
+    async def serverinfo(self, ctx) -> None:
+        """ Shows information about the server. """
+
         guild = ctx.guild
-        guild_age = (ctx.message.created_at - guild.created_at).days
-        created_at = f"Server created on {guild.created_at.strftime('%b %d %Y at %H:%M')}. That\'s over {guild_age} days ago!"
         color = discord.Color.green()
 
-        em = discord.Embed(description=created_at, color=color)
-        em.add_field(name='Online Members',
-                     value=len({m.id for m in guild.members if m.status is not discord.Status.offline}))
-        em.add_field(name='Total Members', value=len(guild.members))
-        em.add_field(name='Text Channels', value=len(guild.text_channels))
-        em.add_field(name='Voice Channels', value=len(guild.voice_channels))
-        em.add_field(name='Roles', value=len(guild.roles))
-        em.add_field(name='Owner', value=guild.owner)
 
-        em.set_thumbnail(url=None or guild.icon_url)
-        em.set_author(name=guild.name, icon_url=None or guild.icon_url)
+        em = discord.Embed(description=guild.description, color=ctx.author.color)
+        online = len({m.id for m in guild.members if m.status is not discord.Status.offline})
+        em.add_field(name="Server ID", value=guild.id, inline=True)
+        em.add_field(name="Owner", value=guild.owner.mention, inline=False)
+
+        admins_role = discord.utils.get(guild.roles, id=admin_role_id)
+        admins = len([m.mention for m in guild.members if admins_role in m.roles])
+        em.add_field(name="👑 Admins", value=admins, inline=True)
+
+        mods_role = discord.utils.get(guild.roles, id=mod_role_id)
+        mods = len([m.mention for m in guild.members if mods_role in m.roles])
+        em.add_field(name="👮 Mods", value=mods, inline=True)
+
+        teachers_role = discord.utils.get(guild.roles, id=teacher_role_id)
+        teachers = len([m.mention for m in guild.members if teachers_role in m.roles])
+        em.add_field(name="<:zslothmod:737325517077872697> Teachers", value=teachers, inline=True)
+
+        em.add_field(name="Members", value=f"🟢 {online} members ⚫ {len(guild.members)} members", inline=False)
+        em.add_field(name="Channels", value=f"⌨️ {len(guild.text_channels)} | 🔈 {len(guild.voice_channels)}", inline=True)
+        em.add_field(name="Roles", value=len(guild.roles), inline=True)
+        em.add_field(name="Emojis", value=len(guild.emojis), inline=True)
+        em.add_field(name="🌐 Region", value=str(guild.region).title() if guild.region else None, inline=True)
+        em.add_field(name="'<:ban:593407893248802817>' Bans", value=len(await guild.bans()), inline=True)
+        em.add_field(name="🌟 Boosts", value=f"{guild.premium_subscription_count} (Level {guild.premium_tier})", inline=True)
+        features = ', '.join(list(map(lambda f: f.replace('_', ' ').capitalize(), guild.features)))
+        em.add_field(name="Server Features", value=features if features else None, inline=False)
+
+
+        em.set_thumbnail(url=guild.icon_url)
+        em.set_image(url=guild.banner_url)
+        em.set_author(name=guild.name, icon_url=guild.icon_url)
+        created_at = await Social.sort_time(guild, guild.created_at)
+        em.set_footer(text=f"Created: {guild.created_at.strftime('%d/%m/%y')} ({created_at})")
         await ctx.send(embed=em)
 
     # Shows all the info about a user
