@@ -567,13 +567,13 @@ class Moderation(commands.Cog):
 				await self.insert_in_muted(member.id, rr.id, current_ts, seconds)
 
 			# General embed
-			general_embed = discord.Embed(description=f"**For:** `{time_dict['days']}d` `{time_dict['hours']}h`, `{time_dict['minutes']}m` and `{time_dict['seconds']}s`\n**Reason:** {reason}", colour=discord.Colour.dark_grey(), timestamp=ctx.message.created_at)
+			general_embed = discord.Embed(description=f"**For:** `{time_dict['days']}d`, `{time_dict['hours']}h`, `{time_dict['minutes']}m` and `{time_dict['seconds']}s`\n**Reason:** {reason}", colour=discord.Colour.dark_grey(), timestamp=ctx.message.created_at)
 			general_embed.set_author(name=f"{member} has been tempmuted", icon_url=member.avatar_url)
 			await ctx.send(embed=general_embed)
 			# Moderation log embed
 			moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
 			embed = discord.Embed(
-				description=F"**Tempmuted** {member.mention} for `{time_dict['days']}d` `{time_dict['hours']}h`, `{time_dict['minutes']}m` and `{time_dict['seconds']}s`\n**Reason:** {reason}\n**Location:** {ctx.channel.mention}",
+				description=F"**Tempmuted** {member.mention} for `{time_dict['days']}d`, `{time_dict['hours']}h`, `{time_dict['minutes']}m` and `{time_dict['seconds']}s`\n**Reason:** {reason}\n**Location:** {ctx.channel.mention}",
 				color=discord.Color.lighter_grey(),
 				timestamp=ctx.message.created_at)
 			embed.set_author(name=f"{ctx.author} (ID {ctx.author.id})", icon_url=ctx.author.avatar_url)
