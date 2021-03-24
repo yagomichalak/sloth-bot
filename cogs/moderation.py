@@ -4,7 +4,7 @@ import asyncio
 from mysqldb import *
 from datetime import datetime
 import time
-from typing import List, Union, Dict
+from typing import List, Union, Dict, Tuple
 import os
 
 mod_log_id = int(os.getenv('MOD_LOG_CHANNEL_ID'))
@@ -415,8 +415,8 @@ class Moderation(commands.Cog):
 					keep_roles.append(member_role)
 
 			await member.edit(roles=keep_roles)
-			for rr in remove_roles:
-				await self.insert_in_muted(member.id, rr.id, )
+			user_role_ids = [(member.id, rr.id, None, None) for rr in remove_roles]
+			await self.insert_in_muted(user_role_ids)
 
 			# General embed
 			general_embed = discord.Embed(description=f'**Reason:** {reason}', colour=discord.Colour.dark_grey(), timestamp=ctx.message.created_at)
@@ -476,13 +476,14 @@ class Moderation(commands.Cog):
 					member_roles.remove(role)
 
 				await member.edit(roles=member_roles)
-				for mrole in user_roles:
-					try:
-						# await member.add_roles(the_role, atomic=True)
-						await self.remove_role_from_system(member.id, mrole)
-					except Exception:
-						pass
-			# General embed
+				role_ids = [(member.id, mrole[1]) for mrole in user_roles]
+				user_role_ids = [(member.id, mrole[1])]
+				try:
+					await self.remove_role_from_system(user_role_ids)
+				except Exception as e:
+					print(e)
+					pass
+
 			general_embed = discord.Embed(colour=discord.Colour.light_grey(),
 										  timestamp=ctx.message.created_at)
 			general_embed.set_author(name=f'{member} has been unmuted', icon_url=member.avatar_url)
@@ -563,8 +564,8 @@ class Moderation(commands.Cog):
 					keep_roles.append(member_role)
 
 			await member.edit(roles=keep_roles)
-			for rr in remove_roles:
-				await self.insert_in_muted(member.id, rr.id, current_ts, seconds)
+			user_role_ids = [(member.id, rr.id, current_ts, seconds) for rr in remove_roles]
+			await self.insert_in_muted(user_role_ids)
 
 			# General embed
 			general_embed = discord.Embed(description=f"**For:** `{time_dict['days']}d`, `{time_dict['hours']}h`, `{time_dict['minutes']}m` and `{time_dict['seconds']}s`\n**Reason:** {reason}", colour=discord.Colour.dark_grey(), timestamp=ctx.message.created_at)
@@ -905,11 +906,11 @@ class Moderation(commands.Cog):
 		except discord.errors.NotFound:
 			return await ctx.send("**Invalid user id!**", delete_after=3)
 
-	async def insert_in_muted(self, user_id: int, role_id: int, mute_ts: int = None, muted_for_seconds: int = None):
+	async def insert_in_muted(self, user_role_ids: List[Tuple[int]]):
 		mycursor, db = await the_database()
-		await mycursor.execute("""
+		await mycursor.executemany("""
 			INSERT INTO mutedmember (
-			user_id, role_id, mute_ts, muted_for_seconds) VALUES (%s, %s, %s, %s)""", (user_id, role_id, mute_ts, muted_for_seconds)
+			user_id, role_id, mute_ts, muted_for_seconds) VALUES (%s, %s, %s, %s)""", user_role_ids
 		)
 		await db.commit()
 		await mycursor.close()
@@ -921,9 +922,9 @@ class Moderation(commands.Cog):
 		await mycursor.close()
 		return user_roles
 
-	async def remove_role_from_system(self, user_id: int, role_id: int):
+	async def remove_role_from_system(self, user_role_ids: int):
 		mycursor, db = await the_database()
-		await mycursor.execute("DELETE FROM mutedmember WHERE user_id = %s AND role_id = %s", (user_id, role_id))
+		await mycursor.executemany("DELETE FROM MutedMember WHERE user_id = %s AND role_id = %s", user_role_ids)
 		await db.commit()
 		await mycursor.close()
 

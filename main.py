@@ -46,7 +46,7 @@ token = os.getenv('TOKEN')
 async def on_ready():
 	change_status.start()
 	change_color.start()
-	update_timezones.start()
+	# update_timezones.start()
 	print('Bot is ready!')
 
 @tasks.loop(seconds=65)

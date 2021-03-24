@@ -75,6 +75,7 @@ class Show(commands.Cog):
 
     # Shows the specific rule
     @commands.command()
+    @commands.has_any_role(*allowed_roles)
     async def rule(self, ctx, numb: int = None):
         '''
         Shows a specific server rule.
