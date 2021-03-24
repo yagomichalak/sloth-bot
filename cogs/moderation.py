@@ -476,8 +476,8 @@ class Moderation(commands.Cog):
 					member_roles.remove(role)
 
 				await member.edit(roles=member_roles)
-				role_ids = [(member.id, mrole[1]) for mrole in user_roles]
-				user_role_ids = [(member.id, mrole[1])]
+				user_role_ids = [(member.id, mrole[1]) for mrole in user_roles]
+				# user_role_ids = [(member.id, mrole[1])]
 				try:
 					await self.remove_role_from_system(user_role_ids)
 				except Exception as e:

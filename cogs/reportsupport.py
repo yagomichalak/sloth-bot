@@ -129,8 +129,8 @@ class ReportSupport(commands.Cog):
 			# Support us on Patreon
 			await member.send(f"**Support us on Patreon!**\nhttps://www.patreon.com/Languagesloth")
 
-		elif mid == int(os.getenv('REPORT_MESSAGE_ID')) and str(emoji) == '<:ban:593407893248802817>' and not perms.administrator:
-		# elif mid == int(os.getenv('REPORT_MESSAGE_ID')):
+		# elif mid == int(os.getenv('REPORT_MESSAGE_ID')) and str(emoji) == '<:ban:593407893248802817>' and not perms.administrator:
+		elif mid == int(os.getenv('REPORT_MESSAGE_ID')):
 
 			member_ts = self.report_cache.get(member.id)
 			time_now = time.time()
@@ -383,7 +383,8 @@ class ReportSupport(commands.Cog):
 			read_messages=True, send_messages=True, connect=False, view_channel=True, manage_messages=True)}
 		try:
 			the_channel = await guild.create_text_channel(name=f"case-{counter[0][0]}", category=case_cat, overwrites=overwrites)
-		except:
+		except Exception as e:
+			print('===error while reporting===')
 			await member.send("**Something went wrong with it, please contact an admin!**")
 			raise Exception
 		else:
