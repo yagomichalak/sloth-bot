@@ -382,7 +382,7 @@ class ReportSupport(commands.Cog):
 		moderator: discord.PermissionOverwrite(
 			read_messages=True, send_messages=True, connect=False, view_channel=True, manage_messages=True)}
 		try:
-			the_channel = await guild.create_text_channel(name=f"report-{counter[0][0]}", category=case_cat, overwrites=overwrites)
+			the_channel = await guild.create_text_channel(name=f"case-{counter[0][0]}", category=case_cat, overwrites=overwrites)
 		except Exception:
 			await member.send("**Something went wrong with it, please contact an admin!**")
 			raise Exception
