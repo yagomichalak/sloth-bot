@@ -84,9 +84,9 @@ class Metamorph(Player):
 			channel = self.bots_txt
 
 			await channel.send(
-				content=f"<@{ff[0]}>", 
+				content=f"<@{f[0]}>", 
 				embed=discord.Embed(
-					description=f"**<@{ff[3]}>'s `Frog` has just expired! 🐸→💥→🦥**",
+					description=f"**<@{f[3]}>'s `Frog` has just expired! 🐸→💥→🦥**",
 					color=discord.Color.red()))
 
 
