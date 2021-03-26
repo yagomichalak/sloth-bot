@@ -154,7 +154,7 @@ class Tools(commands.Cog):
             return await ctx.send("**Please, inform a language!**", delete_after=5)
         elif not message:
             return await ctx.send("**Please, inform a message to translate!**", delete_after=5)
-        trans = Translator()
+        trans = Translator(service_urls=['translate.googleapis.com'])
         try:
             translation = trans.translate(f'{message}', dest=f'{language}')
         except ValueError:
