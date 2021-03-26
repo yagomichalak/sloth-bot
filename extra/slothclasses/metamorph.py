@@ -79,7 +79,7 @@ class Metamorph(Player):
 		frogs = await self.get_expired_frogs()
 		for f in frogs:
 			await self.delete_skill_action_by_target_id_and_skill_type(f[3], 'frog')
-			await self.update_user_frogified(f[3], 0)
+			await self.update_user_frogged(f[3], 0)
 
 			channel = self.bots_txt
 
@@ -88,7 +88,6 @@ class Metamorph(Player):
 				embed=discord.Embed(
 					description=f"**<@{f[3]}>'s `Frog` has just expired! 🐸→💥→🦥**",
 					color=discord.Color.red()))
-
 
 	@commands.command(aliases=['frogify', 'dnk'])
 	@Player.skills_used(requirement=5)
