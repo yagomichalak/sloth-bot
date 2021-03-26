@@ -59,7 +59,7 @@ class Metamorph(Player):
 
 		transmutations = await self.get_expired_transmutations()
 		for tm in transmutations:
-			print(tm)
+			# print(tm)
 			await self.delete_skill_action_by_target_id_and_skill_type(tm[3], 'transmutation')
 
 			channel = self.bots_txt
@@ -78,16 +78,19 @@ class Metamorph(Player):
 
 		frogs = await self.get_expired_frogs()
 		for f in frogs:
-			await self.delete_skill_action_by_target_id_and_skill_type(f[3], 'frog')
-			await self.update_user_frogged(f[3], 0)
+			try:
+				await self.delete_skill_action_by_target_id_and_skill_type(f[3], 'frog')
+				await self.update_user_frogged(f[3], 0)
 
-			channel = self.bots_txt
+				channel = self.bots_txt
 
-			await channel.send(
-				content=f"<@{f[0]}>", 
-				embed=discord.Embed(
-					description=f"**<@{f[3]}>'s `Frog` has just expired! 🐸→💥→🦥**",
-					color=discord.Color.red()))
+				await channel.send(
+					content=f"<@{f[0]}>", 
+					embed=discord.Embed(
+						description=f"**<@{f[3]}>'s `Frog` has just expired! 🐸→💥→🦥**",
+						color=discord.Color.red()))
+			except:
+				pass
 
 	@commands.command(aliases=['frogify', 'dnk'])
 	@Player.skills_used(requirement=5)
