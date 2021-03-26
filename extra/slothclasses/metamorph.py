@@ -78,7 +78,7 @@ class Metamorph(Player):
 
 		frogs = await self.get_expired_frogs()
 		for f in frogs:
-			await self.delete_skill_action_by_target_id_and_skill_type(ff[3], 'frog')
+			await self.delete_skill_action_by_target_id_and_skill_type(f[3], 'frog')
 			await self.update_user_frogified(f[3], 0)
 
 			channel = self.bots_txt
