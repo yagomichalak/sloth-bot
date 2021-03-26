@@ -69,10 +69,10 @@ class Moderation(commands.Cog):
 
 						bot = discord.utils.get(guild.members, id=self.client.user.id)
 
-						member_roles = [
+						member_roles = list([
 							a_role for the_role in user_roles if (a_role := discord.utils.get(guild.roles, id=the_role[1]))
 							and a_role < bot.top_role
-						]
+						])
 						member_roles.extend(member.roles)
 
 						member_roles = list(set(member_roles))
@@ -80,11 +80,12 @@ class Moderation(commands.Cog):
 							member_roles.remove(role)
 
 						await member.edit(roles=member_roles)
-						for mrole in user_roles:
-							try:
-								await self.remove_role_from_system(member.id, mrole[1])
-							except Exception as e:
-								pass
+						user_role_ids = [(member.id, mrole[1]) for mrole in user_roles]
+						try:
+							await self.remove_role_from_system(user_role_ids)
+						except Exception as e:
+							print(e)
+							pass
 
 
 
@@ -465,10 +466,10 @@ class Moderation(commands.Cog):
 
 				bot = discord.utils.get(ctx.guild.members, id=self.client.user.id)
 
-				member_roles = [
+				member_roles = list([
 					a_role for the_role in user_roles if (a_role := discord.utils.get(member.guild.roles, id=the_role[1]))
 					and a_role < bot.top_role
-				]
+				])
 				member_roles.extend(member.roles)
 
 				member_roles = list(set(member_roles))
@@ -477,7 +478,6 @@ class Moderation(commands.Cog):
 
 				await member.edit(roles=member_roles)
 				user_role_ids = [(member.id, mrole[1]) for mrole in user_roles]
-				# user_role_ids = [(member.id, mrole[1])]
 				try:
 					await self.remove_role_from_system(user_role_ids)
 				except Exception as e:
