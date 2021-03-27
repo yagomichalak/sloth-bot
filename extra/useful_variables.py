@@ -79,8 +79,8 @@ different_class_roles = {
     "conlangs": [
         "esperanto"
     ],
-    "indian languages": [
-        "hindi", "urdu", "bengali"
+    "hindustani": [
+        "hindi", "urdu", "hindustani"
     ],
     "balkan languages": [
         "croatian", "serbian", "bosnian"
