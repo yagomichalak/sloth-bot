@@ -23,7 +23,8 @@ class Merchant(Player):
 	@Player.user_is_class('merchant')
 	@Player.skill_mark()
 	async def open_shop(self, ctx) -> None:
-		""" A command for Merchants. """
+		""" Puts a changing-SlothClass potion for sale for the price you want.
+		Ps: It costs 50łł to do it and the item remains there for 24 hours. """
 
 		if ctx.channel.id != bots_and_commands_channel_id:
 			return await ctx.send(f"**{ctx.author.mention}, you can only use this command in {self.bots_txt.mention}!**")

@@ -19,7 +19,8 @@ class Cybersloth(Player):
 	@Player.user_is_class('cybersloth')
 	@Player.skill_mark()
 	async def hack(self, ctx, target: discord.Member = None) -> None:
-		""" A command for Cybersloths. """
+		""" Hacks a member, making them unable to check their z!info and z!profile for 24hrs.
+		:param target: The target member. """
 
 		attacker = ctx.author
 

@@ -62,8 +62,9 @@ class Prawler(Player):
 	@Player.user_is_class('prawler')
 	@Player.skill_mark()
 	async def steal(self, ctx, target: discord.Member = None) -> None:
-		""" A command for Prawlers. 
-		:param target: The member from whom you want to steal. """
+		""" Steals money from a member. 
+		:param target: The member from whom you want to steal.
+		PS: The target has 40 minutes to defend themselves from the stealing. """
 
 		if ctx.channel.id != bots_and_commands_channel_id:
 			return await ctx.send(f"**{ctx.author.mention}, you can only use this command in {self.bots_txt.mention}!**")
