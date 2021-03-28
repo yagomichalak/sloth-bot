@@ -29,7 +29,8 @@ class Agares(Player):
 	@Player.user_is_class('agares')
 	@Player.skill_mark()
 	async def magic_pull(self, ctx, target: discord.Member = None) -> None:
-		""" A command for Agares. """
+		""" Moves a member to the channel you are in.
+		:param target: The target member. """
 
 		attacker = ctx.author
 

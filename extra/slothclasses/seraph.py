@@ -21,7 +21,10 @@ class Seraph(Player):
 	@Player.user_is_class('seraph')
 	@Player.skill_mark()
 	async def divine_protection(self, ctx, target: discord.Member = None) -> None:
-		""" A command for Seraphs. """
+		""" Gives a Divine Protection shield to a member, so they are protected against
+		attacks for 24 hours. 
+		:param target: The target member. (Optional)
+		PS: If target not provided, you are the target. """
 
 		if ctx.channel.id != bots_and_commands_channel_id:
 			return await ctx.send(f"**{ctx.author.mention}, you can only use this command in {self.bots_txt.mention}!**")

@@ -22,7 +22,8 @@ class Warrior(Player):
 	@Player.user_is_class('warrior')
 	@Player.skill_mark()
 	async def hit(self, ctx, target: discord.Member = None) -> None:
-		""" A command for Warriors. """
+		""" Knocks someone out, making them unable to use their skills for 24 hours.
+		:param target: The target member. """
 
 		attacker = ctx.author
 
