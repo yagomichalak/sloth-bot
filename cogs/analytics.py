@@ -16,21 +16,25 @@ select_your_language_channel_id = int(os.getenv('SELECT_YOUR_LANGUAGE_CHANNEL_ID
 
 
 class Analytics(commands.Cog):
-	'''
-	A cog related to the analytics of the server.
-	'''
+	""" A cog related to the analytics of the server. """
 
 	def __init__(self, client) -> None:
+		""" Class initializing method. """
+
 		self.client = client
 		self.dnk_id: int = int(os.getenv('DNK_ID'))
 
 	@commands.Cog.listener()
 	async def on_ready(self) -> None:
+		""" Tells when the cog's ready to be used. """
+
 		print("Analytics cog is online!")
 		self.check_midnight.start()
 
 	@tasks.loop(minutes=1)
 	async def check_midnight(self) -> None:
+		""" Checks whether it's midnight. """
+
 		time_now = datetime.now()
 		tzone = timezone("Etc/GMT-1")
 		date_and_time = time_now.astimezone(tzone)
@@ -59,6 +63,9 @@ class Analytics(commands.Cog):
 
 	@commands.Cog.listener()
 	async def on_member_join(self, member) -> None:
+		""" Tells the newcomer to assign themselves a native language role, and updates the joined members counter.
+		"""
+
 		channel = discord.utils.get(member.guild.channels, id=select_your_language_channel_id)
 		await channel.send(
 			f'''Hello {member.mention} ! Scroll up and choose your Native Language by clicking in the flag that best represents it!
@@ -68,27 +75,38 @@ class Analytics(commands.Cog):
 
 	@commands.Cog.listener()
 	async def on_member_remove(self, member) -> None:
-		return await self.update_left()
+		""" Updates the let members counter. """
+
+		await self.update_left()
 
 	@commands.Cog.listener()
 	async def on_message(self, message) -> None:
+		""" Updates the messages counter. """
+
 		if not message.guild:
 			return
 
-		return await self.update_messages()
+		await self.update_messages()
 
 	@commands.command(hidden=True)
 	@commands.has_permissions(administrator=True)
 	async def stop_task(self, ctx) -> None:
+		""" Stops the midnight-checker task. """
+
 		await ctx.message.delete()
 		self.check_midnight.stop()
 		return await ctx.send("**Analytics task has been stopped!**", delete_after=3)
 
 	async def bump_data(self, joined: int, left: int, messages: int, members: int, online: int,
 						complete_date: str) -> None:
-		'''
-		Bumps the data from the given day to the database.
-		'''
+		""" Bumps the data from the given day to the database.
+		:param joined: The joined members counter.
+		:param left: The left members counter.
+		:param messages: The messages counter.
+		:param members: The members counter.
+		:param online: The online members counter.
+		:param complete_date: The complete date referring to the data. """
+
 		mycursor, db = await the_database()
 		await mycursor.execute('''
 			INSERT INTO DataBumps (
@@ -121,9 +139,8 @@ class Analytics(commands.Cog):
 	@commands.command(hidden=True)
 	@commands.has_permissions(administrator=True)
 	async def drop_table_sloth_analytics(self, ctx) -> None:
-		'''
-		(ADM) Drops the SlothAnalytics table.
-		'''
+		""" (ADM) Drops the SlothAnalytics table. """
+
 		await ctx.message.delete()
 		mycursor, db = await the_database()
 		await mycursor.execute("DROP TABLE SlothAnalytics")
@@ -134,49 +151,60 @@ class Analytics(commands.Cog):
 	@commands.command(hidden=True)
 	@commands.has_permissions(administrator=True)
 	async def reset_table_sloth_analytics(self, ctx=None) -> None:
-		'''
-		(ADM) Resets the SlothAnalytics table.
-		'''
+		""" (ADM) Resets the SlothAnalytics table. """
+
 		if ctx:
 			await ctx.message.delete()
 		mycursor, db = await the_database()
 		await mycursor.execute("DELETE FROM SlothAnalytics")
-		await db.commit()  # IDK
 		time_now = datetime.now()
 		tzone = timezone("CET")
 		date_and_time = time_now.astimezone(tzone)
 		day = date_and_time.strftime('%d')
-		await mycursor.execute("INSERT INTO SlothAnalytics (day_now) VALUES (%s)", (day))
+		await mycursor.execute("INSERT INTO SlothAnalytics (day_now) VALUES (%s)", (day,))
 		await db.commit()
 		await mycursor.close()
 		if ctx:
 			return await ctx.send("**Table *SlothAnalytics* reset!**", delete_after=3)
 
 	async def update_joined(self) -> None:
+		""" Updates the joined members counting. """
+
 		mycursor, db = await the_database()
 		await mycursor.execute("UPDATE SlothAnalytics SET m_joined = m_joined + 1")
 		await db.commit()
 		await mycursor.close()
 
 	async def update_left(self) -> None:
+		""" Updates the left members counting. """
+
 		mycursor, db = await the_database()
 		await mycursor.execute("UPDATE SlothAnalytics SET m_left = m_left + 1")
 		await db.commit()
 		await mycursor.close()
 
 	async def update_messages(self) -> None:
+		""" Updates the message counting. """
+
 		mycursor, db = await the_database()
 		await mycursor.execute("UPDATE SlothAnalytics SET messages_sent = messages_sent + 1")
 		await db.commit()
 		await mycursor.close()
 
 	async def update_day(self, day: str) -> None:
+		""" Updates the day.
+		:param day: The day it is. """
+
 		mycursor, db = await the_database()
-		await mycursor.execute(f"UPDATE SlothAnalytics SET day_now = '{day}'")
+		await mycursor.execute("UPDATE SlothAnalytics SET day_now = %s", (day,))
 		await db.commit()
 		await mycursor.close()
 
 	async def check_relatory_time(self, time_now: str) -> bool:
+		""" Checks the relatory time in the database, so it knows whether it should reset
+		the data or not.
+		:param time_now: The current time. """
+
 		mycursor, db = await the_database()
 		await mycursor.execute("SELECT * from SlothAnalytics")
 		info = await mycursor.fetchall()
@@ -187,6 +215,8 @@ class Analytics(commands.Cog):
 			return False
 
 	async def get_info(self) -> List[int]:
+		""" Gets the analytics info. """
+
 		mycursor, db = await the_database()
 		await mycursor.execute("SELECT * from SlothAnalytics")
 		info = await mycursor.fetchall()
@@ -207,10 +237,10 @@ class Analytics(commands.Cog):
 
 		await ctx.message.delete()
 		mycursor, db = await the_database()
-		await mycursor.execute('''
+		await mycursor.execute("""
 			CREATE TABLE DataBumps (
 			m_joined BIGINT, m_left BIGINT, messages BIGINT, members BIGINT, online BIGINT, complete_date VARCHAR(11)
-			)''')
+			)""")
 		await db.commit()
 		await mycursor.close()
 		return await ctx.send("**Table `DataBumps` created!**")
@@ -472,4 +502,6 @@ class Analytics(commands.Cog):
 
 
 def setup(client):
+	""" Cog's setup function. """
+
 	client.add_cog(Analytics(client))

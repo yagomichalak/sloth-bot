@@ -6,25 +6,30 @@ from PIL import Image, ImageFont, ImageDraw
 import os
 from cogs.slothcurrency import SlothCurrency
 from mysqldb import *
+from typing import List, Union
 
 class CreateSmartRoom(commands.Cog):
-	'''
-	A cog related to the creation of a custom voice channel.
-	'''
+	""" A cog related to the creation of a custom voice channel. """
 
 	def __init__(self, client):
+		""" Class initializing method. """
+
 		self.client = client
 		self.vc_id = int(os.getenv('CREATE_SMART_ROOM_VC_ID'))
 		self.cat_id = int(os.getenv('CREATE_SMART_ROOM_CAT_ID'))
 
 	@commands.Cog.listener()
 	async def on_ready(self):
+		""" Tells when the cog is ready to be used. """
+
 		print("CreateSmartRoom cog is online")
 		self.check_galaxy_expiration.start()
 
 
 	@tasks.loop(hours=3)
 	async def check_galaxy_expiration(self):
+		""" Task that checks Galaxy Rooms expirations. """
+
 		if not await self.table_galaxy_vc_exists():
 			return
 
@@ -45,8 +50,6 @@ class CreateSmartRoom(commands.Cog):
 				await self.user_notified_yes(member.id)
 			except Exception:
 				pass
-
-
 
 		# Looks for expired rooms to delete
 		all_rooms = await self.get_all_galaxy_rooms(the_time)
@@ -72,7 +75,10 @@ class CreateSmartRoom(commands.Cog):
 
 
 	@commands.Cog.listener()
-	async def on_voice_state_update(self, member, before, after):
+	async def on_voice_state_update(self, member, before, after) -> None:
+		""" Handler for voice channel activity, that's eventually gonna be used
+		for creating a SmartRoom. """
+
 		# Checks if the user is leaving the vc and whether there still are people in there
 		if before.channel:
 			if before.channel.category:
@@ -131,7 +137,9 @@ class CreateSmartRoom(commands.Cog):
 
 
 	# Room type 1
-	async def basic_room(self, member):
+	async def basic_room(self, member: discord.Member) -> None:
+		""" Prompts questions to the member in order to create a Basic Room.
+		:param member: The member to prompt. """
 
 		# Checks
 		def check_size(m):
@@ -222,12 +230,10 @@ class CreateSmartRoom(commands.Cog):
 			return await self.basic_room(member)
 
 	# Room type 2
-	async def premium_room(self, member):
-		'''
-		To-do:
-		- Link the the text channel and the voice channel to the user in the database.
-		- Make control commands within the text channel
-		'''
+	async def premium_room(self, member: discord.Member) -> None:
+		""" Prompts questions to the member in order to create a Premium Room.
+		:param member: The member to prompt. """
+
 		# Checks
 		def check_size(m):
 			value = m.content
@@ -321,12 +327,9 @@ class CreateSmartRoom(commands.Cog):
 			return await self.premium_room(member)
 
 	# Room type 3
-	async def galaxy_room(self, member):
-		'''
-		To-do:
-		- Link the the text channels and the voice channel to the user in the database.
-		- Make control commands within the text channel
-		'''
+	async def galaxy_room(self, member: discord.Member) -> None:
+		""" Prompts questions to the member in order to create a Galaxy Room.
+		:param member: The member to prompt. """
 
 		def check_size(m):
 			value = m.content
@@ -474,7 +477,11 @@ class CreateSmartRoom(commands.Cog):
 		else:
 			await self.galaxy_room(member)
 
-	async def get_response(self, member, check):
+	async def get_response(self, member, check) -> str:
+		""" Gets a message response from the member.
+		:param member: The member.
+		:param check: The check that is gonna be used. """
+
 		try:
 			response = await self.client.wait_for('message', timeout=60.0, check=check)
 			response = response.content
@@ -484,7 +491,11 @@ class CreateSmartRoom(commands.Cog):
 		else:
 			return response
 
-	async def get_reaction_response(self, member, check):
+	async def get_reaction_response(self, member, check) -> List[Union[discord.Reaction, discord.User]]:
+		""" Gets a reaction response from the member.
+		:param member: The member.
+		:param check: The check that is gonna be used. """
+
 		try:
 			reaction, user = await self.client.wait_for('reaction_add', timeout=60.0, check=check)
 		except asyncio.TimeoutError:
@@ -497,28 +508,52 @@ class CreateSmartRoom(commands.Cog):
 			return reaction, user
 
 
-	async def overwrite_image(self, member_id, text, coords, color, image):
+	async def overwrite_image(self, member_id, text, coords, color, image) -> None:
+		""" Writes a text on a Smartroom's image preview, and overwrites the original one.
+		:param member_id: The ID of the user who's creating it.
+		:param text: The text that's gonna be written.
+		:param coords: The coordinates for the text.
+		:param color: The color of the text.
+		:param image: The image to write on. """
+
 		small = ImageFont.truetype("./images/smart_vc/uni-sans-regular.ttf", 40)
 		base = Image.open(image)
 		draw = ImageDraw.Draw(base)
 		draw.text(coords, text, color, font=small)
 		base.save(f'./images/smart_vc/user_previews/{member_id}.png')
 
-	async def overwrite_image_with_image(self, member_id, coords, size):
-		f'./images/smart_vc/user_previews/{member_id}.png'
-		user_preview = Image.open(f"./images/smart_vc/user_previews/{member_id}.png")
+	async def overwrite_image_with_image(self, member_id, coords, size) -> None:
+		""" Pastes a voice channel image on top of a SmartRoom's image preview
+		and overwrites the original one.
+		:param member_id: The ID of the user who's creating it.
+		:param coords: The coordinates for the image that's gonna be pasted on top of it.
+		:param size: The size of the voice channel. """
+
+		path = f'./images/smart_vc/user_previews/{member_id}.png'
+		user_preview = Image.open(path)
 		size_image = Image.open(size).resize((78, 44), Image.LANCZOS)
 		user_preview.paste(size_image, coords, size_image)
-		user_preview.save(f"./images/smart_vc/user_previews/{member_id}.png")
+		user_preview.save(path)
 
-	async def make_preview_basic(self, member_id, vc, size):
+	async def make_preview_basic(self, member_id, vc, size) -> None:
+		""" Makes a creation preview for a Basic Room.
+		:param member_id: The ID of the user who's creating it.
+		:param vc: The voice channel name.
+		:param size: The voice channel size; user limit. """
+
 		preview_template = './images/smart_vc/basic/1 preview2.png'
 		color = (132, 142, 142)
 		await self.overwrite_image(member_id, vc, (585, 870), color, preview_template)
 		if int(size) != 0:
 			await self.overwrite_image_with_image(member_id, (405, 870), f'./images/smart_vc/sizes/voice channel ({size}).png')
 
-	async def make_preview_premium(self, member_id, txt, vc, size):
+	async def make_preview_premium(self, member_id, txt, vc, size) -> None:
+		""" Makes a creation preview for a Premium Room.
+		:param member_id: The ID of the user who's creating it.
+		:param txt: The name o the first text channel.
+		:param vc: The voice channel name.
+		:param size: The voice channel size; user limit. """
+
 		preview_template = './images/smart_vc/premium/2 preview2.png'
 		color = (132, 142, 142)
 		await self.overwrite_image(member_id, txt.lower(), (585, 760), color, preview_template)
@@ -526,7 +561,16 @@ class CreateSmartRoom(commands.Cog):
 		if int(size) != 0:
 			await self.overwrite_image_with_image(member_id, (405, 955), f'./images/smart_vc/sizes/voice channel ({size}).png')
 
-	async def make_preview_galaxy(self, member_id, cat_name, txt1, txt2, vc, size):
+	async def make_preview_galaxy(self, member_id, cat_name, txt1, txt2, vc, size) -> None:
+		""" Makes a creation preview for a Galaxy Room.
+		:param member_id: The ID of the user who's creating it.
+		:param cat_name: The category name.
+		:param txt1: The name o the first text channel.
+		:param txt2: The name o the second text channel.
+		:param txt3: The name o the third text channel. (Deprecated)
+		:param vc: The main voice channel name.
+		:param size: The voice channel size; user limit. """
+
 		preview_template = './images/smart_vc/galaxy/3 preview2.png'
 		color = (132, 142, 142)
 		await self.overwrite_image(member_id, cat_name, (545, 700), color, preview_template)
@@ -542,10 +586,9 @@ class CreateSmartRoom(commands.Cog):
 	# Premium related functions
 	@commands.command(hidden=True)
 	@commands.has_permissions(administrator=True)
-	async def create_table_premium_vc(self, ctx):
-		'''
-		(ADM) Creates the PremiumVc table.
-		'''
+	async def create_table_premium_vc(self, ctx) -> None:
+		""" (ADM) Creates the PremiumVc table. """
+
 		if await self.table_premium_vc_exists():
 			return await ctx.send("**Table __PremiumVc__ already exists!**")
 
@@ -558,10 +601,9 @@ class CreateSmartRoom(commands.Cog):
 
 	@commands.command(hidden=True)
 	@commands.has_permissions(administrator=True)
-	async def drop_table_premium_vc(self, ctx):
-		'''
-		(ADM) Drops the PremiumVc table.
-		'''
+	async def drop_table_premium_vc(self, ctx) -> None:
+		""" (ADM) Drops the PremiumVc table. """
+
 		if not await self.table_premium_vc_exists():
 			return await ctx.send("**Table __PremiumVc__ doesn't exist!**")
 
@@ -574,10 +616,9 @@ class CreateSmartRoom(commands.Cog):
 
 	@commands.command(hidden=True)
 	@commands.has_permissions(administrator=True)
-	async def reset_table_premium_vc(self, ctx):
-		'''
-		(ADM) Resets the PremiumVc table.
-		'''
+	async def reset_table_premium_vc(self, ctx) -> None:
+		""" (ADM) Resets the PremiumVc table. """
+
 		if not await self.table_premium_vc_exists():
 			return await ctx.send("**Table __PremiumVc__ doesn't exist yet!**")
 
@@ -589,6 +630,8 @@ class CreateSmartRoom(commands.Cog):
 		return await ctx.send("**Table __PremiumVc__ reset!**")
 
 	async def table_premium_vc_exists(self) -> bool:
+		""" Checks whether the PremiumVc table exists. """
+
 		mycursor, db = await the_database()
 		await mycursor.execute("SHOW TABLE STATUS LIKE 'PremiumVc'")
 		table_info = await mycursor.fetchall()
@@ -600,32 +643,43 @@ class CreateSmartRoom(commands.Cog):
 		else:
 			return True
 
-	async def insert_premium_vc(self, user_id: int, user_vc: int, user_txt: int):
+	async def insert_premium_vc(self, user_id: int, user_vc: int, user_txt: int) -> None:
+		""" Inserts a Premium Room.
+		:param user_id: The owner ID.
+		:param user_vc: The voice channel ID.
+		:param user_txt: The text channel ID. """
+
 		mycursor, db = await the_database()
 		await mycursor.execute("INSERT INTO PremiumVc (user_id, user_vc, user_txt) VALUES (%s, %s, %s)", (user_id, user_vc, user_txt))
 		await db.commit()
 		await mycursor.close()
 
-	async def get_premium_vc(self, user_vc: int):
+	async def get_premium_vc(self, user_vc: int) -> List[List[int]]:
+		""" Gets a Premium Room by voice channel ID.
+		:param user_vc: The voice channel ID. """
+
 		mycursor, db = await the_database()
 		await mycursor.execute("SELECT * FROM PremiumVc WHERE user_vc = %s", (user_vc,))
 		premium_vc = await mycursor.fetchall()
 		await mycursor.close()
 		return premium_vc
 
-	async def delete_premium_vc(self, user_id: int, user_vc: int):
+	async def delete_premium_vc(self, user_id: int, user_vc: int) -> None:
+		""" Deletes a Premium Room by voice channel ID.
+		:param user_id: The owner ID.
+		:param user_vc: The voice channel ID. """
+
 		mycursor, db = await the_database()
-		await mycursor.execute(f"DELETE FROM PremiumVc WHERE user_id = {user_id} and user_vc = {user_vc}")
+		await mycursor.execute("DELETE FROM PremiumVc WHERE user_id = %s and user_vc = %s", (user_id, user_vc))
 		await db.commit()
 		await mycursor.close()
 
 	# Galaxy related functions
 	@commands.command(hidden=True)
 	@commands.has_permissions(administrator=True)
-	async def create_table_galaxy_vc(self, ctx):
-		'''
-		(ADM) Creates the GalaxyVc table.
-		'''
+	async def create_table_galaxy_vc(self, ctx) -> None:
+		""" (ADM) Creates the GalaxyVc table. """
+
 		if await self.table_galaxy_vc_exists():
 			return await ctx.send("**Table __GalaxyVc__ already exists!**")
 
@@ -638,10 +692,9 @@ class CreateSmartRoom(commands.Cog):
 
 	@commands.command(hidden=True)
 	@commands.has_permissions(administrator=True)
-	async def drop_table_galaxy_vc(self, ctx):
-		'''
-		(ADM) Drops the GalaxyVc table.
-		'''
+	async def drop_table_galaxy_vc(self, ctx) -> None:
+		""" (ADM) Drops the GalaxyVc table. """
+
 		if not await self.table_galaxy_vc_exists():
 			return await ctx.send("**Table __GalaxyVc__ doesn't exist!**")
 
@@ -654,10 +707,9 @@ class CreateSmartRoom(commands.Cog):
 
 	@commands.command(hidden=True)
 	@commands.has_permissions(administrator=True)
-	async def reset_table_galaxy_vc(self, ctx):
-		'''
-		(ADM) Resets the GalaxyVc table.
-		'''
+	async def reset_table_galaxy_vc(self, ctx) -> None:
+		""" (ADM) Resets the GalaxyVc table. """
+
 		if not await self.table_galaxy_vc_exists():
 			return await ctx.send("**Table __GalaxyVc__ doesn't exist yet!**")
 
@@ -669,6 +721,8 @@ class CreateSmartRoom(commands.Cog):
 		return await ctx.send("**Table __GalaxyVc__ reset!**")
 
 	async def table_galaxy_vc_exists(self) -> bool:
+		""" Checks whether the GalaxyVc table exists. """
+
 		mycursor, db = await the_database()
 		await mycursor.execute("SHOW TABLE STATUS LIKE 'GalaxyVc'")
 		table_info = await mycursor.fetchall()
@@ -680,38 +734,59 @@ class CreateSmartRoom(commands.Cog):
 		else:
 			return True
 
-	async def insert_galaxy_vc(self, user_id: int, user_cat: int, user_vc: int, user_txt1: int, user_txt2: int, user_ts: int):
+	async def insert_galaxy_vc(self, user_id: int, user_cat: int, user_vc: int, user_txt1: int, user_txt2: int, user_ts: int) -> None:
+		""" Inserts a Galaxy Room.
+		:param user_id: The owner ID.
+		:param user_cat: The category ID.
+		:param user_vc: The Galaxy Room's main voice channel ID.
+		:param user_txt1: The ID of the first text channel.
+		:param user_txt2: The ID of the second text channel.
+		:param user_ts: The current timestamp. """
+
 		mycursor, db = await the_database()
-		await mycursor.execute("INSERT INTO GalaxyVc (user_id, user_cat, user_vc, user_txt1, user_txt2, user_ts) VALUES (%s, %s, %s, %s, %s, %s)", (user_id, user_cat, user_vc, user_txt1, user_txt2, user_ts))
+		await mycursor.execute("""
+			INSERT INTO GalaxyVc (user_id, user_cat, user_vc, user_txt1, user_txt2, user_ts) 
+			VALUES (%s, %s, %s, %s, %s, %s)""", (user_id, user_cat, user_vc, user_txt1, user_txt2, user_ts)
+		)
 		await db.commit()
 		await mycursor.close()
 
-	async def get_galaxy_txt(self, user_id: int, user_cat: int):
+	async def get_galaxy_txt(self, user_id: int, user_cat: int) -> List[List[int]]:
+		""" Gets the Galaxy Room's channels by category ID.
+		:param user_id: The ID of the owner of the channels.
+		:param user_cat: The ID of the category. """
+
 		mycursor, db = await the_database()
-		await mycursor.execute(f"SELECT * FROM GalaxyVc WHERE user_id = {user_id} and user_cat = {user_cat}")
+		await mycursor.execute("SELECT * FROM GalaxyVc WHERE user_id = %s and user_cat = %s", (user_id, user_cat))
 		premium_vc = await mycursor.fetchall()
 		await mycursor.close()
 		return premium_vc
 
 	async def get_all_galaxy_rooms(self, the_time: int):
+		""" Get all expired Galaxy Rooms.
+		:param the_time The current time. """
+
 		mycursor, db = await the_database()
-		await mycursor.execute(f"SELECT * FROM GalaxyVc WHERE {the_time} - user_ts >= 1209600")
+		await mycursor.execute("SELECT * FROM GalaxyVc WHERE %s - user_ts >= 1209600", (the_time,))
 		rooms = await mycursor.fetchall()
 		await mycursor.close()
 		return rooms
 
-	async def delete_galaxy_vc(self, user_id: int, user_vc: int):
+	async def delete_galaxy_vc(self, user_id: int, user_vc: int) -> None:
+		""" Deletes a a Galaxy Room by voice channel ID.
+		:param user_id: The user ID.
+		:param user_vc: The voice channel ID. """
+
 		mycursor, db = await the_database()
-		await mycursor.execute(f"DELETE FROM GalaxyVc WHERE user_id = {user_id} and user_vc = {user_vc}")
+		await mycursor.execute("DELETE FROM GalaxyVc WHERE user_id = %s and user_vc = %s", (user_id, user_vc))
 		await db.commit()
 		await mycursor.close()
 
 	@commands.command(aliases=['permit'])
-	async def allow(self, ctx, member: discord.Member = None):
-		'''
-		Allows a member to join your channels.
-		:param member: The member to allow.
-		'''
+	async def allow(self, ctx, member: discord.Member = None) -> None:
+		""" Allows a member to join your channels.
+		:param member: The member to allow. """
+
 		if not member:
 			return await ctx.send("**Inform a member to allow!**")
 
@@ -738,11 +813,10 @@ class CreateSmartRoom(commands.Cog):
 		await ctx.send("**This is not your room, so you cannot allow someone in it!**")
 
 	@commands.command(aliases=['prohibit'])
-	async def forbid(self, ctx, member: discord.Member = None):
-		'''
-		Forbids a member from joining your channels.
-		:param member: The member to forbid.
-		'''
+	async def forbid(self, ctx, member: discord.Member = None) -> None:
+		""" Forbids a member from joining your channels.
+		:param member: The member to forbid. """
+
 		if not member:
 			return await ctx.send("**Inform a member to forbid!**")
 
@@ -758,9 +832,14 @@ class CreateSmartRoom(commands.Cog):
 
 		await ctx.send("**This is not your room, so you cannot forbid someone from it!**")
 
-	async def get_user_vc_timestamp(self, user_id: int, the_time: int):
+	async def get_user_vc_timestamp(self, user_id: int, the_time: int) -> int:
+		""" Gets the user voice channel timestamp, and insert them into the database
+		in case they are not there yet.
+		:param user_id: The ID of the user.
+		:param the_time: The current time. """
+
 		mycursor, db = await the_database()
-		await mycursor.execute(f'SELECT * FROM UserVCstamp WHERE user_id = {user_id}')
+		await mycursor.execute("SELECT * FROM UserVCstamp WHERE user_id = %s", (user_id,))
 		user = await mycursor.fetchall()
 		await mycursor.close()
 
@@ -770,13 +849,21 @@ class CreateSmartRoom(commands.Cog):
 
 		return user[0][1]
 
-	async def insert_user_vc(self, user_id: int, the_time: int):
+	async def insert_user_vc(self, user_id: int, the_time: int) -> None:
+		""" Inserts a user into the UserVCstamp table.
+		:param user_id: The ID of the user.
+		:param the_time: The current time. """
+
 		mycursor, db = await the_database()
 		await mycursor.execute("INSERT INTO UserVCstamp (user_id, user_vc_ts) VALUES (%s, %s)", (user_id, the_time - 61))
 		await db.commit()
 		await mycursor.close()
 
-	async def update_user_vc_ts(self, user_id: int, new_ts: int):
+	async def update_user_vc_ts(self, user_id: int, new_ts: int) -> None:
+		""" Updates the user's voice channel timestamp.
+		:param user_id: The ID of the user.
+		:param new_ts: The new/current timestamp. """
+
 		mycursor, db = await the_database()
 		await mycursor.execute("UPDATE UserVCstamp SET user_vc_ts = %s WHERE user_id = %s", (new_ts, user_id))
 		await db.commit()
@@ -784,10 +871,9 @@ class CreateSmartRoom(commands.Cog):
 
 	@commands.has_permissions(administrator=True)
 	@commands.command(hidden=True)
-	async def create_table_user_vc_ts(self, ctx):
-		'''
-		(ADM) Creates the UserVcstamp table.
-		'''
+	async def create_table_user_vc_ts(self, ctx) -> None:
+		""" (ADM) Creates the UserVcstamp table. """
+
 		await ctx.message.delete()
 		if await self.table_user_vc_ts_exists():
 			return await ctx.send("**Table __UserVCstamp__ already exists!**")
@@ -800,10 +886,9 @@ class CreateSmartRoom(commands.Cog):
 
 	@commands.has_permissions(administrator=True)
 	@commands.command(hidden=True)
-	async def drop_table_user_vc_ts(self, ctx):
-		'''
-		(ADM) Drops the UserVcstamp table.
-		'''
+	async def drop_table_user_vc_ts(self, ctx) -> None:
+		""" (ADM) Drops the UserVcstamp table. """
+
 		await ctx.message.delete()
 		if not await self.table_user_vc_ts_exists():
 			return await ctx.send("**Table __UserVCstamp__ doesn't exist!**")
@@ -816,10 +901,9 @@ class CreateSmartRoom(commands.Cog):
 
 	@commands.has_permissions(administrator=True)
 	@commands.command(hidden=True)
-	async def reset_table_user_vc_ts(self, ctx):
-		'''
-		(ADM) Resets the UserVcstamp table.
-		'''
+	async def reset_table_user_vc_ts(self, ctx) -> None:
+		""" (ADM) Resets the UserVcstamp table. """
+
 		await ctx.message.delete()
 		if not await self.table_user_vc_ts_exists():
 			return await ctx.send("**Table __UserVCstamp__ doesn't exist yet!**")
@@ -831,8 +915,10 @@ class CreateSmartRoom(commands.Cog):
 		return await ctx.send("**Table __UserVCstamp__ reset!**", delete_after=5)
 
 	async def table_user_vc_ts_exists(self) -> bool:
+		""" Checks whether the UserVCstamp table exists. """
+
 		mycursor, db = await the_database()
-		await mycursor.execute(f"SHOW TABLE STATUS LIKE 'UserVCstamp'")
+		await mycursor.execute("SHOW TABLE STATUS LIKE 'UserVCstamp'")
 		table_info = await mycursor.fetchall()
 		await mycursor.close()
 
@@ -845,10 +931,9 @@ class CreateSmartRoom(commands.Cog):
 
 	# Other useful commands
 	@commands.command(aliases=['creation', 'expiration'])
-	async def galaxy_info(self, ctx):
-		'''
-		Shows the creation and expiration time of the user's Galaxy Rooms.
-		'''
+	async def galaxy_info(self, ctx) -> None:
+		""" Shows the creation and expiration time of the user's Galaxy Rooms. """
+
 		user_galaxy = await self.get_galaxy_txt(ctx.author.id, ctx.channel.category.id)
 		if not user_galaxy:
 			return await ctx.send("**You cannot run this command outside your rooms, in case you have them!**")
@@ -881,10 +966,9 @@ class CreateSmartRoom(commands.Cog):
 		await ctx.send(embed=embed)
 
 	@commands.command(aliases=['rent'])
-	async def pay_rent(self, ctx):
-		'''
-		Delays the user's Galaxy Rooms deletion by 14 days for 350łł.
-		'''
+	async def pay_rent(self, ctx) -> None:
+		""" Delays the user's Galaxy Rooms deletion by 14 days for 350łł. """
+
 		if not ctx.guild:
 			return await ctx.send("**Don't use it here!**")
 			
@@ -912,32 +996,48 @@ class CreateSmartRoom(commands.Cog):
 		await self.user_notified_no(ctx.author.id)
 		await ctx.send(f"**{ctx.author.mention}, Galaxy Rooms renewed!**")
 
-	async def increment_galaxy_ts(self, user_id: int, addition: int):
+	async def increment_galaxy_ts(self, user_id: int, addition: int) -> None:
+		""" Increments a Galaxy Room's timestamp so it lasts longer.
+		:param user_id: The ID of the owner of the Galaxy Room.
+		:param addition: The amount of time to increment, in seconds. """
+
 		mycursor, db = await the_database()
 		await mycursor.execute("UPDATE GalaxyVc SET user_ts = user_ts + %s WHERE user_id = %s", (addition, user_id))
 		await db.commit()
 		await mycursor.close()
 
-	async def get_all_galaxy_rooms_in_danger_zone(self, the_time):
+	async def get_all_galaxy_rooms_in_danger_zone(self, the_time) -> None:
+		""" Gets all Galaxy Rooms in the danger zone; at least 2 days from being deleted.
+		:param the_time: The current time. """
+
 		mycursor, db = await the_database()
 		await mycursor.execute("SELECT * FROM GalaxyVc WHERE (user_ts + 1209600) - %s <= 172800 and user_notified = 'no'", (the_time,))
 		danger_rooms = await mycursor.fetchall()
 		await mycursor.close()
 		return  danger_rooms
 
-	async def user_notified_yes(self, user_id: int):
+	async def user_notified_yes(self, user_id: int) -> None:
+		""" Updates the the user notified status to 'yes'.
+		:param user_id: The ID of the user. """
+
 		mycursor, db = await the_database()
 		await mycursor.execute("UPDATE GalaxyVc SET user_notified = 'yes' WHERE user_id = %s", (user_id,))
 		await db.commit()
 		await mycursor.close()
 
-	async def user_notified_no(self, user_id: int):
+	async def user_notified_no(self, user_id: int) -> None:
+		""" Updates the the user notified status to 'no'.
+		:param user_id: The ID of the user. """
+
 		mycursor, db = await the_database()
 		await mycursor.execute("UPDATE GalaxyVc SET user_notified = 'no' WHERE user_id = %s", (user_id,))
 		await db.commit()
 		await mycursor.close()
 
 	async def has_galaxy_rooms(self, user_id: int) -> bool:
+		""" Checks whether a user has a Galaxy Room.
+		:param user_id: The ID of the user to check it. """
+
 		mycursor, db = await the_database()
 		await mycursor.execute("SELECT * FROM GalaxyVc WHERE user_id = %s", (user_id,))
 		user_rooms = await mycursor.fetchall()
@@ -950,4 +1050,6 @@ class CreateSmartRoom(commands.Cog):
 
 
 def setup(client):
+	""" Cog's setup function. """
+
 	client.add_cog(CreateSmartRoom(client))
