@@ -438,5 +438,41 @@ class Tools(commands.Cog):
             text.append(f"**`{not_moved}` {'people were' if moved > 1 else 'person was'} not moved!**")
         await ctx.send(' '.join(text))
 
+    @commands.command(aliases=['tp', 'beam'])
+    @commands.has_permissions(administrator=True)
+    async def teleport(self, ctx, vc_1: discord.VoiceChannel = None, vc_2: discord.VoiceChannel = None) -> None:
+        """ Teleports all members in a given voice channel to another one.
+        :param vc_1: The origin vc.
+        :param vc_2: The target vc. """
+
+        member = ctx.author
+
+        if not vc_1:
+            return await ctx.send(f"**Please, inform the origin vc, {member.mention}!**")
+
+        if not vc_2:
+            return await ctx.send(f"**Please, inform the target vc, {member.mention}!**")
+
+
+        moved = not_moved = 0
+
+        members = [m for m in vc_1.members]
+
+        for m in members:
+            try:
+                await m.move_to(vc_2)
+            except:
+                not_moved +=1
+            else:
+                moved += 1
+
+        text = []
+        if moved:
+            text.append(f"**`{moved}` {'people were' if moved > 1 else 'person was'} moved from `{vc_1}` to `{vc_2}`!**")
+        if not_moved:
+            text.append(f"**`{not_moved}` {'people were' if moved > 1 else 'person was'} not moved!**")
+        await ctx.send(' '.join(text))
+
+
 def setup(client):
     client.add_cog(Tools(client))
