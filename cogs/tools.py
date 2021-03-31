@@ -405,7 +405,7 @@ class Tools(commands.Cog):
     async def move(self, ctx) -> None:
         """ Moves 1 or more people to a voice channel.
         Ps¹: If no channel is provided, the channel you are in will be used.
-        Ps²: The voice channel has to be tagged in the following format: <#vc_id>"""
+        Ps²: The voice channel has to be tagged in the following format: <#vc_id> """
 
         member = ctx.author
         channel = c[0] if (c := ctx.message.channel_mentions) else None
@@ -433,9 +433,9 @@ class Tools(commands.Cog):
 
         text = []
         if moved:
-            text.append(f"**`{moved}` were moved to `{channel}`!**")
+            text.append(f"**`{moved}` {'people were' if moved > 1 else 'person was'} moved to `{channel}`!**")
         if not_moved:
-            text.append(f"**`{not_moved}` people were not moved!**")
+            text.append(f"**`{not_moved}` {'people were' if moved > 1 else 'person was'} not moved!**")
         await ctx.send(' '.join(text))
 
 def setup(client):
