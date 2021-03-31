@@ -457,6 +457,8 @@ class Tools(commands.Cog):
         moved = not_moved = 0
 
         members = [m for m in vc_1.members]
+        if not members:
+            return await ctx.send(f"**No members found to move!**")
 
         for m in members:
             try:
