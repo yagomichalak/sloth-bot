@@ -11,7 +11,6 @@ from contextlib import redirect_stdout
 import os
 from extra.menu import ConfirmSkill, InroleLooping
 
-
 mod_role_id=int(os.getenv('MOD_ROLE_ID'))
 admin_role_id=int(os.getenv('ADMIN_ROLE_ID'))
 owner_role_id=int(os.getenv('OWNER_ROLE_ID'))
@@ -21,9 +20,7 @@ teacher_role_id = int(os.getenv('TEACHER_ROLE_ID'))
 
 
 class Tools(commands.Cog):
-    '''
-    Some useful tool commands.
-    '''
+    """ Some useful tool commands. """
 
     def __init__(self, client):
         self.client = client
@@ -402,6 +399,44 @@ class Tools(commands.Cog):
             else:
                 await ctx.send(f"**They stopped comming, but we've gathered `{magneted_members}/{len(all_members)}` members!**")
 
+
+    @commands.command(aliases=['mv', 'drag'])
+    @commands.has_permissions(administrator=True)
+    async def move(self, ctx) -> None:
+        """ Moves 1 or more people to a voice channel.
+        Ps¹: If no channel is provided, the channel you are in will be used.
+        Ps²: The voice channel has to be tagged in the following format: <#vc_id>"""
+
+        member = ctx.author
+        channel = c[0] if (c := ctx.message.channel_mentions) else None
+        if not channel:
+            if voice := member.voice:
+                channel = voice.channel
+
+        members = ctx.message.mentions
+
+        moved = not_moved = 0
+
+        if not channel:
+            return await ctx.send(f"**No channels were provided, and you are not in a channel either, {member.mention}!**")
+
+        if not members:
+            return await ctx.send(f"**No members were provided, {member.mention}!**")
+
+        for m in members:
+            try:
+                await m.move_to(channel)
+            except Exception as e:
+                not_moved += 1
+            else:
+                moved += 1
+
+        text = []
+        if moved:
+            text.append(f"**`{moved}` were moved to `{channel}`!**")
+        if not_moved:
+            text.append(f"**`{not_moved}` people were not moved!**")
+        await ctx.send(' '.join(text))
 
 def setup(client):
     client.add_cog(Tools(client))
