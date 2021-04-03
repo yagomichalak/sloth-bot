@@ -10,6 +10,7 @@ import traceback
 from contextlib import redirect_stdout
 import os
 from extra.menu import ConfirmSkill, InroleLooping
+from cogs.createsmartroom import CreateSmartRoom
 
 mod_role_id=int(os.getenv('MOD_ROLE_ID'))
 admin_role_id=int(os.getenv('ADMIN_ROLE_ID'))
@@ -328,7 +329,7 @@ class Tools(commands.Cog):
             return await ctx.send(f"**Please, inform a member, {ctx.author.mention}!**")
 
         member_state = member.voice
-        if channel := member_state and member_state.channel:
+        if (channel := member_state) and member_state.channel:
             msg = f"**{member.mention} is in the `{channel.name}` voice channel.**"
             try:
                 invite = await channel.create_invite()
@@ -405,27 +406,28 @@ class Tools(commands.Cog):
     async def move(self, ctx) -> None:
         """ Moves 1 or more people to a voice channel.
         Ps¹: If no channel is provided, the channel you are in will be used.
-        Ps²: The voice channel has to be tagged in the following format: <#vc_id> """
+        Ps²: The voice channel can be in the following formats: <#id>, id, name.
+        Ps³: The members can be in the following formats: <@id>, id, name, nick, display_name. """
 
         member = ctx.author
-        channel = c[0] if (c := ctx.message.channel_mentions) else None
-        if not channel:
-            if voice := member.voice:
-                channel = voice.channel
+        channels = await CreateSmartRoom.get_voice_channel_mentions(message=ctx.message)
 
-        members = ctx.message.mentions
+        members = await CreateSmartRoom.get_mentions(message=ctx.message)
 
         moved = not_moved = 0
+        voice = voice.channel if (voice := member.voice) else None
 
-        if not channel:
+        if not channels and not voice:
             return await ctx.send(f"**No channels were provided, and you are not in a channel either, {member.mention}!**")
+
+        channels.append(voice)
 
         if not members:
             return await ctx.send(f"**No members were provided, {member.mention}!**")
 
         for m in members:
             try:
-                await m.move_to(channel)
+                await m.move_to(channels[0])
             except Exception as e:
                 not_moved += 1
             else:
@@ -433,10 +435,11 @@ class Tools(commands.Cog):
 
         text = []
         if moved:
-            text.append(f"**`{moved}` {'people were' if moved > 1 else 'person was'} moved to `{channel}`!**")
+            text.append(f"**`{moved}` {'people were' if moved > 1 else 'person was'} moved to `{channels[0]}`!**")
         if not_moved:
             text.append(f"**`{not_moved}` {'people were' if moved > 1 else 'person was'} not moved!**")
         await ctx.send(' '.join(text))
+
 
     @commands.command(aliases=['tp', 'beam'])
     @commands.has_permissions(administrator=True)
@@ -447,11 +450,15 @@ class Tools(commands.Cog):
 
         member = ctx.author
 
-        if not vc_1:
-            return await ctx.send(f"**Please, inform the origin vc, {member.mention}!**")
+        voice = voice.channel if (voice := member.voice) else None
 
-        if not vc_2:
-            return await ctx.send(f"**Please, inform the target vc, {member.mention}!**")
+        if not vc_1 and not vc_2:
+            return await ctx.send(f"**Inform the voice channels, {member.mention}!**")
+
+        if vc_1 and not vc_2:
+            if not voice:
+                return await ctx.send(f"**You provided just 1 VC, and you're not in one, so we can't make a target VC, {member.mention}!**")
+            vc_1, vc_2 = voice, vc_1
 
 
         moved = not_moved = 0

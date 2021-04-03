@@ -874,54 +874,119 @@ class CreateSmartRoom(commands.Cog):
 		await mycursor.close()
 
 	@commands.command(aliases=['permit'])
-	async def allow(self, ctx, member: discord.Member = None) -> None:
-		""" Allows a member to join your channels.
-		:param member: The member to allow. """
+	async def allow(self, ctx) -> None:
+		""" Allows one or more members to join your channels.
+		:param members: The members to allow. """
 
-		if not member:
-			return await ctx.send("**Inform a member to allow!**")
+		members = await CreateSmartRoom.get_mentions(message=ctx.message)
+		member = ctx.author
 
-		if member.id == ctx.author.id:
-			return await ctx.send(f"**You cannot allow yourself!**")
+		if member in members:
+			members.remove(member)
+
+		if not members:
+			return await ctx.send(f"**Inform one or more members to allow, {member.mention}!**")
+
 
 		user_galaxy = await self.get_galaxy_txt(ctx.author.id, ctx.channel.category.id)
-		if user_galaxy:
-			user_category = discord.utils.get(ctx.guild.categories, id=user_galaxy[0][1])
-			for room in user_galaxy:
-				for i in range(2, 6):
-					# id, cat, vc, txt1, txt2, txt3, ts
-					channel = self.client.get_channel(room[i])
-					try:
-						await channel.set_permissions(
-				member, read_messages=True, send_messages=True, connect=True, speak=True, view_channel=True)
-					except Exception:
-						pass
-			await user_category.set_permissions(
-				member, read_messages=True, send_messages=True, connect=True, speak=True, view_channel=True)
-			return await ctx.send(f"**{member.mention} has been allowed!**")
+		if not user_galaxy:
+			return await ctx.send(f"**This is not your room, so you cannot allow someone in it, {member.mention}!**")
+
+		user_category = discord.utils.get(ctx.guild.categories, id=user_galaxy[0][1])
+		allowed = []
+
+		for m in members:
+			try:
+				await user_category.set_permissions(
+					m, read_messages=True, send_messages=True, connect=True, speak=True, view_channel=True)
+			except:
+				pass
+			else:
+				allowed.append(m.mention)
+
+		if not allowed:
+			return await ctx.send(f"**For some reason, I couldn't allow any of those members, {member.mention}!**")
+
+		allowed = ', '.join(allowed)
+		await ctx.send(f"**{allowed} {'have' if len(allowed) > 1 else 'has'} been allowed, {member.mention}!**")
 
 
-		await ctx.send("**This is not your room, so you cannot allow someone in it!**")
+	@staticmethod
+	async def get_mentions(message: discord.Message) -> List[discord.Member]:
+		""" Get mentions from a specific message.
+		:param message: The message to get the mentions from. """
+
+		guild = message.guild
+
+		members = [
+			m for word in message.content.split() 
+			if word.isdigit() and (m := discord.utils.get(guild.members, id=int(word)))
+			or (m := discord.utils.get(guild.members, name=str(word)))
+			or (m := discord.utils.get(guild.members, nick=str(word)))
+			or (m := discord.utils.get(guild.members, display_name=str(word)))
+		]
+		members.extend(message.mentions)
+		members = list(set(members))
+
+		return members
+
+	@staticmethod
+	async def get_voice_channel_mentions(message: discord.Message) -> List[discord.VoiceChannel]:
+		""" Get voice channel mentions from a specific message.
+		:param message: The message to get the mentions from. """
+
+		guild = message.guild
+
+		channel_mentions = [
+			m for word in message.content.split() 
+			if word.isdigit() and (m := discord.utils.get(guild.voice_channels, id=int(word)))
+			or (m := discord.utils.get(guild.voice_channels, name=str(word)))
+		]
+		
+		channel_mentions.extend(list(map(lambda c: isinstance(c, discord.VoiceChannel), message.channel_mentions)))
+		channel_mentions = list(set(channel_mentions))
+
+		return channel_mentions
 
 	@commands.command(aliases=['prohibit'])
-	async def forbid(self, ctx, member: discord.Member = None) -> None:
-		""" Forbids a member from joining your channels.
-		:param member: The member to forbid. """
+	async def forbid(self, ctx) -> None:
+		""" Forbids one or more members from joining your channels.
+		:param members: The members to forbid. """
 
-		if not member:
-			return await ctx.send("**Inform a member to forbid!**")
+		members = await CreateSmartRoom.get_mentions(message=ctx.message)
+		member = ctx.author
 
-		if member.id == ctx.author.id:
-			return await ctx.send(f"**You cannot forbid yourself!**")
+		if member in members:
+			members.remove(member)
+
+		if not members:
+			return await ctx.send(f"**Inform one or more members to forbid, {member.mention}!**")
+
 
 		user_galaxy = await self.get_galaxy_txt(ctx.author.id, ctx.channel.category.id)
-		if user_galaxy:
-			user_category = discord.utils.get(ctx.guild.categories, id=user_galaxy[0][1])
-			await user_category.set_permissions(
-				member, read_messages=False, send_messages=False, connect=False, speak=False, view_channel=False)
-			return await ctx.send(f"**{member.mention} has been forbidden!**")
+		if not user_galaxy:
+			return await ctx.send(f"**This is not your room, so you cannot forbid someone from it, {member.mention}!**")
 
-		await ctx.send("**This is not your room, so you cannot forbid someone from it!**")
+		user_category = discord.utils.get(ctx.guild.categories, id=user_galaxy[0][1])
+		forbid = []
+
+		user_category = discord.utils.get(ctx.guild.categories, id=user_galaxy[0][1])
+		for m in members:
+			try:
+				await user_category.set_permissions(
+					m, read_messages=False, send_messages=False, connect=False, speak=False, view_channel=False)
+			except:
+				pass
+			else:
+				forbid.append(m.mention)
+
+		if not forbid:
+			return await ctx.send(f"**For some reason, I couldn't forbid any of those members, {member.mention}!**")
+
+		forbid = ', '.join(forbid)
+
+		await ctx.send(f"**{forbid} {'have' if len(forbid) > 1 else 'has'} been forbidden, {member.mention}!**")
+
 
 	async def get_user_vc_timestamp(self, user_id: int, the_time: int) -> int:
 		""" Gets the user voice channel timestamp, and insert them into the database
