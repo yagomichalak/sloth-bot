@@ -6,7 +6,8 @@ from PIL import Image, ImageFont, ImageDraw
 import os
 from cogs.slothcurrency import SlothCurrency
 from mysqldb import *
-from typing import List, Union
+from typing import List, Union, Callable, Any
+from extra.menu import ConfirmSkill
 
 class CreateSmartRoom(commands.Cog):
 	""" A cog related to the creation of a custom voice channel. """
@@ -106,8 +107,7 @@ class CreateSmartRoom(commands.Cog):
 			old_time = await self.get_user_vc_timestamp(member.id, the_time)
 			if not the_time - old_time >= 60:
 				await member.send(
-					f"**You're on a cooldown, try again in {round(60 - (the_time - old_time))} seconds!**",
-					delete_after=5)
+					f"**You're on a cooldown, try again in {round(60 - (the_time - old_time))} seconds!**",)
 				# return await member.move_to(None)
 				return
 			if the_time - old_time >= 60:
@@ -200,19 +200,22 @@ class CreateSmartRoom(commands.Cog):
 
 			# Checks if the user has money for it (5łł)
 			user_currency = await SlothCurrency.get_user_currency(member, member.id)
-			if user_currency:
-				if user_currency[0][1] >= 5:
-					await SlothCurrency.update_user_money(member, member.id, -5)
-				else:
-					return await member.send("**You don't have enough money to buy this service!**")
-
-			else:
+			if not user_currency:
 				return await member.send(embed=discord.Embed(description="**You don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one!**"))
+
+			if user_currency[0][1] < 5:
+				return await member.send("**You don't have enough money to buy this service!**")
 
 
 			# Gets the CreateSmartRoom category, creates the VC and tries to move the user to there
 			the_category_test = discord.utils.get(member.guild.categories, id=self.cat_id)
-			creation = await the_category_test.create_voice_channel(name=f"{name}", user_limit=limit)
+
+			if not (creation := await self.try_to_create(kind='voice', category=the_category_test, name=name, user_limit=limit)):
+				return await member.send(f"**Channels limit reached, creation cannot be completed, try again later!**")
+
+			await SlothCurrency.update_user_money(member, member.id, -5)
+			await member.send(f"**You've been charged `5łł`!**")
+
 			await member.send(file=discord.File('./images/smart_vc/created.png'))
 			try:
 				await member.move_to(creation)
@@ -292,29 +295,48 @@ class CreateSmartRoom(commands.Cog):
 		if str(reaction.emoji) == '✅':
 			# Checks if the user has money for it (100łł)
 			user_currency = await SlothCurrency.get_user_currency(member, member.id)
-			if user_currency:
-				if user_currency[0][1] >= 100:
-					await SlothCurrency.update_user_money(member, member.id, -100)
-				else:
-					return await member.send("**You don't have enough money to buy this service!**")
-
-			else:
+			if not user_currency:
 				return await member.send(embed=discord.Embed(description="**You don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one!**"))
+
+			if user_currency[0][1] < 100:
+				return await member.send("**You don't have enough money to buy this service!**")
+
 			# Gets the CreateSmartRoom category, creates the VC and text channel and tries to move the user to there
+
+			creations = []
+			failed = False
+
 			the_category_test = discord.utils.get(member.guild.categories, id=self.cat_id)
-			creation = await the_category_test.create_voice_channel(name=f"{name}", user_limit=limit)
-			txt_creation = await the_category_test.create_text_channel(name=f"{name}")
+
+			if vc_channel := await self.try_to_create(kind='voice', category=the_category_test, name=name, user_limit=limit):
+				creations.append(vc_channel)
+			else:
+				failed = True
+
+			if txt_channel := await self.try_to_create(kind='text', category=the_category_test, name=name):
+				creations.append(txt_channel)
+			else:
+				failed = True
+
+			# Checks whether there are failed creations, if so, delete the channels
+			if failed:
+				await self.delete_things(creations)
+				return await member.send(f"**Channels limit reached, creation cannot be completed, try again later!**")
+
+			await SlothCurrency.update_user_money(member, member.id, -100)
+			await member.send(f"**You've been charged `100łł`!**")
+
 			# Puts the channels ids in the database
-			await self.insert_premium_vc(member.id, creation.id, txt_creation.id)
+			await self.insert_premium_vc(member.id, vc_channel.id, txt_channel.id)
 			await member.send(file=discord.File('./images/smart_vc/created.png'))
 			try:
-				await member.move_to(creation)
+				await member.move_to(vc_channel)
 			except discord.errors.HTTPException:
 				await member.send("**You cannot be moved because you are not in a Voice-Channel! You have one minute to join the room before it gets deleted together with the text channel.**")
 				await asyncio.sleep(60)
-				if len(creation.members) == 0:
-					await creation.delete()
-					await txt_creation.delete()
+				if len(vc_channel.members) == 0:
+					await vc_channel.delete()
+					await txt_channel.delete()
 			finally:
 				try:
 					os.remove(f'./images/smart_vc/user_previews/{member.id}.png')
@@ -325,6 +347,37 @@ class CreateSmartRoom(commands.Cog):
 		# Restart room setup
 		else:
 			return await self.premium_room(member)
+
+
+	async def try_to_create(self, kind: str, category: discord.CategoryChannel = None, guild: discord.Guild = None, **kwargs: Any) -> Union[bool, Any]:
+		""" Try to create something.
+		:param thing: The thing to try to create.
+		:param kind: Kind of creation. (txt, vc, cat)
+		:param category: The category in which it will be created. (Optional)
+		:param guild: The guild in which it will be created in. (Required for categories)
+		:param kwargs: The arguments to inform the creations. """
+
+		try:
+			if kind == 'text':
+				the_thing = await category.create_text_channel(**kwargs)
+			elif kind == 'voice':
+				the_thing = await category.create_voice_channel(**kwargs)
+			elif kind == 'category':
+				the_thing = await guild.create_category(**kwargs)
+		except:
+			return False
+		else:
+			return the_thing
+
+	async def delete_things(self, things: List[Any]) -> None:
+		""" Deletes a list of things.
+		:param things: The things to delete. """
+
+		for thing in things:
+			try:
+				await thing.delete()
+			except:
+				pass
 
 	# Room type 3
 	async def galaxy_room(self, member: discord.Member) -> None:
@@ -408,14 +461,6 @@ class CreateSmartRoom(commands.Cog):
 		if txt2_name is None:
 			return
 
-		# # Gets the name of the text channel 3
-		# msg6 = await member.send(file=discord.File('./images/smart_vc/galaxy/3 select text chat 3.png'))
-		# bot_msg = msg6
-		# txt3_name = await self.get_response(member, check_cat_or_txt_name)
-
-		# if txt3_name is None:
-		# 	return
-
 		# Makes the preview image
 		#member_id, cat_name, txt1, txt2, txt3, vc, size
 		await self.make_preview_galaxy(member.id, category_name, txt1_name, txt2_name, vc_name, limit)
@@ -438,14 +483,16 @@ class CreateSmartRoom(commands.Cog):
 
 			# Checks if the user has money (1000łł)
 			user_currency = await SlothCurrency.get_user_currency(member, member.id)
-			if user_currency:
-				if user_currency[0][1] >= 1000:
-					await SlothCurrency.update_user_money(member, member.id, -1000)
-				else:
-					return await member.send("**You don't have enough money to buy this service!**")
-
-			else:
+			if not user_currency:
 				return await member.send(embed=discord.Embed(description="**You don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one!**"))
+
+			if user_currency[0][1] < 1000:
+				return await member.send("**You don't have enough money to buy this service!**")
+
+
+			creations = []
+			failed = False
+
 			# Gets the CreateSmartRoom category, creates the VC and text channel and tries to move the user to there
 			overwrites = {
 			member.guild.default_role: discord.PermissionOverwrite(
@@ -454,18 +501,42 @@ class CreateSmartRoom(commands.Cog):
 				read_messages=True, send_messages=True, connect=True, speak=True, view_channel=True)
 			}
 			#, overwrites=overwrites
-			category_created = await member.guild.create_category(name=category_name, overwrites=overwrites)
-			vc_creation = await category_created.create_voice_channel(name=f"{vc_name}", user_limit=limit)
-			txt_creation1 = await category_created.create_text_channel(name=f"{txt1_name}")
-			txt_creation2 = await category_created.create_text_channel(name=f"{txt2_name}")
-			# txt_creation3 = await category_created.create_text_channel(name=f"{txt3_name}")
+
+			# if the_cat := await member.guild.create_category(name=category_name, overwrites=overwrites):
+			if the_cat := await self.try_to_create(kind='category', guild=member.guild, name=category_name, overwrites=overwrites):
+				creations.append(the_cat)
+			else:
+				return await member.send(f"**Channels limit reached, creation cannot be completed, try again later!**")
+
+			if vc_channel := await self.try_to_create(kind='voice', category=the_cat, name=vc_name, user_limit=limit):
+				creations.append(vc_channel)
+			else:
+				failed = True
+
+			if txt_channel1 := await self.try_to_create(kind='text', category=the_cat, name=txt1_name):
+				creations.append(txt_channel1)
+			else:
+				failed = True
+
+			if txt_channel2 := await self.try_to_create(kind='text', category=the_cat, name=txt2_name):
+				creations.append(txt_channel2)
+			else:
+				failed = True
+
+			if failed:
+				await self.delete_things(creations)
+				return await member.send(f"**Channels limit reached, creation cannot be completed, try again later!**")
+
+			await SlothCurrency.update_user_money(member, member.id, -1000)
+			await member.send(f"**You've been charged `1000łł`!**")
+
 			# Inserts the channels in the database
 			epoch = datetime.utcfromtimestamp(0)
 			the_time = (datetime.utcnow() - epoch).total_seconds()
-			await self.insert_galaxy_vc(member.id, category_created.id, vc_creation.id, txt_creation1.id, txt_creation2.id, the_time)
+			await self.insert_galaxy_vc(member.id, the_cat.id, vc_channel.id, txt_channel1.id, txt_channel2.id, the_time)
 			await member.send(file=discord.File('./images/smart_vc/created.png'))
 			try:
-				await member.move_to(vc_creation)
+				await member.move_to(vc_channel)
 			except discord.errors.HTTPException:
 				await member.send("**You cannot be moved because you are not in a Voice-Channel, but your channels and category will remain alive nonetheless! 👍**")
 			finally:
@@ -758,9 +829,20 @@ class CreateSmartRoom(commands.Cog):
 
 		mycursor, db = await the_database()
 		await mycursor.execute("SELECT * FROM GalaxyVc WHERE user_id = %s and user_cat = %s", (user_id, user_cat))
-		premium_vc = await mycursor.fetchall()
+		galaxy_vc = await mycursor.fetchall()
 		await mycursor.close()
-		return premium_vc
+		return galaxy_vc
+
+	async def get_galaxy_by_cat_id(self, cat_id: int) -> List[int]:
+		""" Gets a Galaxy Room by category ID.
+		:param cat_id: The category ID. """
+
+		mycursor, db = await the_database()
+		await mycursor.execute("SELECT * FROM GalaxyVc WHERE user_cat = %s", (cat_id,))
+		galaxy_vc = await mycursor.fetchone()
+		await mycursor.close()
+		return galaxy_vc
+
 
 	async def get_all_galaxy_rooms(self, the_time: int):
 		""" Get all expired Galaxy Rooms.
@@ -779,6 +861,15 @@ class CreateSmartRoom(commands.Cog):
 
 		mycursor, db = await the_database()
 		await mycursor.execute("DELETE FROM GalaxyVc WHERE user_id = %s and user_vc = %s", (user_id, user_vc))
+		await db.commit()
+		await mycursor.close()
+
+	async def delete_galaxy_by_cat_id(self, cat_id: int) -> None:
+		""" Deletes a a Galaxy Room by category ID.
+		:param cat_id: The category ID. """
+
+		mycursor, db = await the_database()
+		await mycursor.execute("DELETE FROM GalaxyVc WHERE user_cat = %s", (cat_id,))
 		await db.commit()
 		await mycursor.close()
 
@@ -995,6 +1086,49 @@ class CreateSmartRoom(commands.Cog):
 		await self.increment_galaxy_ts(ctx.author.id, 1209600)
 		await self.user_notified_no(ctx.author.id)
 		await ctx.send(f"**{ctx.author.mention}, Galaxy Rooms renewed!**")
+
+	@commands.command(aliases=['cgr', 'close_galaxy', 'closegalaxy', 'delete_galaxy', 'deletegalaxy'])
+	async def close_galaxy_room(self, ctx) -> None:
+		""" Delays the user's Galaxy Rooms deletion by 14 days for 350łł. """
+
+		if not ctx.guild:
+			return await ctx.send("**Don't use it here!**")
+
+		member = ctx.author
+		channel = ctx.channel
+
+		if not (cat := channel.category):
+			return await ctx.send(f"**This is definitely not a Galaxy Room, {member.mention}!**")
+
+		if not (galaxy_room := await self.get_galaxy_by_cat_id(cat.id)):
+			return await ctx.send(f"**This is not a Galaxy Room, {member.mention}!**")
+
+		perms = channel.permissions_for(member)
+		if member.id != galaxy_room[0] and not perms.administrator:
+			return await ctx.send(f"**You don't have permission to do this, {member.mention}!**")
+
+
+		confirm = await ConfirmSkill(f"**Are you sure you want to close this Galaxy Room, {member.mention}!**").prompt(ctx)
+		if not confirm:
+			return await ctx.send(f"**Not deleting it then, {member.mention}!**")
+
+
+		member = self.client.get_user(galaxy_room[0])
+		rooms = [
+			discord.utils.get(channel.guild.channels, id=galaxy_room[4]),
+			discord.utils.get(channel.guild.channels, id=galaxy_room[3]),
+			discord.utils.get(channel.guild.channels, id=galaxy_room[2]),
+			discord.utils.get(channel.guild.categories, id=galaxy_room[1])
+		]
+		try:
+			await self.delete_things(rooms)
+			await member.send(f"**Hey! Your rooms expired so they got deleted!**")
+		except Exception:
+			pass
+		finally:
+			await self.delete_galaxy_by_cat_id(galaxy_room[1])
+
+
 
 	async def increment_galaxy_ts(self, user_id: int, addition: int) -> None:
 		""" Increments a Galaxy Room's timestamp so it lasts longer.
