@@ -936,28 +936,53 @@ class SlothCurrency(commands.Cog):
 									   colour=discord.Color.green(), timestamp=datetime.utcnow())
 			return await member.send(embed=shop_embed)
 
-	async def insert_user_currency(self, user_id: int, the_time: int):
+	async def insert_user_currency(self, user_id: int, the_time: int) -> None:
+		""" Inserts a user into the currency system.
+		:param user_id: The user's ID.
+		:param the_time: The current timestamp. """
+
 		mycursor, db = await the_database()
 		await mycursor.execute("INSERT INTO UserCurrency (user_id, user_money, last_purchase_ts) VALUES (%s, %s, %s)",
 							   (user_id, 0, the_time))
 		await db.commit()
 		await mycursor.close()
 
-	async def update_user_money(self, user_id: int, money: int):
+	async def update_user_money(self, user_id: int, money: int) -> None:
+		""" Updates the user money.
+		:param user_id: The user's ID.
+		:param money: The money addition. (It can be negative)"""
+
 		mycursor, db = await the_database()
-		await mycursor.execute(f"UPDATE UserCurrency SET user_money = user_money + {money} WHERE user_id = {user_id}")
+		await mycursor.execute("UPDATE UserCurrency SET user_money = user_money + %s WHERE user_id = %s", (money, user_id))
 		await db.commit()
 		await mycursor.close()
 
-	async def update_user_purchase_ts(self, user_id: int, the_time: int):
+	async def update_user_purchase_ts(self, user_id: int, the_time: int) -> None:
+		""" Updates the user purchase timestamp.
+		:param user_id: The user's ID.
+		:param the_time: The current timestamp. """
+
 		mycursor, db = await the_database()
-		await mycursor.execute(f"UPDATE UserCurrency SET last_purchase_ts = {the_time} WHERE user_id = {user_id}")
+		await mycursor.execute("UPDATE UserCurrency SET last_purchase_ts = %s WHERE user_id = %s", (the_time, user_id))
 		await db.commit()
 		await mycursor.close()
 
-	async def update_user_lotto_ts(self, user_id: int, the_time: int):
+	async def update_user_lotto_ts(self, user_id: int, the_time: int) -> None:
+		""" Updates the user lotto timestamp.
+		:param user_id: The user's ID.
+		:param the_time: The current timestamp. """
+
 		mycursor, db = await the_database()
-		await mycursor.execute(f"UPDATE UserCurrency SET user_lotto = {the_time} WHERE user_id = {user_id}")
+		await mycursor.execute("UPDATE UserCurrency SET user_lotto = %s WHERE user_id = %s", (the_time, user_id))
+		await db.commit()
+		await mycursor.close()
+
+	async def update_user_hosted(self, user_id: int) -> None:
+		""" Updates the user hosted classes counter.
+		:param user_id: The user's ID. """
+
+		mycursor, db = await the_database()
+		await mycursor.execute("UPDATE UserCurrency SET user_hosted = user_hosted + 1 WHERE user_id = %s", (user_id,))
 		await db.commit()
 		await mycursor.close()
 

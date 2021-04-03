@@ -1,7 +1,8 @@
 import discord
 from discord.ext import commands, menus
-from typing import Union, List
+from typing import Union, List, Dict
 import asyncio
+# from . import TeacherFeedbackDatabaseDelete
 
 class ConfirmSkill(menus.Menu):
 	""" Class related to confirmation skill actions. """
@@ -142,6 +143,25 @@ async def prompt_message(client, member: discord.Member, channel: discord.TextCh
 		message = await client.wait_for('message', timeout=240, 
 		check=msg_check)
 	except asyncio.TimeoutError:
+		await channel.send(f"**Timeout! Try again, {member.mention}...**")
+		return None
+	else:
+		content = message.content
+		return content
+
+async def prompt_message_guild(client, member: discord.Member, channel: discord.TextChannel, limit: int = 100) -> str:
+	def msg_check(message):
+		if message.author == member and message.guild:
+			if len(message.content) <= limit:
+				return True
+			else:
+				client.loop.create_task(channel.send(f"**Your answer must be within {limit} characters**"))
+		else:
+			return False
+	try:
+		message = await client.wait_for('message', timeout=240, 
+		check=msg_check)
+	except asyncio.TimeoutError:
 		await channel.send("**Timeout! Try again.**")
 		return None
 	else:
@@ -229,3 +249,77 @@ class SwitchTribePages(menus.ListPageSource):
 			ctx=menu.ctx, tribe=self.tribe, entries=entries, offset=offset+1, lentries=len(self.entries)
 			)
 
+class SwitchSavedClasses(menus.ListPageSource):
+	""" A class for switching tribe pages. """
+
+	def __init__(self, data, **kwargs):
+		""" Class initializing method. """
+
+		super().__init__(data, per_page=1)
+		self.change_embed = kwargs.get('change_embed')
+		self.db = kwargs.get('db')
+		self.cog = kwargs.get('cog')
+
+	def is_paginating(self) -> bool:
+		""":class:`bool`: Whether pagination is required."""
+
+		return True
+		# return len(self.entries) > self.per_page
+
+	async def format_page(self, menu, entries):
+		""" Formats each page. """
+
+		offset = menu.current_page * self.per_page
+		return await self.change_embed(
+			ctx=menu.ctx, entries=entries, offset=offset+1, lentries=len(self.entries)
+			)
+
+
+class SwitchSavedClassesButtons(menus.Menu):
+	""" Class related to confirmation skill actions. """
+
+	def __init__(self, msg, content: str = None):
+		""" Class initializing method that inherits the parent's initializer. """
+
+		super().__init__(timeout=60, delete_message_after=False, clear_reactions_after=True)
+
+
+	async def select_btn(self, payload):
+		""" Selects saved class."""
+
+		entries = self._source.entries
+		entry = entries[self.current_page]
+		formatted_entry = {'language': entry[1], 'type': entry[2], 'desc': entry[3]}
+		cog = self._source.cog
+
+		await cog.start_class(payload.member, formatted_entry)
+		self.stop()
+
+	async def new_btn(self, payload):
+		""" Starts the process of setting up a new class."""
+
+		cog = self._source.cog
+		self.stop()
+		class_info: Dict[str, str] = await cog.ask_class_creation_questions(payload.member)
+		if class_info.values():
+			await cog.start_class(payload.member, class_info)
+
+	async def trash_btn(self, payload):
+		""" Throws the saved class in the trash."""
+
+		entries = self._source.entries
+		entry = entries[self.current_page]
+
+		self._source.entries = tuple(p for p in entries if p != entries[self.current_page])
+		entries = self._source.entries
+		db = self._source.db
+		await db.delete_teacher_saved_class(*entry)
+
+		max_pages = len(entries)
+		if entries and max_pages-1 >= self.current_page:
+
+			await self.show_page(self.current_page)
+		elif entries and max_pages-1 < self.current_page:
+			await self.show_page(self.current_page-1)
+		else:
+			self.stop()
