@@ -796,8 +796,8 @@ class TeacherFeedback(commands.Cog):
 			value=f"**Language:** {teacher_class[3].title()}.\n**Type:** {teacher_class[4]}.\n**Time:** {formatted_text}.\n**Total Members:** {teacher_class[7]}.\n**Timestamp:** {teacher_class[5]}.", inline=True)
 
 		# Adds the class status information field.
-		total_messages = await self.db.get_teacher_class_messages_by_teacher_and_vc_id(member.id, voice_channel.id)
-		raw_total_time = await self.db.get_teacher_class_time_by_teacher_and_vc_id(member.id, voice_channel.id)
+		total_messages = await self.db.get_teacher_class_messages_by_teacher_and_vc_id(teacher.id, voice_channel.id)
+		raw_total_time = await self.db.get_teacher_class_time_by_teacher_and_vc_id(teacher.id, voice_channel.id)
 		total_time = await TeacherFeedback.get_formatted_time_text(raw_total_time)
 
 		embed.add_field(name="__Channels__", 
