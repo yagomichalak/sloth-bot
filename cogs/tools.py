@@ -400,7 +400,6 @@ class Tools(commands.Cog):
             else:
                 await ctx.send(f"**They stopped comming, but we've gathered `{magneted_members}/{len(all_members)}` members!**")
 
-
     @commands.command(aliases=['mv', 'drag'])
     @commands.has_permissions(administrator=True)
     async def move(self, ctx) -> None:
