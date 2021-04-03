@@ -329,7 +329,7 @@ class Tools(commands.Cog):
             return await ctx.send(f"**Please, inform a member, {ctx.author.mention}!**")
 
         member_state = member.voice
-        if (channel := member_state) and member_state.channel:
+        if channel := member_state and member_state.channel:
             msg = f"**{member.mention} is in the `{channel.name}` voice channel.**"
             try:
                 invite = await channel.create_invite()
