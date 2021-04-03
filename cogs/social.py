@@ -103,14 +103,14 @@ class Social(commands.Cog):
 
 		mods_role = discord.utils.get(guild.roles, id=mod_role_id)
 		mods = len([m.mention for m in guild.members if mods_role in m.roles])
-		em.add_field(name="👮 Mods", value=mods, inline=True)
+		em.add_field(name="<:zslothmod:737325517077872697> Mods", value=mods, inline=True)
 
 		teachers_role = discord.utils.get(guild.roles, id=teacher_role_id)
 		teachers = len([m.mention for m in guild.members if teachers_role in m.roles])
-		em.add_field(name="<:zslothmod:737325517077872697> Teachers", value=teachers, inline=True)
+		em.add_field(name="🧑‍🏫 Teachers", value=teachers, inline=True)
 
-		em.add_field(name="Members", value=f"🟢 {online} members ⚫ {len(guild.members)} members", inline=False)
-		em.add_field(name="Channels", value=f"⌨️ {len(guild.text_channels)} | 🔈 {len(guild.voice_channels)}", inline=True)
+		em.add_field(name="Members", value=f"🟢 {online} members ⚫ {len(guild.members)} members", inline=True)
+		em.add_field(name="Channels", value=f"⌨️ {len(guild.text_channels)} | 🔈 {len(guild.voice_channels)} | 📁 {len(guild.categories)} | **=** {len(guild.channels)}", inline=False)
 		em.add_field(name="Roles", value=len(guild.roles), inline=True)
 		em.add_field(name="Emojis", value=len(guild.emojis), inline=True)
 		em.add_field(name="🌐 Region", value=str(guild.region).title() if guild.region else None, inline=True)
