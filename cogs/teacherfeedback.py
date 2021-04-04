@@ -635,13 +635,13 @@ class TeacherFeedback(commands.Cog):
 
 		# Gets the emoji relative to the class type.
 		cemoji = ''
-		if class_info['type'] == 'pronunciation': 
+		if class_info['type'].title() == 'Pronunciation': 
 			cemoji = '🗣️'
 
-		elif class_info['type'] == 'grammar':
+		elif class_info['type'].title() == 'Grammar':
 			cemoji = '📖'
 
-		elif class_info['type'] == 'programming':
+		elif class_info['type'].title() == 'Programming':
 			cemoji = '💻'
 
 		# Creates the text channel
