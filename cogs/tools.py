@@ -550,7 +550,7 @@ class Tools(commands.Cog):
             ctx.command.reset_cooldown(ctx)
             await ctx.send(f"**I couldn't do it for some reason, make sure your DM's are open, {member.mention}!**")
         else:
-            await ctx.send(f"**List sent, {member.mention}!**")
+            await ctx.send(f"**List sent into your DM's, {member.mention}!**")
 
 
     @staticmethod
