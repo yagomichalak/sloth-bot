@@ -11,6 +11,10 @@ from contextlib import redirect_stdout
 import os
 from extra.menu import ConfirmSkill, InroleLooping
 from cogs.createsmartroom import CreateSmartRoom
+from datetime import datetime
+import pytz
+from pytz import timezone
+from mysqldb import the_database
 
 mod_role_id=int(os.getenv('MOD_ROLE_ID'))
 admin_role_id=int(os.getenv('ADMIN_ROLE_ID'))
@@ -480,6 +484,222 @@ class Tools(commands.Cog):
         if not_moved:
             text.append(f"**`{not_moved}` {'people were' if moved > 1 else 'person was'} not moved!**")
         await ctx.send(' '.join(text))
+
+    @commands.command()
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def time(self, ctx: commands.Context, time: str = None, my_timezone: str = None) -> None:
+        """ Tells the time in a given timezone, and compares to the CET one.
+        :param time: The time you want to check. Ex: 7pm
+        :param my_timezone: The time zone to convert """
+
+        member = ctx.author
+        default_timezone = 'Etc/GMT'
+
+        user_timezone = await self.select_user_timezone(member.id)
+
+        if not time:
+            if user_timezone:
+                time_now = datetime.now(timezone(user_timezone[1])).strftime(f"%H:%M {user_timezone[1]}")
+            else:
+                time_now = datetime.now(timezone(default_timezone)).strftime(f"%H:%M {default_timezone}")
+
+            return await ctx.send(f"**Now it's `{time_now}`, {member.mention}**")
+
+        if not my_timezone:
+            if not user_timezone:
+                return await ctx.send(f"**Please, inform a `my_timezone`, {member.mention}!**")
+            my_timezone = user_timezone[1]
+
+        if not my_timezone in (timezones := pytz.all_timezones):
+            return await ctx.send(f"**Please, inform a valid timezone, {member.mention}!**\n`(Type b!timezones to get a full list with the timezones in your DM's)`")
+
+        # Given info (time and timezone)
+        given_time = time
+        given_timezone = my_timezone.title()
+
+        # Format given time
+        given_date = datetime.strptime(given_time, '%H:%M')
+        # print(f"Given date: {given_date.strftime('%H:%M')}")
+
+        # Convert given date to given timezone
+        tz = pytz.timezone(given_timezone)
+        converted_time = datetime.now(tz=tz)
+        converted_time = converted_time.replace(hour=given_date.hour, minute=given_date.minute)
+        # print(f"Given date formated to given timezone: {converted_time.strftime('%H:%M')}")
+
+        # Converting date to GMT (Etc/GMT-1)
+        GMT = timezone(default_timezone)
+
+        date_to_utc = converted_time.astimezone(GMT).strftime('%H:%M')
+        datetime_text = f"**`{converted_time.strftime('%H:%M')} ({given_timezone})` = `{date_to_utc} ({GMT})`**"
+        await ctx.send(datetime_text)
+
+    @commands.command()
+    @commands.cooldown(1, 300, commands.BucketType.user)
+    async def timezones(self, ctx) -> None:
+        """ Sends a full list with the timezones into the user's DM's. 
+        (Cooldown) = 5 minutes. """
+
+        member = ctx.author
+
+        timezones = pytz.all_timezones
+        timezone_text = ', '.join(timezones)
+        try:
+            await Tools.send_big_message(channel=member, message=timezone_text)
+        except Exception as e:
+            ctx.command.reset_cooldown(ctx)
+            await ctx.send(f"**I couldn't do it for some reason, make sure your DM's are open, {member.mention}!**")
+        else:
+            await ctx.send(f"**List sent, {member.mention}!**")
+
+
+    @staticmethod
+    async def send_big_message(channel, message):
+        """ Sends a big message to a given channel. """
+
+        if (len(message) <= 2048):
+            embed = discord.Embed(title="Timezones:", description=message, colour=discord.Colour.green())
+            await channel.send(embed=embed)
+        else:
+            embedList = []
+            n = 2048
+            embedList = [message[i:i + n] for i in range(0, len(message), n)]
+            for num, item in enumerate(embedList, start=1):
+                if (num == 1):
+                    embed = discord.Embed(title="Timezones:", description=item, colour=discord.Colour.green())
+                    embed.set_footer(text=num)
+                    await channel.send(embed=embed)
+                else:
+                    embed = discord.Embed(description=item, colour=discord.Colour.green())
+                    embed.set_footer(text=num)
+                    await channel.send(embed=embed)
+
+    @commands.command()
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def settimezone(self, ctx, my_timezone: str = None) -> None:
+        """ Sets the timezone.
+        :param my_timezone: Your timezone.
+        Ps: Use b!timezones to get a full list with the timezones in your DM's. """
+
+        member = ctx.author
+
+        if not my_timezone:
+            return await ctx.send(f"**Please, inform a timezone, {member.mention}!**")
+
+        my_timezone = my_timezone.title()
+        if not my_timezone in pytz.all_timezones:
+            return await ctx.send(f"**Please, inform a valid timezone, {member.mention}!**")
+
+        if user_timezone := await self.select_user_timezone(member.id):
+            await self.update_user_timezone(member.id, my_timezone)
+            await ctx.send(f"**Updated timezone from `{user_timezone[1]}` to `{my_timezone}`, {member.mention}!**")
+        else:
+            await self.insert_user_timezone(member.id, my_timezone)
+            await ctx.send(f"**Set timezone to `{my_timezone}`, {member.mention}!**")
+
+    # Database (CRUD)
+
+
+    async def insert_user_timezone(self, user_id: int, my_timezone: str) -> None:
+        """ Inserts a timezone for a user.
+        :param user_id: The ID of the user to insert.
+        :param my_timezone: The user's timezone. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("INSERT INTO UserTimezones (user_id, my_timezone) VALUES (%s, %s)", (user_id, my_timezone))
+        await db.commit()
+        await mycursor.close()
+
+    async def select_user_timezone(self, user_id: int) -> None:
+        """ Gets the user's timezone.
+        :param user_id: The ID of the user to get. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("SELECT * FROM UserTimezones WHERE user_id = %s", (user_id,))
+        user_timezone = await mycursor.fetchone()
+        await mycursor.close()
+        return user_timezone
+
+    async def update_user_timezone(self, user_id: int, my_timezone: str) -> None:
+        """ Updates the user's timezone.
+        :param user_id: The ID of the user to update.
+        :param my_timezone: The user's new timezone. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("UPDATE UserTimezones SET my_timezone = %s WHERE user_id = %s", (my_timezone, user_id))
+        await db.commit()
+        await mycursor.close()
+
+
+    async def delete_user_timezone(self, user_id: int) -> None:
+        """ Deletes the user's timezone.
+        :param user_id: The ID of the user to delete. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("DELETE FROM UserTimezones WHERE user_id = %s", (user_id,))
+        await db.commit()
+        await mycursor.close()
+
+
+    @commands.command(hidden=True)
+    @commands.has_permissions(administrator=True)
+    async def create_table_user_timezones(self, ctx) -> None:
+        """ (ADM) Creates the UserTimezones table. """
+
+        if await self.check_table_user_timezones():
+            return await ctx.send("**Table __UserTimezones__ already exists!**")
+        
+        await ctx.message.delete()
+        mycursor, db = await the_database()
+        await mycursor.execute("CREATE TABLE UserTimezones (user_id BIGINT NOT NULL, my_timezone VARCHAR(50) NOT NULL)")
+        await db.commit()
+        await mycursor.close()
+
+        return await ctx.send("**Table __UserTimezones__ created!**", delete_after=3)
+
+    @commands.command(hidden=True)
+    @commands.has_permissions(administrator=True)
+    async def drop_table_user_timezones(self, ctx) -> None:
+        """ (ADM) Creates the UserTimezones table """
+        if not await self.check_table_user_timezones():
+            return await ctx.send("**Table __UserTimezones__ doesn't exist!**")
+        await ctx.message.delete()
+        mycursor, db = await the_database()
+        await mycursor.execute("DROP TABLE UserTimezones")
+        await db.commit()
+        await mycursor.close()
+
+        return await ctx.send("**Table __UserTimezones__ dropped!**", delete_after=3)
+
+    @commands.command(hidden=True)
+    @commands.has_permissions(administrator=True)
+    async def reset_table_user_timezones(self, ctx) -> None:
+        """ (ADM) Creates the UserTimezones table """
+
+        if not await self.check_table_user_timezones():
+            return await ctx.send("**Table __UserTimezones__ doesn't exist yet!**")
+
+        await ctx.message.delete()
+        mycursor, db = await the_database()
+        await mycursor.execute("DELETE FROM UserTimezones")
+        await db.commit()
+        await mycursor.close()
+
+        return await ctx.send("**Table __UserTimezones__ reset!**", delete_after=3)
+
+    async def check_table_user_timezones(self) -> bool:
+        """ Checks if the UserTimezones table exists """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("SHOW TABLE STATUS LIKE 'UserTimezones'")
+        table_info = await mycursor.fetchall()
+        await mycursor.close()
+
+        if len(table_info) == 0:
+            return False
+
+        else:
+            return True
 
 
 def setup(client):
