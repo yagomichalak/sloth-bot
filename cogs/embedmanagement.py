@@ -160,7 +160,7 @@ class EmbedManagement(commands.Cog):
 
 	# Subcommands (Tier 2)
 
-	@embed.group()
+	@embed.group(aliases=['s'])
 	async def show(self, ctx, embed_name: str = None) -> None:
 		""" Shows an embed. 
 		:param embed_name: The name of the embed that you want to show. """
@@ -202,7 +202,7 @@ class EmbedManagement(commands.Cog):
 		else:
 			return await ctx.send(f"**Embed `{embed_name}` doesn't exist, {ctx.author.mention}!**")
 
-	@embed.group()
+	@embed.group(aliases=['c'])
 	@commands.has_permissions(administrator=True)
 	async def create(self, ctx, embed_name: str = None) -> None:
 		""" Creates an embed in the DB. 
@@ -224,7 +224,7 @@ class EmbedManagement(commands.Cog):
 			await self.insert_embed(embed_name)
 			await ctx.send(f"**`{embed_name}` added into database!**")
 
-	@embed.group()
+	@embed.group(aliases=['d', 'del', 'rm', 'remove'])
 	@commands.has_permissions(administrator=True)
 	async def delete(self, ctx, embed_name: str =  None, field: str = None) -> None:
 		""" Deletes a field from the DB.
@@ -288,7 +288,7 @@ class EmbedManagement(commands.Cog):
 
 			await ctx.send(f"**`{field}` deleted from database!**")
 
-	@embed.group()
+	@embed.group(aliases=['e'])
 	@commands.has_permissions(administrator=True)
 	async def edit(self, ctx) -> None:	
 		""" Edits an embed in the DB. """
@@ -312,7 +312,7 @@ class EmbedManagement(commands.Cog):
 
 
 	# SubcomMands (Tier 3)
-	@edit.command()
+	@edit.command(aliases=['a', 'at', 'auth'])
 	async def author(self, ctx, embed_name: str = None, name: str = None, icon_link: str = None) -> None:
 		
 		""" Sets the author for the given saved embed. 
@@ -363,7 +363,7 @@ class EmbedManagement(commands.Cog):
 			await mycursor.close()
 			await ctx.send(f"**Inserted `author` for {embed_name}!**")
 
-	@edit.command()
+	@edit.command(aliases=['tt'])
 	async def title(self, ctx, embed_name: str = None, *, title: str = None) -> None:
 		""" Sets the title for the given saved embed. 
 		:param embed_name: The name of the embed to insert.
@@ -406,7 +406,7 @@ class EmbedManagement(commands.Cog):
 			await mycursor.close()
 			await ctx.send(f"**Inserted `title` for {embed_name}!**")
 
-	@edit.command()
+	@edit.command(aliases=['d', 'dc', 'desc'])
 	async def description(self, ctx, embed_name: str = None, *, description_text: str = None) -> None:
 		""" Sets the description for the given saved embed. 
 		:param embed_name: The name of the embed to insert.
@@ -448,7 +448,7 @@ class EmbedManagement(commands.Cog):
 			await mycursor.close()
 			await ctx.send(f"**Inserted `description` for {embed_name}!**")
 
-	@edit.command()
+	@edit.command(aliases=['tn', 'th', 'thumb'])
 	async def thumbnail(self, ctx, embed_name: str = None, icon_link: str =  None) -> None:
 		""" Sets the thumbnail for the given saved embed. 
 		:param embed_name: The name of the embed to insert.
@@ -491,7 +491,7 @@ class EmbedManagement(commands.Cog):
 			await mycursor.close()
 			await ctx.send(f"**Inserted `thumbnail` for {embed_name}!**")
 
-	@edit.command()
+	@edit.command(aliases=['i', 'im', 'img', 'pic'])
 	async def image(self, ctx, embed_name: str = None, image_link: str = None) -> None:
 		""" Sets the image for the given saved embed. 
 		:param embed_name: The name of the embed to insert.
@@ -533,7 +533,7 @@ class EmbedManagement(commands.Cog):
 			await mycursor.close()
 			await ctx.send(f"**Inserted `image` for {embed_name}!**")
 
-	@edit.command()
+	@edit.command(aliases=['c', 'co', 'cl', 'clr', 'colour'])
 	async def color(self, ctx, embed_name: str = None, hex_color: str = None) -> None:
 		""" Sets the color for the given saved embed. 
 		:param embed_name: The name of the embed to insert.
@@ -575,7 +575,7 @@ class EmbedManagement(commands.Cog):
 			await mycursor.close()
 			await ctx.send(f"**Inserted `color` for {embed_name}!**")
 
-	@edit.command()
+	@edit.command(aliases=['ft', 'fo', 'foo', 'foot', 'ftr'])
 	async def footer(self, ctx, embed_name: str = None, icon_link: str = None, *, text: str = None) -> None:
 		""" Sets the footer for the given saved embed. 
 		:param embed_name: The name of the embed to insert.
@@ -624,7 +624,7 @@ class EmbedManagement(commands.Cog):
 			await mycursor.close()
 			await ctx.send(f"**Inserted `footer` for {embed_name}!**")
 
-	@edit.command()
+	@edit.command(aliases=['ts', 'time'])
 	async def timestamp(self, ctx, embed_name: str = None, yes_no: str = None) -> None:
 		""" Sets the timestamp for the given saved embed. 
 		:param embed_name: The name of the embed to insert.
@@ -668,7 +668,7 @@ class EmbedManagement(commands.Cog):
 			await mycursor.close()
 			await ctx.send(f"**Inserted `image` for {embed_name}!**")
 
-	@edit.command()
+	@edit.command(aliases=['fi', 'fld'])
 	async def field(self, ctx, embed_name: str = None, field_name: str =  None, field_value: str = None, field_inline: str = 'no') -> None:
 		""" Inserts a text field for the given saved embed. 
 		:param embed_name: The name of the embed.
