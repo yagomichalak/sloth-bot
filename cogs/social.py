@@ -110,7 +110,9 @@ class Social(commands.Cog):
 		em.add_field(name="🧑‍🏫 Teachers", value=teachers, inline=True)
 
 		em.add_field(name="Members", value=f"🟢 {online} members ⚫ {len(guild.members)} members", inline=True)
-		em.add_field(name="Channels", value=f"⌨️ {len(guild.text_channels)} | 🔈 {len(guild.voice_channels)} | 📁 {len(guild.categories)} | **=** {len(guild.channels)}", inline=False)
+		em.add_field(name="Channels", 
+			value=f"⌨️ {len(guild.text_channels)} | 🔈 {len(guild.voice_channels)} | 📻 {len(guild.stage_channels)} | 📁 {len(guild.categories)} | **=** {len(guild.channels)}", 
+			inline=False)
 		em.add_field(name="Roles", value=len(guild.roles), inline=True)
 		em.add_field(name="Emojis", value=len(guild.emojis), inline=True)
 		em.add_field(name="🌐 Region", value=str(guild.region).title() if guild.region else None, inline=True)
