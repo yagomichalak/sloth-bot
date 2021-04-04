@@ -424,8 +424,8 @@ class EmbedManagement(commands.Cog):
 		if not description_text:
 			return await ctx.send(f"**Please, inform a `description_text` for the embed, {member.mention}!**")
 
-		if len(description_text) > 500:
-			return await ctx.send(f"**Please, inform a `description_text` witihin 1-500 characters, {member.mention}!**")
+		if len(description_text) > 6000:
+			return await ctx.send(f"**Please, inform a `description_text` witihin 1-6000 characters, {member.mention}!**")
 
 		if not await self.embed_exists(embed_name):
 			return await ctx.send(f"**Embed `{embed_name}` doesn't exist, {member.mention}!**")
