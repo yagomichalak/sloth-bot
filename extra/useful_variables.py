@@ -74,7 +74,7 @@ different_class_roles = {
         "js", "cobol", "java", "go", "golang", "fluter",
         "typescript", "ts", "js and ts", "lua",
         "javascript and typescript", "sql", "programming",
-        "computer science", "cs50", "cs", "'web dev",
+        "computer science", "cs50", "cs", "web dev",
         "web development", "comp sci"
     ],
     "conlangs": [
