@@ -888,17 +888,24 @@ class CreateSmartRoom(commands.Cog):
 			return await ctx.send(f"**Inform one or more members to allow, {member.mention}!**")
 
 
-		user_galaxy = await self.get_galaxy_txt(ctx.author.id, ctx.channel.category.id)
+		user_galaxy = await self.get_galaxy_txt(member.id, ctx.channel.category.id)
 		if not user_galaxy:
 			return await ctx.send(f"**This is not your room, so you cannot allow someone in it, {member.mention}!**")
 
-		user_category = discord.utils.get(ctx.guild.categories, id=user_galaxy[0][1])
+		channels = [
+			discord.utils.get(ctx.guild.categories, id=user_galaxy[0][1])
+			discord.utils.get(ctx.guild.channels, id=user_galaxy[0][2])
+			discord.utils.get(ctx.guild.channels, id=user_galaxy[0][3])
+			discord.utils.get(ctx.guild.channels, id=user_galaxy[0][4])
+		]
 		allowed = []
 
 		for m in members:
 			try:
-				await user_category.set_permissions(
-					m, read_messages=True, send_messages=True, connect=True, speak=True, view_channel=True)
+				for c in channels:
+					await c.set_permissions(
+						m, read_messages=True, send_messages=True, connect=True, speak=True, view_channel=True)
+
 			except:
 				pass
 			else:
@@ -967,14 +974,20 @@ class CreateSmartRoom(commands.Cog):
 		if not user_galaxy:
 			return await ctx.send(f"**This is not your room, so you cannot forbid someone from it, {member.mention}!**")
 
-		user_category = discord.utils.get(ctx.guild.categories, id=user_galaxy[0][1])
+
+		channels = [
+			discord.utils.get(ctx.guild.categories, id=user_galaxy[0][1])
+			discord.utils.get(ctx.guild.channels, id=user_galaxy[0][2])
+			discord.utils.get(ctx.guild.channels, id=user_galaxy[0][3])
+			discord.utils.get(ctx.guild.channels, id=user_galaxy[0][4])
+		]
 		forbid = []
 
-		user_category = discord.utils.get(ctx.guild.categories, id=user_galaxy[0][1])
 		for m in members:
 			try:
-				await user_category.set_permissions(
-					m, read_messages=False, send_messages=False, connect=False, speak=False, view_channel=False)
+				for c in channels:
+					await c.set_permissions(
+						m, read_messages=False, send_messages=False, connect=False, speak=False, view_channel=False)
 			except:
 				pass
 			else:
@@ -1154,7 +1167,7 @@ class CreateSmartRoom(commands.Cog):
 
 	@commands.command(aliases=['cgr', 'close_galaxy', 'closegalaxy', 'delete_galaxy', 'deletegalaxy'])
 	async def close_galaxy_room(self, ctx) -> None:
-		""" Delays the user's Galaxy Rooms deletion by 14 days for 350łł. """
+		""" Deletes a Galaxy Room. """
 
 		if not ctx.guild:
 			return await ctx.send("**Don't use it here!**")
@@ -1187,7 +1200,7 @@ class CreateSmartRoom(commands.Cog):
 		]
 		try:
 			await self.delete_things(rooms)
-			await member.send(f"**Hey! Your rooms expired so they got deleted!**")
+			await member.send(f"**Hey! Your rooms got deleted!**")
 		except Exception:
 			pass
 		finally:
