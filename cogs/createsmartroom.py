@@ -893,9 +893,9 @@ class CreateSmartRoom(commands.Cog):
 			return await ctx.send(f"**This is not your room, so you cannot allow someone in it, {member.mention}!**")
 
 		channels = [
-			discord.utils.get(ctx.guild.categories, id=user_galaxy[0][1])
-			discord.utils.get(ctx.guild.channels, id=user_galaxy[0][2])
-			discord.utils.get(ctx.guild.channels, id=user_galaxy[0][3])
+			discord.utils.get(ctx.guild.categories, id=user_galaxy[0][1]),
+			discord.utils.get(ctx.guild.channels, id=user_galaxy[0][2]),
+			discord.utils.get(ctx.guild.channels, id=user_galaxy[0][3]),
 			discord.utils.get(ctx.guild.channels, id=user_galaxy[0][4])
 		]
 		allowed = []
@@ -976,9 +976,9 @@ class CreateSmartRoom(commands.Cog):
 
 
 		channels = [
-			discord.utils.get(ctx.guild.categories, id=user_galaxy[0][1])
-			discord.utils.get(ctx.guild.channels, id=user_galaxy[0][2])
-			discord.utils.get(ctx.guild.channels, id=user_galaxy[0][3])
+			discord.utils.get(ctx.guild.categories, id=user_galaxy[0][1]),
+			discord.utils.get(ctx.guild.channels, id=user_galaxy[0][2]),
+			discord.utils.get(ctx.guild.channels, id=user_galaxy[0][3]),
 			discord.utils.get(ctx.guild.channels, id=user_galaxy[0][4])
 		]
 		forbid = []
