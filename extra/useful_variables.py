@@ -81,7 +81,10 @@ different_class_roles = {
         "esperanto"
     ],
     "hindustani": [
-        "hindi", "urdu", "hindustani", "bengali"
+        "hindi", "urdu", "hindustani"
+    ],
+    "south asian": [
+    	"bengali"
     ],
     "balkan languages": [
         "croatian", "serbian", "bosnian"
