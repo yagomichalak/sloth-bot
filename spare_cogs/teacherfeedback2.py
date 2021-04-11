@@ -114,11 +114,11 @@ class CreateClassroom(commands.Cog):
         bca = before.channel.category if bc else None
         aca = after.channel.category if ac else None
 
-        #print(f"\033[31mBefore channel\033[m: {bc}")
-        #print(f"\033[31mBefore category\033[m: {bca}")
-        #print(f"\033[33mAfter channel\033[m: {ac}")
-        #print(f"\033[33mAfter category\033[m: {aca}")
-        #print('\033[34m=-\033[m'*12)
+        # print(f"\033[31mBefore channel\033[m: {bc}")
+        # print(f"\033[31mBefore category\033[m: {bca}")
+        # print(f"\033[33mAfter channel\033[m: {ac}")
+        # print(f"\033[33mAfter category\033[m: {aca}")
+        # print('\033[34m=-\033[m'*12)
 
         # Before voice state
         bm = before.mute
@@ -133,9 +133,9 @@ class CreateClassroom(commands.Cog):
         ass = after.self_stream
         asv = after.self_video
 
-        #print(bsm == asm and bsd == asd and bss == ass)
+        # print(bsm == asm and bsd == asd and bss == ass)
 
-        #Checking if it's in the CreateClassroom category
+        # Checking if it's in the CreateClassroom category
         if bca and bca.id != create_room_cat_id or aca and aca.id != create_room_cat_id:
             return
 
@@ -875,7 +875,7 @@ class CreateClassroom(commands.Cog):
 
     # Database commands
 
-    #Saved classes table
+    # Saved classes table
     @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
     async def create_table_saved_classes(self, ctx):

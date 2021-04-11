@@ -10,7 +10,7 @@ def defragment_gif(path: str, output: str) -> None:
     :param path:
     :param output: """
 
-    imageObject = Image.open(path)#.convert('RGBA')
+    imageObject = Image.open(path) #.convert('RGBA')
 
     # Display individual frames from the loaded animated GIF file
     for frame in range(0,imageObject.n_frames):
@@ -106,7 +106,7 @@ if __name__ == '__main__':
     #         gif.export('../temp_profile.gif')
     #         print('Finished!')
 
-    #=========================================================#
+    # =========================================================#
 
 
     # profile = Image.open('../test.png').convert('RGBA')
@@ -132,9 +132,9 @@ if __name__ == '__main__':
     #     output="./media/effects/fidget_spinner/fidget_spinner"
     # )
 
-    #=========================================================#
-    #==========Adds=multiple=effects=onto=an=image============#
-    #=========================================================#
+    # =========================================================#
+    # ==========Adds=multiple=effects=onto=an=image============#
+    # =========================================================#
 
     def smth():
         profile = Image.open('../profile.png').convert('RGBA')
@@ -156,7 +156,7 @@ if __name__ == '__main__':
                 # Gets all frame images from the folder
                 for i in range(len(glob.glob(f"{full_path}/*.png"))):
                 # for i in range(73):
-                    frame = Image.open(f"{full_path}/{effect}_{i+1}.png")#.rotate(-(i*5))
+                    frame = Image.open(f"{full_path}/{effect}_{i+1}.png") #.rotate(-(i*5))
                     # Checks whether frame has to be resized
                     if all_effects[effect]['resize']:
                         frame = frame.resize(all_effects[effect]['resize']).convert('RGBA')

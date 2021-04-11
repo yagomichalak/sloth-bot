@@ -295,7 +295,7 @@ class Analytics(commands.Cog):
 		else:
 			return True
 
-	#==========================================#
+	# ==========================================#
 
 
 	async def get_monthly_total(self) -> List[int]:

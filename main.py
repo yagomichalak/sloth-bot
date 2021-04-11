@@ -24,7 +24,7 @@ admin_commands_channel_id = int(os.getenv('ADMIN_COMMANDS_CHANNEL_ID'))
 patreon_role_id = int(os.getenv('SLOTH_EXPLORER_ROLE_ID'))
 announ_announ_channel_id = int(os.getenv('ANNOUNCEMENT_CHANNEL_ID'))
 error_log_channel_id = int(os.getenv('ERROR_LOG_CHANNEL_ID'))
-#colors = cycle([(255, 0, 0), (255, 127, 0), (255, 255, 0), (0, 255, 0), (0, 0, 255), (75, 0, 130), (143, 0, 255)])
+# colors = cycle([(255, 0, 0), (255, 127, 0), (255, 255, 0), (0, 255, 0), (0, 0, 255), (75, 0, 130), (143, 0, 255)])
 shades_of_pink = cycle([(252, 15, 192), (255, 0, 255), (248, 24, 148),
 			  (224, 17, 95), (246, 74, 138), (236, 85, 120),
 			  (255, 11, 255), (227, 49, 99), (253, 185, 200),
@@ -100,7 +100,7 @@ async def on_member_remove(member):
 	embed.add_field(name=f"Roles: {len(roles)}", value=" ".join([role.mention for role in roles]), inline=False)
 	embed.add_field(name="Top role:", value=member.top_role.mention, inline=False)
 	embed.add_field(name="Bot?", value=member.bot)
-	#cosmos = discord.utils.get(member.guild.members, id=user_cosmos_id)
+	# cosmos = discord.utils.get(member.guild.members, id=user_cosmos_id)
 	await channel.send(embed=embed)
 
 

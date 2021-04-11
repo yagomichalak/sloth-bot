@@ -92,7 +92,7 @@ class Tools(commands.Cog):
         guild = ctx.message.guild
         voice_client = guild.voice_client
         user_voice = ctx.message.author.voice
-        #voice_client: discord.VoiceClient = discord.utils.get(self.client.voice_clients, guild=ctx.guild)
+        # voice_client: discord.VoiceClient = discord.utils.get(self.client.voice_clients, guild=ctx.guild)
 
         if voice_client:
             if user_voice.channel == voice_client.channel:
