@@ -8,6 +8,7 @@ import os
 mod_role_id = int(os.getenv('MOD_ROLE_ID'))
 guild_id = int(os.getenv('SERVER_ID'))
 
+
 class ModActivity(commands.Cog):
     '''
     A cog related to the Moderators' activity.

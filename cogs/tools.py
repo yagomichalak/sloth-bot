@@ -23,6 +23,7 @@ owner_role_id=int(os.getenv('OWNER_ROLE_ID'))
 allowed_roles = [owner_role_id, admin_role_id, mod_role_id, int(os.getenv('SLOTH_LOVERS_ROLE_ID'))]
 teacher_role_id = int(os.getenv('TEACHER_ROLE_ID'))
 
+
 class Tools(commands.Cog):
     """ Some useful tool commands. """
 

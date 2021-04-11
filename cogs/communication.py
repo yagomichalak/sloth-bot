@@ -7,6 +7,7 @@ announcement_channel_id = int(os.getenv('ANNOUNCEMENT_CHANNEL_ID'))
 mod_role_id = int(os.getenv('MOD_ROLE_ID'))
 allowed_roles = [int(os.getenv('OWNER_ROLE_ID')), int(os.getenv('ADMIN_ROLE_ID')), mod_role_id]
 
+
 class Communication(commands.Cog):
     """ A cog related to communication commands. """
 

@@ -20,6 +20,7 @@ def who_is(query, session_id="general"):
                 pass
     return "I don't know about " + query
 
+
 class ChatterSloth(commands.Cog):
     '''
     A cog related to the bot's 'AI' feature.

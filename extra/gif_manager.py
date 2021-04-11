@@ -43,6 +43,7 @@ def remove_background(path: str, output: str) -> None:
         im.putdata(newData)
         im.save(f"{output}_{i+1}.png")
 
+
 class GIF:
     """ A handler for GIF creations."""
 

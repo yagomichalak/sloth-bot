@@ -15,6 +15,7 @@ from mysqldb import the_django_database
 
 allowed_roles = [int(os.getenv('OWNER_ROLE_ID')), int(os.getenv('ADMIN_ROLE_ID')), int(os.getenv('MOD_ROLE_ID'))]
 
+
 class TeacherAPI(commands.Cog):
     """ (WIP) A category for using The Language Sloth's teacher's API,
     and some other useful commands related to it. """

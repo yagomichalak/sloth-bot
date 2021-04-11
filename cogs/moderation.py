@@ -16,6 +16,7 @@ mod_role_id = int(os.getenv('MOD_ROLE_ID'))
 allowed_roles = [int(os.getenv('OWNER_ROLE_ID')), int(os.getenv('ADMIN_ROLE_ID')), mod_role_id]
 server_id = int(os.getenv('SERVER_ID'))
 
+
 class Moderation(commands.Cog):
     '''
     Moderation related commands.

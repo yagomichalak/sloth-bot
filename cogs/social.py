@@ -16,6 +16,7 @@ mod_role_id = int(os.getenv('MOD_ROLE_ID'))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID'))
 teacher_role_id = int(os.getenv('TEACHER_ROLE_ID'))
 
+
 class Social(commands.Cog):
     '''
     Social related commands.

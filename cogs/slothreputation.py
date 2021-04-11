@@ -8,6 +8,7 @@ from extra.menu import ConfirmSkill
 
 commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
 
+
 class SlothReputation(commands.Cog):
     '''
     Reputation commands

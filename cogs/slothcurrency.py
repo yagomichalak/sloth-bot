@@ -55,6 +55,7 @@ gauth.SaveCredentialsFile("mycreds.txt")
 
 drive = GoogleDrive(gauth)
 
+
 class SlothCurrency(commands.Cog):
     '''
     Sloth Currency commands.

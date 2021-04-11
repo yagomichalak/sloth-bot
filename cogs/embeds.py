@@ -5,6 +5,7 @@ from extra.useful_variables import rules
 
 allowed_roles = [int(os.getenv('OWNER_ROLE_ID')), int(os.getenv('ADMIN_ROLE_ID')), int(os.getenv('MOD_ROLE_ID'))]
 
+
 class Embeds(commands.Cog):
     '''
     A cog related to embedded messages.

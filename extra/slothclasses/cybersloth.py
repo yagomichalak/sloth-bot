@@ -8,6 +8,7 @@ from datetime import datetime
 
 bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
 
+
 class Cybersloth(Player):
 
     def __init__(self, client) -> None:

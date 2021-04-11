@@ -23,6 +23,7 @@ lesson_management_role_id = int(os.getenv('LESSON_MANAGEMENT_ROLE_ID'))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID'))
 sloth_explorer_role_id = int(os.getenv('SLOTH_EXPLORER_ROLE_ID'))
 
+
 class CreateClassroom(commands.Cog):
     '''
     Commands related to the class creation system.

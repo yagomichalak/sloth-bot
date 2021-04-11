@@ -3,6 +3,7 @@ from discord.ext import commands
 import os
 from cogs.slothcurrency import SlothCurrency
 
+
 class RoleTexts(commands.Cog):
     """ A class focused on giving members a text
     when they get a new role. """
