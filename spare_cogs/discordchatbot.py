@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
-import wikipedia, os
+import wikipedia
+import os
 from chatbot import Chat, register_call
 
 template_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),"../chatbotTemplate","chatbottemplate.template")
