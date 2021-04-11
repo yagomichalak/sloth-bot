@@ -182,7 +182,7 @@ class Prawler(Player):
 
 	async def check_steals(self) -> None:
 		""" Check on-going steals and their expiration time. """
-		
+
 		steals = await self.get_expired_steals()
 		for steal in steals:
 			channel = self.bots_txt

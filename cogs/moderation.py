@@ -116,7 +116,7 @@ class Moderation(commands.Cog):
 		await mycursor.close()
 		return tempmutes
 
-				
+
 	async def check_invite_guild(self, msg, guild):
 		'''
 		Checks whether it's a guild invite or not
@@ -159,7 +159,7 @@ class Moderation(commands.Cog):
 			await member.add_roles(muted_role)
 			general = discord.utils.get(member.guild.channels, id=general_channel)
 			await general.send(f"**Stop right there, {member.mention}! ✋ You were muted, left and rejoined the server, but that won't work!**")
-	
+
 	@commands.Cog.listener()
 	async def on_message_delete(self, message):
 		if message.author.bot:
@@ -212,7 +212,7 @@ class Moderation(commands.Cog):
 
 			await ctx.send(f"**`{deleted}` messages deleted for `{member}`**",
 				delete_after=5)
-			
+
 		else:
 			await ctx.channel.purge(limit=amount)
 
@@ -330,7 +330,7 @@ class Moderation(commands.Cog):
 		:param time: The given time. """
 
 		print('here?')
-		
+
 		keys = ['d', 'h', 'm', 's']
 		for k in keys:
 			if k in time:
@@ -445,7 +445,7 @@ class Moderation(commands.Cog):
 				await member.send(embed=general_embed)
 			except:
 				pass
-		
+
 		else:
 			await ctx.send(f'**{member} is already muted!**')
 
@@ -936,7 +936,7 @@ class Moderation(commands.Cog):
 
 		if await self.check_table_mutedmember_exists():
 			return await ctx.send("**Table __MutedMember__ already exists!**")
-		
+
 		await ctx.message.delete()
 		mycursor, db = await the_database()
 		await mycursor.execute("""CREATE TABLE mutedmember (
@@ -991,7 +991,7 @@ class Moderation(commands.Cog):
 
 		else:
 			return True
-		
+
 
 	# Infraction methods
 	@commands.command(aliases=['infr', 'show_warnings', 'sw', 'show_bans', 'sb', 'show_muted', 'sm'])
@@ -1003,7 +1003,7 @@ class Moderation(commands.Cog):
 		'''
 		if not member:
 			return await ctx.send("**Inform a member!**")
-		
+
 		# Try to get user infractions
 		if user_infractions := await self.get_user_infractions(member.id):
 			warns = len([w for w in user_infractions if w[1] == 'warn'])
@@ -1117,7 +1117,7 @@ class Moderation(commands.Cog):
 
 		if not member:
 			return await ctx.send("**Inform a member!**")
-		
+
 		if user_infractions := await self.get_user_infractions(member.id):
 			await self.remove_user_infractions(member.id)
 			await ctx.send(f"**Removed all infractions for {member.mention}!**")
@@ -1131,7 +1131,7 @@ class Moderation(commands.Cog):
 
 		if await self.check_table_user_infractions():
 			return await ctx.send("**Table __UserInfractions__ already exists!**")
-		
+
 		await ctx.message.delete()
 		mycursor, db = await the_database()
 		await mycursor.execute("""CREATE TABLE UserInfractions (

@@ -188,7 +188,7 @@ class Merchant(Player):
 	# @Player.not_ready()
 	async def package(self, ctx) -> None:
 		""" Buys a package from Dark Sloth Web and has a 35% chance of getting any equippable item from the Leaf Shop. """
-		
+
 		merchant = ctx.author
 
 		if ctx.channel.id != bots_and_commands_channel_id:
@@ -246,7 +246,7 @@ class Merchant(Player):
 			await self.delete_skill_action_by_target_id_and_skill_type(tm[3], 'potion')
 
 			channel = self.bots_txt
-		
+
 			await channel.send(
 				content=f"<@{tm[0]}>",
 				embed=discord.Embed(

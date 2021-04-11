@@ -24,7 +24,7 @@ class Game(commands.Cog):
 
 		emoji = '\u2B1B'
 		# emoji = ':black_large_square:'
-		
+
 		simple_square = [[emoji for __ in range(columns)] for _ in range(rows)]
 		# pprint(square)
 		square = await self.make_square_border(simple_square, emoji, player_x, player_y)
@@ -66,7 +66,7 @@ class Game(commands.Cog):
 		x = player_x
 		y = player_y
 		inserted['player'] = (x, y, player)
-		
+
 		if update:
 			# Puts item
 			square, item_tuple = await self.insert_item(square, columns, rows, inserted)

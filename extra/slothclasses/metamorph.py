@@ -63,7 +63,7 @@ class Metamorph(Player):
 			await self.delete_skill_action_by_target_id_and_skill_type(tm[3], 'transmutation')
 
 			channel = self.bots_txt
-			
+
 
 			await channel.send(
 				content=f"<@{tm[0]}>",
@@ -102,7 +102,7 @@ class Metamorph(Player):
 		""" Makes someone a frog temporarily.
 		:param target: The person who you want to frog. """
 
-		
+
 		if ctx.channel.id != bots_and_commands_channel_id:
 			return await ctx.send(f"**{ctx.author.mention}, you can only use this command in {self.bots_txt.mention}!**")
 

@@ -83,7 +83,7 @@ class TeacherFeedback(commands.Cog):
 				user = await self.db.get_waiting_reward_student(payload.user_id, payload.message_id)
 				lenactive = user[-1]
 				return await self.show_user_feedback(msg=msg, guild=guild, user=user, lenactive=lenactive, teacher=payload.member)
-			
+
 		else:
 			pass
 
@@ -93,7 +93,7 @@ class TeacherFeedback(commands.Cog):
 	async def on_message(self, message):
 		if not message.guild:
 			return
-			
+
 		if message.author.bot:
 			return
 
@@ -154,7 +154,7 @@ class TeacherFeedback(commands.Cog):
 			if bca and bca.id == create_room_cat_id:
 				# print('leave class')
 				await self.leave_class(member, before.channel)
-		
+
 	# ===== Channel Events =====
 
 	async def join_channel(self, member, before, after) -> None:
@@ -188,7 +188,7 @@ class TeacherFeedback(commands.Cog):
 			await self.join_class(member, after.channel)
 
 	# ===== Class management =====
-	
+
 	async def create_class(self, member: discord.Member) -> None:
 		""" Creates a class.
 		:param member: The class host/hostess. """
@@ -805,13 +805,13 @@ class TeacherFeedback(commands.Cog):
 		# Adds the PostScript fields
 		embed.add_field(name="PS¹", value="The `time` field updates whenever the teacher leaves the room.", inline=False)
 		embed.add_field(name="PS²", value="If the `timestamp` field is **None**, it means the teacher is not in the voice channel, therefore users can't earn status.", inline=False)
-		
+
 		# Adds embelishment fields
 		embed.set_thumbnail(url=teacher.avatar_url)
 		embed.set_author(name=teacher, icon_url=teacher.avatar_url)
 		embed.set_footer(text=guild, icon_url=guild.icon_url)
 		await ctx.send(embed=embed)
-			
+
 
 
 

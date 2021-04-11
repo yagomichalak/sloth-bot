@@ -314,7 +314,7 @@ class EmbedManagement(commands.Cog):
 	# SubcomMands (Tier 3)
 	@edit.command(aliases=['a', 'at', 'auth'])
 	async def author(self, ctx, embed_name: str = None, name: str = None, icon_link: str = None) -> None:
-		
+
 		""" Sets the author for the given saved embed.
 		:param embed_name: The name of the embed to insert.
 		:param name: The author name.

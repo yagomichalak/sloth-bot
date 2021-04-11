@@ -411,7 +411,7 @@ class Analytics(commands.Cog):
 
 
 		while True:
-			
+
 			# PR (Percentage Rate)
 			pr_compound = (current_compound * pr) / 100
 
@@ -443,7 +443,7 @@ class Analytics(commands.Cog):
 			# If none of the conditions are satisfied, starts another iteration of another looping
 			current_compound = sum_both
 			count += 1
-			
+
 
 		last_day, future_day = await self.get_current_day_and_future_day(count, hours)
 		line1 = f"{'Present:':<8} {present} members. Date: ({last_day})"

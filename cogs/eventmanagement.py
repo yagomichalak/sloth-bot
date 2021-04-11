@@ -237,7 +237,7 @@ class EventManagement(commands.Cog):
 		# Checks whether member can delete room
 		if room[0] == member.id: # If it's the owner of the room
 			delete = True
-			
+
 		elif perms.administrator or mod_role_id in [r.id for r in member.roles]: # If it's a staff member
 			delete = True
 

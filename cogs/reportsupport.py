@@ -124,7 +124,7 @@ class ReportSupport(commands.Cog):
 			await dnk.send(embed=embed)
 			await member.send("**DNK is going to DM you as soon as possible!**")
 			await self.dnk_embed(member)
-			
+
 		elif mid == int(os.getenv('SUPPORT_PATREON_MESSAGE_ID')) and str(emoji) == '❤️':
 			# Support us on Patreon
 			await member.send(f"**Support us on Patreon!**\nhttps://www.patreon.com/Languagesloth")
@@ -142,7 +142,7 @@ class ReportSupport(commands.Cog):
 
 			self.report_cache[member.id] = time.time()
 			await self.select_report(member, guild)
-			
+
 
 	async def send_application(self, member):
 
@@ -209,7 +209,7 @@ class ReportSupport(commands.Cog):
 		a2 = await self.get_message(member, msg_check)
 		if not a2:
 			return
-		
+
 		embed.description = '''
 		- On The Language Sloth, our classes happen once a week at the same time weekly.
 		Please let us know when would be the best time for you to teach,
@@ -279,7 +279,7 @@ class ReportSupport(commands.Cog):
 			self.cache[member.id] = time.time()
 			# Saves in the database
 			await self.save_teacher_app(app.id, member.id)
-						
+
 		else:
 			await member.send("**Let's do it again then! If you want to cancel your application, let it timeout!**")
 			return await self.send_application(member)
@@ -319,7 +319,7 @@ class ReportSupport(commands.Cog):
 				description='**Try again!**',
 				color=discord.Color.red())
 			await member.send(embed=timeout_embed)
-			
+
 		else:
 			emoji = str(r.emoji)
 			if emoji == '1️⃣':
@@ -330,7 +330,7 @@ class ReportSupport(commands.Cog):
 						return
 				except:
 					pass
-					
+
 				else:
 					return await self.audio(member, 'server_help')
 
@@ -364,7 +364,7 @@ class ReportSupport(commands.Cog):
 
 	# - Report someone
 	async def report_someone(self, member, guild):
-					
+
 		if await self.member_has_open_channel(member.id):
 			embed = discord.Embed(title="Error!", description="**You already have an open channel!**", color=discord.Color.red())
 			await member.send(embed=embed)
@@ -400,11 +400,11 @@ class ReportSupport(commands.Cog):
 			message = await the_channel.send(content=f"{member.mention}, {moderator.mention}, {cosmos.mention}", embed=embed)
 			ctx = await self.client.get_context(message)
 			return await self.client.get_cog('Tools').vc(ctx=ctx, member=member)
-			
+
 
 	# - Report someone
 	async def generic_help(self, member, guild, type_help, message):
-					
+
 		if await self.member_has_open_channel(member.id):
 			embed = discord.Embed(title="Error!", description="**You already have an open channel!**", color=discord.Color.red())
 			await member.send(embed=embed)
@@ -670,7 +670,7 @@ class ReportSupport(commands.Cog):
 
 		user_channel = await self.get_case_channel(ctx.channel.id)
 		if user_channel:
-			
+
 			confirm = await ConfirmSkill(f"**Are you sure you want to forbid {member.mention} from being a witness in this case channel, {ctx.author.mention}?**").prompt(ctx)
 			if not confirm:
 				return await ctx.send(f"**Not forbidding them, then!**")
@@ -755,7 +755,7 @@ class ReportSupport(commands.Cog):
 
 				for task in pending_tasks:
 					task.cancel()
-				
+
 			except asyncio.TimeoutError:
 				await the_msg.remove_reaction('⬅️', self.client.user)
 				await the_msg.remove_reaction('➡️', self.client.user)
@@ -875,7 +875,7 @@ class ReportSupport(commands.Cog):
 	# Database back-end methods
 	async def get_teacher_app_by_message(self, message_id: int) -> List[str]:
 		""" Gets a teacher application from the database by providing a message id. """
-		
+
 		mycursor, db = await the_database()
 		await mycursor.execute("SELECT * FROM TeacherApplication WHERE message_id = %s", (message_id,))
 		teacher_app = await mycursor.fetchall()
@@ -884,7 +884,7 @@ class ReportSupport(commands.Cog):
 
 	async def get_teacher_app_by_channel(self, channel_id: int) -> List[str]:
 		""" Gets a teacher application from the database by providing a channel id. """
-		
+
 		mycursor, db = await the_database()
 		await mycursor.execute("SELECT * FROM TeacherApplication WHERE txt_id = %s", (channel_id,))
 		teacher_app = await mycursor.fetchall()
@@ -894,7 +894,7 @@ class ReportSupport(commands.Cog):
 
 	async def save_teacher_app(self, message_id: int, teacher_id: int) -> None:
 		""" Saves a teacher application into the database. """
-		
+
 		mycursor, db = await the_database()
 		await mycursor.execute('''
 			INSERT INTO TeacherApplication (message_id, teacher_id)

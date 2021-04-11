@@ -81,7 +81,7 @@ class Social(commands.Cog):
 					strings.append(
 						f"{period_value} {plural if period_value > 1 else period_name}"
 					)
-					
+
 		return ", ".join(strings[:2])
 
 	@commands.command(aliases=['si', 'server'])
@@ -197,6 +197,6 @@ class Social(commands.Cog):
 		em.set_image(url=data['img'])
 		await ctx.send(embed=em)
 
-		
+
 def setup(client):
 	client.add_cog(Social(client))
