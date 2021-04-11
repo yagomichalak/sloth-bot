@@ -397,7 +397,7 @@ class Munk(Player):
 			await ctx.send(f"**{member.mention} refused your invitation to join `{user_tribe['name']}`, {inviter.mention}!**")
 
 
-	@commands.command()	
+	@commands.command()
 	@commands.cooldown(1, 10, commands.BucketType.user)
 	async def tribe(self, ctx, *, name: str = None) -> None:
 		""" Shows some information about a tribe.

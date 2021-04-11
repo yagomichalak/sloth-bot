@@ -290,7 +290,7 @@ class EmbedManagement(commands.Cog):
 
 	@embed.group(aliases=['e'])
 	@commands.has_permissions(administrator=True)
-	async def edit(self, ctx) -> None:	
+	async def edit(self, ctx) -> None:
 		""" Edits an embed in the DB. """
 
 		if ctx.invoked_subcommand:
@@ -732,10 +732,10 @@ class EmbedManagement(commands.Cog):
 						if int(m.content.strip()) > 0 and int(m.content.strip()) <= 25:
 							return True
 						else:
-							self.client.loop.create_task(ctx.send(f"**The index has to be between 1-25, {member.mention}!**"))	
+							self.client.loop.create_task(ctx.send(f"**The index has to be between 1-25, {member.mention}!**"))
 							return False
 					else:
-						self.client.loop.create_task(ctx.send(f"**The index `MUST` be an integer value, {member.mention}!**"))	
+						self.client.loop.create_task(ctx.send(f"**The index `MUST` be an integer value, {member.mention}!**"))
 						return False
 				else:
 					self.client.loop.create_task(ctx.send(f"**The index can have a maximum lenght of 2, {member.mention}!**"))

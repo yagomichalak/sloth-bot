@@ -32,7 +32,7 @@ class Game(commands.Cog):
 		return square, new_inserted
 
 	async def make_square_border(self, square: List[List[str]], emoji: str, player_x: int, player_y: int) -> List[List[str]]:
-		""" Makes a border for the given square. """		
+		""" Makes a border for the given square. """
 
 		blue = ':blue_square:'
 
