@@ -547,4 +547,3 @@ class Player(commands.Cog):
         await mycursor.execute("UPDATE UserCurrency SET last_skill_ts = 0 WHERE user_id = %s", (user_id,))
         await db.commit()
         await mycursor.close()
-
