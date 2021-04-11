@@ -186,8 +186,8 @@ class EmbedManagement(commands.Cog):
 
 			return await ctx.send(embed=embed, content=f"**Inform an embed name, {ctx.author.mention}!**")
 
-		#try to get embed_name from db (check if exists)
-		#
+		# try to get embed_name from db (check if exists)
+
 		if len(embed_name) > 30:
 			return await ctx.send(f"**The `embed_name` must be within 1-30 characters, {ctx.author.mention}!**")
 

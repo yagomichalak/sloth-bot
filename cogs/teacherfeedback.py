@@ -260,7 +260,7 @@ class TeacherFeedback(commands.Cog):
 
 		saved_class = entries
 
-		#create_class = await self.create_class(member, cc_channel, saved_classes[class_index][1].title(), saved_classes[class_index][2].title(), saved_classes[class_index][3])
+		# create_class = await self.create_class(member, cc_channel, saved_classes[class_index][1].title(), saved_classes[class_index][2].title(), saved_classes[class_index][3])
 
 		embed = discord.Embed(
 			title=f"__**{saved_class[1].title()} - ({offset}/{lentries})**__",

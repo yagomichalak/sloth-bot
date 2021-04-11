@@ -7,7 +7,7 @@ from PIL import Image, ImageDraw, ImageFont
 from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
 import os
-#import requests
+# import requests
 import shutil
 import asyncio
 import aiohttp
@@ -70,7 +70,7 @@ class SlothCurrency(commands.Cog):
 	async def on_ready(self):
 		print("SlothCurrency cog is online!")
 		# await self.download_update()
-		#await self.text_download_update()
+		# await self.text_download_update()
 
 	@commands.Cog.listener()
 	async def on_message(self, message):
@@ -750,7 +750,7 @@ class SlothCurrency(commands.Cog):
 		foot = Image.open(await self.get_user_specific_type_item(member.id, 'foot'))
 		head = Image.open(await self.get_user_specific_type_item(member.id, 'head'))
 		hud = Image.open(await self.get_user_specific_type_item(member.id, 'hud'))
-		#badge = Image.open(await self.get_user_specific_type_item(member.id, 'badge'))
+		# badge = Image.open(await self.get_user_specific_type_item(member.id, 'badge'))
 		pfp = await self.get_user_pfp(member)
 		background.paste(sloth, (0, 0), sloth)
 		background.paste(body, (0, 0), body)
@@ -844,7 +844,7 @@ class SlothCurrency(commands.Cog):
 				if os.path.isdir(full_path):
 					# Gets all frame images from the folder
 					for i in range(len(glob.glob(f"{full_path}/*.png"))):
-						frame = Image.open(f"{full_path}/{effect}_{i+1}.png")#.convert('RGBA') # remove this convert later
+						frame = Image.open(f"{full_path}/{effect}_{i+1}.png") # convert('RGBA') # remove this convert later
 						# Checs whether frame has to be resized
 						if all_effects[effect]['resize']:
 							frame = frame.resize(all_effects[effect]['resize']).convert('RGBA')
@@ -1260,7 +1260,7 @@ class SlothCurrency(commands.Cog):
 				exchanged_money += 3
 				await asyncio.sleep(0)
 				continue
-				#return await self.convert_messages(member_id, messages_left, exchanged_money, times)
+				# return await self.convert_messages(member_id, messages_left, exchanged_money, times)
 			else:
 				await self.update_user_server_messages(member_id, -times * 50)
 				await self.update_user_money(member_id, exchanged_money)
@@ -1277,7 +1277,7 @@ class SlothCurrency(commands.Cog):
 				exchanged_money += 3
 				await asyncio.sleep(0)
 				continue
-				#return await self.convert_time(member_id, time_left, exchanged_money, times)
+				# return await self.convert_time(member_id, time_left, exchanged_money, times)
 			else:
 				await self.update_user_server_time(member_id, -times * 1800)
 				await self.update_user_money(member_id, exchanged_money)
@@ -1368,7 +1368,7 @@ class SlothCurrency(commands.Cog):
 			await ctx.send(f"You don't have {money}łł!")
 
 	async def get_user_pfp(self, member):
-		#im = Image.open(requests.get(member.avatar_url, stream=True).raw)
+		# im = Image.open(requests.get(member.avatar_url, stream=True).raw)
 		async with self.session.get(str(member.avatar_url)) as response:
 			image_bytes = await response.content.read()
 			with BytesIO(image_bytes) as pfp:
@@ -1400,7 +1400,7 @@ class SlothCurrency(commands.Cog):
 
 		im_square = crop_max_square(im).resize((thumb_width, thumb_width), Image.LANCZOS)
 		im_thumb = mask_circle_transparent(im_square, 4)
-		#im_thumb.save('png/user_pfp.png', 'png', quality=90)
+		# im_thumb.save('png/user_pfp.png', 'png', quality=90)
 		return im_thumb
 	
 	async def get_specific_user(self, user_id: int):

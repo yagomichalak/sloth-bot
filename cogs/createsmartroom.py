@@ -462,7 +462,7 @@ class CreateSmartRoom(commands.Cog):
 			return
 
 		# Makes the preview image
-		#member_id, cat_name, txt1, txt2, txt3, vc, size
+		# member_id, cat_name, txt1, txt2, txt3, vc, size
 		await self.make_preview_galaxy(member.id, category_name, txt1_name, txt2_name, vc_name, limit)
 		# Gets the configuration confirmation
 		msg6 = await member.send(file=discord.File(f'./images/smart_vc/user_previews/{member.id}.png'))
@@ -500,7 +500,6 @@ class CreateSmartRoom(commands.Cog):
 			member: discord.PermissionOverwrite(
 				read_messages=True, send_messages=True, connect=True, speak=True, view_channel=True)
 			}
-			#, overwrites=overwrites
 
 			# if the_cat := await member.guild.create_category(name=category_name, overwrites=overwrites):
 			if the_cat := await self.try_to_create(kind='category', guild=member.guild, name=category_name, overwrites=overwrites):
@@ -1154,7 +1153,7 @@ class CreateSmartRoom(commands.Cog):
 		if seconds_left > 172800:
 			return await ctx.send("**You can only renew your rooms at least 2 days before their deletion time.**")
 
-		#Checks if the user has money for it (1000łł)		
+		# Checks if the user has money for it (1000łł)		
 		user_currency = await SlothCurrency.get_user_currency(ctx.author, ctx.author.id)
 		if user_currency[0][1] >= 1000:
 			await SlothCurrency.update_user_money(ctx.author, ctx.author.id, -1000)

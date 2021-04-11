@@ -82,7 +82,7 @@ class ReportSupport(commands.Cog):
 
 		# Checks if the reaction was in the RepportSupport channel
 		channel = self.client.get_channel(payload.channel_id)
-		#print(channel)
+		# print(channel)
 		if not channel or str(channel).startswith('Direct Message with') or channel.id != reportsupport_channel_id:
 			return
 
@@ -103,8 +103,8 @@ class ReportSupport(commands.Cog):
 
 		if mid == int(os.getenv('APPLY_TEACHER_MESSAGE_ID')) and str(emoji) == '✅':
 			# Apply to be a teacher
-			#link = "https://docs.google.com/forms/d/1H-rzl9AKgfH1WuKN7nYAW-xJx411Q4-HxfPXuPUFQXs/viewform?edit_requested=true"
-			#await member.send(f"**You can apply for being a teacher by filling out this form:**\n{link}")
+			# link = "https://docs.google.com/forms/d/1H-rzl9AKgfH1WuKN7nYAW-xJx411Q4-HxfPXuPUFQXs/viewform?edit_requested=true"
+			# await member.send(f"**You can apply for being a teacher by filling out this form:**\n{link}")
 			member_ts = self.cache.get(member.id)
 			time_now = time.time()
 			if member_ts:
@@ -362,7 +362,7 @@ class ReportSupport(commands.Cog):
 
 
 
-	#- Report someone
+	# - Report someone
 	async def report_someone(self, member, guild):
 					
 		if await self.member_has_open_channel(member.id):
@@ -387,7 +387,7 @@ class ReportSupport(commands.Cog):
 			await member.send("**Something went wrong with it, please contact an admin!**")
 			raise Exception
 		else:
-			#print('created!')
+			# print('created!')
 			created_embed = discord.Embed(
 				title="Report room created!",
 				description=f"**Go to {the_channel.mention}!**",
@@ -402,7 +402,7 @@ class ReportSupport(commands.Cog):
 			return await self.client.get_cog('Tools').vc(ctx=ctx, member=member)
 			
 
-	#- Report someone
+	# - Report someone
 	async def generic_help(self, member, guild, type_help, message):
 					
 		if await self.member_has_open_channel(member.id):
@@ -425,7 +425,7 @@ class ReportSupport(commands.Cog):
 			await member.send("**Something went wrong with it, please contact an admin!**")
 			raise Exception
 		else:
-			#print('created!')
+			# print('created!')
 			created_embed = discord.Embed(
 				title=f"Room for `{type_help}` created!",
 				description=f"**Go to {the_channel.mention}!**",
@@ -765,12 +765,12 @@ class ReportSupport(commands.Cog):
 				for task in done_tasks:
 					reaction, user = await task
 				if str(reaction.emoji) == "➡️":
-					#await the_msg.remove_reaction(reaction.emoji, member)
+					# await the_msg.remove_reaction(reaction.emoji, member)
 					if command_index < (len(list_of_commands) - 1):
 						command_index += 1
 					continue
 				elif str(reaction.emoji) == "⬅️":
-					#await the_msg.remove_reaction(reaction.emoji, member)
+					# await the_msg.remove_reaction(reaction.emoji, member)
 					if command_index > 0:
 						command_index -= 1
 					continue
@@ -787,7 +787,7 @@ class ReportSupport(commands.Cog):
 		teacher = discord.utils.get(guild.members, id=teacher_app[0][1])
 
 
-		#moderator = discord.utils.get(guild.roles, id=moderator_role_id)
+		# moderator = discord.utils.get(guild.roles, id=moderator_role_id)
 		cosmos = discord.utils.get(guild.members, id=self.cosmos_id)
 		admin = discord.utils.get(guild.roles, id=admin_role_id)
 		lesson_management = discord.utils.get(guild.roles, id=lesson_management_role_id)
@@ -800,7 +800,7 @@ class ReportSupport(commands.Cog):
 		lesson_management: discord.PermissionOverwrite(
 			read_messages=True, send_messages=True, connect=True, view_channel=True),
 		}
-		#moderator: discord.PermissionOverwrite(read_messages=True, send_messages=True, connect=False, view_channel=True, manage_messages=True)
+		# moderator: discord.PermissionOverwrite(read_messages=True, send_messages=True, connect=False, view_channel=True, manage_messages=True)
 		txt_channel = await guild.create_text_channel(name=f"{teacher.name}'s-interview", category=app_cat, overwrites=overwrites)
 		vc_channel = await app_cat.create_voice_channel(name=f"{teacher.name}'s Interview", overwrites=overwrites)
 
@@ -860,7 +860,7 @@ class ReportSupport(commands.Cog):
 					try:
 						all_apps_channel = discord.utils.get(ctx.guild.channels, id=self.app_channel_id)
 						msg = await all_apps_channel.fetch_message(app_channel[0][0])
-						#await msg.delete()
+						# await msg.delete()
 						await msg.add_reaction('🔒')
 					except Exception:
 						pass
