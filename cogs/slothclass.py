@@ -18,6 +18,7 @@ classes: Dict[str, Any] = {
 
 bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
 
+
 class SlothClass(*classes.values()):
     """ A category for the Sloth Class system. """
 

@@ -6,6 +6,7 @@ from typing import List, Union
 
 server_id = int(os.getenv('SERVER_ID'))
 
+
 class CurseMember(commands.Cog):
     '''
     A cog related to the 'curse a member' feature.

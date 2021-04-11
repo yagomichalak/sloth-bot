@@ -25,6 +25,7 @@ class_history_channel_id = int(os.getenv('CLASS_HISTORY_CHANNEL_ID'))
 reward_channel_id = int(os.getenv('REWARD_CHANNEL_ID'))
 bot_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
 
+
 class TeacherFeedback(commands.Cog):
     """ Category for language class creations
     and related commands. """
@@ -818,10 +819,12 @@ class TeacherFeedback(commands.Cog):
         else:
             await ctx.send(f"**This isn't a class channel, {member.mention}!**")
 
+
 class TeacherFeedbackDatabaseCreate:
     """ [CREATE] A class for creating things in the database. """
 
     pass
+
 
 class TeacherFeedbackDatabaseInsert:
     """ [INSERT] A class for inserting things into the database. """
@@ -898,6 +901,7 @@ class TeacherFeedbackDatabaseInsert:
             VALUES (%s, %s, %s, %s, %s)""", (user[4], user[1], user[6], user[5], user[0]))
         await db.commit()
         await mycursor.close()
+
 
 class TeacherFeedbackDatabaseSelect:
     """ [SELECT] A class for selecting things from the database. """
@@ -1028,6 +1032,7 @@ class TeacherFeedbackDatabaseSelect:
         await mycursor.close()
         return users
 
+
 class TeacherFeedbackDatabaseUpdate:
     """ [UPDATE] A class for updating things in the database. """
 
@@ -1125,6 +1130,7 @@ class TeacherFeedbackDatabaseUpdate:
         await db.commit()
         await mycursor.close()
 
+
 class TeacherFeedbackDatabaseDelete:
     """ [DELETE] A class for deleting things from the database. """
 
@@ -1193,6 +1199,7 @@ class TeacherFeedbackDatabaseDelete:
         await db.commit()
         await mycursor.close()
 
+
 class TeacherFeedbackDatabaseShow:
     """ [SHOW] A class for checking things in the database. """
 
@@ -1202,6 +1209,7 @@ db_classes: List[object] = [
     TeacherFeedbackDatabaseCreate, TeacherFeedbackDatabaseInsert, TeacherFeedbackDatabaseSelect,
     TeacherFeedbackDatabaseUpdate, TeacherFeedbackDatabaseDelete, TeacherFeedbackDatabaseShow
     ]
+
 
 class TeacherFeedbackDatabase(*db_classes):
     pass

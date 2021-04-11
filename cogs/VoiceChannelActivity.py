@@ -8,6 +8,7 @@ import os
 
 allowed_roles = [int(os.getenv('OWNER_ROLE_ID')), int(os.getenv('ADMIN_ROLE_ID')), int(os.getenv('MOD_ROLE_ID'))]
 
+
 class VoiceChannelActivity(commands.Cog):
     """ Category for the users' voice channel activities. """
 

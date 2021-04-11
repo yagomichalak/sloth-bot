@@ -13,6 +13,7 @@ import io
 bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
 select_your_language_channel_id = int(os.getenv('SELECT_YOUR_LANGUAGE_CHANNEL_ID'))
 
+
 class Analytics(commands.Cog):
     """ A cog related to the analytics of the server. """
 

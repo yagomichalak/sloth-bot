@@ -21,6 +21,7 @@ allowed_roles = [
 int(os.getenv('OWNER_ROLE_ID')), admin_role_id,
 moderator_role_id]
 
+
 class ReportSupport(commands.Cog):
     '''
     A cog related to the system of reports and some other things.

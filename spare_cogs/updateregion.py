@@ -6,6 +6,7 @@ import os
 server_id = int(os.getenv('SERVER_ID'))
 bot_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
 
+
 class UpdateRegion(commands.Cog):
     '''
     A cog related to the automatic region update feature.

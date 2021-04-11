@@ -5,6 +5,7 @@ from typing import List, Any, Union, Tuple, Dict
 import asyncio
 from random import randint
 
+
 class Game(commands.Cog):
     """ A category for a simple embedded message game. """
 

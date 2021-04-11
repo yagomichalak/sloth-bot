@@ -4,6 +4,7 @@ from typing import Union, List, Dict
 import asyncio
 # from . import TeacherFeedbackDatabaseDelete
 
+
 class ConfirmSkill(menus.Menu):
     """ Class related to confirmation skill actions. """
 
@@ -77,6 +78,7 @@ class ConfirmSkill(menus.Menu):
         await self.start(ctx, wait=True)
         return self.result
 
+
 class InventoryLoop(menus.ListPageSource):
     """ A class for iterating through inventory items. """
 
@@ -101,6 +103,7 @@ class InventoryLoop(menus.ListPageSource):
             embed.set_footer(text=f"({i+1}-{i+1+6} of {len(self.entries)})")
 
         return embed
+
 
 class OpenShopLoop(menus.ListPageSource):
     """ A class for iterating through inventory items. """
@@ -203,6 +206,7 @@ async def prompt_number(client, ctx: commands.Context, the_msg: discord.Message,
     else:
         return int(content)
 
+
 class InroleLooping(menus.ListPageSource):
     def __init__(self, members, **kwargs):
         super().__init__(members, per_page=15)
@@ -221,6 +225,7 @@ class InroleLooping(menus.ListPageSource):
 
         return embed
 
+
 class SwitchTribePages(menus.ListPageSource):
     """ A class for switching tribe pages. """
 
@@ -238,6 +243,7 @@ class SwitchTribePages(menus.ListPageSource):
         return await self.change_embed(
             ctx=menu.ctx, tribe=self.tribe, entries=entries, offset=offset+1, lentries=len(self.entries)
             )
+
 
 class SwitchSavedClasses(menus.ListPageSource):
     """ A class for switching tribe pages. """
@@ -263,6 +269,7 @@ class SwitchSavedClasses(menus.ListPageSource):
         return await self.change_embed(
             ctx=menu.ctx, entries=entries, offset=offset+1, lentries=len(self.entries)
             )
+
 
 class SwitchSavedClassesButtons(menus.Menu):
     """ Class related to confirmation skill actions. """

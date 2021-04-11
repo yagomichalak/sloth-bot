@@ -11,6 +11,7 @@ owner_role_id=int(os.getenv('OWNER_ROLE_ID'))
 event_manager_role_id=int(os.getenv('EVENT_MANAGER_ROLE_ID'))
 preference_role_id=int(os.getenv('PREFERENCE_ROLE_ID'))
 
+
 class EventManagement(commands.Cog):
     """ A category for event related commands. """
 

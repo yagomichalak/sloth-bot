@@ -5,6 +5,7 @@ from cogs.slothcurrency import SlothCurrency
 from datetime import datetime
 import aiohttp
 
+
 class Misc(commands.Cog):
     '''
     Miscellaneous related commands.

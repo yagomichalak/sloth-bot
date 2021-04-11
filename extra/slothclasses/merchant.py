@@ -10,6 +10,7 @@ import random
 
 bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
 
+
 class Merchant(Player):
 
     def __init__(self, client) -> None:

@@ -9,6 +9,7 @@ from mysqldb import *
 from typing import List, Union, Callable, Any
 from extra.menu import ConfirmSkill
 
+
 class CreateSmartRoom(commands.Cog):
     """ A cog related to the creation of a custom voice channel. """
 

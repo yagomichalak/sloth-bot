@@ -8,6 +8,7 @@ import os
 
 allowed_roles = [int(os.getenv('OWNER_ROLE_ID')), int(os.getenv('ADMIN_ROLE_ID')), int(os.getenv('MOD_ROLE_ID'))]
 
+
 class EmbedManagement(commands.Cog):
     """ A category for managing embeds; show, create, delete and edit. """
 
@@ -813,6 +814,7 @@ class EmbedManagement(commands.Cog):
         )
         embed.set_footer(text="Example embed above")
         await ctx.send(embed=embed)
+
 
 class SortEmbed:
     """ A class for sorting embed fields with the given data. """

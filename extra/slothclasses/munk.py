@@ -11,6 +11,7 @@ import asyncio
 bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
 approve_thumbnail_channel_id = int(os.getenv('APPROVE_THUMBNAIL_CHANNEL_ID'))
 
+
 class Munk(Player):
 
     def __init__(self, client) -> None:
