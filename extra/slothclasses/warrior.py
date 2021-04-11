@@ -93,7 +93,7 @@ class Warrior(Player):
 		""" Has a 35% change of breaking someone's Divine Protection shield.
 		:param target: The target who you are trying to smash the protection. """
 
-		
+
 		attacker = ctx.author
 
 		if ctx.channel.id != bots_and_commands_channel_id:
@@ -124,7 +124,7 @@ class Warrior(Player):
 		user = await self.get_user_currency(attacker.id)
 		if not user[1] >= 50:
 			return await ctx.send(f"**You don't have `50łł` to use this skill, {attacker.mention}!**")
-			
+
 		confirmed = await ConfirmSkill(f"**{attacker.mention}, are you sure you want to smash {target.mention}'s Divine Protection shield for `50łł`?**").prompt(ctx)
 		if not confirmed:
 			return await ctx.send("**Not hacking them, then!**")
@@ -168,7 +168,7 @@ class Warrior(Player):
 			await self.update_user_is_knocked_out(ko[3], 0)
 
 			channel = self.bots_txt
-		
+
 			await channel.send(
 				content=f"<@{ko[0]}>",
 				embed=discord.Embed(

@@ -59,7 +59,7 @@ class Cybersloth(Player):
 
 
 		await self.check_cooldown(user_id=attacker.id, skill_number=1)
-		
+
 		try:
 			current_timestamp = await self.get_timestamp()
 			# Don't need to store it, since it is forever
@@ -137,7 +137,7 @@ class Cybersloth(Player):
 			await self.update_user_action_skill_two_ts(attacker.id, current_timestamp)
 			# Updates user's skills used counter
 			await self.update_user_skills_used(user_id=attacker.id)
-			
+
 		except Exception as e:
 			print(e)
 			return await ctx.send(f"**For some reason I couldn't wire your target, {attacker.mention}!**")
@@ -158,7 +158,7 @@ class Cybersloth(Player):
 			await self.update_user_is_hacked(h[3], 0)
 
 			channel = self.bots_txt
-		
+
 			await channel.send(
 				content=f"<@{h[0]}>",
 				embed=discord.Embed(
@@ -175,7 +175,7 @@ class Cybersloth(Player):
 			await self.update_user_is_wired(w[3], 0)
 
 			channel = self.bots_txt
-		
+
 			await channel.send(
 				content=f"<@{w[0]}>",
 				embed=discord.Embed(

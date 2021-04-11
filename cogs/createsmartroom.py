@@ -948,7 +948,7 @@ class CreateSmartRoom(commands.Cog):
 			if word.isdigit() and (m := discord.utils.get(guild.voice_channels, id=int(word)))
 			or (m := discord.utils.get(guild.voice_channels, name=str(word)))
 		]
-		
+
 		channel_mentions.extend(list(map(lambda c: isinstance(c, discord.VoiceChannel), message.channel_mentions)))
 		channel_mentions = list(set(channel_mentions))
 
@@ -1117,7 +1117,7 @@ class CreateSmartRoom(commands.Cog):
 			**Expected expiration:** {datetime.utcfromtimestamp(deadline)}\n''',
 			color=ctx.author.color,
 			timestamp=ctx.message.created_at)
-		
+
 		embed.set_thumbnail(url=ctx.author.avatar_url)
 		embed.set_footer(text="Requested")
 
@@ -1139,7 +1139,7 @@ class CreateSmartRoom(commands.Cog):
 
 		if not ctx.guild:
 			return await ctx.send("**Don't use it here!**")
-			
+
 		user_galaxy = await self.get_galaxy_txt(ctx.author.id, ctx.channel.category.id)
 		if not user_galaxy:
 			return await ctx.send("**You cannot run this command outside your rooms, in case you have them!**")

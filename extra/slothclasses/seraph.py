@@ -76,7 +76,7 @@ class Seraph(Player):
 		by making it last for one more day and a 20% chance of getting a protection for themselves too
 		(in case they don't have one already). """
 
-		
+
 		perpetrator = ctx.author
 
 		if ctx.channel.id != bots_and_commands_channel_id:
@@ -129,7 +129,7 @@ class Seraph(Player):
 		else:
 			await ctx.send(f"**You had a `35%` chance of reinforcing all active Divine Protection shields, but you missed it, {perpetrator.mention}!**")
 
-		
+
 		# Checks whether the perpetrator already has a Divien Protection shield
 		if not await self.is_user_protected(perpetrator.id):
 			n2 = random.random()
@@ -156,14 +156,14 @@ class Seraph(Player):
 
 	async def check_protections(self) -> None:
 		""" Check on-going protections and their expiration time. """
-		
+
 		divine_protections = await self.get_expired_protections()
 		for dp in divine_protections:
 			await self.update_user_protected(dp[3], 0)
 			await self.delete_skill_action_by_target_id_and_skill_type(dp[3], 'divine_protection')
 
 			channel = self.bots_txt
-			
+
 
 			await channel.send(
 				content=f"<@{dp[0]}>, <@{dp[3]}>",

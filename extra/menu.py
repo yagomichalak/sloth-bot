@@ -25,7 +25,7 @@ class ConfirmSkill(menus.Menu):
 	async def finalize(self, timed_out) -> None:
 		""" Runs when it finalizes.
 		:param timed_out: Whether it timed-out or not. """
-		
+
 		if timed_out:
 			await self.sent_msg.edit(embed=discord.Embed(description="**Timeout!**", color=discord.Color.red()))
 

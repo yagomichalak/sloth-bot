@@ -41,7 +41,7 @@ class TeacherAPI(commands.Cog):
 		:param language: The language related to the flag.
 		:returns: The path of the requested flag, or of the default one.
 		"""
-	
+
 		path = f"./media/flags/{language.lower()}.png"
 		if os.path.isfile(path):
 			return path
@@ -57,7 +57,7 @@ class TeacherAPI(commands.Cog):
 		:param color: The text color.
 		:param stroke: The stroke color.
 		"""
-		
+
 		draw.text((coords[0]-1, coords[1]), text, stroke, font=font) # Left
 		draw.text((coords[0]+1, coords[1]), text, stroke, font=font) # Right
 		draw.text((coords[0], coords[1]-1), text, stroke, font=font) # Top
@@ -112,7 +112,7 @@ class TeacherAPI(commands.Cog):
 		"""
 
 		# Checks if the command was given all the required information to make the card.
-		
+
 		author = ctx.author
 		try:
 			assert teacher, await ctx.send(f"**Please, {author.mention}, inform the `teacher`!**")
@@ -248,7 +248,7 @@ class TeacherAPI(commands.Cog):
 			try:
 				async with self.session.get(f"{self.website_link}/api/teachers/?format=json") as response:
 					data = json.loads(await response.read())
-					
+
 			except Exception as e:
 				await channel.send("**No!**")
 			else:
@@ -532,7 +532,7 @@ class TeacherAPI(commands.Cog):
 
 		if not user_id:
 			return await ctx.send("**Please, inform a user ID!**")
-		
+
 		cards = await self.get_teacher_cards(user_id)
 		if not cards:
 			return await ctx.send("**No cards found for the given user!**")

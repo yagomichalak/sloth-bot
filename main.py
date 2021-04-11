@@ -115,7 +115,7 @@ async def on_command_error(ctx, error):
 
 	elif isinstance(error, commands.CommandOnCooldown):
 		await ctx.send(error)
-		
+
 	elif isinstance(error, commands.MissingAnyRole):
 		role_names = [f"**{str(discord.utils.get(ctx.guild.roles, id=role_id))}**" for role_id in error.missing_roles]
 		await ctx.send(f"You are missing at least one of the required roles: {', '.join(role_names)}")
@@ -182,7 +182,7 @@ async def update_timezones():
 @client.event
 async def on_voice_state_update(member, before, after):
 	# No longer being used
-	
+
 	return
 	if not member.guild:
 		return

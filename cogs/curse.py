@@ -10,20 +10,20 @@ class CurseMember(commands.Cog):
 	'''
 	A cog related to the 'curse a member' feature.
 	'''
-	
+
 	def __init__(self, client) -> None:
 		""" Class initializing method. """
 
 		self.client = client
-		
-	
+
+
 	@commands.Cog.listener()
 	async def on_ready(self) -> None:
 		""" Tells when the cog's ready to be used. """
 
 		print('CurseMember cog is online!')
-	
-	
+
+
 	@commands.Cog.listener()
 	async def on_voice_state_update(self, member, before, after) -> None:
 		""" Event for checking whether the user who joined any voice channel
@@ -121,7 +121,7 @@ class CurseMember(commands.Cog):
 		await db.commit()
 		await mycursor.close()
 
-	
+
 	@commands.command(hidden=True)
 	@commands.has_permissions(administrator=True)
 	async def create_table_cursed_member(self, ctx) -> None:
@@ -134,8 +134,8 @@ class CurseMember(commands.Cog):
 		await mycursor.close()
 
 		return await ctx.send("**Table CursedMember was created!**", delete_after=3)
-	
-	
+
+
 	@commands.command(hidden=True)
 	@commands.has_permissions(administrator=True)
 	async def drop_table_cursed_member(self, ctx) -> None:
@@ -148,8 +148,8 @@ class CurseMember(commands.Cog):
 		await mycursor.close()
 
 		return await ctx.send("**Table CursedMember was dropped!**", delete_after=3)
-		
-		
+
+
 	@commands.command(hidden=True)
 	@commands.has_permissions(administrator=True)
 	async def reset_table_cursed_member(self, ctx) -> None:
@@ -162,8 +162,8 @@ class CurseMember(commands.Cog):
 		await mycursor.close()
 
 		return await ctx.send("**Table CursedMember was reseted!**", delete_after=3)
-	
-	
+
+
 	async def get_cursed_member(self, user_id: int) -> List[List[int]]:
 		""" Gets the cursed member from the database. """
 
@@ -188,8 +188,8 @@ class CurseMember(commands.Cog):
 		else:
 			await mycursor.close()
 			return False
-	
-	
+
+
 def setup(client):
 	""" Cog's setup function. """
 

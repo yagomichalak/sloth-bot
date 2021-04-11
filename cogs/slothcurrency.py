@@ -118,12 +118,12 @@ class SlothCurrency(commands.Cog):
 		# Checks if it wasn't a bot's reaction
 		if payload.member.bot:
 			return
-		
+
 		# Takes off the reaction in the shop channel
 		if payload.channel_id in shop_channels:
 			guild = self.client.get_guild(payload.guild_id)
 			channel = discord.utils.get(guild.channels, id=payload.channel_id)
-		
+
 			msg = await channel.fetch_message(payload.message_id)
 			await msg.remove_reaction(payload.emoji.name, payload.member)
 
@@ -657,7 +657,7 @@ class SlothCurrency(commands.Cog):
 		:param ctx: The context.
 		:param member: The member who was frogged.
 		:param knocked_out: Whether the user is knocked out"""
-		
+
 		SlothClass = self.client.get_cog('SlothClass')
 		try:
 			# Gets original skill action and the attacker
@@ -693,7 +693,7 @@ class SlothCurrency(commands.Cog):
 		public_flag_names = list(map(lambda pf: pf.name, public_flags))
 		return public_flag_names
 
-		
+
 
 	@commands.command()
 	async def profile(self, ctx, member: discord.Member = None):
@@ -853,7 +853,7 @@ class SlothCurrency(commands.Cog):
 
 			# Loops through the frames based on the amount of frames of the longest effect.
 			longest_gif = max([len(frames['frames']) for frames in all_effects.values()])
-			
+
 			for efx in all_effects.keys():
 				all_effects[efx]['frames'] = cycle(all_effects[efx]['frames'])
 
@@ -879,7 +879,7 @@ class SlothCurrency(commands.Cog):
 				# print('saving...')
 				gif.export(gif_file_path)
 				# print('Finished!')
-				
+
 		except Exception as e:
 			# print('gaaa')
 			print(e)
@@ -1003,7 +1003,7 @@ class SlothCurrency(commands.Cog):
 				shutil.rmtree('./sloth_custom_images')
 			except Exception:
 				pass
-				
+
 		all_folders = {"background": "1V8l391o3-vsF9H2Jv24lDmy8e2erlHyI",
 					   "sloth": "16DB_lNrnrmvxu2E7RGu01rQGQk7z-zRy",
 					   "body": "1jYvG3vhL32-A0qDYn6lEG6fk_GKYDXD7",
@@ -1057,7 +1057,7 @@ class SlothCurrency(commands.Cog):
 		all_text_folders = {"languages": "1_gBiliWPrCj5cLpChQfg9QRnj8skQVHM"}
 
 		text_categories = ["languages"]
-		
+
 		for t_category in text_categories:
 			try:
 				os.makedirs(f'./texts/{t_category}')
@@ -1220,7 +1220,7 @@ class SlothCurrency(commands.Cog):
 		user_info = await self.get_user_activity_info(ctx.author.id)
 		if not user_info:
 			return await ctx.send("**You have nothing to exchange!**")
-			
+
 		user_found = await self.get_user_currency(ctx.author.id)
 		if not user_found:
 			epoch = datetime.utcfromtimestamp(0)
@@ -1402,7 +1402,7 @@ class SlothCurrency(commands.Cog):
 		im_thumb = mask_circle_transparent(im_square, 4)
 		# im_thumb.save('png/user_pfp.png', 'png', quality=90)
 		return im_thumb
-	
+
 	async def get_specific_user(self, user_id: int):
 		mycursor, db = await the_database()
 		await mycursor.execute("SELECT * FROM MembersScore WHERE user_id = %s", (user_id,))

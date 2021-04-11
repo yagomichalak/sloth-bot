@@ -406,7 +406,7 @@ class Munk(Player):
 
 
 		member = ctx.author
-		
+
 		tribe = None
 		if name:
 			tribe = await self.get_tribe_info_by_name(name)
@@ -415,7 +415,7 @@ class Munk(Player):
 			if not user_currency or not user_currency[18]:
 				return await ctx.send(
 					f"**You didn't provide any tribe name and you're not in a tribe either, {member.mention}!**")
-	
+
 
 			tribe = await self.get_tribe_info_by_name(user_currency[18])
 
@@ -610,7 +610,7 @@ class Munk(Player):
 
 	async def check_tribe_creations(self) -> None:
 		""" Check on-going steals and their expiration time. """
-		
+
 		creations = await self.get_skill_actions_by_skill_type('tribe_creation')
 		guild = self.client.get_guild(int(os.getenv('SERVER_ID')))
 		for creation in creations:
