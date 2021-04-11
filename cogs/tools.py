@@ -334,7 +334,7 @@ class Tools(commands.Cog):
 
         member_state = member.voice
         if channel := member_state and member_state.channel:
-            msg = f"**{member.mention} is in the `{channel.mention}` voice channel.**"
+            msg = f"**{member.mention} is in the {channel.mention} voice channel.**"
             try:
                 invite = await channel.create_invite()
             except:

@@ -660,7 +660,7 @@ class Moderation(commands.Cog):
 		if not perms.administrator:
 			confirmations[author.id] = author.name
 			mod_ban_embed = discord.Embed(
-				title=f"Ban Request ({len(confirmations)}/5) → (2mins)",
+				title=f"Ban Request ({len(confirmations)}/5) → (5mins)",
 				description=f'''
 				{author.mention} wants to ban {member.mention}, it requires 4 more moderator ✅ reactions for it!
 				```Reason: {reason}```''', 
@@ -694,7 +694,7 @@ class Moderation(commands.Cog):
 
 			while True:
 				try:
-					r, _ = await self.client.wait_for('reaction_add', timeout=120, check=check_mod)
+					r, _ = await self.client.wait_for('reaction_add', timeout=300, check=check_mod)
 				except asyncio.TimeoutError:
 					mod_ban_embed.description = f'Timeout, {member} is not getting banned!'
 					await msg.remove_reaction('✅', self.client.user)
