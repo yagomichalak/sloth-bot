@@ -26,7 +26,7 @@ class SlothReputation(commands.Cog):
     async def on_message(self, message):
         if not message.guild:
             return
-            
+
         if message.author.bot:
             return
         elif not await self.check_table_exist():
@@ -85,17 +85,17 @@ class SlothReputation(commands.Cog):
                 return await ctx.send(f"**{member} doesn't have an account yet!**")
 
 
-        
+
         SlothCurrency = self.client.get_cog('SlothCurrency')
 
         if ucur[0][12]:
             return await SlothCurrency.send_hacked_image(ctx, member)
 
-        
+
         all_users = await self.get_all_users_by_score_points()
         position = [[i+1, u[4]] for i, u in enumerate(all_users) if u[0] == member.id]
         position = [it for subpos in position for it in subpos] if position else ['??', 0]
-        
+
         # Gets user Server Activity info, such as messages sent and time in voice channels
         user_info = await SlothCurrency.get_user_activity_info(member.id)
         if not user_info and member.id == ctx.author.id:
@@ -157,7 +157,7 @@ class SlothReputation(commands.Cog):
 
         try:
             await info_msg.add_reaction('💰')
-            r, u = await self.client.wait_for('reaction_add', timeout=60, 
+            r, u = await self.client.wait_for('reaction_add', timeout=60,
                 check=lambda r, u: u.id == ctx.author.id and r.message.id == info_msg.id and str(r.emoji) == '💰'
                 )
         except asyncio.TimeoutError:
@@ -293,7 +293,7 @@ class SlothReputation(commands.Cog):
             "CREATE TABLE MembersScore (user_id bigint, user_xp bigint, user_lvl int, user_xp_time int, score_points bigint, rep_time bigint)")
         await db.commit()
         await mycursor.close()
-                
+
         await ctx.send("**Table *MembersScore* created!**", delete_after=3)
 
     @commands.has_permissions(administrator=True)
@@ -454,6 +454,6 @@ class SlothReputation(commands.Cog):
         users = await mycursor.fetchall()
         await mycursor.close()
         return users
-        
+
 def setup(client):
     client.add_cog(SlothReputation(client))

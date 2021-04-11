@@ -22,7 +22,7 @@ class Seraph(Player):
 	@Player.skill_mark()
 	async def divine_protection(self, ctx, target: discord.Member = None) -> None:
 		""" Gives a Divine Protection shield to a member, so they are protected against
-		attacks for 24 hours. 
+		attacks for 24 hours.
 		:param target: The target member. (Optional)
 		PS: If target not provided, you are the target. """
 
@@ -51,7 +51,7 @@ class Seraph(Player):
 
 			current_timestamp = await self.get_timestamp()
 			await self.insert_skill_action(
-				user_id=ctx.author.id, skill_type="divine_protection", skill_timestamp=current_timestamp, 
+				user_id=ctx.author.id, skill_type="divine_protection", skill_timestamp=current_timestamp,
 				target_id=target.id, channel_id=ctx.channel.id
 			)
 			await self.update_user_protected(target.id, 1)
@@ -72,8 +72,8 @@ class Seraph(Player):
 	@Player.skill_mark()
 	# @Player.not_ready()
 	async def reinforce(self, ctx) -> None:
-		""" Gets a 35% chance of reinforcing all of their protected people's Divine Protection shield, 
-		by making it last for one more day and a 20% chance of getting a protection for themselves too 
+		""" Gets a 35% chance of reinforcing all of their protected people's Divine Protection shield,
+		by making it last for one more day and a 20% chance of getting a protection for themselves too
 		(in case they don't have one already). """
 
 		
@@ -105,7 +105,7 @@ class Seraph(Player):
 
 		current_timestamp = await self.get_timestamp()
 
-		# Upate user's money 
+		# Upate user's money
 		await self.update_user_money(perpetrator.id, -50)
 		# Update perpetrator's second skill timestamp
 		await self.update_user_action_skill_two_ts(user_id=perpetrator.id, current_ts=current_timestamp)
@@ -139,7 +139,7 @@ class Seraph(Player):
 				try:
 					# Give user a shield
 					await self.insert_skill_action(
-						user_id=perpetrator.id, skill_type="divine_protection", skill_timestamp=current_timestamp, 
+						user_id=perpetrator.id, skill_type="divine_protection", skill_timestamp=current_timestamp,
 						target_id=perpetrator.id, channel_id=ctx.channel.id
 					)
 
@@ -166,7 +166,7 @@ class Seraph(Player):
 			
 
 			await channel.send(
-				content=f"<@{dp[0]}>, <@{dp[3]}>", 
+				content=f"<@{dp[0]}>, <@{dp[3]}>",
 				embed=discord.Embed(
 					description=f"**<@{dp[3]}>'s `Divine Protection` from <@{dp[0]}> just expired!**",
 					color=discord.Color.red()))
@@ -174,7 +174,7 @@ class Seraph(Player):
 
 	async def update_user_protected(self, user_id: int, protected: int) -> None:
 		""" Updates the user's protected state.
-		:param user_id: The ID of the member to update. 
+		:param user_id: The ID of the member to update.
 		:param protected: Whether it's gonna be set to true or false. """
 
 		mycursor, db = await the_database()
@@ -199,7 +199,7 @@ class Seraph(Player):
 		the_time = await self.get_timestamp()
 		mycursor, db = await the_database()
 		await mycursor.execute("""
-			SELECT * FROM SlothSkills 
+			SELECT * FROM SlothSkills
 			WHERE skill_type = 'divine_protection' AND (%s - skill_timestamp) >= 86400
 			""", (the_time,))
 		divine_protections = await mycursor.fetchall()

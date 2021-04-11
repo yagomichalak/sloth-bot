@@ -54,7 +54,7 @@ class Merchant(Player):
 			try:
 				current_timestamp = await self.get_timestamp()
 				await self.insert_skill_action(
-					user_id=member.id, skill_type="potion", skill_timestamp=current_timestamp, 
+					user_id=member.id, skill_type="potion", skill_timestamp=current_timestamp,
 					target_id=member.id, channel_id=ctx.channel.id, price=item_price
 				)
 				await self.update_user_action_skill_ts(member.id, current_timestamp)
@@ -154,7 +154,7 @@ class Merchant(Player):
 						content=f"{buyer.mention}, {member.mention}, <@{wired_user[0]}>",
 						embed=siphon_embed)
 
-				else:	                        
+				else:	
 					# Updates both buyer and seller's money
 					await self.update_user_money(buyer.id, - merchant_item[7])
 					await self.update_user_money(member.id, merchant_item[7])
@@ -258,7 +258,7 @@ class Merchant(Player):
 
 	async def update_user_has_potion(self, user_id: int, has_it: int) -> None:
 		""" Updates the user's protected state.
-		:param user_id: The ID of the member to update. 
+		:param user_id: The ID of the member to update.
 		:param has_it: Whether it's gonna be set to true or false. """
 
 		mycursor, db = await the_database()
@@ -290,9 +290,9 @@ class Merchant(Player):
 		return potions
 
 	async def get_open_shop_embed(self, channel, perpetrator_id: int, price: int) -> discord.Embed:
-		""" Makes an embedded message for a magic pull action. 
+		""" Makes an embedded message for a magic pull action.
 		:param channel: The context channel.
-		:param perpetrator_id: The ID of the perpetrator of the magic pulling. 
+		:param perpetrator_id: The ID of the perpetrator of the magic pulling.
 		:param price: The price of the item that Merchant put into the shop. """
 
 		timestamp = await self.get_timestamp()

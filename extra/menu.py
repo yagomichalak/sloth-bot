@@ -140,7 +140,7 @@ async def prompt_message(client, member: discord.Member, channel: discord.TextCh
 		else:
 			return False
 	try:
-		message = await client.wait_for('message', timeout=240, 
+		message = await client.wait_for('message', timeout=240,
 		check=msg_check)
 	except asyncio.TimeoutError:
 		await channel.send(f"**Timeout! Try again, {member.mention}...**")
@@ -159,7 +159,7 @@ async def prompt_message_guild(client, member: discord.Member, channel: discord.
 		else:
 			return False
 	try:
-		message = await client.wait_for('message', timeout=240, 
+		message = await client.wait_for('message', timeout=240,
 		check=msg_check)
 	except asyncio.TimeoutError:
 		await channel.send("**Timeout! Try again.**")
@@ -196,8 +196,8 @@ async def prompt_number(client, ctx: commands.Context, the_msg: discord.Message,
 
 
 	msg = await ctx.send(embed=discord.Embed(
-		description=the_msg, 
-		color=member.color, 
+		description=the_msg,
+		color=member.color,
 		timestamp=ctx.message.created_at))
 
 	try:

@@ -79,7 +79,7 @@ class Munk(Player):
 	@Player.user_is_class('munk')
 	@Player.skill_mark()
 	async def munk(self, ctx, target: discord.Member = None) -> None:
-		""" Converts a user into a real Munk. 
+		""" Converts a user into a real Munk.
 		:param target: The person you want to convert to a Munk. """
 
 		if ctx.channel.id != bots_and_commands_channel_id:
@@ -120,7 +120,7 @@ class Munk(Player):
 			current_timestamp = await self.get_timestamp()
 			# Don't need to store it, since it is forever
 			# await self.insert_skill_action(
-			# 	user_id=attacker.id, skill_type="munk", skill_timestamp=current_timestamp, 
+			# 	user_id=attacker.id, skill_type="munk", skill_timestamp=current_timestamp,
 			# 	target_id=target.id, channel_id=ctx.channel.id
 			# )
 			await self.update_user_action_skill_ts(attacker.id, current_timestamp)
@@ -138,7 +138,7 @@ class Munk(Player):
 
 
 	async def get_munk_embed(self, channel, perpetrator_id: int, target_id: int) -> discord.Embed:
-		""" Makes an embedded message for a munk action. 
+		""" Makes an embedded message for a munk action.
 		:param channel: The context channel.
 		:param perpetrator_id: The ID of the perpetrator of the munk skill.
 		:param target_id: The ID of the target member that is gonna be protected. """
@@ -161,7 +161,7 @@ class Munk(Player):
 		""" Makes an embedded message for a tribe joining.
 		:param channel: The context channel.
 		:param inviter: The inviter.
-		:param target_id: The target member that is gonna be invited to a tribe. 
+		:param target_id: The target member that is gonna be invited to a tribe.
 		:param tribe: The tribe and its information. """
 
 		timestamp = await self.get_timestamp()
@@ -182,7 +182,7 @@ class Munk(Player):
 		return join_tribe_embed
 
 	async def get_tribe_info_by_name(self, name: str) -> Dict[str, Union[str, int]]:
-		""" Gets information about a specific tribe. 
+		""" Gets information about a specific tribe.
 		:param name: The name of the tribe. """
 
 		mycursor, db = await the_database()
@@ -215,7 +215,7 @@ class Munk(Player):
 
 
 	async def get_tribe_info_by_user_id(self, user_id: str) -> Dict[str, Union[str, int]]:
-		""" Gets information about a specific tribe. 
+		""" Gets information about a specific tribe.
 		:param user_id: The ID of the user owner of the tribe. """
 
 		mycursor, db = await the_database()
@@ -302,7 +302,7 @@ class Munk(Player):
 			self.client.get_command('request_thumbnail').reset_cooldown(ctx)
 			return await ctx.send(f"**You don't even have a tribe, you cannot request it, {requester.mention}!**")
 
-		confirm = await ConfirmSkill(content=requester.mention, 
+		confirm = await ConfirmSkill(content=requester.mention,
 			msg=f"**Are you sure you want to request [this]({image_url}) to be `{user_tribe['name']}`'s thumbnail/logo?**").prompt(ctx)
 		if confirm:
 			# Sends message to a moderation-clearance room
@@ -320,7 +320,7 @@ class Munk(Player):
 			current_timestamp = await self.get_timestamp()
 
 			await self.insert_skill_action(
-				user_id=requester.id, skill_type="thumbnail_request", skill_timestamp=current_timestamp, 
+				user_id=requester.id, skill_type="thumbnail_request", skill_timestamp=current_timestamp,
 				target_id=requester.id, channel_id=room.id, message_id=request_msg.id,
 				content=image_url
 			)
@@ -401,7 +401,7 @@ class Munk(Player):
 	@commands.cooldown(1, 10, commands.BucketType.user)
 	async def tribe(self, ctx, *, name: str = None) -> None:
 		""" Shows some information about a tribe.
-		If not provided a tribe name, it will check the one the user is in. 
+		If not provided a tribe name, it will check the one the user is in.
 		:param name: The tribe name. """
 
 
@@ -555,7 +555,7 @@ class Munk(Player):
 
 	async def update_someones_tribe(self, user_id: int, tribe_name: str = None) -> None:
 		""" Updates someone's tribe status.
-		:param user_id: The ID of the user who's gonna be updated. 
+		:param user_id: The ID of the user who's gonna be updated.
 		:param tribe_name: The name of the tribe the user is gonna be set to. (default = None) """
 
 		mycursor, db = await the_database()
@@ -572,23 +572,23 @@ class Munk(Player):
 
 		mycursor, db = await the_django_database()
 		await mycursor.execute("""
-			UPDATE tribe_tribe SET tribe_thumbnail = %s 
+			UPDATE tribe_tribe SET tribe_thumbnail = %s
 			WHERE owner_id = %s AND tribe_name = %s""", (link, user_id, tribe_name))
 		await db.commit()
 		await mycursor.close()
 
 		mycursor, db = await the_database()
 		await mycursor.execute("""
-			UPDATE UserTribe SET tribe_thumbnail = %s 
+			UPDATE UserTribe SET tribe_thumbnail = %s
 			WHERE user_id = %s AND tribe_name = %s""", (link, user_id, tribe_name))
 		await db.commit()
 		await mycursor.close()
 
 
 	async def update_tribe_name(self, member: int, two_emojis: str, joining: bool) -> None:
-		""" Updates someone's nickname so it has their tribe's two-emoji combination identifier. 
+		""" Updates someone's nickname so it has their tribe's two-emoji combination identifier.
 		:param member: The member whose nickname is gonna be updated.
-		:param two_emojis: The two-emoji combination identifier. 
+		:param two_emojis: The two-emoji combination identifier.
 		:param joining: Whether the user is joining the tribe. """
 
 		dname = member.display_name

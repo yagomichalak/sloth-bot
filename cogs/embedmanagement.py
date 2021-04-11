@@ -24,7 +24,7 @@ class EmbedManagement(commands.Cog):
 
 	# Database methods
 	async def insert_embed(self, embed_name: str) -> None:
-		""" Inserts an embed from the DB. 
+		""" Inserts an embed from the DB.
 		:param embed_name: The name of the embed to insert.
 		"""
 
@@ -34,7 +34,7 @@ class EmbedManagement(commands.Cog):
 		await mycursor.close()
 
 	async def delete_embed(self, embed_name: str) -> None:
-		""" Deletes an embed from the DB. 
+		""" Deletes an embed from the DB.
 		:param embed_name: The name of the embed to delete.
 		"""
 
@@ -73,7 +73,7 @@ class EmbedManagement(commands.Cog):
 			return False
 		else:
 			await mycursor.close()
-			return True 
+			return True
 
 	async def delete_field(self, embed_name: str, field_name: str) -> None:
 		""" Deletes a field from the DB.
@@ -96,7 +96,7 @@ class EmbedManagement(commands.Cog):
 		return embeds_list
 
 	async def get_embed_fields(self, embed_name: str) -> Dict[str, Union[None, List[str]]]:
-		""" Get all embed fields from the DB if there are any. 
+		""" Get all embed fields from the DB if there are any.
 		:param embed_name: The name of the embed from which to get the fields. """
 
 		fields = {
@@ -122,7 +122,7 @@ class EmbedManagement(commands.Cog):
 		return fields
 
 	async def embed_exists(self, embed_name: str) -> bool:
-		""" Checks if embed exists in the DB. 
+		""" Checks if embed exists in the DB.
 		:param embed_name: The name of embed which . """
 
 		mycursor, db = await the_database()
@@ -162,7 +162,7 @@ class EmbedManagement(commands.Cog):
 
 	@embed.group(aliases=['s'])
 	async def show(self, ctx, embed_name: str = None) -> None:
-		""" Shows an embed. 
+		""" Shows an embed.
 		:param embed_name: The name of the embed that you want to show. """
 
 		if not embed_name:
@@ -205,7 +205,7 @@ class EmbedManagement(commands.Cog):
 	@embed.group(aliases=['c'])
 	@commands.has_permissions(administrator=True)
 	async def create(self, ctx, embed_name: str = None) -> None:
-		""" Creates an embed in the DB. 
+		""" Creates an embed in the DB.
 		:param embed_name: The name of the embed. """
 
 		if not embed_name:
@@ -281,7 +281,7 @@ class EmbedManagement(commands.Cog):
 				await self.delete_embed(embed_name.lower())
 			elif field.lower() == 'field':
 				deleted = await self.delete_text_field(embed_name, field_index)
-				if not deleted: 
+				if not deleted:
 					return await ctx.send("**I couldn't delete this index, are you sure it exists?**")
 			else:
 				await self.delete_field(embed_name, options[field.lower()])
@@ -315,7 +315,7 @@ class EmbedManagement(commands.Cog):
 	@edit.command(aliases=['a', 'at', 'auth'])
 	async def author(self, ctx, embed_name: str = None, name: str = None, icon_link: str = None) -> None:
 		
-		""" Sets the author for the given saved embed. 
+		""" Sets the author for the given saved embed.
 		:param embed_name: The name of the embed to insert.
 		:param name: The author name.
 		:param icon_link: The author's icon link.
@@ -365,7 +365,7 @@ class EmbedManagement(commands.Cog):
 
 	@edit.command(aliases=['tt'])
 	async def title(self, ctx, embed_name: str = None, *, title: str = None) -> None:
-		""" Sets the title for the given saved embed. 
+		""" Sets the title for the given saved embed.
 		:param embed_name: The name of the embed to insert.
 		:param title: The embed title.
 		"""
@@ -408,7 +408,7 @@ class EmbedManagement(commands.Cog):
 
 	@edit.command(aliases=['d', 'dc', 'desc'])
 	async def description(self, ctx, embed_name: str = None, *, description_text: str = None) -> None:
-		""" Sets the description for the given saved embed. 
+		""" Sets the description for the given saved embed.
 		:param embed_name: The name of the embed to insert.
 		:param description_text: The embed description.
 		"""
@@ -450,7 +450,7 @@ class EmbedManagement(commands.Cog):
 
 	@edit.command(aliases=['tn', 'th', 'thumb'])
 	async def thumbnail(self, ctx, embed_name: str = None, icon_link: str =  None) -> None:
-		""" Sets the thumbnail for the given saved embed. 
+		""" Sets the thumbnail for the given saved embed.
 		:param embed_name: The name of the embed to insert.
 		:param icon_link: The icon link for the thumbnail.
 		"""
@@ -493,7 +493,7 @@ class EmbedManagement(commands.Cog):
 
 	@edit.command(aliases=['i', 'im', 'img', 'pic'])
 	async def image(self, ctx, embed_name: str = None, image_link: str = None) -> None:
-		""" Sets the image for the given saved embed. 
+		""" Sets the image for the given saved embed.
 		:param embed_name: The name of the embed to insert.
 		:param image_link: The embed image.
 		"""
@@ -535,7 +535,7 @@ class EmbedManagement(commands.Cog):
 
 	@edit.command(aliases=['c', 'co', 'cl', 'clr', 'colour'])
 	async def color(self, ctx, embed_name: str = None, hex_color: str = None) -> None:
-		""" Sets the color for the given saved embed. 
+		""" Sets the color for the given saved embed.
 		:param embed_name: The name of the embed to insert.
 		:param hex_color: The embed color.
 		"""
@@ -577,7 +577,7 @@ class EmbedManagement(commands.Cog):
 
 	@edit.command(aliases=['ft', 'fo', 'foo', 'foot', 'ftr'])
 	async def footer(self, ctx, embed_name: str = None, icon_link: str = None, *, text: str = None) -> None:
-		""" Sets the footer for the given saved embed. 
+		""" Sets the footer for the given saved embed.
 		:param embed_name: The name of the embed to insert.
 		:param icon_link: The link for the footer icon.
 		:param text: The text for the footer.
@@ -626,7 +626,7 @@ class EmbedManagement(commands.Cog):
 
 	@edit.command(aliases=['ts', 'time'])
 	async def timestamp(self, ctx, embed_name: str = None, yes_no: str = None) -> None:
-		""" Sets the timestamp for the given saved embed. 
+		""" Sets the timestamp for the given saved embed.
 		:param embed_name: The name of the embed to insert.
 		:param yes_no: If you want the embed to have a timestamp.
 		"""
@@ -670,7 +670,7 @@ class EmbedManagement(commands.Cog):
 
 	@edit.command(aliases=['fi', 'fld'])
 	async def field(self, ctx, embed_name: str = None, field_name: str =  None, field_value: str = None, field_inline: str = 'no') -> None:
-		""" Inserts a text field for the given saved embed. 
+		""" Inserts a text field for the given saved embed.
 		:param embed_name: The name of the embed.
 		:param field_name: The embed's field name.
 		:param field_value: The embed's field value.
@@ -711,7 +711,7 @@ class EmbedManagement(commands.Cog):
 			return
 		mycursor, db = await the_database()
 		await mycursor.execute("""
-			INSERT INTO EmbedFields (embed_name, field_name, field_value, field_inline) 
+			INSERT INTO EmbedFields (embed_name, field_name, field_value, field_inline)
 			VALUES (%s, %s, %s, %s)""", (embed_name, field_name, field_value, field_inline))
 		await db.commit()
 		await mycursor.close()
@@ -826,7 +826,7 @@ class SortEmbed:
 	""" A class for sorting embed fields with the given data. """
 
 	def __init__(self, fields: Dict[str, List[str]]) -> None:
-		""" Class initializing method. 
+		""" Class initializing method.
 		:param fields: A dictionary containing data that needs to be sorted. """
 
 		self.fields = fields
@@ -863,7 +863,7 @@ class SortEmbed:
 		return embed
 
 	async def sort_embed_author(self, embed: discord.Embed, values: List[str]) -> discord.Embed:
-		""" Sorts the embed author. 
+		""" Sorts the embed author.
 		:param values: The list of values to sort from. """
 
 		try:
@@ -877,7 +877,7 @@ class SortEmbed:
 			return embed
 
 	async def sort_embed_color(self, embed: discord.Member, values: List[str]) -> discord.Embed:
-		""" Sorts the embed color. 
+		""" Sorts the embed color.
 		:param values: The list of values to sort from. """
 
 		try:
@@ -889,7 +889,7 @@ class SortEmbed:
 			return embed
 
 	async def sort_embed_description(self, embed: discord.Member, values: List[str]) -> discord.Embed:
-		""" Sorts the embed description. 
+		""" Sorts the embed description.
 		:param values: The list of values to sort from. """
 
 		try:
@@ -900,7 +900,7 @@ class SortEmbed:
 			return embed
 
 	async def sort_embed_footer(self, embed: discord.Member, values: List[str]) -> discord.Embed:
-		""" Sorts the embed footer. 
+		""" Sorts the embed footer.
 		:param values: The list of values to sort from. """
 
 		try:
@@ -914,7 +914,7 @@ class SortEmbed:
 			return embed
 
 	async def sort_embed_image(self, embed: discord.Member, values: List[str]) -> discord.Embed:
-		""" Sorts the embed image. 
+		""" Sorts the embed image.
 		:param values: The list of values to sort from. """
 
 		try:
@@ -927,7 +927,7 @@ class SortEmbed:
 			return embed
 
 	async def sort_embed_thumbnail(self, embed: discord.Member, values: List[str]) -> discord.Embed:
-		""" Sorts the embed thumbnail. 
+		""" Sorts the embed thumbnail.
 		:param values: The list of values to sort from. """
 
 		try:
@@ -940,7 +940,7 @@ class SortEmbed:
 			return embed
 
 	async def sort_embed_timestamp(self, embed: discord.Member, values: List[str]) -> discord.Embed:
-		""" Sorts the embed timestamp. 
+		""" Sorts the embed timestamp.
 		:param values: The list of values to sort from. """
 
 		try:
@@ -952,7 +952,7 @@ class SortEmbed:
 			return embed
 
 	async def sort_embed_title(self, embed: discord.Member, values: List[str]) -> discord.Embed:
-		""" Sorts the embed title. 
+		""" Sorts the embed title.
 		:param values: The list of values to sort from. """
 
 		try:
@@ -964,7 +964,7 @@ class SortEmbed:
 
 
 	async def sort_embed_text_fields(self, embed: discord.Member, values: List[List[str]]) -> discord.Embed:
-		""" Sorts the embed fields. 
+		""" Sorts the embed fields.
 		:param values: The list of values to sort from. """
 
 		for field in values:

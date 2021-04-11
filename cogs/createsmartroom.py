@@ -816,7 +816,7 @@ class CreateSmartRoom(commands.Cog):
 
 		mycursor, db = await the_database()
 		await mycursor.execute("""
-			INSERT INTO GalaxyVc (user_id, user_cat, user_vc, user_txt1, user_txt2, user_ts) 
+			INSERT INTO GalaxyVc (user_id, user_cat, user_vc, user_txt1, user_txt2, user_ts)
 			VALUES (%s, %s, %s, %s, %s, %s)""", (user_id, user_cat, user_vc, user_txt1, user_txt2, user_ts)
 		)
 		await db.commit()
@@ -926,7 +926,7 @@ class CreateSmartRoom(commands.Cog):
 		guild = message.guild
 
 		members = [
-			m for word in message.content.split() 
+			m for word in message.content.split()
 			if word.isdigit() and (m := discord.utils.get(guild.members, id=int(word)))
 			or (m := discord.utils.get(guild.members, name=str(word)))
 			or (m := discord.utils.get(guild.members, nick=str(word)))
@@ -945,7 +945,7 @@ class CreateSmartRoom(commands.Cog):
 		guild = message.guild
 
 		channel_mentions = [
-			m for word in message.content.split() 
+			m for word in message.content.split()
 			if word.isdigit() and (m := discord.utils.get(guild.voice_channels, id=int(word)))
 			or (m := discord.utils.get(guild.voice_channels, name=str(word)))
 		]

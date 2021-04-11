@@ -107,7 +107,7 @@ class Moderation(commands.Cog):
 				continue
 
 	async def get_expired_tempmutes(self, current_ts: int) -> List[int]:
-		""" Gets expired tempmutes. 
+		""" Gets expired tempmutes.
 		:param current_ts: The current timestamp. """
 
 		mycursor, db = await the_database()
@@ -203,7 +203,7 @@ class Moderation(commands.Cog):
 		if member:
 			channel = ctx.channel
 			msgs = list(filter(
-				lambda m: m.author.id == member.id, 
+				lambda m: m.author.id == member.id,
 				await channel.history(limit=200).flatten()
 			))
 			for _ in range(amount):
@@ -439,7 +439,7 @@ class Moderation(commands.Cog):
 			epoch = datetime.utcfromtimestamp(0)
 			current_ts = (datetime.utcnow() - epoch).total_seconds()
 			await self.insert_user_infraction(
-				user_id=member.id, infr_type="mute", reason=reason, 
+				user_id=member.id, infr_type="mute", reason=reason,
 				timestamp=current_ts , perpetrator=ctx.author.id)
 			try:
 				await member.send(embed=general_embed)
@@ -582,7 +582,7 @@ class Moderation(commands.Cog):
 			await moderation_log.send(embed=embed)
 			# # Inserts a infraction into the database
 			await self.insert_user_infraction(
-				user_id=member.id, infr_type="mute", reason=reason, 
+				user_id=member.id, infr_type="mute", reason=reason,
 				timestamp=current_ts , perpetrator=ctx.author.id)
 			try:
 				await member.send(embed=general_embed)
@@ -628,7 +628,7 @@ class Moderation(commands.Cog):
 				epoch = datetime.utcfromtimestamp(0)
 				current_ts = (datetime.utcnow() - epoch).total_seconds()
 				await self.insert_user_infraction(
-					user_id=member.id, infr_type="kick", reason=reason, 
+					user_id=member.id, infr_type="kick", reason=reason,
 					timestamp=current_ts , perpetrator=ctx.author.id)
 				try:
 					await member.send(embed=general_embed)
@@ -663,7 +663,7 @@ class Moderation(commands.Cog):
 				title=f"Ban Request ({len(confirmations)}/5) → (2mins)",
 				description=f'''
 				{author.mention} wants to ban {member.mention}, it requires 4 more moderator ✅ reactions for it!
-				```Reason: {reason}```''', 
+				```Reason: {reason}```''',
 				colour=discord.Colour.dark_red(), timestamp=ctx.message.created_at)
 			mod_ban_embed.set_author(name=f'{member} is going to Brazil...', icon_url=member.avatar_url)
 			msg = await ctx.send(embed=mod_ban_embed)
@@ -740,7 +740,7 @@ class Moderation(commands.Cog):
 			epoch = datetime.utcfromtimestamp(0)
 			current_ts = (datetime.utcnow() - epoch).total_seconds()
 			await self.insert_user_infraction(
-				user_id=member.id, infr_type="ban", reason=reason, 
+				user_id=member.id, infr_type="ban", reason=reason,
 				timestamp=current_ts , perpetrator=ctx.author.id)
 			try:
 				await member.send(embed=general_embed)
@@ -849,7 +849,7 @@ class Moderation(commands.Cog):
 				epoch = datetime.utcfromtimestamp(0)
 				current_ts = (datetime.utcnow() - epoch).total_seconds()
 				await self.insert_user_infraction(
-					user_id=member.id, infr_type="softban", reason=reason, 
+					user_id=member.id, infr_type="softban", reason=reason,
 					timestamp=current_ts , perpetrator=ctx.author.id)
 				try:
 					await member.send(embed=general_embed)
@@ -896,7 +896,7 @@ class Moderation(commands.Cog):
 			epoch = datetime.utcfromtimestamp(0)
 			current_ts = (datetime.utcnow() - epoch).total_seconds()
 			await self.insert_user_infraction(
-				user_id=member.id, infr_type="hackban", reason=reason, 
+				user_id=member.id, infr_type="hackban", reason=reason,
 				timestamp=current_ts , perpetrator=ctx.author.id)
 			try:
 				await member.send(embed=general_embed)
@@ -1031,8 +1031,8 @@ class Moderation(commands.Cog):
 				infr_date = datetime.fromtimestamp(infr[3]).strftime('%Y/%m/%d at %H:%M:%S')
 				perpetrator = discord.utils.get(ctx.guild.members, id=infr[5])
 				embed.add_field(
-					name=f"{infr_type} ID: {infr[4]}", 
-					value=f"```apache\nGiven on {infr_date}\nBy {perpetrator}\nReason: {infr[2]}```", 
+					name=f"{infr_type} ID: {infr[4]}",
+					value=f"```apache\nGiven on {infr_date}\nBy {perpetrator}\nReason: {infr[2]}```",
 					inline=True)
 
 		# Shows the infractions
@@ -1135,12 +1135,12 @@ class Moderation(commands.Cog):
 		await ctx.message.delete()
 		mycursor, db = await the_database()
 		await mycursor.execute("""CREATE TABLE UserInfractions (
-			user_id BIGINT NOT NULL, 
-			infraction_type VARCHAR(7) NOT NULL, 
-			infraction_reason VARCHAR(100) DEFAULT NULL, 
-			infraction_ts BIGINT NOT NULL, 
-			infraction_id BIGINT NOT NULL AUTO_INCREMENT, 
-			perpetrator BIGINT NOT NULL, 
+			user_id BIGINT NOT NULL,
+			infraction_type VARCHAR(7) NOT NULL,
+			infraction_reason VARCHAR(100) DEFAULT NULL,
+			infraction_ts BIGINT NOT NULL,
+			infraction_id BIGINT NOT NULL AUTO_INCREMENT,
+			perpetrator BIGINT NOT NULL,
 			PRIMARY KEY(infraction_id)
 			)""")
 		await db.commit()

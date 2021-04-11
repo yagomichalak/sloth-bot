@@ -25,7 +25,7 @@ class Player(commands.Cog):
 
 	# Check user class
 	def user_is_class(command_class):
-		""" Checks whether the user has the required Sloth Class to run the command. 
+		""" Checks whether the user has the required Sloth Class to run the command.
 		:param command_class: The Sloth Class required to run that command. """
 
 		async def get_user_sloth_class(user_id: int) -> Union[str, bool]:
@@ -53,7 +53,7 @@ class Player(commands.Cog):
 
 
 	async def check_cooldown(self, user_id, skill_number: int, seconds: int = 86400)-> bool:
-		""" Checks whether user skill is on cooldown (method). 
+		""" Checks whether user skill is on cooldown (method).
 		:param user_id: The ID of the user who to check it"""
 
 		last_skill_ts = await self.get_user_action_skill_ts(user_id=user_id, skill_number=skill_number)
@@ -282,14 +282,14 @@ class Player(commands.Cog):
 		:param user_id: The ID of the perpetrator of the skill action.
 		:param skill_type: The type of the skill action.
 		:param skill_timestamp: The timestamp of the skill action.
-		:param target_id: The ID of the target member of the skill action. 
-		:param message_id: The ID of the message related to the action, if there's any. 
-		:param price: The price of the item or something, if it is for sale. 
+		:param target_id: The ID of the target member of the skill action.
+		:param message_id: The ID of the message related to the action, if there's any.
+		:param price: The price of the item or something, if it is for sale.
 		:param content: The content of the skill, if any. """
 
 		mycursor, db = await the_database()
 		await mycursor.execute("""
-			INSERT INTO SlothSkills (user_id, skill_type, skill_timestamp, target_id, message_id, channel_id, emoji, price, content) 
+			INSERT INTO SlothSkills (user_id, skill_type, skill_timestamp, target_id, message_id, channel_id, emoji, price, content)
 			VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)""", (user_id, skill_type, skill_timestamp, target_id, message_id, channel_id, emoji, price, content))
 		await db.commit()
 		await mycursor.close()
@@ -328,7 +328,7 @@ class Player(commands.Cog):
 
 	async def get_skill_action_by_message_id_and_skill_type(self, message_id: int, skill_type: str) -> Union[List[Union[int, str]], bool]:
 		""" Gets a skill action by message ID and skill type.
-		:param message_id: The ID with which to get the skill action. 
+		:param message_id: The ID with which to get the skill action.
 		:param skill_type: The skill type of the skill action. """
 
 		mycursor, db = await the_database()
@@ -339,7 +339,7 @@ class Player(commands.Cog):
 
 	async def get_skill_action_by_target_id_and_skill_type(self, target_id: int, skill_type: str) -> Union[List[Union[int, str]], bool]:
 		""" Gets a skill action by target ID and skill type.
-		:param target_id: The target ID with which to get the skill action. 
+		:param target_id: The target ID with which to get the skill action.
 		:param skill_type: The skill type of the skill action. """
 
 		mycursor, db = await the_database()
@@ -351,7 +351,7 @@ class Player(commands.Cog):
 
 	async def get_skill_action_by_user_id_and_skill_type(self, user_id: int, skill_type: str) -> Union[List[Union[int, str]], bool]:
 		""" Gets a skill action by user ID and skill type.
-		:param user_id: The user ID with which to get the skill action. 
+		:param user_id: The user ID with which to get the skill action.
 		:param skill_type: The skill type of the skill action. """
 
 		mycursor, db = await the_database()
@@ -373,7 +373,7 @@ class Player(commands.Cog):
 
 	async def get_user_action_skill_ts(self, user_id: int, skill_number: int = 1) -> Union[str, bool]:
 		""" Gets the user's last action skill timestamp from the database.
-		:param user_id: The ID of the user to get the action skill timestamp. 
+		:param user_id: The ID of the user to get the action skill timestamp.
 		:param skill_number: The number of the skill, ex: 1 for skill 1. """
 
 		mycursor, db = await the_database()
@@ -402,7 +402,7 @@ class Player(commands.Cog):
 		the_time = await self.get_timestamp()
 		mycursor, db = await the_database()
 		await mycursor.execute("""
-			SELECT * FROM SlothSkills 
+			SELECT * FROM SlothSkills
 			WHERE skill_type = 'transmutation' AND (%s - skill_timestamp) >= 3600
 			""", (the_time,))
 		transmutations = await mycursor.fetchall()
@@ -415,7 +415,7 @@ class Player(commands.Cog):
 		the_time = await self.get_timestamp()
 		mycursor, db = await the_database()
 		await mycursor.execute("""
-			SELECT * FROM SlothSkills 
+			SELECT * FROM SlothSkills
 			WHERE skill_type = 'frog' AND (%s - skill_timestamp) >= 86400
 			""", (the_time,))
 		frogs = await mycursor.fetchall()
@@ -428,7 +428,7 @@ class Player(commands.Cog):
 		the_time = await self.get_timestamp()
 		mycursor, db = await the_database()
 		await mycursor.execute("""
-			SELECT * FROM SlothSkills 
+			SELECT * FROM SlothSkills
 			WHERE skill_type = 'potion' AND (%s - skill_timestamp) >= 86400
 			""", (the_time,))
 		transmutations = await mycursor.fetchall()
@@ -441,7 +441,7 @@ class Player(commands.Cog):
 		the_time = await self.get_timestamp()
 		mycursor, db = await the_database()
 		await mycursor.execute("""
-			SELECT * FROM SlothSkills 
+			SELECT * FROM SlothSkills
 			WHERE skill_type = 'hack' AND (%s - skill_timestamp) >= 86400
 			""", (the_time,))
 		hacks = await mycursor.fetchall()
@@ -454,7 +454,7 @@ class Player(commands.Cog):
 		the_time = await self.get_timestamp()
 		mycursor, db = await the_database()
 		await mycursor.execute("""
-			SELECT * FROM SlothSkills 
+			SELECT * FROM SlothSkills
 			WHERE skill_type = 'wire' AND (%s - skill_timestamp) >= 86400
 			""", (the_time,))
 		wires = await mycursor.fetchall()
@@ -467,7 +467,7 @@ class Player(commands.Cog):
 		the_time = await self.get_timestamp()
 		mycursor, db = await the_database()
 		await mycursor.execute("""
-			SELECT * FROM SlothSkills 
+			SELECT * FROM SlothSkills
 			WHERE skill_type = 'hit' AND (%s - skill_timestamp) >= 86400
 			""", (the_time,))
 		knock_outs = await mycursor.fetchall()
@@ -475,7 +475,7 @@ class Player(commands.Cog):
 		return knock_outs
 
 	async def get_user_currency(self, user_id: int) -> Union[List[Union[str, int]], bool]:
-		""" Gets the user currency. 
+		""" Gets the user currency.
 		:param user_id: The ID of the user to get. """
 
 		mycursor, db = await the_database()
@@ -505,7 +505,7 @@ class Player(commands.Cog):
 
 	async def delete_skill_action_by_target_id_and_skill_type(self, target_id: int, skill_type: str) -> None:
 		""" Deletes a skill action by target ID.
-		:param target_id: The ID of the target member. 
+		:param target_id: The ID of the target member.
 		:param skill_type: The type of the action skill. """
 
 		mycursor, db = await the_database()
@@ -523,14 +523,14 @@ class Player(commands.Cog):
 
 		mycursor, db = await the_database()
 		await mycursor.execute("""
-			UPDATE UserCurrency SET user_money = user_money + %s 
+			UPDATE UserCurrency SET user_money = user_money + %s
 			WHERE user_id = %s""", (money, user_id))
 		await db.commit()
 		await mycursor.close()
 
 	async def update_user_action_skill_ts(self, user_id: int, current_ts: int) -> None:
 		""" Updates the user's last action skill timestamp.
-		:param user_id: The ID of the member to update. 
+		:param user_id: The ID of the member to update.
 		:param current_ts: The timestamp to update to. """
 
 		mycursor, db = await the_database()
@@ -540,7 +540,7 @@ class Player(commands.Cog):
 
 	async def update_user_action_skill_two_ts(self, user_id: int, current_ts: int) -> None:
 		""" Updates the user's last action skill two timestamp.
-		:param user_id: The ID of the member to update. 
+		:param user_id: The ID of the member to update.
 		:param current_ts: The timestamp to update to. """
 
 		mycursor, db = await the_database()
@@ -559,7 +559,7 @@ class Player(commands.Cog):
 		await mycursor.close()
 
 	async def reset_user_action_skill_cooldown(self, user_id: int) -> None:
-		""" Resets the user's action skill cooldown. 
+		""" Resets the user's action skill cooldown.
 		:param user_id: The ID of the user to reet the cooldown. """
 
 		mycursor, db = await the_database()

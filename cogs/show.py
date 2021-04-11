@@ -65,7 +65,7 @@ class Show(commands.Cog):
             value=f'```apache\nThe bot is running and being hosted on a "{sys.platform}" machine.```',
             inline=True)
 
-        embed.set_author(name='DNK#6725', url='https://discord.gg/languages', 
+        embed.set_author(name='DNK#6725', url='https://discord.gg/languages',
             icon_url='https://cdn.discordapp.com/attachments/719020754858934294/720289112040669284/DNK_icon.png')
         embed.set_thumbnail(url=self.client.user.avatar_url)
         embed.set_footer(text=ctx.guild, icon_url=ctx.guild.icon_url)
@@ -107,7 +107,7 @@ class Show(commands.Cog):
                               timestamp=ctx.message.created_at)
         i = 1
         for rule, rule_value in rules.items():
-            embed.add_field(name=f"{i} - {rule}", value=rule_value, inline=False)        
+            embed.add_field(name=f"{i} - {rule}", value=rule_value, inline=False)
             i += 1
 
         embed.add_field(name="<:zzSloth:686237376510689327>", value="Have fun!", inline=True)
@@ -132,7 +132,7 @@ class Show(commands.Cog):
 
         mycursor, db = await the_database()
         await mycursor.execute("""
-            SELECT 
+            SELECT
             STR_TO_DATE(complete_date, '%d/%m/%Y') AS Months,
             SUM(m_joined) - SUM(m_left) AS 'Total Joins',
             members AS 'First Member Record of the Month',

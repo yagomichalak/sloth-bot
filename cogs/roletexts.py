@@ -61,7 +61,7 @@ class RoleTexts(commands.Cog):
 				pass
 
 	async def read_text(self, path) -> str:
-		""" Reads a text file. 
+		""" Reads a text file.
 		:param path: The path of the file to read. """
 
 		with open(path, 'r') as f:

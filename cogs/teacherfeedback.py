@@ -280,8 +280,8 @@ class TeacherFeedback(commands.Cog):
 		cc_channel = discord.utils.get(member.guild.channels, id=create_room_txt_id)
 		txt, vc = await self.create_channels(member, cc_channel, class_info)
 		await self.db.insert_active_teacher_class(
-			member.id, 
-			txt.id, vc.id, class_info['language'], class_info['type'], 
+			member.id,
+			txt.id, vc.id, class_info['language'], class_info['type'],
 			int(current_ts), class_info['desc'])
 
 	async def join_class(self, member: discord.Member, class_vc: discord.VoiceChannel) -> None:
@@ -424,7 +424,7 @@ class TeacherFeedback(commands.Cog):
 		await simple.add_reaction('❌')
 
 		await self.save_class_feedback(
-			msg=simple, teacher=member, users_feedback=users_feedback, 
+			msg=simple, teacher=member, users_feedback=users_feedback,
 			class_type=teacher_class[4], language=teacher_class[3], guild=guild
 		)
 
@@ -604,7 +604,7 @@ class TeacherFeedback(commands.Cog):
 			read_messages=False, send_messages=False, connect=False, speak=False, view_channel=False)
 
 		overwrites[teacher_role] = discord.PermissionOverwrite(
-			read_messages=True, send_messages=True, manage_messages=True, mute_members=True, embed_links=True, connect=True, 
+			read_messages=True, send_messages=True, manage_messages=True, mute_members=True, embed_links=True, connect=True,
 			speak=True, move_members=True, view_channel=True)
 
 		overwrites[mod_role] = discord.PermissionOverwrite(
@@ -635,7 +635,7 @@ class TeacherFeedback(commands.Cog):
 
 		# Gets the emoji relative to the class type.
 		cemoji = ''
-		if class_info['type'].title() == 'Pronunciation': 
+		if class_info['type'].title() == 'Pronunciation':
 			cemoji = '🗣️'
 
 		elif class_info['type'].title() == 'Grammar':
@@ -792,7 +792,7 @@ class TeacherFeedback(commands.Cog):
 
 		# Adds the general information field
 		formatted_text = await TeacherFeedback.get_formatted_time_text(teacher_class[6])
-		embed.add_field(name="__General__", 
+		embed.add_field(name="__General__",
 			value=f"**Language:** {teacher_class[3].title()}.\n**Type:** {teacher_class[4]}.\n**Time:** {formatted_text}.\n**Total Members:** {teacher_class[7]}.\n**Timestamp:** {teacher_class[5]}.", inline=True)
 
 		# Adds the class status information field.
@@ -800,7 +800,7 @@ class TeacherFeedback(commands.Cog):
 		raw_total_time = await self.db.get_teacher_class_time_by_teacher_and_vc_id(teacher.id, voice_channel.id)
 		total_time = await TeacherFeedback.get_formatted_time_text(raw_total_time)
 
-		embed.add_field(name="__Channels__", 
+		embed.add_field(name="__Channels__",
 			value=f"**Text Channel:** {text_channel.mention}.\n**Messages sent:** {total_messages}.\n**Voice Channel:** {voice_channel}.\n**Members In it:** {len(voice_channel.members)}.\n**Total time in it:** {total_time}", inline=True)
 		# Adds the PostScript fields
 		embed.add_field(name="PS¹", value="The `time` field updates whenever the teacher leaves the room.", inline=False)
@@ -854,7 +854,7 @@ class TeacherFeedbackDatabaseInsert:
 
 		mycursor, db = await the_database()
 		await mycursor.execute("""
-			INSERT INTO SavedClasses (teacher_id, language, class_type, class_desc) 
+			INSERT INTO SavedClasses (teacher_id, language, class_type, class_desc)
 			VALUES (%s, %s, %s, %s)""", (teacher_id, language, class_type, class_desc))
 		await db.commit()
 		await mycursor.close()
@@ -871,7 +871,7 @@ class TeacherFeedbackDatabaseInsert:
 
 		mycursor, db = await the_database()
 		await mycursor.execute("""
-			INSERT INTO ActiveClasses (teacher_id, txt_id, vc_id, language, class_type, vc_timestamp, class_desc) 
+			INSERT INTO ActiveClasses (teacher_id, txt_id, vc_id, language, class_type, vc_timestamp, class_desc)
 			VALUES (%s, %s, %s, %s, %s, %s, %s)""", (teacher_id, txt_id, vc_id, language, class_type, the_time, class_desc))
 		await db.commit()
 		await mycursor.close()
@@ -896,8 +896,8 @@ class TeacherFeedbackDatabaseInsert:
 		mycursor, db = await the_database()
 
 		sql = """INSERT INTO RewardStudents (
-			reward_message, student_id, student_messages, 
-			student_time, teacher_id, class_type, 
+			reward_message, student_id, student_messages,
+			student_time, teacher_id, class_type,
 			language)
 			VALUES (%s, %s, %s, %s, %s, %s, %s)"""
 
@@ -1065,7 +1065,7 @@ class TeacherFeedbackDatabaseUpdate:
 
 		mycursor, db = await the_database()
 		await mycursor.execute("""
-			UPDATE ActiveClasses SET vc_time = vc_time + (%s - vc_timestamp), vc_timestamp = NULL 
+			UPDATE ActiveClasses SET vc_time = vc_time + (%s - vc_timestamp), vc_timestamp = NULL
 			WHERE teacher_id = %s AND vc_timestamp IS NOT NULL""", (the_time, teacher_id))
 		await db.commit()
 		await mycursor.close()
@@ -1105,7 +1105,7 @@ class TeacherFeedbackDatabaseUpdate:
 
 	async def update_all_students_ts(self, teacher_id: int, the_time: int) -> None:
 		""" Updates all students' voice channel timestamp.
-		:param teacher_id: The teacher's ID. 
+		:param teacher_id: The teacher's ID.
 		:param the_time: The current timestamp. """
 
 		mycursor, db = await the_database()
@@ -1121,7 +1121,7 @@ class TeacherFeedbackDatabaseUpdate:
 
 		mycursor, db = await the_database()
 		await mycursor.execute("""
-			UPDATE Students SET student_time = student_time + (%s - student_ts), student_ts = NULL 
+			UPDATE Students SET student_time = student_time + (%s - student_ts), student_ts = NULL
 			WHERE student_id = %s AND teacher_id = %s AND student_ts IS NOT NULL""", (the_time, student_id, teacher_id))
 
 		await db.commit()
@@ -1134,7 +1134,7 @@ class TeacherFeedbackDatabaseUpdate:
 
 		mycursor, db = await the_database()
 		await mycursor.execute("""
-			UPDATE Students SET student_time = student_time + (%s - student_ts), student_ts = NULL 
+			UPDATE Students SET student_time = student_time + (%s - student_ts), student_ts = NULL
 			WHERE teacher_id = %s AND student_ts IS NOT NULL""", (the_time, teacher_id))
 		await db.commit()
 		await mycursor.close()
@@ -1147,7 +1147,7 @@ class TeacherFeedbackDatabaseUpdate:
 
 		mycursor, db = await the_database()
 		await mycursor.execute("""
-			UPDATE Students SET student_messages = student_messages + 1 
+			UPDATE Students SET student_messages = student_messages + 1
 			WHERE student_id = %s AND vc_id = %s""", (student_id, vc_id))
 		await db.commit()
 		await mycursor.close()
@@ -1217,7 +1217,7 @@ class TeacherFeedbackDatabaseDelete:
 
 		mycursor, db = await the_database()
 		await mycursor.execute("""
-			DELETE FROM SavedClasses 
+			DELETE FROM SavedClasses
 			WHERE teacher_id = %s AND language = %s AND class_type = %s AND class_desc = %s""",
 			 (teacher_id, language, class_type, class_desc))
 		await db.commit()

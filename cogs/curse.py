@@ -52,7 +52,7 @@ class CurseMember(commands.Cog):
 				await self.play_earrape(member.id, vc)
 
 	async def play_earrape(self, mid, vc) -> None:
-		""" Plays an earrape song. 
+		""" Plays an earrape song.
 		:param mid: The member ID.
 		:param vc: The voice channel that the member's currently in. """
 

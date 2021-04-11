@@ -66,7 +66,7 @@ class Metamorph(Player):
 			
 
 			await channel.send(
-				content=f"<@{tm[0]}>", 
+				content=f"<@{tm[0]}>",
 				embed=discord.Embed(
 					description=f"**<@{tm[3]}>'s `Transmutation` has just expired! 🐩→💥→🦥**",
 					color=discord.Color.red()))
@@ -85,7 +85,7 @@ class Metamorph(Player):
 				channel = self.bots_txt
 
 				await channel.send(
-					content=f"<@{f[0]}>", 
+					content=f"<@{f[0]}>",
 					embed=discord.Embed(
 						description=f"**<@{f[3]}>'s `Frog` has just expired! 🐸→💥→🦥**",
 						color=discord.Color.red()))
@@ -99,7 +99,7 @@ class Metamorph(Player):
 	@Player.skill_mark()
 	# @Player.not_ready()
 	async def frog(self, ctx, target: discord.Member = None) -> None:
-		""" Makes someone a frog temporarily. 
+		""" Makes someone a frog temporarily.
 		:param target: The person who you want to frog. """
 
 		
@@ -155,7 +155,7 @@ class Metamorph(Player):
 
 
 	async def get_transmutation_embed(self, channel, perpetrator_id: int) -> discord.Embed:
-		""" Makes an embedded message for a transmutation action. 
+		""" Makes an embedded message for a transmutation action.
 		:param channel: The context channel.
 		:param perpetrator_id: The ID of the perpetrator of the transmutation. """
 
@@ -175,7 +175,7 @@ class Metamorph(Player):
 
 
 	async def get_frogged_embed(self, channel, attacker_id: int, target_id: int) -> discord.Embed:
-		""" Makes an embedded message for a frog action. 
+		""" Makes an embedded message for a frog action.
 		:param channel: The context channel.
 		:param attacker_id: The ID of the attacker.
 		:param target_id: The ID of the target. """
@@ -197,7 +197,7 @@ class Metamorph(Player):
 
 	async def update_user_frogged(self, user_id: int, frogged: int) -> None:
 		""" Updates the user's frog state.
-		:param user_id: The ID of the member to update. 
+		:param user_id: The ID of the member to update.
 		:param frog: Whether it's gonna be set to true or false. """
 
 		mycursor, db = await the_database()

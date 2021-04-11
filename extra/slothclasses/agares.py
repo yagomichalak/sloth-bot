@@ -147,9 +147,9 @@ class Agares(Player):
 
 
 	async def get_magic_pull_embed(self, channel, perpetrator_id: int, target_id: int, t_before_vc: discord.VoiceChannel, t_after_vc: discord.VoiceChannel) -> discord.Embed:
-		""" Makes an embedded message for a magic pull action. 
+		""" Makes an embedded message for a magic pull action.
 		:param channel: The context channel.
-		:param perpetrator_id: The ID of the perpetrator of the magic pulling. 
+		:param perpetrator_id: The ID of the perpetrator of the magic pulling.
 		:param target_id: The ID of the target of the magic pulling. """
 
 		timestamp = await self.get_timestamp()
@@ -168,9 +168,9 @@ class Agares(Player):
 
 
 	async def get_recharge_embed(self, channel, perpetrator_id: int, target_id: int) -> discord.Embed:
-		""" Makes an embedded message for a recharge action. 
+		""" Makes an embedded message for a recharge action.
 		:param channel: The context channel.
-		:param perpetrator_id: The ID of the perpetrator of the magic pulling. 
+		:param perpetrator_id: The ID of the perpetrator of the magic pulling.
 		:param target_id: The ID of the target of the magic pulling. """
 
 		timestamp = await self.get_timestamp()

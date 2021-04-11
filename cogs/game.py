@@ -56,7 +56,7 @@ class Game(commands.Cog):
 		return new_list
 
 	async def put_objects(self, square: List[List[str]], inserted: Dict[str, Tuple[int]], player_x: int, player_y: int, columns: int, rows: int, update: bool) -> List[List[str]]:
-		""" Puts all objects into the game square field. 
+		""" Puts all objects into the game square field.
 		:param square: The game square field. """
 
 		# List of inserted items
@@ -110,8 +110,8 @@ class Game(commands.Cog):
 				return square, (rand_x, rand_y, destiny)
 
 	async def check_player_collision(self, inserted: Dict[str, List[int]], x: int, y: int, xadd: int, yadd: int, emj: str, columns: int, rows: int) -> Dict[str, List[Union[int, bool]]]:
-		""" Checks collision of the player with items and the destinies. 
-		:param inserted: The objects inserted into the canvas. 
+		""" Checks collision of the player with items and the destinies.
+		:param inserted: The objects inserted into the canvas.
 		:param xadd: The addition to apply to the X axis, in case of collision.
 		:param yadd: The addition to apply to the Y axis, in case of collision."""
 

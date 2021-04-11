@@ -16,7 +16,7 @@ from mysqldb import the_django_database
 allowed_roles = [int(os.getenv('OWNER_ROLE_ID')), int(os.getenv('ADMIN_ROLE_ID')), int(os.getenv('MOD_ROLE_ID'))]
 
 class TeacherAPI(commands.Cog):
-	""" (WIP) A category for using The Language Sloth's teacher's API, 
+	""" (WIP) A category for using The Language Sloth's teacher's API,
 	and some other useful commands related to it. """
 	def __init__(self, client) -> None:
 		""" Cog initializer """
@@ -37,7 +37,7 @@ class TeacherAPI(commands.Cog):
 		print('Tests cog is online!')
 
 	async def get_flag(self, language: str) -> str:
-		""" Gets a flag from the media files. 
+		""" Gets a flag from the media files.
 		:param language: The language related to the flag.
 		:returns: The path of the requested flag, or of the default one.
 		"""
@@ -50,7 +50,7 @@ class TeacherAPI(commands.Cog):
 
 
 	async def paste_text(self, draw, coords: Tuple[int], text: str, color: Tuple[int], font, stroke: Tuple[int]) -> None:
-		""" Pastes the given text making a nifty stroke around it. 
+		""" Pastes the given text making a nifty stroke around it.
 		:param draw: The draw object to paste on.
 		:param coords: The image coordinates to paste on.
 		:param text: The text to write in the image.
@@ -152,7 +152,7 @@ class TeacherAPI(commands.Cog):
 		background.paste(template, (0, 0), template)
 
 		# Writing the text  (0 196, 187) | (5, 66, 39)
-		draw = ImageDraw.Draw(background) 
+		draw = ImageDraw.Draw(background)
 		await self.paste_text(draw, (230, 100), teacher_name, (0, 196, 187), small, (5, 66, 39))
 		await self.paste_text(draw, (230, 136), language.title(), (0, 196, 187), small, (5, 66, 39))
 		await self.paste_text(draw, (230, 172), weekday, (0, 196, 187), small, (5, 66, 39))
@@ -217,7 +217,7 @@ class TeacherAPI(commands.Cog):
 
 
 	async def get_flag(self, language: str) -> str:
-		""" Gets the flag for the given language if there is one, otherwise returns the default flag. 
+		""" Gets the flag for the given language if there is one, otherwise returns the default flag.
 
 		:param language: The language from which to get the flag.
 		:returns: The flag path.
@@ -285,12 +285,12 @@ class TeacherAPI(commands.Cog):
 		""" Sorts the given data by the days of the week. """
 
 		weekdays: Dict[str, List[str]] = {
-			'Sunday': [], 
-			'Monday': [], 
-			'Tuesday': [], 
-			'Wednesday': [], 
-			'Thursday': [], 
-			'Friday': [], 
+			'Sunday': [],
+			'Monday': [],
+			'Tuesday': [],
+			'Wednesday': [],
+			'Thursday': [],
+			'Friday': [],
 			'Saturday': [],
 		}
 
@@ -386,7 +386,7 @@ class TeacherAPI(commands.Cog):
 		await ctx.send(embed=teacher_embed)
 
 	async def _change_teacher_state(self, member_id: int, state: int) -> None:
-		""" Changes the current state of a given member in the website. 
+		""" Changes the current state of a given member in the website.
 		:param member_id: The ID of the member that you are changing it.
 		:param state: The state to which you are gonna set the to (0=False/1=True). """
 
@@ -396,7 +396,7 @@ class TeacherAPI(commands.Cog):
 		await mycursor.close()
 
 	async def _get_teacher_state(self, member_id: int) -> bool:
-		""" Gets the member current state from the website. 
+		""" Gets the member current state from the website.
 		:param member_id: The ID of the member that you are checking it. """
 
 		mycursor, db = await the_django_database()
@@ -506,7 +506,7 @@ class TeacherAPI(commands.Cog):
 					await msg.remove_reaction(r, u)
 					if index > 0:
 					  index -= 1
-					continue  
+					continue
 				elif str(r.emoji) == '🛑':
 					await msg.remove_reaction('⬅️', self.client.user)
 					await msg.remove_reaction('➡️', self.client.user)
@@ -527,7 +527,7 @@ class TeacherAPI(commands.Cog):
 	@commands.has_permissions(administrator=True)
 	async def delete_teacher_cards(self, ctx, user_id: int = None) -> None:
 		""" Deletes all cards from a given teacher from the database.
-		:param user_id: The ID of the user from whom to get the cards. 
+		:param user_id: The ID of the user from whom to get the cards.
 		PS: Always use user IDs, since the member could have left the server. """
 
 		if not user_id:
