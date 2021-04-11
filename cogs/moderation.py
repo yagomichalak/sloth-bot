@@ -307,7 +307,7 @@ class Moderation(commands.Cog):
             current_ts = (datetime.utcnow() - epoch).total_seconds()
             await self.insert_user_infraction(
                 user_id=member.id, infr_type="warn", reason=reason,
-                timestamp=current_ts , perpetrator=ctx.author.id)
+                timestamp=current_ts, perpetrator=ctx.author.id)
             try:
                 await member.send(embed=general_embed)
             except:
@@ -434,7 +434,7 @@ class Moderation(commands.Cog):
             current_ts = (datetime.utcnow() - epoch).total_seconds()
             await self.insert_user_infraction(
                 user_id=member.id, infr_type="mute", reason=reason,
-                timestamp=current_ts , perpetrator=ctx.author.id)
+                timestamp=current_ts, perpetrator=ctx.author.id)
             try:
                 await member.send(embed=general_embed)
             except:
@@ -575,7 +575,7 @@ class Moderation(commands.Cog):
             # # Inserts a infraction into the database
             await self.insert_user_infraction(
                 user_id=member.id, infr_type="mute", reason=reason,
-                timestamp=current_ts , perpetrator=ctx.author.id)
+                timestamp=current_ts, perpetrator=ctx.author.id)
             try:
                 await member.send(embed=general_embed)
             except:
@@ -620,7 +620,7 @@ class Moderation(commands.Cog):
                 current_ts = (datetime.utcnow() - epoch).total_seconds()
                 await self.insert_user_infraction(
                     user_id=member.id, infr_type="kick", reason=reason,
-                    timestamp=current_ts , perpetrator=ctx.author.id)
+                    timestamp=current_ts, perpetrator=ctx.author.id)
                 try:
                     await member.send(embed=general_embed)
                 except:
@@ -731,7 +731,7 @@ class Moderation(commands.Cog):
             current_ts = (datetime.utcnow() - epoch).total_seconds()
             await self.insert_user_infraction(
                 user_id=member.id, infr_type="ban", reason=reason,
-                timestamp=current_ts , perpetrator=ctx.author.id)
+                timestamp=current_ts, perpetrator=ctx.author.id)
             try:
                 await member.send(embed=general_embed)
             except:
@@ -839,7 +839,7 @@ class Moderation(commands.Cog):
                 current_ts = (datetime.utcnow() - epoch).total_seconds()
                 await self.insert_user_infraction(
                     user_id=member.id, infr_type="softban", reason=reason,
-                    timestamp=current_ts , perpetrator=ctx.author.id)
+                    timestamp=current_ts, perpetrator=ctx.author.id)
                 try:
                     await member.send(embed=general_embed)
                 except:
@@ -886,7 +886,7 @@ class Moderation(commands.Cog):
             current_ts = (datetime.utcnow() - epoch).total_seconds()
             await self.insert_user_infraction(
                 user_id=member.id, infr_type="hackban", reason=reason,
-                timestamp=current_ts , perpetrator=ctx.author.id)
+                timestamp=current_ts, perpetrator=ctx.author.id)
             try:
                 await member.send(embed=general_embed)
             except:
