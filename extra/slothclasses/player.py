@@ -34,7 +34,7 @@ class Player(commands.Cog):
 
 			mycursor, db = await the_database()
 			await mycursor.execute("SELECT sloth_class FROM UserCurrency WHERE user_id = %s", (user_id,))
-			user_sloth_class = await mycursor.fetchone()		
+			user_sloth_class = await mycursor.fetchone()
 			await mycursor.close()
 			if user_sloth_class:
 				return user_sloth_class[0]

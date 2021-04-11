@@ -714,7 +714,7 @@ class TeacherFeedback(commands.Cog):
 
 		epoch = datetime.utcfromtimestamp(0)
 		the_time = (datetime.utcnow() - epoch).total_seconds()
-		return the_time	
+		return the_time
 
 
 	@staticmethod

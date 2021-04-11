@@ -101,7 +101,7 @@ class VoiceChannelActivity(commands.Cog):
 		if not await self.table_voice_channel_activity_exists():
 			return await ctx.send("**The __VoiceChannelActivity__ doesn't exist!**")
 
-		mycursor, db = await the_database()		
+		mycursor, db = await the_database()
 		await mycursor.execute("DROP TABLE VoiceChannelActivity")
 		await db.commit()
 		await mycursor.close()

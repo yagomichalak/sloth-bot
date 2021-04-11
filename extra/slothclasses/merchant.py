@@ -154,7 +154,7 @@ class Merchant(Player):
 						content=f"{buyer.mention}, {member.mention}, <@{wired_user[0]}>",
 						embed=siphon_embed)
 
-				else:	
+				else:
 					# Updates both buyer and seller's money
 					await self.update_user_money(buyer.id, - merchant_item[7])
 					await self.update_user_money(member.id, merchant_item[7])
