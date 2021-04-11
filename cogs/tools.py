@@ -326,7 +326,7 @@ class Tools(commands.Cog):
     @commands.command()
     @commands.has_any_role(*allowed_roles)
     async def vc(self, ctx, member: discord.Member = None) -> None:
-        """ Tells where the given member is at (voice channel). 
+        """ Tells where the given member is at (voice channel).
         :param member: The member you are looking for. """
 
         if not member:
@@ -344,7 +344,7 @@ class Tools(commands.Cog):
             await ctx.send(msg)
         else:
             await ctx.send(f"**{member.mention} is not in a VC!**")
-        
+
 
     @commands.command(aliases=['mag'], hidden=True)
     @commands.cooldown(1, 300, commands.BucketType.guild)
@@ -385,12 +385,12 @@ class Tools(commands.Cog):
                 audio_source = discord.FFmpegPCMAudio('best_audio.mp3')
                 voice_client.play(audio_source, after=lambda e: print("Finished trolling people!"))
             else:
-                pass     
+                pass
 
         except Exception as e:
             print(e)
             return await ctx.send("**Something went wrong, I'll stop here!**")
-        
+
         else:
             # Moves all members who are in the voice channel to the context channel.
             magneted_members = 0
@@ -537,7 +537,7 @@ class Tools(commands.Cog):
     @commands.command()
     @commands.cooldown(1, 300, commands.BucketType.user)
     async def timezones(self, ctx) -> None:
-        """ Sends a full list with the timezones into the user's DM's. 
+        """ Sends a full list with the timezones into the user's DM's.
         (Cooldown) = 5 minutes. """
 
         member = ctx.author
@@ -648,7 +648,7 @@ class Tools(commands.Cog):
 
         if await self.check_table_user_timezones():
             return await ctx.send("**Table __UserTimezones__ already exists!**")
-        
+
         await ctx.message.delete()
         mycursor, db = await the_database()
         await mycursor.execute("CREATE TABLE UserTimezones (user_id BIGINT NOT NULL, my_timezone VARCHAR(50) NOT NULL)")

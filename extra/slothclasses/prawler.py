@@ -62,7 +62,7 @@ class Prawler(Player):
 	@Player.user_is_class('prawler')
 	@Player.skill_mark()
 	async def steal(self, ctx, target: discord.Member = None) -> None:
-		""" Steals money from a member. 
+		""" Steals money from a member.
 		:param target: The member from whom you want to steal.
 		PS: The target has 40 minutes to defend themselves from the stealing. """
 
@@ -106,7 +106,7 @@ class Prawler(Player):
 		try:
 			steal = await ctx.send(embed=embed)
 			await self.insert_skill_action(
-				user_id=attacker.id, skill_type="steal", skill_timestamp=current_timestamp, 
+				user_id=attacker.id, skill_type="steal", skill_timestamp=current_timestamp,
 				target_id=target.id, message_id=steal.id, channel_id=steal.channel.id, emoji="🛡️"
 			)
 			await self.update_user_action_skill_ts(attacker.id, current_timestamp)
@@ -131,8 +131,8 @@ class Prawler(Player):
 	@Player.skill_mark()
 	# @Player.not_ready()
 	async def sharpen(self, ctx) -> None:
-		""" Sharpen one's blade so when stealing from someone, 
-		it has a 35% chance of doubling the stolen money and stealing it from them as a bonus (if they have the money). 
+		""" Sharpen one's blade so when stealing from someone,
+		it has a 35% chance of doubling the stolen money and stealing it from them as a bonus (if they have the money).
 		The blade can be sharpened up to 5 times. """
 
 		if ctx.channel.id != bots_and_commands_channel_id:
@@ -223,7 +223,7 @@ class Prawler(Player):
 		""" Tries to double the steal based on the attacker's knife sharpness stack.
 		:param attacker_id: The ID of the attacker.
 		:param stack: The attacker's knife sharpness stack.
-		:money loop: The loop that the recursion is in. 
+		:money loop: The loop that the recursion is in.
 		:param init_rob_money: The initial rob money that will be doubled. """
 
 		rob_money = init_rob_money * 2
@@ -265,7 +265,7 @@ class Prawler(Player):
 
 		mycursor, db = await the_database()
 		await mycursor.execute("""
-			UPDATE UserCurrency 
+			UPDATE UserCurrency
 			SET knife_sharpness_stack = knife_sharpness_stack + %s
 			WHERE user_id = %s""", (increment, user_id))
 		await db.commit()
@@ -278,7 +278,7 @@ class Prawler(Player):
 		the_time = await self.get_timestamp()
 		mycursor, db = await the_database()
 		await mycursor.execute("""
-			SELECT * FROM SlothSkills 
+			SELECT * FROM SlothSkills
 			WHERE skill_type = 'steal' AND (%s - skill_timestamp) >= 2400
 			""", (the_time,))
 		steals = await mycursor.fetchall()
@@ -289,7 +289,7 @@ class Prawler(Player):
 		""" Makes an embedded message for a steal action.
 		:param channel: The context channel.
 		:param perpetrator_id: The ID of the perpetrator of the stealing.
-		:param target_id: The ID of the target member who is beeing stolen from. 
+		:param target_id: The ID of the target member who is beeing stolen from.
 		:param attack_succeed: Whether the attack succeeded or not. """
 
 		timestamp = await self.get_timestamp()
@@ -335,7 +335,7 @@ class Prawler(Player):
 		""" Makes an embedded message for a rob being doubled.
 		:param channel: The context channel.
 		:param perpetrator_id: The ID of the perpetrator of the stealing.
-		:param double_amount: The amount of leaves that it was doubled to. 
+		:param double_amount: The amount of leaves that it was doubled to.
 		:param rob_stack: The stack related to the current rob. """
 
 		timestamp = await self.get_timestamp()

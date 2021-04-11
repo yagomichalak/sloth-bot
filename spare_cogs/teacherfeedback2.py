@@ -76,7 +76,7 @@ class CreateClassroom(commands.Cog):
                 await asyncio.sleep(0.5)
                 user, lenactive = await self.get_waiting_reward_student(payload.user_id, payload.message_id)
                 return await self.show_user_feedback(msg=msg, guild=guild, user=user, lenactive=lenactive, teacher=payload.member)
-            
+
         else:
             # print('Not in the system anymore, for some reason...')
             pass
@@ -87,7 +87,7 @@ class CreateClassroom(commands.Cog):
     async def on_message(self, message):
         if not message.guild:
             return
-            
+
         mc = message.channel
         mca = message.channel.category
         member = message.author
@@ -346,7 +346,7 @@ class CreateClassroom(commands.Cog):
             await simple.add_reaction('✅')
             await simple.add_reaction('❌')
             await self.save_class_feedback(msg=simple,
-                teacher=member, users_feedback=users_feedback, 
+                teacher=member, users_feedback=users_feedback,
                 class_type=teacher_class[0][4], language=teacher_class[0][3], guild=guild
             )
 
@@ -367,8 +367,8 @@ class CreateClassroom(commands.Cog):
         mycursor, db = await the_database()
 
         sql = """INSERT INTO RewardStudents (
-            reward_message, student_id, student_messages, 
-            student_time, teacher_id, class_type, 
+            reward_message, student_id, student_messages,
+            student_time, teacher_id, class_type,
             language)
             VALUES (%s, %s, %s, %s, %s, %s, %s)"""
 
@@ -387,7 +387,7 @@ class CreateClassroom(commands.Cog):
         await self.show_user_feedback(msg=msg, guild=guild, user=user, lenactive=lenactive, teacher=teacher)
         # print("**Nice!**")
 
-    
+
     async def add_student_rewarded(self, user: List[Union[int, str]]):
         """ Saves a user to be rewarded later on.
         :param user: The user to be saved. """
@@ -599,21 +599,21 @@ class CreateClassroom(commands.Cog):
                 speak=True, view_channel=True, embed_links=True)
 
         overwrites[member.guild.default_role] = discord.PermissionOverwrite(
-            read_messages=False, send_messages=False, connect=False, 
+            read_messages=False, send_messages=False, connect=False,
             speak=False, view_channel=False)
 
         overwrites[teacher_role] = discord.PermissionOverwrite(
-            read_messages=True, send_messages=True, manage_messages=True, 
-            mute_members=True, embed_links=True, connect=True, 
+            read_messages=True, send_messages=True, manage_messages=True,
+            mute_members=True, embed_links=True, connect=True,
             speak=True, move_members=True, view_channel=True)
 
         overwrites[mod_role] = discord.PermissionOverwrite(
-            read_messages=True, send_messages=True, manage_messages=True, 
+            read_messages=True, send_messages=True, manage_messages=True,
             mute_members=True, embed_links=True, connect=True,
             speak=True, move_members=True, view_channel=True)
 
         overwrites[lesson_management_role] = discord.PermissionOverwrite(
-            read_messages=True, send_messages=True, manage_messages=True, 
+            read_messages=True, send_messages=True, manage_messages=True,
             mute_members=True, embed_links=True, connect=True,
             speak=True, move_members=True, view_channel=True, manage_channels=True)
 

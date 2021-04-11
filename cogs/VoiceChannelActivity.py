@@ -123,7 +123,7 @@ class VoiceChannelActivity(commands.Cog):
 
 
 	async def insert_first_row(self, channel_members: List[Tuple[Union[int, str]]]) -> None:
-		""" Inserts the first row of the minute with the info of all users who are in voice channels. 
+		""" Inserts the first row of the minute with the info of all users who are in voice channels.
 		:param channel_members: A list of tuples containing the individual members and their info. """
 
 		mycursor, db = await the_database()
@@ -134,7 +134,7 @@ class VoiceChannelActivity(commands.Cog):
 		await mycursor.close()
 
 	async def insert_row(self, the_time: datetime, channel_id: int, channel_name: str, member_id: int, member_name: str) -> None:
-		""" Inserts a row containing info of member and the voice channel that they're currently in. 
+		""" Inserts a row containing info of member and the voice channel that they're currently in.
 		:param the_time: The current time.
 		:param: channel_id: The ID channel that the member is in.
 		:param channel_name: The name of the channel that the member is in.
@@ -179,7 +179,7 @@ class VoiceChannelActivity(commands.Cog):
 	# 	return records
 
 	# async def get_user_record_by_time2(self, member_id: int, time: str) -> List[Union[int, str]]:
-	# 	""" Gets user records by the given hour. 
+	# 	""" Gets user records by the given hour.
 	# 	:param member_id: The ID of the member from whom you want to fetch information.
 	# 	:param time: The time at around the user that you are looking for has to have information. """
 
@@ -209,16 +209,16 @@ class VoiceChannelActivity(commands.Cog):
 				print('Provided 2 values!')
 				time2 = datetime.strptime(time2, '%H')
 				await mycursor.execute("""
-					SELECT DISTINCT HOUR(the_time), member_name, member_id 
-					FROM VoiceChannelActivity WHERE channel_id = %s AND HOUR(the_time) BETWEEN %s AND %s""", 
+					SELECT DISTINCT HOUR(the_time), member_name, member_id
+					FROM VoiceChannelActivity WHERE channel_id = %s AND HOUR(the_time) BETWEEN %s AND %s""",
 					(channel.id, time.hour, time2.hour))
 
 				text = f"Users who joined `{channel}` between `{time.hour}:00` and `{time2.hour}:59`:"
 			else:
 				print('Provided 1 value!')
 				await mycursor.execute("""
-					SELECT DISTINCT HOUR(the_time), member_name, member_id 
-					FROM VoiceChannelActivity WHERE channel_id = %s AND HOUR(the_time) = %s""", 
+					SELECT DISTINCT HOUR(the_time), member_name, member_id
+					FROM VoiceChannelActivity WHERE channel_id = %s AND HOUR(the_time) = %s""",
 					(channel.id, time.hour))
 
 				text = f"Users who joined `{channel}` between `{time.hour}:00` and `{time.hour}:59`:"
@@ -235,8 +235,8 @@ class VoiceChannelActivity(commands.Cog):
 				text = f"Users who joined `{channel}` between `{the_time1}` and `{the_time2}`:"
 
 				await mycursor.execute("""
-					SELECT DISTINCT the_time, member_name, member_id 
-					FROM VoiceChannelActivity WHERE channel_id = %s AND the_time BETWEEN %s AND %s""", 
+					SELECT DISTINCT the_time, member_name, member_id
+					FROM VoiceChannelActivity WHERE channel_id = %s AND the_time BETWEEN %s AND %s""",
 					(channel.id, the_time1, the_time2))
 
 			# If not, assumes the second value
@@ -250,8 +250,8 @@ class VoiceChannelActivity(commands.Cog):
 
 				text = f"Users who joined `{channel}` between `{the_time1}` and `{the_time2}`:"
 				await mycursor.execute("""
-					SELECT DISTINCT the_time, member_name, member_id 
-					FROM VoiceChannelActivity WHERE channel_id = %s AND the_time BETWEEN %s AND %s""", 
+					SELECT DISTINCT the_time, member_name, member_id
+					FROM VoiceChannelActivity WHERE channel_id = %s AND the_time BETWEEN %s AND %s""",
 					(channel.id, the_time1, the_time2))
 
 		records = await mycursor.fetchall()
@@ -259,7 +259,7 @@ class VoiceChannelActivity(commands.Cog):
 		return records, time, text
 
 	async def get_user_record_by_time(self, member: discord.Member, time: str, time2: str = None) -> List[Union[int, str]]:
-		""" Gets user records by the given hour. 
+		""" Gets user records by the given hour.
 		:param member: The member from whom you want to fetch information.
 		:param time: The time at around the user that you are looking for has to have information. """
 
@@ -274,8 +274,8 @@ class VoiceChannelActivity(commands.Cog):
 				print('Provided 2 values!')
 				time2 = datetime.strptime(time2, '%H')
 				await mycursor.execute("""
-					SELECT DISTINCT HOUR(the_time), channel_id, channel_name,  member_id 
-					FROM VoiceChannelActivity WHERE HOUR(the_time) BETWEEN %s AND %s AND member_id = %s""", 
+					SELECT DISTINCT HOUR(the_time), channel_id, channel_name,  member_id
+					FROM VoiceChannelActivity WHERE HOUR(the_time) BETWEEN %s AND %s AND member_id = %s""",
 					(time.hour, time2.hour, member.id))
 
 				text = f"User between `{time.hour}` and `{time2.hour}` was in:"
@@ -284,8 +284,8 @@ class VoiceChannelActivity(commands.Cog):
 			else:
 				print('Provided 1 value!')
 				await mycursor.execute("""
-					SELECT DISTINCT HOUR(the_time), channel_id, channel_name,  member_id 
-					FROM VoiceChannelActivity WHERE HOUR(the_time) = %s AND member_id = %s""", 
+					SELECT DISTINCT HOUR(the_time), channel_id, channel_name,  member_id
+					FROM VoiceChannelActivity WHERE HOUR(the_time) = %s AND member_id = %s""",
 					(time.hour, member.id))
 
 				text = f"User between `{time.hour}` and `{time.hour}` was in:"
@@ -302,9 +302,9 @@ class VoiceChannelActivity(commands.Cog):
 
 
 				await mycursor.execute("""
-					SELECT DISTINCT the_time, channel_id, channel_name, member_id 
-					FROM VoiceChannelActivity 
-					WHERE the_time BETWEEN %s AND %s AND member_id = %s""", 
+					SELECT DISTINCT the_time, channel_id, channel_name, member_id
+					FROM VoiceChannelActivity
+					WHERE the_time BETWEEN %s AND %s AND member_id = %s""",
 					(the_time1, the_time2, member.id))
 
 				text = f"{member} between `{the_time1}` and `{the_time2}` was in:"
@@ -324,9 +324,9 @@ class VoiceChannelActivity(commands.Cog):
 					text = f"{member} between `{the_time1}` and `{the_time2}` was in:"
 
 				await mycursor.execute("""
-					SELECT DISTINCT the_time, channel_id, channel_name, member_id 
-					FROM VoiceChannelActivity 
-					WHERE the_time BETWEEN %s AND %s AND member_id = %s""", 
+					SELECT DISTINCT the_time, channel_id, channel_name, member_id
+					FROM VoiceChannelActivity
+					WHERE the_time BETWEEN %s AND %s AND member_id = %s""",
 					(the_time1, the_time2, member.id))
 
 		records = await mycursor.fetchall()
@@ -335,7 +335,7 @@ class VoiceChannelActivity(commands.Cog):
 		return records, time, text
 
 	async def format_time(self, time: str) -> str:
-		""" Formats the time if needed. 
+		""" Formats the time if needed.
 		:param time: The time you want to format. """
 
 		formated_time = time

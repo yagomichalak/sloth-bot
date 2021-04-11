@@ -10,7 +10,7 @@ import os
 
 from extra.slothclasses import agares, cybersloth, merchant, metamorph, munk, prawler, seraph, warrior
 classes: Dict[str, Any] = {
-	'agares': agares.Agares, 'cybersloth': cybersloth.Cybersloth, 
+	'agares': agares.Agares, 'cybersloth': cybersloth.Cybersloth,
 	'merchant': merchant.Merchant, 'metamorph': metamorph.Metamorph,
 	'munk': munk.Munk, 'prawler': prawler.Prawler,
 	'seraph': seraph.Seraph, 'warrior': warrior.Warrior
@@ -67,7 +67,7 @@ class SlothClass(*classes.values()):
 		mycursor, db = await the_database()
 		await mycursor.execute("""
 			SELECT sloth_class, COUNT(sloth_class) AS sloth_count
-			FROM UserCurrency 
+			FROM UserCurrency
 			WHERE sloth_class != 'default'
 			GROUP BY sloth_class
 			ORDER BY sloth_count DESC
@@ -161,7 +161,7 @@ class SlothClass(*classes.values()):
 	@commands.command(aliases=['rsc'])
 	@commands.has_permissions(administrator=True)
 	async def reset_skill_cooldown(self, ctx, member: discord.Member = None) -> None:
-		""" (ADMIN) Resets the action skill cooldown of the given member. 
+		""" (ADMIN) Resets the action skill cooldown of the given member.
 		:param member: The member to reset the cooldown (default = author). """
 
 		if not member:

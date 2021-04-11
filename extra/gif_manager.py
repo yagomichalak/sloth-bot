@@ -6,7 +6,7 @@ from itertools import cycle
 
 
 def defragment_gif(path: str, output: str) -> None:
-    """ Defragments a gif into frames. 
+    """ Defragments a gif into frames.
     :param path:
     :param output: """
 
@@ -135,14 +135,14 @@ if __name__ == '__main__':
     #=========================================================#
     #==========Adds=multiple=effects=onto=an=image============#
     #=========================================================#
-    
+
     def smth():
         profile = Image.open('../profile.png').convert('RGBA')
         gif = GIF(image=profile, frame_duration=40)
 
         path = '../media/effects'
         all_effects = {
-            'fidget_spinner': {'frames': [], 'cords': (218, 222), 'resize': (150, 150)}, 
+            'fidget_spinner': {'frames': [], 'cords': (218, 222), 'resize': (150, 150)},
             'star': {'frames': [], 'cords': (150, 10), 'resize': (50, 50)},
             'transmutated': {'frames': [], 'cords': (0, 0), 'resize': None},
             'protected': {'frames': [], 'cords': (0, 0), 'resize': None}
@@ -167,7 +167,7 @@ if __name__ == '__main__':
 
         # Loops through the frames based on the amount of frames of the longest effect.
         longest_gif = max([len(frames['frames']) for frames in all_effects.values()])
-        
+
         for efx in all_effects.keys():
             all_effects[efx]['frames'] = cycle(all_effects[efx]['frames'])
 
@@ -211,7 +211,7 @@ if __name__ == '__main__':
             background.save(f'../media/effects/knocked_out/protected_{i+1}.png', 'png', quality=90)
 
     # get_frames()
-            
+
 
     # base = gif.new_frame()
 

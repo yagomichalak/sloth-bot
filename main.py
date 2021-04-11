@@ -183,7 +183,7 @@ async def update_timezones():
 async def on_voice_state_update(member, before, after):
 	# No longer being used
 	
-	return 
+	return
 	if not member.guild:
 		return
 	mod_role = discord.utils.get(member.guild.roles, id=moderator_role_id)
@@ -261,9 +261,9 @@ async def help(ctx, cmd: str = None):
 	'''
 	if not cmd:
 		embed = discord.Embed(
-			title="All commands and categories", 
-			description=f"```ini\nUse {client.command_prefix}help command or {client.command_prefix}help category to know more about a specific command or category\n\n[Examples]\n[1] Category: {client.command_prefix}help SlothCurrency\n[2] Command : {client.command_prefix}help rep```", 
-			timestamp=ctx.message.created_at, 
+			title="All commands and categories",
+			description=f"```ini\nUse {client.command_prefix}help command or {client.command_prefix}help category to know more about a specific command or category\n\n[Examples]\n[1] Category: {client.command_prefix}help SlothCurrency\n[2] Command : {client.command_prefix}help rep```",
+			timestamp=ctx.message.created_at,
 			color=ctx.author.color
 			)
 
@@ -272,8 +272,8 @@ async def help(ctx, cmd: str = None):
 			commands = [c.name for c in cog.get_commands() if not c.hidden]
 			if commands:
 				embed.add_field(
-					name=f"__{cog.qualified_name}__", 
-					value=f"`Commands:` {', '.join(commands)}", 
+					name=f"__{cog.qualified_name}__",
+					value=f"`Commands:` {', '.join(commands)}",
 					inline=False
 					)
 
@@ -282,8 +282,8 @@ async def help(ctx, cmd: str = None):
 			if not y.cog_name and not y.hidden:
 				cmds.append(y.name)
 		embed.add_field(
-			name='__Uncategorized Commands__', 
-			value=f"`Commands:` {', '.join(cmds)}", 
+			name='__Uncategorized Commands__',
+			value=f"`Commands:` {', '.join(cmds)}",
 			inline=False)
 		await ctx.send(embed=embed)
 

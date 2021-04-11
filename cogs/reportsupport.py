@@ -117,8 +117,8 @@ class ReportSupport(commands.Cog):
 		elif mid == int(os.getenv('ORDER_BOT_MESSAGE_ID')) and str(emoji) == '🤖':
 			# Order a bot
 			dnk = self.client.get_user(dnk_id)
-			embed = discord.Embed(title="New possible order!", 
-				description=f"{member.mention} wants to order something from you!", 
+			embed = discord.Embed(title="New possible order!",
+				description=f"{member.mention} wants to order something from you!",
 				color=member.color)
 			embed.set_thumbnail(url=member.avatar_url)
 			await dnk.send(embed=embed)
@@ -203,7 +203,7 @@ class ReportSupport(commands.Cog):
 			return
 
 		embed.description = '''
-		- Why do you want to teach that language on the language sloth? 
+		- Why do you want to teach that language on the language sloth?
 		Please answer with one message.'''
 		q2 = await member.send(embed=embed)
 		a2 = await self.get_message(member, msg_check)
@@ -211,7 +211,7 @@ class ReportSupport(commands.Cog):
 			return
 		
 		embed.description = '''
-		- On The Language Sloth, our classes happen once a week at the same time weekly. 
+		- On The Language Sloth, our classes happen once a week at the same time weekly.
 		Please let us know when would be the best time for you to teach,
 		E.A: Thursdays 3 pm CET, you can specify your timezone.
 		Again remember to answer with one message.'''
@@ -221,8 +221,8 @@ class ReportSupport(commands.Cog):
 			return
 
 		embed.description = '''
-		-Let's talk about your English level, how do you consider your English level? 
-		Are you able to teach lessons in English? 
+		-Let's talk about your English level, how do you consider your English level?
+		Are you able to teach lessons in English?
 		Please answer using one message only'''
 		q4 = await member.send(embed=embed)
 		a4 = await self.get_message(member, msg_check)
@@ -308,14 +308,14 @@ class ReportSupport(commands.Cog):
 
 		try:
 			r, _ = await self.client.wait_for(
-				'reaction_add', 
-				timeout=240, 
+				'reaction_add',
+				timeout=240,
 				check=lambda r, u: u.id == member.id and r.emoji in react_list \
 					and r.message.id == msg.id
 			)
 		except asyncio.TimeoutError:
 			timeout_embed = discord.Embed(
-				title="Timeout", 
+				title="Timeout",
 				description='**Try again!**',
 				color=discord.Color.red())
 			await member.send(embed=timeout_embed)
@@ -376,9 +376,9 @@ class ReportSupport(commands.Cog):
 		moderator = discord.utils.get(guild.roles, id=moderator_role_id)
 		cosmos = discord.utils.get(guild.members, id=self.cosmos_id)
 		overwrites = {guild.default_role: discord.PermissionOverwrite(
-			read_messages=False, send_messages=False, connect=False, view_channel=False), 
+			read_messages=False, send_messages=False, connect=False, view_channel=False),
 		member: discord.PermissionOverwrite(
-			read_messages=True, send_messages=True, connect=False, view_channel=True), 
+			read_messages=True, send_messages=True, connect=False, view_channel=True),
 		moderator: discord.PermissionOverwrite(
 			read_messages=True, send_messages=True, connect=False, view_channel=True, manage_messages=True)}
 		try:
@@ -389,8 +389,8 @@ class ReportSupport(commands.Cog):
 		else:
 			#print('created!')
 			created_embed = discord.Embed(
-				title="Report room created!", 
-				description=f"**Go to {the_channel.mention}!**", 
+				title="Report room created!",
+				description=f"**Go to {the_channel.mention}!**",
 				color=discord.Color.green())
 			await member.send(embed=created_embed)
 			await self.insert_user_open_channel(member.id, the_channel.id)
@@ -414,9 +414,9 @@ class ReportSupport(commands.Cog):
 		case_cat = discord.utils.get(guild.categories, id=case_cat_id)
 		moderator = discord.utils.get(guild.roles, id=moderator_role_id)
 		overwrites = {guild.default_role: discord.PermissionOverwrite(
-			read_messages=False, send_messages=False, connect=False, view_channel=False), 
+			read_messages=False, send_messages=False, connect=False, view_channel=False),
 		member: discord.PermissionOverwrite(
-			read_messages=True, send_messages=True, connect=False, view_channel=True), 
+			read_messages=True, send_messages=True, connect=False, view_channel=True),
 		moderator: discord.PermissionOverwrite(
 			read_messages=True, send_messages=True, connect=False, view_channel=True, manage_messages=True)}
 		try:
@@ -427,12 +427,12 @@ class ReportSupport(commands.Cog):
 		else:
 			#print('created!')
 			created_embed = discord.Embed(
-				title=f"Room for `{type_help}` created!", 
-				description=f"**Go to {the_channel.mention}!**", 
+				title=f"Room for `{type_help}` created!",
+				description=f"**Go to {the_channel.mention}!**",
 				color=discord.Color.green())
 			await member.send(embed=created_embed)
 			await self.insert_user_open_channel(member.id, the_channel.id)
-			embed = discord.Embed(title=f"{type_help.title()}!", 
+			embed = discord.Embed(title=f"{type_help.title()}!",
 			description=f"{message}",
 				color=discord.Color.red())
 			await the_channel.send(content=f"{member.mention}, {moderator.mention}", embed=embed)
@@ -440,7 +440,7 @@ class ReportSupport(commands.Cog):
 
 	async def get_message(self, member, check):
 		try:
-			message = await self.client.wait_for('message', timeout=240, 
+			message = await self.client.wait_for('message', timeout=240,
 			check=check)
 		except asyncio.TimeoutError:
 			await member.send("**Timeout! Try again.**")
@@ -451,7 +451,7 @@ class ReportSupport(commands.Cog):
 
 	async def get_reaction(self, member, check):
 		try:
-			reaction, user = await self.client.wait_for('reaction_add', 
+			reaction, user = await self.client.wait_for('reaction_add',
 			timeout=120, check=check)
 		except asyncio.TimeoutError:
 			await member.send("**Timeout! Try again.**")
@@ -527,7 +527,7 @@ class ReportSupport(commands.Cog):
 		if len(table_info) == 0:
 			return False
 		else:
-			return True 
+			return True
 
 
 	@commands.command(hidden=True)
@@ -591,7 +591,7 @@ class ReportSupport(commands.Cog):
 		if len(table_info) == 0:
 			return False
 		else:
-			return True 
+			return True
 
 	async def get_case_number(self):
 		mycursor, db = await the_database()
@@ -705,7 +705,7 @@ class ReportSupport(commands.Cog):
 			await confirmation.add_reaction('✅')
 			await confirmation.add_reaction('❌')
 			try:
-				reaction, user = await self.client.wait_for('reaction_add', timeout=20, 
+				reaction, user = await self.client.wait_for('reaction_add', timeout=20,
 					check=lambda r, u: u == ctx.author and r.message.channel == ctx.channel and str(r.emoji) in ['✅', '❌'])
 			except asyncio.TimeoutError:
 				embed = discord.Embed(title="Confirmation",
@@ -762,7 +762,7 @@ class ReportSupport(commands.Cog):
 				break
 
 			else:
-				for task in done_tasks: 
+				for task in done_tasks:
 					reaction, user = await task
 				if str(reaction.emoji) == "➡️":
 					#await the_msg.remove_reaction(reaction.emoji, member)
@@ -794,7 +794,7 @@ class ReportSupport(commands.Cog):
 
 		# Creates channels
 		overwrites: Dict = {guild.default_role: discord.PermissionOverwrite(
-			read_messages=False, send_messages=False, connect=False, view_channel=False), 
+			read_messages=False, send_messages=False, connect=False, view_channel=False),
 		teacher: discord.PermissionOverwrite(
 			read_messages=True, send_messages=True, connect=True, view_channel=True),
 		lesson_management: discord.PermissionOverwrite(
@@ -810,7 +810,7 @@ class ReportSupport(commands.Cog):
 		app_embed = discord.Embed(
 			title=f"{teacher.name}'s Interview",
 			description=f'''
-			Hello, {teacher.mention}, we have received and reviewed your teacher application. In order to set up your lesson and explain how our system works we have to schedule a voice conversation with you. 
+			Hello, {teacher.mention}, we have received and reviewed your teacher application. In order to set up your lesson and explain how our system works we have to schedule a voice conversation with you.
 			When would be the best time to talk to one of our staff?''',
 			color=teacher.color)
 		await txt_channel.send(content=f"{cosmos.mention}, {lesson_management.mention}, {teacher.mention}", embed=app_embed)
@@ -841,7 +841,7 @@ class ReportSupport(commands.Cog):
 			await confirmation.add_reaction('✅')
 			await confirmation.add_reaction('❌')
 			try:
-				reaction, user = await self.client.wait_for('reaction_add', timeout=20, 
+				reaction, user = await self.client.wait_for('reaction_add', timeout=20,
 					check=lambda r, u: u == ctx.author and r.message.id == confirmation.id and str(r.emoji) in ['✅', '❌'])
 			except asyncio.TimeoutError:
 				embed = discord.Embed(title="Confirmation",
@@ -908,7 +908,7 @@ class ReportSupport(commands.Cog):
 		""" Updates the teacher's application; adding the txt and vc ids into it. """
 
 		mycursor, db = await the_database()
-		await mycursor.execute('''UPDATE TeacherApplication SET 
+		await mycursor.execute('''UPDATE TeacherApplication SET
 			channel_open = 'yes', txt_id = %s, vc_id = %s
 			WHERE teacher_id = %s''', (txt_id, vc_id, teacher_id)
 			)
@@ -1017,7 +1017,7 @@ class ReportSupport(commands.Cog):
 				audio_source = discord.FFmpegPCMAudio(f'tts/{audio_name}.mp3')
 				voice_client.play(audio_source, after=lambda e: print("Finished Warning Staff!"))
 			else:
-				print('couldnt play it!')               
+				print('couldnt play it!')
 
 		except Exception as e:
 			print(e)

@@ -85,8 +85,8 @@ class Cybersloth(Player):
 	@Player.skill_mark()
 	# @Player.not_ready()
 	async def wire(self, ctx, target: discord.Member = None) -> None:
-		""" Wires someone so if they buy a potion or transfer money to someone, 
-		it siphons off up to 35% of the value amount. 
+		""" Wires someone so if they buy a potion or transfer money to someone,
+		it siphons off up to 35% of the value amount.
 		:param target: The person who you want to wire. """
 
 		attacker = ctx.author
@@ -185,7 +185,7 @@ class Cybersloth(Player):
 
 	async def update_user_is_hacked(self, user_id: int, hacked: int) -> None:
 		""" Updates the user's protected state.
-		:param user_id: The ID of the member to update. 
+		:param user_id: The ID of the member to update.
 		:param hacked: Whether it's gonna be set to true or false. """
 
 		mycursor, db = await the_database()
@@ -196,7 +196,7 @@ class Cybersloth(Player):
 
 	async def update_user_is_wired(self, user_id: int, wired: int) -> None:
 		""" Updates the user's protected state.
-		:param user_id: The ID of the member to update. 
+		:param user_id: The ID of the member to update.
 		:param wired: Whether it's gonna be set to true or false. """
 
 		mycursor, db = await the_database()

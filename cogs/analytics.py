@@ -304,11 +304,11 @@ class Analytics(commands.Cog):
 		mycursor, db = await the_database()
 
 		await mycursor.execute("""
-			SELECT Month(STR_TO_DATE(complete_date, '%d/%m/%Y')) AS Months, 
-				(SUM(m_joined) - SUM(m_left)) AS 'Totals Joinings', 
+			SELECT Month(STR_TO_DATE(complete_date, '%d/%m/%Y')) AS Months,
+				(SUM(m_joined) - SUM(m_left)) AS 'Totals Joinings',
 				COUNT(*) AS 'Records',
-				MAX(members) AS 'Members at the End' 
-			FROM DataBumps 
+				MAX(members) AS 'Members at the End'
+			FROM DataBumps
 			GROUP BY Months;
 		""")
 
@@ -324,11 +324,11 @@ class Analytics(commands.Cog):
 		mycursor, db = await the_database()
 
 		await mycursor.execute("""
-			SELECT STR_TO_DATE(complete_date, '%d/%m/%Y') AS Days, 
-				(SUM(m_joined) - SUM(m_left)) AS 'Totals Joinings', 
+			SELECT STR_TO_DATE(complete_date, '%d/%m/%Y') AS Days,
+				(SUM(m_joined) - SUM(m_left)) AS 'Totals Joinings',
 				COUNT(*) AS 'Records',
-				members AS 'Members at the End' 
-			FROM DataBumps 
+				members AS 'Members at the End'
+			FROM DataBumps
 			GROUP BY Days;
 		""")
 
@@ -385,7 +385,7 @@ class Analytics(commands.Cog):
 
 	async def get_current_day_and_future_day(self, days: int, hours: int) -> str:
 		""" Gets the current day and the future day, by incrementing X days to the current day.
-		:param days: The amount of days to be incremented. 
+		:param days: The amount of days to be incremented.
 		:param hours: The amount of hours to be incremented. """
 
 		tzone = timezone('Etc/GMT-1')
@@ -397,9 +397,9 @@ class Analytics(commands.Cog):
 		return last_day, future_day
 
 	async def predict_total_members(self, present: int, future: int, pr: float) -> int:
-		""" Predicts the total of members in days. 
+		""" Predicts the total of members in days.
 		:param present: The current value.
-		:param future: The goal value. 
+		:param future: The goal value.
 		:param the percentage growth rate. """
 
 		count = 0

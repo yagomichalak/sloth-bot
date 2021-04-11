@@ -22,9 +22,9 @@ from extra.useful_variables import level_badges, flag_badges
 from extra.gif_manager import GIF
 
 shop_channels = [
-int(os.getenv('BACKGROUND_ITEMS_CHANNEL_ID')), int(os.getenv('HAND_ITEMS_CHANNEL_ID')), 
-int(os.getenv('CLOTHES_ITEMS_CHANNEL_ID')), int(os.getenv('LIMITED_EDITION_ITEMS_CHANNEL_ID')), 
-int(os.getenv('HEAD_ITEMS_CHANNEL_ID')), int(os.getenv('LEG_ITEMS_CHANNEL_ID')), 
+int(os.getenv('BACKGROUND_ITEMS_CHANNEL_ID')), int(os.getenv('HAND_ITEMS_CHANNEL_ID')),
+int(os.getenv('CLOTHES_ITEMS_CHANNEL_ID')), int(os.getenv('LIMITED_EDITION_ITEMS_CHANNEL_ID')),
+int(os.getenv('HEAD_ITEMS_CHANNEL_ID')), int(os.getenv('LEG_ITEMS_CHANNEL_ID')),
 int(os.getenv('PATREONS_CHANNEL_ID'))
 ]
 afk_channel_id = int(os.getenv('AFK_CHANNEL_ID'))
@@ -125,7 +125,7 @@ class SlothCurrency(commands.Cog):
 			channel = discord.utils.get(guild.channels, id=payload.channel_id)
 		
 			msg = await channel.fetch_message(payload.message_id)
-			await msg.remove_reaction(payload.emoji.name, payload.member)        
+			await msg.remove_reaction(payload.emoji.name, payload.member)
 
 		# Checks if it was a reaction within the shop's channel
 		if not payload.channel_id in shop_channels:
@@ -582,8 +582,8 @@ class SlothCurrency(commands.Cog):
 		mycursor, db = await the_database()
 		await mycursor.execute("""
 			CREATE TABLE UserCurrency (
-			user_id bigint, user_money bigint, last_purchase_ts bigint, 
-			user_classes bigint default 0, user_class_reward bigint default 0, user_hosted bigint default 0, 
+			user_id bigint, user_money bigint, last_purchase_ts bigint,
+			user_classes bigint default 0, user_class_reward bigint default 0, user_hosted bigint default 0,
 			user_lotto bigint default null, sloth_class varchar(30) default 'default', change_class_ts bigint default 0,
 			last_skill_ts bigint default 0, protected tinyint(1) default 0, has_potion tinyint(1) default 0,
 			hacked tinyint(1) default 0, knocked_out tinyint(1) default 0), last_skill_two_ts bigint default 0,
@@ -625,8 +625,8 @@ class SlothCurrency(commands.Cog):
 
 
 	async def send_hacked_image(self, ctx: commands.Context, member: discord.Member) -> None:
-		""" Makes and sends a hacked image. 
-		:param ctx: The context. 
+		""" Makes and sends a hacked image.
+		:param ctx: The context.
 		:param member: The member who was hacked. """
 
 		SlothClass = self.client.get_cog('SlothClass')
@@ -653,9 +653,9 @@ class SlothCurrency(commands.Cog):
 
 
 	async def send_frogged_image(self, ctx: commands.Context, member: discord.Member, knocked_out: bool = False) -> None:
-		""" Makes and sends a frogged image. 
-		:param ctx: The context. 
-		:param member: The member who was frogged. 
+		""" Makes and sends a frogged image.
+		:param ctx: The context.
+		:param member: The member who was frogged.
 		:param knocked_out: Whether the user is knocked out"""
 		
 		SlothClass = self.client.get_cog('SlothClass')
@@ -686,7 +686,7 @@ class SlothCurrency(commands.Cog):
 			return os.remove(file_path)
 
 	async def get_member_public_flags(self, member: discord.Member) -> List[str]:
-		""" Gets the member's public flags. 
+		""" Gets the member's public flags.
 		:param member: The member to get the flags from. """
 
 		public_flags = member.public_flags.all()
@@ -733,10 +733,10 @@ class SlothCurrency(commands.Cog):
 		if has_effect('frogged'):
 			return await self.send_frogged_image(ctx, member, user_info[0][13])
 
-		small = ImageFont.truetype("built titling sb.ttf", 45) 
+		small = ImageFont.truetype("built titling sb.ttf", 45)
 		background = Image.open(await self.get_user_specific_type_item(member.id, 'background'))
 
-		# Checks whether user is transmutated        
+		# Checks whether user is transmutated
 		sloth = None
 		if has_effect('transmutated'):
 			sloth = Image.open(f"./sloth_custom_images/sloth/transmutated_sloth.png")
@@ -825,7 +825,7 @@ class SlothCurrency(commands.Cog):
 
 
 	async def make_gif_image(self, member_id: int, file_path: str, all_effects: Dict[str, Dict[str, Union[List[str], Tuple[int]]]]) -> None:
-		""" Makes a gif image out a profile image. 
+		""" Makes a gif image out a profile image.
 		:param file_path:
 		:param effects: """
 

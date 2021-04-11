@@ -90,7 +90,7 @@ class Warrior(Player):
 	@Player.skill_mark()
 	# @Player.not_ready()
 	async def smash(self, ctx, target: discord.Member = None) -> None:
-		""" Has a 35% change of breaking someone's Divine Protection shield. 
+		""" Has a 35% change of breaking someone's Divine Protection shield.
 		:param target: The target who you are trying to smash the protection. """
 
 		
@@ -133,7 +133,7 @@ class Warrior(Player):
 		await self.check_cooldown(user_id=attacker.id, skill_number=2)
 
 		current_timestamp = await self.get_timestamp()
-		# Upate user's money 
+		# Upate user's money
 		await self.update_user_money(attacker.id, -50)
 		# # Update attacker's second skill timestamp
 		await self.update_user_action_skill_two_ts(user_id=attacker.id, current_ts=current_timestamp)
@@ -179,7 +179,7 @@ class Warrior(Player):
 
 	async def update_user_is_knocked_out(self, user_id: int, is_it: int) -> None:
 		""" Updates the user's protected state.
-		:param user_id: The ID of the member to update. 
+		:param user_id: The ID of the member to update.
 		:param is_it: Whether it's gonna be set to true or false. """
 
 		mycursor, db = await the_database()
