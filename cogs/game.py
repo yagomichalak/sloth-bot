@@ -13,11 +13,9 @@ class Game(commands.Cog):
 
         self.client = client
 
-
     @commands.Cog.listener()
     async def on_ready(self) -> None:
         print("Game cog is online!")
-
 
     async def make_game_square(self, inserted: Dict[str, Tuple[int]], columns: int, rows: int, player_x: int, player_y: int, update: bool = False) -> str:
         """ Makes a game square with emojis. """
@@ -52,7 +50,6 @@ class Game(commands.Cog):
                 new_row[-1] = blue
                 new_list.append(new_row)
 
-
         return new_list
 
     async def put_objects(self, square: List[List[str]], inserted: Dict[str, Tuple[int]], player_x: int, player_y: int, columns: int, rows: int, update: bool) -> List[List[str]]:
@@ -80,7 +77,6 @@ class Game(commands.Cog):
             x, y, emoji = values
             square[y][x] = emoji
 
-
         return square, inserted
 
     async def insert_item(self, square: List[List[str]], columns, rows, inserted: Dict[str, Tuple[int]]) -> Dict[str, Tuple[int]]:
@@ -94,8 +90,6 @@ class Game(commands.Cog):
             if (rand_x, rand_y) not in inserted.values():
                 square[rand_y][rand_x] = item
                 return square, (rand_x, rand_y, item)
-
-
 
     async def insert_destiny(self, square: List[List[str]], columns, rows, inserted: Dict[str, Tuple[int]]) -> Dict[str, Tuple[int]]:
         """"""
@@ -178,7 +172,6 @@ class Game(commands.Cog):
         await msg.remove_reaction('⬇️', member)
         await msg.remove_reaction('⬆️', member)
         await msg.remove_reaction('🏳️', member)
-
 
     @commands.command()
     @commands.cooldown(1, 3600, commands.BucketType.user)
@@ -267,7 +260,6 @@ class Game(commands.Cog):
                     return await self.remove_message_reaction(msg, ctx.author)
 
                 square, inserted = await self.make_game_square(inserted=inserted, columns=columns, rows=rows, player_x=x, player_y=y)
-
 
 def setup(client) -> None:
     client.add_cog(Game(client))

@@ -32,8 +32,6 @@ class CreateClassroom(commands.Cog):
         self.client = client
         self.teacher_cache: Dict = {}
 
-
-
     @commands.Cog.listener()
     async def on_ready(self):
         print("CreateClassroom cog is online!")
@@ -51,7 +49,6 @@ class CreateClassroom(commands.Cog):
         # Checks whether it was a reaction in the rewards channel
         if payload.channel_id != reward_channel_id:
             return
-
 
         guild = self.client.get_guild(payload.guild_id)
 
@@ -81,8 +78,6 @@ class CreateClassroom(commands.Cog):
             # print('Not in the system anymore, for some reason...')
             pass
 
-
-
     @commands.Cog.listener()
     async def on_message(self, message):
         if not message.guild:
@@ -105,7 +100,6 @@ class CreateClassroom(commands.Cog):
             # Checks if user is an active student
             if await self.check_student_by_vc(member.id, the_class[0][2]):
                 await self.update_student_messages(member.id, the_class[0][2])
-
 
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):
@@ -207,7 +201,6 @@ class CreateClassroom(commands.Cog):
                             cc_channel = discord.utils.get(member.guild.channels, id=cc_channel_id)
                             class_ids = await self.create_class(member, cc_channel, class_info[0], class_info[1], class_info[2])
                             await self.insert_active_class(member.id, class_ids[0], class_ids[1], class_info[0].title(), class_info[1], int(the_time), class_info[2])
-
 
             # Check if teacher is rejoining their class
             elif ac.id != create_room_vc_id and await self.get_active_class_by_teacher_and_vc(member.id, ac.id):
@@ -353,7 +346,6 @@ class CreateClassroom(commands.Cog):
     async def save_class_feedback(self, msg, teacher, users_feedback, class_type, language, guild) -> None:
         """ Saves all users that filled the class' requirements. """
 
-
         # Checks the class' requirements based on the type of the class (Grammar, Pronunciation)
         reward_channel = discord.utils.get(guild.channels, id=reward_channel_id)
         active_users = []
@@ -362,7 +354,6 @@ class CreateClassroom(commands.Cog):
                 active_users = [uf for uf in users_feedback if uf[3] >= 1800]
             elif class_type.title() == 'Grammar':
                 active_users = [uf for uf in users_feedback if uf[1] >= 5]
-
 
         mycursor, db = await the_database()
 
@@ -386,7 +377,6 @@ class CreateClassroom(commands.Cog):
         # print('Let us start the first show_user_feedback!!!!!!!!')
         await self.show_user_feedback(msg=msg, guild=guild, user=user, lenactive=lenactive, teacher=teacher)
         # print("**Nice!**")
-
 
     async def add_student_rewarded(self, user: List[Union[int, str]]):
         """ Saves a user to be rewarded later on.
@@ -440,7 +430,6 @@ class CreateClassroom(commands.Cog):
         await mycursor.execute("DELETE FROM RewardStudents WHERE reward_message = %s and teacher_id = %s and student_id = %s", (msg_id, teacher_id, user_id))
         await db.commit()
         await mycursor.close()
-
 
     async def show_user_feedback(self, msg, guild, user, lenactive, teacher: discord.Member) -> None:
 
@@ -570,7 +559,6 @@ class CreateClassroom(commands.Cog):
                     speak=True, view_channel=True, embed_links=True)
             else:
                 language = custom_role_name
-
 
             # print(language)
             # print(custom_role)
@@ -742,7 +730,6 @@ class CreateClassroom(commands.Cog):
                     self.client.loop.create_task(
                         cc_channel.send(f'**{member}, inform a valid answer! (Yes / No)**', delete_after=5))
 
-
         # Question 1 - Language
         await cc_channel.send(f"**{member.mention}, type the language that you are gonna teach in the class.\n(None = Don't want to create a class)**")
 
@@ -844,7 +831,6 @@ class CreateClassroom(commands.Cog):
 
         else:
             return class_language, class_type, class_desc
-
 
     async def create_class(self, member, cc_channel, language, class_type, desc):
         # (Creating rooms)
@@ -949,7 +935,6 @@ class CreateClassroom(commands.Cog):
         await mycursor.execute("INSERT INTO SavedClasses (teacher_id, language, class_type, class_desc) VALUES (%s, %s, %s, %s)", (teacher_id, language, class_type, class_desc))
         await db.commit()
         await mycursor.close()
-
 
     # Active classes table
     @commands.command(hidden=True)
@@ -1082,7 +1067,6 @@ class CreateClassroom(commands.Cog):
         await db.commit()
         await mycursor.close()
 
-
     # Delete
     async def delete_active_class(self, teacher_id: int):
         mycursor, db = await the_database()
@@ -1196,7 +1180,6 @@ class CreateClassroom(commands.Cog):
         await db.commit()
         await mycursor.close()
 
-
     async def update_all_students_time(self, teacher_id: int, the_time: int):
         mycursor, db = await the_database()
         await mycursor.execute(f"UPDATE Students SET student_time = student_time + ({the_time} - student_ts), student_ts = NULL WHERE teacher_id = {teacher_id} and student_ts is not NULL")
@@ -1271,7 +1254,6 @@ class CreateClassroom(commands.Cog):
         await mycursor.execute(f"UPDATE UserCurrency SET user_hosted = user_hosted + 1 WHERE user_id = {teacher_id}")
         await db.commit()
         await mycursor.close()
-
 
     # Discord commands
     @commands.command(aliases=['endclass', 'end', 'finishclass', 'finish', 'finish_class'])

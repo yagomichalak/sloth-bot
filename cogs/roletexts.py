@@ -19,7 +19,6 @@ class RoleTexts(commands.Cog):
         print('RoleTexts cog is online!')
         # await SlothCurrency.text_download_update(self.client)
 
-
     @commands.Cog.listener()
     async def on_member_update(self, before, after):
         """ When the member is assigned to a new role,

@@ -16,9 +16,7 @@ class ActionSkillOnCooldown(commands.CheckFailure):
         self.error_message = error_message
         self.cooldown = cooldown
 
-
 class CommandNotReady(commands.CheckFailure): pass
-
 
 class SkillsUsedRequirement(commands.CheckFailure):
 

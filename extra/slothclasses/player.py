@@ -16,12 +16,10 @@ class Player(commands.Cog):
         print('testtest')
         self.client = client
 
-
     @commands.Cog.listener()
     async def on_ready(self) -> None:
         print('am i ready????')
         self.bots_txt = await self.client.fetch_channel(bots_and_commands_channel_id)
-
 
     # Check user class
     def user_is_class(command_class):
@@ -50,7 +48,6 @@ class Player(commands.Cog):
             raise MissingRequiredSlothClass(
                 required_class=command_class, error_message="You don't have the required Sloth Class to run this command!")
         return commands.check(real_check)
-
 
     async def check_cooldown(self, user_id, skill_number: int, seconds: int = 86400)-> bool:
         """ Checks whether user skill is on cooldown (method).
@@ -94,7 +91,6 @@ class Player(commands.Cog):
             return True
         return commands.check(real_check)
 
-
     def not_ready():
         """ Makes a command not be usable. """
 
@@ -103,7 +99,6 @@ class Player(commands.Cog):
             raise CommandNotReady()
 
         return commands.check(real_check)
-
 
     def skills_used(requirement: int):
         """ Checks whether the user's action skill is on cooldown. """
@@ -120,7 +115,6 @@ class Player(commands.Cog):
                 error_message=f"You must have `{requirement}` skills used in order to use this skill, {ctx.author.mention}!")
 
         return commands.check(real_check)
-
 
     # Is user EFFECT
 
@@ -203,14 +197,7 @@ class Player(commands.Cog):
             effects['frogged']['cords'] = (0, 0)
             effects['frogged']['resize'] = None
 
-
         return effects
-
-
-
-
-
-
 
     async def is_user_protected(self, user_id: int) -> bool:
         """ Checks whether user is protected.
@@ -242,7 +229,6 @@ class Player(commands.Cog):
         await mycursor.close()
         return user_hacked is not None and user_hacked[0]
 
-
     async def is_user_wired(self, user_id: int) -> bool:
         """ Checks whether user is wired.
         :param user_id: The ID of the user to check it. """
@@ -263,7 +249,6 @@ class Player(commands.Cog):
         await mycursor.close()
         return user_knocked_out is not None and user_knocked_out[0]
 
-
     async def is_user_frogged(self, user_id: int) -> bool:
         """ Checks whether user is frogged.
         :param user_id: The ID of the user to check it. """
@@ -273,9 +258,6 @@ class Player(commands.Cog):
         user_frogged = await mycursor.fetchone()
         await mycursor.close()
         return user_frogged is not None and user_frogged[0]
-
-
-
 
     async def insert_skill_action(self, user_id: int, skill_type: str, skill_timestamp: int, target_id: int = None, message_id: int = None, channel_id: int = None, emoji: str = None, price: int = 0, content: str = None) -> None:
         """ Inserts a skill action into the database, if needed.
@@ -347,7 +329,6 @@ class Player(commands.Cog):
         skill_action = await mycursor.fetchone()
         await mycursor.close()
         return skill_action
-
 
     async def get_skill_action_by_user_id_and_skill_type(self, user_id: int, skill_type: str) -> Union[List[Union[int, str]], bool]:
         """ Gets a skill action by user ID and skill type.
@@ -513,7 +494,6 @@ class Player(commands.Cog):
         await db.commit()
         await mycursor.close()
 
-
     # ========== UPDATE ========== #
 
     async def update_user_money(self, user_id: int, money: int):
@@ -566,5 +546,4 @@ class Player(commands.Cog):
         await mycursor.execute("UPDATE UserCurrency SET last_skill_ts = 0 WHERE user_id = %s", (user_id,))
         await db.commit()
         await mycursor.close()
-
 

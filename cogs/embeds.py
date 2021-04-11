@@ -5,7 +5,6 @@ from extra.useful_variables import rules
 
 allowed_roles = [int(os.getenv('OWNER_ROLE_ID')), int(os.getenv('ADMIN_ROLE_ID')), int(os.getenv('MOD_ROLE_ID'))]
 
-
 class Embeds(commands.Cog):
     '''
     A cog related to embedded messages.
@@ -68,7 +67,6 @@ class Embeds(commands.Cog):
         embed.set_author(name='The Language Sloth', url='https://discordapp.com',
                          icon_url='https://cdn.discordapp.com/attachments/562019489642709022/676564701399744512/jungle_2.gif')
         await ctx.send(embed=embed)
-
 
 def setup(client):
     client.add_cog(Embeds(client))

@@ -26,7 +26,6 @@ class CreateSmartRoom(commands.Cog):
         print("CreateSmartRoom cog is online")
         self.check_galaxy_expiration.start()
 
-
     @tasks.loop(hours=3)
     async def check_galaxy_expiration(self):
         """ Task that checks Galaxy Rooms expirations. """
@@ -74,7 +73,6 @@ class CreateSmartRoom(commands.Cog):
             finally:
                 await self.delete_galaxy_vc(room[0], room[2])
 
-
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after) -> None:
         """ Handler for voice channel activity, that's eventually gonna be used
@@ -113,7 +111,6 @@ class CreateSmartRoom(commands.Cog):
             if the_time - old_time >= 60:
                 await self.update_user_vc_ts(member.id, the_time)
 
-
             df_msg = await member.send(file=discord.File('./images/smart_vc/selection_menu.png'))
             await df_msg.add_reaction('1️⃣')
             await df_msg.add_reaction('2️⃣')
@@ -134,7 +131,6 @@ class CreateSmartRoom(commands.Cog):
                 await self.premium_room(member)
             else:
                 await self.galaxy_room(member)
-
 
     # Room type 1
     async def basic_room(self, member: discord.Member) -> None:
@@ -205,7 +201,6 @@ class CreateSmartRoom(commands.Cog):
 
             if user_currency[0][1] < 5:
                 return await member.send("**You don't have enough money to buy this service!**")
-
 
             # Gets the CreateSmartRoom category, creates the VC and tries to move the user to there
             the_category_test = discord.utils.get(member.guild.categories, id=self.cat_id)
@@ -343,11 +338,9 @@ class CreateSmartRoom(commands.Cog):
                 except Exception:
                     pass
 
-
         # Restart room setup
         else:
             return await self.premium_room(member)
-
 
     async def try_to_create(self, kind: str, category: discord.CategoryChannel = None, guild: discord.Guild = None, **kwargs: Any) -> Union[bool, Any]:
         """ Try to create something.
@@ -428,7 +421,6 @@ class CreateSmartRoom(commands.Cog):
         if category_name is None:
             return
 
-
         # Gets the size of the room
         msg2 = await member.send(file=discord.File('./images/smart_vc/galaxy/3 select size vc.png'))
         bot_msg = msg2
@@ -488,7 +480,6 @@ class CreateSmartRoom(commands.Cog):
 
             if user_currency[0][1] < 1000:
                 return await member.send("**You don't have enough money to buy this service!**")
-
 
             creations = []
             failed = False
@@ -577,7 +568,6 @@ class CreateSmartRoom(commands.Cog):
         else:
             return reaction, user
 
-
     async def overwrite_image(self, member_id, text, coords, color, image) -> None:
         """ Writes a text on a Smartroom's image preview, and overwrites the original one.
         :param member_id: The ID of the user who's creating it.
@@ -649,7 +639,6 @@ class CreateSmartRoom(commands.Cog):
         await self.overwrite_image(member_id, vc, (585, 970), color, f'./images/smart_vc/user_previews/{member_id}.png')
         if int(size) != 0:
             await self.overwrite_image_with_image(member_id, (405, 975), f'./images/smart_vc/sizes/voice channel ({size}).png')
-
 
     # Database commands
 
@@ -842,7 +831,6 @@ class CreateSmartRoom(commands.Cog):
         await mycursor.close()
         return galaxy_vc
 
-
     async def get_all_galaxy_rooms(self, the_time: int):
         """ Get all expired Galaxy Rooms.
         :param the_time The current time. """
@@ -886,7 +874,6 @@ class CreateSmartRoom(commands.Cog):
         if not members:
             return await ctx.send(f"**Inform one or more members to allow, {member.mention}!**")
 
-
         user_galaxy = await self.get_galaxy_txt(member.id, ctx.channel.category.id)
         if not user_galaxy:
             return await ctx.send(f"**This is not your room, so you cannot allow someone in it, {member.mention}!**")
@@ -915,7 +902,6 @@ class CreateSmartRoom(commands.Cog):
 
         allowed = ', '.join(allowed)
         await ctx.send(f"**{allowed} {'have' if len(allowed) > 1 else 'has'} been allowed, {member.mention}!**")
-
 
     @staticmethod
     async def get_mentions(message: discord.Message) -> List[discord.Member]:
@@ -968,11 +954,9 @@ class CreateSmartRoom(commands.Cog):
         if not members:
             return await ctx.send(f"**Inform one or more members to forbid, {member.mention}!**")
 
-
         user_galaxy = await self.get_galaxy_txt(ctx.author.id, ctx.channel.category.id)
         if not user_galaxy:
             return await ctx.send(f"**This is not your room, so you cannot forbid someone from it, {member.mention}!**")
-
 
         channels = [
             discord.utils.get(ctx.guild.categories, id=user_galaxy[0][1]),
@@ -998,7 +982,6 @@ class CreateSmartRoom(commands.Cog):
         forbid = ', '.join(forbid)
 
         await ctx.send(f"**{forbid} {'have' if len(forbid) > 1 else 'has'} been forbidden, {member.mention}!**")
-
 
     async def get_user_vc_timestamp(self, user_id: int, the_time: int) -> int:
         """ Gets the user voice channel timestamp, and insert them into the database
@@ -1096,7 +1079,6 @@ class CreateSmartRoom(commands.Cog):
         else:
             return True
 
-
     # Other useful commands
     @commands.command(aliases=['creation', 'expiration'])
     async def galaxy_info(self, ctx) -> None:
@@ -1184,11 +1166,9 @@ class CreateSmartRoom(commands.Cog):
         if member.id != galaxy_room[0] and not perms.administrator:
             return await ctx.send(f"**You don't have permission to do this, {member.mention}!**")
 
-
         confirm = await ConfirmSkill(f"**Are you sure you want to close this Galaxy Room, {member.mention}!**").prompt(ctx)
         if not confirm:
             return await ctx.send(f"**Not deleting it then, {member.mention}!**")
-
 
         member = self.client.get_user(galaxy_room[0])
         rooms = [
@@ -1204,8 +1184,6 @@ class CreateSmartRoom(commands.Cog):
             pass
         finally:
             await self.delete_galaxy_by_cat_id(galaxy_room[1])
-
-
 
     async def increment_galaxy_ts(self, user_id: int, addition: int) -> None:
         """ Increments a Galaxy Room's timestamp so it lasts longer.
@@ -1258,7 +1236,6 @@ class CreateSmartRoom(commands.Cog):
             return True
         else:
             return False
-
 
 def setup(client):
     """ Cog's setup function. """

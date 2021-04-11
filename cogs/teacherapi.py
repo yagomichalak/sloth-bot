@@ -29,7 +29,6 @@ class TeacherAPI(commands.Cog):
         # self.website_link: str = 'http://127.0.0.1:8000'
         self.django_website_root =  os.getenv('DJANGO_WEBSITE_ROOT')
 
-
     @commands.Cog.listener()
     async def on_ready(self) -> None:
         """ For when the bot starts up """
@@ -48,7 +47,6 @@ class TeacherAPI(commands.Cog):
         else:
             return f"./media/flags/default.png"
 
-
     async def paste_text(self, draw, coords: Tuple[int], text: str, color: Tuple[int], font, stroke: Tuple[int]) -> None:
         """ Pastes the given text making a nifty stroke around it.
         :param draw: The draw object to paste on.
@@ -63,7 +61,6 @@ class TeacherAPI(commands.Cog):
         draw.text((coords[0], coords[1]-1), text, stroke, font=font) # Top
         draw.text((coords[0], coords[1]+1), text, stroke, font=font) # Bottom
         draw.text((coords[0], coords[1]), text, color, font=font) # Center
-
 
     async def make_description(self, description: str) -> str:
         """ Rearranges the given text by adding \\n tags every 29 characters
@@ -98,7 +95,6 @@ class TeacherAPI(commands.Cog):
 
                 im = image.convert('RGBA')
                 return im
-
 
     @commands.command(aliases=['mc', 'card'])
     @commands.has_any_role(*allowed_roles)
@@ -159,7 +155,6 @@ class TeacherAPI(commands.Cog):
         await self.paste_text(draw, (230, 208), time, (0, 196, 187), small, (5, 66, 39))
         await self.paste_text(draw, (170, 280), description, (0, 196, 187), small, (5, 66, 39))
 
-
         # Get current timestamp
         epoch = datetime.utcfromtimestamp(0)
         the_time = (datetime.utcnow() - epoch).total_seconds()
@@ -204,8 +199,6 @@ class TeacherAPI(commands.Cog):
                 full_path = os.path.join(path, file)
                 zip.write(full_path, file)
 
-
-
         await ctx.send(file=discord.File('media/temporary/teacher_icons.zip'))
 
         # Deletes the icons folder
@@ -214,7 +207,6 @@ class TeacherAPI(commands.Cog):
             shutil.rmtree('./media/temporary')
         except Exception as e:
             pass
-
 
     async def get_flag(self, language: str) -> str:
         """ Gets the flag for the given language if there is one, otherwise returns the default flag.
@@ -235,7 +227,6 @@ class TeacherAPI(commands.Cog):
         # If not found, returns the default one
         else:
             return './media/flags/default.png'
-
 
     @commands.command(aliases=['uc'])
     @commands.has_permissions(administrator=True)
@@ -269,7 +260,6 @@ class TeacherAPI(commands.Cog):
                         await msg.add_reaction('✅')
                         await asyncio.sleep(0.5)
 
-
     async def clear_classes_channel(self, guild: discord.Guild) -> None:
         """ Clears all messages from the classes channel. """
 
@@ -298,7 +288,6 @@ class TeacherAPI(commands.Cog):
             weekdays[teacher_class['weekday']].append(teacher_class['image'])
 
         return weekdays
-
 
     @commands.command(aliases=['schedule', 'scheduled', 'scheduled classes', 'cls'])
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -419,7 +408,6 @@ class TeacherAPI(commands.Cog):
         if not member:
             return await ctx.send("**Inform the the member to check whether they're a teacher!**")
 
-
         teacher_role = discord.utils.get(ctx.guild.roles, id=self.teacher_role_id)
         teacher_state = await self._get_teacher_state(member.id)
         teacher_embed = discord.Embed(
@@ -431,7 +419,6 @@ class TeacherAPI(commands.Cog):
 
         await ctx.send(embed=teacher_embed)
 
-
     async def get_teacher_cards(self, user_id: int) -> List[List[Union[int, str]]]:
         """ Gets all cards from a given teacher.
         :param user_id: The ID of the teacher. """
@@ -441,7 +428,6 @@ class TeacherAPI(commands.Cog):
         data = await mycursor.fetchall()
         await mycursor.close()
         return data
-
 
     @commands.command(aliases=['see_cards', 'stc'])
     @commands.cooldown(1, 10, commands.BucketType.user)
@@ -464,7 +450,6 @@ class TeacherAPI(commands.Cog):
         await msg.add_reaction('⬅️')
         await msg.add_reaction('➡️')
         await msg.add_reaction('🛑')
-
 
         while True:
             current = data[index]
@@ -516,7 +501,6 @@ class TeacherAPI(commands.Cog):
     async def _delete_teacher_cards(self, user_id: int) -> None:
         """ Deletes all cards from a given teacher.
         :param user_id: The ID of the teacher from which to delete the cards. """
-
 
         mycursor, db = await the_django_database()
         await mycursor.execute("DELETE FROM teacherclass_teacherclass WHERE owner_id = %s", (user_id,))
@@ -575,7 +559,6 @@ class TeacherAPI(commands.Cog):
 
             await msg.remove_reaction('⬅️', u)
             await msg.remove_reaction('➡️', u)
-
 
 def setup(client) -> None:
     client.add_cog(TeacherAPI(client))

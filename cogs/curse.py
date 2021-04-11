@@ -16,13 +16,11 @@ class CurseMember(commands.Cog):
 
         self.client = client
 
-
     @commands.Cog.listener()
     async def on_ready(self) -> None:
         """ Tells when the cog's ready to be used. """
 
         print('CurseMember cog is online!')
-
 
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after) -> None:
@@ -40,7 +38,6 @@ class CurseMember(commands.Cog):
         if not after.channel:
             if voice_client.channel == before.channel:
                 await voice_client.disconnect()
-
 
         if after.channel:
             if voice_client and after.channel:
@@ -76,7 +73,6 @@ class CurseMember(commands.Cog):
         await ctx.message.delete()
         if not member:
             return await ctx.send("**Inform a member to curse!**", delete_after=3)
-
 
         if member.voice:
             await self.is_connected(ctx)
@@ -121,7 +117,6 @@ class CurseMember(commands.Cog):
         await db.commit()
         await mycursor.close()
 
-
     @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
     async def create_table_cursed_member(self, ctx) -> None:
@@ -134,7 +129,6 @@ class CurseMember(commands.Cog):
         await mycursor.close()
 
         return await ctx.send("**Table CursedMember was created!**", delete_after=3)
-
 
     @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
@@ -149,7 +143,6 @@ class CurseMember(commands.Cog):
 
         return await ctx.send("**Table CursedMember was dropped!**", delete_after=3)
 
-
     @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
     async def reset_table_cursed_member(self, ctx) -> None:
@@ -162,7 +155,6 @@ class CurseMember(commands.Cog):
         await mycursor.close()
 
         return await ctx.send("**Table CursedMember was reseted!**", delete_after=3)
-
 
     async def get_cursed_member(self, user_id: int) -> List[List[int]]:
         """ Gets the cursed member from the database. """
@@ -188,7 +180,6 @@ class CurseMember(commands.Cog):
         else:
             await mycursor.close()
             return False
-
 
 def setup(client):
     """ Cog's setup function. """

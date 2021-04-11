@@ -23,7 +23,6 @@ class Agares(Player):
             int(os.getenv('APPLICATION_CAT_ID'))
         ]
 
-
     @commands.command(aliases=['ma'])
     @Player.skill_on_cooldown()
     @Player.user_is_class('agares')
@@ -121,7 +120,6 @@ class Agares(Player):
         if target_currency[7] == 'default':
             return await ctx.send(f"**You cannot recharge the skill of someone who has a `default` Sloth class, {perpetrator.mention}!**")
 
-
         confirm = await ConfirmSkill(f"**Are you sure you to reset {target.mention}'s first skill cooldown, {perpetrator.mention}?**").prompt(ctx)
         if not confirm:
             return await ctx.send(f"**Not resetting it, then!**")
@@ -145,7 +143,6 @@ class Agares(Player):
 
             await ctx.send(embed=recharge_embed)
 
-
     async def get_magic_pull_embed(self, channel, perpetrator_id: int, target_id: int, t_before_vc: discord.VoiceChannel, t_after_vc: discord.VoiceChannel) -> discord.Embed:
         """ Makes an embedded message for a magic pull action.
         :param channel: The context channel.
@@ -165,7 +162,6 @@ class Agares(Player):
         magic_pull_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon_url)
 
         return magic_pull_embed
-
 
     async def get_recharge_embed(self, channel, perpetrator_id: int, target_id: int) -> discord.Embed:
         """ Makes an embedded message for a recharge action.

@@ -19,7 +19,6 @@ class EventManagement(commands.Cog):
 
         self.client = client
 
-
     @commands.Cog.listener()
     async def on_ready(self) -> None:
         """ Tells when the cog is ready to use. """
@@ -35,7 +34,6 @@ class EventManagement(commands.Cog):
         mod_role = discord.utils.get(guild.roles, id=mod_role_id)
 
         overwrites = {}
-
 
         overwrites[guild.default_role] = discord.PermissionOverwrite(
         read_messages=False, send_messages=False, connect=False,
@@ -56,7 +54,6 @@ class EventManagement(commands.Cog):
         speak=True, move_members=True, view_channel=True)
 
         return overwrites
-
 
     # CREATE EVENT
 
@@ -219,7 +216,6 @@ class EventManagement(commands.Cog):
         else:
             await ctx.send(f"**{ctx.author.mention}, {text_channel.mention} is up and running!**")
 
-
     # DELETE EVENT
 
     @commands.command()
@@ -233,14 +229,12 @@ class EventManagement(commands.Cog):
         if not (room := await self.get_event_room_by_txt_id(ctx.channel.id)):
             return await ctx.send(f"**{member.mention}, this is not an event room**")
 
-
         # Checks whether member can delete room
         if room[0] == member.id: # If it's the owner of the room
             delete = True
 
         elif perms.administrator or mod_role_id in [r.id for r in member.roles]: # If it's a staff member
             delete = True
-
 
         if delete:
             confirm = await ConfirmSkill(f"**{member.mention}, are you sure you want to delete the event rooms?**").prompt(ctx)
@@ -254,7 +248,6 @@ class EventManagement(commands.Cog):
                     await ctx.send(f"**Something went wrong with it, try again later, {member.mention}!**")
             else:
                 await ctx.send(f"**Not deleting them, then, {member.mention}!**")
-
 
     # ======
 
@@ -284,7 +277,6 @@ class EventManagement(commands.Cog):
         event_room = await mycursor.fetchone()
         await mycursor.close()
         return event_room
-
 
     async def get_event_room_by_vc_id(self, vc_id: int) -> List[int]:
         """ Gets an Event Room by VC ID.
@@ -392,7 +384,6 @@ class EventManagement(commands.Cog):
             return False
         else:
             return True
-
 
 def setup(client) -> None:
     """ Cog's setup function. """

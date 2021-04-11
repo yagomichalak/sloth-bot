@@ -11,7 +11,6 @@ bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
 
 class Warrior(Player):
 
-
     def __init__(self, client) -> None:
         self.client = client
         # super().__init__(self)
@@ -55,11 +54,9 @@ class Warrior(Player):
         if await self.is_user_knocked_out(target.id):
             return await ctx.send(f"**{attacker.mention}, {target.mention} is already knocked out!**")
 
-
         confirmed = await ConfirmSkill(f"**{attacker.mention}, are you sure you want to knock {target.mention} out?**").prompt(ctx)
         if not confirmed:
             return await ctx.send("**Not knocking them out, then!**")
-
 
         await self.check_cooldown(user_id=attacker.id, skill_number=1)
 
@@ -82,7 +79,6 @@ class Warrior(Player):
             print(e)
             return await ctx.send(f"**Something went wrong and your `Hit` skill failed, {attacker.mention}!**")
 
-
     @commands.command(aliases=['crush', 'break'])
     @Player.skills_used(requirement=5)
     @Player.skill_on_cooldown(skill_number=2)
@@ -92,7 +88,6 @@ class Warrior(Player):
     async def smash(self, ctx, target: discord.Member = None) -> None:
         """ Has a 35% change of breaking someone's Divine Protection shield.
         :param target: The target who you are trying to smash the protection. """
-
 
         attacker = ctx.author
 
@@ -129,7 +124,6 @@ class Warrior(Player):
         if not confirmed:
             return await ctx.send("**Not hacking them, then!**")
 
-
         await self.check_cooldown(user_id=attacker.id, skill_number=2)
 
         current_timestamp = await self.get_timestamp()
@@ -156,8 +150,6 @@ class Warrior(Player):
         else:
             await ctx.send(f"**You had a `35%` chance of smashing {target.mention}'s Divine Protection shield, but you missed it, {attacker.mention}!**")
 
-
-
     async def check_knock_outs(self) -> None:
 
         """ Check on-going knock-outs and their expiration time. """
@@ -175,8 +167,6 @@ class Warrior(Player):
                     description=f"**<@{ko[3]}> got better from <@{ko[0]}>'s knock-out! 🤕**",
                     color=discord.Color.red()))
 
-
-
     async def update_user_is_knocked_out(self, user_id: int, is_it: int) -> None:
         """ Updates the user's protected state.
         :param user_id: The ID of the member to update.
@@ -186,7 +176,6 @@ class Warrior(Player):
         await mycursor.execute("UPDATE UserCurrency SET knocked_out = %s WHERE user_id = %s", (is_it, user_id))
         await db.commit()
         await mycursor.close()
-
 
     async def get_hit_embed(self, channel, perpetrator_id: int, target_id: int) -> discord.Embed:
         """ Makes an embedded message for a knock-out action.

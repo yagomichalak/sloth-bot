@@ -14,8 +14,6 @@ class Metamorph(Player):
         self.client = client
         # self.bots_txt = await self.client.fetch_channel(bots_and_commands_channel_id)
 
-
-
     @commands.command(aliases=['transmutate', 'trans'])
     @Player.skill_on_cooldown()
     @Player.user_is_class('metamorph')
@@ -64,13 +62,11 @@ class Metamorph(Player):
 
             channel = self.bots_txt
 
-
             await channel.send(
                 content=f"<@{tm[0]}>",
                 embed=discord.Embed(
                     description=f"**<@{tm[3]}>'s `Transmutation` has just expired! 🐩→💥→🦥**",
                     color=discord.Color.red()))
-
 
     async def check_frogs(self) -> None:
 
@@ -102,7 +98,6 @@ class Metamorph(Player):
         """ Makes someone a frog temporarily.
         :param target: The person who you want to frog. """
 
-
         if ctx.channel.id != bots_and_commands_channel_id:
             return await ctx.send(f"**{ctx.author.mention}, you can only use this command in {self.bots_txt.mention}!**")
 
@@ -118,7 +113,6 @@ class Metamorph(Player):
 
         if 'knocked_out' in attacker_effects:
             return await ctx.send(f"**{attacker.mention}, you can't use your skill, because you are knocked-out!**")
-
 
         target_effects = await self.get_user_effects(user_id=target.id)
 
@@ -153,7 +147,6 @@ class Metamorph(Player):
             frogged_embed = await self.get_frogged_embed(channel=ctx.channel, attacker_id=attacker.id, target_id=target.id)
             await ctx.send(embed=frogged_embed)
 
-
     async def get_transmutation_embed(self, channel, perpetrator_id: int) -> discord.Embed:
         """ Makes an embedded message for a transmutation action.
         :param channel: The context channel.
@@ -172,7 +165,6 @@ class Metamorph(Player):
         transmutation_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon_url)
 
         return transmutation_embed
-
 
     async def get_frogged_embed(self, channel, attacker_id: int, target_id: int) -> discord.Embed:
         """ Makes an embedded message for a frog action.
@@ -193,7 +185,6 @@ class Metamorph(Player):
         transmutation_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon_url)
 
         return transmutation_embed
-
 
     async def update_user_frogged(self, user_id: int, frogged: int) -> None:
         """ Updates the user's frog state.

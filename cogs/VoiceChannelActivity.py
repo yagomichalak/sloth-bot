@@ -17,7 +17,6 @@ class VoiceChannelActivity(commands.Cog):
         self.client = client
         self.server_id = 777886754761605140
 
-
     @commands.Cog.listener()
     async def on_ready(self) -> None:
         """ Tells when the cog is ready to use. """
@@ -31,7 +30,6 @@ class VoiceChannelActivity(commands.Cog):
     async def on_voice_state_update(self, member, before, after):
         """ Registers a member whenever they join a channel. """
 
-
         # === Checks whether the user just changed their state being in the same VC. ===
         if before.self_mute != after.self_mute: return
         if before.self_deaf != after.self_deaf: return
@@ -41,7 +39,6 @@ class VoiceChannelActivity(commands.Cog):
         if before.mute != after.mute: return
         if before.deaf != after.deaf: return
 
-
         if channel := after.channel:
 
             tzone = timezone('Etc/GMT-1')
@@ -49,7 +46,6 @@ class VoiceChannelActivity(commands.Cog):
             the_time = date_and_time.strftime('%H:%M')
 
             await self.insert_row(the_time, channel.id, channel.name, member.id, member.name)
-
 
     @tasks.loop(seconds=60)
     async def calculate(self) -> None:
@@ -72,7 +68,6 @@ class VoiceChannelActivity(commands.Cog):
         all_channel_members = [m for c in all_channel_members for m in c]
         if all_channel_members:
             await self.insert_first_row(all_channel_members)
-
 
     @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
@@ -120,7 +115,6 @@ class VoiceChannelActivity(commands.Cog):
         await db.commit()
         await mycursor.close()
         await ctx.send("**Table __VoiceChannelActivity__ reset!**")
-
 
     async def insert_first_row(self, channel_members: List[Tuple[Union[int, str]]]) -> None:
         """ Inserts the first row of the minute with the info of all users who are in voice channels.
@@ -300,7 +294,6 @@ class VoiceChannelActivity(commands.Cog):
                 the_time1 = f"{time.hour}:{time.minute}"
                 the_time2 = f"{time2.hour}:{time2.minute}"
 
-
                 await mycursor.execute("""
                     SELECT DISTINCT the_time, channel_id, channel_name, member_id
                     FROM VoiceChannelActivity
@@ -357,7 +350,6 @@ class VoiceChannelActivity(commands.Cog):
         if not time:
             return await ctx.send("**Yo, inform a time!**")
 
-
         time = await self.format_time(time)
         time2 = await self.format_time(time2) if time2 else None
 
@@ -402,14 +394,12 @@ class VoiceChannelActivity(commands.Cog):
 
         channels = set([c.mention if (c := discord.utils.get(ctx.guild.channels, id=channel[1])) else channel[2] for channel in records])
 
-
         embed = discord.Embed(
             title=text,
             description=f"{', '.join(channels)}"
             )
 
         await ctx.send(embed=embed)
-
 
 def setup(client) -> None:
     client.add_cog(VoiceChannelActivity(client))

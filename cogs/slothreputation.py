@@ -8,7 +8,6 @@ from extra.menu import ConfirmSkill
 
 commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
 
-
 class SlothReputation(commands.Cog):
     '''
     Reputation commands
@@ -84,13 +83,10 @@ class SlothReputation(commands.Cog):
             else:
                 return await ctx.send(f"**{member} doesn't have an account yet!**")
 
-
-
         SlothCurrency = self.client.get_cog('SlothCurrency')
 
         if ucur[0][12]:
             return await SlothCurrency.send_hacked_image(ctx, member)
-
 
         all_users = await self.get_all_users_by_score_points()
         position = [[i+1, u[4]] for i, u in enumerate(all_users) if u[0] == member.id]
@@ -103,7 +99,6 @@ class SlothReputation(commands.Cog):
 
         elif not user_info and not member.id == ctx.author.id:
             return await ctx.send("**Member not found in the system!**")
-
 
         SlothClass = self.client.get_cog('SlothClass')
         effects = await SlothClass.get_user_effects(user_id=member.id)
@@ -139,7 +134,6 @@ class SlothReputation(commands.Cog):
         embed.add_field(name=f"🏆 __**Leaderboard Info:**__", value=f"{position[1]}. pts | #{position[0]}", inline=True)
         embed.add_field(name="🧮 __**Skills Used:**__", value=f"{ucur[0][15]} skills.")
 
-
         # Gets tribe information for the given user
         user_tribe = await SlothClass.get_tribe_info_by_user_id(user_id=member.id)
         if user_tribe['name']:
@@ -170,7 +164,6 @@ class SlothReputation(commands.Cog):
             else:
                 await ctx.send(f"**{ctx.author.mention}, not exchanging, then!**")
 
-
     @commands.command(aliases=['leaderboard', 'lb', 'scoreboard'])
     async def score(self, ctx):
         """ Shows the top ten members in the reputation leaderboard. """
@@ -200,7 +193,6 @@ class SlothReputation(commands.Cog):
             if i + 1 == 10:
                 break
         return await ctx.send(embed=leaderboard)
-
 
     @commands.command(aliases=['level_board', 'levelboard', 'levels'])
     async def level_score(self, ctx):
@@ -342,7 +334,6 @@ class SlothReputation(commands.Cog):
         await mycursor.execute(f"UPDATE MembersScore set user_lvl = user_lvl+1 WHERE user_id = {id}")
         await db.commit()
         await mycursor.close()
-
 
     async def update_user_xp_time(self, id: int, time: int):
         mycursor, db = await the_database()

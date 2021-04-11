@@ -7,7 +7,6 @@ def tr(language: str, message: str) -> List[str]:
     :param message: The message to translate.
     :return: A translated message. """
 
-
     print(language, message)
     trans = Translator(service_urls=['translate.googleapis.com'])
 
@@ -20,7 +19,6 @@ def tr(language: str, message: str) -> List[str]:
     else:
         print('AH')
         return translation.src, translation.dest, translation.text
-
 
 message = tr(language="en", message="Das ist wirklich")
 # print(message)

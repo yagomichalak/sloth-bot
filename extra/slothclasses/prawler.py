@@ -17,7 +17,6 @@ class Prawler(Player):
         self.client = client
         # bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
 
-
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload) -> None:
         """ Checks reactions related to skill actions. """
@@ -55,7 +54,6 @@ class Prawler(Player):
                     embed=discord.Embed(
                         description=f"**{payload.member.mention} defended themselves against <@{skill_action[0]}>'s stealing, good luck next time!**",
                         color=discord.Color.green()))
-
 
     @commands.command(aliases=['stl', 'rob'])
     @Player.skill_on_cooldown()
@@ -121,9 +119,6 @@ class Prawler(Player):
             await steal.add_reaction('🛡️')
             await steal.edit(content=f"<@{target.id}>")
 
-
-
-
     @commands.command()
     @Player.skills_used(requirement=5)
     @Player.skill_on_cooldown(skill_number=2, seconds=2592000)
@@ -152,7 +147,6 @@ class Prawler(Player):
         if not user[1] >= 1000:
             return await ctx.send(f"**You don't have `1000łł` to use this skill, {perpetrator.mention}!**")
 
-
         confirmed = await ConfirmSkill(
             f"**{perpetrator.mention}, are you sure you want to sharpen your knife sharpness stack `{stack}` to `{stack+1}` for `1000łł`?**"
             ).prompt(ctx)
@@ -178,7 +172,6 @@ class Prawler(Player):
             sharpen_embed = await self.get_sharpen_embed(
                 channel=ctx.channel, perpetrator_id=perpetrator.id, stack=stack+1)
             await ctx.send(embed=sharpen_embed)
-
 
     async def check_steals(self) -> None:
         """ Check on-going steals and their expiration time. """
@@ -218,7 +211,6 @@ class Prawler(Player):
                 if stack:
                     return await self.double_steal(channel=channel, attacker_id=steal[0], target_id=steal[3], stack=stack)
 
-
     async def double_steal(self, channel: discord.TextChannel, attacker_id: int, target_id: int, stack: int, loop: int = 1, init_rob_money: int = 5) -> None:
         """ Tries to double the steal based on the attacker's knife sharpness stack.
         :param attacker_id: The ID of the attacker.
@@ -227,7 +219,6 @@ class Prawler(Player):
         :param init_rob_money: The initial rob money that will be doubled. """
 
         rob_money = init_rob_money * 2
-
 
         # Calculates a 35% chance of doubling the previous steal amount
         if random.random() <= 0.35:
@@ -255,13 +246,10 @@ class Prawler(Player):
             await channel.send(
                 f"**<@{attacker_id}>, you had a `35%` chance of doubling the previous amount and getting more `{rob_money}łł`, but you missed it!**")
 
-
-
     async def increments_user_sharpness_stack(self, user_id: int, increment: int) -> None:
         """ Increments the user knife sharpness stack.
         :param user_id: The ID of the user.
         :param increment: The value to be incremented (negative numbers to decrement). """
-
 
         mycursor, db = await the_database()
         await mycursor.execute("""
@@ -270,7 +258,6 @@ class Prawler(Player):
             WHERE user_id = %s""", (increment, user_id))
         await db.commit()
         await mycursor.close()
-
 
     async def get_expired_steals(self) -> List[List[Union[str, int]]]:
         """ Gets expired steal skill actions. """
@@ -309,7 +296,6 @@ class Prawler(Player):
         steal_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon_url)
 
         return steal_embed
-
 
     async def get_sharpen_embed(self, channel, perpetrator_id: int, stack: int) -> discord.Embed:
         """ Makes an embedded message for a knife sharpen action.

@@ -23,7 +23,6 @@ owner_role_id=int(os.getenv('OWNER_ROLE_ID'))
 allowed_roles = [owner_role_id, admin_role_id, mod_role_id, int(os.getenv('SLOTH_LOVERS_ROLE_ID'))]
 teacher_role_id = int(os.getenv('TEACHER_ROLE_ID'))
 
-
 class Tools(commands.Cog):
     """ Some useful tool commands. """
 
@@ -33,7 +32,6 @@ class Tools(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         print('Tools cog is ready!')
-
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -61,7 +59,6 @@ class Tools(commands.Cog):
 
         else:
             return await ctx.send(f"**No role with that name was found!**")
-
 
     # Countsdown from a given number
     @commands.command()
@@ -120,7 +117,6 @@ class Tools(commands.Cog):
 
         voice = ctx.message.author.voice
         voice_client = ctx.message.guild.voice_client
-
 
         # Checks if the user is in a voice channel
         if voice is None:
@@ -209,7 +205,6 @@ class Tools(commands.Cog):
                               colour=ctx.author.color, timestamp=ctx.message.created_at)
         embed.set_author(name=ctx.author, icon_url=ctx.author.avatar_url)
         return await ctx.send(embed=embed)
-
 
     @commands.command()
     @commands.has_permissions(administrator=True)
@@ -322,7 +317,6 @@ class Tools(commands.Cog):
         all_members = [m.name for vc in vcs for m in vc.members]
         await ctx.send(f"**`{len(all_members)}` members are in a vc atm!**")
 
-
     @commands.command()
     @commands.has_any_role(*allowed_roles)
     async def vc(self, ctx, member: discord.Member = None) -> None:
@@ -344,7 +338,6 @@ class Tools(commands.Cog):
             await ctx.send(msg)
         else:
             await ctx.send(f"**{member.mention} is not in a VC!**")
-
 
     @commands.command(aliases=['mag'], hidden=True)
     @commands.cooldown(1, 300, commands.BucketType.guild)
@@ -443,7 +436,6 @@ class Tools(commands.Cog):
             text.append(f"**`{not_moved}` {'people were' if moved > 1 else 'person was'} not moved!**")
         await ctx.send(' '.join(text))
 
-
     @commands.command(aliases=['tp', 'beam'])
     @commands.has_permissions(administrator=True)
     async def teleport(self, ctx, vc_1: discord.VoiceChannel = None, vc_2: discord.VoiceChannel = None) -> None:
@@ -462,7 +454,6 @@ class Tools(commands.Cog):
             if not voice:
                 return await ctx.send(f"**You provided just 1 VC, and you're not in one, so we can't make a target VC, {member.mention}!**")
             vc_1, vc_2 = voice, vc_1
-
 
         moved = not_moved = 0
 
@@ -552,7 +543,6 @@ class Tools(commands.Cog):
         else:
             await ctx.send(f"**List sent into your DM's, {member.mention}!**")
 
-
     @staticmethod
     async def send_big_message(channel, message):
         """ Sends a big message to a given channel. """
@@ -599,7 +589,6 @@ class Tools(commands.Cog):
 
     # Database (CRUD)
 
-
     async def insert_user_timezone(self, user_id: int, my_timezone: str) -> None:
         """ Inserts a timezone for a user.
         :param user_id: The ID of the user to insert.
@@ -630,7 +619,6 @@ class Tools(commands.Cog):
         await db.commit()
         await mycursor.close()
 
-
     async def delete_user_timezone(self, user_id: int) -> None:
         """ Deletes the user's timezone.
         :param user_id: The ID of the user to delete. """
@@ -639,7 +627,6 @@ class Tools(commands.Cog):
         await mycursor.execute("DELETE FROM UserTimezones WHERE user_id = %s", (user_id,))
         await db.commit()
         await mycursor.close()
-
 
     @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
@@ -700,7 +687,6 @@ class Tools(commands.Cog):
 
         else:
             return True
-
 
 def setup(client):
     client.add_cog(Tools(client))

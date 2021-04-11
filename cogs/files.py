@@ -2,7 +2,6 @@ import discord
 from discord.ext import commands
 import os
 
-
 class Files(commands.Cog):
     '''
     File related commands; showing, sending files.
@@ -71,7 +70,6 @@ class Files(commands.Cog):
             embed.add_field(name='None', value='No files available')
 
         await ctx.send(content=None, embed=embed)
-
 
 def setup(client):
     client.add_cog(Files(client))

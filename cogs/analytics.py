@@ -10,10 +10,8 @@ import asyncio
 from mysqldb import the_database
 import io
 
-
 bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
 select_your_language_channel_id = int(os.getenv('SELECT_YOUR_LANGUAGE_CHANNEL_ID'))
-
 
 class Analytics(commands.Cog):
     """ A cog related to the analytics of the server. """
@@ -297,7 +295,6 @@ class Analytics(commands.Cog):
 
     # ==========================================#
 
-
     async def get_monthly_total(self) -> List[int]:
         """ Gets all monthly total of members. """
 
@@ -337,7 +334,6 @@ class Analytics(commands.Cog):
         await mycursor.close()
         # pprint(months)
         return months
-
 
     async def growth_percentage(self, present: int, past: int) -> float:
         """ Gets the growth percentage of a value compared to another one.
@@ -382,7 +378,6 @@ class Analytics(commands.Cog):
 
         return pr_list
 
-
     async def get_current_day_and_future_day(self, days: int, hours: int) -> str:
         """ Gets the current day and the future day, by incrementing X days to the current day.
         :param days: The amount of days to be incremented.
@@ -408,7 +403,6 @@ class Analytics(commands.Cog):
         # print('-'*20)
         tzone = timezone('Etc/GMT-1')
         td = datetime.now().astimezone(tzone)
-
 
         while True:
 
@@ -444,7 +438,6 @@ class Analytics(commands.Cog):
             current_compound = sum_both
             count += 1
 
-
         last_day, future_day = await self.get_current_day_and_future_day(count, hours)
         line1 = f"{'Present:':<8} {present} members. Date: ({last_day})"
         line2 = f"|↓ in {count} day(s) and {hours} hours ↓|"
@@ -459,8 +452,6 @@ class Analytics(commands.Cog):
         last_record = await mycursor.fetchone()
         await mycursor.close()
         return last_record[0]
-
-
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -501,8 +492,6 @@ class Analytics(commands.Cog):
         )
 
         await ctx.send(embed=embed)
-
-
 
 def setup(client):
     """ Cog's setup function. """

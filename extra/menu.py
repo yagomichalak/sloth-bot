@@ -77,8 +77,6 @@ class ConfirmSkill(menus.Menu):
         await self.start(ctx, wait=True)
         return self.result
 
-
-
 class InventoryLoop(menus.ListPageSource):
     """ A class for iterating through inventory items. """
 
@@ -129,7 +127,6 @@ class OpenShopLoop(menus.ListPageSource):
 
         return embed
 
-
 async def prompt_message(client, member: discord.Member, channel: discord.TextChannel, limit: int = 100) -> str:
     def msg_check(message):
         if message.author == member and not message.guild:
@@ -168,12 +165,10 @@ async def prompt_message_guild(client, member: discord.Member, channel: discord.
         content = message.content
         return content
 
-
 async def prompt_number(client, ctx: commands.Context, the_msg: discord.Message, member: discord.Member, limit: int = 1000) -> Union[int, None]:
     """ Prompts the user for a number.
     :param ctx: The context.
     :param member: The member that is gonna be prompted. """
-
 
     def check(m) -> bool:
         if m.author.id == member.id and msg.channel.id == m.channel.id:
@@ -194,7 +189,6 @@ async def prompt_number(client, ctx: commands.Context, the_msg: discord.Message,
         else:
             return False
 
-
     msg = await ctx.send(embed=discord.Embed(
         description=the_msg,
         color=member.color,
@@ -208,7 +202,6 @@ async def prompt_number(client, ctx: commands.Context, the_msg: discord.Message,
         return None
     else:
         return int(content)
-
 
 class InroleLooping(menus.ListPageSource):
     def __init__(self, members, **kwargs):
@@ -226,9 +219,7 @@ class InroleLooping(menus.ListPageSource):
         for i, v in enumerate(entries, start=start):
             embed.set_footer(text=f"({i+1}-{i+6} of {len(self.entries)})")
 
-
         return embed
-
 
 class SwitchTribePages(menus.ListPageSource):
     """ A class for switching tribe pages. """
@@ -239,7 +230,6 @@ class SwitchTribePages(menus.ListPageSource):
         super().__init__(data, per_page=15)
         self.tribe = kwargs.get('tribe')
         self.change_embed = kwargs.get('change_embed')
-
 
     async def format_page(self, menu, entries):
         """ Formats each page. """
@@ -274,7 +264,6 @@ class SwitchSavedClasses(menus.ListPageSource):
             ctx=menu.ctx, entries=entries, offset=offset+1, lentries=len(self.entries)
             )
 
-
 class SwitchSavedClassesButtons(menus.Menu):
     """ Class related to confirmation skill actions. """
 
@@ -282,7 +271,6 @@ class SwitchSavedClassesButtons(menus.Menu):
         """ Class initializing method that inherits the parent's initializer. """
 
         super().__init__(timeout=60, delete_message_after=False, clear_reactions_after=True)
-
 
     async def select_btn(self, payload):
         """ Selects saved class."""

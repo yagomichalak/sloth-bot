@@ -52,11 +52,9 @@ class Cybersloth(Player):
         if await self.is_user_hacked(target.id):
             return await ctx.send(f"**{attacker.mention}, {target.mention} is already hacked!**")
 
-
         confirmed = await ConfirmSkill(f"**{attacker.mention}, are you sure you want to hack {target.mention}?**").prompt(ctx)
         if not confirmed:
             return await ctx.send("**Not hacking them, then!**")
-
 
         await self.check_cooldown(user_id=attacker.id, skill_number=1)
 
@@ -123,9 +121,7 @@ class Cybersloth(Player):
         if not confirmed:
             return await ctx.send("**Not hacking them, then!**")
 
-
         await self.check_cooldown(user_id=attacker.id, skill_number=2)
-
 
         try:
             current_timestamp = await self.get_timestamp()
@@ -146,7 +142,6 @@ class Cybersloth(Player):
             wire_embed = await self.get_wire_embed(
                 channel=ctx.channel, perpetrator_id=attacker.id, target_id=target.id)
             await ctx.send(embed=wire_embed)
-
 
     async def check_hacks(self) -> None:
 
@@ -182,7 +177,6 @@ class Cybersloth(Player):
                     description=f"**<@{w[0]}> lost connection with <@{w[3]}> and the wire doesn't seem to work anymore! 🔌**",
                     color=discord.Color.red()))
 
-
     async def update_user_is_hacked(self, user_id: int, hacked: int) -> None:
         """ Updates the user's protected state.
         :param user_id: The ID of the member to update.
@@ -193,7 +187,6 @@ class Cybersloth(Player):
         await db.commit()
         await mycursor.close()
 
-
     async def update_user_is_wired(self, user_id: int, wired: int) -> None:
         """ Updates the user's protected state.
         :param user_id: The ID of the member to update.
@@ -203,7 +196,6 @@ class Cybersloth(Player):
         await mycursor.execute("UPDATE UserCurrency SET wired = %s WHERE user_id = %s", (wired, user_id))
         await db.commit()
         await mycursor.close()
-
 
     async def get_hack_embed(self, channel: discord.TextChannel, perpetrator_id: int, target_id: int,) -> discord.Embed:
         """ Makes an embedded message for a hacking skill action.

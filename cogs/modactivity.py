@@ -8,7 +8,6 @@ import os
 mod_role_id = int(os.getenv('MOD_ROLE_ID'))
 guild_id = int(os.getenv('SERVER_ID'))
 
-
 class ModActivity(commands.Cog):
     '''
     A cog related to the Moderators' activity.
@@ -34,7 +33,6 @@ class ModActivity(commands.Cog):
 
         await self.get_moderator_current_messages(message.author.id)
         await self.update_moderator_message(message.author.id)
-
 
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):
@@ -203,7 +201,6 @@ class ModActivity(commands.Cog):
         await mycursor.execute("DELETE FROM ModActivity")
         await db.commit()
         await mycursor.close()
-
 
 def setup(client):
     client.add_cog(ModActivity(client))

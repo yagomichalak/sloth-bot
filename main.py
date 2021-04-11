@@ -103,7 +103,6 @@ async def on_member_remove(member):
     # cosmos = discord.utils.get(member.guild.members, id=user_cosmos_id)
     await channel.send(embed=embed)
 
-
 # Handles the errors
 @client.event
 async def on_command_error(ctx, error):
@@ -157,7 +156,6 @@ async def on_command_error(ctx, error):
         await error_log.send(f"ERROR: {error} | Class: {error.__class__} | Cause: {error.__cause__}")
         await error_log.send('='*10)
 
-
 # Members status update
 @tasks.loop(seconds=10)
 async def change_status():
@@ -176,7 +174,6 @@ async def update_timezones():
         date_and_time_in_text = date_and_time.strftime('%H:%M')
         print(the_vc)
         await the_vc.edit(name=f'{timezones[tz][1]} - {date_and_time_in_text}')
-
 
 # Joins VC log #########
 @client.event
@@ -320,7 +317,6 @@ async def load(ctx, extension: str = None):
     client.load_extension(f'cogs.{extension}')
     return await ctx.send(f"**{extension} loaded!**", delete_after=3)
 
-
 @client.command(hidden=True)
 @commands.has_permissions(administrator=True)
 async def unload(ctx, extension: str = None):
@@ -332,7 +328,6 @@ async def unload(ctx, extension: str = None):
         return await ctx.send("**Inform the cog!**")
     client.unload_extension(f'cogs.{extension}')
     return await ctx.send(f"**{extension} unloaded!**", delete_after=3)
-
 
 @client.command(hidden=True)
 @commands.has_permissions(administrator=True)
@@ -346,7 +341,6 @@ async def reload(ctx, extension: str = None):
     client.unload_extension(f'cogs.{extension}')
     client.load_extension(f'cogs.{extension}')
     return await ctx.send(f"**{extension} reloaded!**", delete_after=3)
-
 
 for filename in os.listdir('./cogs'):
     if filename.endswith('.py'):

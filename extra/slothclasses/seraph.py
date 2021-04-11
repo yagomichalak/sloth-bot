@@ -15,7 +15,6 @@ class Seraph(Player):
         self.client = client
         # self.bots_txt = await self.client.fetch_channel(bots_and_commands_channel_id)
 
-
     @commands.command(aliases=['dp', 'divine', 'protection'])
     @Player.skill_on_cooldown()
     @Player.user_is_class('seraph')
@@ -64,7 +63,6 @@ class Seraph(Player):
         else:
             await ctx.send("**Not protecting anyone, then!**")
 
-
     @commands.command()
     @Player.skills_used(requirement=5)
     @Player.skill_on_cooldown(skill_number=2)
@@ -75,7 +73,6 @@ class Seraph(Player):
         """ Gets a 35% chance of reinforcing all of their protected people's Divine Protection shield,
         by making it last for one more day and a 20% chance of getting a protection for themselves too
         (in case they don't have one already). """
-
 
         perpetrator = ctx.author
 
@@ -129,7 +126,6 @@ class Seraph(Player):
         else:
             await ctx.send(f"**You had a `35%` chance of reinforcing all active Divine Protection shields, but you missed it, {perpetrator.mention}!**")
 
-
         # Checks whether the perpetrator already has a Divien Protection shield
         if not await self.is_user_protected(perpetrator.id):
             n2 = random.random()
@@ -164,13 +160,11 @@ class Seraph(Player):
 
             channel = self.bots_txt
 
-
             await channel.send(
                 content=f"<@{dp[0]}>, <@{dp[3]}>",
                 embed=discord.Embed(
                     description=f"**<@{dp[3]}>'s `Divine Protection` from <@{dp[0]}> just expired!**",
                     color=discord.Color.red()))
-
 
     async def update_user_protected(self, user_id: int, protected: int) -> None:
         """ Updates the user's protected state.
@@ -182,7 +176,6 @@ class Seraph(Player):
         await db.commit()
         await mycursor.close()
 
-
     async def reinforce_shields(self, perpetrator_id: int) -> None:
         """ Reinforces all active Divine Protection shields.
         :param perpetrator_id: The ID of the perpetrator of those shields. """
@@ -191,7 +184,6 @@ class Seraph(Player):
         await mycursor.execute("UPDATE SlothSkills SET skill_timestamp = skill_timestamp + 86400 WHERE user_id = %s", (perpetrator_id,))
         await db.commit()
         await mycursor.close()
-
 
     async def get_expired_protections(self) -> None:
         """ Gets expired divine protection skill actions. """
@@ -205,7 +197,6 @@ class Seraph(Player):
         divine_protections = await mycursor.fetchall()
         await mycursor.close()
         return divine_protections
-
 
     async def get_divine_protection_embed(self, channel, perpetrator_id: int, target_id: int) -> discord.Embed:
         """ Makes an embedded message for a divine protection action.
@@ -226,7 +217,6 @@ class Seraph(Player):
         divine_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon_url)
 
         return divine_embed
-
 
     async def get_reinforce_shields_embed(self, channel, perpetrator_id: int, shields_len: int) -> discord.Embed:
         """ Makes an embedded message for a shield reinforcement action.

@@ -5,7 +5,6 @@ from cogs.slothcurrency import SlothCurrency
 from datetime import datetime
 import aiohttp
 
-
 class Misc(commands.Cog):
     '''
     Miscellaneous related commands.
@@ -17,7 +16,6 @@ class Misc(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         print("Misc cog is online!")
-
 
     @commands.command()
     async def dice(self, ctx):
@@ -140,7 +138,6 @@ class Misc(commands.Cog):
             await ctx.send(
                 f"**{author.mention}, better luck next time... You guessed {g1}, {g2}, {g3}...\nThe numbers were:** `{', '.join(string_numbers)}`")
 
-
     @commands.command(aliases=['number'])
     async def numberfact(self, ctx, number: int = None):
         '''Get a fact about a number.'''
@@ -155,7 +152,6 @@ class Misc(commands.Cog):
                     await ctx.send(f"**Did you know?**\n*{fact}*")
         except KeyError:
             await ctx.send("**No facts are available for that number.**", delete_after=3)
-
 
 def setup(client):
     client.add_cog(Misc(client))
