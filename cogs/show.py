@@ -116,7 +116,7 @@ class Show(commands.Cog):
         embed.set_author(name='The Language Sloth', url='https://discordapp.com',
                          icon_url='https://cdn.discordapp.com/attachments/562019489642709022/676564604087697439/ezgif.com-gif-maker_1.gif')
         await ctx.send(
-            content="Hello, **The Language Sloth** is a public Discord server for people all across the globe to meet ,learn languages and exchange cultures. here are our rules of conduct.",
+            content="Hello, **The Language Sloth** is a public Discord server for people all across the globe to meet, learn languages and exchange cultures. here are our rules of conduct.",
             embed=embed)
 
     @commands.command(aliases=['ss'])

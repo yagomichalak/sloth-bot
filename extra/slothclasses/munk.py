@@ -200,7 +200,7 @@ class Munk(Player):
 
         if tribe:
             tribe_info = {
-                'owner_id': tribe[0] ,
+                'owner_id': tribe[0],
                 'name': tribe[1],
                 'description': tribe[2],
                 'two_emojis': tribe[3],
@@ -232,7 +232,7 @@ class Munk(Player):
 
         if tribe:
             tribe_info = {
-                'owner_id': tribe[0] ,
+                'owner_id': tribe[0],
                 'name': tribe[1],
                 'description': tribe[2],
                 'two_emojis': tribe[3],
