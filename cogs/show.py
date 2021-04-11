@@ -8,7 +8,6 @@ import sys
 
 allowed_roles = [int(os.getenv('OWNER_ROLE_ID')), int(os.getenv('ADMIN_ROLE_ID')), int(os.getenv('MOD_ROLE_ID'))]
 
-
 class Show(commands.Cog):
     '''
     Commands involving showing some information related to the server.
@@ -30,7 +29,6 @@ class Show(commands.Cog):
         await ctx.message.delete()
         all_users = ctx.guild.members
         await ctx.send(f'{len(all_users)} members!')
-
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -70,8 +68,6 @@ class Show(commands.Cog):
         embed.set_thumbnail(url=self.client.user.avatar_url)
         embed.set_footer(text=ctx.guild, icon_url=ctx.guild.icon_url)
         await ctx.send(embed=embed)
-
-
 
     # Shows the specific rule
     @commands.command()
@@ -121,7 +117,6 @@ class Show(commands.Cog):
         await ctx.send(
             content="Hello, **The Language Sloth** is a public Discord server for people all across the globe to meet ,learn languages and exchange cultures. here are our rules of conduct.",
             embed=embed)
-
 
     @commands.command(aliases=['ss'])
     @commands.cooldown(1, 10, commands.BucketType.user)
@@ -178,8 +173,6 @@ class Show(commands.Cog):
         embed.set_author(name=member, icon_url=member.avatar_url)
         embed.set_footer(text=member.guild, icon_url=member.guild.icon_url)
         await ctx.send(embed=embed)
-
-
 
 def setup(client):
     client.add_cog(Show(client))

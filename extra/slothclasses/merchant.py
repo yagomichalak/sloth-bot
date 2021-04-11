@@ -10,13 +10,11 @@ import random
 
 bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
 
-
 class Merchant(Player):
 
     def __init__(self, client) -> None:
         self.client = client
         # self.bots_txt = await self.client.fetch_channel(bots_and_commands_channel_id)
-
 
     @commands.command(aliases=['os', 'open', 'shop'])
     @Player.skill_on_cooldown()
@@ -71,7 +69,6 @@ class Merchant(Player):
         else:
             return await ctx.send(f"**Not doing it, then, {member.mention}!**")
 
-
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def sloth_shop(self, ctx) -> None:
@@ -91,7 +88,6 @@ class Merchant(Player):
         else:
             return await ctx.send(f"**There are no items in the `Sloth class shop` yet, {ctx.author.mention}!**")
 
-
     @commands.command(aliases=['bp', 'buy'])
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def buy_potion(self, ctx, member: discord.Member = None) -> None:
@@ -101,11 +97,9 @@ class Merchant(Player):
         if not member:
             return await ctx.send(f"**Please, inform a `Merchant`, {buyer.mention}!**")
 
-
         if not (merchant_item := await self.get_potion_skill_action_by_user_id(member.id)):
             return await ctx.send(
                 f"**{member} is either not a `Merchant` or they don't have a potion available for purchase, {buyer.mention}!**")
-
 
         user_info = await self.get_user_currency(buyer.id)
         if not user_info:
@@ -179,7 +173,6 @@ class Merchant(Player):
                     timestamp=ctx.message.created_at
                     ))
 
-
     @commands.command()
     @Player.skills_used(requirement=5)
     @Player.skill_on_cooldown(skill_number=2)
@@ -235,7 +228,6 @@ class Merchant(Player):
         else:
             await ctx.send(f"**{merchant.mention}, you had a `35%` chance of getting something from the Dark Sloth Web, it happened that today wasn't your day!**")
 
-
     async def check_open_shop_items(self) -> None:
 
         """ Check on-going open-shop items and their expiration time. """
@@ -253,7 +245,6 @@ class Merchant(Player):
                     description=f"**<@{tm[3]}>'s `changing-Sloth-class potion` has just expired! Then it's been removed from the `Sloth class shop`! 🍯**",
                     color=discord.Color.red()))
 
-
     # ========== Update ===========
 
     async def update_user_has_potion(self, user_id: int, has_it: int) -> None:
@@ -266,7 +257,6 @@ class Merchant(Player):
         await db.commit()
         await mycursor.close()
 
-
     # ========== Get ===========
 
     async def get_potion_skill_action_by_user_id(self, user_id: int) -> Union[List[Union[int, str]], bool]:
@@ -278,7 +268,6 @@ class Merchant(Player):
         skill_action = await mycursor.fetchone()
         await mycursor.close()
         return skill_action
-
 
     async def get_open_shop_items(self) -> List[List[Union[str, int]]]:
         """ Gets all open shop items. """

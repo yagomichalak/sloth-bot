@@ -21,7 +21,6 @@ class EmbedManagement(commands.Cog):
         """ Tells when the cog is ready to use. """
         print("EmbedManagement cog is online!")
 
-
     # Database methods
     async def insert_embed(self, embed_name: str) -> None:
         """ Inserts an embed from the DB.
@@ -53,7 +52,6 @@ class EmbedManagement(commands.Cog):
             await mycursor.execute(sql, (embed_name,))
         await db.commit()
         await mycursor.close()
-
 
     async def delete_text_field(self, embed_name: str, field_index: int) -> bool:
         """ Deletes a text field from the DB.
@@ -309,7 +307,6 @@ class EmbedManagement(commands.Cog):
           timestamp=ctx.message.created_at
         )
         await ctx.send(embed=embed)
-
 
     # SubcomMands (Tier 3)
     @edit.command(aliases=['a', 'at', 'auth'])
@@ -648,7 +645,6 @@ class EmbedManagement(commands.Cog):
         if not await self.embed_exists(embed_name):
             return await ctx.send(f"**Embed `{embed_name}` doesn't exist, {member.mention}!**")
 
-
         confirmation = await self.reaction_confirmation(ctx, member, yes_no.title())
 
         if not confirmation:
@@ -717,13 +713,11 @@ class EmbedManagement(commands.Cog):
         await mycursor.close()
         await ctx.send(f"**Inserted `text_field` for {embed_name}!**")
 
-
     # Prompts
     async def prompt_index(self, ctx: commands.Context, member: discord.Member) -> Union[int, None]:
         """ Prompts the user for an index.
         :param ctx: The context.
         :param member: The member that is gonna be prompted. """
-
 
         def check(m) -> bool:
             if m.author.id == member.id and msg.channel.id == ctx.channel.id:
@@ -744,7 +738,6 @@ class EmbedManagement(commands.Cog):
             else:
                 return False
 
-
         msg = await ctx.send(f"**Inform the index of the text field that you want to delete, {member.mention}. (It starts at 1)**")
 
         try:
@@ -755,7 +748,6 @@ class EmbedManagement(commands.Cog):
             return None
         else:
             return int(content)
-
 
     # Confirmation
     async def reaction_confirmation(self, ctx: commands.Context, member: discord.Member, value: str) -> bool:
@@ -830,7 +822,6 @@ class SortEmbed:
         :param fields: A dictionary containing data that needs to be sorted. """
 
         self.fields = fields
-
 
     async def sort_embed_fields(self) -> discord.Embed:
         """ Sorts all fields in order to form an embed. """
@@ -961,7 +952,6 @@ class SortEmbed:
             pass
         finally:
             return embed
-
 
     async def sort_embed_text_fields(self, embed: discord.Member, values: List[List[str]]) -> discord.Embed:
         """ Sorts the embed fields.

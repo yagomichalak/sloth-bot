@@ -47,7 +47,6 @@ class Moderation(commands.Cog):
                 if not is_from_guild:
                     return await self.mute(ctx=ctx, member=message.author, reason="Invite Advertisement.")
 
-
     @tasks.loop(minutes=1)
     async def look_for_expired_tempmutes(self) -> None:
         """ Looks for expired tempmutes and unmutes the users. """
@@ -87,8 +86,6 @@ class Moderation(commands.Cog):
                             print(e)
                             pass
 
-
-
                     # Moderation log embed
                     moderation_log = discord.utils.get(guild.channels, id=mod_log_id)
                     embed = discord.Embed(
@@ -115,7 +112,6 @@ class Moderation(commands.Cog):
         tempmutes = list(map(lambda m: m[0], await mycursor.fetchall()))
         await mycursor.close()
         return tempmutes
-
 
     async def check_invite_guild(self, msg, guild):
         '''
@@ -152,7 +148,6 @@ class Moderation(commands.Cog):
         if account_age <= 2:
             suspect_channel = discord.utils.get(member.guild.channels, id=suspect_channel_id)
             await suspect_channel.send(f"🔴 Alert! Possible fake account: {member.mention} joined the server. Account was just created.\nAccount age: {account_age} day(s)!")
-
 
         if await self.get_muted_roles(member.id):
             muted_role = discord.utils.get(member.guild.roles, id=muted_role_id)
@@ -278,7 +273,6 @@ class Moderation(commands.Cog):
         if smessage := special_channels.get(ctx.channel.id):
             await ctx.send(smessage)
 
-
     # Warns a member
     @commands.command()
     @commands.has_any_role(*allowed_roles)
@@ -376,7 +370,6 @@ class Moderation(commands.Cog):
             return False, False
         else:
             return the_time_dict, seconds
-
 
     @commands.command()
     @commands.has_any_role(*allowed_roles)
@@ -530,11 +523,9 @@ class Moderation(commands.Cog):
         if not time:
             return await ctx.send('**Inform a time!**', delete_after=3)
 
-
         time_dict, seconds = await self.get_mute_time(ctx=ctx, time=time)
         if not seconds:
             return
-
 
         # print('ah')
         epoch = datetime.utcfromtimestamp(0)
@@ -591,7 +582,6 @@ class Moderation(commands.Cog):
         else:
             await ctx.send(f'**{member} is already muted!**', delete_after=5)
 
-
     @commands.command()
     @commands.has_any_role(*allowed_roles)
     async def kick(self, ctx, member: discord.Member = None, *, reason=None):
@@ -647,7 +637,6 @@ class Moderation(commands.Cog):
         await ctx.message.delete()
         if not member:
             return await ctx.send('**Please, specify a member!**', delete_after=3)
-
 
         channel = ctx.channel
         author = ctx.author
@@ -746,7 +735,6 @@ class Moderation(commands.Cog):
                 await member.send(embed=general_embed)
             except:
                 pass
-
 
     # Bans a member
     @commands.command()
@@ -928,7 +916,6 @@ class Moderation(commands.Cog):
         await db.commit()
         await mycursor.close()
 
-
     @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
     async def create_table_mutedmember(self, ctx) -> None:
@@ -992,7 +979,6 @@ class Moderation(commands.Cog):
         else:
             return True
 
-
     # Infraction methods
     @commands.command(aliases=['infr', 'show_warnings', 'sw', 'show_bans', 'sb', 'show_muted', 'sm'])
     @commands.has_any_role(*allowed_roles)
@@ -1053,7 +1039,6 @@ class Moderation(commands.Cog):
         await db.commit()
         await mycursor.close()
 
-
     async def get_user_infractions(self, user_id: int) -> List[List[Union[str, int]]]:
         """ Gets all infractions from a user. """
 
@@ -1062,7 +1047,6 @@ class Moderation(commands.Cog):
         user_infractions = await mycursor.fetchall()
         await mycursor.close()
         return user_infractions
-
 
     async def get_user_infraction_by_infraction_id(self, infraction_id: int) -> List[List[Union[str, int]]]:
         """ Gets a specific infraction by ID. """
@@ -1191,7 +1175,6 @@ class Moderation(commands.Cog):
 
         else:
             return True
-
 
 def setup(client):
     client.add_cog(Moderation(client))

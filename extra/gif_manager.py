@@ -4,7 +4,6 @@ import glob
 from typing import Tuple, Dict, Union, Any
 from itertools import cycle
 
-
 def defragment_gif(path: str, output: str) -> None:
     """ Defragments a gif into frames.
     :param path:
@@ -17,8 +16,6 @@ def defragment_gif(path: str, output: str) -> None:
         imageObject.seek(frame)
         imageObject.convert('RGBA')
         imageObject.save(f"{output}_{frame+1}.png", transparency=0)
-
-
 
 def remove_background(path: str, output: str) -> None:
     """ Removes the background of image frames.
@@ -43,10 +40,8 @@ def remove_background(path: str, output: str) -> None:
                 else:
                     newData.append(item)
 
-
         im.putdata(newData)
         im.save(f"{output}_{i+1}.png")
-
 
 class GIF:
     """ A handler for GIF creations."""
@@ -80,7 +75,6 @@ class GIF:
         image.save(path, "GIF", save_all=True, append_images=self._frames,
                    duration=self._frame_duration, transparency=0, loop=0, **kwargs)
 
-
 if __name__ == '__main__':
 
     ## Puts a single effect onto an image ##
@@ -108,7 +102,6 @@ if __name__ == '__main__':
 
     # =========================================================#
 
-
     # profile = Image.open('../test.png').convert('RGBA')
     # path1 = '../media/effects/fidget_spinner/fidget_spinner_2.png'
     # path2 = '../media/effects/star/star_stage_1.png'
@@ -117,15 +110,10 @@ if __name__ == '__main__':
     # profile.save('../profile3.png')
     # print('ye')
 
-
-
-
     # defragment_gif(
     #     path="./media/effects/fidget_spinner/fidget_spinner.gif",
     #     output="./media/effects/fidget_spinner/fidget_spinner"
     #     )
-
-
 
     # remove_background(
     #     path="./media/effects/fidget_spinner/fidget_spinner/*.png",
@@ -164,13 +152,11 @@ if __name__ == '__main__':
                     # Appends to its respective frame list
                     all_effects[effect]['frames'].append(frame)
 
-
         # Loops through the frames based on the amount of frames of the longest effect.
         longest_gif = max([len(frames['frames']) for frames in all_effects.values()])
 
         for efx in all_effects.keys():
             all_effects[efx]['frames'] = cycle(all_effects[efx]['frames'])
-
 
         for i in range(longest_gif):
             print(i+1)
@@ -194,9 +180,6 @@ if __name__ == '__main__':
     # smth()
     def get_frames():
 
-
-
-
         for i in range(74):
             # background = profile.copy()
             print(i)
@@ -212,13 +195,11 @@ if __name__ == '__main__':
 
     # get_frames()
 
-
     # base = gif.new_frame()
 
     # frame = Image.open(f"{full_path}/{effect}_{i+1}.png").resize((150, 150)).convert('RGBA')
     # base.paste(frame, (218, 222), frame)
     # gif.add_frame(base)
-
 
     # gif.export('../temp_profile.gif')
     # print('Finished!')

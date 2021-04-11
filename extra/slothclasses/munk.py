@@ -16,7 +16,6 @@ class Munk(Player):
     def __init__(self, client) -> None:
         self.client = client
 
-
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload) -> None:
         """ Checks reactions related to skill actions. """
@@ -72,7 +71,6 @@ class Munk(Player):
                     message_embed.set_image(url=skill_action[8])
                     await self.bots_txt.send(content=f"<@{skill_action[0]}>", embed=message_embed)
                     await message.delete()
-
 
     @commands.command()
     @Player.skill_on_cooldown()
@@ -135,7 +133,6 @@ class Munk(Player):
 
         else:
             await msg.edit(content=f"<@{target.id}>")
-
 
     async def get_munk_embed(self, channel, perpetrator_id: int, target_id: int) -> discord.Embed:
         """ Makes an embedded message for a munk action.
@@ -213,7 +210,6 @@ class Munk(Player):
 
         return tribe_info
 
-
     async def get_tribe_info_by_user_id(self, user_id: str) -> Dict[str, Union[str, int]]:
         """ Gets information about a specific tribe.
         :param user_id: The ID of the user owner of the tribe. """
@@ -269,9 +265,6 @@ class Munk(Player):
         await mycursor.close()
 
         return tribe_members
-
-
-
 
     @commands.command(aliases=['request_logo', 'ask_thumbnail', 'ask_logo'])
     @commands.cooldown(1, 3600, commands.BucketType.user)
@@ -334,8 +327,6 @@ class Munk(Player):
             self.client.get_command('request_thumbnail').reset_cooldown(ctx)
             await ctx.send(f"**Not doing requesting it, then, {requester.mention}!**")
 
-
-
     @commands.command(aliases=['invite'])
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def tribe_invite(self, ctx, member: discord.Member = None) -> None:
@@ -361,7 +352,6 @@ class Munk(Player):
         if not confirm:
             return await ctx.send("**Not inviting them, then!**")
 
-
         # Checks whether user is already in a tribe.
         user_currency = await self.get_user_currency(member.id)
         if not user_currency:
@@ -370,7 +360,6 @@ class Munk(Player):
             return await ctx.send(f"**You cannot invite someone that doesn't have a Sloth Class, {inviter.mention}!**")
         if user_currency[18]:
             return await ctx.send(f"**You cannot invite someone that is already in a tribe, {inviter.mention}!**")
-
 
         custom_ctx = ctx
         custom_ctx.author = member
@@ -396,14 +385,12 @@ class Munk(Player):
         else:
             await ctx.send(f"**{member.mention} refused your invitation to join `{user_tribe['name']}`, {inviter.mention}!**")
 
-
     @commands.command()
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def tribe(self, ctx, *, name: str = None) -> None:
         """ Shows some information about a tribe.
         If not provided a tribe name, it will check the one the user is in.
         :param name: The tribe name. """
-
 
         member = ctx.author
 
@@ -416,12 +403,10 @@ class Munk(Player):
                 return await ctx.send(
                     f"**You didn't provide any tribe name and you're not in a tribe either, {member.mention}!**")
 
-
             tribe = await self.get_tribe_info_by_name(user_currency[18])
 
         if not tribe['name']:
             return await ctx.send(f"**No tribes with that name were found, {member.mention}!**")
-
 
         # Gets all tribe members
         tribe_members = await self.get_tribe_members(tribe_name=tribe['name'])
@@ -437,7 +422,6 @@ class Munk(Player):
         # print('1= TRRRIIIIIBE', tribe)
         pages = menus.MenuPages(source=SwitchTribePages(all_members, **additional), clear_reactions_after=True)
         await pages.start(ctx)
-
 
     async def _make_tribe_embed(self, ctx: commands.Context, tribe: Dict[str, Union[str, int]], entries: int, offset: int, lentries: int) -> discord.Embed:
 
@@ -464,9 +448,7 @@ class Munk(Player):
         for i, v in enumerate(entries, start=offset):
             tribe_embed.set_footer(text=f"({i} of {lentries})")
 
-
         return tribe_embed
-
 
     @commands.command(aliases=['expel', 'kick_out', 'can_i_show_you_the_door?'])
     @commands.cooldown(1, 10, commands.BucketType.user)
@@ -493,7 +475,6 @@ class Munk(Player):
         if not confirm:
             return await ctx.send("**Not kicking them, then!**")
 
-
         # Checks whether user is already in a tribe.
         user_currency = await self.get_user_currency(member.id)
         if not user_currency:
@@ -512,7 +493,6 @@ class Munk(Player):
             await ctx.send(f"**Something went wrong with it, {expeller.mention}!**")
         else:
             await ctx.send(f"**You successfully kicked {member.mention} out of `{user_tribe['name']}`, {expeller.mention}!**")
-
 
     @commands.command()
     @commands.cooldown(1, 10, commands.BucketType.user)
@@ -537,7 +517,6 @@ class Munk(Player):
         if not confirm:
             return await ctx.send("**Not leaving it, then!**")
 
-
         # Updates user tribe status and nickname
 
         try:
@@ -552,7 +531,6 @@ class Munk(Player):
         else:
             await ctx.send(f"**You successfully left `{user_tribe['name']}`, {member.mention}!**")
 
-
     async def update_someones_tribe(self, user_id: int, tribe_name: str = None) -> None:
         """ Updates someone's tribe status.
         :param user_id: The ID of the user who's gonna be updated.
@@ -562,7 +540,6 @@ class Munk(Player):
         await mycursor.execute("UPDATE UserCurrency SET tribe = %s WHERE user_id = %s", (tribe_name, user_id))
         await db.commit()
         await mycursor.close()
-
 
     async def update_tribe_thumbnail(self, user_id: int, tribe_name: str, link: str = None) -> None:
         """ Updates someone's tribe thumbnail link.
@@ -583,7 +560,6 @@ class Munk(Player):
             WHERE user_id = %s AND tribe_name = %s""", (link, user_id, tribe_name))
         await db.commit()
         await mycursor.close()
-
 
     async def update_tribe_name(self, member: int, two_emojis: str, joining: bool) -> None:
         """ Updates someone's nickname so it has their tribe's two-emoji combination identifier.
@@ -607,7 +583,6 @@ class Munk(Player):
             if nick != dname:
                 await member.edit(nick=nick)
 
-
     async def check_tribe_creations(self) -> None:
         """ Check on-going steals and their expiration time. """
 
@@ -624,7 +599,6 @@ class Munk(Player):
                     pass
             except:
                 pass
-
 
     @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)

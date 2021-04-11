@@ -36,13 +36,11 @@ class TeacherFeedback(commands.Cog):
         self.db = TeacherFeedbackDatabase()
         self.teacher_cache: Dict[int, int] = {}
 
-
     @commands.Cog.listener()
     async def on_ready(self) -> None:
         """ Tells when the cog is ready to use. """
 
         print("TeacherFeedback cog is online!")
-
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload) -> None:
@@ -57,7 +55,6 @@ class TeacherFeedback(commands.Cog):
         # Checks whether it was a reaction in the rewards channel
         if payload.channel_id != reward_channel_id:
             return
-
 
         guild = self.client.get_guild(payload.guild_id)
 
@@ -86,8 +83,6 @@ class TeacherFeedback(commands.Cog):
 
         else:
             pass
-
-
 
     @commands.Cog.listener()
     async def on_message(self, message):
@@ -249,7 +244,6 @@ class TeacherFeedback(commands.Cog):
         teacher_menu.add_button(button=trash_btn)
 
         await teacher_menu.start(ctx)
-
 
     async def _make_saved_class_embed(self, ctx: commands.Context, entries: List[List[Union[str, int]]], offset: int, lentries: int) -> discord.Embed:
         """ Makes an embedded message for the teacher's saved class.
@@ -432,7 +426,6 @@ class TeacherFeedback(commands.Cog):
         lenactive = user[-1]
         await self.show_user_feedback(msg=simple, guild=guild, user=user, lenactive=lenactive, teacher=member)
 
-
     async def save_class_feedback(self, msg: discord.Message, teacher: discord.Member, users_feedback: List[List[int]], class_type: str, language: str, guild: discord.Guild) -> None:
         """ Saves the members data so the teacher can give them a feedback and reward them later.
         :param msg: The message to attach the students' data to.
@@ -452,13 +445,11 @@ class TeacherFeedback(commands.Cog):
             elif class_type.title() == 'Programming':
                 active_users = [uf for uf in users_feedback if uf[3] >= 1800]
 
-
         formatted_active_users = [
             (msg.id, u[0], u[1], u[3], teacher.id, class_type, language) for u in active_users
         ]
 
         await self.db.insert_student_reward(formatted_active_users)
-
 
     async def show_user_feedback(self, msg: discord.Message, guild: discord.Guild, user: List[int], lenactive: int, teacher: discord.Member) -> None:
         """ Shows the embedded message containing the rewardable students.
@@ -508,7 +499,6 @@ class TeacherFeedback(commands.Cog):
         reward_embed.set_author(name=f"ID: {member.id}")
         reward_embed.set_footer(text=guild.name, icon_url=guild.icon_url)
         await msg.edit(embed=reward_embed)
-
 
     async def reward_accepted_students(self, teacher: discord.Member, users_to_reward: List[int]) -> None:
         """ Rewards all users that got accepted by the teacher.
@@ -584,7 +574,6 @@ class TeacherFeedback(commands.Cog):
                     speak=True, view_channel=True, embed_links=True)
             else:
                 language = custom_role_name
-
 
         # Tries to get role permissions for the Native, Fluent, Studying role pattern
         if native_role := discord.utils.get(member.guild.roles, name=f"Native {language.title()}"):
@@ -668,7 +657,6 @@ class TeacherFeedback(commands.Cog):
         await text_channel.send(f"**{member.mention}, this is your text channel!**")
         return text_channel, voice_channel
 
-
     # ===== Interactions =====
     async def ask_class_creation_questions(self, member) -> Union[None, Dict[str, str]]:
 
@@ -706,7 +694,6 @@ class TeacherFeedback(commands.Cog):
 
         return {'language': class_language, 'type': class_type, 'desc': class_desc}
 
-
     # ===== Tools =====
     @staticmethod
     async def get_timestamp() -> int:
@@ -715,7 +702,6 @@ class TeacherFeedback(commands.Cog):
         epoch = datetime.utcfromtimestamp(0)
         the_time = (datetime.utcnow() - epoch).total_seconds()
         return the_time
-
 
     @staticmethod
     async def check_teacher_vc_cooldown(teacher_id: int, teacher_cache: Dict[int, int], cooldown: int = 60) -> bool:
@@ -812,10 +798,6 @@ class TeacherFeedback(commands.Cog):
         embed.set_footer(text=guild, icon_url=guild.icon_url)
         await ctx.send(embed=embed)
 
-
-
-
-
     @commands.command(aliases=['end_class', 'closeclass', 'endclass', 'end', 'finishclass', 'finish', 'finish_class'])
     @commands.has_any_role(*[mod_role_id, admin_role_id])
     async def close_class(self, ctx) -> None:
@@ -835,7 +817,6 @@ class TeacherFeedback(commands.Cog):
 
         else:
             await ctx.send(f"**This isn't a class channel, {member.mention}!**")
-
 
 class TeacherFeedbackDatabaseCreate:
     """ [CREATE] A class for creating things in the database. """
@@ -888,7 +869,6 @@ class TeacherFeedbackDatabaseInsert:
         await db.commit()
         await mycursor.close()
 
-
     async def insert_student_reward(self, formatted_active_users: List[List[Union[str, int]]]) -> None:
         """ Inserts reward related data into the database.
         :param formatted_active_users: The formatted data for the rewardable students. """
@@ -908,7 +888,6 @@ class TeacherFeedbackDatabaseInsert:
         await db.commit()
         await mycursor.close()
 
-
     async def insert_student_rewarded(self, user: List[Union[int, str]]):
         """ Saves a user to be rewarded later on.
         :param user: The user to be saved. """
@@ -919,7 +898,6 @@ class TeacherFeedbackDatabaseInsert:
             VALUES (%s, %s, %s, %s, %s)""", (user[4], user[1], user[6], user[5], user[0]))
         await db.commit()
         await mycursor.close()
-
 
 class TeacherFeedbackDatabaseSelect:
     """ [SELECT] A class for selecting things from the database. """
@@ -1003,7 +981,6 @@ class TeacherFeedbackDatabaseSelect:
         await mycursor.close()
         return total_time
 
-
     # ===== Student =====
     async def get_student_by_vc_id(self, student_id: int, vc_id: int) -> List[int]:
         """ Gets a student by voice channe ID.
@@ -1025,7 +1002,6 @@ class TeacherFeedbackDatabaseSelect:
         the_students = await mycursor.fetchall()
         await mycursor.close()
         return the_students
-
 
     # ===== Reward =====
 
@@ -1051,8 +1027,6 @@ class TeacherFeedbackDatabaseSelect:
         users = await mycursor.fetchall()
         await mycursor.close()
         return users
-
-
 
 class TeacherFeedbackDatabaseUpdate:
     """ [UPDATE] A class for updating things in the database. """
@@ -1139,7 +1113,6 @@ class TeacherFeedbackDatabaseUpdate:
         await db.commit()
         await mycursor.close()
 
-
     async def update_student_messages(self, student_id: int, vc_id: int) -> None:
         """ Update student's message counter.
         :param student_id: The student's ID.
@@ -1175,7 +1148,6 @@ class TeacherFeedbackDatabaseDelete:
         await db.commit()
         await mycursor.close()
 
-
     async def delete_active_students(self, teacher_id: int) -> None:
         """ Deletes active students.
         :param teacher_id: The teacher's ID. """
@@ -1184,7 +1156,6 @@ class TeacherFeedbackDatabaseDelete:
         await mycursor.execute("DELETE FROM Students WHERE teacher_id = %s", (teacher_id,))
         await db.commit()
         await mycursor.close()
-
 
     async def delete_waiting_reward_student(self, msg_id: int, user_id: int, teacher_id: int) -> None:
         """ Deletes a student from the rewards table.
@@ -1207,7 +1178,6 @@ class TeacherFeedbackDatabaseDelete:
         await db.commit()
         await mycursor.close()
 
-
     async def delete_teacher_saved_class(self, teacher_id: int, language: str, class_type: str, class_desc: str) -> None:
         """ Deletes a teacher saved class from the system.
         :param teacher_id: The teacher's ID.
@@ -1222,7 +1192,6 @@ class TeacherFeedbackDatabaseDelete:
              (teacher_id, language, class_type, class_desc))
         await db.commit()
         await mycursor.close()
-
 
 class TeacherFeedbackDatabaseShow:
     """ [SHOW] A class for checking things in the database. """

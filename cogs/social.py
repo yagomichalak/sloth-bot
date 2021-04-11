@@ -12,7 +12,6 @@ reddit = praw.Reddit(client_id=os.getenv('REDDIT_CLIENT_ID'),  # client id
                      username='',  # Not needed
                      password='')  # Not needed
 
-
 mod_role_id = int(os.getenv('MOD_ROLE_ID'))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID'))
 teacher_role_id = int(os.getenv('TEACHER_ROLE_ID'))
@@ -56,7 +55,6 @@ class Social(commands.Cog):
     @staticmethod
     async def sort_time(guild: discord.Guild, at: datetime) -> str:
 
-
         timedelta = datetime.utcnow() - at
 
         if type(timedelta) is not float:
@@ -91,7 +89,6 @@ class Social(commands.Cog):
         guild = ctx.guild
         color = discord.Color.green()
 
-
         em = discord.Embed(description=guild.description, color=ctx.author.color)
         online = len({m.id for m in guild.members if m.status is not discord.Status.offline})
         em.add_field(name="Server ID", value=guild.id, inline=True)
@@ -120,7 +117,6 @@ class Social(commands.Cog):
         em.add_field(name="🌟 Boosts", value=f"{guild.premium_subscription_count} (Level {guild.premium_tier})", inline=True)
         features = ', '.join(list(map(lambda f: f.replace('_', ' ').capitalize(), guild.features)))
         em.add_field(name="Server Features", value=features if features else None, inline=False)
-
 
         em.set_thumbnail(url=guild.icon_url)
         em.set_image(url=guild.banner_url)
@@ -173,12 +169,10 @@ class Social(commands.Cog):
     #     for i in range(0, post_to_pick):
     #         submissions = next(x for x in memes_submissions if not x.stickied)
 
-
     #     meme_embed = discord.Embed(title="__**Meme**__", colour=ctx.author.colour, timestamp=ctx.message.created_at)
     #     meme_embed.set_image(url=submissions.url)
     #     meme_embed.set_author(name=ctx.author, icon_url=ctx.author.avatar_url)
     #     await ctx.send(embed=meme_embed)
-
 
     @commands.command(aliases=['xkcd', 'comic'])
     async def randomcomic(self, ctx):
@@ -196,7 +190,6 @@ class Social(commands.Cog):
         em.set_footer(text=f"Published on {data['month']}/{data['day']}/{data['year']}")
         em.set_image(url=data['img'])
         await ctx.send(embed=em)
-
 
 def setup(client):
     client.add_cog(Social(client))

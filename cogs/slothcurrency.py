@@ -30,7 +30,6 @@ int(os.getenv('PATREONS_CHANNEL_ID'))
 afk_channel_id = int(os.getenv('AFK_CHANNEL_ID'))
 booster_role_id = int(os.getenv('BOOSTER_ROLE_ID'))
 
-
 gauth = GoogleAuth()
 # gauth.LocalWebserverAuth()
 gauth.LoadCredentialsFile("mycreds.txt")
@@ -55,7 +54,6 @@ else:
 gauth.SaveCredentialsFile("mycreds.txt")
 
 drive = GoogleDrive(gauth)
-
 
 class SlothCurrency(commands.Cog):
     '''
@@ -198,7 +196,6 @@ class SlothCurrency(commands.Cog):
         the_menu = menus.MenuPages(source=InventoryLoop(user_items), clear_reactions_after=True)
         await the_menu.start(ctx)
 
-
     @commands.command()
     async def equip(self, ctx, *, item_name: str = None):
         '''
@@ -339,7 +336,6 @@ class SlothCurrency(commands.Cog):
         await db.commit()
         await mycursor.close()
 
-
     async def remove_user_item(self, user_id: int, item_name: str):
         mycursor, db = await the_database()
         await mycursor.execute(f"DELETE FROM UserItems WHERE item_name = '{item_name}' and user_id = {user_id}")
@@ -352,7 +348,6 @@ class SlothCurrency(commands.Cog):
             f"UPDATE UserItems SET enable = '{enable}' WHERE user_id = {user_id} and item_name = '{item_name}'")
         await db.commit()
         await mycursor.close()
-
 
     async def get_user_items(self, user_id: int):
         mycursor, db = await the_database()
@@ -623,7 +618,6 @@ class SlothCurrency(commands.Cog):
 
         return await ctx.send("**Table *UserCurrency* reseted!**", delete_after=3)
 
-
     async def send_hacked_image(self, ctx: commands.Context, member: discord.Member) -> None:
         """ Makes and sends a hacked image.
         :param ctx: The context.
@@ -650,7 +644,6 @@ class SlothCurrency(commands.Cog):
             await ctx.send(file=discord.File(file_path))
             # await asyncio.sleep(0.5)
             return os.remove(file_path)
-
 
     async def send_frogged_image(self, ctx: commands.Context, member: discord.Member, knocked_out: bool = False) -> None:
         """ Makes and sends a frogged image.
@@ -692,8 +685,6 @@ class SlothCurrency(commands.Cog):
         public_flags = member.public_flags.all()
         public_flag_names = list(map(lambda pf: pf.name, public_flags))
         return public_flag_names
-
-
 
     @commands.command()
     async def profile(self, ctx, member: discord.Member = None):
@@ -823,7 +814,6 @@ class SlothCurrency(commands.Cog):
                 finally:
                     os.remove(file_path)
 
-
     async def make_gif_image(self, member_id: int, file_path: str, all_effects: Dict[str, Dict[str, Union[List[str], Tuple[int]]]]) -> None:
         """ Makes a gif image out a profile image.
         :param file_path:
@@ -887,9 +877,6 @@ class SlothCurrency(commands.Cog):
         finally:
             # print('returning...')
             return gif_file_path
-
-
-
 
     @commands.command()
     @commands.has_permissions(administrator=True)
@@ -995,7 +982,6 @@ class SlothCurrency(commands.Cog):
         """
         if ctx:
             await ctx.message.delete()
-
 
         if rall.lower() == 'yes':
             try:
@@ -1187,7 +1173,6 @@ class SlothCurrency(commands.Cog):
         await db.commit()
         await mycursor.close()
 
-
     @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
     async def reset_table_server_activity(self, ctx):
@@ -1233,8 +1218,6 @@ class SlothCurrency(commands.Cog):
         async with ctx.typing():
             cmsg, message_times = await self.convert_messages(member_id, user_message)
             ctime, time_times = await self.convert_time(member_id, user_time)
-
-
 
         embed = discord.Embed(title="Exchange", colour=ctx.author.color, timestamp=ctx.message.created_at)
         embed.set_author(name=ctx.author, url=ctx.author.avatar_url)
@@ -1335,7 +1318,6 @@ class SlothCurrency(commands.Cog):
             return await ctx.send(embed=discord.Embed(description="**You don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one!**"))
         elif not target_user:
             return await ctx.send(f"**{member} does not have a bank account yet!**", delete_after=5)
-
 
         if the_user[0][1] >= int(money):
             SlothClass = self.client.get_cog('SlothClass')

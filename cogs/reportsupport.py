@@ -39,7 +39,6 @@ class ReportSupport(commands.Cog):
     async def on_ready(self) -> None:
         print('ReportSupport cog is online!')
 
-
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload) -> None:
         # Checks if it wasn't a bot's reaction
@@ -78,7 +77,6 @@ class ReportSupport(commands.Cog):
                         msg = "**Teacher Application**\nOur staff has avaluated your teacher application and has come to the conclusion that we are not in need of this lesson."
                         await member.send(embed=discord.Embed(description=msg))
                 return
-
 
         # Checks if the reaction was in the RepportSupport channel
         channel = self.client.get_channel(payload.channel_id)
@@ -142,7 +140,6 @@ class ReportSupport(commands.Cog):
 
             self.report_cache[member.id] = time.time()
             await self.select_report(member, guild)
-
 
     async def send_application(self, member):
 
@@ -284,7 +281,6 @@ class ReportSupport(commands.Cog):
             await member.send("**Let's do it again then! If you want to cancel your application, let it timeout!**")
             return await self.send_application(member)
 
-
     # Report methods
     async def select_report(self, member, guild):
 
@@ -360,8 +356,6 @@ class ReportSupport(commands.Cog):
                 # Cancel, I misclicked
                 return await member.send("**All right, cya!**")
 
-
-
     # - Report someone
     async def report_someone(self, member, guild):
 
@@ -401,7 +395,6 @@ class ReportSupport(commands.Cog):
             ctx = await self.client.get_context(message)
             return await self.client.get_cog('Tools').vc(ctx=ctx, member=member)
 
-
     # - Report someone
     async def generic_help(self, member, guild, type_help, message):
 
@@ -436,7 +429,6 @@ class ReportSupport(commands.Cog):
             description=f"{message}",
                 color=discord.Color.red())
             await the_channel.send(content=f"{member.mention}, {moderator.mention}", embed=embed)
-
 
     async def get_message(self, member, check):
         try:
@@ -529,7 +521,6 @@ class ReportSupport(commands.Cog):
         else:
             return True
 
-
     @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
     async def create_table_open_channels(self, ctx):
@@ -581,7 +572,6 @@ class ReportSupport(commands.Cog):
 
         return await ctx.send("**Table __OpenChannels__ reset!**", delete_after=3)
 
-
     async def table_open_channels_exists(self) -> bool:
         mycursor, db = await the_database()
         await mycursor.execute(f"SHOW TABLE STATUS LIKE 'OpenChannels'")
@@ -625,8 +615,6 @@ class ReportSupport(commands.Cog):
         await mycursor.close()
         return channel
 
-
-
     @commands.command(aliases=['permit_case', 'allow_case', 'witness', 'aw'])
     @commands.has_any_role(*allowed_roles)
     async def allow_witness(self, ctx, member: discord.Member = None):
@@ -635,7 +623,6 @@ class ReportSupport(commands.Cog):
 
         if not member:
             return await ctx.send("**Inform a witness to allow!**")
-
 
         user_channel = await self.get_case_channel(ctx.channel.id)
         if user_channel:
@@ -653,10 +640,8 @@ class ReportSupport(commands.Cog):
 
             return await ctx.send(f"**{member.mention} has been allowed here!**")
 
-
         else:
             await ctx.send(f"**This is not a case channel, {ctx.author.mention}!**")
-
 
     @commands.command(aliases=['forbid_case', 'fw'])
     @commands.has_any_role(*allowed_roles)
@@ -666,7 +651,6 @@ class ReportSupport(commands.Cog):
 
         if not member:
             return await ctx.send("**Inform a witness to forbid!**")
-
 
         user_channel = await self.get_case_channel(ctx.channel.id)
         if user_channel:
@@ -683,7 +667,6 @@ class ReportSupport(commands.Cog):
                 pass
 
             return await ctx.send(f"**{member.mention} has been forbidden here!**")
-
 
         else:
             await ctx.send(f"**This is not a case channel, {ctx.author.mention}!**")
@@ -725,7 +708,6 @@ class ReportSupport(commands.Cog):
                     await confirmation.edit(content='', embed=embed)
         else:
             await ctx.send(f"**What do you think that you are doing? You cannot delete this channel, {ctx.author.mention}!**")
-
 
     async def dnk_embed(self, member):
         def check(r, u):
@@ -775,7 +757,6 @@ class ReportSupport(commands.Cog):
                         command_index -= 1
                     continue
 
-
     # Discord methods
     async def create_interview_room(self, guild: discord.Guild, teacher_app: List[str]) -> None:
         """ Creates an interview room with the teacher """
@@ -785,7 +766,6 @@ class ReportSupport(commands.Cog):
 
         msg = await app_channel.fetch_message(teacher_app[0][0])
         teacher = discord.utils.get(guild.members, id=teacher_app[0][1])
-
 
         # moderator = discord.utils.get(guild.roles, id=moderator_role_id)
         cosmos = discord.utils.get(guild.members, id=self.cosmos_id)
@@ -815,7 +795,6 @@ class ReportSupport(commands.Cog):
             color=teacher.color)
         await txt_channel.send(content=f"{cosmos.mention}, {lesson_management.mention}, {teacher.mention}", embed=app_embed)
 
-
     # In-game commands
     @commands.command()
     @commands.has_permissions(administrator=True)
@@ -827,7 +806,6 @@ class ReportSupport(commands.Cog):
         # Checks if the channel is in the teacher applications category
         if not ctx.channel.category or not ctx.channel.category.id == self.app_cat_id:
             return await ctx.send(f"**This is not an application channel, {ctx.author.mention}!**")
-
 
         app_channel = await self.get_teacher_app_by_channel(ctx.channel.id)
         if app_channel:
@@ -870,8 +848,6 @@ class ReportSupport(commands.Cog):
         else:
             await ctx.send(f"**What do you think that you are doing? You cannot delete this channel, {ctx.author.mention}!**")
 
-
-
     # Database back-end methods
     async def get_teacher_app_by_message(self, message_id: int) -> List[str]:
         """ Gets a teacher application from the database by providing a message id. """
@@ -891,7 +867,6 @@ class ReportSupport(commands.Cog):
         await mycursor.close()
         return teacher_app
 
-
     async def save_teacher_app(self, message_id: int, teacher_id: int) -> None:
         """ Saves a teacher application into the database. """
 
@@ -903,7 +878,6 @@ class ReportSupport(commands.Cog):
         await db.commit()
         await mycursor.close()
 
-
     async def update_teacher_application(self, teacher_id: int, txt_id: int, vc_id: int) -> None:
         """ Updates the teacher's application; adding the txt and vc ids into it. """
 
@@ -914,7 +888,6 @@ class ReportSupport(commands.Cog):
             )
         await db.commit()
         await mycursor.close()
-
 
     async def delete_teacher_app(self, message_id: int) -> None:
         """ Deletes a teacher application from the database. """
@@ -958,7 +931,6 @@ class ReportSupport(commands.Cog):
 
         await ctx.send("**Table `TeacherApplication` dropped!**")
 
-
     @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
     async def reset_table_teacher_application(self, ctx) -> None:
@@ -987,14 +959,11 @@ class ReportSupport(commands.Cog):
         else:
             return False
 
-
     async def audio(self, member: discord.Member, audio_name: str) -> None:
         # Resolves bot's channel state
 
-
         staff_vc = self.client.get_channel(staff_vc_id)
         bot_state = member.guild.voice_client
-
 
         print('user_channel', staff_vc)
         print('bot', bot_state)
@@ -1022,7 +991,6 @@ class ReportSupport(commands.Cog):
         except Exception as e:
             print(e)
             return await ctx.send("**Something went wrong, I'll stop here!**")
-
 
 def setup(client):
     client.add_cog(ReportSupport(client))

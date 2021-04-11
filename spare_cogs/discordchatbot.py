@@ -32,7 +32,6 @@ class ChatterSloth(commands.Cog):
     async def on_ready(self):
         print("The bot is ready!")
 
-
     @commands.Cog.listener()
     async def on_message(self, message):
         if not message.guild:
@@ -54,7 +53,6 @@ class ChatterSloth(commands.Cog):
             msg = message.content.split(f'{self.client.user.mention[2:]}', 1)
             msg = msg[1].strip()
             await self.chatbot(message.channel, msg)
-
 
     async def chatbot(self, channel, message):
         result = chat.respond(message)

@@ -27,7 +27,6 @@ class SlothClass(*classes.values()):
         self.client = client
         super(SlothClass, self).__init__(client)
 
-
     @commands.Cog.listener()
     async def on_ready(self) -> None:
         """ Tells when the cog is ready to use. """
@@ -57,7 +56,6 @@ class SlothClass(*classes.values()):
             await func()
         except:
             pass
-
 
     @commands.command(aliases=['sloth_class', 'slothclasses'])
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -148,7 +146,6 @@ class SlothClass(*classes.values()):
         else:
             return True
 
-
     @commands.command()
     @commands.has_permissions()
     async def get_ts(self, ctx) -> None:
@@ -156,7 +153,6 @@ class SlothClass(*classes.values()):
 
         timestamp = await self.get_timestamp()
         await ctx.send(f"**{timestamp}**")
-
 
     @commands.command(aliases=['rsc'])
     @commands.has_permissions(administrator=True)
@@ -174,7 +170,6 @@ class SlothClass(*classes.values()):
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def skills(self, ctx):
         """ Shows all skills for the user's Sloth class. """
-
 
         user = await self.get_user_currency(ctx.author.id)
         if not user:
@@ -195,7 +190,6 @@ class SlothClass(*classes.values()):
                 continue
             elif not [check for check in c.checks if check.__qualname__ == 'Player.skill_mark.<locals>.real_check']:
                 continue
-
 
             if 'Player.not_ready.<locals>.real_check' in [check.__qualname__ for check in c.checks]:
                 cmds.append(f"{prefix}{c.qualified_name:<18} [Not ready]")
@@ -221,10 +215,6 @@ class SlothClass(*classes.values()):
         skills_embed.set_thumbnail(url=f"https://thelanguagesloth.com/media/sloth_classes/{user[7]}.png")
         skills_embed.set_footer(text=ctx.guild, icon_url=ctx.guild.icon_url)
         await ctx.send(embed=skills_embed)
-
-
-
-
 
 def setup(client) -> None:
     """ Cog's setup function. """

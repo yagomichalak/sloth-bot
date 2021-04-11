@@ -42,7 +42,6 @@ list_of_commands = [
 I'm open to new ideas, in other words, if you want a custom command designed specially for your server, having database access or not, you tell me how you want it to be done and if it's doable, I'll do it.''']
 ]
 
-
 rules = {
     "No NSFW": "The Language Sloth is an educational community. For this reason, NSFW content will not be tolerated in either VCs or text channels. Pornographic, violent, foul, offensive, or even politically charged content/conversations are to be avoided, as they will result in punishment.",
 
@@ -90,7 +89,6 @@ different_class_roles = {
         "croatian", "serbian", "bosnian"
     ]
 }
-
 
 level_badges = {
     10: ['level_10', (5, 10)],
