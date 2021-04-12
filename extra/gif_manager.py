@@ -78,6 +78,7 @@ class GIF:
         image.save(path, "GIF", save_all=True, append_images=self._frames,
                    duration=self._frame_duration, transparency=0, loop=0, **kwargs)
 
+
 if __name__ == '__main__':
 
     ## Puts a single effect onto an image ##
