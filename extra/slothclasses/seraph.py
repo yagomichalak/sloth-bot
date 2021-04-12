@@ -211,8 +211,8 @@ class Seraph(Player):
             title="A Divine Protection has been executed!",
             timestamp=datetime.utcfromtimestamp(timestamp)
         )
-        divine_embed.description=f"🛡️ <@{perpetrator_id}> protected <@{target_id}> from attacks for 24 hours! 🛡️"
-        divine_embed.color=discord.Color.green()
+        divine_embed.description = f"🛡️ <@{perpetrator_id}> protected <@{target_id}> from attacks for 24 hours! 🛡️"
+        divine_embed.color = discord.Color.green()
 
         divine_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Seraph.png")
         divine_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon_url)
@@ -231,8 +231,8 @@ class Seraph(Player):
             title="A Shield Reinforcement has been executed!",
             timestamp=datetime.utcfromtimestamp(timestamp)
         )
-        reinforce_shields_embed.description=f"🛡️ <@{perpetrator_id}> reinforced `{shields_len}` active shields; now they have more 24 hours of duration! 🛡️💪"
-        reinforce_shields_embed.color=discord.Color.green()
+        reinforce_shields_embed.descriptio n = f"🛡️ <@{perpetrator_id}> reinforced `{shields_len}` active shields; now they have more 24 hours of duration! 🛡️💪"
+        reinforce_shields_embed.color = discord.Color.green()
 
         reinforce_shields_embed.set_author(name='35% of chance', url=self.client.user.avatar_url)
         reinforce_shields_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Seraph.png")
@@ -252,8 +252,8 @@ class Seraph(Player):
             title="A Divine Protection shield has been Given!",
             timestamp=datetime.utcfromtimestamp(timestamp)
         )
-        self_shield_embed.description=f"🛡️ <@{perpetrator_id}> got a shield for themselves for reinforcing other shields! 🛡️💪"
-        self_shield_embed.color=discord.Color.green()
+        self_shield_embed.description = f"🛡️ <@{perpetrator_id}> got a shield for themselves for reinforcing other shields! 🛡️💪"
+        self_shield_embed.color = discord.Color.green()
 
         self_shield_embed.set_author(name='20% of chance', url=self.client.user.avatar_url)
         self_shield_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Seraph.png")

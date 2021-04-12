@@ -112,7 +112,7 @@ class EmbedManagement(commands.Cog):
 
         mycursor, db = await the_database()
         for field in fields:
-            sql = "SELECT * FROM "+ field + " WHERE embed_name = %s"
+            sql = "SELECT * FROM " + field + " WHERE embed_name = %s"
             await mycursor.execute(sql, (embed_name,))
             field_data: List[str] = await mycursor.fetchall()
             fields[field] = field_data[:]
@@ -178,7 +178,7 @@ class EmbedManagement(commands.Cog):
                 for lst in embeds_list:
                     new_list.append(lst[0])
                 values = '\n'.join(new_list)
-                embed.description=f"```apache\n{values}```**Example usage:** `{self.client.command_prefix}embed show embed_name`"
+                embed.description = f"```apache\n{values}```**Example usage:** `{self.client.command_prefix}embed show embed_name`"
 
             else:
                 embed.description = "**No embeds were created yet!**"
@@ -771,9 +771,9 @@ class EmbedManagement(commands.Cog):
                 str(r.emoji) in ['✅', '❌']
             )
         except asyncio.TimeoutError:
-            embed.title="__Confirmatiou timed-out!__"
+            embed.title = "__Confirmatiou timed-out!__"
             embed.description = '',
-            color=discord.Color.red()
+            color = discord.Color.red()
             await msg.edit(embed=embed)
             return False
 
@@ -782,13 +782,13 @@ class EmbedManagement(commands.Cog):
             if emoji == '✅':
                 embed.title = "__Successfully confirmed!__"
                 embed.description = f"Action to the value `{value}` has been confirmed!"
-                embed.color=discord.Color.green()
+                embed.color = discord.Color.green()
                 await msg.edit(embed=embed)
                 return True
             elif emoji == '❌':
-                embed.title="Refused!__"
+                embed.title = "Refused!__"
                 embed.description = f"Action to the value `{value}` has not been confirmed!"
-                embed.color=discord.Color.red()
+                embed.color = discord.Color.red()
                 await msg.edit(embed=embed)
                 return False
 
@@ -938,7 +938,7 @@ class SortEmbed:
 
         try:
             if values[0][1] == 'yes':
-                embed.timestamp=datetime.utcnow()
+                embed.timestamp = datetime.utcnow()
         except:
             pass
         finally:
@@ -949,7 +949,7 @@ class SortEmbed:
         :param values: The list of values to sort from. """
 
         try:
-            embed.title=values[0][1]
+            embed.title = values[0][1]
         except:
             pass
         finally:

@@ -136,7 +136,7 @@ class Game(commands.Cog):
                     moved = None
 
             elif emj == '⬇️':
-                if item_y + 1 < rows -1:
+                if item_y + 1 < rows - 1:
 
                     inserted['item'] = (item_x+xadd, item_y+yadd, item_emj)
                     moved = True
@@ -204,7 +204,7 @@ class Game(commands.Cog):
         while True:
 
             square = '\n'.join(map(lambda r: ''.join(r), square))
-            embed.description=square
+            embed.description = square
             await msg.edit(embed=embed)
             if gg:
                 embed.title = "__wy`GRA`łeś/aś!__"
@@ -243,7 +243,7 @@ class Game(commands.Cog):
 
                 elif emj == '⬇️':
                     await msg.remove_reaction(r, u)
-                    if y + 1 < rows -1:
+                    if y + 1 < rows - 1:
                         inserted, moved, gg = await self.check_player_collision(inserted, x, y+1, 0, 1, emj, columns, rows)
                         if moved is not None:
                             y += 1

@@ -147,8 +147,8 @@ class Munk(Player):
             title="A Munk Convertion has been delightfully performed!",
             timestamp=datetime.utcfromtimestamp(timestamp)
         )
-        munk_embed.description=f"🐿️ <@{perpetrator_id}> converted <@{target_id}> into a `Munk`! 🐿️"
-        munk_embed.color=discord.Color.green()
+        munk_embed.description = f"🐿️ <@{perpetrator_id}> converted <@{target_id}> into a `Munk`! 🐿️"
+        munk_embed.color = discord.Color.green()
 
         munk_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Munk.png")
         munk_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon_url)

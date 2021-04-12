@@ -50,7 +50,7 @@ class Player(commands.Cog):
                 required_class=command_class, error_message="You don't have the required Sloth Class to run this command!")
         return commands.check(real_check)
 
-    async def check_cooldown(self, user_id, skill_number: int, seconds: int = 86400)-> bool:
+    async def check_cooldown(self, user_id, skill_number: int, seconds: int = 86400) -> bool:
         """ Checks whether user skill is on cooldown (method).
         :param user_id: The ID of the user who to check it"""
 

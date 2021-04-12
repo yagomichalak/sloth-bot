@@ -156,8 +156,8 @@ class Agares(Player):
             title="A Magic Pull has been Successfully Pulled Off!",
             timestamp=datetime.utcfromtimestamp(timestamp)
         )
-        magic_pull_embed.description=f"**<@{perpetrator_id}> magic pulled <@{target_id}> from `{t_before_vc}` to `{t_after_vc}`!** 🧲"
-        magic_pull_embed.color=discord.Color.green()
+        magic_pull_embed.description = f"**<@{perpetrator_id}> magic pulled <@{target_id}> from `{t_before_vc}` to `{t_after_vc}`!** 🧲"
+        magic_pull_embed.color = discord.Color.green()
 
         magic_pull_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Agares.png")
         magic_pull_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon_url)
@@ -176,8 +176,8 @@ class Agares(Player):
             title="A Cooldown Recharge just Happend!",
             timestamp=datetime.utcfromtimestamp(timestamp)
         )
-        recharge_embed.description=f"**<@{perpetrator_id}> reset <@{target_id}>'s first skill cooldown!** 🔁"
-        recharge_embed.color=discord.Color.green()
+        recharge_embed.description = f"**<@{perpetrator_id}> reset <@{target_id}>'s first skill cooldown!** 🔁"
+        recharge_embed.color = discord.Color.green()
 
         recharge_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Agares.png")
         recharge_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon_url)

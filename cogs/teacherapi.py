@@ -455,8 +455,8 @@ class TeacherAPI(commands.Cog):
         while True:
             current = data[index]
             embed.clear_fields()
-            embed.title=f"Showing cards ({index+1}/{len(data)})"
-            embed.description=f"**User:** {teacher.mention}"
+            embed.title = f"Showing cards ({index+1}/{len(data)})"
+            embed.description = f"**User:** {teacher.mention}"
             embed.color = ctx.author.color
 
             embed.add_field(
