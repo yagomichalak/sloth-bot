@@ -13,7 +13,7 @@ def defragment_gif(path: str, output: str) -> None:
     imageObject = Image.open(path) #.convert('RGBA')
 
     # Display individual frames from the loaded animated GIF file
-    for frame in range(0,imageObject.n_frames):
+    for frame in range(0, imageObject.n_frames):
         imageObject.seek(frame)
         imageObject.convert('RGBA')
         imageObject.save(f"{output}_{frame+1}.png", transparency=0)

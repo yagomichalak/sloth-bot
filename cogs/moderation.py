@@ -173,7 +173,7 @@ class Moderation(commands.Cog):
         if message:
             message = message[0]
             embed = discord.Embed(title="Sniped", description=f"**>>** {message.content}", color=message.author.color, timestamp=message.created_at)
-            embed.set_author(name=message.author,url=message.author.avatar_url, icon_url=message.author.avatar_url)
+            embed.set_author(name=message.author, url=message.author.avatar_url, icon_url=message.author.avatar_url)
             await ctx.send(embed=embed)
         else:
             await ctx.send("**I couldn't snipe any messages!**")

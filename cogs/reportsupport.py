@@ -286,7 +286,7 @@ class ReportSupport(commands.Cog):
     async def select_report(self, member, guild):
 
         # Ask what they want to do [Report someone, general help, missclick]
-        react_list = ['1️⃣','2️⃣','3️⃣', '❌']
+        react_list = ['1️⃣', '2️⃣', '3️⃣', '❌']
 
         report_embed = discord.Embed(
             title="What kind of report would you like to start?")

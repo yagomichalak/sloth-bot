@@ -54,7 +54,7 @@ class Munk(Player):
                     message_embed.set_image(url=skill_action[8])
                     await self.bots_txt.send(content=f"<@{skill_action[0]}>", embed=message_embed)
                     await message.delete()
-                    await self.update_tribe_thumbnail(user_id=skill_action[0], tribe_name=tribe['name'],link=skill_action[8])
+                    await self.update_tribe_thumbnail(user_id=skill_action[0], tribe_name=tribe['name'], link=skill_action[8])
 
             elif emoji == '❌':
 

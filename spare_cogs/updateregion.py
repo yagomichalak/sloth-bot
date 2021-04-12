@@ -36,7 +36,7 @@ class UpdateRegion(commands.Cog):
                         if region:
                             everything.append(region)
 
-        counted_regions = [[x,everything.count(x)] for x in set(everything)]
+        counted_regions = [[x, everything.count(x)] for x in set(everything)]
         counted_regions.sort(key=lambda x: x[1], reverse=True)
         top_region = counted_regions[0][0]
         old_region = guild.region

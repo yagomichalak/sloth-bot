@@ -308,7 +308,7 @@ async def help(ctx, cmd: str = None):
                 cog_embed = discord.Embed(title=f"__Cog:__ {cog.qualified_name}", description=f"__**Description:**__\n```{cog.description}```", color=ctx.author.color, timestamp=ctx.message.created_at)
                 for c in cog.get_commands():
                     if not c.hidden:
-                        cog_embed.add_field(name=c.name,value=c.help,inline=False)
+                        cog_embed.add_field(name=c.name, value=c.help, inline=False)
 
                 return await ctx.send(embed=cog_embed)
 

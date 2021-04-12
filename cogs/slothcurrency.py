@@ -791,7 +791,7 @@ class SlothCurrency(commands.Cog):
         file_path = f'media/temporary/profile_{member.id}.png'
         background.save(file_path, 'png', quality=90)
 
-        all_effects = {key:value for (key, value) in effects.items() if value.get('has_gif')}
+        all_effects = {key: value for (key, value) in effects.items() if value.get('has_gif')}
         async with ctx.typing():
             if all_effects:
                 try:
