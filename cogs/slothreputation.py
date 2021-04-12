@@ -26,7 +26,7 @@ class SlothReputation(commands.Cog):
     async def on_message(self, message):
         if not message.guild:
             return
-            
+
         if message.author.bot:
             return
         elif not await self.check_table_exist():
@@ -84,18 +84,15 @@ class SlothReputation(commands.Cog):
             else:
                 return await ctx.send(f"**{member} doesn't have an account yet!**")
 
-
-        
         SlothCurrency = self.client.get_cog('SlothCurrency')
 
         if ucur[0][12]:
             return await SlothCurrency.send_hacked_image(ctx, member)
 
-        
         all_users = await self.get_all_users_by_score_points()
         position = [[i+1, u[4]] for i, u in enumerate(all_users) if u[0] == member.id]
         position = [it for subpos in position for it in subpos] if position else ['??', 0]
-        
+
         # Gets user Server Activity info, such as messages sent and time in voice channels
         user_info = await SlothCurrency.get_user_activity_info(member.id)
         if not user_info and member.id == ctx.author.id:
@@ -103,7 +100,6 @@ class SlothReputation(commands.Cog):
 
         elif not user_info and not member.id == ctx.author.id:
             return await ctx.send("**Member not found in the system!**")
-
 
         SlothClass = self.client.get_cog('SlothClass')
         effects = await SlothClass.get_user_effects(user_id=member.id)
@@ -139,7 +135,6 @@ class SlothReputation(commands.Cog):
         embed.add_field(name=f"🏆 __**Leaderboard Info:**__", value=f"{position[1]}. pts | #{position[0]}", inline=True)
         embed.add_field(name="🧮 __**Skills Used:**__", value=f"{ucur[0][15]} skills.")
 
-
         # Gets tribe information for the given user
         user_tribe = await SlothClass.get_tribe_info_by_user_id(user_id=member.id)
         if user_tribe['name']:
@@ -157,7 +152,8 @@ class SlothReputation(commands.Cog):
 
         try:
             await info_msg.add_reaction('💰')
-            r, u = await self.client.wait_for('reaction_add', timeout=60, 
+            r, u = await self.client.wait_for(
+                'reaction_add', timeout=60,
                 check=lambda r, u: u.id == ctx.author.id and r.message.id == info_msg.id and str(r.emoji) == '💰'
                 )
         except asyncio.TimeoutError:
@@ -169,7 +165,6 @@ class SlothReputation(commands.Cog):
                 await SlothCurrency.exchange(ctx)
             else:
                 await ctx.send(f"**{ctx.author.mention}, not exchanging, then!**")
-
 
     @commands.command(aliases=['leaderboard', 'lb', 'scoreboard'])
     async def score(self, ctx):
@@ -200,7 +195,6 @@ class SlothReputation(commands.Cog):
             if i + 1 == 10:
                 break
         return await ctx.send(embed=leaderboard)
-
 
     @commands.command(aliases=['level_board', 'levelboard', 'levels'])
     async def level_score(self, ctx):
@@ -293,7 +287,7 @@ class SlothReputation(commands.Cog):
             "CREATE TABLE MembersScore (user_id bigint, user_xp bigint, user_lvl int, user_xp_time int, score_points bigint, rep_time bigint)")
         await db.commit()
         await mycursor.close()
-                
+
         await ctx.send("**Table *MembersScore* created!**", delete_after=3)
 
     @commands.has_permissions(administrator=True)
@@ -342,7 +336,6 @@ class SlothReputation(commands.Cog):
         await mycursor.execute(f"UPDATE MembersScore set user_lvl = user_lvl+1 WHERE user_id = {id}")
         await db.commit()
         await mycursor.close()
-
 
     async def update_user_xp_time(self, id: int, time: int):
         mycursor, db = await the_database()
@@ -454,6 +447,7 @@ class SlothReputation(commands.Cog):
         users = await mycursor.fetchall()
         await mycursor.close()
         return users
-        
+
+
 def setup(client):
     client.add_cog(SlothReputation(client))

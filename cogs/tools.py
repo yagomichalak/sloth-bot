@@ -16,9 +16,9 @@ import pytz
 from pytz import timezone
 from mysqldb import the_database
 
-mod_role_id=int(os.getenv('MOD_ROLE_ID'))
-admin_role_id=int(os.getenv('ADMIN_ROLE_ID'))
-owner_role_id=int(os.getenv('OWNER_ROLE_ID'))
+mod_role_id = int(os.getenv('MOD_ROLE_ID'))
+admin_role_id = int(os.getenv('ADMIN_ROLE_ID'))
+owner_role_id = int(os.getenv('OWNER_ROLE_ID'))
 
 allowed_roles = [owner_role_id, admin_role_id, mod_role_id, int(os.getenv('SLOTH_LOVERS_ROLE_ID'))]
 teacher_role_id = int(os.getenv('TEACHER_ROLE_ID'))
@@ -33,7 +33,6 @@ class Tools(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         print('Tools cog is ready!')
-
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -61,7 +60,6 @@ class Tools(commands.Cog):
 
         else:
             return await ctx.send(f"**No role with that name was found!**")
-
 
     # Countsdown from a given number
     @commands.command()
@@ -92,7 +90,7 @@ class Tools(commands.Cog):
         guild = ctx.message.guild
         voice_client = guild.voice_client
         user_voice = ctx.message.author.voice
-        #voice_client: discord.VoiceClient = discord.utils.get(self.client.voice_clients, guild=ctx.guild)
+        # voice_client: discord.VoiceClient = discord.utils.get(self.client.voice_clients, guild=ctx.guild)
 
         if voice_client:
             if user_voice.channel == voice_client.channel:
@@ -120,7 +118,6 @@ class Tools(commands.Cog):
 
         voice = ctx.message.author.voice
         voice_client = ctx.message.guild.voice_client
-
 
         # Checks if the user is in a voice channel
         if voice is None:
@@ -210,10 +207,9 @@ class Tools(commands.Cog):
         embed.set_author(name=ctx.author, icon_url=ctx.author.avatar_url)
         return await ctx.send(embed=embed)
 
-
     @commands.command()
     @commands.has_permissions(administrator=True)
-    async def eval(self, ctx, *, body = None):
+    async def eval(self, ctx, *, body=None):
         '''
         (ADM) Executes a given command from Python onto Discord.
         :param body: The body of the command.
@@ -322,11 +318,10 @@ class Tools(commands.Cog):
         all_members = [m.name for vc in vcs for m in vc.members]
         await ctx.send(f"**`{len(all_members)}` members are in a vc atm!**")
 
-
     @commands.command()
     @commands.has_any_role(*allowed_roles)
     async def vc(self, ctx, member: discord.Member = None) -> None:
-        """ Tells where the given member is at (voice channel). 
+        """ Tells where the given member is at (voice channel).
         :param member: The member you are looking for. """
 
         if not member:
@@ -334,7 +329,7 @@ class Tools(commands.Cog):
 
         member_state = member.voice
         if channel := member_state and member_state.channel:
-            msg = f"**{member.mention} is in the `{channel.mention}` voice channel.**"
+            msg = f"**{member.mention} is in the {channel.mention} voice channel.**"
             try:
                 invite = await channel.create_invite()
             except:
@@ -344,7 +339,6 @@ class Tools(commands.Cog):
             await ctx.send(msg)
         else:
             await ctx.send(f"**{member.mention} is not in a VC!**")
-        
 
     @commands.command(aliases=['mag'], hidden=True)
     @commands.cooldown(1, 300, commands.BucketType.guild)
@@ -385,12 +379,12 @@ class Tools(commands.Cog):
                 audio_source = discord.FFmpegPCMAudio('best_audio.mp3')
                 voice_client.play(audio_source, after=lambda e: print("Finished trolling people!"))
             else:
-                pass     
+                pass
 
         except Exception as e:
             print(e)
             return await ctx.send("**Something went wrong, I'll stop here!**")
-        
+
         else:
             # Moves all members who are in the voice channel to the context channel.
             magneted_members = 0
@@ -443,7 +437,6 @@ class Tools(commands.Cog):
             text.append(f"**`{not_moved}` {'people were' if moved > 1 else 'person was'} not moved!**")
         await ctx.send(' '.join(text))
 
-
     @commands.command(aliases=['tp', 'beam'])
     @commands.has_permissions(administrator=True)
     async def teleport(self, ctx, vc_1: discord.VoiceChannel = None, vc_2: discord.VoiceChannel = None) -> None:
@@ -463,7 +456,6 @@ class Tools(commands.Cog):
                 return await ctx.send(f"**You provided just 1 VC, and you're not in one, so we can't make a target VC, {member.mention}!**")
             vc_1, vc_2 = voice, vc_1
 
-
         moved = not_moved = 0
 
         members = [m for m in vc_1.members]
@@ -474,7 +466,7 @@ class Tools(commands.Cog):
             try:
                 await m.move_to(vc_2)
             except:
-                not_moved +=1
+                not_moved += 1
             else:
                 moved += 1
 
@@ -510,7 +502,7 @@ class Tools(commands.Cog):
                 return await ctx.send(f"**Please, inform a `my_timezone`, {member.mention}!**")
             my_timezone = user_timezone[1]
 
-        if not my_timezone in (timezones := pytz.all_timezones):
+        if my_timezone not in (timezones := pytz.all_timezones):
             return await ctx.send(f"**Please, inform a valid timezone, {member.mention}!**\n`(Type b!timezones to get a full list with the timezones in your DM's)`")
 
         # Given info (time and timezone)
@@ -537,7 +529,7 @@ class Tools(commands.Cog):
     @commands.command()
     @commands.cooldown(1, 300, commands.BucketType.user)
     async def timezones(self, ctx) -> None:
-        """ Sends a full list with the timezones into the user's DM's. 
+        """ Sends a full list with the timezones into the user's DM's.
         (Cooldown) = 5 minutes. """
 
         member = ctx.author
@@ -551,7 +543,6 @@ class Tools(commands.Cog):
             await ctx.send(f"**I couldn't do it for some reason, make sure your DM's are open, {member.mention}!**")
         else:
             await ctx.send(f"**List sent into your DM's, {member.mention}!**")
-
 
     @staticmethod
     async def send_big_message(channel, message):
@@ -587,7 +578,7 @@ class Tools(commands.Cog):
             return await ctx.send(f"**Please, inform a timezone, {member.mention}!**")
 
         my_timezone = my_timezone.title()
-        if not my_timezone in pytz.all_timezones:
+        if my_timezone not in pytz.all_timezones:
             return await ctx.send(f"**Please, inform a valid timezone, {member.mention}!**")
 
         if user_timezone := await self.select_user_timezone(member.id):
@@ -598,7 +589,6 @@ class Tools(commands.Cog):
             await ctx.send(f"**Set timezone to `{my_timezone}`, {member.mention}!**")
 
     # Database (CRUD)
-
 
     async def insert_user_timezone(self, user_id: int, my_timezone: str) -> None:
         """ Inserts a timezone for a user.
@@ -630,7 +620,6 @@ class Tools(commands.Cog):
         await db.commit()
         await mycursor.close()
 
-
     async def delete_user_timezone(self, user_id: int) -> None:
         """ Deletes the user's timezone.
         :param user_id: The ID of the user to delete. """
@@ -640,7 +629,6 @@ class Tools(commands.Cog):
         await db.commit()
         await mycursor.close()
 
-
     @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
     async def create_table_user_timezones(self, ctx) -> None:
@@ -648,7 +636,7 @@ class Tools(commands.Cog):
 
         if await self.check_table_user_timezones():
             return await ctx.send("**Table __UserTimezones__ already exists!**")
-        
+
         await ctx.message.delete()
         mycursor, db = await the_database()
         await mycursor.execute("CREATE TABLE UserTimezones (user_id BIGINT NOT NULL, my_timezone VARCHAR(50) NOT NULL)")
