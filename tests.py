@@ -21,6 +21,7 @@ def tr(language: str, message: str) -> List[str]:
         print('AH')
         return translation.src, translation.dest, translation.text
 
+
 message = tr(language="en", message="Das ist wirklich")
 # print(message)
 
