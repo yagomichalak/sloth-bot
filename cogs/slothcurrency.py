@@ -835,7 +835,7 @@ class SlothCurrency(commands.Cog):
                 if os.path.isdir(full_path):
                     # Gets all frame images from the folder
                     for i in range(len(glob.glob(f"{full_path}/*.png"))):
-                        frame = Image.open(f"{full_path}/{effect}_{i+1}.png") # convert('RGBA') # remove this convert later
+                        frame = Image.open(f"{full_path}/{effect}_{i+1}.png")  # convert('RGBA') # remove this convert later
                         # Checs whether frame has to be resized
                         if all_effects[effect]['resize']:
                             frame = frame.resize(all_effects[effect]['resize']).convert('RGBA')

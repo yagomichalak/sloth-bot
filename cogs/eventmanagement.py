@@ -231,10 +231,10 @@ class EventManagement(commands.Cog):
             return await ctx.send(f"**{member.mention}, this is not an event room**")
 
         # Checks whether member can delete room
-        if room[0] == member.id: # If it's the owner of the room
+        if room[0] == member.id:  # If it's the owner of the room
             delete = True
 
-        elif perms.administrator or mod_role_id in [r.id for r in member.roles]: # If it's a staff member
+        elif perms.administrator or mod_role_id in [r.id for r in member.roles]:  # If it's a staff member
             delete = True
 
         if delete:

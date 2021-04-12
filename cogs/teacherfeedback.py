@@ -300,7 +300,7 @@ class TeacherFeedback(commands.Cog):
             await self.db.update_teacher_class_ts(member.id, current_ts)
             await self.db.update_all_students_ts(member.id, current_ts)
 
-        else: # Otherwise, it's a student
+        else:  # Otherwise, it's a student
             teacher = discord.utils.get(member.guild.members, id=teacher_class[0])
             teacher_in_class = teacher and teacher in class_vc.members
 

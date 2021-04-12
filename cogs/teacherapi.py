@@ -57,11 +57,11 @@ class TeacherAPI(commands.Cog):
         :param stroke: The stroke color.
         """
 
-        draw.text((coords[0]-1, coords[1]), text, stroke, font=font) # Left
-        draw.text((coords[0]+1, coords[1]), text, stroke, font=font) # Right
-        draw.text((coords[0], coords[1]-1), text, stroke, font=font) # Top
-        draw.text((coords[0], coords[1]+1), text, stroke, font=font) # Bottom
-        draw.text((coords[0], coords[1]), text, color, font=font) # Center
+        draw.text((coords[0]-1, coords[1]), text, stroke, font=font)  # Left
+        draw.text((coords[0]+1, coords[1]), text, stroke, font=font)  # Right
+        draw.text((coords[0], coords[1]-1), text, stroke, font=font)  # Top
+        draw.text((coords[0], coords[1]+1), text, stroke, font=font)  # Bottom
+        draw.text((coords[0], coords[1]), text, color, font=font)  # Center
 
     async def make_description(self, description: str) -> str:
         """ Rearranges the given text by adding \\n tags every 29 characters
