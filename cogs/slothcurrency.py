@@ -1335,10 +1335,11 @@ class SlothCurrency(commands.Cog):
                     content=f"{ctx.author.mention}, {member.mention}, <@{wired_user[0]}>",
                     embed=discord.Embed(
                         title="__Intercepted Transfer__",
-                        description=
-                        f"{ctx.author.mention} tried to transfer `{money}łł` to {member.mention}, " +
-                        f"but <@{wired_user[0]}> siphoned off `{siphon_percentage}%` of it; `{cybersloth_money}łł`! " +
-                        f"So {member.mention} actually got `{target_money}łł`!",
+                        description=(
+                            f"{ctx.author.mention} tried to transfer `{money}łł` to {member.mention}, "
+                            f"but <@{wired_user[0]}> siphoned off `{siphon_percentage}%` of it; `{cybersloth_money}łł`! "
+                            f"So {member.mention} actually got `{target_money}łł`!"
+                        ),
                         color=ctx.author.color,
                         timestamp=ctx.message.created_at)
                 )
