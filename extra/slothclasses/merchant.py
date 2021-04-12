@@ -124,8 +124,7 @@ class Merchant(Player):
                 return await ctx.send(f"**{member.mention} doesn't have a potion available for purchase, {buyer.mention}!**")
 
             try:
-                if wired_user := await self.get_skill_action_by_target_id_and_skill_type(
-                    target_id=member.id, skill_type='wire'):
+                if wired_user := await self.get_skill_action_by_target_id_and_skill_type(target_id=member.id, skill_type='wire'):
 
                     siphon_percentage = 35
                     cybersloth_money = round((merchant_item[7]*siphon_percentage)/100)

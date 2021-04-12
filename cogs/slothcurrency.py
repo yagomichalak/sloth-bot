@@ -1322,9 +1322,11 @@ class SlothCurrency(commands.Cog):
 
         if the_user[0][1] >= int(money):
             SlothClass = self.client.get_cog('SlothClass')
-            if wired_user := await SlothClass.get_skill_action_by_target_id_and_skill_type(
-                target_id=ctx.author.id, skill_type='wire'):
 
+            wired_user = await SlothClass.get_skill_action_by_target_id_and_skill_type(
+                target_id=ctx.author.id, skill_type='wire')
+
+            if wired_user:
                 siphon_percentage = 35
                 cybersloth_money = round((money*siphon_percentage)/100)
                 target_money = money - cybersloth_money
