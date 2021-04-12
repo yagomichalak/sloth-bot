@@ -152,7 +152,8 @@ class SlothReputation(commands.Cog):
 
         try:
             await info_msg.add_reaction('💰')
-            r, u = await self.client.wait_for('reaction_add', timeout=60,
+            r, u = await self.client.wait_for(
+                'reaction_add', timeout=60,
                 check=lambda r, u: u.id == ctx.author.id and r.message.id == info_msg.id and str(r.emoji) == '💰'
                 )
         except asyncio.TimeoutError:

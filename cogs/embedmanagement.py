@@ -145,8 +145,7 @@ class EmbedManagement(commands.Cog):
 
         cmd = self.client.get_command('embed')
         prefix = self.client.command_prefix
-        subcommands = [f"{prefix}{c.qualified_name}" for c in cmd.commands
-              ]
+        subcommands = [f"{prefix}{c.qualified_name}" for c in cmd.commands]
 
         subcommands = '\n'.join(subcommands)
         embed = discord.Embed(
@@ -298,8 +297,7 @@ class EmbedManagement(commands.Cog):
 
         cmd = self.client.get_command('embed edit')
         prefix = self.client.command_prefix
-        subcommands = [f"{prefix}{c.qualified_name}" for c in cmd.commands
-              ]
+        subcommands = [f"{prefix}{c.qualified_name}" for c in cmd.commands]
 
         subcommands = '\n'.join(subcommands)
         embed = discord.Embed(

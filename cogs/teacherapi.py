@@ -473,9 +473,10 @@ class TeacherAPI(commands.Cog):
 
             await msg.edit(embed=embed)
             try:
-                r, u = await self.client.wait_for('reaction_add', timeout=60,
+                r, u = await self.client.wait_for(
+                    'reaction_add', timeout=60,
                     check=lambda r, u: u.id == ctx.author.id and msg.id == r.message.id and str(r.emoji) in ['⬅️', '➡️', '🛑']
-                )
+                    )
             except asyncio.TimeoutError:
                 await msg.remove_reaction('⬅️', self.client.user)
                 await msg.remove_reaction('➡️', self.client.user)
