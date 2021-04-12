@@ -1269,7 +1269,7 @@ class SlothCurrency(commands.Cog):
 
     @commands.command()
     @commands.has_permissions(administrator=True)
-    async def add_message(self, ctx, member: discord.Member = None, add_message: int= None):
+    async def add_message(self, ctx, member: discord.Member = None, add_message: int = None):
         '''
         (ADM) Adds messages to the member's status.
         :param member: The member to add the messages to.
