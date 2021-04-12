@@ -307,7 +307,7 @@ class ReportSupport(commands.Cog):
             r, _ = await self.client.wait_for(
                 'reaction_add',
                 timeout=240,
-                check=lambda r, u: u.id == member.id and  r.emoji in react_list and r.message.id == msg.id
+                check=lambda r, u: u.id == member.id and r.emoji in react_list and r.message.id == msg.id
             )
         except asyncio.TimeoutError:
             timeout_embed = discord.Embed(

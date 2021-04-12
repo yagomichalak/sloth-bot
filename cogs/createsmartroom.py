@@ -1206,7 +1206,7 @@ class CreateSmartRoom(commands.Cog):
         await mycursor.execute("SELECT * FROM GalaxyVc WHERE (user_ts + 1209600) - %s <= 172800 and user_notified = 'no'", (the_time,))
         danger_rooms = await mycursor.fetchall()
         await mycursor.close()
-        return  danger_rooms
+        return danger_rooms
 
     async def user_notified_yes(self, user_id: int) -> None:
         """ Updates the the user notified status to 'yes'.
