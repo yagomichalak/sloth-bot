@@ -31,7 +31,6 @@ class Show(commands.Cog):
         all_users = ctx.guild.members
         await ctx.send(f'{len(all_users)} members!')
 
-
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def about(self, ctx) -> None:
@@ -39,8 +38,10 @@ class Show(commands.Cog):
 
         embed = discord.Embed(
             title=f"__About ({self.client.user})__",
-            description=f"The {self.client.user} bot is an all-in-one bot designed specially for `The Language Sloth` server. " \
-            + "It has many different commands and features to best satisfy our needs in this server, and it's continuously being improved.",
+            description=(
+                f"The {self.client.user} bot is an all-in-one bot designed specially for `The Language Sloth` server. "
+                "It has many different commands and features to best satisfy our needs in this server, and it's continuously being improved."
+                ),
             color=ctx.author.color,
             timestamp=ctx.message.created_at,
             url='https://thelanguagesloth.com/bots/sloth/'
@@ -65,13 +66,11 @@ class Show(commands.Cog):
             value=f'```apache\nThe bot is running and being hosted on a "{sys.platform}" machine.```',
             inline=True)
 
-        embed.set_author(name='DNK#6725', url='https://discord.gg/languages', 
+        embed.set_author(name='DNK#6725', url='https://discord.gg/languages',
             icon_url='https://cdn.discordapp.com/attachments/719020754858934294/720289112040669284/DNK_icon.png')
         embed.set_thumbnail(url=self.client.user.avatar_url)
         embed.set_footer(text=ctx.guild, icon_url=ctx.guild.icon_url)
         await ctx.send(embed=embed)
-
-
 
     # Shows the specific rule
     @commands.command()
@@ -107,7 +106,7 @@ class Show(commands.Cog):
                               timestamp=ctx.message.created_at)
         i = 1
         for rule, rule_value in rules.items():
-            embed.add_field(name=f"{i} - {rule}", value=rule_value, inline=False)        
+            embed.add_field(name=f"{i} - {rule}", value=rule_value, inline=False)
             i += 1
 
         embed.add_field(name="<:zzSloth:686237376510689327>", value="Have fun!", inline=True)
@@ -119,9 +118,8 @@ class Show(commands.Cog):
         embed.set_author(name='The Language Sloth', url='https://discordapp.com',
                          icon_url='https://cdn.discordapp.com/attachments/562019489642709022/676564604087697439/ezgif.com-gif-maker_1.gif')
         await ctx.send(
-            content="Hello, **The Language Sloth** is a public Discord server for people all across the globe to meet ,learn languages and exchange cultures. here are our rules of conduct.",
+            content="Hello, **The Language Sloth** is a public Discord server for people all across the globe to meet, learn languages and exchange cultures. here are our rules of conduct.",
             embed=embed)
-
 
     @commands.command(aliases=['ss'])
     @commands.cooldown(1, 10, commands.BucketType.user)
@@ -132,7 +130,7 @@ class Show(commands.Cog):
 
         mycursor, db = await the_database()
         await mycursor.execute("""
-            SELECT 
+            SELECT
             STR_TO_DATE(complete_date, '%d/%m/%Y') AS Months,
             SUM(m_joined) - SUM(m_left) AS 'Total Joins',
             members AS 'First Member Record of the Month',
@@ -146,11 +144,13 @@ class Show(commands.Cog):
 
         embed = discord.Embed(
             title="__Server's Monthly Statuses__",
-            description="**N**: Month counting;\n"\
-            +"**Date**: Months respective to the data;\n"\
-            +"**Joins**: New members;\n"\
-            +"**First**: Total members in the first day of the month;\n"\
-            +"**Last**: Total members in the last day of the month.",
+            description=(
+                "**N**: Month counting;\n"
+                "**Date**: Months respective to the data;\n"
+                "**Joins**: New members;\n"
+                "**First**: Total members in the first day of the month;\n"
+                "**Last**: Total members in the last day of the month."
+                ),
             color=member.color,
             timestamp=ctx.message.created_at,
             url="http://thelanguagesloth.com"
@@ -178,7 +178,6 @@ class Show(commands.Cog):
         embed.set_author(name=member, icon_url=member.avatar_url)
         embed.set_footer(text=member.guild, icon_url=member.guild.icon_url)
         await ctx.send(embed=embed)
-
 
 
 def setup(client):

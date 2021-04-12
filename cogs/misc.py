@@ -18,7 +18,6 @@ class Misc(commands.Cog):
     async def on_ready(self):
         print("Misc cog is online!")
 
-
     @commands.command()
     async def dice(self, ctx):
         '''Rolls a certain number of dice'''
@@ -139,7 +138,6 @@ class Misc(commands.Cog):
         else:
             await ctx.send(
                 f"**{author.mention}, better luck next time... You guessed {g1}, {g2}, {g3}...\nThe numbers were:** `{', '.join(string_numbers)}`")
-
 
     @commands.command(aliases=['number'])
     async def numberfact(self, ctx, number: int = None):

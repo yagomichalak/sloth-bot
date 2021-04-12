@@ -7,6 +7,7 @@ announcement_channel_id = int(os.getenv('ANNOUNCEMENT_CHANNEL_ID'))
 mod_role_id = int(os.getenv('MOD_ROLE_ID'))
 allowed_roles = [int(os.getenv('OWNER_ROLE_ID')), int(os.getenv('ADMIN_ROLE_ID')), mod_role_id]
 
+
 class Communication(commands.Cog):
     """ A cog related to communication commands. """
 
@@ -60,7 +61,7 @@ class Communication(commands.Cog):
         general_channel = discord.utils.get(ctx.guild.channels, id=general_voice_chat_id)
         await general_channel.send(
             f'''__**Welcome to the Language Sloth**__! {member.mention}
-This is a community of people who are practicing and studying languages from all around the world! While you're here, you will also make tons of new friends! There is a lot to do here in the server but there are some things you should do to start off. 
+This is a community of people who are practicing and studying languages from all around the world! While you're here, you will also make tons of new friends! There is a lot to do here in the server but there are some things you should do to start off.
 
 1. Make sure you go check out the <#688967996512665655> and the informations page. These rules are very important and are taken seriously here on the server.
 2. After you have finished reading those, you can assign yourself some roles at <#679333977705676830> <#683987207065042944> <#688037387561205824> and <#562019509477703697>! These roles will give you access to different voice and text channels! To choose your role click on the flag that best represents your native language.
@@ -118,6 +119,7 @@ If you have any questions feel free to ask! And if you experience any type of pr
         if check_member:
             return await member.send(message)
         await ctx.send(f"**Member: {member} not found!", delete_after=3)
+
 
 def setup(client):
     """ Cog's setup function. """
