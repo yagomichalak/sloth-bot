@@ -766,8 +766,7 @@ class EmbedManagement(commands.Cog):
             await msg.add_reaction('❌')
 
             r, _ = await self.client.wait_for('reaction_add', timeout=60,
-                check=lambda r, u: r.message.id == msg.id and u.id == member.id and \
-                str(r.emoji) in ['✅', '❌']
+                check=lambda r, u: r.message.id == msg.id and u.id == member.id and str(r.emoji) in ['✅', '❌']
             )
         except asyncio.TimeoutError:
             embed.title = "__Confirmatiou timed-out!__"

@@ -38,8 +38,10 @@ class Show(commands.Cog):
 
         embed = discord.Embed(
             title=f"__About ({self.client.user})__",
-            description=f"The {self.client.user} bot is an all-in-one bot designed specially for `The Language Sloth` server. " \
-            + "It has many different commands and features to best satisfy our needs in this server, and it's continuously being improved.",
+            description=(
+                f"The {self.client.user} bot is an all-in-one bot designed specially for `The Language Sloth` server. "
+                "It has many different commands and features to best satisfy our needs in this server, and it's continuously being improved."
+                ),
             color=ctx.author.color,
             timestamp=ctx.message.created_at,
             url='https://thelanguagesloth.com/bots/sloth/'
@@ -142,11 +144,13 @@ class Show(commands.Cog):
 
         embed = discord.Embed(
             title="__Server's Monthly Statuses__",
-            description="**N**: Month counting;\n"\
-            + "**Date**: Months respective to the data;\n"\
-            + "**Joins**: New members;\n"\
-            + "**First**: Total members in the first day of the month;\n"\
-            + "**Last**: Total members in the last day of the month.",
+            description=(
+                "**N**: Month counting;\n"
+                "**Date**: Months respective to the data;\n"
+                "**Joins**: New members;\n"
+                "**First**: Total members in the first day of the month;\n"
+                "**Last**: Total members in the last day of the month."
+                ),
             color=member.color,
             timestamp=ctx.message.created_at,
             url="http://thelanguagesloth.com"
