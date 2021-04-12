@@ -215,8 +215,7 @@ class Game(commands.Cog):
 
             try:
                 r, u = await self.client.wait_for('reaction_add', timeout=60,
-                    check=lambda r, u: u.id == member.id and r.message.id == msg.id \
-                    and str(r.emoji) in ['⬅️', '➡️', '⬇️', '⬆️', '🏳️']
+                    check=lambda r, u: u.id == member.id and r.message.id == msg.id and str(r.emoji) in ['⬅️', '➡️', '⬇️', '⬆️', '🏳️']
                 )
             except asyncio.TimeoutError:
                 await self.remove_message_reaction(msg, ctx.author)

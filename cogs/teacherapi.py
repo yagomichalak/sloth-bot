@@ -333,8 +333,10 @@ class TeacherAPI(commands.Cog):
         await self._change_teacher_state(member.id, 1)
         teacher_embed = discord.Embed(
             title=f"__Promoted!__",
-            description=f"{member.mention} has been `promoted` to a teacher! " \
-            + f"Click [here]({self.website_link}/profile) to access your profile.",
+            description=(
+                f"{member.mention} has been `promoted` to a teacher! "
+                f"Click [here]({self.website_link}/profile) to access your profile."
+                ),
             color=member.color,
             timestamp=ctx.message.created_at,
             url=self.website_link
@@ -461,8 +463,10 @@ class TeacherAPI(commands.Cog):
 
             embed.add_field(
                 name="__Class Info__",
-                value=f"**ID:** {current[0]}\n**Language:** {current[1]}\n**Description:** {current[2]}\n" \
-                + f"**Day:** {current[5]} at {current[6]}\n**Type:** {current[7]}",
+                value=(
+                    f"**ID:** {current[0]}\n**Language:** {current[1]}\n**Description:** {current[2]}\n"
+                    f"**Day:** {current[5]} at {current[6]}\n**Type:** {current[7]}"
+                    ),
                 inline=True
             )
             image_path = f"{self.website_link}/{current[3].replace('../', '').replace(' ', '%20')}"
