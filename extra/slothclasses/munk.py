@@ -48,7 +48,7 @@ class Munk(Player):
                     message_embed = discord.Embed(
                         title="Thumbnail Approved!",
                         description=f"**<@{payload.user_id}>, approved your tribe `{tribe['name']}`'s thumbnail/logo, <@{skill_action[0]}>!**",
-                        color = discord.Color.green(),
+                        color=discord.Color.green(),
                         url=tribe['link']
                     )
                     message_embed.set_image(url=skill_action[8])
@@ -66,7 +66,7 @@ class Munk(Player):
                     message_embed = discord.Embed(
                         title="Thumbnail Refused!",
                         description=f"**<@{payload.user_id}>, refused your tribe `{tribe['name']}`'s thumbnail/logo, <@{skill_action[0]}>!**",
-                        color = discord.Color.red(),
+                        color=discord.Color.red(),
                         url=tribe['link']
                     )
                     message_embed.set_image(url=skill_action[8])
