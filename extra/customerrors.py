@@ -2,7 +2,8 @@ import discord
 from discord.ext import commands
 
 
-class NotInWhitelist(commands.CheckFailure): pass
+class NotInWhitelist(commands.CheckFailure):
+    pass
 
 
 class MissingRequiredSlothClass(commands.CheckFailure):
@@ -20,7 +21,8 @@ class ActionSkillOnCooldown(commands.CheckFailure):
         self.cooldown = cooldown
 
 
-class CommandNotReady(commands.CheckFailure): pass
+class CommandNotReady(commands.CheckFailure):
+    pass
 
 
 class SkillsUsedRequirement(commands.CheckFailure):

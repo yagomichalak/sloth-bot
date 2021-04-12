@@ -270,7 +270,8 @@ class EmbedManagement(commands.Cog):
         # prompts user for which field that they want to delete
         if field.lower() == 'field':
             field_index = await self.prompt_index(ctx, member)
-            if not field_index: return
+            if not field_index:
+                return
 
         confirmation = await self.reaction_confirmation(ctx=ctx, member=member, value=field)
 

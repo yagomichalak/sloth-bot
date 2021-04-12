@@ -117,12 +117,18 @@ class TeacherFeedback(commands.Cog):
             return
 
         # Check voice states
-        if before.mute != after.mute: return
-        if before.deaf != before.deaf: return
-        if before.self_mute != after.self_mute: return
-        if before.self_deaf != after.self_deaf: return
-        if before.self_stream != after.self_stream: return
-        if before.self_video != after.self_video: return
+        if before.mute != after.mute:
+            return
+        if before.deaf != before.deaf:
+            return
+        if before.self_mute != after.self_mute:
+            return
+        if before.self_deaf != after.self_deaf:
+            return
+        if before.self_stream != after.self_stream:
+            return
+        if before.self_video != after.self_video:
+            return
 
         # Get before/after channels and their categories
         bc = before.channel
