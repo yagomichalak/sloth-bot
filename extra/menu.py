@@ -56,7 +56,7 @@ class ConfirmSkill(menus.Menu):
 
         embed = self.sent_msg.embeds[0]
         embed.color = discord.Color.green()
-        embed.title="Confirmed!"
+        embed.title = "Confirmed!"
         await self.sent_msg.edit(embed=embed)
         self.result = True
         self.stop()
@@ -67,7 +67,7 @@ class ConfirmSkill(menus.Menu):
 
         embed = self.sent_msg.embeds[0]
         embed.color = discord.Color.red()
-        embed.title="Denied!"
+        embed.title = "Denied!"
         await self.sent_msg.edit(embed=embed)
         self.result = False
         self.stop()

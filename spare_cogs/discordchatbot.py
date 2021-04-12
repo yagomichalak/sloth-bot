@@ -5,7 +5,7 @@ import os
 from chatbot import Chat, register_call
 
 template_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),"../chatbotTemplate","chatbottemplate.template")
-chat=Chat(template_file_path)
+chat = Chat(template_file_path)
 allowed_roles = [474774889778380820, 574265899801116673, 497522510212890655, 588752954266222602]
 
 @register_call("whoIs")

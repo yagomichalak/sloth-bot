@@ -190,8 +190,8 @@ class Warrior(Player):
             title="Someone was Knocked Out!",
             timestamp=datetime.utcfromtimestamp(timestamp)
         )
-        hit_embed.description=f"**<@{perpetrator_id}> knocked <@{target_id}> out!** 😵"
-        hit_embed.color=discord.Color.green()
+        hit_embed.description = f"**<@{perpetrator_id}> knocked <@{target_id}> out!** 😵"
+        hit_embed.color = discord.Color.green()
 
         hit_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Warrior.png")
         hit_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon_url)
@@ -210,8 +210,8 @@ class Warrior(Player):
             title="Someone just got Vulnerable!",
             timestamp=datetime.utcfromtimestamp(timestamp)
         )
-        smash_embed.description=f"**<@{perpetrator_id}> smashed <@{target_id}>'s' Divine Protection shield; it's gone!** 🚫"
-        smash_embed.color=discord.Color.green()
+        smash_embed.description = f"**<@{perpetrator_id}> smashed <@{target_id}>'s' Divine Protection shield; it's gone!** 🚫"
+        smash_embed.color = discord.Color.green()
 
         smash_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Warrior.png")
         smash_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon_url)

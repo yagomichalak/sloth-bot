@@ -159,8 +159,8 @@ class Metamorph(Player):
             title="A Transmutation just happened in front of everyone's eyes!",
             timestamp=datetime.utcfromtimestamp(timestamp)
         )
-        transmutation_embed.description=f"**<@{perpetrator_id}> transmutated themselves into something else! 🦥→💥→🐩**"
-        transmutation_embed.color=discord.Color.green()
+        transmutation_embed.description = f"**<@{perpetrator_id}> transmutated themselves into something else! 🦥→💥→🐩**"
+        transmutation_embed.color = discord.Color.green()
 
         transmutation_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Metamorph.png")
         transmutation_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon_url)
@@ -179,8 +179,8 @@ class Metamorph(Player):
             title="A Prince(ss) rolled back Time!",
             timestamp=datetime.utcfromtimestamp(timestamp)
         )
-        transmutation_embed.description=f"**<@{attacker_id}> frogged <@{target_id}>!  🦥→💥→🐸**"
-        transmutation_embed.color=discord.Color.green()
+        transmutation_embed.description = f"**<@{attacker_id}> frogged <@{target_id}>!  🦥→💥→🐸**"
+        transmutation_embed.color = discord.Color.green()
 
         transmutation_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Metamorph.png")
         transmutation_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon_url)

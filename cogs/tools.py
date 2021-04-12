@@ -16,9 +16,9 @@ import pytz
 from pytz import timezone
 from mysqldb import the_database
 
-mod_role_id=int(os.getenv('MOD_ROLE_ID'))
-admin_role_id=int(os.getenv('ADMIN_ROLE_ID'))
-owner_role_id=int(os.getenv('OWNER_ROLE_ID'))
+mod_role_id = int(os.getenv('MOD_ROLE_ID'))
+admin_role_id = int(os.getenv('ADMIN_ROLE_ID'))
+owner_role_id = int(os.getenv('OWNER_ROLE_ID'))
 
 allowed_roles = [owner_role_id, admin_role_id, mod_role_id, int(os.getenv('SLOTH_LOVERS_ROLE_ID'))]
 teacher_role_id = int(os.getenv('TEACHER_ROLE_ID'))
@@ -466,7 +466,7 @@ class Tools(commands.Cog):
             try:
                 await m.move_to(vc_2)
             except:
-                not_moved +=1
+                not_moved += 1
             else:
                 moved += 1
 

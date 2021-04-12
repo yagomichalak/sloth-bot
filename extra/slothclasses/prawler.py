@@ -46,7 +46,7 @@ class Prawler(Player):
                     if message:
                         message_embed = message.embeds[0]
                         message_embed.color = discord.Color.green()
-                        message_embed.description=f"**Good job, <@{skill_action[3]}>! You saved yourself against <@{skill_action[0]}>'s stealing!**"
+                        message_embed.description = f"**Good job, <@{skill_action[3]}>! You saved yourself against <@{skill_action[0]}>'s stealing!**"
                         await message.edit(embed=message_embed)
                         await message.remove_reaction('🛡️', self.client.user)
                         await message.remove_reaction('🛡️', payload.member)
@@ -185,7 +185,7 @@ class Prawler(Player):
                 if message:
                     message_embed = message.embeds[0]
                     message_embed.color = discord.Color.red()
-                    message_embed.description=f"**Too late, <@{steal[3]}>! You were robbed by <@{steal[0]}>!**"
+                    message_embed.description = f"**Too late, <@{steal[3]}>! You were robbed by <@{steal[0]}>!**"
                     await message.edit(embed=message_embed)
                     await message.remove_reaction('🛡️', self.client.user)
                 # Removes skill action from the database
@@ -287,11 +287,11 @@ class Prawler(Player):
             timestamp=datetime.utcfromtimestamp(timestamp)
         )
         if attack_succeeded:
-            steal_embed.description=f"🍃 <@{attacker_id}> stole 5łł from <@{target_id}>! 🍃"
-            steal_embed.color=discord.Color.red()
+            steal_embed.description = f"🍃 <@{attacker_id}> stole 5łł from <@{target_id}>! 🍃"
+            steal_embed.color = discord.Color.red()
         else:
-            steal_embed.description=f"🍃 <@{attacker_id}> tried to steal 5łł from <@{target_id}>, but they didn't have it! 🍃"
-            steal_embed.color=discord.Color.green()
+            steal_embed.description = f"🍃 <@{attacker_id}> tried to steal 5łł from <@{target_id}>, but they didn't have it! 🍃"
+            steal_embed.color = discord.Color.green()
 
         steal_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Prawler.png")
         steal_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon_url)
@@ -310,8 +310,8 @@ class Prawler(Player):
             title="A Knife has been Sharpened!",
             timestamp=datetime.utcfromtimestamp(timestamp)
         )
-        sharpen_embed.description=f"<@{perpetrator_id}> has just sharpened his knife to stack `{stack}` 🔪"
-        sharpen_embed.color=discord.Color.green()
+        sharpen_embed.description = f"<@{perpetrator_id}> has just sharpened his knife to stack `{stack}` 🔪"
+        sharpen_embed.color = discord.Color.green()
 
         sharpen_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Prawler.png")
         sharpen_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon_url)
@@ -331,8 +331,8 @@ class Prawler(Player):
             timestamp=datetime.utcfromtimestamp(timestamp)
         )
 
-        rob_doubled_embed.description=f"<@{attacker_id}> managed to double their stealing, and got more `{double_amount}łł` 🔪🍃"
-        rob_doubled_embed.color=discord.Color.green()
+        rob_doubled_embed.description = f"<@{attacker_id}> managed to double their stealing, and got more `{double_amount}łł` 🔪🍃"
+        rob_doubled_embed.color = discord.Color.green()
 
         rob_doubled_embed.set_author(name=f"Rob stack {rob_stack} (35% chance)", icon_url=self.client.user.avatar_url)
         rob_doubled_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Prawler.png")

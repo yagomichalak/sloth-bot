@@ -468,7 +468,7 @@ class Analytics(commands.Cog):
 
         # await calculate_monthly()
         pr_list = await self.calculate_daily()
-        pr_average = sum(pr_list)/ len(pr_list)
+        pr_average = sum(pr_list) / len(pr_list)
         if pr_average <= 0:
             return await ctx.send(f"**I'm afraid I can't calculate it, because you have a negative PR of `{round(pr_average, 2)}%`**")
         # last_record = await self.get_last_members_record()

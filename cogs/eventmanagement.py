@@ -5,11 +5,11 @@ import os
 from typing import Dict, Any, List
 from mysqldb import the_database
 
-mod_role_id=int(os.getenv('MOD_ROLE_ID'))
-admin_role_id=int(os.getenv('ADMIN_ROLE_ID'))
-owner_role_id=int(os.getenv('OWNER_ROLE_ID'))
-event_manager_role_id=int(os.getenv('EVENT_MANAGER_ROLE_ID'))
-preference_role_id=int(os.getenv('PREFERENCE_ROLE_ID'))
+mod_role_id = int(os.getenv('MOD_ROLE_ID'))
+admin_role_id = int(os.getenv('ADMIN_ROLE_ID'))
+owner_role_id = int(os.getenv('OWNER_ROLE_ID'))
+event_manager_role_id = int(os.getenv('EVENT_MANAGER_ROLE_ID'))
+preference_role_id = int(os.getenv('PREFERENCE_ROLE_ID'))
 
 
 class EventManagement(commands.Cog):

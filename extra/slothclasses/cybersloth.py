@@ -210,9 +210,9 @@ class Cybersloth(Player):
             title="Someone just got Hacked and lost Control of Everything!",
             timestamp=datetime.utcfromtimestamp(timestamp)
         )
-        hack_embed.description=f"**<@{perpetrator_id}> hacked <@{target_id}>!** <a:hackerman:652303204809179161>"
+        hack_embed.description = f"**<@{perpetrator_id}> hacked <@{target_id}>!** <a:hackerman:652303204809179161>"
         # hack_embed.description=f"**<@{perpetrator_id}> hacked <@{attacker_id}>!** <a:hackerman:802354539184259082>"
-        hack_embed.color=discord.Color.green()
+        hack_embed.color = discord.Color.green()
 
         hack_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Cybersloth.png")
         hack_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon_url)
@@ -231,8 +231,8 @@ class Cybersloth(Player):
             title="Someone has been wired up!",
             timestamp=datetime.utcfromtimestamp(timestamp)
         )
-        wire_embed.description=f"**<@{perpetrator_id}> wired <@{target_id}>!** 🔌"
-        wire_embed.color=discord.Color.green()
+        wire_embed.description = f"**<@{perpetrator_id}> wired <@{target_id}>!** 🔌"
+        wire_embed.color = discord.Color.green()
         wire_embed.set_image(url='https://i.pinimg.com/originals/8f/e1/d1/8fe1d171c2cfc5b7cc5f6b022d2a51b1.gif')
         wire_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Cybersloth.png")
         wire_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon_url)

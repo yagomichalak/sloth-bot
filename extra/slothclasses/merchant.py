@@ -291,8 +291,8 @@ class Merchant(Player):
             title="A Merchant item has been put into the `Sloth Class Shop`!",
             timestamp=datetime.utcfromtimestamp(timestamp)
         )
-        open_shop_embed.description=f"**<@{perpetrator_id}> put a `changing-Sloth-class potion` into the Sloth class shop, for the price of `{price}łł`!** 🍯"
-        open_shop_embed.color=discord.Color.green()
+        open_shop_embed.description = f"**<@{perpetrator_id}> put a `changing-Sloth-class potion` into the Sloth class shop, for the price of `{price}łł`!** 🍯"
+        open_shop_embed.color = discord.Color.green()
 
         open_shop_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Merchant.png")
         open_shop_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon_url)
