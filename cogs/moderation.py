@@ -658,6 +658,7 @@ class Moderation(commands.Cog):
             mod_ban_embed.set_author(name=f'{member} is going to Brazil...', icon_url=member.avatar_url)
             msg = await ctx.send(embed=mod_ban_embed)
             await msg.add_reaction('✅')
+
             # Prompts for 3 moderator reactions
             def check_mod(r, u):
                 if u.bot:
