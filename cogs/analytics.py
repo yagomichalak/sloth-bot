@@ -8,7 +8,6 @@ from typing import List
 import os
 import asyncio
 from mysqldb import the_database
-import io
 
 bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
 select_your_language_channel_id = int(os.getenv('SELECT_YOUR_LANGUAGE_CHANNEL_ID'))
@@ -54,10 +53,12 @@ class Analytics(commands.Cog):
             draw.text((140, 460), f"{len(members)}", (255, 255, 255), font=small)
             draw.text((140, 520), f"{len(online_members)}", (255, 255, 255), font=small)
 
-            with io.BytesIO() as fp:
-                analytics.save(fp, 'png', quality=90)
-                fp.seek(0)
-                await channel.send(file=fp, filename="analytics_result.png")
+            file_path = './png/analytics_result.png'
+            try:
+                analytics.save(file_path, 'png', quality=90)
+                await channel.send(file=discord.File(file_path))
+            finally:
+                return os.remove(file_path)
 
             await self.reset_table_sloth_analytics()
             complete_date = date_and_time.strftime('%d/%m/%Y')
