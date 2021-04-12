@@ -29,7 +29,7 @@ class ModActivity(commands.Cog):
             return
         guild = self.client.get_guild(guild_id)
         moderator_role = discord.utils.get(guild.roles, id=mod_role_id)
-        if not moderator_role in message.author.roles:
+        if moderator_role not in message.author.roles:
             return
 
         await self.get_moderator_current_messages(message.author.id)
@@ -41,7 +41,7 @@ class ModActivity(commands.Cog):
             return
         guild = self.client.get_guild(guild_id)
         moderator_role = discord.utils.get(guild.roles, id=mod_role_id)
-        if not moderator_role in member.roles:
+        if moderator_role not in member.roles:
             return
         epoch = datetime.utcfromtimestamp(0)
         the_time = (datetime.utcnow() - epoch).total_seconds()

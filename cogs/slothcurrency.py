@@ -127,7 +127,7 @@ class SlothCurrency(commands.Cog):
             await msg.remove_reaction(payload.emoji.name, payload.member)
 
         # Checks if it was a reaction within the shop's channel
-        if not payload.channel_id in shop_channels:
+        if payload.channel_id not in shop_channels:
             return
 
         epoch = datetime.utcfromtimestamp(0)

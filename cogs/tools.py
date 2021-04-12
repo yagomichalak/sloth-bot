@@ -502,7 +502,7 @@ class Tools(commands.Cog):
                 return await ctx.send(f"**Please, inform a `my_timezone`, {member.mention}!**")
             my_timezone = user_timezone[1]
 
-        if not my_timezone in (timezones := pytz.all_timezones):
+        if my_timezone not in (timezones := pytz.all_timezones):
             return await ctx.send(f"**Please, inform a valid timezone, {member.mention}!**\n`(Type b!timezones to get a full list with the timezones in your DM's)`")
 
         # Given info (time and timezone)
@@ -578,7 +578,7 @@ class Tools(commands.Cog):
             return await ctx.send(f"**Please, inform a timezone, {member.mention}!**")
 
         my_timezone = my_timezone.title()
-        if not my_timezone in pytz.all_timezones:
+        if my_timezone not in pytz.all_timezones:
             return await ctx.send(f"**Please, inform a valid timezone, {member.mention}!**")
 
         if user_timezone := await self.select_user_timezone(member.id):
