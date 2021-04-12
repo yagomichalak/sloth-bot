@@ -4,6 +4,7 @@ import glob
 from typing import Tuple, Dict, Union, Any
 from itertools import cycle
 
+
 def defragment_gif(path: str, output: str) -> None:
     """ Defragments a gif into frames.
     :param path:
@@ -16,6 +17,7 @@ def defragment_gif(path: str, output: str) -> None:
         imageObject.seek(frame)
         imageObject.convert('RGBA')
         imageObject.save(f"{output}_{frame+1}.png", transparency=0)
+
 
 def remove_background(path: str, output: str) -> None:
     """ Removes the background of image frames.

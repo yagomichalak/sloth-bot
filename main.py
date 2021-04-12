@@ -41,6 +41,7 @@ client = commands.Bot(command_prefix='z!', intents=intents, help_command=None)
 
 token = os.getenv('TOKEN')
 
+
 # Tells when the bot is online
 @client.event
 async def on_ready():
@@ -49,12 +50,14 @@ async def on_ready():
     # update_timezones.start()
     print('Bot is ready!')
 
+
 @tasks.loop(seconds=65)
 async def change_color():
     guild = client.get_guild(server_id)
     patreon = discord.utils.get(guild.roles, id=patreon_role_id)
     r, g, b = next(shades_of_pink)
     await patreon.edit(colour=discord.Colour.from_rgb(r, g, b))
+
 
 @client.event
 async def on_member_update(before, after):
@@ -85,6 +88,7 @@ async def on_member_update(before, after):
                 await announ.send(patreon_roles[pr][0])
                 return await after.send(patreon_roles[pr][1])
 
+
 @client.event
 async def on_member_remove(member):
     roles = [role for role in member.roles]
@@ -102,6 +106,7 @@ async def on_member_remove(member):
     embed.add_field(name="Bot?", value=member.bot)
     # cosmos = discord.utils.get(member.guild.members, id=user_cosmos_id)
     await channel.send(embed=embed)
+
 
 # Handles the errors
 @client.event
@@ -156,11 +161,13 @@ async def on_command_error(ctx, error):
         await error_log.send(f"ERROR: {error} | Class: {error.__class__} | Cause: {error.__cause__}")
         await error_log.send('='*10)
 
+
 # Members status update
 @tasks.loop(seconds=10)
 async def change_status():
     guild = client.get_guild(server_id)
     await client.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=f'{len(guild.members)} members.'))
+
 
 @tasks.loop(seconds=60)
 async def update_timezones():
@@ -174,6 +181,7 @@ async def update_timezones():
         date_and_time_in_text = date_and_time.strftime('%H:%M')
         print(the_vc)
         await the_vc.edit(name=f'{timezones[tz][1]} - {date_and_time_in_text}')
+
 
 # Joins VC log #########
 @client.event
@@ -230,6 +238,8 @@ async def on_voice_state_update(member, before, after):
             await mod_log.send(embed=embed)
 
 start_time = datetime.utcnow()
+
+
 @client.command()
 async def uptime(ctx: commands.Context):
     '''
@@ -250,6 +260,7 @@ async def uptime(ctx: commands.Context):
         time_format = "**{s}** seconds."
     uptime_stamp = time_format.format(d=days, h=hours, m=minutes, s=seconds)
     await ctx.send(f"I've been online for {uptime_stamp}")
+
 
 @client.command()
 async def help(ctx, cmd: str = None):
@@ -305,6 +316,7 @@ async def help(ctx, cmd: str = None):
         else:
             await ctx.send(f"**Invalid parameter! `{cmd}` is neither a command nor a cog!**")
 
+
 @client.command(hidden=True)
 @commands.has_permissions(administrator=True)
 async def load(ctx, extension: str = None):
@@ -317,6 +329,7 @@ async def load(ctx, extension: str = None):
     client.load_extension(f'cogs.{extension}')
     return await ctx.send(f"**{extension} loaded!**", delete_after=3)
 
+
 @client.command(hidden=True)
 @commands.has_permissions(administrator=True)
 async def unload(ctx, extension: str = None):
@@ -328,6 +341,7 @@ async def unload(ctx, extension: str = None):
         return await ctx.send("**Inform the cog!**")
     client.unload_extension(f'cogs.{extension}')
     return await ctx.send(f"**{extension} unloaded!**", delete_after=3)
+
 
 @client.command(hidden=True)
 @commands.has_permissions(administrator=True)

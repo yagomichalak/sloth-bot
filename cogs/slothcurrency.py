@@ -1394,5 +1394,6 @@ class SlothCurrency(commands.Cog):
         await mycursor.close()
         return member
 
+
 def setup(client):
     client.add_cog(SlothCurrency(client))

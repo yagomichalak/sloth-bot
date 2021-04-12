@@ -203,5 +203,6 @@ class ModActivity(commands.Cog):
         await db.commit()
         await mycursor.close()
 
+
 def setup(client):
     client.add_cog(ModActivity(client))

@@ -68,6 +68,7 @@ class RoleTexts(commands.Cog):
             lines = f.read()
             return lines
 
+
 def setup(client) -> None:
     """ Cog's setup function. """
 

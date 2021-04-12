@@ -561,5 +561,6 @@ class TeacherAPI(commands.Cog):
             await msg.remove_reaction('⬅️', u)
             await msg.remove_reaction('➡️', u)
 
+
 def setup(client) -> None:
     client.add_cog(TeacherAPI(client))

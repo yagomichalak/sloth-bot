@@ -47,5 +47,6 @@ class UpdateRegion(commands.Cog):
         else:
             await channel.send(f"**Region remained the same; `{old_region}`**")
 
+
 def setup(client):
     client.add_cog(UpdateRegion(client))

@@ -175,5 +175,6 @@ class Show(commands.Cog):
         embed.set_footer(text=member.guild, icon_url=member.guild.icon_url)
         await ctx.send(embed=embed)
 
+
 def setup(client):
     client.add_cog(Show(client))

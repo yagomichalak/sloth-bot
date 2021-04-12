@@ -1214,6 +1214,7 @@ db_classes: List[object] = [
 class TeacherFeedbackDatabase(*db_classes):
     pass
 
+
 def setup(client) -> None:
     """ Cog's setup function. """
 

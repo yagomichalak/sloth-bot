@@ -447,5 +447,6 @@ class SlothReputation(commands.Cog):
         await mycursor.close()
         return users
 
+
 def setup(client):
     client.add_cog(SlothReputation(client))

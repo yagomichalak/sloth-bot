@@ -386,6 +386,7 @@ class EventManagement(commands.Cog):
         else:
             return True
 
+
 def setup(client) -> None:
     """ Cog's setup function. """
 

@@ -993,5 +993,6 @@ class ReportSupport(commands.Cog):
             print(e)
             return await ctx.send("**Something went wrong, I'll stop here!**")
 
+
 def setup(client):
     client.add_cog(ReportSupport(client))
