@@ -491,7 +491,7 @@ class TeacherAPI(commands.Cog):
                 elif str(r.emoji) == '⬅️':
                     await msg.remove_reaction(r, u)
                     if index > 0:
-                      index -= 1
+                        index -= 1
                     continue
                 elif str(r.emoji) == '🛑':
                     await msg.remove_reaction('⬅️', self.client.user)
