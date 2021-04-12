@@ -8,6 +8,7 @@ template_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),"..
 chat = Chat(template_file_path)
 allowed_roles = [474774889778380820, 574265899801116673, 497522510212890655, 588752954266222602]
 
+
 @register_call("whoIs")
 def who_is(query, session_id="general"):
     try:
@@ -73,6 +74,7 @@ class ChatterSloth(commands.Cog):
                     embed = discord.Embed(description=item, colour=discord.Colour.green())
                     embed.set_footer(text="Page {}".format(num))
                     await channel.send(embed=embed)
+
 
 def setup(client):
     client.add_cog(ChatterSloth(client))

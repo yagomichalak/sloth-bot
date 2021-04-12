@@ -1277,5 +1277,6 @@ class CreateClassroom(commands.Cog):
         else:
             await ctx.send(f"**This isn't a class channel, {member.mention}!**")
 
+
 def setup(client):
     client.add_cog(CreateClassroom(client))

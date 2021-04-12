@@ -120,6 +120,7 @@ If you have any questions feel free to ask! And if you experience any type of pr
             return await member.send(message)
         await ctx.send(f"**Member: {member} not found!", delete_after=3)
 
+
 def setup(client):
     """ Cog's setup function. """
 

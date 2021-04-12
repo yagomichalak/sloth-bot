@@ -154,5 +154,6 @@ class Misc(commands.Cog):
         except KeyError:
             await ctx.send("**No facts are available for that number.**", delete_after=3)
 
+
 def setup(client):
     client.add_cog(Misc(client))

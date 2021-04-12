@@ -72,5 +72,6 @@ class Files(commands.Cog):
 
         await ctx.send(content=None, embed=embed)
 
+
 def setup(client):
     client.add_cog(Files(client))

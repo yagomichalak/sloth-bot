@@ -1240,6 +1240,7 @@ class CreateSmartRoom(commands.Cog):
         else:
             return False
 
+
 def setup(client):
     """ Cog's setup function. """
 

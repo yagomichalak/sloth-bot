@@ -262,5 +262,6 @@ class Game(commands.Cog):
 
                 square, inserted = await self.make_game_square(inserted=inserted, columns=columns, rows=rows, player_x=x, player_y=y)
 
+
 def setup(client) -> None:
     client.add_cog(Game(client))

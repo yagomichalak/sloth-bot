@@ -192,5 +192,6 @@ class Social(commands.Cog):
         em.set_image(url=data['img'])
         await ctx.send(embed=em)
 
+
 def setup(client):
     client.add_cog(Social(client))

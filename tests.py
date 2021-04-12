@@ -1,6 +1,7 @@
 from googletrans import Translator
 from typing import List
 
+
 def tr(language: str, message: str) -> List[str]:
     """ Translates a message into another language.
     :param language: The language to translate the message to.

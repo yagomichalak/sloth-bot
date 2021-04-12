@@ -217,6 +217,7 @@ class SlothClass(*classes.values()):
         skills_embed.set_footer(text=ctx.guild, icon_url=ctx.guild.icon_url)
         await ctx.send(embed=skills_embed)
 
+
 def setup(client) -> None:
     """ Cog's setup function. """
 

@@ -69,5 +69,6 @@ class Embeds(commands.Cog):
                          icon_url='https://cdn.discordapp.com/attachments/562019489642709022/676564701399744512/jungle_2.gif')
         await ctx.send(embed=embed)
 
+
 def setup(client):
     client.add_cog(Embeds(client))

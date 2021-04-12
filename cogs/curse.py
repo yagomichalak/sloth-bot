@@ -182,6 +182,7 @@ class CurseMember(commands.Cog):
             await mycursor.close()
             return False
 
+
 def setup(client):
     """ Cog's setup function. """
 

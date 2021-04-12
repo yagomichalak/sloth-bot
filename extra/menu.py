@@ -130,6 +130,7 @@ class OpenShopLoop(menus.ListPageSource):
 
         return embed
 
+
 async def prompt_message(client, member: discord.Member, channel: discord.TextChannel, limit: int = 100) -> str:
     def msg_check(message):
         if message.author == member and not message.guild:
@@ -149,6 +150,7 @@ async def prompt_message(client, member: discord.Member, channel: discord.TextCh
         content = message.content
         return content
 
+
 async def prompt_message_guild(client, member: discord.Member, channel: discord.TextChannel, limit: int = 100) -> str:
     def msg_check(message):
         if message.author == member and message.guild:
@@ -167,6 +169,7 @@ async def prompt_message_guild(client, member: discord.Member, channel: discord.
     else:
         content = message.content
         return content
+
 
 async def prompt_number(client, ctx: commands.Context, the_msg: discord.Message, member: discord.Member, limit: int = 1000) -> Union[int, None]:
     """ Prompts the user for a number.

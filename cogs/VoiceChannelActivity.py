@@ -402,5 +402,6 @@ class VoiceChannelActivity(commands.Cog):
 
         await ctx.send(embed=embed)
 
+
 def setup(client) -> None:
     client.add_cog(VoiceChannelActivity(client))

@@ -1177,5 +1177,6 @@ class Moderation(commands.Cog):
         else:
             return True
 
+
 def setup(client):
     client.add_cog(Moderation(client))

@@ -494,6 +494,7 @@ class Analytics(commands.Cog):
 
         await ctx.send(embed=embed)
 
+
 def setup(client):
     """ Cog's setup function. """
 

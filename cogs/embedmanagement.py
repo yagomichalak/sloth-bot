@@ -971,6 +971,7 @@ class SortEmbed:
 
         return embed
 
+
 def setup(client) -> None:
     """ Cog's setup function. """
 
