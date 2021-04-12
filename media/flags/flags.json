@@ -18,7 +18,7 @@
  "4": {
   "af.png": [
    "pashto", "persian", "dari"
-  ] 
+  ]
  },
  "5": {
   "ag.png": [
@@ -142,7 +142,7 @@
  },
  "27": {
   "bq.png": [
-   "bonairean papiamentu", "bonairean papiamento", 
+   "bonairean papiamentu", "bonairean papiamento",
    "bonairean dutch", "bonairean english",
 
    "st. eustatian papiamentu", "st. eustatian papiamento",
@@ -179,10 +179,10 @@
  },
  "34": {
   "by.png": [
-   "belarusian" 
+   "belarusian"
   ]
  },
- "35": { 
+ "35": {
   "bz.png": [
    "belizean english"
   ]
@@ -248,7 +248,7 @@
    "curaçaoan dutch", "curaçaoan papiamento",
    "curaçaoan papiamentu", "curaçaoan english"
   ]
- }, 
+ },
  "48": {
   "cz.png": [
    "czech"
@@ -292,7 +292,7 @@
  },
  "56": {
   "ee.png": [
-   "estonian", "estonian russian" 
+   "estonian", "estonian russian"
   ]
  },
  "57": {
@@ -308,7 +308,7 @@
  },
  "59": {
   "es.png": [
-   "spanish" 
+   "spanish"
   ]
  },
  "60": {
@@ -346,7 +346,7 @@
    "welsh"
   ]
  },
- "67": { 
+ "67": {
   "gb.png": [
    "british english"
   ]
@@ -450,7 +450,7 @@
  },
  "86": {
   "it.png": [
-   "italian", "tuscan", "piedmontese", "lombard", 
+   "italian", "tuscan", "piedmontese", "lombard",
    "venetian", "sardinian", "neapolitan",
    "romanesco", "calabrese", "pugliese", "romagnol",
    "friulian"
@@ -622,7 +622,7 @@
  },
  "120": {
   "mo.png": [
-   "macau chinese", "macau cantonese", 
+   "macau chinese", "macau cantonese",
    "macau portuguese"
   ]
  },
@@ -837,8 +837,8 @@
  },
  "160": {
   "sg.png": [
-    "tamil", "singaporean malay", "singaporean english", 
-    "singaporean tamil", "singaporean chinese", 
+    "tamil", "singaporean malay", "singaporean english",
+    "singaporean tamil", "singaporean chinese",
     "singaporean mandarin chinese"
   ]
  },
@@ -890,7 +890,7 @@
  },
  "171": {
   "sx.png": [
-    "st. martinois english", "st. martinois dutch ", 
+    "st. martinois english", "st. martinois dutch ",
     "st. maarteener english", "st. maartener dutch"
   ]
  },
@@ -911,7 +911,7 @@
  },
  "175": {
   "th.png": [
-   "thai", "northern thai", "central thai", 
+   "thai", "northern thai", "central thai",
    "southern thai", "isan"
   ]
  },
@@ -937,7 +937,7 @@
  },
  "180": {
   "tw.png": [
-   "taiwanese chinese", "taiwanese", "taiwanese hokkien", 
+   "taiwanese chinese", "taiwanese", "taiwanese hokkien",
    "hakka"
   ]
  },

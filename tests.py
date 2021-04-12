@@ -1,12 +1,12 @@
 from googletrans import Translator
 from typing import List
 
+
 def tr(language: str, message: str) -> List[str]:
     """ Translates a message into another language.
     :param language: The language to translate the message to.
     :param message: The message to translate.
     :return: A translated message. """
-
 
     print(language, message)
     trans = Translator(service_urls=['translate.googleapis.com'])
