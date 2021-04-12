@@ -28,7 +28,7 @@ class TeacherAPI(commands.Cog):
         self.classes_channel_id: int = int(os.getenv('CLASSES_CHANNEL_ID'))
         self.website_link: str = 'https://thelanguagesloth.com'
         # self.website_link: str = 'http://127.0.0.1:8000'
-        self.django_website_root =  os.getenv('DJANGO_WEBSITE_ROOT')
+        self.django_website_root = os.getenv('DJANGO_WEBSITE_ROOT')
 
     @commands.Cog.listener()
     async def on_ready(self) -> None:
@@ -523,7 +523,7 @@ class TeacherAPI(commands.Cog):
             return await ctx.send("**No cards found for the given user!**")
 
         member = self.client.get_user(user_id)
-        teacher =  member if member else user_id
+        teacher = member if member else user_id
 
         embed = discord.Embed(
             title=f"Teacher `{teacher}`",

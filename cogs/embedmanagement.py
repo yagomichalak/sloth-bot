@@ -225,7 +225,7 @@ class EmbedManagement(commands.Cog):
 
     @embed.group(aliases=['d', 'del', 'rm', 'remove'])
     @commands.has_permissions(administrator=True)
-    async def delete(self, ctx, embed_name: str =  None, field: str = None) -> None:
+    async def delete(self, ctx, embed_name: str = None, field: str = None) -> None:
         """ Deletes a field from the DB.
         :param embed_name: The name of the embed that is gonna be deleted a field or entirely.
         :param field: The name of the field. """
@@ -447,7 +447,7 @@ class EmbedManagement(commands.Cog):
             await ctx.send(f"**Inserted `description` for {embed_name}!**")
 
     @edit.command(aliases=['tn', 'th', 'thumb'])
-    async def thumbnail(self, ctx, embed_name: str = None, icon_link: str =  None) -> None:
+    async def thumbnail(self, ctx, embed_name: str = None, icon_link: str = None) -> None:
         """ Sets the thumbnail for the given saved embed.
         :param embed_name: The name of the embed to insert.
         :param icon_link: The icon link for the thumbnail.
@@ -666,7 +666,7 @@ class EmbedManagement(commands.Cog):
             await ctx.send(f"**Inserted `image` for {embed_name}!**")
 
     @edit.command(aliases=['fi', 'fld'])
-    async def field(self, ctx, embed_name: str = None, field_name: str =  None, field_value: str = None, field_inline: str = 'no') -> None:
+    async def field(self, ctx, embed_name: str = None, field_name: str = None, field_value: str = None, field_inline: str = 'no') -> None:
         """ Inserts a text field for the given saved embed.
         :param embed_name: The name of the embed.
         :param field_name: The embed's field name.
