@@ -318,7 +318,7 @@ class TeacherAPI(commands.Cog):
             return await ctx.send("**Please, inform a member to promote to a teacher!**")
 
         teacher_role = discord.utils.get(ctx.guild.roles, id=self.teacher_role_id)
-        if not teacher_role in member.roles:
+        if teacher_role not in member.roles:
             try:
                 await member.add_roles(teacher_role)
             except:
