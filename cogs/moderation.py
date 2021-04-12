@@ -374,7 +374,7 @@ class Moderation(commands.Cog):
 
     @commands.command()
     @commands.has_any_role(*allowed_roles)
-    async def mute(self, ctx, member: discord.Member = None, *, reason = None):
+    async def mute(self, ctx, member: discord.Member = None, *, reason=None):
         '''
         (MOD) Mutes a member.
         :param member: The @ or the ID of the user to mute.
