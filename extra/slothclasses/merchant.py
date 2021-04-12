@@ -136,10 +136,11 @@ class Merchant(Player):
                     cybersloth = self.client.get_user(wired_user[0])
                     siphon_embed = discord.Embed(
                             title="__Intercepted Purchase__",
-                            description=
-                            f"{buyer.mention} bought a `changing-Sloth-class potion` from {member.mention} for `{merchant_item[7]}łł`, " +
-                            f"but {cybersloth.mention if cybersloth else str(cybersloth)} siphoned off `{siphon_percentage}%` of the price; `{cybersloth_money}łł`! " +
-                            f"So the Merhcant {member.mention} actually got `{target_money}łł`!",
+                            description=(
+                                f"{buyer.mention} bought a `changing-Sloth-class potion` from {member.mention} for `{merchant_item[7]}łł`, "
+                                f"but {cybersloth.mention if cybersloth else str(cybersloth)} siphoned off `{siphon_percentage}%` of the price; `{cybersloth_money}łł`! "
+                                f"So the Merhcant {member.mention} actually got `{target_money}łł`!"
+                            ),
                             color=buyer.color,
                             timestamp=ctx.message.created_at)
                     if cybersloth:
