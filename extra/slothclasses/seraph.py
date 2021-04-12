@@ -231,7 +231,7 @@ class Seraph(Player):
             title="A Shield Reinforcement has been executed!",
             timestamp=datetime.utcfromtimestamp(timestamp)
         )
-        reinforce_shields_embed.descriptio n = f"🛡️ <@{perpetrator_id}> reinforced `{shields_len}` active shields; now they have more 24 hours of duration! 🛡️💪"
+        reinforce_shields_embed.description = f"🛡️ <@{perpetrator_id}> reinforced `{shields_len}` active shields; now they have more 24 hours of duration! 🛡️💪"
         reinforce_shields_embed.color = discord.Color.green()
 
         reinforce_shields_embed.set_author(name='35% of chance', url=self.client.user.avatar_url)
