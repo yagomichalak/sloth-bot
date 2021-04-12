@@ -6,6 +6,7 @@ from pytz import timezone
 from PIL import Image, ImageFont, ImageDraw
 from typing import List
 import os
+import io
 import asyncio
 from mysqldb import the_database
 
@@ -53,12 +54,11 @@ class Analytics(commands.Cog):
             draw.text((140, 460), f"{len(members)}", (255, 255, 255), font=small)
             draw.text((140, 520), f"{len(online_members)}", (255, 255, 255), font=small)
 
-            file_path = './png/analytics_result.png'
-            try:
-                analytics.save(file_path, 'png', quality=90)
-                await channel.send(file=discord.File(file_path))
-            finally:
-                return os.remove(file_path)
+            with io.BytesIO() as fp:
+                analytics.save(fp, 'png', quality=90)
+                fp.seek(0)
+                fp = discord.File(fp, filename="analytics_result.png")
+                await channel.send(file=fp)
 
             await self.reset_table_sloth_analytics()
             complete_date = date_and_time.strftime('%d/%m/%Y')
