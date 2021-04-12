@@ -42,7 +42,6 @@ list_of_commands = [
 I'm open to new ideas, in other words, if you want a custom command designed specially for your server, having database access or not, you tell me how you want it to be done and if it's doable, I'll do it.''']
 ]
 
-
 rules = {
     "No NSFW": "The Language Sloth is an educational community. For this reason, NSFW content will not be tolerated in either VCs or text channels. Pornographic, violent, foul, offensive, or even politically charged content/conversations are to be avoided, as they will result in punishment.",
 
@@ -69,7 +68,7 @@ Any of the above infractions may result in server mute or ban at the discretion 
 different_class_roles = {
     "programming": [
         "python", "html", "html and css",
-        "html & css","c#", "csharp", "c++", "c",
+        "html & css", "c#", "csharp", "c++", "c",
         "c plus plus", "css", "mysql", "apache", "javascript",
         "js", "cobol", "java", "go", "golang", "fluter",
         "typescript", "ts", "js and ts", "lua",
@@ -84,13 +83,12 @@ different_class_roles = {
         "hindi", "urdu", "hindustani"
     ],
     "south asian languages": [
-    	"bengali"
+        "bengali"
     ],
     "balkan languages": [
         "croatian", "serbian", "bosnian"
     ]
 }
-
 
 level_badges = {
     10: ['level_10', (5, 10)],

@@ -6,6 +6,7 @@ import os
 server_id = int(os.getenv('SERVER_ID'))
 bot_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
 
+
 class UpdateRegion(commands.Cog):
     '''
     A cog related to the automatic region update feature.
@@ -35,8 +36,8 @@ class UpdateRegion(commands.Cog):
                         if region:
                             everything.append(region)
 
-        counted_regions = [[x,everything.count(x)] for x in set(everything)]
-        counted_regions.sort(key = lambda x: x[1], reverse=True) 
+        counted_regions = [[x, everything.count(x)] for x in set(everything)]
+        counted_regions.sort(key=lambda x: x[1], reverse=True)
         top_region = counted_regions[0][0]
         old_region = guild.region
         await guild.edit(region=top_region)
@@ -45,6 +46,7 @@ class UpdateRegion(commands.Cog):
             await channel.send(f"**Region changed from `{old_region}` to `{top_region}`**")
         else:
             await channel.send(f"**Region remained the same; `{old_region}`**")
+
 
 def setup(client):
     client.add_cog(UpdateRegion(client))
