@@ -503,7 +503,7 @@ class Moderation(commands.Cog):
     # Mutes a member temporarily
     @commands.command()
     @commands.has_any_role(*allowed_roles)
-    async def tempmute(self, ctx, member: discord.Member = None, reason: str =  None, *, time: str = None):
+    async def tempmute(self, ctx, member: discord.Member = None, reason: str = None, *, time: str = None):
         """
         Mutes a member for a determined amount of time.
         :param member: The @ or the ID of the user to tempmute.
