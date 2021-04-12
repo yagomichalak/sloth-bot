@@ -459,7 +459,7 @@ class CreateClassroom(commands.Cog):
                 # return await self.reward_accepted_students()
                 done_embed = discord.Embed(title="__**DONE!**__", colour=discord.Colour.green())
                 await msg.edit(embed=done_embed, delete_after=3)
-                users = await self,get_reward_accepted_students(msg.id)
+                users = await self.get_reward_accepted_students(msg.id)
                 if users:
                     return await self.reward_accepted_students(teacher, users)
                 else:
