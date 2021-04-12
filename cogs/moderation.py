@@ -1013,7 +1013,7 @@ class Moderation(commands.Cog):
         embed.set_footer(text=f"Requested by: {ctx.author}", icon_url=ctx.author.avatar_url)
 
         # Loops through each infraction and adds a field to the embedded message
-        ## 0-user_id, 1-infraction_type, 2-infraction_reason, 3-infraction_ts, 4-infraction_id, 5-perpetrator
+        # 0-user_id, 1-infraction_type, 2-infraction_reason, 3-infraction_ts, 4-infraction_id, 5-perpetrator
         for infr in user_infractions:
             if (infr_type := infr[1]) in ['mute', 'warn']:
                 infr_date = datetime.fromtimestamp(infr[3]).strftime('%Y/%m/%d at %H:%M:%S')
