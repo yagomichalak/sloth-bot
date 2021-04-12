@@ -81,7 +81,7 @@ class GIF:
 
 if __name__ == '__main__':
 
-    ## Puts a single effect onto an image ##
+    # Puts a single effect onto an image #
 
     # profile = Image.open('../profile.png').convert('RGBA')
     # gif = GIF(image=profile, frame_duration=40)
