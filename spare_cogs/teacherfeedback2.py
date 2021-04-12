@@ -743,7 +743,7 @@ class CreateClassroom(commands.Cog):
                 elif not len(value) <= 20 and author == member:
                     self.client.loop.create_task(
                         cc_channel.send(f"**{member}, inform a shorter name! (Max = 20 characters)**",
-                                              delete_after=5))
+                                        delete_after=5))
 
         try:
             class_language = await self.client.wait_for('message', timeout=60.0, check=check_language)
@@ -772,11 +772,11 @@ class CreateClassroom(commands.Cog):
                                                                                      'Grammar']:
                     self.client.loop.create_task(
                         cc_channel.send(f"**{member}, type a valid answer! (Pronunciation / Grammar)**",
-                                              delete_after=5))
+                                        delete_after=5))
                 elif not len(value) <= 13 and author == member:
                     self.client.loop.create_task(
                         cc_channel.send(f"**{member}, inform a shorter name! (Max = 13 characters)**",
-                                              delete_after=5))
+                                        delete_after=5))
 
         try:
             class_type = await self.client.wait_for('message', timeout=60.0, check=check_type)
@@ -800,7 +800,7 @@ class CreateClassroom(commands.Cog):
                 elif len(value) > 100 and author == member:
                     self.client.loop.create_task(
                         cc_channel.send(f"**{member}, inform a shorter description! (Max = 100 characters)**",
-                                              delete_after=5))
+                                        delete_after=5))
 
         try:
             class_desc = await self.client.wait_for('message', timeout=60.0, check=check_description)
