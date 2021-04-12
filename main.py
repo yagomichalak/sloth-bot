@@ -245,7 +245,7 @@ async def uptime(ctx: commands.Context):
     '''
     Shows for how much time the bot is online.
     '''
-    now = datetime.utcnow() # Timestamp of when uptime function is run
+    now = datetime.utcnow()  # Timestamp of when uptime function is run
     delta = now - start_time
     hours, remainder = divmod(int(delta.total_seconds()), 3600)
     minutes, seconds = divmod(remainder, 60)
