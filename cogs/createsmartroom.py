@@ -1111,7 +1111,7 @@ class CreateSmartRoom(commands.Cog):
             embed.description += f"**Time left:** {round(seconds_left/3600/24)} days left"
         elif seconds_left >= 3600:
             embed.description += f"**Time left:** {round(seconds_left/3600)} hours left"
-        elif seconds_left  >= 60:
+        elif seconds_left >= 60:
             embed.description += f"**Time left:** {round(seconds_left/60)} minutes left"
         else:
             embed.description += f"**Time left:** {round(seconds_left)} seconds left"
