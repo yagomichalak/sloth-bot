@@ -871,7 +871,8 @@ class ReportSupport(commands.Cog):
         """ Saves a teacher application into the database. """
 
         mycursor, db = await the_database()
-        await mycursor.execute('''
+        await mycursor.execute(
+            '''
             INSERT INTO TeacherApplication (message_id, teacher_id)
             VALUES (%s, %s)''', (message_id, teacher_id)
             )
@@ -882,7 +883,8 @@ class ReportSupport(commands.Cog):
         """ Updates the teacher's application; adding the txt and vc ids into it. """
 
         mycursor, db = await the_database()
-        await mycursor.execute('''UPDATE TeacherApplication SET
+        await mycursor.execute(
+            '''UPDATE TeacherApplication SET
             channel_open = 'yes', txt_id = %s, vc_id = %s
             WHERE teacher_id = %s''', (txt_id, vc_id, teacher_id)
             )

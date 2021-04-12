@@ -898,10 +898,11 @@ class Moderation(commands.Cog):
 
     async def insert_in_muted(self, user_role_ids: List[Tuple[int]]):
         mycursor, db = await the_database()
-        await mycursor.executemany("""
+        await mycursor.executemany(
+            """
             INSERT INTO mutedmember (
             user_id, role_id, mute_ts, muted_for_seconds) VALUES (%s, %s, %s, %s)""", user_role_ids
-        )
+            )
         await db.commit()
         await mycursor.close()
 

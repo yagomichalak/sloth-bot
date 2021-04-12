@@ -806,10 +806,11 @@ class CreateSmartRoom(commands.Cog):
         :param user_ts: The current timestamp. """
 
         mycursor, db = await the_database()
-        await mycursor.execute("""
+        await mycursor.execute(
+            """
             INSERT INTO GalaxyVc (user_id, user_cat, user_vc, user_txt1, user_txt2, user_ts)
             VALUES (%s, %s, %s, %s, %s, %s)""", (user_id, user_cat, user_vc, user_txt1, user_txt2, user_ts)
-        )
+            )
         await db.commit()
         await mycursor.close()
 
