@@ -43,25 +43,32 @@ I'm open to new ideas, in other words, if you want a custom command designed spe
 ]
 
 rules = {
-    "No NSFW": "The Language Sloth is an educational community. For this reason, NSFW content will not be tolerated in either VCs or text channels. Pornographic, violent, foul, offensive, or even politically charged content/conversations are to be avoided, as they will result in punishment.",
+    "NSFW is forbidden": """This applies to, among others, pornographic, gore, violent, foul, offensive content/conversations. They will not be tolerated in either VCs or text channels.
+This rule also applies to profile pictures, usernames, and discord status.""",
 
-    "Respectful Conduct": "Being intentionally disrespectful, following people, harassing over dms and using foul language are not allowed here, specially the Staff of this server.",
+    "Be respectful": """Discrimination on the grounds of race, nationality, religion, gender, or sexual orientation is forbidden. 
+Do not insult other users.
+Do not harass other users.
+Do not swear mindlessly.
+Do not make people feel uncomfortable, or otherwise bother them in any unwanted way.
+This rule applies to both activity on the server and dms. """,
 
-    "Avoid Controversy": "The following topics are not permitted on the server: Politics, Religion,Gender identity/Sexual orientation, Self-Harm or anything considered controversial. The only place where these topics are acceptable is Debate Club.",
+    "Avoid Controversy": """As the Language Sloth is an international server of educational nature, we have people from all over the world here. To avoid unnecessary conflicts, topics considered controversial are only allowed in the Debate Club. 
+This applies to, among others, politics, religion, self-harm, suicide, gender identity, sexual orientation.
+This rule also applies to profile pictures.""",
 
-    "No Advertising": "Advertising Discord servers or self-promoting via dm spam or voice channels without permission from our staff will result in immediate ban. If you would like to get permission, get in touch with our staff.",
+    "Advertising is forbidden": """Advertising Discord servers or self-promoting via text/voice channels or dms is not allowed. If you would like to get permission, get in touch with our Staff.""",
 
-    "No Doxing": "Do not share others' personal information without their consent.",
+    "No not dox": "Do not share other users' personal information without their consent.",
 
-    "No Spamming": """Do not flood or spam text channels.
+    "No not spam": """Do not flood or spam text channels.
 Do not spam react in messages.
 Do not ping staff members repeatedly without a reason.
-Do not mic spam/earrape in voice channels
-Any of the above infractions may result in server mute or ban at the discretion of the admins/mods.""",
+Do not mic spam/earrape in voice channels.""",
 
-    "Do not impersonate others": "Do not impersonate other users or members of the staff.",
+    "Do not impersonate others": "Do not impersonate other users or Staff members.",
 
-    "No Begging": "No asking to be granted roles/moderator roles. You may apply for these positions by accessing the link in #🌟announcements🌟 but repeatedly begging the staff may result in warnings or ban."
+    "No not beg": """No asking to be granted roles/moderator roles. You may apply for these positions by accessing the link in #:star2:announcements:star2: but repeatedly begging the staff may result in warnings or ban."""
 
 }
 
