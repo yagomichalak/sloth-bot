@@ -216,6 +216,54 @@ class EventManagement(commands.Cog):
         else:
             await ctx.send(f"**{ctx.author.mention}, {text_channel.mention} is up and running!**")
 
+
+    @create_event.command()
+    @commands.has_any_role(*[event_manager_role_id, mod_role_id, admin_role_id, owner_role_id])
+    @commands.cooldown(1, 60, commands.BucketType.user)
+    async def reading(self, ctx) -> None:
+        """ Creates a Reading Session voice and text channel. """
+
+        if await self.get_event_room_by_user_id(ctx.author.id):
+            return await ctx.send(f"**{ctx.author.mention}, you already have an event room going on!**")
+
+        confirm = await ConfirmSkill("Do you want to create a `Reading Session`?").prompt(ctx)
+        if not confirm:
+            return await ctx.send("**Not creating it then!**")
+
+        overwrites = await self.get_event_permissions(ctx.guild)
+
+        culture_club_role = discord.utils.get(
+            ctx.guild.roles, id=int(os.getenv('READING_CLUB_ROLE_ID'))
+        )
+        # Adds some perms to the Culture Club role
+        overwrites[culture_club_role] = discord.PermissionOverwrite(
+            read_messages=True, send_messages=True,
+            connect=True, speak=True, view_channel=True)
+
+        events_category = discord.utils.get(
+            ctx.author.guild.categories, id=int(os.getenv('EVENTS_CAT_ID')))
+
+        try:
+            # Creating text channel
+            text_channel = await events_category.create_text_channel(
+                name=f"🎏 Reading Session 📖",
+                overwrites=overwrites)
+            # Creating voice channel
+            voice_channel = await events_category.create_voice_channel(
+                name=f"🎏 Reading Session 📖",
+                user_limit=None,
+                overwrites=overwrites)
+            # Inserts it into the database
+            await self.insert_event_room(
+                user_id=ctx.author.id, vc_id=voice_channel.id, txt_id=text_channel.id)
+        except Exception as e:
+            print(e)
+            await ctx.send(f"**{ctx.author.mention}, something went wrong, try again later!**")
+
+        else:
+            await ctx.send(f"**{ctx.author.mention}, {text_channel.mention} is up and running!**")
+
+
     # DELETE EVENT
 
     @commands.command()
