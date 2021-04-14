@@ -915,7 +915,7 @@ class Moderation(commands.Cog):
 
     async def remove_role_from_system(self, user_role_ids: int):
         mycursor, db = await the_database()
-        await mycursor.executemany("DELETE FROM MutedMember WHERE user_id = %s AND role_id = %s", user_role_ids)
+        await mycursor.executemany("DELETE FROM mutedmember WHERE user_id = %s AND role_id = %s", user_role_ids)
         await db.commit()
         await mycursor.close()
 
