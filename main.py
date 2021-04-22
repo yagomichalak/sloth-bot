@@ -263,7 +263,7 @@ async def uptime(ctx: commands.Context):
 
 
 @client.command()
-async def help(ctx, cmd: str = None):
+async def help(ctx, *, cmd: str = None):
     '''
     Shows some information about commands and categories.
     '''
@@ -298,7 +298,7 @@ async def help(ctx, cmd: str = None):
     else:
         # Checks if it's a command
         if command := client.get_command(cmd.lower()):
-            command_embed = discord.Embed(title=f"__Command:__ {command.name}", description=f"__**Description:**__\n```{command.help}```", color=ctx.author.color, timestamp=ctx.message.created_at)
+            command_embed = discord.Embed(title=f"__Command:__ {command.qualified_name}", description=f"__**Description:**__\n```{command.help}```", color=ctx.author.color, timestamp=ctx.message.created_at)
             return await ctx.send(embed=command_embed)
 
         # Checks if it's a cog
@@ -308,7 +308,7 @@ async def help(ctx, cmd: str = None):
                 cog_embed = discord.Embed(title=f"__Cog:__ {cog.qualified_name}", description=f"__**Description:**__\n```{cog.description}```", color=ctx.author.color, timestamp=ctx.message.created_at)
                 for c in cog.get_commands():
                     if not c.hidden:
-                        cog_embed.add_field(name=c.name, value=c.help, inline=False)
+                        cog_embed.add_field(name=c.qualified_name, value=c.help, inline=False)
 
                 return await ctx.send(embed=cog_embed)
 
