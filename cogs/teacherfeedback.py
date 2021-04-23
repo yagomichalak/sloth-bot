@@ -24,6 +24,7 @@ sloth_explorer_role_id = int(os.getenv('SLOTH_EXPLORER_ROLE_ID'))
 class_history_channel_id = int(os.getenv('CLASS_HISTORY_CHANNEL_ID'))
 reward_channel_id = int(os.getenv('REWARD_CHANNEL_ID'))
 bot_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
+queuebot_id = int(os.getenv('QUEUE_BOT_ID'))
 
 
 class TeacherFeedback(commands.Cog):
@@ -598,6 +599,11 @@ class TeacherFeedback(commands.Cog):
         # Gets permissions for general roles
         overwrites[member.guild.default_role] = discord.PermissionOverwrite(
             read_messages=False, send_messages=False, connect=False, speak=False, view_channel=False)
+
+        if queuebot := discord.utils.get(member.guild.members, id=queuebot_id)
+            overwrites[queuebot] = discord.PermissionOverwrite(
+                read_messages=False, send_messages=False, view_channel=False
+            )
 
         overwrites[teacher_role] = discord.PermissionOverwrite(
             read_messages=True, send_messages=True, manage_messages=True, mute_members=True, embed_links=True, connect=True,
