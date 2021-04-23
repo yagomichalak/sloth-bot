@@ -893,8 +893,9 @@ You can only add 1 additional channel. Voice **OR** Text."""))
 		for m in members:
 			try:
 				for c in channels:
-					await c.set_permissions(
-						m, read_messages=True, send_messages=True, connect=True, speak=True, view_channel=True)
+					if c:
+						await c.set_permissions(
+							m, read_messages=True, send_messages=True, connect=True, speak=True, view_channel=True)
 
 			except:
 				pass
@@ -974,8 +975,9 @@ You can only add 1 additional channel. Voice **OR** Text."""))
 		for m in members:
 			try:
 				for c in channels:
-					await c.set_permissions(
-						m, read_messages=False, send_messages=False, connect=False, speak=False, view_channel=False)
+					if c:
+						await c.set_permissions(
+							m, read_messages=False, send_messages=False, connect=False, speak=False, view_channel=False)
 			except:
 				pass
 			else:
