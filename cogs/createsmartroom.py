@@ -522,7 +522,7 @@ class CreateSmartRoom(commands.Cog):
 				except Exception:
 					pass
 
-				await member.send("""**Congrats you created a galaxy room** :tada:
+				await member.send(embed=discord.Embed(description="""**Congrats you created a galaxy room** :tada:
 Here are some rules and rights:
 
 1) Your galaxy room costs **1500** :leaves: every **14 days**. You will get a reminder to pay your rent in the galaxy room a few days before it's due. If you don't pay using the **z!renew** command, the galaxy room gets deleted. 
@@ -532,7 +532,7 @@ Here are some rules and rights:
 3) You have to allow a minimum of **10** users. (Bots or admins do not count) 
 
 4) You can add an additional channel for **500** :leaves: by writing **z!agc text (name of the channel)**  or **z!agc voice (user limit) (name of the channel)** for a voice channel. 
-You can only add 1 additional channel. Voice **OR** Text.""")
+You can only add 1 additional channel. Voice **OR** Text."""))
 
 		else:
 			return
