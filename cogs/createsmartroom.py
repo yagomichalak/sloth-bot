@@ -1295,7 +1295,7 @@ You can only add 1 additional channel. Voice **OR** Text.""")
 	# @commands.cooldown(1, 60, commands.BucketType.user)
 	async def add_voice(self, ctx, limit: int = None, *, name: str = None) -> None:
 		""" Adds a Voice Channel.
-		:param: The user limit of the Voice Cchannel.
+		:param limit: The user limit of the Voice Cchannel.
 		:param name: The name of the Voice Channel. """
 
 		member = ctx.author
@@ -1340,7 +1340,7 @@ You can only add 1 additional channel. Voice **OR** Text.""")
 
 		cat = discord.utils.get(ctx.guild.categories, id=user_rooms[1])
 			
-		if not (vc := await self.try_to_create(kind='voice', category=cat, name=name, limit=limit)):
+		if not (vc := await self.try_to_create(kind='voice', category=cat, name=name, user_limit=limit)):
 			return await ctx.send(f"**Channels limit reached, creation cannot be completed, try again later!**")
 
 		await self.update_vc_2(member.id, vc.id)
