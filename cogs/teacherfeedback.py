@@ -600,7 +600,7 @@ class TeacherFeedback(commands.Cog):
         overwrites[member.guild.default_role] = discord.PermissionOverwrite(
             read_messages=False, send_messages=False, connect=False, speak=False, view_channel=False)
 
-        if queuebot := discord.utils.get(member.guild.members, id=queuebot_id)
+        if queuebot := discord.utils.get(member.guild.members, id=queuebot_id):
             overwrites[queuebot] = discord.PermissionOverwrite(
                 read_messages=False, send_messages=False, view_channel=False
             )
