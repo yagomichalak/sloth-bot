@@ -226,10 +226,8 @@ class CreateSmartRoom(commands.Cog):
 					os.remove(f'./images/smart_vc/user_previews/{member.id}.png')
 				except Exception:
 					pass
-
-		# Restart room setup
 		else:
-			return await self.basic_room(member)
+			return
 
 	# Room type 2
 	async def premium_room(self, member: discord.Member) -> None:
@@ -342,9 +340,8 @@ class CreateSmartRoom(commands.Cog):
 				except Exception:
 					pass
 
-		# Restart room setup
 		else:
-			return await self.premium_room(member)
+			return
 
 	async def try_to_create(self, kind: str, category: discord.CategoryChannel = None, guild: discord.Guild = None, **kwargs: Any) -> Union[bool, Any]:
 		""" Try to create something.
@@ -525,8 +522,20 @@ class CreateSmartRoom(commands.Cog):
 				except Exception:
 					pass
 
+				await member.send("""**Congrats you created a galaxy room** :tada:
+Here are some rules and rights:
+
+1) Your galaxy room costs **1500** :leaves: every **14 days**. You will get a reminder to pay your rent in the galaxy room a few days before it's due. If you don't pay using the **z!renew** command, the galaxy room gets deleted. 
+
+2) You can **allow** or **unallow** any user to see and use your galaxy room by using the command **z!allow @User/ID** and **z!forbid @User/ID**
+
+3) You have to allow a minimum of **10** users. (Bots or admins do not count) 
+
+4) You can add an additional channel for **500** :leaves: by writing **z!agc text (name of the channel)**  or **z!agc voice (user limit) (name of the channel)** for a voice channel. 
+You can only add 1 additional channel. Voice **OR** Text.""")
+
 		else:
-			await self.galaxy_room(member)
+			return
 
 	async def get_response(self, member, check) -> str:
 		""" Gets a message response from the member.
@@ -623,12 +632,11 @@ class CreateSmartRoom(commands.Cog):
 
 		preview_template = './images/smart_vc/galaxy/3 preview2.png'
 		color = (132, 142, 142)
-		await self.overwrite_image(member_id, cat_name, (545, 700), color, preview_template)
-		await self.overwrite_image(member_id, txt1.lower(), (585, 780), color, f'./images/smart_vc/user_previews/{member_id}.png')
-		# await self.overwrite_image(member_id, txt2.lower(), (585, 870), color, f'./images/smart_vc/user_previews/{member_id}.png')
+		await self.overwrite_image(member_id, cat_name, (505, 730), color, preview_template)
+		await self.overwrite_image(member_id, txt1.lower(), (585, 840), color, f'./images/smart_vc/user_previews/{member_id}.png')
 		await self.overwrite_image(member_id, vc, (585, 970), color, f'./images/smart_vc/user_previews/{member_id}.png')
 		if int(size) != 0:
-			await self.overwrite_image_with_image(member_id, (405, 975), f'./images/smart_vc/sizes/voice channel ({size}).png')
+			await self.overwrite_image_with_image(member_id, (375, 965), f'./images/smart_vc/sizes/voice channel ({size}).png')
 
 	# Database commands
 
@@ -1287,6 +1295,7 @@ class CreateSmartRoom(commands.Cog):
 	# @commands.cooldown(1, 60, commands.BucketType.user)
 	async def add_voice(self, ctx, limit: int = None, *, name: str = None) -> None:
 		""" Adds a Voice Channel.
+		:param: The user limit of the Voice Cchannel.
 		:param name: The name of the Voice Channel. """
 
 		member = ctx.author
