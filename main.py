@@ -78,8 +78,8 @@ async def on_member_update(before, after):
 
     patreon_roles = {
         int(os.getenv('SLOTH_NATION_ROLE_ID')): [f"**Thank you! {after.mention} for joining the `Sloth Nation`!**", "**Hey! Thank you for helping our community, you will now receive :leaves: 2500 ŁŁ monthly, you'll have access to exclusive content from our events.**"],
-        int(os.getenv('SLOTH_NAPPER_ROLE_ID')): [f"**Wowie! {after.mention} joined the `Sloth Nappers`!  :zslothsleepyuwu:**", "**Hey! Thank you for helping our community! You will be contacted by an Admin soon!**"],
-        int(os.getenv('SLOTH_EXPLORER_ROLE_ID')): [f"**Hype! {after.mention} is now the highest rank, `Sloth Explorer`!  :zslothvcool: **", "**Hey! Thank you for helping our community! You will be contacted by an Admin soon!**"]}
+        int(os.getenv('SLOTH_NAPPER_ROLE_ID')): [f"**Wowie! {after.mention} joined the `Sloth Nappers`!  >:zslothsleepyuwu:695420722419466371>**", "**Hey! Thank you for helping our community! You will be contacted by an Admin soon!**"],
+        int(os.getenv('SLOTH_EXPLORER_ROLE_ID')): [f"**Hype! {after.mention} is now the highest rank, `Sloth Explorer`!  <:zslothvcool:695411944332460053> **", "**Hey! Thank you for helping our community! You will be contacted by an Admin soon!**"]}
 
     if new_role:
         for pr in patreon_roles.keys():
