@@ -94,6 +94,10 @@ different_class_roles = {
     ],
     "balkan languages": [
         "croatian", "serbian", "bosnian"
+    ],
+    "sign languages": [
+        "sign language", "sign languages", "asl",
+        "fsl", "bsl"
     ]
 }
 
