@@ -453,7 +453,7 @@ class Munk(Player):
 
     @commands.command(aliases=['expel', 'kick_out', 'can_i_show_you_the_door?'])
     @commands.cooldown(1, 10, commands.BucketType.user)
-    async def kickout(self, ctx, member: discord.Member = None) -> None:
+    async def kickout(self, ctx, member: discord.User = None) -> None:
         """ Exepels someone from your tribe.
         :param member: The member to expel. """
 
