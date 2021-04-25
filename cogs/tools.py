@@ -9,6 +9,7 @@ import textwrap
 import traceback
 from contextlib import redirect_stdout
 import os
+from treelib import Node, Tree
 from extra.menu import ConfirmSkill, InroleLooping
 from cogs.createsmartroom import CreateSmartRoom
 from datetime import datetime
@@ -537,7 +538,7 @@ class Tools(commands.Cog):
         timezones = pytz.all_timezones
         timezone_text = ', '.join(timezones)
         try:
-            await Tools.send_big_message(channel=member, message=timezone_text)
+            await Tools.send_big_message(title="Timezones:", channel=member, message=timezone_text, color=discord.Color.green())
         except Exception as e:
             ctx.command.reset_cooldown(ctx)
             await ctx.send(f"**I couldn't do it for some reason, make sure your DM's are open, {member.mention}!**")
@@ -545,11 +546,11 @@ class Tools(commands.Cog):
             await ctx.send(f"**List sent into your DM's, {member.mention}!**")
 
     @staticmethod
-    async def send_big_message(channel, message):
+    async def send_big_message(title, channel, message, color):
         """ Sends a big message to a given channel. """
 
         if (len(message) <= 2048):
-            embed = discord.Embed(title="Timezones:", description=message, colour=discord.Colour.green())
+            embed = discord.Embed(title=title, description=message, color=discord.Colour.green())
             await channel.send(embed=embed)
         else:
             embedList = []
@@ -557,11 +558,11 @@ class Tools(commands.Cog):
             embedList = [message[i:i + n] for i in range(0, len(message), n)]
             for num, item in enumerate(embedList, start=1):
                 if (num == 1):
-                    embed = discord.Embed(title="Timezones:", description=item, colour=discord.Colour.green())
+                    embed = discord.Embed(title=title, description=item, color=discord.Colour.green())
                     embed.set_footer(text=num)
                     await channel.send(embed=embed)
                 else:
-                    embed = discord.Embed(description=item, colour=discord.Colour.green())
+                    embed = discord.Embed(description=item, color=discord.Colour.green())
                     embed.set_footer(text=num)
                     await channel.send(embed=embed)
 
@@ -688,6 +689,41 @@ class Tools(commands.Cog):
 
         else:
             return True
+
+
+    @commands.command(aliases=['show_tree', 'file_tree', 'showtree', 'filetree', 'sft'])
+    @commands.has_permissions(administrator=True)
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def show_file_tree(self, ctx) -> None:
+        """ Shows file tree. """
+
+        tree = Tree()
+
+        ignore_files = ['venv', '__pycache__', '.git', '.gitignore']
+
+        tree.create_node('Root', 'root')
+
+        for file in os.listdir('./'):
+            if file in ignore_files:
+                continue
+
+            if os.path.isdir(file):
+                tree.create_node(file, file, parent='root')
+                for subfile in (directory := os.listdir(f'./{file}')):
+                    if subfile in ignore_files:
+                        continue
+                    tree.create_node(subfile, subfile, parent=file)
+
+            else:
+                tree.create_node(file, file, parent='root')
+
+
+        # the_tree = tree.show(line_type="ascii-em")
+
+        # embed = discord.Embed(description=tree)
+
+        # await ctx.send(embed=embed)
+        await Tools.send_big_message('File Tree', ctx.channel, str(tree), discord.Color.green())
 
 
 def setup(client):

@@ -1,32 +1,27 @@
-from googletrans import Translator
-from typing import List
+from treelib import Node, Tree
+import os
 
+tree = Tree()
 
-def tr(language: str, message: str) -> List[str]:
-    """ Translates a message into another language.
-    :param language: The language to translate the message to.
-    :param message: The message to translate.
-    :return: A translated message. """
+ignore_files = ['venv', '__pycache__', '.git', '.gitignore']
 
-    print(language, message)
-    trans = Translator(service_urls=['translate.googleapis.com'])
+tree.create_node('Root', 'root')
 
-    try:
-        translation = trans.translate(message, dest=language)
-        print(translation)
-    except ValueError as e:
-        print('Value Error:', e)
+for file in os.listdir('./'):
+    if file in ignore_files:
+        continue
+
+    if os.path.isdir(file):
+        tree.create_node(file, file, parent='root')
+        for subfile in (directory := os.listdir(f'./{file}')):
+            if subfile in ignore_files:
+                continue
+            # print(f"{file} -> {subfile}")
+            tree.create_node(subfile, subfile, parent=file)
 
     else:
-        print('AH')
-        return translation.src, translation.dest, translation.text
+        # print(f"{file}")
+        tree.create_node(file, file, parent='root')
 
 
-message = tr(language="en", message="Das ist wirklich")
-# print(message)
-
-# pip uninstall googletrans
-# git clone https://github.com/alainrouillon/py-googletrans.git
-# cd ./py-googletrans
-# git checkout origin/feature/enhance-use-of-direct-api
-# python setup.py install
+tree.show(line_type="ascii-em")
