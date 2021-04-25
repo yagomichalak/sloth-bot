@@ -29,30 +29,6 @@ class Social(commands.Cog):
     async def on_ready(self):
         print('Social cog is ready!')
 
-    # @commands.command(aliases=['si', 'server'])
-    # async def serverinfo(self, ctx):
-    #     '''
-    #     Shows some information about the server.
-    #     '''
-    #     await ctx.message.delete()
-    #     guild = ctx.guild
-    #     guild_age = (ctx.message.created_at - guild.created_at).days
-    #     created_at = f"Server created on {guild.created_at.strftime('%b %d %Y at %H:%M')}. That\'s over {guild_age} days ago!"
-    #     color = discord.Color.green()
-
-    #     em = discord.Embed(description=created_at, color=color)
-    #     em.add_field(name='Online Members',
-    #                  value=len({m.id for m in guild.members if m.status is not discord.Status.offline}))
-    #     em.add_field(name='Total Members', value=len(guild.members))
-    #     em.add_field(name='Text Channels', value=len(guild.text_channels))
-    #     em.add_field(name='Voice Channels', value=len(guild.voice_channels))
-    #     em.add_field(name='Roles', value=len(guild.roles))
-    #     em.add_field(name='Owner', value=guild.owner)
-
-    #     em.set_thumbnail(url=None or guild.icon_url)
-    #     em.set_author(name=guild.name, icon_url=None or guild.icon_url)
-    #     await ctx.send(embed=em)
-
     @staticmethod
     async def sort_time(guild: discord.Guild, at: datetime) -> str:
 
