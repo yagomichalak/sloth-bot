@@ -695,7 +695,7 @@ class Tools(commands.Cog):
     @commands.has_permissions(administrator=True)
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def show_file_tree(self, ctx) -> None:
-        """ Shows file tree. """
+        """ Shows the file tree. """
 
         tree = Tree()
 
