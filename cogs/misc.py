@@ -91,7 +91,7 @@ class Misc(commands.Cog):
             return await ctx.send("**All guesses must be integers!**", delete_after=3)
 
         for n in [g1, g2, g3]:
-            if n < 0 or n > 5:
+            if n <= 0 or n > 5:
                 return await ctx.send(f"**Each number must be between 1-5!**", delete_after=3)
 
         # Check if user is not on cooldown
