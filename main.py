@@ -117,6 +117,9 @@ async def on_command_error(ctx, error):
     elif isinstance(error, commands.MissingRequiredArgument):
         await ctx.send('Please, inform all parameters!')
 
+    elif isinstance(error, commands.NotOwner):
+        await ctx.send("You're not the bot's owner!")
+
     elif isinstance(error, commands.CommandOnCooldown):
         await ctx.send(error)
 
@@ -242,9 +245,8 @@ start_time = datetime.utcnow()
 
 @client.command()
 async def uptime(ctx: commands.Context):
-    '''
-    Shows for how much time the bot is online.
-    '''
+    """ Shows for how much time the bot is online. """
+
     now = datetime.utcnow()  # Timestamp of when uptime function is run
     delta = now - start_time
     hours, remainder = divmod(int(delta.total_seconds()), 3600)
@@ -264,9 +266,9 @@ async def uptime(ctx: commands.Context):
 
 @client.command()
 async def help(ctx, *, cmd: str = None):
-    '''
-    Shows some information about commands and categories.
-    '''
+    """ Shows some information about commands and categories. 
+    :param cmd: The command/category. """
+
     if not cmd:
         embed = discord.Embed(
             title="All commands and categories",
