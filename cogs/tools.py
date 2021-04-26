@@ -694,8 +694,9 @@ class Tools(commands.Cog):
     @commands.command(aliases=['show_tree', 'file_tree', 'showtree', 'filetree', 'sft'])
     @commands.has_permissions(administrator=True)
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def show_file_tree(self, ctx) -> None:
-        """ Shows the file tree. """
+    async def show_file_tree(self, ctx, path: str = None) -> None:
+        """ Shows the file tree.
+        :param path: The path (Optional). """
 
         if not path:
             path = './'
