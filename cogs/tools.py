@@ -697,13 +697,21 @@ class Tools(commands.Cog):
     async def show_file_tree(self, ctx) -> None:
         """ Shows the file tree. """
 
+        if not path:
+            path = './'
+
+        path = path.replace('../', '')
+
+        if not os.path.isdir(path):
+            return await ctx.send(f"**Invalid path, {ctx.author.mention}!**")
+
         tree = Tree()
 
         ignore_files = ['venv', '__pycache__', '.git', '.gitignore']
 
         tree.create_node('Root', 'root')
 
-        for file in os.listdir('./'):
+        for file in os.listdir(path):
             if file in ignore_files:
                 continue
 
