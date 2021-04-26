@@ -209,7 +209,7 @@ class Tools(commands.Cog):
         return await ctx.send(embed=embed)
 
     @commands.command()
-    @commands.has_permissions(administrator=True)
+    @commands.is_owner()
     async def eval(self, ctx, *, body=None):
         '''
         (ADM) Executes a given command from Python onto Discord.
