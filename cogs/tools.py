@@ -709,7 +709,7 @@ class Tools(commands.Cog):
 
         ignore_files = ['venv', '__pycache__', '.git', '.gitignore']
 
-        tree.create_node('Root', 'root')
+        tree.create_node('Root' if path == './' else path, 'root')
 
         for file in os.listdir(path):
             if file in ignore_files:
