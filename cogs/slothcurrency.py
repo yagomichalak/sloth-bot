@@ -179,7 +179,7 @@ class SlothCurrency(commands.Cog):
             return await ctx.send("**Inform a message id!**", delete_after=3)
         await mid.add_reaction(reaction)
 
-    @commands.command()
+    @commands.command(aliases=['inv'])
     async def inventory(self, ctx, member: discord.Member = None):
         '''
         Shows the member's item inventory.
@@ -194,7 +194,7 @@ class SlothCurrency(commands.Cog):
         if not user_items:
             return await ctx.send(f"**You don't have items to show, {ctx.author.mention}!**")
 
-        the_menu = menus.MenuPages(source=InventoryLoop(user_items), clear_reactions_after=True)
+        the_menu = menus.MenuPages(source=InventoryLoop(user_items, member), clear_reactions_after=True)
         await the_menu.start(ctx)
 
     @commands.command()

@@ -82,8 +82,10 @@ class ConfirmSkill(menus.Menu):
 class InventoryLoop(menus.ListPageSource):
     """ A class for iterating through inventory items. """
 
-    def __init__(self, data):
+    def __init__(self, data, target: discord.Member):
         super().__init__(data, per_page=6)
+
+        self.target = target
 
     async def format_page(self, menu, entries) -> discord.Embed:
         """ Formats the inventory for each page. """
@@ -93,10 +95,10 @@ class InventoryLoop(menus.ListPageSource):
         embed = discord.Embed(
             title="__Inventory Items__",
             description="All your items gathered in one place.",
-            color=menu.ctx.author.color,
-            timestamp=menu.ctx.message.created_at
+            color=self.target.color,
+            timestamp=menu.ctx.message.created_at 
         )
-        embed.set_thumbnail(url=menu.ctx.author.avatar_url)
+        embed.set_thumbnail(url=self.target.avatar_url)
 
         for i, v in enumerate(entries, start=offset):
             embed.add_field(name=f"{i+1}. {v[1]}", value=f"**State:** `{v[2]}`\n**Kind:** `{v[3]}`", inline=True)
