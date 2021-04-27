@@ -1,5 +1,5 @@
 import discord
-from discord.ext import commands
+from discord.ext import commands, menus
 import os
 from datetime import datetime
 from PIL import Image, ImageFont, ImageDraw
@@ -12,6 +12,7 @@ import asyncio
 from zipfile import ZipFile
 from typing import Dict, List, Union
 from mysqldb import the_django_database
+from extra.menu import ConfirmSkill
 
 allowed_roles = [int(os.getenv('OWNER_ROLE_ID')), int(os.getenv('ADMIN_ROLE_ID')), int(os.getenv('MOD_ROLE_ID'))]
 
@@ -515,56 +516,35 @@ class TeacherAPI(commands.Cog):
 
     @commands.command(aliases=['delete_cards', 'dtc'])
     @commands.has_permissions(administrator=True)
-    async def delete_teacher_cards(self, ctx, user_id: int = None) -> None:
+    async def delete_teacher_cards(self, ctx, user: discord.User = None) -> None:
         """ Deletes all cards from a given teacher from the database.
-        :param user_id: The ID of the user from whom to get the cards.
-        PS: Always use user IDs, since the member could have left the server. """
+        :param user: The user from whom to get the cards. """
 
-        if not user_id:
-            return await ctx.send("**Please, inform a user ID!**")
+        if not user:
+            return await ctx.send("**Please, inform a user!**")
 
-        cards = await self.get_teacher_cards(user_id)
+        cards = await self.get_teacher_cards(user.id)
         if not cards:
             return await ctx.send("**No cards found for the given user!**")
 
-        member = self.client.get_user(user_id)
-        teacher = member if member else user_id
+        member = self.client.get_user(user.id)
+        teacher = member if member else user
 
-        embed = discord.Embed(
-            title=f"Teacher `{teacher}`",
-            description=f"The teacher has `{len(cards)}` cards, do you want to delete them?",
-            color=ctx.author.color,
-            timestamp=ctx.message.created_at,
-        )
+        confirm = await ConfirmSkill(f"The teacher {teacher.mention} has `{len(cards)}` cards, do you want to delete them, {ctx.author.mention}?").prompt(ctx)
+        if not confirm:
+            return await ctx.send("**Not deleting them then!**")
 
-        msg = await ctx.send(embed=embed)
-        await msg.add_reaction('✅')
-        await msg.add_reaction('❌')
-        try:
-            r, u = await self.client.wait_for('reaction_add', timeout=60,
-                check=lambda r, u: u.id == ctx.author.id and r.message.id == msg.id and str(r.emoji) in ['✅', '❌'])
+        
+        await self._delete_teacher_cards(user.id)
+        for card in cards:
+            card_path = f"{self.django_website_root}/{card[3].replace('../', '')}"
+            if os.path.exists(card_path):
+                try:
+                    os.remove(card_path)
+                except:
+                    pass
 
-        except asyncio.TimeoutError:
-            await msg.remove_reaction('✅', self.client.user)
-            await msg.remove_reaction('❌', self.client.user)
-
-        else:
-            if str(r.emoji) == '✅':
-                await self._delete_teacher_cards(user_id)
-                for card in cards:
-                    card_path = f"{self.django_website_root}/{card[3].replace('../', '')}"
-                    if os.path.exists(card_path):
-                        try:
-                            os.remove(card_path)
-                        except:
-                            pass
-
-                await ctx.send(f"**Cards successfully deleted for `{teacher}`!**")
-            else:
-                await ctx.send("**Not deleting them then!**")
-
-            await msg.remove_reaction('⬅️', u)
-            await msg.remove_reaction('➡️', u)
+        await ctx.send(f"**Cards successfully deleted for `{teacher}`!**")
 
 
 def setup(client) -> None:
