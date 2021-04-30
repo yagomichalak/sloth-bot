@@ -164,36 +164,6 @@ class VoiceChannelActivity(commands.Cog):
             await mycursor.execute("DELETE FROM VoiceChannelActivity WHERE HOUR(the_time) = %s", (hours.pop(0),))
             await db.commit()
 
-    # async def get_hour_record_by_channel2(self, channel_id: int, time: str) -> List[List[Union[datetime, str, int]]]:
-    #     """ Gets all user records at a given hour and channel.
-    #     :param channel_id: The ID of the channel to which you are filtering.
-    #     :param time: The time to which you are filtering the search. """
-
-    #     mycursor, db = await the_database()
-    #     if len(time) < 3:
-    #         await mycursor.execute("SELECT DISTINCT HOUR(the_time), member_name, member_id FROM VoiceChannelActivity WHERE channel_id = %s and HOUR(the_time) = %s", (channel_id, time))
-    #     else:
-    #         await mycursor.execute("SELECT DISTINCT the_time, member_name, member_id FROM VoiceChannelActivity WHERE channel_id = %s and the_time = %s", (channel_id, time))
-
-    #     records = await mycursor.fetchall()
-    #     await mycursor.close()
-    #     return records
-
-    # async def get_user_record_by_time2(self, member_id: int, time: str) -> List[Union[int, str]]:
-    #     """ Gets user records by the given hour.
-    #     :param member_id: The ID of the member from whom you want to fetch information.
-    #     :param time: The time at around the user that you are looking for has to have information. """
-
-    #     mycursor, db = await the_database()
-    #     if len(time) < 3:
-    #         await mycursor.execute("SELECT DISTINCT HOUR(the_time), channel_id, channel_name,  member_id from VoiceChannelActivity WHERE HOUR(the_time) = %s and member_id = %s", (time, member_id))
-    #     else:
-    #         await mycursor.execute("SELECT DISTINCT the_time, channel_id, channel_name, member_id from VoiceChannelActivity WHERE the_time = %s and member_id = %s", (time, member_id))
-
-    #     records = await mycursor.fetchall()
-    #     await mycursor.close()
-    #     return records
-
     async def get_hour_record_by_channel(self, channel: discord.TextChannel, time: str, time2: str = None) -> List[List[Union[datetime, str, int]]]:
         """ Gets all user records at a given hour and channel.
         :param channel_id: The ID of the channel to which you are filtering.
@@ -389,12 +359,7 @@ class VoiceChannelActivity(commands.Cog):
         time = await self.format_time(time)
         time2 = await self.format_time(time2) if time2 else None
 
-        print('Time1', time)
-        print('Time2', time2)
-
         records, ftime, text = await self.get_user_record_by_time(member, time, time2)
-        print('Records', records)
-        print('Ftime', ftime)
 
         if not records:
             return await ctx.send("**Nothing found for the given time and/or member!**")
