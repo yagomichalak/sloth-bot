@@ -84,7 +84,7 @@ different_class_roles = {
         "web development", "comp sci"
     ],
     "conlangs": [
-        "esperanto"
+        "esperanto", "toki pona"
     ],
     "hindustani": [
         "hindi", "urdu", "hindustani"
