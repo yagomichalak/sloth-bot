@@ -504,7 +504,7 @@ class Tools(commands.Cog):
             my_timezone = user_timezone[1]
 
         if my_timezone not in (timezones := pytz.all_timezones):
-            return await ctx.send(f"**Please, inform a valid timezone, {member.mention}!**\n`(Type b!timezones to get a full list with the timezones in your DM's)`")
+            return await ctx.send(f"**Please, inform a valid timezone, {member.mention}!**\n`(Type z!timezones to get a full list with the timezones in your DM's)`")
 
         # Given info (time and timezone)
         given_time = time
@@ -571,7 +571,7 @@ class Tools(commands.Cog):
     async def settimezone(self, ctx, my_timezone: str = None) -> None:
         """ Sets the timezone.
         :param my_timezone: Your timezone.
-        Ps: Use b!timezones to get a full list with the timezones in your DM's. """
+        Ps: Use z!timezones to get a full list with the timezones in your DM's. """
 
         member = ctx.author
 
