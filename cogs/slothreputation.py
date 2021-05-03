@@ -70,7 +70,7 @@ class SlothReputation(commands.Cog):
         progress_bar = f"{xp}xp / {goal_xp}xp\n{':blue_square:' * boxes}{':white_large_square:' * (length_progress_bar - boxes)}"
         return progress_bar
 
-    @commands.command(aliases=['status', 'exchange', 'level', 'exp', 'xp', 'money', 'balance'])
+    @commands.command(aliases=['status', 'exchange', 'level', 'lvl', 'exp', 'xp', 'money', 'balance'])
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def info(self, ctx, member: discord.Member = None):
         """ Shows the user's level and experience points. """
