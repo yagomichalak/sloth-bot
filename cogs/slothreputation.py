@@ -57,6 +57,19 @@ class SlothReputation(commands.Cog):
             channel = discord.utils.get(user.guild.channels, id=commands_channel_id)
             return await channel.send(f"**{user.mention} has leveled up to lvl {the_user[0][2] + 1}! <:zslothrich:701157794686042183> Here's {(the_user[0][2] + 1) * 5}łł! <:zslothrich:701157794686042183>**")
 
+
+    async def get_progress_bar(self, xp: int, goal_xp, length_progress_bar: int = 20) -> str:
+        """ Gets a string/emoji progress bar.
+        :param xp: The current XP of the user.
+        :param goal_xp: The XP they are trying to achieve.
+        :param length_progress_bar: The amount of blocks in the bar. Default=20 """
+
+
+        percentage = int((xp / goal_xp) * 100)
+        boxes = int((percentage * length_progress_bar) / 100)
+        progress_bar = f"{xp}xp / {goal_xp}xp\n{':blue_square:' * boxes}{':white_large_square:' * (length_progress_bar - boxes)}"
+        return progress_bar
+
     @commands.command(aliases=['status', 'exchange', 'level', 'exp', 'xp', 'money', 'balance'])
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def info(self, ctx, member: discord.Member = None):
@@ -111,16 +124,18 @@ class SlothReputation(commands.Cog):
             return False
 
         embed = discord.Embed(title="__All Information__", colour=member.color, timestamp=ctx.message.created_at)
-        embed.add_field(name="📊 __**Level:**__", value=f"{user[0][2]}.", inline=True)
-        embed.add_field(name="🔮 __**EXP:**__", value=f"{user[0][1]} / {((user[0][2]+1)**5)}.", inline=True)
+        xp = user[0][1]
+        goal_xp = ((user[0][2]+1)**5)
+        lvl = user[0][2]
+        embed.add_field(name="📊 __**Level:**__", value=f"{lvl}.", inline=True)
         embed.add_field(name="🍃 __**Balance:**__", value=f"{ucur[0][1]}łł", inline=True)
+        progress_bar = await self.get_progress_bar(xp=xp, goal_xp=goal_xp)
+        embed.add_field(name="🔮 __**Progress Bar:**__", value=progress_bar, inline=False)
 
         embed.add_field(name="🧑‍🎓 __**Participated in:**__", value=f"{ucur[0][3]} classes.", inline=True)
         embed.add_field(name="🌟 __**Rewarded in:**__", value=f"{ucur[0][4]} classes.", inline=True)
         embed.add_field(name="🧑‍🏫 __**Hosted:**__", value=f"{ucur[0][5]} classes.", inline=True)
 
-        # embed.add_field(name="<a:hackerman:652303204809179161> __**Hacked:**__", value=f"{True if ucur[0][12] else False}", inline=True)
-        # embed.add_field(name="<a:hackerman:802354539184259082> __**Hacked:**__", value=f"{True if ucur[0][12] else False}", inline=True)
         embed.add_field(name="🕵️ __**Sloth Class:**__", value=ucur[0][7], inline=True)
         embed.add_field(name="🍯 __**Has Potion:**__", value=f"{True if ucur[0][11] else False}", inline=True)
         embed.add_field(name="🛡️ __**Protected:**__", value=f"{has_effect('protected')}", inline=True)
