@@ -58,7 +58,7 @@ class SlothReputation(commands.Cog):
             return await channel.send(f"**{user.mention} has leveled up to lvl {the_user[0][2] + 1}! <:zslothrich:701157794686042183> Here's {(the_user[0][2] + 1) * 5}łł! <:zslothrich:701157794686042183>**")
 
 
-    async def get_progress_bar(self, xp: int, goal_xp, length_progress_bar: int = 20) -> str:
+    async def get_progress_bar(self, xp: int, goal_xp, length_progress_bar: int = 17) -> str:
         """ Gets a string/emoji progress bar.
         :param xp: The current XP of the user.
         :param goal_xp: The XP they are trying to achieve.
