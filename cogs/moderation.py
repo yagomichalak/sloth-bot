@@ -603,15 +603,20 @@ class Moderation(commands.Cog):
         if not member:
             await ctx.send('**Please, specify a member!**', delete_after=3)
         else:
+            # General embed
+            general_embed = discord.Embed(description=f'**Reason:** {reason}', colour=discord.Colour.magenta())
+            general_embed.set_author(name=f'{member} has been kicked', icon_url=member.avatar_url)
+            await ctx.send(embed=general_embed)
+            try:
+                await member.send(embed=general_embed)
+            except:
+                pass
+
             try:
                 await member.kick(reason=reason)
             except Exception:
                 await ctx.send('**You cannot do that!**', delete_after=3)
             else:
-                # General embed
-                general_embed = discord.Embed(description=f'**Reason:** {reason}', colour=discord.Colour.magenta())
-                general_embed.set_author(name=f'{member} has been kicked', icon_url=member.avatar_url)
-                await ctx.send(embed=general_embed)
                 # Moderation log embed
                 moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
                 embed = discord.Embed(title='__**Kick**__', colour=discord.Colour.magenta(),
@@ -629,10 +634,6 @@ class Moderation(commands.Cog):
                 await self.insert_user_infraction(
                     user_id=member.id, infr_type="kick", reason=reason,
                     timestamp=current_ts, perpetrator=ctx.author.id)
-                try:
-                    await member.send(embed=general_embed)
-                except:
-                    pass
 
     # Bans a member
     @commands.command()
@@ -715,15 +716,19 @@ class Moderation(commands.Cog):
             icon = ctx.guild.icon_url
 
         # Bans and logs
+        # General embed
+        general_embed = discord.Embed(description=f'**Reason:** {reason}', colour=discord.Colour.dark_red())
+        general_embed.set_author(name=f'{member} has been banned', icon_url=member.avatar_url)
+        await ctx.send(embed=general_embed)
+        try:
+            await member.send(content="If you think you should be unbanned, you can make a ban appeal here: https://discord.gg/mjGq9gMxKB", embed=general_embed)
+        except:
+            pass
         try:
             await member.ban(delete_message_days=7, reason=reason)
         except Exception:
             await ctx.send('**You cannot do that!**', delete_after=3)
         else:
-            # General embed
-            general_embed = discord.Embed(description=f'**Reason:** {reason}', colour=discord.Colour.dark_red())
-            general_embed.set_author(name=f'{member} has been banned', icon_url=member.avatar_url)
-            await ctx.send(embed=general_embed)
             # Moderation log embed
             moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
             embed = discord.Embed(title='__**Banishment**__', colour=discord.Colour.dark_red(),
@@ -741,10 +746,6 @@ class Moderation(commands.Cog):
             await self.insert_user_infraction(
                 user_id=member.id, infr_type="ban", reason=reason,
                 timestamp=current_ts, perpetrator=ctx.author.id)
-            try:
-                await member.send(content="If you think you should be unbanned, you can make a ban appeal here: https://discord.gg/mjGq9gMxKB", embed=general_embed)
-            except:
-                pass
 
     # Bans a member
     @commands.command()
@@ -822,16 +823,21 @@ class Moderation(commands.Cog):
         if not member:
             await ctx.send('**Please, specify a member!**', delete_after=3)
         else:
+            # General embed
+            general_embed = discord.Embed(description=f'**Reason:** {reason}', colour=discord.Colour.dark_purple())
+            general_embed.set_author(name=f'{member} has been softbanned', icon_url=member.avatar_url)
+            await ctx.send(embed=general_embed)
+            try:
+                await member.send(embed=general_embed)
+            except:
+                pass
+
             try:
                 await member.ban(delete_message_days=7, reason=reason)
                 await member.unban(reason=reason)
             except Exception:
                 await ctx.send('**You cannot do that!**', delete_after=3)
             else:
-                # General embed
-                general_embed = discord.Embed(description=f'**Reason:** {reason}', colour=discord.Colour.dark_purple())
-                general_embed.set_author(name=f'{member} has been softbanned', icon_url=member.avatar_url)
-                await ctx.send(embed=general_embed)
                 # Moderation log embed
                 moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
                 embed = discord.Embed(title='__**SoftBanishment**__', colour=discord.Colour.dark_purple(),
@@ -849,10 +855,6 @@ class Moderation(commands.Cog):
                 await self.insert_user_infraction(
                     user_id=member.id, infr_type="softban", reason=reason,
                     timestamp=current_ts, perpetrator=ctx.author.id)
-                try:
-                    await member.send(embed=general_embed)
-                except:
-                    pass
 
     @commands.command()
     @commands.has_permissions(administrator=True)
