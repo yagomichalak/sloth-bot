@@ -749,7 +749,7 @@ class Moderation(commands.Cog):
         general_embed.set_author(name=f'{member} has been banned', icon_url=member.avatar_url)
         await ctx.send(embed=general_embed)
         try:
-            await member.send(content="If you think you should be unbanned, you can make a ban appeal here: https://discord.gg/mjGq9gMxKB", embed=general_embed)
+            await member.send(content="If you think you should be unbanned, you can make a ban appeal here: https://discord.gg/C8Ab85ETRB", embed=general_embed)
         except:
             pass
         try:
