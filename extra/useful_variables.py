@@ -118,3 +118,28 @@ flag_badges = {
     "partner": ['badge_discord_partnered.png', (695, 10)],
     "staff": ['badge_discord_partnered.png', (745, 10)],
 }
+
+banned_links = [
+    'https://gfycat.com/pleasedflickeringhectorsdolphin',
+    'https://gfycat.com/readygiftedgopher',
+    'https://gfycat.com/infantileyearlyauklet',
+    'https://thumbs.gfycat.com/InfantileYearlyAuklet-mobile.mp4',
+    'https://gfycat.com/shamefulscarcedowitcher',
+    'https://gfycat.com/fastickyinvisiblerail',
+    'https://gfycat.com/wetangryflamingo',
+    'https://giant.gfycat.com/TartAdolescentBird.mp4',
+    'https://giant.gfycat.com/LeafyRashAmethystgemclam.mp4',
+    'https://cdn.discordapp.com/attachments/787762360353947669/834568503121150042/LinedNaturalIndianrhinoceros.mp4',
+    'https://cdn.discordapp.com/attachments/816038154389553272/839387573474557982/video0_1.mp4',
+    'https://giant.gfycat.com/HarmfulThankfulFrigatebird.mp4',
+    'https://thumbs.gfycat.com/AccurateFlatJuliabutterfly-mobile.mp4',
+    'https://images-ext-2.discordapp.net/external/pMKck-5kRztOUwD0aJZjEWBABNRKausATegghw1f77U/https/giant.gfycat.com/RevolvingPassionateCirriped.mp4',
+    'https/giant.gfycat.com/RevolvingPassionateCirriped.mp4',
+    'https://gfycat.com/forthrightagonizingamericantoad',
+    'https://thumbs.gfycat.com/SamePlumpDwarfrabbit-mobile.mp4/',
+    'https://gfycat.com/educatedrawkitty',
+    'https://gfycat.com/glassunfitcricket',
+    'https://giant.gfycat.com/WeirdShadowyGoa.mp4',
+    'https://gfycat.com/someaggravatingindochinahogdeer',
+    'https://giant.gfycat.com/ImportantThankfulIceblueredtopzebra.mp4',
+]
