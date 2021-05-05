@@ -6,6 +6,7 @@ from datetime import datetime
 import time
 from typing import List, Union, Dict, Tuple
 import os
+from extra.useful_variables import banned_links
 
 mod_log_id = int(os.getenv('MOD_LOG_CHANNEL_ID'))
 muted_role_id = int(os.getenv('MUTED_ROLE_ID'))
@@ -38,6 +39,9 @@ class Moderation(commands.Cog):
         if message.author.bot:
             return
 
+        # Banned links
+        await self.check_banned_links(message)
+
         # Invite tracker
         msg = str(message.content)
         if 'discord.gg/' in msg.lower():
@@ -47,6 +51,30 @@ class Moderation(commands.Cog):
                 is_from_guild = await self.check_invite_guild(msg, message.guild)
                 if not is_from_guild:
                     return await self.mute(ctx=ctx, member=message.author, reason="Invite Advertisement.")
+
+    async def check_banned_links(self, message: discord.Message) -> None:
+        """ Checks if the message sent was or contains a banned link. """
+
+        content = message.content
+        videos = [v for v in message.attachments if v.content_type in ['video/mp4', 'video/webm']]
+
+        # Checks it in the message attachments
+        for video in videos:
+            print(video)
+            if str(video) in banned_links:
+                ctx = await self.client.get_context(message)
+                perms = ctx.channel.permissions_for(ctx.author)
+                if not perms.administrator and mod_role_id not in [r.id for r in ctx.author.roles]:
+                    return await self.mute(ctx=ctx, member=message.author, reason="Banned Link")
+
+        # Checks it in the message content
+        for word in message.content.split():
+            print(word)
+            if word in banned_links:
+                ctx = await self.client.get_context(message)
+                perms = ctx.channel.permissions_for(ctx.author)
+                if not perms.administrator and mod_role_id not in [r.id for r in ctx.author.roles]:
+                    return await self.mute(ctx=ctx, member=message.author, reason="Banned Link")
 
     @tasks.loop(minutes=1)
     async def look_for_expired_tempmutes(self) -> None:
