@@ -11,9 +11,10 @@ bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
 
 class Cybersloth(Player):
 
+    emoji = '<:Cybersloth:839498017823916082>'
+
     def __init__(self, client) -> None:
         self.client = client
-        # self.bots_txt = await self.client.fetch_channel(bots_and_commands_channel_id)
 
     @commands.command(aliases=['eb', 'energy', 'boost'])
     @Player.skill_on_cooldown()

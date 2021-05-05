@@ -12,10 +12,10 @@ bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
 
 class Warrior(Player):
 
+    emoji = '<:Warrior:839498018792800286>'
+
     def __init__(self, client) -> None:
         self.client = client
-        # super().__init__(self)
-        # self.bots_txt = await self.client.fetch_channel(bots_and_commands_channel_id)
 
     @commands.command(aliases=['ko', 'knock-out', 'knock_out', 'knock'])
     @Player.skill_on_cooldown()

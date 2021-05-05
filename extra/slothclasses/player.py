@@ -14,12 +14,10 @@ bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
 class Player(commands.Cog):
 
     def __init__(self, client) -> None:
-        print('testtest')
         self.client = client
 
     @commands.Cog.listener()
     async def on_ready(self) -> None:
-        print('am i ready????')
         self.bots_txt = await self.client.fetch_channel(bots_and_commands_channel_id)
 
     # Check user class

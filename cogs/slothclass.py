@@ -9,7 +9,7 @@ from pytz import timezone
 import os
 
 from extra.slothclasses import agares, cybersloth, merchant, metamorph, munk, prawler, seraph, warrior
-classes: Dict[str, Any] = {
+classes: Dict[str, object] = {
     'agares': agares.Agares, 'cybersloth': cybersloth.Cybersloth,
     'merchant': merchant.Merchant, 'metamorph': metamorph.Metamorph,
     'munk': munk.Munk, 'prawler': prawler.Prawler,
@@ -205,18 +205,29 @@ class SlothClass(*classes.values()):
                     continue
 
         cmds_text = '\n'.join(cmds)
+
+        emoji = user_class.emoji if (user_class := classes.get(user[7].lower())) else ''
+
         skills_embed = discord.Embed(
-            title=f"__Available Skills for__: `{user[7]}`",
-            # description=f"```apache\nSkills: ```",
+            title=f"__Available Skills for__: `{user[7]}` {emoji}",
             color=ctx.author.color,
             timestamp=ctx.message.created_at
         )
-        skills_embed.add_field(name="__Skills__:", value=f"```apache\n{cmds_text}```")
+        skills_embed.add_field(name=f"__Skills__:", value=f"```apache\n{cmds_text}```")
         skills_embed.set_author(name=ctx.author, icon_url=ctx.author.avatar_url)
         skills_embed.set_thumbnail(url=f"https://thelanguagesloth.com/media/sloth_classes/{user[7]}.png")
         skills_embed.set_footer(text=ctx.guild, icon_url=ctx.guild.icon_url)
         await ctx.send(embed=skills_embed)
 
+
+    @commands.command(hidden=True)
+    @commands.has_permissions(administrator=True)
+    async def test(self, ctx, sloth_class: str = None) -> None:
+        """ Tests something. 
+        :param sloth_class: A sloth class for checking out. """
+
+
+        user_class = classes.get(sloth_class.lower())
 
 def setup(client) -> None:
     """ Cog's setup function. """
