@@ -14,6 +14,8 @@ approve_thumbnail_channel_id = int(os.getenv('APPROVE_THUMBNAIL_CHANNEL_ID'))
 
 class Munk(Player):
 
+    emoji = '<:Munk:839498018712715284>'
+
     def __init__(self, client) -> None:
         self.client = client
 

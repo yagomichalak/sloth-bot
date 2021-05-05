@@ -14,9 +14,10 @@ bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
 
 class Prawler(Player):
 
+    emoji = '<:Prawler:839498018361049139>'
+
     def __init__(self, client) -> None:
         self.client = client
-        # bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload) -> None:

@@ -11,9 +11,10 @@ bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
 
 class Agares(Player):
 
+    emoji = '<:Agares:839497855621660693>'
+
     def __init__(self, client) -> None:
         self.client = client
-        # self.bots_txt = await self.client.fetch_channel(bots_and_commands_channel_id)
 
         self.safe_categories = [
             int(os.getenv('LESSON_CAT_ID')),

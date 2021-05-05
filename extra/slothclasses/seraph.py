@@ -12,9 +12,10 @@ bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
 
 class Seraph(Player):
 
+    emoji = '<:Seraph:839498018998976563>'
+
     def __init__(self, client) -> None:
         self.client = client
-        # self.bots_txt = await self.client.fetch_channel(bots_and_commands_channel_id)
 
     @commands.command(aliases=['dp', 'divine', 'protection'])
     @Player.skill_on_cooldown()

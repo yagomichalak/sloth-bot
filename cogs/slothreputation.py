@@ -5,6 +5,7 @@ from datetime import datetime
 import os
 from typing import List
 from extra.menu import ConfirmSkill
+from .slothclass import classes
 
 commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
 
@@ -136,7 +137,8 @@ class SlothReputation(commands.Cog):
         embed.add_field(name="🌟 __**Rewarded in:**__", value=f"{ucur[0][4]} classes.", inline=True)
         embed.add_field(name="🧑‍🏫 __**Hosted:**__", value=f"{ucur[0][5]} classes.", inline=True)
 
-        embed.add_field(name="🕵️ __**Sloth Class:**__", value=ucur[0][7], inline=True)
+        emoji = user_class.emoji if (user_class := classes.get(ucur[0][7].lower())) else ''
+        embed.add_field(name="🕵️ __**Sloth Class:**__", value=f"{ucur[0][7]} {emoji}", inline=True)
         embed.add_field(name="🍯 __**Has Potion:**__", value=f"{True if ucur[0][11] else False}", inline=True)
         embed.add_field(name="🛡️ __**Protected:**__", value=f"{has_effect('protected')}", inline=True)
         embed.add_field(name="😵 __**Knocked Out:**__", value=f"{has_effect('knocked_out')}", inline=True)
