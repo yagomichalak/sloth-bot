@@ -60,7 +60,6 @@ class Moderation(commands.Cog):
 
         # Checks it in the message attachments
         for video in videos:
-            print(video)
             if str(video) in banned_links:
                 ctx = await self.client.get_context(message)
                 perms = ctx.channel.permissions_for(ctx.author)
@@ -69,7 +68,6 @@ class Moderation(commands.Cog):
 
         # Checks it in the message content
         for word in message.content.split():
-            print(word)
             if word in banned_links:
                 ctx = await self.client.get_context(message)
                 perms = ctx.channel.permissions_for(ctx.author)
