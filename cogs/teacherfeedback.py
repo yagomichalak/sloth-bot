@@ -545,7 +545,7 @@ class TeacherFeedback(commands.Cog):
 
             if await SlothCurrency.get_user_currency(teacher.id):
                 try:
-                    await SlothCurrency.update_user_money(teacher.id, 25)
+                    await SlothCurrency.update_user_money(teacher.id, 50)
                     await SlothCurrency.update_user_hosted(teacher.id)
                 except:
                     pass
