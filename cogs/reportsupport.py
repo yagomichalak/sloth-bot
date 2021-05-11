@@ -102,8 +102,6 @@ class ReportSupport(commands.Cog):
 
         if mid == int(os.getenv('APPLY_TEACHER_MESSAGE_ID')) and str(emoji) == '✅':
             # Apply to be a teacher
-            # link = "https://docs.google.com/forms/d/1H-rzl9AKgfH1WuKN7nYAW-xJx411Q4-HxfPXuPUFQXs/viewform?edit_requested=true"
-            # await member.send(f"**You can apply for being a teacher by filling out this form:**\n{link}")
             member_ts = self.cache.get(member.id)
             time_now = time.time()
             if member_ts:
@@ -328,19 +326,19 @@ class ReportSupport(commands.Cog):
                     pass
 
                 else:
-                    return await self.audio(member, 'server_help')
+                    return await self.audio(member, 'case_alert')
 
             elif emoji == '2️⃣':
                 # I need help with the server in general
                 message = f"Please, {member.mention}, try to explain what kind of help you want related to the server."
                 try:
-                    exists = await self.generic_help(member, guild, 'server help', message)
+                    exists = await self.generic_help(member, guild, 'general help', message)
                     if exists is False:
                         return
                 except:
                     pass
                 else:
-                    return await self.audio(member, 'general_help')
+                    return await self.audio(member, 'general_help_alert')
             elif emoji == '3️⃣':
                 # I need to change some roles and I can't
                 message = f"Please, {member.mention}, inform us what roles you want, and if you spotted a specific problem with the reaction-role selection."
@@ -351,7 +349,7 @@ class ReportSupport(commands.Cog):
                 except:
                     pass
                 else:
-                    return await self.audio(member, 'role_help')
+                    return await self.audio(member, 'role_help_alert')
             elif emoji == '❌':
                 # Cancel, I misclicked
                 return await member.send("**All right, cya!**")
