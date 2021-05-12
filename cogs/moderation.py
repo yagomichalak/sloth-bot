@@ -7,6 +7,7 @@ import time
 from typing import List, Union, Dict, Tuple
 import os
 from extra.useful_variables import banned_links
+from extra.menu import ConfirmSkill
 
 mod_log_id = int(os.getenv('MOD_LOG_CHANNEL_ID'))
 muted_role_id = int(os.getenv('MUTED_ROLE_ID'))
@@ -163,6 +164,7 @@ class Moderation(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
+        
         if member.bot:
             return
 
@@ -172,6 +174,13 @@ class Moderation(commands.Cog):
         # Actual timestamp
         time_now = datetime.timestamp(datetime.utcnow())
         account_age = round((time_now - timestamp)/86400)
+
+        if account_age <= 4:
+            if self.get_firewall_state():
+                msg = await member.send(f"**New-account Firewall is on, come back once your account is at least 4 days old.**")
+                ctx = await self.client.get_context(msg)
+                return await self.kick(ctx=ctx, member=member, reason="Possible fake account")
+
         if account_age <= 2:
             suspect_channel = discord.utils.get(member.guild.channels, id=suspect_channel_id)
             await suspect_channel.send(f"🔴 Alert! Possible fake account: {member.mention} joined the server. Account was just created.\nAccount age: {account_age} day(s)!")
@@ -932,6 +941,30 @@ class Moderation(commands.Cog):
         except discord.errors.NotFound:
             return await ctx.send("**Invalid user id!**", delete_after=3)
 
+    @commands.command(aliases=['fw'])
+    @commands.has_permissions(administrative=True)
+    async def firewall(self, ctx) -> None:
+        """ Turns on and off the firewall.
+        When turned on, it'll kick new members having accounts created in less than 4 days. """
+
+        member = ctx.author
+
+        if not await self.check_table_firewall_exists():
+            return await ctx.send(f"**It looks like the firewall is on maintenance, {member.mention}!**")
+
+        if await self.get_firewall_state():
+            confirm = await ConfirmSkill(f"The Firewall is activated, do you want to turn it off, {member.mention}?").prompt(ctx)
+            if confirm:
+                await self.set_firewall_state(0)
+                await ctx.send(f"**Firewall deactivated, {member.mention}!**")
+                await self.client.get_cog('ReportSupport').audio(member, 'troll_firewall_off')
+        else:
+            confirm = await ConfirmSkill(f"The Firewall is deactivated, do you want to turn it on, {member.mention}?").prompt(ctx)
+            if confirm:
+                await self.set_firewall_state(1)
+                await ctx.send(f"**Firewall activated, {member.mention}!**")
+                await self.client.get_cog('ReportSupport').audio(member, 'troll_firewall_on')
+
     async def insert_in_muted(self, user_role_ids: List[Tuple[int]]):
         mycursor, db = await the_database()
         await mycursor.executemany(
@@ -1215,6 +1248,89 @@ class Moderation(commands.Cog):
         else:
             return True
 
+    
+    @commands.command(hidden=True)
+    @commands.has_permissions(administrator=True)
+    async def create_table_firewall(self, ctx) -> None:
+        """ (ADM) Creates the Firewall table. """
+
+        if await self.check_table_firewall_exists():
+            return await ctx.send("**Table __Firewall__ already exists!**")
+
+        await ctx.message.delete()
+        mycursor, db = await the_database()
+        await mycursor.execute("""CREATE TABLE Firewall (
+            state TINYINT(1) NOT NULL DEFAULT 0)""")
+        await mycursor.execute("INSERT INTO Firewall VALUES(0)")
+        await db.commit()
+        await mycursor.close()
+
+        return await ctx.send("**Table __Firewall__ created!**", delete_after=3)
+
+    @commands.command(hidden=True)
+    @commands.has_permissions(administrator=True)
+    async def drop_table_firewall(self, ctx) -> None:
+        """ (ADM) Creates the Firewall table """
+
+        if not await self.check_table_firewall_exists():
+            return await ctx.send("**Table __Firewall__ doesn't exist!**")
+        await ctx.message.delete()
+        mycursor, db = await the_database()
+        await mycursor.execute("DROP TABLE Firewall")
+        await db.commit()
+        await mycursor.close()
+
+        return await ctx.send("**Table __Firewall__ dropped!**", delete_after=3)
+
+    @commands.command(hidden=True)
+    @commands.has_permissions(administrator=True)
+    async def reset_table_firewall(self, ctx):
+        """ (ADM) Resets the Firewall table. """
+
+        if not await self.check_table_firewall_exists():
+            return await ctx.send("**Table __Firewall__ doesn't exist yet**")
+
+        await ctx.message.delete()
+        mycursor, db = await the_database()
+        await mycursor.execute("DELETE FROM Firewall")
+        await mycursor.execute("INSERT INTO Firewall VALUES(0)")
+        await db.commit()
+        await mycursor.close()
+
+        return await ctx.send("**Table __Firewall__ reset!**", delete_after=3)
+
+    async def check_table_firewall_exists(self) -> bool:
+        """ Checks if the MutedMember table exists """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("SHOW TABLE STATUS LIKE 'Firewall'")
+        table_info = await mycursor.fetchall()
+        await mycursor.close()
+
+        if len(table_info) == 0:
+            return False
+
+        else:
+            return True
+
+    async def set_firewall_state(self, state: int) -> None:
+        """ Sets the firewall state to either true or false. 
+        :param state: The state of the firewall to set. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("UPDATE Firewall SET state = %s", (state,))
+        await db.commit()
+        await mycursor.close()
+
+
+    async def get_firewall_state(self) -> int:
+        """ Gets the firewall's current state. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("SELECT state FROM Firewall")
+        fw_state = await mycursor.fetchone()
+        await mycursor.close()
+        return fw_state[0]
 
 def setup(client):
     client.add_cog(Moderation(client))

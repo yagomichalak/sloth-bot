@@ -965,24 +965,18 @@ class ReportSupport(commands.Cog):
         staff_vc = self.client.get_channel(staff_vc_id)
         bot_state = member.guild.voice_client
 
-        print('user_channel', staff_vc)
-        print('bot', bot_state)
         try:
             if bot_state and bot_state.channel and bot_state.channel != staff_vc:
-                print('if')
                 await bot_state.disconnect()
                 await bot_state.move_to(staff_vc)
             elif not bot_state:
-                print('elif')
                 voicechannel = discord.utils.get(member.guild.channels, id=staff_vc.id)
                 vc = await voicechannel.connect()
 
             await asyncio.sleep(2)
             voice_client: discord.VoiceClient = discord.utils.get(self.client.voice_clients, guild=member.guild)
-            print('voice_client', voice_client)
             # Plays / and they don't stop commin' /
             if voice_client and not voice_client.is_playing():
-                print('hehe')
                 audio_source = discord.FFmpegPCMAudio(f'tts/{audio_name}.mp3')
                 voice_client.play(audio_source, after=lambda e: print("Finished Warning Staff!"))
             else:
