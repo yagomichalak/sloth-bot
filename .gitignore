@@ -6,7 +6,6 @@ credentials.json
 client_secrets.json
 sloth_custom_images/
 texts/
-.vs/
 
 .idea/
 **/__pycache__/
