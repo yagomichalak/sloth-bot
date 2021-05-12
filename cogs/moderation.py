@@ -176,7 +176,7 @@ class Moderation(commands.Cog):
         account_age = round((time_now - timestamp)/86400)
 
         if account_age <= 4:
-            if self.get_firewall_state():
+            if await self.get_firewall_state():
                 msg = await member.send(f"**New-account Firewall is on, come back once your account is at least 4 days old.**")
                 ctx = await self.client.get_context(msg)
                 return await self.kick(ctx=ctx, member=member, reason="Possible fake account")
