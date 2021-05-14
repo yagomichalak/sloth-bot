@@ -23,8 +23,6 @@ class Munk(Player):
     async def on_raw_reaction_add_munk(self, payload) -> None:
         """ Checks reactions related to skill actions. """
 
-        print('ah')
-
         # Checks if it wasn't a bot's reaction
         if not payload.guild_id:
             return
