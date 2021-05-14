@@ -735,5 +735,14 @@ class Tools(commands.Cog):
         await Tools.send_big_message('File Tree', ctx.channel, str(tree), discord.Color.green())
 
 
+    @commands.command()
+    @commands.has_any_role(*allowed_roles)
+    async def cosmos(self, ctx) -> None:
+        """ A command for pinging Cosmos, the stealthy little guy. """
+
+        cosmos_id = int(os.getenv('COSMOS_ID'))
+        cosmos = discord.utils.get(ctx.guild.members, id=cosmos_id)
+        await ctx.send(cosmos.mention)
+
 def setup(client):
     client.add_cog(Tools(client))
