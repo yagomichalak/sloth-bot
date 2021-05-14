@@ -736,7 +736,7 @@ class Tools(commands.Cog):
 
 
     @commands.command()
-    @commands.has_any_role(*allowed_roles)
+    @commands.has_any_role(*[owner_role_id, admin_role_id, mod_role_id])
     async def cosmos(self, ctx) -> None:
         """ A command for pinging Cosmos, the stealthy little guy. """
 
