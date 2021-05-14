@@ -24,8 +24,6 @@ class Prawler(Player):
 	async def on_raw_reaction_add_prawler(self, payload) -> None:
 		""" Checks reactions related to skill actions. """
 
-		print('bh')
-
 		# Checks if it wasn't a bot's reaction
 		if not payload.guild_id:
 			return
