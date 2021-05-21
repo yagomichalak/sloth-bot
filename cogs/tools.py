@@ -749,12 +749,13 @@ class Tools(commands.Cog):
     async def music_bot(self, ctx) -> None:
         """ Shows a list with all music bots available in the server. """
 
-        music_bots = [235088799074484224, 252128902418268161, 184405311681986560, 234395307759108106, 718580119068737567, 201503408652419073]
-        music_bots = [valid_mb.mention for mb in music_bots if (valid_mb := discord.utils.get(ctx.guild.members, id=mb))]
+        music_bot_ids = [235088799074484224, 252128902418268161, 184405311681986560, 234395307759108106, 718580119068737567, 201503408652419073]
+        music_bots = [valid_mb for mb in music_bot_ids if (valid_mb := discord.utils.get(ctx.guild.members, id=mb))]
+        music_bots = [f"{mb.mention} ❌" if mb.voice and mb.voice.channel else f"{mb.mention} ✅" for mb in music_bots]
 
         embed = discord.Embed(
             title="__Available Music Bots:__",
-            description=', '.join(music_bots),
+            description=f"✅ = Available | ❌ = Being used\n\n{', '.join(music_bots)}",
             color=ctx.author.color,
             timestamp=ctx.message.created_at
         )
