@@ -749,7 +749,7 @@ class Tools(commands.Cog):
     async def music_bot(self, ctx) -> None:
         """ Shows a list with all music bots available in the server. """
 
-        music_bots = [235088799074484224, 252128902418268161, 184405311681986560, 234395307759108106]
+        music_bots = [235088799074484224, 252128902418268161, 184405311681986560, 234395307759108106, 718580119068737567, 201503408652419073]
         music_bots = [valid_mb.mention for mb in music_bots if (valid_mb := discord.utils.get(ctx.guild.members, id=mb))]
 
         embed = discord.Embed(
