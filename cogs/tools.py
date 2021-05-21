@@ -744,5 +744,21 @@ class Tools(commands.Cog):
         cosmos = discord.utils.get(ctx.guild.members, id=cosmos_id)
         await ctx.send(cosmos.mention)
 
+    @commands.command(aliases=['musicbot', 'music', 'mb'])
+    @commands.cooldown(1, 10, commands.BucketType.user)
+    async def music_bot(self, ctx) -> None:
+        """ Shows a list with all music bots available in the server. """
+
+        music_bots = [235088799074484224, 252128902418268161, 184405311681986560, 234395307759108106]
+        music_bots = [valid_mb.mention for mb in music_bots if (valid_mb := discord.utils.get(ctx.guild.members, id=mb))]
+
+        embed = discord.Embed(
+            title="__Available Music Bots:__",
+            description=', '.join(music_bots),
+            color=ctx.author.color,
+            timestamp=ctx.message.created_at
+        )
+        await ctx.send(embed=embed)
+
 def setup(client):
     client.add_cog(Tools(client))
