@@ -1008,7 +1008,13 @@ class Moderation(commands.Cog):
         await ctx.message.delete()
         mycursor, db = await the_database()
         await mycursor.execute("""CREATE TABLE mutedmember (
-            user_id BIGINT NOT NULL, role_id BIGINT NOT NULL, mute_ts BIGINT DEFAULT NULL, muted_for_seconds BIGINT DEFAULT NULL)""")
+            user_id BIGINT NOT NULL, 
+            role_id BIGINT NOT NULL, 
+            mute_ts BIGINT DEFAULT NULL, 
+            muted_for_seconds BIGINT DEFAULT NULL,
+            PRIMARY KEY (user_id, role_id),
+            CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES UserCurrency (user_id) ON DELETE CASCADE ON UPDATE CASCADE
+            )""")
         await db.commit()
         await mycursor.close()
 
