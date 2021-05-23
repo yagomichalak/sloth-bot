@@ -1212,8 +1212,8 @@ class Moderation(commands.Cog):
             infraction_ts BIGINT NOT NULL,
             infraction_id BIGINT NOT NULL AUTO_INCREMENT,
             perpetrator BIGINT NOT NULL,
-            PRIMARY KEY(infraction_id)
-            )""")
+            PRIMARY KEY (infraction_id)
+            ) CHARSET utf8mb4 COLLATE utf8mb4_unicode_ci""")
         await db.commit()
         await mycursor.close()
 
