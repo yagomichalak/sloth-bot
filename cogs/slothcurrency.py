@@ -578,7 +578,7 @@ class SlothCurrency(commands.Cog):
         mycursor, db = await the_database()
         await mycursor.execute("""
             CREATE TABLE UserCurrency (
-            user_id bigint, user_money bigint, last_purchase_ts bigint,
+            user_id bigint NOT NULL, user_money bigint, last_purchase_ts bigint,
             user_classes bigint default 0, user_class_reward bigint default 0, user_hosted bigint default 0,
             user_lotto bigint default null, sloth_class varchar(30) default 'default', change_class_ts bigint default 0,
             last_skill_ts bigint default 0, protected tinyint(1) default 0, has_potion tinyint(1) default 0,
