@@ -98,6 +98,12 @@ different_class_roles = {
     "sign languages": [
         "sign language", "sign languages", "asl",
         "fsl", "bsl"
+    ],
+    "portuguese": [
+        "brazilian portuguese", "portuguese from brazil", 
+        "portuguese", "angolan portuguese",
+        "portuguese from angola", "portuguese from portugal",
+         "portuguese portuguese"
     ]
 }
 
