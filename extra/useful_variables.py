@@ -107,7 +107,7 @@ different_class_roles = {
     ],
     "english": [
         "english", "inglès", "inglês", "anglais",
-        "angielski", "anglisch", "ingleze"
+        "angielski", "englisch", "ingleze"
     ]
 }
 
