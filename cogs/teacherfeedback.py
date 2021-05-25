@@ -1,4 +1,5 @@
 import discord
+from discord.abc import _Overwrites
 from discord.ext import commands, menus
 from mysqldb import *
 from datetime import datetime
@@ -558,10 +559,106 @@ class TeacherFeedback(commands.Cog):
 
     # ===== Channel management =====
 
-    async def get_channel_perms(self, member: discord.Member, language: str) -> Dict[str, discord.PermissionOverwrite]:
-        """ Gets permissions for the class channels according to the language and its roles.
+    async def get_custom_language_role(self, member: discord.Member, language: str) -> List[Union[str, discord.Role]]:
+        """ Gets a custom language role name.
         :param member: The teacher.
         :param language: The language being taught in the class. """
+
+        custom_role = None
+        # Checks whether it is a custom language that may or may not have a different role pattern
+        if custom_role_name := await TeacherFeedback.get_custom_role_name(different_class_roles, language.lower().strip()):
+            custom_role = discord.utils.get(member.guild.roles,
+                name=custom_role_name.title())
+
+            # Checks whether the role exists
+            if custom_role:
+                language = custom_role.name
+                
+            else:
+                language = custom_role_name
+
+        return language, custom_role
+
+    async def get_perms_for_language(self, member: discord.Member, language: str, overwrites: Dict[object, discord.PermissionOverwrite]) -> Dict[object, discord.PermissionOverwrite]:
+        """ Gets permissions for the roles related to the language being taught in the class.
+        :param member: The teacher.
+        :param language: The language itself.
+        :param overwrites: A dictionary of permissions for the class. """
+
+        # Custom role perms
+        language, custom_role = await self.get_custom_language_role(member, language)
+
+        if custom_role:
+            overwrites[custom_role] = discord.PermissionOverwrite(
+                    read_messages=True, send_messages=True, connect=True,
+                    speak=True, view_channel=True, embed_links=True)
+
+        # Tries to get role permissions for the Native, Fluent, Studying role pattern (Class language)
+        if native_role := discord.utils.get(member.guild.roles, name=f"Native {language.title()}"):
+            overwrites[native_role] = discord.PermissionOverwrite(
+                read_messages=False, send_messages=False, connect=False, speak=False, view_channel=False, embed_links=False)
+
+        if fluent_role := discord.utils.get(member.guild.roles, name=f"Fluent {language.title()}"):
+            overwrites[fluent_role] = discord.PermissionOverwrite(
+                read_messages=True, send_messages=False, connect=False, speak=False, view_channel=True, embed_links=False)
+
+        if studying_role := discord.utils.get(member.guild.roles, name=f"Studying {language.title()}"):
+            overwrites[studying_role] = discord.PermissionOverwrite(
+                read_messages=True, send_messages=False, connect=False, speak=False, view_channel=True, embed_links=False)
+
+        
+
+        return overwrites
+
+    async def get_perms_for_taught_in(self, member: discord.Member, language: str, taught_in: str, overwrites: Dict[object, discord.PermissionOverwrite]) -> Dict[object, discord.PermissionOverwrite]:
+        """ Gets permissions for the roles related to the language used to teach the class.
+        :param member: The teacher.
+        :param taught_in: The language itself.
+        :param overwrites: A dictionary of permissions for the class. """
+
+        # Custom role perms
+        language, _ = await self.get_custom_language_role(member, language)
+        taught_in, custom_role = await self.get_custom_language_role(member, taught_in)
+
+        if custom_role:
+            overwrites[custom_role] = discord.PermissionOverwrite(
+                    read_messages=True, send_messages=True, connect=True,
+                    speak=True, view_channel=True, embed_links=True)
+
+        if language.lower() != taught_in.lower():
+            # Tries to get role permissions for the Native, Fluent, Studying role pattern (Class taught-in language)
+            if native_role := discord.utils.get(member.guild.roles, name=f"Native {taught_in.title()}"):
+                overwrites[native_role] = discord.PermissionOverwrite(
+                    read_messages=False, send_messages=True, connect=True, speak=True, view_channel=False, embed_links=True)
+
+            if fluent_role := discord.utils.get(member.guild.roles, name=f"Fluent {taught_in.title()}"):
+                overwrites[fluent_role] = discord.PermissionOverwrite(
+                    read_messages=False, send_messages=True, connect=True, speak=True, view_channel=False, embed_links=True)
+
+            if studying_role := discord.utils.get(member.guild.roles, name=f"Studying {taught_in.title()}"):
+                overwrites[studying_role] = discord.PermissionOverwrite(
+                    read_messages=False, send_messages=False, connect=False, speak=False, view_channel=False, embed_links=False)
+        else:
+            # Sorts ambiguity when both target and origin languages are the same
+            if native_role := discord.utils.get(member.guild.roles, name=f"Native {taught_in.title()}"):
+                overwrites[native_role] = discord.PermissionOverwrite(
+                    read_messages=True, send_messages=False, connect=False, speak=False, view_channel=True, embed_links=False)
+
+            if fluent_role := discord.utils.get(member.guild.roles, name=f"Fluent {taught_in.title()}"):
+                overwrites[fluent_role] = discord.PermissionOverwrite(
+                    read_messages=True, send_messages=True, connect=True, speak=True, view_channel=True, embed_links=True)
+
+            if studying_role := discord.utils.get(member.guild.roles, name=f"Studying {taught_in.title()}"):
+                overwrites[studying_role] = discord.PermissionOverwrite(
+                    read_messages=True, send_messages=True, connect=True, speak=True, view_channel=True, embed_links=True)
+        
+        return overwrites
+
+    async def get_channel_perms(self, member: discord.Member, language: str, taught_in: str) -> Dict[str, discord.PermissionOverwrite]:
+        """ Gets permissions for the class channels according to the language and its roles.
+        :param member: The teacher.
+        :param language: The language being taught in the class.
+        :param taught_in: The language in which the class is taught. """
 
         # Get some roles
         teacher_role = discord.utils.get(member.guild.roles, id=teacher_role_id)
@@ -571,36 +668,15 @@ class TeacherFeedback(commands.Cog):
         sloth_explorer_role = discord.utils.get(member.guild.roles, id=sloth_explorer_role_id)
 
         overwrites = {}
-        # Checks whether it is a custom language that may or may not have a different role pattern
-        if custom_role_name := await TeacherFeedback.get_custom_role_name(different_class_roles, language.lower().strip()):
-            custom_role = discord.utils.get(member.guild.roles,
-                name=custom_role_name.title())
-
-            # Checks whether the role exists
-            if custom_role:
-                language = custom_role.name
-                overwrites[custom_role] = discord.PermissionOverwrite(
-                    read_messages=True, send_messages=True, connect=True,
-                    speak=True, view_channel=True, embed_links=True)
-            else:
-                language = custom_role_name
-
-        # Tries to get role permissions for the Native, Fluent, Studying role pattern
-        if native_role := discord.utils.get(member.guild.roles, name=f"Native {language.title()}"):
-            overwrites[native_role] = discord.PermissionOverwrite(
-                read_messages=True, send_messages=False, connect=False, speak=False, view_channel=True, embed_links=False)
-
-        if fluent_role := discord.utils.get(member.guild.roles, name=f"Fluent {language.title()}"):
-            overwrites[fluent_role] = discord.PermissionOverwrite(
-                read_messages=True, send_messages=True, connect=True, speak=True, view_channel=True, embed_links=True)
-
-        if studying_role := discord.utils.get(member.guild.roles, name=f"Studying {language.title()}"):
-            overwrites[studying_role] = discord.PermissionOverwrite(
-                read_messages=True, send_messages=True, connect=True, speak=True, view_channel=True, embed_links=True)
-
         # Gets permissions for general roles
         overwrites[member.guild.default_role] = discord.PermissionOverwrite(
             read_messages=False, send_messages=False, connect=False, speak=False, view_channel=False)
+
+        # Class language
+        overwrites = await self.get_perms_for_language(member, language, overwrites)
+        # Class taught in
+        overwrites = await self.get_perms_for_taught_in(member, language, taught_in, overwrites)
+  
 
         if queuebot := discord.utils.get(member.guild.members, id=queuebot_id):
             overwrites[queuebot] = discord.PermissionOverwrite(
@@ -635,7 +711,7 @@ class TeacherFeedback(commands.Cog):
 
         class_category = discord.utils.get(member.guild.categories, id=create_room_cat_id)
         # Gets the channels perm for the particular language
-        overwrites = await self.get_channel_perms(member, class_info['language'])
+        overwrites = await self.get_channel_perms(member, class_info['language'], class_info['taught_in'])
 
         # Gets the emoji relative to the class type.
         cemoji = ''

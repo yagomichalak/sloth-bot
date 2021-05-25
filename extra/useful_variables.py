@@ -104,6 +104,10 @@ different_class_roles = {
         "portuguese", "angolan portuguese",
         "portuguese from angola", "portuguese from portugal",
          "portuguese portuguese"
+    ],
+    "english": [
+        "english", "inglès", "inglês", "anglais",
+        "angielski", "anglisch", "ingleze"
     ]
 }
 
