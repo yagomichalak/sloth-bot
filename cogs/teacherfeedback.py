@@ -269,6 +269,8 @@ class TeacherFeedback(commands.Cog):
             description=saved_class[3], color=discord.Colour.green())
         embed.add_field(name=f"__**Type:**__", value=saved_class[2].title(),
                         inline=True)
+        embed.add_field(name=f"__**Taught in:**__", value=saved_class[4].title(),
+                        inline=True)
         embed.set_thumbnail(url=member.avatar_url)
         embed.set_author(name=member)
         embed.set_footer(text=member.guild.name, icon_url=member.guild.icon_url)
@@ -284,7 +286,7 @@ class TeacherFeedback(commands.Cog):
         await self.db.insert_active_teacher_class(
             member.id,
             txt.id, vc.id, class_info['language'], class_info['type'],
-            int(current_ts), class_info['desc'])
+            int(current_ts), class_info['desc'], class_info['taught_in'])
 
     async def join_class(self, member: discord.Member, class_vc: discord.VoiceChannel) -> None:
         """ Joins a class.
@@ -699,13 +701,20 @@ class TeacherFeedback(commands.Cog):
         if not (class_desc := await prompt_message_guild(client=self.client, member=member, channel=cc_channel, limit=100)):
             return
 
-        # Question 4 - Confirmation
+        # Question 4 - Taught in
+        await cc_channel.send(f"**{member}, what language will this class be taught in? (default=English)**")
+        if not (taught_in := await prompt_message_guild(client=self.client, member=member, channel=cc_channel, limit=20)):
+            return
+        if taught_in.lower() == 'default':
+            taught_in = 'English'
+
+        # Question 5 - Confirmation
         save_class = await ConfirmSkill(f"**{member}, do you wanna save the configurations of this class to use them in the next time?**").prompt(ctx)
         if save_class:
             # Insert class to saved classes, so the user can easily open the class from it later on
-            await self.db.insert_saved_teacher_class(member.id, class_language, class_type, class_desc)
+            await self.db.insert_saved_teacher_class(member.id, class_language, class_type, class_desc, taught_in)
 
-        return {'language': class_language, 'type': class_type, 'desc': class_desc}
+        return {'language': class_language, 'type': class_type, 'desc': class_desc, 'taught_in': taught_in}
 
     # ===== Tools =====
     @staticmethod
@@ -841,21 +850,22 @@ class TeacherFeedbackDatabaseCreate:
 class TeacherFeedbackDatabaseInsert:
     """ [INSERT] A class for inserting things into the database. """
 
-    async def insert_saved_teacher_class(self, teacher_id: int, language: str, class_type: str, class_desc: str) -> None:
+    async def insert_saved_teacher_class(self, teacher_id: int, language: str, class_type: str, class_desc: str, taught_in: str) -> None:
         """ Inserts a saved teacher class.
         :param teacher_id: The teacher's ID.
         :param language: The language being taught in the class.
         :param class_type: The class type (pronunciation, grammar, programming)
-        :param class_desc: The class description. """
+        :param class_desc: The class description.
+        :param taught_in: The language that the class is taught in. """
 
         mycursor, db = await the_database()
         await mycursor.execute("""
-            INSERT INTO SavedClasses (teacher_id, language, class_type, class_desc)
-            VALUES (%s, %s, %s, %s)""", (teacher_id, language, class_type, class_desc))
+            INSERT INTO SavedClasses (teacher_id, language, class_type, class_desc, taught_in)
+            VALUES (%s, %s, %s, %s, %s)""", (teacher_id, language, class_type, class_desc, taught_in))
         await db.commit()
         await mycursor.close()
 
-    async def insert_active_teacher_class(self, teacher_id: int, txt_id: int, vc_id: int, language: str, class_type: str, the_time: int, class_desc: str):
+    async def insert_active_teacher_class(self, teacher_id: int, txt_id: int, vc_id: int, language: str, class_type: str, the_time: int, class_desc: str, taught_in: str = 'English') -> None:
         """ Inserts an active teacher class.
         :param teacher_id: The teacher's ID.
         :param txt_id: The text channel ID.
@@ -863,12 +873,13 @@ class TeacherFeedbackDatabaseInsert:
         :param language: The language being taught in the class.
         :param class_type: The class type (pronunciation, grammar, programming)
         :param the_time: The current timestamp.
-        :param class_desc: The class description. """
+        :param class_desc: The class description.
+        :param taught_in: The language that the class is taught in. """
 
         mycursor, db = await the_database()
         await mycursor.execute("""
-            INSERT INTO ActiveClasses (teacher_id, txt_id, vc_id, language, class_type, vc_timestamp, class_desc)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)""", (teacher_id, txt_id, vc_id, language, class_type, the_time, class_desc))
+            INSERT INTO ActiveClasses (teacher_id, txt_id, vc_id, language, class_type, vc_timestamp, class_desc, taught_in)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)""", (teacher_id, txt_id, vc_id, language, class_type, the_time, class_desc, taught_in))
         await db.commit()
         await mycursor.close()
 
