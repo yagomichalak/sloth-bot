@@ -289,7 +289,7 @@ class SwitchSavedClassesButtons(menus.Menu):
 
         entries = self._source.entries
         entry = entries[self.current_page]
-        formatted_entry = {'language': entry[1], 'type': entry[2], 'desc': entry[3]}
+        formatted_entry = {'language': entry[1], 'type': entry[2], 'desc': entry[3], 'taught_in': entry[4]}
         cog = self._source.cog
 
         await cog.start_class(payload.member, formatted_entry)
