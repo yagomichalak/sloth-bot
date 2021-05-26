@@ -637,7 +637,7 @@ class TeacherFeedback(commands.Cog):
 
             if studying_role := discord.utils.get(member.guild.roles, name=f"Studying {taught_in.title()}"):
                 overwrites[studying_role] = discord.PermissionOverwrite(
-                    read_messages=False, send_messages=True, connect=True, speak=True, view_channel=False, embed_links=False)
+                    read_messages=False, send_messages=True, connect=True, speak=True, view_channel=False, embed_links=True)
         else:
             # Sorts ambiguity when both target and origin languages are the same
             if native_role := discord.utils.get(member.guild.roles, name=f"Native {taught_in.title()}"):
