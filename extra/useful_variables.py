@@ -109,6 +109,27 @@ different_class_roles = {
         "english", "inglés", "inglês", "anglais",
         "angielski", "englisch", "ingleze",
         "İngilizce", "inggris"
+    ],
+    "german": [
+        "almanca", "allemand", "aléman", "jerman"
+    ],
+    "french": [
+        "fransızca","francés", "francês"
+    ],
+    "spanish": [
+        "İspanyolca", "espagnol", "spanisch"
+    ],
+    "dutch": [
+        "felemenkçe", "holländisch", "néerlandais"
+    ],
+    "russian": [
+        "rusça" ,"russo" ,"russe" ,"russisch" 
+    ],
+    "mandarin": [
+        "mandarín" 
+    ],
+    "japanese": [
+        "japonês", "japonais" ,"japanisch", "japonés"
     ]
 }
 
