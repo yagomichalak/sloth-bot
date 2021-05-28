@@ -111,13 +111,13 @@ different_class_roles = {
         "İngilizce", "inggris"
     ],
     "german": [
-        "almanca", "allemand", "aléman", "jerman"
+        "almanca", "allemand", "aléman", "jerman", "deustch"
     ],
     "french": [
-        "fransızca","francés", "francês"
+        "fransızca","francés", "francês", "français"
     ],
     "spanish": [
-        "İspanyolca", "espagnol", "spanisch"
+        "İspanyolca", "espagnol", "spanisch", "español"
     ],
     "dutch": [
         "felemenkçe", "holländisch", "néerlandais"
@@ -129,7 +129,10 @@ different_class_roles = {
         "mandarín" 
     ],
     "japanese": [
-        "japonês", "japonais" ,"japanisch", "japonés"
+        "japonês", "japonais" ,"japanisch", "japonés", "日本語"
+    ],
+    "korean": [
+        "한국어"
     ]
 }
 
