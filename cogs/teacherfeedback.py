@@ -651,7 +651,20 @@ class TeacherFeedback(commands.Cog):
             if studying_role := discord.utils.get(member.guild.roles, name=f"Studying {taught_in.title()}"):
                 overwrites[studying_role] = discord.PermissionOverwrite(
                     read_messages=True, send_messages=True, connect=True, speak=True, view_channel=True, embed_links=True)
-        
+
+        if taught_in == 'English':
+            if native_role := discord.utils.get(member.guild.roles, name=f"Native {language.title()}"):
+                overwrites[native_role] = discord.PermissionOverwrite(
+                    read_messages=True, send_messages=False, connect=False, speak=False, view_channel=True, embed_links=False)
+
+            if fluent_role := discord.utils.get(member.guild.roles, name=f"Fluent {language.title()}"):
+                overwrites[fluent_role] = discord.PermissionOverwrite(
+                    read_messages=True, send_messages=True, connect=True, speak=True, view_channel=True, embed_links=True)
+
+            if studying_role := discord.utils.get(member.guild.roles, name=f"Studying {language.title()}"):
+                overwrites[studying_role] = discord.PermissionOverwrite(
+                    read_messages=True, send_messages=True, connect=True, speak=True, view_channel=True, embed_links=True)
+
         return overwrites
 
     async def get_channel_perms(self, member: discord.Member, language: str, taught_in: str) -> Dict[str, discord.PermissionOverwrite]:
