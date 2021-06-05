@@ -134,7 +134,11 @@ class SlothCurrency(commands.Cog):
         the_time = (datetime.utcnow() - epoch).total_seconds()
         user = await self.get_user_currency(payload.user_id)
         if not user:
-            return await payload.member.send(embed=discord.Embed(description="**You don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one!**"))
+            component = discord.Component()
+            component.add_button(style=5, label="Create Account", emoji="🦥", url="https://thelanguagesloth.com/profile/update")
+            return await payload.member.send(
+                embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one, or in the button below!**"),
+                components=[component])
             # await self.insert_user_currency(payload.user_id, the_time - 61)
 
         old_time = await self.get_user_currency(payload.member.id)
@@ -700,13 +704,21 @@ class SlothCurrency(commands.Cog):
 
         if not user_info:
             if ctx.author.id == member.id:
-                return await ctx.send(embed=discord.Embed(description="**You don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one!**"))
+                component = discord.Component()
+                component.add_button(style=5, label="Create Account", emoji="🦥", url="https://thelanguagesloth.com/profile/update")
+                return await ctx.send(
+                    embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one, or in the button below!**"),
+                    components=[component])
             else:
                 return await ctx.send(f"**{member} doesn't have an account yet!**", delete_after=3)
 
         if user_info[0][7].lower() == 'default':
             if ctx.author.id == member.id:
-                return await ctx.send(embed=discord.Embed(description=f"**{member.mention}, you have a default Sloth class. Click [here](https://thelanguagesloth.com/profile/slothclass) to choose one!**"))
+                component = discord.Component()
+                component.add_button(style=5, label="Create Account", emoji="🦥", url="https://thelanguagesloth.com/profile/update")
+                return await ctx.send(
+                    embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one, or in the button below!**"),
+                    components=[component])
             else:
                 return await ctx.send(f"**{member} has a default Sloth class, I cannot show their profile!**")
 
@@ -1317,7 +1329,11 @@ class SlothCurrency(commands.Cog):
         the_user = await self.get_user_currency(ctx.author.id)
         target_user = await self.get_user_currency(member.id)
         if not the_user:
-            return await ctx.send(embed=discord.Embed(description="**You don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one!**"))
+            component = discord.Component()
+            component.add_button(style=5, label="Create Account", emoji="🦥", url="https://thelanguagesloth.com/profile/update")
+            return await ctx.send(
+                embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one, or in the button below!**"),
+                components=[component])
         elif not target_user:
             return await ctx.send(f"**{member} does not have a bank account yet!**", delete_after=5)
 
