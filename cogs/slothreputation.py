@@ -184,7 +184,7 @@ class SlothReputation(commands.Cog):
         try:
             _, _, btn, rsp = await self.client.wait_for(
                 'interaction_update', timeout=60,
-                check=lambda msg, m, btn, rsp: m.id == ctx.author.id and btn.custom_id == 'exchange_money'
+                check=lambda msg, m, btn, rsp: m.id == member.id and btn.custom_id == 'exchange_money'
                 )
         except asyncio.TimeoutError:
             pass
