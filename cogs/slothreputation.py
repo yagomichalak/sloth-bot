@@ -163,19 +163,25 @@ class SlothReputation(commands.Cog):
         embed.set_thumbnail(url=member.avatar_url)
         embed.set_author(name=member, icon_url=member.avatar_url, url=member.avatar_url)
         embed.set_footer(text=ctx.guild, icon_url=ctx.guild.icon_url)
-        info_msg = await ctx.send(embed=embed)
+
+
+        component = discord.Component()
+
+        component.add_button(style=3, label="Exchange Money!", custom_id="exchange_money", emoji="💰")
+
+        info_msg = await ctx.send(embed=embed, components=[component])
         if ctx.author.id != member.id:
             return
 
         try:
-            await info_msg.add_reaction('💰')
-            r, u = await self.client.wait_for(
-                'reaction_add', timeout=60,
-                check=lambda r, u: u.id == ctx.author.id and r.message.id == info_msg.id and str(r.emoji) == '💰'
+            _, _, btn, rsp = await self.client.wait_for(
+                'interaction_update', timeout=60,
+                check=lambda msg, m, btn, rsp: m.id == ctx.author.id and btn.custom_id == 'exchange_money'
                 )
         except asyncio.TimeoutError:
-            return await info_msg.remove_reaction('💰', self.client.user)
+            pass
         else:
+            btn.ping(rsp)
             confirmed = await ConfirmSkill(f"**{member.mention}, are you sure you want to exchange your {h:d} hours, {m:02d} minutes and {user_info[0][1]} messages?**").prompt(ctx)
             if confirmed:
                 SlothCurrency = self.client.get_cog('SlothCurrency')
