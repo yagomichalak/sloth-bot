@@ -34,7 +34,11 @@ class Social(commands.Cog):
     async def on_interaction_update(self, message, member, button, response) -> None:
         """"""
 
-        if (custom_id := button.custom_id) not in ["user_infractions", "user_profile", "user_info"]:
+        custom_id = button.custom_id
+        for c_id in ["user_infractions", "user_profile", "user_info"]:
+            if custom_id.startswith(c_id):
+                break
+        else:
             return
 
         button.ping(response)
@@ -43,20 +47,21 @@ class Social(commands.Cog):
         ctx = await self.client.get_context(message)
         perms = ctx.channel.permissions_for(ctx.author)
 
+        target_member = discord.utils.get(message.guild.members, id=int(button.custom_id.split(':', 1)[1]))
         
-        if custom_id == 'user_infractions':
+        if custom_id.startswith('user_infractions'):
             if perms.administrator:
-                return await self.client.get_cog("Moderation").infractions(ctx=ctx, member=member)
+                return await self.client.get_cog("Moderation").infractions(ctx=ctx, member=target_member)
             
             for rid in [admin_role_id, mod_role_id]:
                 if rid in [role.id for role in member.roles]:
-                    return await self.client.get_cog("Moderation").infractions(ctx=ctx, member=member)            
+                    return await self.client.get_cog("Moderation").infractions(ctx=ctx, member=target_member)            
             
-        elif custom_id == "user_profile":
-            await self.client.get_cog("SlothCurrency").profile(ctx=ctx, member=member)
+        elif custom_id.startswith("user_profile"):
+            await self.client.get_cog("SlothCurrency").profile(ctx=ctx, member=target_member)
 
-        elif custom_id == "user_info":
-            await self.client.get_cog("SlothReputation").info(ctx=ctx, member=member)
+        elif custom_id.startswith("user_info"):
+            await self.client.get_cog("SlothReputation").info(ctx=ctx, member=target_member)
 
     @staticmethod
     async def sort_time(guild: discord.Guild, at: datetime) -> str:
@@ -162,9 +167,9 @@ class Social(commands.Cog):
 
 
         component = discord.Component()
-        component.add_button(label="See Infractions", style=4, emoji="❗", custom_id="user_infractions")
-        component.add_button(label="See Profile", style=1, emoji="👤", custom_id="user_profile")
-        component.add_button(label="See Info", style=2, emoji="ℹ️", custom_id="user_info")
+        component.add_button(label="See Infractions", style=4, emoji="❗", custom_id=f"user_infractions:{member.id}")
+        component.add_button(label="See Profile", style=1, emoji="👤", custom_id=f"user_profile:{member.id}")
+        component.add_button(label="See Info", style=2, emoji="ℹ️", custom_id=f"user_info:{member.id}")
 
         await ctx.send(embed=embed, components=[component])
 
