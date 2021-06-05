@@ -29,6 +29,35 @@ class Social(commands.Cog):
     async def on_ready(self):
         print('Social cog is ready!')
 
+
+    @commands.Cog.listener()
+    async def on_interaction_update(self, message, member, button, response) -> None:
+        """"""
+
+        if (custom_id := button.custom_id) not in ["user_infractions", "user_profile", "user_info"]:
+            return
+
+        button.ping(response)
+
+
+        ctx = await self.client.get_context(message)
+        perms = ctx.channel.permissions_for(ctx.author)
+
+        
+        if custom_id == 'user_infractions':
+            if perms.administrator:
+                return await self.client.get_cog("Moderation").infractions(ctx=ctx, member=member)
+            
+            for rid in [admin_role_id, mod_role_id]:
+                if rid in [role.id for role in member.roles]:
+                    return await self.client.get_cog("Moderation").infractions(ctx=ctx, member=member)            
+            
+        elif custom_id == "user_profile":
+            await self.client.get_cog("SlothCurrency").profile(ctx=ctx, member=member)
+
+        elif custom_id == "user_info":
+            await self.client.get_cog("SlothReputation").info(ctx=ctx, member=member)
+
     @staticmethod
     async def sort_time(guild: discord.Guild, at: datetime) -> str:
 
@@ -103,7 +132,7 @@ class Social(commands.Cog):
         await ctx.send(embed=em)
 
     # Shows all the info about a user
-    @commands.command()
+    @commands.command(aliases=['user', 'whois', 'who_is'])
     async def userinfo(self, ctx, member: discord.Member = None):
         '''
         Shows all the information about a member.
@@ -131,7 +160,14 @@ class Social(commands.Cog):
 
         embed.add_field(name="Bot?", value=member.bot)
 
-        await ctx.send(embed=embed)
+
+        component = discord.Component()
+        component.add_button(label="See Infractions", style=4, emoji="❗", custom_id="user_infractions")
+        component.add_button(label="See Profile", style=1, emoji="👤", custom_id="user_profile")
+        component.add_button(label="See Info", style=2, emoji="ℹ️", custom_id="user_info")
+
+        await ctx.send(embed=embed, components=[component])
+
 
     # Sends a random post from the meme subreddit
     # @commands.command()

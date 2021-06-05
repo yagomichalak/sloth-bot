@@ -169,7 +169,7 @@ class SlothReputation(commands.Cog):
 
         component.add_button(style=3, label="Exchange Money!", custom_id="exchange_money", emoji="💰")
 
-        info_msg = await ctx.send(embed=embed, components=[component])
+        await ctx.send(embed=embed, components=[component])
         if ctx.author.id != member.id:
             return
 
