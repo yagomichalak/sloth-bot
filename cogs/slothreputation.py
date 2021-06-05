@@ -86,7 +86,11 @@ class SlothReputation(commands.Cog):
         user = await self.get_specific_user(member.id)
         if not user:
             if ctx.author.id == member.id:
-                return await ctx.send(embed=discord.Embed(description="**You don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one!**"))
+                component = discord.Component()
+                component.add_button(style=5, label="Create Account", emoji="🦥", url="https://thelanguagesloth.com/profile/update")
+                return await ctx.send(
+                    embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one, or in the button below!**"),
+                    components=[component])
             else:
                 return await ctx.send(f"**{member} doesn't have an account yet!**")
 
@@ -94,7 +98,11 @@ class SlothReputation(commands.Cog):
         ucur = await self.get_user_currency(member.id)
         if not ucur:
             if ctx.author.id == member.id:
-                return await ctx.send(embed=discord.Embed(description="**You don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one!**"))
+                component = discord.Component()
+                component.add_button(style=5, label="Create Account", emoji="🦥", url="https://thelanguagesloth.com/profile/update")
+                return await ctx.send(
+                    embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one, or in the button below!**"),
+                    components=[component])
             else:
                 return await ctx.send(f"**{member} doesn't have an account yet!**")
 
@@ -269,7 +277,12 @@ class SlothReputation(commands.Cog):
         target_user = await self.get_specific_user(member.id)
         if not target_user:
             if ctx.author.id == member.id:
-                return await ctx.send(embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one!**"))
+
+                component = discord.Component()
+                component.add_button(style=5, label="Create Account", emoji="🦥", url="https://thelanguagesloth.com/profile/update")
+                return await ctx.send(
+                    embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one, or in the button below!**"),
+                    components=[component])
             else:
                 return await ctx.send("**This member is not on the leaderboard yet!**", delete_after=3)
 

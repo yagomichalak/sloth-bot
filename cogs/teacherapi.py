@@ -336,14 +336,15 @@ class TeacherAPI(commands.Cog):
             title=f"__Promoted!__",
             description=(
                 f"{member.mention} has been `promoted` to a teacher! "
-                f"Click [here]({self.website_link}/profile) to access your profile."
+                f"Click [here]({self.website_link}/profile) to access your profile or in the button below."
                 ),
             color=member.color,
             timestamp=ctx.message.created_at,
             url=self.website_link
             )
-
-        await ctx.send(embed=teacher_embed)
+        component = discord.Component()
+        component.add_button(style=5, label="Access Profile!", url=f"{self.website_link}/profile", emoji="🧑‍🏫")
+        await ctx.send(embed=teacher_embed, components=[component])
 
     @commands.command(aliases=['dt'])
     @commands.has_permissions(administrator=True)

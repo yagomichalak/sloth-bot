@@ -201,7 +201,11 @@ class CreateSmartRoom(commands.Cog):
 			# Checks if the user has money for it (5łł)
 			user_currency = await SlothCurrency.get_user_currency(member, member.id)
 			if not user_currency:
-				return await member.send(embed=discord.Embed(description="**You don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one!**"))
+				component = discord.Component()
+				component.add_button(style=5, label="Create Account", emoji="🦥", url="https://thelanguagesloth.com/profile/update")
+				return await member.send(
+					embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one, or in the button below!**"),
+					components=[component])
 
 			if user_currency[0][1] < 5:
 				return await member.send("**You don't have enough money to buy this service!**")
@@ -293,7 +297,11 @@ class CreateSmartRoom(commands.Cog):
 			# Checks if the user has money for it (100łł)
 			user_currency = await SlothCurrency.get_user_currency(member, member.id)
 			if not user_currency:
-				return await member.send(embed=discord.Embed(description="**You don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one!**"))
+				component = discord.Component()
+				component.add_button(style=5, label="Create Account", emoji="🦥", url="https://thelanguagesloth.com/profile/update")
+				return await member.send(
+					embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one, or in the button below!**"),
+					components=[component])
 
 			if user_currency[0][1] < 100:
 				return await member.send("**You don't have enough money to buy this service!**")
@@ -469,7 +477,11 @@ class CreateSmartRoom(commands.Cog):
 			# Checks if the user has money (1500łł)
 			user_currency = await SlothCurrency.get_user_currency(member, member.id)
 			if not user_currency:
-				return await member.send(embed=discord.Embed(description="**You don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one!**"))
+				component = discord.Component()
+				component.add_button(style=5, label="Create Account", emoji="🦥", url="https://thelanguagesloth.com/profile/update")
+				return await member.send(
+					embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one, or in the button below!**"),
+					components=[component])
 
 			if user_currency[0][1] < 1500:
 				return await member.send("**You don't have enough money to buy this service!**")
@@ -1277,7 +1289,11 @@ You can only add 1 additional channel. Voice **OR** Text."""))
 
 		SlothCurrency = self.client.get_cog('SlothCurrency')
 		if not (user_currency := await SlothCurrency.get_user_currency(member.id)):
-			return await ctx.send(embed=discord.Embed(description="**You don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one!**"))
+			component = discord.Component()
+			component.add_button(style=5, label="Create Account", emoji="🦥", url="https://thelanguagesloth.com/profile/update")
+			return await member.send(
+				embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one, or in the button below!**"),
+				components=[component])
 
 		if user_currency[0][1] < 500:
 			return await ctx.send("**You don't have enough money to buy this service!**")
@@ -1334,7 +1350,11 @@ You can only add 1 additional channel. Voice **OR** Text."""))
 
 		SlothCurrency = self.client.get_cog('SlothCurrency')
 		if not (user_currency := await SlothCurrency.get_user_currency(member.id)):
-			return await ctx.send(embed=discord.Embed(description="**You don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one!**"))
+			component = discord.Component()
+			component.add_button(style=5, label="Create Account", emoji="🦥", url="https://thelanguagesloth.com/profile/update")
+			return await member.send(
+				embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one, or in the button below!**"),
+				components=[component])
 
 		if user_currency[0][1] < 500:
 			return await ctx.send("**You don't have enough money to buy this service!**")
