@@ -7,6 +7,7 @@ from extra.menu import ConfirmSkill
 import time
 from typing import List, Dict
 import os
+from datetime import datetime
 
 reportsupport_channel_id = int(os.getenv('REPORT_CHANNEL_ID'))
 dnk_id = int(os.getenv('DNK_ID'))
@@ -33,16 +34,77 @@ class ReportSupport(commands.Cog):
         self.cache = {}
         self.report_cache = {}
         # Teacher application attributes
-        self.app_channel_id: int = int(os.getenv('APPLICATION_CHANNEL_ID'))
-        self.app_cat_id: int = int(os.getenv('APPLICATION_CAT_ID'))
+        self.teacher_app_channel_d: int = int(os.getenv('TEACHER_APPLICATION_CHANNEL_ID'))
+        self.teacher_app_cat_id: int = int(os.getenv('TEACHER_APPLICATION_CAT_ID'))
+
+        # self.moderator_app_channel: int = int(os.getenv('MODERATOR_APPLICATION_CHANNEL_ID'))
+        # self.moderator_app_cat_id: int = int(os.getenv('MODERATOR_APPLICATION_CAT_ID'))
+        
 
     @commands.Cog.listener()
     async def on_ready(self) -> None:
         print('ReportSupport cog is online!')
 
     @commands.Cog.listener()
+    async def on_raw_interaction_update(self, payload, member, button, response) -> None:
+        """ Handles Report-Support related buttons. """
+
+        print('ahoy')
+        
+        if int(payload['id']) != int(os.getenv('REPORT_SUPPORT_MSG_ID')):
+            return
+
+        button.ping(response)
+
+        custom_id = button.custom_id
+        print(custom_id)
+
+        if custom_id.startswith('apply_to_teach') or custom_id.startswith('apply_to_moderate'):
+            # Apply to be a teacher
+            member_ts = self.cache.get(member.id)
+            time_now = time.time()
+            if member_ts:
+                sub = time_now - member_ts
+                if sub <= 1800:
+                    return await member.send(
+                        f"**You are on cooldown to apply, try again in {(1800-sub)/60:.1f} minutes**")
+
+            if custom_id.startswith('apply_to_teach'):
+                await self.send_teacher_application(member)
+            else:
+                #await self.send_moderator_application(member)
+                pass
+
+
+        elif custom_id.startswith('apply_to_moderate'):
+            pass
+        elif custom_id.startswith('buy_custom_bot'):
+            # Order a bot
+            dnk = self.client.get_user(dnk_id)
+            embed = discord.Embed(title="New possible order!",
+                description=f"{member.mention} ({member.id}) might be interested in buying something from you!",
+                color=member.color)
+            embed.set_thumbnail(url=member.avatar_url)
+            await dnk.send(embed=embed)
+            await member.send(f"**If you are really interested in **buying** a custom bot, send a private message to {dnk.mention}!**")
+            await self.dnk_embed(member)
+
+        elif custom_id.startswith('report_support'):
+            member_ts = self.report_cache.get(member.id)
+            time_now = time.time()
+            if member_ts:
+                sub = time_now - member_ts
+                if sub <= 240:
+                    return await member.send(
+                        f"**You are on cooldown to report, try again in {round(240-sub)} seconds**")
+
+            self.report_cache[member.id] = time.time()
+            await self.select_report(member, member.guild)
+
+    @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload) -> None:
         # Checks if it wasn't a bot's reaction
+
         if not payload.guild_id:
             return
 
@@ -52,7 +114,7 @@ class ReportSupport(commands.Cog):
         guild = self.client.get_guild(payload.guild_id)
 
         # Checks if it's in the applications channel
-        if payload.channel_id == self.app_channel_id:
+        if payload.channel_id == self.teacher_app_channel_id:
             emoji = str(payload.emoji)
             if emoji == '✅':
                 # Gets the teacher app and does the magic
@@ -70,77 +132,17 @@ class ReportSupport(commands.Cog):
                 teacher_app = await self.get_teacher_app_by_message(payload.message_id)
                 if teacher_app and teacher_app[0][2] == 'no':
                     await self.delete_teacher_app(payload.message_id)
-                    app_channel = self.client.get_channel(self.app_channel_id)
-                    app_msg = await app_channel.fetch_message(payload.message_id)
+                    teacher_app_channel = self.client.get_channel(self.teacher_app_channel_id)
+                    app_msg = await teacher_app_channel.fetch_message(payload.message_id)
                     await app_msg.add_reaction('🔏')
                     teacher = discord.utils.get(guild.members, id=teacher_app[0][1])
                     if teacher:
                         msg = "**Teacher Application**\nOur staff has avaluated your teacher application and has come to the conclusion that we are not in need of this lesson."
-                        await member.send(embed=discord.Embed(description=msg))
+                        await payload.member.send(embed=discord.Embed(description=msg))
                 return
 
-        # Checks if the reaction was in the RepportSupport channel
-        channel = self.client.get_channel(payload.channel_id)
-        # print(channel)
-        if not channel or str(channel).startswith('Direct Message with') or channel.id != reportsupport_channel_id:
-            return
 
-        # Deletes the reaction
-        msg = await channel.fetch_message(payload.message_id)
-        await msg.remove_reaction(payload.emoji, payload.member)
-
-        # Checks if the member does not have kick_member permissions (not from the staff)
-        member = payload.member
-        category = channel.category
-        perms = category.permissions_for(member)
-        # if perms.kick_members:
-        #     return
-
-        # Checks which reaction they reacted and redirects them to the respective option.
-        mid = payload.message_id
-        emoji = payload.emoji
-
-        if mid == int(os.getenv('APPLY_TEACHER_MESSAGE_ID')) and str(emoji) == '✅':
-            # Apply to be a teacher
-            member_ts = self.cache.get(member.id)
-            time_now = time.time()
-            if member_ts:
-                sub = time_now - member_ts
-                if sub <= 1800:
-                    return await member.send(
-                        f"**You are on cooldown to apply, try again in {(1800-sub)/60:.1f} minutes**")
-            await self.send_application(member)
-
-        elif mid == int(os.getenv('ORDER_BOT_MESSAGE_ID')) and str(emoji) == '🤖':
-            # Order a bot
-            dnk = self.client.get_user(dnk_id)
-            embed = discord.Embed(title="New possible order!",
-                description=f"{member.mention} wants to order something from you!",
-                color=member.color)
-            embed.set_thumbnail(url=member.avatar_url)
-            await dnk.send(embed=embed)
-            await member.send("**DNK is going to DM you as soon as possible!**")
-            await self.dnk_embed(member)
-
-        elif mid == int(os.getenv('SUPPORT_PATREON_MESSAGE_ID')) and str(emoji) == '❤️':
-            # Support us on Patreon
-            await member.send(f"**Support us on Patreon!**\nhttps://www.patreon.com/Languagesloth")
-
-        # elif mid == int(os.getenv('REPORT_MESSAGE_ID')) and str(emoji) == '<:ban:593407893248802817>' and not perms.administrator:
-        elif mid == int(os.getenv('REPORT_MESSAGE_ID')):
-
-            member_ts = self.report_cache.get(member.id)
-            time_now = time.time()
-            if member_ts:
-                sub = time_now - member_ts
-                if sub <= 240:
-                    return await member.send(
-                        f"**You are on cooldown to report, try again in {round(240-sub)} seconds**")
-
-            self.report_cache[member.id] = time.time()
-            await self.select_report(member, guild)
-
-    async def send_application(self, member):
+    async def send_teacher_application(self, member):
 
         def msg_check(message):
             if message.author == member and not message.guild:
@@ -183,7 +185,7 @@ class ReportSupport(commands.Cog):
             return
 
         if terms_r != '✅':
-            return
+            return await member.send(f"**Thank you anyways, bye!**")
 
         embed = discord.Embed(title=f"__Teacher Application__")
         embed.set_footer(text=f"by {member}", icon_url=member.avatar_url)
@@ -265,11 +267,11 @@ class ReportSupport(commands.Cog):
             return
 
         if r == '✅':
-            embed.description = "**Application successfully made, please be patient now!**"
+            embed.description = "**Application successfully made, please, be patient now!**"
             await member.send(embed=embed)
-            app_channel = await self.client.fetch_channel(self.app_channel_id)
+            teacher_app_channel = await self.client.fetch_channel(self.teacher_app_channel_id)
             cosmos = discord.utils.get(app_channel.guild.members, id=self.cosmos_id)
-            app = await app_channel.send(content=f"{cosmos.mention}, {member.mention}\n{app}")
+            app = await teacher_app_channel.send(content=f"{cosmos.mention}, {member.mention}\n{app}")
             await app.add_reaction('✅')
             await app.add_reaction('❌')
             self.cache[member.id] = time.time()
@@ -277,8 +279,152 @@ class ReportSupport(commands.Cog):
             await self.save_teacher_app(app.id, member.id)
 
         else:
-            await member.send("**Let's do it again then! If you want to cancel your application, let it timeout!**")
-            return await self.send_application(member)
+            return await member.send("**Thank you anyways!**")
+
+
+    async def send_moderator_application(self, member):
+
+        def msg_check(message):
+            if message.author == member and not message.guild:
+                if len(message.content) <= 100:
+                    return True
+                else:
+                    self.client.loop.create_task(member.send("**Your answer must be within 100 characters**"))
+            else:
+                return False
+
+        def check_reaction(r, u):
+            return u.id == member.id and not r.message.guild and str(r.emoji) in ['✅', '❌']
+
+        terms_embed = discord.Embed(
+            title="Terms of Application",
+            description="""Hello there! 
+Before you can formally start applying for Staff in The Language Sloth, there are a couple requirements we would like you to know we feel necessity for:
+
+Entry requirements:
+
+```》Must be at least 16 years of age
+》Must have at least a conversational level of English
+》Must be an active member
+》Must not have any warnings in the past 3 months.```""",
+            color=member.color
+        )
+
+        terms = await member.send(embed=terms_embed)
+        await terms.add_reaction('✅')
+        await terms.add_reaction('❌')
+
+        # Waits for reaction confirmation to the terms of application
+        terms_r = await self.get_reaction(member, check_reaction)
+
+        if terms_r is None:
+            return
+
+        if terms_r != '✅':
+            return
+
+        embed = discord.Embed(title=f"__Moderator Application__")
+        embed.set_footer(text=f"by {member}", icon_url=member.avatar_url)
+
+        embed.description = """
+        - Hello, there you've reacted to apply to become a moderator.
+To apply please answer to these following questions with One message at a time
+Question one:
+Do you have any experience moderating Discord servers?"""
+        q1 = await member.send(embed=embed)
+        a1 = await self.get_message(member, msg_check)
+        if not a1:
+            return
+
+        embed.description = """
+        - - What is your gender?
+Please answer with one message."""
+        q2 = await member.send(embed=embed)
+        a2 = await self.get_message(member, msg_check)
+        if not a2:
+            return
+
+        embed.description = """
+        - What's your English level? Are you able to express yourself using English?
+Please answer using one message only."""
+        q3 = await member.send(embed=embed)
+        a3 = await self.get_message(member, msg_check)
+        if not a3:
+            return
+
+        embed.description = """
+        - Why are you applying to be Staff? What is your motivation?
+Please answer using one message only."""
+        q4 = await member.send(embed=embed)
+        a4 = await self.get_message(member, msg_check)
+        if not a4:
+            return
+
+        embed.description = """- How do you think The Language Sloth could be a better community?
+Please answer using one message only."""
+        q5 = await member.send(embed=embed)
+        a5 = await self.get_message(member, msg_check)
+        if not a5:
+            return
+
+        embed.description = """- How active are you on Discord in general?
+Please answer using one message only."""
+        q6 = await member.send(embed=embed)
+        a6 = await self.get_message(member, msg_check)
+        if not a6:
+            return
+
+        embed.description = """- What is your time zone?
+Please answer using one message only.."""
+        q7 = await member.send(embed=embed)
+        a7 = await self.get_message(member, msg_check)
+        if not a7:
+            return
+
+        # Get user's native roles
+        user_native_roles = []
+        for role in member.roles:
+            if str(role.name).lower().startswith('native'):
+                user_native_roles.append(role.name.title())
+
+        # Application result
+        app = f"""```ini\n[Username]: {member} ({member.id})
+        [Joined the server]: {member.joined_at.strftime("%a, %d %B %y, %I %M %p UTC")}
+        [Native roles]: {', '.join(user_native_roles)}
+        [Experience moderating]: {a1.capitalize()}
+        [Gender]: {a2.title()}
+        [English level]: {a3.capitalize()}
+        [Reason & Motivation]: {a4.capitalize()}
+        [How we can improve Sloth]:{a5.capitalize()}
+        [Activity Status]: {a6.capitalize()}
+        [Timezone]: {a7.title()}```"""
+        await member.send(app)
+        embed.description = """
+        Are you sure you want to apply this? :white_check_mark: to send and :x: to Cancel
+        """
+        app_conf = await member.send(embed=embed)
+        await app_conf.add_reaction('✅')
+        await app_conf.add_reaction('❌')
+
+        # Waits for reaction confirmation
+        r = await self.get_reaction(member, check_reaction)
+        if r is None:
+            return
+
+        if r == '✅':
+            embed.description = "**Application successfully made, please, be patient now!**"
+            await member.send(embed=embed)
+            moderator_app_channel = await self.client.fetch_channel(self.moderator_app_channel_id)
+            cosmos = discord.utils.get(moderator_app_channel.guild.members, id=self.cosmos_id)
+            app = await moderator_app_channel.send(content=f"{cosmos.mention}, {member.mention}\n{app}")
+            await app.add_reaction('✅')
+            await app.add_reaction('❌')
+            self.cache[member.id] = time.time()
+            # Saves in the database
+            # await self.save_moderator_app(app.id, member.id)
+
+        else:
+            return await member.send("**Thank you anyway!**")
 
     # Report methods
     async def select_report(self, member, guild):
@@ -759,15 +905,14 @@ class ReportSupport(commands.Cog):
     async def create_interview_room(self, guild: discord.Guild, teacher_app: List[str]) -> None:
         """ Creates an interview room with the teacher """
 
-        app_channel = self.client.get_channel(self.app_channel_id)
-        app_cat = discord.utils.get(guild.categories, id=self.app_cat_id)
+        teacher_app_channel = self.client.get_channel(self.teacher_app_channel_id)
+        teacher_app_cat = discord.utils.get(guild.categories, id=self.teacher_app_cat_id)
 
-        msg = await app_channel.fetch_message(teacher_app[0][0])
+        msg = await teacher_app_channel.fetch_message(teacher_app[0][0])
         teacher = discord.utils.get(guild.members, id=teacher_app[0][1])
 
         # moderator = discord.utils.get(guild.roles, id=moderator_role_id)
         cosmos = discord.utils.get(guild.members, id=self.cosmos_id)
-        admin = discord.utils.get(guild.roles, id=admin_role_id)
         lesson_management = discord.utils.get(guild.roles, id=lesson_management_role_id)
 
         # Creates channels
@@ -779,8 +924,8 @@ class ReportSupport(commands.Cog):
             read_messages=True, send_messages=True, connect=True, view_channel=True),
         }
         # moderator: discord.PermissionOverwrite(read_messages=True, send_messages=True, connect=False, view_channel=True, manage_messages=True)
-        txt_channel = await guild.create_text_channel(name=f"{teacher.name}'s-interview", category=app_cat, overwrites=overwrites)
-        vc_channel = await app_cat.create_voice_channel(name=f"{teacher.name}'s Interview", overwrites=overwrites)
+        txt_channel = await guild.create_text_channel(name=f"{teacher.name}'s-interview", category=teacher_app_cat, overwrites=overwrites)
+        vc_channel = await teacher_app_cat.create_voice_channel(name=f"{teacher.name}'s Interview", overwrites=overwrites)
 
         # Updates the teacher's application in the database, adding the channels ids
         await self.update_teacher_application(teacher.id, txt_channel.id, vc_channel.id)
