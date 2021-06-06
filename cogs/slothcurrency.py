@@ -715,9 +715,9 @@ class SlothCurrency(commands.Cog):
         if user_info[0][7].lower() == 'default':
             if ctx.author.id == member.id:
                 component = discord.Component()
-                component.add_button(style=5, label="Create Account", emoji="🦥", url="https://thelanguagesloth.com/profile/update")
+                component.add_button(style=5, label="Choose Class", emoji="🦥", url="https://thelanguagesloth.com/profile/slothclass")
                 return await ctx.send(
-                    embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one, or in the button below!**"),
+                    embed=discord.Embed(description=f"**{member.mention}, you don't have a Sloth class yet. Click [here](https://thelanguagesloth.com/profile/slothclass) to choose one, or in the button below!**"),
                     components=[component])
             else:
                 return await ctx.send(f"**{member} has a default Sloth class, I cannot show their profile!**")
