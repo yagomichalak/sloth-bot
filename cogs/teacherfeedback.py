@@ -1296,18 +1296,19 @@ class TeacherFeedbackDatabaseDelete:
         await db.commit()
         await mycursor.close()
 
-    async def delete_teacher_saved_class(self, teacher_id: int, language: str, class_type: str, class_desc: str) -> None:
+    async def delete_teacher_saved_class(self, teacher_id: int, language: str, class_type: str, class_desc: str, taught_in: str) -> None:
         """ Deletes a teacher saved class from the system.
         :param teacher_id: The teacher's ID.
         :param language: The language of the class.
         :param class_type: The type of class (Pronunciation / Grammar / Programming)
-        :param class_desc: The description of the class. """
+        :param class_desc: The description of the class.
+        :param taught_in: The language that is using to teach the class. """
 
         mycursor, db = await the_database()
         await mycursor.execute("""
             DELETE FROM SavedClasses
-            WHERE teacher_id = %s AND language = %s AND class_type = %s AND class_desc = %s""",
-             (teacher_id, language, class_type, class_desc))
+            WHERE teacher_id = %s AND language = %s AND class_type = %s AND class_desc = %s AND taught_in = %s""",
+             (teacher_id, language, class_type, class_desc, taught_in))
         await db.commit()
         await mycursor.close()
 
