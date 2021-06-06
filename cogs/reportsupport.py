@@ -34,7 +34,7 @@ class ReportSupport(commands.Cog):
         self.cache = {}
         self.report_cache = {}
         # Teacher application attributes
-        self.teacher_app_channel_d: int = int(os.getenv('TEACHER_APPLICATION_CHANNEL_ID'))
+        self.teacher_app_channel_id: int = int(os.getenv('TEACHER_APPLICATION_CHANNEL_ID'))
         self.teacher_app_cat_id: int = int(os.getenv('TEACHER_APPLICATION_CAT_ID'))
 
         # self.moderator_app_channel: int = int(os.getenv('MODERATOR_APPLICATION_CHANNEL_ID'))
