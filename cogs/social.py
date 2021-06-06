@@ -32,7 +32,7 @@ class Social(commands.Cog):
 
     @commands.Cog.listener()
     async def on_interaction_update(self, message, member, button, response) -> None:
-        """"""
+        """ Handles button clicks in the quick button menu in the z!userinfo command. """
 
         custom_id = button.custom_id
         for c_id in ["user_infractions", "user_profile", "user_info"]:
