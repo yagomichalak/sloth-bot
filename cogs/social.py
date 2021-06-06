@@ -45,7 +45,7 @@ class Social(commands.Cog):
 
 
         ctx = await self.client.get_context(message)
-        perms = ctx.channel.permissions_for(ctx.author)
+        perms = ctx.channel.permissions_for(member)
 
         target_member = discord.utils.get(message.guild.members, id=int(button.custom_id.split(':', 1)[1]))
         
