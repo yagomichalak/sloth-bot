@@ -40,7 +40,7 @@ class Show(commands.Cog):
             title=f"__About ({self.client.user})__",
             description=(
                 f"The {self.client.user} bot is an all-in-one bot designed specially for `The Language Sloth` server. "
-                "It has many different commands and features to best satisfy our needs in this server, and it's continuously being improved."
+                "It has many different commands and features to best satisfy our needs in this server, and it's continuously being improved and updated."
                 ),
             color=ctx.author.color,
             timestamp=ctx.message.created_at,
@@ -50,27 +50,36 @@ class Show(commands.Cog):
         lines = subprocess.getstatusoutput('find . -name "*.py" -not -path "./venv*" | xargs wc -l')
         lines = lines[1].split()[-2] if lines else 0
 
+        commits = subprocess.getstatusoutput('git rev-list --count HEAD')[1]
+        github_link = "https://github.com/yagomichalak/sloth-bot"
+
         embed.add_field(
-            name="__Lines__",
-            value=f"```apache\n{lines} lines of code. (Python)```",
+            name="__Lines and Commits__",
+            value=f"```apache\n{lines} lines of Python code. It currently has {commits} commits on GitHub```",
             inline=True)
         embed.add_field(
-            name="__Commands__",
-            value=f"```apache\n{len([_ for _ in self.client.walk_commands()])} commands.```",
-            inline=True)
-        embed.add_field(
-            name="__Categories__",
-            value=f"```apache\n{len(self.client.cogs)} categories.```",
+            name="__Commands and Categories__",
+            value=f"```apache\n{len([_ for _ in self.client.walk_commands()])} commands separated in {len(self.client.cogs)} different categories.```",
             inline=True)
         embed.add_field(name="__Operating System__",
             value=f'```apache\nThe bot is running and being hosted on a "{sys.platform}" machine.```',
             inline=True)
 
+        embed.add_field(
+            name="__Contribute__",
+            value=f"If you want to contribute to the bot by improving its code or by adding an additional feature, you can find the bot's GitHub repo [here]({github_link})!",
+            inline=False
+        )
+
         embed.set_author(name='DNK#6725', url='https://discord.gg/languages',
             icon_url='https://cdn.discordapp.com/attachments/719020754858934294/720289112040669284/DNK_icon.png')
         embed.set_thumbnail(url=self.client.user.avatar_url)
         embed.set_footer(text=ctx.guild, icon_url=ctx.guild.icon_url)
-        await ctx.send(embed=embed)
+
+        component = discord.Component()
+        component.add_button(style=5, label='GitHub', emoji="🔗", url=github_link)
+        component.add_button(style=5, label="Patreon", emoji="<:patreon:831401582426980422>", url="https://www.patreon.com/Languagesloth")
+        await ctx.send(embed=embed, components=[component])
 
     # Shows the specific rule
     @commands.command()
