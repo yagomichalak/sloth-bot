@@ -8,6 +8,8 @@ import os
 from datetime import datetime
 from itertools import cycle
 
+from extra.useful_variables import patreon_roles
+
 from extra.customerrors import MissingRequiredSlothClass, ActionSkillOnCooldown, CommandNotReady, SkillsUsedRequirement
 
 load_dotenv()
@@ -76,17 +78,13 @@ async def on_member_update(before, after):
             new_role = r2
             break
 
-    patreon_roles = {
-        int(os.getenv('SLOTH_NATION_ROLE_ID')): [f"**Thank you! {after.mention} for joining the `Sloth Nation`!**", "**Hey! Thank you for helping our community, you will now receive :leaves: 2500 ŁŁ monthly, you'll have access to exclusive content from our events.**"],
-        int(os.getenv('SLOTH_NAPPER_ROLE_ID')): [f"**Wowie! {after.mention} joined the `Sloth Nappers`!  >:zslothsleepyuwu:695420722419466371>**", "**Hey! Thank you for helping our community! You will be contacted by an Admin soon!**"],
-        int(os.getenv('SLOTH_EXPLORER_ROLE_ID')): [f"**Hype! {after.mention} joined the `Sloth Explorer`!  <:zslothvcool:695411944332460053> **", "**Hey! Thank you for helping our community! You will be contacted by an Admin soon!**"],
-        int(os.getenv('ASTROSLOTH_ROLE_ID')): [f"**Hype! {after.mention} is now the highest rank, `Astrosloth`!  <:zslothvcool:695411944332460053> **", "**Hey! Thank you for helping our community! You will be contacted by an Admin soon!**"], }
+    
 
     if new_role:
         for pr in patreon_roles.keys():
             if new_role.id == pr:
                 announ = discord.utils.get(before.guild.channels, id=announ_announ_channel_id)
-                await announ.send(patreon_roles[pr][0])
+                await announ.send(patreon_roles[pr][0].format(after.member))
                 return await after.send(patreon_roles[pr][1])
 
 

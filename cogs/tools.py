@@ -16,6 +16,7 @@ from datetime import datetime
 import pytz
 from pytz import timezone
 from mysqldb import the_database
+from extra.useful_variables import patreon_roles
 
 mod_role_id = int(os.getenv('MOD_ROLE_ID'))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID'))
@@ -761,5 +762,23 @@ class Tools(commands.Cog):
         )
         await ctx.send(embed=embed)
 
+
+    @commands.command(aliases=["pd"])
+    @commands.has_permissions(administrator=True)
+    async def payday(self, ctx) -> None:
+        """ Pays all Patreon members when run. (Generally run on the 6th) """
+
+        # Loops through each Patreon role and gets a list containing members that have them
+
+        SlothCurrency = self.client.get_cog('SlothCurrency')
+        for patreon_role, values in patreon_roles.items():
+            members = [m for m in ctx.guild.members if patreon_role in m.roles]
+            # Give them money
+            for member in members:
+                try:
+                    await SlothCurrency.update_user_money(member.id, values[3])
+                    await member.send(values[2])
+                except:
+                    continue
 def setup(client):
     client.add_cog(Tools(client))
