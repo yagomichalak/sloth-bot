@@ -67,7 +67,7 @@ class Show(commands.Cog):
 
         embed.add_field(
             name="__Contribute__",
-            value=f"If you want to contribute to the bot by improving its code or by adding an additional feature, you can find the bot's GitHub repo [here]({github_link})!",
+            value=f"If you want to contribute to the bot by improving its code or by adding an additional feature, you can find its GitHub repo [here]({github_link})!",
             inline=False
         )
 
