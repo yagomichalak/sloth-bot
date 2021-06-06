@@ -270,7 +270,7 @@ class ReportSupport(commands.Cog):
             embed.description = "**Application successfully made, please, be patient now!**"
             await member.send(embed=embed)
             teacher_app_channel = await self.client.fetch_channel(self.teacher_app_channel_id)
-            cosmos = discord.utils.get(app_channel.guild.members, id=self.cosmos_id)
+            cosmos = discord.utils.get(teacher_app_channel.guild.members, id=self.cosmos_id)
             app = await teacher_app_channel.send(content=f"{cosmos.mention}, {member.mention}\n{app}")
             await app.add_reaction('✅')
             await app.add_reaction('❌')
@@ -947,7 +947,7 @@ Please answer using one message only.."""
         '''
 
         # Checks if the channel is in the teacher applications category
-        if not ctx.channel.category or not ctx.channel.category.id == self.app_cat_id:
+        if not ctx.channel.category or not ctx.channel.category.id == self.teacher_app_cat_id:
             return await ctx.send(f"**This is not an application channel, {ctx.author.mention}!**")
 
         app_channel = await self.get_teacher_app_by_channel(ctx.channel.id)
