@@ -112,7 +112,7 @@ different_class_roles = {
     "english": [
         "english", "inglés", "inglês", "anglais",
         "angielski", "englisch", "ingleze",
-        "İngilizce", "inggris"
+        "İngilizce", "ingilizce", "inggris"
     ],
     "german": [
         "almanca", "allemand", "aléman", "jerman", "deustch"
