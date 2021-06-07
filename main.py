@@ -84,7 +84,8 @@ async def on_member_update(before, after):
         for pr in patreon_roles.keys():
             if new_role.id == pr:
                 announ = discord.utils.get(before.guild.channels, id=announ_announ_channel_id)
-                await announ.send(patreon_roles[pr][0].format(after))
+                print('yooo')
+                await announ.send(patreon_roles[pr][0].format(member=after))
                 return await after.send(patreon_roles[pr][1])
 
 

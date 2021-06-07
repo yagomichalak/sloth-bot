@@ -1129,7 +1129,7 @@ Please answer using one message only.."""
 
         except Exception as e:
             print(e)
-            return await ctx.send("**Something went wrong, I'll stop here!**")
+            return
 
 
 def setup(client):
