@@ -768,11 +768,11 @@ class Tools(commands.Cog):
     async def payday(self, ctx) -> None:
         """ Pays all Patreon members when run. (Generally run on the 6th) """
 
-        # Loops through each Patreon role and gets a list containing members that have them
-
         SlothCurrency = self.client.get_cog('SlothCurrency')
+
+        # Loops through each Patreon role and gets a list containing members that have them
         for patreon_role, values in patreon_roles.items():
-            members = [m for m in ctx.guild.members if patreon_role in m.roles]
+            members = [m for m in ctx.guild.members if discord.utils.get(ctx.guild.roles, id=patreon_role) in m.roles]
             # Give them money
             for member in members:
                 try:
@@ -780,5 +780,8 @@ class Tools(commands.Cog):
                     await member.send(values[2])
                 except:
                     continue
+
+        await ctx.send(f"**All Patreons were paid!**")
+        
 def setup(client):
     client.add_cog(Tools(client))
