@@ -1347,5 +1347,54 @@ class Moderation(commands.Cog):
         await mycursor.close()
         return fw_state[0]
 
+    @commands.command(aliases=['apps'])
+    @commands.has_permissions(administrator=True)
+    async def applications(self, ctx, title: str = None) -> None:
+        """ Opens/closes the applications for a title in the server.
+        :param title: The title that appliacations are opening/closing for. Ex: teacher/moderator. """
+
+        member = ctx.author
+
+        mod_app = ['moderator', 'mod', 'staff', 'm', 'moderation']
+
+        teacher_app = ['teacher', 't', 'tchr', 'teaching']
+
+        if not title:
+            return await ctx.send(f"**Please, inform a `title`, {member.mention}!**")
+
+        if title.lower() not in mod_app + teacher_app:
+            return await ctx.send(f"**Invalid title, {member.mention}!**")
+
+        channel = discord.utils.get(ctx.guild.text_channels, id=int(os.getenv('REPORT_CHANNEL_ID')))
+        message = await channel.fetch_message(int(os.getenv('REPORT_SUPPORT_MSG_ID'))) # Message containing the application buttons
+        components = message.components
+        buttons = components[0].components['components']
+
+        if title.lower() in mod_app:
+            if buttons[1].get('disabled'):
+                buttons[1]['label'] = "Apply to be a Moderator!"
+                buttons[1]['disabled'] = False
+            else:
+                buttons[1]['label'] = "Apply to be a Moderator!"
+                buttons[1]['disabled'] = True
+
+            await ctx.send(f"**Moderator applications are now {'closed' if buttons[1]['disabled'] else 'open'}, {member.mention}!**")
+
+        elif title.lower() in teacher_app:
+            if buttons[0].get('disabled'):
+                buttons[0]['disabled'] = False
+            else:
+                buttons[0]['disabled'] = True
+
+            await ctx.send(f"**Teacher applications are now {'closed' if buttons[0]['disabled'] else 'open'}, {member.mention}!**")
+
+
+        confirm = await ConfirmSkill(f"**Do you wanna confirm the changes? Otherwise you can disregard the message above, {member.mention}.**").prompt(ctx)
+        if confirm:
+            await message.edit(components=components)
+            await ctx.send(f"**Done!**")
+        else:
+            await ctx.send("**Not changing it, then...**")
+
 def setup(client):
     client.add_cog(Moderation(client))
