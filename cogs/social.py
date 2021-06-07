@@ -5,6 +5,7 @@ from random import randint
 import aiohttp
 import os
 from datetime import datetime
+from typing import List
 
 reddit = praw.Reddit(client_id=os.getenv('REDDIT_CLIENT_ID'),  # client id
                      client_secret=os.getenv('REDDIT_CLIENT_SECRET'),  # my client secret
@@ -45,17 +46,11 @@ class Social(commands.Cog):
 
 
         ctx = await self.client.get_context(message)
-        perms = ctx.channel.permissions_for(member)
-
         target_member = discord.utils.get(message.guild.members, id=int(button.custom_id.split(':', 1)[1]))
         
         if custom_id.startswith('user_infractions'):
-            if perms.administrator:
+            if await Social.is_allowed(ctx, member, [mod_role_id, admin_role_id]):
                 return await self.client.get_cog("Moderation").infractions(ctx=ctx, member=target_member)
-            
-            for rid in [admin_role_id, mod_role_id]:
-                if rid in [role.id for role in member.roles]:
-                    return await self.client.get_cog("Moderation").infractions(ctx=ctx, member=target_member)            
             
         elif custom_id.startswith("user_profile"):
             await self.client.get_cog("SlothCurrency").profile(ctx=ctx, member=target_member)
@@ -158,6 +153,7 @@ class Social(commands.Cog):
 
         embed.add_field(name="Created at:", value=member.created_at.strftime("%a, %d %B %y, %I %M %p UTC"),
                         inline=False)
+
         embed.add_field(name="Joined at:", value=member.joined_at.strftime("%a, %d %B %y, %I %M %p UTC"), inline=False)
 
         embed.add_field(name=f"Roles: {len(roles)}", value=" ".join([role.mention for role in roles]), inline=False)
@@ -167,11 +163,35 @@ class Social(commands.Cog):
 
 
         component = discord.Component()
-        component.add_button(label="See Infractions", style=4, emoji="❗", custom_id=f"user_infractions:{member.id}")
+        if await Social.is_allowed(ctx, member, [mod_role_id, admin_role_id]):
+            component.add_button(label="See Infractions", style=4, emoji="❗", custom_id=f"user_infractions:{member.id}")
+        
         component.add_button(label="See Profile", style=1, emoji="👤", custom_id=f"user_profile:{member.id}")
         component.add_button(label="See Info", style=2, emoji="ℹ️", custom_id=f"user_info:{member.id}")
 
         await ctx.send(embed=embed, components=[component])
+
+
+    @staticmethod
+    async def is_allowed(ctx: commands.Context, member: discord.Member, roles: List[int]) -> bool:
+        """ Checks whether the member has adm perms or has an allowed role. """
+
+        perms = ctx.channel.permissions_for(member)
+
+        if perms.administrator:
+            return True
+
+        for rid in roles:
+            if rid in [role.id for role in member.roles]:
+                return True
+
+        else:
+            return False
+
+        
+        
+
+        
 
 
     # Sends a random post from the meme subreddit
