@@ -154,6 +154,14 @@ class Misc(commands.Cog):
         except KeyError:
             await ctx.send("**No facts are available for that number.**", delete_after=3)
 
+    @commands.command()
+    async def justask(self, ctx):
+        """ Posts link to "Don't ask to ask, just ask" """
+        await ctx.message.delete()
+        em = discord.Embed(color=ctx.author.color, title=f"Don't ask to ask, just ask.",
+                           timestamp=ctx.message.created_at, url='https://dontasktoask.com/')
+        em.set_footer(text=f"With ♥ from {ctx.author}", icon_url=ctx.author.avatar_url)
+        await ctx.send(embed=em)
 
 def setup(client):
     client.add_cog(Misc(client))
