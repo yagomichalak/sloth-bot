@@ -176,7 +176,7 @@ class Social(commands.Cog):
     async def is_allowed(ctx: commands.Context, member: discord.Member, roles: List[int]) -> bool:
         """ Checks whether the member has adm perms or has an allowed role. """
 
-        perms = ctx.channel.permissions_for(member)
+        perms = ctx.channel.permissions_for(ctx.author)
 
         if perms.administrator:
             return True
