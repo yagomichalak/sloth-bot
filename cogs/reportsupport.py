@@ -369,59 +369,65 @@ Entry requirements:
         embed = discord.Embed(title=f"__Moderator Application__")
         embed.set_footer(text=f"by {member}", icon_url=member.avatar_url)
 
-        embed.description = """
-        - Hello, there you've reacted to apply to become a moderator.
-To apply please answer to these following questions with One message at a time
-Question one:
-Do you have any experience moderating Discord servers?"""
+        embed.description = "- What's your age?"
         q1 = await member.send(embed=embed)
         a1 = await self.get_message(member, msg_check)
         if not a1:
             return
 
         embed.description = """
-        - What is your gender?
-Please answer with one message."""
+        - Hello, there you've reacted to apply to become a moderator.
+To apply please answer to these following questions with One message at a time
+Question one:
+Do you have any experience moderating Discord servers?"""
         q2 = await member.send(embed=embed)
         a2 = await self.get_message(member, msg_check)
         if not a2:
             return
 
         embed.description = """
-        - What's your English level? Are you able to express yourself using English?
-Please answer using one message only."""
+        - What is your gender?
+Please answer with one message."""
         q3 = await member.send(embed=embed)
         a3 = await self.get_message(member, msg_check)
         if not a3:
             return
 
         embed.description = """
-        - Why are you applying to be Staff? What is your motivation?
+        - What's your English level? Are you able to express yourself using English?
 Please answer using one message only."""
         q4 = await member.send(embed=embed)
         a4 = await self.get_message(member, msg_check)
         if not a4:
             return
 
-        embed.description = """- How do you think The Language Sloth could be a better community?
+        embed.description = """
+        - Why are you applying to be Staff? What is your motivation?
 Please answer using one message only."""
         q5 = await member.send(embed=embed)
         a5 = await self.get_message(member, msg_check)
         if not a5:
             return
 
-        embed.description = """- How active are you on Discord in general?
+        embed.description = """- How do you think The Language Sloth could be a better community?
 Please answer using one message only."""
         q6 = await member.send(embed=embed)
         a6 = await self.get_message(member, msg_check)
         if not a6:
             return
 
-        embed.description = """- What is your time zone?
-Please answer using one message only.."""
+        embed.description = """- How active are you on Discord in general?
+Please answer using one message only."""
         q7 = await member.send(embed=embed)
         a7 = await self.get_message(member, msg_check)
         if not a7:
+            return
+
+        embed.description = """- What is your time zone?
+Please answer using one message only.."""
+        q8 = await member.send(embed=embed)
+        a8 = await self.get_message(member, msg_check)
+        if not a8:
             return
 
         # Get user's native roles
@@ -434,13 +440,14 @@ Please answer using one message only.."""
         app = f"""```ini\n[Username]: {member} ({member.id})
 [Joined the server]: {member.joined_at.strftime("%a, %d %B %y, %I %M %p UTC")}
 [Native roles]: {', '.join(user_native_roles)}
-[Experience moderating]: {a1.capitalize()}
-[Gender]: {a2.title()}
-[English level]: {a3.capitalize()}
-[Reason & Motivation]: {a4.capitalize()}
-[How we can improve Sloth]: {a5.capitalize()}
-[Activity Status]: {a6.capitalize()}
-[Timezone]: {a7.title()}```"""
+[Age]: {a1}
+[Experience moderating]: {a2.capitalize()}
+[Gender]: {a3.title()}
+[English level]: {a4.capitalize()}
+[Reason & Motivation]: {a5.capitalize()}
+[How we can improve Sloth]: {a6.capitalize()}
+[Activity Status]: {a7.capitalize()}
+[Timezone]: {a8.title()}```"""
         await member.send(app)
         embed.description = """
         Are you sure you want to apply this? :white_check_mark: to send and :x: to Cancel
