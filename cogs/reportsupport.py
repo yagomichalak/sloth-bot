@@ -174,7 +174,7 @@ class ReportSupport(commands.Cog):
                 await app_msg.add_reaction('🔏')
                 moderator = discord.utils.get(guild.members, id=moderator_app[0][1])
                 if moderator:
-                    msg = "**Moderator Application**\nOur staff has avaluated your moderator application and has come to a conclusion, and due to intern and unspecified reasons we are **declining** it. Thank you anyways*"
+                    msg = "**Moderator Application**\nOur staff has avaluated your moderator application and has come to a conclusion, and due to intern and unspecified reasons we are **declining** it. Thank you anyways"
                     await payload.member.send(embed=discord.Embed(description=msg))
             return
 
@@ -474,7 +474,7 @@ Please answer using one message only.."""
 
         else:
             self.cache[member.id] = 0
-            return await member.send("**Thank you anyway!**")
+            return await member.send("**Thank you anyways!**")
 
     # Report methods
     async def select_report(self, member, guild):
