@@ -191,7 +191,7 @@ async def prompt_number(client, ctx: commands.Context, the_msg: discord.Message,
                     client.loop.create_task(ctx.send(f"**The number `MUST` be an integer value, {member.mention}!**"))
                     return False
             else:
-                client.loop.create_task(ctx.send(f"**The number has a maximum lenght of 2, {member.mention}!**"))
+                client.loop.create_task(ctx.send(f"**The number has a maximum length of 2, {member.mention}!**"))
                 return False
 
         else:
