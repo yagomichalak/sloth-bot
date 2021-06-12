@@ -745,13 +745,13 @@ class Tools(commands.Cog):
         cosmos = discord.utils.get(ctx.guild.members, id=cosmos_id)
         await ctx.send(cosmos.mention)
 
-    @commands.command(aliases=['musicbot', 'music', 'mb'])
+    @commands.command(aliases=['musicbot', 'music_bot', 'musicbots', 'music', 'mb'])
     @commands.cooldown(1, 10, commands.BucketType.user)
-    async def music_bot(self, ctx) -> None:
+    async def music_bots(self, ctx) -> None:
         """ Shows a list with all music bots available in the server. """
 
-        music_bot_ids = [235088799074484224, 252128902418268161, 184405311681986560, 234395307759108106, 718580119068737567, 201503408652419073, 282859044593598464]
-        music_bots = [valid_mb for mb in music_bot_ids if (valid_mb := discord.utils.get(ctx.guild.members, id=mb))]
+        music_bot_role = discord.utils.get(ctx.guild.roles, id=int(os.getenv('MUSIC_BOT_ROLE_ID')))
+        music_bots = [mb for mb in ctx.guild.members if music_bot_role in mb.roles]
         music_bots = [f"{mb.mention} ❌" if mb.voice and mb.voice.channel else f"{mb.mention} ✅" for mb in music_bots]
 
         embed = discord.Embed(
