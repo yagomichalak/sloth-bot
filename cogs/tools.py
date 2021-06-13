@@ -745,6 +745,24 @@ class Tools(commands.Cog):
         cosmos = discord.utils.get(ctx.guild.members, id=cosmos_id)
         await ctx.send(cosmos.mention)
 
+    @commands.command()
+    @commands.has_any_role(*[owner_role_id, admin_role_id, mod_role_id])
+    async def muffin(self, ctx) -> None:
+        """ A command for pinging Muffin, the rich Lux lass. """
+
+        muffin_id = int(os.getenv('MUFIFN_ID'))
+        muffin = discord.utils.get(ctx.guild.members, id=muffin_id)
+        await ctx.send(muffin.mention)
+
+    @commands.command()
+    @commands.has_any_role(*[owner_role_id, admin_role_id, mod_role_id])
+    async def prisca(self, ctx) -> None:
+        """ A command for pinging Prisca, the photoshop Turk. """
+
+        prisca_id = int(os.getenv('PRISCA_ID'))
+        prisca = discord.utils.get(ctx.guild.members, id=prisca_id)
+        await ctx.send(prisca.mention)
+
     @commands.command(aliases=['musicbot', 'music_bot', 'musicbots', 'music', 'mb'])
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def music_bots(self, ctx) -> None:
