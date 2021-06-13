@@ -37,8 +37,8 @@ class ReportSupport(commands.Cog):
         self.teacher_app_channel_id: int = int(os.getenv('TEACHER_APPLICATION_CHANNEL_ID'))
         self.teacher_app_cat_id: int = int(os.getenv('TEACHER_APPLICATION_CAT_ID'))
 
-        # self.moderator_app_channel: int = int(os.getenv('MODERATOR_APPLICATION_CHANNEL_ID'))
-        # self.moderator_app_cat_id: int = int(os.getenv('MODERATOR_APPLICATION_CAT_ID'))
+        self.moderator_app_channel_id: int = int(os.getenv('MODERATOR_APPLICATION_CHANNEL_ID'))
+        self.moderator_app_cat_id: int = int(os.getenv('MODERATOR_APPLICATION_CAT_ID'))
         
 
     @commands.Cog.listener()
@@ -48,8 +48,6 @@ class ReportSupport(commands.Cog):
     @commands.Cog.listener()
     async def on_raw_interaction_update(self, payload, member, button, response) -> None:
         """ Handles Report-Support related buttons. """
-
-        print('ahoy')
         
         if int(payload['id']) != int(os.getenv('REPORT_SUPPORT_MSG_ID')):
             return
@@ -57,7 +55,6 @@ class ReportSupport(commands.Cog):
         button.ping(response)
 
         custom_id = button.custom_id
-        print(custom_id)
 
         if custom_id.startswith('apply_to_teach') or custom_id.startswith('apply_to_moderate'):
             # Apply to be a teacher
@@ -72,12 +69,9 @@ class ReportSupport(commands.Cog):
             if custom_id.startswith('apply_to_teach'):
                 await self.send_teacher_application(member)
             else:
-                #await self.send_moderator_application(member)
-                pass
+                await self.send_moderator_application(member)
+                
 
-
-        elif custom_id.startswith('apply_to_moderate'):
-            pass
         elif custom_id.startswith('buy_custom_bot'):
             # Order a bot
             dnk = self.client.get_user(dnk_id)
@@ -113,33 +107,76 @@ class ReportSupport(commands.Cog):
 
         guild = self.client.get_guild(payload.guild_id)
 
-        # Checks if it's in the applications channel
+        # Checks if it's in the teacher applications channel
         if payload.channel_id == self.teacher_app_channel_id:
-            emoji = str(payload.emoji)
-            if emoji == '✅':
-                # Gets the teacher app and does the magic
-                teacher_app = await self.get_teacher_app_by_message(payload.message_id)
-                if not teacher_app:
-                    return
+            await self.handle_teacher_application(guild, payload)
 
-                # Checks if the person has not an open interview channel already
-                if teacher_app[0][2] == 'no':
-                    # Creates an interview room with the teacher and sends their application there (you can z!close there)
-                    return await self.create_interview_room(guild, teacher_app)
+        # Checks if it's in the moderator applications channel
+        elif payload.channel_id == self.moderator_app_channel_id:
+            await self.handle_moderator_application(guild, payload)
 
-            elif emoji == '❌':
-                # Tries to delete the teacher app from the db, in case it is registered
-                teacher_app = await self.get_teacher_app_by_message(payload.message_id)
-                if teacher_app and teacher_app[0][2] == 'no':
-                    await self.delete_teacher_app(payload.message_id)
-                    teacher_app_channel = self.client.get_channel(self.teacher_app_channel_id)
-                    app_msg = await teacher_app_channel.fetch_message(payload.message_id)
-                    await app_msg.add_reaction('🔏')
-                    teacher = discord.utils.get(guild.members, id=teacher_app[0][1])
-                    if teacher:
-                        msg = "**Teacher Application**\nOur staff has avaluated your teacher application and has come to the conclusion that we are not in need of this lesson."
-                        await payload.member.send(embed=discord.Embed(description=msg))
+
+    async def handle_teacher_application(self, guild, payload) -> None:
+        """ Handles teacher application.
+        :param guild: The server in which the application is running.
+        :param payload: Data about the Staff member who is opening the application. """
+
+        emoji = str(payload.emoji)
+        if emoji == '✅':
+            # Gets the teacher app and does the magic
+            teacher_app = await self.get_teacher_app_by_message(payload.message_id)
+            if not teacher_app:
                 return
+
+            # Checks if the person has not an open interview channel already
+            if teacher_app[0][2] == 'no':
+                # Creates an interview room with the teacher and sends their application there (you can z!close there)
+                return await self.create_teacher_interview_room(guild, teacher_app)
+
+        elif emoji == '❌':
+            # Tries to delete the teacher app from the db, in case it is registered
+            teacher_app = await self.get_teacher_app_by_message(payload.message_id)
+            if teacher_app and teacher_app[0][2] == 'no':
+                await self.delete_teacher_app(payload.message_id)
+                teacher_app_channel = self.client.get_channel(self.teacher_app_channel_id)
+                app_msg = await teacher_app_channel.fetch_message(payload.message_id)
+                await app_msg.add_reaction('🔏')
+                teacher = discord.utils.get(guild.members, id=teacher_app[0][1])
+                if teacher:
+                    msg = "**Teacher Application**\nOur staff has avaluated your teacher application and has come to the conclusion that we are not in need of this lesson."
+                    await payload.member.send(embed=discord.Embed(description=msg))
+            return
+
+    async def handle_moderator_application(self, guild, payload) -> None:
+        """ Handles moderator application.
+        :param guild: The server in which the application is running.
+        :param payload: Data about the Staff member who is opening the application. """
+
+        emoji = str(payload.emoji)
+        if emoji == '✅':
+            # Gets the moderator app and does the magic
+            moderator_app = await self.get_moderator_app_by_message(payload.message_id)
+            if not moderator_app:
+                return
+
+            # Checks if the person has not an open interview channel already
+            if not moderator_app[0][2]:
+                # Creates an interview room with the moderator and sends their application there (you can z!close there)
+                return await self.create_moderator_interview_room(guild, moderator_app)
+
+        elif emoji == '❌':
+            # Tries to delete the moderator app from the db, in case it is registered
+            moderator_app = await self.get_moderator_app_by_message(payload.message_id)
+            if moderator_app and not moderator_app[0][2]:
+                await self.delete_moderator_app(payload.message_id)
+                moderator_app_channel = self.client.get_channel(self.moderator_app_channel_id)
+                app_msg = await moderator_app_channel.fetch_message(payload.message_id)
+                await app_msg.add_reaction('🔏')
+                moderator = discord.utils.get(guild.members, id=moderator_app[0][1])
+                if moderator:
+                    msg = "**Moderator Application**\nOur staff has avaluated your moderator application and has come to a conclusion, and due to intern and unspecified reasons we are **declining** it. Thank you anyways"
+                    await payload.member.send(embed=discord.Embed(description=msg))
+            return
 
 
     async def send_teacher_application(self, member):
@@ -182,9 +219,11 @@ class ReportSupport(commands.Cog):
         terms_r = await self.get_reaction(member, check_reaction)
 
         if terms_r is None:
+            self.cache[member.id] = 0
             return
 
         if terms_r != '✅':
+            self.cache[member.id] = 0
             return await member.send(f"**Thank you anyways, bye!**")
 
         embed = discord.Embed(title=f"__Teacher Application__")
@@ -219,7 +258,7 @@ class ReportSupport(commands.Cog):
             return
 
         embed.description = '''
-        -Let's talk about your English level, how do you consider your English level?
+        - Let's talk about your English level, how do you consider your English level?
         Are you able to teach lessons in English?
         Please answer using one message only'''
         q4 = await member.send(embed=embed)
@@ -239,7 +278,7 @@ class ReportSupport(commands.Cog):
         if not a6:
             return
 
-        embed.description = '''- How old are you?.'''
+        embed.description = '''- How old are you?'''
         q7 = await member.send(embed=embed)
         a7 = await self.get_message(member, msg_check)
         if not a7:
@@ -274,15 +313,17 @@ class ReportSupport(commands.Cog):
             app = await teacher_app_channel.send(content=f"{cosmos.mention}, {member.mention}\n{app}")
             await app.add_reaction('✅')
             await app.add_reaction('❌')
-            self.cache[member.id] = time.time()
             # Saves in the database
             await self.save_teacher_app(app.id, member.id)
 
         else:
+            self.cache[member.id] = 0
             return await member.send("**Thank you anyways!**")
 
 
     async def send_moderator_application(self, member):
+
+        self.cache[member.id] = time.time()
 
         def msg_check(message):
             if message.author == member and not message.guild:
@@ -318,67 +359,75 @@ Entry requirements:
         terms_r = await self.get_reaction(member, check_reaction)
 
         if terms_r is None:
+            self.cache[member.id] = 0
             return
 
         if terms_r != '✅':
-            return
-
+            self.cache[member.id] = 0
+            return await member.send(f"**Thanks anyways, bye!**")
+            
         embed = discord.Embed(title=f"__Moderator Application__")
         embed.set_footer(text=f"by {member}", icon_url=member.avatar_url)
 
-        embed.description = """
-        - Hello, there you've reacted to apply to become a moderator.
-To apply please answer to these following questions with One message at a time
-Question one:
-Do you have any experience moderating Discord servers?"""
+        embed.description = "- What's your age?"
         q1 = await member.send(embed=embed)
         a1 = await self.get_message(member, msg_check)
         if not a1:
             return
 
         embed.description = """
-        - - What is your gender?
-Please answer with one message."""
+        - Hello, there you've reacted to apply to become a moderator.
+To apply please answer to these following questions with One message at a time
+Question one:
+Do you have any experience moderating Discord servers?"""
         q2 = await member.send(embed=embed)
         a2 = await self.get_message(member, msg_check)
         if not a2:
             return
 
         embed.description = """
-        - What's your English level? Are you able to express yourself using English?
-Please answer using one message only."""
+        - What is your gender?
+Please answer with one message."""
         q3 = await member.send(embed=embed)
         a3 = await self.get_message(member, msg_check)
         if not a3:
             return
 
         embed.description = """
-        - Why are you applying to be Staff? What is your motivation?
+        - What's your English level? Are you able to express yourself using English?
 Please answer using one message only."""
         q4 = await member.send(embed=embed)
         a4 = await self.get_message(member, msg_check)
         if not a4:
             return
 
-        embed.description = """- How do you think The Language Sloth could be a better community?
+        embed.description = """
+        - Why are you applying to be Staff? What is your motivation?
 Please answer using one message only."""
         q5 = await member.send(embed=embed)
         a5 = await self.get_message(member, msg_check)
         if not a5:
             return
 
-        embed.description = """- How active are you on Discord in general?
+        embed.description = """- How do you think The Language Sloth could be a better community?
 Please answer using one message only."""
         q6 = await member.send(embed=embed)
         a6 = await self.get_message(member, msg_check)
         if not a6:
             return
 
-        embed.description = """- What is your time zone?
-Please answer using one message only.."""
+        embed.description = """- How active are you on Discord in general?
+Please answer using one message only."""
         q7 = await member.send(embed=embed)
         a7 = await self.get_message(member, msg_check)
         if not a7:
+            return
+
+        embed.description = """- What is your time zone?
+Please answer using one message only.."""
+        q8 = await member.send(embed=embed)
+        a8 = await self.get_message(member, msg_check)
+        if not a8:
             return
 
         # Get user's native roles
@@ -389,15 +438,16 @@ Please answer using one message only.."""
 
         # Application result
         app = f"""```ini\n[Username]: {member} ({member.id})
-        [Joined the server]: {member.joined_at.strftime("%a, %d %B %y, %I %M %p UTC")}
-        [Native roles]: {', '.join(user_native_roles)}
-        [Experience moderating]: {a1.capitalize()}
-        [Gender]: {a2.title()}
-        [English level]: {a3.capitalize()}
-        [Reason & Motivation]: {a4.capitalize()}
-        [How we can improve Sloth]:{a5.capitalize()}
-        [Activity Status]: {a6.capitalize()}
-        [Timezone]: {a7.title()}```"""
+[Joined the server]: {member.joined_at.strftime("%a, %d %B %y, %I %M %p UTC")}
+[Native roles]: {', '.join(user_native_roles)}
+[Age]: {a1}
+[Experience moderating]: {a2.capitalize()}
+[Gender]: {a3.title()}
+[English level]: {a4.capitalize()}
+[Reason & Motivation]: {a5.capitalize()}
+[How we can improve Sloth]: {a6.capitalize()}
+[Activity Status]: {a7.capitalize()}
+[Timezone]: {a8.title()}```"""
         await member.send(app)
         embed.description = """
         Are you sure you want to apply this? :white_check_mark: to send and :x: to Cancel
@@ -419,12 +469,12 @@ Please answer using one message only.."""
             app = await moderator_app_channel.send(content=f"{cosmos.mention}, {member.mention}\n{app}")
             await app.add_reaction('✅')
             await app.add_reaction('❌')
-            self.cache[member.id] = time.time()
             # Saves in the database
-            # await self.save_moderator_app(app.id, member.id)
+            await self.save_moderator_app(app.id, member.id)
 
         else:
-            return await member.send("**Thank you anyway!**")
+            self.cache[member.id] = 0
+            return await member.send("**Thank you anyways!**")
 
     # Report methods
     async def select_report(self, member, guild):
@@ -902,13 +952,12 @@ Please answer using one message only.."""
                     continue
 
     # Discord methods
-    async def create_interview_room(self, guild: discord.Guild, teacher_app: List[str]) -> None:
-        """ Creates an interview room with the teacher """
+    async def create_teacher_interview_room(self, guild: discord.Guild, teacher_app: List[str]) -> None:
+        """ Creates an interview room with the teacher.
+        :param guild: The server in which the interview will be.
+        :param teacher_app: The teacher application info. """
 
-        teacher_app_channel = self.client.get_channel(self.teacher_app_channel_id)
         teacher_app_cat = discord.utils.get(guild.categories, id=self.teacher_app_cat_id)
-
-        msg = await teacher_app_channel.fetch_message(teacher_app[0][0])
         teacher = discord.utils.get(guild.members, id=teacher_app[0][1])
 
         # moderator = discord.utils.get(guild.roles, id=moderator_role_id)
@@ -938,6 +987,37 @@ Please answer using one message only.."""
             color=teacher.color)
         await txt_channel.send(content=f"{cosmos.mention}, {lesson_management.mention}, {teacher.mention}", embed=app_embed)
 
+    async def create_moderator_interview_room(self, guild: discord.Guild, moderator_app: List[str]) -> None:
+        """ Creates an interview room with the moderator.
+        :param guild: The server in which the interview will be.
+        :param moderator_app: The moderator application info. """
+
+        moderator_app_cat = discord.utils.get(guild.categories, id=self.moderator_app_cat_id)
+        moderator = discord.utils.get(guild.members, id=moderator_app[0][1])
+
+        cosmos = discord.utils.get(guild.members, id=self.cosmos_id)
+        admin = discord.utils.get(guild.roles, id=admin_role_id)
+
+        # Creates channels
+        overwrites: Dict = {guild.default_role: discord.PermissionOverwrite(
+            read_messages=False, send_messages=False, connect=False, view_channel=False),
+        moderator: discord.PermissionOverwrite(
+            read_messages=True, send_messages=True, connect=True, view_channel=True),
+        }
+        txt_channel = await guild.create_text_channel(name=f"{moderator.name}'s-interview", category=moderator_app_cat, overwrites=overwrites)
+        vc_channel = await moderator_app_cat.create_voice_channel(name=f"{moderator.name}'s Interview", overwrites=overwrites)
+
+        # Updates the moderator's application in the database, adding the channels ids
+        await self.update_moderator_application(moderator.id, txt_channel.id, vc_channel.id)
+
+        app_embed = discord.Embed(
+            title=f"{moderator.name}'s Interview",
+            description=f"""
+            Hello, {moderator.mention}, we have received and reviewed your moderator application. In order to set you up and explain how our moderation works we have to schedule a voice conversation with you.
+            When would be the best time to talk to one of our staff?""",
+            color=moderator.color)
+        await txt_channel.send(content=f"{cosmos.mention}, {admin.mention}, {moderator.mention}", embed=app_embed)
+
     # In-game commands
     @commands.command()
     @commands.has_permissions(administrator=True)
@@ -947,10 +1027,20 @@ Please answer using one message only.."""
         '''
 
         # Checks if the channel is in the teacher applications category
-        if not ctx.channel.category or not ctx.channel.category.id == self.teacher_app_cat_id:
+        if not ctx.channel.category or not ctx.channel.category.id in [self.teacher_app_cat_id, self.moderator_app_cat_id]:
             return await ctx.send(f"**This is not an application channel, {ctx.author.mention}!**")
 
-        app_channel = await self.get_teacher_app_by_channel(ctx.channel.id)
+        application_type = None
+        all_apps_channel = None
+
+        if app_channel := await self.get_teacher_app_by_channel(ctx.channel.id):
+            application_type = 'teacher'
+            all_apps_channel = discord.utils.get(ctx.guild.channels, id=self.teacher_app_channel_id)
+
+        elif app_channel := await self.get_moderator_app_by_channel(ctx.channel.id):
+            application_type = 'moderator'
+            all_apps_channel = discord.utils.get(ctx.guild.channels, id=self.moderator_app_channel_id)
+
         if app_channel:
             txt_channel = discord.utils.get(ctx.guild.channels, id=app_channel[0][3])
             vc_channel = discord.utils.get(ctx.guild.channels, id=app_channel[0][4])
@@ -977,9 +1067,12 @@ Please answer using one message only.."""
                     await asyncio.sleep(3)
                     await txt_channel.delete()
                     await vc_channel.delete()
-                    await self.delete_teacher_app(app_channel[0][0])
+
+                    if application_type == 'teacher':
+                        await self.delete_teacher_app(app_channel[0][0])
+                    elif application_type == 'moderator':
+                        await self.delete_moderator_app(app_channel[0][0])
                     try:
-                        all_apps_channel = discord.utils.get(ctx.guild.channels, id=self.app_channel_id)
                         msg = await all_apps_channel.fetch_message(app_channel[0][0])
                         # await msg.delete()
                         await msg.add_reaction('🔒')
@@ -1104,6 +1197,128 @@ Please answer using one message only.."""
         else:
             return False
 
+    # Moderator Applications
+
+    async def get_moderator_app_by_message(self, message_id: int) -> List[str]:
+        """ Gets a moderator application from the database by message ID.
+        :param message_id: The message ID. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("SELECT * FROM ModeratorApplication WHERE message_id = %s", (message_id,))
+        moderator_app = await mycursor.fetchall()
+        await mycursor.close()
+        return moderator_app
+
+    async def get_moderator_app_by_channel(self, channel_id: int) -> List[str]:
+        """ Gets a moderator application from the database by channel ID.
+        :param channel_id: The text channel ID. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("SELECT * FROM ModeratorApplication WHERE txt_id = %s", (channel_id,))
+        moderator_app = await mycursor.fetchall()
+        await mycursor.close()
+        return moderator_app
+
+    async def save_moderator_app(self, message_id: int, moderator_id: int) -> None:
+        """ Saves a moderator application into the database.
+        :param message_id: The ID of the applicaiton message.
+        :param moderator_id: The moderator ID. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute(
+            """
+            INSERT INTO ModeratorApplication (message_id, moderator_id)
+            VALUES (%s, %s)""", (message_id, moderator_id)
+            )
+        await db.commit()
+        await mycursor.close()
+
+    async def update_moderator_application(self, moderator_id: int, txt_id: int, vc_id: int) -> None:
+        """ Updates the moderator's application; adding the txt and vc ids into it.
+        :param moderator_id: The moderator ID.
+        :param txt_id: The text channel ID.
+        :param vc_id: The voice channel ID. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute(
+            """UPDATE ModeratorApplication SET
+            channel_open = 1, txt_id = %s, vc_id = %s
+            WHERE moderator_id = %s""", (txt_id, vc_id, moderator_id)
+            )
+        await db.commit()
+        await mycursor.close()
+
+    async def delete_moderator_app(self, message_id: int) -> None:
+        """ Deletes a moderator application from the database.
+        :param message_id: The application message's ID. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("DELETE FROM ModeratorApplication WHERE message_id = %s", (message_id,))
+        await db.commit()
+        await mycursor.close()
+
+    # Database ADM commands
+    @commands.command(hidden=True)
+    @commands.has_permissions(administrator=True)
+    async def create_table_moderator_application(self, ctx) -> None:
+        """ (ADM) Creates the ModeratorApplication table. """
+
+        if await self.table_moderator_application_exists():
+            return await ctx.send("**Table `ModeratorApplication` already exists!**")
+
+        mycursor, db = await the_database()
+        await mycursor.execute("""CREATE TABLE ModeratorApplication (
+            message_id BIGINT, moderator_id BIGINT, channel_open TINYINT(1) default 0,
+            txt_id BIGINT default null, vc_id BIGINT default null)""")
+
+        await db.commit()
+        await mycursor.close()
+
+        await ctx.send("**Table `ModeratorApplication` created!**")
+
+    @commands.command(hidden=True)
+    @commands.has_permissions(administrator=True)
+    async def drop_table_moderator_application(self, ctx) -> None:
+        """ (ADM) Drops the ModeratorApplication table. """
+
+        if not await self.table_moderator_application_exists():
+            return await ctx.send("**Table `ModeratorApplication` doesn't exist!**")
+
+        mycursor, db = await the_database()
+        await mycursor.execute("DROP TABLE ModeratorApplication")
+        await db.commit()
+        await mycursor.close()
+
+        await ctx.send("**Table `ModeratorApplication` dropped!**")
+
+    @commands.command(hidden=True)
+    @commands.has_permissions(administrator=True)
+    async def reset_table_moderator_application(self, ctx) -> None:
+        """ (ADM) Resets the ModeratorApplication table. """
+
+        if not await self.table_moderator_application_exists():
+            return await ctx.send("**Table `ModeratorApplication` doesn't exist yet!**")
+
+        mycursor, db = await the_database()
+        await mycursor.execute("DELETE FROM ModeratorApplication")
+        await db.commit()
+        await mycursor.close()
+
+        await ctx.send("**Table `ModeratorApplication` reset!**")
+
+    async def table_moderator_application_exists(self) -> bool:
+        """ Checks whether the ModeratorApplication table exists. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("SHOW TABLE STATUS LIKE 'ModeratorApplication'")
+        exists = await mycursor.fetchall()
+        await mycursor.close()
+
+        if len(exists):
+            return True
+        else:
+            return False
+
     async def audio(self, member: discord.Member, audio_name: str) -> None:
         # Resolves bot's channel state
 
@@ -1129,7 +1344,7 @@ Please answer using one message only.."""
 
         except Exception as e:
             print(e)
-            return await ctx.send("**Something went wrong, I'll stop here!**")
+            return
 
 
 def setup(client):
