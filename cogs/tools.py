@@ -750,7 +750,7 @@ class Tools(commands.Cog):
     async def muffin(self, ctx) -> None:
         """ A command for pinging Muffin, the rich Lux lass. """
 
-        muffin_id = int(os.getenv('MUFIFN_ID'))
+        muffin_id = int(os.getenv('MUFFIN_ID'))
         muffin = discord.utils.get(ctx.guild.members, id=muffin_id)
         await ctx.send(muffin.mention)
 
