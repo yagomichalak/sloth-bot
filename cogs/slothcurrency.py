@@ -367,8 +367,7 @@ class SlothCurrency(commands.Cog):
             f"SELECT item_name, image_name FROM UserItems WHERE user_id = {user_id} and item_type = '{item_type}' and enable = 'equipped'")
         spec_type_items = await mycursor.fetchone()
         await mycursor.close()
-
-        if spec_type_items[1]:
+        if spec_type_items and spec_type_items[1]:
             return f'./sloth_custom_images/{item_type}/{spec_type_items[1]}'
 
         else:
@@ -761,7 +760,7 @@ class SlothCurrency(commands.Cog):
         foot = Image.open(await self.get_user_specific_type_item(member.id, 'foot'))
         head = Image.open(await self.get_user_specific_type_item(member.id, 'head'))
         hud = Image.open(await self.get_user_specific_type_item(member.id, 'hud'))
-        # badge = Image.open(await self.get_user_specific_type_item(member.id, 'badge'))
+        
         pfp = await self.get_user_pfp(member)
         background.paste(sloth, (0, 0), sloth)
         background.paste(body, (0, 0), body)
