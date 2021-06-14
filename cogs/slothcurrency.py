@@ -1,4 +1,5 @@
 import discord
+from discord import user
 from discord.ext import commands, menus
 from mysqldb import *
 from datetime import datetime
@@ -109,64 +110,6 @@ class SlothCurrency(commands.Cog):
             addition = the_time - old_time
             await self.update_user_server_time(member.id, addition)
 
-    @commands.Cog.listener()
-    async def on_raw_reaction_add(self, payload):
-        if not payload.guild_id:
-            return
-
-        # Checks if it wasn't a bot's reaction
-        if payload.member.bot:
-            return
-
-        # Takes off the reaction in the shop channel
-        if payload.channel_id in shop_channels:
-            guild = self.client.get_guild(payload.guild_id)
-            channel = discord.utils.get(guild.channels, id=payload.channel_id)
-
-            msg = await channel.fetch_message(payload.message_id)
-            await msg.remove_reaction(payload.emoji.name, payload.member)
-
-        # Checks if it was a reaction within the shop's channel
-        if payload.channel_id not in shop_channels:
-            return
-
-        epoch = datetime.utcfromtimestamp(0)
-        the_time = (datetime.utcnow() - epoch).total_seconds()
-        user = await self.get_user_currency(payload.user_id)
-        if not user:
-            component = discord.Component()
-            component.add_button(style=5, label="Create Account", emoji="🦥", url="https://thelanguagesloth.com/profile/update")
-            return await payload.member.send(
-                embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one, or in the button below!**"),
-                components=[component])
-            # await self.insert_user_currency(payload.user_id, the_time - 61)
-
-        old_time = await self.get_user_currency(payload.member.id)
-        if not the_time - old_time[0][2] >= 60:
-            return await payload.member.send(
-                f"**You're on a cooldown, try again in {round(60 - (the_time - old_time[0][2]))} seconds!**",
-                delete_after=10)
-
-        registered_items = await self.get_registered_items()
-        for ri in registered_items:
-            if ri[4] == payload.message_id:
-                if str(payload.emoji) == ri[5]:
-                    user_have_item = await self.check_user_have_item(payload.user_id, ri[2])
-                    if user_have_item:
-                        return await payload.member.send(
-                            f"**You already have the item: __{ri[2]}__ in your inventory!**")
-                    else:
-                        return await self.try_to_buy_item(payload.user_id, ri[1], ri[2], ri[3], payload.guild_id,
-                                                          the_time)
-
-    # @commands.Cog.listener()
-    # async def on_raw_reaction_remove(self, payload):
-    #     if not payload.guild_id:
-    #         return
-    #     member = discord.utils.get(self.client.get_guild(payload.guild_id).members, id=payload.user_id)
-    #     if member.bot:
-    #         return
-
     # In-game commands
     @commands.command()
     @commands.has_permissions(administrator=True)
@@ -211,14 +154,12 @@ class SlothCurrency(commands.Cog):
         if not item_name:
             return await ctx.send("**Inform an item to equip!**", delete_after=3)
 
-        user_items = await self.get_user_items(ctx.author.id)
-        for item in user_items:
-            if str(item[1]) == item_name.title():
-                if await self.check_user_can_equip(ctx.author.id, item_name.title()):
-                    await self.update_user_item_info(ctx.author.id, item_name, 'equipped')
-                    return await ctx.send(f"**{ctx.author.mention} equipped __{item_name.title()}__!**", delete_after=3)
-                else:
-                    return await ctx.send(f"**You already have a __{item[3]}__ item equipped!**", delete_after=3)
+        if user_item := await self.get_user_item(ctx.author.id, item_name.title()):
+            if await self.check_user_can_equip(ctx.author.id, item_name.title()):
+                await self.update_user_item_info(ctx.author.id, item_name, 'equipped')
+                return await ctx.send(f"**{ctx.author.mention} equipped __{item_name.title()}__!**", delete_after=3)
+            else:
+                return await ctx.send(f"**You already have a __{user_item[3]}__ item equipped!**", delete_after=3)
         else:
             return await ctx.send(f"**You don't have an item named __{item_name.title()}__!**", delete_after=3)
 
@@ -302,13 +243,9 @@ class SlothCurrency(commands.Cog):
         if not item_name:
             return await ctx.send("**Inform an item to add!**", delete_after=3)
 
-        spec_item = await self.get_specific_register_item(item_name)
-        if len(spec_item) == 0:
-            return await ctx.send(f"**The item: __{item_name.title()}__ doesn't exist!**", delete_after=3)
-
-        user_have_item = await self.get_user_specific_item(member.id, item_name)
-        if len(user_have_item) == 0:
-            await self.insert_user_item(member.id, item_name, 'unequipped', spec_item[0][1].lower())
+        user_has_item = await self.get_user_specific_item(member.id, item_name.title())
+        if len(user_has_item) == 0:
+            await self.insert_user_item(member.id, item_name, 'unequipped', item_name.title())
             return await ctx.send(f"**{item_name.title()} given to {member.name}!**", delete_after=3)
         else:
             return await ctx.send(f"**{member.name} already have that item!**", delete_after=3)
@@ -327,8 +264,8 @@ class SlothCurrency(commands.Cog):
         if not item_name:
             return await ctx.send("**Inform an item to remove!**", delete_after=3)
 
-        user_have_item = await self.get_user_specific_item(member.id, item_name)
-        if len(user_have_item) != 0:
+        user_has_item = await self.get_user_specific_item(member.id, item_name)
+        if len(user_has_item) != 0:
             await self.remove_user_item(member.id, item_name)
             return await ctx.send(f"**{item_name.title()} taken from {member.name}!**", delete_after=3)
         else:
@@ -373,18 +310,13 @@ class SlothCurrency(commands.Cog):
         else:
             return f'./sloth_custom_images/{item_type}/base_{item_type}.png'
 
-        # if len(spec_type_items) != 0:
-        #     registered_item = await self.get_specific_register_item(spec_type_items[0][1])
-        #     return f'./sloth_custom_images/{item_type}/{registered_item[0][0]}'
-        # else:
-        #     default_item = f'./sloth_custom_images/{item_type}/base_{item_type}.png'
-        #     return default_item
-
     async def check_user_can_equip(self, user_id, item_name: str) -> bool:
         mycursor, db = await the_database()
-        item_type = await self.get_specific_register_item(item_name)
+        await mycursor.execute("SELECT item_type FROM UserItems WHERE user_id = %s AND item_name = %s", (user_id, item_name))
+        item_type = await mycursor.fetchone()
+        
         await mycursor.execute(
-            f"SELECT * FROM UserItems WHERE user_id = {user_id} and item_type = '{item_type[0][1]}' and enable = 'equipped'")
+            f"SELECT * FROM UserItems WHERE user_id = {user_id} and item_type = '{item_type[1]}' and enable = 'equipped'")
         equipped_item = await mycursor.fetchall()
         await mycursor.close()
 
@@ -396,7 +328,7 @@ class SlothCurrency(commands.Cog):
     async def check_user_can_unequip(self, user_id, item_name: str) -> bool:
         mycursor, db = await the_database()
         await mycursor.execute(
-            f"SELECT * FROM UserItems WHERE user_id = {user_id} and item_name = '{item_name.lower()}' and enable = 'unequipped'")
+            "SELECT * FROM UserItems WHERE user_id = %s and item_name = %s and enable = 'unequipped'", (user_id, item_name.title()))
         unequipped_item = await mycursor.fetchall()
         await mycursor.close()
 
@@ -405,173 +337,18 @@ class SlothCurrency(commands.Cog):
         else:
             return True
 
-    async def get_user_specific_item(self, user_id: int, item_name: str):
+    async def get_user_specific_item(self, user_id: int, item_name: str) -> List[Union[str, int]]:
         mycursor, db = await the_database()
-        await mycursor.execute(f"SELECT * FROM UserItems WHERE user_id = {user_id} and item_name = '{item_name}'")
-        item_system = await mycursor.fetchall()
+        await mycursor.execute("SELECT * FROM UserItems WHERE user_id = %s and item_name = %s", (user_id, item_name))
+        item_system = await mycursor.fetchone()
         await mycursor.close()
         return item_system
 
-    # Register Items
-    @commands.command(hidden=True)
-    @commands.has_permissions(administrator=True)
-    async def create_table_register_items(self, ctx):
-        '''
-        (ADM) Creates the RegisteredItems table.
-        '''
-        await ctx.message.delete()
-        mycursor, db = await the_database()
-        await mycursor.execute(
-            "CREATE TABLE RegisteredItems (image_name VARCHAR(50),item_type VARCHAR(10), item_name VARCHAR(30), item_price int, message_ref bigint default null, reaction_ref VARCHAR(50) default null) DEFAULT CHARSET utf8mb4")
-        await db.commit()
-        await mycursor.close()
+    async def check_user_has_item(self, user_id: int, item_name: str):
 
-        return await ctx.send("**Table *RegisteredItems* created!**", delete_after=3)
-
-    @commands.command(hidden=True)
-    @commands.has_permissions(administrator=True)
-    async def drop_table_register_items(self, ctx):
-        '''
-        (ADM) Drops the RegisteredItems table.
-        '''
-        await ctx.message.delete()
-        mycursor, db = await the_database()
-        await mycursor.execute(f"DROP TABLE RegisteredItems")
-        await db.commit()
-        await mycursor.close()
-
-        return await ctx.send("**Table *RegisteredItems* dropped!**", delete_after=3)
-
-    @commands.command(hidden=True)
-    @commands.has_permissions(administrator=True)
-    async def reset_table_register_items(self, ctx):
-        '''
-        (ADM) Resets the RegisteredItems table.
-        '''
-        await ctx.message.delete()
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM RegisteredItems")
-        await db.commit()
-        await mycursor.close()
-
-        return await ctx.send("**Table *RegisteredItems* reseted!**", delete_after=3)
-
-    @commands.command()
-    @commands.has_permissions(administrator=True)
-    async def show_registered(self, ctx):
-        '''
-        (ADM) Shows all the registered items in the shop.
-        '''
-        await ctx.message.delete()
-        mycursor, db = await the_database()
-        await mycursor.execute("SELECT * FROM RegisteredItems")
-        registered_items = await mycursor.fetchall()
-        await mycursor.close()
-
-        embed = discord.Embed(title="Registered Items", description="All registered items and their info",
-                              colour=discord.Colour.dark_green(), timestamp=ctx.message.created_at)
-        for ri in registered_items:
-            embed.add_field(name=f"{ri[2]}",
-                            value=f"**File:** {ri[0]} | **Type:** {ri[1]} | **Price:** {ri[3]}łł | **Reaction:** {ri[5]} |**Message ID:** {ri[4]}",
-                            inline=False)
-        return await ctx.send(embed=embed)
-
-    async def get_registered_items(self):
-        mycursor, db = await the_database()
-        await mycursor.execute("SELECT * FROM RegisteredItems")
-        registered_items = await mycursor.fetchall()
-        await mycursor.close()
-        return registered_items
-
-    async def get_specific_register_item(self, item_name: str):
-        mycursor, db = await the_database()
-        await mycursor.execute(f"SELECT * FROM RegisteredItems WHERE item_name = '{item_name}'")
-        item = await mycursor.fetchall()
-        await mycursor.close()
-        return item
-
-    @commands.command()
-    @commands.has_permissions(administrator=True)
-    async def remove_registered_item(self, ctx, *, item_name: str = None):
-        '''
-        (ADM) Removes a registered item from the shop system.
-        :param item_name: The name of the item to remove.
-        '''
-        await ctx.message.delete()
-        if not item_name:
-            return await ctx.send("**Inform an item name!**", delete_after=3)
-
-        have_spec_item = await self.get_specific_register_item(item_name.title())
-        if len(have_spec_item) != 0:
-            await self.delete_registered_item(item_name.title())
-            return await ctx.send(f"**{item_name.title()} deleted from the system!**", delete_after=3)
-        else:
-            return await ctx.send("**Item not found in the system!**", delete_after=3)
-
-    @commands.command()
-    @commands.has_permissions(administrator=True)
-    async def register_item(self, ctx, mid: discord.Message = None, reactf=None, image_name: str = None, item_type: str = None, item_price: int = None, *, item_name: str = None):
-        '''
-        (ADM) Registers an item to the sloth shop.
-        :param mid: The message ID of the image from which people will buy the item.
-        :param reactf: The reaction that will trigger the buying process of that item.
-        :param image_name: The name of the image item that will be shown in the user's inventory.
-        :param item_type: The type of item; head, hand, body, bg...
-        :param item_price: The price of the item
-        :param item_name: The origin name of the image item that is in the system.
-        '''
-
-        # print(reactf)
-        if not mid:
-            return await ctx.send("**Specify the message id!**", delete_after=3)
-        elif not reactf:
-            if not len(reactf) <= 50:
-                return await ctx.send("**Specify a shorter reaction!** (max=50)", delete_after=3)
-            else:
-                return await ctx.send("**Specify the reaction!**", delete_after=3)
-        elif not image_name:
-            if not len(item_name) <= 50:
-                return await ctx.send("**Specify a shorter item name! (max=50)**", delete_after=3)
-            else:
-                return await ctx.send("**Specify the image name!**", delete_after=3)
-        elif not item_type:
-            if not len(item_type) <= 10:
-                return await ctx.send("**Specify a shorter item type name!**", delete_after=3)
-            else:
-                return await ctx.send("**Specify the item type!**", delete_after=3)
-
-        elif not item_price:
-            return await ctx.send("**Specify the item price!**", delete_after=3)
-        elif not item_name:
-            if not len(item_name) <= 30:
-                return await ctx.send("**Specify a shorter item name! (max=30)**", delete_after=3)
-            else:
-                return await ctx.send("**Specify the item name!**", delete_after=3)
-
-        await self.insert_registered_item(mid.id, reactf, image_name, item_type, item_price, item_name)
-        await mid.add_reaction(reactf)
-        return await ctx.send(f"**Item __{item_name.title()}__ successfully registered!**", delete_after=3)
-
-    async def insert_registered_item(self, mid: int, reactf, image_name: str, item_type: str, item_price: int,
-                                     item_name: str):
-        mycursor, db = await the_database()
-        await mycursor.execute(
-            "INSERT INTO RegisteredItems (image_name, item_type, item_name, item_price, message_ref, reaction_ref) VALUES (%s, %s, %s, %s, %s, %s)",
-            (image_name, item_type.lower(), item_name.title(), item_price, mid, reactf))
-        await db.commit()
-        await mycursor.close()
-
-    async def delete_registered_item(self, item_name: str):
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM RegisteredItems WHERE item_name = %s", (item_name,))
-        await db.commit()
-        await mycursor.close()
-
-    async def check_user_have_item(self, user_id: int, item_name: str):
-
-        user_items = await self.get_user_specific_item(user_id, item_name)
+        user_item = await self.get_user_specific_item(user_id, item_name)
         # print(user_items)
-        if user_items:
+        if user_item:
             return True
         else:
             return False
