@@ -216,7 +216,7 @@ class Merchant(Player):
             random_item = random.choice(registered_items)
 
             # Checks whether user already has the item
-            user_has_item = await SlothCurrency.check_user_have_item(user_id=merchant.id, item_name=random_item[2])
+            user_has_item = await SlothCurrency.check_user_has_item(user_id=merchant.id, item_name=random_item[2])
             if user_has_item:
                 # Gives the user the price of the item
                 await self.update_user_money(merchant.id, random_item[3])
