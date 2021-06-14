@@ -156,7 +156,7 @@ class Social(commands.Cog):
 
         embed.add_field(name="Joined at:", value=member.joined_at.strftime("%a, %d %B %y, %I %M %p UTC"), inline=False)
 
-        embed.add_field(name=f"Roles: {len(roles)}", value=" ".join([role.mention for role in roles]), inline=False)
+        embed.add_field(name=f"Roles: {len(roles)}", value=" ".join([role.mention for role in roles][:15]), inline=False)
         embed.add_field(name="Top role:", value=member.top_role.mention, inline=False)
 
         embed.add_field(name="Bot?", value=member.bot)

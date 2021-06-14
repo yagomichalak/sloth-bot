@@ -364,16 +364,22 @@ class SlothCurrency(commands.Cog):
     async def get_user_specific_type_item(self, user_id, item_type):
         mycursor, db = await the_database()
         await mycursor.execute(
-            f"SELECT * FROM UserItems WHERE user_id = {user_id} and item_type = '{item_type}' and enable = 'equipped'")
-        spec_type_items = await mycursor.fetchall()
+            f"SELECT item_name FROM UserItems WHERE user_id = {user_id} and item_type = '{item_type}' and enable = 'equipped'")
+        spec_type_items = await mycursor.fetchone()
         await mycursor.close()
 
-        if len(spec_type_items) != 0:
-            registered_item = await self.get_specific_register_item(spec_type_items[0][1])
-            return f'./sloth_custom_images/{item_type}/{registered_item[0][0]}'
+        if spec_type_items[0]:
+            return f'./sloth_custom_images/{item_type}/{spec_type_items[0]}'
+
         else:
-            default_item = f'./sloth_custom_images/{item_type}/base_{item_type}.png'
-            return default_item
+            return f'./sloth_custom_images/{item_type}/base_{item_type}.png'
+
+        # if len(spec_type_items) != 0:
+        #     registered_item = await self.get_specific_register_item(spec_type_items[0][1])
+        #     return f'./sloth_custom_images/{item_type}/{registered_item[0][0]}'
+        # else:
+        #     default_item = f'./sloth_custom_images/{item_type}/base_{item_type}.png'
+        #     return default_item
 
     async def check_user_can_equip(self, user_id, item_name: str) -> bool:
         mycursor, db = await the_database()
