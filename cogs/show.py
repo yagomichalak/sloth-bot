@@ -59,7 +59,7 @@ class Show(commands.Cog):
             inline=True)
         embed.add_field(
             name="__Commands and Categories__",
-            value=f"```apache\n{len([_ for _ in self.client.walk_commands()])} commands separated in {len(self.client.cogs)} different categories.```",
+            value=f"```apache\n{len([_ for _ in self.client.walk_commands()])} commands and {len(self.client.slash.commands.keys())} slash commands separated in {len(self.client.cogs)} different categories.```",
             inline=True)
         embed.add_field(name="__Operating System__",
             value=f'```apache\nThe bot is running and being hosted on a "{sys.platform}" machine.```',
