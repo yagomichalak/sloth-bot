@@ -14,7 +14,7 @@ owner_role_id = int(os.getenv('OWNER_ROLE_ID'))
 mod_role_id = int(os.getenv('MOD_ROLE_ID'))
 allowed_roles = [owner_role_id, admin_role_id, mod_role_id]
 
-guild_ids = [777886754761605140]
+guild_ids = [int(os.getenv('SERVER_ID'))]
 
 class Embeds(commands.Cog):
     '''
@@ -58,9 +58,7 @@ class Embeds(commands.Cog):
                         create_permission(int(os.getenv('COSMOS_ID')), SlashCommandPermissionType.USER, True),
                         create_permission(owner_role_id, SlashCommandPermissionType.ROLE, True),
                         create_permission(admin_role_id, SlashCommandPermissionType.ROLE, True),
-                        create_permission(mod_role_id, SlashCommandPermissionType.ROLE, True),
-                        # create_permission(int(os.getenv('ADMIN_ROLE_ID')), SlashCommandPermissionType.ROLE, True),
-                        # create_multi_ids_permission(allowed_roles, SlashCommandPermissionType.ROLE, True),
+                        create_permission(mod_role_id, SlashCommandPermissionType.ROLE, True)
                     ]
                 })
     async def _embed(self, ctx, **fields):
