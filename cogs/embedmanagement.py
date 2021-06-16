@@ -135,9 +135,9 @@ class EmbedManagement(commands.Cog):
 
     # In-Discord methods / commands
 
-    @commands.group()
+    @commands.group(aliases=['cemb', 'cembed'])
     @commands.has_any_role(*allowed_roles)
-    async def embed(self, ctx) -> None:
+    async def custom_embed(self, ctx) -> None:
         """ Embeds a message."""
 
         if ctx.invoked_subcommand:
@@ -158,7 +158,7 @@ class EmbedManagement(commands.Cog):
 
     # Subcommands (Tier 2)
 
-    @embed.group(aliases=['s'])
+    @custom_embed.group(aliases=['s'])
     async def show(self, ctx, embed_name: str = None) -> None:
         """ Shows an embed.
         :param embed_name: The name of the embed that you want to show. """
@@ -200,7 +200,7 @@ class EmbedManagement(commands.Cog):
         else:
             return await ctx.send(f"**Embed `{embed_name}` doesn't exist, {ctx.author.mention}!**")
 
-    @embed.group(aliases=['c'])
+    @custom_embed.group(aliases=['c'])
     @commands.has_permissions(administrator=True)
     async def create(self, ctx, embed_name: str = None) -> None:
         """ Creates an embed in the DB.
@@ -222,7 +222,7 @@ class EmbedManagement(commands.Cog):
             await self.insert_embed(embed_name)
             await ctx.send(f"**`{embed_name}` added into database!**")
 
-    @embed.group(aliases=['d', 'del', 'rm', 'remove'])
+    @custom_embed.group(aliases=['d', 'del', 'rm', 'remove'])
     @commands.has_permissions(administrator=True)
     async def delete(self, ctx, embed_name: str = None, field: str = None) -> None:
         """ Deletes a field from the DB.
@@ -287,7 +287,7 @@ class EmbedManagement(commands.Cog):
 
             await ctx.send(f"**`{field}` deleted from database!**")
 
-    @embed.group(aliases=['e'])
+    @custom_embed.group(aliases=['e'])
     @commands.has_permissions(administrator=True)
     async def edit(self, ctx) -> None:
         """ Edits an embed in the DB. """
