@@ -4,6 +4,11 @@ from pytz import timezone
 from dotenv import load_dotenv
 from discord.ext import commands, tasks
 
+# Slash
+from discord_slash import SlashCommand, SlashContext
+from discord_slash.model import SlashCommandPermissionType
+from discord_slash.utils.manage_commands import create_option, create_choice, create_permission
+
 import os
 from datetime import datetime
 from itertools import cycle
@@ -16,8 +21,8 @@ load_dotenv()
 
 # IDs
 user_cosmos_id = int(os.getenv('COSMOS_ID'))
-server_id = int(os.getenv('SERVER_ID'))
 moderator_role_id = int(os.getenv('MOD_ROLE_ID'))
+server_id = int(os.getenv('SERVER_ID'))
 teacher_role_id = int(os.getenv('TEACHER_ROLE_ID'))
 moderation_log_channel_id = int(os.getenv('MOD_LOG_CHANNEL_ID'))
 lesson_category_id = int(os.getenv('LESSON_CAT_ID'))
@@ -26,6 +31,8 @@ admin_commands_channel_id = int(os.getenv('ADMIN_COMMANDS_CHANNEL_ID'))
 patreon_role_id = int(os.getenv('SLOTH_EXPLORER_ROLE_ID'))
 announ_announ_channel_id = int(os.getenv('ANNOUNCEMENT_CHANNEL_ID'))
 error_log_channel_id = int(os.getenv('ERROR_LOG_CHANNEL_ID'))
+guild_ids = [777886754761605140]
+
 # colors = cycle([(255, 0, 0), (255, 127, 0), (255, 255, 0), (0, 255, 0), (0, 0, 255), (75, 0, 130), (143, 0, 255)])
 shades_of_pink = cycle([(252, 15, 192), (255, 0, 255), (248, 24, 148),
               (224, 17, 95), (246, 74, 138), (236, 85, 120),
@@ -40,6 +47,7 @@ shades_of_pink = cycle([(252, 15, 192), (255, 0, 255), (248, 24, 148),
 # Making the client variable
 intents = discord.Intents.all()
 client = commands.Bot(command_prefix='z!', intents=intents, help_command=None)
+slash = SlashCommand(client, sync_commands=True, sync_on_cog_reload=True)
 
 token = os.getenv('TOKEN')
 
@@ -279,6 +287,7 @@ async def help(ctx, *, cmd: str = None):
         for cog in client.cogs:
             cog = client.get_cog(cog)
             commands = [c.name for c in cog.get_commands() if not c.hidden]
+
             if commands:
                 embed.add_field(
                     name=f"__{cog.qualified_name}__",
@@ -290,6 +299,14 @@ async def help(ctx, *, cmd: str = None):
         for y in client.walk_commands():
             if not y.cog_name and not y.hidden:
                 cmds.append(y.name)
+
+        if slash.commands:
+            embed.add_field(
+                name="__Slash Commands__", 
+                value=', '.join([cmd for cmd in slash.commands]),
+                inline=False
+            )
+                
         embed.add_field(
             name='__Uncategorized Commands__',
             value=f"`Commands:` {', '.join(cmds)}",

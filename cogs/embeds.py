@@ -2,9 +2,19 @@ import discord
 from discord.ext import commands
 import os
 from extra.useful_variables import rules
+from extra import utils
+from datetime import datetime
+from discord_slash import cog_ext, SlashContext
+from discord_slash.model import SlashCommandPermissionType
+from discord_slash.utils.manage_commands import create_option, create_choice, create_permission, create_multi_ids_permission
 
-allowed_roles = [int(os.getenv('OWNER_ROLE_ID')), int(os.getenv('ADMIN_ROLE_ID')), int(os.getenv('MOD_ROLE_ID'))]
 
+admin_role_id = int(os.getenv('ADMIN_ROLE_ID'))
+owner_role_id = int(os.getenv('OWNER_ROLE_ID'))
+mod_role_id = int(os.getenv('MOD_ROLE_ID'))
+allowed_roles = [owner_role_id, admin_role_id, mod_role_id]
+
+guild_ids = [777886754761605140]
 
 class Embeds(commands.Cog):
     '''
@@ -20,9 +30,9 @@ class Embeds(commands.Cog):
         print('Embeds cog is ready.')
 
     # Sends an embedded message
-    @commands.command()
+    @commands.command(aliases=['emb'])
     @commands.has_any_role(*allowed_roles)
-    async def emb(self, ctx):
+    async def embed(self, ctx):
         '''
         (MOD) Sends an embedded message.
         '''
@@ -30,9 +40,48 @@ class Embeds(commands.Cog):
         if len(ctx.message.content.split()) < 2:
             return await ctx.send('You must inform all parameters!')
 
-        msg = ctx.message.content.split('!emb', 1)
+        msg = ctx.message.content.split('z!embed', 1)
         embed = discord.Embed(description=msg[1], colour=discord.Colour.dark_green())
         await ctx.send(embed=embed)
+
+    @cog_ext.cog_slash(name="embed", description="Makes an embedded message", default_permission=False,
+                options=[
+                    create_option(name="description", description="You decide", option_type=3, required=False),
+                    create_option(name="title", description="You decide", option_type=3, required=False),
+                    create_option(name="timestamp", description="You decide", option_type=5, required=False),
+                    create_option(name="url", description="URL for the title", option_type=3, required=False),#,
+                    create_option(name="thumbnail", description="Thumbnail for the embed.", option_type=3, required=False),
+                    create_option(name="image", description="Display image.", option_type=3, required=False),
+                ], guild_ids=guild_ids,
+                permissions={
+                    guild_ids[0]: [
+                        create_permission(int(os.getenv('COSMOS_ID')), SlashCommandPermissionType.USER, True),
+                        create_permission(owner_role_id, SlashCommandPermissionType.ROLE, True),
+                        create_permission(admin_role_id, SlashCommandPermissionType.ROLE, True),
+                        create_permission(mod_role_id, SlashCommandPermissionType.ROLE, True),
+                        # create_permission(int(os.getenv('ADMIN_ROLE_ID')), SlashCommandPermissionType.ROLE, True),
+                        # create_multi_ids_permission(allowed_roles, SlashCommandPermissionType.ROLE, True),
+                    ]
+                })
+    async def _embed(self, ctx, **fields):
+
+        # Checks if there's a timestamp and sorts time
+        if (timestamp := fields.get('timestamp')) is not None:
+            if timestamp:
+                fields['timestamp'] = await utils.parse_time()
+            else:
+                fields.pop('timestamp', None)
+
+        emb = discord.Embed(**fields)
+
+        if (thumbnail := fields.get('thumbnail')) is not None:
+            emb.set_thumbnail(url=thumbnail)
+
+        if (image := fields.get('image')) is not None:
+            emb.set_image(url=image)
+
+
+        await ctx.send(embeds=[emb])
 
     @commands.command()
     @commands.has_permissions(administrator=True)

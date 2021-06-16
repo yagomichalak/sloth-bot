@@ -18,6 +18,11 @@ from pytz import timezone
 from mysqldb import the_database
 from extra.useful_variables import patreon_roles
 
+guild_ids = [777886754761605140]
+from discord_slash import cog_ext, SlashContext
+from discord_slash.model import SlashCommandPermissionType
+from discord_slash.utils.manage_commands import create_option, create_choice, create_permission, create_multi_ids_permission
+
 mod_role_id = int(os.getenv('MOD_ROLE_ID'))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID'))
 owner_role_id = int(os.getenv('OWNER_ROLE_ID'))
@@ -801,5 +806,30 @@ class Tools(commands.Cog):
 
         await ctx.send(f"**All Patreons were paid!**")
         
+    @cog_ext.cog_slash(name="dnk", description="Tells you something about DNK.", guild_ids=guild_ids)
+    async def _dnk(self, ctx):
+        await ctx.send(f"**DNK est toujours là pour des vrais !**")
+
+    @cog_ext.cog_slash(name="mention", description="Used to mention staff members", options=[
+        create_option(
+            name="member", description="The Staff member to mention/ping.", option_type=3, required=True, 
+            choices=[
+                create_choice(name="Cosmos", value=os.getenv('COSMOS_ID')), create_choice(name="Alex", value=os.getenv('ALEX_ID')),
+                create_choice(name="DNK", value=os.getenv('DNK_ID')), create_choice(name="Muffin", value=os.getenv('MUFFIN_ID')),
+                create_choice(name="Pretzel", value=os.getenv('PRETZEL_ID')), create_choice(name="Prisca", value=os.getenv('PRISCA_ID'))
+            ]
+        )], default_permission=False, permissions={guild_ids[0]: [
+                create_permission(int(os.getenv('COSMOS_ID')), SlashCommandPermissionType.USER, True),
+                create_permission(int(os.getenv('OWNER_ROLE_ID')), SlashCommandPermissionType.ROLE, True),
+                create_permission(int(os.getenv('ADMIN_ROLE_ID')), SlashCommandPermissionType.ROLE, True)
+            ]}, guild_ids=guild_ids
+        )
+    async def _mention(self, ctx, member: int):
+
+        if staff_member := discord.utils.get(ctx.guild.members, id=int(member)):
+            await ctx.send(staff_member.mention)
+        else:
+            await ctx.send("**For some reason I couldn't ping them =\ **")
+
 def setup(client):
     client.add_cog(Tools(client))
