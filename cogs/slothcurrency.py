@@ -291,9 +291,16 @@ class SlothCurrency(commands.Cog):
         await db.commit()
         await mycursor.close()
 
+    async def get_user_item(self, user_id: int):
+        mycursor, db = await the_database()
+        await mycursor.execute("SELECT * FROM UserItems WHERE user_id = %s ORDER BY user_id", (user_id,))
+        item_system = await mycursor.fetchone()
+        await mycursor.close()
+        return item_system
+
     async def get_user_items(self, user_id: int):
         mycursor, db = await the_database()
-        await mycursor.execute(f"SELECT * FROM UserItems WHERE user_id = {user_id} ORDER BY user_id")
+        await mycursor.execute("SELECT * FROM UserItems WHERE user_id = %s ORDER BY user_id", (user_id,))
         item_system = await mycursor.fetchall()
         await mycursor.close()
         return item_system
