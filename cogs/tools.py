@@ -18,7 +18,7 @@ from pytz import timezone
 from mysqldb import the_database
 from extra.useful_variables import patreon_roles
 
-guild_ids = [777886754761605140]
+guild_ids = [int(os.getenv('SERVER_ID'))]
 from discord_slash import cog_ext, SlashContext
 from discord_slash.model import SlashCommandPermissionType
 from discord_slash.utils.manage_commands import create_option, create_choice, create_permission, create_multi_ids_permission
