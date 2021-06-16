@@ -32,7 +32,7 @@ admin_commands_channel_id = int(os.getenv('ADMIN_COMMANDS_CHANNEL_ID'))
 patreon_role_id = int(os.getenv('SLOTH_EXPLORER_ROLE_ID'))
 announ_announ_channel_id = int(os.getenv('ANNOUNCEMENT_CHANNEL_ID'))
 error_log_channel_id = int(os.getenv('ERROR_LOG_CHANNEL_ID'))
-guild_ids = [777886754761605140]
+guild_ids = [server_id]
 
 # colors = cycle([(255, 0, 0), (255, 127, 0), (255, 255, 0), (0, 255, 0), (0, 0, 255), (75, 0, 130), (143, 0, 255)])
 shades_of_pink = cycle([(252, 15, 192), (255, 0, 255), (248, 24, 148),
