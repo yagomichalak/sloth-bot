@@ -44,7 +44,7 @@ class Embeds(commands.Cog):
         embed = discord.Embed(description=msg[1], colour=discord.Colour.dark_green())
         await ctx.send(embed=embed)
 
-    @cog_ext.cog_slash(name="embed", description="Makes an embedded message", default_permission=False,
+    @cog_ext.cog_slash(name="embed", description="(MOD) Makes an improved embedded message", default_permission=False,
                 options=[
                     create_option(name="description", description="You decide", option_type=3, required=False),
                     create_option(name="title", description="You decide", option_type=3, required=False),

@@ -810,7 +810,7 @@ class Tools(commands.Cog):
     async def _dnk(self, ctx):
         await ctx.send(f"**DNK est toujours là pour des vrais !**")
 
-    @cog_ext.cog_slash(name="mention", description="Used to mention staff members", options=[
+    @cog_ext.cog_slash(name="mention", description="(ADMIN) Used to mention staff members", options=[
         create_option(
             name="member", description="The Staff member to mention/ping.", option_type=3, required=True, 
             choices=[

@@ -8,6 +8,7 @@ from discord.ext import commands, tasks
 from discord_slash import SlashCommand, SlashContext
 from discord_slash.model import SlashCommandPermissionType
 from discord_slash.utils.manage_commands import create_option, create_choice, create_permission
+from discord_slash.model import CogBaseCommandObject
 
 import os
 from datetime import datetime
@@ -286,7 +287,10 @@ async def help(ctx, *, cmd: str = None):
 
         for cog in client.cogs:
             cog = client.get_cog(cog)
-            commands = [c.name for c in cog.get_commands() if not c.hidden]
+
+            commands = [f"{client.command_prefix}{c.name}" for c in cog.get_commands() if not c.hidden]
+            slash_commands = [f"/{sc}" for sc, sco in cog.client.slash.commands.items() if sco.cog == cog]
+            commands.extend(slash_commands)
 
             if commands:
                 embed.add_field(
@@ -296,16 +300,12 @@ async def help(ctx, *, cmd: str = None):
                     )
 
         cmds = []
+        slash_cmds = [f"/{sc}" for sc, sco in client.slash.commands.items() if not sco.cog]
         for y in client.walk_commands():
             if not y.cog_name and not y.hidden:
-                cmds.append(y.name)
+                cmds.append(f"{client.command_prefix}{y.name}")
 
-        if slash.commands:
-            embed.add_field(
-                name="__Slash Commands__", 
-                value=', '.join([cmd for cmd in slash.commands]),
-                inline=False
-            )
+        cmds.extend(slash_cmds)
                 
         embed.add_field(
             name='__Uncategorized Commands__',
@@ -315,8 +315,12 @@ async def help(ctx, *, cmd: str = None):
 
     else:
         # Checks if it's a command
+        if cmd.startswith('/') and (command := client.slash.commands.get(cmd[1:])):
+            command_embed = discord.Embed(title=f"__Command:__ /{command.name}", description=f"__**Description:**__\n```{command.description}```", color=ctx.author.color, timestamp=ctx.message.created_at)
+            return await ctx.send(embed=command_embed)
+            
         if command := client.get_command(cmd.lower()):
-            command_embed = discord.Embed(title=f"__Command:__ {command.qualified_name}", description=f"__**Description:**__\n```{command.help}```", color=ctx.author.color, timestamp=ctx.message.created_at)
+            command_embed = discord.Embed(title=f"__Command:__ {client.command_prefix}{command.qualified_name}", description=f"__**Description:**__\n```{command.help}```", color=ctx.author.color, timestamp=ctx.message.created_at)
             return await ctx.send(embed=command_embed)
 
         # Checks if it's a cog
