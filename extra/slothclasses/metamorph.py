@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-from .player import Player
+from .player import Player, Skill
 from mysqldb import the_database
 from extra.menu import ConfirmSkill
 from extra import utils
@@ -39,7 +39,7 @@ class Metamorph(Player):
         if not confirmed:
             return await ctx.send(f"**{member.mention}, not transmutating, then!**")
 
-        await self.check_cooldown(user_id=member.id, skill_number=1)
+        await self.check_cooldown(user_id=member.id, skill=Skill.ONE)
 
         timestamp = await utils.get_timestamp()
         await self.insert_skill_action(
@@ -47,7 +47,7 @@ class Metamorph(Player):
             skill_timestamp=timestamp, target_id=member.id,
             channel_id=ctx.channel.id
         )
-        await self.update_user_action_skill_ts(member.id, timestamp)
+        await self.update_user_skill_ts(member.id, Skill.ONE, timestamp)
         # Updates user's skills used counter
         await self.update_user_skills_used(user_id=member.id)
 
@@ -93,7 +93,7 @@ class Metamorph(Player):
 
     @commands.command(aliases=['frogify'])
     @Player.skills_used(requirement=5)
-    @Player.skill_on_cooldown(skill_number=2)
+    @Player.skill_on_cooldown(skill=Skill.TWO)
     @Player.user_is_class('metamorph')
     @Player.skill_mark()
     # @Player.not_ready()
@@ -129,7 +129,7 @@ class Metamorph(Player):
         if not confirmed:
             return await ctx.send(f"**{attacker.mention}, not frogging them, then!**")
 
-        await self.check_cooldown(user_id=attacker.id, skill_number=2)
+        await self.check_cooldown(user_id=attacker.id, skill=Skill.TWO)
 
         timestamp = await utils.get_timestamp()
         await self.insert_skill_action(
@@ -138,7 +138,7 @@ class Metamorph(Player):
             channel_id=ctx.channel.id
         )
         try:
-            await self.update_user_action_skill_two_ts(attacker.id, timestamp)
+            await self.update_user_skill_ts(attacker.id, Skill.TWO, timestamp)
             # Updates user's skills used counter
             await self.update_user_skills_used(user_id=attacker.id)
 

@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands, menus
-from .player import Player
+from .player import Player, Skill
 from mysqldb import the_database, the_django_database
 from extra.menu import ConfirmSkill, SwitchTribePages
 from extra import utils
@@ -115,7 +115,7 @@ class Munk(Player):
         if not confirmed:
             return await ctx.send("**Not converting them, then!**")
 
-        await self.check_cooldown(user_id=attacker.id, skill_number=1)
+        await self.check_cooldown(user_id=attacker.id, skill=Skill.ONE)
 
         try:
             await target.edit(nick=f"{target.display_name} Munk")
@@ -125,7 +125,7 @@ class Munk(Player):
             #     user_id=attacker.id, skill_type="munk", skill_timestamp=current_timestamp,
             #     target_id=target.id, channel_id=ctx.channel.id
             # )
-            await self.update_user_action_skill_ts(attacker.id, current_timestamp)
+            await self.update_user_skill_ts(attacker.id, Skill.ONE, current_timestamp)
             # Updates user's skills used counter
             await self.update_user_skills_used(user_id=attacker.id)
             munk_embed = await self.get_munk_embed(

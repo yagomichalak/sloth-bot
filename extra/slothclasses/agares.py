@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 import os
-from .player import Player
+from .player import Player, Skill
 from extra.menu import ConfirmSkill
 from extra import utils
 
@@ -84,7 +84,7 @@ class Agares(Player):
         else:
             # Puts the attacker's skill on cooldown
             current_ts = await utils.get_timestamp()
-            await self.update_user_action_skill_ts(attacker.id, current_ts)
+            await self.update_user_skill_ts(attacker.id, Skill.ONE, current_ts)
             # Updates user's skills used counter
             await self.update_user_skills_used(user_id=attacker.id)
             # Sends embedded message into the channel
@@ -95,7 +95,7 @@ class Agares(Player):
 
     @commands.command()
     @Player.skills_used(requirement=5)
-    @Player.skill_on_cooldown(skill_number=2)
+    @Player.skill_on_cooldown(skill=Skill.TWO)
     @Player.user_is_class('agares')
     @Player.skill_mark()
     # @Player.not_ready()
@@ -128,7 +128,7 @@ class Agares(Player):
         if not confirm:
             return await ctx.send(f"**Not resetting it, then!**")
 
-        await self.check_cooldown(user_id=perpetrator.id, skill_number=2)
+        await self.check_cooldown(user_id=perpetrator.id, skill=Skill.TWO)
 
         try:
             await self.reset_user_action_skill_cooldown(target.id)
@@ -138,7 +138,7 @@ class Agares(Player):
         else:
             # Puts the perpetrator's skill on cooldown
             current_ts = await utils.get_timestamp()
-            await self.update_user_action_skill_two_ts(perpetrator.id, current_ts)
+            await self.update_user_skill_ts(perpetrator.id, Skill.TWO, current_ts)
             # Updates user's skills used counter
             await self.update_user_skills_used(user_id=perpetrator.id)
             # Sends embedded message into the channel

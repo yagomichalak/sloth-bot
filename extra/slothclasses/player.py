@@ -9,7 +9,17 @@ from typing import Union, List
 from datetime import datetime
 import os
 
+from enum import Enum
+
 bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
+
+class Skill(Enum):
+
+    ONE = 'skill_one_ts'
+    TWO = 'skill_two_ts'
+    THREE = 'skill_three_ts'
+    FOUR = 'skill_four_ts'
+    FIVE = 'skill_five_ts'
 
 
 class Player(commands.Cog):
@@ -49,27 +59,26 @@ class Player(commands.Cog):
                 required_class=command_class, error_message="You don't have the required Sloth Class to run this command!")
         return commands.check(real_check)
 
-    async def check_cooldown(self, user_id, skill_number: int, seconds: int = 86400) -> bool:
+    async def check_cooldown(self, user_id: int, skill: Enum, seconds: int = 86400) -> bool:
         """ Checks whether user skill is on cooldown (method).
         :param user_id: The ID of the user who to check it"""
 
-        last_skill_ts = await self.get_user_action_skill_ts(user_id=user_id, skill_number=skill_number)
+        skill_ts = await self.get_user_action_skill_ts(user_id=user_id, skill_field=skill.value)
 
-        # current_time = ctx.message.created_at
-        current_time = datetime.utcnow()
-
-        cooldown_in_seconds = (current_time - datetime.fromtimestamp(last_skill_ts)).total_seconds()
+        current_ts = await utils.get_timestamp()
+        cooldown_in_seconds = current_ts - skill_ts
         if cooldown_in_seconds >= seconds:
             return True
+
         raise ActionSkillOnCooldown(try_after=cooldown_in_seconds, error_message="Action skill on cooldown!")
 
-    def skill_on_cooldown(skill_number: int = 1, seconds: int = 86400):
+    def skill_on_cooldown(skill: Enum = Skill.ONE, seconds: int = 86400):
         """ Checks whether the user's action skill is on cooldown. """
 
         async def real_check(ctx):
             """ Perfoms the real check. """
 
-            last_skill_ts = await Player.get_user_action_skill_ts(Player, user_id=ctx.author.id, skill_number=skill_number)
+            last_skill_ts = await Player.get_user_action_skill_ts(Player, user_id=ctx.author.id, skill_field=skill.value)
             current_time = await utils.get_timestamp()
             cooldown_in_seconds = current_time - last_skill_ts
             if cooldown_in_seconds >= seconds:
@@ -348,21 +357,18 @@ class Player(commands.Cog):
         await mycursor.close()
         return skill_action
 
-    async def get_user_action_skill_ts(self, user_id: int, skill_number: int = 1) -> Union[str, bool]:
+    async def get_user_action_skill_ts(self, user_id: int, skill_field: str) -> Union[str, bool]:
         """ Gets the user's last action skill timestamp from the database.
         :param user_id: The ID of the user to get the action skill timestamp.
-        :param skill_number: The number of the skill, ex: 1 for skill 1. """
+        :param skill_field: The skill field to check. """
 
         mycursor, db = await the_database()
-        if skill_number == 1:
-            await mycursor.execute("SELECT last_skill_ts FROM UserCurrency WHERE user_id = %s", (user_id,))
-        elif skill_number == 2:
-            await mycursor.execute("SELECT last_skill_two_ts FROM UserCurrency WHERE user_id = %s", (user_id,))
+        await mycursor.execute("SELECT %s FROM SkillsCooldown WHERE user_id = %s", (skill_field, user_id))
 
-        last_skill_ts = await mycursor.fetchone()
+        skill_ts = await mycursor.fetchone()
         await mycursor.close()
-        if last_skill_ts:
-            return last_skill_ts[0]
+        if skill_ts:
+            return skill_ts[0]
         else:
             return None
 
@@ -504,26 +510,6 @@ class Player(commands.Cog):
         await db.commit()
         await mycursor.close()
 
-    async def update_user_action_skill_ts(self, user_id: int, current_ts: int) -> None:
-        """ Updates the user's last action skill timestamp.
-        :param user_id: The ID of the member to update.
-        :param current_ts: The timestamp to update to. """
-
-        mycursor, db = await the_database()
-        await mycursor.execute("UPDATE UserCurrency SET last_skill_ts = %s WHERE user_id = %s", (current_ts, user_id))
-        await db.commit()
-        await mycursor.close()
-
-    async def update_user_action_skill_two_ts(self, user_id: int, current_ts: int) -> None:
-        """ Updates the user's last action skill two timestamp.
-        :param user_id: The ID of the member to update.
-        :param current_ts: The timestamp to update to. """
-
-        mycursor, db = await the_database()
-        await mycursor.execute("UPDATE UserCurrency SET last_skill_two_ts = %s WHERE user_id = %s", (current_ts, user_id))
-        await db.commit()
-        await mycursor.close()
-
     async def update_user_skills_used(self, user_id: int, addition: int = 1) -> None:
         """ Updates the user's skills used counter.
         :param user_id: The ID of the user.
@@ -534,12 +520,15 @@ class Player(commands.Cog):
         await db.commit()
         await mycursor.close()
 
-    async def reset_user_action_skill_cooldown(self, user_id: int) -> None:
-        """ Resets the user's action skill cooldown.
-        :param user_id: The ID of the user to reet the cooldown. """
+    # =====
+    async def update_user_skill_ts(self, user_id: int, skill: Enum, new_skill_ts: int = None) -> None:
+        """ Updates the value of the user's skill.
+        :parma user_id: The ID of the user.
+        :param skill: The Enum of the skill.
+        :param new_skill_ts: The new timestamp value for the skill. Default = None. """
 
         mycursor, db = await the_database()
-        await mycursor.execute("UPDATE UserCurrency SET last_skill_ts = 0 WHERE user_id = %s", (user_id,))
+        await mycursor.execute("UPDATE SkillsCooldown SET %s = %s WHERE user_id = %s", (skill.value, new_skill_ts, user_id))
         await db.commit()
         await mycursor.close()
 

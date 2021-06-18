@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands, menus
-from .player import Player
+from .player import Player, Skill
 from mysqldb import the_database
 from extra.menu import ConfirmSkill, prompt_number, OpenShopLoop
 from extra import utils
@@ -44,7 +44,7 @@ class Merchant(Player):
 
         confirm = await ConfirmSkill(f"**{member.mention}, are you sure you want to spend `50łł` to put an item in your shop with the price of `{item_price}`łł ?**").prompt(ctx)
         if confirm:
-            await self.check_cooldown(user_id=member.id, skill_number=1)
+            await self.check_cooldown(user_id=member.id, skill=Skill.ONE)
 
             user_currency = await self.get_user_currency(member.id)
             if user_currency[1] >= 50:
@@ -58,7 +58,7 @@ class Merchant(Player):
                     user_id=member.id, skill_type="potion", skill_timestamp=current_timestamp,
                     target_id=member.id, channel_id=ctx.channel.id, price=item_price
                 )
-                await self.update_user_action_skill_ts(member.id, current_timestamp)
+                await self.update_user_skill_ts(member.id, Skill.ONE, current_timestamp)
                 # Updates user's skills used counter
                 await self.update_user_skills_used(user_id=member.id)
                 open_shop_embed = await self.get_open_shop_embed(
@@ -178,7 +178,7 @@ class Merchant(Player):
 
     @commands.command()
     @Player.skills_used(requirement=5)
-    @Player.skill_on_cooldown(skill_number=2)
+    @Player.skill_on_cooldown(skill=Skill.TWO)
     @Player.user_is_class('merchant')
     @Player.skill_mark()
     # @Player.not_ready()
@@ -197,7 +197,7 @@ class Merchant(Player):
         if not confirm:
             return await ctx.send(f"**Not buying it, then!**")
 
-        await self.check_cooldown(user_id=merchant.id, skill_number=2)
+        await self.check_cooldown(user_id=merchant.id, skill=Skill.TWO)
 
         # Checks whether user has money
         user_currency = await self.get_user_currency(merchant.id)
@@ -207,7 +207,7 @@ class Merchant(Player):
             return await ctx.send(f"**{merchant.mention}, you don't have `50łł`!**")
 
         current_timestamp = await utils.get_timestamp()
-        await self.update_user_action_skill_two_ts(merchant.id, current_timestamp)
+        await self.update_user_skillts(merchant.id, Skill.TWO, current_timestamp)
         # Updates user's skills used counter
         await self.update_user_skills_used(user_id=merchant.id)
 

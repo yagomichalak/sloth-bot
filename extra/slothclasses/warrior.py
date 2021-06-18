@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-from .player import Player
+from .player import Player, Skill
 from mysqldb import the_database
 from extra.menu import ConfirmSkill
 from extra import utils
@@ -60,7 +60,7 @@ class Warrior(Player):
         if not confirmed:
             return await ctx.send("**Not knocking them out, then!**")
 
-        await self.check_cooldown(user_id=attacker.id, skill_number=1)
+        await self.check_cooldown(user_id=attacker.id, skill=Skill.ONE)
 
         try:
             current_timestamp = await utils.get_timestamp()
@@ -70,7 +70,7 @@ class Warrior(Player):
                 user_id=attacker.id, skill_type="hit", skill_timestamp=current_timestamp,
                 target_id=target.id, channel_id=ctx.channel.id
             )
-            await self.update_user_action_skill_ts(attacker.id, current_timestamp)
+            await self.update_user_skill_ts(attacker.id, Skill.ONE, current_timestamp)
             # Updates user's skills used counter
             await self.update_user_skills_used(user_id=attacker.id)
 
@@ -83,7 +83,7 @@ class Warrior(Player):
 
     @commands.command(aliases=['crush', 'break'])
     @Player.skills_used(requirement=5)
-    @Player.skill_on_cooldown(skill_number=2)
+    @Player.skill_on_cooldown(skill=Skill.TWO)
     @Player.user_is_class('warrior')
     @Player.skill_mark()
     # @Player.not_ready()
@@ -126,13 +126,13 @@ class Warrior(Player):
         if not confirmed:
             return await ctx.send("**Not hacking them, then!**")
 
-        await self.check_cooldown(user_id=attacker.id, skill_number=2)
+        await self.check_cooldown(user_id=attacker.id, skill=Skill.TWO)
 
         current_timestamp = await utils.get_timestamp()
         # Upate user's money
         await self.update_user_money(attacker.id, -50)
         # # Update attacker's second skill timestamp
-        await self.update_user_action_skill_two_ts(user_id=attacker.id, current_ts=current_timestamp)
+        await self.update_user_skill_ts(user_id=attacker.id, skill=Skill.TWO, new_skill_ts=current_timestamp)
         # Updates user's skills used counter
         await self.update_user_skills_used(user_id=attacker.id)
 
