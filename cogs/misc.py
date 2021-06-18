@@ -387,13 +387,11 @@ class Misc(commands.Cog):
         embed.set_author(name=member, url=member.avatar_url, icon_url=member.avatar_url)
         embed.set_thumbnail(url=member.avatar_url)
         embed.set_footer(text="Requested at:", icon_url=member.guild.icon_url)
-        
-        current_ts = await utils.get_timestamp()
+    
 
-        tzone = timezone('Etc/GMT-1')
+        tzone = timezone('Etc/GMT')
         for reminder in reminders:
-            time_now = datetime.utcfromtimestamp(current_ts + reminder[4])
-            
+            time_now = datetime.fromtimestamp(reminder[3] + reminder[4])
             date_and_time = time_now.astimezone(tzone)
             remind_at = date_and_time.strftime('%Y-%m-%d at %H:%M:%S')
 
