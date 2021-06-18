@@ -358,7 +358,6 @@ class Moderation(commands.Cog):
         :param ctx: The context.
         :param time: The given time. """
 
-        print('here?')
 
         keys = ['d', 'h', 'm', 's']
         for k in keys:
