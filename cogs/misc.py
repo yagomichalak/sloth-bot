@@ -358,7 +358,7 @@ class Misc(commands.Cog):
         current_ts = await utils.get_timestamp()
         await self.insert_member_reminder(member.id, text, current_ts, seconds)
 
-        tzone = timezone('Etc/GMT')
+        tzone = timezone('Etc/GMT-1')
         time_now = datetime.utcfromtimestamp(current_ts + seconds)
         date_and_time = time_now.astimezone(tzone)
         remind_at = date_and_time.strftime('%Y/%m/%d at %H:%M:%S')
@@ -390,10 +390,12 @@ class Misc(commands.Cog):
         
         current_ts = await utils.get_timestamp()
 
-        for reminder in reminders:	
-
-            remind_at = datetime.utcfromtimestamp(current_ts + reminder[4])
-            remind_at = remind_at.strftime('%Y-%m-%d at %H:%M:%S')
+        tzone = timezone('Etc/GMT-1')
+        for reminder in reminders:
+            time_now = datetime.utcfromtimestamp(current_ts + reminder[4])
+            
+            date_and_time = time_now.astimezone(tzone)
+            remind_at = date_and_time.strftime('%Y-%m-%d at %H:%M:%S')
 
             embed.add_field(
                 name=f"ID: {reminder[0]}", 
