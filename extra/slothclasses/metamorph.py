@@ -3,6 +3,7 @@ from discord.ext import commands
 from .player import Player
 from mysqldb import the_database
 from extra.menu import ConfirmSkill
+from extra import utils
 import os
 from datetime import datetime
 
@@ -40,7 +41,7 @@ class Metamorph(Player):
 
         await self.check_cooldown(user_id=member.id, skill_number=1)
 
-        timestamp = await self.get_timestamp()
+        timestamp = await utils.get_timestamp()
         await self.insert_skill_action(
             user_id=member.id, skill_type="transmutation",
             skill_timestamp=timestamp, target_id=member.id,
@@ -90,7 +91,7 @@ class Metamorph(Player):
             except:
                 pass
 
-    @commands.command(aliases=['frogify', 'dnk'])
+    @commands.command(aliases=['frogify'])
     @Player.skills_used(requirement=5)
     @Player.skill_on_cooldown(skill_number=2)
     @Player.user_is_class('metamorph')
@@ -130,7 +131,7 @@ class Metamorph(Player):
 
         await self.check_cooldown(user_id=attacker.id, skill_number=2)
 
-        timestamp = await self.get_timestamp()
+        timestamp = await utils.get_timestamp()
         await self.insert_skill_action(
             user_id=attacker.id, skill_type="frog",
             skill_timestamp=timestamp, target_id=target.id,
@@ -154,11 +155,11 @@ class Metamorph(Player):
         :param channel: The context channel.
         :param perpetrator_id: The ID of the perpetrator of the transmutation. """
 
-        timestamp = await self.get_timestamp()
+        timestamp = await utils.get_timestamp()
 
         transmutation_embed = discord.Embed(
             title="A Transmutation just happened in front of everyone's eyes!",
-            timestamp=datetime.utcfromtimestamp(timestamp)
+            timestamp=datetime.fromtimestamp(timestamp)
         )
         transmutation_embed.description = f"**<@{perpetrator_id}> transmutated themselves into something else! 🦥→💥→🐩**"
         transmutation_embed.color = discord.Color.green()
@@ -174,11 +175,11 @@ class Metamorph(Player):
         :param attacker_id: The ID of the attacker.
         :param target_id: The ID of the target. """
 
-        timestamp = await self.get_timestamp()
+        timestamp = await utils.get_timestamp()
 
         transmutation_embed = discord.Embed(
             title="A Prince(ss) rolled back Time!",
-            timestamp=datetime.utcfromtimestamp(timestamp)
+            timestamp=datetime.fromtimestamp(timestamp)
         )
         transmutation_embed.description = f"**<@{attacker_id}> frogged <@{target_id}>!  🦥→💥→🐸**"
         transmutation_embed.color = discord.Color.green()

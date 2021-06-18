@@ -3,6 +3,7 @@ from discord.ext import commands, menus
 from .player import Player
 from mysqldb import the_database, the_django_database
 from extra.menu import ConfirmSkill, SwitchTribePages
+from extra import utils
 import os
 from datetime import datetime
 from typing import List, Union, Dict, Any
@@ -118,7 +119,7 @@ class Munk(Player):
 
         try:
             await target.edit(nick=f"{target.display_name} Munk")
-            current_timestamp = await self.get_timestamp()
+            current_timestamp = await utils.get_timestamp()
             # Don't need to store it, since it is forever
             # await self.insert_skill_action(
             #     user_id=attacker.id, skill_type="munk", skill_timestamp=current_timestamp,
@@ -143,11 +144,11 @@ class Munk(Player):
         :param perpetrator_id: The ID of the perpetrator of the munk skill.
         :param target_id: The ID of the target member that is gonna be protected. """
 
-        timestamp = await self.get_timestamp()
+        timestamp = await utils.get_timestamp()
 
         munk_embed = discord.Embed(
             title="A Munk Convertion has been delightfully performed!",
-            timestamp=datetime.utcfromtimestamp(timestamp)
+            timestamp=datetime.fromtimestamp(timestamp)
         )
         munk_embed.description = f"🐿️ <@{perpetrator_id}> converted <@{target_id}> into a `Munk`! 🐿️"
         munk_embed.color = discord.Color.green()
@@ -164,13 +165,13 @@ class Munk(Player):
         :param target_id: The target member that is gonna be invited to a tribe.
         :param tribe: The tribe and its information. """
 
-        timestamp = await self.get_timestamp()
+        timestamp = await utils.get_timestamp()
 
         join_tribe_embed = discord.Embed(
             title="Someone just joined a Tribe!",
             description=f"🏕️ {target.mention} just joined `{tribe['name']}`! 🏕️",
             color=discord.Color.green(),
-            timestamp=datetime.utcfromtimestamp(timestamp),
+            timestamp=datetime.fromtimestamp(timestamp),
             url=tribe['link']
         )
 
@@ -313,7 +314,7 @@ class Munk(Player):
             request_msg = await room.send(embed=request_embed)
 
             # Don't need to store it, since it is forever
-            current_timestamp = await self.get_timestamp()
+            current_timestamp = await utils.get_timestamp()
 
             await self.insert_skill_action(
                 user_id=requester.id, skill_type="thumbnail_request", skill_timestamp=current_timestamp,

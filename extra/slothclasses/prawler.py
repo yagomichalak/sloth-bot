@@ -3,6 +3,7 @@ from discord.ext import commands
 from .player import Player
 from mysqldb import the_database
 from extra.menu import ConfirmSkill
+from extra import utils
 import os
 from datetime import datetime
 from typing import List, Union
@@ -97,7 +98,7 @@ class Prawler(Player):
 
 		await self.check_cooldown(user_id=attacker.id, skill_number=1)
 
-		current_timestamp = await self.get_timestamp()
+		current_timestamp = await utils.get_timestamp()
 
 		embed = discord.Embed(
 			description=f"**{target.mention}, you are being robbed by {attacker.mention}! Defend yourself by reacting with 🛡️!**",
@@ -161,7 +162,7 @@ class Prawler(Player):
 
 		try:
 			# Update user's second skill cooldown timestamp
-			current_ts = await self.get_timestamp()
+			current_ts = await utils.get_timestamp()
 			await self.update_user_action_skill_two_ts(user_id=perpetrator.id, current_ts=current_ts)
 			await self.increments_user_sharpness_stack(user_id=perpetrator.id, increment=1)
 			# Updates user's skills used counter
@@ -261,7 +262,7 @@ class Prawler(Player):
 	async def get_expired_steals(self) -> List[List[Union[str, int]]]:
 		""" Gets expired steal skill actions. """
 
-		the_time = await self.get_timestamp()
+		the_time = await utils.get_timestamp()
 		mycursor, db = await the_database()
 		await mycursor.execute("""
 			SELECT * FROM SlothSkills
@@ -278,11 +279,11 @@ class Prawler(Player):
 		:param target_id: The ID of the target member who is beeing stolen from.
 		:param attack_succeed: Whether the attack succeeded or not. """
 
-		timestamp = await self.get_timestamp()
+		timestamp = await utils.get_timestamp()
 
 		steal_embed = discord.Embed(
 			title="A steal just happend!",
-			timestamp=datetime.utcfromtimestamp(timestamp)
+			timestamp=datetime.fromtimestamp(timestamp)
 		)
 		if attack_succeeded:
 			steal_embed.description = f"🍃 <@{attacker_id}> stole 5łł from <@{target_id}>! 🍃"
@@ -302,11 +303,11 @@ class Prawler(Player):
 		:param perpetrator_id: The ID of the perpetrator of the stealing.
 		:param stack: The stack number that the knife was sharpened to. """
 
-		timestamp = await self.get_timestamp()
+		timestamp = await utils.get_timestamp()
 
 		sharpen_embed = discord.Embed(
 			title="A Knife has been Sharpened!",
-			timestamp=datetime.utcfromtimestamp(timestamp)
+			timestamp=datetime.fromtimestamp(timestamp)
 		)
 		sharpen_embed.description = f"<@{perpetrator_id}> has just sharpened his knife to stack `{stack}` 🔪"
 		sharpen_embed.color = discord.Color.green()
@@ -323,10 +324,10 @@ class Prawler(Player):
 		:param double_amount: The amount of leaves that it was doubled to.
 		:param rob_stack: The stack related to the current rob. """
 
-		timestamp = await self.get_timestamp()
+		timestamp = await utils.get_timestamp()
 		rob_doubled_embed = discord.Embed(
 			title="Rob has been Doubled!",
-			timestamp=datetime.utcfromtimestamp(timestamp)
+			timestamp=datetime.fromtimestamp(timestamp)
 		)
 
 		rob_doubled_embed.description = f"<@{attacker_id}> managed to double their stealing, and got more `{double_amount}łł` 🔪🍃"

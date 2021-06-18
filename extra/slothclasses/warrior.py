@@ -3,6 +3,7 @@ from discord.ext import commands
 from .player import Player
 from mysqldb import the_database
 from extra.menu import ConfirmSkill
+from extra import utils
 import os
 from datetime import datetime
 import random
@@ -62,7 +63,7 @@ class Warrior(Player):
         await self.check_cooldown(user_id=attacker.id, skill_number=1)
 
         try:
-            current_timestamp = await self.get_timestamp()
+            current_timestamp = await utils.get_timestamp()
             # Don't need to store it, since it is forever
             await self.update_user_is_knocked_out(target.id, 1)
             await self.insert_skill_action(
@@ -127,7 +128,7 @@ class Warrior(Player):
 
         await self.check_cooldown(user_id=attacker.id, skill_number=2)
 
-        current_timestamp = await self.get_timestamp()
+        current_timestamp = await utils.get_timestamp()
         # Upate user's money
         await self.update_user_money(attacker.id, -50)
         # # Update attacker's second skill timestamp
@@ -184,11 +185,11 @@ class Warrior(Player):
         :param perpetrator_id: The ID of the perpetrator of the knock-out.
         :param target_id: The ID of the target of the knock-out. """
 
-        timestamp = await self.get_timestamp()
+        timestamp = await utils.get_timestamp()
 
         hit_embed = discord.Embed(
             title="Someone was Knocked Out!",
-            timestamp=datetime.utcfromtimestamp(timestamp)
+            timestamp=datetime.fromtimestamp(timestamp)
         )
         hit_embed.description = f"**<@{perpetrator_id}> knocked <@{target_id}> out!** 😵"
         hit_embed.color = discord.Color.green()
@@ -204,11 +205,11 @@ class Warrior(Player):
         :param perpetrator_id: The ID of the perpetrator of the smash action.
         :param target_id: The ID of the target of the smash action. """
 
-        timestamp = await self.get_timestamp()
+        timestamp = await utils.get_timestamp()
 
         smash_embed = discord.Embed(
             title="Someone just got Vulnerable!",
-            timestamp=datetime.utcfromtimestamp(timestamp)
+            timestamp=datetime.fromtimestamp(timestamp)
         )
         smash_embed.description = f"**<@{perpetrator_id}> smashed <@{target_id}>'s' Divine Protection shield; it's gone!** 🚫"
         smash_embed.color = discord.Color.green()
