@@ -3,6 +3,7 @@ from discord.ext import commands, menus
 from .player import Player
 from mysqldb import the_database
 from extra.menu import ConfirmSkill, prompt_number, OpenShopLoop
+from extra import utils
 import os
 from typing import List, Union
 from datetime import datetime
@@ -52,7 +53,7 @@ class Merchant(Player):
                 return await ctx.send(f"**{member.mention}, you don't have `50łł`!**")
 
             try:
-                current_timestamp = await self.get_timestamp()
+                current_timestamp = await utils.get_timestamp()
                 await self.insert_skill_action(
                     user_id=member.id, skill_type="potion", skill_timestamp=current_timestamp,
                     target_id=member.id, channel_id=ctx.channel.id, price=item_price
@@ -205,7 +206,7 @@ class Merchant(Player):
         else:
             return await ctx.send(f"**{merchant.mention}, you don't have `50łł`!**")
 
-        current_timestamp = await self.get_timestamp()
+        current_timestamp = await utils.get_timestamp()
         await self.update_user_action_skill_two_ts(merchant.id, current_timestamp)
         # Updates user's skills used counter
         await self.update_user_skills_used(user_id=merchant.id)
@@ -286,11 +287,11 @@ class Merchant(Player):
         :param perpetrator_id: The ID of the perpetrator of the magic pulling.
         :param price: The price of the item that Merchant put into the shop. """
 
-        timestamp = await self.get_timestamp()
+        timestamp = await utils.get_timestamp()
 
         open_shop_embed = discord.Embed(
             title="A Merchant item has been put into the `Sloth Class Shop`!",
-            timestamp=datetime.utcfromtimestamp(timestamp)
+            timestamp=datetime.fromtimestamp(timestamp)
         )
         open_shop_embed.description = f"**<@{perpetrator_id}> put a `changing-Sloth-class potion` into the Sloth class shop, for the price of `{price}łł`!** 🍯"
         open_shop_embed.color = discord.Color.green()

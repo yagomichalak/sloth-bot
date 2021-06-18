@@ -3,6 +3,7 @@ from discord.ext import commands
 from .player import Player
 from mysqldb import the_database
 from extra.menu import ConfirmSkill
+from extra import utils
 import os
 from datetime import datetime
 
@@ -61,7 +62,7 @@ class Cybersloth(Player):
         await self.check_cooldown(user_id=attacker.id, skill_number=1)
 
         try:
-            current_timestamp = await self.get_timestamp()
+            current_timestamp = await utils.get_timestamp()
             # Don't need to store it, since it is forever
             await self.update_user_is_hacked(target.id, 1)
             await self.insert_skill_action(
@@ -126,7 +127,7 @@ class Cybersloth(Player):
         await self.check_cooldown(user_id=attacker.id, skill_number=2)
 
         try:
-            current_timestamp = await self.get_timestamp()
+            current_timestamp = await utils.get_timestamp()
             await self.update_user_is_wired(target.id, 1)
             await self.insert_skill_action(
                 user_id=attacker.id, skill_type="wire", skill_timestamp=current_timestamp,
@@ -205,11 +206,11 @@ class Cybersloth(Player):
         :param perpetrator_id: The ID of the perpetrator of the hacking.
         :param target_id: The ID of the target of the hacking. """
 
-        timestamp = await self.get_timestamp()
+        timestamp = await utils.get_timestamp()
 
         hack_embed = discord.Embed(
             title="Someone just got Hacked and lost Control of Everything!",
-            timestamp=datetime.utcfromtimestamp(timestamp)
+            timestamp=datetime.fromtimestamp(timestamp)
         )
         hack_embed.description = f"**<@{perpetrator_id}> hacked <@{target_id}>!** <a:hackerman:652303204809179161>"
         # hack_embed.description=f"**<@{perpetrator_id}> hacked <@{attacker_id}>!** <a:hackerman:802354539184259082>"
@@ -226,11 +227,11 @@ class Cybersloth(Player):
         :param perpetrator_id: The ID of the perpetrator of the wiring.
         :param target_id: The ID of the target of the wiring. """
 
-        timestamp = await self.get_timestamp()
+        timestamp = await utils.get_timestamp()
 
         wire_embed = discord.Embed(
             title="Someone has been wired up!",
-            timestamp=datetime.utcfromtimestamp(timestamp)
+            timestamp=datetime.fromtimestamp(timestamp)
         )
         wire_embed.description = f"**<@{perpetrator_id}> wired <@{target_id}>!** 🔌"
         wire_embed.color = discord.Color.green()

@@ -3,6 +3,8 @@ from discord.ext import commands
 import os
 from .player import Player
 from extra.menu import ConfirmSkill
+from extra import utils
+
 import os
 from datetime import datetime
 
@@ -81,7 +83,7 @@ class Agares(Player):
                 f"**{attacker.mention}, for some reason I couldn't magic pull {target.mention} from `{target_vc}` to `{attacker_vc}`**")
         else:
             # Puts the attacker's skill on cooldown
-            current_ts = await self.get_timestamp()
+            current_ts = await utils.get_timestamp()
             await self.update_user_action_skill_ts(attacker.id, current_ts)
             # Updates user's skills used counter
             await self.update_user_skills_used(user_id=attacker.id)
@@ -135,7 +137,7 @@ class Agares(Player):
             await ctx.send(f"**For some reason I couldn't reset {target.menion}'s cooldown, {perpetrator.mention}!**")
         else:
             # Puts the perpetrator's skill on cooldown
-            current_ts = await self.get_timestamp()
+            current_ts = await utils.get_timestamp()
             await self.update_user_action_skill_two_ts(perpetrator.id, current_ts)
             # Updates user's skills used counter
             await self.update_user_skills_used(user_id=perpetrator.id)
@@ -151,11 +153,11 @@ class Agares(Player):
         :param perpetrator_id: The ID of the perpetrator of the magic pulling.
         :param target_id: The ID of the target of the magic pulling. """
 
-        timestamp = await self.get_timestamp()
+        timestamp = await utils.get_timestamp()
 
         magic_pull_embed = discord.Embed(
             title="A Magic Pull has been Successfully Pulled Off!",
-            timestamp=datetime.utcfromtimestamp(timestamp)
+            timestamp=datetime.fromtimestamp(timestamp)
         )
         magic_pull_embed.description = f"**<@{perpetrator_id}> magic pulled <@{target_id}> from `{t_before_vc}` to `{t_after_vc}`!** 🧲"
         magic_pull_embed.color = discord.Color.green()
@@ -171,11 +173,11 @@ class Agares(Player):
         :param perpetrator_id: The ID of the perpetrator of the magic pulling.
         :param target_id: The ID of the target of the magic pulling. """
 
-        timestamp = await self.get_timestamp()
+        timestamp = await utils.get_timestamp()
 
         recharge_embed = discord.Embed(
             title="A Cooldown Recharge just Happend!",
-            timestamp=datetime.utcfromtimestamp(timestamp)
+            timestamp=datetime.fromtimestamp(timestamp)
         )
         recharge_embed.description = f"**<@{perpetrator_id}> reset <@{target_id}>'s first skill cooldown!** 🔁"
         recharge_embed.color = discord.Color.green()

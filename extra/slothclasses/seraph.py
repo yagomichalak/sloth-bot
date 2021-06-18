@@ -3,6 +3,7 @@ from discord.ext import commands
 from .player import Player
 from mysqldb import the_database
 from extra.menu import ConfirmSkill
+from extra import utils
 import os
 from datetime import datetime
 import random
@@ -50,7 +51,7 @@ class Seraph(Player):
         if confirmed:
             await self.check_cooldown(user_id=ctx.author.id, skill_number=1)
 
-            current_timestamp = await self.get_timestamp()
+            current_timestamp = await utils.get_timestamp()
             await self.insert_skill_action(
                 user_id=ctx.author.id, skill_type="divine_protection", skill_timestamp=current_timestamp,
                 target_id=target.id, channel_id=ctx.channel.id
@@ -102,7 +103,7 @@ class Seraph(Player):
 
         await self.check_cooldown(user_id=perpetrator.id, skill_number=2)
 
-        current_timestamp = await self.get_timestamp()
+        current_timestamp = await utils.get_timestamp()
 
         # Upate user's money
         await self.update_user_money(perpetrator.id, -50)
@@ -190,7 +191,7 @@ class Seraph(Player):
     async def get_expired_protections(self) -> None:
         """ Gets expired divine protection skill actions. """
 
-        the_time = await self.get_timestamp()
+        the_time = await utils.get_timestamp()
         mycursor, db = await the_database()
         await mycursor.execute("""
             SELECT * FROM SlothSkills
@@ -206,11 +207,11 @@ class Seraph(Player):
         :param perpetrator_id: The ID of the perpetrator of the divine protection.
         :param target_id: The ID of the target member that is gonna be protected. """
 
-        timestamp = await self.get_timestamp()
+        timestamp = await utils.get_timestamp()
 
         divine_embed = discord.Embed(
             title="A Divine Protection has been executed!",
-            timestamp=datetime.utcfromtimestamp(timestamp)
+            timestamp=datetime.fromtimestamp(timestamp)
         )
         divine_embed.description = f"🛡️ <@{perpetrator_id}> protected <@{target_id}> from attacks for 24 hours! 🛡️"
         divine_embed.color = discord.Color.green()
@@ -226,11 +227,11 @@ class Seraph(Player):
         :param perpetrator_id: The ID of the perpetrator of the shield reinforcement.
         :param shields_len: The amount of active shields that the perpetrator have. """
 
-        timestamp = await self.get_timestamp()
+        timestamp = await utils.get_timestamp()
 
         reinforce_shields_embed = discord.Embed(
             title="A Shield Reinforcement has been executed!",
-            timestamp=datetime.utcfromtimestamp(timestamp)
+            timestamp=datetime.fromtimestamp(timestamp)
         )
         reinforce_shields_embed.description = f"🛡️ <@{perpetrator_id}> reinforced `{shields_len}` active shields; now they have more 24 hours of duration! 🛡️💪"
         reinforce_shields_embed.color = discord.Color.green()
@@ -247,11 +248,11 @@ class Seraph(Player):
         :param perpetrator_id: The ID of the perpetrator of the shield reinforcement.
         :param shields_len: The amount of active shields that the perpetrator have. """
 
-        timestamp = await self.get_timestamp()
+        timestamp = await utils.get_timestamp()
 
         self_shield_embed = discord.Embed(
             title="A Divine Protection shield has been Given!",
-            timestamp=datetime.utcfromtimestamp(timestamp)
+            timestamp=datetime.fromtimestamp(timestamp)
         )
         self_shield_embed.description = f"🛡️ <@{perpetrator_id}> got a shield for themselves for reinforcing other shields! 🛡️💪"
         self_shield_embed.color = discord.Color.green()

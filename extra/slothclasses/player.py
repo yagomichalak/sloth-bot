@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 
 from extra.customerrors import MissingRequiredSlothClass, ActionSkillOnCooldown, CommandNotReady, SkillsUsedRequirement
+from extra import utils
 
 from mysqldb import the_database, the_django_database
 from typing import Union, List
@@ -57,7 +58,7 @@ class Player(commands.Cog):
         # current_time = ctx.message.created_at
         current_time = datetime.utcnow()
 
-        cooldown_in_seconds = (current_time - datetime.utcfromtimestamp(last_skill_ts)).total_seconds()
+        cooldown_in_seconds = (current_time - datetime.fromtimestamp(last_skill_ts)).total_seconds()
         if cooldown_in_seconds >= seconds:
             return True
         raise ActionSkillOnCooldown(try_after=cooldown_in_seconds, error_message="Action skill on cooldown!")
@@ -69,11 +70,7 @@ class Player(commands.Cog):
             """ Perfoms the real check. """
 
             last_skill_ts = await Player.get_user_action_skill_ts(Player, user_id=ctx.author.id, skill_number=skill_number)
-            # current_time = ctx.message.created_at
-            # cooldown_in_seconds = (current_time - datetime.utcfromtimestamp(last_skill_ts)).total_seconds()
-
-            epoch = datetime.utcfromtimestamp(0)
-            current_time = (datetime.utcnow() - epoch).total_seconds()
+            current_time = await utils.get_timestamp()
             cooldown_in_seconds = current_time - last_skill_ts
             if cooldown_in_seconds >= seconds:
                 return True
@@ -123,7 +120,7 @@ class Player(commands.Cog):
         # effects = []
 
         effects = {}
-        now = await self.get_timestamp()
+        now = await utils.get_timestamp()
 
         def calculate(now, then):
             # - int(now)
@@ -372,14 +369,14 @@ class Player(commands.Cog):
     async def get_timestamp(self) -> int:
         """ Gets the current timestamp. """
 
-        epoch = datetime.utcfromtimestamp(0)
+        epoch = datetime.fromtimestamp(0)
         the_time = (datetime.utcnow() - epoch).total_seconds()
         return the_time
 
     async def get_expired_transmutations(self) -> None:
         """ Gets expired transmutation skill actions. """
 
-        the_time = await self.get_timestamp()
+        the_time = await utils.get_timestamp()
         mycursor, db = await the_database()
         await mycursor.execute("""
             SELECT * FROM SlothSkills
@@ -392,7 +389,7 @@ class Player(commands.Cog):
     async def get_expired_frogs(self) -> None:
         """ Gets expired frog skill actions. """
 
-        the_time = await self.get_timestamp()
+        the_time = await utils.get_timestamp()
         mycursor, db = await the_database()
         await mycursor.execute("""
             SELECT * FROM SlothSkills
@@ -405,7 +402,7 @@ class Player(commands.Cog):
     async def get_expired_open_shop_items(self) -> None:
         """ Gets expired transmutation skill actions. """
 
-        the_time = await self.get_timestamp()
+        the_time = await utils.get_timestamp()
         mycursor, db = await the_database()
         await mycursor.execute("""
             SELECT * FROM SlothSkills
@@ -418,7 +415,7 @@ class Player(commands.Cog):
     async def get_expired_hacks(self) -> None:
         """ Gets expired hacks skill actions. """
 
-        the_time = await self.get_timestamp()
+        the_time = await utils.get_timestamp()
         mycursor, db = await the_database()
         await mycursor.execute("""
             SELECT * FROM SlothSkills
@@ -431,7 +428,7 @@ class Player(commands.Cog):
     async def get_expired_wires(self) -> None:
         """ Gets expired wires skill actions. """
 
-        the_time = await self.get_timestamp()
+        the_time = await utils.get_timestamp()
         mycursor, db = await the_database()
         await mycursor.execute("""
             SELECT * FROM SlothSkills
@@ -444,7 +441,7 @@ class Player(commands.Cog):
     async def get_expired_knock_outs(self) -> None:
         """ Gets expired knock-out skill actions. """
 
-        the_time = await self.get_timestamp()
+        the_time = await utils.get_timestamp()
         mycursor, db = await the_database()
         await mycursor.execute("""
             SELECT * FROM SlothSkills
@@ -545,3 +542,27 @@ class Player(commands.Cog):
         await mycursor.execute("UPDATE UserCurrency SET last_skill_ts = 0 WHERE user_id = %s", (user_id,))
         await db.commit()
         await mycursor.close()
+
+
+    @commands.command(aliases=["fx", "efx", "user_effects", "usereffects", "geteffects", "membereffects", "member_effects"])
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def effects(self, ctx, member: discord.Member = None) -> None:
+        """ Gets all effects from a member.
+        :param member: The member to get it from. """
+
+        if not member:
+            member = ctx.author
+
+        effects = await self.get_user_effects(member.id)
+        formated_effects = [f"__**{effect.title()}**__: {values['cooldown']}" for effect, values in effects.items()]
+        
+        embed = discord.Embed(
+            title=f"__Effects for {member}__",
+            description='\n'.join(formated_effects),
+            color=member.color,
+            timestamp=ctx.message.created_at,
+            url=member.avatar_url
+        )
+        embed.set_thumbnail(url=member.avatar_url)
+
+        await ctx.send(embed=embed)
