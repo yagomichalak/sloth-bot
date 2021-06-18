@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-from .player import Player
+from .player import Player, Skill
 from mysqldb import the_database
 from extra.menu import ConfirmSkill
 from extra import utils
@@ -96,7 +96,7 @@ class Prawler(Player):
 		if not confirmed:
 			return await ctx.send("**Not stealing from anyone, then!**")
 
-		await self.check_cooldown(user_id=attacker.id, skill_number=1)
+		await self.check_cooldown(user_id=attacker.id, skill=Skill.ONE)
 
 		current_timestamp = await utils.get_timestamp()
 
@@ -111,7 +111,7 @@ class Prawler(Player):
 				user_id=attacker.id, skill_type="steal", skill_timestamp=current_timestamp,
 				target_id=target.id, message_id=steal.id, channel_id=steal.channel.id, emoji="🛡️"
 			)
-			await self.update_user_action_skill_ts(attacker.id, current_timestamp)
+			await self.update_user_skill_ts(attacker.id, Skill.ONE, current_timestamp)
 			# Updates user's skills used counter
 			await self.update_user_skills_used(user_id=attacker.id)
 		except Exception as e:
@@ -124,7 +124,7 @@ class Prawler(Player):
 
 	@commands.command()
 	@Player.skills_used(requirement=5)
-	@Player.skill_on_cooldown(skill_number=2, seconds=2592000)
+	@Player.skill_on_cooldown(skill=Skill.TWO, seconds=2592000)
 	@Player.user_is_class('prawler')
 	@Player.skill_mark()
 	# @Player.not_ready()
@@ -156,14 +156,14 @@ class Prawler(Player):
 		if not confirmed:
 			return await ctx.send("**Not stealing from anyone, then!**")
 
-		await self.check_cooldown(user_id=perpetrator.id, skill_number=2, seconds=2592000)
+		await self.check_cooldown(user_id=perpetrator.id, skill=Skill.TWO, seconds=2592000)
 
 		await self.update_user_money(perpetrator.id, -1000)
 
 		try:
 			# Update user's second skill cooldown timestamp
 			current_ts = await utils.get_timestamp()
-			await self.update_user_action_skill_two_ts(user_id=perpetrator.id, current_ts=current_ts)
+			await self.update_user_skill_ts(user_id=perpetrator.id, skill=Skill.TWO, current_ts=current_ts)
 			await self.increments_user_sharpness_stack(user_id=perpetrator.id, increment=1)
 			# Updates user's skills used counter
 			await self.update_user_skills_used(user_id=perpetrator.id)

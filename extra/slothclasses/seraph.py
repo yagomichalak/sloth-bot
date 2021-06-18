@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
-from .player import Player
+from discord.ext.commands.errors import NoEntryPointError
+from .player import Player, Skill
 from mysqldb import the_database
 from extra.menu import ConfirmSkill
 from extra import utils
@@ -49,7 +50,7 @@ class Seraph(Player):
 
         confirmed = await ConfirmSkill(f"**{ctx.author.mention}, are you sure you want to use your skill, to protect {target.mention}?**").prompt(ctx)
         if confirmed:
-            await self.check_cooldown(user_id=ctx.author.id, skill_number=1)
+            await self.check_cooldown(user_id=ctx.author.id, skill=Skill.ONE)
 
             current_timestamp = await utils.get_timestamp()
             await self.insert_skill_action(
@@ -57,7 +58,7 @@ class Seraph(Player):
                 target_id=target.id, channel_id=ctx.channel.id
             )
             await self.update_user_protected(target.id, 1)
-            await self.update_user_action_skill_ts(ctx.author.id, current_timestamp)
+            await self.update_user_skill_ts(ctx.author.id, Skill.ONE, current_timestamp)
             # Updates user's skills used counter
             await self.update_user_skills_used(user_id=ctx.author.id)
             divine_protection_embed = await self.get_divine_protection_embed(
@@ -68,13 +69,13 @@ class Seraph(Player):
 
     @commands.command()
     @Player.skills_used(requirement=5)
-    @Player.skill_on_cooldown(skill_number=2)
+    @Player.skill_on_cooldown(skill=Skill.TWO)
     @Player.user_is_class('seraph')
     @Player.skill_mark()
     # @Player.not_ready()
     async def reinforce(self, ctx) -> None:
-        """ Gets a 35% chance of reinforcing all of their protected people's Divine Protection shield,
-        by making it last for one more day and a 20% chance of getting a protection for themselves too
+        """ Gets a 50% chance of reinforcing all of their protected people's Divine Protection shield,
+        by making it last for one more day and a 45% chance of getting a protection for themselves too
         (in case they don't have one already). """
 
         perpetrator = ctx.author
@@ -101,20 +102,20 @@ class Seraph(Player):
         if not confirm:
             return await ctx.send(f"**Not reinforcing them, then, {perpetrator.mention}!**")
 
-        await self.check_cooldown(user_id=perpetrator.id, skill_number=2)
+        await self.check_cooldown(user_id=perpetrator.id, skill=Skill.TWO)
 
         current_timestamp = await utils.get_timestamp()
 
         # Upate user's money
         await self.update_user_money(perpetrator.id, -50)
         # Update perpetrator's second skill timestamp
-        await self.update_user_action_skill_two_ts(user_id=perpetrator.id, current_ts=current_timestamp)
+        await self.update_user_skill_ts(user_id=perpetrator.id, skill=Skill.TWO, new_skill_ts=current_timestamp)
         # Updates user's skills used counter
         await self.update_user_skills_used(user_id=perpetrator.id)
 
-        # Calculates chance (35%) of reinforcing the shields of the targets
+        # Calculates chance (50%) of reinforcing the shields of the targets
         n1 = random.random()
-        if n1 <= 0.35:
+        if n1 <= 0.5:
             # Tries to execute it and update the database
             try:
                 # Update active Divine Protection shields' time (+1 day)
@@ -127,13 +128,13 @@ class Seraph(Player):
                     channel=ctx.channel, perpetrator_id=perpetrator.id, shields_len=len(shields))
                 await ctx.send(embed=reinforce_shields_embed)
         else:
-            await ctx.send(f"**You had a `35%` chance of reinforcing all active Divine Protection shields, but you missed it, {perpetrator.mention}!**")
+            await ctx.send(f"**You had a `50%` chance of reinforcing all active Divine Protection shields, but you missed it, {perpetrator.mention}!**")
 
         # Checks whether the perpetrator already has a Divien Protection shield
         if not await self.is_user_protected(perpetrator.id):
             n2 = random.random()
-            # Calculates the chance (20%) of getting a shield for the perpetrator
-            if n2 <= 0.2:
+            # Calculates the chance (45%) of getting a shield for the perpetrator
+            if n2 <= 0.45:
                 # Tries to execute it and update the database
                 try:
                     # Give user a shield
@@ -151,7 +152,7 @@ class Seraph(Player):
                     await ctx.send(embed=self_shield_embed)
 
             else:
-                await ctx.send(f"**You had a `20%` chance of getting a Divine Protection shield for yourself, but you missed it, {perpetrator.mention}!**")
+                await ctx.send(f"**You had a `45%` chance of getting a Divine Protection shield for yourself, but you missed it, {perpetrator.mention}!**")
 
     async def check_protections(self) -> None:
         """ Check on-going protections and their expiration time. """
@@ -262,3 +263,13 @@ class Seraph(Player):
         self_shield_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon_url)
 
         return self_shield_embed
+
+    @commands.command()
+    @Player.skills_used(requirement=20)
+    @Player.skill_mark()
+    @Player.skill_on_cooldown(skill=Skill.THREE)
+    @Player.not_ready()
+    async def heal(self, ctx, member: discord.Member = None) -> None:
+        """ Heals a member from all debuffs. """
+
+        pass

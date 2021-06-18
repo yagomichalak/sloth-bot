@@ -4,8 +4,7 @@ from mysqldb import the_database
 from typing import Union, List, Any, Dict
 from extra.customerrors import MissingRequiredSlothClass, ActionSkillOnCooldown
 from extra.menu import ConfirmSkill, prompt_message, prompt_number
-from datetime import datetime
-from pytz import timezone
+from extra import utils
 import os
 
 from extra.slothclasses import agares, cybersloth, merchant, metamorph, munk, prawler, seraph, warrior
@@ -150,10 +149,10 @@ class SlothClass(*classes.values()):
     @commands.command()
     @commands.has_permissions()
     async def get_ts(self, ctx) -> None:
-        """ Gets the current timestamp"""
+        """ Gets the current timestamp (Etc/GMT)"""
 
-        timestamp = await self.get_timestamp()
-        await ctx.send(f"**{timestamp}**")
+        timestamp = await utils.get_timestamp()
+        await ctx.send(f"**Current timestamp: `{timestamp}`**")
 
     @commands.command(aliases=['rsc'])
     @commands.has_permissions(administrator=True)
@@ -230,12 +229,74 @@ class SlothClass(*classes.values()):
 
     @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
-    async def test(self, ctx, sloth_class: str = None) -> None:
-        """ Tests something. 
-        :param sloth_class: A sloth class for checking out. """
+    async def create_table_skills_cooldown(self, ctx) -> None:
+        """ Creates the SkillsCooldown table. """
 
+        member = ctx.author
 
-        user_class = classes.get(sloth_class.lower())
+        if await self.table_skills_cooldown_exists():
+            return await ctx.send(f"**Table `SkillsCooldown` already exists, {member.mention}!**")
+
+        mycursor, db = await the_database()
+        await mycursor.execute("""
+        CREATE TABLE SkillsCooldown (
+            user_id BIGINT NOT NULL,
+            skill_one_ts BIGINT DEFAULT NULL,
+            skill_two_ts BIGINT DEFAULT NULL,
+            skill_three_ts BIGINT DEFAULT NULL,
+            skill_four_ts BIGINT DEFAULT NULL,
+            skill_five_ts BIGINT DEFAULT NULL,
+            PRIMARY KEY (user_id),
+            CONSTRAINT fk_skills_user_id FOREIGN KEY (user_id) REFERENCES UserCurrency (user_id) ON DELETE CASCADE ON UPDATE CASCADE
+        )
+        """)
+        await db.commit()
+        await mycursor.close()
+        await ctx.send(f"**Table `SkillsCooldown` created, {member.mention}!**")
+
+    @commands.command(hidden=True)
+    @commands.has_permissions(administrator=True)
+    async def drop_table_skills_cooldown(self, ctx) -> None:
+        """ Drops the SkillsCooldown table. """
+
+        member = ctx.author
+
+        if not await self.table_skills_cooldown_exists():
+            return await ctx.send(f"**Table `SkillsCooldown` doesn't exist, {member.mention}!**")
+
+        mycursor, db = await the_database()
+        await mycursor.execute("DROP TABLE SkillsCooldown")
+        await db.commit()
+        await mycursor.close()
+        await ctx.send(f"**Table `SkillsCooldown` dropped, {member.mention}!**")
+
+    @commands.command(hidden=True)
+    @commands.has_permissions(administrator=True)
+    async def reset_table_skills_cooldown(self, ctx) -> None:
+        """ Resets the SkillsCooldown table. """
+
+        member = ctx.author
+
+        if not await self.table_skills_cooldown_exists():
+            return await ctx.send(f"**Table `SkillsCooldown` doesn't exist yet, {member.mention}!**")
+
+        mycursor, db = await the_database()
+        await mycursor.execute("DELETE FROM SkillsCooldown")
+        await db.commit()
+        await mycursor.close()
+        await ctx.send(f"**Table `SkillsCooldown` reset, {member.mention}!**")
+
+    async def table_skills_cooldown_exists(self) -> bool:
+        """ Checks whether the SkillsCooldown table exists. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("SHOW TABLE STATUS LIKE 'SkillsCooldown'")
+        exists = await mycursor.fetchall()
+        await mycursor.close()
+        if exists:
+            return True
+        else:
+            return False
 
 def setup(client) -> None:
     """ Cog's setup function. """

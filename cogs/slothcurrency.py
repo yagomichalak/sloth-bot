@@ -155,6 +155,7 @@ class SlothCurrency(commands.Cog):
             return await ctx.send("**Inform an item to equip!**", delete_after=3)
 
         if user_item := await self.get_user_item(ctx.author.id, item_name.title()):
+            print('moah')
             if await self.check_user_can_equip(ctx.author.id, item_name.title()):
                 await self.update_user_item_info(ctx.author.id, item_name, 'equipped')
                 return await ctx.send(f"**{ctx.author.mention} equipped __{item_name.title()}__!**", delete_after=3)
@@ -291,9 +292,9 @@ class SlothCurrency(commands.Cog):
         await db.commit()
         await mycursor.close()
 
-    async def get_user_item(self, user_id: int):
+    async def get_user_item(self, user_id: int, item_name: str):
         mycursor, db = await the_database()
-        await mycursor.execute("SELECT * FROM UserItems WHERE user_id = %s ORDER BY user_id", (user_id,))
+        await mycursor.execute("SELECT * FROM UserItems WHERE user_id = %s AND item_name = %s", (user_id, item_name))
         item_system = await mycursor.fetchone()
         await mycursor.close()
         return item_system
@@ -317,13 +318,14 @@ class SlothCurrency(commands.Cog):
         else:
             return f'./sloth_custom_images/{item_type}/base_{item_type}.png'
 
-    async def check_user_can_equip(self, user_id, item_name: str) -> bool:
+    async def check_user_can_equip(self, user_id: int, item_name: str) -> bool:
         mycursor, db = await the_database()
         await mycursor.execute("SELECT item_type FROM UserItems WHERE user_id = %s AND item_name = %s", (user_id, item_name))
         item_type = await mycursor.fetchone()
         
         await mycursor.execute(
-            f"SELECT * FROM UserItems WHERE user_id = {user_id} and item_type = '{item_type[1]}' and enable = 'equipped'")
+            "SELECT * FROM UserItems WHERE user_id = %s and item_type = %s and enable = 'equipped'",
+            (user_id, item_type[0]))
         equipped_item = await mycursor.fetchall()
         await mycursor.close()
 
