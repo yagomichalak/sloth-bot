@@ -82,9 +82,13 @@ class Agares(Player):
             await ctx.send(
                 f"**{attacker.mention}, for some reason I couldn't magic pull {target.mention} from `{target_vc}` to `{attacker_vc}`**")
         else:
+            _, exists = await self.check_cooldown(user_id=attacker.id, skill=Skill.ONE)
             # Puts the attacker's skill on cooldown
             current_ts = await utils.get_timestamp()
-            await self.update_user_skill_ts(attacker.id, Skill.ONE, current_ts)
+            if exists:
+                await self.update_user_skill_ts(attacker.id, Skill.ONE, current_ts)
+            else:
+                await self.insert_user_skill_cooldown(ctx.author.id, Skill.ONE, current_ts)
             # Updates user's skills used counter
             await self.update_user_skills_used(user_id=attacker.id)
             # Sends embedded message into the channel
@@ -128,7 +132,7 @@ class Agares(Player):
         if not confirm:
             return await ctx.send(f"**Not resetting it, then!**")
 
-        await self.check_cooldown(user_id=perpetrator.id, skill=Skill.TWO)
+        _, exists = await self.check_cooldown(user_id=perpetrator.id, skill=Skill.TWO)
 
         try:
             await self.reset_user_action_skill_cooldown(target.id)
@@ -138,7 +142,10 @@ class Agares(Player):
         else:
             # Puts the perpetrator's skill on cooldown
             current_ts = await utils.get_timestamp()
-            await self.update_user_skill_ts(perpetrator.id, Skill.TWO, current_ts)
+            if exists:
+                await self.update_user_skill_ts(perpetrator.id, Skill.TWO, current_ts)
+            else:
+                await self.insert_user_skill_cooldown(perpetrator.id, Skill.TWO, current_ts)
             # Updates user's skills used counter
             await self.update_user_skills_used(user_id=perpetrator.id)
             # Sends embedded message into the channel

@@ -44,7 +44,7 @@ class Merchant(Player):
 
         confirm = await ConfirmSkill(f"**{member.mention}, are you sure you want to spend `50łł` to put an item in your shop with the price of `{item_price}`łł ?**").prompt(ctx)
         if confirm:
-            await self.check_cooldown(user_id=member.id, skill=Skill.ONE)
+            _, exists = await self.check_cooldown(user_id=member.id, skill=Skill.ONE)
 
             user_currency = await self.get_user_currency(member.id)
             if user_currency[1] >= 50:
@@ -58,7 +58,10 @@ class Merchant(Player):
                     user_id=member.id, skill_type="potion", skill_timestamp=current_timestamp,
                     target_id=member.id, channel_id=ctx.channel.id, price=item_price
                 )
-                await self.update_user_skill_ts(member.id, Skill.ONE, current_timestamp)
+                if exists:
+                    await self.update_user_skill_ts(member.id, Skill.ONE, current_timestamp)
+                else:
+                    await self.insert_user_skill_cooldown(ctx.author.id, Skill.ONE, current_timestamp)
                 # Updates user's skills used counter
                 await self.update_user_skills_used(user_id=member.id)
                 open_shop_embed = await self.get_open_shop_embed(
@@ -197,7 +200,7 @@ class Merchant(Player):
         if not confirm:
             return await ctx.send(f"**Not buying it, then!**")
 
-        await self.check_cooldown(user_id=merchant.id, skill=Skill.TWO)
+        _, exists = await self.check_cooldown(user_id=merchant.id, skill=Skill.TWO)
 
         # Checks whether user has money
         user_currency = await self.get_user_currency(merchant.id)
@@ -207,7 +210,10 @@ class Merchant(Player):
             return await ctx.send(f"**{merchant.mention}, you don't have `50łł`!**")
 
         current_timestamp = await utils.get_timestamp()
-        await self.update_user_skillts(merchant.id, Skill.TWO, current_timestamp)
+        if exists:
+            await self.update_user_skill_ts(merchant.id, Skill.TWO, current_timestamp)
+        else:
+            await self.insert_user_skill_cooldown(ctx.author.id, Skill.TWO, current_timestamp)
         # Updates user's skills used counter
         await self.update_user_skills_used(user_id=merchant.id)
 

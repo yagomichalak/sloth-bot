@@ -2,8 +2,9 @@ import discord
 from discord.ext import commands, tasks, menus
 from mysqldb import the_database
 from typing import Union, List, Any, Dict
-from extra.customerrors import MissingRequiredSlothClass, ActionSkillOnCooldown
+from extra.customerrors import MissingRequiredSlothClass, ActionSkillOnCooldown, SkillsUsedRequirement, CommandNotReady
 from extra.menu import ConfirmSkill, prompt_message, prompt_number
+from extra.slothclasses.player import Skill
 from extra import utils
 import os
 
@@ -163,7 +164,7 @@ class SlothClass(*classes.values()):
         if not member:
             member = ctx.author
 
-        await self.reset_user_action_skill_cooldown(member.id)
+        await self.update_user_skill_ts(member.id, Skill.ONE, None)
         return await ctx.send(f"**Action skill cooldown reset for {member.mention}!**")
 
     @commands.command(aliases=['my_skills'])
@@ -172,6 +173,8 @@ class SlothClass(*classes.values()):
         """ Shows all skills for the user's Sloth class. """
 
         user = await self.get_user_currency(ctx.author.id)
+        member = ctx.author
+
         if not user:
             component = discord.Component()
             component.add_button(style=5, label="Create Account", emoji="🦥", url="https://thelanguagesloth.com/profile/update")
@@ -199,17 +202,22 @@ class SlothClass(*classes.values()):
             elif not [check for check in c.checks if check.__qualname__ == 'Player.skill_mark.<locals>.real_check']:
                 continue
 
-            if 'Player.not_ready.<locals>.real_check' in [check.__qualname__ for check in c.checks]:
-                cmds.append(f"{prefix}{c.qualified_name:<18} [Not ready]")
-            else:
-                try:
-                    await c.can_run(ctx)
-                    cmds.append(f"{prefix}{c.qualified_name:<18} [Ready to use]")
-                except commands.CommandError as e:
+            # if 'Player.not_ready.<locals>.real_check' in [check.__qualname__ for check in c.checks]:
+            #     cmds.append(f"{prefix}{c.qualified_name:<18} [Not ready]")
+            # else:
+            try:
+                await c.can_run(ctx)
+                cmds.append(f"{prefix}{c.qualified_name:<18} [Ready to use]")
+            except commands.CommandError as e:
+                if isinstance(e, ActionSkillOnCooldown):
                     cmds.append(f"{prefix}{c.qualified_name:<18} [On cooldown]")
-                    continue
-                except Exception as e:
-                    continue
+                elif isinstance(e, SkillsUsedRequirement):
+                    cmds.append(f"{prefix}{c.qualified_name:<18} [Requires {e.skills_required} used skills]")
+                elif isinstance(e, CommandNotReady):
+                    cmds.append(f"{prefix}{c.qualified_name:<18} [Not Ready]")
+                continue
+            except Exception as e:
+                continue
 
         cmds_text = '\n'.join(cmds)
 

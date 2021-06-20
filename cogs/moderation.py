@@ -8,6 +8,7 @@ from typing import List, Union, Dict, Tuple
 import os
 from extra.useful_variables import banned_links
 from extra.menu import ConfirmSkill
+from extra import utils
 
 mod_log_id = int(os.getenv('MOD_LOG_CHANNEL_ID'))
 muted_role_id = int(os.getenv('MUTED_ROLE_ID'))
@@ -171,7 +172,7 @@ class Moderation(commands.Cog):
         the_time = member.created_at
         timestamp = datetime.timestamp(the_time)
         # Actual timestamp
-        time_now = datetime.timestamp(datetime.utcnow())
+        time_now = await utils.get_timestamp()
         account_age = round((time_now - timestamp)/86400)
 
         if account_age <= 4:

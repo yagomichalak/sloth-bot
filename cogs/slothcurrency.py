@@ -195,8 +195,10 @@ class SlothCurrency(commands.Cog):
         '''
         await ctx.message.delete()
         mycursor, db = await the_database()
-        await mycursor.execute(
-            "CREATE TABLE UserItems (user_id bigint, item_name VARCHAR(30), enable VARCHAR(10), item_type VARCHAR(10))")
+        await mycursor.execute("""
+        CREATE TABLE UserItems (
+            user_id bigint, item_name VARCHAR(30), enable VARCHAR(10), 
+            item_type VARCHAR(10), image_name VARCHAR(50))""")
         await db.commit()
         await mycursor.close()
 
@@ -373,15 +375,15 @@ class SlothCurrency(commands.Cog):
         mycursor, db = await the_database()
         await mycursor.execute("""
             CREATE TABLE UserCurrency (
-            user_id bigint NOT NULL, user_money bigint, last_purchase_ts bigint,
+            user_id bigint NOT NULL, user_money bigint default 0, last_purchase_ts bigint default null,
             user_classes bigint default 0, user_class_reward bigint default 0, user_hosted bigint default 0,
             user_lotto bigint default null, sloth_class varchar(30) default 'default', change_class_ts bigint default 0,
             last_skill_ts bigint default 0, protected tinyint(1) default 0, has_potion tinyint(1) default 0,
             hacked tinyint(1) default 0, knocked_out tinyint(1) default 0, last_skill_two_ts bigint default 0,
             skills_used int default 0, wired tinyint(1) default 0, tribe varchar(50) default null,
             frogged tinyint(1) default 0,
-            PRIMARY KEY (user_id)
-            _""")
+            PRIMARY KEY (user_id))
+            """)
         await db.commit()
         await mycursor.close()
 
@@ -514,7 +516,7 @@ class SlothCurrency(commands.Cog):
                 return await ctx.send(f"**{member} has a default Sloth class, I cannot show their profile!**")
 
         SlothClass = self.client.get_cog('SlothClass')
-        effects = await SlothClass.get_user_effects(user_id=member.id)
+        effects = await SlothClass.get_user_effects(member=member)
 
         def has_effect(effect: str):
             if effect in effects:

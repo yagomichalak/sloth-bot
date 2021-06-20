@@ -59,7 +59,7 @@ class Cybersloth(Player):
         if not confirmed:
             return await ctx.send("**Not hacking them, then!**")
 
-        await self.check_cooldown(user_id=attacker.id, skill=Skill.ONE)
+        _, exists = await self.check_cooldown(user_id=attacker.id, skill=Skill.ONE)
 
         try:
             current_timestamp = await utils.get_timestamp()
@@ -69,7 +69,10 @@ class Cybersloth(Player):
                 user_id=attacker.id, skill_type="hack", skill_timestamp=current_timestamp,
                 target_id=target.id, channel_id=ctx.channel.id
             )
-            await self.update_user_skill_ts(attacker.id, Skill.ONE, current_timestamp)
+            if exists:
+                await self.update_user_skill_ts(attacker.id, Skill.ONE, current_timestamp)
+            else:
+                await self.insert_user_skill_cooldown(ctx.author.id, Skill.ONE, current_timestamp)
             # Updates user's skills used counter
             await self.update_user_skills_used(user_id=attacker.id)
             hack_embed = await self.get_hack_embed(
@@ -124,7 +127,7 @@ class Cybersloth(Player):
         if not confirmed:
             return await ctx.send("**Not hacking them, then!**")
 
-        await self.check_cooldown(user_id=attacker.id, skill=Skill.TWO)
+        _, exists = await self.check_cooldown(user_id=attacker.id, skill=Skill.TWO)
 
         try:
             current_timestamp = await utils.get_timestamp()
@@ -133,7 +136,10 @@ class Cybersloth(Player):
                 user_id=attacker.id, skill_type="wire", skill_timestamp=current_timestamp,
                 target_id=target.id, channel_id=ctx.channel.id
             )
-            await self.update_user_skill_ts(attacker.id, Skill.TWO, current_timestamp)
+            if exists:
+                await self.update_user_skill_ts(attacker.id, Skill.TWO, current_timestamp)
+            else:
+                await self.insert_user_skill_cooldown(ctx.author.id, Skill.TWO, current_timestamp)
             # Updates user's skills used counter
             await self.update_user_skills_used(user_id=attacker.id)
 

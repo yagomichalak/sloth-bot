@@ -96,7 +96,7 @@ class Prawler(Player):
 		if not confirmed:
 			return await ctx.send("**Not stealing from anyone, then!**")
 
-		await self.check_cooldown(user_id=attacker.id, skill=Skill.ONE)
+		_, exists = await self.check_cooldown(user_id=attacker.id, skill=Skill.ONE)
 
 		current_timestamp = await utils.get_timestamp()
 
@@ -111,7 +111,11 @@ class Prawler(Player):
 				user_id=attacker.id, skill_type="steal", skill_timestamp=current_timestamp,
 				target_id=target.id, message_id=steal.id, channel_id=steal.channel.id, emoji="🛡️"
 			)
-			await self.update_user_skill_ts(attacker.id, Skill.ONE, current_timestamp)
+			if exists:
+				await self.update_user_skill_ts(attacker.id, Skill.ONE, current_timestamp)
+			else:
+				await self.insert_user_skill_cooldown(ctx.author.id, Skill.ONE, current_timestamp)
+
 			# Updates user's skills used counter
 			await self.update_user_skills_used(user_id=attacker.id)
 		except Exception as e:
@@ -156,14 +160,18 @@ class Prawler(Player):
 		if not confirmed:
 			return await ctx.send("**Not stealing from anyone, then!**")
 
-		await self.check_cooldown(user_id=perpetrator.id, skill=Skill.TWO, seconds=2592000)
+		_, exists = await self.check_cooldown(user_id=perpetrator.id, skill=Skill.TWO, seconds=2592000)
 
 		await self.update_user_money(perpetrator.id, -1000)
 
 		try:
 			# Update user's second skill cooldown timestamp
 			current_ts = await utils.get_timestamp()
-			await self.update_user_skill_ts(user_id=perpetrator.id, skill=Skill.TWO, current_ts=current_ts)
+			if exists:
+				await self.update_user_skill_ts(user_id=perpetrator.id, skill=Skill.TWO, current_ts=current_ts)
+			else:
+				await self.insert_user_skill_cooldown(ctx.author.id, Skill.TWO, current_ts)
+				
 			await self.increments_user_sharpness_stack(user_id=perpetrator.id, increment=1)
 			# Updates user's skills used counter
 			await self.update_user_skills_used(user_id=perpetrator.id)
