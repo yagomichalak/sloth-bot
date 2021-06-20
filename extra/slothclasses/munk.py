@@ -426,13 +426,11 @@ class Munk(Player):
             'change_embed': self._make_tribe_embed
         }
 
-        # print('1= TRRRIIIIIBE', tribe)
         pages = menus.MenuPages(source=SwitchTribePages(all_members, **additional), clear_reactions_after=True)
         await pages.start(ctx)
 
     async def _make_tribe_embed(self, ctx: commands.Context, tribe: Dict[str, Union[str, int]], entries: int, offset: int, lentries: int) -> discord.Embed:
 
-        # print('2= TRRRIIIIIBE', tribe)
 
         tribe_owner = self.client.get_user(tribe['owner_id'])
         tribe_embed = discord.Embed(
@@ -666,3 +664,58 @@ class Munk(Player):
             return False
         else:
             return True
+
+    @commands.command()
+    @Player.skills_used(requirement=5)
+    @Player.skill_on_cooldown(skill=Skill.TWO)
+    @Player.user_is_class('munk')
+    @Player.skill_mark()
+    async def create_tribe(self, ctx) -> None:
+        """ Guides you into the creation of a tribe,
+        which is a custom group for people to join and do something. """
+
+        member = ctx.author
+
+        link = 'https://thelanguagesloth.com/tribes'
+
+        tribe_embed = discord.Embed(
+            title="__Tribe Creation__",
+            description=f"In order to create your tribe, access our website by clicking [here]({link}) or in the button below!",
+            color=member.color,
+            timestamp=ctx.message.created_at,
+            url=link
+        )
+
+        tribe_embed.set_author(name=member, url=member.avatar_url, icon_url=member.avatar_url)
+        tribe_embed.set_thumbnail(url=member.avatar_url)
+        tribe_embed.set_footer(text=member.guild.name, icon_url=member.guild.icon_url)
+
+        compo = discord.Component()
+        compo.add_button(style=5, label="Create Tribe!", url=link, emoji="🏕️")
+
+        await ctx.send(embed=tribe_embed, components=[compo])
+
+
+    @commands.command()
+    @Player.skills_used(requirement=20)
+    @Player.skill_on_cooldown(skill=Skill.THREE)
+    @Player.user_is_class('munk')
+    @Player.skill_mark()
+    @Player.not_ready()
+    async def create_tribe_role(self, ctx, role_name: str = None) -> None:
+        """ Creates a tribe role.
+    
+        With different roles and positions in your tribe, you
+        can better administrate and know what each person should do
+        or their purpose inside your tribe.
+
+        :param role_name: The name of the tribe role. (MAX = 30 Chars)
+        
+        Ps: It is not an actual server role. """
+
+        member = ctx.author
+
+        if not role_name:
+            return await ctx.send(f"**Please, inform a tribe role name, {member.mention}!**")
+
+        # Do the magic here.

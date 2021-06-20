@@ -194,3 +194,28 @@ class Agares(Player):
         recharge_embed.set_image(url='https://media1.tenor.com/images/623500b09831e08eb963bdc7d75797c4/tenor.gif?itemid=20299439')
 
         return recharge_embed
+
+    @commands.command()
+    @Player.skills_used(requirement=20)
+    @Player.skill_on_cooldown(skill=Skill.THREE)
+    @Player.user_is_class('metamorph')
+    @Player.skill_mark()
+    @Player.not_ready()
+    async def reflect(self, ctx, target: discord.Member = None) -> None:
+        """ Gives someone the ability to automatically reflect any debuff skill for 24h.
+        You still get the debuff, but the perpetrator of the attacke gets it too. (100%)
+        :param target: The target member.
+
+        PS:
+        - If target not informed, the target is you.
+        - If you have any active debuff and use this skill, it has a 45% chance of
+        reflecting the same skill to the attacker.
+
+        * Cooldown: 1 day.
+        * Skill cost: 100łł. """
+
+        if not target:
+            target = ctx.author
+
+        # Do the magic
+

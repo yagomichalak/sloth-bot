@@ -151,6 +151,7 @@ class Seraph(Player):
                         user_id=perpetrator.id, skill_type="divine_protection", skill_timestamp=current_timestamp,
                         target_id=perpetrator.id, channel_id=ctx.channel.id
                     )
+                    await self.update_user_protected(perpetrator.id, 1)
 
                 except Exception as e:
                     print(e)
@@ -185,7 +186,6 @@ class Seraph(Player):
         :param protected: Whether it's gonna be set to true or false. """
 
         mycursor, db = await the_database()
-        print(protected, user_id)
         await mycursor.execute("UPDATE UserCurrency SET protected = %s WHERE user_id = %s", (protected, user_id))
         await db.commit()
         await mycursor.close()
@@ -247,7 +247,7 @@ class Seraph(Player):
         reinforce_shields_embed.description = f"🛡️ <@{perpetrator_id}> reinforced `{shields_len}` active shields; now they have more 24 hours of duration! 🛡️💪"
         reinforce_shields_embed.color = discord.Color.green()
 
-        reinforce_shields_embed.set_author(name='35% of chance', url=self.client.user.avatar_url)
+        reinforce_shields_embed.set_author(name='50% of chance', url=self.client.user.avatar_url)
         reinforce_shields_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Seraph.png")
         reinforce_shields_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon_url)
 
@@ -268,7 +268,7 @@ class Seraph(Player):
         self_shield_embed.description = f"🛡️ <@{perpetrator_id}> got a shield for themselves for reinforcing other shields! 🛡️💪"
         self_shield_embed.color = discord.Color.green()
 
-        self_shield_embed.set_author(name='20% of chance', url=self.client.user.avatar_url)
+        self_shield_embed.set_author(name='45% of chance', url=self.client.user.avatar_url)
         self_shield_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Seraph.png")
         self_shield_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon_url)
 
@@ -303,7 +303,7 @@ class Seraph(Player):
 
         effects = await self.get_user_effects(target)
         debuffs = [fx for fx, values in effects.items() if values['debuff']]
-        print("Debuffs", debuffs)
+
         if not debuffs:
             return await ctx.send(f"**{target.mention} doesn't have any active debuff, {perpetrator.mention}!**")
 
@@ -365,7 +365,6 @@ class Seraph(Player):
         
         await self.update_user_debuffs(member.id)
         await self.delete_skill_action_by_target_id(member.id)
-        print('Removed them!')
         return debuffs_removed
 
     async def make_heal_embed(self, target: discord.Member, perpetrator: discord.Member, debuffs_removed: int) -> discord.Embed:

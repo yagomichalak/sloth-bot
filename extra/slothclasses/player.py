@@ -386,7 +386,6 @@ class Player(commands.Cog):
 
         mycursor, db = await the_database()
         sql = "SELECT " + skill_field + " FROM SkillsCooldown WHERE user_id = %s"
-        print(sql)
         await mycursor.execute(sql, (user_id,))
 
         skill_ts = await mycursor.fetchone()
@@ -552,7 +551,6 @@ class Player(commands.Cog):
 
         mycursor, db = await the_database()
         sql = "UPDATE SkillsCooldown SET " + skill.value + " = %s WHERE user_id = %s"
-        print(sql)
         await mycursor.execute(sql, (new_skill_ts, user_id))
         await db.commit()
         await mycursor.close()
@@ -580,31 +578,6 @@ class Player(commands.Cog):
 
         mycursor, db = await the_database()
         sql = "INSERT INTO SkillsCooldown (user_id, " + skill.value + ") VALUES (%s, %s)"
-        print(sql)
         await mycursor.execute(sql, (user_id, skill_ts))
         await db.commit()
         await mycursor.close()
-
-
-    @commands.command(aliases=["fx", "efx", "user_effects", "usereffects", "geteffects", "membereffects", "member_effects"])
-    @commands.cooldown(1, 5, commands.BucketType.user)
-    async def effects(self, ctx, member: discord.Member = None) -> None:
-        """ Gets all effects from a member.
-        :param member: The member to get it from. """
-
-        if not member:
-            member = ctx.author
-
-        effects = await self.get_user_effects(member)
-        formated_effects = [f"__**{effect.title()}**__: {values['cooldown']}" for effect, values in effects.items()]
-        
-        embed = discord.Embed(
-            title=f"__Effects for {member}__",
-            description='\n'.join(formated_effects),
-            color=member.color,
-            timestamp=ctx.message.created_at,
-            url=member.avatar_url
-        )
-        embed.set_thumbnail(url=member.avatar_url)
-
-        await ctx.send(embed=embed)
