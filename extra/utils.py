@@ -14,4 +14,5 @@ async def parse_time(tz: str = 'Etc/GMT') -> str:
     """ Parses time from the current timestamp.
     :param tz: The timezone to get the timstamp from. Default = Etc/GMT """
 
-    return datetime(*map(int, re.split(r'[^\d]', str(datetime.now(tz)).replace('+00:00', ''))))
+    tzone = timezone(tz)
+    return datetime(*map(int, re.split(r'[^\d]', str(datetime.now(tzone)).replace('+00:00', ''))))

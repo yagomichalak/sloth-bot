@@ -3,13 +3,13 @@ wikipedia==1.4.0
 git+https://github.com/yagomichalak/discord.py.git@v1.x
 aiohttp==3.6.3
 aiomysql==0.0.21
-praw==7.1.0
+praw==7.3.0
 pytz==2020.4
-gTTS==2.2.1
+gTTS==2.2.3
 git+https://github.com/Rapptz/discord-ext-menus
 PyDrive==1.3.1
 googletrans==3.1.0a0
-chatbot==1.5.2b
+chatbot==1.5.2b0
 # discord==1.0.1
 Pillow==8.1.0
 python-dotenv==0.15.0

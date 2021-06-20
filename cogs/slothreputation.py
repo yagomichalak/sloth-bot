@@ -124,7 +124,7 @@ class SlothReputation(commands.Cog):
             return await ctx.send("**Member not found in the system!**")
 
         SlothClass = self.client.get_cog('SlothClass')
-        effects = await SlothClass.get_user_effects(user_id=member.id)
+        effects = await SlothClass.get_user_effects(member=member)
 
         def has_effect(effect: str):
             if effect in effects:

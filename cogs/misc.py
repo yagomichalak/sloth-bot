@@ -359,7 +359,7 @@ class Misc(commands.Cog):
         await self.insert_member_reminder(member.id, text, current_ts, seconds)
 
         tzone = timezone('Etc/GMT')
-        time_now = datetime.utcfromtimestamp(current_ts + seconds)
+        time_now = datetime.fromtimestamp(current_ts + seconds)
         date_and_time = time_now.astimezone(tzone)
         remind_at = date_and_time.strftime('%Y/%m/%d at %H:%M:%S')
         await ctx.send(f"**Reminding you at `{remind_at}`, {member.mention}!**")

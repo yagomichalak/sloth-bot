@@ -1,6 +1,8 @@
 import discord
+from discord import user
 from discord.ext import commands
 from discord.ext.commands.errors import NoEntryPointError
+from discord.ext.commands.help import HelpCommand
 from .player import Player, Skill
 from mysqldb import the_database
 from extra.menu import ConfirmSkill
@@ -8,6 +10,7 @@ from extra import utils
 import os
 from datetime import datetime
 import random
+from typing import List
 
 bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
 
@@ -50,15 +53,18 @@ class Seraph(Player):
 
         confirmed = await ConfirmSkill(f"**{ctx.author.mention}, are you sure you want to use your skill, to protect {target.mention}?**").prompt(ctx)
         if confirmed:
-            await self.check_cooldown(user_id=ctx.author.id, skill=Skill.ONE)
-
+            _, exists = await self.check_cooldown(user_id=ctx.author.id, skill=Skill.ONE)
             current_timestamp = await utils.get_timestamp()
             await self.insert_skill_action(
                 user_id=ctx.author.id, skill_type="divine_protection", skill_timestamp=current_timestamp,
                 target_id=target.id, channel_id=ctx.channel.id
             )
             await self.update_user_protected(target.id, 1)
-            await self.update_user_skill_ts(ctx.author.id, Skill.ONE, current_timestamp)
+            if exists:
+                await self.update_user_skill_ts(ctx.author.id, Skill.ONE, current_timestamp)
+            else:
+                await self.insert_user_skill_cooldown(ctx.author.id, Skill.ONE, current_timestamp)
+
             # Updates user's skills used counter
             await self.update_user_skills_used(user_id=ctx.author.id)
             divine_protection_embed = await self.get_divine_protection_embed(
@@ -102,14 +108,17 @@ class Seraph(Player):
         if not confirm:
             return await ctx.send(f"**Not reinforcing them, then, {perpetrator.mention}!**")
 
-        await self.check_cooldown(user_id=perpetrator.id, skill=Skill.TWO)
+        _, exists = await self.check_cooldown(user_id=perpetrator.id, skill=Skill.TWO)
 
         current_timestamp = await utils.get_timestamp()
 
         # Upate user's money
         await self.update_user_money(perpetrator.id, -50)
         # Update perpetrator's second skill timestamp
-        await self.update_user_skill_ts(user_id=perpetrator.id, skill=Skill.TWO, new_skill_ts=current_timestamp)
+        if exists:
+            await self.update_user_skill_ts(user_id=perpetrator.id, skill=Skill.TWO, new_skill_ts=current_timestamp)
+        else:
+            await self.insert_user_skill_cooldown(ctx.author.id, Skill.TWO, current_timestamp)
         # Updates user's skills used counter
         await self.update_user_skills_used(user_id=perpetrator.id)
 
@@ -176,6 +185,7 @@ class Seraph(Player):
         :param protected: Whether it's gonna be set to true or false. """
 
         mycursor, db = await the_database()
+        print(protected, user_id)
         await mycursor.execute("UPDATE UserCurrency SET protected = %s WHERE user_id = %s", (protected, user_id))
         await db.commit()
         await mycursor.close()
@@ -266,10 +276,117 @@ class Seraph(Player):
 
     @commands.command()
     @Player.skills_used(requirement=20)
-    @Player.skill_mark()
     @Player.skill_on_cooldown(skill=Skill.THREE)
+    @Player.user_is_class('seraph')
+    @Player.skill_mark()
     @Player.not_ready()
-    async def heal(self, ctx, member: discord.Member = None) -> None:
-        """ Heals a member from all debuffs. """
+    async def heal(self, ctx, target: discord.Member = None) -> None:
+        """ Heals a member from all debuffs.
+        :param target: The member from whom remove the debuffs.
+        PS: If target not provided, the target is you.
 
-        pass
+        Skill cost: 100łł.
+        Cooldown: 1 day. """
+
+        perpetrator = ctx.author
+
+        if not target:
+            target = ctx.author
+
+        target_currency = await self.get_user_currency(target.id)
+        if not target_currency:
+            return await ctx.send(f"**You cannot protect someone who doesn't have an account, {ctx.author.mention}!**")
+
+        if target_currency[7] == 'default':
+            return await ctx.send(f"**You cannot protect someone who has a `default` Sloth class, {ctx.author.mention}!**")
+
+
+        effects = await self.get_user_effects(target)
+        debuffs = [fx for fx, values in effects.items() if values['debuff']]
+        print("Debuffs", debuffs)
+        if not debuffs:
+            return await ctx.send(f"**{target.mention} doesn't have any active debuff, {perpetrator.mention}!**")
+
+        user = await self.get_user_currency(perpetrator.id)
+        if not user[1] >= 100:
+            return await ctx.send(f"**You don't have `100łł` to use this skill, {perpetrator.mention}!**")
+
+        confirm = await ConfirmSkill(f"**Do you really want to heal {target.mention} from all debuffs, {perpetrator.mention}?**").prompt(ctx)
+        if not confirm:
+            return await ctx.send(f"**Not doing it then, {perpetrator.mention}!**")
+
+        _, exists = await self.check_cooldown(perpetrator.id, Skill.THREE)
+
+        await self.update_user_money(perpetrator.id, -100)
+
+        current_ts = await utils.get_timestamp()
+        if exists:
+            await self.update_user_skill_ts(perpetrator.id, Skill.THREE, current_ts)
+        else:
+            await self.insert_user_skill_cooldown(perpetrator.id, Skill.THREE, current_ts)
+
+        debuffs_removed = await self.remove_debuffs(member=target, debuffs=debuffs)
+
+        heal_embed = await self.make_heal_embed(target=target, perpetrator=perpetrator, debuffs_removed=debuffs_removed)
+        await ctx.send(embed=heal_embed)
+
+        
+    async def remove_debuffs(self, member: discord.Member, debuffs: List[str]) -> int:
+        """ Removes all debuffs from a member.
+        :param member: The member from whom to remove the debuffs.
+        :param debuffs: A list of debuffs to remove. """
+
+        debuffs_removed = 0
+        for debuff in debuffs:
+            try:
+                if debuff == 'hacked':  
+
+                    debuffs_removed += 1
+
+                if debuff == 'knocked_out':  
+
+                    debuffs_removed += 1
+
+                if debuff == 'wired':  
+
+                    debuffs_removed += 1
+
+                if debuff == 'frogged':
+
+                    debuffs_removed += 1
+
+                if debuff == 'munk':
+                    await member.edit(nick=member.display_name.replace('Munk', '').strip())
+                    debuffs_removed += 1
+
+            except Exception as e:
+                print(e)
+                continue
+        
+        await self.update_user_debuffs(member.id)
+        await self.delete_skill_action_by_target_id(member.id)
+        print('Removed them!')
+        return debuffs_removed
+
+    async def make_heal_embed(self, target: discord.Member, perpetrator: discord.Member, debuffs_removed: int) -> discord.Embed:
+        """ Makes an embedded message for a heal skill action.
+        :param target: The member that was healed.
+        :param perpetrator: The person who healed them.
+        :param debuffs_removed: The amount of debuffs removed """
+
+        parsed_time = await utils.parse_time()
+        heal_embed = discord.Embed(
+            title="__Someone just got healed__!",
+            description=f"{target.mention} just got healed from `{debuffs_removed}` bad effect(s)!",
+            color=target.color,
+            timestamp=parsed_time
+        )
+
+        heal_embed.set_thumbnail(url=target.avatar_url)
+        heal_embed.set_image(url="https://cdn3.iconfinder.com/data/icons/role-playing-game-5/340/magic_game_rpg_human_healing_heal-512.png")
+        heal_embed.set_author(name=perpetrator, url=perpetrator.avatar_url, icon_url=perpetrator.avatar_url)
+        heal_embed.set_footer(text=perpetrator.guild.name, icon_url=perpetrator.guild.icon_url)
+
+        return heal_embed
+        
+

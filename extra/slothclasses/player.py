@@ -1,5 +1,6 @@
 import discord
 from discord.ext import commands
+from discord.ext.commands.core import cooldown
 
 from extra.customerrors import MissingRequiredSlothClass, ActionSkillOnCooldown, CommandNotReady, SkillsUsedRequirement
 from extra import utils
@@ -8,6 +9,7 @@ from mysqldb import the_database, the_django_database
 from typing import Union, List
 from datetime import datetime
 import os
+from pytz import timezone
 
 from enum import Enum
 
@@ -63,12 +65,14 @@ class Player(commands.Cog):
         """ Checks whether user skill is on cooldown (method).
         :param user_id: The ID of the user who to check it"""
 
-        skill_ts = await self.get_user_action_skill_ts(user_id=user_id, skill_field=skill.value)
+        skill_ts, exists = await self.get_user_action_skill_ts(user_id=user_id, skill_field=skill.value)
+        if not skill_ts:
+            return True, exists
 
         current_ts = await utils.get_timestamp()
         cooldown_in_seconds = current_ts - skill_ts
         if cooldown_in_seconds >= seconds:
-            return True
+            return True, exists
 
         raise ActionSkillOnCooldown(try_after=cooldown_in_seconds, error_message="Action skill on cooldown!")
 
@@ -78,11 +82,15 @@ class Player(commands.Cog):
         async def real_check(ctx):
             """ Perfoms the real check. """
 
-            last_skill_ts = await Player.get_user_action_skill_ts(Player, user_id=ctx.author.id, skill_field=skill.value)
+            skill_ts, exists = await Player.get_user_action_skill_ts(Player, user_id=ctx.author.id, skill_field=skill.value)
+            if not skill_ts:
+                return True
+
             current_time = await utils.get_timestamp()
-            cooldown_in_seconds = current_time - last_skill_ts
+            cooldown_in_seconds = current_time - skill_ts
             if cooldown_in_seconds >= seconds:
                 return True
+
             raise ActionSkillOnCooldown(
                 try_after=cooldown_in_seconds, error_message="Action skill on cooldown!", cooldown=seconds)
 
@@ -117,13 +125,13 @@ class Player(commands.Cog):
                 return True
 
             raise SkillsUsedRequirement(
-                error_message=f"You must have `{requirement}` skills used in order to use this skill, {ctx.author.mention}!")
+                error_message=f"You must have `{requirement}` skills used in order to use this skill, {ctx.author.mention}!", skills_required=requirement)
 
         return commands.check(real_check)
 
     # Is user EFFECT
 
-    async def get_user_effects(self, user_id: int) -> List[str]:
+    async def get_user_effects(self, member: Union[discord.User, discord.Member]) -> List[str]:
         """ Gets the effects that the user is under. """
 
         # effects = []
@@ -152,55 +160,69 @@ class Player(commands.Cog):
 
             return msg
 
-        if await self.is_user_protected(user_id=user_id):
-            then = await self.get_skill_action_by_target_id_and_skill_type(target_id=user_id, skill_type='divine_protection')
+        if await self.is_user_protected(user_id=member.id):
+            then = await self.get_skill_action_by_target_id_and_skill_type(target_id=member.id, skill_type='divine_protection')
             effects['protected'] = {}
             effects['protected']['cooldown'] = calculate(now=now, then=then[2]) if then else 'Ends in ??'
             effects['protected']['frames'] = []
             effects['protected']['cords'] = (0, 0)
             effects['protected']['resize'] = None
             effects['protected']['has_gif'] = True
+            effects['protected']['debuff'] = False
 
-        if await self.is_transmutated(user_id=user_id):
-            then = await self.get_skill_action_by_target_id_and_skill_type(target_id=user_id, skill_type='transmutation')
+        if await self.is_transmutated(user_id=member.id):
+            then = await self.get_skill_action_by_target_id_and_skill_type(target_id=member.id, skill_type='transmutation')
             effects['transmutated'] = {}
             effects['transmutated']['cooldown'] = calculate(now=now, then=then[2]) if then else 'Ends in ??'
             effects['transmutated']['frames'] = []
             effects['transmutated']['cords'] = (0, 0)
             effects['transmutated']['resize'] = None
             effects['transmutated']['has_gif'] = True
+            effects['transmutated']['debuff'] = False
 
-        if await self.is_user_hacked(user_id=user_id):
-            then = await self.get_skill_action_by_target_id_and_skill_type(target_id=user_id, skill_type='hack')
+        if await self.is_user_hacked(user_id=member.id):
+            then = await self.get_skill_action_by_target_id_and_skill_type(target_id=member.id, skill_type='hack')
             effects['hacked'] = {}
             effects['hacked']['cooldown'] = calculate(now=now, then=then[2]) if then else 'Ends in ??'
             effects['hacked']['frames'] = []
             effects['hacked']['cords'] = (0, 0)
             effects['hacked']['resize'] = None
+            effects['hacked']['debuff'] = True
 
-        if await self.is_user_wired(user_id=user_id):
-            then = await self.get_skill_action_by_target_id_and_skill_type(target_id=user_id, skill_type='wire')
+        if await self.is_user_wired(user_id=member.id):
+            then = await self.get_skill_action_by_target_id_and_skill_type(target_id=member.id, skill_type='wire')
             effects['wired'] = {}
             effects['wired']['cooldown'] = calculate(now=now, then=then[2]) if then else 'Ends in ??'
             effects['wired']['frames'] = []
             effects['wired']['cords'] = (0, 0)
             effects['wired']['resize'] = None
+            effects['wired']['debuff'] = True
 
-        if await self.is_user_knocked_out(user_id=user_id):
-            then = await self.get_skill_action_by_target_id_and_skill_type(target_id=user_id, skill_type='knock_out')
+        if await self.is_user_knocked_out(user_id=member.id):
+            then = await self.get_skill_action_by_target_id_and_skill_type(target_id=member.id, skill_type='knock_out')
             effects['knocked_out'] = {}
             effects['knocked_out']['cooldown'] = calculate(now=now, then=then[2]) if then else 'Ends in ??'
             effects['knocked_out']['frames'] = []
             effects['knocked_out']['cords'] = (0, 0)
             effects['knocked_out']['resize'] = None
+            effects['knocked_out']['debuff'] = True
 
-        if await self.is_user_frogged(user_id=user_id):
-            then = await self.get_skill_action_by_target_id_and_skill_type(target_id=user_id, skill_type='frog')
+        if await self.is_user_frogged(user_id=member.id):
+            then = await self.get_skill_action_by_target_id_and_skill_type(target_id=member.id, skill_type='frog')
             effects['frogged'] = {}
             effects['frogged']['cooldown'] = calculate(now=now, then=then[2]) if then else 'Ends in ??'
             effects['frogged']['frames'] = []
             effects['frogged']['cords'] = (0, 0)
             effects['frogged']['resize'] = None
+            effects['frogged']['debuff'] = True
+
+        if 'Munk' in member.display_name:
+            effects['munk'] = {}
+            effects['munk']['cooldown'] = "Endless"
+            effects['munk']['frames'] = []
+            effects['munk']['cords'] = (0, 0)
+            effects['munk']['resize'] = None
+            effects['munk']['debuff'] = True
 
         return effects
 
@@ -357,26 +379,28 @@ class Player(commands.Cog):
         await mycursor.close()
         return skill_action
 
-    async def get_user_action_skill_ts(self, user_id: int, skill_field: str) -> Union[str, bool]:
+    async def get_user_action_skill_ts(self, user_id: int, skill_field: str) -> List[Union[str, bool]]:
         """ Gets the user's last action skill timestamp from the database.
         :param user_id: The ID of the user to get the action skill timestamp.
         :param skill_field: The skill field to check. """
 
         mycursor, db = await the_database()
-        await mycursor.execute("SELECT %s FROM SkillsCooldown WHERE user_id = %s", (skill_field, user_id))
+        sql = "SELECT " + skill_field + " FROM SkillsCooldown WHERE user_id = %s"
+        print(sql)
+        await mycursor.execute(sql, (user_id,))
 
         skill_ts = await mycursor.fetchone()
         await mycursor.close()
         if skill_ts:
-            return skill_ts[0]
+            return skill_ts[0], True
         else:
-            return None
+            return None, False
 
     async def get_timestamp(self) -> int:
         """ Gets the current timestamp. """
 
-        epoch = datetime.fromtimestamp(0)
-        the_time = (datetime.utcnow() - epoch).total_seconds()
+        tzone = timezone('Etc/GMT')
+        the_time = datetime.now(tzone).timestamp()
         return the_time
 
     async def get_expired_transmutations(self) -> None:
@@ -520,7 +544,6 @@ class Player(commands.Cog):
         await db.commit()
         await mycursor.close()
 
-    # =====
     async def update_user_skill_ts(self, user_id: int, skill: Enum, new_skill_ts: int = None) -> None:
         """ Updates the value of the user's skill.
         :parma user_id: The ID of the user.
@@ -528,7 +551,37 @@ class Player(commands.Cog):
         :param new_skill_ts: The new timestamp value for the skill. Default = None. """
 
         mycursor, db = await the_database()
-        await mycursor.execute("UPDATE SkillsCooldown SET %s = %s WHERE user_id = %s", (skill.value, new_skill_ts, user_id))
+        sql = "UPDATE SkillsCooldown SET " + skill.value + " = %s WHERE user_id = %s"
+        print(sql)
+        await mycursor.execute(sql, (new_skill_ts, user_id))
+        await db.commit()
+        await mycursor.close()
+
+    async def update_user_debuffs(self, user_id: int, on_off: int = 0) -> None:
+        """ Updates all available debuffs for an user to on or off.
+        :param user_id: The ID of the user.
+        :param on_off: Whether it's gonna be set to on or off. (0 = off | 1 = on).
+        Default = 0. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("""
+        UPDATE UserCurrency SET hacked = %s, knocked_out = %s, frogged = %s, wired = %s
+        WHERE user_id = %s""", (on_off, on_off, on_off, on_off, user_id))
+        await db.commit()
+        await mycursor.close()
+
+    # ========== INSERT ==========
+
+    async def insert_user_skill_cooldown(self, user_id: int, skill: Enum, skill_ts: int) -> None:
+        """ Updates the value of the user's skill.
+        :parma user_id: The ID of the user.
+        :param skill: The Enum of the skill.
+        :param skill_ts: The timestamp value for the skill. """
+
+        mycursor, db = await the_database()
+        sql = "INSERT INTO SkillsCooldown (user_id, " + skill.value + ") VALUES (%s, %s)"
+        print(sql)
+        await mycursor.execute(sql, (user_id, skill_ts))
         await db.commit()
         await mycursor.close()
 
@@ -542,7 +595,7 @@ class Player(commands.Cog):
         if not member:
             member = ctx.author
 
-        effects = await self.get_user_effects(member.id)
+        effects = await self.get_user_effects(member)
         formated_effects = [f"__**{effect.title()}**__: {values['cooldown']}" for effect, values in effects.items()]
         
         embed = discord.Embed(

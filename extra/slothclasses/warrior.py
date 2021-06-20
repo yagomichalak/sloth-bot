@@ -60,7 +60,7 @@ class Warrior(Player):
         if not confirmed:
             return await ctx.send("**Not knocking them out, then!**")
 
-        await self.check_cooldown(user_id=attacker.id, skill=Skill.ONE)
+        _, exists = await self.check_cooldown(user_id=attacker.id, skill=Skill.ONE)
 
         try:
             current_timestamp = await utils.get_timestamp()
@@ -70,7 +70,10 @@ class Warrior(Player):
                 user_id=attacker.id, skill_type="hit", skill_timestamp=current_timestamp,
                 target_id=target.id, channel_id=ctx.channel.id
             )
-            await self.update_user_skill_ts(attacker.id, Skill.ONE, current_timestamp)
+            if exists:
+                await self.update_user_skill_ts(attacker.id, Skill.ONE, current_timestamp)
+            else:
+                await self.insert_user_skill_cooldown(ctx.author.id, Skill.ONE, current_timestamp)
             # Updates user's skills used counter
             await self.update_user_skills_used(user_id=attacker.id)
 
@@ -126,13 +129,16 @@ class Warrior(Player):
         if not confirmed:
             return await ctx.send("**Not hacking them, then!**")
 
-        await self.check_cooldown(user_id=attacker.id, skill=Skill.TWO)
+        _, exists = await self.check_cooldown(user_id=attacker.id, skill=Skill.TWO)
 
         current_timestamp = await utils.get_timestamp()
         # Upate user's money
         await self.update_user_money(attacker.id, -50)
         # # Update attacker's second skill timestamp
-        await self.update_user_skill_ts(user_id=attacker.id, skill=Skill.TWO, new_skill_ts=current_timestamp)
+        if exists:
+            await self.update_user_skill_ts(user_id=attacker.id, skill=Skill.TWO, new_skill_ts=current_timestamp)
+        else:
+            await self.insert_user_skill_cooldown(ctx.author.id, Skill.TWO, current_timestamp)
         # Updates user's skills used counter
         await self.update_user_skills_used(user_id=attacker.id)
 
