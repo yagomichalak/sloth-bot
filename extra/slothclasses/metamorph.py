@@ -204,3 +204,24 @@ class Metamorph(Player):
         await mycursor.execute("UPDATE UserCurrency SET frogged = %s WHERE user_id = %s", (frogged, user_id))
         await db.commit()
         await mycursor.close()
+
+
+    @commands.command()
+    @Player.skills_used(requirement=20)
+    @Player.skill_on_cooldown(skill=Skill.THREE)
+    @Player.user_is_class('metamorph')
+    @Player.skill_mark()
+    @Player.not_ready()
+    async def mirror(self, ctx, target: discord.Member = None) -> None:
+        """ Mirrors someone else's first skill.
+        :param target: The person from whom to mirror the skill.
+
+        * Cooldown: 1 day.
+        * Skill cost: 50łł. """
+
+        perpetrator = ctx.author
+
+        if not target:
+            return await ctx.send(f"**Please, inform a target, {perpetrator.mention}!**")
+
+        # Do the magic
