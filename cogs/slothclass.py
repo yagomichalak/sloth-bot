@@ -169,11 +169,15 @@ class SlothClass(*classes.values()):
 
     @commands.command(aliases=['my_skills'])
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def skills(self, ctx):
-        """ Shows all skills for the user's Sloth class. """
+    async def skills(self, ctx, member: discord.Member = None) -> None:
+        """ Shows all skills for the user's Sloth class.
+        :param member: The person from whom to see the skills.
+        PS: If you don't inform a member, you will see your skills. """
 
-        user = await self.get_user_currency(ctx.author.id)
-        member = ctx.author
+        if not member:
+            member = ctx.author
+
+        user = await self.get_user_currency(member.id)
 
         if not user:
             component = discord.Component()
@@ -225,11 +229,11 @@ class SlothClass(*classes.values()):
 
         skills_embed = discord.Embed(
             title=f"__Available Skills for__: `{user[7]}` {emoji}",
-            color=ctx.author.color,
+            color=member.color,
             timestamp=ctx.message.created_at
         )
         skills_embed.add_field(name=f"__Skills__:", value=f"```apache\n{cmds_text}```")
-        skills_embed.set_author(name=ctx.author, icon_url=ctx.author.avatar_url)
+        skills_embed.set_author(name=member, icon_url=member.avatar_url)
         skills_embed.set_thumbnail(url=f"https://thelanguagesloth.com/media/sloth_classes/{user[7]}.png")
         skills_embed.set_footer(text=ctx.guild, icon_url=ctx.guild.icon_url)
         await ctx.send(embed=skills_embed)
