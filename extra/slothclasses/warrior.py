@@ -91,7 +91,7 @@ class Warrior(Player):
     @Player.skill_mark()
     # @Player.not_ready()
     async def smash(self, ctx, target: discord.Member = None) -> None:
-        """ Has a 35% change of breaking someone's Divine Protection shield.
+        """ Has a 50% change of breaking someone's Divine Protection shield.
         :param target: The target who you are trying to smash the protection. """
 
         attacker = ctx.author
@@ -143,7 +143,7 @@ class Warrior(Player):
         await self.update_user_skills_used(user_id=attacker.id)
 
         # Calculates chance of smashing someone's Divine Protection shield
-        if random.random() <= 0.35:
+        if random.random() <= 0.5:
             try:
                 await self.update_user_protected(target.id, 0)
                 await self.delete_skill_action_by_target_id_and_skill_type(target.id, 'divine_protection')
@@ -156,7 +156,7 @@ class Warrior(Player):
                 channel=ctx.channel, perpetrator_id=attacker.id, target_id=target.id)
                 await ctx.send(embed=smash_embed)
         else:
-            await ctx.send(f"**You had a `35%` chance of smashing {target.mention}'s Divine Protection shield, but you missed it, {attacker.mention}!**")
+            await ctx.send(f"**You had a `50%` chance of smashing {target.mention}'s Divine Protection shield, but you missed it, {attacker.mention}!**")
 
     async def check_knock_outs(self) -> None:
 
