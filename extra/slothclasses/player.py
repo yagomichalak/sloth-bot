@@ -409,7 +409,7 @@ class Player(commands.Cog):
         mycursor, db = await the_database()
         await mycursor.execute("""
             SELECT * FROM SlothSkills
-            WHERE skill_type = 'transmutation' AND (%s - skill_timestamp) >= 3600
+            WHERE skill_type = 'transmutation' AND (%s - skill_timestamp) >= 86400
             """, (the_time,))
         transmutations = await mycursor.fetchall()
         await mycursor.close()

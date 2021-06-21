@@ -22,7 +22,7 @@ class Metamorph(Player):
     @Player.user_is_class('metamorph')
     @Player.skill_mark()
     async def transmutation(self, ctx) -> None:
-        """ Transmutates into a different form for 1 hour, that you can see in your z!profile. """
+        """ Transmutates into a different form for 1 day, that you can see in your z!profile. """
 
         if ctx.channel.id != bots_and_commands_channel_id:
             return await ctx.send(f"**{ctx.author.mention}, you can only use this command in {self.bots_txt.mention}!**")
