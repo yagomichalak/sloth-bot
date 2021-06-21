@@ -31,6 +31,7 @@ class ReportSupport(commands.Cog):
     def __init__(self, client) -> None:
         self.client = client
         self.cosmos_id: int = int(os.getenv('COSMOS_ID'))
+        self.muffin_id: int = int(os.getenv('MUFFIN_ID'))
         self.cache = {}
         self.report_cache = {}
         # Teacher application attributes
@@ -319,8 +320,8 @@ class ReportSupport(commands.Cog):
             embed.description = "**Application successfully made, please, be patient now!**"
             await member.send(embed=embed)
             teacher_app_channel = await self.client.fetch_channel(self.teacher_app_channel_id)
-            cosmos = discord.utils.get(teacher_app_channel.guild.members, id=self.cosmos_id)
-            app = await teacher_app_channel.send(content=f"{cosmos.mention}, {member.mention}\n{app}")
+            muffin = discord.utils.get(teacher_app_channel.guild.members, id=self.muffin_id)
+            app = await teacher_app_channel.send(content=f"{muffin.mention}, {member.mention}\n{app}")
             await app.add_reaction('✅')
             await app.add_reaction('❌')
             # Saves in the database
@@ -971,7 +972,7 @@ Please answer using one message only.."""
         teacher = discord.utils.get(guild.members, id=teacher_app[0][1])
 
         # moderator = discord.utils.get(guild.roles, id=moderator_role_id)
-        cosmos = discord.utils.get(guild.members, id=self.cosmos_id)
+        muffin = discord.utils.get(guild.members, id=self.muffin_id)
         lesson_management = discord.utils.get(guild.roles, id=lesson_management_role_id)
 
         # Creates channels
@@ -995,7 +996,7 @@ Please answer using one message only.."""
             Hello, {teacher.mention}, we have received and reviewed your teacher application. In order to set up your lesson and explain how our system works we have to schedule a voice conversation with you.
             When would be the best time to talk to one of our staff?''',
             color=teacher.color)
-        await txt_channel.send(content=f"{cosmos.mention}, {lesson_management.mention}, {teacher.mention}", embed=app_embed)
+        await txt_channel.send(content=f"{muffin.mention}, {lesson_management.mention}, {teacher.mention}", embed=app_embed)
 
     async def create_moderator_interview_room(self, guild: discord.Guild, moderator_app: List[str]) -> None:
         """ Creates an interview room with the moderator.
