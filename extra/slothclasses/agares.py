@@ -108,12 +108,11 @@ class Agares(Player):
         :param target: The target person who you want to recharge the skill for. """
 
         perpetrator = ctx.author
+        if not target:
+            target = ctx.author
 
         if ctx.channel.id != bots_and_commands_channel_id:
             return await ctx.send(f"**{perpetrator.mention}, you can only use this command in {self.bots_txt.mention}!**")
-
-        if not target:
-            return await ctx.send(f"**Please, inform a target, {perpetrator.mention}**")
 
         if target.bot:
             return await ctx.send(f"**{perpetrator.mention}, you cannot use this on a bot!**")
@@ -135,10 +134,10 @@ class Agares(Player):
         _, exists = await self.check_cooldown(user_id=perpetrator.id, skill=Skill.TWO)
 
         try:
-            await self.reset_user_action_skill_cooldown(target.id)
+            await self.update_user_skill_ts(target.id, Skill.ONE)
         except Exception as e:
             print(e)
-            await ctx.send(f"**For some reason I couldn't reset {target.menion}'s cooldown, {perpetrator.mention}!**")
+            await ctx.send(f"**For some reason I couldn't reset {target.mention}'s cooldown, {perpetrator.mention}!**")
         else:
             # Puts the perpetrator's skill on cooldown
             current_ts = await utils.get_timestamp()
