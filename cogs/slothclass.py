@@ -196,6 +196,8 @@ class SlothClass(*classes.values()):
         class_commands = the_class.__dict__['__cog_commands__']
         prefix = self.client.command_prefix
         cmds = []
+
+        ctx.author = member
         for c in class_commands:
             if c.hidden:
                 continue
@@ -209,6 +211,7 @@ class SlothClass(*classes.values()):
             # if 'Player.not_ready.<locals>.real_check' in [check.__qualname__ for check in c.checks]:
             #     cmds.append(f"{prefix}{c.qualified_name:<18} [Not ready]")
             # else:
+            
             try:
                 await c.can_run(ctx)
                 cmds.append(f"{prefix}{c.qualified_name:<18} [Ready to use]")
