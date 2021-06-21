@@ -106,14 +106,24 @@ class ReportSupport(commands.Cog):
             return
 
         guild = self.client.get_guild(payload.guild_id)
+        lesson_manager_role = discord.utils.get(guild.roles, id=lesson_management_role_id)
+        mod_role = discord.utils.get(guild.roles, id=moderator_role_id)
+        channel = await self.client.fetch_channel(payload.channel_id)
+        message = await channel.fetch_message(payload.message_id)
 
         # Checks if it's in the teacher applications channel
         if payload.channel_id == self.teacher_app_channel_id:
-            await self.handle_teacher_application(guild, payload)
+            if mod_role in payload.member.roles or lesson_manager_role in payload.member.roles:
+                await message.remove_reaction(payload.emoji, payload.member)
+            else:
+                await self.handle_teacher_application(guild, payload)
 
         # Checks if it's in the moderator applications channel
         elif payload.channel_id == self.moderator_app_channel_id:
-            await self.handle_moderator_application(guild, payload)
+            if mod_role in payload.member.roles or lesson_manager_role in payload.member.roles:
+                await message.remove_reaction(payload.emoji, payload.member)
+            else:
+                await self.handle_moderator_application(guild, payload)
 
 
     async def handle_teacher_application(self, guild, payload) -> None:
