@@ -113,19 +113,19 @@ class Moderation(commands.Cog):
                         except Exception as e:
                             print(e)
                             pass
-
-                    # Moderation log embed
-                    moderation_log = discord.utils.get(guild.channels, id=mod_log_id)
-                    embed = discord.Embed(
-                        description=F"**Unmuted** {member.mention}\n**Reason:** Tempmute is over",
-                        color=discord.Color.light_gray())
-                    embed.set_author(name=f"{self.client.user} (ID {self.client.user.id})", icon_url=self.client.user.avatar_url)
-                    embed.set_thumbnail(url=member.avatar_url)
-                    await moderation_log.send(embed=embed)
-                    try:
-                        await member.send(embed=embed)
-                    except:
-                        pass
+                        else:
+                            # Moderation log embed
+                            moderation_log = discord.utils.get(guild.channels, id=mod_log_id)
+                            embed = discord.Embed(
+                                description=F"**Unmuted** {member.mention}\n**Reason:** Tempmute is over",
+                                color=discord.Color.light_gray())
+                            embed.set_author(name=f"{self.client.user} (ID {self.client.user.id})", icon_url=self.client.user.avatar_url)
+                            embed.set_thumbnail(url=member.avatar_url)
+                            await moderation_log.send(embed=embed)
+                            try:
+                                await member.send(embed=embed)
+                            except:
+                                pass
 
             except Exception as e:
                 print(e)
