@@ -154,8 +154,8 @@ class ReportSupport(commands.Cog):
                 await app_msg.add_reaction('🔏')
                 teacher = discord.utils.get(guild.members, id=teacher_app[0][1])
                 if teacher:
-                    msg = "**Teacher Application**\nOur staff has avaluated your teacher application and has come to the conclusion that we are not in need of this lesson."
-                    await payload.member.send(embed=discord.Embed(description=msg))
+                    msg = "**Teacher Application**\nOur staff has evaluated your teacher application and has come to the conclusion that we are not in need of this lesson."
+                    await teacher.send(embed=discord.Embed(description=msg))
             return
 
     async def handle_moderator_application(self, guild, payload) -> None:
