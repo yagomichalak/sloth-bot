@@ -121,7 +121,7 @@ different_class_roles = {
         "fransızca","francés", "francês", "français"
     ],
     "spanish": [
-        "i̇spanyolca", "espagnol", "spanisch", "español"
+        "ispanyolca", "espagnol", "spanisch", "español"
     ],
     "dutch": [
         "felemenkçe", "holländisch", "néerlandais"
