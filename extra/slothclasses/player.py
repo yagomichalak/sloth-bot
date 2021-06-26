@@ -138,8 +138,9 @@ class Player(commands.Cog):
 
         effects = {}
         now = await utils.get_timestamp()
+        general_cooldown = 86400 # Worth a day in seconds
 
-        def calculate(now, then):
+        def calculate(now, then): # Prolly deprecated for our system, might delete this func later
             # - int(now)
             m, s = divmod((int(then) - int(now)), 60)
             h, m = divmod(m, 60)
@@ -159,11 +160,14 @@ class Player(commands.Cog):
                 msg = f"Ends in `{s:02d}s`"
 
             return msg
+        
 
         if await self.is_user_protected(user_id=member.id):
             then = await self.get_skill_action_by_target_id_and_skill_type(target_id=member.id, skill_type='divine_protection')
             effects['protected'] = {}
-            effects['protected']['cooldown'] = calculate(now=now, then=then[2]) if then else 'Ends in ??'
+            # effects['protected']['cooldown'] = calculate(now=now, then=then[2]) if then else 'Ends in ??'
+            secs = int(then[2]) + general_cooldown
+            effects['protected']['cooldown'] = f"Ends <t:{secs}:R>" if then else 'Ends in ??'
             effects['protected']['frames'] = []
             effects['protected']['cords'] = (0, 0)
             effects['protected']['resize'] = None
@@ -173,7 +177,9 @@ class Player(commands.Cog):
         if await self.is_transmutated(user_id=member.id):
             then = await self.get_skill_action_by_target_id_and_skill_type(target_id=member.id, skill_type='transmutation')
             effects['transmutated'] = {}
-            effects['transmutated']['cooldown'] = calculate(now=now, then=then[2]) if then else 'Ends in ??'
+            # effects['transmutated']['cooldown'] = calculate(now=now, then=then[2]) if then else 'Ends in ??'
+            secs = int(then[2]) + general_cooldown
+            effects['transmutated']['cooldown'] = f"Ends <t:{secs}:R>" if then else 'Ends in ??'
             effects['transmutated']['frames'] = []
             effects['transmutated']['cords'] = (0, 0)
             effects['transmutated']['resize'] = None
@@ -183,7 +189,9 @@ class Player(commands.Cog):
         if await self.is_user_hacked(user_id=member.id):
             then = await self.get_skill_action_by_target_id_and_skill_type(target_id=member.id, skill_type='hack')
             effects['hacked'] = {}
-            effects['hacked']['cooldown'] = calculate(now=now, then=then[2]) if then else 'Ends in ??'
+            # effects['hacked']['cooldown'] = calculate(now=now, then=then[2]) if then else 'Ends in ??'
+            secs = int(then[2]) + general_cooldown
+            effects['hacked']['cooldown'] = f"Ends <t:{secs}:R>" if then else 'Ends in ??'
             effects['hacked']['frames'] = []
             effects['hacked']['cords'] = (0, 0)
             effects['hacked']['resize'] = None
@@ -192,7 +200,9 @@ class Player(commands.Cog):
         if await self.is_user_wired(user_id=member.id):
             then = await self.get_skill_action_by_target_id_and_skill_type(target_id=member.id, skill_type='wire')
             effects['wired'] = {}
-            effects['wired']['cooldown'] = calculate(now=now, then=then[2]) if then else 'Ends in ??'
+            # effects['wired']['cooldown'] = calculate(now=now, then=then[2]) if then else 'Ends in ??'
+            secs = int(then[2]) + general_cooldown
+            effects['wired']['cooldown'] = f"Ends <t:{secs}:R>" if then else 'Ends in ??'
             effects['wired']['frames'] = []
             effects['wired']['cords'] = (0, 0)
             effects['wired']['resize'] = None
@@ -201,7 +211,9 @@ class Player(commands.Cog):
         if await self.is_user_knocked_out(user_id=member.id):
             then = await self.get_skill_action_by_target_id_and_skill_type(target_id=member.id, skill_type='knock_out')
             effects['knocked_out'] = {}
-            effects['knocked_out']['cooldown'] = calculate(now=now, then=then[2]) if then else 'Ends in ??'
+            # effects['knocked_out']['cooldown'] = calculate(now=now, then=then[2]) if then else 'Ends in ??'
+            secs = int(then[2]) + general_cooldown
+            effects['knocked_out']['cooldown'] = f"Ends <t:{secs}:R>" if then else 'Ends in ??'
             effects['knocked_out']['frames'] = []
             effects['knocked_out']['cords'] = (0, 0)
             effects['knocked_out']['resize'] = None
@@ -210,7 +222,9 @@ class Player(commands.Cog):
         if await self.is_user_frogged(user_id=member.id):
             then = await self.get_skill_action_by_target_id_and_skill_type(target_id=member.id, skill_type='frog')
             effects['frogged'] = {}
-            effects['frogged']['cooldown'] = calculate(now=now, then=then[2]) if then else 'Ends in ??'
+            # effects['frogged']['cooldown'] = calculate(now=now, then=then[2]) if then else 'Ends in ??'
+            secs = int(then[2]) + general_cooldown
+            effects['frogged']['cooldown'] = f"Ends <t:{secs}:R>" if then else 'Ends in ??'
             effects['frogged']['frames'] = []
             effects['frogged']['cords'] = (0, 0)
             effects['frogged']['resize'] = None
