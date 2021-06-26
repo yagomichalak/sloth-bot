@@ -175,7 +175,7 @@ class SlothReputation(commands.Cog):
 
         component = discord.Component()
 
-        component.add_button(style=3, label="Exchange Money!", custom_id="exchange_money", emoji="💰")
+        component.add_button(style=3, label="Exchange Activity!", custom_id="exchange_money", emoji="💰")
 
         await ctx.send(embed=embed, components=[component])
         if ctx.author.id != member.id:
