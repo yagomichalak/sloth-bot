@@ -15,9 +15,10 @@ class MissingRequiredSlothClass(commands.CheckFailure):
 
 class ActionSkillOnCooldown(commands.CheckFailure):
 
-    def __init__(self, try_after: int, error_message: str, cooldown: int = 86400) -> None:
+    def __init__(self, try_after: int, error_message: str, skill_ts: int, cooldown: int = 86400) -> None:
         self.try_after = try_after
         self.error_message = error_message
+        self.skill_ts = skill_ts
         self.cooldown = cooldown
 
 

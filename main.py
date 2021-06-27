@@ -15,6 +15,7 @@ from datetime import datetime
 from itertools import cycle
 
 from extra.useful_variables import patreon_roles
+from extra import utils
 
 from extra.customerrors import MissingRequiredSlothClass, ActionSkillOnCooldown, CommandNotReady, SkillsUsedRequirement
 
@@ -151,17 +152,21 @@ async def on_command_error(ctx, error):
         await ctx.send(f"**{error.error_message}**")
 
     elif isinstance(error, ActionSkillOnCooldown):
-        m, s = divmod(error.cooldown - int(error.try_after), 60)
-        h, m = divmod(m, 60)
-        d, h = divmod(h, 24)
-        if d > 0:
-            await ctx.send(f"**You can use your skill again in {d:d} days, {h:d} hours, {m:02d} minutes and {s:02d} seconds!**")
-        elif h > 0:
-            await ctx.send(f"**You can use your skill again in {h:d} hours, {m:02d} minutes and {s:02d} seconds!**")
-        elif m > 0:
-            await ctx.send(f"**You can use your skill again in {m:02d} minutes and {s:02d} seconds!**")
-        elif s > 0:
-            await ctx.send(f"**You can use your skill again in {s:02d} seconds!**")
+        # m, s = divmod(error.cooldown - int(error.try_after), 60)
+        # h, m = divmod(m, 60)
+        # d, h = divmod(h, 24)
+        # if d > 0:
+        #     await ctx.send(f"**You can use your skill again in {d:d} days, {h:d} hours, {m:02d} minutes and {s:02d} seconds!**")
+        # elif h > 0:
+        #     await ctx.send(f"**You can use your skill again in {h:d} hours, {m:02d} minutes and {s:02d} seconds!**")
+        # elif m > 0:
+        #     await ctx.send(f"**You can use your skill again in {m:02d} minutes and {s:02d} seconds!**")
+        # elif s > 0:
+        #     await ctx.send(f"**You can use your skill again in {s:02d} seconds!**")
+
+        # cooldown = await utils.get_timestamp() + error.try_after
+        cooldown = error.skill_ts + error.cooldown
+        await ctx.send(f"**You can use your skill again <t:{int(cooldown)}:R>!**")
 
     print('='*10)
     print(f"ERROR: {error} | Class: {error.__class__} | Cause: {error.__cause__}")
