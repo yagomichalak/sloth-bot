@@ -162,13 +162,11 @@ class Prawler(Player):
 
 		_, exists = await self.check_cooldown(user_id=perpetrator.id, skill=Skill.TWO, seconds=2592000)
 
-		await self.update_user_money(perpetrator.id, -1000)
-
 		try:
 			# Update user's second skill cooldown timestamp
 			current_ts = await utils.get_timestamp()
 			if exists:
-				await self.update_user_skill_ts(user_id=perpetrator.id, skill=Skill.TWO, current_ts=current_ts)
+				await self.update_user_skill_ts(user_id=perpetrator.id, skill=Skill.TWO, new_skill_ts=current_ts)
 			else:
 				await self.insert_user_skill_cooldown(ctx.author.id, Skill.TWO, current_ts)
 				
@@ -177,8 +175,10 @@ class Prawler(Player):
 			await self.update_user_skills_used(user_id=perpetrator.id)
 
 		except Exception as e:
+			print(e)
 			await ctx.send(f"**For some reason I couldn't sharpen your knife, {perpetrator.mention}!**")
 		else:
+			await self.update_user_money(perpetrator.id, -1000)
 			sharpen_embed = await self.get_sharpen_embed(
 				channel=ctx.channel, perpetrator_id=perpetrator.id, stack=stack+1)
 			await ctx.send(embed=sharpen_embed)
