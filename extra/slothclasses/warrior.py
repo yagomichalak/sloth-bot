@@ -224,3 +224,14 @@ class Warrior(Player):
         smash_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon_url)
 
         return smash_embed
+
+    @commands.command()
+    @Player.skills_used(requirement=20)
+    @Player.skill_on_cooldown(Skill.THREE)
+    @Player.user_is_class('warrior')
+    @Player.skill_mark()
+    @Player.not_ready()
+    async def unknown(self, ctx, target: discord.Member = None) -> None:
+        """ Unknown skill, that is TBD. """
+
+        pass
