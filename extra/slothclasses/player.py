@@ -74,7 +74,7 @@ class Player(commands.Cog):
         if cooldown_in_seconds >= seconds:
             return True, exists
 
-        raise ActionSkillOnCooldown(try_after=cooldown_in_seconds, error_message="Action skill on cooldown!")
+        raise ActionSkillOnCooldown(try_after=cooldown_in_seconds, error_message="Action skill on cooldown!", skill_ts=skill_ts)
 
     def skill_on_cooldown(skill: Enum = Skill.ONE, seconds: int = 86400):
         """ Checks whether the user's action skill is on cooldown. """
@@ -92,7 +92,7 @@ class Player(commands.Cog):
                 return True
 
             raise ActionSkillOnCooldown(
-                try_after=cooldown_in_seconds, error_message="Action skill on cooldown!", cooldown=seconds)
+                try_after=cooldown_in_seconds, error_message="Action skill on cooldown!", skill_ts=skill_ts, cooldown=seconds)
 
         return commands.check(real_check)
 
