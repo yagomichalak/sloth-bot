@@ -346,3 +346,15 @@ class Prawler(Player):
 		rob_doubled_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon_url)
 
 		return rob_doubled_embed
+
+
+	@commands.command()
+	@Player.skills_used(requirement=20)
+	@Player.skill_on_cooldown(Skill.THREE)
+	@Player.user_is_class('prawler')
+	@Player.skill_mark()
+	@Player.not_ready()
+	async def unspecified(self, ctx, target: discord.Member = None) -> None:
+		""" Unspecified skill, that is TBD. """
+
+		pass

@@ -19,11 +19,11 @@ class Merchant(Player):
     def __init__(self, client) -> None:
         self.client = client
 
-    @commands.command(aliases=['os', 'open', 'shop'])
+    @commands.command(aliases=['sellpotion', 'potion'])
     @Player.skill_on_cooldown()
     @Player.user_is_class('merchant')
     @Player.skill_mark()
-    async def open_shop(self, ctx) -> None:
+    async def sell_potion(self, ctx) -> None:
         """ Puts a changing-SlothClass potion for sale for the price you want.
         Ps: It costs 50łł to do it and the item remains there for 24 hours. """
 
@@ -35,14 +35,14 @@ class Merchant(Player):
         if await self.is_user_knocked_out(member.id):
             return await ctx.send(f"**{member.mention}, you can't use your skill, because you are knocked-out!**")
 
-        if (shopitem := await self.get_skill_action_by_user_id_and_skill_type(member.id, 'potion')):
-            return await ctx.send(f"**{member.mention}, you already have an item in your shop!**")
+        if await self.get_skill_action_by_user_id_and_skill_type(member.id, 'potion'):
+            return await ctx.send(f"**{member.mention}, you already have a potion in your shop!**")
 
         item_price = await prompt_number(self.client, ctx, f"**{member.mention}, for how much do you want to sell your changing-Sloth-class potion?**", member)
         if item_price is None:
             return
 
-        confirm = await ConfirmSkill(f"**{member.mention}, are you sure you want to spend `50łł` to put an item in your shop with the price of `{item_price}`łł ?**").prompt(ctx)
+        confirm = await ConfirmSkill(f"**{member.mention}, are you sure you want to spend `50łł` to put a potion in your shop with the price of `{item_price}`łł ?**").prompt(ctx)
         if confirm:
             _, exists = await self.check_cooldown(user_id=member.id, skill=Skill.ONE)
 
@@ -308,3 +308,23 @@ class Merchant(Player):
         return open_shop_embed
 
         
+    @commands.command(aliases=["sellring", "ring"])
+    @Player.skills_used(requirement=20)
+    @Player.skill_on_cooldown(Skill.THREE)
+    @Player.user_is_class('merchant')
+    @Player.skill_mark()
+    @Player.not_ready()
+    async def sell_ring(self, ctx, target: discord.Member = None) -> None:
+        """ Unknown unspecified skill, that is TBD. """
+
+        pass
+
+    @commands.command()
+    @commands.cooldown(1, 60, commands.BucketType.user)
+    @Player.not_ready()
+    async def marry(self, ctx, member: discord.Member = None) -> None:
+        """ Marries someone.
+        :param member: The person to marry.
+        PS: You need a wedding ring to propose someone, buy one with your local merchant. """
+
+        pass
