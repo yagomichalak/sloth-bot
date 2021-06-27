@@ -59,7 +59,6 @@ token = os.getenv('TOKEN')
 async def on_ready():
     change_status.start()
     change_color.start()
-    # update_timezones.start()
     print('Bot is ready!')
 
 
@@ -87,8 +86,6 @@ async def on_member_update(before, after):
         if r2 not in roles:
             new_role = r2
             break
-
-    
 
     if new_role:
         for pr in patreon_roles.keys():

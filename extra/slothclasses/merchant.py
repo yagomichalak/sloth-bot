@@ -306,3 +306,5 @@ class Merchant(Player):
         open_shop_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon_url)
 
         return open_shop_embed
+
+        
