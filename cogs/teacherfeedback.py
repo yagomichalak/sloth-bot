@@ -590,8 +590,8 @@ class TeacherFeedback(commands.Cog):
 
         if custom_role:
             overwrites[custom_role] = discord.PermissionOverwrite(
-                    read_messages=True, send_messages=True, connect=True,
-                    speak=True, view_channel=True, embed_links=True)
+                    read_messages=True, send_messages=False, connect=False,
+                    speak=False, view_channel=True, embed_links=False)
 
         # Tries to get role permissions for the Native, Fluent, Studying role pattern (Class language)
         if native_role := discord.utils.get(member.guild.roles, name=f"Native {language.title()}"):
@@ -622,8 +622,8 @@ class TeacherFeedback(commands.Cog):
 
         if custom_role:
             overwrites[custom_role] = discord.PermissionOverwrite(
-                    read_messages=True, send_messages=True, connect=True,
-                    speak=True, view_channel=True, embed_links=True)
+                    read_messages=False, send_messages=True, connect=False,
+                    speak=True, view_channel=False, embed_links=True)
 
         if language.lower() != taught_in.lower():
             # Tries to get role permissions for the Native, Fluent, Studying role pattern (Class taught-in language)
