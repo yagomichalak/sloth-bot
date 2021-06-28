@@ -49,7 +49,7 @@ class Social(commands.Cog):
         target_member = discord.utils.get(message.guild.members, id=int(button.custom_id.split(':', 1)[1]))
         
         if custom_id.startswith('user_infractions'):
-            if await Social.is_allowed(ctx, member, [mod_role_id, admin_role_id]):
+            if await Social.is_allowed(ctx, [mod_role_id, admin_role_id]):
                 return await self.client.get_cog("Moderation").infractions(ctx=ctx, member=target_member)
             
         elif custom_id.startswith("user_profile"):
@@ -163,7 +163,7 @@ class Social(commands.Cog):
 
 
         component = discord.Component()
-        if await Social.is_allowed(ctx, member, [mod_role_id, admin_role_id]):
+        if await Social.is_allowed(ctx, [mod_role_id, admin_role_id]):
             component.add_button(label="See Infractions", style=4, emoji="❗", custom_id=f"user_infractions:{member.id}")
         
         component.add_button(label="See Profile", style=1, emoji="👤", custom_id=f"user_profile:{member.id}")
@@ -173,7 +173,7 @@ class Social(commands.Cog):
 
 
     @staticmethod
-    async def is_allowed(ctx: commands.Context, member: discord.Member, roles: List[int]) -> bool:
+    async def is_allowed(ctx: commands.Context, roles: List[int]) -> bool:
         """ Checks whether the member has adm perms or has an allowed role. """
 
         perms = ctx.channel.permissions_for(ctx.author)
@@ -182,7 +182,7 @@ class Social(commands.Cog):
             return True
 
         for rid in roles:
-            if rid in [role.id for role in member.roles]:
+            if rid in [role.id for role in ctx.author.roles]:
                 return True
 
         else:
