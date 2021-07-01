@@ -34,10 +34,9 @@ class Analytics(commands.Cog):
     async def check_midnight(self) -> None:
         """ Checks whether it's midnight. """
 
-        time_now = datetime.now()
         tzone = timezone("Etc/GMT-1")
-        date_and_time = time_now.astimezone(tzone)
-        day = date_and_time.strftime('%d')
+        time_now = datetime.now(tzone)
+        day = time_now.strftime('%d')
 
         if await self.check_relatory_time(day):
             await self.update_day(day)
@@ -61,7 +60,7 @@ class Analytics(commands.Cog):
                 await channel.send(file=fp)
 
             await self.reset_table_sloth_analytics()
-            complete_date = date_and_time.strftime('%d/%m/%Y')
+            complete_date = time_now.strftime('%d/%m/%Y')
             await self.bump_data(info[0][0], info[0][1], info[0][2], len(members), len(online_members), str(complete_date))
 
     @commands.Cog.listener()
