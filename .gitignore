@@ -1,12 +1,12 @@
 venv
 .env
 mycreds.txt
-mysqldb.py
 credentials.json
 client_secrets.json
 sloth_custom_images/
 texts/
 .vs/
+sloth.sql
 
 .idea/
 **/__pycache__/

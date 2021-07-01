@@ -14,7 +14,11 @@ from typing import Dict, List, Union
 from mysqldb import the_django_database
 from extra.menu import ConfirmSkill
 
-allowed_roles = [int(os.getenv('OWNER_ROLE_ID')), int(os.getenv('ADMIN_ROLE_ID')), int(os.getenv('MOD_ROLE_ID'))]
+owner_role_id = int(os.getenv('OWNER_ROLE_ID'))
+admin_role_id = int(os.getenv('ADMIN_ROLE_ID'))
+mod_role_id = int(os.getenv('MOD_ROLE_ID'))
+lesson_manager_role_id = int(os.getenv('LESSON_MANAGEMENT_ROLE_ID'))
+allowed_roles = [owner_role_id, admin_role_id, mod_role_id]
 
 
 class TeacherAPI(commands.Cog):
@@ -310,7 +314,7 @@ class TeacherAPI(commands.Cog):
             await ctx.send(embed=embed)
 
     @commands.command(aliases=['pt'])
-    @commands.has_permissions(administrator=True)
+    @commands.has_any_role(*[owner_role_id, admin_role_id, lesson_manager_role_id])
     async def promote_teacher(self, ctx, member: discord.Member = None) -> None:
         """ Promotes a member to a teacher.
         :param member: The member that is gonna be promoted. """
@@ -347,7 +351,7 @@ class TeacherAPI(commands.Cog):
         await ctx.send(embed=teacher_embed, components=[component])
 
     @commands.command(aliases=['dt'])
-    @commands.has_permissions(administrator=True)
+    @commands.has_any_role(*[owner_role_id, admin_role_id, lesson_manager_role_id])
     async def demote_teacher(self, ctx, member: discord.Member = None) -> None:
         """ Demotes a teacher to a regular user.
         :param member: The teacher that is gonna be demoted. """
@@ -405,7 +409,7 @@ class TeacherAPI(commands.Cog):
             return False
 
     @commands.command(aliases=['check_teacher', 'teacher', 'it'])
-    @commands.has_any_role(*allowed_roles)
+    @commands.has_any_role(*allowed_roles, lesson_manager_role_id)
     async def is_teacher(self, ctx, member: discord.Member = None) -> None:
         """ Checks whether the given member is a teacher.
         :param member: The member that you wanna check it. """
