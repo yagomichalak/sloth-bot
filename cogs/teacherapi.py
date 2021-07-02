@@ -263,7 +263,6 @@ class TeacherAPI(commands.Cog):
                         color=discord.Color.green()))
                     for teacher_class in classes:
                         msg = await channel.send(teacher_class)
-                        await msg.add_reaction('✅')
                         await asyncio.sleep(0.5)
 
     async def clear_classes_channel(self, guild: discord.Guild) -> None:
