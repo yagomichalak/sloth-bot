@@ -155,7 +155,9 @@ class Moderation(commands.Cog):
 
             invite += c
 
-        inv_code = discord.utils.resolve_invite(invite.replace('(', '').replace(')', ''))
+        for char in ['!', '@', '.', '(', ')', '[', ']', '#', '?', ':', ';', '`', '"', "'"]:
+            invite = invite.replace(char, '')
+        inv_code = discord.utils.resolve_invite(invite)
         guild_inv = discord.utils.get(await guild.invites(), code=inv_code)
         if guild_inv:
             return True
