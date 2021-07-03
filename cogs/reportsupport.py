@@ -74,6 +74,14 @@ class ReportSupport(commands.Cog):
                 
 
         elif custom_id.startswith('buy_custom_bot'):
+            member_ts = self.report_cache.get(member.id)
+            time_now = time.time()
+            if member_ts:
+                sub = time_now - member_ts
+                if sub <= 240:
+                    return await member.send(
+                        f"**You are on cooldown to use this, try again in {round(240-sub)} seconds**")
+                        
             # Order a bot
             dnk = self.client.get_user(dnk_id)
             embed = discord.Embed(title="New possible order!",
