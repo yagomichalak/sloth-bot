@@ -146,17 +146,19 @@ class Moderation(commands.Cog):
         Checks whether it's a guild invite or not
         '''
 
-        invite = 'discord.gg/'
-        start_index = msg.index(invite)
+        invite_root = 'discord.gg/'
+        start_index = msg.index(invite_root)
         end_index = start_index + 11
+        invite_hash = ''
         for c in msg[end_index:]:
             if c == ' ':
                 break
 
-            invite += c
+            invite_hash += c
 
         for char in ['!', '@', '.', '(', ')', '[', ']', '#', '?', ':', ';', '`', '"', "'", ',', '{', '}']:
-            invite = invite.replace(char, '')
+            invite_hash = invite_hash.replace(char, '')
+        invite = invite_root + invite_hash
         inv_code = discord.utils.resolve_invite(invite)
         guild_inv = discord.utils.get(await guild.invites(), code=inv_code)
         if guild_inv:
