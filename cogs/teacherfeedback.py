@@ -431,6 +431,7 @@ class TeacherFeedback(commands.Cog):
 
         await simple.add_reaction('✅')
         await simple.add_reaction('❌')
+        await simple.add_reaction('👥')
 
         await self.save_class_feedback(
             msg=simple, teacher=member, users_feedback=users_feedback,
