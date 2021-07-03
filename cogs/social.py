@@ -4,8 +4,8 @@ import praw
 from random import randint
 import aiohttp
 import os
-from datetime import datetime
 from typing import List
+from extra import utils
 
 reddit = praw.Reddit(client_id=os.getenv('REDDIT_CLIENT_ID'),  # client id
                      client_secret=os.getenv('REDDIT_CLIENT_SECRET'),  # my client secret
@@ -58,42 +58,11 @@ class Social(commands.Cog):
         elif custom_id.startswith("user_info"):
             await self.client.get_cog("SlothReputation").info(ctx=ctx, member=target_member)
 
-    @staticmethod
-    async def sort_time(guild: discord.Guild, at: datetime) -> str:
-
-        timedelta = datetime.utcnow() - at
-
-        if type(timedelta) is not float:
-            timedelta = timedelta.total_seconds()
-
-        seconds = int(timedelta)
-
-        periods = [
-            ('year', 60*60*24*365, 'years'),
-            ('months', 60*60*24*30, "months"),
-            ('day', 60*60*24, "days"),
-            ('hour', 60*60, "hours"),
-            ('minute', 60, "minutes"),
-            ('second', 1, "seconds")
-        ]
-
-        strings = []
-        for period_name, period_seconds, plural in periods:
-            if seconds >= period_seconds:
-                period_value, seconds = divmod(seconds, period_seconds)
-                if period_value > 0:
-                    strings.append(
-                        f"{period_value} {plural if period_value > 1 else period_name}"
-                    )
-
-        return ", ".join(strings[:2])
-
     @commands.command(aliases=['si', 'server'])
     async def serverinfo(self, ctx) -> None:
         """ Shows information about the server. """
 
         guild = ctx.guild
-        color = discord.Color.green()
 
         em = discord.Embed(description=guild.description, color=ctx.author.color)
         online = len({m.id for m in guild.members if m.status is not discord.Status.offline})
@@ -127,7 +96,7 @@ class Social(commands.Cog):
         em.set_thumbnail(url=guild.icon_url)
         em.set_image(url=guild.banner_url)
         em.set_author(name=guild.name, icon_url=guild.icon_url)
-        created_at = await Social.sort_time(guild, guild.created_at)
+        created_at = await utils.sort_time(guild.created_at)
         em.set_footer(text=f"Created: {guild.created_at.strftime('%d/%m/%y')} ({created_at})")
         await ctx.send(embed=em)
 
@@ -151,19 +120,22 @@ class Social(commands.Cog):
         embed.add_field(name="ID:", value=member.id, inline=False)
         embed.add_field(name="Guild name:", value=member.display_name, inline=False)
 
-        embed.add_field(name="Created at:", value=member.created_at.strftime("%a, %d %B %y, %I %M %p UTC"),
-                        inline=False)
+        sorted_time_create = f"<t:{int(member.created_at.timestamp())}:R>"
+        sorted_time_join = f"<t:{int(member.joined_at.timestamp())}:R>"
 
-        embed.add_field(name="Joined at:", value=member.joined_at.strftime("%a, %d %B %y, %I %M %p UTC"), inline=False)
+        embed.add_field(name="Created at:", value=f"{member.created_at.strftime('%d/%m/%y')} ({sorted_time_create}) **GMT**",
+						inline=False)
+        embed.add_field(name="Joined at:", value=f"{member.joined_at.strftime('%d/%m/%y')} ({sorted_time_join}) **GMT**", inline=False)
 
-        embed.add_field(name=f"Roles: {len(roles)}", value=" ".join([role.mention for role in roles][:15]), inline=False)
+        embed.add_field(name="Top role:", value=member.top_role.mention, inline=False)
+
         embed.add_field(name="Top role:", value=member.top_role.mention, inline=False)
 
         embed.add_field(name="Bot?", value=member.bot)
 
 
         component = discord.Component()
-        if await Social.is_allowed(ctx, [mod_role_id, admin_role_id]):
+        if await utils.is_allowed([mod_role_id, admin_role_id]).predicate(ctx):
             component.add_button(label="See Infractions", style=4, emoji="❗", custom_id=f"user_infractions:{member.id}")
         
         component.add_button(label="See Profile", style=1, emoji="👤", custom_id=f"user_profile:{member.id}")
