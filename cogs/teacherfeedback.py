@@ -62,8 +62,8 @@ class TeacherFeedback(commands.Cog):
         guild = self.client.get_guild(payload.guild_id)
 
         # Checks if it's a reward message
-        user = await self.db.get_waiting_reward_student(payload.user_id, payload.message_id)
-        lenactive = user[-1]
+        users = await self.db.get_waiting_reward_student(payload.user_id, payload.message_id)
+        lenactive = users[-1]
         if lenactive:
             emoji = str(payload.emoji)
             channel = discord.utils.get(guild.channels, id=reward_channel_id)
@@ -71,18 +71,22 @@ class TeacherFeedback(commands.Cog):
             await msg.remove_reaction(payload.emoji.name, payload.member)
             if emoji == '✅':
                 # Adds user to RewardAcceptedStudents table
-                await self.db.insert_student_rewarded(user)
-                await self.db.delete_waiting_reward_student(user[0], user[1], user[4])
+                await self.db.insert_student_rewarded(users[0])
+                await self.db.delete_waiting_reward_student(users[0][0], users[0][1], users[0][4])
                 await asyncio.sleep(0.5)
                 user = await self.db.get_waiting_reward_student(payload.user_id, payload.message_id)
                 lenactive = user[-1]
                 await self.show_user_feedback(msg=msg, guild=guild, user=user, lenactive=lenactive, teacher=payload.member)
-            else:
-                await self.db.delete_waiting_reward_student(msg_id=user[0], user_id=user[1], teacher_id=user[4])
+            elif emoji == '❌':
+                await self.db.delete_waiting_reward_student(msg_id=users[0][0], user_id=users[0][1], teacher_id=users[0][4])
                 await asyncio.sleep(0.5)
                 user = await self.db.get_waiting_reward_student(payload.user_id, payload.message_id)
                 lenactive = user[-1]
                 return await self.show_user_feedback(msg=msg, guild=guild, user=user, lenactive=lenactive, teacher=payload.member)
+            elif emoji == '👥':
+                done_embed = discord.Embed(title="__**DONE!**__", color=discord.Color.green())
+                await msg.edit(embed=done_embed, delete_after=3)
+                return await self.reward_accepted_students(payload.user_id, users)
 
         else:
             pass
