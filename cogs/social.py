@@ -129,8 +129,6 @@ class Social(commands.Cog):
 
         embed.add_field(name="Top role:", value=member.top_role.mention, inline=False)
 
-        embed.add_field(name="Top role:", value=member.top_role.mention, inline=False)
-
         embed.add_field(name="Bot?", value=member.bot)
 
 
