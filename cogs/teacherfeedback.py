@@ -1,4 +1,5 @@
 import discord
+from discord import user
 from discord.abc import _Overwrites
 from discord.ext import commands, menus
 from mysqldb import *
@@ -62,8 +63,8 @@ class TeacherFeedback(commands.Cog):
         guild = self.client.get_guild(payload.guild_id)
 
         # Checks if it's a reward message
-        users = await self.db.get_waiting_reward_student(payload.user_id, payload.message_id)
-        lenactive = users[-1]
+        user = await self.db.get_waiting_reward_student(payload.user_id, payload.message_id)
+        lenactive = user[-1]
         if lenactive:
             emoji = str(payload.emoji)
             channel = discord.utils.get(guild.channels, id=reward_channel_id)
@@ -71,22 +72,23 @@ class TeacherFeedback(commands.Cog):
             await msg.remove_reaction(payload.emoji.name, payload.member)
             if emoji == '✅':
                 # Adds user to RewardAcceptedStudents table
-                await self.db.insert_student_rewarded(users[0])
-                await self.db.delete_waiting_reward_student(users[0][0], users[0][1], users[0][4])
+                await self.db.insert_student_rewarded(user)
+                await self.db.delete_waiting_reward_student(user[0], user[1], user[4])
                 await asyncio.sleep(0.5)
                 user = await self.db.get_waiting_reward_student(payload.user_id, payload.message_id)
                 lenactive = user[-1]
                 await self.show_user_feedback(msg=msg, guild=guild, user=user, lenactive=lenactive, teacher=payload.member)
             elif emoji == '❌':
-                await self.db.delete_waiting_reward_student(msg_id=users[0][0], user_id=users[0][1], teacher_id=users[0][4])
+                await self.db.delete_waiting_reward_student(msg_id=user[0], user_id=user[1], teacher_id=user[4])
                 await asyncio.sleep(0.5)
                 user = await self.db.get_waiting_reward_student(payload.user_id, payload.message_id)
                 lenactive = user[-1]
                 return await self.show_user_feedback(msg=msg, guild=guild, user=user, lenactive=lenactive, teacher=payload.member)
             elif emoji == '👥':
+                users = await self.db.get_all_waiting_reward_student(payload.user_id, payload.message_id)
                 done_embed = discord.Embed(title="__**DONE!**__", color=discord.Color.green())
                 await msg.edit(embed=done_embed, delete_after=3)
-                return await self.reward_accepted_students(payload.user_id, users)
+                return await self.reward_accepted_students(payload.member, users)
 
         else:
             pass
@@ -549,7 +551,8 @@ class TeacherFeedback(commands.Cog):
                 except:
                     pass
 
-            the_reward_embed.add_field(name="__**Rewarded members**__", value=', '.join(rewarded_members_text), inline=True)
+            rewarded_members_text = ', '.join(rewarded_members_text) if rewarded_members_text else "No one got rewarded!"
+            the_reward_embed.add_field(name="__**Rewarded members**__", value=rewarded_members_text, inline=True)
 
             if await SlothCurrency.get_user_currency(teacher.id):
                 try:
@@ -1122,6 +1125,19 @@ class TeacherFeedbackDatabaseSelect:
 
         await mycursor.execute("SELECT *, COUNT(*) FROM RewardStudents WHERE reward_message = %s and teacher_id = %s", (msg_id, teacher_id))
         users = await mycursor.fetchone()
+        await mycursor.close()
+
+        return users
+
+    async def get_all_waiting_reward_student(self, teacher_id: int, msg_id: int) -> List[List[Union[str, int]]]:
+        """ Gets reward related data that is waiting to be given reviewed.
+        :param teacher_id: The teacher's ID.
+        :param msg_id: The ID of the message attached to the data. """
+
+        mycursor, db = await the_database()
+
+        await mycursor.execute("SELECT *, COUNT(*) FROM RewardStudents WHERE reward_message = %s and teacher_id = %s", (msg_id, teacher_id))
+        users = await mycursor.fetchall()
         await mycursor.close()
 
         return users
