@@ -85,10 +85,14 @@ class TeacherFeedback(commands.Cog):
                 lenactive = user[-1]
                 return await self.show_user_feedback(msg=msg, guild=guild, user=user, lenactive=lenactive, teacher=payload.member)
             elif emoji == '👥':
+                # student_id, language, class_type, msg_id
+
                 users = await self.db.get_all_waiting_reward_student(payload.user_id, payload.message_id)
+                formated_users = [(u[1], u[6], u[5], u[0]) for u in users]
+
                 done_embed = discord.Embed(title="__**DONE!**__", color=discord.Color.green())
                 await msg.edit(embed=done_embed, delete_after=3)
-                return await self.reward_accepted_students(payload.member, users)
+                return await self.reward_accepted_students(payload.member, formated_users)
 
         else:
             pass
