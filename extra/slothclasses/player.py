@@ -84,12 +84,12 @@ class Player(commands.Cog):
 
             skill_ts, exists = await Player.get_user_action_skill_ts(Player, user_id=ctx.author.id, skill_field=skill.value)
             if not skill_ts:
-                return True
+                return True, exists
 
             current_time = await utils.get_timestamp()
             cooldown_in_seconds = current_time - skill_ts
             if cooldown_in_seconds >= seconds:
-                return True
+                return True, exists
 
             raise ActionSkillOnCooldown(
                 try_after=cooldown_in_seconds, error_message="Action skill on cooldown!", skill_ts=skill_ts, cooldown=seconds)
@@ -436,7 +436,7 @@ class Player(commands.Cog):
         await mycursor.close()
         return frogs
 
-    async def get_expired_open_shop_items(self) -> None:
+    async def get_expired_potion_items(self) -> List[List[Union[str, int]]]:
         """ Gets expired transmutation skill actions. """
 
         the_time = await utils.get_timestamp()
@@ -444,6 +444,19 @@ class Player(commands.Cog):
         await mycursor.execute("""
             SELECT * FROM SlothSkills
             WHERE skill_type = 'potion' AND (%s - skill_timestamp) >= 86400
+            """, (the_time,))
+        transmutations = await mycursor.fetchall()
+        await mycursor.close()
+        return transmutations
+
+    async def get_expired_ring_items(self) -> List[List[Union[str, int]]]:
+        """ Gets expired transmutation skill actions. """
+
+        the_time = await utils.get_timestamp()
+        mycursor, db = await the_database()
+        await mycursor.execute("""
+            SELECT * FROM SlothSkills
+            WHERE skill_type = 'ring' AND (%s - skill_timestamp) >= 36000
             """, (the_time,))
         transmutations = await mycursor.fetchall()
         await mycursor.close()
