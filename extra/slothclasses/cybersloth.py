@@ -59,7 +59,7 @@ class Cybersloth(Player):
         if not confirmed:
             return await ctx.send("**Not hacking them, then!**")
 
-        _, exists = await self.check_cooldown(user_id=attacker.id, skill=Skill.ONE)
+        _, exists = await Player.skill_on_cooldown(skill=Skill.ONE).predicate(ctx)
 
         try:
             current_timestamp = await utils.get_timestamp()
@@ -87,7 +87,6 @@ class Cybersloth(Player):
     @Player.skill_on_cooldown(skill=Skill.TWO)
     @Player.user_is_class('cybersloth')
     @Player.skill_mark()
-    # @Player.not_ready()
     async def wire(self, ctx, target: discord.Member = None) -> None:
         """ Wires someone so if they buy a potion or transfer money to someone,
         it siphons off up to 35% of the value amount.
@@ -127,7 +126,7 @@ class Cybersloth(Player):
         if not confirmed:
             return await ctx.send("**Not hacking them, then!**")
 
-        _, exists = await self.check_cooldown(user_id=attacker.id, skill=Skill.TWO)
+        _, exists = await Player.skill_on_cooldown(skill=Skill.TWO).predicate(ctx)
 
         try:
             current_timestamp = await utils.get_timestamp()
