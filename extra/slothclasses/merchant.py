@@ -213,76 +213,78 @@ class Merchant(Player):
                 f"**{member} is either not a `Merchant` or they don't have a ring available for purchase, {buyer.mention}!**")
 
         user_info = await self.get_user_currency(buyer.id)
+        slothprofile = await self.get_sloth_profile(buyer.id)
+        
         if not user_info:
-            await ctx.send(embed=discord.Embed(description=f"**{buyer.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one!**"))
+            return await ctx.send(embed=discord.Embed(description=f"**{buyer.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one!**"))
 
-        elif user_info[7].lower() == 'default':
-            await ctx.send(embed=discord.Embed(description=f"**{buyer.mention}, you don't have a Sloth class yet. Click [here](https://thelanguagesloth.com/profile/slothclass) to choose one!**"))
+        if user_info[7].lower() == 'default':
+            return await ctx.send(embed=discord.Embed(description=f"**{buyer.mention}, you don't have a Sloth class yet. Click [here](https://thelanguagesloth.com/profile/slothclass) to choose one!**"))
 
-        elif user_info[11] and user_info[11] == 2:
-            await ctx.send(embed=discord.Embed(description=f"**{buyer.mention}, you already have two `Wedding Rings`, you can't buy another one!**"))
+        if slothprofile and slothprofile[7] == 2:
+            return await ctx.send(embed=discord.Embed(description=f"**{buyer.mention}, you already have two `Wedding Rings`, you can't buy another one!**"))
 
-        elif user_info[1] < merchant_item[7]:
-            await ctx.send(embed=discord.Embed(description=f"**{buyer.mention}, the ring costs {merchant_item[7]}, but you only have {user_info[1]}łł!**"))
+        if user_info[1] < merchant_item[7]:
+            return await ctx.send(embed=discord.Embed(description=f"**{buyer.mention}, the ring costs {merchant_item[7]}, but you only have {user_info[1]}łł!**"))
 
-        else:
-            confirm = await ConfirmSkill(f"**{buyer.mention}, are you sure you want to buy a `Wedding Ring` for `{merchant_item[7]}łł`?**").prompt(ctx)
-            if not confirm:
-                return await ctx.send(f"**Not buying it, then, {buyer.mention}!**")
+        confirm = await ConfirmSkill(f"**{buyer.mention}, are you sure you want to buy a `Wedding Ring` for `{merchant_item[7]}łł`?**").prompt(ctx)
+        if not confirm:
+            return await ctx.send(f"**Not buying it, then, {buyer.mention}!**")
 
-            if not await self.get_skill_action_by_user_id_and_skill_type(member.id, 'ring'):
-                return await ctx.send(f"**{member.mention} doesn't have a `Wedding Ring` available for purchase, {buyer.mention}!**")
+        if not await self.get_skill_action_by_user_id_and_skill_type(member.id, 'ring'):
+            return await ctx.send(f"**{member.mention} doesn't have a `Wedding Ring` available for purchase, {buyer.mention}!**")
 
-            try:
-                if wired_user := await self.get_skill_action_by_target_id_and_skill_type(target_id=member.id, skill_type='wire'):
+        try:
+            if wired_user := await self.get_skill_action_by_target_id_and_skill_type(target_id=member.id, skill_type='wire'):
 
-                    siphon_percentage = 35
-                    cybersloth_money = round((merchant_item[7]*siphon_percentage)/100)
-                    target_money = merchant_item[7] - cybersloth_money
-                    await self.update_user_money(member.id, target_money)
-                    await self.update_user_money(buyer.id, -merchant_item[7])
-                    await self.update_user_money(wired_user[0], cybersloth_money)
-                    cybersloth = self.client.get_user(wired_user[0])
-                    siphon_embed = discord.Embed(
-                            title="__Intercepted Purchase__",
-                            description=(
-                                f"{buyer.mention} bought a `Wedding Ring` from {member.mention} for `{merchant_item[7]}łł`, "
-                                f"but {cybersloth.mention if cybersloth else str(cybersloth)} siphoned off `{siphon_percentage}%` of the price; `{cybersloth_money}łł`! "
-                                f"So the Merhcant {member.mention} actually got `{target_money}łł`!"
-                            ),
-                            color=buyer.color,
-                            timestamp=ctx.message.created_at)
-                    if cybersloth:
-                        siphon_embed.set_thumbnail(url=cybersloth.avatar_url)
+                siphon_percentage = 35
+                cybersloth_money = round((merchant_item[7]*siphon_percentage)/100)
+                target_money = merchant_item[7] - cybersloth_money
+                await self.update_user_money(member.id, target_money)
+                print('- a ', merchant_item[7])
+                await self.update_user_money(buyer.id, -merchant_item[7])
+                await self.update_user_money(wired_user[0], cybersloth_money)
+                cybersloth = self.client.get_user(wired_user[0])
+                siphon_embed = discord.Embed(
+                        title="__Intercepted Purchase__",
+                        description=(
+                            f"{buyer.mention} bought a `Wedding Ring` from {member.mention} for `{merchant_item[7]}łł`, "
+                            f"but {cybersloth.mention if cybersloth else str(cybersloth)} siphoned off `{siphon_percentage}%` of the price; `{cybersloth_money}łł`! "
+                            f"So the Merhcant {member.mention} actually got `{target_money}łł`!"
+                        ),
+                        color=buyer.color,
+                        timestamp=ctx.message.created_at)
+                if cybersloth:
+                    siphon_embed.set_thumbnail(url=cybersloth.avatar_url)
 
-                    await ctx.send(
-                        content=f"{buyer.mention}, {member.mention}, <@{wired_user[0]}>",
-                        embed=siphon_embed)
-
-                else:
-                    # Updates both buyer and seller's money
-                    await self.update_user_money(buyer.id, - merchant_item[7])
-                    await self.update_user_money(member.id, merchant_item[7])
-
-                # Gives the buyer their potion and removes the potion from the store
-                await self.update_user_rings(buyer.id)
-                await self.delete_skill_action_by_target_id_and_skill_type(member.id, 'ring')
-            except Exception as e:
-                print(e)
-                await ctx.send(embed=discord.Embed(
-                    title="Error!",
-                    description=f"**Something went wrong with that purchase, {buyer.mention}!**",
-                    color=discord.Color.red(),
-                    timestamp=ctx.message.created_at
-                    ))
+                await ctx.send(
+                    content=f"{buyer.mention}, {member.mention}, <@{wired_user[0]}>",
+                    embed=siphon_embed)
 
             else:
-                await ctx.send(embed=discord.Embed(
-                    title="__Successful Acquisition__",
-                    description=f"{buyer.mention} bought a `changing-Sloth-class potion` from {member.mention}!",
-                    color=discord.Color.green(),
-                    timestamp=ctx.message.created_at
-                    ))
+                # Updates both buyer and seller's money
+                await self.update_user_money(buyer.id, - merchant_item[7])
+                await self.update_user_money(member.id, merchant_item[7])
+
+            # Gives the buyer their potion and removes the potion from the store
+            await self.update_user_rings(buyer.id)
+            await self.delete_skill_action_by_target_id_and_skill_type(member.id, 'ring')
+        except Exception as e:
+            print(e)
+            await ctx.send(embed=discord.Embed(
+                title="Error!",
+                description=f"**Something went wrong with that purchase, {buyer.mention}!**",
+                color=discord.Color.red(),
+                timestamp=ctx.message.created_at
+                ))
+
+        else:
+            await ctx.send(embed=discord.Embed(
+                title="__Successful Acquisition__",
+                description=f"{buyer.mention} bought a `Wedding Ring` from {member.mention}!",
+                color=discord.Color.green(),
+                timestamp=ctx.message.created_at
+                ))
 
 
     @commands.command()
@@ -386,6 +388,17 @@ class Merchant(Player):
         await db.commit()
         await mycursor.close()
 
+    async def update_user_rings(self, user_id: int, increment: int = 1) -> None:
+        """ Updates the user's ring counter.
+        :param user_id: The ID of the member to update.
+        :param increment: Incremention value. Default = 1.
+        PS: Increment can be negative. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("UPDATE SlothProfile SET rings = rings + %s WHERE user_id = %s", (increment, user_id))
+        await db.commit()
+        await mycursor.close()
+
     # ========== Get ===========
     async def get_ring_skill_action_by_user_id(self, user_id: int) -> Union[List[Union[int, str]], None]:
         """ Gets a ring skill action by reaction context.
@@ -460,7 +473,7 @@ class Merchant(Player):
             _, exists = await Player.skill_on_cooldown(skill=Skill.THREE, seconds=36000).predicate(ctx)
 
             user_currency = await self.get_user_currency(member.id)
-            if user_currency[1] >= 50:
+            if user_currency[1] >= 100:
                 await self.update_user_money(member.id, -100)
             else:
                 return await ctx.send(f"**{member.mention}, you don't have `100łł`!**")

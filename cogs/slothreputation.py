@@ -111,6 +111,8 @@ class SlothReputation(commands.Cog):
         if ucur[0][12]:
             return await SlothCurrency.send_hacked_image(ctx, member)
 
+        sp = await self.client.get_cog('SlothClass').get_sloth_profile(member.id)
+
         all_users = await self.get_all_users_by_score_points()
         position = [[i+1, u[4]] for i, u in enumerate(all_users) if u[0] == member.id]
         position = [it for subpos in position for it in subpos] if position else ['??', 0]
@@ -148,6 +150,8 @@ class SlothReputation(commands.Cog):
         emoji = user_class.emoji if (user_class := classes.get(ucur[0][7].lower())) else ''
         embed.add_field(name="🕵️ __**Sloth Class:**__", value=f"{ucur[0][7]} {emoji}", inline=True)
         embed.add_field(name="🍯 __**Has Potion:**__", value=f"{True if ucur[0][11] else False}", inline=True)
+        embed.add_field(name="💍 __**Rings:**__", value=f"{sp[7]} rings." if sp else '0 rings.', inline=True)
+
         embed.add_field(name="🛡️ __**Protected:**__", value=f"{has_effect('protected')}", inline=True)
         embed.add_field(name="😵 __**Knocked Out:**__", value=f"{has_effect('knocked_out')}", inline=True)
         embed.add_field(name="🔌 __**Wired:**__", value=f"{has_effect('wired')}", inline=True)
