@@ -297,8 +297,8 @@ class SlothClassDatabaseCommands(commands.Cog):
 
             PRIMARY KEY (user_id),
             CONSTRAINT fk_sloth_pfl_user_id FOREIGN KEY (user_id) REFERENCES UserCurrency (user_id) ON DELETE CASCADE ON UPDATE CASCADE,
-            CONSTRAINT fk_sloth_pfl_tribe_name FOREIGN KEY (tribe) REFERENCES UserTribe (tribe_name) ON UPDATE CASCADE
-        )""")
+            CONSTRAINT fk_sloth_pfl_tribe_name FOREIGN KEY (tribe) REFERENCES TribeMember (tribe_name) ON UPDATE CASCADE
+        ) DEFAULT CHARSET=utf8mb4""")
         await db.commit()
         await mycursor.close()
         await ctx.send(f"**Table `SlothProfile` created, {member.mention}!**")
