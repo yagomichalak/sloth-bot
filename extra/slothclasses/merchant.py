@@ -111,6 +111,7 @@ class Merchant(Player):
             color=ctx.author.color,
             timestamp=ctx.message.created_at
         )
+        
         await ctx.send(embed=items_embed)
 
     @buy.command()
