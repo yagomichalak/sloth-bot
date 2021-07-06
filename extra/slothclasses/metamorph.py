@@ -39,7 +39,7 @@ class Metamorph(Player):
         if not confirmed:
             return await ctx.send(f"**{member.mention}, not transmutating, then!**")
 
-        _, exists = await self.check_cooldown(user_id=member.id, skill=Skill.ONE)
+        _, exists = await Player.skill_on_cooldown(skill=Skill.ONE).predicate(ctx)
 
         timestamp = await utils.get_timestamp()
         await self.insert_skill_action(
@@ -99,7 +99,6 @@ class Metamorph(Player):
     @Player.skill_on_cooldown(skill=Skill.TWO)
     @Player.user_is_class('metamorph')
     @Player.skill_mark()
-    # @Player.not_ready()
     async def frog(self, ctx, target: discord.Member = None) -> None:
         """ Makes someone a frog temporarily.
         :param target: The person who you want to frog. """
@@ -132,7 +131,7 @@ class Metamorph(Player):
         if not confirmed:
             return await ctx.send(f"**{attacker.mention}, not frogging them, then!**")
 
-        _, exists = await self.check_cooldown(user_id=attacker.id, skill=Skill.TWO)
+        _, exists = await Player.skill_on_cooldown(skill=Skill.TWO).predicate(ctx)
 
         timestamp = await utils.get_timestamp()
         await self.insert_skill_action(

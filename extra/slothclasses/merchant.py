@@ -111,12 +111,12 @@ class Merchant(Player):
             color=ctx.author.color,
             timestamp=ctx.message.created_at
         )
-        
+
         await ctx.send(embed=items_embed)
 
     @buy.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def potion(self, ctx, member: discord.Member = None, item_name: str = None) -> None:
+    async def potion(self, ctx, member: discord.Member = None) -> None:
         """ Buys a changing-Sloth-class potion from a Merchant. """
 
         buyer = ctx.author
@@ -201,7 +201,7 @@ class Merchant(Player):
 
     @buy.command(aliases=['wedding', 'wedding_ring', 'weddingring'])
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def ring(self, ctx, member: discord.Member = None, item_name: str = None) -> None:
+    async def ring(self, ctx, member: discord.Member = None) -> None:
         """ Buys a Wedding Ring from a Merchant. """
 
         buyer = ctx.author
@@ -265,8 +265,8 @@ class Merchant(Player):
                     await self.update_user_money(member.id, merchant_item[7])
 
                 # Gives the buyer their potion and removes the potion from the store
-                await self.update_user_has_potion(buyer.id, 1)
-                await self.delete_skill_action_by_target_id_and_skill_type(member.id, 'potion')
+                await self.update_user_rings(buyer.id)
+                await self.delete_skill_action_by_target_id_and_skill_type(member.id, 'ring')
             except Exception as e:
                 print(e)
                 await ctx.send(embed=discord.Embed(
@@ -290,7 +290,6 @@ class Merchant(Player):
     @Player.skill_on_cooldown(skill=Skill.TWO)
     @Player.user_is_class('merchant')
     @Player.skill_mark()
-    # @Player.not_ready()
     async def package(self, ctx) -> None:
         """ Buys a package from Dark Sloth Web and has a 35% chance of getting any equippable item from the Leaf Shop. """
 
@@ -306,7 +305,7 @@ class Merchant(Player):
         if not confirm:
             return await ctx.send(f"**Not buying it, then!**")
 
-        _, exists = await self.check_cooldown(user_id=merchant.id, skill=Skill.TWO)
+        _, exists = await Player.skill_on_cooldown(skill=Skill.TWO).predicate(ctx)
 
         # Checks whether user has money
         user_currency = await self.get_user_currency(merchant.id)

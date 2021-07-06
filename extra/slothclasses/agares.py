@@ -82,7 +82,7 @@ class Agares(Player):
             await ctx.send(
                 f"**{attacker.mention}, for some reason I couldn't magic pull {target.mention} from `{target_vc}` to `{attacker_vc}`**")
         else:
-            _, exists = await self.check_cooldown(user_id=attacker.id, skill=Skill.ONE)
+            _, exists = await Player.skill_on_cooldown(skill=Skill.ONE).predicate(ctx)
             # Puts the attacker's skill on cooldown
             current_ts = await utils.get_timestamp()
             if exists:
@@ -102,7 +102,6 @@ class Agares(Player):
     @Player.skill_on_cooldown(skill=Skill.TWO)
     @Player.user_is_class('agares')
     @Player.skill_mark()
-    # @Player.not_ready()
     async def recharge(self, ctx, target: discord.Member = None) -> None:
         """ Recharges someone's first skill by removing its cooldown.
         :param target: The target person who you want to recharge the skill for. """
@@ -131,7 +130,7 @@ class Agares(Player):
         if not confirm:
             return await ctx.send(f"**Not resetting it, then!**")
 
-        _, exists = await self.check_cooldown(user_id=perpetrator.id, skill=Skill.TWO)
+        _, exists = await Player.skill_on_cooldown(skill=Skill.TWO).predicate(ctx)
 
         try:
             await self.update_user_skill_ts(target.id, Skill.ONE)

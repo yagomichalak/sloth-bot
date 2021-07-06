@@ -61,21 +61,6 @@ class Player(commands.Cog):
                 required_class=command_class, error_message="You don't have the required Sloth Class to run this command!")
         return commands.check(real_check)
 
-    async def check_cooldown(self, user_id: int, skill: Enum, seconds: int = 86400) -> bool:
-        """ Checks whether user skill is on cooldown (method).
-        :param user_id: The ID of the user who to check it"""
-
-        skill_ts, exists = await self.get_user_action_skill_ts(user_id=user_id, skill_field=skill.value)
-        if not skill_ts:
-            return True, exists
-
-        current_ts = await utils.get_timestamp()
-        cooldown_in_seconds = current_ts - skill_ts
-        if cooldown_in_seconds >= seconds:
-            return True, exists
-
-        raise ActionSkillOnCooldown(try_after=cooldown_in_seconds, error_message="Action skill on cooldown!", skill_ts=skill_ts)
-
     def skill_on_cooldown(skill: Enum = Skill.ONE, seconds: int = 86400):
         """ Checks whether the user's action skill is on cooldown. """
 
@@ -365,14 +350,18 @@ class Player(commands.Cog):
         await mycursor.close()
         return skill_action
 
-    async def get_skill_action_by_user_id_and_skill_type(self, user_id: int, skill_type: str) -> Union[List[Union[int, str]], bool]:
+    async def get_skill_action_by_user_id_and_skill_type(self, user_id: int, skill_type: str, multiple: bool = False
+    ) -> Union[List[List[Union[int, str]]], List[Union[int, str]], bool]:
         """ Gets a skill action by user ID and skill type.
         :param user_id: The user ID with which to get the skill action.
         :param skill_type: The skill type of the skill action. """
 
         mycursor, db = await the_database()
         await mycursor.execute("SELECT * FROM SlothSkills WHERE user_id = %s and skill_type = %s", (user_id, skill_type))
-        skill_actions = await mycursor.fetchall()
+        if multiple:
+            skill_actions = await mycursor.fetchall()
+        else:
+            skill_actions = await mycursor.fetchone()
         await mycursor.close()
         return skill_actions
 
@@ -530,13 +519,14 @@ class Player(commands.Cog):
         await db.commit()
         await mycursor.close()
 
-    async def delete_skill_action_by_target_id_and_skill_type(self, target_id: int, skill_type: str) -> None:
+    async def delete_skill_action_by_target_id_and_skill_type(self, target_id: int, skill_type: str, multiple: bool = False) -> None:
         """ Deletes a skill action by target ID.
         :param target_id: The ID of the target member.
         :param skill_type: The type of the action skill. """
 
         mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM SlothSkills WHERE target_id = %s AND skill_type = %s", (target_id, skill_type))
+        sql = "DELETE FROM SlothSkills WHERE target_id = %s AND skill_type = %s" + 'LIMIT 1' if not multiple else ''
+        await mycursor.execute(sql, (target_id, skill_type))
         await db.commit()
         await mycursor.close()
 

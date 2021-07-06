@@ -53,7 +53,7 @@ class Seraph(Player):
 
         confirmed = await ConfirmSkill(f"**{ctx.author.mention}, are you sure you want to use your skill, to protect {target.mention}?**").prompt(ctx)
         if confirmed:
-            _, exists = await self.check_cooldown(user_id=ctx.author.id, skill=Skill.ONE)
+            _, exists = await Player.skill_on_cooldown(skill=Skill.ONE).predicate(ctx)
             current_timestamp = await utils.get_timestamp()
             await self.insert_skill_action(
                 user_id=ctx.author.id, skill_type="divine_protection", skill_timestamp=current_timestamp,
@@ -78,7 +78,6 @@ class Seraph(Player):
     @Player.skill_on_cooldown(skill=Skill.TWO)
     @Player.user_is_class('seraph')
     @Player.skill_mark()
-    # @Player.not_ready()
     async def reinforce(self, ctx) -> None:
         """ Gets a 50% chance of reinforcing all of their protected people's Divine Protection shield,
         by making it last for one more day and a 45% chance of getting a protection for themselves too
@@ -93,7 +92,7 @@ class Seraph(Player):
             return await ctx.send(f"**{perpetrator.mention}, you can't use your skill, because you are knocked-out!**")
 
         # Gets all active Divine Protection shields from the user
-        shields = await self.get_skill_action_by_user_id_and_skill_type(user_id=perpetrator.id, skill_type='divine_protection')
+        shields = await self.get_skill_action_by_user_id_and_skill_type(user_id=perpetrator.id, skill_type='divine_protection', multiple=True)
         if not shields:
             return await ctx.send(f"**You don't have any active shield, {perpetrator.mention}!**")
 
@@ -108,7 +107,7 @@ class Seraph(Player):
         if not confirm:
             return await ctx.send(f"**Not reinforcing them, then, {perpetrator.mention}!**")
 
-        _, exists = await self.check_cooldown(user_id=perpetrator.id, skill=Skill.TWO)
+        _, exists = await Player.skill_on_cooldown(skill=Skill.TWO).predicate(ctx)
 
         current_timestamp = await utils.get_timestamp()
 
@@ -315,7 +314,7 @@ class Seraph(Player):
         if not confirm:
             return await ctx.send(f"**Not doing it then, {perpetrator.mention}!**")
 
-        _, exists = await self.check_cooldown(perpetrator.id, Skill.THREE)
+        _, exists = await Player.skill_on_cooldown(Skill.THREE).predicate(ctx)
 
         await self.update_user_money(perpetrator.id, -100)
 

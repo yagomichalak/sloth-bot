@@ -60,7 +60,7 @@ class Warrior(Player):
         if not confirmed:
             return await ctx.send("**Not knocking them out, then!**")
 
-        _, exists = await self.check_cooldown(user_id=attacker.id, skill=Skill.ONE)
+        _, exists = await Player.skill_on_cooldown(skill=Skill.ONE).predicate(ctx)
 
         try:
             current_timestamp = await utils.get_timestamp()
@@ -89,7 +89,6 @@ class Warrior(Player):
     @Player.skill_on_cooldown(skill=Skill.TWO)
     @Player.user_is_class('warrior')
     @Player.skill_mark()
-    # @Player.not_ready()
     async def smash(self, ctx, target: discord.Member = None) -> None:
         """ Has a 50% change of breaking someone's Divine Protection shield.
         :param target: The target who you are trying to smash the protection. """
@@ -129,7 +128,7 @@ class Warrior(Player):
         if not confirmed:
             return await ctx.send("**Not hacking them, then!**")
 
-        _, exists = await self.check_cooldown(user_id=attacker.id, skill=Skill.TWO)
+        _, exists = await Player.skill_on_cooldown(skill=Skill.TWO).predicate(ctx)
 
         current_timestamp = await utils.get_timestamp()
         # Upate user's money
