@@ -120,14 +120,14 @@ class OpenShopLoop(menus.ListPageSource):
 
         embed = discord.Embed(
             title="__Sloth Class Shop Items__",
-            description="All available shop items.\n**To buy a potion, use: `z!buy_potion @member`**",
+            description="All available shop items.\n**To buy a potion, use: `z!buy [potion/ring] @member`**",
             color=menu.ctx.author.color,
             timestamp=menu.ctx.message.created_at
         )
         embed.set_author(name=menu.ctx.author, icon_url=menu.ctx.author.avatar_url)
 
         for i, v in enumerate(entries, start=offset):
-            embed.add_field(name=f"{i+1}.", value=f"**Merchant:** <@{v[0]}>\n**Item Price:** `{v[7]}`", inline=True)
+            embed.add_field(name=f"{i+1}.", value=f"**Merchant:** <@{v[0]}>\n**Item:** `{v[1]}` {v[6] if v[6] else ''}\n**Item Price:** `{v[7]}`", inline=True)
             embed.set_footer(text=f"({i+1}-{i+6} of {len(self.entries)})")
 
         return embed

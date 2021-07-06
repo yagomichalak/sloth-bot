@@ -44,7 +44,7 @@ class Merchant(Player):
 
         confirm = await ConfirmSkill(f"**{member.mention}, are you sure you want to spend `50łł` to put a potion in your shop with the price of `{item_price}`łł ?**").prompt(ctx)
         if confirm:
-            _, exists = await self.check_cooldown(user_id=member.id, skill=Skill.ONE)
+            _, exists = await Player.skill_on_cooldown(skill=Skill.ONE).predicate(ctx)
 
             user_currency = await self.get_user_currency(member.id)
             if user_currency[1] >= 50:
@@ -52,11 +52,13 @@ class Merchant(Player):
             else:
                 return await ctx.send(f"**{member.mention}, you don't have `50łł`!**")
 
+            item_emoji = '🍯'
+
             try:
                 current_timestamp = await utils.get_timestamp()
                 await self.insert_skill_action(
                     user_id=member.id, skill_type="potion", skill_timestamp=current_timestamp,
-                    target_id=member.id, channel_id=ctx.channel.id, price=item_price
+                    target_id=member.id, channel_id=ctx.channel.id, price=item_price, emoji=item_emoji
                 )
                 if exists:
                     await self.update_user_skill_ts(member.id, Skill.ONE, current_timestamp)
@@ -65,7 +67,7 @@ class Merchant(Player):
                 # Updates user's skills used counter
                 await self.update_user_skills_used(user_id=member.id)
                 open_shop_embed = await self.get_open_shop_embed(
-                    channel=ctx.channel, perpetrator_id=member.id, price=item_price)
+                    channel=ctx.channel, perpetrator_id=member.id, price=item_price, item_name='changing-Sloth-class potion', emoji=item_emoji)
                 await ctx.send(embed=open_shop_embed)
             except Exception as e:
                 print(e)
@@ -79,13 +81,6 @@ class Merchant(Player):
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def sloth_shop(self, ctx) -> None:
         """ Shows all class related items in the Sloth shop. """
-
-        embed = discord.Embed(
-            title="__Sloth Class Shop__",
-            description="All available items related to Sloth classes.",
-            color=ctx.author.color,
-            timestamp=ctx.message.created_at
-            )
 
         potions = await self.get_open_shop_items()
         if potions:
@@ -237,13 +232,12 @@ class Merchant(Player):
         else:
             await ctx.send(f"**{merchant.mention}, you had a `35%` chance of getting something from the Dark Sloth Web, it happened that today wasn't your day!**")
 
-    async def check_open_shop_items(self) -> None:
+    async def check_shop_potion_items(self) -> None:
 
-        """ Check on-going open-shop items and their expiration time. """
+        """ Check on-going changing-Sloth-class potion items and their expiration time. """
 
-        transmutations = await self.get_expired_open_shop_items()
+        transmutations = await self.get_expired_potion_items()
         for tm in transmutations:
-            print(tm)
             await self.delete_skill_action_by_target_id_and_skill_type(tm[3], 'potion')
 
             channel = self.bots_txt
@@ -252,6 +246,22 @@ class Merchant(Player):
                 content=f"<@{tm[0]}>",
                 embed=discord.Embed(
                     description=f"**<@{tm[3]}>'s `changing-Sloth-class potion` has just expired! Then it's been removed from the `Sloth class shop`! 🍯**",
+                    color=discord.Color.red()))
+
+    async def check_shop_ring_items(self) -> None:
+
+        """ Check on-going Wedding Ring items and their expiration time. """
+
+        transmutations = await self.get_expired_ring_items()
+        for tm in transmutations:
+            await self.delete_skill_action_by_target_id_and_skill_type(tm[3], 'ring')
+
+            channel = self.bots_txt
+
+            await channel.send(
+                content=f"<@{tm[0]}>",
+                embed=discord.Embed(
+                    description=f"**<@{tm[3]}>'s `Wedding Ring` has just expired! Then it's been removed from the `Sloth class shop`! 🍯**",
                     color=discord.Color.red()))
 
     # ========== Update ===========
@@ -268,12 +278,22 @@ class Merchant(Player):
 
     # ========== Get ===========
 
-    async def get_potion_skill_action_by_user_id(self, user_id: int) -> Union[List[Union[int, str]], bool]:
+    async def get_potion_skill_action_by_user_id(self, user_id: int) -> Union[List[Union[int, str]], None]:
         """ Gets a potion skill action by reaction context.
         :param user_id: The ID of the user of the skill action. """
 
-        mycursor, db = await the_database()
+        mycursor, _ = await the_database()
         await mycursor.execute("SELECT * FROM SlothSkills WHERE user_id = %s AND skill_type = 'potion'", (user_id,))
+        skill_action = await mycursor.fetchone()
+        await mycursor.close()
+        return skill_action
+
+    async def get_ring_skill_action_by_user_id(self, user_id: int) -> Union[List[Union[int, str]], None]:
+        """ Gets a ring skill action by reaction context.
+        :param user_id: The ID of the user of the skill action. """
+
+        mycursor, _ = await the_database()
+        await mycursor.execute("SELECT * FROM SlothSkills WHERE user_id = %s AND skill_type = 'ring'", (user_id,))
         skill_action = await mycursor.fetchone()
         await mycursor.close()
         return skill_action
@@ -281,17 +301,18 @@ class Merchant(Player):
     async def get_open_shop_items(self) -> List[List[Union[str, int]]]:
         """ Gets all open shop items. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("SELECT * FROM SlothSkills WHERE skill_type = 'potion'")
+        mycursor, _ = await the_database()
+        await mycursor.execute("SELECT * FROM SlothSkills WHERE skill_type = 'potion' OR skill_type = 'ring'")
         potions = await mycursor.fetchall()
         await mycursor.close()
         return potions
 
-    async def get_open_shop_embed(self, channel, perpetrator_id: int, price: int) -> discord.Embed:
+    async def get_open_shop_embed(self, channel, perpetrator_id: int, price: int, item_name: str, emoji: str = '') -> discord.Embed:
         """ Makes an embedded message for a magic pull action.
         :param channel: The context channel.
         :param perpetrator_id: The ID of the perpetrator of the magic pulling.
-        :param price: The price of the item that Merchant put into the shop. """
+        :param price: The price of the item that Merchant put into the shop.
+        :param item_name: The name of the item put into the shop. """
 
         timestamp = await utils.get_timestamp()
 
@@ -299,7 +320,7 @@ class Merchant(Player):
             title="A Merchant item has been put into the `Sloth Class Shop`!",
             timestamp=datetime.fromtimestamp(timestamp)
         )
-        open_shop_embed.description = f"**<@{perpetrator_id}> put a `changing-Sloth-class potion` into the Sloth class shop, for the price of `{price}łł`!** 🍯"
+        open_shop_embed.description = f"**<@{perpetrator_id}> put a `{item_name}` into the Sloth class shop, for the price of `{price}łł`!** {emoji}"
         open_shop_embed.color = discord.Color.green()
 
         open_shop_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Merchant.png")
@@ -310,14 +331,66 @@ class Merchant(Player):
         
     @commands.command(aliases=["sellring", "ring"])
     @Player.skills_used(requirement=20)
-    @Player.skill_on_cooldown(Skill.THREE)
+    @Player.skill_on_cooldown(Skill.THREE, 36000)
     @Player.user_is_class('merchant')
     @Player.skill_mark()
-    @Player.not_ready()
-    async def sell_ring(self, ctx, target: discord.Member = None) -> None:
-        """ Unknown unspecified skill, that is TBD. """
+    # @Player.not_ready()
+    async def sell_ring(self, ctx) -> None:
+        """ Puts a Wedding Ring for sale.
+        
+        Skill cost: 100łł
+        Cooldown: 10 hours. """
 
-        pass
+        if ctx.channel.id != bots_and_commands_channel_id:
+            return await ctx.send(f"**{ctx.author.mention}, you can only use this command in {self.bots_txt.mention}!**")
+
+        member = ctx.author
+
+        if await self.is_user_knocked_out(member.id):
+            return await ctx.send(f"**{member.mention}, you can't use your skill, because you are knocked-out!**")
+
+        if await self.get_skill_action_by_user_id_and_skill_type(member.id, 'ring'):
+            return await ctx.send(f"**{member.mention}, you already have a ring in your shop!**")
+
+        item_price = await prompt_number(self.client, ctx, f"**{member.mention}, for how much do you want to sell your ring?**", member)
+        if item_price is None:
+            return
+
+        confirm = await ConfirmSkill(f"**{member.mention}, are you sure you want to spend `100łł` to put a potion in your shop with the price of `{item_price}`łł ?**").prompt(ctx)
+        if confirm:
+            _, exists = await Player.skill_on_cooldown(skill=Skill.THREE, seconds=36000).predicate(ctx)
+
+            user_currency = await self.get_user_currency(member.id)
+            if user_currency[1] >= 50:
+                await self.update_user_money(member.id, -100)
+            else:
+                return await ctx.send(f"**{member.mention}, you don't have `100łł`!**")
+
+            item_emoji = '💍'
+
+            try:
+                current_timestamp = await utils.get_timestamp()
+                await self.insert_skill_action(
+                    user_id=member.id, skill_type="ring", skill_timestamp=current_timestamp,
+                    target_id=member.id, channel_id=ctx.channel.id, price=item_price, emoji=item_emoji
+                )
+                if exists:
+                    await self.update_user_skill_ts(member.id, Skill.THREE, current_timestamp)
+                else:
+                    await self.insert_user_skill_cooldown(ctx.author.id, Skill.THREE, current_timestamp)
+                # Updates user's skills used counter
+                await self.update_user_skills_used(user_id=member.id)
+                open_shop_embed = await self.get_open_shop_embed(
+                    channel=ctx.channel, perpetrator_id=member.id, price=item_price, item_name='Wedding Ring', emoji=item_emoji)
+                await ctx.send(embed=open_shop_embed)
+            except Exception as e:
+                print(e)
+                return await ctx.send(f"**{member.mention}, something went wrong with it, try again later!**")
+            else:
+                await ctx.send(f"**{member}, your item is now in the shop, check `z!sloth_shop` to see it there!**")
+        else:
+            return await ctx.send(f"**Not doing it, then, {member.mention}!**")
+
 
     @commands.command()
     @commands.cooldown(1, 60, commands.BucketType.user)
