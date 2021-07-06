@@ -139,3 +139,83 @@ class SlothClassDatabaseCommands(commands.Cog):
             return False
 
     # ======== SlothProfile =========
+    @commands.command(hidden=True)
+    @commands.has_permissions(administrator=True)
+    async def create_table_sloth_profile(self, ctx) -> None:
+        """ Creates the SlothProfile table. """
+
+        member = ctx.author
+
+        if await self.table_sloth_profile_exists():
+            return await ctx.send(f"**Table `SlothProfile` already exists, {member.mention}!**")
+
+        mycursor, db = await the_database()
+        await mycursor.execute("""
+        CREATE TABLE SlothProfile (
+            user_id BIGINT NOT NULL,
+            sloth_class VARCHAR(30),
+            skills_used INT NOT NULL,
+            tribe VARCHAR(50) DEFAULT NULL,
+
+            has_potion tinyint(1) default 0,
+            knife_sharpness_stack tinyint(1) default 0,
+            rings tinyint(1) default 0,
+
+            hacked tinyint(1) default 0,
+            protected tinyint(1) default 0,
+            knocked_out tinyint(1) default 0,
+            wired tinyint(1) default 0,
+            frogged tinyint(1) default 0,
+
+
+            PRIMARY KEY (user_id),
+            CONSTRAINT fk_sloth_pfl_user_id FOREIGN KEY (user_id) REFERENCES UserCurrency (user_id) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT fk_sloth_pfl_tribe_id FOREIGN KEY (tribe) REFERENCES UserTribe (tribe_name) ON UPDATE CASCADE
+        )""")
+        await db.commit()
+        await mycursor.close()
+        await ctx.send(f"**Table `SlothProfile` created, {member.mention}!**")
+
+    @commands.command(hidden=True)
+    @commands.has_permissions(administrator=True)
+    async def drop_table_sloth_profile(self, ctx) -> None:
+        """ Drops the SlothProfile table. """
+
+        member = ctx.author
+
+        if not await self.table_sloth_profile_exists():
+            return await ctx.send(f"**Table `SlothProfile` doesn't exist, {member.mention}!**")
+
+        mycursor, db = await the_database()
+        await mycursor.execute("DROP TABLE SlothProfile")
+        await db.commit()
+        await mycursor.close()
+        await ctx.send(f"**Table `SlothProfile` dropped, {member.mention}!**")
+
+    @commands.command(hidden=True)
+    @commands.has_permissions(administrator=True)
+    async def reset_table_sloth_profile(self, ctx) -> None:
+        """ Resets the SlothProfile table. """
+
+        member = ctx.author
+
+        if not await self.table_sloth_profile_exists():
+            return await ctx.send(f"**Table `SlothProfile` doesn't exist yet, {member.mention}!**")
+
+        mycursor, db = await the_database()
+        await mycursor.execute("DELETE FROM SlothProfile")
+        await db.commit()
+        await mycursor.close()
+        await ctx.send(f"**Table `SlothProfile` reset, {member.mention}!**")
+
+    async def table_sloth_profile_exists(self) -> bool:
+        """ Checks whether the SlothProfile table exists. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("SHOW TABLE STATUS LIKE 'SlothProfile'")
+        exists = await mycursor.fetchall()
+        await mycursor.close()
+        if exists:
+            return True
+        else:
+            return False

@@ -619,7 +619,8 @@ class Munk(Player):
                 user_id BIGINT NOT NULL, tribe_name VARCHAR(50) NOT NULL,
                 tribe_description VARCHAR(200) NOT NULL, two_emojis VARCHAR(2) NOT NULL,
                 tribe_thumbnail VARCHAR(200) DEFAULT NULL, tribe_form VARCHAR(100) DEFAULT NULL,
-                slug VARCHAR(75) NOT NULL
+                slug VARCHAR(75) NOT NULL,
+                PRIMARY KEY (tribe_name)
             ) DEFAULT CHARSET=utf8mb4""")
         await db.commit()
         await mycursor.close()
