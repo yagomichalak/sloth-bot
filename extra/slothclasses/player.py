@@ -490,12 +490,22 @@ class Player(commands.Cog):
         await mycursor.close()
         return knock_outs
 
-    async def get_user_currency(self, user_id: int) -> Union[List[Union[str, int]], bool]:
+    async def get_user_currency(self, user_id: int) -> List[Union[str, int]]:
         """ Gets the user currency.
         :param user_id: The ID of the user to get. """
 
         mycursor, db = await the_database()
         await mycursor.execute("SELECT * FROM UserCurrency WHERE user_id = %s", (user_id,))
+        user = await mycursor.fetchone()
+        await mycursor.close()
+        return user
+
+    async def get_sloth_profile(self, user_id: int) -> List[Union[str, int]]:
+        """ Gets the SlothProfile for the user.
+        :param user_id: The ID of the user to get. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("SELECT * FROM SlothProfile WHERE user_id = %s", (user_id,))
         user = await mycursor.fetchone()
         await mycursor.close()
         return user

@@ -605,67 +605,6 @@ class Munk(Player):
             except:
                 pass
 
-    @commands.command(hidden=True)
-    @commands.has_permissions(administrator=True)
-    async def create_table_user_tribe(self, ctx) -> None:
-        """ (Owner) Creates the UserTribe table. """
-
-        if await self.table_user_tribe_exists():
-            return await ctx.send("**The `UserTribe` table already exists!**")
-
-        mycursor, db = await the_database()
-        await mycursor.execute("""
-            CREATE TABLE UserTribe (
-                user_id BIGINT NOT NULL, tribe_name VARCHAR(50) NOT NULL,
-                tribe_description VARCHAR(200) NOT NULL, two_emojis VARCHAR(2) NOT NULL,
-                tribe_thumbnail VARCHAR(200) DEFAULT NULL, tribe_form VARCHAR(100) DEFAULT NULL,
-                slug VARCHAR(75) NOT NULL,
-                PRIMARY KEY (tribe_name)
-            ) DEFAULT CHARSET=utf8mb4""")
-        await db.commit()
-        await mycursor.close()
-        await ctx.send("**Created `UserTribe` table!**")
-
-    @commands.command(hidden=True)
-    @commands.has_permissions(administrator=True)
-    async def drop_table_user_tribe(self, ctx) -> None:
-        """ (Owner) Drops the UserTribe table. """
-
-        if not await self.table_user_tribe_exists():
-            return await ctx.send("**The `UserTribe` table doesn't exist!**")
-
-        mycursor, db = await the_database()
-        await mycursor.execute("DROP TABLE UserTribe")
-        await db.commit()
-        await mycursor.close()
-        await ctx.send("**Dropped `UserTribe` table!**")
-
-    @commands.command(hidden=True)
-    @commands.has_permissions(administrator=True)
-    async def reset_table_user_tribe(self, ctx) -> None:
-        """ (Owner) Resets the UserTribe table. """
-
-        if not await self.table_user_tribe_exists():
-            return await ctx.send("**The `UserTribe` table doesn't exist yet!**")
-
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM UserTribe")
-        await db.commit()
-        await mycursor.close()
-        await ctx.send("**Reset `UserTribe` table!**")
-
-    async def table_user_tribe_exists(self) -> bool:
-        """ Checks whether the UserTribe table exists. """
-
-        mycursor, db = await the_database()
-        await mycursor.execute("SHOW TABLE STATUS LIKE 'UserTribe'")
-        table_info = await mycursor.fetchall()
-        await mycursor.close()
-        if len(table_info) == 0:
-            return False
-        else:
-            return True
-
     @commands.command()
     @Player.skills_used(requirement=5)
     @Player.skill_on_cooldown(skill=Skill.TWO)
@@ -720,3 +659,4 @@ class Munk(Player):
             return await ctx.send(f"**Please, inform a tribe role name, {member.mention}!**")
 
         # Do the magic here.
+        pass

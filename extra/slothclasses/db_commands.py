@@ -138,6 +138,132 @@ class SlothClassDatabaseCommands(commands.Cog):
         else:
             return False
 
+    # ======== UserTribe =========
+    @commands.command(hidden=True)
+    @commands.has_permissions(administrator=True)
+    async def create_table_user_tribe(self, ctx) -> None:
+        """ (Owner) Creates the UserTribe table. """
+
+        if await self.table_user_tribe_exists():
+            return await ctx.send("**The `UserTribe` table already exists!**")
+
+        mycursor, db = await the_database()
+        await mycursor.execute("""
+            CREATE TABLE UserTribe (
+                user_id BIGINT NOT NULL, tribe_name VARCHAR(50) NOT NULL,
+                tribe_description VARCHAR(200) NOT NULL, two_emojis VARCHAR(2) NOT NULL,
+                tribe_thumbnail VARCHAR(200) DEFAULT NULL, tribe_form VARCHAR(100) DEFAULT NULL,
+                slug VARCHAR(75) NOT NULL,
+                PRIMARY KEY (tribe_name),
+                CONSTRAINT fk_tribe_owner_id FOREIGN KEY (user_id) REFERENCES UserCurrency (user_id) ON DELETE CASCADE ON UPDATE CASCADE
+            ) DEFAULT CHARSET=utf8mb4""")
+        await db.commit()
+        await mycursor.close()
+        await ctx.send("**Created `UserTribe` table!**")
+
+    @commands.command(hidden=True)
+    @commands.has_permissions(administrator=True)
+    async def drop_table_user_tribe(self, ctx) -> None:
+        """ (Owner) Drops the UserTribe table. """
+
+        if not await self.table_user_tribe_exists():
+            return await ctx.send("**The `UserTribe` table doesn't exist!**")
+
+        mycursor, db = await the_database()
+        await mycursor.execute("DROP TABLE UserTribe")
+        await db.commit()
+        await mycursor.close()
+        await ctx.send("**Dropped `UserTribe` table!**")
+
+    @commands.command(hidden=True)
+    @commands.has_permissions(administrator=True)
+    async def reset_table_user_tribe(self, ctx) -> None:
+        """ (Owner) Resets the UserTribe table. """
+
+        if not await self.table_user_tribe_exists():
+            return await ctx.send("**The `UserTribe` table doesn't exist yet!**")
+
+        mycursor, db = await the_database()
+        await mycursor.execute("DELETE FROM UserTribe")
+        await db.commit()
+        await mycursor.close()
+        await ctx.send("**Reset `UserTribe` table!**")
+
+    async def table_user_tribe_exists(self) -> bool:
+        """ Checks whether the UserTribe table exists. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("SHOW TABLE STATUS LIKE 'UserTribe'")
+        table_info = await mycursor.fetchall()
+        await mycursor.close()
+        if len(table_info) == 0:
+            return False
+        else:
+            return True
+
+    # ======== TribeMember =========
+    @commands.command(hidden=True)
+    @commands.has_permissions(administrator=True)
+    async def create_table_tribe_member(self, ctx) -> None:
+        """ (Owner) Creates the TribeMember table. """
+
+        if await self.table_tribe_member_exists():
+            return await ctx.send("**The `TribeMember` table already exists!**")
+
+        mycursor, db = await the_database()
+        await mycursor.execute("""
+            CREATE TABLE TribeMember (
+                owner_id BIGINT NOT NULL,
+                tribe_name VARCHAR(50) NOT NULL,
+                member_id BIGINT NOT NULL,
+                tribe_role VARCHAR(30) DEFAULT NULL,
+                CONSTRAINT fk_tribe_owner FOREIGN KEY (owner_id) REFERENCES UserTribe (user_id) ON DELETE CASCADE ON UPDATE CASCADE,
+                CONSTRAINT fk_tribe_name FOREIGN KEY (tribe_name) REFERENCES UserTribe (tribe_name) ON DELETE CASCADE ON UPDATE CASCADE
+            ) DEFAULT CHARSET=utf8mb4""")
+        await db.commit()
+        await mycursor.close()
+        await ctx.send("**Created `TribeMember` table!**")
+
+    @commands.command(hidden=True)
+    @commands.has_permissions(administrator=True)
+    async def drop_table_tribe_member(self, ctx) -> None:
+        """ (Owner) Drops the TribeMember table. """
+
+        if not await self.table_tribe_member_exists():
+            return await ctx.send("**The `TribeMember` table doesn't exist!**")
+
+        mycursor, db = await the_database()
+        await mycursor.execute("DROP TABLE TribeMember")
+        await db.commit()
+        await mycursor.close()
+        await ctx.send("**Dropped `TribeMember` table!**")
+
+    @commands.command(hidden=True)
+    @commands.has_permissions(administrator=True)
+    async def reset_table_tribe_member(self, ctx) -> None:
+        """ (Owner) Resets the TribeMember table. """
+
+        if not await self.table_tribe_member_exists():
+            return await ctx.send("**The `TribeMember` table doesn't exist yet!**")
+
+        mycursor, db = await the_database()
+        await mycursor.execute("DELETE FROM TribeMember")
+        await db.commit()
+        await mycursor.close()
+        await ctx.send("**Reset `TribeMember` table!**")
+
+    async def table_tribe_member_exists(self) -> bool:
+        """ Checks whether the TribeMember table exists. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("SHOW TABLE STATUS LIKE 'TribeMember'")
+        table_info = await mycursor.fetchall()
+        await mycursor.close()
+        if len(table_info) == 0:
+            return False
+        else:
+            return True
+
     # ======== SlothProfile =========
     @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
@@ -156,6 +282,7 @@ class SlothClassDatabaseCommands(commands.Cog):
             sloth_class VARCHAR(30),
             skills_used INT NOT NULL,
             tribe VARCHAR(50) DEFAULT NULL,
+            change_class_ts BIGINT DEFAULT 0,
 
             has_potion tinyint(1) default 0,
             knife_sharpness_stack tinyint(1) default 0,
@@ -170,7 +297,7 @@ class SlothClassDatabaseCommands(commands.Cog):
 
             PRIMARY KEY (user_id),
             CONSTRAINT fk_sloth_pfl_user_id FOREIGN KEY (user_id) REFERENCES UserCurrency (user_id) ON DELETE CASCADE ON UPDATE CASCADE,
-            CONSTRAINT fk_sloth_pfl_tribe_id FOREIGN KEY (tribe) REFERENCES UserTribe (tribe_name) ON UPDATE CASCADE
+            CONSTRAINT fk_sloth_pfl_tribe_name FOREIGN KEY (tribe) REFERENCES UserTribe (tribe_name) ON UPDATE CASCADE
         )""")
         await db.commit()
         await mycursor.close()
