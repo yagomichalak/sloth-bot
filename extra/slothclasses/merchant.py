@@ -89,16 +89,40 @@ class Merchant(Player):
         else:
             return await ctx.send(f"**There are no items in the `Sloth class shop` yet, {ctx.author.mention}!**")
 
-    @commands.command(aliases=['bp', 'buy'])
+
+    @commands.group(aliases=['buy_item', 'buyitem', 'purchase'])
+    async def buy(self, ctx) -> None:
+        """ Buys a specific item from a Merchant.
+        (Use this without an item name to see what items you can possibly buy with this command)
+        __**Example:**__
+    ```ini\nz!buy potion @Salonce\nz!buy ring 376864935944388609"""
+        if ctx.invoked_subcommand:
+            return
+
+        cmd = self.client.get_command('buy')
+        prefix = self.client.command_prefix
+        subcommands = [f"{prefix}{c.qualified_name}" for c in cmd.commands
+            ]
+
+        subcommands = '\n'.join(subcommands)
+        items_embed = discord.Embed(
+            title="__Subcommads__:",
+            description=f"```apache\n{subcommands}```",
+            color=ctx.author.color,
+            timestamp=ctx.message.created_at
+        )
+        await ctx.send(embed=items_embed)
+
+    @buy.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def buy_potion(self, ctx, member: discord.Member = None) -> None:
+    async def potion(self, ctx, member: discord.Member = None, item_name: str = None) -> None:
         """ Buys a changing-Sloth-class potion from a Merchant. """
 
         buyer = ctx.author
         if not member:
             return await ctx.send(f"**Please, inform a `Merchant`, {buyer.mention}!**")
 
-        if not (merchant_item := await self.get_potion_skill_action_by_user_id(member.id)):
+        if not(merchant_item := await self.get_skill_action_by_user_id_and_skill_type(member.id, 'potion')):
             return await ctx.send(
                 f"**{member} is either not a `Merchant` or they don't have a potion available for purchase, {buyer.mention}!**")
 
@@ -120,7 +144,7 @@ class Merchant(Player):
             if not confirm:
                 return await ctx.send(f"**Not buying it, then, {buyer.mention}!**")
 
-            if not await self.get_potion_skill_action_by_user_id(member.id):
+            if not await self.get_skill_action_by_user_id_and_skill_type(member.id, 'potion'):
                 return await ctx.send(f"**{member.mention} doesn't have a potion available for purchase, {buyer.mention}!**")
 
             try:
@@ -173,6 +197,92 @@ class Merchant(Player):
                     color=discord.Color.green(),
                     timestamp=ctx.message.created_at
                     ))
+
+    @buy.command(aliases=['wedding', 'wedding_ring', 'weddingring'])
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def ring(self, ctx, member: discord.Member = None, item_name: str = None) -> None:
+        """ Buys a Wedding Ring from a Merchant. """
+
+        buyer = ctx.author
+        if not member:
+            return await ctx.send(f"**Please, inform a `Merchant`, {buyer.mention}!**")
+
+        if not(merchant_item := await self.get_skill_action_by_user_id_and_skill_type(member.id, 'ring')):
+            return await ctx.send(
+                f"**{member} is either not a `Merchant` or they don't have a ring available for purchase, {buyer.mention}!**")
+
+        user_info = await self.get_user_currency(buyer.id)
+        if not user_info:
+            await ctx.send(embed=discord.Embed(description=f"**{buyer.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one!**"))
+
+        elif user_info[7].lower() == 'default':
+            await ctx.send(embed=discord.Embed(description=f"**{buyer.mention}, you don't have a Sloth class yet. Click [here](https://thelanguagesloth.com/profile/slothclass) to choose one!**"))
+
+        elif user_info[11] and user_info[11] == 2:
+            await ctx.send(embed=discord.Embed(description=f"**{buyer.mention}, you already have two `Wedding Rings`, you can't buy another one!**"))
+
+        elif user_info[1] < merchant_item[7]:
+            await ctx.send(embed=discord.Embed(description=f"**{buyer.mention}, the ring costs {merchant_item[7]}, but you only have {user_info[1]}łł!**"))
+
+        else:
+            confirm = await ConfirmSkill(f"**{buyer.mention}, are you sure you want to buy a `Wedding Ring` for `{merchant_item[7]}łł`?**").prompt(ctx)
+            if not confirm:
+                return await ctx.send(f"**Not buying it, then, {buyer.mention}!**")
+
+            if not await self.get_skill_action_by_user_id_and_skill_type(member.id, 'ring'):
+                return await ctx.send(f"**{member.mention} doesn't have a `Wedding Ring` available for purchase, {buyer.mention}!**")
+
+            try:
+                if wired_user := await self.get_skill_action_by_target_id_and_skill_type(target_id=member.id, skill_type='wire'):
+
+                    siphon_percentage = 35
+                    cybersloth_money = round((merchant_item[7]*siphon_percentage)/100)
+                    target_money = merchant_item[7] - cybersloth_money
+                    await self.update_user_money(member.id, target_money)
+                    await self.update_user_money(buyer.id, -merchant_item[7])
+                    await self.update_user_money(wired_user[0], cybersloth_money)
+                    cybersloth = self.client.get_user(wired_user[0])
+                    siphon_embed = discord.Embed(
+                            title="__Intercepted Purchase__",
+                            description=(
+                                f"{buyer.mention} bought a `Wedding Ring` from {member.mention} for `{merchant_item[7]}łł`, "
+                                f"but {cybersloth.mention if cybersloth else str(cybersloth)} siphoned off `{siphon_percentage}%` of the price; `{cybersloth_money}łł`! "
+                                f"So the Merhcant {member.mention} actually got `{target_money}łł`!"
+                            ),
+                            color=buyer.color,
+                            timestamp=ctx.message.created_at)
+                    if cybersloth:
+                        siphon_embed.set_thumbnail(url=cybersloth.avatar_url)
+
+                    await ctx.send(
+                        content=f"{buyer.mention}, {member.mention}, <@{wired_user[0]}>",
+                        embed=siphon_embed)
+
+                else:
+                    # Updates both buyer and seller's money
+                    await self.update_user_money(buyer.id, - merchant_item[7])
+                    await self.update_user_money(member.id, merchant_item[7])
+
+                # Gives the buyer their potion and removes the potion from the store
+                await self.update_user_has_potion(buyer.id, 1)
+                await self.delete_skill_action_by_target_id_and_skill_type(member.id, 'potion')
+            except Exception as e:
+                print(e)
+                await ctx.send(embed=discord.Embed(
+                    title="Error!",
+                    description=f"**Something went wrong with that purchase, {buyer.mention}!**",
+                    color=discord.Color.red(),
+                    timestamp=ctx.message.created_at
+                    ))
+
+            else:
+                await ctx.send(embed=discord.Embed(
+                    title="__Successful Acquisition__",
+                    description=f"{buyer.mention} bought a `changing-Sloth-class potion` from {member.mention}!",
+                    color=discord.Color.green(),
+                    timestamp=ctx.message.created_at
+                    ))
+
 
     @commands.command()
     @Player.skills_used(requirement=5)
@@ -277,17 +387,6 @@ class Merchant(Player):
         await mycursor.close()
 
     # ========== Get ===========
-
-    async def get_potion_skill_action_by_user_id(self, user_id: int) -> Union[List[Union[int, str]], None]:
-        """ Gets a potion skill action by reaction context.
-        :param user_id: The ID of the user of the skill action. """
-
-        mycursor, _ = await the_database()
-        await mycursor.execute("SELECT * FROM SlothSkills WHERE user_id = %s AND skill_type = 'potion'", (user_id,))
-        skill_action = await mycursor.fetchone()
-        await mycursor.close()
-        return skill_action
-
     async def get_ring_skill_action_by_user_id(self, user_id: int) -> Union[List[Union[int, str]], None]:
         """ Gets a ring skill action by reaction context.
         :param user_id: The ID of the user of the skill action. """
@@ -334,7 +433,7 @@ class Merchant(Player):
     @Player.skill_on_cooldown(Skill.THREE, 36000)
     @Player.user_is_class('merchant')
     @Player.skill_mark()
-    # @Player.not_ready()
+    @Player.not_ready()
     async def sell_ring(self, ctx) -> None:
         """ Puts a Wedding Ring for sale.
         
