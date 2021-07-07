@@ -17,6 +17,7 @@ import pytz
 from pytz import timezone
 from mysqldb import the_database
 from extra.useful_variables import patreon_roles
+from extra import utils
 
 guild_ids = [int(os.getenv('SERVER_ID'))]
 from discord_slash import cog_ext, SlashContext
@@ -492,7 +493,7 @@ class Tools(commands.Cog):
         :param my_timezone: The time zone to convert """
 
         member = ctx.author
-        default_timezone = 'Etc/GMT'
+        default_timezone = timezone('Etc/GMT')
 
         user_timezone = await self.select_user_timezone(member.id)
 
@@ -500,7 +501,7 @@ class Tools(commands.Cog):
             if user_timezone:
                 time_now = datetime.now(timezone(user_timezone[1])).strftime(f"%H:%M {user_timezone[1]}")
             else:
-                time_now = datetime.now(timezone(default_timezone)).strftime(f"%H:%M {default_timezone}")
+                time_now = datetime.now(default_timezone).strftime(f"%H:%M {default_timezone}")
 
             return await ctx.send(f"**Now it's `{time_now}`, {member.mention}**")
 
@@ -513,24 +514,19 @@ class Tools(commands.Cog):
             return await ctx.send(f"**Please, inform a valid timezone, {member.mention}!**\n`(Type z!timezones to get a full list with the timezones in your DM's)`")
 
         # Given info (time and timezone)
-        given_time = time
         given_timezone = my_timezone.title()
 
         # Format given time
-        given_date = datetime.strptime(given_time, '%H:%M')
+        given_date = datetime.strptime(time, '%H:%M')
         # print(f"Given date: {given_date.strftime('%H:%M')}")
 
         # Convert given date to given timezone
-        tz = pytz.timezone(given_timezone)
-        converted_time = datetime.now(tz=tz)
-        converted_time = converted_time.replace(hour=given_date.hour, minute=given_date.minute)
-        # print(f"Given date formated to given timezone: {converted_time.strftime('%H:%M')}")
+        time_now_here = await utils.get_time_now('Brazil/East')
+        time_now_here = time_now_here.replace(hour=given_date.hour, minute=given_date.minute)
+        time_now_there = await utils.get_time_now()
+        converted_time = time_now_here.astimezone(default_timezone)
 
-        # Converting date to GMT (Etc/GMT-1)
-        GMT = timezone(default_timezone)
-
-        date_to_utc = converted_time.astimezone(GMT).strftime('%H:%M')
-        datetime_text = f"**`{converted_time.strftime('%H:%M')} ({given_timezone})` = `{date_to_utc} ({GMT})`**"
+        datetime_text = f"**`{time_now_here.strftime('%H:%M')} ({given_timezone})` = `{converted_time.strftime('%H:%M')} ({default_timezone})`**"
         await ctx.send(datetime_text)
 
     @commands.command()
