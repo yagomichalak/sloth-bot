@@ -72,7 +72,7 @@ Do not mic spam/earrape in voice channels.""",
 
     "Do not impersonate others": "Do not impersonate other users or Staff members.",
 
-    "Do not beg": """No asking to be granted roles/moderator roles. You may apply for these positions by accessing the link in #:star2:announcements:star2: but repeatedly begging the staff may result in warnings or ban."""
+    "Do not beg": """No asking to be granted roles/moderator roles. You may apply for these positions by clicking the `apply to moderate` button in <#729454413290143774> but repeatedly begging the staff may result in warnings or ban."""
 
 }
 
