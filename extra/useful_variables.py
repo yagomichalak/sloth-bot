@@ -63,16 +63,16 @@ This rule also applies to profile pictures.""",
 
     "Advertising is forbidden": """Advertising Discord servers or self-promoting via text/voice channels or dms is not allowed. If you would like to get permission, get in touch with our Staff.""",
 
-    "No not dox": "Do not share other users' personal information without their consent.",
+    "Do not dox": "Do not share other users' personal information without their consent.",
 
-    "No not spam": """Do not flood or spam text channels.
+    "Do not spam": """Do not flood or spam text channels.
 Do not spam react in messages.
 Do not ping staff members repeatedly without a reason.
 Do not mic spam/earrape in voice channels.""",
 
     "Do not impersonate others": "Do not impersonate other users or Staff members.",
 
-    "No not beg": """No asking to be granted roles/moderator roles. You may apply for these positions by accessing the link in #:star2:announcements:star2: but repeatedly begging the staff may result in warnings or ban."""
+    "Do not beg": """No asking to be granted roles/moderator roles. You may apply for these positions by accessing the link in #:star2:announcements:star2: but repeatedly begging the staff may result in warnings or ban."""
 
 }
 
