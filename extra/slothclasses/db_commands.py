@@ -279,8 +279,8 @@ class SlothClassDatabaseCommands(commands.Cog):
         await mycursor.execute("""
         CREATE TABLE SlothProfile (
             user_id BIGINT NOT NULL,
-            sloth_class VARCHAR(30),
-            skills_used INT NOT NULL,
+            sloth_class VARCHAR(30) DEFAULT 'default',
+            skills_used INT DEFAULT 0,
             tribe VARCHAR(50) DEFAULT NULL,
             change_class_ts BIGINT DEFAULT 0,
 

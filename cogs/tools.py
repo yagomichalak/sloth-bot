@@ -24,6 +24,8 @@ from discord_slash import cog_ext, SlashContext
 from discord_slash.model import SlashCommandPermissionType
 from discord_slash.utils.manage_commands import create_option, create_choice, create_permission, create_multi_ids_permission
 
+from typing import List
+
 mod_role_id = int(os.getenv('MOD_ROLE_ID'))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID'))
 owner_role_id = int(os.getenv('OWNER_ROLE_ID'))
@@ -41,6 +43,28 @@ class Tools(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         print('Tools cog is ready!')
+
+    @commands.Cog.listener()
+    async def on_message(self, message) -> None:
+        """ Reacts to messages sent in Lesson Announcement channels. """
+        
+        if not message.guild:
+            return
+
+        channel = message.channel
+
+        announcement_channels: List[int] = [
+            576793212304228352, 801514509424525363, 799394160096444456,
+            761303171833790464, 784499538366824488, 760958206683643975, 
+            852918933786066984, 860637056682426388
+        ]
+
+        if channel.id in announcement_channels:
+            try:
+                await message.add_reaction('✅')
+            except:
+                pass
+
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
