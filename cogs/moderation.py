@@ -446,6 +446,8 @@ class Moderation(commands.Cog):
 
             bot = discord.utils.get(ctx.guild.members, id=self.client.user.id)
 
+            current_ts = await utils.get_timestamp()
+
             for i, member_role in enumerate(member.roles):
                 if i == 0:
                     continue
@@ -464,7 +466,7 @@ class Moderation(commands.Cog):
                     keep_roles.append(member_role)
 
             await member.edit(roles=keep_roles)
-            user_role_ids = [(member.id, rr.id, None, None) for rr in remove_roles]
+            user_role_ids = [(member.id, rr.id, current_ts, None) for rr in remove_roles]
             await self.insert_in_muted(user_role_ids)
 
             # General embed
@@ -484,8 +486,6 @@ class Moderation(commands.Cog):
             embed.set_footer(text=f"Muted by {ctx.author}", icon_url=ctx.author.avatar_url)
             await moderation_log.send(embed=embed)
             # Inserts a infraction into the database
-            epoch = datetime.utcfromtimestamp(0)
-            current_ts = (datetime.utcnow() - epoch).total_seconds()
             await self.insert_user_infraction(
                 user_id=member.id, infr_type="mute", reason=reason,
                 timestamp=current_ts, perpetrator=ctx.author.id)
@@ -584,8 +584,7 @@ class Moderation(commands.Cog):
             return
 
         # print('ah')
-        epoch = datetime.utcfromtimestamp(0)
-        current_ts = int((datetime.utcnow() - epoch).total_seconds())
+        current_ts = await utils.get_timestamp()
 
         # print(current_ts, seconds)
 
