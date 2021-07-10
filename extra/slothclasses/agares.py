@@ -56,11 +56,11 @@ class Agares(Player):
         if target.bot:
             return await ctx.send(f"**{attacker.mention}, you cannot magic pull a bot!**")
 
-        target_currency = await self.get_user_currency(target.id)
-        if not target_currency:
+        target_sloth_profile = await self.get_sloth_profile(target.id)
+        if not target_sloth_profile:
             return await ctx.send(f"**You cannot magic pull someone who doesn't have an account, {attacker.mention}!**")
 
-        if target_currency[7] == 'default':
+        if target_sloth_profile[1] == 'default':
             return await ctx.send(f"**You cannot magic pull someone who has a `default` Sloth class, {attacker.mention}!**")
 
         target_state = target.voice
@@ -119,11 +119,11 @@ class Agares(Player):
         if await self.is_user_knocked_out(perpetrator.id):
             return await ctx.send(f"**{perpetrator.mention}, you can't use your skill, because you are knocked-out!**")
 
-        target_currency = await self.get_user_currency(target.id)
-        if not target_currency:
+        target_sloth_profile = await self.get_sloth_profile(target.id)
+        if not target_sloth_profile:
             return await ctx.send(f"**You cannot recharge the skill of someone who doesn't have an account, {perpetrator.mention}!**")
 
-        if target_currency[7] == 'default':
+        if target_sloth_profile[1] == 'default':
             return await ctx.send(f"**You cannot recharge the skill of someone who has a `default` Sloth class, {perpetrator.mention}!**")
 
         confirm = await ConfirmSkill(f"**Are you sure you to reset {target.mention}'s first skill cooldown, {perpetrator.mention}?**").prompt(ctx)

@@ -128,13 +128,14 @@ class Merchant(Player):
                 f"**{member} is either not a `Merchant` or they don't have a potion available for purchase, {buyer.mention}!**")
 
         user_info = await self.get_user_currency(buyer.id)
-        if not user_info:
+        sloth_profile = await self.get_sloth_profile(buyer.id)
+        if not user_info or not sloth_profile:
             await ctx.send(embed=discord.Embed(description=f"**{buyer.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one!**"))
 
-        elif user_info[7].lower() == 'default':
+        elif sloth_profile[1].lower() == 'default':
             await ctx.send(embed=discord.Embed(description=f"**{buyer.mention}, you don't have a Sloth class yet. Click [here](https://thelanguagesloth.com/profile/slothclass) to choose one!**"))
 
-        elif user_info[11]:
+        elif sloth_profile[5]:
             await ctx.send(embed=discord.Embed(description=f"**{buyer.mention}, you already have a potion, you can't buy another one!**"))
 
         elif user_info[1] < merchant_item[7]:
@@ -218,7 +219,7 @@ class Merchant(Player):
         if not user_info:
             return await ctx.send(embed=discord.Embed(description=f"**{buyer.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one!**"))
 
-        if user_info[7].lower() == 'default':
+        if slothprofile[1].lower() == 'default':
             return await ctx.send(embed=discord.Embed(description=f"**{buyer.mention}, you don't have a Sloth class yet. Click [here](https://thelanguagesloth.com/profile/slothclass) to choose one!**"))
 
         if slothprofile and slothprofile[7] == 2:
@@ -241,7 +242,6 @@ class Merchant(Player):
                 cybersloth_money = round((merchant_item[7]*siphon_percentage)/100)
                 target_money = merchant_item[7] - cybersloth_money
                 await self.update_user_money(member.id, target_money)
-                print('- a ', merchant_item[7])
                 await self.update_user_money(buyer.id, -merchant_item[7])
                 await self.update_user_money(wired_user[0], cybersloth_money)
                 cybersloth = self.client.get_user(wired_user[0])

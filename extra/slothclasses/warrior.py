@@ -43,11 +43,11 @@ class Warrior(Player):
         if target.bot:
             return await ctx.send(f"**{attacker.mention}, you cannot knock out a bot!**")
 
-        target_currency = await self.get_user_currency(target.id)
-        if not target_currency:
+        target_sloth_profile = await self.get_sloth_profile(target.id)
+        if not target_sloth_profile:
             return await ctx.send(f"**You cannot knock out someone who doesn't have an account, {attacker.mention}!**")
 
-        if target_currency[7] == 'default':
+        if target_sloth_profile[1] == 'default':
             return await ctx.send(f"**You cannot knock out someone who has a `default` Sloth class, {attacker.mention}!**")
 
         if await self.is_user_protected(target.id):
@@ -110,11 +110,11 @@ class Warrior(Player):
         if target.bot:
             return await ctx.send(f"**{attacker.mention}, you cannot do it on a bot!**")
 
-        target_currency = await self.get_user_currency(target.id)
-        if not target_currency:
+        target_sloth_profile = await self.get_sloth_profile(target.id)
+        if not target_sloth_profile:
             return await ctx.send(f"**You cannot do it on someone who doesn't have an account, {attacker.mention}!**")
 
-        if target_currency[7] == 'default':
+        if target_sloth_profile[1] == 'default':
             return await ctx.send(f"**You cannot do it on someone who has a `default` Sloth class, {attacker.mention}!**")
 
         if not await self.is_user_protected(target.id):
