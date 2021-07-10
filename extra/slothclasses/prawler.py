@@ -82,11 +82,11 @@ class Prawler(Player):
 		if attacker.id == target.id:
 			return await ctx.send("**You cannot steal from yourself!**")
 
-		target_currency = await self.get_user_currency(target.id)
-		if not target_currency:
+		target_sloth_profile = await self.get_sloth_profile(target.id)
+		if not target_sloth_profile:
 			return await ctx.send(f"**You cannot steal from someone who doesn't have an account, {attacker.mention}!**")
 
-		if target_currency[7] == 'default':
+		if target_sloth_profile[1] == 'default':
 			return await ctx.send(f"**You cannot steal from someone who has a `default` Sloth class, {attacker.mention}!**")
 
 		if await self.is_user_protected(target.id):
@@ -145,7 +145,8 @@ class Prawler(Player):
 			return await ctx.send(f"**{perpetrator.mention}, you can't use your skill, because you are knocked-out!**")
 
 		user = await self.get_user_currency(perpetrator.id)
-		stack = user[16]
+		sloth_profile = await self.get_sloth_profile(perpetrator.id)
+		stack = sloth_profile[6]
 
 		if stack == 5:
 			return await ctx.send(f"**{perpetrator.mention}, your knife sharpness is already stacked to its maximum; `{stack}`!**")
@@ -214,8 +215,8 @@ class Prawler(Player):
 			except Exception as e:
 				pass
 			finally:
-				user = await self.get_user_currency(steal[0])
-				stack = user[16]
+				sloth_profile = await self.get_sloth_profile(steal[0])
+				stack = sloth_profile[6]
 				if stack:
 					return await self.double_steal(channel=channel, attacker_id=steal[0], target_id=steal[3], stack=stack)
 
