@@ -469,7 +469,7 @@ class Munk(Player):
 
     @commands.command(aliases=['expel', 'kick_out', 'can_i_show_you_the_door?'])
     @commands.cooldown(1, 10, commands.BucketType.user)
-    async def kickout(self, ctx, member: discord.User = None) -> None:
+    async def kickout(self, ctx, member: Union[discord.Member, discord.User] = None) -> None:
         """ Exepels someone from your tribe.
         :param member: The member to expel. """
 
@@ -503,6 +503,7 @@ class Munk(Player):
             # await self.update_someones_tribe(user_id=member.id, tribe_name=None)
             await self.delete_tribe_member(user_id=member.id)
             try:
+                print(member, member.display_name, user_tribe['two_emojis'])
                 await self.update_tribe_name(member=member, two_emojis=user_tribe['two_emojis'], joining=False)
             except:
                 pass
@@ -522,14 +523,14 @@ class Munk(Player):
         if ctx.channel.id != bots_and_commands_channel_id:
             return await ctx.send(f"**{member.mention}, you can only use this command in {self.bots_txt.mention}!**")
 
-        user_currency = await self.get_user_currency(user_id=member.id)
-        if not user_currency[18]:
+        tribe_member = await self.get_tribe_member(user_id=member.id)
+        if not tribe_member[1]:
             return await ctx.send(f"**You are not in a tribe, {member.mention}**!")
 
-        user_tribe = await self.get_tribe_info_by_name(user_currency[18])
-
-        if member.id == user_tribe['owner_id']:
+        if member.id == tribe_member[0]:
             return await ctx.send(f"**You cannot leave your own tribe, {member.mention}!**")
+
+        user_tribe = await self.get_tribe_info_by_name(tribe_member[1])
 
         confirm = await ConfirmSkill(f"Are you sure you want to leave `{user_tribe['name']}`, {member.mention}?").prompt(ctx)
         if not confirm:
@@ -538,10 +539,12 @@ class Munk(Player):
         # Updates user tribe status and nickname
 
         try:
-            await self.update_someones_tribe(user_id=member.id, tribe_name=None)
+            await self.delete_tribe_member(member.id)
             try:
+                print(member, member.display_name, user_tribe['two_emojis'])
                 await self.update_tribe_name(member=member, two_emojis=user_tribe['two_emojis'], joining=False)
-            except:
+            except Exception as ee:
+                print(ee)
                 pass
         except Exception as e:
             print(e)
@@ -579,7 +582,7 @@ class Munk(Player):
         await db.commit()
         await mycursor.close()
 
-    async def update_tribe_name(self, member: int, two_emojis: str, joining: bool) -> None:
+    async def update_tribe_name(self, member: discord.Member, two_emojis: str, joining: bool) -> None:
         """ Updates someone's nickname so it has their tribe's two-emoji combination identifier.
         :param member: The member whose nickname is gonna be updated.
         :param two_emojis: The two-emoji combination identifier.
@@ -596,7 +599,6 @@ class Munk(Player):
                 await member.edit(nick=f"{dname.strip()} {two_emojis}".strip())
 
         else:
-
             nick = ' '.join(map(lambda p: p.strip(), dname.rsplit(two_emojis, 1)))
             if nick != dname:
                 await member.edit(nick=nick)
