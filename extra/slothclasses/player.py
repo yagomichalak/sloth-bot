@@ -104,9 +104,9 @@ class Player(commands.Cog):
         async def real_check(ctx):
             """ Perfoms the real check. """
 
-            user_currency = await Player.get_user_currency(Player, user_id=ctx.author.id)
+            sloth_profile = await Player.get_sloth_profile(Player, user_id=ctx.author.id)
 
-            if user_currency[15] >= requirement:
+            if sloth_profile[2] >= requirement:
                 return True
 
             raise SkillsUsedRequirement(

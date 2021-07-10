@@ -4,23 +4,41 @@ from mysqldb import the_database
 async def convert_everyone() -> None:
     mycursor, db = await the_database()
 
-    placeholders = ['%s'] * 13
-    sql_template = """
-    INSERT IGNORE INTO SlothProfiles VALUES ({placeholders})
-    """
-    sql = sql_template.format(placeholders=','.join(placeholders))
 
     # Get columns from 
     await mycursor.execute("""
-    SELECT user_id, sloth_class, skills_used,
-    tribe, change_class_ts, has_potion,
+    SELECT UC.user_id, sloth_class, skills_used,
+    UT.tribe_name, change_class_ts, has_potion,
     knife_sharpness_stack, 0, hacked,
     protected, knocked_out, wired,
-    frogged FROM UserCurrency""")
-
+    frogged, UC.user_id 
+    FROM UserCurrency UC
+    LEFT JOIN UserTribe UT
+    ON UC.tribe = UT.tribe_name
+    """)
     users = await mycursor.fetchall()
     # return await ctx.send(users)
-    await mycursor.executemany(sql, users)
+
+    sql = """
+    INSERT IGNORE INTO TribeMember (owner_id, tribe_name, member_id, tribe_role)
+    SELECT UT.user_id, tribe_name, UC.user_id, 'Member'
+    FROM UserCurrency UC
+    LEFT JOIN UserTribe UT
+    ON UC.tribe = UT.tribe_name
+    """
+    await mycursor.executemany(sql)
+
+
+
+    placeholders = ['%s'] * 14
+    sql_template2 = """
+    INSERT IGNORE INTO SlothProfile VALUES ({placeholders})
+    """
+    sql2 = sql_template2.format(placeholders=','.join(placeholders))
+    await mycursor.executemany(sql2, users)
+
+
+
     await db.commit()
 
     await ctx.send('Success!')
