@@ -191,7 +191,7 @@ class Cybersloth(Player):
         :param hacked: Whether it's gonna be set to true or false. """
 
         mycursor, db = await the_database()
-        await mycursor.execute("UPDATE UserCurrency SET hacked = %s WHERE user_id = %s", (hacked, user_id))
+        await mycursor.execute("UPDATE SlothProfile SET hacked = %s WHERE user_id = %s", (hacked, user_id))
         await db.commit()
         await mycursor.close()
 
@@ -201,7 +201,7 @@ class Cybersloth(Player):
         :param wired: Whether it's gonna be set to true or false. """
 
         mycursor, db = await the_database()
-        await mycursor.execute("UPDATE UserCurrency SET wired = %s WHERE user_id = %s", (wired, user_id))
+        await mycursor.execute("UPDATE SlothProfile SET wired = %s WHERE user_id = %s", (wired, user_id))
         await db.commit()
         await mycursor.close()
 

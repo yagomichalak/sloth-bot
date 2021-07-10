@@ -1,5 +1,8 @@
 import discord
+from discord import user
+from discord.channel import TextChannel
 from discord.ext import commands, menus
+from discord.utils import maybe_coroutine
 from .player import Player, Skill
 from mysqldb import the_database, the_django_database
 from extra.menu import ConfirmSkill, SwitchTribePages
@@ -249,6 +252,16 @@ class Munk(Player):
 
         return tribe_info
 
+    async def get_tribe_member(self, user_id: int) -> List[Union[str, int]]:
+        """ Gets a Tribe Member.
+        :param user_id: The ID of the tribe member to get. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("SELECT * FROM TribeMember WHERE member_id = %s", (user_id,))
+        tribe_member = await mycursor.fetchone()
+        await mycursor.close()
+        return tribe_member
+
     async def get_tribe_members(self, tribe_owner_id: int = None, tribe_name: str = None) -> Dict[str, List[int]]:
         """ Gets a list of IDs of members of a particular tribe.
         :param tribe_owner_id: The ID of the owner of the tribe (Optional).
@@ -262,11 +275,11 @@ class Munk(Player):
         if tribe_owner_id:
             await mycursor.execute("SELECT tribe_name FROM UserTribe WHERE user_id = %s", (tribe_owner_id,))
             tribe = await mycursor.fetchone()
-            await mycursor.execute("SELECT user_id FROM UserCurrency WHERE tribe = %s", (tribe[0],))
+            await mycursor.execute("SELECT user_id FROM SlothProfile WHERE tribe = %s", (tribe[0],))
             tribe_members = await mycursor.fetchall()
 
         elif tribe_name:
-            await mycursor.execute("SELECT user_id FROM UserCurrency WHERE tribe = %s", (tribe_name,))
+            await mycursor.execute("SELECT user_id FROM SlothProfile WHERE tribe = %s", (tribe_name,))
             tribe_members = list(map(lambda mid: mid[0], await mycursor.fetchall()))
 
         await mycursor.close()
@@ -345,8 +358,8 @@ class Munk(Player):
         if ctx.channel.id != bots_and_commands_channel_id:
             return await ctx.send(f"**{inviter.mention}, you can only use this command in {self.bots_txt.mention}!**")
 
-        user_tribe = await self.get_tribe_info_by_user_id(user_id=inviter.id)
-        if not user_tribe['name']:
+        tribe_member = await self.get_tribe_member(inviter.id)
+        if not tribe_member or tribe_member[0] != tribe_member[2]:
             return await ctx.send(f"**You don't have a tribe, {inviter.mention}**!")
 
         if not member:
@@ -355,42 +368,41 @@ class Munk(Player):
         if inviter.id == member.id:
             return await ctx.send(f"**You cannot invite yourself into your own tribe, {inviter.mention}!**")
 
-        confirm = await ConfirmSkill(f"Are you sure you want to invite, {member.mention} to `{user_tribe['name']}`?").prompt(ctx)
+        confirm = await ConfirmSkill(f"Are you sure you want to invite, {member.mention} to `{tribe_member[1]}`?").prompt(ctx)
         if not confirm:
             return await ctx.send("**Not inviting them, then!**")
 
         # Checks whether user is already in a tribe.
-        user_currency = await self.get_user_currency(member.id)
-        if not user_currency:
+        sloth_profile = await self.get_sloth_profile(member.id)
+        if not sloth_profile:
             return await ctx.send(f"**You cannot invite someone that doesn't have an account, {inviter.mention}!**")
-        if user_currency[7] == 'default':
+        if sloth_profile[1] == 'default':
             return await ctx.send(f"**You cannot invite someone that doesn't have a Sloth Class, {inviter.mention}!**")
-        if user_currency[18]:
+        if sloth_profile[3]:
             return await ctx.send(f"**You cannot invite someone that is already in a tribe, {inviter.mention}!**")
 
         custom_ctx = ctx
         custom_ctx.author = member
-        invite = await ConfirmSkill(content=f"{member.mention}", msg=f"{inviter.mention} invited you to join their tribe called `{user_tribe['name']}`, do you wanna join?").prompt(custom_ctx)
+        invite = await ConfirmSkill(content=f"{member.mention}", msg=f"{inviter.mention} invited you to join their tribe called `{tribe_member[1]}`, do you wanna join?").prompt(custom_ctx)
         if invite:
-            if not user_currency[18]:
+            user_tribe = await self.get_tribe_info_by_user_id(inviter.id)
+            try:
+                await self.insert_tribe_member(owner_id=inviter.id, tribe_name=tribe_member[1], user_id=member.id)
+                await self.update_someones_tribe(user_id=member.id, tribe_name=tribe_member[1])
                 try:
-                    await self.update_someones_tribe(user_id=member.id, tribe_name=user_tribe['name'])
-                    try:
-                        await self.update_tribe_name(member=member, two_emojis=user_tribe['two_emojis'], joining=True)
-                    except:
-                        pass
+                    await self.update_tribe_name(member=member, two_emojis=user_tribe['two_emojis'], joining=True)
+                except:
+                    pass
 
-                except Exception as e:
-                    print(e)
-                    await ctx.send(f"**Something went wrong with it, {member.mention}, {inviter.mention}!**")
-                else:
-                    join_tribe_embed = await self.get_join_tribe_embed(
-                        channel=ctx.channel, inviter=inviter, target=member, tribe=user_tribe)
-                    await ctx.send(embed=join_tribe_embed)
+            except Exception as e:
+                print(e)
+                await ctx.send(f"**Something went wrong with it, {member.mention}, {inviter.mention}!**")
             else:
-                await ctx.send(f"**You're already in a tribe, {member.mention}!**")
+                join_tribe_embed = await self.get_join_tribe_embed(
+                    channel=ctx.channel, inviter=inviter, target=member, tribe=user_tribe)
+                await ctx.send(embed=join_tribe_embed)
         else:
-            await ctx.send(f"**{member.mention} refused your invitation to join `{user_tribe['name']}`, {inviter.mention}!**")
+            await ctx.send(f"**{member.mention} refused your invitation to join `{tribe_member[1]}`, {inviter.mention}!**")
 
     @commands.command()
     @commands.cooldown(1, 10, commands.BucketType.user)
@@ -405,12 +417,12 @@ class Munk(Player):
         if name:
             tribe = await self.get_tribe_info_by_name(name)
         else:
-            user_currency = await self.get_user_currency(member.id)
-            if not user_currency or not user_currency[18]:
+            sloth_profile = await self.get_sloth_profile(member.id)
+            if not sloth_profile or not sloth_profile[3]:
                 return await ctx.send(
                     f"**You didn't provide any tribe name and you're not in a tribe either, {member.mention}!**")
 
-            tribe = await self.get_tribe_info_by_name(user_currency[18])
+            tribe = await self.get_tribe_info_by_name(sloth_profile[3])
 
         if not tribe['name']:
             return await ctx.send(f"**No tribes with that name were found, {member.mention}!**")
@@ -481,14 +493,15 @@ class Munk(Player):
             return await ctx.send("**Not kicking them, then!**")
 
         # Checks whether user is already in a tribe.
-        user_currency = await self.get_user_currency(member.id)
-        if not user_currency:
+        sloth_profile = await self.get_sloth_profile(member.id)
+        if not sloth_profile:
             return await ctx.send(f"**You cannot kick out someone that doesn't even have an account, {expeller.mention}!**")
-        if user_currency[18] != user_tribe['name']:
+        if sloth_profile[3] != user_tribe['name']:
             return await ctx.send(f"**You cannot kick out someone that is not in your tribe, {expeller.mention}!**")
 
         try:
-            await self.update_someones_tribe(user_id=member.id, tribe_name=None)
+            # await self.update_someones_tribe(user_id=member.id, tribe_name=None)
+            await self.delete_tribe_member(user_id=member.id)
             try:
                 await self.update_tribe_name(member=member, two_emojis=user_tribe['two_emojis'], joining=False)
             except:
@@ -542,7 +555,7 @@ class Munk(Player):
         :param tribe_name: The name of the tribe the user is gonna be set to. (default = None) """
 
         mycursor, db = await the_database()
-        await mycursor.execute("UPDATE UserCurrency SET tribe = %s WHERE user_id = %s", (tribe_name, user_id))
+        await mycursor.execute("UPDATE SlothProfile SET tribe = %s, tribe_user_id = %s WHERE user_id = %s", (tribe_name, user_id, user_id))
         await db.commit()
         await mycursor.close()
 
@@ -660,3 +673,26 @@ class Munk(Player):
 
         # Do the magic here.
         pass
+
+    async def insert_tribe_member(self, owner_id: int, tribe_name: str, user_id: int, tribe_role: str = 'Member') -> None:
+        """ Inserts a Tribe Member.
+        :param owner_id: The ID of the owner of the tribe the user is joining.
+        :param tribe_name: The tribe name.
+        :param user_id: The ID of the user.
+        :param tribe_role: The initial role they're gonna have in the tribe. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("""
+        INSERT INTO TribeMember (owner_id, tribe_name, member_id, tribe_role)
+        VALUES (%s, %s, %s, %s)""", (owner_id, tribe_name, user_id, tribe_role))
+        await db.commit()
+        await mycursor.close()
+
+    async def delete_tribe_member(self, user_id: int) -> None:
+        """ Deletes a Tribe Member.
+        :param user_id: The ID of the tribe member. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("DELETE FROM TribeMember WHERE member_id = %s", (user_id,))
+        await db.commit()
+        await mycursor.close()

@@ -43,7 +43,7 @@ class Player(commands.Cog):
             :param user_id: The ID of the user to get the Sloth Class. """
 
             mycursor, db = await the_database()
-            await mycursor.execute("SELECT sloth_class FROM UserCurrency WHERE user_id = %s", (user_id,))
+            await mycursor.execute("SELECT sloth_class FROM SlothProfile WHERE user_id = %s", (user_id,))
             user_sloth_class = await mycursor.fetchone()
             await mycursor.close()
             if user_sloth_class:
@@ -122,35 +122,13 @@ class Player(commands.Cog):
         # effects = []
 
         effects = {}
-        now = await utils.get_timestamp()
         general_cooldown = 86400 # Worth a day in seconds
-
-        def calculate(now, then): # Prolly deprecated for our system, might delete this func later
-            # - int(now)
-            m, s = divmod((int(then) - int(now)), 60)
-            h, m = divmod(m, 60)
-            d, h = divmod(h, 24)
-
-            d += 1
-
-            msg = ""
-
-            if d > 0:
-                msg = f"Ends in `{d:d}d`, `{h:d}h`, `{m:02d}m` & `{s:02d}s`"
-            elif h > 0:
-                msg = f"Ends in `{h:d}h`, `{m:02d}m` & `{s:02d}s`"
-            elif m > 0:
-                msg = f"Ends in `{m:02d}m` & `{s:02d}s`"
-            elif s > 0:
-                msg = f"Ends in `{s:02d}s`"
-
-            return msg
         
 
         if await self.is_user_protected(user_id=member.id):
             then = await self.get_skill_action_by_target_id_and_skill_type(target_id=member.id, skill_type='divine_protection')
             effects['protected'] = {}
-            # effects['protected']['cooldown'] = calculate(now=now, then=then[2]) if then else 'Ends in ??'
+    
             effects['protected']['cooldown'] = f"Ends <t:{int(then[2]) + general_cooldown}:R>" if then else 'Ends in ??'
             effects['protected']['frames'] = []
             effects['protected']['cords'] = (0, 0)
@@ -161,7 +139,6 @@ class Player(commands.Cog):
         if await self.is_transmutated(user_id=member.id):
             then = await self.get_skill_action_by_target_id_and_skill_type(target_id=member.id, skill_type='transmutation')
             effects['transmutated'] = {}
-            # effects['transmutated']['cooldown'] = calculate(now=now, then=then[2]) if then else 'Ends in ??'
             effects['transmutated']['cooldown'] = f"Ends <t:{int(then[2]) + general_cooldown}:R>" if then else 'Ends in ??'
             effects['transmutated']['frames'] = []
             effects['transmutated']['cords'] = (0, 0)
@@ -172,7 +149,6 @@ class Player(commands.Cog):
         if await self.is_user_hacked(user_id=member.id):
             then = await self.get_skill_action_by_target_id_and_skill_type(target_id=member.id, skill_type='hack')
             effects['hacked'] = {}
-            # effects['hacked']['cooldown'] = calculate(now=now, then=then[2]) if then else 'Ends in ??'
             effects['hacked']['cooldown'] = f"Ends <t:{int(then[2]) + general_cooldown}:R>" if then else 'Ends in ??'
             effects['hacked']['frames'] = []
             effects['hacked']['cords'] = (0, 0)
@@ -182,7 +158,6 @@ class Player(commands.Cog):
         if await self.is_user_wired(user_id=member.id):
             then = await self.get_skill_action_by_target_id_and_skill_type(target_id=member.id, skill_type='wire')
             effects['wired'] = {}
-            # effects['wired']['cooldown'] = calculate(now=now, then=then[2]) if then else 'Ends in ??'
             effects['wired']['cooldown'] = f"Ends <t:{int(then[2]) + general_cooldown}:R>" if then else 'Ends in ??'
             effects['wired']['frames'] = []
             effects['wired']['cords'] = (0, 0)
@@ -192,7 +167,6 @@ class Player(commands.Cog):
         if await self.is_user_knocked_out(user_id=member.id):
             then = await self.get_skill_action_by_target_id_and_skill_type(target_id=member.id, skill_type='knock_out')
             effects['knocked_out'] = {}
-            # effects['knocked_out']['cooldown'] = calculate(now=now, then=then[2]) if then else 'Ends in ??'
             effects['knocked_out']['cooldown'] = f"Ends <t:{int(then[2]) + general_cooldown}:R>" if then else 'Ends in ??'
             effects['knocked_out']['frames'] = []
             effects['knocked_out']['cords'] = (0, 0)
@@ -202,7 +176,6 @@ class Player(commands.Cog):
         if await self.is_user_frogged(user_id=member.id):
             then = await self.get_skill_action_by_target_id_and_skill_type(target_id=member.id, skill_type='frog')
             effects['frogged'] = {}
-            # effects['frogged']['cooldown'] = calculate(now=now, then=then[2]) if then else 'Ends in ??'
             effects['frogged']['cooldown'] = f"Ends <t:{int(then[2]) + general_cooldown}:R>" if then else 'Ends in ??'
             effects['frogged']['frames'] = []
             effects['frogged']['cords'] = (0, 0)
@@ -224,7 +197,7 @@ class Player(commands.Cog):
         :param user_id: The ID of the user to check it. """
 
         mycursor, db = await the_database()
-        await mycursor.execute("SELECT protected FROM UserCurrency WHERE user_id = %s", (user_id,))
+        await mycursor.execute("SELECT protected FROM SlothProfile WHERE user_id = %s", (user_id,))
         user_protected = await mycursor.fetchone()
         await mycursor.close()
         return user_protected is not None and user_protected[0]
@@ -244,7 +217,7 @@ class Player(commands.Cog):
         :param user_id: The ID of the user to check it. """
 
         mycursor, db = await the_database()
-        await mycursor.execute("SELECT hacked FROM UserCurrency WHERE user_id = %s", (user_id,))
+        await mycursor.execute("SELECT hacked FROM SlothProfile WHERE user_id = %s", (user_id,))
         user_hacked = await mycursor.fetchone()
         await mycursor.close()
         return user_hacked is not None and user_hacked[0]
@@ -254,7 +227,7 @@ class Player(commands.Cog):
         :param user_id: The ID of the user to check it. """
 
         mycursor, db = await the_database()
-        await mycursor.execute("SELECT wired FROM UserCurrency WHERE user_id = %s", (user_id,))
+        await mycursor.execute("SELECT wired FROM SlothProfile WHERE user_id = %s", (user_id,))
         user_wired = await mycursor.fetchone()
         await mycursor.close()
         return user_wired is not None and user_wired[0]
@@ -264,7 +237,7 @@ class Player(commands.Cog):
         :param user_id: The ID of the user to check it. """
 
         mycursor, db = await the_database()
-        await mycursor.execute("SELECT knocked_out FROM UserCurrency WHERE user_id = %s", (user_id,))
+        await mycursor.execute("SELECT knocked_out FROM SlothProfile WHERE user_id = %s", (user_id,))
         user_knocked_out = await mycursor.fetchone()
         await mycursor.close()
         return user_knocked_out is not None and user_knocked_out[0]
@@ -274,7 +247,7 @@ class Player(commands.Cog):
         :param user_id: The ID of the user to check it. """
 
         mycursor, db = await the_database()
-        await mycursor.execute("SELECT frogged FROM UserCurrency WHERE user_id = %s", (user_id,))
+        await mycursor.execute("SELECT frogged FROM SlothProfile WHERE user_id = %s", (user_id,))
         user_frogged = await mycursor.fetchone()
         await mycursor.close()
         return user_frogged is not None and user_frogged[0]
@@ -560,7 +533,7 @@ class Player(commands.Cog):
         :param addition: What will be added to the user's current number of skills used. (Can be negative numbers)"""
 
         mycursor, db = await the_database()
-        await mycursor.execute("UPDATE UserCurrency SET skills_used = skills_used + %s WHERE user_id = %s", (addition, user_id))
+        await mycursor.execute("UPDATE SlothProfile SET skills_used = skills_used + %s WHERE user_id = %s", (addition, user_id))
         await db.commit()
         await mycursor.close()
 
@@ -584,7 +557,7 @@ class Player(commands.Cog):
 
         mycursor, db = await the_database()
         await mycursor.execute("""
-        UPDATE UserCurrency SET hacked = %s, knocked_out = %s, frogged = %s, wired = %s
+        UPDATE SlothProfile SET hacked = %s, knocked_out = %s, frogged = %s, wired = %s
         WHERE user_id = %s""", (on_off, on_off, on_off, on_off, user_id))
         await db.commit()
         await mycursor.close()

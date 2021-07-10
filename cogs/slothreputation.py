@@ -1,5 +1,6 @@
 import discord
 from discord.ext import commands
+from discord.ext.commands.core import is_owner
 from mysqldb import *
 from datetime import datetime
 import os
@@ -96,7 +97,8 @@ class SlothReputation(commands.Cog):
 
         # Gets user's currency info, such as money balance, class participations, sloth class, etc.
         ucur = await self.get_user_currency(member.id)
-        if not ucur:
+        sloth_profile = await self.client.get_cog('SlothClass').get_sloth_profile(member.id)
+        if not ucur or not sloth_profile:
             if ctx.author.id == member.id:
                 component = discord.Component()
                 component.add_button(style=5, label="Create Account", emoji="🦥", url="https://thelanguagesloth.com/profile/update")
@@ -108,10 +110,17 @@ class SlothReputation(commands.Cog):
 
         SlothCurrency = self.client.get_cog('SlothCurrency')
 
-        if ucur[0][12]:
-            return await SlothCurrency.send_hacked_image(ctx, member)
+        SlothClass = self.client.get_cog('SlothClass')
+        effects = await SlothClass.get_user_effects(member=member)
 
-        sp = await self.client.get_cog('SlothClass').get_sloth_profile(member.id)
+        def has_effect(effect: str):
+            if effect in effects:
+                return effects[effect]['cooldown']
+
+            return False
+
+        if has_effect('hacked'):
+            return await SlothCurrency.send_hacked_image(ctx, member)
 
         all_users = await self.get_all_users_by_score_points()
         position = [[i+1, u[4]] for i, u in enumerate(all_users) if u[0] == member.id]
@@ -125,14 +134,6 @@ class SlothReputation(commands.Cog):
         elif not user_info and not member.id == ctx.author.id:
             return await ctx.send("**Member not found in the system!**")
 
-        SlothClass = self.client.get_cog('SlothClass')
-        effects = await SlothClass.get_user_effects(member=member)
-
-        def has_effect(effect: str):
-            if effect in effects:
-                return effects[effect]['cooldown']
-
-            return False
 
         embed = discord.Embed(title="__All Information__", colour=member.color, timestamp=ctx.message.created_at)
         xp = user[0][1]
@@ -147,30 +148,39 @@ class SlothReputation(commands.Cog):
         embed.add_field(name="🌟 __**Rewarded in:**__", value=f"{ucur[0][4]} classes.", inline=True)
         embed.add_field(name="🧑‍🏫 __**Hosted:**__", value=f"{ucur[0][5]} classes.", inline=True)
 
-        emoji = user_class.emoji if (user_class := classes.get(ucur[0][7].lower())) else ''
-        embed.add_field(name="🕵️ __**Sloth Class:**__", value=f"{ucur[0][7]} {emoji}", inline=True)
-        embed.add_field(name="🍯 __**Has Potion:**__", value=f"{True if ucur[0][11] else False}", inline=True)
-        embed.add_field(name="💍 __**Rings:**__", value=f"{sp[7]} rings." if sp else '0 rings.', inline=True)
+        emoji = user_class.emoji if (user_class := classes.get(sloth_profile[1].lower())) else ''
+        embed.add_field(name="🕵️ __**Sloth Class:**__", value=f"{sloth_profile[1]} {emoji}", inline=True)
+        embed.add_field(name="🍯 __**Has Potion:**__", value=f"{True if sloth_profile[5] else False}", inline=True)
+        embed.add_field(name="💍 __**Rings:**__", value=f"{sloth_profile[7]}/2 rings." if sloth_profile else '0 rings.', inline=True)
 
         embed.add_field(name="🛡️ __**Protected:**__", value=f"{has_effect('protected')}", inline=True)
         embed.add_field(name="😵 __**Knocked Out:**__", value=f"{has_effect('knocked_out')}", inline=True)
         embed.add_field(name="🔌 __**Wired:**__", value=f"{has_effect('wired')}", inline=True)
         embed.add_field(name="🐸 __**Frogged:**__", value=f"{has_effect('frogged')}", inline=True)
-        embed.add_field(name="🔪 __**Knife Sharpness Stack:**__", value=f"{ucur[0][16]}/5", inline=True)
+        embed.add_field(name="🔪 __**Knife Sharpness Stack:**__", value=f"{sloth_profile[6]}/5", inline=True)
         m, s = divmod(user_info[0][2], 60)
         h, m = divmod(m, 60)
 
         embed.add_field(name=f"💰 __**Exchangeable Activity:**__", value=f"{h:d} hours, {m:02d} minutes and {user_info[0][1]} messages.", inline=True)
         embed.add_field(name=f"🏆 __**Leaderboard Info:**__", value=f"{position[1]}. pts | #{position[0]}", inline=True)
-        embed.add_field(name="🧮 __**Skills Used:**__", value=f"{ucur[0][15]} skills.")
+        embed.add_field(name="🧮 __**Skills Used:**__", value=f"{sloth_profile[2]} skills.")
 
         # Gets tribe information for the given user
-        user_tribe = await SlothClass.get_tribe_info_by_user_id(user_id=member.id)
-        if user_tribe['name']:
-            embed.add_field(name="🏕️ __**Tribe:**__", value=f"[{user_tribe['name']}]({user_tribe['link']}) ({user_tribe['two_emojis']}) 👑", inline=True)
+        # user_tribe = await SlothClass.get_tribe_info_by_user_id(user_id=member.id)
+        if sloth_profile[3]:
+            tribe_member = await SlothClass.get_tribe_member(user_id=member.id)
+            user_tribe = await SlothClass.get_tribe_info_by_name(name=sloth_profile[3])
+            tribe_owner = tribe_member[0] == tribe_member[2]
+            embed.add_field(
+                name="🏕️ __**Tribe:**__", 
+                value=f"[{user_tribe['name']}]({user_tribe['link']}) ({user_tribe['two_emojis']}){' 👑' if tribe_owner else ''}", 
+                inline=True)
+                
         else:
-            user_tribe = await SlothClass.get_tribe_info_by_name(name=ucur[0][18])
-            embed.add_field(name="🏕️ __**Tribe:**__", value=f"[{user_tribe['name']}]({user_tribe['link']}) ({user_tribe['two_emojis']})", inline=True)
+            embed.add_field(name="🏕️ __**Tribe:**__", value="None", inline=True)
+
+
+
 
         embed.set_thumbnail(url=member.avatar_url)
         embed.set_author(name=member, icon_url=member.avatar_url, url=member.avatar_url)
