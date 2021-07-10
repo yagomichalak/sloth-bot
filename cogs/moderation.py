@@ -141,6 +141,18 @@ class Moderation(commands.Cog):
         await mycursor.close()
         return tempmutes
 
+    async def get_muted_members(self, current_ts: int, days_ago: Optional[int] = 0) -> List[int]:
+        """ Gets muted members from the past X days.
+        :param current_ts: The current timestamp.
+        :param days_ago: The amount of days ago to get muted members from. [Optional] """
+
+        seconds_ago = 86400 * days_ago
+        mycursor, db = await the_database()
+        await mycursor.execute("SELECT DISTINCT(user_id) FROM mutedmember WHERE (%s -  mute_ts) >= %s", (current_ts, seconds_ago))
+        muted_members = list(map(lambda m: m[0], await mycursor.fetchall()))
+        await mycursor.close()
+        return muted_members
+
     async def check_invite_guild(self, msg, guild):
         '''
         Checks whether it's a guild invite or not
@@ -633,20 +645,21 @@ class Moderation(commands.Cog):
     @commands.command(aliases=['kick_muted_members', 'kickmuted'])
     @utils.is_allowed(allowed_roles)
     async def kick_muted(self, ctx, *, reason: Optional[str] = None) -> None:
-        """ Kicks all muted members.
+        """ Kicks all muted members from at least 2 days ago.
         :param reason: The reason for kicking the muted members. [Optional] """
 
         await ctx.message.delete()
         perpetrator = ctx.author
 
         muted_role = discord.utils.get(ctx.guild.roles, id=muted_role_id)
-        muted_members = [m for m in ctx.guild.members if muted_role in m.roles]
+        current_ts = await utils.get_timestamp()
+        muted_members = [m for m in await self.get_muted_members(current_ts, 2) if muted_role in m.roles]
 
         if len(muted_members) == 0:
             return await ctx.send(f"**There are no muted members, {perpetrator.mention}!**")
 
         confirm = await ConfirmSkill(
-            f"**Are you sure you want to kick {len(muted_members)} muted members, {perpetrator.mention}?**"
+            f"**Are you sure you want to kick {len(muted_members)} muted members from at least 2 days ago, {perpetrator.mention}?**"
             ).prompt(ctx)
 
         if confirm:
@@ -1458,6 +1471,8 @@ class Moderation(commands.Cog):
             await ctx.send(f"**Done!**")
         else:
             await ctx.send("**Not changing it, then...**")
+
+
 
 def setup(client):
     client.add_cog(Moderation(client))
