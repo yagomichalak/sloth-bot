@@ -4,7 +4,7 @@ import asyncio
 from mysqldb import *
 from datetime import datetime
 import time
-from typing import List, Union, Dict, Tuple
+from typing import List, Union, Dict, Tuple, Optional
 import os
 from extra.useful_variables import banned_links
 from extra.menu import ConfirmSkill
@@ -203,7 +203,7 @@ class Moderation(commands.Cog):
         last_deleted_message.append(message)
 
     @commands.command()
-    @commands.has_any_role(*allowed_roles)
+    @utils.is_allowed(allowed_roles)
     async def snipe(self, ctx):
         '''
         (MOD) Snipes the last deleted message.
@@ -252,7 +252,7 @@ class Moderation(commands.Cog):
             await ctx.channel.purge(limit=amount)
 
     @commands.command()
-    @commands.has_any_role(*allowed_roles)
+    @utils.is_allowed(allowed_roles)
     async def clear(self, ctx):
         '''
         (MOD) Clears the whole channel.
@@ -315,7 +315,7 @@ class Moderation(commands.Cog):
 
     # Warns a member
     @commands.command()
-    @commands.has_any_role(*allowed_roles)
+    @utils.is_allowed(allowed_roles)
     async def warn(self, ctx, member: discord.Member = None, *, reason=None):
         '''
         (MOD) Warns a member.
@@ -411,7 +411,7 @@ class Moderation(commands.Cog):
             return the_time_dict, seconds
 
     @commands.command()
-    @commands.has_any_role(*allowed_roles)
+    @utils.is_allowed(allowed_roles)
     async def mute(self, ctx, member: discord.Member = None, *, reason=None):
         '''
         (MOD) Mutes a member.
@@ -487,7 +487,7 @@ class Moderation(commands.Cog):
 
     # Unmutes a member
     @commands.command()
-    @commands.has_any_role(*allowed_roles)
+    @utils.is_allowed(allowed_roles)
     async def unmute(self, ctx, member: discord.Member = None):
         '''
         (MOD) Unmutes a member.
@@ -545,7 +545,7 @@ class Moderation(commands.Cog):
 
     # Mutes a member temporarily
     @commands.command()
-    @commands.has_any_role(*allowed_roles)
+    @utils.is_allowed(allowed_roles)
     async def tempmute(self, ctx, member: discord.Member = None, reason: str = None, *, time: str = None):
         """
         Mutes a member for a determined amount of time.
@@ -630,8 +630,71 @@ class Moderation(commands.Cog):
         else:
             await ctx.send(f'**{member} is already muted!**', delete_after=5)
 
+    @commands.command(aliases=['kick_muted_members', 'kickmuted'])
+    @utils.is_allowed(allowed_roles)
+    async def kick_muted(self, ctx, *, reason: Optional[str] = None) -> None:
+        """ Kicks all muted members.
+        :param reason: The reason for kicking the muted members. [Optional] """
+
+        await ctx.message.delete()
+        perpetrator = ctx.author
+
+        muted_role = discord.utils.get(ctx.guild.roles, id=muted_role_id)
+        muted_members = [m for m in ctx.guild.members if muted_role in m.roles]
+
+        if len(muted_members) == 0:
+            return await ctx.send(f"**There are no muted members, {perpetrator.mention}!**")
+
+        confirm = await ConfirmSkill(
+            f"**Are you sure you want to kick {len(muted_members)} muted members, {perpetrator.mention}?**"
+            ).prompt(ctx)
+
+        if confirm:
+            kicked_members = []
+
+            current_ts = await utils.get_timestamp()
+
+            for muted_member in muted_members:
+                try:
+                    # Kicks the muted member
+                    await muted_member.kick(reason=reason)
+                    # Inserts a infraction into the database
+                    await self.insert_user_infraction(
+                        user_id=muted_member.id, infr_type="kick", reason=reason,
+                        timestamp=current_ts, perpetrator=ctx.author.id)
+                except Exception:
+                    await ctx.send('**You cannot do that!**', delete_after=3)
+                else:
+                    kicked_members.append(f"Name: {muted_member.display_name} ({muted_member.id})")
+
+            if len(kicked_members) >= 1:
+                # General embed
+                general_embed = discord.Embed(description=f'**Reason:** {reason}', colour=discord.Color.teal())
+                general_embed.set_author(name=f'{len(muted_members)} muted members have been kicked')
+                await ctx.send(embed=general_embed)
+
+                # Moderation log embed
+                moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
+                embed = discord.Embed(title='__**Kick**__', color=discord.Color.teal(),
+                                      timestamp=ctx.message.created_at)
+                muted_text = '\n'.join(kicked_members)
+                embed.add_field(
+                    name='User info:', 
+                    value=f'```apache\n{muted_text}```', 
+                inline=False)
+                embed.add_field(name='Reason:', value=f'```{reason}```')
+                embed.set_footer(text=f"Kicked by {perpetrator}", icon_url=perpetrator.avatar_url)
+                await moderation_log.send(embed=embed)
+                
+            else:
+                await ctx.send(f"**For some reason I couldn't kick any of the {len(muted_members)} muted members, {perpetrator.mention}!**")
+  
+        else:
+            await ctx.send(f"**Not kicking them, then, {perpetrator.mention}!**")
+
+
     @commands.command()
-    @commands.has_any_role(*allowed_roles)
+    @utils.is_allowed(allowed_roles)
     async def kick(self, ctx, member: discord.Member = None, *, reason=None):
         '''
         (MOD) Kicks a member from the server.
@@ -668,15 +731,14 @@ class Moderation(commands.Cog):
                 embed.set_footer(text=f"Kicked by {ctx.author}", icon_url=ctx.author.avatar_url)
                 await moderation_log.send(embed=embed)
                 # Inserts a infraction into the database
-                epoch = datetime.utcfromtimestamp(0)
-                current_ts = (datetime.utcnow() - epoch).total_seconds()
+                current_ts = await utils.get_timestamp()
                 await self.insert_user_infraction(
                     user_id=member.id, infr_type="kick", reason=reason,
                     timestamp=current_ts, perpetrator=ctx.author.id)
 
     # Bans a member
     @commands.command()
-    @commands.has_any_role(*allowed_roles)
+    @utils.is_allowed(allowed_roles)
     async def ban(self, ctx, member: discord.Member = None, *, reason=None) -> None:
         '''
         (ModTeam/ADM) Bans a member from the server.
@@ -780,8 +842,7 @@ class Moderation(commands.Cog):
             embed.set_footer(text=f"Banned by {perpetrators}", icon_url=icon)
             await moderation_log.send(embed=embed)
             # Inserts a infraction into the database
-            epoch = datetime.utcfromtimestamp(0)
-            current_ts = (datetime.utcnow() - epoch).total_seconds()
+            current_ts = await utils.get_timestamp()
             await self.insert_user_infraction(
                 user_id=member.id, infr_type="ban", reason=reason,
                 timestamp=current_ts, perpetrator=ctx.author.id)
@@ -889,8 +950,7 @@ class Moderation(commands.Cog):
                 embed.set_footer(text=f"SoftBanned by {ctx.author}", icon_url=ctx.author.avatar_url)
                 await moderation_log.send(embed=embed)
                 # Inserts a infraction into the database
-                epoch = datetime.utcfromtimestamp(0)
-                current_ts = (datetime.utcnow() - epoch).total_seconds()
+                current_ts = await utils.get_timestamp()
                 await self.insert_user_infraction(
                     user_id=member.id, infr_type="softban", reason=reason,
                     timestamp=current_ts, perpetrator=ctx.author.id)
@@ -932,8 +992,7 @@ class Moderation(commands.Cog):
             await moderation_log.send(embed=embed)
 
             # Inserts a infraction into the database
-            epoch = datetime.utcfromtimestamp(0)
-            current_ts = (datetime.utcnow() - epoch).total_seconds()
+            current_ts = await utils.get_timestamp()
             await self.insert_user_infraction(
                 user_id=member.id, infr_type="hackban", reason=reason,
                 timestamp=current_ts, perpetrator=ctx.author.id)
@@ -1072,7 +1131,7 @@ class Moderation(commands.Cog):
 
     # Infraction methods
     @commands.command(aliases=['infr', 'show_warnings', 'sw', 'show_bans', 'sb', 'show_muted', 'sm'])
-    @commands.has_any_role(*allowed_roles)
+    @utils.is_allowed(allowed_roles)
     async def infractions(self, ctx, member: discord.Member = None) -> None:
         '''
         Shows all infractions of a specific user.
@@ -1165,7 +1224,7 @@ class Moderation(commands.Cog):
         await mycursor.close()
 
     @commands.command(aliases=['ri', 'remove_warn', 'remove_warning'])
-    @commands.has_any_role(*allowed_roles)
+    @utils.is_allowed(allowed_roles)
     async def remove_infraction(self, ctx, infr_id: int = None):
         """
         (MOD) Removes a specific infraction by ID.
@@ -1183,7 +1242,7 @@ class Moderation(commands.Cog):
             await ctx.send(f"**Infraction with ID `{infr_id}` was not found!**")
 
     @commands.command(aliases=['ris', 'remove_warns', 'remove_warnings'])
-    @commands.has_any_role(*allowed_roles)
+    @utils.is_allowed(allowed_roles)
     async def remove_infractions(self, ctx, member: discord.Member = None):
         """
         (MOD) Removes all infractions for a specific user.
