@@ -67,7 +67,7 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
         mycursor, db = await the_database()
         await mycursor.execute("""
             SELECT sloth_class, COUNT(sloth_class) AS sloth_count
-            FROM UserCurrency
+            FROM SlothProfile
             WHERE sloth_class != 'default'
             GROUP BY sloth_class
             ORDER BY sloth_count DESC
@@ -119,22 +119,22 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
         if not member:
             member = ctx.author
 
-        user = await self.get_user_currency(member.id)
+        sloth_profile = await self.get_sloth_profile(member.id)
 
-        if not user:
+        if not sloth_profile:
             component = discord.Component()
             component.add_button(style=5, label="Create Account", emoji="🦥", url="https://thelanguagesloth.com/profile/update")
             return await ctx.send(
                 embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one, or in the button below!**"),
                 components=[component])
-        if user[7] == 'default':
+        if sloth_profile[1] == 'default':
             component = discord.Component()
             component.add_button(style=5, label="Create Account", emoji="🦥", url="https://thelanguagesloth.com/profile/update")
             return await ctx.send(
                 embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one, or in the button below!**"),
                 components=[component])
 
-        the_class = classes.get(user[7].lower())
+        the_class = classes.get(sloth_profile[1].lower())
         class_commands = the_class.__dict__['__cog_commands__']
         prefix = self.client.command_prefix
         cmds = []
@@ -166,16 +166,16 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
 
         cmds_text = '\n'.join(cmds)
 
-        emoji = user_class.emoji if (user_class := classes.get(user[7].lower())) else ''
+        emoji = user_class.emoji if (user_class := classes.get(sloth_profile[1].lower())) else ''
 
         skills_embed = discord.Embed(
-            title=f"__Available Skills for__: `{user[7]}` {emoji}",
+            title=f"__Available Skills for__: `{sloth_profile[1]}` {emoji}",
             color=member.color,
             timestamp=ctx.message.created_at
         )
         skills_embed.add_field(name=f"__Skills__:", value=f"```apache\n{cmds_text}```")
         skills_embed.set_author(name=member, icon_url=member.avatar_url)
-        skills_embed.set_thumbnail(url=f"https://thelanguagesloth.com/media/sloth_classes/{user[7]}.png")
+        skills_embed.set_thumbnail(url=f"https://thelanguagesloth.com/media/sloth_classes/{sloth_profile[1]}.png")
         skills_embed.set_footer(text=ctx.guild, icon_url=ctx.guild.icon_url)
         await ctx.send(embed=skills_embed)
 

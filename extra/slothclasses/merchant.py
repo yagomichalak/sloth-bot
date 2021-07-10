@@ -384,7 +384,7 @@ class Merchant(Player):
         :param has_it: Whether it's gonna be set to true or false. """
 
         mycursor, db = await the_database()
-        await mycursor.execute("UPDATE UserCurrency SET has_potion = %s WHERE user_id = %s", (has_it, user_id))
+        await mycursor.execute("UPDATE SlothProfile SET has_potion = %s WHERE user_id = %s", (has_it, user_id))
         await db.commit()
         await mycursor.close()
 

@@ -180,7 +180,7 @@ class Warrior(Player):
         :param is_it: Whether it's gonna be set to true or false. """
 
         mycursor, db = await the_database()
-        await mycursor.execute("UPDATE UserCurrency SET knocked_out = %s WHERE user_id = %s", (is_it, user_id))
+        await mycursor.execute("UPDATE SlothProfile SET knocked_out = %s WHERE user_id = %s", (is_it, user_id))
         await db.commit()
         await mycursor.close()
 

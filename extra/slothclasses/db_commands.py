@@ -217,6 +217,7 @@ class SlothClassDatabaseCommands(commands.Cog):
                 tribe_name VARCHAR(50) NOT NULL,
                 member_id BIGINT NOT NULL,
                 tribe_role VARCHAR(30) DEFAULT NULL,
+                PRIMARY KEY (member_id),
                 CONSTRAINT fk_tribe_owner FOREIGN KEY (owner_id) REFERENCES UserTribe (user_id) ON DELETE CASCADE ON UPDATE CASCADE,
                 CONSTRAINT fk_tribe_name FOREIGN KEY (tribe_name) REFERENCES UserTribe (tribe_name) ON DELETE CASCADE ON UPDATE CASCADE
             ) DEFAULT CHARSET=utf8mb4""")
@@ -284,20 +285,21 @@ class SlothClassDatabaseCommands(commands.Cog):
             tribe VARCHAR(50) DEFAULT NULL,
             change_class_ts BIGINT DEFAULT 0,
 
-            has_potion tinyint(1) default 0,
-            knife_sharpness_stack tinyint(1) default 0,
-            rings tinyint(1) default 0,
+            has_potion TINYINT(1) DEFAULT 0,
+            knife_sharpness_stack TINYINT(1) DEFAULT 0,
+            rings TINYINT(1) DEFAULT 0,
 
-            hacked tinyint(1) default 0,
-            protected tinyint(1) default 0,
-            knocked_out tinyint(1) default 0,
-            wired tinyint(1) default 0,
-            frogged tinyint(1) default 0,
+            hacked TINYINT(1) DEFAULT 0,
+            protected TINYINT(1) DEFAULT 0,
+            knocked_out TINYINT(1) DEFAULT 0,
+            wired TINYINT(1) DEFAULT 0,
+            frogged TINYINT(1) DEFAULT 0,
 
+            tribe_user_id BIGINT DEFAULT NULL
 
             PRIMARY KEY (user_id),
             CONSTRAINT fk_sloth_pfl_user_id FOREIGN KEY (user_id) REFERENCES UserCurrency (user_id) ON DELETE CASCADE ON UPDATE CASCADE,
-            CONSTRAINT fk_sloth_pfl_tribe_name FOREIGN KEY (tribe) REFERENCES TribeMember (tribe_name) ON UPDATE CASCADE
+            CONSTRAINT fk_sloth_pfl_tribe_name FOREIGN KEY (tribe_user_id, tribe) REFERENCES TribeMember (member_id, tribe_name) ON DELETE SET NULL ON UPDATE CASCADE
         ) DEFAULT CHARSET=utf8mb4""")
         await db.commit()
         await mycursor.close()

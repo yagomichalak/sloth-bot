@@ -185,7 +185,7 @@ class Seraph(Player):
         :param protected: Whether it's gonna be set to true or false. """
 
         mycursor, db = await the_database()
-        await mycursor.execute("UPDATE UserCurrency SET protected = %s WHERE user_id = %s", (protected, user_id))
+        await mycursor.execute("UPDATE SlothProfile SET protected = %s WHERE user_id = %s", (protected, user_id))
         await db.commit()
         await mycursor.close()
 
