@@ -494,8 +494,9 @@ class SlothCurrency(commands.Cog):
             member = ctx.author
 
         user_info = await self.get_user_currency(member.id)
+        sloth_profile = await self.get_sloth_profile(member.id)
 
-        if not user_info:
+        if not user_info or not sloth_profile:
             if ctx.author.id == member.id:
                 component = discord.Component()
                 component.add_button(style=5, label="Create Account", emoji="🦥", url="https://thelanguagesloth.com/profile/update")
@@ -505,7 +506,7 @@ class SlothCurrency(commands.Cog):
             else:
                 return await ctx.send(f"**{member} doesn't have an account yet!**", delete_after=3)
 
-        if user_info[0][7].lower() == 'default':
+        if sloth_profile[1].lower() == 'default':
             if ctx.author.id == member.id:
                 component = discord.Component()
                 component.add_button(style=5, label="Choose a Class", emoji="🦥", url="https://thelanguagesloth.com/profile/slothclass")
@@ -529,7 +530,7 @@ class SlothCurrency(commands.Cog):
             return await self.send_hacked_image(ctx, member)
         # Checks whether user is frogged
         if has_effect('frogged'):
-            return await self.send_frogged_image(ctx, member, user_info[0][13])
+            return await self.send_frogged_image(ctx, member, sloth_profile[10])
 
         small = ImageFont.truetype("built titling sb.ttf", 45)
         background = Image.open(await self.get_user_specific_type_item(member.id, 'background'))
@@ -539,7 +540,7 @@ class SlothCurrency(commands.Cog):
         if has_effect('transmutated'):
             sloth = Image.open(f"./sloth_custom_images/sloth/transmutated_sloth.png")
         else:
-            sloth = Image.open(f"./sloth_custom_images/sloth/{user_info[0][7].title()}.png")
+            sloth = Image.open(f"./sloth_custom_images/sloth/{sloth_profile[1].title()}.png")
 
         # print('czxcxzcxzcxzczcxaaaaaaaaadasdsadsadsa')
         # sloth = Image.open(f"./sloth_custom_images/sloth/{user_info[0][7].title()}.png")
