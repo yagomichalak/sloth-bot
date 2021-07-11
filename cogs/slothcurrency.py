@@ -494,7 +494,7 @@ class SlothCurrency(commands.Cog):
             member = ctx.author
 
         user_info = await self.get_user_currency(member.id)
-        sloth_profile = await self.get_sloth_profile(member.id)
+        sloth_profile = await self.client.get_cog('SlothClass').get_sloth_profile(member.id)
 
         if not user_info or not sloth_profile:
             if ctx.author.id == member.id:
