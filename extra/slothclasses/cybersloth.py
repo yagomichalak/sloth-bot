@@ -245,3 +245,17 @@ class Cybersloth(Player):
         wire_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon_url)
 
         return wire_embed
+
+
+    @commands.command()
+    @Player.skills_used(requirement=20)
+    @Player.skill_on_cooldown(skill=Skill.THREE)
+    @Player.user_is_class('cybersloth')
+    @Player.skill_mark()
+    @Player.not_ready()
+    async def virus(self, ctx) -> None:
+        """ Makes all people that you hacked infect other people that look onto their profiles. """
+
+        perpetrator = ctx.author
+
+        pass
