@@ -69,6 +69,9 @@ class Embeds(commands.Cog):
             else:
                 fields.pop('timestamp', None)
 
+        description = fields.get('description')
+        fields['description'] = description.replace(r'\n', '\n')
+
         emb = discord.Embed(**fields)
 
         if (thumbnail := fields.get('thumbnail')) is not None:
