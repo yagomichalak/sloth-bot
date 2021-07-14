@@ -652,7 +652,10 @@ class Moderation(commands.Cog):
 
         muted_role = discord.utils.get(ctx.guild.roles, id=muted_role_id)
         current_ts = await utils.get_timestamp()
-        muted_members = [m for m in await self.get_muted_members(current_ts, 2) if muted_role in m.roles]
+        muted_members = [
+            muted_member for m in await self.get_muted_members(current_ts, 2) 
+            if (muted_member := discord.utils.get(ctx.guild.members, id=m)) and muted_role in muted_member.roles
+        ]
 
         if len(muted_members) == 0:
             return await ctx.send(f"**There are no muted members, {perpetrator.mention}!**")

@@ -212,8 +212,36 @@ class Agares(Player):
         * Cooldown: 1 day.
         * Skill cost: 100łł. """
 
+        perpetrator = ctx.author
+
         if not target:
             target = ctx.author
 
-        # Do the magic
+        sloth_profile = await self.get_sloth_profile(target.id)
+        if sloth_profile:
+            return await ctx.send(f"**You cannot use this skill on someone who doesn't have a Sloth Profile, {perpetrator.mention}!**")
+
+        if sloth_profile[1] == 'default':
+            return await ctx.send(f"**You cannot use this skill on someone who has a default Sloth Class, {perpetrator.mention}!**")
+
+        current_ts = await utils.get_timestamp()
+        user_currency = await self.get_user_currency(perpetrator.id)
+        if user_currency[1] >= 100:
+            confirm = await ConfirmSkill(f"**Are you sure you want to use your reflect skill on {target.mention}, {perpetrator.mention}?**").prompt(ctx)
+            if not confirm:
+                return await ctx.send(f"**Not doing it then, {perpetrator.mention}!**")
+            try:
+
+                await self.insert_skill_action(
+                    user_id=perpetrator.id, skill_type="reflect", skill_timestamp=current_ts, target_id=target.id)
+                await self.update_user_money(perpetrator.id, -100)
+            except Exception as e:
+                print(e)
+                await ctx.send(f"**Something went wrong with this skill!**")
+
+            else:
+                pass
+        else:
+            await ctx.send(f"**You don't have 100łł to use this skill, {perpetrator.mention}!**")
+
 

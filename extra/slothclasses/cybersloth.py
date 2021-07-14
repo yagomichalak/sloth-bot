@@ -270,16 +270,26 @@ class Cybersloth(Player):
         if user_currency[1] >= 150:
             # Update `content` of active hacks to `virus`
             confirm = await ConfirmSkill(f"**Are you sure you want to spend `150łł` to use this skill, {attacker.mention}?**").prompt(ctx)
-            if confirm:
-                try:
-                    await self.update_hacks_content(attacker_id=attacker.id)
-                    await self.update_user_money(attacker.id, -150)
-                except Exception as e:
-                    print(e)
-                    await ctx.send(f"**It looks like something went wrong with this skill, {attacker.mention}!**")
+            if not confirm:
+                return await ctx.send(f"**Not doing it then, {attacker.mention}!**")
+
+            _, exists = await Player.skill_on_cooldown(skill=Skill.THREE).predicate(ctx)
+            current_ts = await utils.get_timestamp()
+            try:
+                await self.update_hacks_content(attacker_id=attacker.id)
+                await self.update_user_money(attacker.id, -150)
+                if exists:
+                    await self.update_user_skill_ts(attacker.id, Skill.THREE, current_ts)
                 else:
-                    contagious_embed = await self.get_contagious_hack(ctx.channel, attacker.id, len(hacks))
-                    await ctx.send(embed=contagious_embed)
+                    await self.insert_user_skill_cooldown(attacker.id, Skill.THREE, current_ts)
+                # Updates user's skills used counter
+                await self.update_user_skills_used(user_id=attacker.id)
+            except Exception as e:
+                print(e)
+                await ctx.send(f"**It looks like something went wrong with this skill, {attacker.mention}!**")
+            else:
+                contagious_embed = await self.get_contagious_hack(ctx.channel, attacker.id, len(hacks))
+                await ctx.send(embed=contagious_embed)
         else:
             await ctx.send(f"**You don't have 150łł to use this skill, {attacker.mention}!**")
     
