@@ -180,7 +180,7 @@ class SlothReputation(commands.Cog):
         embed.set_author(name=member, icon_url=member.avatar_url, url=member.avatar_url)
         embed.set_footer(text=ctx.guild, icon_url=ctx.guild.icon_url)
 
-        if ctx.author.id == member.id:
+        if ctx.author.id != member.id:
             return await ctx.send(embed=embed)
         else:
 
