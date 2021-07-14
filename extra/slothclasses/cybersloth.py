@@ -1,4 +1,5 @@
 import discord
+from discord import embeds
 from discord.ext import commands
 from .player import Player, Skill
 from mysqldb import the_database
@@ -254,8 +255,120 @@ class Cybersloth(Player):
     @Player.skill_mark()
     @Player.not_ready()
     async def virus(self, ctx) -> None:
-        """ Makes all people that you hacked infect other people that look onto their profiles. """
+        """ Makes all people that you hacked infect other people that look onto their profiles.
+        
+        Skill Cost: 150łł
+        Cooldown: 2 days."""
 
-        perpetrator = ctx.author
+        attacker = ctx.author
+        hacks = await self.get_user_target_hacks(attacker.id)
+        if not hacks:
+            return await ctx.send(f"**You don't have any active hack, {attacker.mention}!**")
 
-        pass
+        
+        user_currency = await self.get_user_currency(attacker.id)
+        if user_currency[1] >= 150:
+            # Update `content` of active hacks to `virus`
+            confirm = await ConfirmSkill(f"**Are you sure you want to spend `150łł` to use this skill, {attacker.mention}?**").prompt(ctx)
+            if confirm:
+                try:
+                    await self.update_hacks_content(attacker_id=attacker.id)
+                    await self.update_user_money(attacker.id, -150)
+                except Exception as e:
+                    print(e)
+                    await ctx.send(f"**It looks like something went wrong with this skill, {attacker.mention}!**")
+                else:
+                    contagious_embed = await self.get_contagious_hack(ctx.channel, attacker.id, len(hacks))
+                    await ctx.send(embed=contagious_embed)
+        else:
+            await ctx.send(f"**You don't have 150łł to use this skill, {attacker.mention}!**")
+    
+    async def update_hacks_content(self, attacker_id: int) -> None:
+        """ Updates all content fields of hacks executed by a specific user.
+        :param attacker_id: The ID of the attacker. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("UPDATE SlothSkills SET content = 'virus' WHERE user_id = %s", (attacker_id,))
+        await db.commit()
+        await mycursor.close()
+
+    async def check_virus(self, ctx: commands.Context, target: discord.Member) -> None:
+        """ Checks if the target member has a contagious virus in their hack.
+        :param ctx: The context of the command.
+        :param target: The target member. """
+
+        infected = ctx.author
+
+        hack = await self.get_skill_action_by_target_id_and_skill_type(target.id, skill_type='hack')
+        if hack[8] != 'virus' or hack[0] == infected.id:
+            return
+
+        effects = await self.get_user_effects(infected)
+        if await self.has_effect(effects, 'hacked'):
+            return
+
+        if await self.has_effect(effects, 'protected'):
+            return
+        
+        try:
+            current_timestamp = await utils.get_timestamp()
+            # Don't need to store it, since it is forever
+            await self.insert_skill_action(
+                user_id=hack[0], skill_type="hack", skill_timestamp=current_timestamp,
+                target_id=infected.id, channel_id=ctx.channel.id, content="virus"
+            )
+            await self.update_user_is_hacked(infected.id, 1)
+
+            
+
+        except Exception as e:
+            print('Failed virus', e)
+        else:
+            virus_embed = await self.get_virus_embed(
+                channel=ctx.channel, perpetrator_id=hack[0], target_id=target.id, infected_id=infected.id)
+            await ctx.send(embed=virus_embed)
+
+    async def get_contagious_hack(self, channel: discord.TextChannel, perpetrator_id: int, lenhacks) -> discord.Embed:
+        """ Makes an embedded message for a virus infection skill action.
+        :param channel: The context channel.
+        :param perpetrator_id: The ID of the perpetrator of the initial hack.
+        :param lenhacks: The length of the list of hacks the user has. """
+
+        timestamp = await utils.get_timestamp()
+
+        contagious_embed = discord.Embed(
+            title="Viruses are Everywhere!",
+            timestamp=datetime.fromtimestamp(timestamp)
+        )
+        contagious_embed.description = f"**<@{perpetrator_id}> just made his `{lenhacks}` active hacks contagious, beware!** ⚜️"
+        contagious_embed.color = discord.Color.green()
+
+
+        contagious_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Cybersloth.png")
+        contagious_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon_url)
+
+        return contagious_embed
+
+        
+
+    async def get_virus_embed(self, channel: discord.TextChannel, perpetrator_id: int, target_id: int, infected_id: int) -> discord.Embed:
+        """ Makes an embedded message for a virus infection skill action.
+        :param channel: The context channel.
+        :param perpetrator_id: The ID of the perpetrator of the initial hack.
+        :param target_id: The ID of the target of the hack.
+        :param infected_id: The ID of the infected member of the hack. """
+
+        timestamp = await utils.get_timestamp()
+
+        wire_embed = discord.Embed(
+            title="Someone has been infected by a hacking!",
+            timestamp=datetime.fromtimestamp(timestamp)
+        )
+        wire_embed.description = f"**<@{infected_id}> got infected by <@{perpetrator_id}>'s virus through <@{target_id}>!** ⚜️"
+        wire_embed.color = discord.Color.green()
+        
+        wire_embed.set_image(url='https://media1.tenor.com/images/df4840a6e3ddd163fd5cef6d678a57aa/tenor.gif?itemid=9991524')
+        wire_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Cybersloth.png")
+        wire_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon_url)
+
+        return wire_embed

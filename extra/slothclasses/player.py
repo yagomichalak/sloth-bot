@@ -6,7 +6,7 @@ from extra.customerrors import MissingRequiredSlothClass, ActionSkillOnCooldown,
 from extra import utils
 
 from mysqldb import the_database, the_django_database
-from typing import Union, List
+from typing import Union, List, Dict, Any
 from datetime import datetime
 import os
 from pytz import timezone
@@ -113,6 +113,12 @@ class Player(commands.Cog):
                 error_message=f"You must have `{requirement}` skills used in order to use this skill, {ctx.author.mention}!", skills_required=requirement)
 
         return commands.check(real_check)
+
+    async def has_effect(self, effects: Dict[str, Dict[str, Any]], effect: str) -> Union[str, bool]:
+        if effect in effects:
+            return effects[effect]['cooldown']
+
+        return False
 
     # Is user EFFECT
 
@@ -424,8 +430,27 @@ class Player(commands.Cog):
         await mycursor.close()
         return transmutations
 
-    async def get_expired_hacks(self) -> None:
-        """ Gets expired hacks skill actions. """
+    async def get_hacks(self) -> List[List[Union[str, int]]]:
+        """ Gets all hack skill actions. """
+
+        mycursor, _ = await the_database()
+        await mycursor.execute("SELECT * FROM SlothSkills WHERE skill_type = 'hack'")
+        hacks = await mycursor.fetchall()
+        await mycursor.close()
+        return hacks
+    
+    async def get_user_target_hacks(self, attacker_id: int) -> List[List[Union[str, int]]]:
+        """ Gets all hacks that a specific user commited or spreaded.
+        :param attacker_id: The ID of the attacker. """
+
+        mycursor, _ = await the_database()
+        await mycursor.execute("SELECT * FROM SlothSkills WHERE skill_type = 'hack' AND user_id = %s", (attacker_id,))
+        hacks = await mycursor.fetchall()
+        await mycursor.close()
+        return hacks
+
+    async def get_expired_hacks(self) -> List[List[Union[str, int]]]:
+        """ Gets expired hack skill actions. """
 
         the_time = await utils.get_timestamp()
         mycursor, db = await the_database()
