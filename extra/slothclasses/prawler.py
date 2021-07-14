@@ -151,11 +151,11 @@ class Prawler(Player):
 		if stack == 5:
 			return await ctx.send(f"**{perpetrator.mention}, your knife sharpness is already stacked to its maximum; `{stack}`!**")
 
-		if not user[1] >= 1000:
-			return await ctx.send(f"**You don't have `1000łł` to use this skill, {perpetrator.mention}!**")
+		if not user[1] >= 500:
+			return await ctx.send(f"**You don't have `500łł` to use this skill, {perpetrator.mention}!**")
 
 		confirmed = await ConfirmSkill(
-			f"**{perpetrator.mention}, are you sure you want to sharpen your knife sharpness stack `{stack}` to `{stack+1}` for `1000łł`?**"
+			f"**{perpetrator.mention}, are you sure you want to sharpen your knife sharpness stack `{stack}` to `{stack+1}` for `500łł`?**"
 			).prompt(ctx)
 		if not confirmed:
 			return await ctx.send("**Not stealing from anyone, then!**")
@@ -178,7 +178,7 @@ class Prawler(Player):
 			print(e)
 			await ctx.send(f"**For some reason I couldn't sharpen your knife, {perpetrator.mention}!**")
 		else:
-			await self.update_user_money(perpetrator.id, -1000)
+			await self.update_user_money(perpetrator.id, -500)
 			sharpen_embed = await self.get_sharpen_embed(
 				channel=ctx.channel, perpetrator_id=perpetrator.id, stack=stack+1)
 			await ctx.send(embed=sharpen_embed)
