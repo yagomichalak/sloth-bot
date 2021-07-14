@@ -1,6 +1,6 @@
 import discord
+from discord import components
 from discord.ext import commands
-from discord.ext.commands.core import is_owner
 from mysqldb import *
 from datetime import datetime
 import os
@@ -113,14 +113,11 @@ class SlothReputation(commands.Cog):
         SlothClass = self.client.get_cog('SlothClass')
         effects = await SlothClass.get_user_effects(member=member)
 
-        def has_effect(effect: str):
-            if effect in effects:
-                return effects[effect]['cooldown']
-
-            return False
-
-        if has_effect('hacked'):
-            return await SlothCurrency.send_hacked_image(ctx, member)
+        if await SlothClass.has_effect(effects, 'hacked'):
+            await SlothCurrency.send_hacked_image(ctx, member)
+            # if ctx.author.id != member.id:
+            #      await SlothClass.check_virus(ctx=ctx, target=member)
+            return
 
         all_users = await self.get_all_users_by_score_points()
         position = [[i+1, u[4]] for i, u in enumerate(all_users) if u[0] == member.id]
@@ -153,10 +150,10 @@ class SlothReputation(commands.Cog):
         embed.add_field(name="🍯 __**Has Potion:**__", value=f"{True if sloth_profile[5] else False}", inline=True)
         embed.add_field(name="💍 __**Rings:**__", value=f"{sloth_profile[7]}/2 rings." if sloth_profile else '0 rings.', inline=True)
 
-        embed.add_field(name="🛡️ __**Protected:**__", value=f"{has_effect('protected')}", inline=True)
-        embed.add_field(name="😵 __**Knocked Out:**__", value=f"{has_effect('knocked_out')}", inline=True)
-        embed.add_field(name="🔌 __**Wired:**__", value=f"{has_effect('wired')}", inline=True)
-        embed.add_field(name="🐸 __**Frogged:**__", value=f"{has_effect('frogged')}", inline=True)
+        embed.add_field(name="🛡️ __**Protected:**__", value=f"{await SlothClass.has_effect(effects, 'protected')}", inline=True)
+        embed.add_field(name="😵 __**Knocked Out:**__", value=f"{await SlothClass.has_effect(effects, 'knocked_out')}", inline=True)
+        embed.add_field(name="🔌 __**Wired:**__", value=f"{await SlothClass.has_effect(effects, 'wired')}", inline=True)
+        embed.add_field(name="🐸 __**Frogged:**__", value=f"{await SlothClass.has_effect(effects, 'frogged')}", inline=True)
         embed.add_field(name="🔪 __**Knife Sharpness Stack:**__", value=f"{sloth_profile[6]}/5", inline=True)
         m, s = divmod(user_info[0][2], 60)
         h, m = divmod(m, 60)
@@ -179,37 +176,33 @@ class SlothReputation(commands.Cog):
         else:
             embed.add_field(name="🏕️ __**Tribe:**__", value="None", inline=True)
 
-
-
-
         embed.set_thumbnail(url=member.avatar_url)
         embed.set_author(name=member, icon_url=member.avatar_url, url=member.avatar_url)
         embed.set_footer(text=ctx.guild, icon_url=ctx.guild.icon_url)
 
-
-        component = discord.Component()
-
-        component.add_button(style=3, label="Exchange Activity!", custom_id="exchange_money", emoji="💰")
-
-        await ctx.send(embed=embed, components=[component])
-        if ctx.author.id != member.id:
-            return
-
-        try:
-            _, _, btn, rsp = await self.client.wait_for(
-                'interaction_update', timeout=60,
-                check=lambda msg, m, btn, rsp: m.id == member.id and btn.custom_id == 'exchange_money'
-                )
-        except asyncio.TimeoutError:
-            pass
+        if ctx.author.id == member.id:
+            return await ctx.send(embed=embed)
         else:
-            btn.ping(rsp)
-            confirmed = await ConfirmSkill(f"**{member.mention}, are you sure you want to exchange your {h:d} hours, {m:02d} minutes and {user_info[0][1]} messages?**").prompt(ctx)
-            if confirmed:
-                SlothCurrency = self.client.get_cog('SlothCurrency')
-                await SlothCurrency.exchange(ctx)
+
+            component = discord.Component()
+            component.add_button(style=3, label="Exchange Activity!", custom_id="exchange_money", emoji="💰")
+            await ctx.send(embed=embed, components=[component])
+
+            try:
+                _, _, btn, rsp = await self.client.wait_for(
+                    'interaction_update', timeout=60,
+                    check=lambda msg, m, btn, rsp: m.id == member.id and btn.custom_id == 'exchange_money'
+                    )
+            except asyncio.TimeoutError:
+                pass
             else:
-                await ctx.send(f"**{ctx.author.mention}, not exchanging, then!**")
+                btn.ping(rsp)
+                confirmed = await ConfirmSkill(f"**{member.mention}, are you sure you want to exchange your {h:d} hours, {m:02d} minutes and {user_info[0][1]} messages?**").prompt(ctx)
+                if confirmed:
+                    SlothCurrency = self.client.get_cog('SlothCurrency')
+                    await SlothCurrency.exchange(ctx)
+                else:
+                    await ctx.send(f"**{ctx.author.mention}, not exchanging, then!**")
 
     @commands.command(aliases=['leaderboard', 'lb', 'scoreboard'])
     async def score(self, ctx):

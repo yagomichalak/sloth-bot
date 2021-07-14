@@ -517,19 +517,17 @@ class SlothCurrency(commands.Cog):
                 return await ctx.send(f"**{member} has a default Sloth class, I cannot show their profile!**")
 
         SlothClass = self.client.get_cog('SlothClass')
-        effects = await SlothClass.get_user_effects(member=member)
-
-        def has_effect(effect: str):
-            if effect in effects:
-                return effects[effect]
-
-            return False
+        effects = await SlothClass.get_user_effects(member=member)        
 
         # Checks whether user is hacked
-        if has_effect('hacked'):
-            return await self.send_hacked_image(ctx, member)
+        if await SlothClass.has_effect(effects, 'hacked'):
+            await self.send_hacked_image(ctx, member)
+            # if ctx.author.id != member.id:
+            #     await SlothClass.check_virus(ctx=ctx, target=member)
+            return
+
         # Checks whether user is frogged
-        if has_effect('frogged'):
+        if await SlothClass.has_effect(effects, 'frogged'):
             return await self.send_frogged_image(ctx, member, sloth_profile[10])
 
         small = ImageFont.truetype("built titling sb.ttf", 45)
@@ -537,7 +535,7 @@ class SlothCurrency(commands.Cog):
 
         # Checks whether user is transmutated
         sloth = None
-        if has_effect('transmutated'):
+        if await SlothClass.has_effect(effects, 'transmutated'):
             sloth = Image.open(f"./sloth_custom_images/sloth/transmutated_sloth.png")
         else:
             sloth = Image.open(f"./sloth_custom_images/sloth/{sloth_profile[1].title()}.png")
