@@ -206,66 +206,6 @@ class Player(commands.Cog):
 
         return effects
 
-    async def is_user_protected(self, user_id: int) -> bool:
-        """ Checks whether user is protected.
-        :param user_id: The ID of the user to check it. """
-
-        mycursor, db = await the_database()
-        await mycursor.execute("SELECT protected FROM SlothProfile WHERE user_id = %s", (user_id,))
-        user_protected = await mycursor.fetchone()
-        await mycursor.close()
-        return user_protected is not None and user_protected[0]
-
-    async def is_transmutated(self, user_id: int) -> bool:
-        """ Checks whether user is transmutated.
-        :param user_id: The ID of the user to check it. """
-
-        mycursor, db = await the_database()
-        await mycursor.execute("SELECT COUNT(*) FROM SlothSkills WHERE user_id = %s AND skill_type = 'transmutation'", (user_id,))
-        user_transmutated = await mycursor.fetchone()
-        await mycursor.close()
-        return user_transmutated[0]
-
-    async def is_user_hacked(self, user_id: int) -> bool:
-        """ Checks whether user is hacked.
-        :param user_id: The ID of the user to check it. """
-
-        mycursor, db = await the_database()
-        await mycursor.execute("SELECT hacked FROM SlothProfile WHERE user_id = %s", (user_id,))
-        user_hacked = await mycursor.fetchone()
-        await mycursor.close()
-        return user_hacked is not None and user_hacked[0]
-
-    async def is_user_wired(self, user_id: int) -> bool:
-        """ Checks whether user is wired.
-        :param user_id: The ID of the user to check it. """
-
-        mycursor, db = await the_database()
-        await mycursor.execute("SELECT wired FROM SlothProfile WHERE user_id = %s", (user_id,))
-        user_wired = await mycursor.fetchone()
-        await mycursor.close()
-        return user_wired is not None and user_wired[0]
-
-    async def is_user_knocked_out(self, user_id: int) -> bool:
-        """ Checks whether user is knocked out.
-        :param user_id: The ID of the user to check it. """
-
-        mycursor, db = await the_database()
-        await mycursor.execute("SELECT knocked_out FROM SlothProfile WHERE user_id = %s", (user_id,))
-        user_knocked_out = await mycursor.fetchone()
-        await mycursor.close()
-        return user_knocked_out is not None and user_knocked_out[0]
-
-    async def is_user_frogged(self, user_id: int) -> bool:
-        """ Checks whether user is frogged.
-        :param user_id: The ID of the user to check it. """
-
-        mycursor, db = await the_database()
-        await mycursor.execute("SELECT frogged FROM SlothProfile WHERE user_id = %s", (user_id,))
-        user_frogged = await mycursor.fetchone()
-        await mycursor.close()
-        return user_frogged is not None and user_frogged[0]
-
     async def insert_skill_action(self, user_id: int, skill_type: str, skill_timestamp: int, target_id: int = None, message_id: int = None, channel_id: int = None, emoji: str = None, price: int = 0, content: str = None) -> None:
         """ Inserts a skill action into the database, if needed.
         :param user_id: The ID of the perpetrator of the skill action.
