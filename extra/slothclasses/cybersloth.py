@@ -85,6 +85,9 @@ class Cybersloth(Player):
         except Exception as e:
             print(e)
             return await ctx.send(f"**Something went wrong and your `Hack` skill failed, {attacker.mention}!**")
+        else:
+            if 'reflect' in target_fx:
+                await self.reflect_attack(ctx, attacker, target, 'hack')
 
     @commands.command()
     @Player.skills_used(requirement=5)
