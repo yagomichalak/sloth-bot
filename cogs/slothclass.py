@@ -202,6 +202,37 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
 
         await ctx.send(embed=embed)
 
+    @commands.command()
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def skills_update(self, ctx) -> None:
+        """ Shows the updates/current status of upcoming Sloth Class Skills. """
+
+        member = ctx.author
+        guild = ctx.guild
+
+        embed = discord.Embed(
+            title="__Sloth Class Skills Status__",
+            description="🟢 - Finished;\n🟠 - Work in Progress;\n🔴 - Not Started.",
+            color=member.color,
+            timestamp=ctx.message.created_at,
+            url="https://thelanguagesloth.com"
+        )
+
+        embed.set_thumbnail(url=guild.icon_url)
+        embed.set_author(name=self.client.user, url=self.client.user.avatar_url, icon_url=self.client.user.avatar_url)
+        embed.set_footer(text=f"Requested by {member}", icon_url=member.avatar_url)
+
+        embed.add_field(name="🟠 Agares' 3rd Skill:", value="**Skill**: `Reflect`.", inline=True)
+        embed.add_field(name="🟢 Cybersloth's 3rd Skill:", value="**Skill**: `Virus`.", inline=True)
+        embed.add_field(name="🟢 Merchant's 3rd Skill:", value="**Skill**: `Sell Ring`.", inline=False)
+        embed.add_field(name="🔴 Metamorph's 3rd Skill:", value="**Skill**: `Mirror`.", inline=True)
+        embed.add_field(name="🟠 Munk's 3rd Skill:", value="**Skill**: `Create Tribe Role`.", inline=True)
+        embed.add_field(name="🔴 Prawler's 3rd Skill:", value="**Skill**: `??`.", inline=False)
+        embed.add_field(name="🟢 Seraph's 3rd Skill:", value="**Skill**: `Heal`.", inline=True)
+        embed.add_field(name="🔴 Warrior's 3rd Skill:", value="**Skill**: `??`.", inline=True)
+
+        await ctx.send(embed=embed)
+
 def setup(client) -> None:
     """ Cog's setup function. """
 
