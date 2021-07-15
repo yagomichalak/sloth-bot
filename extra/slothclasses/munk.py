@@ -116,7 +116,9 @@ class Munk(Player):
         if target_sloth_profile[1] == 'default':
             return await ctx.send(f"**You cannot convert someone who has a `default` Sloth class, {attacker.mention}!**")
 
-        if await self.is_user_protected(target.id):
+        target_fx = await self.get_user_effects(target)
+
+        if 'protected' in target_fx:
             return await ctx.send(f"**{attacker.mention}, you cannot convert {target.mention} into a `Munk`, because they are protected against attacks!**")
 
         confirmed = await ConfirmSkill(f"**{attacker.mention}, are you sure you want to convert {target.mention} into a `Munk`?**").prompt(ctx)
