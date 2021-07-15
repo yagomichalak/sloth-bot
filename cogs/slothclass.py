@@ -222,7 +222,7 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
         embed.set_author(name=self.client.user, url=self.client.user.avatar_url, icon_url=self.client.user.avatar_url)
         embed.set_footer(text=f"Requested by {member}", icon_url=member.avatar_url)
 
-        embed.add_field(name="🟠 Agares' 3rd Skill:", value="**Skill**: `Reflect`.", inline=True)
+        embed.add_field(name="🟢 Agares' 3rd Skill:", value="**Skill**: `Reflect`.", inline=True)
         embed.add_field(name="🟢 Cybersloth's 3rd Skill:", value="**Skill**: `Virus`.", inline=True)
         embed.add_field(name="🟢 Merchant's 3rd Skill:", value="**Skill**: `Sell Ring`.", inline=False)
         embed.add_field(name="🔴 Metamorph's 3rd Skill:", value="**Skill**: `Mirror`.", inline=True)

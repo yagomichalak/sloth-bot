@@ -199,10 +199,10 @@ class Agares(Player):
 
         return recharge_embed
 
-    @commands.command()
+    @commands.command(aliases=['reflection'])
     @Player.skills_used(requirement=20)
     @Player.skill_on_cooldown(skill=Skill.THREE)
-    @Player.user_is_class('metamorph')
+    @Player.user_is_class('agares')
     @Player.skill_mark()
     @Player.not_ready()
     async def reflect(self, ctx, target: discord.Member = None) -> None:
@@ -221,7 +221,7 @@ class Agares(Player):
         perpetrator = ctx.author
 
         if not target:
-            target = ctx.author
+            target = perpetrator
 
         if ctx.channel.id != bots_and_commands_channel_id:
             return await ctx.send(f"**{perpetrator.mention}, you can only use this command in {self.bots_txt.mention}!**")
@@ -235,7 +235,7 @@ class Agares(Player):
             return await ctx.send(f"**{perpetrator.mention}, you cannot use this on a bot!**")
 
         sloth_profile = await self.get_sloth_profile(target.id)
-        if sloth_profile:
+        if not sloth_profile:
             return await ctx.send(f"**You cannot use this skill on someone who doesn't have a Sloth Profile, {perpetrator.mention}!**")
 
         if sloth_profile[1] == 'default':
@@ -275,6 +275,31 @@ class Agares(Player):
 
             await ctx.send(embed=reflect_embed)
 
+    async def reflect_attack(self, ctx: commands.Context, attacker: discord.Member, target: discord.Member, skill_type: str) -> None:
+        """ Reflects the attacker's skill to themselves.
+        :param ctx: The context of the command.
+        :param attacker: The perpetrator of the skill.
+        :param target: The target the skill.
+        :param skill_type: The skill type """
+
+        current_ts = await utils.get_timestamp()
+
+        try:
+            await self.insert_skill_action(
+                user_id=target.id, skill_type=skill_type, skill_timestamp=current_ts, target_id=attacker.id)
+        except Exception as e:
+            print(e)
+            await ctx.send(f"**Something went wrong with this skill!**")
+
+        else:
+            # Sends embedded message into the channel
+            reflected_attack_embed = await self.get_reflected_attack_embed(
+                channel=ctx.channel, attacker_id=attacker.id, target_id=target.id, skill_type=skill_type)
+
+            await ctx.send(embed=reflected_attack_embed)
+
+
+
     async def get_reflect_embed(self, channel, perpetrator_id: int, target_id: int) -> discord.Embed:
         """ Makes an embedded message for a reflect action.
         :param channel: The context channel.
@@ -295,5 +320,28 @@ class Agares(Player):
         reflect_embed.set_image(url='https://media1.tenor.com/images/3fc942141e181ef927813f0a5a679193/tenor.gif?itemid=15706915')
 
         return reflect_embed
+
+
+    async def get_reflected_attack_embed(self, channel, attacker_id: int, target_id: int, skill_type: str) -> discord.Embed:
+        """ Makes an embedded message for a reflected attack.
+        :param channel: The context channel.
+        :param attacker_id: The ID of the perpetrator of the attack.
+        :param target_id: The ID of the target of the attack.
+        :param skill_type: The type of the skill """
+
+        timestamp = await utils.get_timestamp()
+
+        reflected_attack_embed = discord.Embed(
+            title="An Attack has been Reflected to its Perpetrator!",
+            timestamp=datetime.fromtimestamp(timestamp)
+        )
+        reflected_attack_embed.description = f"""**<@{target_id}> was attacked by <@{attacker_id}> with a skill of type {skill_type}, 
+        but <@{target_id}> managed to reflect the attack to them afterwards!** ↕️"""
+        reflected_attack_embed.color = discord.Color.green()
+
+        reflected_attack_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon_url)
+        reflected_attack_embed.set_image(url='https://cdn.discordapp.com/attachments/777886760994471986/865325125032345610/image-removebg-preview.png')
+
+        return reflected_attack_embed
 
 
