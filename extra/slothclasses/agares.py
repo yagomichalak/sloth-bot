@@ -29,7 +29,7 @@ class Agares(Player):
         ]
 
     @commands.command(aliases=['ma'])
-    @Player.skill_on_cooldown()
+    @Player.skill_on_cooldown(seconds=28800)
     @Player.user_is_class('agares')
     @Player.skill_mark()
     async def magic_pull(self, ctx, target: discord.Member = None) -> None:
