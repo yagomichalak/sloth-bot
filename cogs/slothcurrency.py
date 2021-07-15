@@ -779,6 +779,24 @@ class SlothCurrency(commands.Cog):
         await db.commit()
         await mycursor.close()
 
+    async def update_user_classes(self, user_id: int) -> None:
+        """ Updates the user classes counter.
+        :param user_id: The user's ID. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("UPDATE UserCurrency SET user_classes = user_classes + 1 WHERE user_id = %s", (user_id,))
+        await db.commit()
+        await mycursor.close()
+
+    async def update_user_class_reward(self, user_id: int) -> None:
+        """ Updates the user reward classes counter.
+        :param user_id: The user's ID. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("UPDATE UserCurrency SET user_class_reward = user_class_reward + 1 WHERE user_id = %s", (user_id,))
+        await db.commit()
+        await mycursor.close()
+
     # Google Drive commands
     @commands.command()
     @commands.has_permissions(administrator=True)
