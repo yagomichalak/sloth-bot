@@ -4,6 +4,7 @@ import os
 from .player import Player, Skill
 from extra.menu import ConfirmSkill
 from extra import utils
+from mysqldb import the_database
 
 import os
 from datetime import datetime
@@ -284,12 +285,11 @@ class Agares(Player):
 
         current_ts = await utils.get_timestamp()
 
-
         try:
-            if skill_type != 'munk':
+            if skill_type not in ['munk', 'smash']:
                 await self.insert_skill_action(
                     user_id=target.id, skill_type=skill_type, skill_timestamp=current_ts, target_id=attacker.id)
-            else:
+            elif skill_type == 'munk':
                 await attacker.edit(nick=f"{attacker.display_name} Munk")
         except Exception as e:
             print(e)
@@ -313,10 +313,10 @@ class Agares(Player):
         timestamp = await utils.get_timestamp()
 
         reflect_embed = discord.Embed(
-            title="A Reflection Shield has been Put!",
+            title="A Reflection Aura has been Put!",
             timestamp=datetime.fromtimestamp(timestamp)
         )
-        reflect_embed.description = f"**<@{perpetrator_id}> put a Reflection Shiled onto <@{target_id}>!** ↕️"
+        reflect_embed.description = f"**<@{perpetrator_id}> put a Reflection Aura onto <@{target_id}>!** ↕️"
         reflect_embed.color = discord.Color.green()
 
         reflect_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Agares.png")
@@ -347,5 +347,34 @@ class Agares(Player):
         reflected_attack_embed.set_image(url='https://cdn.discordapp.com/attachments/777886760994471986/865325125032345610/image-removebg-preview.png')
 
         return reflected_attack_embed
+
+    async def check_reflects(self) -> None:
+        """ Check on-going Reflect Aura and their expiration time. """
+
+        reflects = await self.get_expired_reflects()
+        for rf in reflects:
+            await self.delete_skill_action_by_target_id_and_skill_type(rf[3], 'reflect')
+
+            channel = self.bots_txt
+
+            await channel.send(
+                content=f"<@{rf[0]}>, <@{rf[3]}>",
+                embed=discord.Embed(
+                    description=f"**<@{rf[3]}>'s `Reflect Aura` from <@{rf[0]}> just expired!**",
+                    color=discord.Color.red()))
+
+
+    async def get_expired_reflects(self) -> None:
+        """ Gets expired Reflect Aura skill actions. """
+
+        the_time = await utils.get_timestamp()
+        mycursor, db = await the_database()
+        await mycursor.execute("""
+            SELECT * FROM SlothSkills
+            WHERE skill_type = 'reflect' AND (%s - skill_timestamp) >= 86400
+            """, (the_time,))
+        reflects = await mycursor.fetchall()
+        await mycursor.close()
+        return reflects
 
 
