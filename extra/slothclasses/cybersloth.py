@@ -31,7 +31,9 @@ class Cybersloth(Player):
         if ctx.channel.id != bots_and_commands_channel_id:
             return await ctx.send(f"**{attacker.mention}, you can only use this command in {self.bots_txt.mention}!**")
 
-        if await self.is_user_knocked_out(attacker.id):
+        attacker_fx = await self.get_user_effects(attacker)
+
+        if 'knocked_out' in attacker_fx:
             return await ctx.send(f"**{attacker.mention}, you can't use your skill, because you are knocked-out!**")
 
         if not target:
@@ -50,10 +52,12 @@ class Cybersloth(Player):
         if target_sloth_profile[1] == 'default':
             return await ctx.send(f"**You cannot hack someone who has a `default` Sloth class, {attacker.mention}!**")
 
-        if await self.is_user_protected(target.id):
+        target_fx = await self.get_user_effects(target)
+
+        if 'protected' in target_fx:
             return await ctx.send(f"**{attacker.mention}, {target.mention} is protected, you can't hack them!**")
 
-        if await self.is_user_hacked(target.id):
+        if 'hacked' in target_fx:
             return await ctx.send(f"**{attacker.mention}, {target.mention} is already hacked!**")
 
         confirmed = await ConfirmSkill(f"**{attacker.mention}, are you sure you want to hack {target.mention}?**").prompt(ctx)
@@ -65,7 +69,6 @@ class Cybersloth(Player):
         try:
             current_timestamp = await utils.get_timestamp()
             # Don't need to store it, since it is forever
-            await self.update_user_is_hacked(target.id, 1)
             await self.insert_skill_action(
                 user_id=attacker.id, skill_type="hack", skill_timestamp=current_timestamp,
                 target_id=target.id, channel_id=ctx.channel.id
@@ -78,7 +81,7 @@ class Cybersloth(Player):
             await self.update_user_skills_used(user_id=attacker.id)
             hack_embed = await self.get_hack_embed(
                 channel=ctx.channel, perpetrator_id=attacker.id, target_id=target.id)
-            msg = await ctx.send(embed=hack_embed)
+            await ctx.send(embed=hack_embed)
         except Exception as e:
             print(e)
             return await ctx.send(f"**Something went wrong and your `Hack` skill failed, {attacker.mention}!**")
@@ -98,7 +101,9 @@ class Cybersloth(Player):
         if ctx.channel.id != bots_and_commands_channel_id:
             return await ctx.send(f"**{attacker.mention}, you can only use this command in {self.bots_txt.mention}!**")
 
-        if await self.is_user_knocked_out(attacker.id):
+        attacker_fx = await self.get_user_effects(attacker)
+
+        if 'knocked_out' in attacker_fx:
             return await ctx.send(f"**{attacker.mention}, you can't use your skill, because you are knocked-out!**")
 
         if not target:
@@ -117,21 +122,22 @@ class Cybersloth(Player):
         if target_sloth_profile[1] == 'default':
             return await ctx.send(f"**You cannot wire someone who has a `default` Sloth class, {attacker.mention}!**")
 
-        if await self.is_user_protected(target.id):
+        target_fx = await self.get_user_effects(target)
+
+        if 'protected' in target_fx:
             return await ctx.send(f"**{attacker.mention}, {target.mention} is protected, you can't wire them!**")
 
-        if await self.is_user_wired(target.id):
+        if 'wired' in target_fx:
             return await ctx.send(f"**{attacker.mention}, {target.mention} is already wired!**")
 
         confirmed = await ConfirmSkill(f"**{attacker.mention}, are you sure you want to wire {target.mention}?**").prompt(ctx)
         if not confirmed:
-            return await ctx.send("**Not hacking them, then!**")
+            return await ctx.send("**Not wiring them, then!**")
 
         _, exists = await Player.skill_on_cooldown(skill=Skill.TWO).predicate(ctx)
 
         try:
             current_timestamp = await utils.get_timestamp()
-            await self.update_user_is_wired(target.id, 1)
             await self.insert_skill_action(
                 user_id=attacker.id, skill_type="wire", skill_timestamp=current_timestamp,
                 target_id=target.id, channel_id=ctx.channel.id
@@ -159,7 +165,6 @@ class Cybersloth(Player):
         hacks = await self.get_expired_hacks()
         for h in hacks:
             await self.delete_skill_action_by_target_id_and_skill_type(h[3], 'hack')
-            await self.update_user_is_hacked(h[3], 0)
 
             channel = self.bots_txt
 
@@ -176,7 +181,6 @@ class Cybersloth(Player):
         wires = await self.get_expired_wires()
         for w in wires:
             await self.delete_skill_action_by_target_id_and_skill_type(w[3], 'wire')
-            await self.update_user_is_wired(w[3], 0)
 
             channel = self.bots_txt
 
@@ -185,26 +189,6 @@ class Cybersloth(Player):
                 embed=discord.Embed(
                     description=f"**<@{w[0]}> lost connection with <@{w[3]}> and the wire doesn't seem to work anymore! 🔌**",
                     color=discord.Color.red()))
-
-    async def update_user_is_hacked(self, user_id: int, hacked: int) -> None:
-        """ Updates the user's protected state.
-        :param user_id: The ID of the member to update.
-        :param hacked: Whether it's gonna be set to true or false. """
-
-        mycursor, db = await the_database()
-        await mycursor.execute("UPDATE SlothProfile SET hacked = %s WHERE user_id = %s", (hacked, user_id))
-        await db.commit()
-        await mycursor.close()
-
-    async def update_user_is_wired(self, user_id: int, wired: int) -> None:
-        """ Updates the user's protected state.
-        :param user_id: The ID of the member to update.
-        :param wired: Whether it's gonna be set to true or false. """
-
-        mycursor, db = await the_database()
-        await mycursor.execute("UPDATE SlothProfile SET wired = %s WHERE user_id = %s", (wired, user_id))
-        await db.commit()
-        await mycursor.close()
 
     async def get_hack_embed(self, channel: discord.TextChannel, perpetrator_id: int, target_id: int,) -> discord.Embed:
         """ Makes an embedded message for a hacking skill action.
@@ -258,40 +242,49 @@ class Cybersloth(Player):
         """ Makes all people that you hacked infect other people that look onto their profiles.
         
         Skill Cost: 150łł
-        Cooldown: 2 days."""
+        Cooldown: 2 days. """
 
         attacker = ctx.author
+
+        if ctx.channel.id != bots_and_commands_channel_id:
+            return await ctx.send(f"**{attacker.mention}, you can only use this command in {self.bots_txt.mention}!**")
+
+        attacker_fx = await self.get_user_effects(attacker)
+
+        if 'knocked_out' in attacker_fx:
+            return await ctx.send(f"**{attacker.mention}, you can't use your skill, because you are knocked-out!**")
+
         hacks = await self.get_user_target_hacks(attacker.id)
         if not hacks:
             return await ctx.send(f"**You don't have any active hack, {attacker.mention}!**")
 
-        
         user_currency = await self.get_user_currency(attacker.id)
-        if user_currency[1] >= 150:
-            # Update `content` of active hacks to `virus`
-            confirm = await ConfirmSkill(f"**Are you sure you want to spend `150łł` to use this skill, {attacker.mention}?**").prompt(ctx)
-            if not confirm:
-                return await ctx.send(f"**Not doing it then, {attacker.mention}!**")
+        if user_currency[1] < 150:
+            return await ctx.send(f"**You don't have 150łł to use this skill, {attacker.mention}!**")
 
-            _, exists = await Player.skill_on_cooldown(skill=Skill.THREE).predicate(ctx)
-            current_ts = await utils.get_timestamp()
-            try:
-                await self.update_hacks_content(attacker_id=attacker.id)
-                await self.update_user_money(attacker.id, -150)
-                if exists:
-                    await self.update_user_skill_ts(attacker.id, Skill.THREE, current_ts)
-                else:
-                    await self.insert_user_skill_cooldown(attacker.id, Skill.THREE, current_ts)
-                # Updates user's skills used counter
-                await self.update_user_skills_used(user_id=attacker.id)
-            except Exception as e:
-                print(e)
-                await ctx.send(f"**It looks like something went wrong with this skill, {attacker.mention}!**")
+        # Update `content` of active hacks to `virus`
+        confirm = await ConfirmSkill(f"**Are you sure you want to spend `150łł` to use this skill, {attacker.mention}?**").prompt(ctx)
+        if not confirm:
+            return await ctx.send(f"**Not doing it then, {attacker.mention}!**")
+
+        _, exists = await Player.skill_on_cooldown(skill=Skill.THREE).predicate(ctx)
+        current_ts = await utils.get_timestamp()
+        try:
+            await self.update_hacks_content(attacker_id=attacker.id)
+            await self.update_user_money(attacker.id, -150)
+            if exists:
+                await self.update_user_skill_ts(attacker.id, Skill.THREE, current_ts)
             else:
-                contagious_embed = await self.get_contagious_hack(ctx.channel, attacker.id, len(hacks))
-                await ctx.send(embed=contagious_embed)
+                await self.insert_user_skill_cooldown(attacker.id, Skill.THREE, current_ts)
+            # Updates user's skills used counter
+            await self.update_user_skills_used(user_id=attacker.id)
+        except Exception as e:
+            print(e)
+            await ctx.send(f"**It looks like something went wrong with this skill, {attacker.mention}!**")
         else:
-            await ctx.send(f"**You don't have 150łł to use this skill, {attacker.mention}!**")
+            contagious_embed = await self.get_contagious_hack(ctx.channel, attacker.id, len(hacks))
+            await ctx.send(embed=contagious_embed)
+            
     
     async def update_hacks_content(self, attacker_id: int) -> None:
         """ Updates all content fields of hacks executed by a specific user.
@@ -314,10 +307,10 @@ class Cybersloth(Player):
             return
 
         effects = await self.get_user_effects(infected)
-        if await self.has_effect(effects, 'hacked'):
+        if 'hacked' in effects:
             return
 
-        if await self.has_effect(effects, 'protected'):
+        if 'protected' in effects:
             return
         
         try:
@@ -326,10 +319,7 @@ class Cybersloth(Player):
             await self.insert_skill_action(
                 user_id=hack[0], skill_type="hack", skill_timestamp=current_timestamp,
                 target_id=infected.id, channel_id=ctx.channel.id, content="virus"
-            )
-            await self.update_user_is_hacked(infected.id, 1)
-
-            
+            )            
 
         except Exception as e:
             print('Failed virus', e)

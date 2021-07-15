@@ -32,7 +32,9 @@ class Merchant(Player):
 
         member = ctx.author
 
-        if await self.is_user_knocked_out(member.id):
+        member_fx = await self.get_user_effects(member)
+
+        if 'knocked_out' in member_fx:
             return await ctx.send(f"**{member.mention}, you can't use your skill, because you are knocked-out!**")
 
         if await self.get_skill_action_by_user_id_and_skill_type(member.id, 'potion'):
@@ -43,39 +45,39 @@ class Merchant(Player):
             return
 
         confirm = await ConfirmSkill(f"**{member.mention}, are you sure you want to spend `50łł` to put a potion in your shop with the price of `{item_price}`łł ?**").prompt(ctx)
-        if confirm:
-            _, exists = await Player.skill_on_cooldown(skill=Skill.ONE).predicate(ctx)
-
-            user_currency = await self.get_user_currency(member.id)
-            if user_currency[1] >= 50:
-                await self.update_user_money(member.id, -50)
-            else:
-                return await ctx.send(f"**{member.mention}, you don't have `50łł`!**")
-
-            item_emoji = '🍯'
-
-            try:
-                current_timestamp = await utils.get_timestamp()
-                await self.insert_skill_action(
-                    user_id=member.id, skill_type="potion", skill_timestamp=current_timestamp,
-                    target_id=member.id, channel_id=ctx.channel.id, price=item_price, emoji=item_emoji
-                )
-                if exists:
-                    await self.update_user_skill_ts(member.id, Skill.ONE, current_timestamp)
-                else:
-                    await self.insert_user_skill_cooldown(ctx.author.id, Skill.ONE, current_timestamp)
-                # Updates user's skills used counter
-                await self.update_user_skills_used(user_id=member.id)
-                open_shop_embed = await self.get_open_shop_embed(
-                    channel=ctx.channel, perpetrator_id=member.id, price=item_price, item_name='changing-Sloth-class potion', emoji=item_emoji)
-                await ctx.send(embed=open_shop_embed)
-            except Exception as e:
-                print(e)
-                return await ctx.send(f"**{member.mention}, something went wrong with it, try again later!**")
-            else:
-                await ctx.send(f"**{member}, your item is now in the shop, check `z!sloth_shop` to see it there!**")
-        else:
+        if not confirm:
             return await ctx.send(f"**Not doing it, then, {member.mention}!**")
+
+        _, exists = await Player.skill_on_cooldown(skill=Skill.ONE).predicate(ctx)
+
+        user_currency = await self.get_user_currency(member.id)
+        if user_currency[1] < 50:
+            return await ctx.send(f"**{member.mention}, you don't have `50łł`!**")
+
+        item_emoji = '🍯'
+
+        try:
+            current_timestamp = await utils.get_timestamp()
+            await self.insert_skill_action(
+                user_id=member.id, skill_type="potion", skill_timestamp=current_timestamp,
+                target_id=member.id, channel_id=ctx.channel.id, price=item_price, emoji=item_emoji
+            )
+            await self.update_user_money(member.id, -50)
+            if exists:
+                await self.update_user_skill_ts(member.id, Skill.ONE, current_timestamp)
+            else:
+                await self.insert_user_skill_cooldown(ctx.author.id, Skill.ONE, current_timestamp)
+            # Updates user's skills used counter
+            await self.update_user_skills_used(user_id=member.id)
+            open_shop_embed = await self.get_open_shop_embed(
+                channel=ctx.channel, perpetrator_id=member.id, price=item_price, item_name='changing-Sloth-class potion', emoji=item_emoji)
+            await ctx.send(embed=open_shop_embed)
+        except Exception as e:
+            print(e)
+            return await ctx.send(f"**{member.mention}, something went wrong with it, try again later!**")
+        else:
+            await ctx.send(f"**{member}, your item is now in the shop, check `z!sloth_shop` to see it there!**")
+            
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -300,7 +302,9 @@ class Merchant(Player):
         if ctx.channel.id != bots_and_commands_channel_id:
             return await ctx.send(f"**{merchant.mention}, you can only use this command in {self.bots_txt.mention}!**")
 
-        if await self.is_user_knocked_out(merchant.id):
+
+        merchant_fx = await self.get_user_effects(merchant)
+        if 'knocked_out' in merchant_fx:
             return await ctx.send(f"**{merchant.mention}, you can't use your skill, because you are knocked-out!**")
 
         confirm = await ConfirmSkill(f"**{merchant.mention}, are you sure you want to spend `50łł` to get a random package from the Dark Sloth Web?**").prompt(ctx)
@@ -458,7 +462,9 @@ class Merchant(Player):
 
         member = ctx.author
 
-        if await self.is_user_knocked_out(member.id):
+        member_fx = await self.get_user_effects(member)
+
+        if 'knocked_out' in member_fx:
             return await ctx.send(f"**{member.mention}, you can't use your skill, because you are knocked-out!**")
 
         if await self.get_skill_action_by_user_id_and_skill_type(member.id, 'ring'):
@@ -469,39 +475,39 @@ class Merchant(Player):
             return
 
         confirm = await ConfirmSkill(f"**{member.mention}, are you sure you want to spend `100łł` to put a potion in your shop with the price of `{item_price}`łł ?**").prompt(ctx)
-        if confirm:
-            _, exists = await Player.skill_on_cooldown(skill=Skill.THREE, seconds=36000).predicate(ctx)
-
-            user_currency = await self.get_user_currency(member.id)
-            if user_currency[1] >= 100:
-                await self.update_user_money(member.id, -100)
-            else:
-                return await ctx.send(f"**{member.mention}, you don't have `100łł`!**")
-
-            item_emoji = '💍'
-
-            try:
-                current_timestamp = await utils.get_timestamp()
-                await self.insert_skill_action(
-                    user_id=member.id, skill_type="ring", skill_timestamp=current_timestamp,
-                    target_id=member.id, channel_id=ctx.channel.id, price=item_price, emoji=item_emoji
-                )
-                if exists:
-                    await self.update_user_skill_ts(member.id, Skill.THREE, current_timestamp)
-                else:
-                    await self.insert_user_skill_cooldown(ctx.author.id, Skill.THREE, current_timestamp)
-                # Updates user's skills used counter
-                await self.update_user_skills_used(user_id=member.id)
-                open_shop_embed = await self.get_open_shop_embed(
-                    channel=ctx.channel, perpetrator_id=member.id, price=item_price, item_name='Wedding Ring', emoji=item_emoji)
-                await ctx.send(embed=open_shop_embed)
-            except Exception as e:
-                print(e)
-                return await ctx.send(f"**{member.mention}, something went wrong with it, try again later!**")
-            else:
-                await ctx.send(f"**{member}, your item is now in the shop, check `z!sloth_shop` to see it there!**")
-        else:
+        if not confirm:
             return await ctx.send(f"**Not doing it, then, {member.mention}!**")
+
+        _, exists = await Player.skill_on_cooldown(skill=Skill.THREE, seconds=36000).predicate(ctx)
+
+        user_currency = await self.get_user_currency(member.id)
+        if user_currency[1] < 100:
+            return await ctx.send(f"**{member.mention}, you don't have `100łł`!**")
+
+        await self.update_user_money(member.id, -100)
+
+        item_emoji = '💍'
+
+        try:
+            current_timestamp = await utils.get_timestamp()
+            await self.insert_skill_action(
+                user_id=member.id, skill_type="ring", skill_timestamp=current_timestamp,
+                target_id=member.id, channel_id=ctx.channel.id, price=item_price, emoji=item_emoji
+            )
+            if exists:
+                await self.update_user_skill_ts(member.id, Skill.THREE, current_timestamp)
+            else:
+                await self.insert_user_skill_cooldown(ctx.author.id, Skill.THREE, current_timestamp)
+            # Updates user's skills used counter
+            await self.update_user_skills_used(user_id=member.id)
+            open_shop_embed = await self.get_open_shop_embed(
+                channel=ctx.channel, perpetrator_id=member.id, price=item_price, item_name='Wedding Ring', emoji=item_emoji)
+            await ctx.send(embed=open_shop_embed)
+        except Exception as e:
+            print(e)
+            return await ctx.send(f"**{member.mention}, something went wrong with it, try again later!**")
+        else:
+            await ctx.send(f"**{member}, your item is now in the shop, check `z!sloth_shop` to see it there!**")
 
 
     @commands.command()

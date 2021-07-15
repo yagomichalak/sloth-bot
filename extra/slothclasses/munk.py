@@ -92,11 +92,16 @@ class Munk(Player):
 
         attacker = ctx.author
 
-        if await self.is_user_knocked_out(attacker.id):
+        attacker_fx = await self.get_user_effects(attacker)
+
+        if 'knocked_out' in attacker_fx:
             return await ctx.send(f"**{attacker.mention}, you can't use your skill, because you are knocked-out!**")
 
         if not target:
             return await ctx.send(f"**Please, choose a member to use the `Munk` skill, {attacker.mention}!**")
+
+        if target.bot:
+            return await ctx.send(f"**You cannot convert a bot into a `Munk`, {attacker.mention}!**")
 
         if attacker.id == target.id:
             return await ctx.send(f"**You cannot convert yourself, since you are already a `Munk`, {attacker.mention}!**")
@@ -123,11 +128,6 @@ class Munk(Player):
         try:
             await target.edit(nick=f"{target.display_name} Munk")
             current_timestamp = await utils.get_timestamp()
-            # Don't need to store it, since it is forever
-            # await self.insert_skill_action(
-            #     user_id=attacker.id, skill_type="munk", skill_timestamp=current_timestamp,
-            #     target_id=target.id, channel_id=ctx.channel.id
-            # )
             if exists:
                 await self.update_user_skill_ts(attacker.id, Skill.ONE, current_timestamp)
             else:
@@ -541,7 +541,6 @@ class Munk(Player):
         try:
             await self.delete_tribe_member(member.id)
             try:
-                print(member, member.display_name, user_tribe['two_emojis'])
                 await self.update_tribe_name(member=member, two_emojis=user_tribe['two_emojis'], joining=False)
             except Exception as ee:
                 print(ee)
