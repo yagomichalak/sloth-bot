@@ -284,9 +284,13 @@ class Agares(Player):
 
         current_ts = await utils.get_timestamp()
 
+
         try:
-            await self.insert_skill_action(
-                user_id=target.id, skill_type=skill_type, skill_timestamp=current_ts, target_id=attacker.id)
+            if skill_type != 'munk':
+                await self.insert_skill_action(
+                    user_id=target.id, skill_type=skill_type, skill_timestamp=current_ts, target_id=attacker.id)
+            else:
+                await attacker.edit(nick=f"{attacker.display_name} Munk")
         except Exception as e:
             print(e)
             await ctx.send(f"**Something went wrong with this skill!**")

@@ -163,6 +163,8 @@ class Metamorph(Player):
         else:
             frogged_embed = await self.get_frogged_embed(channel=ctx.channel, attacker_id=attacker.id, target_id=target.id)
             await ctx.send(embed=frogged_embed)
+            if 'reflect' in target_effects:
+                await self.reflect_attack(ctx, attacker, target, 'frog')
 
     async def get_transmutation_embed(self, channel, perpetrator_id: int) -> discord.Embed:
         """ Makes an embedded message for a transmutation action.

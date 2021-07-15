@@ -171,7 +171,7 @@ class Player(commands.Cog):
             effects['wired']['debuff'] = True
 
 
-        if then := await self.get_skill_action_by_target_id_and_skill_type(target_id=member.id, skill_type='knock_out'):
+        if then := await self.get_skill_action_by_target_id_and_skill_type(target_id=member.id, skill_type='hit'):
             effects['knocked_out'] = {}
             effects['knocked_out']['cooldown'] = f"Ends <t:{int(then[2]) + general_cooldown}:R>" if then else 'Ends in ??'
             effects['knocked_out']['frames'] = []

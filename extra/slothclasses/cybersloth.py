@@ -160,6 +160,8 @@ class Cybersloth(Player):
             wire_embed = await self.get_wire_embed(
                 channel=ctx.channel, perpetrator_id=attacker.id, target_id=target.id)
             await ctx.send(embed=wire_embed)
+            if 'reflect' in target_fx:
+                await self.reflect_attack(ctx, attacker, target, 'wire')
 
     async def check_hacks(self) -> None:
 
@@ -315,6 +317,10 @@ class Cybersloth(Player):
 
         if 'protected' in effects:
             return
+
+        if 'reflect' in effects:
+            attacker = await discord.utils.get(ctx.guild.members, id=hack[0])
+            await self.reflect_attack(ctx, attacker, target, 'hack')
         
         try:
             current_timestamp = await utils.get_timestamp()
