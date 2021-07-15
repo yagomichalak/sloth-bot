@@ -106,7 +106,9 @@ class Munk(Player):
         if attacker.id == target.id:
             return await ctx.send(f"**You cannot convert yourself, since you are already a `Munk`, {attacker.mention}!**")
 
-        if target.display_name.strip().title().endswith('Munk'):
+        target_fx = await self.get_user_effects(target)
+
+        if 'munk' in target_fx:
             return await ctx.send(f"**{target.mention} is already a `Munk`, {attacker.mention}!**")
 
         target_sloth_profile = await self.get_sloth_profile(target.id)
@@ -115,8 +117,6 @@ class Munk(Player):
 
         if target_sloth_profile[1] == 'default':
             return await ctx.send(f"**You cannot convert someone who has a `default` Sloth class, {attacker.mention}!**")
-
-        target_fx = await self.get_user_effects(target)
 
         if 'protected' in target_fx:
             return await ctx.send(f"**{attacker.mention}, you cannot convert {target.mention} into a `Munk`, because they are protected against attacks!**")
@@ -145,6 +145,8 @@ class Munk(Player):
 
         else:
             await msg.edit(content=f"<@{target.id}>")
+            if 'reflect' in target_fx and 'munk' not in attacker_fx:
+                await self.reflect_attack(ctx, attacker, target, 'munk')
 
     async def get_munk_embed(self, channel, perpetrator_id: int, target_id: int) -> discord.Embed:
         """ Makes an embedded message for a munk action.

@@ -76,7 +76,7 @@ class Warrior(Player):
             if exists:
                 await self.update_user_skill_ts(attacker.id, Skill.ONE, current_timestamp)
             else:
-                await self.insert_user_skill_cooldown(ctx.author.id, Skill.ONE, current_timestamp)
+                await self.insert_user_skill_cooldown(attacker.id, Skill.ONE, current_timestamp)
             # Updates user's skills used counter
             await self.update_user_skills_used(user_id=attacker.id)
 
