@@ -31,7 +31,9 @@ class Warrior(Player):
         if ctx.channel.id != bots_and_commands_channel_id:
             return await ctx.send(f"**{attacker.mention}, you can only use this command in {self.bots_txt.mention}!**")
 
-        if await self.is_user_knocked_out(attacker.id):
+        attacker_fx = await self.get_user_effects(attacker)
+
+        if 'knocked_out' in attacker_fx:
             return await ctx.send(f"**{attacker.mention}, you can't use your skill, because you are knocked-out!**")
 
         if not target:
@@ -50,10 +52,12 @@ class Warrior(Player):
         if target_sloth_profile[1] == 'default':
             return await ctx.send(f"**You cannot knock out someone who has a `default` Sloth class, {attacker.mention}!**")
 
-        if await self.is_user_protected(target.id):
+        target_fx = await self.get_user_effects(target)
+
+        if 'protected' in target_fx:
             return await ctx.send(f"**{attacker.mention}, {target.mention} is protected, you can't knock them out!**")
 
-        if await self.is_user_knocked_out(target.id):
+        if 'knocked_out' in target_fx:
             return await ctx.send(f"**{attacker.mention}, {target.mention} is already knocked out!**")
 
         confirmed = await ConfirmSkill(f"**{attacker.mention}, are you sure you want to knock {target.mention} out?**").prompt(ctx)
@@ -65,7 +69,6 @@ class Warrior(Player):
         try:
             current_timestamp = await utils.get_timestamp()
             # Don't need to store it, since it is forever
-            await self.update_user_is_knocked_out(target.id, 1)
             await self.insert_skill_action(
                 user_id=attacker.id, skill_type="hit", skill_timestamp=current_timestamp,
                 target_id=target.id, channel_id=ctx.channel.id
@@ -79,7 +82,7 @@ class Warrior(Player):
 
             hit_embed = await self.get_hit_embed(
                 channel=ctx.channel, perpetrator_id=attacker.id, target_id=target.id)
-            msg = await ctx.send(embed=hit_embed)
+            await ctx.send(embed=hit_embed)
         except Exception as e:
             print(e)
             return await ctx.send(f"**Something went wrong and your `Hit` skill failed, {attacker.mention}!**")
@@ -98,7 +101,9 @@ class Warrior(Player):
         if ctx.channel.id != bots_and_commands_channel_id:
             return await ctx.send(f"**{attacker.mention}, you can only use this command in {self.bots_txt.mention}!**")
 
-        if await self.is_user_knocked_out(attacker.id):
+        attacker_fx = await self.get_user_effects(attacker)
+
+        if 'knocked_out' in attacker_fx:
             return await ctx.send(f"**{attacker.mention}, you can't use your skill, because you are knocked-out!**")
 
         if not target:
@@ -117,11 +122,13 @@ class Warrior(Player):
         if target_sloth_profile[1] == 'default':
             return await ctx.send(f"**You cannot do it on someone who has a `default` Sloth class, {attacker.mention}!**")
 
-        if not await self.is_user_protected(target.id):
+        target_fx = await self.get_user_effects(target)
+
+        if 'protected' not in target_fx:
             return await ctx.send(f"**{attacker.mention}, {target.mention} doesn't have a protection!**")
 
         user = await self.get_user_currency(attacker.id)
-        if not user[1] >= 50:
+        if user[1] < 50:
             return await ctx.send(f"**You don't have `50łł` to use this skill, {attacker.mention}!**")
 
         confirmed = await ConfirmSkill(f"**{attacker.mention}, are you sure you want to smash {target.mention}'s Divine Protection shield for `50łł`?**").prompt(ctx)
@@ -144,7 +151,6 @@ class Warrior(Player):
         # Calculates chance of smashing someone's Divine Protection shield
         if random.random() <= 0.5:
             try:
-                await self.update_user_protected(target.id, 0)
                 await self.delete_skill_action_by_target_id_and_skill_type(target.id, 'divine_protection')
             except Exception as e:
                 print(e)
@@ -164,7 +170,6 @@ class Warrior(Player):
         knock_outs = await self.get_expired_knock_outs()
         for ko in knock_outs:
             await self.delete_skill_action_by_target_id_and_skill_type(ko[3], 'hit')
-            await self.update_user_is_knocked_out(ko[3], 0)
 
             channel = self.bots_txt
 
@@ -173,16 +178,6 @@ class Warrior(Player):
                 embed=discord.Embed(
                     description=f"**<@{ko[3]}> got better from <@{ko[0]}>'s knock-out! 🤕**",
                     color=discord.Color.red()))
-
-    async def update_user_is_knocked_out(self, user_id: int, is_it: int) -> None:
-        """ Updates the user's protected state.
-        :param user_id: The ID of the member to update.
-        :param is_it: Whether it's gonna be set to true or false. """
-
-        mycursor, db = await the_database()
-        await mycursor.execute("UPDATE SlothProfile SET knocked_out = %s WHERE user_id = %s", (is_it, user_id))
-        await db.commit()
-        await mycursor.close()
 
     async def get_hit_embed(self, channel, perpetrator_id: int, target_id: int) -> discord.Embed:
         """ Makes an embedded message for a knock-out action.

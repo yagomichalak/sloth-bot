@@ -40,7 +40,9 @@ class Agares(Player):
         if ctx.channel.id != bots_and_commands_channel_id:
             return await ctx.send(f"**{attacker.mention}, you can only use this command in {self.bots_txt.mention}!**")
 
-        if await self.is_user_knocked_out(attacker.id):
+        attacker_fx = await self.get_user_effects(attacker)
+
+        if 'knocked_out' in attacker_fx:
             return await ctx.send(f"**{attacker.mention}, you can't use your skill, because you are knocked-out!**")
 
         attacker_state = attacker.voice
@@ -72,7 +74,9 @@ class Agares(Player):
             return await ctx.send(
                 f"**{attacker.mention}, you can't magic pull {target.mention} from `{target_vc}`, because it's a safe channel.**")
 
-        if await self.is_user_protected(target.id):
+        target_fx = await self.get_user_effects(target)
+
+        if 'protected' in target_fx:
             return await ctx.send(f"**{attacker.mention}, {target.mention} is protected, you can't magic pull them!**")
 
         try:
@@ -113,11 +117,13 @@ class Agares(Player):
         if ctx.channel.id != bots_and_commands_channel_id:
             return await ctx.send(f"**{perpetrator.mention}, you can only use this command in {self.bots_txt.mention}!**")
 
+        perpetrator_fx = await self.get_user_effects(perpetrator)
+
+        if 'knocked_out' in perpetrator_fx:
+            return await ctx.send(f"**{perpetrator.mention}, you can't use your skill, because you are knocked-out!**")
+
         if target.bot:
             return await ctx.send(f"**{perpetrator.mention}, you cannot use this on a bot!**")
-
-        if await self.is_user_knocked_out(perpetrator.id):
-            return await ctx.send(f"**{perpetrator.mention}, you can't use your skill, because you are knocked-out!**")
 
         target_sloth_profile = await self.get_sloth_profile(target.id)
         if not target_sloth_profile:
@@ -175,8 +181,8 @@ class Agares(Player):
     async def get_recharge_embed(self, channel, perpetrator_id: int, target_id: int) -> discord.Embed:
         """ Makes an embedded message for a recharge action.
         :param channel: The context channel.
-        :param perpetrator_id: The ID of the perpetrator of the magic pulling.
-        :param target_id: The ID of the target of the magic pulling. """
+        :param perpetrator_id: The ID of the perpetrator of the recharging.
+        :param target_id: The ID of the target of the recharging. """
 
         timestamp = await utils.get_timestamp()
 
@@ -217,6 +223,17 @@ class Agares(Player):
         if not target:
             target = ctx.author
 
+        if ctx.channel.id != bots_and_commands_channel_id:
+            return await ctx.send(f"**{perpetrator.mention}, you can only use this command in {self.bots_txt.mention}!**")
+
+        perpetrator_fx = await self.get_user_effects(perpetrator)
+
+        if 'knocked_out' in perpetrator_fx:
+            return await ctx.send(f"**{perpetrator.mention}, you can't use your skill, because you are knocked-out!**")
+
+        if target.bot:
+            return await ctx.send(f"**{perpetrator.mention}, you cannot use this on a bot!**")
+
         sloth_profile = await self.get_sloth_profile(target.id)
         if sloth_profile:
             return await ctx.send(f"**You cannot use this skill on someone who doesn't have a Sloth Profile, {perpetrator.mention}!**")
@@ -226,22 +243,57 @@ class Agares(Player):
 
         current_ts = await utils.get_timestamp()
         user_currency = await self.get_user_currency(perpetrator.id)
-        if user_currency[1] >= 100:
-            confirm = await ConfirmSkill(f"**Are you sure you want to use your reflect skill on {target.mention}, {perpetrator.mention}?**").prompt(ctx)
-            if not confirm:
-                return await ctx.send(f"**Not doing it then, {perpetrator.mention}!**")
-            try:
+        if user_currency[1] < 100:
+            return await ctx.send(f"**You don't have 100łł to use this skill, {perpetrator.mention}!**")
 
-                await self.insert_skill_action(
-                    user_id=perpetrator.id, skill_type="reflect", skill_timestamp=current_ts, target_id=target.id)
-                await self.update_user_money(perpetrator.id, -100)
-            except Exception as e:
-                print(e)
-                await ctx.send(f"**Something went wrong with this skill!**")
+        confirm = await ConfirmSkill(f"**Are you sure you want to use your reflect skill on {target.mention}, {perpetrator.mention}?**").prompt(ctx)
+        if not confirm:
+            return await ctx.send(f"**Not doing it then, {perpetrator.mention}!**")
 
+        _, exists = await Player.skill_on_cooldown(skill=Skill.THREE).predicate(ctx)
+        try:
+
+            await self.insert_skill_action(
+                user_id=perpetrator.id, skill_type="reflect", skill_timestamp=current_ts, target_id=target.id)
+            await self.update_user_money(perpetrator.id, -100)
+
+            if exists:
+                await self.update_user_skill_ts(perpetrator.id, Skill.THREE, current_ts)
             else:
-                pass
+                await self.insert_user_skill_cooldown(perpetrator.id, Skill.THREE, current_ts)
+
+            await self.update_user_skills_used(user_id=perpetrator.id)
+
+        except Exception as e:
+            print(e)
+            await ctx.send(f"**Something went wrong with this skill!**")
+
         else:
-            await ctx.send(f"**You don't have 100łł to use this skill, {perpetrator.mention}!**")
+            # Sends embedded message into the channel
+            reflect_embed = await self.get_reflect_embed(
+                channel=ctx.channel, perpetrator_id=perpetrator.id, target_id=target.id)
+
+            await ctx.send(embed=reflect_embed)
+
+    async def get_reflect_embed(self, channel, perpetrator_id: int, target_id: int) -> discord.Embed:
+        """ Makes an embedded message for a reflect action.
+        :param channel: The context channel.
+        :param perpetrator_id: The ID of the perpetrator of the reflect.
+        :param target_id: The ID of the target of the reflect. """
+
+        timestamp = await utils.get_timestamp()
+
+        reflect_embed = discord.Embed(
+            title="A Reflection Shield has been Put!",
+            timestamp=datetime.fromtimestamp(timestamp)
+        )
+        reflect_embed.description = f"**<@{perpetrator_id}> put a Reflection Shiled onto <@{target_id}>!** ↕️"
+        reflect_embed.color = discord.Color.green()
+
+        reflect_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Agares.png")
+        reflect_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon_url)
+        reflect_embed.set_image(url='https://media1.tenor.com/images/3fc942141e181ef927813f0a5a679193/tenor.gif?itemid=15706915')
+
+        return reflect_embed
 
 

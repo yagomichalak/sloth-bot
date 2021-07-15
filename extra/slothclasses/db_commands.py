@@ -290,12 +290,6 @@ class SlothClassDatabaseCommands(commands.Cog):
             knife_sharpness_stack TINYINT(1) DEFAULT 0,
             rings TINYINT(1) DEFAULT 0,
 
-            hacked TINYINT(1) DEFAULT 0,
-            protected TINYINT(1) DEFAULT 0,
-            knocked_out TINYINT(1) DEFAULT 0,
-            wired TINYINT(1) DEFAULT 0,
-            frogged TINYINT(1) DEFAULT 0,
-
             tribe_user_id BIGINT DEFAULT NULL
 
             PRIMARY KEY (user_id),

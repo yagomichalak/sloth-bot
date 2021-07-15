@@ -29,13 +29,15 @@ class Metamorph(Player):
 
         member = ctx.author
 
-        if await self.is_user_knocked_out(member.id):
+        member_fx = await self.get_user_effects(member)
+
+        if 'knocked_out' in member_fx:
             return await ctx.send(f"**{member.mention}, you can't use your skill, because you are knocked-out!**")
 
-        if await self.is_transmutated(member.id):
+        if 'transmutated' in member_fx:
             return await ctx.send(f"**You are already transmutated, {member.mention}!**")
 
-        confirmed = await ConfirmSkill(f"**{member.mention}, are you sure you want to transmutate yourself into a diffrent form for 1 hour?**").prompt(ctx)
+        confirmed = await ConfirmSkill(f"**{member.mention}, are you sure you want to transmutate yourself into a diffrent form for 1 day?**").prompt(ctx)
         if not confirmed:
             return await ctx.send(f"**{member.mention}, not transmutating, then!**")
 
@@ -50,11 +52,11 @@ class Metamorph(Player):
         if exists:
             await self.update_user_skill_ts(member.id, Skill.ONE, timestamp)
         else:
-            await self.insert_user_skill_cooldown(ctx.author.id, Skill.ONE, timestamp)
+            await self.insert_user_skill_cooldown(member.id, Skill.ONE, timestamp)
         # Updates user's skills used counter
         await self.update_user_skills_used(user_id=member.id)
 
-        transmutation_embed = await self.get_transmutation_embed(channel=ctx.channel, perpetrator_id=ctx.author.id)
+        transmutation_embed = await self.get_transmutation_embed(channel=ctx.channel, perpetrator_id=member.id)
         await ctx.send(embed=transmutation_embed)
 
     async def check_transmutations(self) -> None:
@@ -82,7 +84,6 @@ class Metamorph(Player):
         for f in frogs:
             try:
                 await self.delete_skill_action_by_target_id_and_skill_type(f[3], 'frog')
-                await self.update_user_frogged(f[3], 0)
 
                 channel = self.bots_txt
 
@@ -108,16 +109,26 @@ class Metamorph(Player):
 
         attacker = ctx.author
 
+        attacker_effects = await self.get_user_effects(member=attacker)
+
+        if 'knocked_out' in attacker_effects:
+            return await ctx.send(f"**{attacker.mention}, you can't use your skill, because you are knocked-out!**")
+
         if not target:
             return await ctx.send(f"**Please, inform a target to frog, {attacker.mention}!**")
 
         if target.id == attacker.id:
             return await ctx.send(f"**You cannot frog yourself, {attacker.mention}!**")
 
-        attacker_effects = await self.get_user_effects(member=attacker)
+        if target.bot:
+            return await ctx.send(f"**{attacker.mention}, you cannot frog a bot!**")
 
-        if 'knocked_out' in attacker_effects:
-            return await ctx.send(f"**{attacker.mention}, you can't use your skill, because you are knocked-out!**")
+        target_sloth_profile = await self.get_sloth_profile(target.id)
+        if not target_sloth_profile:
+            return await ctx.send(f"**You cannot frog someone who doesn't have an account, {attacker.mention}!**")
+
+        if target_sloth_profile[1] == 'default':
+            return await ctx.send(f"**You cannot frog someone who has a `default` Sloth class, {attacker.mention}!**")
 
         target_effects = await self.get_user_effects(member=target)
 
@@ -146,8 +157,6 @@ class Metamorph(Player):
                 await self.insert_user_skill_cooldown(ctx.author.id, Skill.TWO, timestamp)
             # Updates user's skills used counter
             await self.update_user_skills_used(user_id=attacker.id)
-
-            await self.update_user_frogged(target.id, 1)
         except Exception as e:
             print(e)
             await ctx.send(f"**Something went wrong with it, {attacker.mention}!**")
@@ -193,16 +202,6 @@ class Metamorph(Player):
         transmutation_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon_url)
 
         return transmutation_embed
-
-    async def update_user_frogged(self, user_id: int, frogged: int) -> None:
-        """ Updates the user's frog state.
-        :param user_id: The ID of the member to update.
-        :param frog: Whether it's gonna be set to true or false. """
-
-        mycursor, db = await the_database()
-        await mycursor.execute("UPDATE SlothProfile SET frogged = %s WHERE user_id = %s", (frogged, user_id))
-        await db.commit()
-        await mycursor.close()
 
 
     @commands.command()

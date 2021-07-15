@@ -131,8 +131,8 @@ class Player(commands.Cog):
         general_cooldown = 86400 # Worth a day in seconds
         
 
-        if await self.is_user_protected(user_id=member.id):
-            then = await self.get_skill_action_by_target_id_and_skill_type(target_id=member.id, skill_type='divine_protection')
+
+        if then := await self.get_skill_action_by_target_id_and_skill_type(target_id=member.id, skill_type='divine_protection'):
             effects['protected'] = {}
     
             effects['protected']['cooldown'] = f"Ends <t:{int(then[2]) + general_cooldown}:R>" if then else 'Ends in ??'
@@ -142,8 +142,8 @@ class Player(commands.Cog):
             effects['protected']['has_gif'] = True
             effects['protected']['debuff'] = False
 
-        if await self.is_transmutated(user_id=member.id):
-            then = await self.get_skill_action_by_target_id_and_skill_type(target_id=member.id, skill_type='transmutation')
+
+        if then := await self.get_skill_action_by_target_id_and_skill_type(target_id=member.id, skill_type='transmutation'):
             effects['transmutated'] = {}
             effects['transmutated']['cooldown'] = f"Ends <t:{int(then[2]) + general_cooldown}:R>" if then else 'Ends in ??'
             effects['transmutated']['frames'] = []
@@ -152,8 +152,8 @@ class Player(commands.Cog):
             effects['transmutated']['has_gif'] = True
             effects['transmutated']['debuff'] = False
 
-        if await self.is_user_hacked(user_id=member.id):
-            then = await self.get_skill_action_by_target_id_and_skill_type(target_id=member.id, skill_type='hack')
+
+        if then := await self.get_skill_action_by_target_id_and_skill_type(target_id=member.id, skill_type='hack'):
             effects['hacked'] = {}
             effects['hacked']['cooldown'] = f"Ends <t:{int(then[2]) + general_cooldown}:R>" if then else 'Ends in ??'
             effects['hacked']['frames'] = []
@@ -161,8 +161,8 @@ class Player(commands.Cog):
             effects['hacked']['resize'] = None
             effects['hacked']['debuff'] = True
 
-        if await self.is_user_wired(user_id=member.id):
-            then = await self.get_skill_action_by_target_id_and_skill_type(target_id=member.id, skill_type='wire')
+
+        if then := await self.get_skill_action_by_target_id_and_skill_type(target_id=member.id, skill_type='wire'):
             effects['wired'] = {}
             effects['wired']['cooldown'] = f"Ends <t:{int(then[2]) + general_cooldown}:R>" if then else 'Ends in ??'
             effects['wired']['frames'] = []
@@ -170,8 +170,8 @@ class Player(commands.Cog):
             effects['wired']['resize'] = None
             effects['wired']['debuff'] = True
 
-        if await self.is_user_knocked_out(user_id=member.id):
-            then = await self.get_skill_action_by_target_id_and_skill_type(target_id=member.id, skill_type='knock_out')
+
+        if then := await self.get_skill_action_by_target_id_and_skill_type(target_id=member.id, skill_type='knock_out'):
             effects['knocked_out'] = {}
             effects['knocked_out']['cooldown'] = f"Ends <t:{int(then[2]) + general_cooldown}:R>" if then else 'Ends in ??'
             effects['knocked_out']['frames'] = []
@@ -179,8 +179,8 @@ class Player(commands.Cog):
             effects['knocked_out']['resize'] = None
             effects['knocked_out']['debuff'] = True
 
-        if await self.is_user_frogged(user_id=member.id):
-            then = await self.get_skill_action_by_target_id_and_skill_type(target_id=member.id, skill_type='frog')
+
+        if then := await self.get_skill_action_by_target_id_and_skill_type(target_id=member.id, skill_type='frog'):
             effects['frogged'] = {}
             effects['frogged']['cooldown'] = f"Ends <t:{int(then[2]) + general_cooldown}:R>" if then else 'Ends in ??'
             effects['frogged']['frames'] = []
@@ -195,6 +195,14 @@ class Player(commands.Cog):
             effects['munk']['cords'] = (0, 0)
             effects['munk']['resize'] = None
             effects['munk']['debuff'] = True
+
+        if then := await self.get_skill_action_by_target_id_and_skill_type(target_id=member.id, skill_type='reflect'):
+            effects['reflect'] = {}
+            effects['reflect']['cooldown'] = f"Ends <t:{int(then[2]) + general_cooldown}:R>" if then else 'Ends in ??'
+            effects['reflect']['frames'] = []
+            effects['reflect']['cords'] = (0, 0)
+            effects['reflect']['resize'] = None
+            effects['reflect']['debuff'] = False
 
         return effects
 
@@ -527,6 +535,18 @@ class Player(commands.Cog):
         await db.commit()
         await mycursor.close()
 
+    async def delete_debuff_skill_action_by_target_id(self, target_id: int) -> None:
+        """ Deletes debuff skill actions by target ID.
+        :param target_id: The ID of the target member. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("""
+        DELETE FROM SlothSkills WHERE target_id = %s
+        WHERE skill_type IN ('hack', 'wire', 'frog', 'hit')
+        """, (target_id,))
+        await db.commit()
+        await mycursor.close()
+
     async def delete_skill_action_by_target_id_and_skill_type(self, target_id: int, skill_type: str, multiple: bool = False) -> None:
         """ Deletes a skill action by target ID.
         :param target_id: The ID of the target member.
@@ -571,19 +591,6 @@ class Player(commands.Cog):
         mycursor, db = await the_database()
         sql = "UPDATE SkillsCooldown SET " + skill.value + " = %s WHERE user_id = %s"
         await mycursor.execute(sql, (new_skill_ts, user_id))
-        await db.commit()
-        await mycursor.close()
-
-    async def update_user_debuffs(self, user_id: int, on_off: int = 0) -> None:
-        """ Updates all available debuffs for an user to on or off.
-        :param user_id: The ID of the user.
-        :param on_off: Whether it's gonna be set to on or off. (0 = off | 1 = on).
-        Default = 0. """
-
-        mycursor, db = await the_database()
-        await mycursor.execute("""
-        UPDATE SlothProfile SET hacked = %s, knocked_out = %s, frogged = %s, wired = %s
-        WHERE user_id = %s""", (on_off, on_off, on_off, on_off, user_id))
         await db.commit()
         await mycursor.close()
 

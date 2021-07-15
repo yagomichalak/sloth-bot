@@ -73,11 +73,16 @@ class Prawler(Player):
 
 		attacker = ctx.author
 
-		if await self.is_user_knocked_out(attacker.id):
+		attacker_fx = await self.get_user_effects(attacker)
+
+		if 'knocked_out' in attacker_fx:
 			return await ctx.send(f"**{attacker.mention}, you can't use your skill, because you are knocked-out!**")
 
 		if not target:
 			return await ctx.send(f"**Inform a member to steal, {attacker.mention}!**")
+
+		if target.bot:
+			return await ctx.send(f"**You cannot steal from a bot, {attacker.mention}!**")
 
 		if attacker.id == target.id:
 			return await ctx.send("**You cannot steal from yourself!**")
@@ -89,7 +94,9 @@ class Prawler(Player):
 		if target_sloth_profile[1] == 'default':
 			return await ctx.send(f"**You cannot steal from someone who has a `default` Sloth class, {attacker.mention}!**")
 
-		if await self.is_user_protected(target.id):
+		target_fx = await self.get_user_effects(target)
+
+		if 'protected' in target_fx:
 			return await ctx.send(f"**{attacker.mention}, you cannot steal from {target.mention}, because they are protected against attacks!**")
 
 		confirmed = await ConfirmSkill(f"**{attacker.mention}, are you sure you want to steal from {target.mention}?**").prompt(ctx)
@@ -133,7 +140,7 @@ class Prawler(Player):
 	@Player.skill_mark()
 	async def sharpen(self, ctx) -> None:
 		""" Sharpen one's blade so when stealing from someone,
-		it has a 35% chance of doubling the stolen money and stealing it from them as a bonus (if they have the money).
+		it has a 50% chance of doubling the stolen money and stealing it from them as a bonus (if they have the money).
 		The blade can be sharpened up to 5 times. """
 
 		if ctx.channel.id != bots_and_commands_channel_id:
@@ -141,7 +148,9 @@ class Prawler(Player):
 
 		perpetrator = ctx.author
 
-		if await self.is_user_knocked_out(perpetrator.id):
+		perpetrator_fx = await self.get_user_effects(perpetrator)
+
+		if 'knocked_out' in perpetrator_fx:
 			return await ctx.send(f"**{perpetrator.mention}, you can't use your skill, because you are knocked-out!**")
 
 		user = await self.get_user_currency(perpetrator.id)
@@ -229,8 +238,8 @@ class Prawler(Player):
 
 		rob_money = init_rob_money * 2
 
-		# Calculates a 35% chance of doubling the previous steal amount
-		if random.random() <= 0.35:
+		# Calculates a 50% chance of doubling the previous steal amount
+		if random.random() <= 0.5:
 			try:
 				target_currency = await self.get_user_currency(target_id)
 				# Checks whether target still has money to be robbed from
@@ -252,7 +261,7 @@ class Prawler(Player):
 
 		else:
 			await channel.send(
-				f"**<@{attacker_id}>, you had a `35%` chance of doubling the previous amount and getting more `{rob_money}łł`, but you missed it!**")
+				f"**<@{attacker_id}>, you had a `50%` chance of doubling the previous amount and getting more `{rob_money}łł`, but you missed it!**")
 
 	async def increments_user_sharpness_stack(self, user_id: int, increment: int) -> None:
 		""" Increments the user knife sharpness stack.
@@ -341,7 +350,7 @@ class Prawler(Player):
 		rob_doubled_embed.description = f"<@{attacker_id}> managed to double their stealing, and got more `{double_amount}łł` 🔪🍃"
 		rob_doubled_embed.color = discord.Color.green()
 
-		rob_doubled_embed.set_author(name=f"Rob stack {rob_stack} (35% chance)", icon_url=self.client.user.avatar_url)
+		rob_doubled_embed.set_author(name=f"Rob stack {rob_stack} (50% chance)", icon_url=self.client.user.avatar_url)
 		rob_doubled_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Prawler.png")
 		rob_doubled_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon_url)
 

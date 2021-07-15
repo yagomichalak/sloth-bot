@@ -32,46 +32,55 @@ class Seraph(Player):
         :param target: The target member. (Optional)
         PS: If target not provided, you are the target. """
 
-        if ctx.channel.id != bots_and_commands_channel_id:
-            return await ctx.send(f"**{ctx.author.mention}, you can only use this command in {self.bots_txt.mention}!**")
+        perpetrator = ctx.author
 
-        if await self.is_user_knocked_out(ctx.author.id):
-            return await ctx.send(f"**{ctx.author.mention}, you can't use your skill, because you are knocked-out!**")
+        if ctx.channel.id != bots_and_commands_channel_id:
+            return await ctx.send(f"**{perpetrator.mention}, you can only use this command in {self.bots_txt.mention}!**")
+
+        perpetrator_fx = await self.get_user_effects(perpetrator)
+
+        if 'knocked_out' in perpetrator_fx:
+            return await ctx.send(f"**{perpetrator.mention}, you can't use your skill, because you are knocked-out!**")
 
         if not target:
-            target = ctx.author
+            target = perpetrator
+
+        if target.bot:
+            return await ctx.send(f"**You cannot protect a bot, {perpetrator.mention}!**")
 
         target_sloth_profile = await self.get_sloth_profile(target.id)
         if not target_sloth_profile:
-            return await ctx.send(f"**You cannot protect someone who doesn't have an account, {ctx.author.mention}!**")
+            return await ctx.send(f"**You cannot protect someone who doesn't have an account, {perpetrator.mention}!**")
 
         if target_sloth_profile[1] == 'default':
-            return await ctx.send(f"**You cannot protect someone who has a `default` Sloth class, {ctx.author.mention}!**")
+            return await ctx.send(f"**You cannot protect someone who has a `default` Sloth class, {perpetrator.mention}!**")
 
-        if await self.is_user_protected(target.id):
-            return await ctx.send(f"**{target.mention} is already protected, {ctx.author.mention}!**")
+        target_fx = await self.get_user_effects(target)
 
-        confirmed = await ConfirmSkill(f"**{ctx.author.mention}, are you sure you want to use your skill, to protect {target.mention}?**").prompt(ctx)
-        if confirmed:
-            _, exists = await Player.skill_on_cooldown(skill=Skill.ONE).predicate(ctx)
-            current_timestamp = await utils.get_timestamp()
-            await self.insert_skill_action(
-                user_id=ctx.author.id, skill_type="divine_protection", skill_timestamp=current_timestamp,
-                target_id=target.id, channel_id=ctx.channel.id
-            )
-            await self.update_user_protected(target.id, 1)
-            if exists:
-                await self.update_user_skill_ts(ctx.author.id, Skill.ONE, current_timestamp)
-            else:
-                await self.insert_user_skill_cooldown(ctx.author.id, Skill.ONE, current_timestamp)
+        if 'protected' in target_fx:
+            return await ctx.send(f"**{target.mention} is already protected, {perpetrator.mention}!**")
 
-            # Updates user's skills used counter
-            await self.update_user_skills_used(user_id=ctx.author.id)
-            divine_protection_embed = await self.get_divine_protection_embed(
-                channel=ctx.channel, perpetrator_id=ctx.author.id, target_id=target.id)
-            await ctx.send(embed=divine_protection_embed)
+        confirmed = await ConfirmSkill(f"**{perpetrator.mention}, are you sure you want to use your skill, to protect {target.mention}?**").prompt(ctx)
+        if not confirmed:
+            return await ctx.send("**Not protecting anyone, then!**")
+
+        _, exists = await Player.skill_on_cooldown(skill=Skill.ONE).predicate(ctx)
+        current_timestamp = await utils.get_timestamp()
+        await self.insert_skill_action(
+            user_id=perpetrator.id, skill_type="divine_protection", skill_timestamp=current_timestamp,
+            target_id=target.id, channel_id=ctx.channel.id
+        )
+        if exists:
+            await self.update_user_skill_ts(perpetrator.id, Skill.ONE, current_timestamp)
         else:
-            await ctx.send("**Not protecting anyone, then!**")
+            await self.insert_user_skill_cooldown(perpetrator.id, Skill.ONE, current_timestamp)
+
+        # Updates user's skills used counter
+        await self.update_user_skills_used(user_id=perpetrator.id)
+        divine_protection_embed = await self.get_divine_protection_embed(
+            channel=ctx.channel, perpetrator_id=perpetrator.id, target_id=target.id)
+        await ctx.send(embed=divine_protection_embed)
+            
 
     @commands.command()
     @Player.skills_used(requirement=5)
@@ -88,7 +97,9 @@ class Seraph(Player):
         if ctx.channel.id != bots_and_commands_channel_id:
             return await ctx.send(f"**{perpetrator.mention}, you can only use this command in {self.bots_txt.mention}!**")
 
-        if await self.is_user_knocked_out(perpetrator.id):
+        perpetrator_fx = await self.get_user_effects(perpetrator)
+
+        if 'knocked_out' in perpetrator_fx:
             return await ctx.send(f"**{perpetrator.mention}, you can't use your skill, because you are knocked-out!**")
 
         # Gets all active Divine Protection shields from the user
@@ -139,7 +150,7 @@ class Seraph(Player):
             await ctx.send(f"**You had a `50%` chance of reinforcing all active Divine Protection shields, but you missed it, {perpetrator.mention}!**")
 
         # Checks whether the perpetrator already has a Divien Protection shield
-        if not await self.is_user_protected(perpetrator.id):
+        if 'protected' not in perpetrator_fx:
             n2 = random.random()
             # Calculates the chance (45%) of getting a shield for the perpetrator
             if n2 <= 0.45:
@@ -150,7 +161,6 @@ class Seraph(Player):
                         user_id=perpetrator.id, skill_type="divine_protection", skill_timestamp=current_timestamp,
                         target_id=perpetrator.id, channel_id=ctx.channel.id
                     )
-                    await self.update_user_protected(perpetrator.id, 1)
 
                 except Exception as e:
                     print(e)
@@ -168,7 +178,6 @@ class Seraph(Player):
 
         divine_protections = await self.get_expired_protections()
         for dp in divine_protections:
-            await self.update_user_protected(dp[3], 0)
             await self.delete_skill_action_by_target_id_and_skill_type(dp[3], 'divine_protection')
 
             channel = self.bots_txt
@@ -178,16 +187,6 @@ class Seraph(Player):
                 embed=discord.Embed(
                     description=f"**<@{dp[3]}>'s `Divine Protection` from <@{dp[0]}> just expired!**",
                     color=discord.Color.red()))
-
-    async def update_user_protected(self, user_id: int, protected: int) -> None:
-        """ Updates the user's protected state.
-        :param user_id: The ID of the member to update.
-        :param protected: Whether it's gonna be set to true or false. """
-
-        mycursor, db = await the_database()
-        await mycursor.execute("UPDATE SlothProfile SET protected = %s WHERE user_id = %s", (protected, user_id))
-        await db.commit()
-        await mycursor.close()
 
     async def reinforce_shields(self, perpetrator_id: int) -> None:
         """ Reinforces all active Divine Protection shields.
@@ -289,15 +288,26 @@ class Seraph(Player):
 
         perpetrator = ctx.author
 
+        if ctx.channel.id != bots_and_commands_channel_id:
+            return await ctx.send(f"**{perpetrator.mention}, you can only use this command in {self.bots_txt.mention}!**")
+
+        perpetrator_fx = await self.get_user_effects(perpetrator)
+
+        if 'knocked_out' in perpetrator_fx:
+            return await ctx.send(f"**{perpetrator.mention}, you can't use your skill, because you are knocked-out!**")
+
         if not target:
-            target = ctx.author
+            target = perpetrator
+
+        if target.bot:
+            return await ctx.send(f"**You cannot heal a bot, {perpetrator.mention}!**")
 
         target_sloth_profile = await self.get_sloth_profile(target.id)
         if not target_sloth_profile:
-            return await ctx.send(f"**You cannot protect someone who doesn't have an account, {ctx.author.mention}!**")
+            return await ctx.send(f"**You cannot protect someone who doesn't have an account, {perpetrator.mention}!**")
 
         if target_sloth_profile[1] == 'default':
-            return await ctx.send(f"**You cannot protect someone who has a `default` Sloth class, {ctx.author.mention}!**")
+            return await ctx.send(f"**You cannot protect someone who has a `default` Sloth class, {perpetrator.mention}!**")
 
 
         effects = await self.get_user_effects(target)
@@ -307,7 +317,7 @@ class Seraph(Player):
             return await ctx.send(f"**{target.mention} doesn't have any active debuff, {perpetrator.mention}!**")
 
         user = await self.get_user_currency(perpetrator.id)
-        if not user[1] >= 100:
+        if user[1] < 100:
             return await ctx.send(f"**You don't have `100łł` to use this skill, {perpetrator.mention}!**")
 
         confirm = await ConfirmSkill(f"**Do you really want to heal {target.mention} from all debuffs, {perpetrator.mention}?**").prompt(ctx)
@@ -362,8 +372,7 @@ class Seraph(Player):
                 print(e)
                 continue
         
-        await self.update_user_debuffs(member.id)
-        await self.delete_skill_action_by_target_id(member.id)
+        await self.delete_debuff_skill_action_by_target_id(member.id)
         return debuffs_removed
 
     async def make_heal_embed(self, target: discord.Member, perpetrator: discord.Member, debuffs_removed: int) -> discord.Embed:
