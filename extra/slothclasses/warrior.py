@@ -86,6 +86,9 @@ class Warrior(Player):
         except Exception as e:
             print(e)
             return await ctx.send(f"**Something went wrong and your `Hit` skill failed, {attacker.mention}!**")
+        else:
+            if 'reflect' in target_fx:
+                await self.reflect_attack(ctx, attacker, target, 'hit')
 
     @commands.command(aliases=['crush', 'break'])
     @Player.skills_used(requirement=5)
@@ -160,6 +163,9 @@ class Warrior(Player):
                 smash_embed = await self.get_smash_embed(
                 channel=ctx.channel, perpetrator_id=attacker.id, target_id=target.id)
                 await ctx.send(embed=smash_embed)
+                if 'reflect' in target_fx and 'protected' in attacker_fx:
+                    await self.delete_skill_action_by_target_id_and_skill_type(attacker.id, 'divine_protection')
+                    await self.reflect_attack(ctx, attacker, target, 'smash')
         else:
             await ctx.send(f"**You had a `50%` chance of smashing {target.mention}'s Divine Protection shield, but you missed it, {attacker.mention}!**")
 

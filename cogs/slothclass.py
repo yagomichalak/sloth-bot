@@ -40,6 +40,7 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
     async def check_skill_actions(self):
         """ Checks all skill actions and events. """
 
+        await self.try_to_run(self.check_reflects)
         await self.try_to_run(self.check_steals)
         await self.try_to_run(self.check_protections)
         await self.try_to_run(self.check_transmutations)
