@@ -106,8 +106,8 @@ different_class_roles = {
     "portuguese": [
         "brazilian portuguese", "portuguese from brazil", 
         "portuguese", "angolan portuguese",
-        "portuguese from angola", "portuguese from portugal",
-         "portuguese portuguese", "português"
+        "portuguese from angola", "portuguese from portugal", 
+        "portuguese portuguese", "português", "portugués"
     ],
     "english": [
         "english", "inglés", "inglês", "anglais",
@@ -115,7 +115,7 @@ different_class_roles = {
         "ingilizce", "inggris", "영어"
     ],
     "german": [
-        "almanca", "allemand", "aléman", "jerman", "deutsch"
+        "almanca", "allemand", "aléman", "jerman", "deutsch", "آلمانی"
     ],
     "french": [
         "fransızca","francés", "francês", "français"
