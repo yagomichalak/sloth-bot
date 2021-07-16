@@ -389,11 +389,12 @@ class TeacherFeedback(commands.Cog):
         # teacher, txt_id, vc_id, language, class_type, vc_timestamp, vc_time, members, class_desc)
 
         # Checks whether the class duration was greater or equal than 10 minutes.
-        if int(teacher_class[6]) >= 600:
+        if int(teacher_class[6]) >= 5:#600:
 
             await self.show_class_history(member, teacher_class)
 
             await self.db.update_all_user_classes([(uf[0],) for uf in users_feedback])
+            print('ALL USERS', [(uf[0],) for uf in users_feedback])
 
             await self.ask_class_reward(member, teacher_class, users_feedback)
 
@@ -462,12 +463,13 @@ class TeacherFeedback(commands.Cog):
         # Checks the class' requirements based on the type of the class (Grammar, Pronunciation)
         active_users = []
         if users_feedback:
-            if class_type.title() == 'Pronunciation':
-                active_users = [uf for uf in users_feedback if uf[3] >= 1800]
-            elif class_type.title() == 'Grammar':
-                active_users = [uf for uf in users_feedback if uf[1] >= 5]
-            elif class_type.title() == 'Programming':
-                active_users = [uf for uf in users_feedback if uf[3] >= 1800]
+            active_users = [uf for uf in users_feedback]
+            # if class_type.title() == 'Pronunciation':
+            #     active_users = [uf for uf in users_feedback if uf[3] >= 1800]
+            # elif class_type.title() == 'Grammar':
+            #     active_users = [uf for uf in users_feedback if uf[1] >= 5]
+            # elif class_type.title() == 'Programming':
+            #     active_users = [uf for uf in users_feedback if uf[3] >= 1800]
 
         formatted_active_users = [
             (msg.id, u[0], u[1], u[3], teacher.id, class_type, language) for u in active_users
@@ -554,7 +556,8 @@ class TeacherFeedback(commands.Cog):
                     if await SlothCurrency.get_user_currency(member.id):
                         await SlothCurrency.update_user_money(member.id, 10)
                         await SlothCurrency.update_user_class_reward(ru[0])
-                except:
+                except Exception as e:
+                    print('e', e)
                     pass
 
             rewarded_members_text = ', '.join(rewarded_members_text) if rewarded_members_text else "No one got rewarded!"
@@ -564,7 +567,8 @@ class TeacherFeedback(commands.Cog):
                 try:
                     await SlothCurrency.update_user_money(teacher.id, 50)
                     await SlothCurrency.update_user_hosted(teacher.id)
-                except:
+                except Exception as e:
+                    print('e', e)
                     pass
 
             commands_channel = discord.utils.get(teacher.guild.channels, id=bot_commands_channel_id)
@@ -1142,7 +1146,7 @@ class TeacherFeedbackDatabaseSelect:
 
         mycursor, db = await the_database()
 
-        await mycursor.execute("SELECT *, COUNT(*) FROM RewardStudents WHERE reward_message = %s and teacher_id = %s", (msg_id, teacher_id))
+        await mycursor.execute("SELECT * FROM RewardStudents WHERE reward_message = %s and teacher_id = %s", (msg_id, teacher_id))
         users = await mycursor.fetchall()
         await mycursor.close()
 
