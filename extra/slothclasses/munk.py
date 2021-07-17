@@ -679,7 +679,7 @@ class Munk(Player):
     @Player.skill_on_cooldown(skill=Skill.THREE)
     @Player.user_is_class('munk')
     @Player.skill_mark()
-    @Player.not_ready()
+    # @Player.not_ready()
     async def create_tribe_role(self, ctx, role_name: str = None) -> None:
         """ Creates a tribe role.
     
@@ -888,7 +888,7 @@ class Munk(Player):
         if not tribe_role:
             return await ctx.send(f"**You don't have a Tribe Role with that name, {owner.mention}!**")
 
-        confirm = await ConfirmSkill(f"**Are you sure you want to promote {member.mention} to `{tribe_role[2]}`, {owner.mention}?**").prompt(ctx)
+        confirm = await ConfirmSkill(f"**Are you sure you want to demote {member.mention} from `{tribe_role[2]}` to `Member`, {owner.mention}?**").prompt(ctx)
         if not confirm:
             return await ctx.send(f"**Not doing it then, {owner.mention}!**")
 
@@ -898,7 +898,7 @@ class Munk(Player):
             print(e)
             await ctx.send(f"**Something went wrong with it, {owner.mention}!**")
         else:
-            await ctx.send(f"**Successfully promoted {member.mention} to `{tribe_role[2]}`, {owner.mention}!**")
+            await ctx.send(f"**Successfully demote {member.mention} from `{tribe_role[2]}` to `Member`, {owner.mention}!**")
 
     @tribe.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
