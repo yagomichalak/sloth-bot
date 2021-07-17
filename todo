@@ -1,0 +1,9 @@
+To-do:
+- Start and Finish Metamorph's 3rd Skill: Mirror.
+- Devise a 3rd Skill for Prawlers and Warriors.
+- Start and Finish the z!marry command.
+
+- Migrate to discord.py 2.0a
+    - Implement a new Role Selection menu with buttons
+    - Update and existing code fixing breaking changes and change the old button syntax to the new official one.
+    - Implement a UI Selection menu for choosing the different kinds of report-support channels in the user's DM's.
