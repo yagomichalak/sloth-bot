@@ -237,7 +237,7 @@ class SwitchTribePages(menus.ListPageSource):
     def __init__(self, data, **kwargs):
         """ Class initializing method. """
 
-        super().__init__(data, per_page=15)
+        super().__init__(data, per_page=10)
         self.tribe = kwargs.get('tribe')
         self.change_embed = kwargs.get('change_embed')
 

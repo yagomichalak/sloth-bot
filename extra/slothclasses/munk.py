@@ -1,15 +1,12 @@
 import discord
-from discord import user
-from discord.channel import TextChannel
 from discord.ext import commands, menus
-from discord.utils import maybe_coroutine
 from .player import Player, Skill
 from mysqldb import the_database, the_django_database
 from extra.menu import ConfirmSkill, SwitchTribePages
 from extra import utils
 import os
 from datetime import datetime
-from typing import List, Union, Dict, Any
+from typing import List, Union, Dict, Any, Optional
 import asyncio
 
 bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
@@ -158,10 +155,10 @@ class Munk(Player):
 
         munk_embed = discord.Embed(
             title="A Munk Convertion has been delightfully performed!",
+            description=f"🐿️ <@{perpetrator_id}> converted <@{target_id}> into a `Munk`! 🐿️",
+            color = discord.Color.green(),
             timestamp=datetime.fromtimestamp(timestamp)
         )
-        munk_embed.description = f"🐿️ <@{perpetrator_id}> converted <@{target_id}> into a `Munk`! 🐿️"
-        munk_embed.color = discord.Color.green()
 
         munk_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Munk.png")
         munk_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon_url)
@@ -224,7 +221,7 @@ class Munk(Player):
 
         return tribe_info
 
-    async def get_tribe_info_by_user_id(self, user_id: str) -> Dict[str, Union[str, int]]:
+    async def get_tribe_info_by_user_id(self, user_id: int) -> Dict[str, Union[str, int]]:
         """ Gets information about a specific tribe.
         :param user_id: The ID of the user owner of the tribe. """
 
@@ -272,19 +269,20 @@ class Munk(Player):
         :param tribe_name: The name of the tribe. (Optional).
         Ps: At least one of the parameters has to be provided. """
 
-        mycursor, db = await the_database()
+        mycursor, _ = await the_database()
 
         tribe_members: Dict[str, List[int]] = {}
 
         if tribe_owner_id:
             await mycursor.execute("SELECT tribe_name FROM UserTribe WHERE user_id = %s", (tribe_owner_id,))
             tribe = await mycursor.fetchone()
-            await mycursor.execute("SELECT user_id FROM SlothProfile WHERE tribe = %s", (tribe[0],))
+            await mycursor.execute("SELECT member_id, tribe_role FROM TribeMember WHERE tribe_name = %s", (tribe[0],))
             tribe_members = await mycursor.fetchall()
 
         elif tribe_name:
-            await mycursor.execute("SELECT user_id FROM SlothProfile WHERE tribe = %s", (tribe_name,))
-            tribe_members = list(map(lambda mid: mid[0], await mycursor.fetchall()))
+            await mycursor.execute("SELECT member_id, tribe_role FROM TribeMember WHERE tribe_name = %s", (tribe_name,))
+            tribe_members = await mycursor.fetchall()
+            # tribe_members = list(map(lambda mid: (mid[0], mid[1]), await mycursor.fetchall()))
 
         await mycursor.close()
 
@@ -408,9 +406,34 @@ class Munk(Player):
         else:
             await ctx.send(f"**{member.mention} refused your invitation to join `{tribe_member[1]}`, {inviter.mention}!**")
 
-    @commands.command()
+
+    @commands.group(aliases=['tb'])
+    async def tribe(self, ctx) -> None:
+        """ Command for managing and interacting with a tribe.
+        (Use this without a subcommand to see all subcommands available)
+        __**Example:**__
+    ```ini\nz!tribe see\nz!tribe promote @DNK King"""
+        if ctx.invoked_subcommand:
+            return
+
+        cmd = self.client.get_command('tribe')
+        prefix = self.client.command_prefix
+        subcommands = [f"{prefix}{c.qualified_name}" for c in cmd.commands
+            ]
+
+        subcommands = '\n'.join(subcommands)
+        items_embed = discord.Embed(
+            title="__Subcommads__:",
+            description=f"```apache\n{subcommands}```",
+            color=ctx.author.color,
+            timestamp=ctx.message.created_at
+        )
+
+        await ctx.send(embed=items_embed)
+
+    @tribe.command(aliases=['view', 'display', 'show'])
     @commands.cooldown(1, 10, commands.BucketType.user)
-    async def tribe(self, ctx, *, name: str = None) -> None:
+    async def see(self, ctx, *, name: str = None) -> None:
         """ Shows some information about a tribe.
         If not provided a tribe name, it will check the one the user is in.
         :param name: The tribe name. """
@@ -434,7 +457,7 @@ class Munk(Player):
         # Gets all tribe members
         tribe_members = await self.get_tribe_members(tribe_name=tribe['name'])
 
-        all_members = list(map(lambda mid: f"<@{mid}>", tribe_members))
+        all_members = list(map(lambda mid: f"<@{mid[0]}> ({mid[1]})", tribe_members))
 
         # Additional data:
         additional = {
@@ -462,8 +485,6 @@ class Munk(Player):
         if tribe_owner:
             tribe_embed.set_author(name=f"Owner: {tribe_owner}", icon_url=tribe_owner.avatar_url, url=tribe_owner.avatar_url)
 
-        # tribe_embed.set_footer(text=f"Requested by {ctx.author}", icon_url=ctx.author.avatar_url)
-
         tribe_embed.add_field(name="__Members:__", value=', '.join(entries), inline=False)
 
         for i, v in enumerate(entries, start=offset):
@@ -471,7 +492,7 @@ class Munk(Player):
 
         return tribe_embed
 
-    @commands.command(aliases=['expel', 'kick_out', 'can_i_show_you_the_door?'])
+    @tribe.command(aliases=['kick', 'expel', 'kick_out', 'can_i_show_you_the_door?'])
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def kickout(self, ctx, member: Union[discord.Member, discord.User] = None) -> None:
         """ Exepels someone from your tribe.
@@ -517,9 +538,9 @@ class Munk(Player):
         else:
             await ctx.send(f"**You successfully kicked {member.mention} out of `{user_tribe['name']}`, {expeller.mention}!**")
 
-    @commands.command()
+    @tribe.command()
     @commands.cooldown(1, 10, commands.BucketType.user)
-    async def leave_tribe(self, ctx) -> None:
+    async def leave(self, ctx) -> None:
         """ Leaves the tribe the user is in. """
 
         member = ctx.author
@@ -653,8 +674,7 @@ class Munk(Player):
 
         await ctx.send(embed=tribe_embed, components=[compo])
 
-
-    @commands.command()
+    @commands.command(aliases=['add_tribe_role', 'createtriberole', 'addtriberole'])
     @Player.skills_used(requirement=20)
     @Player.skill_on_cooldown(skill=Skill.THREE)
     @Player.user_is_class('munk')
@@ -671,14 +691,318 @@ class Munk(Player):
         
         Ps: It is not an actual server role. """
 
+        perpetrator = ctx.author
+
+        # Do the magic here.
+        if ctx.channel.id != self.bots_txt.id:
+            return await ctx.send(f"**{perpetrator.mention}, you can only use this command in {self.bots_txt.mention}!**")
+
+        perpetrator_fx = await self.get_user_effects(perpetrator)
+
+        if 'knocked_out' in perpetrator_fx:
+            return await ctx.send(f"**{perpetrator.mention}, you can't use this skill, because you are knocked-out!**")
+
+        user_tribe = await self.get_tribe_info_by_user_id(perpetrator.id)
+        if not user_tribe['name']:
+            return await ctx.send(f"**You don't have a tribe, {perpetrator.mention}**!")
+
+        if not role_name:
+            return await ctx.send(f"**Please, inform a Tribe Role name, {perpetrator.mention}!**")
+
+        if len(role_name) > 30:
+            return await ctx.send(f"**Please, infom a Tribe Role name under or equal to 30 characters, {perpetrator.mention}!**")
+        
+        if role_name.lower() in ['owner', 'member']:
+            return await ctx.send(f"**You cannot use this as your Tribe Role's name, {perpetrator.mention}!**")
+
+        tribe_roles = await self.get_tribe_roles(perpetrator.id)
+        if role_name.lower() in [trole[2].lower() for trole in tribe_roles]:
+            return await ctx.send(f"**You already have a Tribe Role with that name, {perpetrator.mention}!**")
+
+        confirm = await ConfirmSkill(f"**Are you sure you want to create a Tribe Role named `{role_name}`, {perpetrator.mention}?**").prompt(ctx)
+        if not confirm:
+            return await ctx.send(f"**Not making it, then, {perpetrator.mention}!**")
+
+        _, exists = await Player.skill_on_cooldown(skill=Skill.THREE, seconds=36000).predicate(ctx)
+
+        try:
+            current_timestamp = await utils.get_timestamp()
+            await self.insert_tribe_role(perpetrator.id, user_tribe['name'], role_name)
+            if exists:
+                await self.update_user_skill_ts(perpetrator.id, Skill.THREE, current_timestamp)
+            else:
+                await self.insert_user_skill_cooldown(perpetrator.id, Skill.THREE, current_timestamp)
+            # Updates user's skills used counter
+            await self.update_user_skills_used(user_id=perpetrator.id)
+            
+        except Exception as e:
+            print(e)
+            return await ctx.send(f"**Something went wrong with your skill and it failed, {perpetrator.mention}!**")
+
+        else:
+            tribe_role_embed = await self.get_tribe_role_embed(
+                channel=ctx.channel, owner_id=perpetrator.id, tribe_info=user_tribe, role_name=role_name)
+            await ctx.send(embed=tribe_role_embed)
+
+    @tribe.command(aliases=['remove_role', 'deleterole', 'removerole'])
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def delete_role(self, ctx, role_name: str = None) -> None:
+        """ Deletes a specific role from the member's tribe.
+        :param role_name: The name of the role to delete. """
+        
         member = ctx.author
 
         if not role_name:
-            return await ctx.send(f"**Please, inform a tribe role name, {member.mention}!**")
+            return await ctx.send(f"**Please, inform a Tribe Role name, {member.mention}!**")
 
-        # Do the magic here.
-        pass
+        if len(role_name) > 30:
+            return await ctx.send(f"**Tribe Role names have a limit of 30 characters, {member.mention}!**")
 
+        user_tribe = await self.get_tribe_info_by_user_id(user_id=member.id)
+        if not user_tribe['name']:
+            return await ctx.send(f"**You don't have a tribe, {member.mention}**!")
+
+        tribe_role = await self.get_tribe_role(member.id, role_name)
+        if not tribe_role:
+            return await ctx.send(f"**You don't have a Tribe Role with that name, {member.mention}!**")
+
+        confirm = await ConfirmSkill(f"**Are you sure you want to delete your tribe's `{tribe_role[2]}` role, {member.mention}?**").prompt(ctx)
+        if not confirm:
+            return await ctx.send(f"**Not doing it then, {member.mention}!**")
+
+        try:
+            await self.delete_tribe_role(member.id, user_tribe['name'], role_name)
+        except Exception as e:
+            print(e)
+            await ctx.send(f"**Something went wrong with it, {member.mention}!**")
+        else:
+            await ctx.send(f"**Successfully deleted the `{role_name}` role from your tribe, {member.mention}!**")
+
+    @tribe.command(aliases=['remove_roles', 'deleteroles', 'removeroles'])
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def delete_roles(self, ctx) -> None:
+        """ Deletes all Tribe Roles from the member's tribe. """
+        
+        member = ctx.author
+
+        user_tribe = await self.get_tribe_info_by_user_id(user_id=member.id)
+        if not user_tribe['name']:
+            return await ctx.send(f"**You don't have a tribe, {member.mention}**!")
+
+        tribe_roles = await self.get_tribe_roles(member.id)
+        if not tribe_roles:
+            return await ctx.send(f"**You don't any Tribe Roles, {member.mention}!**")
+
+        confirm = await ConfirmSkill(f"**Are you sure you want to delete your tribe's roles, {member.mention}?**").prompt(ctx)
+        if not confirm:
+            return await ctx.send(f"**Not doing it then, {member.mention}!**")
+
+        try:
+            await self.delete_tribe_roles(member.id, user_tribe['name'])
+        except Exception as e:
+            print(e)
+            await ctx.send(f"**Something went wrong with it, {member.mention}!**")
+        else:
+            await ctx.send(f"**Successfully deleted all roles from your tribe, {member.mention}!**")
+
+    @tribe.command(aliases=['give_role', 'giverole'])
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def promote(self, ctx, member: discord.Member = None, role_name: str = None) -> None:
+        """ Promotes a Tribe Member to a given Tribe Role.
+        :param member: The Tribe Member to promote.
+        :param role_name: The Tribe Role to promote the member to. """
+
+        owner = ctx.author
+
+        if not member:
+            return await ctx.send(f"**Please, inform a Tribe Member to promote, {owner.mention}!**")
+
+        if owner.id == member.id:
+            return await ctx.send(f"**You cannot promote yourself, {owner.mention}!**")
+
+        if not role_name:
+            return await ctx.send(f"**Please, inform a Tribe Role name, {owner.mention}!**")
+
+        if len(role_name) > 30:
+            return await ctx.send(f"**Tribe Role names have a limit of 30 characters, {owner.mention}!**")
+
+        user_tribe = await self.get_tribe_info_by_user_id(user_id=owner.id)
+        if not user_tribe['name']:
+            return await ctx.send(f"**You don't have a tribe, {owner.mention}**!")
+
+        tribe_member = await self.get_tribe_member(member.id)
+        if not tribe_member:
+            return await ctx.send(f"**{member.mention} is not even in a tribe, {owner.mention}!**")
+
+        if tribe_member[1] != user_tribe['name']:
+            return await ctx.send(f"**{member.mention} is not even from your tribe, {owner.mention}!**")
+        
+        if tribe_member[3].lower() == role_name.lower():
+            return await ctx.send(f"**{member.mention} already has this Tribe Role, {owner.mention}!**")
+
+        tribe_role = await self.get_tribe_role(owner.id, role_name)
+        if not tribe_role:
+            return await ctx.send(f"**You don't have a Tribe Role with that name, {owner.mention}!**")
+
+        confirm = await ConfirmSkill(f"**Are you sure you want to promote {member.mention} to `{tribe_role[2]}`, {owner.mention}?**").prompt(ctx)
+        if not confirm:
+            return await ctx.send(f"**Not doing it then, {owner.mention}!**")
+
+        try:
+            await self.update_user_tribe_role(member.id, tribe_role[2])
+        except Exception as e:
+            print(e)
+            await ctx.send(f"**Something went wrong with it, {owner.mention}!**")
+        else:
+            await ctx.send(f"**Successfully promoted {member.mention} to `{tribe_role[2]}`, {owner.mention}!**")
+
+    @tribe.command(aliases=['take_role', 'takerole'])
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def demote(self, ctx, member: discord.Member = None) -> None:
+        """ Demotes a Tribe Member from their current Tribe Role.
+        :param member: The Tribe Member to demote. """
+
+        owner = ctx.author
+
+        if not member:
+            return await ctx.send(f"**Please, inform a Tribe Member to promote, {owner.mention}!**")
+
+        if owner.id == member.id:
+            return await ctx.send(f"**You cannot demote yourself, {owner.mention}!**")
+
+        user_tribe = await self.get_tribe_info_by_user_id(user_id=owner.id)
+        if not user_tribe['name']:
+            return await ctx.send(f"**You don't have a tribe, {owner.mention}**!")
+
+        tribe_member = await self.get_tribe_member(member.id)
+        if not tribe_member:
+            return await ctx.send(f"**{member.mention} is not even in a tribe, {owner.mention}!**")
+
+        if tribe_member[1] != user_tribe['name']:
+            return await ctx.send(f"**{member.mention} is not even from your tribe, {owner.mention}!**")
+
+        if tribe_member[3] == 'Member':
+            return await ctx.send(f"**{member.mention} already has the default Tribe Role, {owner.mention}!**")
+
+        tribe_role = await self.get_tribe_role(owner.id, tribe_member[3])
+        if not tribe_role:
+            return await ctx.send(f"**You don't have a Tribe Role with that name, {owner.mention}!**")
+
+        confirm = await ConfirmSkill(f"**Are you sure you want to promote {member.mention} to `{tribe_role[2]}`, {owner.mention}?**").prompt(ctx)
+        if not confirm:
+            return await ctx.send(f"**Not doing it then, {owner.mention}!**")
+
+        try:
+            await self.update_user_tribe_role(member.id)
+        except Exception as e:
+            print(e)
+            await ctx.send(f"**Something went wrong with it, {owner.mention}!**")
+        else:
+            await ctx.send(f"**Successfully promoted {member.mention} to `{tribe_role[2]}`, {owner.mention}!**")
+
+    @tribe.command()
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def roles(self, ctx, tribe_name: Optional[str] = None) -> None:
+        """ Shows the Tribe Roles of a given tribe.
+        :param tribe_name: The name of the tribe to show the roles. [Optional]
+
+        PS: If a tribe name is not provided, it will fetch the tribe the user is in. """
+
+        member = ctx.author
+
+        tribe = None
+        if tribe_name:
+            tribe = await self.get_tribe_info_by_name(tribe_name)
+        else:
+            sloth_profile = await self.get_sloth_profile(member.id)
+            if not sloth_profile or not sloth_profile[3]:
+                return await ctx.send(
+                    f"**You didn't provide any tribe name and you're not in a tribe either, {member.mention}!**")
+
+            tribe = await self.get_tribe_info_by_name(sloth_profile[3])
+
+        if not tribe['name']:
+            return await ctx.send(f"**No tribe with that name was found, {member.mention}**!")
+
+        roles = await self.get_tribe_roles(member.id)
+        if not roles:
+            return await ctx.send(f"**This tribe doesn't have any intern roles, {member.mention}!**")
+
+        embed = discord.Embed(
+            title=f"__{tribe['name']}'s Roles__:",
+            description=', '.join([r[2] for r in roles]),
+            color=member.color,
+            timestamp=ctx.message.created_at,
+            url=tribe['link']
+        )
+        embed.set_author(name=member.display_name, url=member.avatar_url, icon_url=member.avatar_url)
+        if tribe['thumbnail']:
+            embed.set_thumbnail(url=tribe['thumbnail'])
+        embed.set_footer(text=ctx.guild.name, icon_url=ctx.guild.icon_url)
+        await ctx.send(embed=embed)
+
+    async def get_tribe_role(self, owner_id: int, role_name: str) -> List[Union[int, str]]:
+        """ Gets a Tribe Role by name.
+        :param owner_id: The ID of the owner of that tribe.
+        :param role_name: The name of the role. """
+
+        mycursor, _ = await the_database()
+        await mycursor.execute("SELECT * FROM TribeRole WHERE owner_id = %s AND LOWER(role_name) =  LOWER(%s)", (owner_id, role_name))
+        tribe_role = await mycursor.fetchone()
+        await mycursor.close()
+        return tribe_role
+
+    async def get_tribe_roles(self, owner_id: int) -> List[List[Union[int, str]]]:
+        """ Gets all Tribe Roles from tribe owner's tribe.
+        :param owner_id: The ID of the owner of that tribe. """
+
+        mycursor, _ = await the_database()
+        await mycursor.execute("SELECT * FROM TribeRole WHERE owner_id = %s", (owner_id,))
+        tribe_roles = await mycursor.fetchall()
+        await mycursor.close()
+        return tribe_roles
+
+    async def insert_tribe_role(self, owner_id: int, tribe_name: str, role_name: str) -> None:
+        """ Inserts a Tribe Role into the database.
+        :param owner_id: The ID of the owner of that tribe.
+        :param tribe_name: The name of the tribe.
+        :param role_name: The name of the role. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("""
+        INSERT INTO TribeRole (owner_id, tribe_name, role_name) VALUES (%s, %s, %s)
+        """, (owner_id, tribe_name, role_name))
+        await db.commit()
+        await mycursor.close()
+
+    async def delete_tribe_role(self, owner_id: int, tribe_name: str, role_name: str) -> None:
+        """ Deletes a Tribe Role from the database.
+        :param owner_id: The ID of the owner of that tribe.
+        :param tribe_name: The name of the tribe.
+        :param role_name: The name of the role. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("DELETE FROM TribeRole WHERE owner_id = %s AND LOWER(role_name) = LOWER(%s)", (owner_id, role_name))
+        await mycursor.execute("""
+        UPDATE TribeMember SET tribe_role = DEFAULT(tribe_role) WHERE tribe_name = %s AND LOWER(tribe_role) = LOWER(%s)
+        """, (tribe_name, role_name))
+        await db.commit()
+        await mycursor.close()
+
+    async def delete_tribe_roles(self, owner_id: int, tribe_name: str) -> None:
+        """ Deletes all Tribe Roles from the database.
+        :param owner_id: The ID of the owner of that tribe.
+        :param tribe_name: The name of the tribe. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("DELETE FROM TribeRole WHERE owner_id = %s", (owner_id,))
+        await mycursor.execute("""
+        UPDATE TribeMember SET tribe_role = DEFAULT(tribe_role)
+         WHERE tribe_name = %s AND tribe_role <> 'Owner'
+        """, (tribe_name,))
+        await db.commit()
+        await mycursor.close()
+        
     async def insert_tribe_member(self, owner_id: int, tribe_name: str, user_id: int, tribe_role: str = 'Member') -> None:
         """ Inserts a Tribe Member.
         :param owner_id: The ID of the owner of the tribe the user is joining.
@@ -701,3 +1025,43 @@ class Munk(Player):
         await mycursor.execute("DELETE FROM TribeMember WHERE member_id = %s", (user_id,))
         await db.commit()
         await mycursor.close()
+
+    async def get_tribe_role_embed(self, channel: discord.TextChannel, owner_id: int, tribe_info: Dict[str, Union[str, int]], role_name: str) -> discord.Embed:
+        """ Makes an embedded message for a Tribe Role creation.
+        :param channel: The context channel.
+        :param owner_id: The owner of the tribe.
+        :param tribe_info: The tribe info.
+        :param role_name: The role created for that tribe. """
+
+        current_ts = await utils.get_timestamp()
+
+        tribe_role_embed = discord.Embed(
+            title="__A Tribe Role has been Created__",
+            description=f"<@{owner_id}> has just created a Tribe Role named `{role_name}` for their tribe named `{tribe_info['name']}`.",
+            color=discord.Color.green(),
+            timestamp=datetime.fromtimestamp(current_ts)
+        )
+
+        if tribe_info['thumbnail']:
+            tribe_role_embed.set_thumbnail(url=tribe_info['thumbnail'])
+
+        tribe_role_embed.set_image(url='https://media1.tenor.com/images/5327c87ecb310a382e891a0ed209357f/tenor.gif?itemid=18799194')
+        tribe_role_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon_url)
+
+        return tribe_role_embed
+
+    async def update_user_tribe_role(self, user_id: int, role_name: Optional[str] = None) -> None:
+        """ Updates the user's Tribe Role.
+        :param user_id: The Tribe Member's ID.
+        :param role_name: The name of the role. [Optional][Default='Member'] """
+
+        mycursor, db = await the_database()
+
+        if role_name:
+            await mycursor.execute("UPDATE TribeMember SET tribe_role = %s WHERE member_id = %s", (role_name, user_id))
+        else:
+            await mycursor.execute("UPDATE TribeMember SET tribe_role = DEFAULT(tribe_role) WHERE member_id = %s", (user_id,))
+
+        await db.commit()
+        await mycursor.close()
+    

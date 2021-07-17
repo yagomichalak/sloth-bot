@@ -266,6 +266,70 @@ class SlothClassDatabaseCommands(commands.Cog):
         else:
             return True
 
+    # ======== TribeRole =========
+    @commands.command(hidden=True)
+    @commands.has_permissions(administrator=True)
+    async def create_table_tribe_role(self, ctx) -> None:
+        """ (Owner) Creates the TribeRole table. """
+
+        if await self.table_tribe_role_exists():
+            return await ctx.send("**The `TribeRole` table already exists!**")
+
+        mycursor, db = await the_database()
+        await mycursor.execute("""
+            CREATE TABLE TribeRole (
+                owner_id BIGINT NOT NULL,
+                tribe_name VARCHAR(50) NOT NULL,
+                role_name VARCHAR(30) NOT NULL,
+                PRIMARY KEY (tribe_name, role_name),
+                CONSTRAINT fk_tr_tribe_owner FOREIGN KEY (owner_id) REFERENCES UserTribe (user_id) ON DELETE CASCADE ON UPDATE CASCADE,
+                CONSTRAINT fk_tr_tribe_name FOREIGN KEY (tribe_name) REFERENCES UserTribe (tribe_name) ON DELETE CASCADE ON UPDATE CASCADE
+            ) DEFAULT CHARSET=utf8mb4""")#COLLATE=utf8mb4_unicode_ci
+        await db.commit()
+        await mycursor.close()
+        await ctx.send("**Created `TribeRole` table!**")
+
+    @commands.command(hidden=True)
+    @commands.has_permissions(administrator=True)
+    async def drop_table_tribe_role(self, ctx) -> None:
+        """ (Owner) Drops the TribeRole table. """
+
+        if not await self.table_tribe_role_exists():
+            return await ctx.send("**The `TribeRole` table doesn't exist!**")
+
+        mycursor, db = await the_database()
+        await mycursor.execute("DROP TABLE TribeRole")
+        await db.commit()
+        await mycursor.close()
+        await ctx.send("**Dropped `TribeRole` table!**")
+
+    @commands.command(hidden=True)
+    @commands.has_permissions(administrator=True)
+    async def reset_table_tribe_role(self, ctx) -> None:
+        """ (Owner) Resets the TribeRole table. """
+
+        if not await self.table_tribe_role_exists():
+            return await ctx.send("**The `TribeRole` table doesn't exist yet!**")
+
+        mycursor, db = await the_database()
+        await mycursor.execute("DELETE FROM TribeRole")
+        await db.commit()
+        await mycursor.close()
+        await ctx.send("**Reset `TribeRole` table!**")
+
+    async def table_tribe_role_exists(self) -> bool:
+        """ Checks whether the TribeRole table exists. """
+
+        mycursor, _ = await the_database()
+        await mycursor.execute("SHOW TABLE STATUS LIKE 'TribeRole'")
+        table_info = await mycursor.fetchall()
+        await mycursor.close()
+        if len(table_info) == 0:
+            return False
+        else:
+            return True
+
+
     # ======== SlothProfile =========
     @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
