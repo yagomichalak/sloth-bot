@@ -862,6 +862,13 @@ class Moderation(commands.Cog):
                 user_id=member.id, infr_type="ban", reason=reason,
                 timestamp=current_ts, perpetrator=ctx.author.id)
 
+            try:
+                await member.send(content="If you think you should be unbanned, you can make a ban appeal here: https://discord.gg/f9B7FzYv8D", embed=general_embed)
+            except:
+                pass
+
+            
+
     # Bans a member
     @commands.command()
     @commands.has_permissions(administrator=True)
@@ -1012,7 +1019,7 @@ class Moderation(commands.Cog):
                 user_id=member.id, infr_type="hackban", reason=reason,
                 timestamp=current_ts, perpetrator=ctx.author.id)
             try:
-                await member.send(content="If you think you should be unbanned, you can make a ban appeal here: https://discord.gg/mjGq9gMxKB", embed=general_embed)
+                await member.send(content="If you think you should be unbanned, you can make a ban appeal here: https://discord.gg/f9B7FzYv8D", embed=general_embed)
             except:
                 pass
 
