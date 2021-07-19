@@ -175,7 +175,7 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
             timestamp=ctx.message.created_at
         )
         skills_embed.add_field(name=f"__Skills__:", value=f"```apache\n{cmds_text}```")
-        skills_embed.set_author(name=member, icon_url=member.avatar_url)
+        skills_embed.set_author(name=member, icon_url=member.avatar.url)
         skills_embed.set_thumbnail(url=f"https://thelanguagesloth.com/media/sloth_classes/{sloth_profile[1]}.png")
         skills_embed.set_footer(text=ctx.guild, icon_url=ctx.guild.icon_url)
         await ctx.send(embed=skills_embed)
@@ -197,9 +197,9 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
             description='\n'.join(formated_effects),
             color=member.color,
             timestamp=ctx.message.created_at,
-            url=member.avatar_url
+            url=member.avatar.url
         )
-        embed.set_thumbnail(url=member.avatar_url)
+        embed.set_thumbnail(url=member.avatar.url)
 
         await ctx.send(embed=embed)
 
@@ -220,8 +220,8 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
         )
 
         embed.set_thumbnail(url=guild.icon_url)
-        embed.set_author(name=self.client.user, url=self.client.user.avatar_url, icon_url=self.client.user.avatar_url)
-        embed.set_footer(text=f"Requested by {member}", icon_url=member.avatar_url)
+        embed.set_author(name=self.client.user, url=self.client.user.avatar.url, icon_url=self.client.user.avatar.url)
+        embed.set_footer(text=f"Requested by {member}", icon_url=member.avatar.url)
 
         embed.add_field(name="🟢 Agares' 3rd Skill:", value="**Skill**: `Reflect`.", inline=True)
         embed.add_field(name="🟢 Cybersloth's 3rd Skill:", value="**Skill**: `Virus`.", inline=True)

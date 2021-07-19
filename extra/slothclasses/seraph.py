@@ -245,7 +245,7 @@ class Seraph(Player):
         reinforce_shields_embed.description = f"🛡️ <@{perpetrator_id}> reinforced `{shields_len}` active shields; now they have more 24 hours of duration! 🛡️💪"
         reinforce_shields_embed.color = discord.Color.green()
 
-        reinforce_shields_embed.set_author(name='50% of chance', url=self.client.user.avatar_url)
+        reinforce_shields_embed.set_author(name='50% of chance', url=self.client.user.avatar.url)
         reinforce_shields_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Seraph.png")
         reinforce_shields_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon_url)
 
@@ -266,7 +266,7 @@ class Seraph(Player):
         self_shield_embed.description = f"🛡️ <@{perpetrator_id}> got a shield for themselves for reinforcing other shields! 🛡️💪"
         self_shield_embed.color = discord.Color.green()
 
-        self_shield_embed.set_author(name='45% of chance', url=self.client.user.avatar_url)
+        self_shield_embed.set_author(name='45% of chance', url=self.client.user.avatar.url)
         self_shield_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Seraph.png")
         self_shield_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon_url)
 
@@ -389,9 +389,9 @@ class Seraph(Player):
             timestamp=parsed_time
         )
 
-        heal_embed.set_thumbnail(url=target.avatar_url)
+        heal_embed.set_thumbnail(url=target.avatar.url)
         heal_embed.set_image(url="https://cdn3.iconfinder.com/data/icons/role-playing-game-5/340/magic_game_rpg_human_healing_heal-512.png")
-        heal_embed.set_author(name=perpetrator, url=perpetrator.avatar_url, icon_url=perpetrator.avatar_url)
+        heal_embed.set_author(name=perpetrator, url=perpetrator.avatar.url, icon_url=perpetrator.avatar.url)
         heal_embed.set_footer(text=perpetrator.guild.name, icon_url=perpetrator.guild.icon_url)
 
         return heal_embed

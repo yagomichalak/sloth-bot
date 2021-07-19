@@ -176,8 +176,8 @@ class SlothReputation(commands.Cog):
         else:
             embed.add_field(name="🏕️ __**Tribe:**__", value="None", inline=True)
 
-        embed.set_thumbnail(url=member.avatar_url)
-        embed.set_author(name=member, icon_url=member.avatar_url, url=member.avatar_url)
+        embed.set_thumbnail(url=member.avatar.url)
+        embed.set_author(name=member, icon_url=member.avatar.url, url=member.avatar.url)
         embed.set_footer(text=ctx.guild, icon_url=ctx.guild.icon_url)
 
         if ctx.author.id != member.id:
@@ -222,7 +222,7 @@ class SlothReputation(commands.Cog):
         position = [[i+1, u[4]] for i, u in enumerate(all_users) if u[0] == ctx.author.id]
         position = [it for subpos in position for it in subpos] if position else ['??', 0]
 
-        leaderboard.set_footer(text=f"Your score: {position[1]} | #{position[0]}", icon_url=ctx.author.avatar_url)
+        leaderboard.set_footer(text=f"Your score: {position[1]} | #{position[0]}", icon_url=ctx.author.avatar.url)
         leaderboard.set_thumbnail(url=ctx.guild.icon_url)
 
         # Embeds each one of the top ten users.
@@ -249,7 +249,7 @@ class SlothReputation(commands.Cog):
         position = [[i+1, u[1]] for i, u in enumerate(all_users) if u[0] == ctx.author.id]
         position = [it for subpos in position for it in subpos] if position else ['??', 0]
 
-        leaderboard.set_footer(text=f"Your XP: {position[1]} | #{position[0]}", icon_url=ctx.author.avatar_url)
+        leaderboard.set_footer(text=f"Your XP: {position[1]} | #{position[0]}", icon_url=ctx.author.avatar.url)
         leaderboard.set_thumbnail(url=ctx.guild.icon_url)
 
         # Embeds each one of the top ten users.
