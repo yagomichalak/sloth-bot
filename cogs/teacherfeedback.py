@@ -286,7 +286,7 @@ class TeacherFeedback(commands.Cog):
                         inline=True)
         embed.add_field(name=f"__**Taught in:**__", value=saved_class[4].title(),
                         inline=True)
-        embed.set_thumbnail(url=member.avatar_url)
+        embed.set_thumbnail(url=member.avatar.url)
         embed.set_author(name=member)
         embed.set_footer(text=member.guild.name, icon_url=member.guild.icon_url)
         return embed
@@ -419,9 +419,9 @@ class TeacherFeedback(commands.Cog):
         class_embed.add_field(name=f"__**Joined:**__", value=f"{teacher_class[7]} members.", inline=False)
         class_embed.add_field(name=f"__**Type of class:**__", value=f"{teacher_class[4].title()}.", inline=False)
 
-        class_embed.set_thumbnail(url=member.avatar_url)
-        class_embed.set_author(name=member.name, url=member.avatar_url)
-        class_embed.set_footer(text='Class Report', icon_url=self.client.user.avatar_url)
+        class_embed.set_thumbnail(url=member.avatar.url)
+        class_embed.set_author(name=member.name, url=member.avatar.url)
+        class_embed.set_footer(text='Class Report', icon_url=self.client.user.avatar.url)
 
         await history_channel.send(embed=class_embed)
 
@@ -523,7 +523,7 @@ class TeacherFeedback(commands.Cog):
             description=f"**Sent:** {user[2]} messages.\n**Have been:** {h:d} hours, {m:02d} minutes and {s:02d} seconds in the voice channel.",
             color=discord.Color.green())
 
-        reward_embed.set_thumbnail(url=member.avatar_url)
+        reward_embed.set_thumbnail(url=member.avatar.url)
         reward_embed.set_author(name=f"ID: {member.id}")
         reward_embed.set_footer(text=guild.name, icon_url=guild.icon_url)
         await msg.edit(embed=reward_embed)
@@ -543,8 +543,8 @@ class TeacherFeedback(commands.Cog):
                 description=f"The following people got rewarded for participating and being active in {teacher.mention}'s __{language}__ {class_type} class!\n__Teacher__ **+50łł**; __students__ **+10łł**",
                 colour=discord.Colour.green())
             the_reward_embed.set_footer(text=teacher.guild.name, icon_url=teacher.guild.icon_url)
-            the_reward_embed.set_thumbnail(url=teacher.avatar_url)
-            the_reward_embed.set_author(name=teacher, icon_url=teacher.avatar_url)
+            the_reward_embed.set_thumbnail(url=teacher.avatar.url)
+            the_reward_embed.set_author(name=teacher, icon_url=teacher.avatar.url)
             the_reward_embed.set_image(
                 url="https://cdn.discordapp.com/attachments/668049600871006208/704406592400916510/emote.png")
 
@@ -911,8 +911,8 @@ class TeacherFeedback(commands.Cog):
         embed.add_field(name="PS²", value="If the `timestamp` field is **None**, it means the teacher is not in the voice channel, therefore users can't earn status.", inline=False)
 
         # Adds embelishment fields
-        embed.set_thumbnail(url=teacher.avatar_url)
-        embed.set_author(name=teacher, icon_url=teacher.avatar_url)
+        embed.set_thumbnail(url=teacher.avatar.url)
+        embed.set_author(name=teacher, icon_url=teacher.avatar.url)
         embed.set_footer(text=guild, icon_url=guild.icon_url)
         await ctx.send(embed=embed)
 

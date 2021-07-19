@@ -87,7 +87,7 @@ class ReportSupport(commands.Cog):
             embed = discord.Embed(title="New possible order!",
                 description=f"{member.mention} ({member.id}) might be interested in buying something from you!",
                 color=member.color)
-            embed.set_thumbnail(url=member.avatar_url)
+            embed.set_thumbnail(url=member.avatar.url)
             await dnk.send(embed=embed)
             await member.send(f"**If you are really interested in **buying** a custom bot, send a private message to {dnk.mention}!**")
             await self.dnk_embed(member)
@@ -246,7 +246,7 @@ class ReportSupport(commands.Cog):
             return await member.send(f"**Thank you anyways, bye!**")
 
         embed = discord.Embed(title=f"__Teacher Application__")
-        embed.set_footer(text=f"by {member}", icon_url=member.avatar_url)
+        embed.set_footer(text=f"by {member}", icon_url=member.avatar.url)
 
         embed.description = '''
         - Hello, there you've reacted to apply to become a teacher.
@@ -386,7 +386,7 @@ Entry requirements:
             return await member.send(f"**Thanks anyways, bye!**")
             
         embed = discord.Embed(title=f"__Moderator Application__")
-        embed.set_footer(text=f"by {member}", icon_url=member.avatar_url)
+        embed.set_footer(text=f"by {member}", icon_url=member.avatar.url)
 
         embed.description = "- What's your age?"
         q1 = await member.send(embed=embed)

@@ -193,7 +193,7 @@ class Tools(commands.Cog):
         embed = discord.Embed(title="__Sloth Translator__",
                               description=f"**Translated from `{translation.src}` to `{translation.dest}`**\n\n{translation.text}",
                               colour=ctx.author.color, timestamp=ctx.message.created_at)
-        embed.set_author(name=ctx.author, icon_url=ctx.author.avatar_url)
+        embed.set_author(name=ctx.author, icon_url=ctx.author.avatar.url)
         await ctx.send(embed=embed)
 
     @commands.command()
@@ -236,7 +236,7 @@ class Tools(commands.Cog):
         embed = discord.Embed(title="__Math__",
                               description=f"`{v1}` **{oper}** `{v2}` **=** `{operators[oper](v1, v2)}`",
                               colour=ctx.author.color, timestamp=ctx.message.created_at)
-        embed.set_author(name=ctx.author, icon_url=ctx.author.avatar_url)
+        embed.set_author(name=ctx.author, icon_url=ctx.author.avatar.url)
         return await ctx.send(embed=embed)
 
     @commands.command()

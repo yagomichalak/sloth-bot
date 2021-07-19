@@ -132,7 +132,7 @@ class ModActivity(commands.Cog):
                               url='https://discordapp.com',
                               colour=discord.Colour.dark_green(), timestamp=ctx.message.created_at)
         embed.set_footer(text='Activity Report',
-                         icon_url=self.client.user.avatar_url)
+                         icon_url=self.client.user.avatar.url)
         embed.set_thumbnail(
             url='https://cdn.discordapp.com/icons/459195345419763713/a_866e6fe442bfb651353df72826238f54.jpg')
         embed.set_author(name=ctx.guild.name)
