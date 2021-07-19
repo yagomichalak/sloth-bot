@@ -181,7 +181,7 @@ class Metamorph(Player):
         transmutation_embed.color = discord.Color.green()
 
         transmutation_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Metamorph.png")
-        transmutation_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon_url)
+        transmutation_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
 
         return transmutation_embed
 
@@ -201,7 +201,7 @@ class Metamorph(Player):
         transmutation_embed.color = discord.Color.green()
 
         transmutation_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Metamorph.png")
-        transmutation_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon_url)
+        transmutation_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
 
         return transmutation_embed
 

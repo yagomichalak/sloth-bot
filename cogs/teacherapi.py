@@ -345,9 +345,9 @@ class TeacherAPI(commands.Cog):
             timestamp=ctx.message.created_at,
             url=self.website_link
             )
-        component = discord.Component()
-        component.add_button(style=5, label="Access Profile!", url=f"{self.website_link}/profile", emoji="🧑‍🏫")
-        await ctx.send(embed=teacher_embed, components=[component])
+        view = discord.ui.View()
+        view.add_item(label="Access Profile!", url=f"{self.website_link}/profile", emoji="🧑‍🏫")
+        await ctx.send(embed=teacher_embed, view=view)
 
     @commands.command(aliases=['dt'])
     @commands.has_any_role(*[owner_role_id, admin_role_id, lesson_manager_role_id])

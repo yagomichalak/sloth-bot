@@ -496,23 +496,22 @@ class SlothCurrency(commands.Cog):
         user_info = await self.get_user_currency(member.id)
         sloth_profile = await self.client.get_cog('SlothClass').get_sloth_profile(member.id)
 
+        view = discord.ui.View()
+        view.add_item(discord.ui.Button(label="Create Account", emoji="🦥", url="https://thelanguagesloth.com/profile/update"))
+
         if not user_info or not sloth_profile:
             if ctx.author.id == member.id:
-                component = discord.Component()
-                component.add_button(style=5, label="Create Account", emoji="🦥", url="https://thelanguagesloth.com/profile/update")
                 return await ctx.send(
                     embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one, or in the button below!**"),
-                    components=[component])
+                    view=view)
             else:
                 return await ctx.send(f"**{member} doesn't have an account yet!**", delete_after=3)
 
         if sloth_profile[1].lower() == 'default':
             if ctx.author.id == member.id:
-                component = discord.Component()
-                component.add_button(style=5, label="Choose a Class", emoji="🦥", url="https://thelanguagesloth.com/profile/slothclass")
                 return await ctx.send(
                     embed=discord.Embed(description=f"**{member.mention}, you don't have a Sloth class yet. Click [here](https://thelanguagesloth.com/profile/slothclass) to choose one, or in the button below!**"),
-                    components=[component])
+                    view=view)
             else:
                 return await ctx.send(f"**{member} has a default Sloth class, I cannot show their profile!**")
 
@@ -1140,11 +1139,11 @@ class SlothCurrency(commands.Cog):
         the_user = await self.get_user_currency(ctx.author.id)
         target_user = await self.get_user_currency(member.id)
         if not the_user:
-            component = discord.Component()
-            component.add_button(style=5, label="Create Account", emoji="🦥", url="https://thelanguagesloth.com/profile/update")
+            view = discord.ui.View()
+            view.add_item(discord.ui.Button(label="Create Account", emoji="🦥", url="https://thelanguagesloth.com/profile/update"))
             return await ctx.send(
                 embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one, or in the button below!**"),
-                components=[component])
+                view=view)
         elif not target_user:
             return await ctx.send(f"**{member} does not have a bank account yet!**", delete_after=5)
 
