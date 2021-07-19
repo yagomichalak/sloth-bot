@@ -78,21 +78,25 @@ class TeacherFeedback(commands.Cog):
                 user = await self.db.get_waiting_reward_student(payload.user_id, payload.message_id)
                 lenactive = user[-1]
                 await self.show_user_feedback(msg=msg, guild=guild, user=user, lenactive=lenactive, teacher=payload.member)
+
             elif emoji == '❌':
                 await self.db.delete_waiting_reward_student(msg_id=user[0], user_id=user[1], teacher_id=user[4])
                 await asyncio.sleep(0.5)
                 user = await self.db.get_waiting_reward_student(payload.user_id, payload.message_id)
                 lenactive = user[-1]
                 return await self.show_user_feedback(msg=msg, guild=guild, user=user, lenactive=lenactive, teacher=payload.member)
+                
             elif emoji == '👥':
                 # student_id, language, class_type, msg_id
 
                 users = await self.db.get_all_waiting_reward_student(payload.user_id, payload.message_id)
+                rewarded_users = await self.db.get_reward_accepted_students(user[0])
                 formated_users = [(u[1], u[6], u[5], u[0]) for u in users]
-
+                all_formated_users = list(set(rewarded_users).union(set(formated_users)))
+                await self.db.delete_waiting_reward_students(user[0], user[4])
                 done_embed = discord.Embed(title="__**DONE!**__", color=discord.Color.green())
                 await msg.edit(embed=done_embed, delete_after=3)
-                return await self.reward_accepted_students(payload.member, formated_users)
+                return await self.reward_accepted_students(payload.member, all_formated_users)
 
         else:
             pass
@@ -1313,6 +1317,17 @@ class TeacherFeedbackDatabaseDelete:
         mycursor, db = await the_database()
 
         await mycursor.execute("DELETE FROM RewardStudents WHERE reward_message = %s AND teacher_id = %s AND student_id = %s", (msg_id, teacher_id, user_id))
+        await db.commit()
+        await mycursor.close()
+
+    async def delete_waiting_reward_students(self, msg_id: int, teacher_id: int) -> None:
+        """ Deletes students from the rewards table.
+        :param msg_id: The ID of the message attached to the user data.
+        :param teacher_id: The teacher's ID. """
+
+        mycursor, db = await the_database()
+
+        await mycursor.execute("DELETE FROM RewardStudents WHERE reward_message = %s AND teacher_id = %s", (msg_id, teacher_id))
         await db.commit()
         await mycursor.close()
 
