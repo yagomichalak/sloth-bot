@@ -837,10 +837,9 @@ class Moderation(commands.Cog):
         general_embed.set_author(name=f'{member} has been banned', icon_url=member.avatar_url)
         await ctx.send(embed=general_embed)
         try:
-            await member.send(sembed=general_embed)
+            await member.send(embed=general_embed)
             await member.send(content="If you think you should be unbanned, you can make a ban appeal here: https://discord.gg/f9B7FzYv8D", embed=general_embed)
         except Exception as e:
-            print(e)
             pass
         try:
             await member.ban(delete_message_days=7, reason=reason)
@@ -955,7 +954,7 @@ class Moderation(commands.Cog):
             try:
                 await member.ban(delete_message_days=7, reason=reason)
                 await member.unban(reason=reason)
-            except Exception:
+            except:
                 await ctx.send('**You cannot do that!**', delete_after=3)
             else:
                 # Moderation log embed
@@ -1000,8 +999,7 @@ class Moderation(commands.Cog):
             await ctx.send(embed=general_embed)
             try:
                 await member.send(embed=general_embed)
-                await member.send(content="If you think you should be unbanned, you can make a ban appeal here: https://discord.gg/f9B7FzYv8D", embed=general_embed)
-            except:
+            except Exception as e:
                 pass
 
             # Moderation log embed
