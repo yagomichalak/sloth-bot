@@ -85,7 +85,7 @@ class TeacherFeedback(commands.Cog):
                 user = await self.db.get_waiting_reward_student(payload.user_id, payload.message_id)
                 lenactive = user[-1]
                 return await self.show_user_feedback(msg=msg, guild=guild, user=user, lenactive=lenactive, teacher=payload.member)
-                
+
             elif emoji == '👥':
                 # student_id, language, class_type, msg_id
 
@@ -393,12 +393,11 @@ class TeacherFeedback(commands.Cog):
         # teacher, txt_id, vc_id, language, class_type, vc_timestamp, vc_time, members, class_desc)
 
         # Checks whether the class duration was greater or equal than 10 minutes.
-        if int(teacher_class[6]) >= 5:#600:
+        if int(teacher_class[6]) >= 600:
 
             await self.show_class_history(member, teacher_class)
 
             await self.db.update_all_user_classes([(uf[0],) for uf in users_feedback])
-            print('ALL USERS', [(uf[0],) for uf in users_feedback])
 
             await self.ask_class_reward(member, teacher_class, users_feedback)
 
@@ -467,13 +466,12 @@ class TeacherFeedback(commands.Cog):
         # Checks the class' requirements based on the type of the class (Grammar, Pronunciation)
         active_users = []
         if users_feedback:
-            active_users = [uf for uf in users_feedback]
-            # if class_type.title() == 'Pronunciation':
-            #     active_users = [uf for uf in users_feedback if uf[3] >= 1800]
-            # elif class_type.title() == 'Grammar':
-            #     active_users = [uf for uf in users_feedback if uf[1] >= 5]
-            # elif class_type.title() == 'Programming':
-            #     active_users = [uf for uf in users_feedback if uf[3] >= 1800]
+            if class_type.title() == 'Pronunciation':
+                active_users = [uf for uf in users_feedback if uf[3] >= 1800]
+            elif class_type.title() == 'Grammar':
+                active_users = [uf for uf in users_feedback if uf[1] >= 5]
+            elif class_type.title() == 'Programming':
+                active_users = [uf for uf in users_feedback if uf[3] >= 1800]
 
         formatted_active_users = [
             (msg.id, u[0], u[1], u[3], teacher.id, class_type, language) for u in active_users
