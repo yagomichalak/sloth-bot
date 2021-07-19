@@ -171,7 +171,7 @@ class Merchant(Player):
                             color=buyer.color,
                             timestamp=ctx.message.created_at)
                     if cybersloth:
-                        siphon_embed.set_thumbnail(url=cybersloth.avatar_url)
+                        siphon_embed.set_thumbnail(url=cybersloth.avatar.url)
 
                     await ctx.send(
                         content=f"{buyer.mention}, {member.mention}, <@{wired_user[0]}>",
@@ -257,7 +257,7 @@ class Merchant(Player):
                         color=buyer.color,
                         timestamp=ctx.message.created_at)
                 if cybersloth:
-                    siphon_embed.set_thumbnail(url=cybersloth.avatar_url)
+                    siphon_embed.set_thumbnail(url=cybersloth.avatar.url)
 
                 await ctx.send(
                     content=f"{buyer.mention}, {member.mention}, <@{wired_user[0]}>",
@@ -440,7 +440,7 @@ class Merchant(Player):
         open_shop_embed.color = discord.Color.green()
 
         open_shop_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Merchant.png")
-        open_shop_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon_url)
+        open_shop_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
 
         return open_shop_embed
 

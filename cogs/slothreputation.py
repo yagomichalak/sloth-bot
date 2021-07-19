@@ -178,7 +178,7 @@ class SlothReputation(commands.Cog):
 
         embed.set_thumbnail(url=member.avatar.url)
         embed.set_author(name=member, icon_url=member.avatar.url, url=member.avatar.url)
-        embed.set_footer(text=ctx.guild, icon_url=ctx.guild.icon_url)
+        embed.set_footer(text=ctx.guild, icon_url=ctx.guild.icon.url)
 
         if ctx.author.id != member.id:
             return await ctx.send(embed=embed)
@@ -223,7 +223,7 @@ class SlothReputation(commands.Cog):
         position = [it for subpos in position for it in subpos] if position else ['??', 0]
 
         leaderboard.set_footer(text=f"Your score: {position[1]} | #{position[0]}", icon_url=ctx.author.avatar.url)
-        leaderboard.set_thumbnail(url=ctx.guild.icon_url)
+        leaderboard.set_thumbnail(url=ctx.guild.icon.url)
 
         # Embeds each one of the top ten users.
         for i, sm in enumerate(top_ten_users):
@@ -250,7 +250,7 @@ class SlothReputation(commands.Cog):
         position = [it for subpos in position for it in subpos] if position else ['??', 0]
 
         leaderboard.set_footer(text=f"Your XP: {position[1]} | #{position[0]}", icon_url=ctx.author.avatar.url)
-        leaderboard.set_thumbnail(url=ctx.guild.icon_url)
+        leaderboard.set_thumbnail(url=ctx.guild.icon.url)
 
         # Embeds each one of the top ten users.
         for i, sm in enumerate(top_ten_users):

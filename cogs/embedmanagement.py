@@ -245,7 +245,7 @@ class EmbedManagement(commands.Cog):
                 color=member.color,
                 timestamp=ctx.message.created_at
             )
-        embed.set_footer(text="ALL -> deletes the embed", icon_url=ctx.guild.icon_url)
+        embed.set_footer(text="ALL -> deletes the embed", icon_url=ctx.guild.icon.url)
 
         if not embed_name:
             return await ctx.send(f"**Please, inform an `embed_name` to remove something from, {member.mention}!**")
@@ -760,7 +760,7 @@ class EmbedManagement(commands.Cog):
                 timestamp=ctx.message.created_at,
                 )
             msg = await ctx.send(embed=embed)
-            embed.set_footer(text="60 seconds to answer!", icon_url=member.guild.icon_url)
+            embed.set_footer(text="60 seconds to answer!", icon_url=member.guild.icon.url)
 
             await msg.add_reaction('✅')
             await msg.add_reaction('❌')

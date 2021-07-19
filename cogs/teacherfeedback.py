@@ -288,7 +288,7 @@ class TeacherFeedback(commands.Cog):
                         inline=True)
         embed.set_thumbnail(url=member.avatar.url)
         embed.set_author(name=member)
-        embed.set_footer(text=member.guild.name, icon_url=member.guild.icon_url)
+        embed.set_footer(text=member.guild.name, icon_url=member.guild.icon.url)
         return embed
 
     async def start_class(self, member: discord.Member, class_info: Dict[str, str]) -> None:
@@ -436,8 +436,8 @@ class TeacherFeedback(commands.Cog):
 
         simple_embed = discord.Embed(
             title=f"All {member.display_name}'s students", description="**LOADING...**", colour=discord.Colour.green())
-        simple_embed.set_thumbnail(url=guild.icon_url)
-        simple_embed.set_footer(text=guild.name, icon_url=guild.icon_url)
+        simple_embed.set_thumbnail(url=guild.icon.url)
+        simple_embed.set_footer(text=guild.name, icon_url=guild.icon.url)
         reward_channel = discord.utils.get(guild.channels, id=reward_channel_id)
         simple = await reward_channel.send(content=member.mention, embed=simple_embed)
 
@@ -525,7 +525,7 @@ class TeacherFeedback(commands.Cog):
 
         reward_embed.set_thumbnail(url=member.avatar.url)
         reward_embed.set_author(name=f"ID: {member.id}")
-        reward_embed.set_footer(text=guild.name, icon_url=guild.icon_url)
+        reward_embed.set_footer(text=guild.name, icon_url=guild.icon.url)
         await msg.edit(embed=reward_embed)
 
     async def reward_accepted_students(self, teacher: discord.Member, users_to_reward: List[int]) -> None:
@@ -542,7 +542,7 @@ class TeacherFeedback(commands.Cog):
                 title="__**Class Activity Reward**__",
                 description=f"The following people got rewarded for participating and being active in {teacher.mention}'s __{language}__ {class_type} class!\n__Teacher__ **+50łł**; __students__ **+10łł**",
                 colour=discord.Colour.green())
-            the_reward_embed.set_footer(text=teacher.guild.name, icon_url=teacher.guild.icon_url)
+            the_reward_embed.set_footer(text=teacher.guild.name, icon_url=teacher.guild.icon.url)
             the_reward_embed.set_thumbnail(url=teacher.avatar.url)
             the_reward_embed.set_author(name=teacher, icon_url=teacher.avatar.url)
             the_reward_embed.set_image(
@@ -913,7 +913,7 @@ class TeacherFeedback(commands.Cog):
         # Adds embelishment fields
         embed.set_thumbnail(url=teacher.avatar.url)
         embed.set_author(name=teacher, icon_url=teacher.avatar.url)
-        embed.set_footer(text=guild, icon_url=guild.icon_url)
+        embed.set_footer(text=guild, icon_url=guild.icon.url)
         await ctx.send(embed=embed)
 
     @commands.command(aliases=['end_class', 'closeclass', 'endclass', 'end', 'finishclass', 'finish', 'finish_class'])

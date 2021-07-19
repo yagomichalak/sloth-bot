@@ -161,7 +161,7 @@ class Munk(Player):
         )
 
         munk_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Munk.png")
-        munk_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon_url)
+        munk_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
 
         return munk_embed
 
@@ -185,7 +185,7 @@ class Munk(Player):
         join_tribe_embed.set_author(name=inviter, icon_url=inviter.avatar.url)
         if tribe['thumbnail']:
             join_tribe_embed.set_thumbnail(url=tribe['thumbnail'])
-        join_tribe_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon_url)
+        join_tribe_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
 
         return join_tribe_embed
 
@@ -667,7 +667,7 @@ class Munk(Player):
 
         tribe_embed.set_author(name=member, url=member.avatar.url, icon_url=member.avatar.url)
         tribe_embed.set_thumbnail(url=member.avatar.url)
-        tribe_embed.set_footer(text=member.guild.name, icon_url=member.guild.icon_url)
+        tribe_embed.set_footer(text=member.guild.name, icon_url=member.guild.icon.url)
 
         compo = discord.Component()
         compo.add_button(style=5, label="Create Tribe!", url=link, emoji="🏕️")
@@ -938,7 +938,7 @@ class Munk(Player):
         embed.set_author(name=member.display_name, url=member.avatar.url, icon_url=member.avatar.url)
         if tribe['thumbnail']:
             embed.set_thumbnail(url=tribe['thumbnail'])
-        embed.set_footer(text=ctx.guild.name, icon_url=ctx.guild.icon_url)
+        embed.set_footer(text=ctx.guild.name, icon_url=ctx.guild.icon.url)
         await ctx.send(embed=embed)
 
     async def get_tribe_role(self, owner_id: int, role_name: str) -> List[Union[int, str]]:
@@ -1046,7 +1046,7 @@ class Munk(Player):
             tribe_role_embed.set_thumbnail(url=tribe_info['thumbnail'])
 
         tribe_role_embed.set_image(url='https://media1.tenor.com/images/5327c87ecb310a382e891a0ed209357f/tenor.gif?itemid=18799194')
-        tribe_role_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon_url)
+        tribe_role_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
 
         return tribe_role_embed
 
