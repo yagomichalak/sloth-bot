@@ -520,15 +520,16 @@ class SlothCurrency(commands.Cog):
         effects = await SlothClass.get_user_effects(member=member)        
 
         # Checks whether user is hacked
-        if await SlothClass.has_effect(effects, 'hacked'):
+        if 'hacked' in effects:
             await self.send_hacked_image(ctx, member)
             # if ctx.author.id != member.id:
             #     await SlothClass.check_virus(ctx=ctx, target=member)
             return
 
         # Checks whether user is frogged
-        if await SlothClass.has_effect(effects, 'frogged'):
-            return await self.send_frogged_image(ctx, member, sloth_profile[10])
+        if 'frogged' in effects:
+            ko = 'knocked_out' in effects
+            return await self.send_frogged_image(ctx, member, ko)
 
         small = ImageFont.truetype("built titling sb.ttf", 45)
         background = Image.open(await self.get_user_specific_type_item(member.id, 'background'))
