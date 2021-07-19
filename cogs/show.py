@@ -74,12 +74,12 @@ class Show(commands.Cog):
         embed.set_author(name='DNK#6725', url='https://discord.gg/languages',
             icon_url='https://cdn.discordapp.com/attachments/719020754858934294/720289112040669284/DNK_icon.png')
         embed.set_thumbnail(url=self.client.user.avatar.url)
-        embed.set_footer(text=ctx.guild, icon_url=ctx.guild.icon_url)
+        embed.set_footer(text=ctx.guild, icon_url=ctx.guild.icon.url)
 
-        component = discord.Component()
-        component.add_button(style=5, label='GitHub', emoji="🔗", url=github_link)
-        component.add_button(style=5, label="Patreon", emoji="<:patreon:831401582426980422>", url="https://www.patreon.com/Languagesloth")
-        await ctx.send(embed=embed, components=[component])
+        view = discord.ui.View()
+        view.add_item(discord.ui.Button(label='GitHub', emoji="🔗", url=github_link))
+        view.add_item(discord.ui.Button(label="Patreon", emoji="<:patreon:831401582426980422>", url="https://www.patreon.com/Languagesloth"))
+        await ctx.send(embed=embed, view=view)
 
     # Shows the specific rule
     @commands.command()
@@ -185,7 +185,7 @@ class Show(commands.Cog):
         )
 
         embed.set_author(name=member, icon_url=member.avatar.url)
-        embed.set_footer(text=member.guild, icon_url=member.guild.icon_url)
+        embed.set_footer(text=member.guild, icon_url=member.guild.icon.url)
         await ctx.send(embed=embed)
 
 

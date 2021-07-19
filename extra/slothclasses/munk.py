@@ -669,10 +669,10 @@ class Munk(Player):
         tribe_embed.set_thumbnail(url=member.avatar.url)
         tribe_embed.set_footer(text=member.guild.name, icon_url=member.guild.icon.url)
 
-        compo = discord.Component()
-        compo.add_button(style=5, label="Create Tribe!", url=link, emoji="🏕️")
+        view = discord.ui.View()
+        view.add_item(discord.ui.Button(label="Create Tribe", url=link, emoji="🏕️"))
 
-        await ctx.send(embed=tribe_embed, components=[compo])
+        await ctx.send(embed=tribe_embed, view=view)
 
     @commands.command(aliases=['add_tribe_role', 'createtriberole', 'addtriberole'])
     @Player.skills_used(requirement=20)

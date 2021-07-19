@@ -5,7 +5,7 @@ from mysqldb import *
 from datetime import datetime
 import os
 from typing import List
-from extra.menu import ConfirmSkill
+from extra.view import ExchangeActivityView
 from .slothclass import classes
 
 commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
@@ -83,15 +83,16 @@ class SlothReputation(commands.Cog):
         if not member:
             member = ctx.author
 
+        view = discord.ui.View()
+        view.add_item(discord.ui.Button(label="Create Account", emoji="🦥", url="https://thelanguagesloth.com/profile/update"))
+
         # Gets users ranking info, such as level and experience points
         user = await self.get_specific_user(member.id)
         if not user:
             if ctx.author.id == member.id:
-                component = discord.Component()
-                component.add_button(style=5, label="Create Account", emoji="🦥", url="https://thelanguagesloth.com/profile/update")
                 return await ctx.send(
                     embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one, or in the button below!**"),
-                    components=[component])
+                    view=view)
             else:
                 return await ctx.send(f"**{member} doesn't have an account yet!**")
 
@@ -100,11 +101,9 @@ class SlothReputation(commands.Cog):
         sloth_profile = await self.client.get_cog('SlothClass').get_sloth_profile(member.id)
         if not ucur or not sloth_profile:
             if ctx.author.id == member.id:
-                component = discord.Component()
-                component.add_button(style=5, label="Create Account", emoji="🦥", url="https://thelanguagesloth.com/profile/update")
                 return await ctx.send(
                     embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one, or in the button below!**"),
-                    components=[component])
+                    view=view)
             else:
                 return await ctx.send(f"**{member} doesn't have an account yet!**")
 
@@ -183,26 +182,8 @@ class SlothReputation(commands.Cog):
         if ctx.author.id != member.id:
             return await ctx.send(embed=embed)
         else:
-
-            component = discord.Component()
-            component.add_button(style=3, label="Exchange Activity!", custom_id="exchange_money", emoji="💰")
-            await ctx.send(embed=embed, components=[component])
-
-            try:
-                _, _, btn, rsp = await self.client.wait_for(
-                    'interaction_update', timeout=60,
-                    check=lambda msg, m, btn, rsp: m.id == member.id and btn.custom_id == 'exchange_money'
-                    )
-            except asyncio.TimeoutError:
-                pass
-            else:
-                btn.ping(rsp)
-                confirmed = await ConfirmSkill(f"**{member.mention}, are you sure you want to exchange your {h:d} hours, {m:02d} minutes and {user_info[0][1]} messages?**").prompt(ctx)
-                if confirmed:
-                    SlothCurrency = self.client.get_cog('SlothCurrency')
-                    await SlothCurrency.exchange(ctx)
-                else:
-                    await ctx.send(f"**{ctx.author.mention}, not exchanging, then!**")
+            view = ExchangeActivityView(self.client, user_info[0])
+            await ctx.send(embed=embed, view=view)
 
     @commands.command(aliases=['leaderboard', 'lb', 'scoreboard'])
     async def score(self, ctx):
@@ -285,11 +266,11 @@ class SlothReputation(commands.Cog):
         if not target_user:
             if ctx.author.id == member.id:
 
-                component = discord.Component()
-                component.add_button(style=5, label="Create Account", emoji="🦥", url="https://thelanguagesloth.com/profile/update")
+                view = discord.ui.View()
+                view.add_item(label="Create Account", emoji="🦥", url="https://thelanguagesloth.com/profile/update")
                 return await ctx.send(
                     embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one, or in the button below!**"),
-                    components=[component])
+                    view=view)
             else:
                 return await ctx.send("**This member is not on the leaderboard yet!**", delete_after=3)
 

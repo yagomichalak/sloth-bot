@@ -137,10 +137,12 @@ class Social(commands.Cog):
         if await utils.is_allowed([mod_role_id, admin_role_id]).predicate(ctx):
             component.add_button(label="See Infractions", style=4, emoji="❗", custom_id=f"user_infractions:{member.id}")
         
+        view = QuickButtons()
+
         component.add_button(label="See Profile", style=1, emoji="👤", custom_id=f"user_profile:{member.id}")
         component.add_button(label="See Info", style=2, emoji="ℹ️", custom_id=f"user_info:{member.id}")
 
-        await ctx.send(embed=embed, components=[component])
+        await ctx.send(embed=embed, view=view)
 
 
     @staticmethod

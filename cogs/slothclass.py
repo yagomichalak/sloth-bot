@@ -122,18 +122,17 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
 
         sloth_profile = await self.get_sloth_profile(member.id)
 
+        view = discord.ui.View()
+        view.add_item(discord.ui.Button(label="Create Account", emoji="🦥", url="https://thelanguagesloth.com/profile/update"))
+
         if not sloth_profile:
-            component = discord.Component()
-            component.add_button(style=5, label="Create Account", emoji="🦥", url="https://thelanguagesloth.com/profile/update")
             return await ctx.send(
                 embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one, or in the button below!**"),
-                components=[component])
+                view=view)
         if sloth_profile[1] == 'default':
-            component = discord.Component()
-            component.add_button(style=5, label="Create Account", emoji="🦥", url="https://thelanguagesloth.com/profile/update")
             return await ctx.send(
                 embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one, or in the button below!**"),
-                components=[component])
+                view=view)
 
         the_class = classes.get(sloth_profile[1].lower())
         class_commands = the_class.__dict__['__cog_commands__']
