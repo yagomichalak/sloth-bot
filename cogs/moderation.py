@@ -838,6 +838,7 @@ class Moderation(commands.Cog):
         await ctx.send(embed=general_embed)
         try:
             await member.send(sembed=general_embed)
+            await member.send(content="If you think you should be unbanned, you can make a ban appeal here: https://discord.gg/f9B7FzYv8D", embed=general_embed)
         except:
             pass
         try:
@@ -861,11 +862,6 @@ class Moderation(commands.Cog):
             await self.insert_user_infraction(
                 user_id=member.id, infr_type="ban", reason=reason,
                 timestamp=current_ts, perpetrator=ctx.author.id)
-
-            try:
-                await member.send(content="If you think you should be unbanned, you can make a ban appeal here: https://discord.gg/f9B7FzYv8D", embed=general_embed)
-            except:
-                pass
 
             
 
@@ -951,6 +947,7 @@ class Moderation(commands.Cog):
             await ctx.send(embed=general_embed)
             try:
                 await member.send(embed=general_embed)
+                await member.send(content="Click here to rejoin: https://discord.gg/languages", embed=general_embed)
             except:
                 pass
 
@@ -1000,6 +997,11 @@ class Moderation(commands.Cog):
                                           timestamp=ctx.message.created_at)
             general_embed.set_author(name=f'{self.client.get_user(user_id)} has been hackbanned')
             await ctx.send(embed=general_embed)
+            try:
+                await member.send(embed=general_embed)
+                await member.send(content="If you think you should be unbanned, you can make a ban appeal here: https://discord.gg/f9B7FzYv8D", embed=general_embed)
+            except:
+                pass
 
             # Moderation log embed
             moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
@@ -1018,10 +1020,6 @@ class Moderation(commands.Cog):
             await self.insert_user_infraction(
                 user_id=member.id, infr_type="hackban", reason=reason,
                 timestamp=current_ts, perpetrator=ctx.author.id)
-            try:
-                await member.send(content="If you think you should be unbanned, you can make a ban appeal here: https://discord.gg/f9B7FzYv8D", embed=general_embed)
-            except:
-                pass
 
         except discord.errors.NotFound:
             return await ctx.send("**Invalid user id!**", delete_after=3)

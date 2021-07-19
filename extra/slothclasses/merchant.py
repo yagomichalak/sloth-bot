@@ -95,7 +95,7 @@ class Merchant(Player):
     @commands.group(aliases=['buy_item', 'buyitem', 'purchase'])
     async def buy(self, ctx) -> None:
         """ Buys a specific item from a Merchant.
-        (Use this without an item name to see what items you can possibly buy with this command)
+        (Use this without an item name to see what items you can possibly buy with this command)```
         __**Example:**__
     ```ini\nz!buy potion @Salonce\nz!buy ring 376864935944388609"""
         if ctx.invoked_subcommand:
