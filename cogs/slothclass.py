@@ -177,7 +177,7 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
         skills_embed.add_field(name=f"__Skills__:", value=f"```apache\n{cmds_text}```")
         skills_embed.set_author(name=member, icon_url=member.avatar.url)
         skills_embed.set_thumbnail(url=f"https://thelanguagesloth.com/media/sloth_classes/{sloth_profile[1]}.png")
-        skills_embed.set_footer(text=ctx.guild, icon_url=ctx.guild.icon_url)
+        skills_embed.set_footer(text=ctx.guild, icon_url=ctx.guild.icon.url)
         await ctx.send(embed=skills_embed)
 
     @commands.command(aliases=["fx", "efx", "user_effects", "usereffects", "geteffects", "membereffects", "member_effects"])
@@ -219,7 +219,7 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
             url="https://thelanguagesloth.com"
         )
 
-        embed.set_thumbnail(url=guild.icon_url)
+        embed.set_thumbnail(url=guild.icon.url)
         embed.set_author(name=self.client.user, url=self.client.user.avatar.url, icon_url=self.client.user.avatar.url)
         embed.set_footer(text=f"Requested by {member}", icon_url=member.avatar.url)
 

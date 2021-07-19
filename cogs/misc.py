@@ -386,7 +386,7 @@ class Misc(commands.Cog):
 
         embed.set_author(name=member, url=member.avatar.url, icon_url=member.avatar.url)
         embed.set_thumbnail(url=member.avatar.url)
-        embed.set_footer(text="Requested at:", icon_url=member.guild.icon_url)
+        embed.set_footer(text="Requested at:", icon_url=member.guild.icon.url)
     
 
         tzone = timezone('Etc/GMT')

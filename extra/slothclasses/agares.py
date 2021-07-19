@@ -175,7 +175,7 @@ class Agares(Player):
         magic_pull_embed.color = discord.Color.green()
 
         magic_pull_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Agares.png")
-        magic_pull_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon_url)
+        magic_pull_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
 
         return magic_pull_embed
 
@@ -195,7 +195,7 @@ class Agares(Player):
         recharge_embed.color = discord.Color.green()
 
         recharge_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Agares.png")
-        recharge_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon_url)
+        recharge_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
         recharge_embed.set_image(url='https://media1.tenor.com/images/623500b09831e08eb963bdc7d75797c4/tenor.gif?itemid=20299439')
 
         return recharge_embed
@@ -320,7 +320,7 @@ class Agares(Player):
         reflect_embed.color = discord.Color.green()
 
         reflect_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Agares.png")
-        reflect_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon_url)
+        reflect_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
         reflect_embed.set_image(url='https://media1.tenor.com/images/3fc942141e181ef927813f0a5a679193/tenor.gif?itemid=15706915')
 
         return reflect_embed
@@ -343,7 +343,7 @@ class Agares(Player):
         but <@{target_id}> managed to reflect the attack to them afterwards!** ↕️"""
         reflected_attack_embed.color = discord.Color.green()
 
-        reflected_attack_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon_url)
+        reflected_attack_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
         reflected_attack_embed.set_image(url='https://cdn.discordapp.com/attachments/777886760994471986/865325125032345610/image-removebg-preview.png')
 
         return reflected_attack_embed

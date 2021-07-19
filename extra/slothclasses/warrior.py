@@ -201,7 +201,7 @@ class Warrior(Player):
         hit_embed.color = discord.Color.green()
 
         hit_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Warrior.png")
-        hit_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon_url)
+        hit_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
 
         return hit_embed
 
@@ -221,7 +221,7 @@ class Warrior(Player):
         smash_embed.color = discord.Color.green()
 
         smash_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Warrior.png")
-        smash_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon_url)
+        smash_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
 
         return smash_embed
 
