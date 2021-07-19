@@ -94,7 +94,8 @@ class Social(commands.Cog):
         em.add_field(name="Server Features", value=features if features else None, inline=False)
 
         em.set_thumbnail(url=guild.icon.url)
-        em.set_image(url=guild.banner_url)
+        if guild.banner:
+            em.set_image(url=guild.banner_url)
         em.set_author(name=guild.name, icon_url=guild.icon.url)
         created_at = await utils.sort_time(guild.created_at)
         em.set_footer(text=f"Created: {guild.created_at.strftime('%d/%m/%y')} ({created_at})")
