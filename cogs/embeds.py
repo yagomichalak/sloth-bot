@@ -48,9 +48,17 @@ class Embeds(commands.Cog):
                     create_option(name="description", description="Description.", option_type=3, required=False),
                     create_option(name="title", description="Title.", option_type=3, required=False),
                     create_option(name="timestamp", description="If timestamp is gonna be shown.", option_type=5, required=False),
-                    create_option(name="url", description="URL for the title.", option_type=3, required=False),#,
+                    create_option(name="url", description="URL for the title.", option_type=3, required=False),
                     create_option(name="thumbnail", description="Thumbnail for the embed.", option_type=3, required=False),
-                    create_option(name="image", description="Display image.", option_type=3, required=False),
+                    create_option(name="image", description="Display image.", option_type=4, required=False),
+                    create_option(name="color", description="The color for the embed.", option_type=3, required=False,
+                        choices=[
+                            create_choice(name="Blue", value="0011ff"), create_choice(name="Red", value="ff0000"),
+                            create_choice(name="Green", value="00ff67"), create_choice(name="Yellow", value="fcff00"),
+                            create_choice(name="Black", value="000000"), create_choice(name="White", value="ffffff"),
+                            create_choice(name="Orange", value="ff7100"), create_choice(name="Brown", value="522400"),
+                            create_choice(name="Purple", value="380058"),
+                        ])
                 ], guild_ids=guild_ids,
                 permissions={
                     guild_ids[0]: [
@@ -72,13 +80,25 @@ class Embeds(commands.Cog):
         description = fields.get('description')
         fields['description'] = description.replace(r'\n', '\n')
 
-        emb = discord.Embed(**fields)
+        if (color := fields.get('color')) is not None:
+            if color:
+                fields['color'] = int(color, 16)
+            else:
+                fields.pop('color', None)
+
+        emb = discord.Embed(**{k:v for k, v in fields.items() if k not in ['thumbnail', 'image']})
 
         if (thumbnail := fields.get('thumbnail')) is not None:
-            emb.set_thumbnail(url=thumbnail)
+            if thumbnail:
+                emb.set_thumbnail(url=thumbnail)
+            else:
+                fields.pop('thumbnail', None)
 
         if (image := fields.get('image')) is not None:
-            emb.set_image(url=image)
+            if image:
+                emb.set_image(url=image)
+            else:
+                fields.pop('image', None)
 
 
         await ctx.send(embeds=[emb])
