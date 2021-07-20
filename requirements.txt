@@ -1,5 +1,6 @@
 wikipedia==1.4.0
 # discord.py==1.7.2
+git+https://github.com/yagomichalak/discord.py
 git+https://github.com/yagomichalak/discord.py.git@v1.x
 aiohttp==3.7.4
 aiomysql==0.0.21
@@ -15,3 +16,4 @@ Pillow==8.1.0
 python-dotenv==0.15.0
 treelib==1.6.1
 discord-py-slash-command==1.2.2
+emoji==1.4.1
