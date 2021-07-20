@@ -36,7 +36,7 @@ class ReportSupportView(discord.ui.View):
         await interaction.response.defer()
         await self.cog.send_teacher_application(member)
 
-    @discord.ui.button(label="Apply to be a Moderator!", style=3, custom_id=f"apply_to_moderate", emoji="🧑‍🏫")
+    @discord.ui.button(label="Apply to be a Moderator!", style=3, custom_id=f"apply_to_moderate", emoji="👮")
     async def apply_to_moderate_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
         """  """
 
