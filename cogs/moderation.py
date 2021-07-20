@@ -1,3 +1,4 @@
+from cogs.reportsupport import ReportSupport
 import discord
 from discord.ext import commands, tasks
 import asyncio
@@ -8,6 +9,7 @@ from typing import List, Union, Dict, Tuple, Optional
 import os
 from extra.useful_variables import banned_links
 from extra.menu import ConfirmSkill
+from extra.view import ReportSupportView
 from extra import utils
 
 mod_log_id = int(os.getenv('MOD_LOG_CHANNEL_ID'))
@@ -1430,8 +1432,9 @@ class Moderation(commands.Cog):
 
     @commands.command(aliases=['apps'])
     @commands.has_permissions(administrator=True)
-    async def applications(self, ctx, title: str = None) -> None:
+    async def applications(self, ctx, message_id: int = None, title: str = None) -> None:
         """ Opens/closes the applications for a title in the server.
+        :param message_id: The ID of the Report-Support message to edit.
         :param title: The title that appliacations are opening/closing for. Ex: teacher/moderator. """
 
         member = ctx.author
@@ -1440,6 +1443,9 @@ class Moderation(commands.Cog):
 
         teacher_app = ['teacher', 't', 'tchr', 'teaching']
 
+        if not message_id:
+            return await ctx.send(f"**Please, inform a message ID, {member.mention}!**")
+
         if not title:
             return await ctx.send(f"**Please, inform a `title`, {member.mention}!**")
 
@@ -1447,32 +1453,27 @@ class Moderation(commands.Cog):
             return await ctx.send(f"**Invalid title, {member.mention}!**")
 
         channel = discord.utils.get(ctx.guild.text_channels, id=int(os.getenv('REPORT_CHANNEL_ID')))
-        message = await channel.fetch_message(int(os.getenv('REPORT_SUPPORT_MSG_ID'))) # Message containing the application buttons
-        components = message.components
-        buttons = components[0].components['components']
+        message = await channel.fetch_message(message_id) # Message containing the application buttons
+        if not message:
+            return await ctx.send(f"**Message not found, {member.mentio}!**")
+        view = ReportSupportView.from_message(message)
+
+        buttons = view.children
 
         if title.lower() in mod_app:
-            if buttons[1].get('disabled'):
-                buttons[1]['label'] = "Apply to be a Moderator!"
-                buttons[1]['disabled'] = False
-            else:
-                buttons[1]['label'] = "Apply to be a Moderator!"
-                buttons[1]['disabled'] = True
+            buttons[1].disabled = False if buttons[1].disabled else True
 
-            await ctx.send(f"**Moderator applications are now {'closed' if buttons[1]['disabled'] else 'open'}, {member.mention}!**")
+            await ctx.send(f"**Moderator applications are now {'closed' if buttons[1].disabled else 'open'}, {member.mention}!**")
 
         elif title.lower() in teacher_app:
-            if buttons[0].get('disabled'):
-                buttons[0]['disabled'] = False
-            else:
-                buttons[0]['disabled'] = True
+            buttons[0].disabled = False if buttons[0].disabled else True
 
-            await ctx.send(f"**Teacher applications are now {'closed' if buttons[0]['disabled'] else 'open'}, {member.mention}!**")
+            await ctx.send(f"**Teacher applications are now {'closed' if buttons[0].disabled else 'open'}, {member.mention}!**")
 
 
         confirm = await ConfirmSkill(f"**Do you wanna confirm the changes? Otherwise you can disregard the message above, {member.mention}.**").prompt(ctx)
         if confirm:
-            await message.edit(components=components)
+            await message.edit(view=view)
             await ctx.send(f"**Done!**")
         else:
             await ctx.send("**Not changing it, then...**")

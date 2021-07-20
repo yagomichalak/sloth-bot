@@ -1,7 +1,97 @@
 import discord
+from extra import utils
 from discord.ext import commands
 from typing import List, Dict, Union, Any
 from .menu import ConfirmSkill
+import os
+
+class ReportSupportView(discord.ui.View):
+
+    def __init__(self, client: commands.Bot) -> None:
+        super().__init__(timeout=None)
+        self.client = client
+        self.cog = client.get_cog('ReportSupport')
+        patreon_button = discord.ui.Button(style=5, label="Support us on Patreon!", url="https://www.patreon.com/Languagesloth", emoji="<:patreon:831401582426980422>")
+        self.children.insert(2, patreon_button)
+
+
+    @discord.ui.button(label="Apply to be a Teacher!", style=3, custom_id=f"apply_to_teach", emoji="🧑‍🏫")
+    async def apply_to_teach_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        member = interaction.user
+
+        # Apply to be a teacher
+        member_ts = self.cog.cache.get(member.id)
+        time_now = await utils.get_timestamp()
+        if member_ts:
+            sub = time_now - member_ts
+            if sub <= 1800:
+                return await member.send(
+                    f"**You are on cooldown to apply, try again in {(1800-sub)/60:.1f} minutes**")
+
+        await interaction.response.defer()
+        await self.cog.send_teacher_application(member)
+
+    @discord.ui.button(label="Apply to be a Moderator!", style=3, custom_id=f"apply_to_moderate", emoji="🧑‍🏫")
+    async def apply_to_moderate_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """  """
+
+        member = interaction.user
+
+        # Apply to be a teacher
+        member_ts = self.cog.cache.get(member.id)
+        time_now = await utils.get_timestamp()
+        if member_ts:
+            sub = time_now - member_ts
+            if sub <= 1800:
+                return await member.send(
+                    f"**You are on cooldown to apply, try again in {(1800-sub)/60:.1f} minutes**")
+
+        await interaction.response.defer()
+        await self.cog.send_moderator_application(member)
+
+
+    @discord.ui.button(label="Get your own Custom Bot (not for free)", style=1, custom_id=f"get_custom_bot", emoji="🤖")
+    async def bot_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+
+        member = interaction.user
+
+        member_ts = self.cog.report_cache.get(member.id)
+        time_now = await utils.get_timestamp()
+        if member_ts:
+            sub = time_now - member_ts
+            if sub <= 240:
+                return await member.send(
+                    f"**You are on cooldown to use this, try again in {round(240-sub)} seconds**")
+            
+        await interaction.response.defer()
+
+        # Order a bot
+        dnk = self.client.get_user(int(os.getenv('DNK_ID')))
+        embed = discord.Embed(title="New possible order!",
+            description=f"{member.mention} ({member.id}) might be interested in buying something from you!",
+            color=member.color)
+        embed.set_thumbnail(url=member.avatar.url)
+        await dnk.send(embed=embed)
+        await member.send(f"**If you are really interested in **buying** a custom bot, send a private message to {dnk.mention}!**")
+        await self.cog.dnk_embed(member)
+
+    @discord.ui.button(label="Report a User or Get Server/Role Support!", style=4, custom_id=f"report_support", emoji="<:politehammer:608941633454735360>")
+    async def report_support_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+
+        member = interaction.user
+
+        member_ts = self.cog.report_cache.get(member.id)
+        time_now = await utils.get_timestamp()
+        if member_ts:
+            sub = time_now - member_ts
+            if sub <= 240:
+                return await member.send(
+                    f"**You are on cooldown to report, try again in {round(240-sub)} seconds**")
+
+        self.cog.report_cache[member.id] = time_now
+        await interaction.response.defer()
+        await self.cog.select_report(member, member.guild)
+
 
 class QuickButtons(discord.ui.View):
 
@@ -52,6 +142,8 @@ class ExchangeActivityView(discord.ui.View):
             await SlothCurrency.exchange(ctx)
         else:
             await interaction.followup.send(f"**{member.mention}, not exchanging, then!**")
+
+        self.stop()
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
 
