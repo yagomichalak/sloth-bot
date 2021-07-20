@@ -4,6 +4,7 @@ from mysqldb import *
 import asyncio
 from extra.useful_variables import list_of_commands
 from extra.menu import ConfirmSkill
+from extra.view import ReportSupportView
 import time
 from typing import List, Dict
 import os
@@ -44,65 +45,11 @@ class ReportSupport(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self) -> None:
+
+        self.client.add_view(view=ReportSupportView(self.client))
+        print(self.client.persistent_views)
         print('ReportSupport cog is online!')
 
-    @commands.Cog.listener()
-    async def on_raw_interaction_update(self, payload, member, button, response) -> None:
-        """ Handles Report-Support related buttons. """
-        
-        if int(payload['id']) != int(os.getenv('REPORT_SUPPORT_MSG_ID')):
-            return
-
-        button.ping(response)
-
-        custom_id = button.custom_id
-
-        if custom_id.startswith('apply_to_teach') or custom_id.startswith('apply_to_moderate'):
-            # Apply to be a teacher
-            member_ts = self.cache.get(member.id)
-            time_now = time.time()
-            if member_ts:
-                sub = time_now - member_ts
-                if sub <= 1800:
-                    return await member.send(
-                        f"**You are on cooldown to apply, try again in {(1800-sub)/60:.1f} minutes**")
-
-            if custom_id.startswith('apply_to_teach'):
-                await self.send_teacher_application(member)
-            else:
-                await self.send_moderator_application(member)
-                
-
-        elif custom_id.startswith('buy_custom_bot'):
-            member_ts = self.report_cache.get(member.id)
-            time_now = time.time()
-            if member_ts:
-                sub = time_now - member_ts
-                if sub <= 240:
-                    return await member.send(
-                        f"**You are on cooldown to use this, try again in {round(240-sub)} seconds**")
-                        
-            # Order a bot
-            dnk = self.client.get_user(dnk_id)
-            embed = discord.Embed(title="New possible order!",
-                description=f"{member.mention} ({member.id}) might be interested in buying something from you!",
-                color=member.color)
-            embed.set_thumbnail(url=member.avatar.url)
-            await dnk.send(embed=embed)
-            await member.send(f"**If you are really interested in **buying** a custom bot, send a private message to {dnk.mention}!**")
-            await self.dnk_embed(member)
-
-        elif custom_id.startswith('report_support'):
-            member_ts = self.report_cache.get(member.id)
-            time_now = time.time()
-            if member_ts:
-                sub = time_now - member_ts
-                if sub <= 240:
-                    return await member.send(
-                        f"**You are on cooldown to report, try again in {round(240-sub)} seconds**")
-
-            self.report_cache[member.id] = time.time()
-            await self.select_report(member, member.guild)
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload) -> None:
@@ -1365,6 +1312,23 @@ Please answer using one message only.."""
             print(e)
             return
 
+    @commands.command(aliases=['make_report_msg', 'reportmsg', 'report_msg', 'supportmsg', 'support_msg'])
+    @commands.has_permissions(administrator=True)
+    async def make_report_support_message(self, ctx) -> None:
+        """ (ADM) Makes a Report-Support message. """
+        
+        guild = ctx.guild
+        embed = discord.Embed(
+            title="__Report-Support Section__",
+            description="""Welcome to the Report-Support section, here you can easily find your way into things and/or get help with whatever problem you may be experiencing.""",
+            color=ctx.author.color,
+            timestamp=ctx.message.created_at,
+            url="https://thelanguagesloth.com"
+        )
+        embed.set_author(name=self.client.user.display_name, url=self.client.user.avatar.url, icon_url=self.client.user.avatar.url)
+        embed.set_thumbnail(url=guild.icon.url)
+        embed.set_footer(text=guild.name, icon_url=guild.icon.url)
+        await ctx.send(embed=embed, view=ReportSupportView(self.client))
 
 def setup(client):
     client.add_cog(ReportSupport(client))
