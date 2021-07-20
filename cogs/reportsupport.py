@@ -1328,7 +1328,9 @@ Please answer using one message only.."""
         embed.set_author(name=self.client.user.display_name, url=self.client.user.avatar.url, icon_url=self.client.user.avatar.url)
         embed.set_thumbnail(url=guild.icon.url)
         embed.set_footer(text=guild.name, icon_url=guild.icon.url)
-        await ctx.send(embed=embed, view=ReportSupportView(self.client))
+        view = ReportSupportView(self.client)
+        await ctx.send(embed=embed, view=view)
+        self.client.add_view(view=view)
 
 def setup(client):
     client.add_cog(ReportSupport(client))
