@@ -5,6 +5,10 @@ from typing import List, Dict, Union, Any
 from .menu import ConfirmSkill
 import os
 
+
+mod_role_id = int(os.getenv('MOD_ROLE_ID'))
+admin_role_id = int(os.getenv('ADMIN_ROLE_ID'))
+
 class ReportSupportView(discord.ui.View):
 
     def __init__(self, client: commands.Bot) -> None:
@@ -95,21 +99,37 @@ class ReportSupportView(discord.ui.View):
 
 class QuickButtons(discord.ui.View):
 
-    def __init__(self, client: commands.Bot,) -> None:
+    def __init__(self, client: commands.Bot, ctx: commands.Context, target_member: discord.Member) -> None:
         super().__init__(timeout=60)
         self.client = client
+        self.ctx = ctx
+        self.target_member = target_member
+        
 
     @discord.ui.button(label="See Infractions", style=4, emoji="❗", custom_id=f"user_infractions", disabled=True)
     async def see_infractions_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
-        pass
+        """ Shows the member's infractions. """
+
+        new_ctx = self.ctx
+        new_ctx.author = interaction.user
+
+        if await utils.is_allowed([mod_role_id, admin_role_id]).predicate(new_ctx):
+            await interaction.response.defer()
+            return await self.client.get_cog("Moderation").infractions(ctx=self.ctx, member=self.target_member)
     
     @discord.ui.button(label="See Profile", style=1, emoji="👤", custom_id=f"user_profile")
     async def see_profile_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
-        pass
+        """ Shows the member's profile. """
+        
+        await interaction.response.defer()
+        await self.client.get_cog("SlothCurrency").profile(ctx=self.ctx, member=self.target_member)
 
     @discord.ui.button(label="See Info", style=2, emoji="ℹ️", custom_id=f"user_info")
     async def see_info_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
-        pass
+        """ Shows the member's info. """
+
+        await interaction.response.defer()
+        await self.client.get_cog("SlothReputation").info(ctx=self.ctx, member=self.target_member)
 
 
 
