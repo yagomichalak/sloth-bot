@@ -31,34 +31,6 @@ class Social(commands.Cog):
     async def on_ready(self):
         print('Social cog is ready!')
 
-
-    @commands.Cog.listener()
-    async def on_interaction_update(self, message, member, button, response) -> None:
-        """ Handles button clicks in the quick button menu in the z!userinfo command. """
-
-        custom_id = button.custom_id
-        for c_id in ["user_infractions", "user_profile", "user_info"]:
-            if custom_id.startswith(c_id):
-                break
-        else:
-            return
-
-        button.ping(response)
-
-
-        ctx = await self.client.get_context(message)
-        target_member = discord.utils.get(message.guild.members, id=int(button.custom_id.split(':', 1)[1]))
-        
-        if custom_id.startswith('user_infractions'):
-            if await Social.is_allowed(ctx, [mod_role_id, admin_role_id]):
-                return await self.client.get_cog("Moderation").infractions(ctx=ctx, member=target_member)
-            
-        elif custom_id.startswith("user_profile"):
-            await self.client.get_cog("SlothCurrency").profile(ctx=ctx, member=target_member)
-
-        elif custom_id.startswith("user_info"):
-            await self.client.get_cog("SlothReputation").info(ctx=ctx, member=target_member)
-
     @commands.command(aliases=['si', 'server'])
     async def serverinfo(self, ctx) -> None:
         """ Shows information about the server. """
@@ -133,9 +105,8 @@ class Social(commands.Cog):
 
         embed.add_field(name="Bot?", value=member.bot)
 
-
         
-        view = QuickButtons()
+        view = QuickButtons(self.client, ctx, member)
         if await utils.is_allowed([mod_role_id, admin_role_id]).predicate(ctx):
             view.see_infractions_button.disabled = False
 
