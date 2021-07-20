@@ -6,6 +6,7 @@ import aiohttp
 import os
 from typing import List
 from extra import utils
+from extra.view import QuickButtons
 
 reddit = praw.Reddit(client_id=os.getenv('REDDIT_CLIENT_ID'),  # client id
                      client_secret=os.getenv('REDDIT_CLIENT_SECRET'),  # my client secret
@@ -133,14 +134,10 @@ class Social(commands.Cog):
         embed.add_field(name="Bot?", value=member.bot)
 
 
-        component = discord.Component()
-        if await utils.is_allowed([mod_role_id, admin_role_id]).predicate(ctx):
-            component.add_button(label="See Infractions", style=4, emoji="❗", custom_id=f"user_infractions:{member.id}")
         
         view = QuickButtons()
-
-        component.add_button(label="See Profile", style=1, emoji="👤", custom_id=f"user_profile:{member.id}")
-        component.add_button(label="See Info", style=2, emoji="ℹ️", custom_id=f"user_info:{member.id}")
+        if await utils.is_allowed([mod_role_id, admin_role_id]).predicate(ctx):
+            view.see_infractions_button.disabled = False
 
         await ctx.send(embed=embed, view=view)
 

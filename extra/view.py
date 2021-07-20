@@ -95,8 +95,22 @@ class ReportSupportView(discord.ui.View):
 
 class QuickButtons(discord.ui.View):
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, client: commands.Bot,) -> None:
+        super().__init__(timeout=60)
+        self.client = client
+
+    @discord.ui.button(label="See Infractions", style=4, emoji="❗", custom_id=f"user_infractions", disabled=True)
+    async def see_infractions_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        pass
+    
+    @discord.ui.button(label="See Profile", style=1, emoji="👤", custom_id=f"user_profile")
+    async def see_profile_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        pass
+
+    @discord.ui.button(label="See Info", style=2, emoji="ℹ️", custom_id=f"user_info")
+    async def see_info_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        pass
+
 
 
 class Test(discord.ui.View):
