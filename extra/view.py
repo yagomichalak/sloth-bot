@@ -3,6 +3,7 @@ from extra import utils
 from discord.ext import commands
 from typing import List, Dict, Union, Any
 from .menu import ConfirmSkill
+from .select import ReportSupportSelect
 import os
 
 
@@ -94,7 +95,10 @@ class ReportSupportView(discord.ui.View):
 
         self.cog.report_cache[member.id] = time_now
         await interaction.response.defer()
-        await self.cog.select_report(member, member.guild)
+        view = discord.ui.View()
+        view.add_item(ReportSupportSelect(self.client))
+        await member.send(content="How can we help you?", view=view)
+        # await self.cog.select_report(member, member.guild)
 
 
 class QuickButtons(discord.ui.View):
