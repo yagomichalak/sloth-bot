@@ -346,7 +346,7 @@ class TeacherAPI(commands.Cog):
             url=self.website_link
             )
         view = discord.ui.View()
-        view.add_item(label="Access Profile!", url=f"{self.website_link}/profile", emoji="🧑‍🏫")
+        view.add_item(discord.ui.Button(label="Access Profile!", url=f"{self.website_link}/profile", emoji="🧑‍🏫"))
         await ctx.send(embed=teacher_embed, view=view)
 
     @commands.command(aliases=['dt'])

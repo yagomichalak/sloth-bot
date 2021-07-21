@@ -267,7 +267,7 @@ class SlothReputation(commands.Cog):
             if ctx.author.id == member.id:
 
                 view = discord.ui.View()
-                view.add_item(label="Create Account", emoji="🦥", url="https://thelanguagesloth.com/profile/update")
+                view.add_item(discord.ui.Button(label="Create Account", emoji="🦥", url="https://thelanguagesloth.com/profile/update"))
                 return await ctx.send(
                     embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one, or in the button below!**"),
                     view=view)
