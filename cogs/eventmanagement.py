@@ -275,7 +275,7 @@ class EventManagement(commands.Cog):
         delete = False
 
         if not (room := await self.get_event_room_by_txt_id(ctx.channel.id)):
-            return await ctx.send(f"**{member.mention}, this is not an event room**")
+            return await ctx.send(f"**{member.mention}, this is not an event room, write this command in the event channel you created!**")
 
         # Checks whether member can delete room
         if room[0] == member.id:  # If it's the owner of the room
