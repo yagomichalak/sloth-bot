@@ -50,7 +50,7 @@ class Embeds(commands.Cog):
                     create_option(name="timestamp", description="If timestamp is gonna be shown.", option_type=5, required=False),
                     create_option(name="url", description="URL for the title.", option_type=3, required=False),
                     create_option(name="thumbnail", description="Thumbnail for the embed.", option_type=3, required=False),
-                    create_option(name="image", description="Display image.", option_type=4, required=False),
+                    create_option(name="image", description="Display image.", option_type=3, required=False),
                     create_option(name="color", description="The color for the embed.", option_type=3, required=False,
                         choices=[
                             create_choice(name="Blue", value="0011ff"), create_choice(name="Red", value="ff0000"),
