@@ -1,3 +1,4 @@
+from discord.role import R
 from cogs.reportsupport import ReportSupport
 import discord
 from discord.ext import commands, tasks
@@ -1023,6 +1024,28 @@ class Moderation(commands.Cog):
 
         except discord.errors.NotFound:
             return await ctx.send("**Invalid user id!**", delete_after=3)
+
+    @commands.command(hidden=True)
+    @commands.has_permissions(administrator=True)
+    async def banraind(self, ctx, users_ids: List[int] = None) -> None:
+
+        if not users_ids:
+            return await ctx.send(f"**Please inform a list of user ids, {ctx.author.mention}!**")
+
+
+        users_ids = list(set(users_ids))
+        banned = 0
+        async with ctx.typing():
+            for user_id in users_ids:
+                try:
+                    member = discord.Object(id=user_id)
+                    await ctx.guild.ban(member, reason="Raid")
+                except:
+                    pass
+                else:
+                    banned += 1
+            await ctx.send(f"Banned {banned} out of {len(users_ids)}")
+
 
     @commands.command(aliases=['fire', 'wall', 'fire_wall'])
     @commands.has_permissions(administrator=True)
