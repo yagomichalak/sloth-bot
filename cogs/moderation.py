@@ -1025,24 +1025,6 @@ class Moderation(commands.Cog):
         except discord.errors.NotFound:
             return await ctx.send("**Invalid user id!**", delete_after=3)
 
-    @commands.command(hidden=True)
-    @commands.has_permissions(administrator=True)
-    async def banraid(self, ctx, *, content: str) -> None:
-
-        message = content.replace(',', '').replace('\n', ' ').split(' ')
-
-        users_ids = list(set([int(userid) for userid in message]))
-        banned = 0
-        async with ctx.typing():
-            for user_id in users_ids:
-                try:
-                    await ctx.guild.ban(user_id, reason="Raid")
-                except:
-                    pass
-                else:
-                    banned += 1
-            await ctx.send(f"Banned {banned} out of {len(users_ids)}")
-
 
     @commands.command(aliases=['fire', 'wall', 'fire_wall'])
     @commands.has_permissions(administrator=True)
