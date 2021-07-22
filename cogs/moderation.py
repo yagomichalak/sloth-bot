@@ -1036,8 +1036,7 @@ class Moderation(commands.Cog):
         async with ctx.typing():
             for user_id in users_ids:
                 try:
-                    member = discord.Object(id=user_id)
-                    await ctx.guild.ban(member, reason="Raid")
+                    await ctx.guild.ban(user_id, reason="Raid")
                 except:
                     pass
                 else:
