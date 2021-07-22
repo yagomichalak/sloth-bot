@@ -270,7 +270,7 @@ class Prawler(Player):
 
 		mycursor, db = await the_database()
 		await mycursor.execute("""
-			UPDATE UserCurrency
+			UPDATE SlothProfile
 			SET knife_sharpness_stack = knife_sharpness_stack + %s
 			WHERE user_id = %s""", (increment, user_id))
 		await db.commit()
