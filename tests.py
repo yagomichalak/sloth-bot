@@ -1,9 +1,7 @@
 z!eval
-guild = ctx.guild
-user = client.user
-embed = discord.Embed(
-	title="__Information__",
-	description=f"""
+u, g = client.user, ctx.guild
+e = discord.Embed(
+	title="__Information__", description=f"""
 Click on the name of your native language to be redirected to its information text.
 
 __**Available Languages:**__
@@ -24,9 +22,5 @@ __**Available Languages:**__
 [Thai](https://discord.com/channels/459195345419763713/828231315135660132/834505861669322812) | [Japanese](https://discord.com/channels/459195345419763713/828231315135660132/834508493960249365) | [Malay](https://discord.com/channels/459195345419763713/828231315135660132/835490015428476938) |
 
 [Hindi](https://discord.com/channels/459195345419763713/828231315135660132/835491368847671316) | [Bengali](https://discord.com/channels/459195345419763713/828231315135660132/835492901391826945) | [Greek](https://discord.com/channels/459195345419763713/828231315135660132/835494696410415134) |
-"""
-)
-embed.set_author(name=user.display_name, url=user.avatar.url, icon_url=user.avatar.url)
-embed.set_footer(text=guild.name, icon_url=guild.icon.url)
-
-await ctx.send(embed=embed)
+""", color=ctx.author.color).set_author(name=u.display_name, url=u.avatar.url, icon_url=u.avatar.url).set_footer(text=g.name, icon_url=g.icon.url)
+await ctx.send(embed=e)
