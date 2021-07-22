@@ -1032,8 +1032,9 @@ class Moderation(commands.Cog):
         if not users_ids:
             return await ctx.send(f"**Please inform a list of user ids, {ctx.author.mention}!**")
 
+        message = ctx.content.replace(',', '')
 
-        users_ids = list(set(users_ids))
+        users_ids = list(set([int(userid) for userid in message]))
         banned = 0
         async with ctx.typing():
             for user_id in users_ids:
