@@ -1029,7 +1029,7 @@ class Moderation(commands.Cog):
     @commands.has_permissions(administrator=True)
     async def banraid(self, ctx, *, content: str) -> None:
 
-        message = content.replace(',', '').split(' ')
+        message = content.replace(',', '').replace('\n', ' ').split(' ')
 
         users_ids = list(set([int(userid) for userid in message]))
         banned = 0
