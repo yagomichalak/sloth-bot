@@ -1027,10 +1027,7 @@ class Moderation(commands.Cog):
 
     @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
-    async def banraind(self, ctx, users_ids: List[int] = None) -> None:
-
-        if not users_ids:
-            return await ctx.send(f"**Please inform a list of user ids, {ctx.author.mention}!**")
+    async def banraid(self, ctx) -> None:
 
         message = ctx.content.replace(',', '')
 
