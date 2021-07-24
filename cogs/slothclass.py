@@ -123,7 +123,7 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
         sloth_profile = await self.get_sloth_profile(member.id)
 
         view = discord.ui.View()
-        view.add_item(discord.ui.Button(label="Create Account", emoji="🦥", url="https://thelanguagesloth.com/profile/update"))
+        view.add_item(discord.ui.Button(style=5, label="Create Account", emoji="🦥", url="https://thelanguagesloth.com/profile/update"))
 
         if not sloth_profile:
             return await ctx.send(

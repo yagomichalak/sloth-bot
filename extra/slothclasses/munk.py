@@ -670,7 +670,7 @@ class Munk(Player):
         tribe_embed.set_footer(text=member.guild.name, icon_url=member.guild.icon.url)
 
         view = discord.ui.View()
-        view.add_item(discord.ui.Button(label="Create Tribe", url=link, emoji="🏕️"))
+        view.add_item(discord.ui.Button(style=5, label="Create Tribe", url=link, emoji="🏕️"))
 
         await ctx.send(embed=tribe_embed, view=view)
 
