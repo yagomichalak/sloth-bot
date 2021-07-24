@@ -679,7 +679,7 @@ class Munk(Player):
     @Player.skill_on_cooldown(skill=Skill.THREE)
     @Player.user_is_class('munk')
     @Player.skill_mark()
-    # @Player.not_ready()
+    @Player.not_ready()
     async def create_tribe_role(self, ctx, role_name: str = None) -> None:
         """ Creates a tribe role.
     
