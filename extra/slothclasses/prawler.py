@@ -126,6 +126,7 @@ class Prawler(Player):
 			# Updates user's skills used counter
 			await self.update_user_skills_used(user_id=attacker.id)
 		except Exception as e:
+			print("Fail at robbing", e)
 			await steal.delete()
 			return await ctx.send(f"**Your skill failed miserably for some reason, {attacker.mention}!**")
 
