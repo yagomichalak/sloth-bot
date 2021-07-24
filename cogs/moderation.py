@@ -813,7 +813,7 @@ class Moderation(commands.Cog):
 
             while True:
                 try:
-                    r, _ = await self.client.wait_for('reaction_add', timeout=300, check=check_mod)
+                    r, u = await self.client.wait_for('reaction_add', timeout=300, check=check_mod)
                 except asyncio.TimeoutError:
                     mod_ban_embed.description = f'Timeout, {member} is not getting banned!'
                     await msg.remove_reaction('✅', self.client.user)
@@ -821,13 +821,15 @@ class Moderation(commands.Cog):
                 else:
                     mod_ban_embed.title = f"Ban Request ({len(confirmations)}/5) → (5mins)"
                     await msg.edit(embed=mod_ban_embed)
-                    if len(confirmations) < 5:
+                    if channel.permissions_for(u).administrator:
+                        break
+                    elif len(confirmations) < 5:
                         continue
                     else:
                         break
 
         # Checks if it was a moderator ban request or just a normal ban
-        if len(confirmations) <= 1:
+        if len(confirmations) == 0:
             perpetrators = ctx.author
             icon = ctx.author.avatar.url
         else:
