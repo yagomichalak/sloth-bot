@@ -497,7 +497,7 @@ class SlothCurrency(commands.Cog):
         sloth_profile = await self.client.get_cog('SlothClass').get_sloth_profile(member.id)
 
         view = discord.ui.View()
-        view.add_item(discord.ui.Button(label="Create Account", emoji="🦥", url="https://thelanguagesloth.com/profile/update"))
+        view.add_item(discord.ui.Button(style=5, label="Create Account", emoji="🦥", url="https://thelanguagesloth.com/profile/update"))
 
         if not user_info or not sloth_profile:
             if ctx.author.id == member.id:
@@ -1140,7 +1140,7 @@ class SlothCurrency(commands.Cog):
         target_user = await self.get_user_currency(member.id)
         if not the_user:
             view = discord.ui.View()
-            view.add_item(discord.ui.Button(label="Create Account", emoji="🦥", url="https://thelanguagesloth.com/profile/update"))
+            view.add_item(discord.ui.Button(style=5, label="Create Account", emoji="🦥", url="https://thelanguagesloth.com/profile/update"))
             return await ctx.send(
                 embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one, or in the button below!**"),
                 view=view)
