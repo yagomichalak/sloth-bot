@@ -317,8 +317,10 @@ class EventManagement(commands.Cog):
             if confirm:
                 try:
                     await self.delete_event_room_by_txt_id(ctx.channel.id)
-                    await self.client.get_channel(room[1]).delete()
-                    await self.client.get_channel(room[2]).delete()
+                    if (room_one := self.client.get_channel(room[1])): 
+                        await room_one.delete()
+                    if (room_two := self.client.get_channel(room[2])): 
+                        await room_two.delete()
                 except Exception as e:
                     print(e)
                     await ctx.send(f"**Something went wrong with it, try again later, {member.mention}!**")
