@@ -87,13 +87,12 @@ class EventManagement(commands.Cog):
         member = ctx.author
         guild = ctx.guild
         room = await self.get_event_room_by_user_id(member.id)
-        channel = discord.utils.get(guild.text_channels, room[2])
+        channel = discord.utils.get(guild.text_channels, room[2]) if room else None
 
         if room and channel:
             return await ctx.send(f"**{member.mention}, you already have an event room going on! ({channel.mention})**")
-        else:
+        elif room and not channel:
             await self.delete_event_room_by_txt_id(room[2])
-        
 
         confirm = await ConfirmSkill("Do you want to create a `Movie Night`?").prompt(ctx)
         if not confirm:
@@ -141,11 +140,11 @@ class EventManagement(commands.Cog):
         member = ctx.author
         guild = ctx.guild
         room = await self.get_event_room_by_user_id(member.id)
-        channel = discord.utils.get(guild.text_channels, room[2])
+        channel = discord.utils.get(guild.text_channels, room[2]) if room else None
 
         if room and channel:
             return await ctx.send(f"**{member.mention}, you already have an event room going on! ({channel.mention})**")
-        else:
+        elif room and not channel:
             await self.delete_event_room_by_txt_id(room[2])
 
         confirm = await ConfirmSkill("Do you want to create a `Karaoke Night`?").prompt(ctx)
@@ -194,11 +193,11 @@ class EventManagement(commands.Cog):
         member = ctx.author
         guild = ctx.guild
         room = await self.get_event_room_by_user_id(member.id)
-        channel = discord.utils.get(guild.text_channels, room[2])
+        channel = discord.utils.get(guild.text_channels, room[2]) if room else None
 
         if room and channel:
             return await ctx.send(f"**{member.mention}, you already have an event room going on! ({channel.mention})**")
-        else:
+        elif room and not channel:
             await self.delete_event_room_by_txt_id(room[2])
 
         confirm = await ConfirmSkill("Do you want to create a `Culture Night`?").prompt(ctx)
@@ -248,11 +247,11 @@ class EventManagement(commands.Cog):
         member = ctx.author
         guild = ctx.guild
         room = await self.get_event_room_by_user_id(member.id)
-        channel = discord.utils.get(guild.text_channels, room[2])
+        channel = discord.utils.get(guild.text_channels, room[2]) if room else None
 
         if room and channel:
             return await ctx.send(f"**{member.mention}, you already have an event room going on! ({channel.mention})**")
-        else:
+        elif room and not channel:
             await self.delete_event_room_by_txt_id(room[2])
 
         confirm = await ConfirmSkill("Do you want to create a `Reading Session`?").prompt(ctx)
