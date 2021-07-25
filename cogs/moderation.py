@@ -49,11 +49,12 @@ class Moderation(commands.Cog):
 
         # Invite tracker
         msg = str(message.content)
-        if 'discord.gg/' in msg.lower():
+        if 'discord.gg/' in msg.lower() or 'discord.com/invite/' in msg.lower():
+            invite_root = 'discord.gg/' if 'discord.gg/' in msg.lower() else 'discord.com/invite/'
             ctx = await self.client.get_context(message)
             perms = ctx.channel.permissions_for(ctx.author)
             if not perms.administrator and mod_role_id not in [r.id for r in ctx.author.roles]:
-                is_from_guild = await self.check_invite_guild(msg, message.guild)
+                is_from_guild = await self.check_invite_guild(msg, message.guild, invite_root)
                 if not is_from_guild:
                     return await self.mute(ctx=ctx, member=message.author, reason="Invite Advertisement.")
 
@@ -156,14 +157,13 @@ class Moderation(commands.Cog):
         await mycursor.close()
         return muted_members
 
-    async def check_invite_guild(self, msg, guild):
+    async def check_invite_guild(self, msg, guild, invite_root: str):
         '''
         Checks whether it's a guild invite or not
         '''
 
-        invite_root = 'discord.gg/'
         start_index = msg.index(invite_root)
-        end_index = start_index + 11
+        end_index = start_index + len(invite_root)
         invite_hash = ''
         for c in msg[end_index:]:
             if c == ' ':
