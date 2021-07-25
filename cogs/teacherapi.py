@@ -13,6 +13,7 @@ from zipfile import ZipFile
 from typing import Dict, List, Union
 from mysqldb import the_django_database
 from extra.menu import ConfirmSkill
+from extra import utils
 
 owner_role_id = int(os.getenv('OWNER_ROLE_ID'))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID'))
@@ -519,7 +520,7 @@ class TeacherAPI(commands.Cog):
         await mycursor.close()
 
     @commands.command(aliases=['delete_cards', 'dtc'])
-    @commands.has_permissions(administrator=True)
+    @utils.is_allowed([*allowed_roles, lesson_manager_role_id])
     async def delete_teacher_cards(self, ctx, user: discord.User = None) -> None:
         """ Deletes all cards from a given teacher from the database.
         :param user: The user from whom to get the cards. """
