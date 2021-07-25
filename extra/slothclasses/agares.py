@@ -87,7 +87,7 @@ class Agares(Player):
             await ctx.send(
                 f"**{attacker.mention}, for some reason I couldn't magic pull {target.mention} from `{target_vc}` to `{attacker_vc}`**")
         else:
-            _, exists = await Player.skill_on_cooldown(skill=Skill.ONE).predicate(ctx)
+            _, exists = await Player.skill_on_cooldown(skill=Skill.ONE, seconds=28800).predicate(ctx)
             # Puts the attacker's skill on cooldown
             current_ts = await utils.get_timestamp()
             if exists:
