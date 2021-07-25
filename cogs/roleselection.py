@@ -1,11 +1,11 @@
 import discord
 from discord.ext import commands, menus
-from discord.ui.button import button
 
 from extra.prompt.menu import Confirm, prompt_number, prompt_emoji_guild, prompt_message_guild, get_role_response
 
 from extra.roleselection.db_commands import RoleSelectionDatabaseCommands
 from extra.roleselection.menu import RoleButton, ManageRoleSelectionMenu
+from extra.prompt.menu import ConfirmButton
 from extra.roleselection.utils import callback as button_callback
 
 from functools import partial
@@ -83,9 +83,16 @@ class RoleSelection(RoleSelectionDatabaseCommands):
 
 			await msg.edit(view=view)
 
-			confirm = await Confirm("**Wanna add more buttons into your menu?**").prompt(ctx)
-			if not confirm:
+			confirm_view = ConfirmButton()
+			embed = discord.Embed(description=f"**Wanna add more buttons into your menu, {member.mention}?**", color=member.color)
+			confirm_msg = await ctx.channel.send(embed=embed, view=confirm_view)
+			
+			
+			await confirm_view.wait()
+			await confirm_msg.delete()
+			if confirm_view.value is None or not confirm_view.value:
 				break
+
 
 		self.client.add_view(view=view, message_id=msg.id)
 		await ctx.send(f"**Menu successfully completed, {member.mention}!**", delete_after=5)

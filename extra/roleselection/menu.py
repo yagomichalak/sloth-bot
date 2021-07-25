@@ -51,7 +51,7 @@ class ManageRoleSelectionMenu(discord.ui.View):
 				await self.message.edit(view=view_menu)
 
 			view = ConfirmButton()
-			embed = discord.Embed(description=f"**Wanna add more buttons into your menu, {member.mention}?**")
+			embed = discord.Embed(description=f"**Wanna add more buttons into your menu, {member.mention}?**", color=member.color)
 			msg = await interaction.channel.send(embed=embed, view=view)
 			
 			
