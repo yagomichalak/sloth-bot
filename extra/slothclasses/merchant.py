@@ -330,20 +330,20 @@ class Merchant(Player):
 
         if random.random() <= 0.35:
             SlothCurrency = self.client.get_cog('SlothCurrency')
-            registered_items = await SlothCurrency.get_registered_items()
+            registered_items = await SlothCurrency.get_shop_items()
             random_item = random.choice(registered_items)
 
             # Checks whether user already has the item
-            user_has_item = await SlothCurrency.check_user_has_item(user_id=merchant.id, item_name=random_item[2])
+            user_has_item = await SlothCurrency.check_user_has_item(user_id=merchant.id, item_name=random_item[4])
             if user_has_item:
                 # Gives the user the price of the item
-                await self.update_user_money(merchant.id, random_item[3])
-                await ctx.send(f"**{merchant.mention}, you already have the `{random_item[2]}` item, so you got it worth of leaves instead; `{random_item[3]}łł`**")
+                await self.update_user_money(merchant.id, random_item[6])
+                await ctx.send(f"**{merchant.mention}, you already have the `{random_item[4]}` item, so you got it worth of leaves instead; `{random_item[5]}łł`**")
 
             else:
                 # Gives the user the item
-                await SlothCurrency.insert_user_item(merchant.id, random_item[2], 'unequipped', random_item[1])
-                await ctx.send(f"**{merchant.mention}, you just got the `{random_item[2]}` item, which is worth `{random_item[3]}łł`**")
+                await SlothCurrency.insert_user_item(merchant.id, random_item[4], 'unequipped', random_item[5])
+                await ctx.send(f"**{merchant.mention}, you just got the `{random_item[4]}` item, which is worth `{random_item[5]}łł`**")
 
         else:
             await ctx.send(f"**{merchant.mention}, you had a `35%` chance of getting something from the Dark Sloth Web, it happened that today wasn't your day!**")

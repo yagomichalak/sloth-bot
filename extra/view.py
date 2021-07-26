@@ -1,4 +1,5 @@
 import discord
+from discord.components import SelectOption
 from extra import utils
 from discord.ext import commands
 from typing import List, Dict, Union, Any
@@ -189,8 +190,8 @@ class ExchangeActivityView(discord.ui.View):
 
 
 class ConfirmButton(discord.ui.View):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, timeout: int = None):
+        super().__init__(timeout=timeout)
         self.value = None
 
     # When the confirm button is pressed, set the inner value to `True` and
