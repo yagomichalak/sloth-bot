@@ -431,7 +431,7 @@ class Tools(commands.Cog):
                 await ctx.send(f"**They stopped comming, but we've gathered `{magneted_members}/{len(all_members)}` members!**")
 
     @commands.command(aliases=['mv', 'drag'])
-    @commands.has_permissions(administrator=True)
+    @utils.is_allowed([mod_role_id, admin_role_id, owner_role_id])
     async def move(self, ctx) -> None:
         """ Moves 1 or more people to a voice channel.
         Ps¹: If no channel is provided, the channel you are in will be used.
