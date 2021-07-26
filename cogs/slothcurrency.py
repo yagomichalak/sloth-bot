@@ -1,6 +1,7 @@
 import discord
 from discord import user
 from discord.ext import commands, menus
+from discord.utils import maybe_coroutine
 from mysqldb import *
 from datetime import datetime
 import random
@@ -247,11 +248,47 @@ class SlothCurrency(commands.Cog):
             return await ctx.send("**Inform an item to add!**", delete_after=3)
 
         user_has_item = await self.get_user_specific_item(member.id, item_name.title())
-        if len(user_has_item) == 0:
-            await self.insert_user_item(member.id, item_name, 'unequipped', item_name.title())
-            return await ctx.send(f"**{item_name.title()} given to {member.name}!**", delete_after=3)
+        if not user_has_item:
+            if (shop_item := await self.get_shop_item(item_name)):
+                await self.insert_user_item(member.id, item_name, 'unequipped', shop_item[5])
+                return await ctx.send(f"**{item_name.title()} given to {member.name}!**", delete_after=3)
+            else:
+                return await ctx.send(f"**This item doesn't exist, {ctx.author.mention}!**")
         else:
-            return await ctx.send(f"**{member.name} already have that item!**", delete_after=3)
+            return await ctx.send(f"**{member.name} already has that item!**", delete_after=3)
+
+    async def get_shop_item(self, item_name: str) -> List[Union[str, int]]:
+        """ Gets a specific item from the shop.
+        :param item_name: The name of the item to get. """
+
+        mycursor, db = await the_django_database()
+        await mycursor.execute("SELECT * FROM shop_shopitem WHERE item_name = %s", (item_name,))
+        item = await mycursor.fetchone()
+        await mycursor.close()
+        return item
+
+    async def get_shop_items(self) -> List[List[Union[str, int]]]:
+        """ Gets all items from the shop. """
+
+        mycursor, db = await the_django_database()
+        await mycursor.execute("SELECT * FROM shop_shopitem")
+        items = await mycursor.fetchall()
+        await mycursor.close()
+        return items
+
+    async def get_user_registered_items(self, user_id: int) -> List[List[Union[str, int]]]:
+        """ Gets all UserItems that are registered on the website.
+        :param user_id: The ID of the user to get the items from. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("""
+        SELECT SSI.* FROM UserItems AS UI 
+        LEFT JOIN slothdjango.shop_shopitem AS SSI ON UI.item_name = SSI.item_name
+        WHERE user_id = %s
+        """, (user_id,))
+        user_items = await mycursor.fetchall()
+        await mycursor.close()
+        return user_items
 
     @commands.command()
     @commands.has_permissions(administrator=True)

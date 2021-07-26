@@ -1,12 +1,15 @@
+from extra.view import ConfirmButton
 import discord
 from discord.ext import commands
 from .player import Player, Skill
 from mysqldb import the_database
 from extra.menu import ConfirmSkill
+from extra.select import WarriorUserItemSelect
 from extra import utils
 import os
 from datetime import datetime
 import random
+from typing import List, Union
 
 bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
 
@@ -227,7 +230,7 @@ class Warrior(Player):
 
     @commands.command(aliases=['ripoff', 'rip', 'shred'])
     @Player.skills_used(requirement=20)
-    @Player.skill_on_cooldown(Skill.THREE)
+    @Player.skill_on_cooldown(Skill.THREE, seconds=172800)
     @Player.user_is_class('warrior')
     @Player.skill_mark()
     @Player.not_ready()
@@ -238,7 +241,114 @@ class Warrior(Player):
         Cooldown: 2 days.
         Price: Half of the price of your target's ripped-off item
 
-        Ps: The menu containing the target's items will appear when using this command on them.
+        Ps: 
+        - The menu containing the target's items will appear when using this command on them.
+        - You will only see up to 25 items of your target, the first 25 items.
+        - If an item is ripped-off, it's removed permanently from the member's inventory.
         """
 
-        pass
+        attacker = ctx.author
+
+        if ctx.channel.id != self.bots_txt.id:
+            return await ctx.send(f"**You can only use this skill in {self.bots_txt.mention}, {attacker.mention}!**")
+
+        attacker_fx = await self.get_user_effects(attacker)
+        if 'knocked_out' in attacker_fx:
+            return await ctx.send(f"**You can't use this skills because you are knocked-out, {attacker.mention}!**")
+    
+        if not target:
+            return await ctx.send(f"**Please, inform a target, {attacker.mention}!**")
+
+        if attacker.id == target.id:
+            return await ctx.send(f"**{attacker.mention}, you cannot do it on yourself!**")
+
+        if target.bot:
+            return await ctx.send(f"**{attacker.mention}, you cannot do it on a bot!**")
+
+        target_sloth_profile = await self.get_sloth_profile(target.id)
+        if not target_sloth_profile:
+            return await ctx.send(f"**You cannot do it on someone who doesn't have an account, {attacker.mention}!**")
+
+        if target_sloth_profile[1] == 'default':
+            return await ctx.send(f"**You cannot do it on someone who has a `default` Sloth class, {attacker.mention}!**")
+
+        target_fx = await self.get_user_effects(target)
+        if 'protected' in target_fx:
+            return await ctx.send(f"**You cannot attack {target.mention} because they are protected, {attacker.mention}!**")
+
+        SlothCurrency = self.client.get_cog('SlothCurrency')
+
+        target_items = await SlothCurrency.get_user_registered_items(target.id)       
+        if not target_items:
+            return await ctx.send(f"**{target.mention} doesn't have any items to rip off, {attacker.mention}!**")
+
+        view = discord.ui.View(timeout=60)
+        view.add_item(WarriorUserItemSelect(target_items[:25]))
+        await ctx.send(f"**{target.display_name}**'s items:", view=view)
+        await view.wait()
+        item = getattr(view, 'selected_item')
+        if item is None:
+            return await ctx.send(f"**Timeout, {attacker.mention}!**")
+        elif item is False:
+            return await ctx.send(f"**You canceled it, {attacker.mention}!**")
+        
+        cost = int(item[6]/2)
+        confirm_view = ConfirmButton(timeout=60)
+        await ctx.send(embed=discord.Embed(
+            title="__Confirm__",
+            description=f"**Do you really wanna rip off {target.mention}'s `{item[4]}` item for the cost of `{cost}łł`, {attacker.mention}?**",
+            color=discord.Color.green()), view=confirm_view
+        )
+        await confirm_view.wait()
+        if confirm_view.value is None or not confirm_view.value:
+            return await ctx.send(f"**Not doing it, then!**")
+
+        _, exists = await Player.skill_on_cooldown(skill=Skill.THREE, seconds=172800).predicate(ctx)
+
+        attacker_currency = await self.get_user_currency(attacker.id)
+        if attacker_currency[0] < cost:
+            return await ctx.send(f"**You don't have {item[6]}łł to rip off the {item[4]} item, {attacker.mention}!**")
+
+        await self.update_user_money(attacker.id, -cost)
+        try:
+            current_timestamp = await utils.get_timestamp()
+            # Don't need to store it, since it is forever
+            if exists:
+                await self.update_user_skill_ts(attacker.id, Skill.THREE, current_timestamp)
+            else:
+                await self.insert_user_skill_cooldown(attacker.id, Skill.THREE, current_timestamp)
+            # Updates user's skills used counter
+            await self.update_user_skills_used(user_id=attacker.id)
+            await SlothCurrency.remove_user_item(target.id, item[4])
+
+        except Exception as e:
+            print(e)
+            return await ctx.send(f"**Something went wrong and your `Rip Off` skill failed, {attacker.mention}!**")
+        else:
+            rip_off_embed = await self.get_rip_off_embed(
+                channel=ctx.channel, perpetrator_id=attacker.id, target_id=target.id, item=item)
+            await ctx.send(embed=rip_off_embed)
+
+
+    async def get_rip_off_embed(self, channel, perpetrator_id: int, target_id: int, item: List[Union[str, int]]) -> discord.Embed:
+        """ Makes an embedded message for a rip off skill.
+        :param channel: The context channel.
+        :param perpetrator_id: The ID of the perpetrator of the rip off skill.
+        :param target_id: The ID of the target of the rip off skill.
+        :param item: The item """
+
+        timestamp = await utils.get_timestamp()
+
+        rip_off_embed = discord.Embed(
+            title="Someone just lost an Item!",
+            description=f"**<@{perpetrator_id}> ripped of <@{target_id}>'s {item[4]} item that was worth `{item[6]}łł`!** <:warrior_scratch:869221184925995079>",
+            color=discord.Color.green(),
+            timestamp=datetime.fromtimestamp(timestamp),
+            url=f"https://thelanguagesloth.com/shop/{item[7]}"
+        )
+        
+        rip_off_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Warrior.png")
+        rip_off_embed.set_image(url=f"https://thelanguagesloth.com/media/{item[3]}")
+        rip_off_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
+
+        return rip_off_embed
