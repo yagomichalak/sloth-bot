@@ -225,13 +225,20 @@ class Warrior(Player):
 
         return smash_embed
 
-    @commands.command()
+    @commands.command(aliases=['ripoff', 'rip', 'shred'])
     @Player.skills_used(requirement=20)
     @Player.skill_on_cooldown(Skill.THREE)
     @Player.user_is_class('warrior')
     @Player.skill_mark()
     @Player.not_ready()
-    async def unknown(self, ctx, target: discord.Member = None) -> None:
-        """ Unknown skill, that is TBD. """
+    async def rip_off(self, ctx, target: discord.Member = None) -> None:
+        """ Will rip off an item of your choice of your target.
+        :param target: The target member.
+        
+        Cooldown: 2 days.
+        Price: Half of the price of your target's ripped-off item
+
+        Ps: The menu containing the target's items will appear when using this command on them.
+        """
 
         pass
