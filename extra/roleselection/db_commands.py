@@ -159,6 +159,8 @@ class RoleSelectionDatabaseCommands(commands.Cog):
         DELETE FROM SelectionMenu
         WHERE message_id = %s AND channel_id = %s AND guild_id = %s AND custom_id = %s
         """, (message_id, channel_id, guild_id, custom_id))
+        await db.commit()
+        await mycursor.close()
 
     @staticmethod
     async def delete_selection_menu_by_message_id(message_id: int, guild_id: int) -> None:
