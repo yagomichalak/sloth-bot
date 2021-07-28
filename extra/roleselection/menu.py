@@ -49,8 +49,9 @@ class ManageRoleSelectionMenu(discord.ui.View):
 				await interaction.channel.send(f"**I couldn't add your button to the database, {member.mention}!**", delete_after=5)
 			else:
 				await self.message.edit(view=view_menu)
+				self.client.add_view(view=view_menu) # Maybe delete this line later
 
-			view = ConfirmButton()
+			view = ConfirmButton(member)
 			embed = discord.Embed(description=f"**Wanna add more buttons into your menu, {member.mention}?**", color=member.color)
 			msg = await interaction.channel.send(embed=embed, view=view)
 			
@@ -89,7 +90,7 @@ class ManageRoleSelectionMenu(discord.ui.View):
 		if not number:
 			return
 
-		view = ConfirmButton()
+		view = ConfirmButton(member)
 		chosen_button = view_menu.children[number-1]
 		embed = discord.Embed(
 			description=f"""**Are you sure you want to delete the button with label `{chosen_button.label}`,
@@ -117,8 +118,8 @@ class ManageRoleSelectionMenu(discord.ui.View):
 				await interaction.channel.send(f"**I couldn't remove your button from the database, {member.mention}!**", delete_after=5)
 			else:
 				await self.message.edit(view=view_menu)
-			
-			# await self.client.add_view(view=view_menu, message_id=self.message.id)
+				await self.client.add_view(view=view_menu, message_id=self.message.id)
+
 			await interaction.channel.send(f"**Menu successfully deleted, {member.mention}!**", delete_after=5)
 		else:
 			await interaction.channel.send(f"**Not deleting it then, {member.mention}!**", delete_after=5)
@@ -130,7 +131,7 @@ class ManageRoleSelectionMenu(discord.ui.View):
 		
 		await interaction.response.defer()
 		member = interaction.user
-		view = ConfirmButton()
+		view = ConfirmButton(member)
 		self.stop()
 		msg = await interaction.channel.send(
 			f"**Are you sure you want to delete this menu, {member.mention}?**", view=view)

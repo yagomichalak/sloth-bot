@@ -7,8 +7,9 @@ import re
 from emoji.core import emojize, demojize
 
 class ConfirmButton(discord.ui.View):
-	def __init__(self):
-		super().__init__()
+	def __init__(self, member: Union[discord.User, discord.Member], timeout: int = 180):
+		super().__init__(timeout=timeout)
+		self.member = member
 		self.value = None
 
 	# When the confirm button is pressed, set the inner value to `True` and
@@ -24,6 +25,9 @@ class ConfirmButton(discord.ui.View):
 	async def cancel(self, button: discord.ui.Button, interaction: discord.Interaction):
 		self.value = False
 		self.stop()
+
+	async def interaction_check(self, interaction: discord.Interaction) -> bool:
+		return self.member.id == interaction.user.id
 
 
 # ===== Message-based =====

@@ -156,7 +156,6 @@ class SlothCurrency(commands.Cog):
             return await ctx.send("**Inform an item to equip!**", delete_after=3)
 
         if user_item := await self.get_user_item(ctx.author.id, item_name.title()):
-            print('moah')
             if await self.check_user_can_equip(ctx.author.id, item_name.title()):
                 await self.update_user_item_info(ctx.author.id, item_name, 'equipped')
                 return await ctx.send(f"**{ctx.author.mention} equipped __{item_name.title()}__!**", delete_after=3)
@@ -250,7 +249,7 @@ class SlothCurrency(commands.Cog):
         user_has_item = await self.get_user_specific_item(member.id, item_name.title())
         if not user_has_item:
             if (shop_item := await self.get_shop_item(item_name)):
-                await self.insert_user_item(member.id, item_name, 'unequipped', shop_item[5])
+                await self.insert_user_item(member.id, item_name, 'unequipped', shop_item[5], str(shop_item[3]).replace('registered_items/', ''))
                 return await ctx.send(f"**{item_name.title()} given to {member.name}!**", delete_after=3)
             else:
                 return await ctx.send(f"**This item doesn't exist, {ctx.author.mention}!**")
@@ -311,10 +310,10 @@ class SlothCurrency(commands.Cog):
         else:
             return await ctx.send(f"**{member.name} doesn't have that item!**", delete_after=3)
 
-    async def insert_user_item(self, user_id: int, item_name: str, enable: str, item_type: str):
+    async def insert_user_item(self, user_id: int, item_name: str, enable: str, item_type: str, item_image: str):
         mycursor, db = await the_database()
-        await mycursor.execute("INSERT INTO UserItems (user_id, item_name, enable, item_type) VALUES (%s, %s, %s, %s)",
-                               (user_id, item_name.title(), enable, item_type.lower()))
+        await mycursor.execute("INSERT INTO UserItems (user_id, item_name, enable, item_type, image_name) VALUES (%s, %s, %s, %s, %s)",
+                               (user_id, item_name.title(), enable, item_type.lower(), item_image))
         await db.commit()
         await mycursor.close()
 
@@ -743,28 +742,6 @@ class SlothCurrency(commands.Cog):
         user_currency = await mycursor.fetchall()
         await mycursor.close()
         return user_currency
-
-    async def try_to_buy_item(self, user_id: int, item_type: str, item_name: str, to_pay: int, guild_id: int,
-                              the_time: int):
-        mycursor, db = await the_database()
-        await mycursor.execute(f"SELECT * FROM UserCurrency WHERE user_id = {user_id}")
-        user_info = await mycursor.fetchall()
-        await mycursor.close()
-
-        member = discord.utils.get(self.client.get_guild(guild_id).members, id=user_id)
-        if user_info[0][1] >= to_pay:
-            await self.insert_user_item(user_id, item_name, 'unequipped', item_type)
-            await self.update_user_money(user_id, - to_pay)
-            await self.update_user_purchase_ts(member.id, the_time)
-            shop_embed = discord.Embed(title="Shop Communication",
-                                       description=f"**You just bought a __{item_name}__!**",
-                                       colour=discord.Color.green(), timestamp=datetime.utcnow())
-            await member.send(embed=shop_embed)
-        else:
-            shop_embed = discord.Embed(title="Shop Communication",
-                                       description=f"**You don't have money for that! You need more `{to_pay - user_info[0][1]}łł` in order to buy it!**",
-                                       colour=discord.Color.green(), timestamp=datetime.utcnow())
-            return await member.send(embed=shop_embed)
 
     async def insert_user_currency(self, user_id: int, the_time: int) -> None:
         """ Inserts a user into the currency system.
@@ -1217,15 +1194,13 @@ class SlothCurrency(commands.Cog):
         else:
             await ctx.send(f"You don't have {money}łł!")
 
-    async def get_user_pfp(self, member):
+    async def get_user_pfp(self, member, thumb_width: int = 59):
         # im = Image.open(requests.get(member.avatar.url, stream=True).raw)
         async with self.session.get(str(member.avatar.url)) as response:
             image_bytes = await response.content.read()
             with BytesIO(image_bytes) as pfp:
                 image = Image.open(pfp)
                 im = image.convert('RGBA')
-
-        thumb_width = 59
 
         def crop_center(pil_img, crop_width, crop_height):
             img_width, img_height = pil_img.size

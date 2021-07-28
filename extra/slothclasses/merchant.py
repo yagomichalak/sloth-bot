@@ -1,3 +1,5 @@
+from discord import file
+from extra.prompt.menu import ConfirmButton
 import discord
 from discord.ext import commands, menus
 from .player import Player, Skill
@@ -5,9 +7,10 @@ from mysqldb import the_database
 from extra.menu import ConfirmSkill, prompt_number, OpenShopLoop
 from extra import utils
 import os
-from typing import List, Union
+from typing import List, Dict, Union
 from datetime import datetime
 import random
+from PIL import Image, ImageDraw, ImageFont
 
 bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
 
@@ -342,7 +345,7 @@ class Merchant(Player):
 
             else:
                 # Gives the user the item
-                await SlothCurrency.insert_user_item(merchant.id, random_item[4], 'unequipped', random_item[5])
+                await SlothCurrency.insert_user_item(merchant.id, random_item[4], 'unequipped', random_item[5], str(random_item[3]).replace('registered_items/', ''))
                 await ctx.send(f"**{merchant.mention}, you just got the `{random_item[4]}` item, which is worth `{random_item[5]}łł`**")
 
         else:
@@ -511,11 +514,266 @@ class Merchant(Player):
 
 
     @commands.command()
-    @commands.cooldown(1, 60, commands.BucketType.user)
+    @commands.cooldown(1, 180, commands.BucketType.user)
     @Player.not_ready()
-    async def marry(self, ctx, member: discord.Member = None) -> None:
+    async def marry(self, ctx, suitor: discord.Member = None) -> None:
         """ Marries someone.
-        :param member: The person to marry.
-        PS: You need a wedding ring to propose someone, buy one with your local merchant. """
+        :param suitor: The person to marry.
+        PS: You need wedding rings to propose someone, buy one from your local Merchant.
+        
+        Cost: 1000łł
 
-        pass
+        Ps: Both you and your suitor must have a sum of at least 2 rings in order to marry.
+        """
+
+        member = ctx.author
+
+        member_marriage = await self.get_user_marriage(member.id)
+        if member_marriage['partner']:
+            self.client.get_command('marry').reset_cooldown(ctx)
+            return await ctx.send(f"**You already have a partner, what do you think you're doing, {member.mention}?** 🤨")
+
+        if not suitor:
+            self.client.get_command('marry').reset_cooldown(ctx)
+            return await ctx.send(f"**Please, inform who you want to marry, {member.mention}!**")
+
+        if member.id == suitor.id:
+            self.client.get_command('marry').reset_cooldown(ctx)
+            return await ctx.send(f"**You cannot marry yourself, {member.mention}!**")
+
+        no_pf_view = discord.ui.View()
+        no_pf_view.add_item(discord.ui.Button(style=5, label="Create Account", emoji="🦥", url="https://thelanguagesloth.com/profile/update"))
+
+        if not (sloth_profile := await self.get_sloth_profile(member.id)):
+            self.client.get_command('marry').reset_cooldown(ctx)
+            return await ctx.send("You don't seem to have a Sloth Account, create one by clicking the button below:", view=no_pf_view)
+
+        if not (target_sloth_profile := await self.get_sloth_profile(suitor.id)):
+            self.client.get_command('marry').reset_cooldown(ctx)
+            return await ctx.send(f"**Your suitor doesn't have a Sloth Account, tell them to create one before trying this again, {member.mention}!**")
+
+        suitor_marriage = await self.get_user_marriage(suitor.id)
+        if suitor_marriage['partner']:
+            self.client.get_command('marry').reset_cooldown(ctx)
+            return await ctx.send(f"**{suitor.mention} already has a partner, you savage, {member.mention}!** 😏")
+
+        p1_rings, p2_rings = sloth_profile[7], target_sloth_profile[7]
+
+        if p1_rings + p2_rings < 2:
+            self.client.get_command('marry').reset_cooldown(ctx)
+            return await ctx.send(f"**You two don't have enough rings to marry each other! The sum of your rings must be greater or equal to 2, {member.mention}!**")
+
+        # Checks the member's money
+        member_currency = await self.get_user_currency(member.id)
+        if member_currency[1] < 1000:
+            self.client.get_command('marry').reset_cooldown(ctx)
+            return await ctx.send(f"**You don't have `1000łł` to marry {suitor.mention}, {member.mention}!**")
+
+        # Asks confirmation
+        confirm_view = ConfirmButton(member, timeout=60)
+        embed = discord.Embed(
+            title="__Confirmation__", color=member.color,
+            description=f"**Are you sure you wanna marry {suitor.mention}, {member.mention}?**")
+        await ctx.send(embed=embed, view=confirm_view)
+
+        await confirm_view.wait()
+        if confirm_view.value is None:
+            self.client.get_command('marry').reset_cooldown(ctx)
+            return await ctx.send(f"**{member.mention}, you took too long to answer...**")
+
+        if not confirm_view.value:
+            self.client.get_command('marry').reset_cooldown(ctx)
+            return await ctx.send(f"**Not doing it then, {member.mention}!**")
+
+
+        # Asks confirmation
+        confirm_view = ConfirmButton(suitor, timeout=60)
+        embed = discord.Embed(
+            title="__Do you wanna Marry me?__", color=int('fa377d', 16), timestamp=ctx.message.created_at,
+            description=f"**{suitor.mention}, {member.mention} is proposing you for `marriage`, do you accept it? 😳**"
+        ).set_thumbnail(url='https://cdn.discordapp.com/emojis/738579957936029837.png?v=1')
+        await ctx.send(content=suitor.mention, embed=embed, view=confirm_view)
+
+        await confirm_view.wait()
+        if confirm_view.value is None:
+            return await ctx.send(f"**{suitor.mention}, you took too long to answer...**")
+
+        if not confirm_view.value:
+            return await ctx.send(f"**Not doing it then, {suitor.mention}!**")
+
+
+        await self.update_user_money(member.id, -1000)
+            
+        # Update ring counters
+        if p1_rings == 2 and p2_rings >= 1:
+            await self.update_user_rings(member.id, -1)
+            await self.update_user_rings(suitor.id, -1)
+        elif p1_rings == 2 and p2_rings == 0:
+            await self.update_user_rings(member.id, -2)
+        elif p1_rings == 1:
+            await self.update_user_rings(member.id, -1)
+            await self.update_user_rings(suitor.id, -1)
+        elif p1_rings == 0:
+            await self.update_user_rings(suitor.id, -2)
+
+        # Update marital status
+        current_ts = await utils.get_timestamp()
+        try:
+            await self.insert_skill_action(
+                user_id=member.id, skill_type='marriage', skill_timestamp=current_ts,
+                target_id=suitor.id)
+            filename, filepath = await self.make_marriage_image(member, suitor)
+        except Exception as e:
+            print(e)
+            await ctx.send(f"**Something went wrong with this, {member.mention}!**")
+        else:
+            marriage_embed = await self.get_marriage_embed(ctx.channel, member, suitor, filename)
+            await ctx.send(embed=marriage_embed, file=discord.File(filepath, filename=filename))
+        finally:
+            os.remove(filepath)
+
+    @commands.command()
+    @commands.cooldown(1, 180, commands.BucketType.user)
+    @Player.not_ready()
+    async def divorce(self, ctx) -> None:
+        """ Divorces your partner.
+        
+        Cost: 500łł """
+
+        member = ctx.author
+
+        member_marriage = await self.get_user_marriage(member.id)
+        if not member_marriage['partner']:
+            return await ctx.send(f"**You don't even have a partner, {member.mention}!** 😔")
+
+        partner = discord.utils.get(ctx.guild.members, id=member_marriage['partner'])
+        partner = discord.Object(id=member_marriage['partner']) if not partner else partner
+
+        # Checks the member's money
+        member_currency = await self.get_user_currency(member.id)
+        if member_currency[1] < 500:
+            self.client.get_command('divorce').reset_cooldown(ctx)
+            return await ctx.send(f"**You don't have `500łł` to divorce <@{partner.id}>, {member.mention}!**")
+
+        # Asks confirmation
+        confirm_view = ConfirmButton(member, timeout=60)
+        embed = discord.Embed(
+            title="__Confirmation__", color=member.color,
+            description=f"**Are you really sure you wanna divorce <@{partner.id}>, {member.mention}?**")
+        await ctx.send(embed=embed, view=confirm_view)
+
+        await confirm_view.wait()
+        if confirm_view.value is None:
+            return await ctx.send(f"**{member.mention}, you took too long to answer...**")
+
+        if not confirm_view.value:
+            return await ctx.send(f"**Not doing it then, {member.mention}!**")
+
+        await self.update_user_money(member.id, -500)
+
+        # Update marital status
+        try:
+            await self.delete_skill_action_by_target_id_and_skill_type(partner.id, skill_type='marriage')
+            await self.delete_skill_action_by_user_id_and_skill_type(member.id, skill_type='marriage')
+        except Exception as e:
+            print(e)
+            await ctx.send(f"**Something went wrong with this, {member.mention}!**")
+        else:
+            divorce_embed = await self.get_divorce_embed(ctx.channel, member, partner)
+            await ctx.send(content=f"<@{partner.id}>", embed=divorce_embed)
+
+    async def get_user_marriage(self, user_id: int) -> Dict[str, Union[str, int]]:
+        """ Gets the user's partner.
+        :param user_id: The ID of the user. """
+
+        skill_action = await self.get_skill_action_by_user_id_and_skill_type(user_id=user_id, skill_type='marriage')
+        if not skill_action:
+            skill_action = await self.get_skill_action_by_target_id_and_skill_type(target_id=user_id, skill_type='marriage')
+
+        marriage = {
+            'user': None,
+            'partner': None,
+            'timestamp': None
+        }
+
+        if not skill_action:
+            return marriage
+
+        marriage = {'user': skill_action[0], 'partner': skill_action[3], 'timestamp': skill_action[2]}
+
+        return marriage
+
+
+    async def make_marriage_image(self, p1: discord.Member, p2: discord.Member) -> List[str]:
+
+        filename = f"marriage_{p1.id}_{p2.id}.png"
+
+        SlothCurrency = self.client.get_cog('SlothCurrency')
+
+        medium = ImageFont.truetype("built titling sb.ttf", 60)
+        background = Image.open(await SlothCurrency.get_user_specific_type_item(p1.id, 'background'))
+
+        # Get PFPs
+        pfp1 = await SlothCurrency.get_user_pfp(p1, 250)
+        pfp2 = await SlothCurrency.get_user_pfp(p2, 250)
+
+
+        background.paste(pfp1, (150, 200), pfp1)
+        # background.paste(heart, (250, 250), heart)
+        background.paste(pfp2, (400, 200), pfp2)
+
+        # Writing names
+        draw = ImageDraw.Draw(background)
+        W, H = (800,600)
+
+        w1, h1 = draw.textsize(str(p1), font=medium)
+        w2, h2 = draw.textsize(str(p2), font=medium)
+
+        draw.text(((W-w1)/2, 50), str(p1), fill="black", font=medium)
+        draw.text(((W-w2)/2, 500), str(p2), fill="black", font=medium)
+
+        filepath = f'media/temporary/{filename}'
+        background.save(filepath, 'png', quality=90)
+        return filename, filepath
+
+    async def get_marriage_embed(self, channel, perpetrator: discord.Member, suitor: discord.Member, filename: str) -> discord.Embed:
+        """ Makes an embedded message for a marriage action.
+        :param channel: The context channel.
+        :param perpetrator: The perpetrator of the proposal.
+        :param suitor: The suitor. """
+
+        timestamp = await utils.get_timestamp()
+
+        marriage_embed = discord.Embed(
+            title="A Marriage is now being Celebrated!",
+            description=f"**{perpetrator.mention} has just married {suitor.mention}!** ❤️💍💍❤️",
+            color=int('fa377d', 16),
+            timestamp=datetime.fromtimestamp(timestamp)
+        )
+        
+        marriage_embed.set_image(url=f"attachment://{filename}")
+        marriage_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
+
+        return marriage_embed
+
+
+    async def get_divorce_embed(self, channel, perpetrator: discord.Member, partner: Union[discord.User, discord.Member]) -> discord.Embed:
+        """ Makes an embedded message for a divorce action.
+        :param channel: The context channel.
+        :param perpetrator: The perpetrator of the divorce.
+        :param partner: The partner. """
+
+        timestamp = await utils.get_timestamp()
+
+        marriage_embed = discord.Embed(
+            title="Oh no, a Marriage has been Ruined!",
+            description=f"**{perpetrator.mention} has just divorced <@{partner.id}>!** 💔💔",
+            color=int('fa377d', 16),
+            timestamp=datetime.fromtimestamp(timestamp)
+        )
+        
+        marriage_embed.set_thumbnail(url="https://media.tenor.com/images/99bba4c52c034aa6c29f51df547b6206/tenor.gif")
+        marriage_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
+
+        return marriage_embed
+        

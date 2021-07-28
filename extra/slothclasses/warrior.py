@@ -1,4 +1,4 @@
-from extra.view import ConfirmButton
+from extra.prompt.menu import ConfirmButton
 import discord
 from discord.ext import commands
 from .player import Player, Skill
@@ -293,7 +293,7 @@ class Warrior(Player):
             return await ctx.send(f"**You canceled it, {attacker.mention}!**")
         
         cost = int(item[6]/2)
-        confirm_view = ConfirmButton(timeout=60)
+        confirm_view = ConfirmButton(attacker, timeout=60)
         await ctx.send(embed=discord.Embed(
             title="__Confirm__",
             description=f"**Do you really wanna rip off {target.mention}'s `{item[4]}` item for the cost of `{cost}łł`, {attacker.mention}?**",
