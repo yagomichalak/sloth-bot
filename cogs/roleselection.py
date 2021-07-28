@@ -83,7 +83,7 @@ class RoleSelection(RoleSelectionDatabaseCommands):
 
 			await msg.edit(view=view)
 
-			confirm_view = ConfirmButton()
+			confirm_view = ConfirmButton(member)
 			embed = discord.Embed(description=f"**Wanna add more buttons into your menu, {member.mention}?**", color=member.color)
 			confirm_msg = await ctx.channel.send(embed=embed, view=confirm_view)
 			

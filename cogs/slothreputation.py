@@ -129,7 +129,7 @@ class SlothReputation(commands.Cog):
 
         elif not user_info and not member.id == ctx.author.id:
             return await ctx.send("**Member not found in the system!**")
-
+    
 
         embed = discord.Embed(title="__All Information__", colour=member.color, timestamp=ctx.message.created_at)
         xp = user[0][1]
@@ -147,7 +147,9 @@ class SlothReputation(commands.Cog):
         emoji = user_class.emoji if (user_class := classes.get(sloth_profile[1].lower())) else ''
         embed.add_field(name="🕵️ __**Sloth Class:**__", value=f"{sloth_profile[1]} {emoji}", inline=True)
         embed.add_field(name="🍯 __**Has Potion:**__", value=f"{True if sloth_profile[5] else False}", inline=True)
-        embed.add_field(name="💍 __**Rings:**__", value=f"{sloth_profile[7]}/2 rings." if sloth_profile else '0 rings.', inline=True)
+        marriage = await SlothClass.get_user_marriage(member.id)
+        if not marriage['partner']:
+            embed.add_field(name="💍 __**Rings:**__", value=f"{sloth_profile[7]}/2 rings." if sloth_profile else '0 rings.', inline=True)
 
         embed.add_field(name="🛡️ __**Protected:**__", value=f"{await SlothClass.has_effect(effects, 'protected')}", inline=True)
         embed.add_field(name="😵 __**Knocked Out:**__", value=f"{await SlothClass.has_effect(effects, 'knocked_out')}", inline=True)
@@ -174,6 +176,10 @@ class SlothReputation(commands.Cog):
                 
         else:
             embed.add_field(name="🏕️ __**Tribe:**__", value="None", inline=True)
+
+        
+        if marriage['partner']:
+            embed.add_field(name="💍 __**Marriage:**__", value=f"Married to <@{marriage['partner']}> (<t:{marriage['timestamp']}:R>)." if sloth_profile else '0 rings.', inline=False)
 
         embed.set_thumbnail(url=member.avatar.url)
         embed.set_author(name=member, icon_url=member.avatar.url, url=member.avatar.url)

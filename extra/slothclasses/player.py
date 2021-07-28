@@ -498,6 +498,17 @@ class Player(commands.Cog):
         await db.commit()
         await mycursor.close()
 
+    async def delete_skill_action_by_user_id_and_skill_type(self, user_id: int, skill_type: str, multiple: bool = False) -> None:
+        """ Deletes a skill action by user ID.
+        :param user_id: The ID of the user member.
+        :param skill_type: The type of the action skill. """
+
+        mycursor, db = await the_database()
+        sql = "DELETE FROM SlothSkills WHERE user_id = %s AND skill_type = %s" + 'LIMIT 1' if not multiple else ''
+        await mycursor.execute(sql, (user_id, skill_type))
+        await db.commit()
+        await mycursor.close()
+
     # ========== UPDATE ========== #
 
     async def update_user_money(self, user_id: int, money: int):
@@ -521,6 +532,17 @@ class Player(commands.Cog):
         await mycursor.execute("UPDATE SlothProfile SET skills_used = skills_used + %s WHERE user_id = %s", (addition, user_id))
         await db.commit()
         await mycursor.close()
+
+    async def update_user_rings(self, user_id: int, addition: int = 1) -> None:
+        """ Updates the user's rings counter.
+        :param user_id: The ID of the user.
+        :param addition: What will be added to the user's current number of rings. (Can be negative numbers)"""
+
+        mycursor, db = await the_database()
+        await mycursor.execute("UPDATE SlothProfile SET rings = rings + %s WHERE user_id = %s", (addition, user_id))
+        await db.commit()
+        await mycursor.close()
+
 
     async def update_user_skill_ts(self, user_id: int, skill: Enum, new_skill_ts: int = None) -> None:
         """ Updates the value of the user's skill.
