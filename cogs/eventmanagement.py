@@ -87,7 +87,7 @@ class EventManagement(commands.Cog):
         member = ctx.author
         guild = ctx.guild
         room = await self.get_event_room_by_user_id(member.id)
-        channel = discord.utils.get(guild.text_channels, room[2]) if room else None
+        channel = discord.utils.get(guild.text_channels, id=room[2]) if room else None
 
         if room and channel:
             return await ctx.send(f"**{member.mention}, you already have an event room going on! ({channel.mention})**")
@@ -140,7 +140,7 @@ class EventManagement(commands.Cog):
         member = ctx.author
         guild = ctx.guild
         room = await self.get_event_room_by_user_id(member.id)
-        channel = discord.utils.get(guild.text_channels, room[2]) if room else None
+        channel = discord.utils.get(guild.text_channels, id=room[2]) if room else None
 
         if room and channel:
             return await ctx.send(f"**{member.mention}, you already have an event room going on! ({channel.mention})**")
@@ -193,7 +193,7 @@ class EventManagement(commands.Cog):
         member = ctx.author
         guild = ctx.guild
         room = await self.get_event_room_by_user_id(member.id)
-        channel = discord.utils.get(guild.text_channels, room[2]) if room else None
+        channel = discord.utils.get(guild.text_channels, id=room[2]) if room else None
 
         if room and channel:
             return await ctx.send(f"**{member.mention}, you already have an event room going on! ({channel.mention})**")
@@ -247,7 +247,7 @@ class EventManagement(commands.Cog):
         member = ctx.author
         guild = ctx.guild
         room = await self.get_event_room_by_user_id(member.id)
-        channel = discord.utils.get(guild.text_channels, room[2]) if room else None
+        channel = discord.utils.get(guild.text_channels, id=room[2]) if room else None
 
         if room and channel:
             return await ctx.send(f"**{member.mention}, you already have an event room going on! ({channel.mention})**")
