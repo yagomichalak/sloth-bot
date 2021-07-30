@@ -834,11 +834,11 @@ Please answer using one message only.."""
         '''
         (MOD) Closes a Case-Channel.
         '''
-        user_channel = await self.get_case_channel(ctx.channel.id)
-        if not user_channel:
+        channel = ctx.channel
+
+        if not isinstance(channel, discord.Thread):
             return await ctx.send(f"**What do you think that you are doing? You cannot close this channel, {ctx.author.mention}!**")
 
-        channel = discord.utils.get(ctx.guild.channels, id=user_channel[0][1])
         embed = discord.Embed(title="Confirmation",
             description="Are you sure that you want to close this channel this channel?",
             color=ctx.author.color,
@@ -851,8 +851,9 @@ Please answer using one message only.."""
         if confirm_view.value is None or not confirm_view.value:
             return await ctx.send(f"**Not closhing this then, {ctx.author.mention}!**")
 
-        await channel.edit(archived=True)
-        await self.remove_user_open_channel(user_channel[0][0])
+        await channel.edit(archived=True, locked=True)
+        if user_channel := await self.get_case_channel(channel.id):
+            await self.remove_user_open_channel(user_channel[0][0])
             
 
     async def dnk_embed(self, member):
