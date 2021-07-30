@@ -1,6 +1,6 @@
 wikipedia==1.4.0
 # discord.py==1.7.2
-git+https://github.com/yagomichalak/discord.py
+git+https://github.com/Rapptz/discord.py
 #git+https://github.com/yagomichalak/discord.py.git@v1.x
 aiohttp==3.7.4
 aiomysql==0.0.21

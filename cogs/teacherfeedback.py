@@ -109,6 +109,9 @@ class TeacherFeedback(commands.Cog):
         if message.author.bot:
             return
 
+        if isinstance(message.channel, discord.Thread):
+            return
+
         mc = message.channel
         mca = message.channel.category
         member = message.author
