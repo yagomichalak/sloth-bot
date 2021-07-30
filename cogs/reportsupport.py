@@ -546,7 +546,7 @@ Please answer using one message only.."""
             return
 
         embed.description = '''
-        - Why do you want to host that language on the language sloth?
+        - Why do you want to host that event on the language sloth?
         Please answer with one message.'''
         q2 = await member.send(embed=embed)
         a2 = await self.get_message(member, msg_check)
