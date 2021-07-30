@@ -574,20 +574,24 @@ Please answer using one message only.."""
         try:
             thread = await report_support_channel.start_thread(name=f"{'-'.join(type_help.split())}")
             await thread.add_user(member)
-        except:
+        except Exception as e:
+            print('thread error', e)
             await member.send("**Something went wrong with it, please contact an admin!**")
             raise Exception
         else:
-            created_embed = discord.Embed(
-                title=f"Room for `{type_help}` created!",
-                description=f"**Go to {thread.mention}!**",
-                color=discord.Color.green())
-            await member.send(embed=created_embed)
-            await self.insert_user_open_channel(member.id, thread.id)
-            embed = discord.Embed(title=f"{type_help.title()}!",
-            description=f"{message}",
-                color=discord.Color.red())
-            await thread.send(content=f"{member.mention}, {moderator.mention}", embed=embed)
+            try:
+                created_embed = discord.Embed(
+                    title=f"Room for `{type_help}` created!",
+                    description=f"**Go to {thread.mention}!**",
+                    color=discord.Color.green())
+                await member.send(embed=created_embed)
+                await self.insert_user_open_channel(member.id, thread.id)
+                embed = discord.Embed(title=f"{type_help.title()}!",
+                description=f"{message}",
+                    color=discord.Color.red())
+                await thread.send(content=f"{member.mention}, {moderator.mention}", embed=embed)
+            except Exception as e:
+                print('thread embed error?', e)
 
     async def get_message(self, member, check):
         try:
