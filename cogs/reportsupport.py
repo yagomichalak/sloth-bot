@@ -33,6 +33,7 @@ class ReportSupport(commands.Cog):
         self.client = client
         self.cosmos_id: int = int(os.getenv('COSMOS_ID'))
         self.muffin_id: int = int(os.getenv('MUFFIN_ID'))
+        self.pretzel_id: int = int(os.getenv('PRETZEL_ID'))
         self.cache = {}
         self.report_cache = {}
         # Teacher application attributes
