@@ -116,7 +116,8 @@ different_class_roles = {
         "ingilizce", "inggris", "영어"
     ],
     "german": [
-        "almanca", "allemand", "aléman", "jerman", "deutsch", "آلمانی"
+        "almanca", "allemand", "aléman", "jerman", "deutsch", "آلمانی",
+        "ألماني"
     ],
     "french": [
         "fransızca","francés", "francês", "français"
