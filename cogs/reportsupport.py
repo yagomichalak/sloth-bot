@@ -851,8 +851,7 @@ Please answer using one message only.."""
         if confirm_view.value is None or not confirm_view.value:
             return await ctx.send(f"**Not closhing this then, {ctx.author.mention}!**")
 
-        await asyncio.sleep(3)
-        await channel.delete()
+        await channel.edit(archived=True)
         await self.remove_user_open_channel(user_channel[0][0])
             
 
