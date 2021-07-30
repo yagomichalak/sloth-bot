@@ -18,10 +18,10 @@ class ReportSupportView(discord.ui.View):
         self.client = client
         self.cog = client.get_cog('ReportSupport')
         patreon_button = discord.ui.Button(style=5, label="Support us on Patreon!", url="https://www.patreon.com/Languagesloth", emoji="<:patreon:831401582426980422>")
-        self.children.insert(2, patreon_button)
+        self.children.insert(3, patreon_button)
 
 
-    @discord.ui.button(label="Apply to be a Teacher!", style=3, custom_id=f"apply_to_teach", emoji="🧑‍🏫")
+    @discord.ui.button(label="Apply for Teacher!", style=3, custom_id=f"apply_to_teach", emoji="🧑‍🏫")
     async def apply_to_teach_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
         member = interaction.user
 
@@ -37,7 +37,7 @@ class ReportSupportView(discord.ui.View):
         await interaction.response.defer()
         await self.cog.send_teacher_application(member)
 
-    @discord.ui.button(label="Apply to be a Moderator!", style=3, custom_id=f"apply_to_moderate", emoji="👮")
+    @discord.ui.button(label="Apply for Moderator!", style=3, custom_id=f"apply_to_moderate", emoji="👮")
     async def apply_to_moderate_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
         """  """
 
@@ -54,6 +54,24 @@ class ReportSupportView(discord.ui.View):
 
         await interaction.response.defer()
         await self.cog.send_moderator_application(member)
+
+    @discord.ui.button(label="Apply for Event Manager!", style=3, custom_id=f"apply_to_manage_events", emoji="🎉")
+    async def apply_to_event_manager_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """  """
+
+        member = interaction.user
+
+        # Apply to be a teacher
+        member_ts = self.cog.cache.get(member.id)
+        time_now = await utils.get_timestamp()
+        if member_ts:
+            sub = time_now - member_ts
+            if sub <= 1800:
+                return await member.send(
+                    f"**You are on cooldown to apply, try again in {(1800-sub)/60:.1f} minutes**")
+
+        await interaction.response.defer()
+        await self.cog.send_event_manager_application(member)
 
 
     @discord.ui.button(label="Get your own Custom Bot (not for free)", style=1, custom_id=f"get_custom_bot", emoji="🤖")
@@ -81,7 +99,7 @@ class ReportSupportView(discord.ui.View):
         await member.send(f"**If you are really interested in **buying** a custom bot, send a private message to {dnk.mention}!**")
         await self.cog.dnk_embed(member)
 
-    @discord.ui.button(label="Report a User or Get Server/Role Support!", style=4, custom_id=f"report_support", emoji="<:politehammer:608941633454735360>")
+    @discord.ui.button(label="Report a User or Get Server/Role Support!", style=4, custom_id=f"report_support", emoji="<:politehammer:608941633454735360>", row=2)
     async def report_support_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
 
         member = interaction.user

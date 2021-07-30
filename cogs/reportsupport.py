@@ -13,7 +13,6 @@ from datetime import datetime
 
 reportsupport_channel_id = int(os.getenv('REPORT_CHANNEL_ID'))
 dnk_id = int(os.getenv('DNK_ID'))
-case_cat_id = int(os.getenv('CASE_CAT_ID'))
 moderator_role_id = int(os.getenv('MOD_ROLE_ID'))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID'))
 lesson_management_role_id = int(os.getenv('LESSON_MANAGEMENT_ROLE_ID'))
@@ -42,6 +41,9 @@ class ReportSupport(commands.Cog):
 
         self.moderator_app_channel_id: int = int(os.getenv('MODERATOR_APPLICATION_CHANNEL_ID'))
         self.moderator_app_cat_id: int = int(os.getenv('MODERATOR_APPLICATION_CAT_ID'))
+
+        self.event_manager_app_channel_id: int = int(os.getenv('EVENT_MANAGER_APPLICATION_CHANNEL_ID'))
+        self.event_manager_app_cat_id: int = int(os.getenv('EVENT_MANAGER_APPLICATION_CAT_ID'))
         
 
     @commands.Cog.listener()
@@ -77,14 +79,21 @@ class ReportSupport(commands.Cog):
 
         # Checks if it's in the moderator applications channel
         elif payload.channel_id == self.moderator_app_channel_id:
-            if mod_role in payload.member.roles or lesson_manager_role in payload.member.roles:
+            if channel.permissions_for(payload.member).administrator:
                 await message.remove_reaction(payload.emoji, payload.member)
             else:
                 await self.handle_moderator_application(guild, payload)
 
+        elif payload.channel_id == self.event_manager_app_channel_id:
+            if not channel.permissions_for(payload.member).administrator:
+                await message.remove_reaction(payload.emoji, payload.member)
+            else:
+                await self.handle_event_manager_application(guild, payload)
+
+
 
     async def handle_teacher_application(self, guild, payload) -> None:
-        """ Handles teacher application.
+        """ Handles teacher applications.
         :param guild: The server in which the application is running.
         :param payload: Data about the Staff member who is opening the application. """
 
@@ -115,7 +124,7 @@ class ReportSupport(commands.Cog):
             return
 
     async def handle_moderator_application(self, guild, payload) -> None:
-        """ Handles moderator application.
+        """ Handles moderator applications.
         :param guild: The server in which the application is running.
         :param payload: Data about the Staff member who is opening the application. """
 
@@ -143,6 +152,37 @@ class ReportSupport(commands.Cog):
                 if moderator:
                     msg = "**Moderator Application**\nOur staff has avaluated your moderator application and has come to a conclusion, and due to intern and unspecified reasons we are **declining** it. Thank you anyways"
                     await payload.member.send(embed=discord.Embed(description=msg))
+            return
+
+    async def handle_event_manager_application(self, guild, payload) -> None:
+        """ Handles event manager applications.
+        :param guild: The server in which the application is running.
+        :param payload: Data about the Staff member who is opening the application. """
+
+        emoji = str(payload.emoji)
+        if emoji == '✅':
+            # Gets the teacher app and does the magic
+            event_manager_app = await self.get_event_manager_app_by_message(payload.message_id)
+            if not event_manager_app:
+                return
+
+            # Checks if the person has not an open interview channel already
+            if event_manager_app[0][2] == 'no':
+                # Creates an interview room with the event_manager and sends their application there (you can z!close there)
+                return await self.create_event_manager_interview_room(guild, event_manager_app)
+
+        elif emoji == '❌':
+            # Tries to delete the event_manager app from the db, in case it is registered
+            event_manager_app = await self.get_event_manager_app_by_message(payload.message_id)
+            if event_manager_app and event_manager_app[0][2] == 'no':
+                await self.delete_event_manager_app(payload.message_id)
+                event_manager_app_channel = self.client.get_channel(self.event_manager_app_channel_id)
+                app_msg = await event_manager_app_channel.fetch_message(payload.message_id)
+                await app_msg.add_reaction('🔏')
+                event_manager = discord.utils.get(guild.members, id=event_manager_app[0][1])
+                if event_manager:
+                    msg = "**event_manager Application**\nOur staff has evaluated your event_manager application and has come to the conclusion that we are not in need of this lesson."
+                    await event_manager.send(embed=discord.Embed(description=msg))
             return
 
 
@@ -286,7 +326,6 @@ class ReportSupport(commands.Cog):
         else:
             self.cache[member.id] = 0
             return await member.send("**Thank you anyways!**")
-
 
     async def send_moderator_application(self, member):
 
@@ -438,6 +477,148 @@ Please answer using one message only.."""
             await app.add_reaction('❌')
             # Saves in the database
             await self.save_moderator_app(app.id, member.id)
+
+        else:
+            self.cache[member.id] = 0
+            return await member.send("**Thank you anyways!**")
+
+
+    async def send_event_manager_application(self, member):
+
+        def msg_check(message):
+            if message.author == member and not message.guild:
+                if len(message.content) <= 100:
+                    return True
+                else:
+                    self.client.loop.create_task(member.send("**Your answer must be within 100 characters**"))
+            else:
+                return False
+
+        def check_reaction(r, u):
+            return u.id == member.id and not r.message.guild and str(r.emoji) in ['✅', '❌']
+
+        terms_embed = discord.Embed(
+            title="Terms of Application",
+            description="""Hello there!
+            Thank you for applying for hosting events here,
+            Before you can formally start applying to host events in The Language Sloth, there are a couple things we would like you to know. The Language Sloth is a free of charge language learning platform which is meant to be accessible and open for anyone who is interested in languages from any background. We do not charge for any kind of service, nor do we pay for any services for hosting events. We are a community that shares the same interest: Languages.
+            We do not require professional skills, however, we have a set numbers of requirements for our event managers
+            Entry requirements:
+
+            》Must be at least 16 years of age
+            》Must have at least a conversational level of English
+            》Must have clear microphone audio
+            》Must prepare their own material weekly
+
+            ``` ✅ To agree with our terms```""",
+            color=member.color
+        )
+
+        terms = await member.send(embed=terms_embed)
+        await terms.add_reaction('✅')
+        await terms.add_reaction('❌')
+
+        # Waits for reaction confirmation to the terms of application
+        terms_r = await self.get_reaction(member, check_reaction)
+
+        if terms_r is None:
+            self.cache[member.id] = 0
+            return
+
+        if terms_r != '✅':
+            self.cache[member.id] = 0
+            return await member.send(f"**Thank you anyways, bye!**")
+
+        embed = discord.Embed(title=f"__Teacher Application__")
+        embed.set_footer(text=f"by {member}", icon_url=member.avatar.url)
+
+        embed.title = "Event manager Application"
+        embed.description = '''
+        - Hello, there you've reacted to apply to become an event manager.
+        To apply please answer to these following questions with One message at a time
+
+        Question one:
+        What is your event called?'''
+        q1 = await member.send(embed=embed)
+        a1 = await self.get_message(member, msg_check)
+        if not a1:
+            return
+
+        embed.description = '''
+        - Why do you want to host that language on the language sloth?
+        Please answer with one message.'''
+        q2 = await member.send(embed=embed)
+        a2 = await self.get_message(member, msg_check)
+        if not a2:
+            return
+
+        embed.description = '''
+        - Please let us know when would be the best time for you to host events
+        E.A: Thursdays 3 pm CET, you can specify your timezone.
+        Again remember to answer with one message.'''
+        q3 = await member.send(embed=embed)
+        a3 = await self.get_message(member, msg_check)
+        if not a3:
+            return
+
+        embed.description = """
+        - Let's talk about your English level, how do you consider your English level?
+        Are you able to host events in English? If not, in which language would you be hosting?
+        Please answer using one message only"""
+        q4 = await member.send(embed=embed)
+        a4 = await self.get_message(member, msg_check)
+        if not a4:
+            return
+
+        embed.description = "- Have you ever hosted events before? If yes, please describe!"
+        q5 = await member.send(embed=embed)
+        a5 = await self.get_message(member, msg_check)
+        if not a5:
+            return
+
+        embed.description = "- Inform a short description for your event/events."
+        q6 = await member.send(embed=embed)
+        a6 = await self.get_message(member, msg_check)
+        if not a6:
+            return
+
+        embed.description = "- How old are you?"
+        q7 = await member.send(embed=embed)
+        a7 = await self.get_message(member, msg_check)
+        if not a7:
+            return
+
+        # Get user's native roles
+        user_native_roles = []
+        for role in member.roles:
+            if str(role.name).lower().startswith('native'):
+                user_native_roles.append(role.name.title())
+
+        # Application result
+        app = f"""```ini\n[Username]: {member} ({member.id})\n[Joined the server]: {member.joined_at.strftime("%a, %d %B %y, %I %M %p UTC")}\n[Applying to host]: {a1.title()}\n[Native roles]: {', '.join(user_native_roles)}\n[Motivation for hosting]: {a2.capitalize()}\n[Applying to host on]: {a3.upper()}\n[English level]: {a4.capitalize()}\n[Experience hosting]: {a5.capitalize()}\n[Description]:{a6.capitalize()}\n[Age]: {a7}```"""
+        await member.send(app)
+        embed.description = '''
+        Are you sure you want to apply this? :white_check_mark: to send and :x: to Cancel
+        '''
+        app_conf = await member.send(embed=embed)
+        await app_conf.add_reaction('✅')
+        await app_conf.add_reaction('❌')
+
+        # Waits for reaction confirmation
+        r = await self.get_reaction(member, check_reaction)
+        if r is None:
+            return
+
+        if r == '✅':
+            embed.description = "**Application successfully made, please, be patient now!**"
+            await member.send(embed=embed)
+            event_manager_channel = await self.client.fetch_channel(self.event_manager_app_channel_id)
+            muffin = discord.utils.get(event_manager_channel.guild.members, id=self.muffin_id)
+            app = await event_manager_channel.send(content=f"{muffin.mention}, {member.mention}\n{app}")
+            await app.add_reaction('✅')
+            await app.add_reaction('❌')
+            # Saves in the database
+            await self.save_event_manager_app(app.id, member.id)
 
         else:
             self.cache[member.id] = 0
@@ -971,6 +1152,38 @@ Please answer using one message only.."""
             color=moderator.color)
         await txt_channel.send(content=f"{cosmos.mention}, {admin.mention}, {moderator.mention}", embed=app_embed)
 
+
+        # Discord methods
+    
+    async def create_event_manager_interview_room(self, guild: discord.Guild, event_manager_app: List[str]) -> None:
+        """ Creates an interview room with the event manager.
+        :param guild: The server in which the interview will be.
+        :param event_manager_app: The moderator application info. """
+
+        event_manager_app_cat = discord.utils.get(guild.categories, id=self.event_manager_app_cat_id)
+        event_manager = discord.utils.get(guild.members, id=event_manager_app[0][1])
+
+        muffin = discord.utils.get(guild.members, id=self.muffin_id)
+
+        # Creates channels
+        overwrites: Dict = {guild.default_role: discord.PermissionOverwrite(
+            read_messages=False, send_messages=False, connect=False, view_channel=False),
+        event_manager: discord.PermissionOverwrite(
+            read_messages=True, send_messages=True, connect=True, view_channel=True),
+        }
+        txt_channel = await guild.create_text_channel(name=f"{event_manager.name}'s-interview", category=event_manager_app_cat, overwrites=overwrites)
+        vc_channel = await event_manager_app_cat.create_voice_channel(name=f"{event_manager.name}'s Interview", overwrites=overwrites)
+
+        # Updates the event_manager's application in the database, adding the channels ids
+        await self.update_event_manager_application(event_manager.id, txt_channel.id, vc_channel.id)
+
+        app_embed = discord.Embed(
+            title=f"{event_manager.name}'s Interview",
+            description=f"""
+            Hello, {event_manager.mention}, we have received and reviewed your event manager application. In order to set you up and explain how our system works we have to schedule a voice conversation with you.
+            When would be the best time to talk to one of our staff?""",
+            color=event_manager.color)
+        await txt_channel.send(content=f"{muffin.mention}, {event_manager.mention}", embed=app_embed)
     # In-game commands
     @commands.command()
     @commands.has_permissions(administrator=True)
@@ -980,7 +1193,7 @@ Please answer using one message only.."""
         '''
 
         # Checks if the channel is in the teacher applications category
-        if not ctx.channel.category or not ctx.channel.category.id in [self.teacher_app_cat_id, self.moderator_app_cat_id]:
+        if not ctx.channel.category or not ctx.channel.category.id in [self.teacher_app_cat_id, self.moderator_app_cat_id, self.event_manager_app_cat_id]:
             return await ctx.send(f"**This is not an application channel, {ctx.author.mention}!**")
 
         application_type = None
@@ -988,11 +1201,15 @@ Please answer using one message only.."""
 
         if app_channel := await self.get_teacher_app_by_channel(ctx.channel.id):
             application_type = 'teacher'
-            all_apps_channel = discord.utils.get(ctx.guild.channels, id=self.teacher_app_channel_id)
+            all_apps_channel = discord.utils.get(ctx.guild.text_channels, id=self.teacher_app_channel_id)
 
         elif app_channel := await self.get_moderator_app_by_channel(ctx.channel.id):
             application_type = 'moderator'
-            all_apps_channel = discord.utils.get(ctx.guild.channels, id=self.moderator_app_channel_id)
+            all_apps_channel = discord.utils.get(ctx.guild.text_channels, id=self.moderator_app_channel_id)
+
+        elif app_channel := await self.get_event_manager_app_by_channel(ctx.channel.id):
+            application_type = 'event_manager'
+            all_apps_channel = discord.utils.get(ctx.guild.text_channels, id=self.event_manager_app_channel_id)
 
         if app_channel:
             txt_channel = discord.utils.get(ctx.guild.channels, id=app_channel[0][3])
@@ -1025,6 +1242,8 @@ Please answer using one message only.."""
                         await self.delete_teacher_app(app_channel[0][0])
                     elif application_type == 'moderator':
                         await self.delete_moderator_app(app_channel[0][0])
+                    elif application_type == 'event_manager':
+                        await self.delete_event_manager_app(app_channel[0][0])
                     try:
                         msg = await all_apps_channel.fetch_message(app_channel[0][0])
                         # await msg.delete()
@@ -1271,6 +1490,122 @@ Please answer using one message only.."""
             return True
         else:
             return False
+
+    # Event Manager Applications
+
+    async def get_event_manager_app_by_message(self, message_id: int) -> List[str]:
+        """ Gets a event_manager application from the database by providing a message id. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("SELECT * FROM EventManagerApplication WHERE message_id = %s", (message_id,))
+        event_manager_app = await mycursor.fetchall()
+        await mycursor.close()
+        return event_manager_app
+
+    async def get_event_manager_app_by_channel(self, channel_id: int) -> List[str]:
+        """ Gets a event_manager application from the database by providing a channel id. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("SELECT * FROM EventManagerApplication WHERE txt_id = %s", (channel_id,))
+        event_manager_app = await mycursor.fetchall()
+        await mycursor.close()
+        return event_manager_app
+
+    async def save_event_manager_app(self, message_id: int, event_manager_id: int) -> None:
+        """ Saves a event_manager application into the database. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute(
+            '''
+            INSERT INTO EventManagerApplication (message_id, event_manager_id)
+            VALUES (%s, %s)''', (message_id, event_manager_id)
+            )
+        await db.commit()
+        await mycursor.close()
+
+    async def update_event_manager_application(self, event_manager_id: int, txt_id: int, vc_id: int) -> None:
+        """ Updates the event_manager's application; adding the txt and vc ids into it. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute(
+            '''UPDATE EventManagerApplication SET
+            channel_open = 'yes', txt_id = %s, vc_id = %s
+            WHERE event_manager_id = %s''', (txt_id, vc_id, event_manager_id)
+            )
+        await db.commit()
+        await mycursor.close()
+
+    async def delete_event_manager_app(self, message_id: int) -> None:
+        """ Deletes a event_manager application from the database. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("DELETE FROM EventManagerApplication WHERE message_id = %s", (message_id,))
+        await db.commit()
+        await mycursor.close()
+
+    # Database ADM commands
+    @commands.command(hidden=True)
+    @commands.has_permissions(administrator=True)
+    async def create_table_event_manager_application(self, ctx) -> None:
+        """ (ADM) Creates the EventManagerApplication table. """
+
+        if await self.table_event_manager_application_exists():
+            return await ctx.send("**Table `EventManagerApplication` already exists!**")
+
+        mycursor, db = await the_database()
+        await mycursor.execute('''CREATE TABLE EventManagerApplication (
+            message_id BIGINT, event_manager_id BIGINT, channel_open VARCHAR(3) default 'no',
+            txt_id BIGINT default null, vc_id BIGINT default null)''')
+
+        await db.commit()
+        await mycursor.close()
+
+        await ctx.send("**Table `EventManagerApplication` created!**")
+
+    @commands.command(hidden=True)
+    @commands.has_permissions(administrator=True)
+    async def drop_table_event_manager_application(self, ctx) -> None:
+        """ (ADM) Drops the EventManagerApplication table. """
+
+        if not await self.table_event_manager_application_exists():
+            return await ctx.send("**Table `EventManagerApplication` doesn't exist!**")
+
+        mycursor, db = await the_database()
+        await mycursor.execute("DROP TABLE EventManagerApplication")
+        await db.commit()
+        await mycursor.close()
+
+        await ctx.send("**Table `EventManagerApplication` dropped!**")
+
+    @commands.command(hidden=True)
+    @commands.has_permissions(administrator=True)
+    async def reset_table_event_manager_application(self, ctx) -> None:
+        """ (ADM) Resets the EventManagerApplication table. """
+
+        if not await self.table_event_manager_application_exists():
+            return await ctx.send("**Table `EventManagerApplication` doesn't exist yet!**")
+
+        mycursor, db = await the_database()
+        await mycursor.execute("DELETE FROM EventManagerApplication")
+        await db.commit()
+        await mycursor.close()
+
+        await ctx.send("**Table `EventManagerApplication` reset!**")
+
+    async def table_event_manager_application_exists(self) -> bool:
+        """ Checks whether the EventManagerApplication table exists. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("SHOW TABLE STATUS LIKE 'EventManagerApplication'")
+        exists = await mycursor.fetchall()
+        await mycursor.close()
+
+        if len(exists):
+            return True
+        else:
+            return False
+
+    
 
     async def audio(self, member: discord.Member, audio_name: str) -> None:
         # Resolves bot's channel state

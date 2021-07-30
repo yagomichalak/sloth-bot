@@ -1436,7 +1436,7 @@ class Moderation(commands.Cog):
 
     @commands.command(aliases=['apps'])
     @commands.has_permissions(administrator=True)
-    async def applications(self, ctx, message_id: int = None, title: str = None) -> None:
+    async def applications(self, ctx, message_id: int = None, *, title: str = None) -> None:
         """ Opens/closes the applications for a title in the server.
         :param message_id: The ID of the Report-Support message to edit.
         :param title: The title that appliacations are opening/closing for. Ex: teacher/moderator. """
@@ -1447,13 +1447,15 @@ class Moderation(commands.Cog):
 
         teacher_app = ['teacher', 't', 'tchr', 'teaching']
 
+        event_manager_app = ['eventmanager', 'event manager', 'em', 'evnt mng']
+
         if not message_id:
             return await ctx.send(f"**Please, inform a message ID, {member.mention}!**")
 
         if not title:
             return await ctx.send(f"**Please, inform a `title`, {member.mention}!**")
 
-        if title.lower() not in mod_app + teacher_app:
+        if title.lower() not in mod_app + teacher_app + event_manager_app:
             return await ctx.send(f"**Invalid title, {member.mention}!**")
 
         channel = discord.utils.get(ctx.guild.text_channels, id=int(os.getenv('REPORT_CHANNEL_ID')))
@@ -1473,6 +1475,11 @@ class Moderation(commands.Cog):
             buttons[0].disabled = False if buttons[0].disabled else True
 
             await ctx.send(f"**Teacher applications are now {'closed' if buttons[0].disabled else 'open'}, {member.mention}!**")
+        
+        elif title.lower() in event_manager_app:
+            buttons[2].disabled = False if buttons[2].disabled else True
+
+            await ctx.send(f"**Event Manager applications are now {'closed' if buttons[2].disabled else 'open'}, {member.mention}!**")
 
 
         confirm = await ConfirmSkill(f"**Do you wanna confirm the changes? Otherwise you can disregard the message above, {member.mention}.**").prompt(ctx)
