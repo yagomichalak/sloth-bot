@@ -538,7 +538,6 @@ Please answer using one message only.."""
             thread = await report_support_channel.start_thread(name=f"case-{counter[0][0]}")
             await thread.add_user(member)
         except Exception as e:
-            print(e)
             await member.send("**Something went wrong with it, please contact an admin!**")
             raise Exception
         else:
@@ -574,8 +573,7 @@ Please answer using one message only.."""
         try:
             thread = await report_support_channel.start_thread(name=f"{'-'.join(type_help.split())}")
             await thread.add_user(member)
-        except Exception as e:
-            print('thread error', e)
+        except Exception:
             await member.send("**Something went wrong with it, please contact an admin!**")
             raise Exception
         else:
