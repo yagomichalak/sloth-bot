@@ -57,14 +57,14 @@ class QueueManagement(commands.Cog):
 
         embed = discord.Embed(
             title=f"__{author.display_name}'s Queue__",
-            description=f', '.join([f"<@{q[1]}>" for q in queue]),
+            description=f', '.join([f"<@{q[1]}> ({q[3]})" for q in queue]),
             color=author.color,
             timestamp=ctx.message.created_at
         )
         embed.set_thumbnail(url=author.avatar.url)
         embed.set_footer(text=guild.name, icon_url=guild.icon.url)
         
-        await ctx.send(embed=embed)
+        await ctx.send(content="0 - Not sorted | 1 - Sorted", embed=embed)
 
     
     @queue.command(aliases=['add_members', 'addmembers', 'addlist', 'add_member_list', 'addmemberlist'])
