@@ -358,11 +358,8 @@ class Misc(commands.Cog):
         current_ts = await utils.get_timestamp()
         await self.insert_member_reminder(member.id, text, current_ts, seconds)
 
-        tzone = timezone('Etc/GMT')
-        time_now = datetime.fromtimestamp(current_ts + seconds)
-        date_and_time = time_now.astimezone(tzone)
-        remind_at = date_and_time.strftime('%Y/%m/%d at %H:%M:%S')
-        await ctx.send(f"**Reminding you at `{remind_at}`, {member.mention}!**")
+        remind_at = int(current_ts + seconds)
+        await ctx.send(f"**Reminding you at <t:{remind_at}>, {member.mention}!**")
 
     @commands.command(aliases=['show_reminders', 'showreminders', 'rmdrs', 'rs'])
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -389,15 +386,12 @@ class Misc(commands.Cog):
         embed.set_footer(text="Requested at:", icon_url=member.guild.icon.url)
     
 
-        tzone = timezone('Etc/GMT')
         for reminder in reminders:
-            time_now = datetime.fromtimestamp(reminder[3] + reminder[4])
-            date_and_time = time_now.astimezone(tzone)
-            remind_at = date_and_time.strftime('%Y-%m-%d at %H:%M:%S')
+            remind_at = int(reminder[3] + reminder[4])
 
             embed.add_field(
                 name=f"ID: {reminder[0]}", 
-                value=f"**Text:** {reminder[2]}\n**Set to:** `{remind_at}`",
+                value=f"**Text:** {reminder[2]}\n**Set to:** <t:{remind_at}>",
                 inline=False)
 
         await ctx.send(embed=embed)

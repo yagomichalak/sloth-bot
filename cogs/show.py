@@ -77,7 +77,7 @@ class Show(commands.Cog):
         embed.set_footer(text=ctx.guild, icon_url=ctx.guild.icon.url)
 
         view = discord.ui.View()
-        view.add_item(discord.ui.Button(lstyle=5, abel='GitHub', emoji="🔗", url=github_link))
+        view.add_item(discord.ui.Button(style=5, label='GitHub', emoji="🔗", url=github_link))
         view.add_item(discord.ui.Button(style=5, label="Patreon", emoji="<:patreon:831401582426980422>", url="https://www.patreon.com/Languagesloth"))
         await ctx.send(embed=embed, view=view)
 

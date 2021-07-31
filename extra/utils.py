@@ -3,6 +3,7 @@ import re
 from pytz import timezone
 from discord.ext import commands
 from typing import List, Dict
+import discord
 
 async def get_timestamp(tz: str = 'Etc/GMT') -> int:
     """ Gets the current timestamp.
@@ -125,3 +126,22 @@ async def sort_time(at: datetime) -> str:
                 )
                 
     return ", ".join(strings[:2])
+
+
+async def get_mentions(message: discord.Message) -> List[discord.Member]:
+    """ Get mentions from a specific message.
+    :param message: The message to get the mentions from. """
+
+    guild = message.guild
+
+    members = [
+        m for word in message.content.split()
+        if word.isdigit() and (m := discord.utils.get(guild.members, id=int(word)))
+        or (m := discord.utils.get(guild.members, name=str(word)))
+        or (m := discord.utils.get(guild.members, nick=str(word)))
+        or (m := discord.utils.get(guild.members, display_name=str(word)))
+    ]
+    members.extend(message.mentions)
+    members = list(set(members))
+
+    return members
