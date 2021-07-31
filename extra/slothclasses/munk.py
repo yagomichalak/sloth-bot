@@ -410,9 +410,7 @@ class Munk(Player):
     @commands.group(aliases=['tb'])
     async def tribe(self, ctx) -> None:
         """ Command for managing and interacting with a tribe.
-        (Use this without a subcommand to see all subcommands available)
-        __**Example:**__
-    ```ini\nz!tribe see\nz!tribe promote @DNK King"""
+        (Use this without a subcommand to see all subcommands available) """
         if ctx.invoked_subcommand:
             return
 
