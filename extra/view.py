@@ -117,7 +117,6 @@ class ReportSupportView(discord.ui.View):
         view = discord.ui.View()
         view.add_item(ReportSupportSelect(self.client))
         await member.send(content="How can we help you?", view=view)
-        # await self.cog.select_report(member, member.guild)
 
 
 class QuickButtons(discord.ui.View):
