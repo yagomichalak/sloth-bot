@@ -625,80 +625,6 @@ Please answer using one message only.."""
             self.cache[member.id] = 0
             return await member.send("**Thank you anyways!**")
 
-    # Report methods
-    async def select_report(self, member, guild):
-
-        # Ask what they want to do [Report someone, general help, missclick]
-        react_list = ['1️⃣', '2️⃣', '3️⃣', '❌']
-
-        report_embed = discord.Embed(
-            title="What kind of report would you like to start?")
-        report_embed.description = '''
-        1️⃣ Report another user for breaking the rules.
-
-        2️⃣ I need help with the server in general.
-
-        3️⃣ I need to change some roles and I can't.
-
-        ❌ Cancel, I missclicked.'''
-        msg = await member.send(embed=report_embed)
-
-        for react in react_list:
-            await msg.add_reaction(react)
-
-        try:
-            r, _ = await self.client.wait_for(
-                'reaction_add',
-                timeout=240,
-                check=lambda r, u: u.id == member.id and r.emoji in react_list and r.message.id == msg.id
-            )
-        except asyncio.TimeoutError:
-            timeout_embed = discord.Embed(
-                title="Timeout",
-                description='**Try again!**',
-                color=discord.Color.red())
-            await member.send(embed=timeout_embed)
-
-        else:
-            emoji = str(r.emoji)
-            if emoji == '1️⃣':
-                # Report another user for breaking the rules
-                try:
-                    exists = await self.report_someone(member, guild)
-                    if exists is False:
-                        return
-                except:
-                    pass
-
-                else:
-                    return await self.audio(member, 'case_alert')
-
-            elif emoji == '2️⃣':
-                # I need help with the server in general
-                message = f"Please, {member.mention}, try to explain what kind of help you want related to the server."
-                try:
-                    exists = await self.generic_help(member, guild, 'general help', message)
-                    if exists is False:
-                        return
-                except:
-                    pass
-                else:
-                    return await self.audio(member, 'general_help_alert')
-            elif emoji == '3️⃣':
-                # I need to change some roles and I can't
-                message = f"Please, {member.mention}, inform us what roles you want, and if you spotted a specific problem with the reaction-role selection."
-                try:
-                    exists = await self.generic_help(member, guild, 'role help', message)
-                    if exists is False:
-                        return
-                except:
-                    pass
-                else:
-                    return await self.audio(member, 'role_help_alert')
-            elif emoji == '❌':
-                # Cancel, I misclicked
-                return await member.send("**All right, cya!**")
-
     # - Report someone
     async def report_someone(self, member, guild):
 
@@ -773,9 +699,9 @@ Please answer using one message only.."""
             except Exception as e:
                 print('thread embed error?', e)
 
-    async def get_message(self, member, check):
+    async def get_message(self, member, check, timeout: int = 300):
         try:
-            message = await self.client.wait_for('message', timeout=240,
+            message = await self.client.wait_for('message', timeout=timeout,
             check=check)
         except asyncio.TimeoutError:
             await member.send("**Timeout! Try again.**")
@@ -784,10 +710,10 @@ Please answer using one message only.."""
             content = message.content
             return content
 
-    async def get_reaction(self, member, check):
+    async def get_reaction(self, member, check, timeout: int = 300):
         try:
             reaction, user = await self.client.wait_for('reaction_add',
-            timeout=120, check=check)
+            timeout=timeout, check=check)
         except asyncio.TimeoutError:
             await member.send("**Timeout! Try again.**")
             return None
