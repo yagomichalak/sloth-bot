@@ -1,11 +1,11 @@
 from discord import user
 from mysqldb import the_database
 import discord
-from discord import client
 from discord.ext import commands
 import os
 from extra import utils
-from typing import List, Dict
+from typing import List, Tuple
+from random import shuffle
 
 moderator_role_id = int(os.getenv('MOD_ROLE_ID'))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID'))
@@ -17,19 +17,9 @@ class QueueManagement(commands.Cog):
 
     def __init__(self, client) -> None:
         self.client = client
-        # self.queues: Dict[int, List[int]] = {}
 
     @commands.Cog.listener()
     async def on_ready(self) -> None:
-
-
-        # queues = await self.get_queues()
-        # for queue in queues:
-        #     if not self.queues.get(queue[0]):
-        #         self.queues[queue[0]] = [queue[1:]]
-        #     else:
-        #         self.queues[queue[0]].append(queue[1:])
-
         print('QueueManagement cog is online!')
 
     @commands.group()
@@ -67,7 +57,7 @@ class QueueManagement(commands.Cog):
 
         embed = discord.Embed(
             title=f"__{author.display_name}'s Queue__",
-            description=f', '.join([f"<@{q}>" for q in queue]),
+            description=f', '.join([f"<@{q[1]}>" for q in queue]),
             color=author.color,
             timestamp=ctx.message.created_at
         )
@@ -121,6 +111,22 @@ class QueueManagement(commands.Cog):
                 f"**You have no members left to sort, considering reseting your queue members state with `z!queue reset`, {author.mention}!**")
 
 
+        if len(not_sorted) < number:
+            return await ctx.send(f"**You want `{number}` members, but your queue list only has `{len(not_sorted)}` unsorted members remaining, {author.mention}!**")
+
+        shuffle(not_sorted)
+        sorted = not_sorted[:number]
+        await self.update_queue_specific_users_state([(1, s[0], s[1]) for s in sorted])
+
+        embed = discord.Embed(
+            title=f"__Sorted {number} Members!__",
+            description=', '.join([f"<@{s[1]}>" for s in sorted]),
+            color=author.color,
+            timestamp=ctx.message.created_at
+        )
+        await ctx.send(embed=embed)
+
+
     @queue.command()
     async def reset(self, ctx) -> None:
         """ Resets the queue members state,
@@ -130,7 +136,8 @@ class QueueManagement(commands.Cog):
         if not await self.get_queue_users(author.id):
             return await ctx.send(f"**You don't even have a queue with members, {author.mention}!**")
 
-        await self.update_queue_users_state(author.id)
+        await self.update_queue_users_state(author.id, 0)
+        await ctx.send(f"**Successfully updated queue member states, {author.mention}!**")
     
 
     @commands.command(hidden=True)
@@ -224,7 +231,7 @@ class QueueManagement(commands.Cog):
         await mycursor.execute("SELECT * FROM Queues WHERE owner_id = %s", (owner_id,))
         users = await mycursor.fetchall()
         await mycursor.close()
-        return [u[1] for u in users]
+        return users
 
     async def delete_queue_user(self, owner_id: int, user_id: int) -> None:
         """ Deletes a user from a Queue.
@@ -245,11 +252,24 @@ class QueueManagement(commands.Cog):
         await db.commit()
         await mycursor.close()
 
-    async def update_queue_users_state(self, owner_id: int) -> None:
+    async def update_queue_users_state(self, owner_id: int, maybe: int = 1) -> None:
         """ Updates the sorted state of queue members.
-         """
+        :param owner_id: The ID of the owner of the queue.
+        :param maybe: True or False but as integer. 0-1 """
 
-        pass
+        mycursor, db = await the_database()
+        await mycursor.execute("UPDATE Queues SET sorted = %s WHERE owner_id = %s", (maybe, owner_id))
+        await db.commit()
+        await mycursor.close()
+
+    async def update_queue_specific_users_state(self, users: List[Tuple[int]]) -> None:
+        """ Updates the sorted state of specific queue members.
+        :param users: The list of users to update. """
+
+        mycursor, db = await the_database()
+        await mycursor.executemany("UPDATE Queues SET sorted = %s WHERE owner_id = %s and user_id = %s", users)
+        await db.commit()
+        await mycursor.close()
         
 
 def setup(client) -> None:
