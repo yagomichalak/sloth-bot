@@ -121,20 +121,27 @@ class Munk(Player):
         confirmed = await ConfirmSkill(f"**{attacker.mention}, are you sure you want to convert {target.mention} into a `Munk`?**").prompt(ctx)
         if not confirmed:
             return await ctx.send("**Not converting them, then!**")
-
-        _, exists = await Player.skill_on_cooldown(skill=Skill.ONE).predicate(ctx)
+        
+        if ctx.invoked_with == 'mirror':
+            mirrored_skill = await self.get_skill_action_by_user_id_and_skill_type(user_id=attacker.id, skill_type='mirror')
+            if not mirrored_skill:
+                return await ctx.send(f"**Something went wrong with this, {attacker.mention}!**")
+        else:
+            _, exists = await Player.skill_on_cooldown(skill=Skill.ONE).predicate(ctx)
 
         try:
             await target.edit(nick=f"{target.display_name} Munk")
             current_timestamp = await utils.get_timestamp()
-            if exists:
-                await self.update_user_skill_ts(attacker.id, Skill.ONE, current_timestamp)
-            else:
-                await self.insert_user_skill_cooldown(ctx.author.id, Skill.ONE, current_timestamp)
+
+            if ctx.invoked_with != 'mirror':
+                if exists:
+                    await self.update_user_skill_ts(attacker.id, Skill.ONE, current_timestamp)
+                else:
+                    await self.insert_user_skill_cooldown(attacker.id, Skill.ONE, current_timestamp)
             # Updates user's skills used counter
             await self.update_user_skills_used(user_id=attacker.id)
             munk_embed = await self.get_munk_embed(
-                channel=ctx.channel, perpetrator_id=ctx.author.id, target_id=target.id)
+                channel=ctx.channel, perpetrator_id=attacker.id, target_id=target.id)
             msg = await ctx.send(embed=munk_embed)
         except Exception as e:
             print(e)
