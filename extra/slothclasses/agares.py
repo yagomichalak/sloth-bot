@@ -87,13 +87,20 @@ class Agares(Player):
             await ctx.send(
                 f"**{attacker.mention}, for some reason I couldn't magic pull {target.mention} from `{target_vc}` to `{attacker_vc}`**")
         else:
-            _, exists = await Player.skill_on_cooldown(skill=Skill.ONE, seconds=28800).predicate(ctx)
+            if ctx.invoked_with == 'mirror':
+                mirrored_skill = await self.get_skill_action_by_user_id_and_skill_type(user_id=attacker.id, skill_type='mirror')
+                if not mirrored_skill:
+                    return await ctx.send(f"**Something went wrong with this, {attacker.mention}!**")
+            else:
+                _, exists = await Player.skill_on_cooldown(skill=Skill.ONE, seconds=28800).predicate(ctx)
             # Puts the attacker's skill on cooldown
             current_ts = await utils.get_timestamp()
-            if exists:
-                await self.update_user_skill_ts(attacker.id, Skill.ONE, current_ts)
-            else:
-                await self.insert_user_skill_cooldown(ctx.author.id, Skill.ONE, current_ts)
+            if ctx.invoked_with != 'mirror':
+                if exists:
+                    await self.update_user_skill_ts(attacker.id, Skill.ONE, current_ts)
+                else:
+                    await self.insert_user_skill_cooldown(attacker.id, Skill.ONE, current_ts)
+
             # Updates user's skills used counter
             await self.update_user_skills_used(user_id=attacker.id)
             # Sends embedded message into the channel
