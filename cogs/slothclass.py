@@ -234,7 +234,7 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
         embed.add_field(name="🟢 Agares' 3rd Skill:", value="**Skill**: `Reflect`.", inline=True)
         embed.add_field(name="🟢 Cybersloth's 3rd Skill:", value="**Skill**: `Virus`.", inline=True)
         embed.add_field(name="🟢 Merchant's 3rd Skill:", value="**Skill**: `Sell Ring`.", inline=False)
-        embed.add_field(name="🟠 Metamorph's 3rd Skill:", value="**Skill**: `Mirror`.", inline=True)
+        embed.add_field(name="🟢 Metamorph's 3rd Skill:", value="**Skill**: `Mirror`.", inline=True)
         embed.add_field(name="🟢 Munk's 3rd Skill:", value="**Skill**: `Create Tribe Role`.", inline=True)
         embed.add_field(name="🔴 Prawler's 3rd Skill:", value="**Skill**: `Sabotage`.", inline=False)
         embed.add_field(name="🟢 Seraph's 3rd Skill:", value="**Skill**: `Heal`.", inline=True)
