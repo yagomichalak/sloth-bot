@@ -32,6 +32,7 @@ class Seraph(Player):
         :param target: The target member. (Optional)
         PS: If target not provided, you are the target. """
 
+
         perpetrator = ctx.author
 
         if ctx.channel.id != bots_and_commands_channel_id:
@@ -64,16 +65,23 @@ class Seraph(Player):
         if not confirmed:
             return await ctx.send("**Not protecting anyone, then!**")
 
-        _, exists = await Player.skill_on_cooldown(skill=Skill.ONE).predicate(ctx)
+        if ctx.invoked_with == 'mirror':
+            mirrored_skill = await self.get_skill_action_by_user_id_and_skill_type(user_id=perpetrator.id, skill_type='mirror')
+            if not mirrored_skill:
+                return await ctx.send(f"**Something went wrong with this, {perpetrator.mention}!**")
+        else:
+            _, exists = await Player.skill_on_cooldown(skill=Skill.ONE).predicate(ctx)
+
         current_timestamp = await utils.get_timestamp()
         await self.insert_skill_action(
             user_id=perpetrator.id, skill_type="divine_protection", skill_timestamp=current_timestamp,
             target_id=target.id, channel_id=ctx.channel.id
         )
-        if exists:
-            await self.update_user_skill_ts(perpetrator.id, Skill.ONE, current_timestamp)
-        else:
-            await self.insert_user_skill_cooldown(perpetrator.id, Skill.ONE, current_timestamp)
+        if ctx.invoked_with != 'mirror':
+            if exists:
+                await self.update_user_skill_ts(perpetrator.id, Skill.ONE, current_timestamp)
+            else:
+                await self.insert_user_skill_cooldown(perpetrator.id, Skill.ONE, current_timestamp)
 
         # Updates user's skills used counter
         await self.update_user_skills_used(user_id=perpetrator.id)

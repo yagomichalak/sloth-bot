@@ -114,6 +114,17 @@ class Player(commands.Cog):
 
         return commands.check(real_check)
 
+    def mirrored_skill() -> bool:
+        async def real_check(ctx) -> bool:
+            mirrored_skill = await Player.get_skill_action_by_user_id_and_skill_type(Player, user_id=ctx.author.id, skill_type='mirror')
+            if mirrored_skill:
+                return True
+            else:
+                return False
+
+
+        return commands.check(real_check)
+
     async def has_effect(self, effects: Dict[str, Dict[str, Any]], effect: str) -> Union[str, bool]:
         if effect in effects:
             return effects[effect]['cooldown']
@@ -205,6 +216,24 @@ class Player(commands.Cog):
             effects['reflect']['debuff'] = False
 
         return effects
+
+    async def get_sloth_class_skills(self, sloth_class: str) -> List[commands.Command]:
+        """ Gets all skills for a given Sloth Class.
+        :param sloth_class: The name of the Sloth Class. """
+
+        the_class = [cls for cls in Player.__subclasses__() if cls.__name__.lower() == sloth_class.lower()][0]
+        class_commands = the_class.__dict__['__cog_commands__']
+        cmds = []
+
+        for c in class_commands:
+            if c.hidden or c.parent or not c.checks:
+                continue
+
+            elif not [check for check in c.checks if check.__qualname__ == 'Player.skill_mark.<locals>.real_check']:
+                continue
+        
+            cmds.append(c)
+        return cmds
 
     async def insert_skill_action(self, user_id: int, skill_type: str, skill_timestamp: int, target_id: int = None, message_id: int = None, channel_id: int = None, emoji: str = None, price: int = 0, content: str = None) -> None:
         """ Inserts a skill action into the database, if needed.

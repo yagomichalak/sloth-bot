@@ -6,6 +6,7 @@ from extra.menu import ConfirmSkill
 from extra import utils
 import os
 from datetime import datetime
+from typing import List, Union, Tuple, Any
 
 bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
 
@@ -206,22 +207,116 @@ class Metamorph(Player):
         return transmutation_embed
 
 
+
+
     @commands.command()
     @Player.skills_used(requirement=20)
-    @Player.skill_on_cooldown(skill=Skill.THREE)
+    @commands.check_any(Player.mirrored_skill(), Player.skill_on_cooldown(skill=Skill.THREE))
     @Player.user_is_class('metamorph')
     @Player.skill_mark()
-    @Player.not_ready()
-    async def mirror(self, ctx, target: discord.Member = None) -> None:
+    # @Player.not_ready()
+    async def mirror(self, ctx, target: discord.Member) -> None:
         """ Mirrors someone else's first skill.
         :param target: The person from whom to mirror the skill.
 
         * Cooldown: 1 day.
-        * Skill cost: 50łł. """
+        * Skill cost: 50łł.
+        
+        Ps: After mirroring a skill, you can reuse this skill for free
+        in order to use the mirrored skill. """
 
         perpetrator = ctx.author
 
+        if ctx.channel.id != self.bots_txt.id:
+            return await ctx.send(f"**{ctx.author.mention}, you can only use this command in {self.bots_txt.mention}!**")
+
+        perpetrator_effects = await self.get_user_effects(member=perpetrator)
+
+        if 'knocked_out' in perpetrator_effects:
+            return await ctx.send(f"**{perpetrator.mention}, you can't use your skill, because you are knocked-out!**")
+
+        mirrored_skill = await self.get_skill_action_by_user_id_and_skill_type(user_id=perpetrator.id, skill_type='mirror')
+        if mirrored_skill:
+            return await self.handle_mirrored_skill(ctx, perpetrator, target, mirrored_skill[8])
+
         if not target:
-            return await ctx.send(f"**Please, inform a target, {perpetrator.mention}!**")
+            return await ctx.send(f"**Please, inform a target to mirror, {perpetrator.mention}!**")
+
+        if target.id == perpetrator.id:
+            return await ctx.send(f"**You cannot mirror yourself, {perpetrator.mention}!**")
+
+        if target.bot:
+            return await ctx.send(f"**{perpetrator.mention}, you cannot mirror a bot!**")
+
+        target_sloth_profile = await self.get_sloth_profile(target.id)
+        if not target_sloth_profile:
+            return await ctx.send(f"**You cannot mirror someone who doesn't have an account, {perpetrator.mention}!**")
+
+        if target_sloth_profile[1] == 'default':
+            return await ctx.send(f"**You cannot mirror someone who has a `default` Sloth class, {perpetrator.mention}!**")
+
 
         # Do the magic
+        cmds = await self.get_sloth_class_skills(target_sloth_profile[1])
+        m_skill = cmds[0].qualified_name
+        confirm = await ConfirmSkill(f"**Are you sure you want to spend `50łł` to mirror `{m_skill}`, {perpetrator.mention}?**").prompt(ctx)
+        if not confirm:
+            return await ctx.send(f"**Not doing it then, {perpetrator.mention}!**")
+
+        await self.update_user_money(perpetrator.id, -50)
+        mirrored_skill = await self.get_skill_action_by_user_id_and_skill_type(user_id=perpetrator.id, skill_type='mirror')
+        _, exists = await Player.skill_on_cooldown(skill=Skill.THREE).predicate(ctx)
+
+        timestamp = await utils.get_timestamp()
+        try:
+            await self.insert_skill_action(
+                user_id=perpetrator.id, skill_type="mirror",
+                skill_timestamp=timestamp, target_id=target.id,
+                channel_id=ctx.channel.id, content=target_sloth_profile[1]
+            )
+            if exists:
+                await self.update_user_skill_ts(perpetrator.id, Skill.THREE, timestamp)
+            else:
+                await self.insert_user_skill_cooldown(perpetrator.id, Skill.THREE, timestamp)
+            # Updates user's skills used counter
+            await self.update_user_skills_used(user_id=perpetrator.id)
+        except Exception as e:
+            print(e)
+            await ctx.send(f"**Something went wrong with it, {perpetrator.mention}!**")
+        else:
+            mirrored_skill_embed = await self.get_mirrored_skill_embed(
+                channel=ctx.channel, perpetrator_id=perpetrator.id, target_id=target.id, m_skill=m_skill)
+            await ctx.send(embed=mirrored_skill_embed)
+
+
+    async def get_mirrored_skill_embed(self, channel: discord.TextChannel, perpetrator_id: int, target_id: int, m_skill: str) -> discord.Embed:
+        """ Makes an embedded message for a mirrored skill action.
+        :param channel:
+        :param perpetrator_id:
+        :param target_id:
+        :param m_skill: """
+
+        mirrored_skill_embed = discord.Embed(description="mirrored skill embed.")
+
+        return mirrored_skill_embed
+
+
+    async def handle_mirrored_skill(self, ctx: commands.Context, perpetrator: discord.Member, target: discord.Member, mirrored_class: str) -> None:
+        """ Handles the usage of a mirrored skill.
+        :param ctx: The context of the command.
+        :param perpetrator: The user who's using the mirrored skill.
+        :param target: The target of that skill.
+        :param mirrored_class: The name of the mirrored class. """
+
+        cmds = await self.get_sloth_class_skills(mirrored_class)
+        skill_command = cmds[0]
+        
+        try:
+            await skill_command(self, ctx, target)
+            await self.delete_skill_action_by_user_id_and_skill_type(user_id=perpetrator.id, skill_type='mirror')
+        except Exception as e:
+            print(e)
+            await ctx.send(f"**Something went wrong with it, {perpetrator.mention}!**")
+
+        else:
+            await ctx.send(f"**Nice, it worked, {perpetrator.mention}!**")
