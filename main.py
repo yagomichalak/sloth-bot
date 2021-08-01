@@ -148,20 +148,13 @@ async def on_command_error(ctx, error):
     elif isinstance(error, SkillsUsedRequirement):
         await ctx.send(f"**{error.error_message}**")
 
-    elif isinstance(error, ActionSkillOnCooldown):
-        # m, s = divmod(error.cooldown - int(error.try_after), 60)
-        # h, m = divmod(m, 60)
-        # d, h = divmod(h, 24)
-        # if d > 0:
-        #     await ctx.send(f"**You can use your skill again in {d:d} days, {h:d} hours, {m:02d} minutes and {s:02d} seconds!**")
-        # elif h > 0:
-        #     await ctx.send(f"**You can use your skill again in {h:d} hours, {m:02d} minutes and {s:02d} seconds!**")
-        # elif m > 0:
-        #     await ctx.send(f"**You can use your skill again in {m:02d} minutes and {s:02d} seconds!**")
-        # elif s > 0:
-        #     await ctx.send(f"**You can use your skill again in {s:02d} seconds!**")
+    elif isinstance(error, commands.CheckAnyFailure):
+        if isinstance(error.errors[0], ActionSkillOnCooldown):
+            the_error = error.errors[0]
+            cooldown = the_error.skill_ts + the_error.cooldown
+            await ctx.send(f"**You can use your skill again <t:{int(cooldown)}:R>!**")
 
-        # cooldown = await utils.get_timestamp() + error.try_after
+    elif isinstance(error, ActionSkillOnCooldown):
         cooldown = error.skill_ts + error.cooldown
         await ctx.send(f"**You can use your skill again <t:{int(cooldown)}:R>!**")
 

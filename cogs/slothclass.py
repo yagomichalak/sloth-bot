@@ -141,17 +141,20 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
 
         ctx.author = member
         for c in class_commands:
-            if c.hidden:
+            if c.hidden or c.parent or not c.checks:
                 continue
-            elif c.parent:
-                continue
-            elif not c.checks:
-                continue
+
             elif not [check for check in c.checks if check.__qualname__ == 'Player.skill_mark.<locals>.real_check']:
                 continue
             
             try:
                 await c.can_run(ctx)
+                if c.qualified_name == 'mirror':
+                    mirrored_skill = await self.get_skill_action_by_user_id_and_skill_type(user_id=ctx.author.id, skill_type='mirror')
+                    if mirrored_skill:
+                        cmds.append(f"{prefix}{c.qualified_name:<18} [Mirrored -> {mirrored_skill[8]}]")        
+                        continue
+                    
                 cmds.append(f"{prefix}{c.qualified_name:<18} [Ready to use]")
             except commands.CommandError as e:
                 if isinstance(e, ActionSkillOnCooldown):
@@ -160,7 +163,13 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
                     cmds.append(f"{prefix}{c.qualified_name:<18} [Requires {e.skills_required} used skills]")
                 elif isinstance(e, CommandNotReady):
                     cmds.append(f"{prefix}{c.qualified_name:<18} [Not Ready]")
+                elif isinstance(e, commands.CheckFailure):
+                    if isinstance(e.errors[0], ActionSkillOnCooldown):
+                        cmds.append(f"{prefix}{c.qualified_name:<18} [On cooldown]")
+                        continue
+                    cmds.append(f"{prefix}{c.qualified_name:<18} [Failure]")
                 continue
+                
             except Exception as e:
                 continue
 
@@ -193,7 +202,7 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
         
         embed = discord.Embed(
             title=f"__Effects for {member}__",
-            description='\n'.join(formated_effects),
+            description='\n'.join(formated_effects) if formated_effects else 'No effects.',
             color=member.color,
             timestamp=ctx.message.created_at,
             url=member.avatar.url
@@ -225,7 +234,7 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
         embed.add_field(name="🟢 Agares' 3rd Skill:", value="**Skill**: `Reflect`.", inline=True)
         embed.add_field(name="🟢 Cybersloth's 3rd Skill:", value="**Skill**: `Virus`.", inline=True)
         embed.add_field(name="🟢 Merchant's 3rd Skill:", value="**Skill**: `Sell Ring`.", inline=False)
-        embed.add_field(name="🔴 Metamorph's 3rd Skill:", value="**Skill**: `Mirror`.", inline=True)
+        embed.add_field(name="🟠 Metamorph's 3rd Skill:", value="**Skill**: `Mirror`.", inline=True)
         embed.add_field(name="🟢 Munk's 3rd Skill:", value="**Skill**: `Create Tribe Role`.", inline=True)
         embed.add_field(name="🔴 Prawler's 3rd Skill:", value="**Skill**: `Sabotage`.", inline=False)
         embed.add_field(name="🟢 Seraph's 3rd Skill:", value="**Skill**: `Heal`.", inline=True)

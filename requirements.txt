@@ -15,5 +15,5 @@ chatbot==1.5.2b0
 Pillow==8.1.0
 python-dotenv==0.15.0
 treelib==1.6.1
-discord-py-slash-command==2.3.2
+discord-py-slash-command==1.2.2
 emoji==1.4.1
