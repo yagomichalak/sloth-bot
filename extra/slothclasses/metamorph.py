@@ -214,8 +214,8 @@ class Metamorph(Player):
     @commands.check_any(Player.mirrored_skill(), Player.skill_on_cooldown(skill=Skill.THREE))
     @Player.user_is_class('metamorph')
     @Player.skill_mark()
-    # @Player.not_ready()
-    async def mirror(self, ctx, target: discord.Member) -> None:
+    @Player.not_ready()
+    async def mirror(self, ctx, target: discord.Member = None) -> None:
         """ Mirrors someone else's first skill.
         :param target: The person from whom to mirror the skill.
 
@@ -237,6 +237,7 @@ class Metamorph(Player):
 
         mirrored_skill = await self.get_skill_action_by_user_id_and_skill_type(user_id=perpetrator.id, skill_type='mirror')
         if mirrored_skill:
+            target = perpetrator if not target else target
             return await self.handle_mirrored_skill(ctx, perpetrator, target, mirrored_skill[8])
 
         if not target:
@@ -255,15 +256,22 @@ class Metamorph(Player):
         if target_sloth_profile[1] == 'default':
             return await ctx.send(f"**You cannot mirror someone who has a `default` Sloth class, {perpetrator.mention}!**")
 
+        if target_sloth_profile[1].lower() == 'merchant':
+            return await ctx.send(f"**You cannot mirror a Merchant, {perpetrator.mention}!**")
 
-        # Do the magic
+        user_currency = await self.get_user_currency(perpetrator.id)
+        if user_currency[1] < 50:
+            return await ctx.send(f"**You don't have `50łł` to use this skill, {perpetrator.mention}!**")
+
         cmds = await self.get_sloth_class_skills(target_sloth_profile[1])
         m_skill = cmds[0].qualified_name
         confirm = await ConfirmSkill(f"**Are you sure you want to spend `50łł` to mirror `{m_skill}`, {perpetrator.mention}?**").prompt(ctx)
         if not confirm:
             return await ctx.send(f"**Not doing it then, {perpetrator.mention}!**")
 
+
         await self.update_user_money(perpetrator.id, -50)
+
         mirrored_skill = await self.get_skill_action_by_user_id_and_skill_type(user_id=perpetrator.id, skill_type='mirror')
         _, exists = await Player.skill_on_cooldown(skill=Skill.THREE).predicate(ctx)
 
@@ -296,7 +304,17 @@ class Metamorph(Player):
         :param target_id:
         :param m_skill: """
 
-        mirrored_skill_embed = discord.Embed(description="mirrored skill embed.")
+        current_date = await utils.get_time_now()
+
+        mirrored_skill_embed = discord.Embed(
+            title="__Someone's Skill just got Mirrored!__",
+            description=f"<@{perpetrator_id}> has just mirrored <@{target_id}> 1st skill; `{m_skill}`!",
+            color=discord.Color.green(),
+            url="https://thelanguagesloth.com",
+            timestamp=current_date)
+
+        mirrored_skill_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Metamorph.png")
+        mirrored_skill_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
 
         return mirrored_skill_embed
 
@@ -317,6 +335,3 @@ class Metamorph(Player):
         except Exception as e:
             print(e)
             await ctx.send(f"**Something went wrong with it, {perpetrator.mention}!**")
-
-        else:
-            await ctx.send(f"**Nice, it worked, {perpetrator.mention}!**")
