@@ -828,7 +828,7 @@ class Tools(commands.Cog):
 		
 	@cog_ext.cog_slash(name="dnk", description="Tells you something about DNK.", guild_ids=guild_ids)
 	async def _dnk(self, ctx):
-		await ctx.send(f"**DNK est toujours là pour des vrais !**")
+		await ctx.send(f"**DNK est toujours là pour les vrais !**")
 
 	@cog_ext.cog_slash(name="twiks", description="Tells you something about Twiks.", guild_ids=guild_ids)
 	async def _twiks(self, ctx):
