@@ -275,14 +275,12 @@ class Metamorph(Player):
         if not confirm:
             return await ctx.send(f"**Not doing it then, {perpetrator.mention}!**")
 
-
-        await self.update_user_money(perpetrator.id, -50)
-
         mirrored_skill = await self.get_skill_action_by_user_id_and_skill_type(user_id=perpetrator.id, skill_type='mirror')
         if mirrored_skill:
             return await ctx.send(f"**You already have a mirrored skill, {perpetrator.mention}!**")
 
         _, exists = await Player.skill_on_cooldown(skill=Skill.THREE).predicate(ctx)
+        await self.update_user_money(perpetrator.id, -50)
 
         timestamp = await utils.get_timestamp()
         try:
