@@ -228,8 +228,7 @@ class Metamorph(Player):
         * Cooldown: 1 day.
         * Skill cost: 50łł.
         
-        Ps: After mirroring a skill, you can reuse this skill for free
-        in order to use the mirrored skill. """
+        Ps: After mirroring a skill, you can reuse this skill for free in order to use the mirrored skill. """
 
         perpetrator = ctx.author
 

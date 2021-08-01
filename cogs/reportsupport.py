@@ -11,6 +11,7 @@ from typing import List, Dict
 import os
 from datetime import datetime
 
+case_cat_id = int(os.getenv('CASE_CAT_ID'))
 reportsupport_channel_id = int(os.getenv('REPORT_CHANNEL_ID'))
 dnk_id = int(os.getenv('DNK_ID'))
 moderator_role_id = int(os.getenv('MOD_ROLE_ID'))
@@ -629,7 +630,7 @@ Please answer using one message only.."""
     async def report_someone(self, member, guild):
 
         if open_channel := await self.member_has_open_channel(member.id):
-            if open_channel := discord.utils.get(guild.threads, id=open_channel[0]):
+            if open_channel := discord.utils.get(guild.text_channels, id=open_channel[0]):
                 embed = discord.Embed(title="Error!", description=f"**You already have an open channel! ({open_channel.mention}>)**", color=discord.Color.red())
                 await member.send(embed=embed)
                 return False
@@ -637,29 +638,33 @@ Please answer using one message only.."""
                 await self.remove_user_open_channel(member.id)
 
         # Report someone
+        case_cat = discord.utils.get(guild.categories, id=case_cat_id)
         counter = await self.get_case_number()
-        report_support_channel = discord.utils.get(guild.text_channels, id=reportsupport_channel_id)
         moderator = discord.utils.get(guild.roles, id=moderator_role_id)
         cosmos = discord.utils.get(guild.members, id=self.cosmos_id)
-
+        overwrites = {guild.default_role: discord.PermissionOverwrite(
+            read_messages=False, send_messages=False, connect=False, view_channel=False),
+        member: discord.PermissionOverwrite(
+            read_messages=True, send_messages=True, connect=False, view_channel=True),
+        moderator: discord.PermissionOverwrite(
+            read_messages=True, send_messages=True, connect=False, view_channel=True, manage_messages=True)}
         try:
-            thread = await report_support_channel.start_thread(name=f"case-{counter[0][0]}")
-            await thread.add_user(member)
-        except Exception as e:
+            the_channel = await guild.create_text_channel(name=f"case-{counter[0][0]}", category=case_cat, overwrites=overwrites)
+        except Exception:
             await member.send("**Something went wrong with it, please contact an admin!**")
             raise Exception
         else:
             # print('created!')
             created_embed = discord.Embed(
                 title="Report room created!",
-                description=f"**Go to {thread.mention}!**",
+                description=f"**Go to {the_channel.mention}!**",
                 color=discord.Color.green())
             await member.send(embed=created_embed)
-            await self.insert_user_open_channel(member.id, thread.id)
+            await self.insert_user_open_channel(member.id, the_channel.id)
             await self.increase_case_number()
             embed = discord.Embed(title="Report Support!", description=f"Please, {member.mention}, try to explain what happened and who you want to report.",
                 color=discord.Color.red())
-            message = await thread.send(content=f"{member.mention}, {moderator.mention}, {cosmos.mention}", embed=embed)
+            message = await the_channel.send(content=f"{member.mention}, {moderator.mention}, {cosmos.mention}", embed=embed)
             ctx = await self.client.get_context(message)
             return await self.client.get_cog('Tools').vc(ctx=ctx, member=member)
 
@@ -667,7 +672,7 @@ Please answer using one message only.."""
     async def generic_help(self, member, guild, type_help, message):
 
         if open_channel := await self.member_has_open_channel(member.id):
-            if open_channel := discord.utils.get(guild.threads, id=open_channel[0]):
+            if open_channel := discord.utils.get(guild.text_channels, id=open_channel[0]):
                 embed = discord.Embed(title="Error!", description=f"**You already have an open channel! ({open_channel.mention}>)**", color=discord.Color.red())
                 await member.send(embed=embed)
                 return False
@@ -675,29 +680,31 @@ Please answer using one message only.."""
                 await self.remove_user_open_channel(member.id)
 
         # General help
-        report_support_channel = discord.utils.get(guild.text_channels, id=reportsupport_channel_id)
+        case_cat = discord.utils.get(guild.categories, id=case_cat_id)
         moderator = discord.utils.get(guild.roles, id=moderator_role_id)
-
+        overwrites = {guild.default_role: discord.PermissionOverwrite(
+            read_messages=False, send_messages=False, connect=False, view_channel=False),
+        member: discord.PermissionOverwrite(
+            read_messages=True, send_messages=True, connect=False, view_channel=True),
+        moderator: discord.PermissionOverwrite(
+            read_messages=True, send_messages=True, connect=False, view_channel=True, manage_messages=True)}
         try:
-            thread = await report_support_channel.start_thread(name=f"{'-'.join(type_help.split())}")
-            await thread.add_user(member)
-        except Exception:
+            the_channel = await guild.create_text_channel(name=f"{'-'.join(type_help.split())}", category=case_cat, overwrites=overwrites)
+        except:
             await member.send("**Something went wrong with it, please contact an admin!**")
             raise Exception
         else:
-            try:
-                created_embed = discord.Embed(
-                    title=f"Room for `{type_help}` created!",
-                    description=f"**Go to {thread.mention}!**",
-                    color=discord.Color.green())
-                await member.send(embed=created_embed)
-                await self.insert_user_open_channel(member.id, thread.id)
-                embed = discord.Embed(title=f"{type_help.title()}!",
-                description=f"{message}",
-                    color=discord.Color.red())
-                await thread.send(content=f"{member.mention}, {moderator.mention}", embed=embed)
-            except Exception as e:
-                print('thread embed error?', e)
+            # print('created!')
+            created_embed = discord.Embed(
+                title=f"Room for `{type_help}` created!",
+                description=f"**Go to {the_channel.mention}!**",
+                color=discord.Color.green())
+            await member.send(embed=created_embed)
+            await self.insert_user_open_channel(member.id, the_channel.id)
+            embed = discord.Embed(title=f"{type_help.title()}!",
+            description=f"{message}",
+                color=discord.Color.red())
+            await the_channel.send(content=f"{member.mention}, {moderator.mention}", embed=embed)
 
     async def get_message(self, member, check, timeout: int = 300):
         try:
@@ -884,7 +891,7 @@ Please answer using one message only.."""
         await mycursor.close()
         return channel
 
-    @commands.command(aliases=['permit_case', 'allow_case', 'witness', 'aw', 'add_witness'])
+    @commands.command(aliases=['permit_case', 'allow_case', 'add_witness', 'witness', 'aw'])
     @commands.has_any_role(*allowed_roles)
     async def allow_witness(self, ctx, member: discord.Member = None):
         """ Allows a witness to join a case channel.
@@ -895,22 +902,24 @@ Please answer using one message only.."""
 
         user_channel = await self.get_case_channel(ctx.channel.id)
         if user_channel:
-            thread = discord.utils.get(ctx.guild.threads, id=user_channel[0][1])
+
+            confirm = await ConfirmSkill(f"**Are you sure you want to allow {member.mention} as a witness in this case channel, {ctx.author.mention}?**").prompt(ctx)
+            if not confirm:
+                return await ctx.send(f"**Not allowing them, then!**")
+
+            channel = discord.utils.get(ctx.guild.channels, id=user_channel[0][1])
             try:
-                await thread.add_user(member)
+                await channel.set_permissions(
+                    member, read_messages=True, send_messages=True, connect=True, speak=True, view_channel=True)
             except Exception:
                 pass
 
-            return await ctx.send(content=member.mention, embed=
-                discord.Embed(title="__Member Allowed!__",
-                description=f"**{member.mention} has been allowed here!**",
-                color=discord.Color.green())
-            )
+            return await ctx.send(f"**{member.mention} has been allowed here!**")
 
         else:
             await ctx.send(f"**This is not a case channel, {ctx.author.mention}!**")
 
-    @commands.command(aliases=['forbid_case', 'fw', 'remove_witness', 'removewitness', 'forbidwitness'])
+    @commands.command(aliases=['forbid_case', 'delete_witness', 'remve_witness', 'fw'])
     @commands.has_any_role(*allowed_roles)
     async def forbid_witness(self, ctx, member: discord.Member = None):
         """ Forbids a witness from a case channel.
@@ -921,47 +930,59 @@ Please answer using one message only.."""
 
         user_channel = await self.get_case_channel(ctx.channel.id)
         if user_channel:
-            thread = discord.utils.get(ctx.guild.threads, id=user_channel[0][1])
+
+            confirm = await ConfirmSkill(f"**Are you sure you want to forbid {member.mention} from being a witness in this case channel, {ctx.author.mention}?**").prompt(ctx)
+            if not confirm:
+                return await ctx.send(f"**Not forbidding them, then!**")
+
+            channel = discord.utils.get(ctx.guild.channels, id=user_channel[0][1])
             try:
-                await thread.remove_user(member)
+                await channel.set_permissions(
+                    member, read_messages=False, send_messages=False, connect=False, speak=False, view_channel=False)
             except Exception:
                 pass
 
-            return await ctx.send(embed=
-                discord.Embed(title="__Member Forbidden!__",
-                description=f"**{member.mention} has been forbidden from here!**",
-                color=discord.Color.red())
-            )
+            return await ctx.send(f"**{member.mention} has been forbidden here!**")
 
         else:
             await ctx.send(f"**This is not a case channel, {ctx.author.mention}!**")
 
-    @commands.command(aliases=['archive_channel', 'delete_channel', 'archive'])
+    @commands.command(aliases=['delete_channel', 'archive'])
     @commands.has_any_role(*allowed_roles)
     async def close_channel(self, ctx):
-        '''
-        (MOD) Closes a Case-Channel.
-        '''
-        channel = ctx.channel
+        """ (MOD) Closes a Case-Channel. """
 
-        if not isinstance(channel, discord.Thread):
-            return await ctx.send(f"**What do you think that you are doing? You cannot close this channel, {ctx.author.mention}!**")
-
-        embed = discord.Embed(title="Confirmation",
-            description="Are you sure that you want to close this channel this channel?",
-            color=ctx.author.color,
-            timestamp=ctx.message.created_at)
-
-        confirm_view = ConfirmButton(ctx.author)
-        await ctx.send(embed=embed, view=confirm_view)
-
-        await confirm_view.wait()
-        if confirm_view.value is None or not confirm_view.value:
-            return await ctx.send(f"**Not closhing this then, {ctx.author.mention}!**")
-
-        await channel.edit(archived=True, locked=True)
-        if user_channel := await self.get_case_channel(channel.id):
-            await self.remove_user_open_channel(user_channel[0][0])
+        user_channel = await self.get_case_channel(ctx.channel.id)
+        if user_channel:
+            channel = discord.utils.get(ctx.guild.text_channels, id=user_channel[0][1])
+            embed = discord.Embed(title="Confirmation",
+                description="Are you sure that you want to delete this channel?",
+                color=ctx.author.color,
+                timestamp=ctx.message.created_at)
+            confirmation = await ctx.send(content=ctx.author.mention, embed=embed)
+            await confirmation.add_reaction('✅')
+            await confirmation.add_reaction('❌')
+            try:
+                reaction, user = await self.client.wait_for('reaction_add', timeout=20,
+                    check=lambda r, u: u == ctx.author and r.message.channel == ctx.channel and str(r.emoji) in ['✅', '❌'])
+            except asyncio.TimeoutError:
+                embed = discord.Embed(title="Confirmation",
+                description="You took too long to answer the question; not deleting it!",
+                color=discord.Color.red(),
+                timestamp=ctx.message.created_at)
+                return await confirmation.edit(content=ctx.author.mention, embed=embed)
+            else:
+                if str(reaction.emoji) == '✅':
+                    embed.description = f"**Channel {ctx.channel.mention} is being deleted...**"
+                    await confirmation.edit(content=ctx.author.mention, embed=embed)
+                    await asyncio.sleep(3)
+                    await channel.delete()
+                    await self.remove_user_open_channel(user_channel[0][0])
+                else:
+                    embed.description = "Not deleting it!"
+                    await confirmation.edit(content='', embed=embed)
+        else:
+            await ctx.send(f"**What do you think that you are doing? You cannot delete this channel, {ctx.author.mention}!**")
             
 
     async def dnk_embed(self, member):

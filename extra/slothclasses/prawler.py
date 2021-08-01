@@ -370,7 +370,8 @@ class Prawler(Player):
 	@Player.user_is_class('prawler')
 	@Player.skill_mark()
 	@Player.not_ready()
-	async def unspecified(self, ctx, target: discord.Member = None) -> None:
-		""" Unspecified skill, that is TBD. """
+	async def sabotage(self, ctx, target: discord.Member = None) -> None:
+		""" Sabotages something.
+		:param target: The person to sabotage. """
 
 		pass
