@@ -863,16 +863,31 @@ class Tools(commands.Cog):
 			create_option(name="month", description="Month of date.", option_type=4, required=False),
 			create_option(name="year", description="Year of date.", option_type=4, required=False),
 
-	], default_permission=False, permissions={guild_ids[0]: [
-			create_permission(int(os.getenv('COSMOS_ID')), SlashCommandPermissionType.USER, True),
-			create_permission(int(os.getenv('OWNER_ROLE_ID')), SlashCommandPermissionType.ROLE, True),
-			create_permission(int(os.getenv('ADMIN_ROLE_ID')), SlashCommandPermissionType.ROLE, True)
-		]}, guild_ids=guild_ids
-	)
-	async def _timestamp(self, ctx) -> None:
+	], guild_ids=guild_ids)
+	async def _timestamp(self, ctx, **fields) -> None:
 		
+		current_date = await utils.get_time_now()
 
-		await ctx.send("Right now I don't do anything lmao, good try tho!", hidden=True)
+		if hour := fields.get('hour'):
+			current_date.replace(hour=hour)
+		if minute := fields.get('minute'):
+			current_date.replace(minute=minute)
+		if day := fields.get('day'):
+			current_date.replace(day=day)
+		if month := fields.get('month'):
+			current_date.replace(month=month)
+		if year := fields.get('year'):
+			current_date.replace(year=year)
+
+		embed = discord.Embed(
+			title="__Timestamp Created__",
+			color=ctx.author.color
+		)
+		timestamp = int(current_date.timestamp())
+		embed.add_field(name="Output", value=f"<t:{timestamp}>")
+		embed.add_field(name="Copyable", value=f"\<t:{timestamp}>")
+
+		await ctx.send(embed=embed, hidden=True)
 
 def setup(client):
 	client.add_cog(Tools(client))
