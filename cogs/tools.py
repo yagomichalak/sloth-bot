@@ -855,7 +855,7 @@ class Tools(commands.Cog):
 		else:
 			await ctx.send("**For some reason I couldn't ping them =\ **")
 
-	@cog_ext.cog_slash(name="timestamp", description="Gets a timestamp for a specific date and time", 
+	@cog_ext.cog_slash(name="timestamp", description="Gets a timestamp for a specific date and time.\nPs: The output will format according to your timezone.", 
 		options=[
 			create_option(name="hour", description="Hour of time in 24 hour format.", option_type=4, required=False),
 			create_option(name="minute", description="Minute of time.", option_type=4, required=False),
@@ -869,18 +869,19 @@ class Tools(commands.Cog):
 		current_date = await utils.get_time_now()
 
 		if hour := fields.get('hour'):
-			current_date.replace(hour=hour)
+			current_date = current_date.replace(hour=hour)
 		if minute := fields.get('minute'):
-			current_date.replace(minute=minute)
+			current_date = current_date.replace(minute=minute)
 		if day := fields.get('day'):
-			current_date.replace(day=day)
+			current_date = current_date.replace(day=day)
 		if month := fields.get('month'):
-			current_date.replace(month=month)
+			current_date = current_date.replace(month=month)
 		if year := fields.get('year'):
-			current_date.replace(year=year)
+			current_date = current_date.replace(year=year)
 
 		embed = discord.Embed(
 			title="__Timestamp Created__",
+			description=f"Requested date: `{current_date.strftime('%m/%d/%Y %H:%M')}` (**GMT**)",
 			color=ctx.author.color
 		)
 		timestamp = int(current_date.timestamp())
