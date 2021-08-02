@@ -156,7 +156,7 @@ class ReportSupport(commands.Cog):
                 moderator = discord.utils.get(guild.members, id=moderator_app[0][1])
                 if moderator:
                     msg = "**Moderator Application**\nOur staff has avaluated your moderator application and has come to a conclusion, and due to intern and unspecified reasons we are **declining** it. Thank you anyways"
-                    await payload.member.send(embed=discord.Embed(description=msg))
+                    await moderator.send(embed=discord.Embed(description=msg))
             return
 
     async def handle_event_manager_application(self, guild, payload) -> None:
