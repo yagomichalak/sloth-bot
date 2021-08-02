@@ -72,25 +72,28 @@ class ReportSupport(commands.Cog):
         channel = await self.client.fetch_channel(payload.channel_id)
         message = await channel.fetch_message(payload.message_id)
 
+        adm = channel.permissions_for(payload.member).administrator
+
         # Checks if it's in the teacher applications channel
         if payload.channel_id == self.teacher_app_channel_id:
-            if mod_role in payload.member.roles or lesson_manager_role in payload.member.roles:
-                await message.remove_reaction(payload.emoji, payload.member)
-            else:
+            if mod_role in payload.member.roles or lesson_manager_role in payload.member.roles or adm:
                 await self.handle_teacher_application(guild, payload)
+            else:
+                await message.remove_reaction(payload.emoji, payload.member)
+                
 
         # Checks if it's in the moderator applications channel
         elif payload.channel_id == self.moderator_app_channel_id:
-            if channel.permissions_for(payload.member).administrator:
-                await message.remove_reaction(payload.emoji, payload.member)
-            else:
+            if adm:
                 await self.handle_moderator_application(guild, payload)
+            else:
+                await message.remove_reaction(payload.emoji, payload.member)
 
         elif payload.channel_id == self.event_manager_app_channel_id:
-            if not channel.permissions_for(payload.member).administrator:
-                await message.remove_reaction(payload.emoji, payload.member)
-            else:
+            if adm:
                 await self.handle_event_manager_application(guild, payload)
+            else:
+                await message.remove_reaction(payload.emoji, payload.member)
 
 
 
@@ -953,36 +956,37 @@ Please answer using one message only.."""
         """ (MOD) Closes a Case-Channel. """
 
         user_channel = await self.get_case_channel(ctx.channel.id)
-        if user_channel:
-            channel = discord.utils.get(ctx.guild.text_channels, id=user_channel[0][1])
+        if not user_channel:
+            return await ctx.send(f"**What do you think that you are doing? You cannot delete this channel, {ctx.author.mention}!**")
+            
+        channel = discord.utils.get(ctx.guild.text_channels, id=user_channel[0][1])
+        embed = discord.Embed(title="Confirmation",
+            description="Are you sure that you want to delete this channel?",
+            color=ctx.author.color,
+            timestamp=ctx.message.created_at)
+        confirmation = await ctx.send(content=ctx.author.mention, embed=embed)
+        await confirmation.add_reaction('✅')
+        await confirmation.add_reaction('❌')
+        try:
+            reaction, user = await self.client.wait_for('reaction_add', timeout=20,
+                check=lambda r, u: u == ctx.author and r.message.channel == ctx.channel and str(r.emoji) in ['✅', '❌'])
+        except asyncio.TimeoutError:
             embed = discord.Embed(title="Confirmation",
-                description="Are you sure that you want to delete this channel?",
-                color=ctx.author.color,
-                timestamp=ctx.message.created_at)
-            confirmation = await ctx.send(content=ctx.author.mention, embed=embed)
-            await confirmation.add_reaction('✅')
-            await confirmation.add_reaction('❌')
-            try:
-                reaction, user = await self.client.wait_for('reaction_add', timeout=20,
-                    check=lambda r, u: u == ctx.author and r.message.channel == ctx.channel and str(r.emoji) in ['✅', '❌'])
-            except asyncio.TimeoutError:
-                embed = discord.Embed(title="Confirmation",
-                description="You took too long to answer the question; not deleting it!",
-                color=discord.Color.red(),
-                timestamp=ctx.message.created_at)
-                return await confirmation.edit(content=ctx.author.mention, embed=embed)
-            else:
-                if str(reaction.emoji) == '✅':
-                    embed.description = f"**Channel {ctx.channel.mention} is being deleted...**"
-                    await confirmation.edit(content=ctx.author.mention, embed=embed)
-                    await asyncio.sleep(3)
-                    await channel.delete()
-                    await self.remove_user_open_channel(user_channel[0][0])
-                else:
-                    embed.description = "Not deleting it!"
-                    await confirmation.edit(content='', embed=embed)
+            description="You took too long to answer the question; not deleting it!",
+            color=discord.Color.red(),
+            timestamp=ctx.message.created_at)
+            return await confirmation.edit(content=ctx.author.mention, embed=embed)
         else:
-            await ctx.send(f"**What do you think that you are doing? You cannot delete this channel, {ctx.author.mention}!**")
+            if str(reaction.emoji) == '✅':
+                embed.description = f"**Channel {ctx.channel.mention} is being deleted...**"
+                await confirmation.edit(content=ctx.author.mention, embed=embed)
+                await asyncio.sleep(3)
+                await channel.delete()
+                await self.remove_user_open_channel(user_channel[0][0])
+            else:
+                embed.description = "Not deleting it!"
+                await confirmation.edit(content='', embed=embed)
+            
             
 
     async def dnk_embed(self, member):
