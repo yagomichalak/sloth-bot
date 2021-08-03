@@ -294,8 +294,8 @@ class EventManagement(commands.Cog):
     @create_event.command()
     @commands.has_any_role(*[event_manager_role_id, mod_role_id, admin_role_id, owner_role_id])
     @commands.cooldown(1, 60, commands.BucketType.user)
-    async def gamming(self, ctx) -> None:
-        """ Creates a Gamming Event voice and text channel. """
+    async def gaming(self, ctx) -> None:
+        """ Creates a Gaming Event voice and text channel. """
 
         member = ctx.author
         guild = ctx.guild
@@ -307,7 +307,7 @@ class EventManagement(commands.Cog):
         elif room and not channel:
             await self.delete_event_room_by_txt_id(room[2])
 
-        confirm = await ConfirmSkill("Do you want to create a `Gamming Event`?").prompt(ctx)
+        confirm = await ConfirmSkill("Do you want to create a `Gaming Event`?").prompt(ctx)
         if not confirm:
             return await ctx.send("**Not creating it then!**")
 
@@ -327,11 +327,11 @@ class EventManagement(commands.Cog):
         try:
             # Creating text channel
             text_channel = await events_category.create_text_channel(
-                name=f"🎮 Gamming Event 🎮",
+                name=f"🎮 Gaming Event 🎮",
                 overwrites=overwrites)
             # Creating voice channel
             voice_channel = await events_category.create_voice_channel(
-                name=f"🎮 Gamming Event 🎮",
+                name=f"🎮 Gaming Event 🎮",
                 user_limit=None,
                 overwrites=overwrites)
             # Inserts it into the database
