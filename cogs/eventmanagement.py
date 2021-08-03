@@ -294,8 +294,8 @@ class EventManagement(commands.Cog):
     @create_event.command()
     @commands.has_any_role(*[event_manager_role_id, mod_role_id, admin_role_id, owner_role_id])
     @commands.cooldown(1, 60, commands.BucketType.user)
-    async def gaming(self, ctx) -> None:
-        """ Creates a Gaming Event voice and text channel. """
+    async def gamming(self, ctx) -> None:
+        """ Creates a Gamming Event voice and text channel. """
 
         member = ctx.author
         guild = ctx.guild
