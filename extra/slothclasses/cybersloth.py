@@ -248,12 +248,11 @@ class Cybersloth(Player):
     @Player.skill_on_cooldown(skill=Skill.THREE)
     @Player.user_is_class('cybersloth')
     @Player.skill_mark()
-    @Player.not_ready()
     async def virus(self, ctx) -> None:
         """ Makes all people that you hacked infect other people that look onto their profiles.
         
-        Skill Cost: 150łł
-        Cooldown: 2 days. """
+        * Skill Cost: 150łł
+        * Cooldown: 2 days. """
 
         attacker = ctx.author
 

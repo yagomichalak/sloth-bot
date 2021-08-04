@@ -220,7 +220,6 @@ class Metamorph(Player):
     @commands.check_any(Player.mirrored_skill(), Player.skill_on_cooldown(skill=Skill.THREE))
     @Player.user_is_class('metamorph')
     @Player.skill_mark()
-    @Player.not_ready()
     async def mirror(self, ctx, target: discord.Member = None) -> None:
         """ Mirrors someone else's first skill.
         :param target: The person from whom to mirror the skill.

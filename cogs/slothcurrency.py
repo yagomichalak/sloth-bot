@@ -567,8 +567,8 @@ class SlothCurrency(commands.Cog):
         # Checks whether user is hacked
         if 'hacked' in effects:
             await self.send_hacked_image(ctx, member)
-            # if ctx.author.id != member.id:
-            #     await SlothClass.check_virus(ctx=ctx, target=member)
+            if ctx.author.id != member.id:
+                await SlothClass.check_virus(ctx=ctx, target=member)
             return
 
         small = ImageFont.truetype("built titling sb.ttf", 45)
