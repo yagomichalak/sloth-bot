@@ -63,7 +63,7 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
 
     @commands.command(aliases=['sloth_class', 'slothclasses'])
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def sloth_classes(self, ctx) -> None:
+    async def sloth_classes(self, ctx, class_name: str = None) -> None:
         """ Shows how many people are in each Sloth Class team. """
 
         mycursor, db = await the_database()

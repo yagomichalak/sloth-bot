@@ -681,7 +681,7 @@ class Munk(Player):
 
     @commands.command(aliases=['add_tribe_role', 'createtriberole', 'addtriberole'])
     @Player.skills_used(requirement=20)
-    @Player.skill_on_cooldown(skill=Skill.THREE)
+    @Player.skill_on_cooldown(skill=Skill.THREE, seconds=36000)
     @Player.user_is_class('munk')
     @Player.skill_mark()
     async def create_tribe_role(self, ctx, role_name: str = None) -> None:
