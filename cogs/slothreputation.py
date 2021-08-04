@@ -112,7 +112,7 @@ class SlothReputation(commands.Cog):
         SlothClass = self.client.get_cog('SlothClass')
         effects = await SlothClass.get_user_effects(member=member)
 
-        if await SlothClass.has_effect(effects, 'hacked'):
+        if 'hacked' in effects:
             await SlothCurrency.send_hacked_image(ctx, member)
             # if ctx.author.id != member.id:
             #      await SlothClass.check_virus(ctx=ctx, target=member)
@@ -156,6 +156,7 @@ class SlothReputation(commands.Cog):
         embed.add_field(name="🔌 __**Wired:**__", value=f"{await SlothClass.has_effect(effects, 'wired')}", inline=True)
         embed.add_field(name="🐸 __**Frogged:**__", value=f"{await SlothClass.has_effect(effects, 'frogged')}", inline=True)
         embed.add_field(name="🔪 __**Knife Sharpness Stack:**__", value=f"{sloth_profile[6]}/5", inline=True)
+        embed.add_field(name="🧤 __**Sabotaged:**__", value=f"{await SlothClass.has_effect(effects, 'sabotaged')}", inline=True)
         m, s = divmod(user_info[0][2], 60)
         h, m = divmod(m, 60)
 
@@ -164,7 +165,6 @@ class SlothReputation(commands.Cog):
         embed.add_field(name="🧮 __**Skills Used:**__", value=f"{sloth_profile[2]} skills.")
 
         # Gets tribe information for the given user
-        # user_tribe = await SlothClass.get_tribe_info_by_user_id(user_id=member.id)
         if sloth_profile[3]:
             tribe_member = await SlothClass.get_tribe_member(user_id=member.id)
             user_tribe = await SlothClass.get_tribe_info_by_name(name=sloth_profile[3])
@@ -189,6 +189,9 @@ class SlothReputation(commands.Cog):
             return await ctx.send(embed=embed)
         else:
             view = ExchangeActivityView(self.client, user_info[0])
+            if 'sabotaged' in effects:
+                view.children[0].disabled = True
+
             await ctx.send(embed=embed, view=view)
 
     @commands.command(aliases=['leaderboard', 'lb', 'scoreboard'])
@@ -279,6 +282,16 @@ class SlothReputation(commands.Cog):
                     view=view)
             else:
                 return await ctx.send("**This member is not on the leaderboard yet!**", delete_after=3)
+
+        SlothClass = self.client.get_cog('SlothClass')
+
+        perpetrator_fx = await SlothClass.get_user_effects(ctx.author)
+        if 'sabotaged' in perpetrator_fx:
+            return await ctx.send(f"**You can't rep anyone because you have been sabotaged, {ctx.author.mention}!**")
+
+        target_fx = await SlothClass.get_user_effects(member)
+        if 'sabotaged' in target_fx:
+            return await ctx.send(f"**You can't rep {member.mention} because they have been sabotaged, {ctx.author.mention}!**")
 
         epoch = datetime.utcfromtimestamp(0)
         time_xp = (datetime.utcnow() - epoch).total_seconds()
