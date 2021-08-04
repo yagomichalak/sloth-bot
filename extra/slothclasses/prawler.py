@@ -368,6 +368,7 @@ class Prawler(Player):
 	@Player.skills_used(requirement=20)
 	@Player.skill_on_cooldown(Skill.THREE)
 	@Player.user_is_class('prawler')
+	@Player.skill_mark()
 	async def sabotage(self, ctx, *, target: discord.Member = None) -> None:
 		""" Sabotages someone, making them unable to gain activity stautus and
 		reputation points, as well as not being able to z!rep people and
