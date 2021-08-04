@@ -451,12 +451,11 @@ class Merchant(Player):
     @Player.skill_on_cooldown(Skill.THREE, 36000)
     @Player.user_is_class('merchant')
     @Player.skill_mark()
-    @Player.not_ready()
     async def sell_ring(self, ctx) -> None:
         """ Puts a Wedding Ring for sale.
         
-        Skill cost: 100łł
-        Cooldown: 10 hours. """
+        * Skill cost: 100łł
+        * Cooldown: 10 hours. """
 
         if ctx.channel.id != bots_and_commands_channel_id:
             return await ctx.send(f"**{ctx.author.mention}, you can only use this command in {self.bots_txt.mention}!**")
@@ -513,13 +512,12 @@ class Merchant(Player):
 
     @commands.command()
     @commands.cooldown(1, 180, commands.BucketType.user)
-    @Player.not_ready()
     async def marry(self, ctx, suitor: discord.Member = None) -> None:
         """ Marries someone.
         :param suitor: The person to marry.
         PS: You need wedding rings to propose someone, buy one from your local Merchant.
         
-        Cost: 1000łł
+        * Cost: 1000łł
 
         Ps: Both you and your suitor must have a sum of at least 2 rings in order to marry.
         """
@@ -632,7 +630,6 @@ class Merchant(Player):
 
     @commands.command()
     @commands.cooldown(1, 180, commands.BucketType.user)
-    @Player.not_ready()
     async def divorce(self, ctx) -> None:
         """ Divorces your partner.
         

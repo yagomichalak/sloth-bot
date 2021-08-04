@@ -212,7 +212,6 @@ class Agares(Player):
     @Player.skill_on_cooldown(skill=Skill.THREE)
     @Player.user_is_class('agares')
     @Player.skill_mark()
-    @Player.not_ready()
     async def reflect(self, ctx, target: discord.Member = None) -> None:
         """ Gives someone the ability to automatically reflect any debuff skill for 24h.
         You still get the debuff, but the perpetrator of the attacke gets it too. (100%)

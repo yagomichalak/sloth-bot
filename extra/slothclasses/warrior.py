@@ -239,13 +239,12 @@ class Warrior(Player):
     @Player.skill_on_cooldown(Skill.THREE, seconds=172800)
     @Player.user_is_class('warrior')
     @Player.skill_mark()
-    @Player.not_ready()
     async def rip_off(self, ctx, target: discord.Member = None) -> None:
         """ Will rip off an item of your choice of your target.
         :param target: The target member.
         
-        Cooldown: 2 days.
-        Price: Half of the price of your target's ripped-off item
+        * Cooldown: 2 days.
+        * Price: Half of the price of your target's ripped-off item
 
         Ps: 
         - The menu containing the target's items will appear when using this command on them.

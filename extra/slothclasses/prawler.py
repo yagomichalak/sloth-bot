@@ -368,8 +368,6 @@ class Prawler(Player):
 	@Player.skills_used(requirement=20)
 	@Player.skill_on_cooldown(Skill.THREE)
 	@Player.user_is_class('prawler')
-	@Player.skill_mark()
-	@Player.not_ready()
 	async def sabotage(self, ctx, *, target: discord.Member = None) -> None:
 		""" Sabotages someone, making them unable to gain activity stautus and
 		reputation points, as well as not being able to z!rep people and
@@ -379,8 +377,8 @@ class Prawler(Player):
 		Ps: Activity status are considered to be the counters for messages sent
 		and time spent in voice channels.
 		
-		Cost: 50łł
-		Cooldown: 1 day """
+		* Cost: 50łł
+		* Cooldown: 1 day """
 
 		attacker = ctx.author
 		

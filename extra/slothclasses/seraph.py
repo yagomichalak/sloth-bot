@@ -285,18 +285,17 @@ class Seraph(Player):
     @Player.skill_on_cooldown(skill=Skill.THREE)
     @Player.user_is_class('seraph')
     @Player.skill_mark()
-    @Player.not_ready()
     async def heal(self, ctx, target: discord.Member = None) -> None:
         """ Heals a member from all debuffs.
         :param target: The member from whom remove the debuffs.
         PS: If target not provided, the target is you.
 
-        Skill cost: 100łł.
-        Cooldown: 1 day. """
+        * Skill cost: 100łł.
+        * Cooldown: 1 day. """
 
         perpetrator = ctx.author
 
-        if ctx.channel.id != bots_and_commands_channel_id:
+        if ctx.channel.id != self.bots_txt.id:
             return await ctx.send(f"**{perpetrator.mention}, you can only use this command in {self.bots_txt.mention}!**")
 
         perpetrator_fx = await self.get_user_effects(perpetrator)
@@ -357,23 +356,22 @@ class Seraph(Player):
         for debuff in debuffs:
             try:
                 if debuff == 'hacked':  
-
                     debuffs_removed += 1
 
                 if debuff == 'knocked_out':  
-
                     debuffs_removed += 1
 
                 if debuff == 'wired':  
-
                     debuffs_removed += 1
 
                 if debuff == 'frogged':
-
                     debuffs_removed += 1
 
                 if debuff == 'munk':
                     await member.edit(nick=member.display_name.replace('Munk', '').strip())
+                    debuffs_removed += 1
+
+                if debuff == 'sabotaged':
                     debuffs_removed += 1
 
             except Exception as e:
