@@ -633,8 +633,8 @@ Please answer using one message only.."""
     async def report_someone(self, member, guild):
 
         if open_channel := await self.member_has_open_channel(member.id):
-            if open_channel := discord.utils.get(guild.text_channels, id=open_channel[0]):
-                embed = discord.Embed(title="Error!", description=f"**You already have an open channel! ({open_channel.mention}>)**", color=discord.Color.red())
+            if open_channel := discord.utils.get(guild.text_channels, id=open_channel[1]):
+                embed = discord.Embed(title="Error!", description=f"**You already have an open channel! ({open_channel.mention})**", color=discord.Color.red())
                 await member.send(embed=embed)
                 return False
             else:
@@ -657,7 +657,6 @@ Please answer using one message only.."""
             await member.send("**Something went wrong with it, please contact an admin!**")
             raise Exception
         else:
-            # print('created!')
             created_embed = discord.Embed(
                 title="Report room created!",
                 description=f"**Go to {the_channel.mention}!**",
@@ -675,8 +674,8 @@ Please answer using one message only.."""
     async def generic_help(self, member, guild, type_help, message):
 
         if open_channel := await self.member_has_open_channel(member.id):
-            if open_channel := discord.utils.get(guild.text_channels, id=open_channel[0]):
-                embed = discord.Embed(title="Error!", description=f"**You already have an open channel! ({open_channel.mention}>)**", color=discord.Color.red())
+            if open_channel := discord.utils.get(guild.text_channels, id=open_channel[1]):
+                embed = discord.Embed(title="Error!", description=f"**You already have an open channel! ({open_channel.mention})**", color=discord.Color.red())
                 await member.send(embed=embed)
                 return False
             else:
