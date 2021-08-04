@@ -215,6 +215,14 @@ class Player(commands.Cog):
             effects['reflect']['resize'] = None
             effects['reflect']['debuff'] = False
 
+        if then := await self.get_skill_action_by_target_id_and_skill_type(target_id=member.id, skill_type='sabotage'):
+            effects['sabotaged'] = {}
+            effects['sabotaged']['cooldown'] = f"Ends <t:{int(then[2]) + general_cooldown}:R>" if then else 'Ends in ??'
+            effects['sabotaged']['frames'] = []
+            effects['sabotaged']['cords'] = (0, 0)
+            effects['sabotaged']['resize'] = None
+            effects['sabotaged']['debuff'] = True
+
         return effects
 
     async def get_sloth_class_skills(self, sloth_class: str) -> List[commands.Command]:

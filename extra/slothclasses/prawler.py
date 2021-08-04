@@ -370,8 +370,133 @@ class Prawler(Player):
 	@Player.user_is_class('prawler')
 	@Player.skill_mark()
 	@Player.not_ready()
-	async def sabotage(self, ctx, target: discord.Member = None) -> None:
-		""" Sabotages something.
-		:param target: The person to sabotage. """
+	async def sabotage(self, ctx, *, target: discord.Member = None) -> None:
+		""" Sabotages someone, making them unable to gain activity stautus and
+		reputation points, as well as not being able to z!rep people and
+		exchange their current activity status as well for 1 day.
+		:param target: The person to sabotage.
+		
+		Ps: Activity status are considered to be the counters for messages sent
+		and time spent in voice channels.
+		
+		Cost: 50łł
+		Cooldown: 1 day """
 
-		pass
+		attacker = ctx.author
+		
+		if ctx.channel.id != self.bots_txt.id:
+			return await ctx.send(f"**{attacker.mention}, you can only use this command in {self.bots_txt.mention}!**")
+
+		attacker_fx = await self.get_user_effects(attacker)
+
+		if 'knocked_out' in attacker_fx:
+			return await ctx.send(f"**{attacker.mention}, you can't use your skill, because you are knocked-out!**")
+
+		if not target:
+			return await ctx.send(f"**Inform a member to sabotage, {attacker.mention}!**")
+
+		if target.bot:
+			return await ctx.send(f"**You cannot sabotage a bot, {attacker.mention}!**")
+
+		if attacker.id == target.id:
+			return await ctx.send("**You cannot sabotage yourself!**")
+
+		target_sloth_profile = await self.get_sloth_profile(target.id)
+		if not target_sloth_profile:
+			return await ctx.send(f"**You cannot sabotage someone who doesn't have an account, {attacker.mention}!**")
+
+		if target_sloth_profile[1] == 'default':
+			return await ctx.send(f"**You cannot sabotage someone who has a `default` Sloth class, {attacker.mention}!**")
+
+		target_fx = await self.get_user_effects(target)
+
+		if 'protected' in target_fx:
+			return await ctx.send(f"**{attacker.mention}, you cannot sabotage {target.mention}, because they are protected against attacks!**")
+
+		if 'sabotaged' in target_fx:
+			return await ctx.send(f"**{attacker.mention}, {target.mention} has been sabotaged already!**")
+
+		attacker_currency = await self.get_user_currency(attacker.id)
+		if attacker_currency[1] < 50:
+			return await ctx.send(f"**You don't have `50łł` to use this skill, {attacker.mention}!**")
+
+		confirmed = await ConfirmSkill(f"**{attacker.mention}, are you sure you want to sabotage {target.mention}?**").prompt(ctx)
+		if not confirmed:
+			return await ctx.send("**Not sabotaging anyone, then!**")
+
+		_, exists = await Player.skill_on_cooldown(skill=Skill.THREE).predicate(ctx)
+		await self.update_user_money(attacker.id, -50)
+
+		current_timestamp = await utils.get_timestamp()
+
+		try:
+			await self.insert_skill_action(
+				user_id=attacker.id, skill_type="sabotage", skill_timestamp=current_timestamp,
+				target_id=target.id,
+			)
+			if exists:
+				await self.update_user_skill_ts(attacker.id, Skill.THREE, current_timestamp)
+			else:
+				await self.insert_user_skill_cooldown(attacker.id, Skill.THREE, current_timestamp)
+
+			# Updates user's skills used counter
+			await self.update_user_skills_used(user_id=attacker.id)
+		except Exception as e:
+			print(e)
+			await ctx.send(f"**Something went wrong with it, {attacker.mention}!**")
+
+		else:
+			sabotage_embed = await self.get_sabotage_embed(ctx.channel, attacker.id, target.id)
+			await ctx.send(embed=sabotage_embed)
+
+			if 'reflect' in target_fx:
+				await self.reflect_attack(ctx, attacker, target, 'sabotage')
+
+
+	async def get_sabotage_embed(self, channel, attacker_id: int, target_id: int) -> discord.Embed:
+		""" Makes an embedded message for sabotage.
+		:param channel: The context channel.
+		:param attacker_id: The ID of the attacker.
+		:param target_id: The target of the sabotage. """
+
+		timestamp = await utils.get_timestamp()
+		sabotage_embed = discord.Embed(
+			title="Someone has just been Sabotaged",
+			description=f"<@{attacker_id}> has sabotaged <@{target_id}> 🧤",
+			color=discord.Color.green(),
+			timestamp=datetime.fromtimestamp(timestamp)
+		)
+		sabotage_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Prawler.png")
+		sabotage_embed.set_image(url='https://media.tenor.com/images/894e9fe551ffaf9a49969c7cecea15ab/tenor.gif')
+		sabotage_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
+
+		return sabotage_embed
+
+	
+	async def check_sabotages(self) -> None:
+		""" Check on-going sabotages and their expiration time. """
+
+		sabotages = await self.get_expired_sabotages()
+		for st in sabotages:
+			await self.delete_skill_action_by_target_id_and_skill_type(st[3], 'sabotage')
+
+			channel = self.bots_txt
+
+			await channel.send(
+				content=f"<@{st[0]}>, <@{st[3]}>",
+				embed=discord.Embed(
+					description=f"**<@{st[3]}>'s `Sabotage` from <@{st[0]}> just expired!**",
+					color=discord.Color.red()))
+
+	async def get_expired_sabotages(self) -> List[Union[str, int]]:
+		""" Gets expired sabotage skill actions. """
+
+		the_time = await utils.get_timestamp()
+		mycursor, _ = await the_database()
+		await mycursor.execute("""
+			SELECT * FROM SlothSkills
+			WHERE skill_type = 'sabotage' AND (%s - skill_timestamp) >= 86400
+			""", (the_time,))
+		sabotages = await mycursor.fetchall()
+		await mycursor.close()
+		return sabotages

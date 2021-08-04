@@ -22,6 +22,7 @@ from typing import List, Dict, Tuple, Union, Any
 
 from extra.useful_variables import level_badges, flag_badges
 from extra.gif_manager import GIF
+from extra import utils
 
 shop_channels = [
 int(os.getenv('BACKGROUND_ITEMS_CHANNEL_ID')), int(os.getenv('HAND_ITEMS_CHANNEL_ID')),
@@ -87,7 +88,9 @@ class SlothCurrency(commands.Cog):
         if not user_info:
             return await self.insert_user_server_activity(message.author.id, 1)
 
-        await self.update_user_server_messages(message.author.id, 1)
+        effects = await self.client.get_cog('SlothClass').get_user_effects(message.author)
+        if 'sabotaged' not in effects:
+            await self.update_user_server_messages(message.author.id, 1)
 
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):
@@ -96,8 +99,7 @@ class SlothCurrency(commands.Cog):
         if not await self.check_table_exist():
             return
 
-        epoch = datetime.utcfromtimestamp(0)
-        the_time = (datetime.utcnow() - epoch).total_seconds()
+        the_time = await utils.get_timestamp()
 
         user_info = await self.get_user_activity_info(member.id)
         if not user_info:
@@ -109,6 +111,9 @@ class SlothCurrency(commands.Cog):
         if not after.channel and not before.channel.id == afk_channel_id:
             old_time = user_info[0][3]
             addition = the_time - old_time
+            effects = await self.client.get_cog('SlothClass').get_user_effects(member)
+            if 'sabotaged' in effects:
+                addition = 0
             await self.update_user_server_time(member.id, addition)
 
     # In-game commands
