@@ -1,9 +1,9 @@
 import discord
 from discord.ext import commands, tasks, menus
 from mysqldb import the_database
-from typing import Union, List, Any, Dict
+from typing import Union, List, Any, Dict, Optional
 from extra.customerrors import MissingRequiredSlothClass, ActionSkillOnCooldown, SkillsUsedRequirement, CommandNotReady
-from extra.menu import ConfirmSkill, prompt_message, prompt_number
+from extra.menu import ConfirmSkill, prompt_message, prompt_number, SlothClassPagination
 from extra.slothclasses.player import Skill
 from extra import utils
 import os
@@ -63,32 +63,67 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
 
     @commands.command(aliases=['sloth_class', 'slothclasses'])
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def sloth_classes(self, ctx, class_name: str = None) -> None:
-        """ Shows how many people are in each Sloth Class team. """
+    async def sloth_classes(self, ctx, class_name: Optional[str] = None) -> None:
+        """ Shows how many people are in each Sloth Class team,
+        or showed a full list with all members of the given class ordered by used skills.
+        :param class_name: The class name to search members from. [Optional] """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("""
-            SELECT sloth_class, COUNT(sloth_class) AS sloth_count
-            FROM SlothProfile
-            WHERE sloth_class != 'default'
-            GROUP BY sloth_class
-            ORDER BY sloth_count DESC
-            """)
+        if class_name and class_name.lower() not in classes:
+            return await ctx.send(f"**This is not a valid Sloth Class, {ctx.author.mention}!**")
+
+        if not class_name or class_name.lower() not in classes:
+            all_sloth_classes = await self.get_sloth_classes(grouped=True)
+            sloth_classes = [f"[Class]: {sc[0]:<10} | [Count]: {sc[1]}\n" for sc in all_sloth_classes]
+            # print([sc for sc in sloth_classes])
+            sloth_classes.append(f"``````ini\n[Class]: {'ALL':<10} | [Count]: {sum([sc[1] for sc in all_sloth_classes])}\n")
+            embed = discord.Embed(
+                title="__Sloth Classes__",
+                description=f"```ini\n{''.join(sloth_classes)}```",
+                color=ctx.author.color,
+                timestamp=ctx.message.created_at,
+                url='https://thelanguagesloth.com/profile/slothclass'
+            )
+
+            await ctx.send(embed=embed)
+        else:
+            selected_class = classes.get(class_name.lower())
+
+            sloth_classes = await self.get_sloth_classes(class_name=selected_class.__name__)
+            members = [f"<@{m[0]}> ({m[1]})" for m in sloth_classes]
+            if members:
+                additional = {
+                    'sloth_class': selected_class
+                }
+                pages = menus.MenuPages(source=SlothClassPagination(members, **additional), clear_reactions_after=True)
+                await pages.start(ctx)
+
+    async def get_sloth_classes(self, grouped: Optional[bool] = False, class_name: Optional[str] = None) -> List[Union[str, int]]:
+        """ Gets all or a specific Sloth Class, grouped or not.
+        :param grouped: Whether it's gonna be grouped. [Optional]
+        :param class_name: The name of the class to selected. [Optional]
+        
+        Ps: You can either specify grouped or the class_name. """
+
+        mycursor, _ = await the_database()
+        if grouped:
+            await mycursor.execute("""
+                SELECT sloth_class, COUNT(sloth_class) AS sloth_count
+                FROM SlothProfile
+                WHERE sloth_class != 'default'
+                GROUP BY sloth_class
+                ORDER BY sloth_count DESC
+                """)
+        elif not grouped and class_name:
+            await mycursor.execute("""
+            SELECT user_id, skills_used 
+            FROM SlothProfile WHERE sloth_class = %s
+            ORDER BY skills_used DESC""", (class_name,))
+
 
         all_sloth_classes = await mycursor.fetchall()
         await mycursor.close()
-        sloth_classes = [f"[Class]: {sc[0]:<10} | [Count]: {sc[1]}\n" for sc in all_sloth_classes]
-        # print([sc for sc in sloth_classes])
-        sloth_classes.append(f"``````ini\n[Class]: {'ALL':<10} | [Count]: {sum([sc[1] for sc in all_sloth_classes])}\n")
-        embed = discord.Embed(
-            title="__Sloth Classes__",
-            description=f"```ini\n{''.join(sloth_classes)}```",
-            color=ctx.author.color,
-            timestamp=ctx.message.created_at,
-            url='https://thelanguagesloth.com/profile/slothclass'
-        )
-
-        await ctx.send(embed=embed)
+        return all_sloth_classes
+        
 
 
     @commands.command()
