@@ -312,7 +312,7 @@ class Warrior(Player):
         _, exists = await Player.skill_on_cooldown(skill=Skill.THREE, seconds=172800).predicate(ctx)
 
         attacker_currency = await self.get_user_currency(attacker.id)
-        if attacker_currency[0] < cost:
+        if attacker_currency[1] < cost:
             return await ctx.send(f"**You don't have {item[6]}łł to rip off the {item[4]} item, {attacker.mention}!**")
 
         await self.update_user_money(attacker.id, -cost)
