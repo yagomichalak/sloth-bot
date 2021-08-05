@@ -474,7 +474,7 @@ class Merchant(Player):
         if item_price is None:
             return
 
-        confirm = await ConfirmSkill(f"**{member.mention}, are you sure you want to spend `100łł` to put a potion in your shop with the price of `{item_price}`łł ?**").prompt(ctx)
+        confirm = await ConfirmSkill(f"**{member.mention}, are you sure you want to spend `100łł` to put a ring in your shop with the price of `{item_price}`łł ?**").prompt(ctx)
         if not confirm:
             return await ctx.send(f"**Not doing it, then, {member.mention}!**")
 

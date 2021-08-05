@@ -5,6 +5,7 @@ from .player import Player, Skill
 from mysqldb import the_database
 from extra.menu import ConfirmSkill
 from extra.select import WarriorUserItemSelect
+from extra.view import BasicUserCheckView
 from extra import utils
 import os
 from datetime import datetime
@@ -287,7 +288,7 @@ class Warrior(Player):
         if not target_items:
             return await ctx.send(f"**{target.mention} doesn't have any items to rip off, {attacker.mention}!**")
 
-        view = discord.ui.View(timeout=60)
+        view = BasicUserCheckView(attacker)
         view.add_item(WarriorUserItemSelect(target_items[:25]))
         await ctx.send(f"**{target.display_name}**'s items:", view=view)
         await view.wait()
