@@ -323,3 +323,23 @@ class SwitchSavedClassesButtons(menus.Menu):
             await self.show_page(self.current_page-1)
         else:
             self.stop()
+
+
+class SlothClassPagination(menus.ListPageSource):
+    def __init__(self, members, **kwargs):
+        super().__init__(members, per_page=15)
+        self.sloth_class = kwargs.get('sloth_class')
+
+    async def format_page(self, menu, entries):
+        start = menu.current_page * self.per_page
+        page_data = '\n'.join(f"`{i+1}` - **{v}**" for i, v in enumerate(entries, start=start))
+        embed = discord.Embed(
+            title=f"__{self.sloth_class.__name__}__ ({self.sloth_class.emoji})",
+            description=f"```Index - @User (Skills Used)```\n{page_data}",
+            color=menu.ctx.author.color,
+            timestamp=menu.ctx.message.created_at
+            )
+        for i, v in enumerate(entries, start=start):
+            embed.set_footer(text=f"({i+1}-{i+6} of {len(self.entries)})")
+
+        return embed
