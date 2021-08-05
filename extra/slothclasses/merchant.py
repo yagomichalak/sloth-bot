@@ -681,9 +681,14 @@ class Merchant(Player):
         """ Gets the user's partner.
         :param user_id: The ID of the user. """
 
+        kind = None
+
         skill_action = await self.get_skill_action_by_user_id_and_skill_type(user_id=user_id, skill_type='marriage')
-        if not skill_action:
+        if skill_action:
+            kind = 1
+        else:
             skill_action = await self.get_skill_action_by_target_id_and_skill_type(target_id=user_id, skill_type='marriage')
+            kind = 2
 
         marriage = {
             'user': None,
@@ -694,7 +699,10 @@ class Merchant(Player):
         if not skill_action:
             return marriage
 
-        marriage = {'user': skill_action[0], 'partner': skill_action[3], 'timestamp': skill_action[2]}
+        if kind == 1:
+            marriage = {'user': skill_action[0], 'partner': skill_action[3], 'timestamp': skill_action[2]}
+        elif kind == 2:
+            marriage = {'user': skill_action[3], 'partner': skill_action[0], 'timestamp': skill_action[2]}
 
         return marriage
 
