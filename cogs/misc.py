@@ -320,7 +320,6 @@ class Misc(commands.Cog):
 
     @commands.command(aliases=['reminder', 'remind', 'remindme', 'set_reminder'])
     @commands.cooldown(1, 10, commands.BucketType.user)
-    @commands.has_any_role(*allowed_roles)
     async def setreminder(self, ctx, text: str = None, *, time: str = None):
         """ Sets a reminder for the user.
         :param text: The descriptive text for the bot to remind you about.
