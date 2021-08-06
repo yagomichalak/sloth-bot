@@ -518,7 +518,7 @@ class Player(commands.Cog):
 
         mycursor, db = await the_database()
         await mycursor.execute("""
-        DELETE FROM SlothSkills WHERE target_id = %s AND skill_type IN ('hack', 'wire', 'frog', 'hit', 'sabotaged')
+        DELETE FROM SlothSkills WHERE target_id = %s AND skill_type IN ('hack', 'wire', 'frog', 'hit', 'sabotage')
         """, (target_id,))
         await db.commit()
         await mycursor.close()
