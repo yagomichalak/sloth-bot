@@ -13,7 +13,9 @@ class SlothClassGeneralCommands(commands.Cog):
     @commands.cooldown(1, 120, commands.BucketType.user)
     async def hug(self, ctx, *, member: discord.Member = None) -> None:
         """ Hugs someone.
-        :param member: The member to hug. """
+        :param member: The member to hug.
+        
+        * Cooldown: 2 minutes """
         
         author = ctx.author
         if author.id == member.id:
@@ -33,7 +35,9 @@ class SlothClassGeneralCommands(commands.Cog):
     @commands.cooldown(1, 120, commands.BucketType.user)
     async def kiss(self, ctx, *, member: discord.Member = None) -> None:
         """ Kisses someone.
-        :param member: The member to kiss. """
+        :param member: The member to kiss.
+        
+        * Cooldown: 2 minutes """
 
         author = ctx.author
         if author.id == member.id:
@@ -53,7 +57,9 @@ class SlothClassGeneralCommands(commands.Cog):
     @commands.cooldown(1, 120, commands.BucketType.user)
     async def slap(self, ctx, *, member: discord.Member = None) -> None:
         """ Slaps someone.
-        :param member: The member to slap. """
+        :param member: The member to slap.
+        
+        * Cooldown: 2 minutes """
 
         author = ctx.author
         if author.id == member.id:
