@@ -19,6 +19,7 @@ class SlothClassGeneralCommands(commands.Cog):
         
         author = ctx.author
         if author.id == member.id:
+            self.client.get_command('hug').reset_cooldown(ctx)
             return await ctx.send(f"**You can't hug yourself, {author.mention}!**")
 
         embed = discord.Embed(
@@ -41,6 +42,7 @@ class SlothClassGeneralCommands(commands.Cog):
 
         author = ctx.author
         if author.id == member.id:
+            self.client.get_command('kiss').reset_cooldown(ctx)
             return await ctx.send(f"**You can't kiss yourself, {author.mention}!**")
 
         embed = discord.Embed(
@@ -63,6 +65,7 @@ class SlothClassGeneralCommands(commands.Cog):
 
         author = ctx.author
         if author.id == member.id:
+            self.client.get_command('slap').reset_cooldown(ctx)
             return await ctx.send(f"**You can't slap yourself, {author.mention}!**")
 
         embed = discord.Embed(
