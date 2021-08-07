@@ -176,8 +176,8 @@ class KissView(discord.ui.View):
         ]
 
         embed = discord.Embed(
-            title="__Hug__",
-            description=f"🤗 {self.member.mention} hugged {self.target.mention} 🤗",
+            title="__Cheek Kiss__",
+            description=f"😗 {self.member.mention} cheek kissed {self.target.mention} 😗",
             color=discord.Color.red(),
             timestamp=interaction.message.created_at
         )
