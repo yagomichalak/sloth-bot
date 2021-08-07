@@ -10,10 +10,10 @@ class SlothClassGeneralCommands(commands.Cog):
 
 
     @commands.command()
-    # @commands.cooldown(1, 10, commands.BucketType.user)
-    # @Player.not_ready()
+    @commands.cooldown(1, 120, commands.BucketType.user)
     async def hug(self, ctx, *, member: discord.Member = None) -> None:
-        """ Hugs someone. """
+        """ Hugs someone.
+        :param member: The member to hug. """
         
         author = ctx.author
         if author.id == member.id:
@@ -30,10 +30,10 @@ class SlothClassGeneralCommands(commands.Cog):
         await ctx.send(embed=embed, view=view)
     
     @commands.command()
-    # @commands.cooldown(1, 10, commands.BucketType.user)
-    # @Player.not_ready()
+    @commands.cooldown(1, 120, commands.BucketType.user)
     async def kiss(self, ctx, *, member: discord.Member = None) -> None:
-        """ Kisses someone. """
+        """ Kisses someone.
+        :param member: The member to kiss. """
 
         author = ctx.author
         if author.id == member.id:
@@ -50,10 +50,10 @@ class SlothClassGeneralCommands(commands.Cog):
         await ctx.send(embed=embed, view=view)
 
     @commands.command()
-    # @commands.cooldown(1, 60, commands.BucketType.user)
-    # @Player.not_ready()
+    @commands.cooldown(1, 120, commands.BucketType.user)
     async def slap(self, ctx, *, member: discord.Member = None) -> None:
-        """ Slaps someone. """
+        """ Slaps someone.
+        :param member: The member to slap. """
 
         author = ctx.author
         if author.id == member.id:
