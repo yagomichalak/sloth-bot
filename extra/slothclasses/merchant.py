@@ -668,7 +668,7 @@ class Merchant(Player):
 
         # Update marital status
         try:
-            await self.delete_skill_action_by_target_id_and_skill_type(partner.id, skill_type='marriage')
+            await self.delete_skill_action_by_target_id_and_skill_type(member.id, skill_type='marriage')
             await self.delete_skill_action_by_user_id_and_skill_type(member.id, skill_type='marriage')
         except Exception as e:
             print(e)
