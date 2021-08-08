@@ -329,7 +329,7 @@ class Misc(commands.Cog):
         - Time Format: 12s 34m 56h 78d (Order doesn't matter).
 
         Example:
-        b!setreminder "do the dishes" 3m 65s
+        z!setreminder "do the dishes" 3m 65s
         = The bot will remind you in 4 minutes and 5 seconds.
 
         PS: Seconds may not be always reliable, since the bot checks reminders every minute. """
