@@ -287,7 +287,7 @@ class Seraph(Player):
     @Player.skill_mark()
     async def heal(self, ctx, target: discord.Member = None) -> None:
         """ Heals a member from all debuffs.
-        :param target: The member from whom remove the debuffs.
+        :param target: The member from whom to remove the debuffs.
         PS: If target not provided, the target is you.
 
         * Skill cost: 100łł.
