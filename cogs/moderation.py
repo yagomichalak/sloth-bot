@@ -957,10 +957,10 @@ class Moderation(commands.Cog):
 			mod_softban_embed = discord.Embed(
 				title=f"Softban Request ({len(confirmations)}/3) → (5mins)",
 				description=f'''
-				{author.mention} wants to ban {member.mention}, it requires 2 more moderator ✅ reactions for it!
+				{author.mention} wants to softban {member.mention}, it requires 2 more moderator ✅ reactions for it!
 				```Reason: {reason}```''',
-				colour=discord.Colour.dark_red(), timestamp=ctx.message.created_at)
-			mod_softban_embed.set_author(name=f'{member} is going to Brazil...', icon_url=member.avatar.url)
+				colour=discord.Colour.dark_purple(), timestamp=ctx.message.created_at)
+			mod_softban_embed.set_author(name=f'{member} is going to Brazil, but will come back!', icon_url=member.avatar.url)
 			msg = await ctx.send(embed=mod_softban_embed)
 			await msg.add_reaction('✅')
 
