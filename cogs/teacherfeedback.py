@@ -726,7 +726,7 @@ class TeacherFeedback(commands.Cog):
         overwrites[show_me_everything_role] = discord.PermissionOverwrite(read_messages=False, send_messages=False, connect=False, view_channel=True)
         overwrites[sloth_pass_role] = discord.PermissionOverwrite(read_messages=True, send_messages=False, connect=False, view_channel=False)
 
-        overwrites[preference_role] = discord.PermissionOverwrite(read_messages=False, send_messages=False, connect=False, view_channel=False)
+        overwrites[preference_role] = discord.PermissionOverwrite(read_messages=False, send_messages=False, connect=True, view_channel=False)
 
         overwrites[sloth_explorer_role] = discord.PermissionOverwrite(
             read_messages=True, send_messages=True, connect=True, speak=True, view_channel=True, embed_links=True)
