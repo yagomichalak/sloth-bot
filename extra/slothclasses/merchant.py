@@ -344,7 +344,7 @@ class Merchant(Player):
             else:
                 # Gives the user the item
                 await SlothCurrency.insert_user_item(merchant.id, random_item[4], 'unequipped', random_item[5], str(random_item[3]).replace('registered_items/', ''))
-                await ctx.send(f"**{merchant.mention}, you just got the `{random_item[4]}` item, which is worth `{random_item[5]}łł`**")
+                await ctx.send(f"**{merchant.mention}, you just got the `{random_item[4]}` item, which is worth `{random_item[6]}łł`**")
 
         else:
             await ctx.send(f"**{merchant.mention}, you had a `35%` chance of getting something from the Dark Sloth Web, it happened that today wasn't your day!**")
