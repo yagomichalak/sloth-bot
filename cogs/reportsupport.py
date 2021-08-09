@@ -473,7 +473,10 @@ Please answer using one message only.."""
             return
 
         if r == '✅':
-            embed.description = "**Application successfully made, please, be patient now!**"
+            # ""
+            embed.description = """**Application successfully made, please, be patient now.
+            
+            We will let you know when we need a new mod. We check apps when we need it!""" 
             await member.send(embed=embed)
             moderator_app_channel = await self.client.fetch_channel(self.moderator_app_channel_id)
             cosmos = discord.utils.get(moderator_app_channel.guild.members, id=self.cosmos_id)
