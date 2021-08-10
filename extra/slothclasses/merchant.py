@@ -693,16 +693,17 @@ class Merchant(Player):
         marriage = {
             'user': None,
             'partner': None,
-            'timestamp': None
+            'timestamp': None,
+            'honeymoon': False
         }
 
         if not skill_action:
             return marriage
 
         if kind == 1:
-            marriage = {'user': skill_action[0], 'partner': skill_action[3], 'timestamp': skill_action[2]}
+            marriage = {'user': skill_action[0], 'partner': skill_action[3], 'timestamp': skill_action[2], "honeymoon": skill_action[8]}
         elif kind == 2:
-            marriage = {'user': skill_action[3], 'partner': skill_action[0], 'timestamp': skill_action[2]}
+            marriage = {'user': skill_action[3], 'partner': skill_action[0], 'timestamp': skill_action[2], "honeymoon": skill_action[8]}
 
         return marriage
 

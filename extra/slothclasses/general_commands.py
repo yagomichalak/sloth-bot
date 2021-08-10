@@ -46,7 +46,7 @@ class SlothClassGeneralCommands(commands.Cog):
         author = ctx.author
         if author.id == member.id:
             self.client.get_command('boot').reset_cooldown(ctx)
-            return await ctx.send(f"**You can't hug yourself, {author.mention}!**")
+            return await ctx.send(f"**You can't boot yourself, {author.mention}!**")
 
         embed = discord.Embed(
             title="__Boot Prompt__",
@@ -105,13 +105,21 @@ class SlothClassGeneralCommands(commands.Cog):
         await ctx.send(embed=embed, view=view)
 
     @commands.command()
-    # @commands.cooldown(1, 10, commands.BucketType.user)
+    @commands.cooldown(1, 300, commands.BucketType.user)
     @Player.not_ready()
     async def honeymoon(self, ctx) -> None:
         """ Celebrates a honey moon with your partner. """
 
         member = ctx.author
-        partner = ctx.author
+
+        member_marriage = await self.client.get_cog('SlothClass').get_user_marriage(member.id)
+        if not member_marriage['partner']:
+            self.client.get_command('honeymoon').reset_cooldown(ctx)
+            return await ctx.send(f"**You don't have a partner, you can't have a honeymoon by yourself, {member.mention}!** 😔")
+
+        partner = discord.utils.get(ctx.guild.members, id=member_marriage['partner'])
+        if not partner:
+            return await ctx.send(f"**It looks like your partner has left the server, {member.mention}. RIP!")
 
         embed = discord.Embed(
             title="__Honeymoon Setup__",
@@ -122,10 +130,10 @@ class SlothClassGeneralCommands(commands.Cog):
         )
         embed.set_thumbnail(url='https://i.pinimg.com/originals/87/35/53/873553eeb255e47b1b4b440e4302e17f.gif')
 
-        embed.set_author(name=member, icon_url=member.avatar.url, url=member.avatar.url)
+        embed.set_author(name=partner, icon_url=partner.avatar.url, url=partner.avatar.url)
         embed.set_footer(text=f"Requested by {member}", icon_url=member.avatar.url)
 
-        view = HoneymoonView(member=member, target=member, timeout=120)
+        view = HoneymoonView(member=member, target=member, timeout=300)
         await ctx.send(content=f"{member.mention}, {partner.mention}", embed=embed, view=view)
 
         await view.wait()
