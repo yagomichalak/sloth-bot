@@ -1,8 +1,7 @@
 import discord
-from discord import member
 from discord.ext import commands
 from .player import Player
-from .view import HugView, KissView, SlapView, HoneymoonView
+from .view import HugView, BootView, KissView, SlapView, HoneymoonView
 from extra import utils
 
 class SlothClassGeneralCommands(commands.Cog):
@@ -32,6 +31,31 @@ class SlothClassGeneralCommands(commands.Cog):
         )
         embed.set_footer(text=f"Requested by {author}", icon_url=author.avatar.url)
         view = HugView(member=author, target=member, timeout=60)
+        await ctx.send(embed=embed, view=view)
+
+    @commands.command()
+    @commands.cooldown(1, 120, commands.BucketType.user)
+    async def boot(self, ctx, *, member: discord.Member = None) -> None:
+        """ Boots/kicks someone.
+        :param member: The member to kick.
+        
+        * Cooldown: 2 minutes
+        
+        Ps: It doesn't KICK the person from the server. """
+        
+        author = ctx.author
+        if author.id == member.id:
+            self.client.get_command('boot').reset_cooldown(ctx)
+            return await ctx.send(f"**You can't hug yourself, {author.mention}!**")
+
+        embed = discord.Embed(
+            title="__Boot Prompt__",
+            description=f"Where do you wanna kick {member.mention}, {author.mention}?",
+            color=author.color,
+            timestamp=ctx.message.created_at
+        )
+        embed.set_footer(text=f"Requested by {author}", icon_url=author.avatar.url)
+        view = BootView(member=author, target=member, timeout=60)
         await ctx.send(embed=embed, view=view)
     
     @commands.command()

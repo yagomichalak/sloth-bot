@@ -61,6 +61,100 @@ class HugView(discord.ui.View):
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
         return self.member.id == interaction.user.id
 
+class BootView(discord.ui.View):
+
+    def __init__(self, member: discord.Member, target: discord.Member, timeout: Optional[float] = 180):
+        super().__init__(timeout=timeout)
+        self.member = member
+        self.target = target
+
+
+    @discord.ui.button(label='Where it hits', style=discord.ButtonStyle.blurple, custom_id='general_kick_id', emoji="🦵")
+    async def general_kick_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Kicks someone without aiming in a specific place. """
+
+        general_kicks: List[str] = [
+            'https://c.tenor.com/vTA-IZFcc3AAAAAC/drop-kick-kick.gif',
+            'https://c.tenor.com/TY_AmszVhJIAAAAC/oh-yeah-high-kick.gif',
+            'https://c.tenor.com/SddY3UqUHOAAAAAC/kick-cartoon.gif',
+            'https://c.tenor.com/Lyqfq7_vJnsAAAAC/kick-funny.gif',
+            'https://c.tenor.com/U0wSQ2s0sloAAAAC/ninja-kick.gif',
+            'https://c.tenor.com/NRKMXEvslqIAAAAd/flying-kick-drop-kick.gif',
+            'https://c.tenor.com/qEVxKG7ihzUAAAAC/kick-woman-lol.gif',
+            'https://c.tenor.com/s7s5glHMddQAAAAC/in-yo-face-flying-side-kick.gif',
+            'https://c.tenor.com/M9qJRj5Bo_wAAAAC/alita-high-kick.gif',
+            'https://c.tenor.com/DYLiR4obvyAAAAAC/superman-ball.gif'
+        ]
+
+        embed = discord.Embed(
+            title="__General Kick__",
+            description=f"🦵 {self.member.mention} landed a magestic kick on {self.target.mention} 🦵",
+            color=discord.Color.dark_purple(),
+            timestamp=interaction.message.created_at
+        )
+
+        embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
+        embed.set_thumbnail(url=self.target.avatar.url)
+        embed.set_image(url=choice(general_kicks))
+        embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
+
+        await interaction.response.send_message(content=self.target.mention, embed=embed)
+        await self.disable_buttons(interaction, followup=True)
+        self.stop()
+
+    @discord.ui.button(label='Butt Kick', style=discord.ButtonStyle.blurple, custom_id='butt_kick_id', emoji="<a:peepoHonkbutt:757358697033760918>")
+    async def butt_kick_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Kicks someone on the butt. """
+
+        butt_kicks: List[str] = [
+            'https://c.tenor.com/EkzVxMWJ3hgAAAAd/looney-tunes-elmer.gif',
+            'https://c.tenor.com/lzeoLQIX-Q8AAAAd/bette-midler-danny-devito.gif',
+            'https://c.tenor.com/7Etzg8KbgE0AAAAC/kick-butt-kick.gif',
+            'https://c.tenor.com/q6pML2by038AAAAC/kick-in-the-butt-fly-away.gif',
+            'https://c.tenor.com/HePCe_y82xYAAAAd/kick-ass.gif',
+            'https://c.tenor.com/-JaZ46RC530AAAAd/elephant-kick.gif',
+            'https://c.tenor.com/esCHs7tm78UAAAAC/spongebob-squarepants-get-out.gif',
+            'https://c.tenor.com/Z3i_1Nyi99MAAAAd/kick-gif-angry.gif',
+            'https://c.tenor.com/XtMM61RE0hwAAAAC/angry-gif.gif',
+            'https://c.tenor.com/a9g3WrRNf24AAAAC/teddy-bear-kick.gif'
+        ]
+
+        embed = discord.Embed(
+            title="__Butt Kick__",
+            description=f"<a:peepoHonkbutt:757358697033760918> {self.member.mention} kicked {self.target.mention}'s butt <a:peepoHonkbutt:757358697033760918>",
+            color=discord.Color.dark_purple(),
+            timestamp=interaction.message.created_at
+        )
+
+        embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
+        embed.set_thumbnail(url=self.target.avatar.url)
+        embed.set_image(url=choice(butt_kicks))
+        embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
+
+        await interaction.response.send_message(content=self.target.mention, embed=embed)
+        await self.disable_buttons(interaction, followup=True)
+        self.stop()
+
+    @discord.ui.button(label='Nevermind', style=discord.ButtonStyle.red, custom_id='nevermind_id', emoji="❌")
+    async def nevermind_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Cancels the hug action. """
+
+        await self.disable_buttons(interaction)
+        self.stop()
+
+    async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
+
+        for child in self.children:
+            child.disabled = True
+
+        if followup:
+            await interaction.followup.edit_message(message_id=interaction.message.id, view=self)
+        else:
+            await interaction.response.edit_message(view=self)
+
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        return self.member.id == interaction.user.id
+
 class SlapView(discord.ui.View):
 
     def __init__(self, client: commands.Cog, member: discord.Member, target: discord.Member, timeout: Optional[float] = 180):
@@ -436,6 +530,7 @@ class HoneymoonView(discord.ui.View):
         super().__init__(timeout=timeout)
         self.member = member
         self.target = target
+        self.value = None
 
         self.places: Dict[str, Dict[str, str]] = {
             "St. Lucia": {
@@ -536,8 +631,6 @@ class HoneymoonView(discord.ui.View):
 
     async def place_to_go_button(self, select: discord.ui.select, interaction: discord.Interaction) -> None:
         """ Handles the selected option for the member's honeymoon spot. """
-
-        # print('yep lets go there!', interaction.data)
 
         embed = interaction.message.embeds[0]
         selected_item = interaction.data['values'][0]
