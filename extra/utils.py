@@ -145,3 +145,10 @@ async def get_mentions(message: discord.Message) -> List[discord.Member]:
     members = list(set(members))
 
     return members
+
+async def disable_buttons(view: discord.ui.View) -> None:
+    """ Disables all buttons from a view.
+    :param view: The view from which to disable the buttons. """
+
+    for child in view.children:
+        child.disabled = True

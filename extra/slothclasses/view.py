@@ -3,6 +3,7 @@ from discord.ext import commands
 from typing import Optional, List, Dict, Union
 from random import choice
 from extra import utils
+from functools import partial
 
 class HugView(discord.ui.View):
 
@@ -254,39 +255,6 @@ class KissView(discord.ui.View):
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
         return self.member.id == interaction.user.id
 
-class HoneymoonView(discord.ui.View):
-
-    def __init__(self, member: discord.Member, target: discord.Member, timeout: Optional[float] = 180):
-        super().__init__(timeout=timeout)
-        self.member = member
-        self.target = target
-
-
-    @discord.ui.button(label='Hug', style=discord.ButtonStyle.blurple, custom_id='hug_id', emoji="")
-    async def honeymoon_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None: pass
-
-
-    @discord.ui.button(label='Nevermind', style=discord.ButtonStyle.red, custom_id='nevermind_id', emoji="❌")
-    async def nevermind_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
-        """ Cancels the slap action. """
-
-        await self.disable_buttons(interaction)
-        self.stop()
-
-
-    async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
-
-        for child in self.children:
-            child.disabled = True
-
-        if followup:
-            await interaction.followup.edit_message(message_id=interaction.message.id, view=self)
-        else:
-            await interaction.response.edit_message(view=self)
-
-    async def interaction_check(self, interaction: discord.Interaction) -> bool:
-        return self.member.id == interaction.user.id
-
 
 class CheatingView(discord.ui.View):
 
@@ -459,3 +427,157 @@ class CheatingActionView(discord.ui.View):
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
         return self.marriage['partner'] == interaction.user.id
+
+
+
+class HoneymoonView(discord.ui.View):
+
+    def __init__(self, member: discord.Member, target: discord.Member, timeout: Optional[float] = 180):
+        super().__init__(timeout=timeout)
+        self.member = member
+        self.target = target
+
+        self.places: Dict[str, Dict[str, str]] = {
+            "St. Lucia": {
+                "value": "St. Lucia",
+                "url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSbIODnrv3_2VO-oAfpp9vgKfufdNUFwvs864eEUKHhA8jVeqRlsk3YkGCGniE83SVpxoU&usqp=CAU",
+                "description": "If you're seeking a luxurious Caribbean honeymoon, look no further than St. Lucia.", "emoji": "⛰️"},
+            "Bora Bora": {
+                "value": "Bora Bora",
+                "url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQoRXIc9H14Wt9ch6OGrp3Ym0rDXwSaMOv13h84fXRhvGf1gJ-QQNeUQnAf2z2duY7AK_w&usqp=CAU",
+                "description": "Bora Bora's jaw-dropping scenery is just the tip of the iceberg – or, rather, the volcano.", "emoji": "⛰️"},
+            "Maldives": {
+                "value": "Maldives",
+                "url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRJT6FRG4GdWt1HkpyIM9UXIXql-0OrRbXu1JS1qsii2jYlB7qKbBVfv73Q5rZQR6qezPs&usqp=CAU",
+                "description": "If you and your sweetheart truly want to get away from it all, head to the Maldives.", "emoji": "🤿"},
+            "Fiji": {
+                "value": "Fiji",
+                "url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRHBvj2ujzvF8NUL70ZmHj2jmgCxmngNN5cQrSO49-EN0Uf6T3ARGlWhXp-aUjcmg2mVr4&usqp=CAU",
+                "description": "Fiji's serene beaches offer complete seclusion for postnuptial relaxation", "emoji": "🛖"},
+            "Maui": {
+                "value": "Maui",
+                "url": "https://www.visiteosusa.com.br/sites/default/files/styles/16_9_1280x720/public/2016-10/Getty_520143072_Brand_City_Maui_Hero_FinalCrop.jpg?itok=0dFZb9Z6",
+                "description": "Jungles to explore, volcanoes to tour and trails to hike, the Hawaiian island of Maui is a must.", "emoji": "🌴"},
+            "Amalfi Coast": {
+                "value": "Amalfi Coast",
+                "url": "https://res.cloudinary.com/dsmafmqwi/image/upload/c_fill,f_auto,h_1280,q_auto/v1/virtualtrips/locations/azeqdfwgqi39hakenk1q",
+                "description": "The Amalfi Coast's colorful villages, crystal-clear water and rugged shoreline are a perfect match.", "emoji": "🌅"},
+            "Bali": {
+                "value": "Bali",
+                "url": "https://www.costacruzeiros.com/content/dam/costa/costa-magazine/articles-magazine/travel/bali-travel/bali_m.jpg.image.694.390.low.jpg",
+                "description": "Towering volcanoes and stone temples provide an unforgettable backdrop for any honeymoon vacation.", "emoji": "⛱️"},
+            "Tahiti": {
+                "value": "Tahiti",
+                "url": "https://ganeshturismo.com.br/wp-content/uploads/2019/08/pacotes-de-viagem-tahiti.jpg",
+                "description": "French Polynesia's largest island is just as romantic as more popular honeymoon locales.", "emoji": "🛳️"},
+            "Santorini": {
+                "value": "Santorini",
+                "url": "https://www.costacruzeiros.com/content/dam/costa/costa-magazine/article-images/things-to-do-in-santorini/santorini-cosa-vedere1.jpg.image.694.390.low.jpg",
+                "description": "Known for its brilliant sunsets, rich Greek food & romantic hotels. Almost tailor-made for newlyweds", "emoji": "🏖️"},
+            "Kauai": {
+                "value": "Kauai",
+                "url": "https://www.gohawaii.com/sites/default/files/styles/image_gallery_bg_xl/public/hero-unit-images/Napali_0_1.jpg?itok=S0scQXWt",
+                "description": "This Hawaiian island offers luxury resorts and secluded stretches of sand for any kind of couple.", "emoji": "⛰️"},
+            "Hawaii": {
+                "value": "Hawaii",
+                "url": "https://www.costacruzeiros.com/content/dam/costa/costa-magazine/articles-magazine/islands/hawaii-island/hawaii_m.jpg.image.694.390.low.jpg",
+                "description": "Hawaii's Big Island can offer you a relaxing honeymoon or one filled with adventure.", "emoji": "🌋"},
+            "Mauritius": {
+                "value": "Mauritius",
+                "url": "https://dbui4lb3qzbcx.cloudfront.net/imagens/611a829010cce7484e24dfc9d9d18674.jpeg",
+                "description": "Mauritius turquoise waters, abundant wildlife & luxe resorts make it an ideal choice for newlyweds.", "emoji": "🌅"},
+            "Florence": {
+                "value": "Florence",
+                "url": "https://lp-cms-production.imgix.net/2019-06/GettyImages-174463015_high.jpg",
+                "description": "Florence, Italy, is a city renowned for its art, history and mouthwatering Italian cuisine", "emoji": "🕌"},
+            "Paris": {
+                "value": "Paris",
+                "url": "https://veja.abril.com.br/wp-content/uploads/2016/05/alx_lista-capitais-europa-mundo-20100806-002_original3.jpeg",
+                "description": "Newlyweds travel to the City of Light for the ultimate experience in sophistication and romance.", "emoji": "<:toureiffel:716592371583942676>"},
+            "Phuket": {
+                "value": "Phuket",
+                "url": "https://www.costacruzeiros.com/content/dam/costa/costa-magazine/articles-magazine/islands/phuket-island/phuket_m.jpg.image.694.390.low.jpg",
+                "description": "White sand beaches, and abundance of cultural sites. A great choice for adventure and relaxation.", "emoji": "🏞️"},
+            "Cinque Terre": {
+                "value": "Cinque Terre",
+                "url": "https://img.itinari.com/pages/images/original/6ec803a9-2376-44b7-8b92-8347dccad652-istock-610863516.jpg?ch=DPR&dpr=1&w=1600&s=38b3f7002a442e612563308e36b0ff80",
+                "description": "Northwestern Italy remote coastal region featuring beaches more suitable for sunbathing & swimming.", "emoji": "🛶"},
+            "St. Barts": {
+                "value": "St. Barts",
+                "url": "https://media-cdn.tripadvisor.com/media/photo-s/1c/df/23/29/eden-rock-lifestyle.jpg",
+                "description": "The French Caribbean island of St. Barts offers chic hotels and bistros in a laid-back setting.", "emoji": "⛵"},
+            "Tuscany": {
+                "value": "Tuscany",
+                "url": "https://www.pandotrip.com/wp-content/uploads/2018/07/Amazing-landscape-of-Val-d%E2%80%99Orcia-Tuscany-Italy.jpg",
+                "description": "From luxury villas to aromatic cuisine, Italy's countryside teems with romance.", "emoji": "🏘️"},
+            "British Virgin Islands": {
+                "value": "British Virgin Islands",
+                "url": "https://travel.home.sndimg.com/content/dam/images/travel/fullrights/2018/4/19/0/CI_BVI_Tourist_Board-Scrub-Island-Resort-Dusk.jpg.rend.hgtvcom.966.644.suffix/1524159978953.jpeg",
+                "description": "For newlyweds who dream of spending their days on the water and their nights in a high-end hotel.", "emoji": "⛵"},
+            "Lake Como": {
+                "value": "Lake Como",
+                "url": "https://images.contentstack.io/v3/assets/blt00454ccee8f8fe6b/blt5508c8547b26bd6d/606faf3dd8743426b393ea62/US_LakeComo_IT_Header.jpg",
+                "description": "Attractive and stunning lake setting located in northern Italy about 50 miles north of Milan.", "emoji": "🗻"}
+            
+        }
+
+        options = [
+            discord.SelectOption(label=place, description=values['description'], emoji=values['emoji'])
+            for place, values in self.places.items()]
+
+        places_select = discord.ui.Select(placeholder="Where do you wanna go to?",
+        custom_id="honeymoon_id", min_values=1, max_values=1, options=options)
+
+        places_select.callback = partial(self.place_to_go_button, places_select)
+
+        self.children.insert(0, places_select)
+
+
+
+    async def place_to_go_button(self, select: discord.ui.select, interaction: discord.Interaction) -> None:
+        """ Handles the selected option for the member's honeymoon spot. """
+
+        # print('yep lets go there!', interaction.data)
+
+        embed = interaction.message.embeds[0]
+        selected_item = interaction.data['values'][0]
+        place = self.places.get(selected_item)
+        if place:
+            embed.set_image(url=place['url'])
+        embed.clear_fields()
+        embed.add_field(name=f"__Place:__ {selected_item}", value=place['description'])
+        
+        await interaction.response.edit_message(embed=embed)
+
+
+    @discord.ui.button(label='Go to Honeymoon!', style=discord.ButtonStyle.blurple, custom_id='hug_id', emoji="🍯", row=1)
+    async def honeymoon_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+
+
+        value = True
+        await self.disable_buttons(interaction)
+        self.stop()
+
+
+    @discord.ui.button(label='Nevermind', style=discord.ButtonStyle.red, custom_id='nevermind_id', emoji="❌", row=1)
+    async def nevermind_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Cancels the slap action. """
+
+        value = False
+
+        await self.disable_buttons(interaction)
+        self.stop()
+
+
+    async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
+
+        for child in self.children:
+            child.disabled = True
+
+        if followup:
+            await interaction.followup.edit_message(message_id=interaction.message.id, view=self)
+        else:
+            await interaction.response.edit_message(view=self)
+
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        return self.member.id == interaction.user.id

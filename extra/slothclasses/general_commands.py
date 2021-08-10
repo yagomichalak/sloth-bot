@@ -1,7 +1,9 @@
 import discord
+from discord import member
 from discord.ext import commands
 from .player import Player
 from .view import HugView, KissView, SlapView, HoneymoonView
+from extra import utils
 
 class SlothClassGeneralCommands(commands.Cog):
 
@@ -79,9 +81,30 @@ class SlothClassGeneralCommands(commands.Cog):
         await ctx.send(embed=embed, view=view)
 
     @commands.command()
-    @commands.cooldown(1, 10, commands.BucketType.user)
+    # @commands.cooldown(1, 10, commands.BucketType.user)
     @Player.not_ready()
     async def honeymoon(self, ctx) -> None:
         """ Celebrates a honey moon with your partner. """
 
-        pass
+        member = ctx.author
+        partner = ctx.author
+
+        embed = discord.Embed(
+            title="__Honeymoon Setup__",
+            description=f"{member.mention}, select where in the world you wanna have your honeymoon with {partner.mention}.",
+            color=discord.Color.gold(),
+            timestamp=ctx.message.created_at,
+            url="https://travel.usnews.com/rankings/best-honeymoon-destinations/"
+        )
+        embed.set_thumbnail(url='https://i.pinimg.com/originals/87/35/53/873553eeb255e47b1b4b440e4302e17f.gif')
+
+        embed.set_author(name=member, icon_url=member.avatar.url, url=member.avatar.url)
+        embed.set_footer(text=f"Requested by {member}", icon_url=member.avatar.url)
+
+        view = HoneymoonView(member=member, target=member, timeout=120)
+        await ctx.send(content=f"{member.mention}, {partner.mention}", embed=embed, view=view)
+
+        await view.wait()
+
+        if view.value is None:
+            await utils.disable_buttons(view)
