@@ -356,9 +356,33 @@ class Munk(Player):
             self.client.get_command('request_thumbnail').reset_cooldown(ctx)
             await ctx.send(f"**Not doing requesting it, then, {requester.mention}!**")
 
-    @commands.command(aliases=['invite'])
+
+
+    @commands.group(aliases=['tb'])
+    async def tribe(self, ctx) -> None:
+        """ Command for managing and interacting with a tribe.
+        (Use this without a subcommand to see all subcommands available) """
+        if ctx.invoked_subcommand:
+            return
+
+        cmd = self.client.get_command('tribe')
+        prefix = self.client.command_prefix
+        subcommands = [f"{prefix}{c.qualified_name}" for c in cmd.commands
+            ]
+
+        subcommands = '\n'.join(subcommands)
+        items_embed = discord.Embed(
+            title="__Subcommads__:",
+            description=f"```apache\n{subcommands}```",
+            color=ctx.author.color,
+            timestamp=ctx.message.created_at
+        )
+
+        await ctx.send(embed=items_embed)
+
+    @tribe.command(aliases=['inv'])
     @commands.cooldown(1, 10, commands.BucketType.user)
-    async def tribe_invite(self, ctx, member: discord.Member = None) -> None:
+    async def invite(self, ctx, member: discord.Member = None) -> None:
         """ Invites a user to your tribe.
         :param member: The member to invite. """
 
@@ -412,29 +436,6 @@ class Munk(Player):
                 await ctx.send(embed=join_tribe_embed)
         else:
             await ctx.send(f"**{member.mention} refused your invitation to join `{tribe_member[1]}`, {inviter.mention}!**")
-
-
-    @commands.group(aliases=['tb'])
-    async def tribe(self, ctx) -> None:
-        """ Command for managing and interacting with a tribe.
-        (Use this without a subcommand to see all subcommands available) """
-        if ctx.invoked_subcommand:
-            return
-
-        cmd = self.client.get_command('tribe')
-        prefix = self.client.command_prefix
-        subcommands = [f"{prefix}{c.qualified_name}" for c in cmd.commands
-            ]
-
-        subcommands = '\n'.join(subcommands)
-        items_embed = discord.Embed(
-            title="__Subcommads__:",
-            description=f"```apache\n{subcommands}```",
-            color=ctx.author.color,
-            timestamp=ctx.message.created_at
-        )
-
-        await ctx.send(embed=items_embed)
 
     @tribe.command(aliases=['view', 'display', 'show'])
     @commands.cooldown(1, 10, commands.BucketType.user)
