@@ -781,3 +781,15 @@ class Merchant(Player):
 
         return marriage_embed
         
+    async def update_marriage_content(self, member_id: int) -> None:
+        """ Updates marriage content to honeymoon.
+        :param member_id: The ID of the member who's married. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("""
+        UPDATE SlothSkills SET content = 'honeymoon' 
+        WHERE user_id = %s AND skill_type = 'marriage' 
+        OR target_id = %s AND skill_type = 'marriage'
+        """, (member_id, member_id))
+        await db.commit()
+        await mycursor.close()
