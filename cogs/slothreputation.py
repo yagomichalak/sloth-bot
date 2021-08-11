@@ -179,7 +179,11 @@ class SlothReputation(commands.Cog):
 
         
         if marriage['partner']:
-            embed.add_field(name="💍 __**Marriage:**__", value=f"Married to <@{marriage['partner']}> (<t:{marriage['timestamp']}:R>)." if sloth_profile else '0 rings.', inline=False)
+            embed.add_field(
+                name="💍 __**Marriage:**__", 
+                value=f"Married to <@{marriage['partner']}> (<t:{marriage['timestamp']}:R>).{' 🌛' if marriage['honeymoon'] else ''}" 
+                if sloth_profile else '0 rings.', 
+                inline=False)
 
         embed.set_thumbnail(url=member.avatar.url)
         embed.set_author(name=member, icon_url=member.avatar.url, url=member.avatar.url)

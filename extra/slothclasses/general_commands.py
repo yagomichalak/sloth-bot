@@ -3,6 +3,7 @@ from discord.ext import commands
 from .player import Player
 from .view import HugView, BootView, KissView, SlapView, HoneymoonView
 from extra import utils
+from extra.prompt.menu import ConfirmButton
 
 class SlothClassGeneralCommands(commands.Cog):
 
@@ -106,19 +107,25 @@ class SlothClassGeneralCommands(commands.Cog):
 
     @commands.command()
     @commands.cooldown(1, 300, commands.BucketType.user)
-    @Player.not_ready()
     async def honeymoon(self, ctx) -> None:
         """ Celebrates a honey moon with your partner. """
 
         member = ctx.author
 
-        member_marriage = await self.client.get_cog('SlothClass').get_user_marriage(member.id)
+        SlothClass = self.client.get_cog('SlothClass')
+
+        member_marriage = await SlothClass.get_user_marriage(member.id)
         if not member_marriage['partner']:
             self.client.get_command('honeymoon').reset_cooldown(ctx)
             return await ctx.send(f"**You don't have a partner, you can't have a honeymoon by yourself, {member.mention}!** 😔")
 
+        if member_marriage['honeymoon']:
+            self.client.get_command('honeymoon').reset_cooldown(ctx)
+            return await ctx.send(f"**You already had a honeymoon, what are you doing, {member.mention}?**")
+
         partner = discord.utils.get(ctx.guild.members, id=member_marriage['partner'])
         if not partner:
+            self.client.get_command('honeymoon').reset_cooldown(ctx)
             return await ctx.send(f"**It looks like your partner has left the server, {member.mention}. RIP!")
 
         embed = discord.Embed(
@@ -133,10 +140,65 @@ class SlothClassGeneralCommands(commands.Cog):
         embed.set_author(name=partner, icon_url=partner.avatar.url, url=partner.avatar.url)
         embed.set_footer(text=f"Requested by {member}", icon_url=member.avatar.url)
 
+        # Honeymoon setup view
         view = HoneymoonView(member=member, target=member, timeout=300)
         await ctx.send(content=f"{member.mention}, {partner.mention}", embed=embed, view=view)
 
         await view.wait()
 
-        if view.value is None:
-            await utils.disable_buttons(view)
+        if not view.value:
+            return await utils.disable_buttons(view)
+
+        # Check user currency
+        user_currency = await SlothClass.get_user_currency(member.id)
+        if user_currency[1] < 1500:
+            return await ctx.send(f"**You don't have `1500łł` to have a honeymoon, {member.mention}!**")
+
+        # Confirmation view
+
+        confirm_embed = discord.Embed(
+            title="__Confirmation Prompt__",
+            description=f"Are you sure you wanna spend `1500łł` for having your honeymoon with {partner.mention}, {member.mention}?",
+            color=discord.Color.orange(),
+            timestamp=ctx.message.created_at
+        )
+        confirmation_view = ConfirmButton(member, 60)
+        msg = await ctx.send(embed=confirm_embed, view=confirmation_view)
+        await confirmation_view.wait()
+
+        if confirmation_view.value is None:
+            embed.description = "Timeout"
+            embed.color = discord.Color.red()
+        elif not confirmation_view.value:
+            embed.description = "Canceled!"
+            embed.color = discord.Color.red()
+        else:
+            embed.description = "Confirmed!"
+            embed.color = discord.Color.green()
+
+        # Disable buttons and updates the confirmation_view
+        await utils.disable_buttons(confirmation_view)
+        await msg.edit(embed=embed, view=confirmation_view)
+
+        if not confirmation_view.value:
+            return
+
+        member_marriage = await SlothClass.get_user_marriage(member.id)
+        if member_marriage['honeymoon']:
+            return await ctx.send(f"**You already had your honeymoon, {member.mention}!**")
+
+        await SlothClass.update_user_money(member.id, -1500) # Updates user money
+        await SlothClass.update_marriage_content(member.id)
+
+        place, activity = view.place, view.activity
+
+
+        final_embed = view.embed
+        final_embed.clear_fields()
+        final_embed.title = "__Honeymoon Time!__"
+        final_embed.description = f"""
+            {member.mention} and {partner.mention} went to `{place['value']}` for their honeymoon! 🍯🌛
+            And arriving there, they will `{activity['name']}`. 🎉
+        """
+
+        await ctx.send(content=f"{member.mention}, {partner.mention}", embed=final_embed)

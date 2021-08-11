@@ -533,6 +533,10 @@ class HoneymoonView(discord.ui.View):
         self.member = member
         self.target = target
         self.value = None
+        self.embed: discord.Embed = None
+
+        self.place: Dict[str, Dict[str, str]] = {}
+        self.activity: Dict[str, Dict[str, str]] = {}
 
         self.current_place: Dict[str, Dict[str, str]] = None
         self.places: Dict[str, Dict[str, str]] = self.get_places()
@@ -570,6 +574,7 @@ class HoneymoonView(discord.ui.View):
             discord.SelectOption(label=activity, emoji="🎉") for activity in place['activities']
         ]
 
+        self.place = place
         embed.clear_fields()
         embed.add_field(name=f"__Place:__ {selected_item}", value=place['description'], inline=False)
         
@@ -577,7 +582,7 @@ class HoneymoonView(discord.ui.View):
 
 
     @discord.ui.select(placeholder="Select an activity to do there.", custom_id="activity_id", disabled=True, row=1, options=[
-        discord.SelectOption(label="I'm a placeholder")
+        discord.SelectOption(label="I'm a placeholder", value="no")
     ])
     async def activities_to_do_button(self, select: discord.ui.select, interaction: discord.Interaction) -> None:
         """ Handles the selected option for the member's honeymoon spot. """
@@ -587,6 +592,7 @@ class HoneymoonView(discord.ui.View):
 
         place = self.current_place
         activity = place['activities'][selected_item]
+        self.activity = activity
 
         if url := activity.get('url'):
             embed.set_thumbnail(url=url)
@@ -602,8 +608,16 @@ class HoneymoonView(discord.ui.View):
     @discord.ui.button(label='Go to Honeymoon!', style=discord.ButtonStyle.blurple, custom_id='hug_id', emoji="🍯", row=2)
     async def honeymoon_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
 
+        member = interaction.user
 
-        value = True
+        if not self.place:
+            return await interaction.response.send_message(f"You need to select a place, {member.mention}", ephemeral=True)
+
+        if not self.activity:
+            return await interaction.response.send_message(f"You need to select an activity, {member.mention}", ephemeral=True)
+
+        self.value = True
+        self.embed = interaction.message.embeds[0]
         await self.disable_buttons(interaction)
         self.stop()
 
@@ -612,7 +626,7 @@ class HoneymoonView(discord.ui.View):
     async def nevermind_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
         """ Cancels the slap action. """
 
-        value = False
+        self.value = False
 
         await self.disable_buttons(interaction)
         self.stop()
