@@ -57,14 +57,14 @@ class QueueManagement(commands.Cog):
 
         embed = discord.Embed(
             title=f"__{author.display_name}'s Queue__",
-            description=f', '.join([f"<@{q[1]}> ({q[3]})" for q in queue]),
+            description=f', '.join([f"<@{q[1]}> ({q[2]})" for q in queue]),
             color=author.color,
             timestamp=ctx.message.created_at
         )
         embed.set_thumbnail(url=author.avatar.url)
-        embed.set_footer(text=guild.name, icon_url=guild.icon.url)
+        embed.set_footer(text="0 - Not sorted | 1 - Sorted", icon_url=guild.icon.url)
         
-        await ctx.send(content="0 - Not sorted | 1 - Sorted", embed=embed)
+        await ctx.send(embed=embed)
 
     
     @queue.command(aliases=['add_members', 'addmembers', 'addlist', 'add_member_list', 'addmemberlist'])
@@ -81,7 +81,21 @@ class QueueManagement(commands.Cog):
         await self.insert_queue_users(formatted_users)
         await ctx.send(f"**Successfully added `{len(members)}` into your Queue, {author.mention}!**")
 
-    @queue.command(aliases=['delete', 'remove'])
+    @queue.command(aliases=['remove_members', 'removemembers', 'removelist', 'remove_member_list', 'removememberlist'])
+    async def remove(self, ctx) -> None:
+        """ Removes one or more members from the your queue list. """
+
+        author = ctx.author
+
+        members = await utils.get_mentions(ctx.message)
+        if not members:
+            return await ctx.send(f"**Please, inform one or more members, {author.mention}!**")
+
+        formatted_users = [(author.id, m.id) for m in members]
+        await self.delete_specific_queue_users(formatted_users)
+        await ctx.send(f"**Successfully removed the users from your Queue, {author.mention}!**")
+
+    @queue.command(aliases=['erase'])
     async def clear(self, ctx) -> None:
         """ Adds a list of members to do something with them later. """
 
@@ -240,6 +254,15 @@ class QueueManagement(commands.Cog):
 
         mycursor, db = await the_database()
         await mycursor.execute("DELETE FROM Queues WHERE owner_id = %s AND user_id = %s", (owner_id, user))
+        await db.commit()
+        await mycursor.close()
+
+    async def delete_specific_queue_users(self, users: List[int]) -> None:
+        """ Deletes a user from a Queue.
+        :param users: The list of users to delete. """
+
+        mycursor, db = await the_database()
+        await mycursor.executemany("DELETE FROM Queues WHERE owner_id = %s AND user_id = %s", users)
         await db.commit()
         await mycursor.close()
 
