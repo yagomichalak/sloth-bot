@@ -6,6 +6,7 @@ from extra import utils
 from extra.prompt.menu import ConfirmButton
 
 class RolePlay(commands.Cog):
+    """ Category for rolepalying commands. """
 
     def __init__(self, client) -> None:
         self.client  = client
@@ -145,7 +146,8 @@ class RolePlay(commands.Cog):
 
         # Honeymoon setup view
         view = HoneymoonView(member=member, target=member, timeout=300)
-        await ctx.send(content=f"{member.mention}, {partner.mention}", embed=embed, view=view)
+        # await ctx.send(content=f"{member.mention}, {partner.mention}", embed=embed, view=view)
+        await ctx.send(content=f"{member.mention}, {member.mention}", embed=embed, view=view)
 
         await view.wait()
 
@@ -210,15 +212,6 @@ class RolePlay(commands.Cog):
             partner_fx = await SlothClass.get_user_effects(partner)
             await SlothClass.remove_debuffs(member=member, debuffs=member_fx)
             await SlothClass.remove_debuffs(member=partner, debuffs=partner_fx)
-            # Protects
-            await SlothClass.insert_skill_action(
-                user_id=member.id, skill_type="divine_protection", skill_timestamp=current_ts,
-                target_id=partner.id
-            )
-            await SlothClass.insert_skill_action(
-                user_id=partner.id, skill_type="divine_protection", skill_timestamp=current_ts,
-                target_id=member.id
-            )
             # Resets skills cooldown
             await SlothClass.update_user_skills_ts(member.id, current_ts)
             await SlothClass.update_user_skills_ts(partner.id, current_ts)
@@ -226,11 +219,27 @@ class RolePlay(commands.Cog):
             ten_days = current_ts - 864000
             await SlothClass.update_change_class_ts(member.id, ten_days)
             await SlothClass.update_change_class_ts(partner.id, ten_days)
+            # Protects / Reinforces
+            if 'protected' not in partner_fx:
+                await SlothClass.insert_skill_action(
+                    user_id=member.id, skill_type="divine_protection", skill_timestamp=current_ts,
+                    target_id=partner.id
+                )
+            else:
+                await SlothClass.reinforce_shield(partner.id)
+            if 'protected' not in member_fx:
+                await SlothClass.insert_skill_action(
+                    user_id=partner.id, skill_type="divine_protection", skill_timestamp=current_ts,
+                    target_id=member.id
+                )
+            else:
+                await SlothClass.reinforce_shield(member.id)
 
         except Exception as e:
             print('Honeymoon error', e)
 
-        await ctx.send(content=f"{member.mention}, {partner.mention}", embed=final_embed)
+        # await ctx.send(content=f"{member.mention}, {partner.mention}", embed=final_embed)
+        await ctx.send(content=f"{member.mention}, {member.mention}", embed=final_embed)
 
 
 def setup(client):

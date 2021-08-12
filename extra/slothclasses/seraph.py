@@ -10,7 +10,7 @@ from extra import utils
 import os
 from datetime import datetime
 import random
-from typing import List
+from typing import List, Optional
 
 bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
 
@@ -196,12 +196,27 @@ class Seraph(Player):
                     description=f"**<@{dp[3]}>'s `Divine Protection` from <@{dp[0]}> just expired!**",
                     color=discord.Color.red()))
 
-    async def reinforce_shields(self, perpetrator_id: int) -> None:
+    async def reinforce_shields(self, perpetrator_id: int, increment: Optional[int] = 86400) -> None:
         """ Reinforces all active Divine Protection shields.
-        :param perpetrator_id: The ID of the perpetrator of those shields. """
+        :param perpetrator_id: The ID of the perpetrator of those shields.
+        :param increment: The amount to increment. Default = 1 day """
 
         mycursor, db = await the_database()
-        await mycursor.execute("UPDATE SlothSkills SET skill_timestamp = skill_timestamp + 86400 WHERE user_id = %s", (perpetrator_id,))
+        await mycursor.execute("""
+            UPDATE SlothSkills SET skill_timestamp = skill_timestamp + %s WHERE user_id = %s
+            AND skill_type = 'divine_protection'""", (increment, perpetrator_id))
+        await db.commit()
+        await mycursor.close()
+
+    async def reinforce_shield(self, user_id: int, increment: Optional[int] = 86400) -> None:
+        """ Reinforces a specific active Divine Protection shield.
+        :param user_id: The ID of the user.
+        :param increment: The amount to increment. Default = 1 day """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("""
+        UPDATE SlothSkills SET skill_timestamp = skill_timestamp + %s WHERE target_id = %s
+        AND skill_type = 'divine_protection'""", (increment, user_id))
         await db.commit()
         await mycursor.close()
 
