@@ -1,3 +1,4 @@
+from extra.prompt.menu import ConfirmButton
 from discord.role import R
 from cogs.reportsupport import ReportSupport
 import discord
@@ -721,38 +722,42 @@ class Moderation(commands.Cog):
 		'''
 		await ctx.message.delete()
 		if not member:
-			await ctx.send('**Please, specify a member!**', delete_after=3)
-		else:
-			# General embed
-			general_embed = discord.Embed(description=f'**Reason:** {reason}', colour=discord.Colour.magenta())
-			general_embed.set_author(name=f'{member} has been kicked', icon_url=member.avatar.url)
-			await ctx.send(embed=general_embed)
-			try:
-				await member.send(embed=general_embed)
-			except:
-				pass
+			return await ctx.send('**Please, specify a member!**', delete_after=3)
 
-			try:
-				await member.kick(reason=reason)
-			except Exception:
-				await ctx.send('**You cannot do that!**', delete_after=3)
-			else:
-				# Moderation log embed
-				moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
-				embed = discord.Embed(title='__**Kick**__', colour=discord.Colour.magenta(),
-									  timestamp=ctx.message.created_at)
-				embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nId: {member.id}```',
-								inline=False)
-				embed.add_field(name='Reason:', value=f'```{reason}```')
-				embed.set_author(name=member)
-				embed.set_thumbnail(url=member.avatar.url)
-				embed.set_footer(text=f"Kicked by {ctx.author}", icon_url=ctx.author.avatar.url)
-				await moderation_log.send(embed=embed)
-				# Inserts a infraction into the database
-				current_ts = await utils.get_timestamp()
-				await self.insert_user_infraction(
-					user_id=member.id, infr_type="kick", reason=reason,
-					timestamp=current_ts, perpetrator=ctx.author.id)
+		confirm = await ConfirmSkill(f"**Are you sure you want to kick {member.mention} from the server, {ctx.author.mention}?**").prompt(ctx)
+		if not confirm:
+			return
+
+		# General embed
+		general_embed = discord.Embed(description=f'**Reason:** {reason}', colour=discord.Colour.magenta())
+		general_embed.set_author(name=f'{member} has been kicked', icon_url=member.avatar.url)
+		await ctx.send(embed=general_embed)
+		try:
+			await member.send(embed=general_embed)
+		except:
+			pass
+
+		try:
+			await member.kick(reason=reason)
+		except Exception:
+			await ctx.send('**You cannot do that!**', delete_after=3)
+		else:
+			# Moderation log embed
+			moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
+			embed = discord.Embed(title='__**Kick**__', colour=discord.Colour.magenta(),
+									timestamp=ctx.message.created_at)
+			embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nId: {member.id}```',
+							inline=False)
+			embed.add_field(name='Reason:', value=f'```{reason}```')
+			embed.set_author(name=member)
+			embed.set_thumbnail(url=member.avatar.url)
+			embed.set_footer(text=f"Kicked by {ctx.author}", icon_url=ctx.author.avatar.url)
+			await moderation_log.send(embed=embed)
+			# Inserts a infraction into the database
+			current_ts = await utils.get_timestamp()
+			await self.insert_user_infraction(
+				user_id=member.id, infr_type="kick", reason=reason,
+				timestamp=current_ts, perpetrator=ctx.author.id)
 
 	# Bans a member
 	@commands.command()
