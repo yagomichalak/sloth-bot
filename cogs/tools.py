@@ -836,7 +836,7 @@ class Tools(commands.Cog):
 
 	@cog_ext.cog_slash(name="mention", description="(ADMIN) Used to mention staff members", options=[
 		create_option(
-			name="member", description="The Staff member to mention/ping.", option_type=3, required=True, 
+			name="member", description="The Staff member to mention/ping.", option_type=3, required=True,
 			choices=[
 				create_choice(name="Cosmos", value=os.getenv('COSMOS_ID')), create_choice(name="Alex", value=os.getenv('ALEX_ID')),
 				create_choice(name="DNK", value=os.getenv('DNK_ID')), create_choice(name="Muffin", value=os.getenv('MUFFIN_ID')),
@@ -855,7 +855,7 @@ class Tools(commands.Cog):
 		else:
 			await ctx.send("**For some reason I couldn't ping them =\ **")
 
-	@cog_ext.cog_slash(name="timestamp", description="Gets a timestamp for a specific date and time.\nPs: The output will format according to your timezone.", 
+	@cog_ext.cog_slash(name="timestamp", description="Gets a timestamp for a specific date and time. - Output will format according to your timezone.", 
 		options=[
 			create_option(name="hour", description="Hour of time in 24 hour format.", option_type=4, required=False),
 			create_option(name="minute", description="Minute of time.", option_type=4, required=False),
@@ -889,6 +889,12 @@ class Tools(commands.Cog):
 		embed.add_field(name="Copyable", value=f"\<t:{timestamp}>")
 
 		await ctx.send(embed=embed, hidden=True)
+
+	
+	# @cog_ext.cog_context_menu(target=2, name = 'Report User', guild_ids=guild_ids)
+	# async def reportuser(self, ctx) -> None:
+
+	# 	await ctx.send('awoi')
 
 def setup(client):
 	client.add_cog(Tools(client))
