@@ -8,7 +8,7 @@ from extra.slothclasses.player import Skill
 from extra import utils
 import os
 
-from extra.slothclasses import agares, cybersloth, merchant, metamorph, munk, prawler, seraph, warrior, general_commands, db_commands
+from extra.slothclasses import agares, cybersloth, merchant, metamorph, munk, prawler, seraph, warrior, db_commands
 classes: Dict[str, object] = {
     'agares': agares.Agares, 'cybersloth': cybersloth.Cybersloth,
     'merchant': merchant.Merchant, 'metamorph': metamorph.Metamorph,
@@ -19,7 +19,7 @@ classes: Dict[str, object] = {
 bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
 
 
-class SlothClass(*classes.values(), general_commands.SlothClassGeneralCommands, db_commands.SlothClassDatabaseCommands):
+class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
     """ A category for the Sloth Class system. """
 
     def __init__(self, client) -> None:

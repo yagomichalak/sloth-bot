@@ -592,6 +592,33 @@ class Player(commands.Cog):
         await db.commit()
         await mycursor.close()
 
+    async def update_user_skills_ts(self, user_id: int, new_skill_ts: int = None) -> None:
+        """ Updates the values of the user's skills.
+        :parma user_id: The ID of the user.
+        :param new_skill_ts: The new timestamp value for the skills. Default = None. """
+
+        mycursor, db = await the_database()
+        sql = """
+        UPDATE SkillsCooldown SET 
+        skill_one_ts = %s, skill_two_ts = %s,
+        skill_three_ts = %s, skill_four_ts = %s,
+        skill_five_ts = %s WHERE user_id = %s
+        """
+        await mycursor.execute(sql, (
+            new_skill_ts, new_skill_ts, new_skill_ts, new_skill_ts, new_skill_ts, user_id))
+        await db.commit()
+        await mycursor.close()
+
+    async def update_change_class_ts(self, user_id: int, new_ts: int) -> None:
+        """ Updates the user's changing-Sloth-class cooldown.
+        :param user_id: The ID of the user.
+        :param new_ts: The new timestamp for the cooldown. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("UPDATE SlothProfile SET change_class_ts = %s WHERE user_id = %s", (new_ts, user_id))
+        await db.commit()
+        await mycursor.close()
+
     # ========== INSERT ==========
 
     async def insert_user_skill_cooldown(self, user_id: int, skill: Enum, skill_ts: int) -> None:

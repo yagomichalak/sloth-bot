@@ -1,11 +1,11 @@
 import discord
 from discord.ext import commands
-from .player import Player
-from .view import HugView, BootView, KissView, SlapView, HoneymoonView
+from extra.slothclasses.player import Player
+from extra.slothclasses.view import HugView, BootView, KissView, SlapView, HoneymoonView
 from extra import utils
 from extra.prompt.menu import ConfirmButton
 
-class SlothClassGeneralCommands(commands.Cog):
+class RolePlay(commands.Cog):
 
     def __init__(self, client) -> None:
         self.client  = client
@@ -200,5 +200,35 @@ class SlothClassGeneralCommands(commands.Cog):
             {member.mention} and {partner.mention} went to `{place['value']}` for their honeymoon! 🍯🌛
             And arriving there, they will `{activity['name']}`. 🎉
         """
+        current_ts = await utils.get_timestamp()
+        try:
+            # Reset effects
+            member_fx = await SlothClass.get_user_effects(member)
+            partner_fx = await SlothClass.get_user_effects(partner)
+            await SlothClass.remove_debuffs(member=member, debuffs=member_fx)
+            await SlothClass.remove_debuffs(member=partner, debuffs=partner_fx)
+            # Protects
+            await SlothClass.insert_skill_action(
+                user_id=member.id, skill_type="divine_protection", skill_timestamp=current_ts,
+                target_id=partner.id
+            )
+            await SlothClass.insert_skill_action(
+                user_id=partner.id, skill_type="divine_protection", skill_timestamp=current_ts,
+                target_id=member.id
+            )
+            # Resets skills cooldown
+            await SlothClass.update_user_skills_ts(member.id, current_ts)
+            await SlothClass.update_user_skills_ts(partner.id, current_ts)
+            # Resets Change-Sloth-Class cooldown
+            ten_days = current_ts - 864000
+            await SlothClass.update_change_class_ts(member.id, ten_days)
+            await SlothClass.update_change_class_ts(partner.id, ten_days)
+
+        except Exception as e:
+            print('Honeymoon error', e)
 
         await ctx.send(content=f"{member.mention}, {partner.mention}", embed=final_embed)
+
+
+def setup(client):
+    client.add_cog(RolePlay(client))
