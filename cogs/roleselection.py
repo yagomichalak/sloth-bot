@@ -27,11 +27,13 @@ class RoleSelection(RoleSelectionDatabaseCommands):
 		selection_menus = await self.get_selection_menus()
 		messages = {}
 		for button in selection_menus:
-			if not messages.get(button[0]):
-				messages[button[0]] = [button[3:]]
-			else:
-				messages[button[0]].append(button[3:])
-
+			try:
+				if not messages.get(button[0]):
+					messages[button[0]] = [button[3:]]
+				else:
+					messages[button[0]].append(button[3:])
+			except Exception as e:
+				print('error in roleseleciton', e)
 		for message_id, buttons in messages.items():
 			try:
 				view = discord.ui.View(timeout=None)
@@ -43,9 +45,10 @@ class RoleSelection(RoleSelectionDatabaseCommands):
 
 				self.client.add_view(view=view, message_id=message_id)
 			except Exception as e:
-				print(e)
+				print('ERROR IN RoleSelection', e)
 			else:
 				continue
+			
 		print('RoleSelection cog is online!')
 
 	@commands.command(aliases=['create_menu', 'createmenu', 'make_menu', 'makemenu', 'startmenu'])
