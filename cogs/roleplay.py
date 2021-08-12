@@ -146,8 +146,7 @@ class RolePlay(commands.Cog):
 
         # Honeymoon setup view
         view = HoneymoonView(member=member, target=member, timeout=300)
-        # await ctx.send(content=f"{member.mention}, {partner.mention}", embed=embed, view=view)
-        await ctx.send(content=f"{member.mention}, {member.mention}", embed=embed, view=view)
+        await ctx.send(content=f"{member.mention}, {partner.mention}", embed=embed, view=view)
 
         await view.wait()
 
@@ -238,8 +237,7 @@ class RolePlay(commands.Cog):
         except Exception as e:
             print('Honeymoon error', e)
 
-        # await ctx.send(content=f"{member.mention}, {partner.mention}", embed=final_embed)
-        await ctx.send(content=f"{member.mention}, {member.mention}", embed=final_embed)
+        await ctx.send(content=f"{member.mention}, {partner.mention}", embed=final_embed)
 
 
 def setup(client):
