@@ -474,8 +474,6 @@ class SlothReputation(commands.Cog):
         await mycursor.close()
         return top_ten_members
 
-    
-
     async def get_specific_user(self, user_id: int):
         mycursor, db = await the_database()
         await mycursor.execute(f"SELECT * FROM MembersScore WHERE user_id = {user_id}")
