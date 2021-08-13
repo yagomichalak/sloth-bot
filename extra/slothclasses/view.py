@@ -770,7 +770,7 @@ class PunchView(discord.ui.View):
 
         embed = discord.Embed(
             title="__Punch Stomach__",
-            description=f"<:eau:875729754215571487> {self.member.mention} punched {self.target.mention} in the stomach, right in the bull's eyes! <:eau:875729754215571487>",
+            description=f"<:eau:875729754215571487> {self.member.mention} punched {self.target.mention} in the stomach <:eau:875729754215571487>",
             color=discord.Color.dark_teal(),
             timestamp=interaction.message.created_at
         )

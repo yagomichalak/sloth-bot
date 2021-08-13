@@ -266,7 +266,8 @@ class RolePlay(commands.Cog):
     @commands.cooldown(1, 120, commands.BucketType.user)
     @Player.not_ready()
     async def give(self, ctx, *, member: discord.Member = None) -> None:
-        """ Gives someone something. """
+        """ Gives someone something.
+        :param member: The member to give something to. """
 
         pass
 
