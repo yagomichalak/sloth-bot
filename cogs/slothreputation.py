@@ -254,12 +254,35 @@ class SlothReputation(commands.Cog):
                 break
         return await ctx.send(embed=leaderboard)
 
+    @commands.command(aliases=['leaf_board', 'leafboard', 'leaves', 'leaves_leaderboard', 'leavesleaderboard', 'll'])
+    async def leaf_score(self, ctx):
+        """ Shows the top ten members in the leaves leaderboard. """
+
+        top_ten_users = await self.get_top_ten_leaves_users()
+        leaderboard = discord.Embed(title="🍃 __The Language Sloth's Leaf Ranking Leaderboard__ 🍃", colour=discord.Colour.dark_green(),
+                                    timestamp=ctx.message.created_at)
+
+        all_users = await self.get_all_leaves_users()
+        position = [[i+1, u[1]] for i, u in enumerate(all_users) if u[0] == ctx.author.id]
+        position = [it for subpos in position for it in subpos] if position else ['??', 0]
+
+        leaderboard.set_footer(text=f"Your leaves: {position[1]} 🍃| #{position[0]}", icon_url=ctx.author.avatar.url)
+        leaderboard.set_thumbnail(url=ctx.guild.icon.url)
+
+        # Embeds each one of the top ten users.
+        for i, sm in enumerate(top_ten_users):
+            member = discord.utils.get(ctx.guild.members, id=sm[0])
+            leaderboard.add_field(name=f"[{i + 1}]# - __**{member}**__", value=f"__**Leaves:**__ `{sm[1]}` 🍃",
+                                  inline=False)
+            if i + 1 == 10:
+                break
+        return await ctx.send(embed=leaderboard)
+
     @commands.command()
     async def rep(self, ctx, member: discord.Member = None):
-        '''
-        Gives someone reputation points.
-        :param member: The member to give the reputation.
-        '''
+        """ Gives someone reputation points.
+        :param member: The member to give the reputation. """
+        
         if not member:
             await ctx.message.delete()
             return await ctx.send(f"**Inform a member to rep to!**", delete_after=3)
@@ -416,7 +439,7 @@ class SlothReputation(commands.Cog):
         return members
 
     async def get_top_ten_users(self) -> List[List[int]]:
-        """ Gets the top ten users in the reputation score. """
+        """ Gets the top ten users with the most reputation point. """
 
         mycursor, db = await the_database()
         await mycursor.execute("SELECT * FROM MembersScore ORDER BY score_points DESC LIMIT 10")
@@ -425,13 +448,33 @@ class SlothReputation(commands.Cog):
         return top_ten_members
 
     async def get_top_ten_xp_users(self) -> List[List[int]]:
-        """ Gets the top ten users in the experience points. """
+        """ Gets the top ten users with most experience points. """
 
         mycursor, db = await the_database()
         await mycursor.execute("SELECT * FROM MembersScore ORDER BY user_xp DESC LIMIT 10")
         top_ten_members = await mycursor.fetchall()
         await mycursor.close()
         return top_ten_members
+
+    async def get_top_ten_leaves_users(self) -> List[List[int]]:
+        """ Gets the top ten users with the most leaves. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("SELECT * FROM UserCurrency ORDER BY user_money DESC LIMIT 10")
+        top_ten_members = await mycursor.fetchall()
+        await mycursor.close()
+        return top_ten_members
+
+    async def get_all_leaves_users(self) -> List[List[int]]:
+        """ Gets all users with the most leaves. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("SELECT * FROM UserCurrency ORDER BY user_money")
+        top_ten_members = await mycursor.fetchall()
+        await mycursor.close()
+        return top_ten_members
+
+    
 
     async def get_specific_user(self, user_id: int):
         mycursor, db = await the_database()
