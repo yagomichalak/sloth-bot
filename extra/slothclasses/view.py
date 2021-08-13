@@ -913,7 +913,7 @@ class TickleView(discord.ui.View):
             'https://c.tenor.com/Adn9UkNqEtwAAAAC/tickling-tickle.gif',
             'https://c.tenor.com/Og-eJJHrT_0AAAAC/kid-baby.gif',
             'https://c.tenor.com/iUM413zNYrEAAAAC/tickling-couple.gif',
-            'https://c.tenor.com/E_3QlHiCW44AAAAd/dool-days-of-our-lives.gif',
+            'https://c.tenor.com/78fdLe3dNdUAAAAd/francisco-tickled-tickle-torture.gif',
             'https://c.tenor.com/lif_b3wnZZ4AAAAC/spongebob-squidward.gif',
             'https://c.tenor.com/c_UdaYn6VYoAAAAd/tickle-tickling.gif',
             'https://c.tenor.com/d2C6eS9nUUIAAAAC/blue-bugcat.gif',
