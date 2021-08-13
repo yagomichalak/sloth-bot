@@ -6,7 +6,7 @@ from extra import utils
 from extra.prompt.menu import ConfirmButton
 
 class RolePlay(commands.Cog):
-    """ Category for rolepalying commands. """
+    """ Category for roleplaying commands. """
 
     def __init__(self, client) -> None:
         self.client  = client
