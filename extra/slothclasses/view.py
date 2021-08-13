@@ -673,7 +673,7 @@ class PunchView(discord.ui.View):
 
         embed = discord.Embed(
             title="__Punch Face__",
-            description=f"👊 {self.member.mention} punched {self.target.mention} in the face, right in the bull's eyes! 👊",
+            description=f"👊 {self.member.mention} punched {self.target.mention} in the face, right in the bull's-eye! 👊",
             color=discord.Color.dark_teal(),
             timestamp=interaction.message.created_at
         )
@@ -816,6 +816,120 @@ class PunchView(discord.ui.View):
         embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
         embed.set_thumbnail(url=self.target.avatar.url)
         embed.set_image(url=choice(punchline_images))
+        embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
+
+        await interaction.response.send_message(content=self.target.mention, embed=embed)
+        await self.disable_buttons(interaction, followup=True)
+        self.stop()
+
+    @discord.ui.button(label='Nevermind', style=discord.ButtonStyle.red, custom_id='nevermind_id', emoji="❌")
+    async def nevermind_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Cancels the hug action. """
+
+        await self.disable_buttons(interaction)
+        self.stop()
+
+    async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
+
+        for child in self.children:
+            child.disabled = True
+
+        if followup:
+            await interaction.followup.edit_message(message_id=interaction.message.id, view=self)
+        else:
+            await interaction.response.edit_message(view=self)
+
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        return self.member.id == interaction.user.id
+
+
+class GiveView(discord.ui.View):
+
+    def __init__(self, member: discord.Member, target: discord.Member, timeout: Optional[float] = 180):
+        super().__init__(timeout=timeout)
+        self.member = member
+        self.target = target
+
+
+    @discord.ui.button(label='Cake', style=discord.ButtonStyle.blurple, custom_id='cake_id', emoji="🍰")
+    async def give_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Gives someone a piece of cake. """
+
+        cakes: List[str] = [
+        ]
+
+        embed = discord.Embed(
+            title="__Hug__",
+            description=f"🍰 {self.member.mention} gave a piece of cake to {self.target.mention} 🍰",
+            color=discord.Color.magenta(),
+            timestamp=interaction.message.created_at
+        )
+
+        embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
+        embed.set_thumbnail(url=self.target.avatar.url)
+        embed.set_image(url=choice(cakes))
+        embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
+
+        await interaction.response.send_message(content=self.target.mention, embed=embed)
+        await self.disable_buttons(interaction, followup=True)
+        self.stop()
+
+    @discord.ui.button(label='Nevermind', style=discord.ButtonStyle.red, custom_id='nevermind_id', emoji="❌")
+    async def nevermind_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Cancels the hug action. """
+
+        await self.disable_buttons(interaction)
+        self.stop()
+
+    async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
+
+        for child in self.children:
+            child.disabled = True
+
+        if followup:
+            await interaction.followup.edit_message(message_id=interaction.message.id, view=self)
+        else:
+            await interaction.response.edit_message(view=self)
+
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        return self.member.id == interaction.user.id
+
+
+class TickleView(discord.ui.View):
+
+    def __init__(self, member: discord.Member, target: discord.Member, timeout: Optional[float] = 180):
+        super().__init__(timeout=timeout)
+        self.member = member
+        self.target = target
+
+
+    @discord.ui.button(label='Tickle', style=discord.ButtonStyle.blurple, custom_id='tickle_id', emoji="<:zslothlmao:686697712074490055>")
+    async def tickle_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Tickles someone. """
+
+        tickles: List[str] = [
+            'https://c.tenor.com/PXL1ONAO9CEAAAAC/tickle-laugh.gif',
+            'https://c.tenor.com/nl5AkvIm4GoAAAAC/tickle-feet.gif',
+            'https://c.tenor.com/Adn9UkNqEtwAAAAC/tickling-tickle.gif',
+            'https://c.tenor.com/Og-eJJHrT_0AAAAC/kid-baby.gif',
+            'https://c.tenor.com/iUM413zNYrEAAAAC/tickling-couple.gif',
+            'https://c.tenor.com/E_3QlHiCW44AAAAd/dool-days-of-our-lives.gif',
+            'https://c.tenor.com/lif_b3wnZZ4AAAAC/spongebob-squidward.gif',
+            'https://c.tenor.com/c_UdaYn6VYoAAAAd/tickle-tickling.gif',
+            'https://c.tenor.com/d2C6eS9nUUIAAAAC/blue-bugcat.gif',
+            'https://c.tenor.com/x_I7TZjIRlQAAAAC/teddy-bear-tickle.gif'
+        ]
+
+        embed = discord.Embed(
+            title="__Tickling__",
+            description=f"<:zslothlmao:686697712074490055> {self.member.mention} tickled {self.target.mention} <:zslothlmao:686697712074490055>",
+            color=discord.Color.dark_gray(),
+            timestamp=interaction.message.created_at
+        )
+
+        embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
+        embed.set_thumbnail(url=self.target.avatar.url)
+        embed.set_image(url=choice(tickles))
         embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
 
         await interaction.response.send_message(content=self.target.mention, embed=embed)

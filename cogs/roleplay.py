@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 from extra.slothclasses.player import Player
-from extra.slothclasses.view import HugView, BootView, KissView, SlapView, HoneymoonView, PunchView
+from extra.slothclasses.view import HugView, BootView, KissView, SlapView, HoneymoonView, PunchView, GiveView, TickleView
 from extra import utils
 from extra.prompt.menu import ConfirmButton
 
@@ -267,9 +267,47 @@ class RolePlay(commands.Cog):
     @Player.not_ready()
     async def give(self, ctx, *, member: discord.Member = None) -> None:
         """ Gives someone something.
-        :param member: The member to give something to. """
+        :param member: The member to give something to.
+        
+        * Cooldown: 2 minutes """
 
-        pass
+        author = ctx.author
+        if author.id == member.id:
+            self.client.get_command('give').reset_cooldown(ctx)
+            return await ctx.send(f"**You can't give yourself anything, {author.mention}!**")
+
+        embed = discord.Embed(
+            title="__Give Prompt__",
+            description=f"What do you wanna give {member.mention}, {author.mention}?",
+            color=author.color,
+            timestamp=ctx.message.created_at
+        )
+        embed.set_footer(text=f"Requested by {author}", icon_url=author.avatar.url)
+        view = GiveView(member=author, target=member, timeout=60)
+        await ctx.send(embed=embed, view=view)
+
+    @commands.command(aliases=['tickling'])
+    # @commands.cooldown(1, 120, commands.BucketType.user)
+    async def tickle(self, ctx, *, member: discord.Member = None) -> None:
+        """ Tickles someone.
+        :param member: The member to tickle.
+        
+        * Cooldown: 2 minutes """
+
+        author = ctx.author
+        if author.id == member.id:
+            self.client.get_command('tickle').reset_cooldown(ctx)
+            return await ctx.send(f"**You can't tickle yourself, {author.mention}!**")
+
+        embed = discord.Embed(
+            title="__Tickling Prompt__",
+            description=f"Are you sure you wanna tickle {member.mention}, {author.mention}?",
+            color=author.color,
+            timestamp=ctx.message.created_at
+        )
+        embed.set_footer(text=f"Requested by {author}", icon_url=author.avatar.url)
+        view = TickleView(member=author, target=member, timeout=60)
+        await ctx.send(embed=embed, view=view)
 
 def setup(client):
     client.add_cog(RolePlay(client))
