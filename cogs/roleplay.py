@@ -287,7 +287,7 @@ class RolePlay(commands.Cog):
         await ctx.send(embed=embed, view=view)
 
     @commands.command(aliases=['tickling'])
-    # @commands.cooldown(1, 120, commands.BucketType.user)
+    @commands.cooldown(1, 120, commands.BucketType.user)
     async def tickle(self, ctx, *, member: discord.Member = None) -> None:
         """ Tickles someone.
         :param member: The member to tickle.
