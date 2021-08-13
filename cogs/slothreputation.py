@@ -469,7 +469,7 @@ class SlothReputation(commands.Cog):
         """ Gets all users with the most leaves. """
 
         mycursor, db = await the_database()
-        await mycursor.execute("SELECT * FROM UserCurrency ORDER BY user_money")
+        await mycursor.execute("SELECT * FROM UserCurrency ORDER BY user_money DESC")
         top_ten_members = await mycursor.fetchall()
         await mycursor.close()
         return top_ten_members
