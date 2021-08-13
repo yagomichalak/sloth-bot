@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 from extra.slothclasses.player import Player
-from extra.slothclasses.view import HugView, BootView, KissView, SlapView, HoneymoonView
+from extra.slothclasses.view import HugView, BootView, KissView, SlapView, HoneymoonView, PunchView
 from extra import utils
 from extra.prompt.menu import ConfirmButton
 
@@ -239,6 +239,36 @@ class RolePlay(commands.Cog):
 
         await ctx.send(content=f"{member.mention}, {partner.mention}", embed=final_embed)
 
+    @commands.command(aliases=['fist'])
+    @commands.cooldown(1, 120, commands.BucketType.user)
+    async def punch(self, ctx, *, member: discord.Member = None) -> None:
+        """ Punches someone.
+        :param member: The person to punch.
+        
+        * Cooldown: 2 minutes """
+
+        author = ctx.author
+        if author.id == member.id:
+            self.client.get_command('punch').reset_cooldown(ctx)
+            return await ctx.send(f"**You can't punch yourself, {author.mention}!**")
+
+        embed = discord.Embed(
+            title="__Punch Prompt__",
+            description=f"Where do you wanna punch {member.mention}, {author.mention}?",
+            color=author.color,
+            timestamp=ctx.message.created_at
+        )
+        embed.set_footer(text=f"Requested by {author}", icon_url=author.avatar.url)
+        view = PunchView(member=author, target=member, timeout=60)
+        await ctx.send(embed=embed, view=view)
+
+    @commands.command()
+    @commands.cooldown(1, 120, commands.BucketType.user)
+    @Player.not_ready()
+    async def give(self, ctx, *, member: discord.Member = None) -> None:
+        """ Gives someone something. """
+
+        pass
 
 def setup(client):
     client.add_cog(RolePlay(client))

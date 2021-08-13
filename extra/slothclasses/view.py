@@ -644,3 +644,200 @@ class HoneymoonView(discord.ui.View):
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
         return self.member.id == interaction.user.id
+
+
+class PunchView(discord.ui.View):
+
+    def __init__(self, member: discord.Member, target: discord.Member, timeout: Optional[float] = 180):
+        super().__init__(timeout=timeout)
+        self.member = member
+        self.target = target
+
+
+    @discord.ui.button(label='Punch Face', style=discord.ButtonStyle.blurple, custom_id='punch_face_id', emoji="👊")
+    async def punch_face_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Punches someone in the face. """
+
+        face_punches: List[str] = [
+            'https://c.tenor.com/-dK24mwTyKwAAAAC/tv-shows-supernatural.gif',
+            'https://c.tenor.com/7JVff7vMCVkAAAAC/face-punch-punch.gif',
+            'https://c.tenor.com/fGAET2FAoo4AAAAC/nice-punch-in-the-face.gif',
+            'https://c.tenor.com/vmVpJSYqBG0AAAAC/punch-in.gif',
+            'https://c.tenor.com/il5bBmkDl88AAAAC/punch-face.gif',
+            'https://c.tenor.com/-5LK7k-ZwScAAAAC/machi-bunny.gif',
+            'https://c.tenor.com/zVecK1PLcXwAAAAC/face-punch.gif',
+            'https://c.tenor.com/6yellz_5L0gAAAAC/emma-roberts-chanel-oberlin.gif',
+            'https://c.tenor.com/-xdO8DGiLKgAAAAC/hit-punch.gif',
+            'https://c.tenor.com/HgsdyL6Uvc0AAAAC/punch-in-your-face.gif'
+        ]
+
+        embed = discord.Embed(
+            title="__Punch Face__",
+            description=f"👊 {self.member.mention} punched {self.target.mention} in the face, right in the bull's eyes! 👊",
+            color=discord.Color.dark_teal(),
+            timestamp=interaction.message.created_at
+        )
+
+        embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
+        embed.set_thumbnail(url=self.target.avatar.url)
+        embed.set_image(url=choice(face_punches))
+        embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
+
+        await interaction.response.send_message(content=self.target.mention, embed=embed)
+        await self.disable_buttons(interaction, followup=True)
+        self.stop()
+
+    @discord.ui.button(label='Punch Throat', style=discord.ButtonStyle.blurple, custom_id='throat_punch_id', emoji="<:zsimpysloth:737321065662906389>")
+    async def punch_throat_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Punches someone in the face. """
+
+        throat_punches: List[str] = [
+            'https://c.tenor.com/Io4G6owWrbcAAAAC/throat-punch-identity-thief.gif',
+            'https://c.tenor.com/1I3eQKMos60AAAAd/throat-punch-punch-in-the-throat.gif',
+            'https://c.tenor.com/SUdP1RlArSsAAAAC/punch-in-the-throat-becky-lynch.gif',
+            'https://c.tenor.com/rt20YcF6lrgAAAAC/cindy-salmon-throat-punch.gif',
+            'https://c.tenor.com/Qj7KR47o7hYAAAAC/paraisopolis-punch.gif',
+            'https://c.tenor.com/Nh9RmNtX2A8AAAAC/throat-punch-the-hardy-bucks.gif',
+            'https://c.tenor.com/zwOfGyvEi2cAAAAC/punch-neck.gif',
+            'https://c.tenor.com/LBYkRjujBfIAAAAC/becky-lynch.gif'
+        ]
+
+        embed = discord.Embed(
+            title="__Punch Throat__",
+            description=f"<:zsimpysloth:737321065662906389> {self.member.mention} punched {self.target.mention} in the throat <:zsimpysloth:737321065662906389>",
+            color=discord.Color.dark_teal(),
+            timestamp=interaction.message.created_at
+        )
+
+        embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
+        embed.set_thumbnail(url=self.target.avatar.url)
+        embed.set_image(url=choice(throat_punches))
+        embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
+
+        await interaction.response.send_message(content=self.target.mention, embed=embed)
+        await self.disable_buttons(interaction, followup=True)
+        self.stop()
+
+    @discord.ui.button(label='Uppercut', style=discord.ButtonStyle.blurple, custom_id='uppercut_id', emoji="💪")
+    async def uppercut_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Gives someone an uppercut in the face. """
+
+        uppercuts: List[str] = [
+            'https://c.tenor.com/tzSoBm8TvbQAAAAC/punch-godzilla.gif',
+            'https://c.tenor.com/CxwPJZ9wgggAAAAC/anime-uppercut.gif',
+            'https://c.tenor.com/kFL3iEag_60AAAAC/azumanga-daioh-azumanga.gif',
+            'https://c.tenor.com/RpOAc1a4oaQAAAAd/cesaro-uppercut.gif',
+            'https://c.tenor.com/zfKYZkbGuecAAAAd/hajime-no-ippo-ippo.gif',
+            'https://c.tenor.com/IMnY5rH7m3UAAAAC/%E0%B9%82%E0%B8%94%E0%B8%99%E0%B8%95%E0%B9%88%E0%B8%AD%E0%B8%A2-%E0%B8%81%E0%B8%AD%E0%B8%A5%E0%B9%8C%E0%B8%9F.gif',
+            'https://c.tenor.com/VkByZU-h2QMAAAAC/donkey-kong-uppercut-donkey-kong.gif',
+            'https://c.tenor.com/OgjecYD39HEAAAAC/usyk-uppercut.gif',
+            'https://c.tenor.com/4z26A7YW15EAAAAd/strong-heavy-punch.gif',
+            'https://c.tenor.com/WZI35DJcOucAAAAC/mike-tyson-punch.gif'
+        ]
+
+        embed = discord.Embed(
+            title="__Punch Face__",
+            description=f"💪 {self.member.mention} blew a fabulous uppercut on {self.target.mention}'s chin 💪",
+            color=discord.Color.dark_teal(),
+            timestamp=interaction.message.created_at
+        )
+
+        embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
+        embed.set_thumbnail(url=self.target.avatar.url)
+        embed.set_image(url=choice(uppercuts))
+        embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
+
+        await interaction.response.send_message(content=self.target.mention, embed=embed)
+        await self.disable_buttons(interaction, followup=True)
+        self.stop()
+
+    @discord.ui.button(label='Punch Stomach', style=discord.ButtonStyle.blurple, custom_id='punch_stomach_id', emoji="<:eau:875729754215571487>")
+    async def punch_stomach_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Punches someone in the stomach. """
+
+        stomach_punches: List[str] = [
+            'https://c.tenor.com/CLj5PsMhCLkAAAAC/naruto-sasuke.gif',
+            'https://c.tenor.com/fIrHXnCVQugAAAAC/punch-belly.gif',
+            'https://c.tenor.com/LE7zzsWtHfgAAAAC/punch-in-the-guts-punching.gif',
+            'https://c.tenor.com/WzXRQw6pPRoAAAAC/punch-jab.gif',
+            'https://c.tenor.com/fGD_kutTO20AAAAC/goku-punch.gif',
+            'https://c.tenor.com/N1a51WnErtUAAAAC/gut-punch.gif',
+            'https://c.tenor.com/WWitSk2MYI0AAAAd/hulk-giganto.gif',
+            'https://c.tenor.com/SJcivTfdcmkAAAAd/megatron-gut-punch.gif',
+            'https://c.tenor.com/yddbbkaUQFYAAAAC/punch-sucker-punch.gif',
+            'https://c.tenor.com/E7i694cxM6wAAAAC/shrek-punch.gif'   
+        ]
+
+        embed = discord.Embed(
+            title="__Punch Stomach__",
+            description=f"<:eau:875729754215571487> {self.member.mention} punched {self.target.mention} in the stomach, right in the bull's eyes! <:eau:875729754215571487>",
+            color=discord.Color.dark_teal(),
+            timestamp=interaction.message.created_at
+        )
+
+        embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
+        embed.set_thumbnail(url=self.target.avatar.url)
+        embed.set_image(url=choice(stomach_punches))
+        embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
+
+        await interaction.response.send_message(content=self.target.mention, embed=embed)
+        await self.disable_buttons(interaction, followup=True)
+        self.stop()
+
+    @discord.ui.button(label='Punchline', style=discord.ButtonStyle.gray, custom_id='punchline_id', emoji="<:I_smell_your_sins:666322848922599434>")
+    async def punchline_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Punches, a line. """
+
+        punchlines = {}
+        with open('./extra/slothclasses/punchlines.json', 'r', encoding="utf-8") as f:
+            punchlines = json.loads(f.read())
+
+        punchline_images: List[str] = [
+            'https://c.tenor.com/lyILvkdNTB0AAAAC/willem-dafoe-laugh.gif',
+            'https://c.tenor.com/ecAzU-fj7LEAAAAC/crazy-jim-carrey.gif',
+            'https://c.tenor.com/yGhUqB860GgAAAAC/worriedface.gif',
+            'https://c.tenor.com/wIxFiobxxbIAAAAd/john-jonah-jameson-lol.gif',
+            'https://c.tenor.com/UAynAquzjogAAAAC/spit-take.gif',
+            'https://c.tenor.com/Sca0lXAwijYAAAAC/laughing-giggle.gif',
+            'https://c.tenor.com/QOXAGHah7MEAAAAC/bilelaca-laugh.gif',
+            'https://c.tenor.com/JCYLRqm7oyIAAAAd/trying-not-to-laugh-zoom-in.gif',
+            'https://c.tenor.com/rmtvkkGm7xYAAAAC/laugh-cant-hold-it-in.gif',
+            'https://c.tenor.com/s1Pu2LSTV7YAAAAd/wtf-laugh.gif'
+        ]
+
+        embed = discord.Embed(
+            title="__Punch Face__",
+            description=f"<:I_smell_your_sins:666322848922599434> {self.member.mention} just told {self.target.mention} a questionable joke:\n\n***** {choice(list(punchlines.values()))} <:I_smell_your_sins:666322848922599434>",
+            color=discord.Color.dark_purple(),
+            timestamp=interaction.message.created_at,
+            url='https://thoughtcatalog.com/january-nelson/2018/12/69-punchlines-so-stupid-they-are-actually-funny/'
+        )
+
+        embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
+        embed.set_thumbnail(url=self.target.avatar.url)
+        embed.set_image(url=choice(punchline_images))
+        embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
+
+        await interaction.response.send_message(content=self.target.mention, embed=embed)
+        await self.disable_buttons(interaction, followup=True)
+        self.stop()
+
+    @discord.ui.button(label='Nevermind', style=discord.ButtonStyle.red, custom_id='nevermind_id', emoji="❌")
+    async def nevermind_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Cancels the hug action. """
+
+        await self.disable_buttons(interaction)
+        self.stop()
+
+    async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
+
+        for child in self.children:
+            child.disabled = True
+
+        if followup:
+            await interaction.followup.edit_message(message_id=interaction.message.id, view=self)
+        else:
+            await interaction.response.edit_message(view=self)
+
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        return self.member.id == interaction.user.id
