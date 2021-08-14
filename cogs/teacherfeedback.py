@@ -687,7 +687,6 @@ class TeacherFeedback(commands.Cog):
 
         # Get some roles
         teacher_role = discord.utils.get(member.guild.roles, id=teacher_role_id)
-        preference_role = discord.utils.get(member.guild.roles, id=preference_role_id)
         mod_role = discord.utils.get(member.guild.roles, id=mod_role_id)
         lesson_management_role = discord.utils.get(member.guild.roles, id=lesson_management_role_id)
         sloth_explorer_role = discord.utils.get(member.guild.roles, id=sloth_explorer_role_id)
@@ -721,12 +720,6 @@ class TeacherFeedback(commands.Cog):
         overwrites[lesson_management_role] = discord.PermissionOverwrite(
             read_messages=True, send_messages=True, manage_messages=True, mute_members=True, embed_links=True, connect=True,
             speak=True, move_members=True, view_channel=True, manage_channels=True)
-
-        
-        overwrites[show_me_everything_role] = discord.PermissionOverwrite(read_messages=False, send_messages=False, connect=False, view_channel=True)
-        overwrites[sloth_pass_role] = discord.PermissionOverwrite(read_messages=True, send_messages=False, connect=False, view_channel=False)
-
-        overwrites[preference_role] = discord.PermissionOverwrite(read_messages=False, send_messages=False, connect=True, view_channel=False)
 
         overwrites[sloth_explorer_role] = discord.PermissionOverwrite(
             read_messages=True, send_messages=True, connect=True, speak=True, view_channel=True, embed_links=True)
