@@ -8,6 +8,7 @@ sloth_custom_images/
 texts/
 .vs/
 sloth.sql
+tests.py
 
 .idea/
 **/__pycache__/

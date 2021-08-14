@@ -806,7 +806,7 @@ class PunchView(discord.ui.View):
         ]
 
         embed = discord.Embed(
-            title="__Punch Face__",
+            title="__Punchline__",
             description=f"<:I_smell_your_sins:666322848922599434> {self.member.mention} just told {self.target.mention} a questionable joke:\n\n***** {choice(list(punchlines.values()))} <:I_smell_your_sins:666322848922599434>",
             color=discord.Color.dark_purple(),
             timestamp=interaction.message.created_at,
@@ -859,7 +859,7 @@ class GiveView(discord.ui.View):
         ]
 
         embed = discord.Embed(
-            title="__Hug__",
+            title="__Give__",
             description=f"🍰 {self.member.mention} gave a piece of cake to {self.target.mention} 🍰",
             color=discord.Color.magenta(),
             timestamp=interaction.message.created_at
