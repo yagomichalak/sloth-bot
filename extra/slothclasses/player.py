@@ -600,9 +600,9 @@ class Player(commands.Cog):
         mycursor, db = await the_database()
         sql = """
         UPDATE SkillsCooldown SET 
-        skill_one_ts = %s, skill_two_ts = %s,
-        skill_three_ts = %s, skill_four_ts = %s,
-        skill_five_ts = %s WHERE user_id = %s
+        skill_one_ts = NULL, skill_two_ts = NULL,
+        skill_three_ts = NULL, skill_four_ts = NULL,
+        skill_five_ts = NULL WHERE user_id = %s
         """
         await mycursor.execute(sql, (
             new_skill_ts, new_skill_ts, new_skill_ts, new_skill_ts, new_skill_ts, user_id))
