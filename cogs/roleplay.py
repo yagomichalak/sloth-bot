@@ -212,8 +212,8 @@ class RolePlay(commands.Cog):
             await SlothClass.remove_debuffs(member=member, debuffs=member_fx)
             await SlothClass.remove_debuffs(member=partner, debuffs=partner_fx)
             # Resets skills cooldown
-            await SlothClass.update_user_skills_ts(member.id, current_ts)
-            await SlothClass.update_user_skills_ts(partner.id, current_ts)
+            await SlothClass.update_user_skills_ts(member.id)
+            await SlothClass.update_user_skills_ts(partner.id)
             # Resets Change-Sloth-Class cooldown
             ten_days = current_ts - 864000
             await SlothClass.update_change_class_ts(member.id, ten_days)

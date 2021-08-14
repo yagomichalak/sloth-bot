@@ -736,7 +736,7 @@ class PunchView(discord.ui.View):
         ]
 
         embed = discord.Embed(
-            title="__Punch Face__",
+            title="__Uppercut__",
             description=f"💪 {self.member.mention} blew a fabulous uppercut on {self.target.mention}'s chin 💪",
             color=discord.Color.dark_teal(),
             timestamp=interaction.message.created_at
