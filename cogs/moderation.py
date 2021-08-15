@@ -1228,11 +1228,10 @@ class Moderation(commands.Cog):
 	# Infraction methods
 	@commands.command(aliases=['infr', 'show_warnings', 'sw', 'show_bans', 'sb', 'show_muted', 'sm'])
 	@utils.is_allowed(allowed_roles)
-	async def infractions(self, ctx, member: discord.Member = None) -> None:
-		'''
-		Shows all infractions of a specific user.
-		:param member: The member to show the infractions from.
-		'''
+	async def infractions(self, ctx, member: Optional[Union[discord.User, discord.Member]] = None) -> None:
+		""" Shows all infractions of a specific user.
+		:param member: The member to show the infractions from. [Optional] [Default = You] """
+
 		if not member:
 			return await ctx.send("**Inform a member!**")
 
@@ -1245,7 +1244,7 @@ class Moderation(commands.Cog):
 			softbans = len([sb for sb in user_infractions if sb[1] == 'softban'])
 			hackbans = len([hb for hb in user_infractions if hb[1] == 'hackban'])
 		else:
-			return await ctx.send(f"**{member.mention} doesn't have any existent infractions!**")
+			return await ctx.send(f"**<@{member.id}> doesn't have any existent infractions!**")
 
 		# Makes the initial embed with their amount of infractions
 		embed = discord.Embed(
