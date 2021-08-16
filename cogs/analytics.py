@@ -1,14 +1,16 @@
 import discord
+from discord import utils
 from discord.ext import commands, tasks
-from mysqldb import *
+from mysqldb import the_database
+
 from datetime import datetime, timedelta
 from pytz import timezone
+from extra import utils
+
 from PIL import Image, ImageFont, ImageDraw
 from typing import List
 import os
 import io
-import asyncio
-from mysqldb import the_database
 
 bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
 select_your_language_channel_id = int(os.getenv('SELECT_YOUR_LANGUAGE_CHANNEL_ID'))
@@ -34,10 +36,10 @@ class Analytics(commands.Cog):
     async def check_midnight(self) -> None:
         """ Checks whether it's midnight. """
 
-        tzone = timezone("Etc/GMT-1")
-        time_now = datetime.now(tzone)
-        day = time_now.strftime('%d')
-
+        # tzone = timezone("Etc/GMT-1")
+        # time_now = datetime.now(tzone)
+        time_now = await utils.get_time_now()
+        day = time_now.day
         if await self.check_relatory_time(day):
             await self.update_day(day)
             channel = self.client.get_channel(bots_and_commands_channel_id)
@@ -59,9 +61,12 @@ class Analytics(commands.Cog):
                 fp = discord.File(fp, filename="analytics_result.png")
                 await channel.send(file=fp)
 
-            await self.reset_table_sloth_analytics()
-            complete_date = time_now.strftime('%d/%m/%Y')
-            await self.bump_data(info[0][0], info[0][1], info[0][2], len(members), len(online_members), str(complete_date))
+            try:
+                await self.reset_table_sloth_analytics()
+                complete_date = time_now.strftime('%d/%m/%Y')
+                await self.bump_data(info[0][0], info[0][1], info[0][2], len(members), len(online_members), str(complete_date))
+            except Exception as e:
+                print('aah')
 
     @commands.Cog.listener()
     async def on_member_join(self, member) -> None:
