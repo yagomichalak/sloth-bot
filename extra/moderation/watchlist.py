@@ -1,16 +1,12 @@
 import discord
-from discord import user
 from discord.ext import commands
 from mysqldb import the_database
-from typing import List, Optional
+from typing import List
 
 class ModerationWatchlistTable(commands.Cog):
     
     def __init__(self, client) -> None:
         self.client = client
-
-    #                              / Guild ID         / Channel ID       / message ID
-    # https://discord.com/channels/459195345419763713/751477221797134416/876830236828925982
 
 
     @commands.command(hidden=True)
