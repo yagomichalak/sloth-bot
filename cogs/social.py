@@ -83,7 +83,6 @@ class Social(commands.Cog):
         :return: An embedded message with the user's information
         '''
         member = ctx.author if not member else member
-        roles = [role for role in member.roles]
 
         embed = discord.Embed(colour=member.color, timestamp=ctx.message.created_at)
 
@@ -110,14 +109,14 @@ class Social(commands.Cog):
         if not await utils.is_allowed([mod_role_id, admin_role_id]).predicate(ctx):
             view.children.remove(view.infractions_button)
             view.children.remove(view.fake_accounts_button)
-            view.children.remove(view.watchlist_button)
-            # view.see_infractions_button.disabled = False
+            view.children.remove(view.children[4])
         else:
-            watchlist = await self.client.get_cog('Moderation').get_user_watchlist(self.target_member.id)
+            watchlist = await self.client.get_cog('Moderation').get_user_watchlist(member.id)
             if watchlist:
-                message_url = f"https://discord.gg/channels/{ctx.guild.id}/{watchlist[2]}/{watchlist[1]}"
-                view.watchlist_button.url = message_url
-
+                message_url = f"https://discord.com/channels/{ctx.guild.id}/{watchlist[2]}/{watchlist[1]}"
+                view.children[4].url = message_url
+            else:
+                view.children[4].disabled = True
 
         await ctx.send(embed=embed, view=view)
 
