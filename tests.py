@@ -47,27 +47,28 @@
 #     embed = await get_embed()
 #     await ctx.send(embed=embed)
 
-edl!eval
+# 2 ====
+# edl!eval
 
-view= discord.ui.View()
-view.add_item(discord.ui.Select(placeholder='Native languages', options=[
-    discord.SelectOption(label='Native English', emoji='🇬🇧'),
-    discord.SelectOption(label='Native Swedish', emoji='🇸🇪'),
-    discord.SelectOption(label='Native German', emoji='🇩🇪'),
-    ], min_values=0))
-view.add_item(discord.ui.Select(placeholder='Fluent languages', options=[
-    discord.SelectOption(label='Fluent English', emoji='🇬🇧'),
-    discord.SelectOption(label='Fluent Swedish', emoji='🇸🇪'),
-    discord.SelectOption(label='Fluent German', emoji='🇩🇪'),
-    ], min_values=0))
-view.add_item(discord.ui.Select(placeholder='Learning languages', options=[
-    discord.SelectOption(label='Learning English', emoji='🇬🇧'),
-    discord.SelectOption(label='Learning Swedish', emoji='🇸🇪'),
-    discord.SelectOption(label='Learning German', emoji='🇩🇪'),
-    ], min_values=0))
+# view= discord.ui.View()
+# view.add_item(discord.ui.Select(placeholder='Native languages', options=[
+#     discord.SelectOption(label='Native English', emoji='🇬🇧'),
+#     discord.SelectOption(label='Native Swedish', emoji='🇸🇪'),
+#     discord.SelectOption(label='Native German', emoji='🇩🇪'),
+#     ], min_values=0))
+# view.add_item(discord.ui.Select(placeholder='Fluent languages', options=[
+#     discord.SelectOption(label='Fluent English', emoji='🇬🇧'),
+#     discord.SelectOption(label='Fluent Swedish', emoji='🇸🇪'),
+#     discord.SelectOption(label='Fluent German', emoji='🇩🇪'),
+#     ], min_values=0))
+# view.add_item(discord.ui.Select(placeholder='Learning languages', options=[
+#     discord.SelectOption(label='Learning English', emoji='🇬🇧'),
+#     discord.SelectOption(label='Learning Swedish', emoji='🇸🇪'),
+#     discord.SelectOption(label='Learning German', emoji='🇩🇪'),
+#     ], min_values=0))
 
-embed = discord.Embed(
-    title="__Germanic Languages__",
-    color=discord.Color.gold()
-)
-await ctx.send(embed=embed, view=view)
+# embed = discord.Embed(
+#     title="__Germanic Languages__",
+#     color=discord.Color.gold()
+# )
+# await ctx.send(embed=embed, view=view)

@@ -1,12 +1,8 @@
-from extra.prompt.menu import ConfirmButton
-from discord.role import R
-from cogs.reportsupport import ReportSupport
 import discord
 from discord.ext import commands, tasks
 import asyncio
 from mysqldb import *
 from datetime import datetime
-import time
 from typing import List, Union, Dict, Tuple, Optional
 import os
 from extra.useful_variables import banned_links
@@ -176,6 +172,9 @@ class Moderation(commands.Cog):
 			invite_hash = invite_hash.replace(char, '')
 		invite = invite_root + invite_hash
 		inv_code = discord.utils.resolve_invite(invite)
+		if inv_code == 'languages':
+			return True
+			
 		guild_inv = discord.utils.get(await guild.invites(), code=inv_code)
 		if guild_inv:
 			return True
