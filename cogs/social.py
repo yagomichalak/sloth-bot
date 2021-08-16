@@ -107,8 +107,9 @@ class Social(commands.Cog):
 
         
         view = QuickButtons(self.client, ctx, member)
-        if await utils.is_allowed([mod_role_id, admin_role_id]).predicate(ctx):
-            view.see_infractions_button.disabled = False
+        if not await utils.is_allowed([mod_role_id, admin_role_id]).predicate(ctx):
+            view.children.remove(view.see_infractions_button)
+            # view.see_infractions_button.disabled = False
 
         await ctx.send(embed=embed, view=view)
 

@@ -3,7 +3,7 @@ from discord.ext import commands, tasks
 import asyncio
 from mysqldb import *
 from datetime import datetime
-from typing import List, Union, Dict, Tuple, Optional
+from typing import List, Union, Dict, Optional
 import os
 
 from extra.useful_variables import banned_links
@@ -14,7 +14,10 @@ from extra import utils
 from extra.moderation.firewall import ModerationFirewallTable
 from extra.moderation.mutedmember import ModerationMutedMemberTable
 from extra.moderation.userinfractions import ModerationUserInfractionsTable
+from extra.moderation.watchlist import ModerationWatchlistTable
+from extra.moderation.fakeaccounts import ModerationFakeAccountsTable
 
+# IDs
 mod_log_id = int(os.getenv('MOD_LOG_CHANNEL_ID'))
 muted_role_id = int(os.getenv('MUTED_ROLE_ID'))
 general_channel = int(os.getenv('GENERAL_CHANNEL_ID'))
@@ -24,12 +27,13 @@ mod_role_id = int(os.getenv('MOD_ROLE_ID'))
 allowed_roles = [int(os.getenv('OWNER_ROLE_ID')), int(os.getenv('ADMIN_ROLE_ID')), mod_role_id]
 server_id = int(os.getenv('SERVER_ID'))
 
-moderation_cogs = [ModerationFirewallTable, ModerationMutedMemberTable, ModerationUserInfractionsTable]
+moderation_cogs: List[commands.Cog] = [
+	ModerationFirewallTable, ModerationMutedMemberTable, ModerationUserInfractionsTable,
+	ModerationWatchlistTable, ModerationFakeAccountsTable
+]
 
 class Moderation(*moderation_cogs):
-	'''
-	Moderation related commands.
-	'''
+	""" Moderation related commands. """
 
 	def __init__(self, client):
 		self.client = client
@@ -64,7 +68,6 @@ class Moderation(*moderation_cogs):
 	async def check_banned_links(self, message: discord.Message) -> None:
 		""" Checks if the message sent was or contains a banned link. """
 
-		content = message.content
 		videos = [v for v in message.attachments if v.content_type in ['video/mp4', 'video/webm']]
 
 		# Checks it in the message attachments
@@ -140,9 +143,7 @@ class Moderation(*moderation_cogs):
 
 
 	async def check_invite_guild(self, msg, guild, invite_root: str):
-		'''
-		Checks whether it's a guild invite or not
-		'''
+		""" Checks whether it's a guild invite or not. """
 
 		start_index = msg.index(invite_root)
 		end_index = start_index + len(invite_root)

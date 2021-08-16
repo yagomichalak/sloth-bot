@@ -890,11 +890,5 @@ class Tools(commands.Cog):
 
 		await ctx.send(embed=embed, hidden=True)
 
-	
-	# @cog_ext.cog_context_menu(target=2, name = 'Report User', guild_ids=guild_ids)
-	# async def reportuser(self, ctx) -> None:
-
-	# 	await ctx.send('awoi')
-
 def setup(client):
 	client.add_cog(Tools(client))

@@ -128,7 +128,7 @@ class QuickButtons(discord.ui.View):
         self.target_member = target_member
         
 
-    @discord.ui.button(label="See Infractions", style=4, emoji="❗", custom_id=f"user_infractions", disabled=True)
+    @discord.ui.button(label="See Infractions", style=4, emoji="❗", custom_id=f"user_infractions")
     async def see_infractions_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
         """ Shows the member's infractions. """
 

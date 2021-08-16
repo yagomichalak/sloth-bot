@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 from mysqldb import the_database
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 class ModerationMutedMemberTable(commands.Cog):
     
@@ -23,8 +23,7 @@ class ModerationMutedMemberTable(commands.Cog):
             role_id BIGINT NOT NULL, 
             mute_ts BIGINT DEFAULT NULL, 
             muted_for_seconds BIGINT DEFAULT NULL,
-            PRIMARY KEY (user_id, role_id),
-            CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES UserCurrency (user_id) ON DELETE CASCADE ON UPDATE CASCADE
+            PRIMARY KEY (user_id, role_id)
             )""")
         await db.commit()
         await mycursor.close()
