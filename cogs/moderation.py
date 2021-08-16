@@ -5,10 +5,15 @@ from mysqldb import *
 from datetime import datetime
 from typing import List, Union, Dict, Tuple, Optional
 import os
+
 from extra.useful_variables import banned_links
 from extra.menu import ConfirmSkill
 from extra.view import ReportSupportView
 from extra import utils
+
+from extra.moderation.firewall import ModerationFirewallTable
+from extra.moderation.mutedmember import ModerationMutedMemberTable
+from extra.moderation.userinfractions import ModerationUserInfractionsTable
 
 mod_log_id = int(os.getenv('MOD_LOG_CHANNEL_ID'))
 muted_role_id = int(os.getenv('MUTED_ROLE_ID'))
@@ -19,8 +24,9 @@ mod_role_id = int(os.getenv('MOD_ROLE_ID'))
 allowed_roles = [int(os.getenv('OWNER_ROLE_ID')), int(os.getenv('ADMIN_ROLE_ID')), mod_role_id]
 server_id = int(os.getenv('SERVER_ID'))
 
+moderation_cogs = [ModerationFirewallTable, ModerationMutedMemberTable, ModerationUserInfractionsTable]
 
-class Moderation(commands.Cog):
+class Moderation(*moderation_cogs):
 	'''
 	Moderation related commands.
 	'''
@@ -132,27 +138,6 @@ class Moderation(commands.Cog):
 				print(e)
 				continue
 
-	async def get_expired_tempmutes(self, current_ts: int) -> List[int]:
-		""" Gets expired tempmutes.
-		:param current_ts: The current timestamp. """
-
-		mycursor, db = await the_database()
-		await mycursor.execute("SELECT DISTINCT(user_id) FROM mutedmember WHERE (%s -  mute_ts) >= muted_for_seconds", (current_ts,))
-		tempmutes = list(map(lambda m: m[0], await mycursor.fetchall()))
-		await mycursor.close()
-		return tempmutes
-
-	async def get_muted_members(self, current_ts: int, days_ago: Optional[int] = 0) -> List[int]:
-		""" Gets muted members from the past X days.
-		:param current_ts: The current timestamp.
-		:param days_ago: The amount of days ago to get muted members from. [Optional] """
-
-		seconds_ago = 86400 * days_ago
-		mycursor, db = await the_database()
-		await mycursor.execute("SELECT DISTINCT(user_id) FROM mutedmember WHERE (%s -  mute_ts) >= %s", (current_ts, seconds_ago))
-		muted_members = list(map(lambda m: m[0], await mycursor.fetchall()))
-		await mycursor.close()
-		return muted_members
 
 	async def check_invite_guild(self, msg, guild, invite_root: str):
 		'''
@@ -1098,7 +1083,6 @@ class Moderation(commands.Cog):
 		except discord.errors.NotFound:
 			return await ctx.send("**Invalid user id!**", delete_after=3)
 
-
 	@commands.command(aliases=['fire', 'wall', 'fire_wall'])
 	@commands.has_permissions(administrator=True)
 	async def firewall(self, ctx) -> None:
@@ -1123,106 +1107,6 @@ class Moderation(commands.Cog):
 				await ctx.send(f"**Firewall activated, {member.mention}!**")
 				await self.client.get_cog('ReportSupport').audio(member, 'troll_firewall_on')
 
-	async def insert_in_muted(self, user_role_ids: List[Tuple[int]]):
-		mycursor, db = await the_database()
-		await mycursor.executemany(
-			"""
-			INSERT INTO mutedmember (
-			user_id, role_id, mute_ts, muted_for_seconds) VALUES (%s, %s, %s, %s)""", user_role_ids
-			)
-		await db.commit()
-		await mycursor.close()
-
-	async def get_muted_roles(self, user_id: int):
-		mycursor, db = await the_database()
-		await mycursor.execute("SELECT * FROM mutedmember WHERE user_id = %s", (user_id,))
-		user_roles = await mycursor.fetchall()
-		await mycursor.close()
-		return user_roles
-
-	async def remove_role_from_system(self, user_role_ids: int):
-		mycursor, db = await the_database()
-		await mycursor.executemany("DELETE FROM mutedmember WHERE user_id = %s AND role_id = %s", user_role_ids)
-		await db.commit()
-		await mycursor.close()
-
-	async def remove_all_roles_from_system(self, user_id: int):
-		""" Removes all muted-roles linked to a user from the system.
-		:param user_id: The ID of the user. """
-
-		mycursor, db = await the_database()
-		await mycursor.executemany("DELETE FROM mutedmember WHERE user_id = %s", (user_id,))
-		await db.commit()
-		await mycursor.close()
-
-	@commands.command(hidden=True)
-	@commands.has_permissions(administrator=True)
-	async def create_table_mutedmember(self, ctx) -> None:
-		""" (ADM) Creates the UserInfractions table. """
-
-		if await self.check_table_mutedmember_exists():
-			return await ctx.send("**Table __MutedMember__ already exists!**")
-
-		await ctx.message.delete()
-		mycursor, db = await the_database()
-		await mycursor.execute("""CREATE TABLE mutedmember (
-			user_id BIGINT NOT NULL, 
-			role_id BIGINT NOT NULL, 
-			mute_ts BIGINT DEFAULT NULL, 
-			muted_for_seconds BIGINT DEFAULT NULL,
-			PRIMARY KEY (user_id, role_id),
-			CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES UserCurrency (user_id) ON DELETE CASCADE ON UPDATE CASCADE
-			)""")
-		await db.commit()
-		await mycursor.close()
-
-		return await ctx.send("**Table __MutedMember__ created!**", delete_after=3)
-
-	@commands.command(hidden=True)
-	@commands.has_permissions(administrator=True)
-	async def drop_table_mutedmember(self, ctx) -> None:
-		""" (ADM) Creates the UserInfractions table """
-		if not await self.check_table_mutedmember_exists():
-			return await ctx.send("**Table __MutedMember__ doesn't exist!**")
-		await ctx.message.delete()
-		mycursor, db = await the_database()
-		await mycursor.execute("DROP TABLE mutedmember")
-		await db.commit()
-		await mycursor.close()
-
-		return await ctx.send("**Table __MutedMember__ dropped!**", delete_after=3)
-
-	@commands.command(hidden=True)
-	@commands.has_permissions(administrator=True)
-	async def reset_table_mutedmember(self, ctx):
-		'''
-		(ADM) Resets the MutedMember table.
-		'''
-		if not await self.check_table_mutedmember_exists():
-			return await ctx.send("**Table __MutedMember__ doesn't exist yet**")
-
-		await ctx.message.delete()
-		mycursor, db = await the_database()
-		await mycursor.execute("DELETE FROM mutedmember")
-		await db.commit()
-		await mycursor.close()
-
-		return await ctx.send("**Table __mutedmember__ reset!**", delete_after=3)
-
-	async def check_table_mutedmember_exists(self) -> bool:
-		'''
-		Checks if the MutedMember table exists
-		'''
-		mycursor, db = await the_database()
-		await mycursor.execute("SHOW TABLE STATUS LIKE 'mutedmember'")
-		table_info = await mycursor.fetchall()
-		await mycursor.close()
-
-		if len(table_info) == 0:
-			return False
-
-		else:
-			return True
 
 	# Infraction methods
 	@commands.command(aliases=['infr', 'show_warnings', 'sw', 'show_bans', 'sb', 'show_muted', 'sm'])
@@ -1268,55 +1152,6 @@ class Moderation(commands.Cog):
 		# Shows the infractions
 		await ctx.send(embed=embed)
 
-	# Database methods
-
-	async def insert_user_infraction(self, user_id: int, infr_type: str, reason: str, timestamp: int, perpetrator: int) -> None:
-		""" Insert a warning into the system. """
-
-		mycursor, db = await the_database()
-		await mycursor.execute("""
-			INSERT INTO UserInfractions (
-			user_id, infraction_type, infraction_reason,
-			infraction_ts, perpetrator)
-			VALUES (%s, %s, %s, %s, %s)""",
-			(user_id, infr_type, reason, timestamp, perpetrator))
-		await db.commit()
-		await mycursor.close()
-
-	async def get_user_infractions(self, user_id: int) -> List[List[Union[str, int]]]:
-		""" Gets all infractions from a user. """
-
-		mycursor, db = await the_database()
-		await mycursor.execute(f"SELECT * FROM UserInfractions WHERE user_id = {user_id}")
-		user_infractions = await mycursor.fetchall()
-		await mycursor.close()
-		return user_infractions
-
-	async def get_user_infraction_by_infraction_id(self, infraction_id: int) -> List[List[Union[str, int]]]:
-		""" Gets a specific infraction by ID. """
-
-		mycursor, db = await the_database()
-		await mycursor.execute(f"SELECT * FROM UserInfractions WHERE infraction_id = {infraction_id}")
-		user_infractions = await mycursor.fetchall()
-		await mycursor.close()
-		return user_infractions
-
-	async def remove_user_infraction(self, infraction_id: int) -> None:
-		""" Removes a specific infraction by ID. """
-
-		mycursor, db = await the_database()
-		await mycursor.execute("DELETE FROM UserInfractions WHERE infraction_id = %s", (infraction_id,))
-		await db.commit()
-		await mycursor.close()
-
-	async def remove_user_infractions(self, user_id: int) -> None:
-		""" Removes all infractions of a user by ID. """
-
-		mycursor, db = await the_database()
-		await mycursor.execute("DELETE FROM UserInfractions WHERE user_id = %s", (user_id,))
-		await db.commit()
-		await mycursor.close()
-
 	@commands.command(aliases=['ri', 'remove_warn', 'remove_warning'])
 	@utils.is_allowed(allowed_roles)
 	async def remove_infraction(self, ctx, infr_id: int = None):
@@ -1346,163 +1181,11 @@ class Moderation(commands.Cog):
 		if not member:
 			return await ctx.send("**Inform a member!**")
 
-		if user_infractions := await self.get_user_infractions(member.id):
+		if await self.get_user_infractions(member.id):
 			await self.remove_user_infractions(member.id)
 			await ctx.send(f"**Removed all infractions for {member.mention}!**")
 		else:
 			await ctx.send(f"**{member.mention} doesn't have any existent infractions!**")
-
-	@commands.command(hidden=True)
-	@commands.has_permissions(administrator=True)
-	async def create_table_user_infractions(self, ctx) -> None:
-		""" (ADM) Creates the UserInfractions table. """
-
-		if await self.check_table_user_infractions():
-			return await ctx.send("**Table __UserInfractions__ already exists!**")
-
-		await ctx.message.delete()
-		mycursor, db = await the_database()
-		await mycursor.execute("""CREATE TABLE UserInfractions (
-			user_id BIGINT NOT NULL,
-			infraction_type VARCHAR(7) NOT NULL,
-			infraction_reason VARCHAR(100) DEFAULT NULL,
-			infraction_ts BIGINT NOT NULL,
-			infraction_id BIGINT NOT NULL AUTO_INCREMENT,
-			perpetrator BIGINT NOT NULL,
-			PRIMARY KEY (infraction_id)
-			) CHARSET utf8mb4 COLLATE utf8mb4_unicode_ci""")
-		await db.commit()
-		await mycursor.close()
-
-		return await ctx.send("**Table __UserInfractions__ created!**", delete_after=3)
-
-	@commands.command(hidden=True)
-	@commands.has_permissions(administrator=True)
-	async def drop_table_user_infractions(self, ctx) -> None:
-		""" (ADM) Creates the UserInfractions table """
-		if not await self.check_table_user_infractions():
-			return await ctx.send("**Table __UserInfractions__ doesn't exist!**")
-		await ctx.message.delete()
-		mycursor, db = await the_database()
-		await mycursor.execute("DROP TABLE UserInfractions")
-		await db.commit()
-		await mycursor.close()
-
-		return await ctx.send("**Table __UserInfractions__ dropped!**", delete_after=3)
-
-	@commands.command(hidden=True)
-	@commands.has_permissions(administrator=True)
-	async def reset_table_user_infractions(self, ctx) -> None:
-		""" (ADM) Creates the UserInfractions table """
-
-		if not await self.check_table_user_infractions():
-			return await ctx.send("**Table __UserInfractions__ doesn't exist yet!**")
-
-		await ctx.message.delete()
-		mycursor, db = await the_database()
-		await mycursor.execute("DELETE FROM UserInfractions")
-		await db.commit()
-		await mycursor.close()
-
-		return await ctx.send("**Table __UserInfractions__ reset!**", delete_after=3)
-
-	async def check_table_user_infractions(self) -> bool:
-		""" Checks if the UserInfractions table exists """
-
-		mycursor, db = await the_database()
-		await mycursor.execute("SHOW TABLE STATUS LIKE 'UserInfractions'")
-		table_info = await mycursor.fetchall()
-		await mycursor.close()
-
-		if len(table_info) == 0:
-			return False
-
-		else:
-			return True
-
-	
-	@commands.command(hidden=True)
-	@commands.has_permissions(administrator=True)
-	async def create_table_firewall(self, ctx) -> None:
-		""" (ADM) Creates the Firewall table. """
-
-		if await self.check_table_firewall_exists():
-			return await ctx.send("**Table __Firewall__ already exists!**")
-
-		await ctx.message.delete()
-		mycursor, db = await the_database()
-		await mycursor.execute("""CREATE TABLE Firewall (
-			state TINYINT(1) NOT NULL DEFAULT 0)""")
-		await mycursor.execute("INSERT INTO Firewall VALUES(0)")
-		await db.commit()
-		await mycursor.close()
-
-		return await ctx.send("**Table __Firewall__ created!**", delete_after=3)
-
-	@commands.command(hidden=True)
-	@commands.has_permissions(administrator=True)
-	async def drop_table_firewall(self, ctx) -> None:
-		""" (ADM) Creates the Firewall table """
-
-		if not await self.check_table_firewall_exists():
-			return await ctx.send("**Table __Firewall__ doesn't exist!**")
-		await ctx.message.delete()
-		mycursor, db = await the_database()
-		await mycursor.execute("DROP TABLE Firewall")
-		await db.commit()
-		await mycursor.close()
-
-		return await ctx.send("**Table __Firewall__ dropped!**", delete_after=3)
-
-	@commands.command(hidden=True)
-	@commands.has_permissions(administrator=True)
-	async def reset_table_firewall(self, ctx):
-		""" (ADM) Resets the Firewall table. """
-
-		if not await self.check_table_firewall_exists():
-			return await ctx.send("**Table __Firewall__ doesn't exist yet**")
-
-		await ctx.message.delete()
-		mycursor, db = await the_database()
-		await mycursor.execute("DELETE FROM Firewall")
-		await mycursor.execute("INSERT INTO Firewall VALUES(0)")
-		await db.commit()
-		await mycursor.close()
-
-		return await ctx.send("**Table __Firewall__ reset!**", delete_after=3)
-
-	async def check_table_firewall_exists(self) -> bool:
-		""" Checks if the MutedMember table exists """
-
-		mycursor, db = await the_database()
-		await mycursor.execute("SHOW TABLE STATUS LIKE 'Firewall'")
-		table_info = await mycursor.fetchall()
-		await mycursor.close()
-
-		if len(table_info) == 0:
-			return False
-
-		else:
-			return True
-
-	async def set_firewall_state(self, state: int) -> None:
-		""" Sets the firewall state to either true or false. 
-		:param state: The state of the firewall to set. """
-
-		mycursor, db = await the_database()
-		await mycursor.execute("UPDATE Firewall SET state = %s", (state,))
-		await db.commit()
-		await mycursor.close()
-
-
-	async def get_firewall_state(self) -> int:
-		""" Gets the firewall's current state. """
-
-		mycursor, db = await the_database()
-		await mycursor.execute("SELECT state FROM Firewall")
-		fw_state = await mycursor.fetchone()
-		await mycursor.close()
-		return fw_state[0]
 
 	@commands.command(aliases=['apps'])
 	@commands.has_permissions(administrator=True)
