@@ -2,7 +2,7 @@ import discord
 from discord.components import SelectOption
 from extra import utils
 from discord.ext import commands
-from typing import List, Dict, Union, Any
+from typing import List, Union
 from .menu import ConfirmSkill
 from .select import ReportSupportSelect
 import os
@@ -128,8 +128,8 @@ class QuickButtons(discord.ui.View):
         self.target_member = target_member
         
 
-    @discord.ui.button(label="See Infractions", style=4, emoji="❗", custom_id=f"user_infractions")
-    async def see_infractions_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+    @discord.ui.button(label="Infractions", style=4, emoji="❗", custom_id=f"user_infractions")
+    async def infractions_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
         """ Shows the member's infractions. """
 
         new_ctx = self.ctx
@@ -139,20 +139,32 @@ class QuickButtons(discord.ui.View):
             await interaction.response.defer()
             return await self.client.get_cog("Moderation").infractions(ctx=self.ctx, member=self.target_member)
     
-    @discord.ui.button(label="See Profile", style=1, emoji="👤", custom_id=f"user_profile")
-    async def see_profile_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+    @discord.ui.button(label="Profile", style=1, emoji="👤", custom_id=f"user_profile")
+    async def profile_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
         """ Shows the member's profile. """
         
         await interaction.response.defer()
         await self.client.get_cog("SlothCurrency").profile(ctx=self.ctx, member=self.target_member)
 
-    @discord.ui.button(label="See Info", style=2, emoji="ℹ️", custom_id=f"user_info")
-    async def see_info_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+    @discord.ui.button(label="Info", style=2, emoji="ℹ️", custom_id=f"user_info")
+    async def info_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
         """ Shows the member's info. """
 
         await interaction.response.defer()
         await self.client.get_cog("SlothReputation").info(ctx=self.ctx, member=self.target_member)
 
+    @discord.ui.button(label="Fake Accounts", style=2, emoji="🥸", custom_id=f"user_fake_accounts")
+    async def fake_accounts_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Shows the member's fake accounts. """
+
+        await interaction.response.defer()
+        await self.client.get_cog("SlothReputation").info(ctx=self.ctx, member=self.target_member)
+
+    @discord.ui.button(label="Watchlist", style=discord.ButtonStyle.url, emoji="⚠️", url="https://discord.gg/channels/guild_id/channel_id/message_id")
+    async def watchlist_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Redirects the member to the watchlist message. if there's any. """
+
+        pass
 
 
 class Test(discord.ui.View):

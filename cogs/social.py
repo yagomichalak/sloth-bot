@@ -108,8 +108,16 @@ class Social(commands.Cog):
         
         view = QuickButtons(self.client, ctx, member)
         if not await utils.is_allowed([mod_role_id, admin_role_id]).predicate(ctx):
-            view.children.remove(view.see_infractions_button)
+            view.children.remove(view.infractions_button)
+            view.children.remove(view.fake_accounts_button)
+            view.children.remove(view.watchlist_button)
             # view.see_infractions_button.disabled = False
+        else:
+            watchlist = await self.client.get_cog('Moderation').get_user_watchlist(self.target_member.id)
+            if watchlist:
+                message_url = f"https://discord.gg/channels/{ctx.guild.id}/{watchlist[2]}/{watchlist[1]}"
+                view.watchlist_button.url = message_url
+
 
         await ctx.send(embed=embed, view=view)
 
