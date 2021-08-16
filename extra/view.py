@@ -126,6 +126,11 @@ class QuickButtons(discord.ui.View):
         self.client = client
         self.ctx = ctx
         self.target_member = target_member
+
+        watchlist_button = discord.ui.Button(
+            label="Watchlist", style=discord.ButtonStyle.url, emoji="⚠️", url=f"https://discord.com/channels/{ctx.guild.id}/{ctx.channel.id}"
+        )
+        self.children.append(watchlist_button)
         
 
     @discord.ui.button(label="Infractions", style=4, emoji="❗", custom_id=f"user_infractions")
@@ -158,13 +163,7 @@ class QuickButtons(discord.ui.View):
         """ Shows the member's fake accounts. """
 
         await interaction.response.defer()
-        await self.client.get_cog("SlothReputation").info(ctx=self.ctx, member=self.target_member)
-
-    @discord.ui.button(label="Watchlist", style=discord.ButtonStyle.url, emoji="⚠️", url="https://discord.gg/channels/guild_id/channel_id/message_id")
-    async def watchlist_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
-        """ Redirects the member to the watchlist message. if there's any. """
-
-        pass
+        await self.client.get_cog("Moderation").fake_accounts(ctx=self.ctx, member=self.target_member)
 
 
 class Test(discord.ui.View):
