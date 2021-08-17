@@ -1,12 +1,42 @@
+from extra.utils import is_allowed
 import discord
 from discord.ext import commands
 from mysqldb import the_database
-from typing import List
+from typing import List, Union
+from extra import utils
+import os
+
+allowed_roles = [int(os.getenv('OWNER_ROLE_ID')), int(os.getenv('ADMIN_ROLE_ID')), int(os.getenv('MOD_ROLE_ID'))]
 
 class ModerationFakeAccountsTable(commands.Cog):
     
     def __init__(self, client) -> None:
         self.client = client
+
+    @commands.command()
+    @utils.is_allowed(allowed_roles)
+    async def fake_accounts(self, ctx, member: Union[discord.User, discord.Member] = None) -> None:
+        """ Shows fake accounts associated with a user.
+        :param member: The user to show the fake accounts from. """
+
+        author = ctx.author
+
+        fake_accounts = await self.get_fake_accounts(member.id)
+        if not fake_accounts:
+            return await ctx.send(f"**{member.display_name} doesn't have fake accounts, {author.mention}!**", delete_after=3)
+
+        users = ', '.join([f"<@{user[1]}" if user[1] != author.id else f"<@{user[0]}" for user in fake_accounts])
+
+        embed = discord.Embed(
+            title="__Fake Accounts__:",
+            description=f"Fake accounts associated with {member.display_name} ({member.id}):\n{users}",
+            color=member.color
+        )
+
+        await embed.set_thumbnail(url=member.avatar.url)
+        await embed.set_author(name=f"Requested by {author}", icon_url=author.avatar.url)
+        await ctx.send(embed=embed)
+
 
     @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
