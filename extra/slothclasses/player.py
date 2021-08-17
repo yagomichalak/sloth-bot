@@ -604,8 +604,7 @@ class Player(commands.Cog):
         skill_three_ts = NULL, skill_four_ts = NULL,
         skill_five_ts = NULL WHERE user_id = %s
         """
-        await mycursor.execute(sql, (
-            new_skill_ts, new_skill_ts, new_skill_ts, new_skill_ts, new_skill_ts, user_id))
+        await mycursor.execute(sql, (user_id,))
         await db.commit()
         await mycursor.close()
 
