@@ -4,6 +4,7 @@ from mysqldb import the_database
 from typing import List
 import os
 from extra import utils
+from extra.prompt.menu import Confirm
 from typing import List, Union
 
 allowed_roles = [int(os.getenv('OWNER_ROLE_ID')), int(os.getenv('ADMIN_ROLE_ID')), int(os.getenv('MOD_ROLE_ID'))]
@@ -73,6 +74,10 @@ class ModerationWatchlistTable(commands.Cog):
             await msg.delete()
         except:
             pass
+
+        confirm = await Confirm(f"**Are you sure you want to remove `{member}` from the watchlist, {author.mention}?**").prompt(ctx)
+        if not confirm:
+            return await ctx.send(f"**Not doing it, then, {author.mention}!**")
 
         await self.delete_user_watchlist(member.id)
         await ctx.send(f"**Successfully removed `{member}` from the watchlist, {author.mention}!**")
