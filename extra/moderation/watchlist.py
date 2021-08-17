@@ -2,11 +2,81 @@ import discord
 from discord.ext import commands
 from mysqldb import the_database
 from typing import List
+import os
+from extra import utils
+from typing import List, Union
+
+allowed_roles = [int(os.getenv('OWNER_ROLE_ID')), int(os.getenv('ADMIN_ROLE_ID')), int(os.getenv('MOD_ROLE_ID'))]
+watchlist_channel_id: int = int(os.getenv('WATCHLIST_CHANNEL_ID'))
+
 
 class ModerationWatchlistTable(commands.Cog):
     
-    def __init__(self, client) -> None:
+    def __init__(self, client: commands.Bot) -> None:
         self.client = client
+
+
+    @commands.command()
+    @utils.is_allowed(allowed_roles)
+    async def watchlist(self, ctx, member: Union[discord.Member, discord.User] = None, *, reason: str = None) -> None:
+        """ Puts a member in the watchlist.
+        :param member: The member to put in the watchlist.
+        :param reason: The reason for putting the member in the watchist. """
+
+        author = ctx.author
+
+        if not member:
+            return await ctx.send(f"**Please, inform a member to put in the watchlist, {author.mention}!**")
+
+        if await self.get_user_watchlist(member.id):
+            return await ctx.send(f"**{member} is already in the watchlist, {author.mention}**")
+
+        watchlist_channel = self.client.get_channel(watchlist_channel_id)
+
+        embed = discord.Embed(
+            title="__Watchlist__:",
+            description=f"{author.mention} watchlisted <@{member.id}>\n__**Reason:**__```{reason}```",
+            color=member.color,
+            timestamp=ctx.message.created_at,
+            url=member.avatar.url
+        )
+        embed.set_thumbnail(url=member.avatar.url)
+        embed.set_author(name=f"{member} ({member.id})", icon_url=member.avatar.url, url=member.avatar.url)
+        embed.set_footer(text=f"Watchlisted by {author} ({author.id})", icon_url=author.avatar.url)
+
+        msg = await watchlist_channel.send(embed=embed)
+
+        await self.insert_user_watchlist(member.id, msg.id)
+
+        view = discord.ui.View()
+        view.add_item(discord.ui.Button(style=discord.ButtonStyle.url, label="Check WL Entry!", emoji="⚠️", url=msg.jump_url))
+        await ctx.send(f"**Successfully put `{member}` into the watchlist, {author.mention}!**", view=view)
+
+
+    @commands.command(aliases=['remove_watchlist', 'delete_watchlist', 'del_watchlist'])
+    @utils.is_allowed(allowed_roles)
+    async def unwatchlist(self, ctx, member: Union[discord.Member, discord.User] = None) -> None:
+        """ Removes a member from the watchlist.
+        :param member: The member to put in the watchlist. """
+
+        author = ctx.author
+
+        if not member:
+            return await ctx.send(f"**Please, inform a member to remove from the watchlist, {author.mention}!**")
+
+        if not (wl_entry := await self.get_user_watchlist(member.id)):
+            return await ctx.send(f"**{member} is not in the watchlist, {author.mention}**")
+
+        try:
+            watchlist_channel = self.client.get_channel(watchlist_channel_id)
+            msg = await watchlist_channel.fetch_message(wl_entry[1])
+            await msg.delete()
+        except:
+            pass
+
+        await self.delete_user_watchlist(member.id)
+        await ctx.send(f"**Successfully removed `{member}` from the watchlist, {author.mention}!**")
+
 
 
     @commands.command(hidden=True)

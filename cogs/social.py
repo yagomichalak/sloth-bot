@@ -17,12 +17,11 @@ reddit = praw.Reddit(client_id=os.getenv('REDDIT_CLIENT_ID'),  # client id
 mod_role_id = int(os.getenv('MOD_ROLE_ID'))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID'))
 teacher_role_id = int(os.getenv('TEACHER_ROLE_ID'))
+watchlist_channel_id = int(os.getenv('WATCHLIST_CHANNEL_ID'))
 
 
 class Social(commands.Cog):
-    '''
-    Social related commands.
-    '''
+    """ Social related commands. """
 
     def __init__(self, client):
         self.client = client
@@ -113,7 +112,7 @@ class Social(commands.Cog):
         else:
             watchlist = await self.client.get_cog('Moderation').get_user_watchlist(member.id)
             if watchlist:
-                message_url = f"https://discord.com/channels/{ctx.guild.id}/{watchlist[2]}/{watchlist[1]}"
+                message_url = f"https://discord.com/channels/{ctx.guild.id}/{watchlist_channel_id}/{watchlist[1]}"
                 view.children[4].url = message_url
             else:
                 view.children[4].disabled = True
