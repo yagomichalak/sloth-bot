@@ -253,7 +253,7 @@ class Agares(Player):
         if user_currency[1] < 100:
             return await ctx.send(f"**You don't have 100łł to use this skill, {perpetrator.mention}!**")
 
-        confirm = await ConfirmSkill(f"**Are you sure you want to use your reflect skill on {target.mention}, {perpetrator.mention}?**").prompt(ctx)
+        confirm = await ConfirmSkill(f"**Are you sure you want to use your reflect skill on {target.mention} for `100łł`, {perpetrator.mention}?**").prompt(ctx)
         if not confirm:
             return await ctx.send(f"**Not doing it then, {perpetrator.mention}!**")
 
