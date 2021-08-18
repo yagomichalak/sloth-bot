@@ -1,10 +1,11 @@
 import discord
 from discord.ext import commands
+from discord.ext.commands.core import has_permissions
 import praw
 from random import randint
 import aiohttp
 import os
-from typing import List
+from typing import List, Union
 from extra import utils
 from extra.view import QuickButtons
 
@@ -75,7 +76,7 @@ class Social(commands.Cog):
 
     # Shows all the info about a user
     @commands.command(aliases=['user', 'whois', 'who_is'])
-    async def userinfo(self, ctx, member: discord.Member = None):
+    async def userinfo(self, ctx, member: Union[discord.Member, discord.User] = None):
         '''
         Shows all the information about a member.
         :param member: The member to show the info.
@@ -90,16 +91,17 @@ class Social(commands.Cog):
         embed.set_footer(text=f"Requested by {ctx.author}", icon_url=ctx.author.avatar.url)
 
         embed.add_field(name="ID:", value=member.id, inline=False)
-        embed.add_field(name="Guild name:", value=member.display_name, inline=False)
 
-        sorted_time_create = f"<t:{int(member.created_at.timestamp())}:R>"
-        sorted_time_join = f"<t:{int(member.joined_at.timestamp())}:R>"
+        if hasattr(member, 'guild'):
+            embed.add_field(name="Guild name:", value=member.display_name, inline=False)
+            sorted_time_create = f"<t:{int(member.created_at.timestamp())}:R>"
+            sorted_time_join = f"<t:{int(member.joined_at.timestamp())}:R>"
 
-        embed.add_field(name="Created at:", value=f"{member.created_at.strftime('%d/%m/%y')} ({sorted_time_create}) **GMT**",
-						inline=False)
-        embed.add_field(name="Joined at:", value=f"{member.joined_at.strftime('%d/%m/%y')} ({sorted_time_join}) **GMT**", inline=False)
+            embed.add_field(name="Created at:", value=f"{member.created_at.strftime('%d/%m/%y')} ({sorted_time_create}) **GMT**",
+                            inline=False)
+            embed.add_field(name="Joined at:", value=f"{member.joined_at.strftime('%d/%m/%y')} ({sorted_time_join}) **GMT**", inline=False)
 
-        embed.add_field(name="Top role:", value=member.top_role.mention, inline=False)
+            embed.add_field(name="Top role:", value=member.top_role.mention, inline=False)
 
         embed.add_field(name="Bot?", value=member.bot)
 
