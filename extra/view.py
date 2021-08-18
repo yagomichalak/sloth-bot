@@ -74,7 +74,7 @@ class ReportSupportView(discord.ui.View):
         await self.cog.send_event_manager_application(member)
 
 
-    @discord.ui.button(label="Get your own Custom Bot (not for free)", style=1, custom_id=f"get_custom_bot", emoji="🤖")
+    @discord.ui.button(label="Get your own Custom Bot (not for free)", style=1, custom_id=f"get_custom_bot", emoji="🤖", disabled=True)
     async def bot_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
 
         member = interaction.user
