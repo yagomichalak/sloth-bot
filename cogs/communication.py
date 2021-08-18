@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 import os
 
-general_voice_chat_id = int(os.getenv('GENERAL_VOICE_CHANNEL_ID'))
+bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
 announcement_channel_id = int(os.getenv('ANNOUNCEMENT_CHANNEL_ID'))
 mod_role_id = int(os.getenv('MOD_ROLE_ID'))
 allowed_roles = [int(os.getenv('OWNER_ROLE_ID')), int(os.getenv('ADMIN_ROLE_ID')), mod_role_id]
@@ -58,8 +58,8 @@ class Communication(commands.Cog):
         if not member:
             return await ctx.send('Inform a member!')
 
-        general_channel = discord.utils.get(ctx.guild.channels, id=general_voice_chat_id)
-        await general_channel.send(
+        bots_and_commands_channel = discord.utils.get(ctx.guild.channels, id=bots_and_commands_channel_id)
+        await bots_and_commands_channel.send(
             f'''__**Welcome to the Language Sloth**__! {member.mention}
 This is a community of people who are practicing and studying languages from all around the world! While you're here, you will also make tons of new friends! There is a lot to do here in the server but there are some things you should do to start off.
 
@@ -83,8 +83,8 @@ If you have any questions feel free to ask! And if you experience any type of pr
         elif not member:
             return await ctx.send('**Inform a member!**', delete_after=3)
 
-        general_channel = discord.utils.get(ctx.guild.channels, id=general_voice_chat_id)
-        await general_channel.send(
+        bots_and_commands_channel = discord.utils.get(ctx.guild.channels, id=bots_and_commands_channel_id)
+        await bots_and_commands_channel.send(
             f'''{member.mention} - Hey! since you didn't assign your native language I went ahead and assigned it for you automatically based on my best guess of what is your native language, I came to the conclusion that it is {language.title()}.  If I'm incorrect please let me know!''')
 
     @commands.command()
