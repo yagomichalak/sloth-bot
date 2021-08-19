@@ -120,7 +120,7 @@ class OpenShopLoop(menus.ListPageSource):
 
         embed = discord.Embed(
             title="__Sloth Class Shop Items__",
-            description="All available shop items.\n**To buy a potion, use: `z!buy [potion/ring] @member`**",
+            description="All available shop items.\n**To buy an item, use: `z!buy [potion/ring] @member`**",
             color=menu.ctx.author.color,
             timestamp=menu.ctx.message.created_at
         )
