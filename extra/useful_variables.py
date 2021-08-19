@@ -91,8 +91,8 @@ different_class_roles = {
     "conlangs": [
         "esperanto", "toki pona"
     ],
-    "hindustani": [
-        "hindi", "urdu", "hindustani"
+    "hindi-urdu": [
+        "hindi", "urdu", "hindustani", "hindi-urdu"
     ],
     "south asian languages": [
         "bengali"
