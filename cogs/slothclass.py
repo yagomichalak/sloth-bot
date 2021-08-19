@@ -4,7 +4,7 @@ from mysqldb import the_database
 from typing import Union, List, Any, Dict, Optional
 from extra.customerrors import MissingRequiredSlothClass, ActionSkillOnCooldown, SkillsUsedRequirement, CommandNotReady
 from extra.menu import ConfirmSkill, prompt_message, prompt_number, SlothClassPagination
-from extra.slothclasses.player import Skill
+from extra.slothclasses.player import Skill, Player
 from extra import utils
 import os
 
@@ -275,6 +275,43 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
         embed.add_field(name="🔴 Prawler's 4th Skill:", value="**Skill**: `Kidnap`.", inline=False)
         embed.add_field(name="🔴 Seraph's 4th Skill:", value="**Skill**: `Attain Grace`.", inline=True)
         embed.add_field(name="🔴 Warrior's 4th Skill:", value="**Skill**: `??`.", inline=True)
+
+        await ctx.send(embed=embed)
+
+    @commands.command()
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def all_skills(self, ctx) -> None:
+        """ Shows all skills available for each Sloth Class. """
+
+        member = ctx.author
+
+        embed = discord.Embed(
+            title="__All Sloth Class Skills__",
+            description="Showing all skills available for all Sloth Class, respectively.",
+            color=member.color,
+            timestamp=ctx.message.created_at,
+            url="https://thelanguagesloth.com/profile/slothclass"
+        )
+
+        # Loops all Sloth Classes
+        for name, sloth_class in classes.items():
+
+            class_cmds = sloth_class.get_commands(sloth_class)
+            skills = []
+
+            # Loops all commands of the Sloth Class
+            for cmd in class_cmds:
+                if cmd.hidden or not cmd.checks:
+                    continue
+
+                # Checks if it has a skill mark on the command
+                for check in cmd.checks:
+                    if check.__qualname__ == 'Player.skill_mark.<locals>.real_check':
+                        skills.append(f"{self.client.command_prefix}{cmd.name}")
+
+            skills_text = '\n'.join(skills)
+            embed.add_field(name=f"__({sloth_class.emoji}) {name.title()}__:", value=f"```{skills_text}```")
+            embed.set_footer(text=f"Requested by {member}", icon_url=member.avatar.url)
 
         await ctx.send(embed=embed)
 
