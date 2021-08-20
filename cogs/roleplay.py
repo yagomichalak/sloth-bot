@@ -263,8 +263,8 @@ class RolePlay(commands.Cog):
         await ctx.send(embed=embed, view=view)
 
     @commands.command()
-    @commands.cooldown(1, 120, commands.BucketType.user)
-    @Player.not_ready()
+    # @commands.cooldown(1, 120, commands.BucketType.user)
+    # @Player.not_ready()
     async def give(self, ctx, *, member: discord.Member = None) -> None:
         """ Gives someone something.
         :param member: The member to give something to.
