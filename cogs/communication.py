@@ -1,11 +1,15 @@
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 import os
+from extra import utils
+from mysqldb import the_database
+from typing import List, Union, Optional
 
 bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
 announcement_channel_id = int(os.getenv('ANNOUNCEMENT_CHANNEL_ID'))
 mod_role_id = int(os.getenv('MOD_ROLE_ID'))
 allowed_roles = [int(os.getenv('OWNER_ROLE_ID')), int(os.getenv('ADMIN_ROLE_ID')), mod_role_id]
+general_channel_id = int(os.getenv('GENERAL_CHANNEL_ID'))
 
 
 class Communication(commands.Cog):
@@ -16,7 +20,28 @@ class Communication(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
+
+        self.advertise_patreon.start()
         print('Communication cog is ready!')
+
+    @tasks.loop(seconds=60)
+    async def advertise_patreon(self) -> None:
+        """ Checks the time for advertising Patreon. """
+
+        current_ts = await utils.get_timestamp()
+        # Checks whether Patreon advertising event exists
+        if not await self.get_advertising_event(event_label='patreon_ad'):
+            # If not, creates it
+            return await self.insert_advertising_event(event_label='patreon_ad', current_ts=current_ts-7200)
+
+        # Checks whether advertising time is due
+        if await self.check_advertising_time(
+            current_ts=int(current_ts), event_label="patreon_ad", ad_time=7200):
+            # Updates time and advertises.
+            await self.update_advertising_time(event_label="patreon_ad", current_ts=current_ts)
+            general_channel = self.client.get_channel(general_channel_id)
+            await general_channel.send("We hope you're enjoying The Language Sloth, Please consider supporting us on Patreon and help us finance our love for language learning and get amazing premium rewards at https://www.patreon.com/Languagesloth")
+
 
     # Says something by using the bot
     @commands.command()
@@ -120,6 +145,130 @@ If you have any questions feel free to ask! And if you experience any type of pr
             return await member.send(message)
         await ctx.send(f"**Member: {member} not found!", delete_after=3)
 
+
+    # Database
+
+
+    @commands.command(hidden=True)
+    @commands.has_permissions(administrator=True)
+    async def create_table_scheduled_events(self, ctx: commands.Context) -> None:
+        """ Creates the ScheduledEvents table. """
+
+        member = ctx.author
+        await ctx.message.delete()
+
+        if await self.check_scheduled_events_exists():
+            return await ctx.send(f"**Table `ScheduledEvents` already exists, {member.mention}!**")
+        
+        mycursor, db = await the_database()
+        await mycursor.execute("""
+            CREATE TABLE ScheduledEvents (
+                event_label VARCHAR(100) NOT NULL,
+                event_ts BIGINT NOT NULL,
+                PRIMARY KEY (event_label)
+            )""")
+        await db.commit()
+        await mycursor.close()
+
+        await ctx.send(f"**Table `ScheduledEvents` created, {member.mention}!**")
+
+    @commands.command(hidden=True)
+    @commands.has_permissions(administrator=True)
+    async def drop_table_scheduled_events(self, ctx: commands.Context) -> None:
+        """ Creates the ScheduledEvents table. """
+
+        member = ctx.author
+        await ctx.message.delete()
+
+        if not await self.check_scheduled_events_exists():
+            return await ctx.send(f"**Table `ScheduledEvents` doesn't exist, {member.mention}!**")
+
+        mycursor, db = await the_database()
+        await mycursor.execute("DROP TABLE ScheduledEvents")
+        await db.commit()
+        await mycursor.close()
+
+        await ctx.send(f"**Table `ScheduledEvents` dropped, {member.mention}!**")
+
+
+    @commands.command(hidden=True)
+    @commands.has_permissions(administrator=True)
+    async def reset_table_scheduled_events(self, ctx: commands.Context) -> None:
+        """ Creates the ScheduledEvents table. """
+
+        member = ctx.author
+        await ctx.message.delete()
+
+        if not await self.check_scheduled_events_exists():
+            return await ctx.send(f"**Table `ScheduledEvents` doesn't exist yet, {member.mention}!**")
+
+        mycursor, db = await the_database()
+        await mycursor.execute("DELETE FROM ScheduledEvents")
+        await db.commit()
+        await mycursor.close()
+
+        await ctx.send(f"**Table `ScheduledEvents` reset, {member.mention}!**")
+
+    async def check_scheduled_events_exists(self) -> bool:
+        """ Checks whether the ScheduledEvents table exists. """
+
+        mycursor, _ = await the_database()
+        await mycursor.execute("SHOW TABLE STATUS LIKE 'ScheduledEvents'")
+        exists = await mycursor.fetchone()
+        await mycursor.close()
+        if exists:
+            return True
+        else:
+            return False
+
+    async def check_advertising_time(self, current_ts: int, event_label: str, ad_time: int) -> bool:
+        """ Checks whether the advertising time is due.
+        :param current_ts: The current timestamp.
+        :param event_label: The label of the event
+        :param ad_time: Advertising time cooldown. """
+
+        mycursor, _ = await the_database()
+        await mycursor.execute("""
+            SELECT * from ScheduledEvents
+            WHERE event_label = %s AND %s - event_ts >= %s
+        """, (event_label, current_ts, ad_time))
+        
+        due_event = await mycursor.fetchone()
+        await mycursor.close()
+        if due_event:
+            return True
+        else:
+            return False
+
+    async def get_advertising_event(self, event_label: str) -> List[Union[str, int]]:
+        """ Gets an advertising event.
+        :param event_label: The label of the advertising event. """
+
+        mycursor, _ = await the_database()
+        await mycursor.execute("SELECT * FROM ScheduledEvents WHERE event_label = %s", (event_label,))
+        event = await mycursor.fetchone()
+        await mycursor.close()
+        return event
+
+    async def insert_advertising_event(self, event_label: str, current_ts: int) -> None:
+        """ Inserts an advertising event.
+        :param event_label: The label of the advertising event.
+        :param current_ts: The timestamp in which it was inserted. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("INSERT INTO ScheduledEvents (event_label, event_ts) VALUES (%s, %s)", (event_label, current_ts))
+        await db.commit()
+        await mycursor.close()
+
+    async def update_advertising_time(self, event_label: str, current_ts: int) -> None:
+        """ Updates the timestamp of the advertising event.
+        :param event_label: The label of the advertising event.
+        :param current_ts: The timestamp to update the event to. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("UPDATE ScheduledEvents SET event_ts = %s WHERE event_label = %s", (current_ts, event_label))
+        await db.commit()
+        await mycursor.close()
 
 def setup(client):
     """ Cog's setup function. """
