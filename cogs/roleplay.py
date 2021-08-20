@@ -263,8 +263,7 @@ class RolePlay(commands.Cog):
         await ctx.send(embed=embed, view=view)
 
     @commands.command()
-    # @commands.cooldown(1, 120, commands.BucketType.user)
-    # @Player.not_ready()
+    @commands.cooldown(1, 120, commands.BucketType.user)
     async def give(self, ctx, *, member: discord.Member = None) -> None:
         """ Gives someone something.
         :param member: The member to give something to.
@@ -308,6 +307,21 @@ class RolePlay(commands.Cog):
         embed.set_footer(text=f"Requested by {author}", icon_url=author.avatar.url)
         view = TickleView(member=author, target=member, timeout=60)
         await ctx.send(embed=embed, view=view)
+
+    @commands.command(aliases=['throw', 'toss'])
+    @commands.cooldown(1, 120, commands.BucketType.user)
+    async def yeet(self, ctx, *, member: discord.Member = None) -> None:
+        """ Yeets something at someone.
+        :param member: The member to yeet something at. """
+
+        pass
+
+    @commands.command()
+    @commands.cooldown(1, 120, commands.BucketType.user)
+    async def seduce(self, ctx, *, member: discord.Member = None) -> None:
+        """ Seduces someone. """
+
+        pass
 
 def setup(client):
     client.add_cog(RolePlay(client))
