@@ -878,7 +878,7 @@ class GiveView(discord.ui.View):
 
         embed = discord.Embed(
             title=f"__{option['name']}__",
-            description=f"{option['emoji']} {option['sentence']} {option['emoji']}",
+            description=f"{option['emoji']} {option['sentence']} {option['emoji']}".format(member=self.member, target=self.target),
             color=discord.Color.magenta(),
             timestamp=interaction.message.created_at
         )
