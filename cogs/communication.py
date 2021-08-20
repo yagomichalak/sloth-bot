@@ -3,7 +3,9 @@ from discord.ext import commands, tasks
 import os
 from extra import utils
 from mysqldb import the_database
-from typing import List, Union, Optional
+from typing import List, Union
+import json
+from random import choice
 
 bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
 announcement_channel_id = int(os.getenv('ANNOUNCEMENT_CHANNEL_ID'))
@@ -38,9 +40,15 @@ class Communication(commands.Cog):
         if await self.check_advertising_time(
             current_ts=int(current_ts), event_label="patreon_ad", ad_time=14400):
             # Updates time and advertises.
-            await self.update_advertising_time(event_label="patreon_ad", current_ts=current_ts)
+            # await self.update_advertising_time(event_label="patreon_ad", current_ts=current_ts)
             general_channel = self.client.get_channel(general_channel_id)
-            await general_channel.send("We hope you're enjoying The Language Sloth, Please consider supporting us on Patreon and help us finance our love for language learning and get amazing premium rewards at https://www.patreon.com/Languagesloth")
+
+            data = {}
+            with open('./extra/random/json/patreon_ads.json', 'r', encoding="utf-8") as f:
+                data = json.loads(f.read())
+            
+            random_message = choice(list(data.values()))
+            await general_channel.send(random_message)
 
 
     # Says something by using the bot
