@@ -1,82 +1,82 @@
 {
     "Cake": {
-        "name": "Cake", "emoji": "🍰", "sentence": "{self.member.mention} gave a piece of cake to {self.target.mention}",
-        "gifs": []
+        "name": "Cake", "emoji": "🍰", "sentence": "{member.mention} gave a piece of cake to {target.mention}",
+        "gifs": ["https://c.tenor.com/_zWV9yOWsfAAAAAC/cake-fat.gif", "https://c.tenor.com/HwZgTskYzeEAAAAC/tina-fey.gif", "https://c.tenor.com/TRkahfU3qDwAAAAd/birthday-cake.gif", "https://c.tenor.com/Km6Afr0yljcAAAAC/insatiable-hungry.gif", "https://c.tenor.com/hLzp-1cqCN4AAAAd/blue-eat.gif", "https://c.tenor.com/AXNPnoApcLcAAAAC/cake-rainbow-cake.gif", "https://c.tenor.com/WbC1fgY8xhwAAAAd/slice-of-cake-bigger-bolder-baking.gif", "https://c.tenor.com/ma1SPE9k-zoAAAAd/cake-smash.gif", "https://c.tenor.com/F-qvrjmpOH4AAAAd/grilled-cheese-cake.gif", "https://c.tenor.com/smkr4m6WVyIAAAAC/cake-lavacake.gif"]
     },
     "Twix": {
-        "name": "Twix", "emoji": "<:twix:878273912553766932>", "sentence": "{self.member.mention} gave a twix bar to {self.target.mention}",
-        "gifs": []
+        "name": "Twix", "emoji": "<:twix:878273912553766932>", "sentence": "{member.mention} gave a twix bar to {target.mention}",
+        "gifs": ["https://c.tenor.com/_nTt7Nlu7JUAAAAC/twix-candy.gif", "https://c.tenor.com/c4WO0qY5FPsAAAAC/twix-camel.gif", "https://c.tenor.com/9DyJM89FRWAAAAAC/seinfeld-george.gif", "https://c.tenor.com/0-VYhIVDSi4AAAAC/holy-musical-batman-sweet-tooth.gif"]
     },
     "Kebab": {
-        "name": "Kebab", "emoji": "<:zslothkebab:739215835108999298>", "sentence": "{self.member.mention} gave a kebab to {self.target.mention}",
-        "gifs": []
+        "name": "Kebab", "emoji": "<:zslothkebab:739215835108999298>", "sentence": "{member.mention} gave a kebab to {target.mention}",
+        "gifs": ["https://c.tenor.com/58MHehmspf8AAAAC/saddam-hussein-adobada.gif", "https://c.tenor.com/8Mr1JlMoqcQAAAAC/kebab-food.gif", "https://c.tenor.com/dyoyGoiC2oYAAAAd/gyro-lunch.gif", "https://c.tenor.com/bBNQz783T1MAAAAC/beef-kabob.gif", "https://c.tenor.com/zlkfFa4Cle4AAAAd/kebab.gif", "https://c.tenor.com/dVGY4CERwMQAAAAC/alan92-food-challenge.gif"]
     },
     "Pizza": {
-        "name": "Pizza", "emoji": "🍕", "sentence": "{self.member.mention} gave a slice of pizza to {self.target.mention}",
-        "gifs": []
+        "name": "Pizza", "emoji": "🍕", "sentence": "{member.mention} gave a slice of pizza to {target.mention}",
+        "gifs": ["https://c.tenor.com/_u85l0HpiIcAAAAC/pizza-pepperoni.gif", "https://c.tenor.com/Xtghy5JVPnEAAAAd/mood-pig-out.gif", "https://c.tenor.com/CckXoUJNQykAAAAC/pizza-cheese.gif", "https://c.tenor.com/8983e3zIuywAAAAC/pizza-heart.gif", "https://c.tenor.com/GCIMVR0cNZUAAAAd/pizza-deep-dish-pizza.gif", "https://c.tenor.com/Pddrw6Yryz0AAAAd/dog-pizza.gif", "https://c.tenor.com/UhhsVw2lzLgAAAAd/love-pizza-pizza.gif", "https://c.tenor.com/tW9dQMk7SwgAAAAd/little-caesars-pizza.gif", "https://c.tenor.com/2ItTxM-WfnsAAAAC/pizza-cheese.gif", "https://c.tenor.com/dmuWwAnJ0vYAAAAC/funny-pizza.gif"]
     },
     "Croissant": {
-        "name": "Croissant", "emoji": "🥐", "sentence": "{self.member.mention} gave a croissant to {self.target.mention}",
-        "gifs": []
+        "name": "Croissant", "emoji": "🥐", "sentence": "{member.mention} gave a croissant to {target.mention}",
+        "gifs": ["https://c.tenor.com/EVLEt1nqvxcAAAAC/croissant-breakfast.gif", "https://c.tenor.com/Phn_4EL76twAAAAC/slow-motion-croissant.gif", "https://c.tenor.com/y8rAgg2tsWAAAAAC/sweet-carbs-croissant.gif", "https://c.tenor.com/a6SBijs8UIIAAAAC/remicone-croissant.gif", "https://c.tenor.com/HJo1V8aYT5wAAAAC/thanksgiving-croissant.gif", "https://c.tenor.com/mh3ZuhbxKc4AAAAC/croissant-chocolate.gif", "https://c.tenor.com/Yg2_pPHemJMAAAAd/carl-carl-wheezer.gif", "https://c.tenor.com/7TBfJ-tnw0IAAAAd/elizabeth-olsen-eat.gif", "https://c.tenor.com/rDpr6v6P5_UAAAAd/polish-club-polish.gif"]
     },
     "Baguette": {
-        "name": "Baguette", "emoji": "🥖", "sentence": "{self.member.mention} gave a baguette to {self.target.mention}",
-        "gifs": []
+        "name": "Baguette", "emoji": "🥖", "sentence": "{member.mention} gave a baguette to {target.mention}",
+        "gifs": ["https://c.tenor.com/PhhN-3LjE3AAAAAd/gatto-cibo.gif", "https://c.tenor.com/y4OPhbfYQvkAAAAC/elettra-lamborghini-oui-oui-la-baguette.gif", "https://c.tenor.com/RqFB7-1TA0wAAAAC/cat-baguette.gif", "https://c.tenor.com/qUVaVQTNxCQAAAAC/steven-colbert-baguette.gif", "https://c.tenor.com/wmdwQx8UPY8AAAAd/baguette-machine-baguette.gif", "https://c.tenor.com/gqE3xcxGnv8AAAAC/eating-chew.gif", "https://c.tenor.com/PZvTCfYfgP0AAAAd/baguette-magic.gif"]
     },
     "Pierogi": {
-        "name": "Pierogi", "emoji": "<:pierogi:878283834909667359>", "sentence": "{self.member.mention} gave {self.target.mention} some pierogi",
-        "gifs": []
+        "name": "Pierogi", "emoji": "<:pierogi:878283834909667359>", "sentence": "{member.mention} gave {target.mention} some pierogi",
+        "gifs": ["https://c.tenor.com/5iUUh4nCLHUAAAAC/aidansarmy-lazer-dogs.gif", "https://c.tenor.com/rpr5SGjebKkAAAAC/pierogi-lunch.gif", "https://c.tenor.com/KMFsp18FqI8AAAAC/chinese-dumplings.gif", "https://c.tenor.com/zEvj_seShNUAAAAC/pierogi-pirogi.gif", "https://c.tenor.com/zDAlTp7vfEkAAAAC/pierogi-flip-pierogi.gif", "https://c.tenor.com/kvznDgiy5ooAAAAC/pierogi.gif", "https://c.tenor.com/XFkQjMPVDTcAAAAC/cooking-gyoza-food52.gif", "https://c.tenor.com/AwPu4NbX2gYAAAAd/hambre-hungry.gif", "https://c.tenor.com/rye5tgag5PwAAAAC/dumpling-food-porn.gif"]
     },
     "Popcorn": {
-        "name": "Popcorn", "emoji": "🍿", "sentence": "{self.member.mention} gave {self.target.mention} a bucket of popcorn",
-        "gifs": []
+        "name": "Popcorn", "emoji": "🍿", "sentence": "{member.mention} gave {target.mention} a bucket of popcorn",
+        "gifs": ["https://c.tenor.com/YS6St_xCRN4AAAAC/popcorn-eating-popcorn.gif", "https://c.tenor.com/L8nQOHAF3VYAAAAC/thriller-michael-jackson.gif", "https://c.tenor.com/_0cv0UNf6TYAAAAC/bill-hader-watching.gif", "https://c.tenor.com/F1KG-Mpw__IAAAAC/popcorn-popcorn-day.gif", "https://c.tenor.com/JqS9iD9qHSoAAAAC/eating-popcorn-movie-time.gif", "https://c.tenor.com/Cg0dZkgo3SYAAAAC/popcorn-julia-popcorn.gif", "https://c.tenor.com/RPUIeyIVUkkAAAAC/popcorn-panda.gif", "https://c.tenor.com/myoYGpI-g8cAAAAC/popcorns-crackhead-eating.gif", "https://c.tenor.com/ASlchYiD1VUAAAAC/popcorn-entertainment.gif", "https://c.tenor.com/qbK_nSIXGFIAAAAC/curry-eat.gif"]
     },
     "Coffee": {
-        "name": "Coffee", "emoji": "<a:coffe_sloth:737788866043314297>", "sentence": "{self.member.mention} gave a cup of coffee {self.target.mention}",
-        "gifs": []
+        "name": "Coffee", "emoji": "<a:coffe_sloth:737788866043314297>", "sentence": "{member.mention} gave a cup of coffee {target.mention}",
+        "gifs": ["https://c.tenor.com/pvbn5bGWSQcAAAAC/coffee-snow-white.gif", "https://c.tenor.com/tqImnFvqFhwAAAAd/coffee-smiley.gif", "https://c.tenor.com/NiXFXBvOTpUAAAAd/need-coffee-i-have-one-cup-a-day.gif", "https://c.tenor.com/y9dY2Ka7_WMAAAAd/yoda-coffee.gif", "https://c.tenor.com/XIseUZRe3C4AAAAC/morning-coffee.gif", "https://c.tenor.com/M2UcJkMe27kAAAAC/coffee-latte.gif", "https://c.tenor.com/I_9SAgYkp-kAAAAC/coffee.gif", "https://c.tenor.com/Z0MMOXH1VbQAAAAC/caf%C3%A9-coffee.gif", "https://c.tenor.com/IzXnvyY0oTMAAAAd/sip-drink.gif", "https://c.tenor.com/ay8O934_NVYAAAAC/coffee-hearts.gif"]
     },
     "Tea": {
-        "name": "Tea", "emoji": "<:cay:815247281250893834>", "sentence": "{self.member.mention} gave a cup of tea to {self.target.mention}",
-        "gifs": []
+        "name": "Tea", "emoji": "<:cay:815247281250893834>", "sentence": "{member.mention} gave a cup of tea to {target.mention}",
+        "gifs": ["https://c.tenor.com/YufCI62GowIAAAAd/parks-and-rec-april-ludgate.gif", "https://c.tenor.com/WM-f7BdFWKAAAAAC/cup-of-tea-teapot.gif", "https://c.tenor.com/hpvoupDAu28AAAAC/kermit-sips-tea.gif", "https://c.tenor.com/oXVQlUxlYxsAAAAC/smh-shade.gif", "https://c.tenor.com/ENTKSiTMXWoAAAAC/tea-time.gif", "https://c.tenor.com/VisXYm-2V5IAAAAC/tea.gif", "https://c.tenor.com/ZrBDEDS70sIAAAAC/sips-tea.gif", "https://c.tenor.com/U3tNL3ktVo0AAAAC/karadeniz-cay.gif", "https://c.tenor.com/v-n7Fn0_2k4AAAAC/tea-hot.gif", "https://c.tenor.com/UuJJfO0CPLoAAAAC/good-morning-coffee.gif"]
     },
     "Muffin": {
-        "name": "Muffin", "emoji": "🧁", "sentence": "{self.member.mention} gave a muffin to {self.target.mention}",
-        "gifs": []
+        "name": "Muffin", "emoji": "🧁", "sentence": "{member.mention} gave a muffin to {target.mention}",
+        "gifs": ["https://c.tenor.com/Uy0mqNhKNK8AAAAC/muffin-time-its-muffin-time.gif", "https://c.tenor.com/K-zKgFdlpp4AAAAC/muffin-cute.gif", "https://c.tenor.com/J5l6mslYTj8AAAAC/chocolate-muffin-muffin.gif", "https://c.tenor.com/m7dJej6jQBwAAAAd/muffin-hogg.gif", "https://c.tenor.com/GRAcVs3T6_IAAAAC/muffin-cute.gif", "https://c.tenor.com/Od5Eb0JmCm0AAAAd/muffin-cupcake.gif", "https://c.tenor.com/eNMpNwjjYR4AAAAC/the-muffin-man-muffin-man.gif", "https://c.tenor.com/-Yhu1kazv70AAAAd/victoria-sponge-cupcakes-cupcake.gif", "https://c.tenor.com/DrxIS7RcRH0AAAAC/cupcake-jumping.gif", "https://c.tenor.com/I4nNLc_YLoEAAAAC/baking-oven.gif"]
     },
-    "Cookıe": {
-        "name": "Cookıe", "emoji": "<:zslothcookie:695423388042133514>", "sentence": "{self.member.mention} gave {self.target.mention} a cookıe",
-        "gifs": []
+    "Cookie": {
+        "name": "Cookie", "emoji": "<:zslothcookie:695423388042133514>", "sentence": "{member.mention} gave {target.mention} a cookıe",
+        "gifs": ["https://c.tenor.com/mNjpKjB8Xz8AAAAC/cookies.gif", "https://c.tenor.com/YBclaql8X7YAAAAC/cookies-enjoy.gif", "https://c.tenor.com/TJREb7mszbwAAAAd/cat-cookies-cookies.gif", "https://c.tenor.com/rTnBjHSdVRQAAAAC/cookies-chocolate-chip-cookies.gif", "https://c.tenor.com/9txVHvCQ7p8AAAAC/cookie-wink.gif", "https://c.tenor.com/Gyir-IHh1SsAAAAC/spongebob-cookies.gif", "https://c.tenor.com/5rKEwpAA5zoAAAAC/choclate-chip-cookie-to-the-rescue.gif", "https://c.tenor.com/naj-rk6rhd8AAAAC/milk-bath-cookie-mascot.gif", "https://c.tenor.com/HeJjdBn99xQAAAAC/chocolate-chip-cookies-cookies.gif", "https://c.tenor.com/GTGO4S0_8_YAAAAd/tim-hortons-cookies.gif"]
     },
     "Honey": {
-        "name": "Honey", "emoji": "🍯", "sentence": "{self.member.mention} gave a honey jar to {self.target.mention}",
-        "gifs": []
+        "name": "Honey", "emoji": "🍯", "sentence": "{member.mention} gave a honey jar to {target.mention}",
+        "gifs": ["https://c.tenor.com/0DjPrYcUH6AAAAAC/honey-sweet.gif", "https://c.tenor.com/O-b4LpY2TyEAAAAC/bath-honey.gif", "https://c.tenor.com/GzIntj-QbcgAAAAd/honey-sweet.gif", "https://c.tenor.com/VNih6rxt51AAAAAC/honey-pooh.gif", "https://c.tenor.com/nEhGeWc67J8AAAAC/honey-mesk.gif", "https://c.tenor.com/BzTCWx3JvH0AAAAC/bees-honey.gif", "https://c.tenor.com/M_MuRE19qt0AAAAC/honey-happy.gif", "https://c.tenor.com/5MiwhqMSPHkAAAAC/honey-chip-and-dale.gif"]
     },
     "Pie": {
-        "name": "Pie", "emoji": "🥧", "sentence": "{self.member.mention} gave a piece of pie to {self.target.mention}",
-        "gifs": []
+        "name": "Pie", "emoji": "🥧", "sentence": "{member.mention} gave a piece of pie to {target.mention}",
+        "gifs": ["https://c.tenor.com/bSS9RT1taOoAAAAC/pies-pie-time.gif", "https://c.tenor.com/MYW4KJklyTwAAAAC/giraffe-pie.gif", "https://c.tenor.com/OR5SLyuqg80AAAAC/cherry-pie-pie.gif", "https://c.tenor.com/wBAiKrfQWrMAAAAC/pie-bake.gif", "https://c.tenor.com/IWU3-GY4teEAAAAC/pumpkin-pie-pie.gif", "https://c.tenor.com/8Omz_gt9b70AAAAC/pumpkin-pie-pie.gif", "https://c.tenor.com/VedeVWHW8-cAAAAd/apple-pie-pie.gif", "https://c.tenor.com/Dzlyn14QeN8AAAAd/apple-pie-pie.gif", "https://c.tenor.com/AcakScpm8ngAAAAC/pumpkin-pie.gif", "https://c.tenor.com/ZoBaj_kB-jIAAAAd/pie-easy-as-pie.gif"]
     },
     "Doughnut": {
-        "name": "Doughnut", "emoji": "🍩", "sentence": "{self.member.mention} gave {self.target.mention} a doughnut",
-        "gifs": []
+        "name": "Doughnut", "emoji": "🍩", "sentence": "{member.mention} gave {target.mention} a doughnut",
+        "gifs": ["https://c.tenor.com/665l_KM-y24AAAAd/eating-hungry.gif", "https://c.tenor.com/ZJAL89-LRI8AAAAC/donuts-doughnuts.gif", "https://c.tenor.com/J3SD9nS0b5YAAAAC/dripping-doughnut-icing.gif", "https://c.tenor.com/7TAAgP5c5oUAAAAd/donuts-doughnuts.gif", "https://c.tenor.com/5HnIUHO6AM8AAAAC/donuts-doughnuts.gif", "https://c.tenor.com/r0n3SjC5640AAAAC/krispy-kreme-donuts.gif", "https://c.tenor.com/RJSf6rlxEM0AAAAC/donut-dog.gif", "https://c.tenor.com/A9KcAvn9Mx8AAAAC/donuts-doughnuts.gif", "https://c.tenor.com/yrow-omq9icAAAAd/glazing-doughnut.gif", "https://c.tenor.com/eh83B6QDF1UAAAAC/donuts-doughnuts.gif"]
     },
-    "Peach": {
-        "name": "Peach", "emoji": "🍑", "sentence": "{self.member.mention} gave {self.target.mention} a delicious peach",
-        "gifs": []
+    "Icecream": {
+        "name": "Icecream", "emoji": "🍦", "sentence": "{member.mention} gave {target.mention} some icecream",
+        "gifs": ["https://c.tenor.com/yvmqZZ1lG-0AAAAC/icecream-day.gif", "https://c.tenor.com/86EuS9r-oLUAAAAC/ice-cream-ice-cream-cone.gif", "https://c.tenor.com/K5wRu-56t2EAAAAC/baby-ice-cream.gif", "https://c.tenor.com/xTs32UMhBoIAAAAC/kitten-ice-cream.gif", "https://c.tenor.com/pzJEO5jV6D4AAAAd/love-story.gif", "https://c.tenor.com/FIQdKZf2ycQAAAAd/dwinterlude.gif", "https://c.tenor.com/bwCPXqpBKDMAAAAC/ice-cream-cone.gif", "https://c.tenor.com/ZiZPDnoOpPQAAAAC/softsetve-soft-serve-ice-cream.gif", "https://c.tenor.com/43eB8PkzaLwAAAAC/ice-cream-dessert.gif", "https://c.tenor.com/E0JkjSC8YY4AAAAd/ice-cream-dessert.gif"]
     },
     "Beer": {
-        "name": "Beer", "emoji": "🍺", "sentence": "{self.member.mention} gave a cold beer to {self.target.mention}",
-        "gifs": []
+        "name": "Beer", "emoji": "🍺", "sentence": "{member.mention} gave a cold beer to {target.mention}",
+        "gifs": ["https://c.tenor.com/cptl21DHAeEAAAAd/beer-german.gif", "https://c.tenor.com/AqnvlduafqEAAAAC/dancing-bear-hold-my-beer.gif", "https://c.tenor.com/olOjlJ2N1iIAAAAd/go-to-sleep-friday.gif", "https://c.tenor.com/Ehvkyl4uz2MAAAAC/beer-time-time-for-beer.gif", "https://c.tenor.com/1KXU2SqNBvwAAAAC/beer-bubbles.gif", "https://c.tenor.com/CPbn6ugwh00AAAAC/drink-chug.gif", "https://c.tenor.com/Dp00aejRu3UAAAAd/whiskey-drink.gif", "https://c.tenor.com/uEj3CMoM7tYAAAAC/beer-candles.gif", "https://c.tenor.com/eyVIKRbsNScAAAAd/murge-bi%C3%A8re.gif", "https://c.tenor.com/l71IyGQOLm8AAAAd/fan-wild.gif"]
     },
-    "Vodka": {
-        "name": "Milk", "emoji": "🥛", "sentence": "{self.member.mention} gave {self.target.mention} some milk",
-        "gifs": []
+    "Milk": {
+        "name": "Milk", "emoji": "🥛", "sentence": "{member.mention} gave {target.mention} some milk",
+        "gifs": ["https://c.tenor.com/9mzrE_2Gn1kAAAAC/milk-in-your-face.gif", "https://c.tenor.com/jKjK7XqOGhcAAAAd/glass-of-milk-milk.gif", "https://c.tenor.com/nSKygjw9HeYAAAAd/milk-drinking-milk.gif", "https://c.tenor.com/Wpi2-jRktJcAAAAC/milk.gif", "https://c.tenor.com/qRQm8_IX4qIAAAAC/peach-cat-cute.gif", "https://c.tenor.com/mTwHKj6b9WcAAAAC/milk-kid.gif", "https://c.tenor.com/KPQQ6B9WF04AAAAd/drink-milk-spilled-milk.gif", "https://c.tenor.com/jdO5IAmfo_sAAAAd/tom-and-jerry-jerry-the-mouse.gif", "https://c.tenor.com/oAnx2WQMcyoAAAAC/chugging-milk-pouring-milk.gif", "https://c.tenor.com/sv3UwDrZoUAAAAAC/milk-shake-milk.gif"]
     },
     "Wine": {
-        "name": "Wine", "emoji": "🍷", "sentence": "{self.member.mention} gave a classy glass of wine to {self.target.mention}",
-        "gifs": []
+        "name": "Wine", "emoji": "🍷", "sentence": "{member.mention} gave a classy glass of wine to {target.mention}",
+        "gifs": ["https://c.tenor.com/dhNsm44bdsgAAAAC/inside-amy-schumer-amy-schumer.gif", "https://c.tenor.com/S-9qg9KeKJQAAAAd/inna-drinking.gif", "https://c.tenor.com/5hucRBBBC1wAAAAC/wine-wine-time-is-it.gif", "https://c.tenor.com/Mp5nyvSkGIcAAAAC/wine-day-keep-it-going.gif", "https://c.tenor.com/vd-pE_3mOzoAAAAd/capo-cagna-wine.gif", "https://c.tenor.com/2WxwA9EafW8AAAAC/sushichaeng-reaction.gif", "https://c.tenor.com/mVl6AF8TemwAAAAC/dorinda-rhony-one-glass-of-wine-just-one-glass.gif", "https://c.tenor.com/M-MZ-KxGLGAAAAAC/wine-pour-me-some.gif", "https://c.tenor.com/pdsmQ6uYYDAAAAAd/capo-cagna-wine.gif", "https://c.tenor.com/rXG74UA2owwAAAAd/arksteriff-drink.gif"]
     },
     "The Cold Shoulder": {
-        "name": "The Cold Shoulder", "emoji": "🧊", "sentence": "{self.member.mention} gave {self.target.mention} the cold shoulder... yikes!",
-        "gifs": []
+        "name": "The Cold Shoulder", "emoji": "🧊", "sentence": "{member.mention} gave {target.mention} the cold shoulder... yikes!",
+        "gifs": ["https://c.tenor.com/roQLKUMKx6AAAAAC/dont-ignore-me-ignore.gif", "https://c.tenor.com/qzmvm8CVcSEAAAAC/cat-ignore.gif", "https://c.tenor.com/DKw4RQmezNgAAAAC/go-away-bye.gif", "https://c.tenor.com/FlTGUK7Mj28AAAAC/wendy-williams-whatever.gif", "https://c.tenor.com/Fa_OgZTXRo0AAAAd/llama-cold.gif", "https://c.tenor.com/nKBu6qo6-bsAAAAC/glee-finn-hudson.gif", "https://c.tenor.com/Z5hlYpow0SAAAAAC/brushoff-mostinterestingman.gif", "https://c.tenor.com/RijtJsuJ8wAAAAAC/mariah-carey-bye.gif"]
     }
 }
