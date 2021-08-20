@@ -362,7 +362,6 @@ class Misc(commands.Cog):
 
     @commands.command(aliases=['show_reminders', 'showreminders', 'rmdrs', 'rs'])
     @commands.cooldown(1, 5, commands.BucketType.user)
-    @commands.has_any_role(*allowed_roles)
     async def reminders(self, ctx) -> None:
         """ Shows reminders that you've set. """
 
@@ -398,7 +397,6 @@ class Misc(commands.Cog):
 
     @commands.command(aliases=["remove_reminder", "dr", "rr", "dontremind", "dont_remind"])
     @commands.cooldown(1, 5, commands.BucketType.user)
-    @commands.has_any_role(*allowed_roles)
     async def delete_reminder(self, ctx, reminder_id: int = None) -> None:
         """ Deletes a member reminder.
         :param reminder_id: The ID of the reminder to delete. """
