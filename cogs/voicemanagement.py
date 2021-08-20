@@ -5,6 +5,7 @@ from typing import Dict, Union
 from extra import utils
 
 server_id = int(os.getenv('SERVER_ID'))
+bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
 
 class VoiceManagement(commands.Cog):
 
@@ -30,30 +31,32 @@ class VoiceManagement(commands.Cog):
         current_ts = await utils.get_timestamp()
         guild = self.client.get_guild(server_id)
 
+        bots_and_commands_channel =  guild.get_channel(bots_and_commands_channel_id)
+
         for user_id in list(self.people.keys()):
             secs = current_ts - self.people[user_id]['timestamp']
             if secs >= 60 and secs < 180:
                 if not self.people[user_id]['camera_on'] and not self.people[user_id]['notified']:
                     # Notifies user to turn on camera
+                    msg = f"**Hey, I saw you are in the `Video Calls` channel and didn't turn on your camera. Please, do it or you will soon get disconnected!**"
                     try:
                         member = guild.get_member(user_id)
-                        await member.send(
-                            f"**Hey, I saw you are in the `Video Calls` channel and didn't turn on your camera. Please, do it or you will soon get disconnected!**")
+                        await member.send(msg)
                         self.people[user_id]['notified'] = True
                     except:
-                        pass
+                        await bots_and_commands_channel.send(f"{msg}. {member.mention}")
 
             elif secs >= 180:
                 if not self.people[user_id]['camera_on']:
                     del self.people[user_id]
                     # Disconnects users with cameras off
                     try:
+                        msg = f"**You got disconnected for not turning on your camera in the `Video Calls` voice channel!**"
                         member = guild.get_member(user_id)
                         await member.move_to(None)
-                        await member.send(
-                            f"**You got disconnected for not turning on your camera in the `Video Calls` voice channel!**")
+                        await member.send(msg)
                     except:
-                        pass
+                        await bots_and_commands_channel.send(f"{msg}. {member.mention}")
 
 
     @commands.Cog.listener()
