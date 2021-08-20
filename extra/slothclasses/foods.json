@@ -1,0 +1,82 @@
+{
+    "Cake": {
+        "name": "Cake", "emoji": "🍰", "sentence": "{self.member.mention} gave a piece of cake to {self.target.mention}",
+        "gifs": []
+    },
+    "Twix": {
+        "name": "Twix", "emoji": "<:twix:878273912553766932>", "sentence": "{self.member.mention} gave a twix bar to {self.target.mention}",
+        "gifs": []
+    },
+    "Kebab": {
+        "name": "Kebab", "emoji": "<:zslothkebab:739215835108999298>", "sentence": "{self.member.mention} gave a kebab to {self.target.mention}",
+        "gifs": []
+    },
+    "Pizza": {
+        "name": "Pizza", "emoji": "🍕", "sentence": "{self.member.mention} gave a slice of pizza to {self.target.mention}",
+        "gifs": []
+    },
+    "Croissant": {
+        "name": "Croissant", "emoji": "🥐", "sentence": "{self.member.mention} gave a croissant to {self.target.mention}",
+        "gifs": []
+    },
+    "Baguette": {
+        "name": "Baguette", "emoji": "🥖", "sentence": "{self.member.mention} gave a baguette to {self.target.mention}",
+        "gifs": []
+    },
+    "Pierogi": {
+        "name": "Pierogi", "emoji": "<:pierogi:878283834909667359>", "sentence": "{self.member.mention} gave {self.target.mention} some pierogi",
+        "gifs": []
+    },
+    "Popcorn": {
+        "name": "Popcorn", "emoji": "🍿", "sentence": "{self.member.mention} gave {self.target.mention} a bucket of popcorn",
+        "gifs": []
+    },
+    "Coffee": {
+        "name": "Coffee", "emoji": "<a:coffe_sloth:737788866043314297>", "sentence": "{self.member.mention} gave a cup of coffee {self.target.mention}",
+        "gifs": []
+    },
+    "Tea": {
+        "name": "Tea", "emoji": "<:cay:815247281250893834>", "sentence": "{self.member.mention} gave a cup of tea to {self.target.mention}",
+        "gifs": []
+    },
+    "Muffin": {
+        "name": "Muffin", "emoji": "🧁", "sentence": "{self.member.mention} gave a muffin to {self.target.mention}",
+        "gifs": []
+    },
+    "Cookıe": {
+        "name": "Cookıe", "emoji": "<:zslothcookie:695423388042133514>", "sentence": "{self.member.mention} gave {self.target.mention} a cookıe",
+        "gifs": []
+    },
+    "Honey": {
+        "name": "Honey", "emoji": "🍯", "sentence": "{self.member.mention} gave a honey jar to {self.target.mention}",
+        "gifs": []
+    },
+    "Pie": {
+        "name": "Pie", "emoji": "🥧", "sentence": "{self.member.mention} gave a piece of pie to {self.target.mention}",
+        "gifs": []
+    },
+    "Doughnut": {
+        "name": "Doughnut", "emoji": "🍩", "sentence": "{self.member.mention} gave {self.target.mention} a doughnut",
+        "gifs": []
+    },
+    "Peach": {
+        "name": "Peach", "emoji": "🍑", "sentence": "{self.member.mention} gave {self.target.mention} a delicious peach",
+        "gifs": []
+    },
+    "Beer": {
+        "name": "Beer", "emoji": "🍺", "sentence": "{self.member.mention} gave a cold beer to {self.target.mention}",
+        "gifs": []
+    },
+    "Vodka": {
+        "name": "Milk", "emoji": "🥛", "sentence": "{self.member.mention} gave {self.target.mention} some milk",
+        "gifs": []
+    },
+    "Wine": {
+        "name": "Wine", "emoji": "🍷", "sentence": "{self.member.mention} gave a classy glass of wine to {self.target.mention}",
+        "gifs": []
+    },
+    "The Cold Shoulder": {
+        "name": "The Cold Shoulder", "emoji": "🧊", "sentence": "{self.member.mention} gave {self.target.mention} the cold shoulder... yikes!",
+        "gifs": []
+    }
+}

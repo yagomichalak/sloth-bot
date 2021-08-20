@@ -139,7 +139,7 @@ class BootView(discord.ui.View):
 
     @discord.ui.button(label='Nevermind', style=discord.ButtonStyle.red, custom_id='nevermind_id', emoji="❌")
     async def nevermind_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
-        """ Cancels the hug action. """
+        """ Cancels the kick action. """
 
         await self.disable_buttons(interaction)
         self.stop()
@@ -824,7 +824,7 @@ class PunchView(discord.ui.View):
 
     @discord.ui.button(label='Nevermind', style=discord.ButtonStyle.red, custom_id='nevermind_id', emoji="❌")
     async def nevermind_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
-        """ Cancels the hug action. """
+        """ Cancels the punch action. """
 
         await self.disable_buttons(interaction)
         self.stop()
@@ -850,33 +850,51 @@ class GiveView(discord.ui.View):
         self.member = member
         self.target = target
 
+        self.foods: Dict[str, Dict[str, str]] = self.get_foods()
 
-    @discord.ui.button(label='Cake', style=discord.ButtonStyle.blurple, custom_id='cake_id', emoji="🍰")
+        options = [
+            discord.SelectOption(label=food, emoji=values['emoji'])
+            for food, values in self.foods.items()]
+
+        foods_select = discord.ui.Select(placeholder="What do you wanna give them?",
+        custom_id="give_select_id", min_values=1, max_values=1, options=options)
+
+        foods_select.callback = partial(self.give_button, foods_select)
+
+        self.children.insert(0, foods_select)
+
+    def get_foods(self) -> Dict[str, Dict[str, str]]:
+        data = {}
+        with open('./extra/slothclasses/foods.json', 'r', encoding="utf-8") as f:
+            data = json.loads(f.read())
+        return data
+
     async def give_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
-        """ Gives someone a piece of cake. """
+        """ Gives someone something. """
 
-        cakes: List[str] = [
-        ]
+
+        selected = interaction.data['values'][0]
+        option = self.foods[selected]
 
         embed = discord.Embed(
-            title="__Give__",
-            description=f"🍰 {self.member.mention} gave a piece of cake to {self.target.mention} 🍰",
+            title=f"__{option['name']}__",
+            description=f"{option['emoji']} {option['sentence']} {option['emoji']}",
             color=discord.Color.magenta(),
             timestamp=interaction.message.created_at
         )
 
         embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
         embed.set_thumbnail(url=self.target.avatar.url)
-        embed.set_image(url=choice(cakes))
+        embed.set_image(url=choice(option['gifs']))
         embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
 
         await interaction.response.send_message(content=self.target.mention, embed=embed)
         await self.disable_buttons(interaction, followup=True)
         self.stop()
 
-    @discord.ui.button(label='Nevermind', style=discord.ButtonStyle.red, custom_id='nevermind_id', emoji="❌")
-    async def nevermind_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
-        """ Cancels the hug action. """
+    @discord.ui.button(label='Nothing', style=discord.ButtonStyle.red, custom_id='nothing_id', emoji="❌", row=2)
+    async def nothing_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Cancels the give action. """
 
         await self.disable_buttons(interaction)
         self.stop()
@@ -938,7 +956,7 @@ class TickleView(discord.ui.View):
 
     @discord.ui.button(label='Nevermind', style=discord.ButtonStyle.red, custom_id='nevermind_id', emoji="❌")
     async def nevermind_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
-        """ Cancels the hug action. """
+        """ Cancels the tickling action. """
 
         await self.disable_buttons(interaction)
         self.stop()
