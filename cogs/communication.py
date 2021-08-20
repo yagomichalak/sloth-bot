@@ -32,11 +32,11 @@ class Communication(commands.Cog):
         # Checks whether Patreon advertising event exists
         if not await self.get_advertising_event(event_label='patreon_ad'):
             # If not, creates it
-            return await self.insert_advertising_event(event_label='patreon_ad', current_ts=current_ts-7200)
+            return await self.insert_advertising_event(event_label='patreon_ad', current_ts=current_ts-14400)
 
         # Checks whether advertising time is due
         if await self.check_advertising_time(
-            current_ts=int(current_ts), event_label="patreon_ad", ad_time=7200):
+            current_ts=int(current_ts), event_label="patreon_ad", ad_time=14400):
             # Updates time and advertises.
             await self.update_advertising_time(event_label="patreon_ad", current_ts=current_ts)
             general_channel = self.client.get_channel(general_channel_id)
