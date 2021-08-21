@@ -362,12 +362,6 @@ class Tools(commands.Cog):
 		member_state = member.voice
 		if channel := member_state and member_state.channel:
 			msg = f"**{member.mention} is in the {channel.mention} voice channel.**"
-			try:
-				invite = await channel.create_invite()
-			except:
-				pass
-			else:
-				msg += f" **Here's a quick invite:** {invite}"
 			await ctx.send(msg)
 		else:
 			await ctx.send(f"**{member.mention} is not in a VC!**")
