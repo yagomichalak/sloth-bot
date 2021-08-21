@@ -21,6 +21,11 @@ class RolePlay(commands.Cog):
         * Cooldown: 2 minutes """
         
         author = ctx.author
+
+        if not member:
+            self.client.get_command(ctx.command.name).reset_cooldown(ctx)
+            return await ctx.send(f"**Please, inform a member, {author.mention}!**")
+
         if author.id == member.id:
             self.client.get_command('hug').reset_cooldown(ctx)
             return await ctx.send(f"**You can't hug yourself, {author.mention}!**")
@@ -46,6 +51,11 @@ class RolePlay(commands.Cog):
         Ps: It doesn't KICK the person from the server. """
         
         author = ctx.author
+
+        if not member:
+            self.client.get_command(ctx.command.name).reset_cooldown(ctx)
+            return await ctx.send(f"**Please, inform a member, {author.mention}!**")
+
         if author.id == member.id:
             self.client.get_command('boot').reset_cooldown(ctx)
             return await ctx.send(f"**You can't boot yourself, {author.mention}!**")
@@ -69,6 +79,11 @@ class RolePlay(commands.Cog):
         * Cooldown: 2 minutes """
 
         author = ctx.author
+
+        if not member:
+            self.client.get_command(ctx.command.name).reset_cooldown(ctx)
+            return await ctx.send(f"**Please, inform a member, {author.mention}!**")
+
         if author.id == member.id:
             self.client.get_command('kiss').reset_cooldown(ctx)
             return await ctx.send(f"**You can't kiss yourself, {author.mention}!**")
@@ -92,6 +107,11 @@ class RolePlay(commands.Cog):
         * Cooldown: 2 minutes """
 
         author = ctx.author
+
+        if not member:
+            self.client.get_command(ctx.command.name).reset_cooldown(ctx)
+            return await ctx.send(f"**Please, inform a member, {author.mention}!**")
+
         if author.id == member.id:
             self.client.get_command('slap').reset_cooldown(ctx)
             return await ctx.send(f"**You can't slap yourself, {author.mention}!**")
@@ -248,6 +268,11 @@ class RolePlay(commands.Cog):
         * Cooldown: 2 minutes """
 
         author = ctx.author
+
+        if not member:
+            self.client.get_command(ctx.command.name).reset_cooldown(ctx)
+            return await ctx.send(f"**Please, inform a member, {author.mention}!**")
+
         if author.id == member.id:
             self.client.get_command('punch').reset_cooldown(ctx)
             return await ctx.send(f"**You can't punch yourself, {author.mention}!**")
@@ -271,6 +296,11 @@ class RolePlay(commands.Cog):
         * Cooldown: 2 minutes """
 
         author = ctx.author
+
+        if not member:
+            self.client.get_command(ctx.command.name).reset_cooldown(ctx)
+            return await ctx.send(f"**Please, inform a member, {author.mention}!**")
+
         if author.id == member.id:
             self.client.get_command('give').reset_cooldown(ctx)
             return await ctx.send(f"**You can't give yourself anything, {author.mention}!**")
@@ -294,6 +324,12 @@ class RolePlay(commands.Cog):
         * Cooldown: 2 minutes """
 
         author = ctx.author
+
+        if not member:
+            self.client.get_command(ctx.command.name).reset_cooldown(ctx)
+            return await ctx.send(f"**Please, inform a member, {author.mention}!**")
+
+            
         if author.id == member.id:
             self.client.get_command('tickle').reset_cooldown(ctx)
             return await ctx.send(f"**You can't tickle yourself, {author.mention}!**")
