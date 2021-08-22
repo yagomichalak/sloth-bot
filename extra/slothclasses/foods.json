@@ -78,5 +78,13 @@
     "The Cold Shoulder": {
         "name": "The Cold Shoulder", "emoji": "🧊", "sentence": "{member.mention} gave {target.mention} the cold shoulder... yikes!",
         "gifs": ["https://c.tenor.com/roQLKUMKx6AAAAAC/dont-ignore-me-ignore.gif", "https://c.tenor.com/qzmvm8CVcSEAAAAC/cat-ignore.gif", "https://c.tenor.com/DKw4RQmezNgAAAAC/go-away-bye.gif", "https://c.tenor.com/FlTGUK7Mj28AAAAC/wendy-williams-whatever.gif", "https://c.tenor.com/Fa_OgZTXRo0AAAAd/llama-cold.gif", "https://c.tenor.com/nKBu6qo6-bsAAAAC/glee-finn-hudson.gif", "https://c.tenor.com/Z5hlYpow0SAAAAAC/brushoff-mostinterestingman.gif", "https://c.tenor.com/RijtJsuJ8wAAAAAC/mariah-carey-bye.gif"]
+    },
+    "Brigadeiro": {
+        "name": "Brigadeiro", "emoji": "<:zslothbrigadeiro:850311864453431307>", "sentence": "{member.mention} gave {target.mention} a brigadeiro",
+        "gifs": ["https://c.tenor.com/AKAe5QNdKZUAAAAd/brigadeiro-docinho.gif", "https://c.tenor.com/BDOG0z8ukyEAAAAC/brigadeiro.gif", "https://c.tenor.com/gaxz6IaDBjIAAAAC/brigadeirim-triggered.gif", "https://c.tenor.com/RvkGsanssN8AAAAd/brigadeiro-docinho.gif", "https://c.tenor.com/bbFtBdBCRlQAAAAd/food-doughnut.gif", "https://c.tenor.com/xlx3q5DxS5EAAAAC/brigadeiro-easter.gif", "https://c.tenor.com/K7JjB1x3wu8AAAAd/chocolate-balls.gif", "https://c.tenor.com/482lFjnkK7oAAAAd/johnny-depp-movie.gif"]
+    },
+    "Lemon": {
+        "name": "Lemon", "emoji": "<:zslothlemon:709893573469798521>", "sentence": "{member.mention} gave {target.mention} a lemon",
+        "gifs": ["https://c.tenor.com/X0scZtUPrOQAAAAC/live-sour.gif", "https://c.tenor.com/nsoMvoc-UzMAAAAC/popuko-pop-team-epic.gif", "https://c.tenor.com/6YOnBEohQykAAAAC/dancing-lemon.gif", "https://c.tenor.com/Edu9EupdKmkAAAAC/dancing-lemon.gif", "https://c.tenor.com/6lS2lC2MqPkAAAAd/lizard-licking.gif", "https://c.tenor.com/7nEIwYmqNXMAAAAC/lemon-yum.gif", "https://c.tenor.com/iR5UQ1XefSQAAAAC/lemon-squeeze.gif", "https://c.tenor.com/uNKFVH2qehoAAAAd/lemon-mcdonalds.gif"]
     }
 }
