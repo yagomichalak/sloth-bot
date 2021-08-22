@@ -95,7 +95,7 @@ different_class_roles = {
         "hindi", "urdu", "hindustani", "hindi-urdu"
     ],
     "south asian languages": [
-        "bengali"
+        "bengali", "tamil", "punjabi" 
     ],
     "balkan languages": [
         "croatian", "serbian", "bosnian"
