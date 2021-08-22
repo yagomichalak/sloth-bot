@@ -346,6 +346,7 @@ class RolePlay(commands.Cog):
 
     @commands.command(aliases=['throw', 'toss'])
     @commands.cooldown(1, 120, commands.BucketType.user)
+    @Player.not_ready()
     async def yeet(self, ctx, *, member: discord.Member = None) -> None:
         """ Yeets something at someone.
         :param member: The member to yeet something at. """
@@ -354,6 +355,7 @@ class RolePlay(commands.Cog):
 
     @commands.command()
     @commands.cooldown(1, 120, commands.BucketType.user)
+    @Player.not_ready()
     async def seduce(self, ctx, *, member: discord.Member = None) -> None:
         """ Seduces someone. """
 
