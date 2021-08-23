@@ -1005,3 +1005,100 @@ class TickleView(discord.ui.View):
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
         return self.member.id == interaction.user.id
+
+class YeetView(discord.ui.View):
+    """ View for the yeet skill. """
+
+    def __init__(self, member: discord.Member, target: discord.Member, timeout: Optional[float] = 180):
+        super().__init__(timeout=timeout)
+        self.member = member
+        self.target = target
+
+
+    @discord.ui.button(label='Something', style=discord.ButtonStyle.blurple, custom_id='yeet_something_id', emoji="🤾‍♂️")
+    async def yeet_something_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Yeet something at someone. """
+
+        yeets: List[str] = [
+            'https://c.tenor.com/WLb6BqWpdM8AAAAd/ball-throw.gif',
+            'https://c.tenor.com/ZaVIDZ0qKa8AAAAC/mad-throw.gif',
+            'https://c.tenor.com/9bbuTshmG60AAAAC/nice-throw-radio.gif',
+            'https://c.tenor.com/e89L3JtrLbgAAAAd/rage-i-quit.gif',
+            'https://c.tenor.com/GiaMbnaK00YAAAAC/guy-throwing-trash-can-at-someone.gif',
+            'https://c.tenor.com/iokjb-fPg9MAAAAi/machiko-rabbit.gif',
+            'https://c.tenor.com/18DiP6FCXvwAAAAC/shoe-throw.gif',
+            'https://c.tenor.com/V_s9qJt0kM4AAAAC/stitch-throw.gif'
+        ]
+
+        embed = discord.Embed(
+            title="__Yeet!__",
+            description=f"🤾‍♂️ {self.member.mention} yeeted something at {self.target.mention} 🤾‍♂️",
+            color=discord.Color.fuchsia(),
+            timestamp=interaction.message.created_at
+        )
+
+        embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
+        embed.set_thumbnail(url=self.target.avatar.url)
+        embed.set_image(url=choice(yeets))
+        embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
+
+        await interaction.response.send_message(content=self.target.mention, embed=embed)
+        await self.disable_buttons(interaction, followup=True)
+        self.stop()
+
+    @discord.ui.button(label='Someone', style=discord.ButtonStyle.blurple, custom_id='yeet_someone_id', emoji="<:ytho:738497432693899275>")
+    async def yeet_someone_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Yeet someone; your target. """
+
+        yeets: List[str] = [
+            'https://c.tenor.com/lNBksxJBJdUAAAAC/divorce-bye.gif',
+            'https://c.tenor.com/VtA1UeS5LiYAAAAC/couple-pissed.gif',
+            'https://c.tenor.com/Ia58SdP_5MIAAAAC/lion-king-toss.gif',
+            'https://c.tenor.com/EkQS-yDvuw4AAAAC/pool-throw.gif',
+            'https://c.tenor.com/mAEWXuWQqkkAAAAC/wtf-is.gif',
+            'https://c.tenor.com/Eqzbcyujjw0AAAAd/throw-child-throw-kid.gif',
+            'https://c.tenor.com/xrFSa7f68XAAAAAC/anime-throw.gif',
+            'https://c.tenor.com/I3oebKLZ6m4AAAAd/hulk-angry.gif',
+            'https://c.tenor.com/eF9c4AaclvIAAAAC/link-pig.gif',
+            'https://c.tenor.com/fihwHmmeW0QAAAAC/rude-cat-throw.gif',
+            'https://c.tenor.com/gISSJc70lH4AAAAC/yeet-naruto.gif',
+            'https://c.tenor.com/mlMJ08Y5-BcAAAAC/see-ya-ya-yeet.gif',
+            'https://c.tenor.com/yhz79wkknsYAAAAd/yeet-cat.gif'
+
+        ]
+
+        embed = discord.Embed(
+            title="__Yeet!__",
+            description=f"<:ytho:738497432693899275> {self.member.mention} yeeted {self.target.mention} <:ytho:738497432693899275>",
+            color=discord.Color.fuchsia(),
+            timestamp=interaction.message.created_at
+        )
+
+        embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
+        embed.set_thumbnail(url=self.target.avatar.url)
+        embed.set_image(url=choice(yeets))
+        embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
+
+        await interaction.response.send_message(content=self.target.mention, embed=embed)
+        await self.disable_buttons(interaction, followup=True)
+        self.stop()
+
+    @discord.ui.button(label='Nevermind', style=discord.ButtonStyle.red, custom_id='nevermind_id', emoji="❌")
+    async def nevermind_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Cancels the tickling action. """
+
+        await self.disable_buttons(interaction)
+        self.stop()
+
+    async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
+
+        for child in self.children:
+            child.disabled = True
+
+        if followup:
+            await interaction.followup.edit_message(message_id=interaction.message.id, view=self)
+        else:
+            await interaction.response.edit_message(view=self)
+
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        return self.member.id == interaction.user.id

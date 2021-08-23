@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 from extra.slothclasses.player import Player
-from extra.slothclasses.view import HugView, BootView, KissView, SlapView, HoneymoonView, PunchView, GiveView, TickleView
+from extra.slothclasses.view import HugView, BootView, KissView, SlapView, HoneymoonView, PunchView, GiveView, TickleView, YeetView
 from extra import utils
 from extra.prompt.menu import ConfirmButton
 
@@ -346,12 +346,33 @@ class RolePlay(commands.Cog):
 
     @commands.command(aliases=['throw', 'toss'])
     @commands.cooldown(1, 120, commands.BucketType.user)
-    @Player.not_ready()
     async def yeet(self, ctx, *, member: discord.Member = None) -> None:
         """ Yeets something at someone.
-        :param member: The member to yeet something at. """
+        :param member: The member to yeet or to yeet something at.
+        
+        * Cooldown: 2 minutes """
 
-        pass
+        author = ctx.author
+
+        if not member:
+            self.client.get_command(ctx.command.name).reset_cooldown(ctx)
+            return await ctx.send(f"**Please, inform a member, {author.mention}!**")
+
+            
+        if author.id == member.id:
+            self.client.get_command(ctx.command.name).reset_cooldown(ctx)
+            return await ctx.send(f"**You can't yeet (something at) yourself, {author.mention}!**")
+
+        embed = discord.Embed(
+            title="__Yeet Prompt__",
+            description=f"What do you wanna yeet, {author.mention}?",
+            color=author.color,
+            timestamp=ctx.message.created_at
+        )
+        embed.set_footer(text=f"Requested by {author}", icon_url=author.avatar.url)
+        view = YeetView(member=author, target=member, timeout=60)
+        await ctx.send(embed=embed, view=view)
+
 
     @commands.command()
     @commands.cooldown(1, 120, commands.BucketType.user)
