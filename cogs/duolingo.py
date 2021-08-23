@@ -195,7 +195,7 @@ class Duolingo(commands.Cog):
                 if unfinished_skills:
                     last = unfinished_skills[-1]
                     embed.add_field(name=f"__Last Lesson__", value=f"""
-                    **Language:** {last['language_string']}
+                    **Language:** `{last['language_string']}`
                     **Title:** `{last['title']}`
                     **Progress Percent:** `{round(last['progress_percent'])}%` `({last['progress_level_session_index']}/{last['num_sessions_for_level']})`
                     """, inline=True)

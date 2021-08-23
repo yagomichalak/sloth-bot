@@ -214,7 +214,7 @@ class Agares(Player):
     @Player.skill_mark()
     async def reflect(self, ctx, target: discord.Member = None) -> None:
         """ Gives someone the ability to automatically reflect any debuff skill for 24h.
-        You still get the debuff, but the perpetrator of the attacke gets it too. (100%)
+        You still get the debuff, but the perpetrator of the attack gets it too. (100%)
         :param target: The target member.
 
         PS:

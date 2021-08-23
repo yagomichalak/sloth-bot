@@ -199,7 +199,21 @@ class SlapView(discord.ui.View):
         slaps: List[str] = [
             'https://c.tenor.com/-nt9Dj8Ei14AAAAd/tap-that.gif',
             'https://c.tenor.com/p4nJMjBtwIMAAAAC/cats-funny.gif',
-            'https://c.tenor.com/wKKCNA6Ni-MAAAAC/cheh-t1-t1lose.gif'
+            'https://c.tenor.com/wKKCNA6Ni-MAAAAC/cheh-t1-t1lose.gif',
+            'https://c.tenor.com/bOERuBKmDSoAAAAC/michael-jackson-sexy.gif',
+            'https://c.tenor.com/PHTpoMvPk_EAAAAC/ass-slap-slap.gif',
+            'https://c.tenor.com/WgHlS-sXVHIAAAAC/tinkerbell-spank.gif',
+            'https://c.tenor.com/9DZ7tx1JATkAAAAC/happy-bunny-pig.gif',
+            'https://c.tenor.com/eS3xAaYHDeMAAAAC/ass-ass-slap.gif',
+            'https://c.tenor.com/CyczLT_QsPIAAAAC/hobo-bros-sexy.gif',
+            'https://c.tenor.com/13Tuskb4T8EAAAAC/elizabeth-olsen-aubrey-plaza.gif',
+            'https://c.tenor.com/YIWoKVWn3FUAAAAC/happy-spank.gif',
+            'https://c.tenor.com/bHE5Txlp5-8AAAAC/slap-butts-anime.gif',
+            'https://c.tenor.com/2o9uTHxpw3UAAAAC/punishment-beat-ass.gif',
+            'https://c.tenor.com/Zl2DQ6lc2-gAAAAC/slap-butt-naughty.gif',
+            'https://c.tenor.com/oUwdLFkrzaMAAAAd/walrus-slaps.gif',
+            'https://c.tenor.com/H3lLTaQZRuwAAAAC/butt-slap-adventure-time.gif'
+
         ]
 
         embed = discord.Embed(
@@ -297,7 +311,25 @@ class KissView(discord.ui.View):
             'https://c.tenor.com/hK8IUmweJWAAAAAC/kiss-me-%D0%BB%D1%8E%D0%B1%D0%BB%D1%8E.gif',
             'https://c.tenor.com/Aaxuq2evHe8AAAAC/kiss-cute.gif',
             'https://c.tenor.com/A0ixOj7Y1WUAAAAC/kiss-anime.gif',
-            'https://c.tenor.com/ErAPuiWY46QAAAAC/kiss-anime.gif'
+            'https://c.tenor.com/ErAPuiWY46QAAAAC/kiss-anime.gif',
+            'https://c.tenor.com/4GdkzkTQdI8AAAAC/kissing-love.gif',
+            'https://c.tenor.com/lsOkG57_ibIAAAAd/kiss-lip-kiss.gif',
+            'https://c.tenor.com/uF0-jdZRkLYAAAAC/kissing-kiss.gif',
+            'https://c.tenor.com/3kvvlXjRse0AAAAC/kiss-lip-kiss.gif',
+            'https://c.tenor.com/RZEZVjS3MeMAAAAC/forcibly-kissing-deep-kiss.gif',
+            'https://c.tenor.com/teTesMTK_c4AAAAC/shiksha-wedding.gif',
+            'https://c.tenor.com/RrUKz9kC3bUAAAAi/dovey-bunnies-kisses.gif',
+            'https://c.tenor.com/FDcq03ZLNX0AAAAi/love-couple.gif',
+            'https://c.tenor.com/LbOTuZXj9y4AAAAC/cat-love.gif',
+            'https://c.tenor.com/OhTr6EO7u14AAAAC/love-you-kiss.gif',
+            'https://c.tenor.com/xTSmPl72UjYAAAAC/kiss-blushing.gif',
+            'https://c.tenor.com/Gr8BaRWOudkAAAAC/brown-and-cony-kiss.gif',
+            'https://c.tenor.com/uhB9b3AzxrQAAAAC/brown.gif',
+            'https://c.tenor.com/cK2c6eQ7Is8AAAAC/cony-and-brown-hug.gif',
+            'https://c.tenor.com/sXNJMF5vI8oAAAAC/love-peachcat.gif',
+            'https://c.tenor.com/MXd8Xby7jnMAAAAC/davydoff-love.gif',
+            'https://c.tenor.com/yWGhrAd0cioAAAAC/kissing-couple.gif'
+
         ]
 
         embed = discord.Embed(
