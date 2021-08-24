@@ -57,25 +57,45 @@ class Social(commands.Cog):
             if reaction.count < 10:
                 continue
 
+            # Check whether message is already in the Slothboard
             if not await self.get_slothboard_message(message.id, channel.id):
-                # Post in #slothboard
+
+                # Checks whether message content contains an embedded image
                 current_date = await utils.get_time_now()
+
                 embed = discord.Embed(
                     title="__Slothboard__",
-                    description=message.content,
                     color=discord.Color.gold(),
                     timestamp=current_date
                 )
 
+                # Gets all Discord link attachments
+                attachment_root = 'https://cdn.discordapp.com/attachments/'
+                content = message.content.split()
+                discord_attachments = [att for att in content if att.startswith(attachment_root)]
+                for datt in discord_attachments:
+                    try:
+                        if not embed.image:
+                            embed.set_image(url=datt)
+
+                        content.remove(datt)
+                    except:
+                        pass
+
+                message.content = ' '.join(content).strip() if content else None
+                embed.description=f"[**Original Message**]({message.jump_url})\n\n**Content:** {message.content}"
+
+                # Gets all embedded attachments
                 if all_attachments := message.attachments:
                     attachments = [att for att in all_attachments if att.content_type.startswith('image')]
+
                     if attachments:
                         embed.set_image(url=attachments[0])
                     else:
                         return
 
                 embed.set_author(name=message.author, url=message.author.avatar.url, icon_url=message.author.avatar.url)
-
+                # Post in #slothboard
                 await self.insert_slothboard_message(message.id, channel.id)
                 slothboard_channel = guild.get_channel(slothboard_channel_id)
                 return await slothboard_channel.send(content=f"**From:** {channel.mention}", embed=embed)
