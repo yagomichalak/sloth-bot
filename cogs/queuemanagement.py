@@ -14,6 +14,7 @@ teacher_role_id = int(os.getenv('TEACHER_ROLE_ID'))
 
 
 class QueueManagement(commands.Cog):
+    """ Category for creating, managing and interacting with queues. """
 
     def __init__(self, client) -> None:
         self.client = client
