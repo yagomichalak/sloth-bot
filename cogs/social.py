@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 from discord.ext.commands.core import has_permissions
+from discord.utils import maybe_coroutine
 import praw
 from random import randint
 import aiohttp
@@ -8,6 +9,8 @@ import os
 from typing import List, Union
 from extra import utils
 from extra.view import QuickButtons
+from mysqldb import the_database
+
 
 reddit = praw.Reddit(client_id=os.getenv('REDDIT_CLIENT_ID'),  # client id
                      client_secret=os.getenv('REDDIT_CLIENT_SECRET'),  # my client secret
@@ -19,7 +22,7 @@ mod_role_id = int(os.getenv('MOD_ROLE_ID'))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID'))
 teacher_role_id = int(os.getenv('TEACHER_ROLE_ID'))
 watchlist_channel_id = int(os.getenv('WATCHLIST_CHANNEL_ID'))
-
+starboard_channel_id = int(os.getenv('STARBOARD_CHANNEL_ID'))
 
 class Social(commands.Cog):
     """ Social related commands. """
@@ -30,6 +33,140 @@ class Social(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         print('Social cog is ready!')
+
+    @commands.Cog.listener()
+    async def on_raw_reaction_add(self, payload) -> None:
+        """ Sends messages to the starboard channel. """
+        
+        emoji = str(payload.emoji)
+        star = '<:zzSloth:686237376510689327>'
+
+        # Checkes whether it's the right emoji
+        if emoji != star:
+            return
+
+        if payload.channel_id == starboard_channel_id:
+            return
+
+        # Gets message
+        guild = self.client.get_guild(payload.guild_id)
+        channel = guild.get_channel(payload.channel_id)
+        message = await channel.fetch_message(payload.message_id)
+        if not message:
+            return
+
+        # Checks whether the message has enough reactions
+        for reaction in message.reactions:
+            if str(reaction) != emoji:
+                continue
+
+            if reaction.count < 10:
+                continue
+
+            if not await self.get_starboard_message(message.id, channel.id):
+                # Post in #starboard
+                current_date = await utils.get_time_now()
+                embed = discord.Embed(
+                    title="__Starboard__",
+                    description=message.content,
+                    color=discord.Color.gold(),
+                    timestamp=current_date
+                )
+
+                if all_attachments := message.attachments:
+                    attachments = [att for att in all_attachments if att.content_type.startswith('image')]
+                    if attachments:
+                        embed.set_image(url=attachments[0])
+                    else:
+                        return
+
+                embed.set_author(name=message.author, url=message.author.avatar.url, icon_url=message.author.avatar.url)
+
+                await self.insert_starboard_message(message.id, channel.id)
+                starboard_channel = guild.get_channel(starboard_channel_id)
+                return await starboard_channel.send(content=f"**From:** {channel.mention}", embed=embed)
+
+    @commands.command(hidden=True)
+    @commands.has_permissions(administrator=True)
+    async def create_table_starboard(self, ctx) -> None:
+        """ (ADM) Creates the Starboard table. """
+
+        if await self.table_starboard_exists():
+            return await ctx.send("**The `Starboard` table already exists!**")
+
+        mycursor, db = await the_database()
+        await mycursor.execute("""
+            CREATE TABLE Starboard (
+                message_id BIGINT NOT NULL,
+                channel_id BIGINT NOT NULL,
+                PRIMARY KEY (message_id, channel_id)
+            )""")
+        await db.commit()
+        await mycursor.close()
+        await ctx.send("**Created `Starboard` table!**")
+
+    @commands.command(hidden=True)
+    @commands.has_permissions(administrator=True)
+    async def drop_table_starboard(self, ctx) -> None:
+        """ (ADM) Drops the Starboard table. """
+
+        if not await self.table_starboard_exists():
+            return await ctx.send("**The `Starboard` table doesn't exist!**")
+
+        mycursor, db = await the_database()
+        await mycursor.execute("DROP TABLE Starboard")
+        await db.commit()
+        await mycursor.close()
+        await ctx.send("**Dropped `Starboard` table!**")
+
+    @commands.command(hidden=True)
+    @commands.has_permissions(administrator=True)
+    async def reset_table_starboard(self, ctx) -> None:
+        """ (ADM) Resets the Starboard table. """
+
+        if not await self.table_starboard_exists():
+            return await ctx.send("**The `Starboard` table doesn't exist yet!**")
+
+        mycursor, db = await the_database()
+        await mycursor.execute("DELETE FROM Starboard")
+        await db.commit()
+        await mycursor.close()
+        await ctx.send("**Reset `Starboard` table!**")
+
+    async def table_starboard_exists(self) -> bool:
+        """ Checks whether the Starboard table exists. """
+
+        mycursor, _ = await the_database()
+        await mycursor.execute("SHOW TABLE STATUS LIKE 'Starboard'")
+        table_info = await mycursor.fetchall()
+        await mycursor.close()
+        if len(table_info) == 0:
+            return False
+        else:
+            return True
+
+    async def get_starboard_message(self, message_id: int, channel_id: int) -> List[int]:
+        """ Gets a starboard message.
+        :param message_id: The ID of the original message.
+        :param channel_id: The ID of the message's original channel. """
+
+        mycursor, _ = await the_database()
+        await mycursor.execute("SELECT * FROM Starboard WHERE message_id = %s AND channel_id = %s", (message_id, channel_id))
+        starboard_message = await mycursor.fetchone()
+        await mycursor.close()
+        return starboard_message
+
+    async def insert_starboard_message(self, message_id: int, channel_id: int) -> None:
+        """ Inserts a starboard message.
+        :param message_id: The ID of the original message.
+        :param channel_id: The ID of the message's original channel.  """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("INSERT INTO Starboard (message_id, channel_id) VALUES (%s, %s)", (
+            message_id, channel_id))
+        await db.commit()
+        await mycursor.close()
+
 
     @commands.command(aliases=['si', 'server'])
     async def serverinfo(self, ctx) -> None:
@@ -122,28 +259,6 @@ class Social(commands.Cog):
         await ctx.send(embed=embed, view=view)
 
 
-    @staticmethod
-    async def is_allowed(ctx: commands.Context, roles: List[int]) -> bool:
-        """ Checks whether the member has adm perms or has an allowed role. """
-
-        perms = ctx.channel.permissions_for(ctx.author)
-
-        if perms.administrator:
-            return True
-
-        for rid in roles:
-            if rid in [role.id for role in ctx.author.roles]:
-                return True
-
-        else:
-            return False
-
-        
-        
-
-        
-
-
     # Sends a random post from the meme subreddit
     # @commands.command()
     # @commands.cooldown(1, 5, type=commands.BucketType.user)
@@ -164,7 +279,8 @@ class Social(commands.Cog):
 
     @commands.command(aliases=['xkcd', 'comic'])
     async def randomcomic(self, ctx):
-        '''Get a comic from xkcd.'''
+        """ Get a comic from xkcd. """
+
         async with aiohttp.ClientSession() as session:
             async with session.get(f'http://xkcd.com/info.0.json') as resp:
                 data = await resp.json()
