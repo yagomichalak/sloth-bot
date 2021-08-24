@@ -1,13 +1,11 @@
 import discord
 from discord import user
 from discord.ext import commands, menus
-from discord.utils import maybe_coroutine
 from mysqldb import *
+from external_cons import the_drive
 from datetime import datetime
 import random
 from PIL import Image, ImageDraw, ImageFont
-from pydrive.auth import GoogleAuth
-from pydrive.drive import GoogleDrive
 import os
 # import requests
 import shutil
@@ -32,31 +30,6 @@ int(os.getenv('PATREONS_CHANNEL_ID'))
 ]
 afk_channel_id = int(os.getenv('AFK_CHANNEL_ID'))
 booster_role_id = int(os.getenv('BOOSTER_ROLE_ID'))
-
-gauth = GoogleAuth()
-# gauth.LocalWebserverAuth()
-gauth.LoadCredentialsFile("mycreds.txt")
-if gauth.credentials is None:
-    # This is what solved the issues:
-    gauth.GetFlow()
-    gauth.flow.params.update({'access_type': 'offline'})
-    gauth.flow.params.update({'approval_prompt': 'force'})
-
-    # Authenticate if they're not there
-    gauth.LocalWebserverAuth()
-elif gauth.access_token_expired:
-
-    # Refresh them if expired
-    gauth.Refresh()
-else:
-
-    # Initialize the saved creds
-    gauth.Authorize()
-
-# Save the current credentials to a file
-gauth.SaveCredentialsFile("mycreds.txt")
-
-drive = GoogleDrive(gauth)
 
 
 class SlothCurrency(commands.Cog):
@@ -826,6 +799,8 @@ class SlothCurrency(commands.Cog):
         if ctx:
             await ctx.message.delete()
 
+        drive = await the_drive()
+
         if rall.lower() == 'yes':
             try:
                 # os.removedirs('./sloth_custom_images')
@@ -874,14 +849,15 @@ class SlothCurrency(commands.Cog):
     @commands.command()
     @commands.has_permissions(administrator=True)
     async def text_download_update(self, ctx=None, rall: str = 'no'):
-        '''
-        (ADM) Downloads all texts from the GoogleDrive and stores in the bot's folder
-        '''
+        """ (ADM) Downloads all texts from the GoogleDrive and stores in the bot's folder. """
+
         if rall.lower() == 'yes':
             try:
                 shutil.rmtree('./texts')
             except Exception as e:
                 pass
+
+        drive = await the_drive()
 
         all_text_folders = {"languages": "1_gBiliWPrCj5cLpChQfg9QRnj8skQVHM"}
 
