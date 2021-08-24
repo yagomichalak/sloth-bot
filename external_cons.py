@@ -5,6 +5,8 @@ from pydrive.drive import GoogleDrive
 from typing import Any
 
 async def the_reddit() -> Any:
+    """ Gets the Reddit connection. """
+
     reddit = praw.Reddit(client_id=os.getenv('REDDIT_CLIENT_ID'),  # client id
                         client_secret=os.getenv('REDDIT_CLIENT_SECRET'),  # my client secret
                         user_agent=os.getenv('USER_AGENT'),  # my user agent. It can be anything
@@ -14,6 +16,8 @@ async def the_reddit() -> Any:
     return reddit
 
 async def the_drive() -> Any:
+    """ Gets the GoogleDrive connection. """
+
     gauth = GoogleAuth()
     # gauth.LocalWebserverAuth()
     gauth.LoadCredentialsFile("mycreds.txt")
