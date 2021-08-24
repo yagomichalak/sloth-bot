@@ -382,5 +382,13 @@ class RolePlay(commands.Cog):
 
         pass
 
+    @commands.command()
+    @commands.cooldown(1, 120, commands.BucketType.user)
+    @Player.not_ready()
+    async def pet(self, ctx, *, member: discord.Member = None) -> None:
+        """ Pets someone. """
+
+        pass
+
 def setup(client):
     client.add_cog(RolePlay(client))
