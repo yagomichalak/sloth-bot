@@ -16,7 +16,7 @@ mod_role_id = int(os.getenv('MOD_ROLE_ID'))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID'))
 teacher_role_id = int(os.getenv('TEACHER_ROLE_ID'))
 watchlist_channel_id = int(os.getenv('WATCHLIST_CHANNEL_ID'))
-starboard_channel_id = int(os.getenv('STARBOARD_CHANNEL_ID'))
+slothboard_channel_id = int(os.getenv('SLOTHBOARD_CHANNEL_ID'))
 
 class Social(commands.Cog):
     """ Social related commands. """
@@ -30,7 +30,7 @@ class Social(commands.Cog):
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload) -> None:
-        """ Sends messages to the starboard channel. """
+        """ Sends messages to the Slothboard channel. """
         
         emoji = str(payload.emoji)
         star = '<:zzSloth:686237376510689327>'
@@ -39,7 +39,7 @@ class Social(commands.Cog):
         if emoji != star:
             return
 
-        if payload.channel_id == starboard_channel_id:
+        if payload.channel_id == slothboard_channel_id:
             return
 
         # Gets message
@@ -57,11 +57,11 @@ class Social(commands.Cog):
             if reaction.count < 10:
                 continue
 
-            if not await self.get_starboard_message(message.id, channel.id):
-                # Post in #starboard
+            if not await self.get_slothboard_message(message.id, channel.id):
+                # Post in #slothboard
                 current_date = await utils.get_time_now()
                 embed = discord.Embed(
-                    title="__Starboard__",
+                    title="__Slothboard__",
                     description=message.content,
                     color=discord.Color.gold(),
                     timestamp=current_date
@@ -76,62 +76,62 @@ class Social(commands.Cog):
 
                 embed.set_author(name=message.author, url=message.author.avatar.url, icon_url=message.author.avatar.url)
 
-                await self.insert_starboard_message(message.id, channel.id)
-                starboard_channel = guild.get_channel(starboard_channel_id)
-                return await starboard_channel.send(content=f"**From:** {channel.mention}", embed=embed)
+                await self.insert_slothboard_message(message.id, channel.id)
+                slothboard_channel = guild.get_channel(slothboard_channel_id)
+                return await slothboard_channel.send(content=f"**From:** {channel.mention}", embed=embed)
 
     @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
-    async def create_table_starboard(self, ctx) -> None:
-        """ (ADM) Creates the Starboard table. """
+    async def create_table_slothboard(self, ctx) -> None:
+        """ (ADM) Creates the Slothboard table. """
 
-        if await self.table_starboard_exists():
-            return await ctx.send("**The `Starboard` table already exists!**")
+        if await self.table_slothboard_exists():
+            return await ctx.send("**The `Slothboard` table already exists!**")
 
         mycursor, db = await the_database()
         await mycursor.execute("""
-            CREATE TABLE Starboard (
+            CREATE TABLE Slothboard (
                 message_id BIGINT NOT NULL,
                 channel_id BIGINT NOT NULL,
                 PRIMARY KEY (message_id, channel_id)
             )""")
         await db.commit()
         await mycursor.close()
-        await ctx.send("**Created `Starboard` table!**")
+        await ctx.send("**Created `Slothboard` table!**")
 
     @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
-    async def drop_table_starboard(self, ctx) -> None:
-        """ (ADM) Drops the Starboard table. """
+    async def drop_table_slothboard(self, ctx) -> None:
+        """ (ADM) Drops the Slothboard table. """
 
-        if not await self.table_starboard_exists():
-            return await ctx.send("**The `Starboard` table doesn't exist!**")
+        if not await self.table_slothboard_exists():
+            return await ctx.send("**The `Slothboard` table doesn't exist!**")
 
         mycursor, db = await the_database()
-        await mycursor.execute("DROP TABLE Starboard")
+        await mycursor.execute("DROP TABLE Slothboard")
         await db.commit()
         await mycursor.close()
-        await ctx.send("**Dropped `Starboard` table!**")
+        await ctx.send("**Dropped `Slothboard` table!**")
 
     @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
-    async def reset_table_starboard(self, ctx) -> None:
-        """ (ADM) Resets the Starboard table. """
+    async def reset_table_slothboard(self, ctx) -> None:
+        """ (ADM) Resets the Slothboard table. """
 
-        if not await self.table_starboard_exists():
-            return await ctx.send("**The `Starboard` table doesn't exist yet!**")
+        if not await self.table_slothboard_exists():
+            return await ctx.send("**The `Slothboard` table doesn't exist yet!**")
 
         mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM Starboard")
+        await mycursor.execute("DELETE FROM Slothboard")
         await db.commit()
         await mycursor.close()
-        await ctx.send("**Reset `Starboard` table!**")
+        await ctx.send("**Reset `Slothboard` table!**")
 
-    async def table_starboard_exists(self) -> bool:
-        """ Checks whether the Starboard table exists. """
+    async def table_slothboard_exists(self) -> bool:
+        """ Checks whether the Slothboard table exists. """
 
         mycursor, _ = await the_database()
-        await mycursor.execute("SHOW TABLE STATUS LIKE 'Starboard'")
+        await mycursor.execute("SHOW TABLE STATUS LIKE 'Slothboard'")
         table_info = await mycursor.fetchall()
         await mycursor.close()
         if len(table_info) == 0:
@@ -139,24 +139,24 @@ class Social(commands.Cog):
         else:
             return True
 
-    async def get_starboard_message(self, message_id: int, channel_id: int) -> List[int]:
-        """ Gets a starboard message.
+    async def get_slothboard_message(self, message_id: int, channel_id: int) -> List[int]:
+        """ Gets a Slothboard message.
         :param message_id: The ID of the original message.
         :param channel_id: The ID of the message's original channel. """
 
         mycursor, _ = await the_database()
-        await mycursor.execute("SELECT * FROM Starboard WHERE message_id = %s AND channel_id = %s", (message_id, channel_id))
-        starboard_message = await mycursor.fetchone()
+        await mycursor.execute("SELECT * FROM Slothboard WHERE message_id = %s AND channel_id = %s", (message_id, channel_id))
+        Slothboard_message = await mycursor.fetchone()
         await mycursor.close()
-        return starboard_message
+        return Slothboard_message
 
-    async def insert_starboard_message(self, message_id: int, channel_id: int) -> None:
-        """ Inserts a starboard message.
+    async def insert_slothboard_message(self, message_id: int, channel_id: int) -> None:
+        """ Inserts a Slothboard message.
         :param message_id: The ID of the original message.
         :param channel_id: The ID of the message's original channel.  """
 
         mycursor, db = await the_database()
-        await mycursor.execute("INSERT INTO Starboard (message_id, channel_id) VALUES (%s, %s)", (
+        await mycursor.execute("INSERT INTO Slothboard (message_id, channel_id) VALUES (%s, %s)", (
             message_id, channel_id))
         await db.commit()
         await mycursor.close()
