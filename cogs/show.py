@@ -105,9 +105,8 @@ class Show(commands.Cog):
     @commands.command()
     @commands.has_any_role(*allowed_roles)
     async def rules(self, ctx):
-        '''
-        (MOD) Sends an embedded message containing all rules in it.
-        '''
+        """ (MOD) Sends an embedded message containing all rules in it. """
+
         await ctx.message.delete()
         embed = discord.Embed(title="Discord’s Terms of Service and Community Guidelines",
                               description="Rules Of The Server", url='https://discordapp.com/guidelines',
