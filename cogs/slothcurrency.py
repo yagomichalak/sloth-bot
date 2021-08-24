@@ -33,9 +33,7 @@ booster_role_id = int(os.getenv('BOOSTER_ROLE_ID'))
 
 
 class SlothCurrency(commands.Cog):
-    '''
-    Sloth Currency commands.
-    '''
+    """ Sloth Currency commands. """
 
     def __init__(self, client):
         self.client = client
