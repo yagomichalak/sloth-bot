@@ -1,8 +1,5 @@
 import discord
 from discord.ext import commands
-from discord.ext.commands.core import has_permissions
-from discord.utils import maybe_coroutine
-import praw
 from random import randint
 import aiohttp
 import os
@@ -10,13 +7,10 @@ from typing import List, Union
 from extra import utils
 from extra.view import QuickButtons
 from mysqldb import the_database
+from external_cons import the_reddit
 
 
-reddit = praw.Reddit(client_id=os.getenv('REDDIT_CLIENT_ID'),  # client id
-                     client_secret=os.getenv('REDDIT_CLIENT_SECRET'),  # my client secret
-                     user_agent=os.getenv('USER_AGENT'),  # my user agent. It can be anything
-                     username='',  # Not needed
-                     password='')  # Not needed
+
 
 mod_role_id = int(os.getenv('MOD_ROLE_ID'))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID'))
@@ -263,10 +257,11 @@ class Social(commands.Cog):
     # @commands.command()
     # @commands.cooldown(1, 5, type=commands.BucketType.user)
     # async def meme(self, ctx):
-    #     '''
-    #     Gets a random meme from Reddit.
-    #     (cooldown = 5 secs)
-    #     '''
+    #     """ Gets a random meme from Reddit.
+
+    #     * Cooldown = 5 secs """
+
+    #     reddit = await the_reddit()
     #     memes_submissions = reddit.subreddit('memes').hot()
     #     post_to_pick = randint(1, 50)
     #     for i in range(0, post_to_pick):

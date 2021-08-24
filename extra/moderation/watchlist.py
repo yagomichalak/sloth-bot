@@ -36,7 +36,7 @@ class ModerationWatchlistTable(commands.Cog):
 
         embed = discord.Embed(
             title="__Watchlist__:",
-            description=f"{author.mention} watchlisted <@{member.id}>\n__**Reason:**__```{reason}```",
+            description=f"{author.mention} watchlisted <@{member.id}>\n__**Reason:**__ ```{reason}```",
             color=member.color,
             timestamp=ctx.message.created_at,
             url=member.avatar.url
