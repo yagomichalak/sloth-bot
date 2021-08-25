@@ -72,32 +72,3 @@
 #     color=discord.Color.gold()
 # )
 # await ctx.send(embed=embed, view=view)
-
-class Message:
-    content: str
-
-message = Message
-message.content = 'dsadd https://cdn.discordapp.com/attachments/ads asda'
-message.attachments = []
-
-print('Content: ', message.content)
-print('Attachments: ', message.attachments)
-
-content = message.content.split()
-
-attachment_root = 'https://cdn.discordapp.com/attachments/'
-import discord
-discord_attachments = [att for att in message.content.split() if att.startswith(attachment_root)]
-for datt in discord_attachments:
-    print(datt)
-    try:
-        fake_attachment = {"url": datt, "content_type": "image"}
-        message.attachments.append(fake_attachment)
-        content.remove(datt)
-    except Exception as e:
-        print('hehe', e)
-
-message.content = ' '.join(content).strip() if content else None
-
-print('New content: ', message.content)
-print('New attachments: ', message.attachments)
