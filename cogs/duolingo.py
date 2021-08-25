@@ -146,11 +146,13 @@ class Duolingo(commands.Cog):
                 data = json.loads(await response.read())
                 lang_data = data['language_data'][list(data['language_data'].keys())[0]]
 
+                finished_skills = [s for s in lang_data['skills'] if s['progress_percent'] == 100]
                 embed = discord.Embed(
                     title=f"__{duo_profile[1]}__",
                     description=f"""
                     **Streak**: `{data['languages'][0]['streak']} days` 🔥
                     **Indexed language:** `{data['learning_language_string']}`
+                    **Finished skills for indexed language:** `{len(finished_skills)}`
                     **Timezone:** `{data.get('timezone')}`
                     **Following:** `{len(lang_data['points_ranking_data']) -1} people`
                     """,
@@ -178,6 +180,7 @@ class Duolingo(commands.Cog):
 
                 if properties := data.get('tracking_properties'):
                     creation_ts = int(properties['creation_date_millis']/1000)
+                    embed.description += f"**Followers:** `{properties['num_followers']} people`"
                     embed.add_field(
                         name="__Properties__:",
                         value=f"""
