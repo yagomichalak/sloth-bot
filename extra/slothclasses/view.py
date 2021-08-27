@@ -1017,7 +1017,7 @@ class YeetView(discord.ui.View):
 
     @discord.ui.button(label='Something', style=discord.ButtonStyle.blurple, custom_id='yeet_something_id', emoji="🤾‍♂️")
     async def yeet_something_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
-        """ Yeet something at someone. """
+        """ Yeets something at someone. """
 
         yeets: List[str] = [
             'https://c.tenor.com/WLb6BqWpdM8AAAAd/ball-throw.gif',
@@ -1048,7 +1048,7 @@ class YeetView(discord.ui.View):
 
     @discord.ui.button(label='Someone', style=discord.ButtonStyle.blurple, custom_id='yeet_someone_id', emoji="<:ytho:738497432693899275>")
     async def yeet_someone_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
-        """ Yeet someone; your target. """
+        """ Yeets someone; your target. """
 
         yeets: List[str] = [
             'https://c.tenor.com/lNBksxJBJdUAAAAC/divorce-bye.gif',
@@ -1085,7 +1085,7 @@ class YeetView(discord.ui.View):
 
     @discord.ui.button(label='Nevermind', style=discord.ButtonStyle.red, custom_id='nevermind_id', emoji="❌")
     async def nevermind_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
-        """ Cancels the tickling action. """
+        """ Cancels the yeet action. """
 
         await self.disable_buttons(interaction)
         self.stop()
@@ -1114,7 +1114,7 @@ class BegView(discord.ui.View):
 
     @discord.ui.button(label='Beg', style=discord.ButtonStyle.blurple, custom_id='beg_id', emoji="🙏")
     async def beg_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
-        """ Yeet something at someone. """
+        """ Begs to someone. """
 
         begs: List[str] = [
             'https://c.tenor.com/q0_DMRk8Sj4AAAAC/please-liz-lemon.gif',
@@ -1141,7 +1141,7 @@ class BegView(discord.ui.View):
         ]
 
         embed = discord.Embed(
-            title="__Yeet!__",
+            title="__Begging__",
             description=f"🙏 {self.member.mention} begged {self.target.mention} 🙏",
             color=discord.Color.dark_orange(),
             timestamp=interaction.message.created_at
@@ -1158,7 +1158,7 @@ class BegView(discord.ui.View):
 
     @discord.ui.button(label='Nevermind', style=discord.ButtonStyle.red, custom_id='nevermind_id', emoji="❌")
     async def nevermind_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
-        """ Cancels the tickling action. """
+        """ Cancels the begging action. """
 
         await self.disable_buttons(interaction)
         self.stop()
@@ -1176,8 +1176,8 @@ class BegView(discord.ui.View):
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
         return self.member.id == interaction.user.id
 
-class PetView(discord.ui.View):
-    """ View for the pet skill. """
+class PatView(discord.ui.View):
+    """ View for the pat skill. """
 
     def __init__(self, member: discord.Member, target: discord.Member, timeout: Optional[float] = 180):
         super().__init__(timeout=timeout)
@@ -1185,11 +1185,11 @@ class PetView(discord.ui.View):
         self.target = target
 
 
-    @discord.ui.button(label='Pet', style=discord.ButtonStyle.blurple, custom_id='beg_id', emoji="🖐️")
-    async def pet_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
-        """ Yeet something at someone. """
+    @discord.ui.button(label='Pat', style=discord.ButtonStyle.blurple, custom_id='beg_id', emoji="🖐️")
+    async def pat_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Pats something at someone. """
 
-        pets: List[str] = [
+        pats: List[str] = [
             'https://c.tenor.com/nwbxEGQINOsAAAAd/pet-dog.gif',
             'https://c.tenor.com/9FVTXVpYPWUAAAAC/kitten-kittens.gif',
             'https://c.tenor.com/jkIeSOUiNBgAAAAC/bunny-cute.gif',
@@ -1216,15 +1216,15 @@ class PetView(discord.ui.View):
         ]
 
         embed = discord.Embed(
-            title="__Pet!__",
-            description=f"🖐️ {self.member.mention} petted {self.target.mention} 🖐️",
+            title="__Patting__",
+            description=f"🖐️ {self.member.mention} patted {self.target.mention} 🖐️",
             color=discord.Color.blurple(),
             timestamp=interaction.message.created_at
         )
 
         embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
         embed.set_thumbnail(url=self.target.avatar.url)
-        embed.set_image(url=choice(pets))
+        embed.set_image(url=choice(pats))
         embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
 
         await interaction.response.send_message(content=self.target.mention, embed=embed)
@@ -1233,7 +1233,7 @@ class PetView(discord.ui.View):
 
     @discord.ui.button(label='Nevermind', style=discord.ButtonStyle.red, custom_id='nevermind_id', emoji="❌")
     async def nevermind_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
-        """ Cancels the tickling action. """
+        """ Cancels the pat action. """
 
         await self.disable_buttons(interaction)
         self.stop()
