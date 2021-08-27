@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 from extra.slothclasses.player import Player
-from extra.slothclasses.view import HugView, BootView, KissView, SlapView, HoneymoonView, PunchView, GiveView, TickleView, YeetView
+from extra.slothclasses.view import HugView, BootView, KissView, SlapView, HoneymoonView, PunchView, GiveView, TickleView, YeetView, BegView
 from extra import utils
 from extra.prompt.menu import ConfirmButton
 
@@ -389,6 +389,33 @@ class RolePlay(commands.Cog):
         """ Pets someone. """
 
         pass
+
+    @commands.command(aliases=['imbegging', 'imbeggin', 'beggin'])
+    @commands.cooldown(1, 120, commands.BucketType.user)
+    async def beg(self, ctx, *, member: discord.Member = None) -> None:
+        """ Begs someone.
+        :param member: The person to beg. """
+
+        author = ctx.author
+
+        if not member:
+            self.client.get_command(ctx.command.name).reset_cooldown(ctx)
+            return await ctx.send(f"**Please, inform a member, {author.mention}!**")
+
+            
+        if author.id == member.id:
+            self.client.get_command(ctx.command.name).reset_cooldown(ctx)
+            return await ctx.send(f"**You can't yeet (something at) yourself, {author.mention}!**")
+
+        embed = discord.Embed(
+            title="__Beg Prompt__",
+            description=f"Are you sure you wanna beg {member.mention}, {author.mention}?",
+            color=author.color,
+            timestamp=ctx.message.created_at
+        )
+        embed.set_footer(text=f"Requested by {author}", icon_url=author.avatar.url)
+        view = BegView(member=author, target=member, timeout=60)
+        await ctx.send(embed=embed, view=view)
 
 def setup(client):
     client.add_cog(RolePlay(client))
