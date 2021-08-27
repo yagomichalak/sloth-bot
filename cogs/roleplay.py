@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 from extra.slothclasses.player import Player
-from extra.slothclasses.view import HugView, BootView, KissView, SlapView, HoneymoonView, PunchView, GiveView, TickleView, YeetView, BegView
+from extra.slothclasses.view import HugView, BootView, KissView, SlapView, HoneymoonView, PunchView, GiveView, TickleView, YeetView, BegView, PetView
 from extra import utils
 from extra.prompt.menu import ConfirmButton
 
@@ -397,7 +397,7 @@ class RolePlay(commands.Cog):
             
         if author.id == member.id:
             self.client.get_command(ctx.command.name).reset_cooldown(ctx)
-            return await ctx.send(f"**You can't yeet (something at) yourself, {author.mention}!**")
+            return await ctx.send(f"**You can't pet yourself, {author.mention}!**")
 
         embed = discord.Embed(
             title="__Pet Prompt__",
@@ -406,7 +406,7 @@ class RolePlay(commands.Cog):
             timestamp=ctx.message.created_at
         )
         embed.set_footer(text=f"Requested by {author}", icon_url=author.avatar.url)
-        view = BegView(member=author, target=member, timeout=60)
+        view = PetView(member=author, target=member, timeout=60)
         await ctx.send(embed=embed, view=view)
 
     @commands.command(aliases=['imbegging', 'imbeggin', 'beggin'])
@@ -424,7 +424,7 @@ class RolePlay(commands.Cog):
             
         if author.id == member.id:
             self.client.get_command(ctx.command.name).reset_cooldown(ctx)
-            return await ctx.send(f"**You can't yeet (something at) yourself, {author.mention}!**")
+            return await ctx.send(f"**You can't beg yourself, {author.mention}!**")
 
         embed = discord.Embed(
             title="__Beg Prompt__",
@@ -435,6 +435,15 @@ class RolePlay(commands.Cog):
         embed.set_footer(text=f"Requested by {author}", icon_url=author.avatar.url)
         view = BegView(member=author, target=member, timeout=60)
         await ctx.send(embed=embed, view=view)
+
+    @commands.command()
+    @commands.cooldown(1, 120, commands.BucketType.user)
+    @Player.not_ready()
+    async def lick(self, ctx, *, member: discord.Member = None) -> None:
+        """ Licks someone
+        :param member: The person to lick. """
+
+        pass
 
 def setup(client):
     client.add_cog(RolePlay(client))
