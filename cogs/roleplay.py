@@ -384,7 +384,6 @@ class RolePlay(commands.Cog):
 
     @commands.command()
     @commands.cooldown(1, 120, commands.BucketType.user)
-    @Player.not_ready()
     async def pet(self, ctx, *, member: discord.Member = None) -> None:
         """ Pets someone.
         :param member: The member to pet. """
@@ -435,15 +434,6 @@ class RolePlay(commands.Cog):
         embed.set_footer(text=f"Requested by {author}", icon_url=author.avatar.url)
         view = BegView(member=author, target=member, timeout=60)
         await ctx.send(embed=embed, view=view)
-
-    @commands.command()
-    @commands.cooldown(1, 120, commands.BucketType.user)
-    @Player.not_ready()
-    async def lick(self, ctx, *, member: discord.Member = None) -> None:
-        """ Licks someone
-        :param member: The person to lick. """
-
-        pass
 
 def setup(client):
     client.add_cog(RolePlay(client))
