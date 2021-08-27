@@ -1250,3 +1250,74 @@ class PatView(discord.ui.View):
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
         return self.member.id == interaction.user.id
+
+class WhisperView(discord.ui.View):
+    """ View for the whisper skill. """
+
+    def __init__(self, member: discord.Member, target: discord.Member, text: str, timeout: Optional[float] = 180):
+        super().__init__(timeout=timeout)
+        self.member = member
+        self.target = target
+        self.text = text
+
+
+    @discord.ui.button(label='Whisper', style=discord.ButtonStyle.blurple, custom_id='whisper_id', emoji="🤫")
+    async def whisper_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Whispers something in someone's ear. """
+
+        whisperings: List[str] = [
+          'https://c.tenor.com/4w1ZuqnoGO4AAAAC/dexter-whisper.gif',
+          'https://c.tenor.com/ST1Xf5EXlgAAAAAC/whisper-jimmy-fallon.gif',
+          'https://c.tenor.com/BefNvhbd5hYAAAAC/whisper-surprised.gif',
+          'https://c.tenor.com/3E4Deyxqq5IAAAAC/gal-gadot-ww.gif',
+          'https://c.tenor.com/Qy7yI3pD5YcAAAAd/whisper.gif',
+          'https://c.tenor.com/huj1jCMArV4AAAAd/callum-kerr-my-therapist-friend.gif',
+          'https://c.tenor.com/ivNVSogpSGQAAAAC/whisper-donald-duck.gif',
+          'https://c.tenor.com/HJXeufjWdDgAAAAC/whisper-bullshit.gif',
+          'https://c.tenor.com/WfhkJWbkSW4AAAAd/hazel-english-shaking.gif',
+          'https://c.tenor.com/rzEb-LoREzEAAAAd/ear-hear.gif',
+          'https://c.tenor.com/2MAJh8k28a0AAAAC/younger-tv-younger.gif',
+          'https://c.tenor.com/h2CWY5U2EJEAAAAd/secret-whisper.gif',
+          'https://c.tenor.com/QezMpZnZeO0AAAAC/foodwars-first10seconds.gif',
+          'https://c.tenor.com/LEeStfoJROcAAAAd/chew-your.gif',
+          'https://c.tenor.com/RNTP-WAqMzUAAAAC/sandra-oh-andy-samberg.gif',
+          'https://c.tenor.com/zXApXPOshXMAAAAC/de-storm-de-storm-youtube.gif',
+          'https://c.tenor.com/ihscqSUt6hIAAAAd/dog-funny.gif',
+          'https://c.tenor.com/5qSWtK6aoGkAAAAC/school-of-rock-whisper-gossip.gif'  
+        ]
+
+        embed = discord.Embed(
+            title="__Whisper__",
+            description=f"""🤫 {self.member.mention} whispered ||**"{self.text}"**|| into {self.target.mention}'s ear 🤫""",
+            color=discord.Color.dark_gold(),
+            timestamp=interaction.message.created_at
+        )
+
+        embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
+        embed.set_thumbnail(url=self.target.avatar.url)
+        embed.set_image(url=choice(whisperings))
+        embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
+
+        await interaction.response.send_message(content=self.target.mention, embed=embed)
+        await self.disable_buttons(interaction, followup=True)
+        self.stop()
+
+    @discord.ui.button(label='Nevermind', style=discord.ButtonStyle.red, custom_id='nevermind_id', emoji="❌")
+    async def nevermind_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Cancels the whisper action. """
+
+        await self.disable_buttons(interaction)
+        self.stop()
+
+    async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
+
+        for child in self.children:
+            child.disabled = True
+
+        if followup:
+            await interaction.followup.edit_message(message_id=interaction.message.id, view=self)
+        else:
+            await interaction.response.edit_message(view=self)
+
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        return self.member.id == interaction.user.id
