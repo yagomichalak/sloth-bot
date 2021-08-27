@@ -1185,18 +1185,40 @@ class PetView(discord.ui.View):
         self.target = target
 
 
-    @discord.ui.button(label='Pet', style=discord.ButtonStyle.blurple, custom_id='beg_id', emoji="🙏")
+    @discord.ui.button(label='Pet', style=discord.ButtonStyle.blurple, custom_id='beg_id', emoji="🖐️")
     async def pet_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
         """ Yeet something at someone. """
 
         pets: List[str] = [
+            'https://c.tenor.com/nwbxEGQINOsAAAAd/pet-dog.gif',
+            'https://c.tenor.com/9FVTXVpYPWUAAAAC/kitten-kittens.gif',
+            'https://c.tenor.com/jkIeSOUiNBgAAAAC/bunny-cute.gif',
+            'https://c.tenor.com/nUNorsu3_RIAAAAd/cat-sweet.gif',
+            'https://c.tenor.com/-xLNpZn2ypoAAAAC/mine-animal.gif',
+            'https://c.tenor.com/f3rcK4rA6sIAAAAC/bunny.gif',
+            'https://c.tenor.com/Uxl8H7KhXzQAAAAC/dog-monkey.gif',
+            'https://c.tenor.com/n6km1_0i97kAAAAC/anime-cat.gif',
+            'https://c.tenor.com/UTZOodcQt3IAAAAC/doggo-petting.gif',
+            'https://c.tenor.com/IuD4UPlUI_MAAAAd/cute-owl.gif',
+            'https://c.tenor.com/ykE14C6EUO0AAAAC/mocha-dog.gif',
+            'https://c.tenor.com/Yg8Mvtr3LR0AAAAC/cute-dog.gif',
+            'https://c.tenor.com/5s87oz-N8VoAAAAd/cockroach-pet.gif',
+            'https://c.tenor.com/XybizgnL1zQAAAAd/kittens-cute.gif',
+            'https://c.tenor.com/X_kiZEj9X38AAAAC/dogs-puppy.gif',
+            'https://c.tenor.com/0K5GUyL-KI8AAAAC/trees-can.gif',
+            'https://c.tenor.com/fVkPn-dI70wAAAAC/cat-pet.gif',
+            'https://c.tenor.com/MgfEseP2_PAAAAAC/frog-pat-head.gif',
+            'https://c.tenor.com/ITGImjl7YXoAAAAd/fox-relaxed.gif',
+            'https://c.tenor.com/QzypKfkMA9MAAAAd/guinea-pig-pet.gif',
+            'https://c.tenor.com/cQ2VwOHNDJsAAAAC/baby-panda.gif',
+            'https://c.tenor.com/XVgmW5qJpcsAAAAC/felizins-pet-pet.gif',
             
         ]
 
         embed = discord.Embed(
-            title="__Yeet!__",
-            description=f"🙏 {self.member.mention} petted {self.target.mention} 🙏",
-            color=discord.Color.dark_orange(),
+            title="__Pet!__",
+            description=f"🖐️ {self.member.mention} petted {self.target.mention} 🖐️",
+            color=discord.Color.blurple(),
             timestamp=interaction.message.created_at
         )
 
