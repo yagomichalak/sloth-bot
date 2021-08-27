@@ -386,9 +386,28 @@ class RolePlay(commands.Cog):
     @commands.cooldown(1, 120, commands.BucketType.user)
     @Player.not_ready()
     async def pet(self, ctx, *, member: discord.Member = None) -> None:
-        """ Pets someone. """
+        """ Pets someone.
+        :param member: The member to pet. """
 
-        pass
+        author = ctx.author
+
+        if not member:
+            self.client.get_command(ctx.command.name).reset_cooldown(ctx)
+            return await ctx.send(f"**Please, inform a member, {author.mention}!**")
+            
+        if author.id == member.id:
+            self.client.get_command(ctx.command.name).reset_cooldown(ctx)
+            return await ctx.send(f"**You can't yeet (something at) yourself, {author.mention}!**")
+
+        embed = discord.Embed(
+            title="__Pet Prompt__",
+            description=f"Are you sure you wanna pet {member.mention}, {author.mention}?",
+            color=author.color,
+            timestamp=ctx.message.created_at
+        )
+        embed.set_footer(text=f"Requested by {author}", icon_url=author.avatar.url)
+        view = BegView(member=author, target=member, timeout=60)
+        await ctx.send(embed=embed, view=view)
 
     @commands.command(aliases=['imbegging', 'imbeggin', 'beggin'])
     @commands.cooldown(1, 120, commands.BucketType.user)

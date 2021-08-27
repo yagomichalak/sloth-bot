@@ -1104,7 +1104,7 @@ class YeetView(discord.ui.View):
         return self.member.id == interaction.user.id
 
 class BegView(discord.ui.View):
-    """ View for the yeet skill. """
+    """ View for the beg skill. """
 
     def __init__(self, member: discord.Member, target: discord.Member, timeout: Optional[float] = 180):
         super().__init__(timeout=timeout)
@@ -1150,6 +1150,59 @@ class BegView(discord.ui.View):
         embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
         embed.set_thumbnail(url=self.target.avatar.url)
         embed.set_image(url=choice(begs))
+        embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
+
+        await interaction.response.send_message(content=self.target.mention, embed=embed)
+        await self.disable_buttons(interaction, followup=True)
+        self.stop()
+
+    @discord.ui.button(label='Nevermind', style=discord.ButtonStyle.red, custom_id='nevermind_id', emoji="❌")
+    async def nevermind_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Cancels the tickling action. """
+
+        await self.disable_buttons(interaction)
+        self.stop()
+
+    async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
+
+        for child in self.children:
+            child.disabled = True
+
+        if followup:
+            await interaction.followup.edit_message(message_id=interaction.message.id, view=self)
+        else:
+            await interaction.response.edit_message(view=self)
+
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        return self.member.id == interaction.user.id
+
+class PetView(discord.ui.View):
+    """ View for the pet skill. """
+
+    def __init__(self, member: discord.Member, target: discord.Member, timeout: Optional[float] = 180):
+        super().__init__(timeout=timeout)
+        self.member = member
+        self.target = target
+
+
+    @discord.ui.button(label='Pet', style=discord.ButtonStyle.blurple, custom_id='beg_id', emoji="🙏")
+    async def pet_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Yeet something at someone. """
+
+        pets: List[str] = [
+            
+        ]
+
+        embed = discord.Embed(
+            title="__Yeet!__",
+            description=f"🙏 {self.member.mention} petted {self.target.mention} 🙏",
+            color=discord.Color.dark_orange(),
+            timestamp=interaction.message.created_at
+        )
+
+        embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
+        embed.set_thumbnail(url=self.target.avatar.url)
+        embed.set_image(url=choice(pets))
         embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
 
         await interaction.response.send_message(content=self.target.mention, embed=embed)
