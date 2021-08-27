@@ -31,7 +31,7 @@ lesson_category_id = int(os.getenv('LESSON_CAT_ID'))
 clock_voice_channel_id = int(os.getenv('CLOCK_VC_ID'))
 admin_commands_channel_id = int(os.getenv('ADMIN_COMMANDS_CHANNEL_ID'))
 patreon_role_id = int(os.getenv('SLOTH_EXPLORER_ROLE_ID'))
-announ_announ_channel_id = int(os.getenv('ANNOUNCEMENT_CHANNEL_ID'))
+support_us_channel_id = int(os.getenv('SUPPORT_US_CHANNEL_ID'))
 error_log_channel_id = int(os.getenv('ERROR_LOG_CHANNEL_ID'))
 guild_ids = [server_id]
 
@@ -90,8 +90,8 @@ async def on_member_update(before, after):
     if new_role:
         for pr in patreon_roles.keys():
             if new_role.id == pr:
-                announ = discord.utils.get(before.guild.channels, id=announ_announ_channel_id)
-                await announ.send(patreon_roles[pr][0].format(member=after))
+                support_us_channel = discord.utils.get(before.guild.channels, id=support_us_channel_id)
+                await support_us_channel.send(patreon_roles[pr][0].format(member=after))
                 return await after.send(patreon_roles[pr][1])
 
 
