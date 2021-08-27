@@ -86,5 +86,17 @@
     "Lemon": {
         "name": "Lemon", "emoji": "<:zslothlemon:709893573469798521>", "sentence": "{member.mention} gave {target.mention} a lemon",
         "gifs": ["https://c.tenor.com/X0scZtUPrOQAAAAC/live-sour.gif", "https://c.tenor.com/nsoMvoc-UzMAAAAC/popuko-pop-team-epic.gif", "https://c.tenor.com/6YOnBEohQykAAAAC/dancing-lemon.gif", "https://c.tenor.com/Edu9EupdKmkAAAAC/dancing-lemon.gif", "https://c.tenor.com/6lS2lC2MqPkAAAAd/lizard-licking.gif", "https://c.tenor.com/7nEIwYmqNXMAAAAC/lemon-yum.gif", "https://c.tenor.com/iR5UQ1XefSQAAAAC/lemon-squeeze.gif", "https://c.tenor.com/uNKFVH2qehoAAAAd/lemon-mcdonalds.gif"]
+    },
+    "Gołąbki": {
+        "name": "Gołąbki", "emoji": "🥬", "sentence": "{member.mention} gave {target.mention} some gołąbki",
+        "gifs": ["https://i1.kwejk.pl/k/obrazki/2018/03/Ywbt2EHbTe4IyXbV.jpg", "https://c.tenor.com/2a1r8NXcqQoAAAAd/pigeon-vibes.gif", "https://c.tenor.com/GV86pRezebEAAAAC/trashdove.gif", "https://c.tenor.com/3kmZL31COSoAAAAC/pigeon-eating.gif", "https://c.tenor.com/iAj_DoRx7UMAAAAC/olivia-ku-avocado.gif", "https://c.tenor.com/omJYIHDP6PgAAAAd/yummy-food-delicious.gif", "https://i.makeagif.com/media/3-26-2018/KTMlZt.gif", "https://i.imgflip.com/1hbwti.gif", "https://cdn.discordapp.com/attachments/706905143601397770/880609912021995530/when-babcia-says-she-is-doing-golabki.png"]
+    },
+    "Cheese": {
+        "name": "Cheese", "emoji": "🧀", "sentence": "{member.mention} gave {target.mention} some cheese",
+        "gifs": ["https://c.tenor.com/QucWbmvTmF4AAAAd/stouffers-mac-and-cheese.gif", "https://c.tenor.com/3BjcEr3YZ44AAAAC/cheese-slice.gif", "https://c.tenor.com/HD6BF_dhzLcAAAAd/cheese-gooey.gif", "https://c.tenor.com/3PMzgokULcEAAAAC/grilledcheese-cheese.gif", "https://c.tenor.com/Tx-blA3wSf8AAAAC/tom-and-jerry-eating.gif", "https://c.tenor.com/F2dVnxVciswAAAAd/chili-cheese-fries-fries.gif", "https://c.tenor.com/7Il1lHg-hEAAAAAd/lick-yummy.gif", "https://c.tenor.com/VScF6GmG7K0AAAAC/cheese-dance.gif", "https://c.tenor.com/YRr_A-GRxcUAAAAC/cheese-cloudy-with-a-chance-of-meatballs.gif"]
+    },
+    "Mooncake": {
+        "name": "Mooncake", "emoji": "🥮", "sentence": "{member.mention} gave {target.mention} mooncake",
+        "gifs": ["https://c.tenor.com/zwOLJJNd_EoAAAAC/%E6%9C%88%E9%A4%85moon-cak-moon-cakes.gif", "https://c.tenor.com/0O_gxMyhmTsAAAAC/yuebing-mooncake.gif", "https://c.tenor.com/g80qe8i0t70AAAAC/mid-autumn-%E4%B8%AD%E7%A7%8B%E8%8A%82%E5%BF%AB%E4%B9%90.gif", "https://c.tenor.com/O2eZEU0eGwkAAAAC/mid-autumn-day-mid-autumn-fall.gif", "https://c.tenor.com/1SSJLJ5ODY4AAAAC/%E6%9C%88%E9%A4%85moon-cak-moon-cakes.gif", "https://c.tenor.com/LCDStRrVaaMAAAAC/%E6%9C%88%E9%A4%85moon-cak-moon-cakes.gif","https://c.tenor.com/swvN73W4sLEAAAAd/baking-joshua-weissman.gif", "https://c.tenor.com/hSF28GU3bAIAAAAC/mooncake-haw.gif", "https://c.tenor.com/9ZjFo795gNoAAAAC/place-down-joshua-weissman.gif", "https://c.tenor.com/pS8ok9Ck47wAAAAC/cut-in-half-joshua-weissman.gif"]
     }
 }
