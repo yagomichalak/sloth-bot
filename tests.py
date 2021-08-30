@@ -72,3 +72,6 @@
 #     color=discord.Color.gold()
 # )
 # await ctx.send(embed=embed, view=view)
+
+
+

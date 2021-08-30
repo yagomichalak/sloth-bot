@@ -2,7 +2,7 @@ import discord
 from discord.components import SelectOption
 from extra import utils
 from discord.ext import commands
-from typing import List, Union
+from typing import List, Union, Optional
 from .menu import ConfirmSkill
 from .select import ReportSupportSelect
 import os
@@ -224,3 +224,31 @@ class ExchangeActivityView(discord.ui.View):
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
 
         return self.user_info[0] == interaction.user.id
+
+
+class GiveawayView(discord.ui.View):
+    """ View for giveaway entries """
+
+    def __init__(self, client: commands.Bot) -> None:
+        super().__init__(timeout=None)
+        self.client = client
+
+
+    @discord.ui.button(label="Participate", emoji="🎉", custom_id="giveaway_btn_id", style=discord.ButtonStyle.success)
+    async def participate_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Handles clicks on the 'participate' button. """
+
+        await interaction.response.defer()
+        user = interaction.user
+        message = interaction.message
+
+        cog = self.client.get_cog('Giveaways')
+
+        entry = await cog.get_giveaway_entry(user.id, message.id)
+        if entry:
+            await cog.delete_giveaway_entry(user.id, message.id)
+            await interaction.followup.send(f"**You just removed your entry for this giveaway, {user.mention}!** ❌", ephemeral=True)
+        else:
+            await cog.insert_giveaway_entry(user.id, message.id)
+            await interaction.followup.send(f"**Thank you for participating, {user.mention}!** ✅", ephemeral=True)
+
