@@ -15,6 +15,8 @@ from typing import List, Dict, Union, Any
 
 
 class RoleSelection(RoleSelectionDatabaseCommands):
+	""" Category for creating, managing and interacting with
+	role selection menus. """
 
 	def __init__(self, client) -> None:
 		self.client = client
