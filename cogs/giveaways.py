@@ -47,21 +47,28 @@ class Giveaways(commands.Cog):
             # Gets the channel and message
             channel = await self.client.fetch_channel(giveaway[1])
             if not channel:
-                return await self.delete_giveaway(giveaway[0])
+                await self.delete_giveaway(giveaway[0])
+                continue
 
             message = await channel.fetch_message(giveaway[0])
             if not message:
-                return await self.delete_giveaway(giveaway[0])
+                await self.delete_giveaway(giveaway[0])
+                continue
 
 
             entries = await self.get_giveaway_entries(giveaway[0])
 
             winners = await self.get_winners(giveaway, entries)
 
+            # Edits the embed
+            embed = message.embeds[0]
+            embed.title += ' (Ended)'
+            embed.color = discord.Color.red()
+
             view = discord.ui.View.from_message(message)
 
             await utils.disable_buttons(view)
-            await message.edit(view=view)
+            await message.edit(embed=embed, view=view)
             # Sends last message
             await message.reply(
                 f"**Giveaway is over, we had a total of `{len(entries)}` people participating, and the `{giveaway[3]}` winners are: {winners}!**"
@@ -191,7 +198,26 @@ class Giveaways(commands.Cog):
         """ Rerolls a giveaway.
         :param message_id: The ID of the giveaway message. """
 
-        await ctx.send(f"**Rerolling it...**")
+        member = ctx.author
+
+        if not message_id:
+            return await ctx.send(f"**Please, inform a message ID, {member.mention}!**")
+
+        giveaway = await self.get_giveaway(message_id)
+        if not giveaway:
+            return await ctx.send(f"**The specified giveaway doesn't exist, {member.mention}!**")
+
+        if not giveaway[5]:
+            return await ctx.send(f"**This giveaway hasn't ended yet, you can't reroll it, {member.mention}!**")
+
+        entries = await self.get_giveaway_entries(giveaway[0])
+
+        winners = await self.get_winners(giveaway, entries)
+
+        # Sends last message
+        await ctx.send(
+            f"**Rerolling giveaway with `{len(entries)}` people participating, and the new `{giveaway[3]}` winners are: {winners}!**"
+        )
 
     @_giveaway.command(aliases=['del', 'remove', 'rem', 'rm'])
     async def delete(self, ctx, message_id: int) -> None:
@@ -330,7 +356,7 @@ class Giveaways(commands.Cog):
         :param current_ts: The current timestamp to compare to registered giveaways' timestamps. """
 
         mycursor, _ = await the_database()
-        await mycursor.execute("SELECT * FROM Giveaways WHERE deadline_ts >= %s", (current_ts,))
+        await mycursor.execute("SELECT * FROM Giveaways WHERE deadline_ts <= %s", (current_ts,))
         giveaways = await mycursor.fetchall()
         await mycursor.close()
         return giveaways
