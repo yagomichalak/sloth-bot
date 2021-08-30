@@ -228,11 +228,10 @@ class Social(commands.Cog):
     # Shows all the info about a user
     @commands.command(aliases=['user', 'whois', 'who_is'])
     async def userinfo(self, ctx, member: Union[discord.Member, discord.User] = None):
-        '''
-        Shows all the information about a member.
+        """ Shows all the information about a member.
         :param member: The member to show the info.
-        :return: An embedded message with the user's information
-        '''
+        :return: An embedded message with the user's information """
+
         member = ctx.author if not member else member
 
         embed = discord.Embed(colour=member.color, timestamp=ctx.message.created_at)
@@ -256,12 +255,11 @@ class Social(commands.Cog):
 
         embed.add_field(name="Bot?", value=member.bot)
 
-        
         view = QuickButtons(self.client, ctx, member)
         if not await utils.is_allowed([mod_role_id, admin_role_id]).predicate(ctx):
+            view.children.remove(view.children[4])
             view.children.remove(view.infractions_button)
             view.children.remove(view.fake_accounts_button)
-            view.children.remove(view.children[4])
         else:
             watchlist = await self.client.get_cog('Moderation').get_user_watchlist(member.id)
             if watchlist:
