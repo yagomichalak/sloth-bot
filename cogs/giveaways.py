@@ -1,12 +1,12 @@
 import discord
 from discord.ext import commands, tasks, flags
-from typing import Any, List, Union, Dict, Optional
+from typing import List, Union, Dict, Optional
 from random import choice
 import os
 
-from discord.ui import view
 from extra import utils
 from extra.view import GiveawayView
+from extra.prompt.menu import Confirm
 
 from mysqldb import the_database
 
@@ -109,13 +109,13 @@ class Giveaways(commands.Cog):
     @_giveaway.command(cls=flags.FlagCommand)
     async def start(self, ctx, **flags) -> None:
         """ Starts a giveaway.
-        :param -t: Title for the giveaway.
-        :param -d: Description of giveaway.
-        :param -p: Prize giveaway.
-        :param -w: Amount of winners. [Optional] [Default = 1]
-        :param -d: Amount of days until the giveaway ends. [Optional]
-        :param -h: Amount of hours until the giveaway ends. [Optional]
-        :param -m: Amount of minutes until the giveaway ends. [Optional]
+        :param t: Title for the giveaway.
+        :param des: Description of giveaway.
+        :param p: Prize giveaway.
+        :param w: Amount of winners. [Optional] [Default = 1]
+        :param d: Amount of days until the giveaway ends. [Optional]
+        :param h: Amount of hours until the giveaway ends. [Optional]
+        :param m: Amount of minutes until the giveaway ends. [Optional]
         
         PS: The total time summing up days, minutes and minutes MUST be greater than 0. """
 
@@ -220,11 +220,24 @@ class Giveaways(commands.Cog):
         )
 
     @_giveaway.command(aliases=['del', 'remove', 'rem', 'rm'])
-    async def delete(self, ctx, message_id: int) -> None:
+    async def delete(self, ctx, message_id: int = None) -> None:
         """ Deletes an existing giveaway.
         :param message_id: The ID of the giveaway message. """
 
-        await ctx.send(f"**Deleting it...**")
+        member = ctx.author
+        if not message_id:
+            return await ctx.send(f"**Please, inform a message ID, {member.mention}!**")
+
+        giveaway = await self.get_giveaway(message_id)
+        if not giveaway:
+            return await ctx.send(f"**The specified giveaway message doesn't exist, {member.mention}!**")
+
+        confirm = await Confirm(f"**Are you sure you want to delete the giveaway with ID: `{giveaway[0]}`, {member.mention}?**").prompt(ctx)
+        if not confirm:
+            return await ctx.send(f"**Not doing it, then, {member.mention}!**")
+
+        await self.delete_giveaway(giveaway[0])
+        await ctx.send((f"**Successfully deleted the giveaway with ID: `{giveaway[0]}`, {member.mention}!**"))
 
 
     async def get_giveaway_time(self, flags: Dict[str, Union[int, str]]) -> int:
