@@ -677,7 +677,7 @@ Please answer using one message only.."""
             return await self.client.get_cog('Tools').vc(ctx=ctx, member=member)
 
     # - Report someone
-    async def generic_help(self, interaction: discord.Interaction, type_help: str, message: str, image: Optional[str] = None):
+    async def generic_help(self, interaction: discord.Interaction, type_help: str, message: str, image: Optional[str] = None, ping: bool = True):
 
         member = interaction.user
         guild = interaction.guild
@@ -715,7 +715,10 @@ Please answer using one message only.."""
             embed = discord.Embed(title=f"{type_help.title()}!", description=message, color=discord.Color.red())
             if image:
                 embed.set_image(url=image)
-            await the_channel.send(content=f"{member.mention}, {moderator.mention}", embed=embed)
+            if ping:
+                await the_channel.send(content=f"{member.mention}, {moderator.mention}", embed=embed)
+            else:
+                await the_channel.send(content=member.mention, embed=embed)
 
     async def get_message(self, member, check, timeout: int = 300):
         try:
