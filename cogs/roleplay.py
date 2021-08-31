@@ -135,7 +135,7 @@ class RolePlay(commands.Cog):
     async def honeymoon(self, ctx) -> None:
         """ Celebrates a honey moon with your partner.
         
-        Benefits: It heals the couple, protects and rests all skills
+        Benefits: It heals the couple, protects and resets all skills
         cooldowns and change class cooldown. """
 
         member = ctx.author
