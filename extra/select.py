@@ -20,15 +20,16 @@ class ReportSupportSelect(discord.ui.Select):
     async def callback(self, interaction: discord.Interaction):
         await interaction.response.defer()
         
-        guild = self.client.get_guild(int(os.getenv('SERVER_ID')))
-        member = discord.utils.get(guild.members, id=interaction.user.id)
+        # guild = self.client.get_guild(int(os.getenv('SERVER_ID')))
+        # member = discord.utils.get(guild.members, id=interaction.user.id)
+        member = interaction.user
 
         option = interaction.data['values'][0]
 
         self.view.stop()
         if option == 'Report':
             try:
-                exists = await self.cog.report_someone(member, guild)
+                exists = await self.cog.report_someone(interaction)
                 if exists is False:
                     return
             except Exception as e:
@@ -40,7 +41,7 @@ class ReportSupportSelect(discord.ui.Select):
         elif option == 'Support':
             message = f"Please, {member.mention}, try to explain what kind of help you want related to the server."
             try:
-                exists = await self.cog.generic_help(member, guild, 'general help', message)
+                exists = await self.cog.generic_help(interaction, 'general help', message)
                 if exists is False:
                     return
             except Exception as e:
@@ -51,7 +52,7 @@ class ReportSupportSelect(discord.ui.Select):
         elif option == 'Help':
             message = f"Please, {member.mention}, inform us what roles you want, and if you spotted a specific problem with the reaction-role selection."
             try:
-                exists = await self.cog.generic_help(member, guild, 'role help', message)
+                exists = await self.cog.generic_help(interaction, 'role help', message)
                 if exists is False:
                     return
             except Exception as e:
@@ -60,7 +61,7 @@ class ReportSupportSelect(discord.ui.Select):
                 return await self.cog.audio(member, 'role_help_alert')
 
         elif option == 'Oopsie':
-            return await member.send("**All right, cya!**")
+            return await interaction.followup.send("**All right, cya!**", ephemeral=True)
 
 
 class WarriorUserItemSelect(discord.ui.Select):

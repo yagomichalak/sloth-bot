@@ -17,7 +17,7 @@ class ReportSupportView(discord.ui.View):
         super().__init__(timeout=None)
         self.client = client
         self.cog = client.get_cog('ReportSupport')
-        patreon_button = discord.ui.Button(style=5, label="Support us on Patreon!", url="https://www.patreon.com/Languagesloth", emoji="<:patreon:831401582426980422>")
+        patreon_button = discord.ui.Button(style=5, label="Support us on Patreon!", url="https://www.patreon.com/Languagesloth", emoji="<:patreon:831401582426980422>", row=2)
         self.children.insert(3, patreon_button)
 
 
@@ -74,7 +74,7 @@ class ReportSupportView(discord.ui.View):
         await self.cog.send_event_manager_application(member)
 
 
-    @discord.ui.button(label="Get your own Custom Bot (not for free)", style=1, custom_id=f"get_custom_bot", emoji="🤖", disabled=True)
+    @discord.ui.button(label="Get your own Custom Bot (not for free)", style=1, custom_id=f"get_custom_bot", emoji="🤖", disabled=True, row=2)
     async def bot_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
 
         member = interaction.user
@@ -99,8 +99,10 @@ class ReportSupportView(discord.ui.View):
         await member.send(f"**If you are really interested in **buying** a custom bot, send a private message to {dnk.mention}!**")
         await self.cog.dnk_embed(member)
 
-    @discord.ui.button(label="Report a User or Get Server/Role Support!", style=4, custom_id=f"report_support", emoji="<:politehammer:608941633454735360>", row=2)
-    async def report_support_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+    @discord.ui.button(label="Verify", style=1, custom_id=f"verify_id", emoji="☑️", row=2)
+    async def verify_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+
+        await interaction.response.defer()
 
         member = interaction.user
 
@@ -109,14 +111,39 @@ class ReportSupportView(discord.ui.View):
         if member_ts:
             sub = time_now - member_ts
             if sub <= 240:
-                return await member.send(
-                    f"**You are on cooldown to report, try again in {round(240-sub)} seconds**")
+                return await interaction.followup.send(
+                    f"**You are on cooldown to use this, try again in {round(240-sub)} seconds, {member.mention}!**", ephemeral=True)
+            
+
+        message = f"""You have opened a verification request, if you would like to verify:
+1.Take a clear picture of yourself holding a piece of paper with today's date and time of verification, and your Discord server name written on it."""
+        try:
+            exists = await self.cog.generic_help(interaction, 'verify', message, 'https://cdn.discordapp.com/attachments/562019472257318943/882352621116096542/slothfacepopoo.png')
+            if exists is False:
+                return
+        except Exception as e:
+            print(e)
+        else:
+            return await self.cog.audio(member, 'general_help_alert')
+
+    @discord.ui.button(label="Report a User or Get Server/Role Support!", style=4, custom_id=f"report_support", emoji="<:politehammer:608941633454735360>", row=3)
+    async def report_support_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+
+        await interaction.response.defer()
+        member = interaction.user
+
+        member_ts = self.cog.report_cache.get(member.id)
+        time_now = await utils.get_timestamp()
+        if member_ts:
+            sub = time_now - member_ts
+            if sub <= 240:
+                return await interaction.followup.send(
+                    f"**You are on cooldown to report, try again in {round(240-sub)} seconds**", ephemeral=True)
 
         self.cog.report_cache[member.id] = time_now
-        await interaction.response.defer()
         view = discord.ui.View()
         view.add_item(ReportSupportSelect(self.client))
-        await member.send(content="How can we help you?", view=view)
+        await interaction.followup.send(content="How can we help you?", view=view, ephemeral=True)
 
 
 class QuickButtons(discord.ui.View):
