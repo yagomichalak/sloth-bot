@@ -7,7 +7,7 @@ from extra.menu import ConfirmSkill
 from extra.prompt.menu import ConfirmButton
 from extra.view import ReportSupportView
 import time
-from typing import List, Dict
+from typing import List, Dict, Optional
 import os
 from datetime import datetime
 
@@ -633,12 +633,15 @@ Please answer using one message only.."""
             return await member.send("**Thank you anyways!**")
 
     # - Report someone
-    async def report_someone(self, member, guild):
+    async def report_someone(self, interaction: discord.Interaction):
+
+        member = interaction.user
+        guild = interaction.guild
 
         if open_channel := await self.member_has_open_channel(member.id):
             if open_channel := discord.utils.get(guild.text_channels, id=open_channel[1]):
                 embed = discord.Embed(title="Error!", description=f"**You already have an open channel! ({open_channel.mention})**", color=discord.Color.red())
-                await member.send(embed=embed)
+                await interaction.followup.send(embed=embed, ephemeral=True)
                 return False
             else:
                 await self.remove_user_open_channel(member.id)
@@ -657,14 +660,14 @@ Please answer using one message only.."""
         try:
             the_channel = await guild.create_text_channel(name=f"case-{counter[0][0]}", category=case_cat, overwrites=overwrites)
         except Exception:
-            await member.send("**Something went wrong with it, please contact an admin!**")
+            await interaction.followup.send("**Something went wrong with it, please contact an admin!**")
             raise Exception
         else:
             created_embed = discord.Embed(
                 title="Report room created!",
                 description=f"**Go to {the_channel.mention}!**",
                 color=discord.Color.green())
-            await member.send(embed=created_embed)
+            await interaction.followup.send(embed=created_embed, ephemeral=True)
             await self.insert_user_open_channel(member.id, the_channel.id)
             await self.increase_case_number()
             embed = discord.Embed(title="Report Support!", description=f"Please, {member.mention}, try to explain what happened and who you want to report.",
@@ -674,12 +677,15 @@ Please answer using one message only.."""
             return await self.client.get_cog('Tools').vc(ctx=ctx, member=member)
 
     # - Report someone
-    async def generic_help(self, member, guild, type_help, message):
+    async def generic_help(self, interaction: discord.Interaction, type_help: str, message: str, image: Optional[str] = None):
+
+        member = interaction.user
+        guild = interaction.guild
 
         if open_channel := await self.member_has_open_channel(member.id):
             if open_channel := discord.utils.get(guild.text_channels, id=open_channel[1]):
                 embed = discord.Embed(title="Error!", description=f"**You already have an open channel! ({open_channel.mention})**", color=discord.Color.red())
-                await member.send(embed=embed)
+                await interaction.followup.send(embed=embed, ephemeral=True)
                 return False
             else:
                 await self.remove_user_open_channel(member.id)
@@ -696,7 +702,7 @@ Please answer using one message only.."""
         try:
             the_channel = await guild.create_text_channel(name=f"{'-'.join(type_help.split())}", category=case_cat, overwrites=overwrites)
         except:
-            await member.send("**Something went wrong with it, please contact an admin!**")
+            await interaction.followup.send("**Something went wrong with it, please contact an admin!**")
             raise Exception
         else:
             # print('created!')
@@ -704,11 +710,11 @@ Please answer using one message only.."""
                 title=f"Room for `{type_help}` created!",
                 description=f"**Go to {the_channel.mention}!**",
                 color=discord.Color.green())
-            await member.send(embed=created_embed)
+            await interaction.followup.send(embed=created_embed, ephemeral=True)
             await self.insert_user_open_channel(member.id, the_channel.id)
-            embed = discord.Embed(title=f"{type_help.title()}!",
-            description=f"{message}",
-                color=discord.Color.red())
+            embed = discord.Embed(title=f"{type_help.title()}!", description=message, color=discord.Color.red())
+            if image:
+                embed.set_image(url=image)
             await the_channel.send(content=f"{member.mention}, {moderator.mention}", embed=embed)
 
     async def get_message(self, member, check, timeout: int = 300):
