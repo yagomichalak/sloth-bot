@@ -118,7 +118,7 @@ class ReportSupportView(discord.ui.View):
         message = f"""You have opened a verification request, if you would like to verify:
 1.Take a clear picture of yourself holding a piece of paper with today's date and time of verification, and your Discord server name written on it."""
         try:
-            exists = await self.cog.generic_help(interaction, 'verify', message, 'https://cdn.discordapp.com/attachments/562019472257318943/882352621116096542/slothfacepopoo.png')
+            exists = await self.cog.generic_help(interaction, 'verify', message, 'https://cdn.discordapp.com/attachments/562019472257318943/882352621116096542/slothfacepopoo.png', False)
             if exists is False:
                 return
         except Exception as e:
