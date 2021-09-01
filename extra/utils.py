@@ -2,7 +2,7 @@ from datetime import datetime
 import re
 from pytz import timezone
 from discord.ext import commands
-from typing import List, Dict
+from typing import List, Dict, Optional
 import discord
 
 async def get_timestamp(tz: str = 'Etc/GMT') -> int:
@@ -32,13 +32,18 @@ async def parse_time(tz: str = 'Etc/GMT') -> str:
 def is_allowed(roles: List[int]) -> bool:
     """ Checks whether the member has adm perms or has an allowed role. """
 
-    async def real_check(ctx: commands.Context):
-        perms = ctx.channel.permissions_for(ctx.author)
+    async def real_check(ctx: Optional[commands.Context] = None, channel: Optional[discord.TextChannel] = None, 
+        member: Optional[discord.Member] = None) -> bool:
+
+        member = member if not ctx else ctx.author
+        channel = channel if not ctx else ctx.channel
+
+        perms = channel.permissions_for(member)
         if perms.administrator:
             return True
 
         for rid in roles:
-            if rid in [role.id for role in ctx.author.roles]:
+            if rid in [role.id for role in member.roles]:
                 return True
 
         else:

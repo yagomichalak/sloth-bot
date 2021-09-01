@@ -1,11 +1,11 @@
 import discord
-from discord import guild
 from discord.ext import commands
 from mysqldb import the_database
 from typing import List, Union
 
 
 class RoleSelectionDatabaseCommands(commands.Cog):
+    """ Class for RoleSelection database commands and methods. """
 
     def __init__(self, client) -> None:
         self.client = client

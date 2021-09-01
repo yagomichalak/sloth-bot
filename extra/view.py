@@ -23,6 +23,8 @@ class ReportSupportView(discord.ui.View):
 
     @discord.ui.button(label="Apply for Teacher!", style=3, custom_id=f"apply_to_teach", emoji="🧑‍🏫")
     async def apply_to_teach_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Button for starting the Teacher application. """
+
         member = interaction.user
 
         # Apply to be a teacher
@@ -39,7 +41,7 @@ class ReportSupportView(discord.ui.View):
 
     @discord.ui.button(label="Apply for Moderator!", style=3, custom_id=f"apply_to_moderate", emoji="👮")
     async def apply_to_moderate_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
-        """  """
+        """ Button for starting the Moderator application. """
 
         member = interaction.user
 
@@ -57,7 +59,7 @@ class ReportSupportView(discord.ui.View):
 
     @discord.ui.button(label="Apply for Event Manager!", style=3, custom_id=f"apply_to_manage_events", emoji="🎉")
     async def apply_to_event_manager_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
-        """  """
+        """ Button for starting the Event Manager application. """
 
         member = interaction.user
 
@@ -76,6 +78,7 @@ class ReportSupportView(discord.ui.View):
 
     @discord.ui.button(label="Get your own Custom Bot (not for free)", style=1, custom_id=f"get_custom_bot", emoji="🤖", disabled=True, row=2)
     async def bot_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Button for buying a custom bot. """
 
         member = interaction.user
 
@@ -101,6 +104,7 @@ class ReportSupportView(discord.ui.View):
 
     @discord.ui.button(label="Verify", style=1, custom_id=f"verify_id", emoji="☑️", row=2)
     async def verify_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Button for starting the verification process. """
 
         await interaction.response.defer()
 
@@ -114,20 +118,11 @@ class ReportSupportView(discord.ui.View):
                 return await interaction.followup.send(
                     f"**You are on cooldown to use this, try again in {round(240-sub)} seconds, {member.mention}!**", ephemeral=True)
             
-
-        message = f"""You have opened a verification request, if you would like to verify:
-1.Take a clear picture of yourself holding a piece of paper with today's date and time of verification, and your Discord server name written on it."""
-        try:
-            exists = await self.cog.generic_help(interaction, 'verify', message, 'https://cdn.discordapp.com/attachments/562019472257318943/882352621116096542/slothfacepopoo.png', False)
-            if exists is False:
-                return
-        except Exception as e:
-            print(e)
-        else:
-            return await self.cog.audio(member, 'general_help_alert')
+        await self.cog.send_verified_selfies_verification(interaction)
 
     @discord.ui.button(label="Report a User or Get Server/Role Support!", style=4, custom_id=f"report_support", emoji="<:politehammer:608941633454735360>", row=3)
     async def report_support_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Button for reporting someone. """
 
         await interaction.response.defer()
         member = interaction.user

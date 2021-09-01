@@ -1,7 +1,9 @@
 import discord
+from discord import member
 from discord.ext import commands
 from mysqldb import *
 import asyncio
+from extra import utils
 from extra.useful_variables import list_of_commands
 from extra.menu import ConfirmSkill
 from extra.prompt.menu import ConfirmButton
@@ -13,6 +15,7 @@ from datetime import datetime
 
 case_cat_id = int(os.getenv('CASE_CAT_ID'))
 reportsupport_channel_id = int(os.getenv('REPORT_CHANNEL_ID'))
+verification_requests_channel_id = int(os.getenv('VERIFICATION_REQUESTS_CHANNEL_ID'))
 dnk_id = int(os.getenv('DNK_ID'))
 moderator_role_id = int(os.getenv('MOD_ROLE_ID'))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID'))
@@ -24,11 +27,16 @@ allowed_roles = [
 int(os.getenv('OWNER_ROLE_ID')), admin_role_id,
 moderator_role_id]
 
+from extra.reportsupport.applications import ApplicationsTable
 
-class ReportSupport(commands.Cog):
-    '''
-    A cog related to the system of reports and some other things.
-    '''
+
+report_support_classes: List[commands.Cog] = [
+    ApplicationsTable
+]
+
+
+class ReportSupport(*report_support_classes):
+    """ A cog related to the system of reports and some other things. """
 
     def __init__(self, client) -> None:
         self.client = client
@@ -76,7 +84,10 @@ class ReportSupport(commands.Cog):
 
         # Checks if it's in the teacher applications channel
         if payload.channel_id == self.teacher_app_channel_id:
-            if mod_role in payload.member.roles or lesson_manager_role in payload.member.roles or adm:
+            # ctx = self.client.get_context(message)
+            # ctx.author = member
+            if await utils.is_allowed([mod_role.id, lesson_manager_role.id]).predicate(channel=channel, member=payload.member):
+            # if mod_role in payload.member.roles or lesson_manager_role in payload.member.roles or adm:
                 await self.handle_teacher_application(guild, payload)
             else:
                 await message.remove_reaction(payload.emoji, payload.member)
@@ -105,24 +116,24 @@ class ReportSupport(commands.Cog):
         emoji = str(payload.emoji)
         if emoji == '✅':
             # Gets the teacher app and does the magic
-            teacher_app = await self.get_teacher_app_by_message(payload.message_id)
+            teacher_app = await self.get_application_by_message(payload.message_id, 'teacher')
             if not teacher_app:
                 return
 
             # Checks if the person has not an open interview channel already
-            if teacher_app[0][2] == 'no':
+            if not teacher_app[3]:
                 # Creates an interview room with the teacher and sends their application there (you can z!close there)
                 return await self.create_teacher_interview_room(guild, teacher_app)
 
         elif emoji == '❌':
             # Tries to delete the teacher app from the db, in case it is registered
-            teacher_app = await self.get_teacher_app_by_message(payload.message_id)
-            if teacher_app and teacher_app[0][2] == 'no':
-                await self.delete_teacher_app(payload.message_id)
+            teacher_app = await self.get_application_by_message(payload.message_id, 'teacher')
+            if teacher_app and not teacher_app[3]:
+                await self.delete_application(payload.message_id, 'teacher')
                 teacher_app_channel = self.client.get_channel(self.teacher_app_channel_id)
                 app_msg = await teacher_app_channel.fetch_message(payload.message_id)
                 await app_msg.add_reaction('🔏')
-                teacher = discord.utils.get(guild.members, id=teacher_app[0][1])
+                teacher = discord.utils.get(guild.members, id=teacher_app[1])
                 if teacher:
                     msg = "**Teacher Application**\nOur staff has evaluated your teacher application and has come to the conclusion that we are not in need of this lesson."
                     await teacher.send(embed=discord.Embed(description=msg))
@@ -136,24 +147,24 @@ class ReportSupport(commands.Cog):
         emoji = str(payload.emoji)
         if emoji == '✅':
             # Gets the moderator app and does the magic
-            moderator_app = await self.get_moderator_app_by_message(payload.message_id)
+            moderator_app = await self.get_application_by_message(payload.message_id, 'moderator')
             if not moderator_app:
                 return
 
             # Checks if the person has not an open interview channel already
-            if not moderator_app[0][2]:
+            if not moderator_app[3]:
                 # Creates an interview room with the moderator and sends their application there (you can z!close there)
                 return await self.create_moderator_interview_room(guild, moderator_app)
 
         elif emoji == '❌':
             # Tries to delete the moderator app from the db, in case it is registered
-            moderator_app = await self.get_moderator_app_by_message(payload.message_id)
-            if moderator_app and not moderator_app[0][2]:
-                await self.delete_moderator_app(payload.message_id)
+            moderator_app = await self.get_application_by_message(payload.message_id, 'moderator')
+            if moderator_app and not moderator_app[3]:
+                await self.delete_application(payload.message_id, 'moderator')
                 moderator_app_channel = self.client.get_channel(self.moderator_app_channel_id)
                 app_msg = await moderator_app_channel.fetch_message(payload.message_id)
                 await app_msg.add_reaction('🔏')
-                moderator = discord.utils.get(guild.members, id=moderator_app[0][1])
+                moderator = discord.utils.get(guild.members, id=moderator_app[1])
                 if moderator:
                     msg = "**Moderator Application**\nOur staff has avaluated your moderator application and has come to a conclusion, and due to intern and unspecified reasons we are **declining** it. Thank you anyways"
                     await moderator.send(embed=discord.Embed(description=msg))
@@ -167,24 +178,24 @@ class ReportSupport(commands.Cog):
         emoji = str(payload.emoji)
         if emoji == '✅':
             # Gets the teacher app and does the magic
-            event_manager_app = await self.get_event_manager_app_by_message(payload.message_id)
+            event_manager_app = await self.get_application_by_message(payload.message_id, 'event_manager')
             if not event_manager_app:
                 return
 
             # Checks if the person has not an open interview channel already
-            if event_manager_app[0][2] == 'no':
+            if not event_manager_app[3]:
                 # Creates an interview room with the event_manager and sends their application there (you can z!close there)
                 return await self.create_event_manager_interview_room(guild, event_manager_app)
 
         elif emoji == '❌':
             # Tries to delete the event_manager app from the db, in case it is registered
-            event_manager_app = await self.get_event_manager_app_by_message(payload.message_id)
-            if event_manager_app and event_manager_app[0][2] == 'no':
-                await self.delete_event_manager_app(payload.message_id)
+            event_manager_app = await self.get_application_by_message(payload.message_id, 'event_manager')
+            if event_manager_app and not event_manager_app[3]:
+                await self.delete_application(payload.message_id, 'event_manager')
                 event_manager_app_channel = self.client.get_channel(self.event_manager_app_channel_id)
                 app_msg = await event_manager_app_channel.fetch_message(payload.message_id)
                 await app_msg.add_reaction('🔏')
-                event_manager = discord.utils.get(guild.members, id=event_manager_app[0][1])
+                event_manager = discord.utils.get(guild.members, id=event_manager_app[1])
                 if event_manager:
                     msg = "**event_manager Application**\nOur staff has evaluated your event_manager application and has come to the conclusion that we are not in need of this lesson."
                     await event_manager.send(embed=discord.Embed(description=msg))
@@ -247,7 +258,7 @@ class ReportSupport(commands.Cog):
         Question one:
         What language are you applying to teach?'''
         q1 = await member.send(embed=embed)
-        a1 = await self.get_message(member, msg_check)
+        a1 = await self.get_message_content(member, msg_check)
         if not a1:
             return
 
@@ -255,7 +266,7 @@ class ReportSupport(commands.Cog):
         - Why do you want to teach that language on the language sloth?
         Please answer with one message.'''
         q2 = await member.send(embed=embed)
-        a2 = await self.get_message(member, msg_check)
+        a2 = await self.get_message_content(member, msg_check)
         if not a2:
             return
 
@@ -265,7 +276,7 @@ class ReportSupport(commands.Cog):
         E.A: Thursdays 3 pm CET, you can specify your timezone.
         Again remember to answer with one message.'''
         q3 = await member.send(embed=embed)
-        a3 = await self.get_message(member, msg_check)
+        a3 = await self.get_message_content(member, msg_check)
         if not a3:
             return
 
@@ -274,25 +285,25 @@ class ReportSupport(commands.Cog):
         Are you able to teach lessons in English?
         Please answer using one message only'''
         q4 = await member.send(embed=embed)
-        a4 = await self.get_message(member, msg_check)
+        a4 = await self.get_message_content(member, msg_check)
         if not a4:
             return
 
         embed.description = '''- Have you ever taught people before?'''
         q5 = await member.send(embed=embed)
-        a5 = await self.get_message(member, msg_check)
+        a5 = await self.get_message_content(member, msg_check)
         if not a5:
             return
 
         embed.description = '''- Inform a short description for your class.'''
         q6 = await member.send(embed=embed)
-        a6 = await self.get_message(member, msg_check)
+        a6 = await self.get_message_content(member, msg_check)
         if not a6:
             return
 
         embed.description = '''- How old are you?'''
         q7 = await member.send(embed=embed)
-        a7 = await self.get_message(member, msg_check)
+        a7 = await self.get_message_content(member, msg_check)
         if not a7:
             return
 
@@ -326,7 +337,7 @@ class ReportSupport(commands.Cog):
             await app.add_reaction('✅')
             await app.add_reaction('❌')
             # Saves in the database
-            await self.save_teacher_app(app.id, member.id)
+            await self.save_application(app.id, member.id, 'teacher')
 
         else:
             self.cache[member.id] = 0
@@ -382,7 +393,7 @@ Entry requirements:
 
         embed.description = "- What's your age?"
         q1 = await member.send(embed=embed)
-        a1 = await self.get_message(member, msg_check)
+        a1 = await self.get_message_content(member, msg_check)
         if not a1:
             return
 
@@ -392,7 +403,7 @@ To apply please answer to these following questions with One message at a time
 Question one:
 Do you have any experience moderating Discord servers?"""
         q2 = await member.send(embed=embed)
-        a2 = await self.get_message(member, msg_check)
+        a2 = await self.get_message_content(member, msg_check)
         if not a2:
             return
 
@@ -400,7 +411,7 @@ Do you have any experience moderating Discord servers?"""
         - What is your gender?
 Please answer with one message."""
         q3 = await member.send(embed=embed)
-        a3 = await self.get_message(member, msg_check)
+        a3 = await self.get_message_content(member, msg_check)
         if not a3:
             return
 
@@ -408,7 +419,7 @@ Please answer with one message."""
         - What's your English level? Are you able to express yourself using English?
 Please answer using one message only."""
         q4 = await member.send(embed=embed)
-        a4 = await self.get_message(member, msg_check)
+        a4 = await self.get_message_content(member, msg_check)
         if not a4:
             return
 
@@ -416,28 +427,28 @@ Please answer using one message only."""
         - Why are you applying to be Staff? What is your motivation?
 Please answer using one message only."""
         q5 = await member.send(embed=embed)
-        a5 = await self.get_message(member, msg_check)
+        a5 = await self.get_message_content(member, msg_check)
         if not a5:
             return
 
         embed.description = """- How do you think The Language Sloth could be a better community?
 Please answer using one message only."""
         q6 = await member.send(embed=embed)
-        a6 = await self.get_message(member, msg_check)
+        a6 = await self.get_message_content(member, msg_check)
         if not a6:
             return
 
         embed.description = """- How active are you on Discord in general?
 Please answer using one message only."""
         q7 = await member.send(embed=embed)
-        a7 = await self.get_message(member, msg_check)
+        a7 = await self.get_message_content(member, msg_check)
         if not a7:
             return
 
         embed.description = """- What is your time zone?
 Please answer using one message only.."""
         q8 = await member.send(embed=embed)
-        a8 = await self.get_message(member, msg_check)
+        a8 = await self.get_message_content(member, msg_check)
         if not a8:
             return
 
@@ -474,7 +485,7 @@ Please answer using one message only.."""
 
         if r == '✅':
             # ""
-            embed.description = """**Application successfully made, please, be patient now.
+            embed.description = """**Application successfully made, please, be patient now.**
             
             We will let you know when we need a new mod. We check apps when we need it!""" 
             await member.send(embed=embed)
@@ -484,7 +495,7 @@ Please answer using one message only.."""
             await app.add_reaction('✅')
             await app.add_reaction('❌')
             # Saves in the database
-            await self.save_moderator_app(app.id, member.id)
+            await self.save_application(app.id, member.id, 'moderator')
 
         else:
             self.cache[member.id] = 0
@@ -548,7 +559,7 @@ Please answer using one message only.."""
         Question one:
         What is your event called?'''
         q1 = await member.send(embed=embed)
-        a1 = await self.get_message(member, msg_check)
+        a1 = await self.get_message_content(member, msg_check)
         if not a1:
             return
 
@@ -556,7 +567,7 @@ Please answer using one message only.."""
         - Why do you want to host that event on the language sloth?
         Please answer with one message.'''
         q2 = await member.send(embed=embed)
-        a2 = await self.get_message(member, msg_check)
+        a2 = await self.get_message_content(member, msg_check)
         if not a2:
             return
 
@@ -565,7 +576,7 @@ Please answer using one message only.."""
         E.A: Thursdays 3 pm CET, you can specify your timezone.
         Again remember to answer with one message.'''
         q3 = await member.send(embed=embed)
-        a3 = await self.get_message(member, msg_check)
+        a3 = await self.get_message_content(member, msg_check)
         if not a3:
             return
 
@@ -574,25 +585,25 @@ Please answer using one message only.."""
         Are you able to host events in English? If not, in which language would you be hosting?
         Please answer using one message only"""
         q4 = await member.send(embed=embed)
-        a4 = await self.get_message(member, msg_check)
+        a4 = await self.get_message_content(member, msg_check)
         if not a4:
             return
 
         embed.description = "- Have you ever hosted events before? If yes, please describe!"
         q5 = await member.send(embed=embed)
-        a5 = await self.get_message(member, msg_check)
+        a5 = await self.get_message_content(member, msg_check)
         if not a5:
             return
 
         embed.description = "- Inform a short description for your event/events."
         q6 = await member.send(embed=embed)
-        a6 = await self.get_message(member, msg_check)
+        a6 = await self.get_message_content(member, msg_check)
         if not a6:
             return
 
         embed.description = "- How old are you?"
         q7 = await member.send(embed=embed)
-        a7 = await self.get_message(member, msg_check)
+        a7 = await self.get_message_content(member, msg_check)
         if not a7:
             return
 
@@ -626,11 +637,73 @@ Please answer using one message only.."""
             await app.add_reaction('✅')
             await app.add_reaction('❌')
             # Saves in the database
-            await self.save_event_manager_app(app.id, member.id)
+            await self.save_application(app.id, member.id, 'event_manager')
 
         else:
             self.cache[member.id] = 0
             return await member.send("**Thank you anyways!**")
+
+    async def send_verified_selfies_verification(self, interaction: discord.Interaction) -> None:
+        """ Sends a message to the user asking for them to send a selfie in order for them
+        to get the verified selfies role.
+        :param interaction: The interaction object. """
+
+        guild = interaction.guild
+        member = interaction.user
+
+
+        def msg_check(message):
+            if message.author == member and not message.guild:
+                if len(message.content) <= 100:
+                    return True
+                else:
+                    self.client.loop.create_task(member.send("**Your answer must be within 100 characters**"))
+            else:
+                return False
+
+        embed = discord.Embed(
+            title=f"__Verify__",
+            description=f"""You have opened a verification request, if you would like to verify:\n
+**1.** Take a clear picture of yourself holding a piece of paper with today's date and time of verification, and your Discord server name written on it. Image links won't work, only image uploads!\n(You have 5 minutes to do so)"""
+        )
+        embed.set_footer(text=f"by {member}", icon_url=member.avatar.url)
+
+        embed.set_image(url="https://cdn.discordapp.com/attachments/562019472257318943/882352621116096542/slothfacepopoo.png")
+
+        await member.send(embed=embed)
+
+        while True:
+            msg = await self.get_message(member, msg_check, 300)
+            if not msg:
+                return await member.send(f"**Timeout, you didn't answer in time, try again later!**")
+
+
+            attachments = [att for att in msg.attachments if att.content_type.startswith('image')]
+            if msg.content.lower() == 'quit':
+                return await member.send(f"**Bye!**")
+
+            if not attachments:
+                await member.send(f"**No uploaded pic detected, send it again or type `quit` to stop this!**")
+                continue
+
+            break
+
+        # Sends verified request to admins
+        verify_embed = discord.Embed(
+            title=f"__Verification Request__",
+            description=f"{member} ({member.id})",
+            color=member.color,
+            timestamp=interaction.message.created_at
+        )
+
+        verify_embed.set_thumbnail(url=member.avatar.url)
+        verify_embed.set_image(url=attachments[0])
+        verification_requests_channel = discord.utils.get(guild.text_channels, id=verification_requests_channel_id)
+        verify_msg = await verification_requests_channel.send(content=member.mention, embed=verify_embed)
+        # Save
+        # await self.insert_verify_request(member.id, verify_msg.id)
+        return await member.send(f"**Request sent, you will get notified here if you get accepted or declined! ✅**")
+
 
     # - Report someone
     async def report_someone(self, interaction: discord.Interaction):
@@ -677,7 +750,12 @@ Please answer using one message only.."""
             return await self.client.get_cog('Tools').vc(ctx=ctx, member=member)
 
     # - Report someone
-    async def generic_help(self, interaction: discord.Interaction, type_help: str, message: str, image: Optional[str] = None, ping: bool = True):
+    async def generic_help(self, interaction: discord.Interaction, type_help: str, message: str, ping: bool = True) -> None:
+        """ Opens a generic help channel.
+        :param interaction: The interaction that generated this action.
+        :param type_help: The kind of general help.
+        :param message: The text message to send in the room.
+        :param ping: Whether mods should be pinged for this. """
 
         member = interaction.user
         guild = interaction.guild
@@ -705,7 +783,6 @@ Please answer using one message only.."""
             await interaction.followup.send("**Something went wrong with it, please contact an admin!**")
             raise Exception
         else:
-            # print('created!')
             created_embed = discord.Embed(
                 title=f"Room for `{type_help}` created!",
                 description=f"**Go to {the_channel.mention}!**",
@@ -713,14 +790,18 @@ Please answer using one message only.."""
             await interaction.followup.send(embed=created_embed, ephemeral=True)
             await self.insert_user_open_channel(member.id, the_channel.id)
             embed = discord.Embed(title=f"{type_help.title()}!", description=message, color=discord.Color.red())
-            if image:
-                embed.set_image(url=image)
+
             if ping:
                 await the_channel.send(content=f"{member.mention}, {moderator.mention}", embed=embed)
             else:
                 await the_channel.send(content=member.mention, embed=embed)
 
-    async def get_message(self, member, check, timeout: int = 300):
+    async def get_message_content(self, member, check, timeout: Optional[int] = 300) -> str:
+        """ Gets a message content.
+        :param member: The member to get the message from.
+        :param check: The check for the event.
+        :param timeout: Timeout for getting the message. [Optional] """
+
         try:
             message = await self.client.wait_for('message', timeout=timeout,
             check=check)
@@ -731,9 +812,24 @@ Please answer using one message only.."""
             content = message.content
             return content
 
+    async def get_message(self, member, check, timeout: Optional[int] = 300) -> discord.Message:
+        """ Gets a message.
+        :param member: The member to get the message from.
+        :param check: The check for the event.
+        :param timeout: Timeout for getting the message. [Optional] """
+
+        try:
+            message = await self.client.wait_for('message', timeout=timeout,
+            check=check)
+        except asyncio.TimeoutError:
+            await member.send("**Timeout! Try again.**")
+            return None
+        else:
+            return message
+
     async def get_reaction(self, member, check, timeout: int = 300):
         try:
-            reaction, user = await self.client.wait_for('reaction_add',
+            reaction, _ = await self.client.wait_for('reaction_add',
             timeout=timeout, check=check)
         except asyncio.TimeoutError:
             await member.send("**Timeout! Try again.**")
@@ -742,7 +838,7 @@ Please answer using one message only.."""
             return str(reaction.emoji)
 
     async def member_has_open_channel(self, member_id: int) -> List[int]:
-        mycursor, db = await the_database()
+        mycursor, _ = await the_database()
         await mycursor.execute(f"SELECT * FROM OpenChannels WHERE user_id = {member_id}")
         user = await mycursor.fetchone()
         await mycursor.close()
@@ -1055,7 +1151,7 @@ Please answer using one message only.."""
         :param teacher_app: The teacher application info. """
 
         teacher_app_cat = discord.utils.get(guild.categories, id=self.teacher_app_cat_id)
-        teacher = discord.utils.get(guild.members, id=teacher_app[0][1])
+        teacher = discord.utils.get(guild.members, id=teacher_app[1])
 
         # moderator = discord.utils.get(guild.roles, id=moderator_role_id)
         muffin = discord.utils.get(guild.members, id=self.muffin_id)
@@ -1074,13 +1170,13 @@ Please answer using one message only.."""
         vc_channel = await teacher_app_cat.create_voice_channel(name=f"{teacher.name}'s Interview", overwrites=overwrites)
 
         # Updates the teacher's application in the database, adding the channels ids
-        await self.update_teacher_application(teacher.id, txt_channel.id, vc_channel.id)
+        await self.update_application(teacher.id, txt_channel.id, vc_channel.id, 'teacher')
 
         app_embed = discord.Embed(
             title=f"{teacher.name}'s Interview",
-            description=f'''
+            description=f"""
             Hello, {teacher.mention}, we have received and reviewed your teacher application. In order to set up your lesson and explain how our system works we have to schedule a voice conversation with you.
-            When would be the best time to talk to one of our staff?''',
+            When would be the best time to talk to one of our staff?""",
             color=teacher.color)
         await txt_channel.send(content=f"{muffin.mention}, {lesson_management.mention}, {teacher.mention}", embed=app_embed)
 
@@ -1090,7 +1186,7 @@ Please answer using one message only.."""
         :param moderator_app: The moderator application info. """
 
         moderator_app_cat = discord.utils.get(guild.categories, id=self.moderator_app_cat_id)
-        moderator = discord.utils.get(guild.members, id=moderator_app[0][1])
+        moderator = discord.utils.get(guild.members, id=moderator_app[1])
 
         cosmos = discord.utils.get(guild.members, id=self.cosmos_id)
         admin = discord.utils.get(guild.roles, id=admin_role_id)
@@ -1105,7 +1201,7 @@ Please answer using one message only.."""
         vc_channel = await moderator_app_cat.create_voice_channel(name=f"{moderator.name}'s Interview", overwrites=overwrites)
 
         # Updates the moderator's application in the database, adding the channels ids
-        await self.update_moderator_application(moderator.id, txt_channel.id, vc_channel.id)
+        await self.update_application(moderator.id, txt_channel.id, vc_channel.id, 'moderator')
 
         app_embed = discord.Embed(
             title=f"{moderator.name}'s Interview",
@@ -1124,7 +1220,7 @@ Please answer using one message only.."""
         :param event_manager_app: The moderator application info. """
 
         event_manager_app_cat = discord.utils.get(guild.categories, id=self.event_manager_app_cat_id)
-        event_manager = discord.utils.get(guild.members, id=event_manager_app[0][1])
+        event_manager = discord.utils.get(guild.members, id=event_manager_app[1])
 
         muffin = discord.utils.get(guild.members, id=self.muffin_id)
 
@@ -1138,7 +1234,7 @@ Please answer using one message only.."""
         vc_channel = await event_manager_app_cat.create_voice_channel(name=f"{event_manager.name}'s Interview", overwrites=overwrites)
 
         # Updates the event_manager's application in the database, adding the channels ids
-        await self.update_event_manager_application(event_manager.id, txt_channel.id, vc_channel.id)
+        await self.update_application(event_manager.id, txt_channel.id, vc_channel.id, 'event_manager')
 
         app_embed = discord.Embed(
             title=f"{event_manager.name}'s Interview",
@@ -1151,65 +1247,59 @@ Please answer using one message only.."""
     @commands.command()
     @commands.has_permissions(administrator=True)
     async def close_app(self, ctx) -> None:
-        '''
-        (ADMIN) Closes an application channel.
-        '''
+        """ (ADMIN) Closes an application channel. """
+
+        member = ctx.author
+        channel = ctx.channel
+        guild = ctx.guild
 
         # Checks if the channel is in the teacher applications category
-        if not ctx.channel.category or not ctx.channel.category.id in [self.teacher_app_cat_id, self.moderator_app_cat_id, self.event_manager_app_cat_id]:
-            return await ctx.send(f"**This is not an application channel, {ctx.author.mention}!**")
+        if not channel.category or not channel.category.id in [self.teacher_app_cat_id, self.moderator_app_cat_id, self.event_manager_app_cat_id]:
+            return await ctx.send(f"**This is not an application channel, {member.mention}!**")
 
         application_type = None
         all_apps_channel = None
 
-        if app_channel := await self.get_teacher_app_by_channel(ctx.channel.id):
-            application_type = 'teacher'
-            all_apps_channel = discord.utils.get(ctx.guild.text_channels, id=self.teacher_app_channel_id)
+        if app_channel := await self.get_application_by_channel(channel.id, 'teacher'):
+            all_apps_channel = discord.utils.get(guild.text_channels, id=self.teacher_app_channel_id)
 
-        elif app_channel := await self.get_moderator_app_by_channel(ctx.channel.id):
-            application_type = 'moderator'
-            all_apps_channel = discord.utils.get(ctx.guild.text_channels, id=self.moderator_app_channel_id)
+        elif app_channel := await self.get_application_by_channel(channel.id, 'moderator'):
+            all_apps_channel = discord.utils.get(guild.text_channels, id=self.moderator_app_channel_id)
 
-        elif app_channel := await self.get_event_manager_app_by_channel(ctx.channel.id):
-            application_type = 'event_manager'
-            all_apps_channel = discord.utils.get(ctx.guild.text_channels, id=self.event_manager_app_channel_id)
+        elif app_channel := await self.get_application_by_channel(channel.id, 'event_manager'):
+            all_apps_channel = discord.utils.get(guild.text_channels, id=self.event_manager_app_channel_id)
+
+        application_type = app_channel[2]
 
         if app_channel:
-            txt_channel = discord.utils.get(ctx.guild.channels, id=app_channel[0][3])
-            vc_channel = discord.utils.get(ctx.guild.channels, id=app_channel[0][4])
+            txt_channel = discord.utils.get(guild.channels, id=app_channel[4])
+            vc_channel = discord.utils.get(guild.channels, id=app_channel[5])
             embed = discord.Embed(title="Confirmation",
                 description="Are you sure that you want to delete this application channel?",
-                color=ctx.author.color,
+                color=member.color,
                 timestamp=ctx.message.created_at)
-            confirmation = await ctx.send(content=ctx.author.mention, embed=embed)
+            confirmation = await ctx.send(content=member.mention, embed=embed)
             await confirmation.add_reaction('✅')
             await confirmation.add_reaction('❌')
             try:
                 reaction, user = await self.client.wait_for('reaction_add', timeout=20,
-                    check=lambda r, u: u == ctx.author and r.message.id == confirmation.id and str(r.emoji) in ['✅', '❌'])
+                    check=lambda r, u: u == member and r.message.id == confirmation.id and str(r.emoji) in ['✅', '❌'])
             except asyncio.TimeoutError:
                 embed = discord.Embed(title="Confirmation",
                 description="You took too long to answer the question; not deleting it!",
                 color=discord.Color.red(),
                 timestamp=ctx.message.created_at)
-                return await confirmation.edit(content=ctx.author.mention, embed=embed)
+                return await confirmation.edit(content=member.mention, embed=embed)
             else:
                 if str(reaction.emoji) == '✅':
                     embed.description = f"**Application channel {txt_channel.mention} is being deleted...**"
-                    await confirmation.edit(content=ctx.author.mention, embed=embed)
+                    await confirmation.edit(content=member.mention, embed=embed)
                     await asyncio.sleep(3)
                     await txt_channel.delete()
                     await vc_channel.delete()
-
-                    if application_type == 'teacher':
-                        await self.delete_teacher_app(app_channel[0][0])
-                    elif application_type == 'moderator':
-                        await self.delete_moderator_app(app_channel[0][0])
-                    elif application_type == 'event_manager':
-                        await self.delete_event_manager_app(app_channel[0][0])
+                    await self.delete_application(app_channel[0], app_channel[2])
                     try:
-                        msg = await all_apps_channel.fetch_message(app_channel[0][0])
-                        # await msg.delete()
+                        msg = await all_apps_channel.fetch_message(app_channel[0])
                         await msg.add_reaction('🔒')
                     except Exception:
                         pass
@@ -1217,358 +1307,8 @@ Please answer using one message only.."""
                     embed.description = "Not deleting it!"
                     await confirmation.edit(content='', embed=embed)
         else:
-            await ctx.send(f"**What do you think that you are doing? You cannot delete this channel, {ctx.author.mention}!**")
+            await ctx.send(f"**What do you think that you are doing? You cannot delete this channel, {member.mention}!**")
 
-    # Database back-end methods
-    async def get_teacher_app_by_message(self, message_id: int) -> List[str]:
-        """ Gets a teacher application from the database by providing a message id. """
-
-        mycursor, db = await the_database()
-        await mycursor.execute("SELECT * FROM TeacherApplication WHERE message_id = %s", (message_id,))
-        teacher_app = await mycursor.fetchall()
-        await mycursor.close()
-        return teacher_app
-
-    async def get_teacher_app_by_channel(self, channel_id: int) -> List[str]:
-        """ Gets a teacher application from the database by providing a channel id. """
-
-        mycursor, db = await the_database()
-        await mycursor.execute("SELECT * FROM TeacherApplication WHERE txt_id = %s", (channel_id,))
-        teacher_app = await mycursor.fetchall()
-        await mycursor.close()
-        return teacher_app
-
-    async def save_teacher_app(self, message_id: int, teacher_id: int) -> None:
-        """ Saves a teacher application into the database. """
-
-        mycursor, db = await the_database()
-        await mycursor.execute(
-            '''
-            INSERT INTO TeacherApplication (message_id, teacher_id)
-            VALUES (%s, %s)''', (message_id, teacher_id)
-            )
-        await db.commit()
-        await mycursor.close()
-
-    async def update_teacher_application(self, teacher_id: int, txt_id: int, vc_id: int) -> None:
-        """ Updates the teacher's application; adding the txt and vc ids into it. """
-
-        mycursor, db = await the_database()
-        await mycursor.execute(
-            '''UPDATE TeacherApplication SET
-            channel_open = 'yes', txt_id = %s, vc_id = %s
-            WHERE teacher_id = %s''', (txt_id, vc_id, teacher_id)
-            )
-        await db.commit()
-        await mycursor.close()
-
-    async def delete_teacher_app(self, message_id: int) -> None:
-        """ Deletes a teacher application from the database. """
-
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM TeacherApplication WHERE message_id = %s", (message_id,))
-        await db.commit()
-        await mycursor.close()
-
-    # Database ADM commands
-    @commands.command(hidden=True)
-    @commands.has_permissions(administrator=True)
-    async def create_table_teacher_application(self, ctx) -> None:
-        """ (ADM) Creates the TeacherApplication table. """
-
-        if await self.table_teacher_application_exists():
-            return await ctx.send("**Table `TeacherApplication` already exists!**")
-
-        mycursor, db = await the_database()
-        await mycursor.execute('''CREATE TABLE TeacherApplication (
-            message_id BIGINT, teacher_id BIGINT, channel_open VARCHAR(3) default 'no',
-            txt_id BIGINT default null, vc_id BIGINT default null)''')
-
-        await db.commit()
-        await mycursor.close()
-
-        await ctx.send("**Table `TeacherApplication` created!**")
-
-    @commands.command(hidden=True)
-    @commands.has_permissions(administrator=True)
-    async def drop_table_teacher_application(self, ctx) -> None:
-        """ (ADM) Drops the TeacherApplication table. """
-
-        if not await self.table_teacher_application_exists():
-            return await ctx.send("**Table `TeacherApplication` doesn't exist!**")
-
-        mycursor, db = await the_database()
-        await mycursor.execute("DROP TABLE TeacherApplication")
-        await db.commit()
-        await mycursor.close()
-
-        await ctx.send("**Table `TeacherApplication` dropped!**")
-
-    @commands.command(hidden=True)
-    @commands.has_permissions(administrator=True)
-    async def reset_table_teacher_application(self, ctx) -> None:
-        """ (ADM) Resets the TeacherApplication table. """
-
-        if not await self.table_teacher_application_exists():
-            return await ctx.send("**Table `TeacherApplication` doesn't exist yet!**")
-
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM TeacherApplication")
-        await db.commit()
-        await mycursor.close()
-
-        await ctx.send("**Table `TeacherApplication` reset!**")
-
-    async def table_teacher_application_exists(self) -> bool:
-        """ Checks whether the TeacherApplication table exists. """
-
-        mycursor, db = await the_database()
-        await mycursor.execute("SHOW TABLE STATUS LIKE 'TeacherApplication'")
-        exists = await mycursor.fetchall()
-        await mycursor.close()
-
-        if len(exists):
-            return True
-        else:
-            return False
-
-    # Moderator Applications
-
-    async def get_moderator_app_by_message(self, message_id: int) -> List[str]:
-        """ Gets a moderator application from the database by message ID.
-        :param message_id: The message ID. """
-
-        mycursor, db = await the_database()
-        await mycursor.execute("SELECT * FROM ModeratorApplication WHERE message_id = %s", (message_id,))
-        moderator_app = await mycursor.fetchall()
-        await mycursor.close()
-        return moderator_app
-
-    async def get_moderator_app_by_channel(self, channel_id: int) -> List[str]:
-        """ Gets a moderator application from the database by channel ID.
-        :param channel_id: The text channel ID. """
-
-        mycursor, db = await the_database()
-        await mycursor.execute("SELECT * FROM ModeratorApplication WHERE txt_id = %s", (channel_id,))
-        moderator_app = await mycursor.fetchall()
-        await mycursor.close()
-        return moderator_app
-
-    async def save_moderator_app(self, message_id: int, moderator_id: int) -> None:
-        """ Saves a moderator application into the database.
-        :param message_id: The ID of the applicaiton message.
-        :param moderator_id: The moderator ID. """
-
-        mycursor, db = await the_database()
-        await mycursor.execute(
-            """
-            INSERT INTO ModeratorApplication (message_id, moderator_id)
-            VALUES (%s, %s)""", (message_id, moderator_id)
-            )
-        await db.commit()
-        await mycursor.close()
-
-    async def update_moderator_application(self, moderator_id: int, txt_id: int, vc_id: int) -> None:
-        """ Updates the moderator's application; adding the txt and vc ids into it.
-        :param moderator_id: The moderator ID.
-        :param txt_id: The text channel ID.
-        :param vc_id: The voice channel ID. """
-
-        mycursor, db = await the_database()
-        await mycursor.execute(
-            """UPDATE ModeratorApplication SET
-            channel_open = 1, txt_id = %s, vc_id = %s
-            WHERE moderator_id = %s""", (txt_id, vc_id, moderator_id)
-            )
-        await db.commit()
-        await mycursor.close()
-
-    async def delete_moderator_app(self, message_id: int) -> None:
-        """ Deletes a moderator application from the database.
-        :param message_id: The application message's ID. """
-
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM ModeratorApplication WHERE message_id = %s", (message_id,))
-        await db.commit()
-        await mycursor.close()
-
-    # Database ADM commands
-    @commands.command(hidden=True)
-    @commands.has_permissions(administrator=True)
-    async def create_table_moderator_application(self, ctx) -> None:
-        """ (ADM) Creates the ModeratorApplication table. """
-
-        if await self.table_moderator_application_exists():
-            return await ctx.send("**Table `ModeratorApplication` already exists!**")
-
-        mycursor, db = await the_database()
-        await mycursor.execute("""CREATE TABLE ModeratorApplication (
-            message_id BIGINT, moderator_id BIGINT, channel_open TINYINT(1) default 0,
-            txt_id BIGINT default null, vc_id BIGINT default null)""")
-
-        await db.commit()
-        await mycursor.close()
-
-        await ctx.send("**Table `ModeratorApplication` created!**")
-
-    @commands.command(hidden=True)
-    @commands.has_permissions(administrator=True)
-    async def drop_table_moderator_application(self, ctx) -> None:
-        """ (ADM) Drops the ModeratorApplication table. """
-
-        if not await self.table_moderator_application_exists():
-            return await ctx.send("**Table `ModeratorApplication` doesn't exist!**")
-
-        mycursor, db = await the_database()
-        await mycursor.execute("DROP TABLE ModeratorApplication")
-        await db.commit()
-        await mycursor.close()
-
-        await ctx.send("**Table `ModeratorApplication` dropped!**")
-
-    @commands.command(hidden=True)
-    @commands.has_permissions(administrator=True)
-    async def reset_table_moderator_application(self, ctx) -> None:
-        """ (ADM) Resets the ModeratorApplication table. """
-
-        if not await self.table_moderator_application_exists():
-            return await ctx.send("**Table `ModeratorApplication` doesn't exist yet!**")
-
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM ModeratorApplication")
-        await db.commit()
-        await mycursor.close()
-
-        await ctx.send("**Table `ModeratorApplication` reset!**")
-
-    async def table_moderator_application_exists(self) -> bool:
-        """ Checks whether the ModeratorApplication table exists. """
-
-        mycursor, db = await the_database()
-        await mycursor.execute("SHOW TABLE STATUS LIKE 'ModeratorApplication'")
-        exists = await mycursor.fetchall()
-        await mycursor.close()
-
-        if len(exists):
-            return True
-        else:
-            return False
-
-    # Event Manager Applications
-
-    async def get_event_manager_app_by_message(self, message_id: int) -> List[str]:
-        """ Gets a event_manager application from the database by providing a message id. """
-
-        mycursor, db = await the_database()
-        await mycursor.execute("SELECT * FROM EventManagerApplication WHERE message_id = %s", (message_id,))
-        event_manager_app = await mycursor.fetchall()
-        await mycursor.close()
-        return event_manager_app
-
-    async def get_event_manager_app_by_channel(self, channel_id: int) -> List[str]:
-        """ Gets a event_manager application from the database by providing a channel id. """
-
-        mycursor, db = await the_database()
-        await mycursor.execute("SELECT * FROM EventManagerApplication WHERE txt_id = %s", (channel_id,))
-        event_manager_app = await mycursor.fetchall()
-        await mycursor.close()
-        return event_manager_app
-
-    async def save_event_manager_app(self, message_id: int, event_manager_id: int) -> None:
-        """ Saves a event_manager application into the database. """
-
-        mycursor, db = await the_database()
-        await mycursor.execute(
-            '''
-            INSERT INTO EventManagerApplication (message_id, event_manager_id)
-            VALUES (%s, %s)''', (message_id, event_manager_id)
-            )
-        await db.commit()
-        await mycursor.close()
-
-    async def update_event_manager_application(self, event_manager_id: int, txt_id: int, vc_id: int) -> None:
-        """ Updates the event_manager's application; adding the txt and vc ids into it. """
-
-        mycursor, db = await the_database()
-        await mycursor.execute(
-            '''UPDATE EventManagerApplication SET
-            channel_open = 'yes', txt_id = %s, vc_id = %s
-            WHERE event_manager_id = %s''', (txt_id, vc_id, event_manager_id)
-            )
-        await db.commit()
-        await mycursor.close()
-
-    async def delete_event_manager_app(self, message_id: int) -> None:
-        """ Deletes a event_manager application from the database. """
-
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM EventManagerApplication WHERE message_id = %s", (message_id,))
-        await db.commit()
-        await mycursor.close()
-
-    # Database ADM commands
-    @commands.command(hidden=True)
-    @commands.has_permissions(administrator=True)
-    async def create_table_event_manager_application(self, ctx) -> None:
-        """ (ADM) Creates the EventManagerApplication table. """
-
-        if await self.table_event_manager_application_exists():
-            return await ctx.send("**Table `EventManagerApplication` already exists!**")
-
-        mycursor, db = await the_database()
-        await mycursor.execute('''CREATE TABLE EventManagerApplication (
-            message_id BIGINT, event_manager_id BIGINT, channel_open VARCHAR(3) default 'no',
-            txt_id BIGINT default null, vc_id BIGINT default null)''')
-
-        await db.commit()
-        await mycursor.close()
-
-        await ctx.send("**Table `EventManagerApplication` created!**")
-
-    @commands.command(hidden=True)
-    @commands.has_permissions(administrator=True)
-    async def drop_table_event_manager_application(self, ctx) -> None:
-        """ (ADM) Drops the EventManagerApplication table. """
-
-        if not await self.table_event_manager_application_exists():
-            return await ctx.send("**Table `EventManagerApplication` doesn't exist!**")
-
-        mycursor, db = await the_database()
-        await mycursor.execute("DROP TABLE EventManagerApplication")
-        await db.commit()
-        await mycursor.close()
-
-        await ctx.send("**Table `EventManagerApplication` dropped!**")
-
-    @commands.command(hidden=True)
-    @commands.has_permissions(administrator=True)
-    async def reset_table_event_manager_application(self, ctx) -> None:
-        """ (ADM) Resets the EventManagerApplication table. """
-
-        if not await self.table_event_manager_application_exists():
-            return await ctx.send("**Table `EventManagerApplication` doesn't exist yet!**")
-
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM EventManagerApplication")
-        await db.commit()
-        await mycursor.close()
-
-        await ctx.send("**Table `EventManagerApplication` reset!**")
-
-    async def table_event_manager_application_exists(self) -> bool:
-        """ Checks whether the EventManagerApplication table exists. """
-
-        mycursor, db = await the_database()
-        await mycursor.execute("SHOW TABLE STATUS LIKE 'EventManagerApplication'")
-        exists = await mycursor.fetchall()
-        await mycursor.close()
-
-        if len(exists):
-            return True
-        else:
-            return False
-
-    
 
     async def audio(self, member: discord.Member, audio_name: str) -> None:
         # Resolves bot's channel state
