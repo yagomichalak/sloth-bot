@@ -130,7 +130,7 @@ class ApplicationsTable(commands.Cog):
 
     @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
-    async def create_table_application(self, ctx) -> None:
+    async def create_table_applications(self, ctx) -> None:
         """ (ADM) Creates the Applications table. """
 
         if await self.table_applications_exists():
