@@ -684,7 +684,7 @@ Please answer using one message only.."""
         try:
             the_channel = await guild.create_text_channel(name=f"case-{counter[0][0]}", category=case_cat, overwrites=overwrites)
         except Exception:
-            await interaction.followup.send("**Something went wrong with it, please contact an admin!**")
+            await interaction.followup.send("**Something went wrong with it, please contact an admin!**", ephemeral=True)
             raise Exception
         else:
             created_embed = discord.Embed(
@@ -731,7 +731,7 @@ Please answer using one message only.."""
         try:
             the_channel = await guild.create_text_channel(name=f"{'-'.join(type_help.split())}", category=case_cat, overwrites=overwrites)
         except:
-            await interaction.followup.send("**Something went wrong with it, please contact an admin!**")
+            await interaction.followup.send("**Something went wrong with it, please contact an admin!**", ephemeral=True)
             raise Exception
         else:
             created_embed = discord.Embed(
