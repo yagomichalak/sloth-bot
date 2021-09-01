@@ -378,7 +378,6 @@ async def reload(ctx, extension: str = None):
 
 for filename in os.listdir('./cogs'):
     if filename.endswith('.py'):
-        if filename in ['giveaways.py']: continue
         client.load_extension(f'cogs.{filename[:-3]}')
 
 client.run(token)

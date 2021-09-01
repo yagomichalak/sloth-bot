@@ -3,6 +3,7 @@ from discord.ext import commands, tasks, flags
 from typing import List, Union, Dict, Optional
 from random import choice
 import os
+import asyncio
 
 from extra import utils
 from extra.view import GiveawayView
@@ -523,12 +524,10 @@ class Giveaways(commands.Cog):
         winners = []
 
         while True:
-
             winner = choice(entries)
             # Checks whether winner is not in the list yet
             if winner not in winners:
                 winners.append(winner)
-                continue
 
             # Checks whether it sorted the required amount of winners
             if len(winners) == amount_of_winners:
