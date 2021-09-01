@@ -756,7 +756,7 @@ class Tools(commands.Cog):
 
 
 	@commands.command()
-	@commands.has_any_role(*[owner_role_id, admin_role_id, mod_role_id])
+	@utils.is_allowed([owner_role_id, admin_role_id, mod_role_id])
 	async def cosmos(self, ctx) -> None:
 		""" A command for pinging Cosmos, the stealthy little guy. """
 
@@ -765,7 +765,7 @@ class Tools(commands.Cog):
 		await ctx.send(cosmos.mention)
 
 	@commands.command()
-	@commands.has_any_role(*[owner_role_id, admin_role_id, mod_role_id])
+	@utils.is_allowed([owner_role_id, admin_role_id, mod_role_id])
 	async def muffin(self, ctx) -> None:
 		""" A command for pinging Muffin, the rich Lux lass. """
 
@@ -774,13 +774,22 @@ class Tools(commands.Cog):
 		await ctx.send(muffin.mention)
 
 	@commands.command()
-	@commands.has_any_role(*[owner_role_id, admin_role_id, mod_role_id])
+	@utils.is_allowed([owner_role_id, admin_role_id, mod_role_id])
 	async def prisca(self, ctx) -> None:
 		""" A command for pinging Prisca, the photoshop Turk. """
 
 		prisca_id = int(os.getenv('PRISCA_ID'))
 		prisca = discord.utils.get(ctx.guild.members, id=prisca_id)
 		await ctx.send(prisca.mention)
+
+	@commands.command(aliases=['gui'])
+	@utils.is_allowed([owner_role_id, admin_role_id, mod_role_id])
+	async def guibot(self, ctx) -> None:
+		""" A command for pinging GuiBot, the lawyer and demoter guy. """
+
+		guibot_id = int(os.getenv('GUIBOT_ID'))
+		guibot = discord.utils.get(ctx.guild.members, id=guibot_id)
+		await ctx.send(guibot.mention)
 
 	@commands.command(aliases=['musicbot', 'music_bot', 'musicbots', 'music', 'mb'])
 	@commands.cooldown(1, 10, commands.BucketType.user)
