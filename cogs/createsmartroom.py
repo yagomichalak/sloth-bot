@@ -215,6 +215,7 @@ class CreateSmartRoom(commands.Cog):
 			if not (creation := await self.try_to_create(kind='voice', category=the_category_test, name=name, user_limit=limit)):
 				return await member.send(f"**Channels limit reached, creation cannot be completed, try again later!**")
 
+			await creation.edit(sync_permissions=True)
 			await SlothCurrency.update_user_money(member, member.id, -5)
 			await member.send(f"**You've been charged `5łł`!**")
 
@@ -314,11 +315,13 @@ class CreateSmartRoom(commands.Cog):
 
 			if vc_channel := await self.try_to_create(kind='voice', category=the_category_test, name=name, user_limit=limit):
 				creations.append(vc_channel)
+				await vc_channel.edit(sync_permissions=True)
 			else:
 				failed = True
 
 			if txt_channel := await self.try_to_create(kind='text', category=the_category_test, name=name):
 				creations.append(txt_channel)
+				await txt_channel.edit(sync_permissions=True)
 			else:
 				failed = True
 
