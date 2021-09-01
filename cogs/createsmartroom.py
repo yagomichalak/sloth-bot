@@ -214,11 +214,7 @@ class CreateSmartRoom(commands.Cog):
 			# Gets the CreateSmartRoom category, creates the VC and tries to move the user to there
 			the_category_test = discord.utils.get(member.guild.categories, id=self.cat_id)
 			muted_role = discord.utils.get(member.guild.roles, id=muted_role_id)
-			overwrites = {
-				member.guild.default_role: discord.PermissionOverwrite(
-					read_messages=False, send_messages=False, connect=False, speak=False, view_channel=False),
-				muted_role: discord.PermissionOverwrite(view_channel=False)
-			}
+			overwrites = {muted_role: discord.PermissionOverwrite(view_channel=False)}
 
 			if not (creation := await self.try_to_create(kind='voice', category=the_category_test, name=name, user_limit=limit, overwrites=overwrites)):
 				return await member.send(f"**Channels limit reached, creation cannot be completed, try again later!**")
@@ -320,11 +316,7 @@ class CreateSmartRoom(commands.Cog):
 
 			the_category_test = discord.utils.get(member.guild.categories, id=self.cat_id)
 			muted_role = discord.utils.get(member.guild.roles, id=muted_role_id)
-			overwrites = {
-				member.guild.default_role: discord.PermissionOverwrite(
-					read_messages=False, send_messages=False, connect=False, speak=False, view_channel=False),
-				muted_role: discord.PermissionOverwrite(view_channel=False)
-			}
+			overwrites = {muted_role: discord.PermissionOverwrite(view_channel=False)}
 
 			if vc_channel := await self.try_to_create(kind='voice', category=the_category_test, name=name, user_limit=limit, overwrites=overwrites):
 				creations.append(vc_channel)
