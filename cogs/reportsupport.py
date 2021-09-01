@@ -1096,8 +1096,11 @@ Please answer using one message only.."""
 
 
     async def audio(self, member: discord.Member, audio_name: str) -> None:
-        # Resolves bot's channel state
+        """ Plays an audio.
+        :param member: A member to get guild context from.
+        :param audio_name: The name of the audio to play. """
 
+        # Resolves bot's channel state
         staff_vc = self.client.get_channel(staff_vc_id)
         bot_state = member.guild.voice_client
 

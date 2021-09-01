@@ -9,6 +9,7 @@ from mysqldb import *
 from typing import List, Union, Callable, Any
 from extra.menu import ConfirmSkill
 
+muted_role_id: int = int(os.getenv('MUTED_ROLE_ID'))
 
 class CreateSmartRoom(commands.Cog):
 	""" A cog related to the creation of a custom voice channel. """
@@ -212,8 +213,14 @@ class CreateSmartRoom(commands.Cog):
 
 			# Gets the CreateSmartRoom category, creates the VC and tries to move the user to there
 			the_category_test = discord.utils.get(member.guild.categories, id=self.cat_id)
+			muted_role = discord.utils.get(member.guild.roles, id=muted_role_id)
+			overwrites = {
+				member.guild.default_role: discord.PermissionOverwrite(
+					read_messages=False, send_messages=False, connect=False, speak=False, view_channel=False),
+				muted_role: discord.PermissionOverwrite(view_channel=False)
+			}
 
-			if not (creation := await self.try_to_create(kind='voice', category=the_category_test, name=name, user_limit=limit)):
+			if not (creation := await self.try_to_create(kind='voice', category=the_category_test, name=name, user_limit=limit, overwrites=overwrites)):
 				return await member.send(f"**Channels limit reached, creation cannot be completed, try again later!**")
 
 			await SlothCurrency.update_user_money(member, member.id, -5)
@@ -312,13 +319,19 @@ class CreateSmartRoom(commands.Cog):
 			failed = False
 
 			the_category_test = discord.utils.get(member.guild.categories, id=self.cat_id)
+			muted_role = discord.utils.get(member.guild.roles, id=muted_role_id)
+			overwrites = {
+				member.guild.default_role: discord.PermissionOverwrite(
+					read_messages=False, send_messages=False, connect=False, speak=False, view_channel=False),
+				muted_role: discord.PermissionOverwrite(view_channel=False)
+			}
 
-			if vc_channel := await self.try_to_create(kind='voice', category=the_category_test, name=name, user_limit=limit):
+			if vc_channel := await self.try_to_create(kind='voice', category=the_category_test, name=name, user_limit=limit, overwrites=overwrites):
 				creations.append(vc_channel)
 			else:
 				failed = True
 
-			if txt_channel := await self.try_to_create(kind='text', category=the_category_test, name=name):
+			if txt_channel := await self.try_to_create(kind='text', category=the_category_test, name=name, overwrites=overwrites):
 				creations.append(txt_channel)
 			else:
 				failed = True
