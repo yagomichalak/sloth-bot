@@ -9,8 +9,6 @@ from mysqldb import *
 from typing import List, Union, Callable, Any
 from extra.menu import ConfirmSkill
 
-muted_role_id: int = int(os.getenv('MUTED_ROLE_ID'))
-
 class CreateSmartRoom(commands.Cog):
 	""" A cog related to the creation of a custom voice channel. """
 
@@ -213,10 +211,8 @@ class CreateSmartRoom(commands.Cog):
 
 			# Gets the CreateSmartRoom category, creates the VC and tries to move the user to there
 			the_category_test = discord.utils.get(member.guild.categories, id=self.cat_id)
-			muted_role = discord.utils.get(member.guild.roles, id=muted_role_id)
-			overwrites = {muted_role: discord.PermissionOverwrite(view_channel=False)}
 
-			if not (creation := await self.try_to_create(kind='voice', category=the_category_test, name=name, user_limit=limit, overwrites=overwrites)):
+			if not (creation := await self.try_to_create(kind='voice', category=the_category_test, name=name, user_limit=limit)):
 				return await member.send(f"**Channels limit reached, creation cannot be completed, try again later!**")
 
 			await SlothCurrency.update_user_money(member, member.id, -5)
@@ -315,15 +311,13 @@ class CreateSmartRoom(commands.Cog):
 			failed = False
 
 			the_category_test = discord.utils.get(member.guild.categories, id=self.cat_id)
-			muted_role = discord.utils.get(member.guild.roles, id=muted_role_id)
-			overwrites = {muted_role: discord.PermissionOverwrite(view_channel=False)}
 
-			if vc_channel := await self.try_to_create(kind='voice', category=the_category_test, name=name, user_limit=limit, overwrites=overwrites):
+			if vc_channel := await self.try_to_create(kind='voice', category=the_category_test, name=name, user_limit=limit):
 				creations.append(vc_channel)
 			else:
 				failed = True
 
-			if txt_channel := await self.try_to_create(kind='text', category=the_category_test, name=name, overwrites=overwrites):
+			if txt_channel := await self.try_to_create(kind='text', category=the_category_test, name=name):
 				creations.append(txt_channel)
 			else:
 				failed = True
@@ -371,7 +365,8 @@ class CreateSmartRoom(commands.Cog):
 				the_thing = await category.create_voice_channel(**kwargs)
 			elif kind == 'category':
 				the_thing = await guild.create_category(**kwargs)
-		except:
+		except Exception as e:
+			print(e)
 			return False
 		else:
 			return the_thing
