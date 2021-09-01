@@ -3,19 +3,16 @@ from discord import member
 from discord.ext import commands
 from mysqldb import *
 import asyncio
-from extra import utils
 from extra.useful_variables import list_of_commands
 from extra.menu import ConfirmSkill
 from extra.prompt.menu import ConfirmButton
 from extra.view import ReportSupportView
-import time
+from extra import utils
 from typing import List, Dict, Optional
 import os
-from datetime import datetime
 
 case_cat_id = int(os.getenv('CASE_CAT_ID'))
 reportsupport_channel_id = int(os.getenv('REPORT_CHANNEL_ID'))
-verification_requests_channel_id = int(os.getenv('VERIFICATION_REQUESTS_CHANNEL_ID'))
 dnk_id = int(os.getenv('DNK_ID'))
 moderator_role_id = int(os.getenv('MOD_ROLE_ID'))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID'))
@@ -28,10 +25,11 @@ int(os.getenv('OWNER_ROLE_ID')), admin_role_id,
 moderator_role_id]
 
 from extra.reportsupport.applications import ApplicationsTable
+from extra.reportsupport.verify import Verify
 
 
 report_support_classes: List[commands.Cog] = [
-    ApplicationsTable
+    ApplicationsTable, Verify
 ]
 
 
@@ -39,21 +37,14 @@ class ReportSupport(*report_support_classes):
     """ A cog related to the system of reports and some other things. """
 
     def __init__(self, client) -> None:
+
+        # super(ReportSupport, self).__init__(client)
         self.client = client
         self.cosmos_id: int = int(os.getenv('COSMOS_ID'))
         self.muffin_id: int = int(os.getenv('MUFFIN_ID'))
         self.pretzel_id: int = int(os.getenv('PRETZEL_ID'))
         self.cache = {}
         self.report_cache = {}
-        # Teacher application attributes
-        self.teacher_app_channel_id: int = int(os.getenv('TEACHER_APPLICATION_CHANNEL_ID'))
-        self.teacher_app_cat_id: int = int(os.getenv('TEACHER_APPLICATION_CAT_ID'))
-
-        self.moderator_app_channel_id: int = int(os.getenv('MODERATOR_APPLICATION_CHANNEL_ID'))
-        self.moderator_app_cat_id: int = int(os.getenv('MODERATOR_APPLICATION_CAT_ID'))
-
-        self.event_manager_app_channel_id: int = int(os.getenv('EVENT_MANAGER_APPLICATION_CHANNEL_ID'))
-        self.event_manager_app_cat_id: int = int(os.getenv('EVENT_MANAGER_APPLICATION_CAT_ID'))
         
 
     @commands.Cog.listener()
@@ -62,50 +53,6 @@ class ReportSupport(*report_support_classes):
         self.client.add_view(view=ReportSupportView(self.client))
         print(self.client.persistent_views)
         print('ReportSupport cog is online!')
-
-
-    @commands.Cog.listener()
-    async def on_raw_reaction_add(self, payload) -> None:
-        # Checks if it wasn't a bot's reaction
-
-        if not payload.guild_id:
-            return
-
-        if not payload.member or payload.member.bot:
-            return
-
-        guild = self.client.get_guild(payload.guild_id)
-        lesson_manager_role = discord.utils.get(guild.roles, id=lesson_management_role_id)
-        mod_role = discord.utils.get(guild.roles, id=moderator_role_id)
-        channel = await self.client.fetch_channel(payload.channel_id)
-        message = await channel.fetch_message(payload.message_id)
-
-        adm = channel.permissions_for(payload.member).administrator
-
-        # Checks if it's in the teacher applications channel
-        if payload.channel_id == self.teacher_app_channel_id:
-            # ctx = self.client.get_context(message)
-            # ctx.author = member
-            if await utils.is_allowed([mod_role.id, lesson_manager_role.id]).predicate(channel=channel, member=payload.member):
-            # if mod_role in payload.member.roles or lesson_manager_role in payload.member.roles or adm:
-                await self.handle_teacher_application(guild, payload)
-            else:
-                await message.remove_reaction(payload.emoji, payload.member)
-                
-
-        # Checks if it's in the moderator applications channel
-        elif payload.channel_id == self.moderator_app_channel_id:
-            if adm:
-                await self.handle_moderator_application(guild, payload)
-            else:
-                await message.remove_reaction(payload.emoji, payload.member)
-
-        elif payload.channel_id == self.event_manager_app_channel_id:
-            if adm:
-                await self.handle_event_manager_application(guild, payload)
-            else:
-                await message.remove_reaction(payload.emoji, payload.member)
-
 
 
     async def handle_teacher_application(self, guild, payload) -> None:
@@ -202,7 +149,9 @@ class ReportSupport(*report_support_classes):
             return
 
 
-    async def send_teacher_application(self, member):
+    async def send_teacher_application(self, member) -> None:
+        """ Sends a teacher application form to the user.
+        :param member: The member to send the application to. """
 
         def msg_check(message):
             if message.author == member and not message.guild:
@@ -337,15 +286,15 @@ class ReportSupport(*report_support_classes):
             await app.add_reaction('✅')
             await app.add_reaction('❌')
             # Saves in the database
-            await self.save_application(app.id, member.id, 'teacher')
+            await self.insert_application(app.id, member.id, 'teacher')
 
         else:
             self.cache[member.id] = 0
             return await member.send("**Thank you anyways!**")
 
     async def send_moderator_application(self, member):
-
-        self.cache[member.id] = time.time()
+        """ Sends a moderator application form to the user.
+        :param member: The member to send the application to. """
 
         def msg_check(message):
             if message.author == member and not message.guild:
@@ -495,7 +444,7 @@ Please answer using one message only.."""
             await app.add_reaction('✅')
             await app.add_reaction('❌')
             # Saves in the database
-            await self.save_application(app.id, member.id, 'moderator')
+            await self.insert_application(app.id, member.id, 'moderator')
 
         else:
             self.cache[member.id] = 0
@@ -503,6 +452,8 @@ Please answer using one message only.."""
 
 
     async def send_event_manager_application(self, member):
+        """ Sends a event manager application form to the user.
+        :param member: The member to send the application to. """
 
         def msg_check(message):
             if message.author == member and not message.guild:
@@ -637,7 +588,7 @@ Please answer using one message only.."""
             await app.add_reaction('✅')
             await app.add_reaction('❌')
             # Saves in the database
-            await self.save_application(app.id, member.id, 'event_manager')
+            await self.insert_application(app.id, member.id, 'event_manager')
 
         else:
             self.cache[member.id] = 0
@@ -650,7 +601,6 @@ Please answer using one message only.."""
 
         guild = interaction.guild
         member = interaction.user
-
 
         def msg_check(message):
             if message.author == member and not message.guild:
@@ -698,10 +648,12 @@ Please answer using one message only.."""
 
         verify_embed.set_thumbnail(url=member.avatar.url)
         verify_embed.set_image(url=attachments[0])
-        verification_requests_channel = discord.utils.get(guild.text_channels, id=verification_requests_channel_id)
-        verify_msg = await verification_requests_channel.send(content=member.mention, embed=verify_embed)
-        # Save
-        # await self.insert_verify_request(member.id, verify_msg.id)
+        verify_req_channel_id = discord.utils.get(guild.text_channels, id=self.verify_reqs_channel_id)
+        verify_msg = await verify_req_channel_id.send(content=member.mention, embed=verify_embed)
+        await verify_msg.add_reaction('✅')
+        await verify_msg.add_reaction('❌')
+        # Saves
+        await self.insert_application(verify_msg.id, member.id, 'verify')
         return await member.send(f"**Request sent, you will get notified here if you get accepted or declined! ✅**")
 
 
@@ -1257,7 +1209,6 @@ Please answer using one message only.."""
         if not channel.category or not channel.category.id in [self.teacher_app_cat_id, self.moderator_app_cat_id, self.event_manager_app_cat_id]:
             return await ctx.send(f"**This is not an application channel, {member.mention}!**")
 
-        application_type = None
         all_apps_channel = None
 
         if app_channel := await self.get_application_by_channel(channel.id, 'teacher'):
@@ -1268,8 +1219,6 @@ Please answer using one message only.."""
 
         elif app_channel := await self.get_application_by_channel(channel.id, 'event_manager'):
             all_apps_channel = discord.utils.get(guild.text_channels, id=self.event_manager_app_channel_id)
-
-        application_type = app_channel[2]
 
         if app_channel:
             txt_channel = discord.utils.get(guild.channels, id=app_channel[4])
@@ -1282,7 +1231,7 @@ Please answer using one message only.."""
             await confirmation.add_reaction('✅')
             await confirmation.add_reaction('❌')
             try:
-                reaction, user = await self.client.wait_for('reaction_add', timeout=20,
+                reaction, _ = await self.client.wait_for('reaction_add', timeout=20,
                     check=lambda r, u: u == member and r.message.id == confirmation.id and str(r.emoji) in ['✅', '❌'])
             except asyncio.TimeoutError:
                 embed = discord.Embed(title="Confirmation",
