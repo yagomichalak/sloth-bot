@@ -2,12 +2,66 @@ import discord
 from discord.ext import commands
 from mysqldb import the_database
 from typing import List
+from extra import utils
+import os
+
+moderator_role_id = int(os.getenv('MOD_ROLE_ID'))
+lesson_management_role_id = int(os.getenv('LESSON_MANAGEMENT_ROLE_ID'))
 
 class ApplicationsTable(commands.Cog):
     """ Cog for managing applications. """
 
-    def __init__(self, client) -> None:
-        self.client = client
+    # Teacher application attributes
+    teacher_app_channel_id: int = int(os.getenv('TEACHER_APPLICATION_CHANNEL_ID'))
+    teacher_app_cat_id: int = int(os.getenv('TEACHER_APPLICATION_CAT_ID'))
+
+    moderator_app_channel_id: int = int(os.getenv('MODERATOR_APPLICATION_CHANNEL_ID'))
+    moderator_app_cat_id: int = int(os.getenv('MODERATOR_APPLICATION_CAT_ID'))
+
+    event_manager_app_channel_id: int = int(os.getenv('EVENT_MANAGER_APPLICATION_CHANNEL_ID'))
+    event_manager_app_cat_id: int = int(os.getenv('EVENT_MANAGER_APPLICATION_CAT_ID'))
+
+
+    @commands.Cog.listener(name="on_raw_reaction_add")
+    async def on_raw_reaction_add_applications(self, payload) -> None:
+        # Checks if it wasn't a bot's reaction
+
+        if not payload.guild_id:
+            return
+
+        if not payload.member or payload.member.bot:
+            return
+
+        guild = self.client.get_guild(payload.guild_id)
+        channel = await self.client.fetch_channel(payload.channel_id)
+        message = await channel.fetch_message(payload.message_id)
+
+        adm = channel.permissions_for(payload.member).administrator
+
+        # Checks if it's in the teacher applications channel
+        if payload.channel_id == self.teacher_app_channel_id:
+            # ctx = self.client.get_context(message)
+            # ctx.author = member
+            if await utils.is_allowed([moderator_role_id, lesson_management_role_id]).predicate(channel=channel, member=payload.member):
+            # if mod_role in payload.member.roles or lesson_manager_role in payload.member.roles or adm:
+                await self.handle_teacher_application(guild, payload)
+            else:
+                await message.remove_reaction(payload.emoji, payload.member)
+                
+
+        # Checks if it's in the moderator applications channel
+        elif payload.channel_id == self.moderator_app_channel_id:
+            if adm:
+                await self.handle_moderator_application(guild, payload)
+            else:
+                await message.remove_reaction(payload.emoji, payload.member)
+
+        elif payload.channel_id == self.event_manager_app_channel_id:
+            if adm:
+                await self.handle_event_manager_application(guild, payload)
+            else:
+                await message.remove_reaction(payload.emoji, payload.member)
+
 
     # Applications
 
@@ -33,7 +87,7 @@ class ApplicationsTable(commands.Cog):
         await mycursor.close()
         return application_app
 
-    async def save_application(self, message_id: int, applicant_id: int, application_type: str) -> None:
+    async def insert_application(self, message_id: int, applicant_id: int, application_type: str) -> None:
         """ Saves a application application into the database.
         :param message_id: The ID of the applicaiton message.
         :param applicant_id: The application ID.

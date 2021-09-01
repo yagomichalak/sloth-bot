@@ -25,6 +25,7 @@ class ReportSupportView(discord.ui.View):
     async def apply_to_teach_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
         """ Button for starting the Teacher application. """
 
+        await interaction.response.defer()
         member = interaction.user
 
         # Apply to be a teacher
@@ -33,16 +34,17 @@ class ReportSupportView(discord.ui.View):
         if member_ts:
             sub = time_now - member_ts
             if sub <= 1800:
-                return await member.send(
-                    f"**You are on cooldown to apply, try again in {(1800-sub)/60:.1f} minutes**")
+                return await interaction.followup.send(
+                    f"**You are on cooldown to apply, try again in {(1800-sub)/60:.1f} minutes**", ephemeral=True)
 
-        await interaction.response.defer()
+        self.cog.cache[member.id] = time_now
         await self.cog.send_teacher_application(member)
 
     @discord.ui.button(label="Apply for Moderator!", style=3, custom_id=f"apply_to_moderate", emoji="👮")
     async def apply_to_moderate_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
         """ Button for starting the Moderator application. """
 
+        await interaction.response.defer()
         member = interaction.user
 
         # Apply to be a teacher
@@ -51,16 +53,17 @@ class ReportSupportView(discord.ui.View):
         if member_ts:
             sub = time_now - member_ts
             if sub <= 1800:
-                return await member.send(
-                    f"**You are on cooldown to apply, try again in {(1800-sub)/60:.1f} minutes**")
+                return await interaction.followup.send(
+                    f"**You are on cooldown to apply, try again in {(1800-sub)/60:.1f} minutes**", ephemeral=True)
 
-        await interaction.response.defer()
+        self.cog.cache[member.id] = time_now
         await self.cog.send_moderator_application(member)
 
     @discord.ui.button(label="Apply for Event Manager!", style=3, custom_id=f"apply_to_manage_events", emoji="🎉")
     async def apply_to_event_manager_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
         """ Button for starting the Event Manager application. """
 
+        await interaction.response.defer()
         member = interaction.user
 
         # Apply to be a teacher
@@ -69,10 +72,10 @@ class ReportSupportView(discord.ui.View):
         if member_ts:
             sub = time_now - member_ts
             if sub <= 1800:
-                return await member.send(
-                    f"**You are on cooldown to apply, try again in {(1800-sub)/60:.1f} minutes**")
+                return await interaction.followup.send(
+                    f"**You are on cooldown to apply, try again in {(1800-sub)/60:.1f} minutes**", ephemeral=True)
 
-        await interaction.response.defer()
+        self.cog.cache[member.id] = time_now
         await self.cog.send_event_manager_application(member)
 
 
@@ -82,16 +85,17 @@ class ReportSupportView(discord.ui.View):
 
         member = interaction.user
 
-        member_ts = self.cog.report_cache.get(member.id)
+        member_ts = self.cog.cache.get(member.id)
         time_now = await utils.get_timestamp()
         if member_ts:
             sub = time_now - member_ts
             if sub <= 240:
                 return await member.send(
-                    f"**You are on cooldown to use this, try again in {round(240-sub)} seconds**")
+                    f"**You are on cooldown to use this, try again in {round(240-sub)} seconds**", ephemeral=True)
             
         await interaction.response.defer()
 
+        self.cog.cache[member.id] = time_now
         # Order a bot
         dnk = self.client.get_user(int(os.getenv('DNK_ID')))
         embed = discord.Embed(title="New possible order!",
@@ -109,15 +113,16 @@ class ReportSupportView(discord.ui.View):
         await interaction.response.defer()
 
         member = interaction.user
-
-        member_ts = self.cog.report_cache.get(member.id)
+        member_ts = self.cog.cache.get(member.id)
         time_now = await utils.get_timestamp()
+
         if member_ts:
             sub = time_now - member_ts
             if sub <= 240:
                 return await interaction.followup.send(
                     f"**You are on cooldown to use this, try again in {round(240-sub)} seconds, {member.mention}!**", ephemeral=True)
-            
+        
+        self.cog.cache[member.id] = time_now
         await self.cog.send_verified_selfies_verification(interaction)
 
     @discord.ui.button(label="Report a User or Get Server/Role Support!", style=4, custom_id=f"report_support", emoji="<:politehammer:608941633454735360>", row=3)
