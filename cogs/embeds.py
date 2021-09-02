@@ -1,13 +1,6 @@
 import discord
 from discord.ext import commands
 import os
-from extra.useful_variables import rules
-from extra import utils
-from datetime import datetime
-# from discord_slash import cog_ext, SlashContext
-# from discord_slash.model import SlashCommandPermissionType
-# from discord_slash.utils.manage_commands import create_option, create_choice, create_permission, create_multi_ids_permission
-
 
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID'))
 owner_role_id = int(os.getenv('OWNER_ROLE_ID'))
@@ -17,9 +10,7 @@ allowed_roles = [owner_role_id, admin_role_id, mod_role_id]
 guild_ids = [int(os.getenv('SERVER_ID'))]
 
 class Embeds(commands.Cog):
-    '''
-    A cog related to embedded messages.
-    '''
+    """ A cog related to embedded messages. """
 
     def __init__(self, client):
         self.client = client
@@ -42,66 +33,6 @@ class Embeds(commands.Cog):
         msg = ctx.message.content.split(ctx.message.content.split(' ')[0], 1)
         embed = discord.Embed(description=msg[1], colour=discord.Colour.dark_green())
         await ctx.send(embed=embed)
-
-    # @cog_ext.cog_slash(name="embed", description="(MOD) Makes an improved embedded message", default_permission=False,
-    #             options=[
-    #                 create_option(name="description", description="Description.", option_type=3, required=False),
-    #                 create_option(name="title", description="Title.", option_type=3, required=False),
-    #                 create_option(name="timestamp", description="If timestamp is gonna be shown.", option_type=5, required=False),
-    #                 create_option(name="url", description="URL for the title.", option_type=3, required=False),
-    #                 create_option(name="thumbnail", description="Thumbnail for the embed.", option_type=3, required=False),
-    #                 create_option(name="image", description="Display image.", option_type=3, required=False),
-    #                 create_option(name="color", description="The color for the embed.", option_type=3, required=False,
-    #                     choices=[
-    #                         create_choice(name="Blue", value="0011ff"), create_choice(name="Red", value="ff0000"),
-    #                         create_choice(name="Green", value="00ff67"), create_choice(name="Yellow", value="fcff00"),
-    #                         create_choice(name="Black", value="000000"), create_choice(name="White", value="ffffff"),
-    #                         create_choice(name="Orange", value="ff7100"), create_choice(name="Brown", value="522400"),
-    #                         create_choice(name="Purple", value="380058"),
-    #                     ])
-    #             ], guild_ids=guild_ids,
-    #             permissions={
-    #                 guild_ids[0]: [
-    #                     create_permission(int(os.getenv('COSMOS_ID')), SlashCommandPermissionType.USER, True),
-    #                     create_permission(owner_role_id, SlashCommandPermissionType.ROLE, True),
-    #                     create_permission(admin_role_id, SlashCommandPermissionType.ROLE, True),
-    #                     create_permission(mod_role_id, SlashCommandPermissionType.ROLE, True)
-    #                 ]
-    #             })
-    # async def _embed(self, ctx, **fields):
-
-    #     # Checks if there's a timestamp and sorts time
-    #     if (timestamp := fields.get('timestamp')) is not None:
-    #         if timestamp:
-    #             fields['timestamp'] = await utils.parse_time()
-    #         else:
-    #             fields.pop('timestamp', None)
-
-    #     description = fields.get('description')
-    #     fields['description'] = description.replace(r'\n', '\n')
-
-    #     if (color := fields.get('color')) is not None:
-    #         if color:
-    #             fields['color'] = int(color, 16)
-    #         else:
-    #             fields.pop('color', None)
-
-    #     emb = discord.Embed(**{k:v for k, v in fields.items() if k not in ['thumbnail', 'image']})
-
-    #     if (thumbnail := fields.get('thumbnail')) is not None:
-    #         if thumbnail:
-    #             emb.set_thumbnail(url=thumbnail)
-    #         else:
-    #             fields.pop('thumbnail', None)
-
-    #     if (image := fields.get('image')) is not None:
-    #         if image:
-    #             emb.set_image(url=image)
-    #         else:
-    #             fields.pop('image', None)
-
-
-    #     await ctx.send(embeds=[emb])
 
     @commands.command()
     @commands.has_permissions(administrator=True)
