@@ -24,6 +24,7 @@ general_channel = int(os.getenv('GENERAL_CHANNEL_ID'))
 last_deleted_message = []
 suspect_channel_id = int(os.getenv('SUSPECT_CHANNEL_ID'))
 mod_role_id = int(os.getenv('MOD_ROLE_ID'))
+senior_mod_role_id = int(os.getenv('SENIOR_MOD_ROLE_ID'))
 allowed_roles = [int(os.getenv('OWNER_ROLE_ID')), int(os.getenv('ADMIN_ROLE_ID')), mod_role_id]
 server_id = int(os.getenv('SERVER_ID'))
 
@@ -59,11 +60,11 @@ class Moderation(*moderation_cogs):
 		if 'discord.gg/' in msg.lower() or 'discord.com/invite/' in msg.lower():
 			invite_root = 'discord.gg/' if 'discord.gg/' in msg.lower() else 'discord.com/invite/'
 			ctx = await self.client.get_context(message)
-			perms = ctx.channel.permissions_for(ctx.author)
-			if not perms.administrator and mod_role_id not in [r.id for r in ctx.author.roles]:
+			if not await utils.is_allowed([mod_role_id, senior_mod_role_id]).predicate(ctx):
 				is_from_guild = await self.check_invite_guild(msg, message.guild, invite_root)
+
 				if not is_from_guild:
-					return await self.mute(ctx=ctx, member=message.author, reason="Invite Advertisement.")
+					return await self.mute(ctx, member=message.author, reason="Invite Advertisement.")
 
 	async def check_banned_links(self, message: discord.Message) -> None:
 		""" Checks if the message sent was or contains a banned link. """
@@ -74,17 +75,15 @@ class Moderation(*moderation_cogs):
 		for video in videos:
 			if str(video) in banned_links:
 				ctx = await self.client.get_context(message)
-				perms = ctx.channel.permissions_for(ctx.author)
-				if not perms.administrator and mod_role_id not in [r.id for r in ctx.author.roles]:
-					return await self.mute(ctx=ctx, member=message.author, reason="Banned Link")
+				if not await utils.is_allowed([mod_role_id, senior_mod_role_id]).predicate(ctx):
+					return await self.mute(ctx, member=message.author, reason="Banned Link")
 
 		# Checks it in the message content
 		for word in message.content.split():
 			if word in banned_links:
 				ctx = await self.client.get_context(message)
-				perms = ctx.channel.permissions_for(ctx.author)
-				if not perms.administrator and mod_role_id not in [r.id for r in ctx.author.roles]:
-					return await self.mute(ctx=ctx, member=message.author, reason="Banned Link")
+				if not await utils.is_allowed([mod_role_id, senior_mod_role_id]).predicate(ctx):
+					return await self.mute(ctx, member=message.author, reason="Banned Link")
 
 	@tasks.loop(minutes=1)
 	async def look_for_expired_tempmutes(self) -> None:
@@ -184,7 +183,7 @@ class Moderation(*moderation_cogs):
 			if await self.get_firewall_state():
 				msg = await member.send(f"**New-account Firewall is on, come back once your account is at least 4 days old.**")
 				ctx = await self.client.get_context(msg)
-				return await self.kick(ctx=ctx, member=member, reason="Possible fake account")
+				return await self.kick(ctx, member=member, reason="Possible fake account")
 
 		if account_age <= 2:
 			suspect_channel = discord.utils.get(member.guild.channels, id=suspect_channel_id)
@@ -357,7 +356,7 @@ class Moderation(*moderation_cogs):
 			user_warns = [w for w in user_infractions if w[1] == 'warn']
 			if len(user_warns) >= 3:
 				ctx.author = self.client.user
-				await self.mute(ctx=ctx, member=member, reason=reason)
+				await self.mute(ctx, member=member, reason=reason)
 
 	async def get_mute_time(self, ctx: commands.Context, time: List[str]) -> Dict[str, int]:
 		""" Gets the mute time in seconds.
@@ -413,7 +412,7 @@ class Moderation(*moderation_cogs):
 
 	@commands.command()
 	@utils.is_allowed(allowed_roles)
-	async def mute(self, ctx, member: discord.Member = None, *, reason: Optional[str] = None):
+	async def mute(self, ctx: commands.Context, member: discord.Member = None, *, reason: Optional[str] = None):
 		'''
 		(MOD) Mutes a member.
 		:param member: The @ or the ID of the user to mute.
@@ -568,7 +567,7 @@ class Moderation(*moderation_cogs):
 		if not time:
 			return await ctx.send('**Inform a time!**', delete_after=3)
 
-		time_dict, seconds = await self.get_mute_time(ctx=ctx, time=time)
+		time_dict, seconds = await self.get_mute_time(ctx, time=time)
 		if not seconds:
 			return
 
