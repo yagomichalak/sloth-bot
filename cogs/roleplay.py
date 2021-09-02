@@ -378,18 +378,6 @@ class RolePlay(commands.Cog):
         view = YeetView(member=author, target=member, timeout=60)
         await ctx.send(embed=embed, view=view)
 
-
-    @commands.command()
-    @commands.cooldown(1, 120, commands.BucketType.user)
-    @Player.not_ready()
-    async def seduce(self, ctx, *, member: discord.Member = None) -> None:
-        """ Seduces someone.
-        :param member: The member to seduce.
-        
-        * Cooldown: 2 minutes """
-
-        pass
-
     @commands.command()
     @commands.cooldown(1, 120, commands.BucketType.user)
     async def pat(self, ctx, *, member: discord.Member = None) -> None:
@@ -456,6 +444,7 @@ class RolePlay(commands.Cog):
         
         * Cooldown: 2 minutes """
 
+        await ctx.message.delete()
         author = ctx.author
 
         if not member:
