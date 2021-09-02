@@ -698,7 +698,7 @@ Please answer using one message only.."""
                 color=discord.Color.red())
             message = await the_channel.send(content=f"{member.mention}, {moderator.mention}, {cosmos.mention}", embed=embed)
             ctx = await self.client.get_context(message)
-            return await self.client.get_cog('Tools').vc(ctx=ctx, member=member)
+            return await self.client.get_cog('Tools').vc(ctx, member=member)
 
     # - Report someone
     async def generic_help(self, interaction: discord.Interaction, type_help: str, message: str, ping: bool = True) -> None:
