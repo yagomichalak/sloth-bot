@@ -169,28 +169,29 @@ class QuickButtons(discord.ui.View):
 
         if await utils.is_allowed([mod_role_id, admin_role_id]).predicate(new_ctx):
             await interaction.response.defer()
-            return await self.client.get_cog("Moderation").infractions(ctx=self.ctx, member=self.target_member)
+            print(self.ctx)
+            return await self.client.get_cog("Moderation").infractions(self.ctx, member=self.target_member)
     
     @discord.ui.button(label="Profile", style=1, emoji="👤", custom_id=f"user_profile")
     async def profile_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
         """ Shows the member's profile. """
         
         await interaction.response.defer()
-        await self.client.get_cog("SlothCurrency").profile(ctx=self.ctx, member=self.target_member)
+        await self.client.get_cog("SlothCurrency").profile(self.ctx, member=self.target_member)
 
     @discord.ui.button(label="Info", style=2, emoji="ℹ️", custom_id=f"user_info")
     async def info_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
         """ Shows the member's info. """
 
         await interaction.response.defer()
-        await self.client.get_cog("SlothReputation").info(ctx=self.ctx, member=self.target_member)
+        await self.client.get_cog("SlothReputation").info(self.ctx, member=self.target_member)
 
     @discord.ui.button(label="Fake Accounts", style=2, emoji="🥸", custom_id=f"user_fake_accounts")
     async def fake_accounts_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
         """ Shows the member's fake accounts. """
 
         await interaction.response.defer()
-        await self.client.get_cog("Moderation").fake_accounts(ctx=self.ctx, member=self.target_member)
+        await self.client.get_cog("Moderation").fake_accounts(self.ctx, member=self.target_member)
 
 
 class Test(discord.ui.View):
