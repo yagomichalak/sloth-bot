@@ -1,21 +1,16 @@
 import pytz
 import discord
+from discord.app import Option, OptionChoice
 from pytz import timezone
 from dotenv import load_dotenv
 from discord.ext import commands, tasks, flags
-
-# Slash
-from discord_slash import SlashCommand, SlashContext
-from discord_slash.model import SlashCommandPermissionType
-from discord_slash.utils.manage_commands import create_option, create_choice, create_permission
-from discord_slash.model import CogBaseCommandObject
+from extra import utils
 
 import os
 from datetime import datetime
 from itertools import cycle
 
 from extra.useful_variables import patreon_roles
-from extra import utils
 
 from extra.customerrors import MissingRequiredSlothClass, ActionSkillOnCooldown, CommandNotReady, SkillsUsedRequirement
 
@@ -23,7 +18,9 @@ load_dotenv()
 
 # IDs
 user_cosmos_id = int(os.getenv('COSMOS_ID'))
+admin_role_id = int(os.getenv('ADMIN_ROLE_ID'))
 moderator_role_id = int(os.getenv('MOD_ROLE_ID'))
+
 server_id = int(os.getenv('SERVER_ID'))
 teacher_role_id = int(os.getenv('TEACHER_ROLE_ID'))
 moderation_log_channel_id = int(os.getenv('MOD_LOG_CHANNEL_ID'))
@@ -47,12 +44,7 @@ shades_of_pink = cycle([(252, 15, 192), (255, 0, 255), (248, 24, 148),
               ])
 
 # Making the client variable
-intents = discord.Intents.all()
-client = commands.Bot(command_prefix='z!', intents=intents, help_command=None)
-slash = SlashCommand(client, sync_commands=True, sync_on_cog_reload=True)
-
-token = os.getenv('TOKEN')
-
+client = commands.Bot(command_prefix='z!', intents=discord.Intents.all(), help_command=None)
 
 # Tells when the bot is online
 @client.event
@@ -68,7 +60,6 @@ async def change_color():
     patreon = discord.utils.get(guild.roles, id=patreon_role_id)
     r, g, b = next(shades_of_pink)
     await patreon.edit(colour=discord.Colour.from_rgb(r, g, b))
-
 
 @client.event
 async def on_member_update(before, after):
@@ -271,79 +262,64 @@ async def uptime(ctx: commands.Context):
 
 
 @client.command()
-async def help(ctx, *, cmd: str = None):
-    """ Shows some information about commands and categories. 
-    :param cmd: The command/category. """
+async def help(ctx: commands.Context, cmd: str = None) -> None:
+  """ Shows some information about commands and categories.
+  :param cmd: The command or cog to show info about. """
+  
+  if not cmd:
+      embed = discord.Embed(
+      title="All commands and categories",
+      description=f"```ini\nUse {client.command_prefix}help command or {client.command_prefix}help category to know more about a specific command or category\n\n[Examples]\n[1] Category: {client.command_prefix}help games\n[2] Command : {client.command_prefix}help play```",
+      timestamp=ctx.message.created_at,
+      color=ctx.author.color
+      )
 
-    if not cmd:
-        embed = discord.Embed(
-            title="All commands and categories",
-            description=f"```ini\nUse {client.command_prefix}help command or {client.command_prefix}help category to know more about a specific command or category\n\n[Examples]\n[1] Category: {client.command_prefix}help SlothCurrency\n[2] Command : {client.command_prefix}help rep```",
-            timestamp=ctx.message.created_at,
-            color=ctx.author.color
+      for cog in client.cogs:
+          cog = client.get_cog(cog)
+          commands = [c.name for c in cog.get_commands() if not c.hidden]
+          if commands:
+            embed.add_field(
+            name=f"__{cog.qualified_name}__",
+            value=f"`Commands:` {', '.join(commands)}",
+            inline=False
             )
 
-        for cog in client.cogs:
-            cog = client.get_cog(cog)
+      cmds = []
+      for y in client.walk_commands():
+          if not y.cog_name and not y.hidden:
+              cmds.append(y.name)
+      embed.add_field(
+      name='__Uncategorized Commands__', 
+      value=f"`Commands:` {', '.join(cmds)}", 
+      inline=False)
+      await ctx.send(embed=embed)
 
-            commands = [f"{client.command_prefix}{c.name}" for c in cog.get_commands() if not c.hidden]
-            slash_commands = [f"/{sc}" for sc, sco in cog.client.slash.commands.items() if sco.cog == cog]
-            commands.extend(slash_commands)
+  else:
+    # Checks if it's a command
+    if command := client.get_command(cmd.lower()):
+      command_embed = discord.Embed(title=f"__Command:__ {command.name}", description=f"__**Description:**__\n```{command.help}```", color=ctx.author.color, timestamp=ctx.message.created_at)
+      return await ctx.send(embed=command_embed)
 
-            if commands:
-                embed.add_field(
-                    name=f"__{cog.qualified_name}__",
-                    value=f"`Commands:` {', '.join(commands)}",
-                    inline=False
-                    )
+    for cog in client.cogs:
+      if str(cog).lower() == str(cmd).lower():
+          cog = client.get_cog(cog)
+          cog_embed = discord.Embed(title=f"__Cog:__ {cog.qualified_name}", description=f"__**Description:**__\n```{cog.description}```", color=ctx.author.color, timestamp=ctx.message.created_at)
+          for c in cog.get_commands():
+              if not c.hidden:
+                  cog_embed.add_field(name=c.name,value=c.help,inline=False)
 
-        cmds = []
-        slash_cmds = [f"/{sc}" for sc, sco in client.slash.commands.items() if not sco.cog]
-        for y in client.walk_commands():
-            if not y.cog_name and not y.hidden:
-                cmds.append(f"{client.command_prefix}{y.name}")
+          return await ctx.send(embed=cog_embed)
 
-        cmds.extend(slash_cmds)
-                
-        embed.add_field(
-            name='__Uncategorized Commands__',
-            value=f"`Commands:` {', '.join(cmds)}",
-            inline=False)
-        await ctx.send(embed=embed)
-
+    # Otherwise, it's an invalid parameter (Not found)
     else:
-        # Checks if it's a command
-        if cmd.startswith('/') and (command := client.slash.commands.get(cmd[1:])):
-            command_embed = discord.Embed(title=f"__Command:__ /{command.name}", description=f"__**Description:**__\n```{command.description}```", color=ctx.author.color, timestamp=ctx.message.created_at)
-            return await ctx.send(embed=command_embed)
-            
-        if command := client.get_command(cmd.lower()):
-            command_embed = discord.Embed(title=f"__Command:__ {client.command_prefix}{command.qualified_name}", description=f"__**Description:**__\n```{command.help}```", color=ctx.author.color, timestamp=ctx.message.created_at)
-            return await ctx.send(embed=command_embed)
-
-        # Checks if it's a cog
-        for cog in client.cogs:
-            if str(cog).lower() == str(cmd).lower():
-                cog = client.get_cog(cog)
-                cog_embed = discord.Embed(title=f"__Cog:__ {cog.qualified_name}", description=f"__**Description:**__\n```{cog.description}```", color=ctx.author.color, timestamp=ctx.message.created_at)
-                for c in cog.get_commands():
-                    if not c.hidden:
-                        cog_embed.add_field(name=c.qualified_name, value=c.help, inline=False)
-
-                return await ctx.send(embed=cog_embed)
-
-        # Otherwise, it's an invalid parameter (Not found)
-        else:
-            await ctx.send(f"**Invalid parameter! `{cmd}` is neither a command nor a cog!**")
-
+      await ctx.send(f"**Invalid parameter! `{cmd}` is neither a command nor a cog!**")
 
 @client.command(hidden=True)
 @commands.has_permissions(administrator=True)
 async def load(ctx, extension: str = None):
-    '''
-    Loads a cog.
-    :param extension: The cog.
-    '''
+    """ Loads a cog.
+    :param extension: The cog. """
+
     if not extension:
         return await ctx.send("**Inform the cog!**")
     client.load_extension(f'cogs.{extension}')
@@ -353,10 +329,9 @@ async def load(ctx, extension: str = None):
 @client.command(hidden=True)
 @commands.has_permissions(administrator=True)
 async def unload(ctx, extension: str = None):
-    '''
-    Unloads a cog.
-    :param extension: The cog.
-    '''
+    """ Unloads a cog.
+    :param extension: The cog. """
+
     if not extension:
         return await ctx.send("**Inform the cog!**")
     client.unload_extension(f'cogs.{extension}')
@@ -366,18 +341,50 @@ async def unload(ctx, extension: str = None):
 @client.command(hidden=True)
 @commands.has_permissions(administrator=True)
 async def reload(ctx, extension: str = None):
-    '''
-    Reloads a cog.
-    :param extension: The cog.
-    '''
+    """ Reloads a cog.
+    :param extension: The cog. """
+
     if not extension:
         return await ctx.send("**Inform the cog!**")
     client.unload_extension(f'cogs.{extension}')
     client.load_extension(f'cogs.{extension}')
     return await ctx.send(f"**{extension} reloaded!**", delete_after=3)
 
+
+
+
+
+@client.slash_command(name="mention", guild_ids=guild_ids)
+@commands.has_any_role(moderator_role_id, admin_role_id)
+async def _mention(ctx, 
+    member: Option(str, name="member", description="The Staff member to mention/ping.", required=True,
+		choices=[
+			OptionChoice(name="Cosmos", value=os.getenv('COSMOS_ID')), OptionChoice(name="Alex", value=os.getenv('ALEX_ID')),
+			OptionChoice(name="DNK", value=os.getenv('DNK_ID')), OptionChoice(name="Muffin", value=os.getenv('MUFFIN_ID')),
+			OptionChoice(name="Pretzel", value=os.getenv('PRETZEL_ID')), OptionChoice(name="Prisca", value=os.getenv('PRISCA_ID')),
+            OptionChoice(name="GuiBot", value=os.getenv('GUIBOT_ID'))
+		]
+	)) -> None:
+    """ (ADMIN) Used to mention staff members.
+    :param member: The member to mention. """
+
+    if staff_member := discord.utils.get(ctx.guild.members, id=int(member)):
+        await ctx.send(staff_member.mention)
+    else:
+        await ctx.send("**For some reason I couldn't ping them =\ **")
+
+
+
+
+
+
+
+
+
+
+
 for filename in os.listdir('./cogs'):
     if filename.endswith('.py'):
         client.load_extension(f'cogs.{filename[:-3]}')
 
-client.run(token)
+client.run(os.getenv('TOKEN'))
