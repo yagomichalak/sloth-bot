@@ -370,16 +370,18 @@ async def _embed(ctx,
             OptionChoice(name="Black", value="000000"), OptionChoice(name="White", value="ffffff"),
             OptionChoice(name="Orange", value="ff7100"), OptionChoice(name="Brown", value="522400"),
             OptionChoice(name="Purple", value="380058")])) -> None:
-    """ (MOD) Makes an improved embedded message """
+    """ (ADM) Makes an improved embedded message """
 
     # Checks if there's a timestamp and sorts time
     embed = discord.Embed()
 
     # Adds optional parameters, if informed
+    if title: embed.title = title
     if timestamp: embed.timestamp = await utils.parse_time()
     if description: embed.description = description.replace(r'\n', '\n')
     if color: embed.color = int(color, 16)
     if thumbnail: embed.set_thumbnail(url=thumbnail)
+    if url: embed.url = url
     if image: embed.set_image(url=image)
 
     if not description and not image and not thumbnail:
