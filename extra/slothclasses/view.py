@@ -1,5 +1,4 @@
 import discord
-from discord import activity
 from discord.ext import commands
 from typing import Optional, List, Dict, Union
 from random import choice
@@ -8,6 +7,7 @@ from functools import partial
 import json
 
 class HugView(discord.ui.View):
+    """ View for the hug skill. """
 
     def __init__(self, member: discord.Member, target: discord.Member, timeout: Optional[float] = 180):
         super().__init__(timeout=timeout)
@@ -64,6 +64,7 @@ class HugView(discord.ui.View):
         return self.member.id == interaction.user.id
 
 class BootView(discord.ui.View):
+    """ View for the boot skill. """
 
     def __init__(self, member: discord.Member, target: discord.Member, timeout: Optional[float] = 180):
         super().__init__(timeout=timeout)
@@ -158,6 +159,7 @@ class BootView(discord.ui.View):
         return self.member.id == interaction.user.id
 
 class SlapView(discord.ui.View):
+    """ View for the slap skill. """
 
     def __init__(self, client: commands.Cog, member: discord.Member, target: discord.Member, timeout: Optional[float] = 180):
         super().__init__(timeout=timeout)
@@ -266,6 +268,7 @@ class SlapView(discord.ui.View):
         return self.member.id == interaction.user.id
 
 class KissView(discord.ui.View):
+    """ View for the kiss skill. """
 
     def __init__(self, client: commands.Cog, member: discord.Member, target: discord.Member, timeout: Optional[float] = 180):
         super().__init__(timeout=timeout)
@@ -385,6 +388,7 @@ class KissView(discord.ui.View):
 
 
 class CheatingView(discord.ui.View):
+    """ View for the spot cheating feature. """
 
     def __init__(self, client, cheater: discord.Member, lover: discord.Member, marriage: Dict[str, Union[str, int]]):
         super().__init__(timeout=300)
@@ -441,6 +445,7 @@ class CheatingView(discord.ui.View):
 
 
 class CheatingActionView(discord.ui.View):
+    """ View for the cheating spotted feature. """
 
     def __init__(self, client, cheater: discord.Member, lover: discord.Member, marriage: Dict[str, Union[str, int]]):
         super().__init__(timeout=60)
@@ -559,6 +564,7 @@ class CheatingActionView(discord.ui.View):
 
 
 class HoneymoonView(discord.ui.View):
+    """ View for the honeymoon skill. """
 
     def __init__(self, member: discord.Member, target: discord.Member, timeout: Optional[float] = 180):
         super().__init__(timeout=timeout)
@@ -679,6 +685,7 @@ class HoneymoonView(discord.ui.View):
 
 
 class PunchView(discord.ui.View):
+    """ View for the punch skill. """
 
     def __init__(self, member: discord.Member, target: discord.Member, timeout: Optional[float] = 180):
         super().__init__(timeout=timeout)
@@ -876,6 +883,7 @@ class PunchView(discord.ui.View):
 
 
 class GiveView(discord.ui.View):
+    """ View for the give skill. """
 
     def __init__(self, member: discord.Member, target: discord.Member, timeout: Optional[float] = 180):
         super().__init__(timeout=timeout)
@@ -946,6 +954,7 @@ class GiveView(discord.ui.View):
 
 
 class TickleView(discord.ui.View):
+    """ View for the tickle skill. """
 
     def __init__(self, member: discord.Member, target: discord.Member, timeout: Optional[float] = 180):
         super().__init__(timeout=timeout)
@@ -1305,6 +1314,81 @@ class WhisperView(discord.ui.View):
     @discord.ui.button(label='Nevermind', style=discord.ButtonStyle.red, custom_id='nevermind_id', emoji="❌")
     async def nevermind_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
         """ Cancels the whisper action. """
+
+        await self.disable_buttons(interaction)
+        self.stop()
+
+    async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
+
+        for child in self.children:
+            child.disabled = True
+
+        if followup:
+            await interaction.followup.edit_message(message_id=interaction.message.id, view=self)
+        else:
+            await interaction.response.edit_message(view=self)
+
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        return self.member.id == interaction.user.id
+
+
+
+
+class HandshakeView(discord.ui.View):
+    """ A view for the handshaking skill """
+
+    def __init__(self, member: discord.Member, target: discord.Member, timeout: Optional[float] = 180):
+        super().__init__(timeout=timeout)
+        self.member = member
+        self.target = target
+
+
+    @discord.ui.button(label='Handshake', style=discord.ButtonStyle.blurple, custom_id='tickle_id', emoji="🤝")
+    async def handshake_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Handshakes someone. """
+
+        handshakes: List[str] = [
+            "https://c.tenor.com/ytbz1Epg7Q8AAAAC/predator-arnold.gif",
+            "https://c.tenor.com/1AOd8kRKXSsAAAAd/kirito-handshake.gif",
+            "https://c.tenor.com/cxsA-a-8uz0AAAAC/tom-and-jerry-jerry-the-mouse.gif",
+            "https://c.tenor.com/dJ-fCu3ZdMYAAAAd/handshake-agree.gif",
+            "https://c.tenor.com/Jk5DASrKx3QAAAAC/my-girl-seal-friendship.gif",
+            "https://c.tenor.com/Xv360gzJarQAAAAC/young-boy-football.gif",
+            "https://c.tenor.com/9UxelIPA3dEAAAAC/hand-shake-phone.gif",
+            "https://c.tenor.com/e7B8WV5Ow7EAAAAC/drake-will-ferrell.gif",
+            "https://c.tenor.com/jkRs8LGfq0oAAAAd/hulk-hogan-shake-hands.gif",
+            "https://c.tenor.com/9t3luBDOyHEAAAAC/the-simpsons-simpson.gif",
+            "https://c.tenor.com/ob72I2v2zTsAAAAC/hand-shake.gif",
+            "https://c.tenor.com/Iy4VniPfZQAAAAAC/secret-handshake-trouble.gif",
+            "https://c.tenor.com/jRj2B9Q0gIIAAAAC/dog-handshake.gif",
+            "https://c.tenor.com/P8UB_ldN6e4AAAAd/quando-rondo-handshake.gif",
+            "https://c.tenor.com/5m5QGsVqkR8AAAAC/shake-hands-tom-and-jerry.gif",
+            "https://c.tenor.com/JGeVX_nI39MAAAAC/shake-handshake.gif",
+            "https://c.tenor.com/El24Zpa9_QUAAAAC/bean-girl.gif",
+            "https://c.tenor.com/kPbvjinMD_0AAAAC/manly-handshake-fma-brotherhood.gif",
+            "https://c.tenor.com/9LbEpuHBPScAAAAd/brooklyn-nine-nine-amy-and-rosa.gif",
+            "https://c.tenor.com/PNLY3dijcIkAAAAC/trump-macron-macron-trump.gif"
+        ]
+
+        embed = discord.Embed(
+            title="__Handshake__",
+            description=f"🤝 {self.member.mention} handshaked {self.target.mention} 🤝",
+            color=discord.Color.brand_green(),
+            timestamp=interaction.message.created_at
+        )
+
+        embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
+        embed.set_thumbnail(url=self.target.avatar.url)
+        embed.set_image(url=choice(handshakes))
+        embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
+
+        await interaction.response.send_message(content=self.target.mention, embed=embed)
+        await self.disable_buttons(interaction, followup=True)
+        self.stop()
+
+    @discord.ui.button(label='Nevermind', style=discord.ButtonStyle.red, custom_id='nevermind_id', emoji="❌")
+    async def nevermind_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Cancels the handshaking action. """
 
         await self.disable_buttons(interaction)
         self.stop()

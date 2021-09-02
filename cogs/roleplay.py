@@ -4,7 +4,8 @@ from extra.slothclasses.player import Player
 from extra.slothclasses.view import (
     HugView, BootView, KissView, SlapView, 
     HoneymoonView, PunchView, GiveView, TickleView,
-     YeetView, BegView, PatView, WhisperView
+     YeetView, BegView, PatView, WhisperView,
+     HandshakeView
 )
 from extra import utils
 from extra.prompt.menu import ConfirmButton
@@ -478,6 +479,36 @@ class RolePlay(commands.Cog):
         embed.set_footer(text=f"Requested by {author}", icon_url=author.avatar.url)
         view = WhisperView(member=author, target=member, text=text, timeout=60)
         await ctx.send(embed=embed, view=view)
+
+    @commands.command()
+    @commands.cooldown(1, 120, commands.BucketType.user)
+    async def handshake(self, ctx, *, member: discord.Member = None) -> None:
+        """ Handshakes someone.
+        :param member: The member to whisper to.
+        
+        * Cooldown: 2 minutes """
+
+        author = ctx.author
+
+        if not member:
+            self.client.get_command(ctx.command.name).reset_cooldown(ctx)
+            return await ctx.send(f"**Please, inform a member, {author.mention}!**")
+
+            
+        if author.id == member.id:
+            self.client.get_command(ctx.command.name).reset_cooldown(ctx)
+            return await ctx.send(f"**You can't handshake yourself, {author.mention}!**")
+
+        embed = discord.Embed(
+            title="__Handshake Prompt__",
+            description=f"Are you sure you wanna handshake {member.mention}, {author.mention}?",
+            color=author.color,
+            timestamp=ctx.message.created_at
+        )
+        embed.set_footer(text=f"Requested by {author}", icon_url=author.avatar.url)
+        view = HandshakeView(member=author, target=member, timeout=60)
+        await ctx.send(embed=embed, view=view)
+
 
 def setup(client):
     client.add_cog(RolePlay(client))
