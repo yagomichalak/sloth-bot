@@ -468,6 +468,7 @@ class RolePlay(commands.Cog):
             return await ctx.send(f"**You can't whisper to yourself, {author.mention}!**")
 
         if not text:
+            self.client.get_command(ctx.command.name).reset_cooldown(ctx)
             return await ctx.send(f"**Please, inform a text to whisper, {author.mention}!**")
 
         embed = discord.Embed(
