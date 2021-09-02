@@ -3,7 +3,6 @@ from discord.ext import commands, tasks, flags
 from typing import List, Union, Dict, Optional
 from random import choice
 import os
-import asyncio
 
 from extra import utils
 from extra.view import GiveawayView

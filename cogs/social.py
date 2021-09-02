@@ -255,7 +255,7 @@ class Social(commands.Cog):
 
         embed.add_field(name="Bot?", value=member.bot)
 
-        view = QuickButtons(self.client, ctx, member)
+        view = QuickButtons(client=self.client, ctx=ctx, target_member=member)
         if not await utils.is_allowed([mod_role_id, admin_role_id]).predicate(ctx):
             view.children.remove(view.children[4])
             view.children.remove(view.infractions_button)
