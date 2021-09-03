@@ -51,6 +51,7 @@ class HugView(discord.ui.View):
         self.stop()
 
     async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
+        """ Disables all buttons of the view menu. """
 
         for child in self.children:
             child.disabled = True
@@ -146,6 +147,7 @@ class BootView(discord.ui.View):
         self.stop()
 
     async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
+        """ Disables all buttons of the view menu. """
 
         for child in self.children:
             child.disabled = True
@@ -255,6 +257,7 @@ class SlapView(discord.ui.View):
         self.stop()
 
     async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
+        """ Disables all buttons of the view menu. """
 
         for child in self.children:
             child.disabled = True
@@ -374,6 +377,7 @@ class KissView(discord.ui.View):
 
 
     async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
+        """ Disables all buttons of the view menu. """
 
         for child in self.children:
             child.disabled = True
@@ -430,6 +434,7 @@ class CheatingView(discord.ui.View):
 
 
     async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
+        """ Disables all buttons of the view menu. """
 
         for child in self.children:
             child.disabled = True
@@ -549,6 +554,7 @@ class CheatingActionView(discord.ui.View):
 
 
     async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
+        """ Disables all buttons of the view menu. """
 
         for child in self.children:
             child.disabled = True
@@ -671,6 +677,7 @@ class HoneymoonView(discord.ui.View):
 
 
     async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
+        """ Disables all buttons of the view menu. """
 
         for child in self.children:
             child.disabled = True
@@ -869,6 +876,7 @@ class PunchView(discord.ui.View):
         self.stop()
 
     async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
+        """ Disables all buttons of the view menu. """
 
         for child in self.children:
             child.disabled = True
@@ -940,6 +948,7 @@ class GiveView(discord.ui.View):
         self.stop()
 
     async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
+        """ Disables all buttons of the view menu. """
 
         for child in self.children:
             child.disabled = True
@@ -1003,6 +1012,7 @@ class TickleView(discord.ui.View):
         self.stop()
 
     async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
+        """ Disables all buttons of the view menu. """
 
         for child in self.children:
             child.disabled = True
@@ -1100,6 +1110,7 @@ class YeetView(discord.ui.View):
         self.stop()
 
     async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
+        """ Disables all buttons of the view menu. """
 
         for child in self.children:
             child.disabled = True
@@ -1173,6 +1184,7 @@ class BegView(discord.ui.View):
         self.stop()
 
     async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
+        """ Disables all buttons of the view menu. """
 
         for child in self.children:
             child.disabled = True
@@ -1248,6 +1260,7 @@ class PatView(discord.ui.View):
         self.stop()
 
     async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
+        """ Disables all buttons of the view menu. """
 
         for child in self.children:
             child.disabled = True
@@ -1319,6 +1332,7 @@ class WhisperView(discord.ui.View):
         self.stop()
 
     async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
+        """ Disables all buttons of the view menu. """
 
         for child in self.children:
             child.disabled = True
@@ -1394,6 +1408,7 @@ class HandshakeView(discord.ui.View):
         self.stop()
 
     async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
+        """ Disables all buttons of the view menu. """
 
         for child in self.children:
             child.disabled = True
@@ -1469,6 +1484,7 @@ class PeekView(discord.ui.View):
         self.stop()
 
     async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
+        """ Disables all buttons of the view menu. """
 
         for child in self.children:
             child.disabled = True
@@ -1490,7 +1506,7 @@ class DriveOverView(discord.ui.View):
         self.target = target
 
 
-    @discord.ui.button(label='Drive Over', style=discord.ButtonStyle.blurple, custom_id='peek_id', emoji="🚗")
+    @discord.ui.button(label='Drive Over', style=discord.ButtonStyle.blurple, custom_id='drive_over_id', emoji="🚗")
     async def drive_over_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
         """ Drives over someone. """
 
@@ -1531,6 +1547,89 @@ class DriveOverView(discord.ui.View):
         self.stop()
 
     async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
+        """ Disables all buttons of the view menu. """
+
+        for child in self.children:
+            child.disabled = True
+
+        if followup:
+            await interaction.followup.edit_message(message_id=interaction.message.id, view=self)
+        else:
+            await interaction.response.edit_message(view=self)
+
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        return self.member.id == interaction.user.id
+
+
+class HighFiveView(discord.ui.View):
+    """ A view for the high five skill """
+
+    def __init__(self, member: discord.Member, target: discord.Member, timeout: Optional[float] = 180):
+        super().__init__(timeout=timeout)
+        self.member = member
+        self.target = target
+
+
+    @discord.ui.button(label='High Five', style=discord.ButtonStyle.blurple, custom_id='peek_id', emoji="🖐️")
+    async def high_five_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ High fives someone. """
+
+        runovers: List[str] = [
+            'https://c.tenor.com/2oPrdhJpUpEAAAAC/kuzco-yzma.gif',
+            'https://c.tenor.com/EqX76RY5-IIAAAAC/high-five-apir.gif',
+            'https://c.tenor.com/RusIdB6WS-IAAAAC/cat-high-five.gif',
+            'https://c.tenor.com/dJD2iLU0qGEAAAAC/high-five-top-gun.gif',
+            'https://c.tenor.com/0jheLvur3C0AAAAC/new-girl-high-five.gif',
+            'https://c.tenor.com/mpCnVpX0xIYAAAAC/high-five-spongebob.gif',
+            'https://c.tenor.com/UYNQrtD9lxIAAAAC/high-five-fail.gif',
+            'https://c.tenor.com/zTpmKaMk25gAAAAC/high-five-lignon.gif',
+            'https://c.tenor.com/UtMb32NBztEAAAAC/neil-patrick-harris-high-five.gif',
+            'https://c.tenor.com/BtqMn35dvT4AAAAd/high-five.gif',
+            'https://c.tenor.com/EcTTHD9dnMUAAAAC/evan-and-katelyn-extreme-high-five.gif',
+            'https://c.tenor.com/MnWr1MLnL6gAAAAC/dream-team-tina-fey.gif',
+            'https://c.tenor.com/fmDOIOVxfVoAAAAC/seth-meyers-late-night-seth.gif',
+            'https://c.tenor.com/eCtm70W3J2QAAAAC/borat-high-five.gif',
+            'https://c.tenor.com/2vfPNlz8cHQAAAAd/highfive-puppy.gif',
+            'https://c.tenor.com/2vfPNlz8cHQAAAAd/highfive-puppy.gif',
+            'https://c.tenor.com/BGBoeXgLE44AAAAC/high-five.gif',
+            'https://c.tenor.com/Jj9Us-qY-UIAAAAC/lou-lignon.gif',
+            'https://c.tenor.com/VkzkUy84s5gAAAAC/sonic-x-tails-and-amy-high-five.gif',
+            'https://c.tenor.com/XKgfZjBlZd0AAAAC/jumping-happy.gif',
+            'https://c.tenor.com/ovJJAp83pmIAAAAC/high-five-lol.gif',
+            'https://c.tenor.com/eagcZFQbQsIAAAAd/high-five-emily-hampshire.gif',
+            'https://c.tenor.com/EvA9kafRz1kAAAAC/high-five-the-good-place.gif',
+            'https://c.tenor.com/ekBfsXahvWsAAAAC/bakabaka7-high-five.gif',
+            'https://c.tenor.com/lQjcsJCRA9sAAAAC/natsu-dragneel-lucy-heartfilia.gif',
+            'https://c.tenor.com/q6PnbtGXo5AAAAAC/tos-high-five.gif',
+            'https://c.tenor.com/825JM-UpUScAAAAC/cat-high-five.gif',
+            'https://c.tenor.com/8KZ4Jdu7A7IAAAAS/highfive-borat.gif'
+        ]
+
+        embed = discord.Embed(
+            title="__High Five__",
+            description=f"🖐️ {self.member.mention} high fived {self.target.mention} 🖐️",
+            color=discord.Color.dark_orange(),
+            timestamp=interaction.message.created_at
+        )
+
+        embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
+        embed.set_thumbnail(url=self.target.avatar.url)
+        embed.set_image(url=choice(runovers))
+        embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
+
+        await interaction.response.send_message(content=self.target.mention, embed=embed)
+        await self.disable_buttons(interaction, followup=True)
+        self.stop()
+
+    @discord.ui.button(label='Nevermind', style=discord.ButtonStyle.red, custom_id='nevermind_id', emoji="❌")
+    async def nevermind_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Cancels the high five action. """
+
+        await self.disable_buttons(interaction)
+        self.stop()
+
+    async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
+        """ Disables all buttons of the view menu. """
 
         for child in self.children:
             child.disabled = True

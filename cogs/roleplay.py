@@ -5,7 +5,7 @@ from extra.slothclasses.view import (
     HugView, BootView, KissView, SlapView, 
     HoneymoonView, PunchView, GiveView, TickleView,
      YeetView, BegView, PatView, WhisperView,
-     HandshakeView, PeekView, DriveOverView
+     HandshakeView, PeekView, DriveOverView, HighFiveView
 )
 from extra import utils
 from extra.prompt.menu import ConfirmButton
@@ -499,11 +499,10 @@ class RolePlay(commands.Cog):
         view = HandshakeView(member=author, target=member, timeout=60)
         await ctx.send(embed=embed, view=view)
 
-    @commands.command(aliases=['hi5', 'h5', 'high_five'])
+    @commands.command(aliases=['hi5', 'h5', 'high_five', 'highestfive', 'highest_five', 'hf'])
     @commands.cooldown(1, 120, commands.BucketType.user)
-    @Player.not_ready()
     async def highfive(self, ctx, *, member: discord.Member = None) -> None:
-        """ Highfives someone.
+        """ High fives someone.
         :param member: The member to highfive.
         
         * Cooldown: 2 minutes """
@@ -517,17 +516,16 @@ class RolePlay(commands.Cog):
             
         if author.id == member.id:
             self.client.get_command(ctx.command.name).reset_cooldown(ctx)
-            return await ctx.send(f"**You can't highfive yourself, {author.mention}!**")
+            return await ctx.send(f"**You can't high five yourself, {author.mention}!**")
 
         embed = discord.Embed(
             title="__Highfive Prompt__",
-            description=f"Are you sure you wanna highfive {member.mention}, {author.mention}?",
+            description=f"Are you sure you wanna high five {member.mention}, {author.mention}?",
             color=author.color,
             timestamp=ctx.message.created_at
         )
         embed.set_footer(text=f"Requested by {author}", icon_url=author.avatar.url)
-        view = HandshakeView(member=author, target=member, timeout=60)
-        # view = HighfiveView(member=author, target=member, timeout=60)
+        view = HighFiveView(member=author, target=member, timeout=60)
         await ctx.send(embed=embed, view=view)
 
     @commands.command()
