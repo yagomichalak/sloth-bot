@@ -165,7 +165,6 @@ async def on_command_error(ctx, error):
 
 @client.event
 async def on_application_command_error(ctx, error) -> None:
-    print('error????')
 
     if isinstance(error, commands.MissingPermissions):
         await ctx.send("You can't do that!")
@@ -277,14 +276,14 @@ async def on_voice_state_update(member, before, after):
             embed.set_author(name=member, icon_url=member.avatar.url)
             await mod_log.send(embed=embed)
 
-start_time = datetime.utcnow()
+start_time = datetime.now(timezone('Etc/GMT'))
 
 
 @client.command()
 async def uptime(ctx: commands.Context):
     """ Shows for how much time the bot is online. """
 
-    now = datetime.utcnow()  # Timestamp of when uptime function is run
+    now = await utils.get_time_now()  # Timestamp of when uptime function is run
     delta = now - start_time
     hours, remainder = divmod(int(delta.total_seconds()), 3600)
     minutes, seconds = divmod(remainder, 60)
