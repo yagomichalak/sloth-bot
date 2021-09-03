@@ -1343,7 +1343,7 @@ class HandshakeView(discord.ui.View):
         self.target = target
 
 
-    @discord.ui.button(label='Handshake', style=discord.ButtonStyle.blurple, custom_id='tickle_id', emoji="🤝")
+    @discord.ui.button(label='Handshake', style=discord.ButtonStyle.blurple, custom_id='handshake_id', emoji="🤝")
     async def handshake_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
         """ Handshakes someone. """
 
@@ -1389,6 +1389,143 @@ class HandshakeView(discord.ui.View):
     @discord.ui.button(label='Nevermind', style=discord.ButtonStyle.red, custom_id='nevermind_id', emoji="❌")
     async def nevermind_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
         """ Cancels the handshaking action. """
+
+        await self.disable_buttons(interaction)
+        self.stop()
+
+    async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
+
+        for child in self.children:
+            child.disabled = True
+
+        if followup:
+            await interaction.followup.edit_message(message_id=interaction.message.id, view=self)
+        else:
+            await interaction.response.edit_message(view=self)
+
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        return self.member.id == interaction.user.id
+
+
+class PeekView(discord.ui.View):
+    """ A view for the peek skill """
+
+    def __init__(self, member: discord.Member, target: discord.Member, timeout: Optional[float] = 180):
+        super().__init__(timeout=timeout)
+        self.member = member
+        self.target = target
+
+
+    @discord.ui.button(label='Peek', style=discord.ButtonStyle.blurple, custom_id='peek_id', emoji="👀")
+    async def peek_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Peeks at someone. """
+
+        peeks: List[str] = [
+            'https://c.tenor.com/Y8TRAK82_s4AAAAd/bill-nye.gif',
+            'https://c.tenor.com/kXh4odz0PW0AAAAC/arrested-development-creep.gif',
+            'https://c.tenor.com/Nt4mzB-VTlEAAAAC/bh187-spongebob.gif',
+            'https://c.tenor.com/_Mgx_mhOaYkAAAAC/creep-creepy.gif',
+            'https://c.tenor.com/BLwyj1w3rJUAAAAC/ariel-hiding.gif',
+            'https://c.tenor.com/gFT6-1jcnXoAAAAd/peaking-peak.gif',
+            'https://c.tenor.com/y2uSpFdZMp4AAAAC/unicorn-store-kit.gif',
+            'https://c.tenor.com/vhxaixvLUz4AAAAd/stalking-spying.gif',
+            'https://c.tenor.com/MlFGQLY79l0AAAAC/crazy-peak.gif',
+            'https://c.tenor.com/nb-IK5uyZDsAAAAC/peek-a-boo-hide.gif',
+            'https://c.tenor.com/25nv4JkM1CcAAAAC/baby-yoda-peek.gif',
+            'https://c.tenor.com/-to5I8QJL-8AAAAd/peek-hiding.gif',
+            'https://c.tenor.com/RUcs87FiJA8AAAAd/cute-cat.gif',
+            'https://c.tenor.com/vgYj0v3_A0kAAAAC/anime-peek.gif',
+            'https://c.tenor.com/djPemeJ4XEkAAAAC/sneak-sneaky.gif',
+            'https://c.tenor.com/P7hbsoaPg-AAAAAC/cat-sneak.gif',
+            'https://c.tenor.com/lZ0UXRHaTXMAAAAC/life-stalk.gif',
+            'https://c.tenor.com/BP_m_CFVMEMAAAAC/uncle-buck-peek.gif',
+            'https://c.tenor.com/rx5QhSm0ty8AAAAd/yoda-hello.gif',
+            'https://c.tenor.com/5Ovv19thBygAAAAC/mario-peek.gif',
+            'https://c.tenor.com/Mp-nTZCIxW0AAAAC/alf-blinds.gif',
+
+        ]
+
+        embed = discord.Embed(
+            title="__Peek__",
+            description=f"👀 {self.member.mention} peeked at {self.target.mention} 👀",
+            color=discord.Color.brand_red(),
+            timestamp=interaction.message.created_at
+        )
+
+        embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
+        embed.set_thumbnail(url=self.target.avatar.url)
+        embed.set_image(url=choice(peeks))
+        embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
+
+        await interaction.response.send_message(content=self.target.mention, embed=embed)
+        await self.disable_buttons(interaction, followup=True)
+        self.stop()
+
+    @discord.ui.button(label='Nevermind', style=discord.ButtonStyle.red, custom_id='nevermind_id', emoji="❌")
+    async def nevermind_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Cancels the peek action. """
+
+        await self.disable_buttons(interaction)
+        self.stop()
+
+    async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
+
+        for child in self.children:
+            child.disabled = True
+
+        if followup:
+            await interaction.followup.edit_message(message_id=interaction.message.id, view=self)
+        else:
+            await interaction.response.edit_message(view=self)
+
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        return self.member.id == interaction.user.id
+
+class DriveOverView(discord.ui.View):
+    """ A view for the drive over skill """
+
+    def __init__(self, member: discord.Member, target: discord.Member, timeout: Optional[float] = 180):
+        super().__init__(timeout=timeout)
+        self.member = member
+        self.target = target
+
+
+    @discord.ui.button(label='Drive Over', style=discord.ButtonStyle.blurple, custom_id='peek_id', emoji="🚗")
+    async def drive_over_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Drives over someone. """
+
+        runovers: List[str] = [
+            'https://c.tenor.com/gSkcprb8EaAAAAAd/mike-barreras.gif',
+            'https://c.tenor.com/XLdjjRtww6gAAAAd/run-drive-safe.gif',
+            'https://c.tenor.com/c1Wq8nV4sG0AAAAd/powercrash-kid-crash.gif',
+            'https://c.tenor.com/Kmai1S8zCscAAAAC/runover-ranover.gif',
+            'https://c.tenor.com/545ezhrKz6UAAAAC/free-guy-ryan-reynolds.gif',
+            'https://c.tenor.com/CYnm0RkWYN4AAAAC/ran-over-car.gif',
+            'https://c.tenor.com/FwmAvRG1j9MAAAAC/horse-woman.gif',
+            'https://c.tenor.com/NQ9aYFDJ7dsAAAAd/hit-and-run-run-over.gif',
+            'https://c.tenor.com/CCl1Y2jnJUQAAAAd/hit-by-a-car-run-over.gif',
+            'https://c.tenor.com/fycpf_htEugAAAAd/panda-yite.gif'
+        ]
+
+        embed = discord.Embed(
+            title="__Drive Over__",
+            description=f"🚗 {self.member.mention} drove over {self.target.mention} 🚗",
+            color=discord.Color.brand_red(),
+            timestamp=interaction.message.created_at
+        )
+
+        embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
+        embed.set_thumbnail(url=self.target.avatar.url)
+        embed.set_image(url=choice(runovers))
+        embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
+
+        await interaction.response.send_message(content=self.target.mention, embed=embed)
+        await self.disable_buttons(interaction, followup=True)
+        self.stop()
+
+    @discord.ui.button(label='Nevermind', style=discord.ButtonStyle.red, custom_id='nevermind_id', emoji="❌")
+    async def nevermind_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Cancels the drive over action. """
 
         await self.disable_buttons(interaction)
         self.stop()
