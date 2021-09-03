@@ -5,7 +5,7 @@ from extra.slothclasses.view import (
     HugView, BootView, KissView, SlapView, 
     HoneymoonView, PunchView, GiveView, TickleView,
      YeetView, BegView, PatView, WhisperView,
-     HandshakeView
+     HandshakeView, PeekView, DriveOverView
 )
 from extra import utils
 from extra.prompt.menu import ConfirmButton
@@ -497,6 +497,93 @@ class RolePlay(commands.Cog):
         )
         embed.set_footer(text=f"Requested by {author}", icon_url=author.avatar.url)
         view = HandshakeView(member=author, target=member, timeout=60)
+        await ctx.send(embed=embed, view=view)
+
+    @commands.command()
+    @commands.cooldown(1, 120, commands.BucketType.user)
+    @Player.not_ready()
+    async def highfive(self, ctx, *, member: discord.Member = None) -> None:
+        """ Handshakes someone.
+        :param member: The member to whisper to.
+        
+        * Cooldown: 2 minutes """
+
+        author = ctx.author
+
+        if not member:
+            self.client.get_command(ctx.command.name).reset_cooldown(ctx)
+            return await ctx.send(f"**Please, inform a member, {author.mention}!**")
+
+            
+        if author.id == member.id:
+            self.client.get_command(ctx.command.name).reset_cooldown(ctx)
+            return await ctx.send(f"**You can't handshake yourself, {author.mention}!**")
+
+        embed = discord.Embed(
+            title="__Handshake Prompt__",
+            description=f"Are you sure you wanna handshake {member.mention}, {author.mention}?",
+            color=author.color,
+            timestamp=ctx.message.created_at
+        )
+        embed.set_footer(text=f"Requested by {author}", icon_url=author.avatar.url)
+        view = HandshakeView(member=author, target=member, timeout=60)
+        await ctx.send(embed=embed, view=view)
+
+    @commands.command()
+    @commands.cooldown(1, 120, commands.BucketType.user)
+    async def peek(self, ctx, *, member: discord.Member = None) -> None:
+        """ Peeks at someone.
+        :param member: The member to peek at.
+        
+        * Cooldown: 2 minutes """
+
+        author = ctx.author
+
+        if not member:
+            self.client.get_command(ctx.command.name).reset_cooldown(ctx)
+            return await ctx.send(f"**Please, inform a member, {author.mention}!**")
+            
+        if author.id == member.id:
+            self.client.get_command(ctx.command.name).reset_cooldown(ctx)
+            return await ctx.send(f"**You can't peek at yourself, {author.mention}!**")
+
+        embed = discord.Embed(
+            title="__Peek Prompt__",
+            description=f"Are you sure you wanna peek at {member.mention}, {author.mention}?",
+            color=author.color,
+            timestamp=ctx.message.created_at
+        )
+        embed.set_footer(text=f"Requested by {author}", icon_url=author.avatar.url)
+        view = PeekView(member=author, target=member, timeout=60)
+        await ctx.send(embed=embed, view=view)
+
+    @commands.command(aliases=['driveover', 'run_over', 'runover'])
+    @commands.cooldown(1, 120, commands.BucketType.user)
+    async def drive_over(self, ctx, *, member: discord.Member = None) -> None:
+        """ Drivers over someone.
+        :param member: The member to drive over.
+        
+        * Cooldown: 2 minutes """
+
+        author = ctx.author
+
+        if not member:
+            self.client.get_command(ctx.command.name).reset_cooldown(ctx)
+            return await ctx.send(f"**Please, inform a member, {author.mention}!**")
+
+            
+        if author.id == member.id:
+            self.client.get_command(ctx.command.name).reset_cooldown(ctx)
+            return await ctx.send(f"**You can't drive over yourself, {author.mention}!**")
+
+        embed = discord.Embed(
+            title="__Drive Over Prompt__",
+            description=f"Are you sure you wanna drive over {member.mention}, {author.mention}?",
+            color=author.color,
+            timestamp=ctx.message.created_at
+        )
+        embed.set_footer(text=f"Requested by {author}", icon_url=author.avatar.url)
+        view = DriveOverView(member=author, target=member, timeout=60)
         await ctx.send(embed=embed, view=view)
 
 
