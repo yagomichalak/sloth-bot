@@ -65,6 +65,8 @@ async def change_color():
 
 @client.event
 async def on_member_update(before, after):
+    """ Sends a messages to new patreons, as soon as they get their patreon roles. """
+
     if not after.guild:
         return
 
@@ -103,7 +105,6 @@ async def on_member_remove(member):
     embed.add_field(name=f"Roles: {len(roles)}", value=" ".join([role.mention for role in roles]), inline=False)
     embed.add_field(name="Top role:", value=member.top_role.mention, inline=False)
     embed.add_field(name="Bot?", value=member.bot)
-    # cosmos = discord.utils.get(member.guild.members, id=user_cosmos_id)
     await channel.send(embed=embed)
 
 
@@ -550,7 +551,9 @@ async def _speak(ctx, language: Option(str, name="language", description="The la
 
 
 
-
+@client.user_command(name="click", guild_ids=guild_ids)
+async def _click(ctx, user: discord.Member) -> None:
+    await ctx.send(f"**Don't touch me, {ctx.author.mention}!**")
 
 
 for filename in os.listdir('./cogs'):
