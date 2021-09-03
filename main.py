@@ -494,26 +494,37 @@ async def _mention(ctx,
 # End of slash commands
 
 
-# @client.command_group(name="cnp", guild_ids=guild_ids)
-# @utils.is_allowed([moderator_role_id, admin_role_id])
-# async def _cnp(ctx, 
-#     text: Option(str, name="text", description="The kind of text you want to post a CNP message for.", required=True,
-#         choices=[
-#             OptionChoice(name="Muted/Purge", value=""), OptionChoice(name="Speak English", value=""),
-#             OptionChoice(name="Nickname", value=""), OptionChoice(name="Resources Talk", value=""),
-#             OptionChoice(name="Classes", value="classes.txt"), OptionChoice(name="Interview (lesson management)", value="")
-#         ])):
-    
-#     pass
-#     print(text)
-
-# @client.command_group(name="cnp", description="For copy and pasting stuff.", guild_ids=guild_ids)
 
 _cnp = client.command_group(name="cnp", description="For copy and pasting stuff.", guild_ids=guild_ids)
 
+@client.command_group(name="specific", guild_ids=guild_ids)
+async def _specific(ctx, 
+    text: Option(str, name="text", description="Pastes a text for specific purposes", required=True,
+        choices=['Muted/Purge', 'Nickname', 'Classes'])):
+    """ Posts a specific test of your choice """
+    
+    
+    member = ctx.author
+
+    available_texts: Dict[str, str] = {}
+    with open(f"./extra/random/json/special_texts.json", 'r', encoding="utf-8") as file:
+        available_texts = json.loads(file.read())
+
+    if not (selected_text := available_texts.get(text.lower())):
+        return await ctx.send(f"**Please, inform a supported language, {member.mention}!**\n{', '.join(available_texts)}")
+
+    embed = discord.Embed(
+        title=f"__{text.title()}__",
+        description=selected_text,
+        color=member.color
+    )
+    await ctx.send(embed=embed)
+
+
 @_cnp.command(name="speak")
-async def _speak(ctx, language: Option(str, name="language", required=True)) -> None:
-    """ The language they should speak. """
+@utils.is_allowed([moderator_role_id, admin_role_id])
+async def _speak(ctx, language: Option(str, name="language", description="The language they should speak.", required=True)) -> None:
+    """ Pastes a 'speak in X language' text in different languages. """
 
     member = ctx.author
 
