@@ -20,7 +20,7 @@ from extra.moderation.fakeaccounts import ModerationFakeAccountsTable
 # IDs
 mod_log_id = int(os.getenv('MOD_LOG_CHANNEL_ID'))
 muted_role_id = int(os.getenv('MUTED_ROLE_ID'))
-general_channel = int(os.getenv('GENERAL_CHANNEL_ID'))
+welcome_channel_id = int(os.getenv('WELCOME_CHANNEL_ID'))
 last_deleted_message = []
 suspect_channel_id = int(os.getenv('SUSPECT_CHANNEL_ID'))
 mod_role_id = int(os.getenv('MOD_ROLE_ID'))
@@ -190,8 +190,8 @@ class Moderation(*moderation_cogs):
 		if await self.get_muted_roles(member.id):
 			muted_role = discord.utils.get(member.guild.roles, id=muted_role_id)
 			await member.add_roles(muted_role)
-			general = discord.utils.get(member.guild.channels, id=general_channel)
-			await general.send(f"**Stop right there, {member.mention}! ✋ You were muted, left and rejoined the server, but that won't work!**")
+			welcome_channel = discord.utils.get(member.guild.channels, id=welcome_channel_id)
+			await welcome_channel.send(f"**Stop right there, {member.mention}! ✋ You were muted, left and rejoined the server, but that won't work!**")
 
 	@commands.Cog.listener()
 	async def on_message_delete(self, message):
