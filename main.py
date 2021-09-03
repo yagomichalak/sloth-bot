@@ -1,5 +1,6 @@
 import discord
 from discord.app import Option, OptionChoice
+from discord.utils import sleep_until
 from pytz import timezone
 from dotenv import load_dotenv
 from discord.ext import commands, tasks, flags
@@ -497,10 +498,11 @@ async def _mention(ctx,
 
 _cnp = client.command_group(name="cnp", description="For copy and pasting stuff.", guild_ids=guild_ids)
 
-@client.command_group(name="specific", guild_ids=guild_ids)
+@_cnp.command(name="specific")
+@utils.is_allowed([moderator_role_id, admin_role_id])
 async def _specific(ctx, 
     text: Option(str, name="text", description="Pastes a text for specific purposes", required=True,
-        choices=['Muted/Purge', 'Nickname', 'Classes'])):
+        choices=['Muted/Purge', 'Nickname', 'Classes', 'Interview', 'Resources'])):
     """ Posts a specific test of your choice """
     
     
@@ -513,12 +515,17 @@ async def _specific(ctx,
     if not (selected_text := available_texts.get(text.lower())):
         return await ctx.send(f"**Please, inform a supported language, {member.mention}!**\n{', '.join(available_texts)}")
 
-    embed = discord.Embed(
-        title=f"__{text.title()}__",
-        description=selected_text,
-        color=member.color
-    )
-    await ctx.send(embed=embed)
+    if selected_text['embed']:
+        embed = discord.Embed(
+            title=f"__{text.title()}__",
+            description=selected_text['text'],
+            color=member.color
+        )
+        if selected_text["image"]:
+            embed.set_image(url=selected_text["image"])
+        await ctx.send(embed=embed)
+    else:
+        await ctx.send(selected_text['text'])
 
 
 @_cnp.command(name="speak")
