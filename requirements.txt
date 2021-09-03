@@ -1,6 +1,4 @@
 wikipedia==1.4.0
-#git+https://github.com/Pycord-Development/pycord@slash
-git+https://github.com/Rapptz/discord.py
 discord-flags==2.1.1
 aiohttp==3.7.4
 aiomysql==0.0.21
@@ -16,3 +14,4 @@ Pillow==8.1.0
 python-dotenv==0.15.0
 treelib==1.6.1
 emoji==1.4.1
+git+https://github.com/Pycord-Development/pycord@slash
