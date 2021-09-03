@@ -1,10 +1,11 @@
-import pytz
 import discord
 from discord.app import Option, OptionChoice
 from pytz import timezone
 from dotenv import load_dotenv
 from discord.ext import commands, tasks, flags
 from extra import utils
+from typing import Dict
+import json
 
 import os
 from datetime import datetime
@@ -161,6 +162,44 @@ async def on_command_error(ctx, error):
         await error_log.send(f"ERROR: {error} | Class: {error.__class__} | Cause: {error.__cause__}")
         await error_log.send('='*10)
 
+@client.event
+async def on_application_command_error(ctx, error) -> None:
+    print('error????')
+
+    if isinstance(error, commands.MissingPermissions):
+        await ctx.send("You can't do that!")
+
+    elif isinstance(error, commands.MissingRequiredArgument):
+        await ctx.send('Please, inform all parameters!')
+
+    elif isinstance(error, commands.NotOwner):
+        await ctx.send("You're not the bot's owner!")
+
+    elif isinstance(error, commands.CommandOnCooldown):
+        await ctx.send(error)
+
+    elif isinstance(error, commands.MissingAnyRole):
+        role_names = [f"**{str(discord.utils.get(ctx.guild.roles, id=role_id))}**" for role_id in error.missing_roles]
+        await ctx.send(f"You are missing at least one of the required roles: {', '.join(role_names)}")
+
+    elif isinstance(error, commands.errors.RoleNotFound):
+        await ctx.send(f"**{error}**")
+
+    elif isinstance(error, commands.ChannelNotFound):
+        await ctx.send("**Channel not found!**")
+
+    elif isinstance(error, discord.app.errors.CheckFailure):
+        await ctx.send("**It looks like you can't run this command!**")
+
+
+    print('='*10)
+    print(f"ERROR: {error} | Class: {error.__class__} | Cause: {error.__cause__}")
+    print('='*10)
+    error_log = client.get_channel(error_log_channel_id)
+    if error_log:
+        await error_log.send('='*10)
+        await error_log.send(f"ERROR: {error} | Class: {error.__class__} | Cause: {error.__cause__}")
+        await error_log.send('='*10)
 
 # Members status update
 @tasks.loop(seconds=10)
@@ -432,8 +471,9 @@ async def _twiks(ctx) -> None:
 
     await ctx.send(f"**Twiks est mon frérot !**")
 
+
 @client.slash_command(name="mention", guild_ids=guild_ids)
-@commands.has_any_role(moderator_role_id, admin_role_id)
+@utils.is_allowed([moderator_role_id, admin_role_id])
 async def _mention(ctx, 
     member: Option(str, name="member", description="The Staff member to mention/ping.", required=True,
 		choices=[
@@ -454,6 +494,42 @@ async def _mention(ctx,
 # End of slash commands
 
 
+# @client.command_group(name="cnp", guild_ids=guild_ids)
+# @utils.is_allowed([moderator_role_id, admin_role_id])
+# async def _cnp(ctx, 
+#     text: Option(str, name="text", description="The kind of text you want to post a CNP message for.", required=True,
+#         choices=[
+#             OptionChoice(name="Muted/Purge", value=""), OptionChoice(name="Speak English", value=""),
+#             OptionChoice(name="Nickname", value=""), OptionChoice(name="Resources Talk", value=""),
+#             OptionChoice(name="Classes", value="classes.txt"), OptionChoice(name="Interview (lesson management)", value="")
+#         ])):
+    
+#     pass
+#     print(text)
+
+# @client.command_group(name="cnp", description="For copy and pasting stuff.", guild_ids=guild_ids)
+
+_cnp = client.command_group(name="cnp", description="For copy and pasting stuff.", guild_ids=guild_ids)
+
+@_cnp.command(name="speak")
+async def _speak(ctx, language: Option(str, name="language", required=True)) -> None:
+    """ The language they should speak. """
+
+    member = ctx.author
+
+    available_languages: Dict[str, str] = {}
+    with open(f"./extra/random/json/speak_in.json", 'r', encoding="utf-8") as file:
+        available_languages = json.loads(file.read())
+
+    if not (language_text := available_languages.get(language.lower())):
+        return await ctx.send(f"**Please, inform a supported language, {member.mention}!**\n{', '.join(available_languages)}")
+
+    embed = discord.Embed(
+        title=f"__{language.title()}__",
+        description=language_text,
+        color=member.color
+    )
+    await ctx.send(embed=embed)
 
 
 
