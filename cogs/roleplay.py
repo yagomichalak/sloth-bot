@@ -474,7 +474,7 @@ class RolePlay(commands.Cog):
     @commands.cooldown(1, 120, commands.BucketType.user)
     async def handshake(self, ctx, *, member: discord.Member = None) -> None:
         """ Handshakes someone.
-        :param member: The member to whisper to.
+        :param member: The member to handshake.
         
         * Cooldown: 2 minutes """
 
@@ -499,12 +499,12 @@ class RolePlay(commands.Cog):
         view = HandshakeView(member=author, target=member, timeout=60)
         await ctx.send(embed=embed, view=view)
 
-    @commands.command()
+    @commands.command(aliases=['hi5', 'h5', 'high_five'])
     @commands.cooldown(1, 120, commands.BucketType.user)
     @Player.not_ready()
     async def highfive(self, ctx, *, member: discord.Member = None) -> None:
-        """ Handshakes someone.
-        :param member: The member to whisper to.
+        """ Highfives someone.
+        :param member: The member to highfive.
         
         * Cooldown: 2 minutes """
 
@@ -517,16 +517,17 @@ class RolePlay(commands.Cog):
             
         if author.id == member.id:
             self.client.get_command(ctx.command.name).reset_cooldown(ctx)
-            return await ctx.send(f"**You can't handshake yourself, {author.mention}!**")
+            return await ctx.send(f"**You can't highfive yourself, {author.mention}!**")
 
         embed = discord.Embed(
-            title="__Handshake Prompt__",
-            description=f"Are you sure you wanna handshake {member.mention}, {author.mention}?",
+            title="__Highfive Prompt__",
+            description=f"Are you sure you wanna highfive {member.mention}, {author.mention}?",
             color=author.color,
             timestamp=ctx.message.created_at
         )
         embed.set_footer(text=f"Requested by {author}", icon_url=author.avatar.url)
         view = HandshakeView(member=author, target=member, timeout=60)
+        # view = HighfiveView(member=author, target=member, timeout=60)
         await ctx.send(embed=embed, view=view)
 
     @commands.command()
