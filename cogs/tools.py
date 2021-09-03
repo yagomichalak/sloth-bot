@@ -828,5 +828,12 @@ class Tools(commands.Cog):
 
 		await ctx.send(f"**All Patreons were paid!**")
 
+	@commands.command(alises=['count_channel', 'countchannel'])
+	@commands.cooldown(1, 5, commands.BucketType.user)
+	async def channels(self, ctx) -> None:
+		""" Counts how many channels there are in the server. """
+
+		await ctx.reply(f"**We currently have `{len(ctx.guild.channels)}` channels!**")
+
 def setup(client):
 	client.add_cog(Tools(client))
