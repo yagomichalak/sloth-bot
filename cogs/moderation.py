@@ -181,9 +181,7 @@ class Moderation(*moderation_cogs):
 
 		if account_age <= 4:
 			if await self.get_firewall_state():
-				msg = await member.send(f"**New-account Firewall is on, come back once your account is at least 4 days old.**")
-				ctx = await self.client.get_context(msg)
-				return await self.kick(ctx, member=member, reason="Possible fake account")
+				return await member.kick(reason="Possible fake account")
 
 		if account_age <= 2:
 			suspect_channel = discord.utils.get(member.guild.channels, id=suspect_channel_id)
@@ -699,11 +697,10 @@ class Moderation(*moderation_cogs):
 	@commands.command()
 	@utils.is_allowed(allowed_roles)
 	async def kick(self, ctx, member: discord.Member = None, *, reason: Optional[str] = None):
-		'''
-		(MOD) Kicks a member from the server.
+		""" (MOD) Kicks a member from the server.
 		:param member: The @ or ID of the user to kick.
-		:param reason: The reason for kicking the user. (Optional)
-		'''
+		:param reason: The reason for kicking the user. (Optional) """
+
 		await ctx.message.delete()
 		if not member:
 			return await ctx.send('**Please, specify a member!**', delete_after=3)
