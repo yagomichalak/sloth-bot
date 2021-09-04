@@ -889,12 +889,14 @@ Please answer using one message only.."""
         txt_channel = await app_parent.create_thread(name=f"{applicant.display_name}'s-interview", message=message, reason=f"{app[2].title()} Interview Room")
 
         # Add permissions for the user in the interview room
+        parent_channel = self.client.get_channel(interview_info['parent'])
         interview_vc = self.client.get_channel(interview_info['interview'])
 
         # Updates the applicant's application in the database, adding the channels ids
         await self.update_application(applicant.id, txt_channel.id, interview_vc.id, app[2])
 
-        # Set voice channel perms for the user.
+        # Set channel perms for the user.
+        await parent_channel.set_permissions(applicant, read_messages=True, send_messages=False, view_channel=True)
         await interview_vc.set_permissions(applicant, speak=True, connect=True, view_channel=True)
 
         app_embed = discord.Embed(
@@ -918,10 +920,6 @@ Please answer using one message only.."""
         channel = ctx.channel
         guild = ctx.guild
 
-        # Checks if the channel is in the teacher applications category
-        # if not channel.category or not channel.category.id in [self.teacher_app_cat_id, self.moderator_app_cat_id, self.event_manager_app_cat_id]:
-        #     return await ctx.send(f"**This is not an application channel, {member.mention}!**")
-
         if not (app := await self.get_application_by_channel(channel.id)):
             return await ctx.send(f"**This is not an application channel, {member.mention}!**")
 
@@ -933,8 +931,10 @@ Please answer using one message only.."""
             return await ctx.send(f"**Not deleting it, then, {member.mention}!**")
     
         applicant = guild.get_member(app[1])
+        parent_channel = discord.utils.get(guild.text_channels, id=interview_info['parent'])
         interview_vc = discord.utils.get(guild.voice_channels, id=interview_info['interview'])
         try:
+            await parent_channel.set_permissions(applicant, overwrite=None)
             await interview_vc.set_permissions(applicant, overwrite=None)
         except:
             pass
