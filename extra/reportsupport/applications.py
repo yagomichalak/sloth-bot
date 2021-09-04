@@ -17,14 +17,17 @@ class ApplicationsTable(commands.Cog):
 
     # Teacher application attributes
     teacher_app_channel_id: int = int(os.getenv('TEACHER_APPLICATION_CHANNEL_ID'))
+    teacher_app_cat_id: int = int(os.getenv('TEACHER_APPLICATION_CAT_ID'))
     teacher_parent_channel_id: int = int(os.getenv('TEACHER_CHANNEL_ID'))
     teacher_interview_vc_id: int = int(os.getenv('TEACHER_INTERVIEW_VC_ID'))
 
     moderator_app_channel_id: int = int(os.getenv('MODERATOR_APPLICATION_CHANNEL_ID'))
+    moderator_app_cat_id: int = int(os.getenv('MODERATOR_APPLICATION_CAT_ID'))
     moderator_parent_channel_id: int = int(os.getenv('MODERATOR_CHANNEL_ID'))
     moderator_interview_vc_id: int = int(os.getenv('MODERATOR_INTERVIEW_VC_ID'))
 
     event_manager_app_channel_id: int = int(os.getenv('EVENT_MANAGER_APPLICATION_CHANNEL_ID'))
+    event_manager_app_cat_id: int = int(os.getenv('EVENT_MANAGER_APPLICATION_CAT_ID'))
     event_manager_parent_channel_id: int = int(os.getenv('EVENT_MANAGER_CHANNEL_ID'))
     event_manager_interview_vc_id: int = int(os.getenv('EVENT_MANAGER_INTERVIEW_VC_ID'))
 
@@ -33,13 +36,16 @@ class ApplicationsTable(commands.Cog):
         'teacher': {
             "app": teacher_app_channel_id, "interview": teacher_interview_vc_id, "parent": teacher_parent_channel_id, 
             "message": "**Teacher Application**\nOur staff has evaluated your teacher application and has come to the conclusion that we are not in need of this lesson.",
+            "cat": teacher_app_cat_id, 
             "pings": [{"id": muffin_id, "role": False}, {"id": lesson_management_role_id, "role": True}]},
         'moderator': {
-            "app": moderator_app_channel_id, "interview": moderator_interview_vc_id, "parent": moderator_parent_channel_id, 
+            "app": moderator_app_channel_id, "interview": moderator_interview_vc_id, "parent": moderator_parent_channel_id,
+            "cat": moderator_app_cat_id, 
             "message": "**Moderator Application**\nOur staff has avaluated your moderator application and has come to a conclusion, and due to intern and unspecified reasons we are **declining** it. Thank you anyways",
             "pings": [{"id": cosmos_id, "role": False}, {"id": admin_role_id, "role": True}]},
         'event_manager': {
             "app": event_manager_app_channel_id,  "interview": event_manager_interview_vc_id, "parent": event_manager_parent_channel_id, 
+            "cat": event_manager_app_cat_id, 
             "message": "**event_manager Application**\nOur staff has evaluated your event_manager application and has come to the conclusion that we are not in need of this lesson.",
             "pings": [{"id": muffin_id, "role": False}]}
     }
