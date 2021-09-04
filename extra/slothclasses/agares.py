@@ -25,7 +25,9 @@ class Agares(Player):
             int(os.getenv('EVENTS_CAT_ID')),
             int(os.getenv('DEBATE_CAT_ID')),
             int(os.getenv('CULTURE_CAT_ID')),
-            int(os.getenv('TEACHER_APPLICATION_CAT_ID'))
+            int(os.getenv('TEACHER_APPLICATION_CAT_ID')),
+            int(os.getenv('MODERATOR_APPLICATION_CAT_ID')),
+            int(os.getenv('EVENT_MANAGER_APPLICATION_CAT_ID'))
         ]
 
     @commands.command(aliases=['ma'])
