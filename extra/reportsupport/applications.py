@@ -1,26 +1,48 @@
 import discord
 from discord.ext import commands
 from mysqldb import the_database
-from typing import List
+from typing import Any, List, Dict, Union
 from extra import utils
 import os
 
-moderator_role_id = int(os.getenv('MOD_ROLE_ID'))
-lesson_management_role_id = int(os.getenv('LESSON_MANAGEMENT_ROLE_ID'))
+cosmos_id: int = int(os.getenv('COSMOS_ID'))
+muffin_id: int = int(os.getenv('MUFFIN_ID'))
+
+moderator_role_id: int = int(os.getenv('MOD_ROLE_ID'))
+admin_role_id: int = int(os.getenv('ADMIN_ROLE_ID'))
+lesson_management_role_id: int = int(os.getenv('LESSON_MANAGEMENT_ROLE_ID'))
 
 class ApplicationsTable(commands.Cog):
     """ Cog for managing applications. """
 
     # Teacher application attributes
     teacher_app_channel_id: int = int(os.getenv('TEACHER_APPLICATION_CHANNEL_ID'))
-    teacher_app_cat_id: int = int(os.getenv('TEACHER_APPLICATION_CAT_ID'))
+    teacher_parent_channel_id: int = int(os.getenv('TEACHER_CHANNEL_ID'))
+    teacher_interview_vc_id: int = int(os.getenv('TEACHER_INTERVIEW_VC_ID'))
 
     moderator_app_channel_id: int = int(os.getenv('MODERATOR_APPLICATION_CHANNEL_ID'))
-    moderator_app_cat_id: int = int(os.getenv('MODERATOR_APPLICATION_CAT_ID'))
+    moderator_parent_channel_id: int = int(os.getenv('MODERATOR_CHANNEL_ID'))
+    moderator_interview_vc_id: int = int(os.getenv('MODERATOR_INTERVIEW_VC_ID'))
 
     event_manager_app_channel_id: int = int(os.getenv('EVENT_MANAGER_APPLICATION_CHANNEL_ID'))
-    event_manager_app_cat_id: int = int(os.getenv('EVENT_MANAGER_APPLICATION_CAT_ID'))
+    event_manager_parent_channel_id: int = int(os.getenv('EVENT_MANAGER_CHANNEL_ID'))
+    event_manager_interview_vc_id: int = int(os.getenv('EVENT_MANAGER_INTERVIEW_VC_ID'))
 
+
+    interview_info: Dict[str, Any] = {
+        'teacher': {
+            "app": teacher_app_channel_id, "interview": teacher_interview_vc_id, "parent": teacher_parent_channel_id, 
+            "message": "**Teacher Application**\nOur staff has evaluated your teacher application and has come to the conclusion that we are not in need of this lesson.",
+            "pings": [{"id": muffin_id, "role": False}, {"id": lesson_management_role_id, "role": True}]},
+        'moderator': {
+            "app": moderator_app_channel_id, "interview": moderator_interview_vc_id, "parent": moderator_parent_channel_id, 
+            "message": "**Moderator Application**\nOur staff has avaluated your moderator application and has come to a conclusion, and due to intern and unspecified reasons we are **declining** it. Thank you anyways",
+            "pings": [{"id": cosmos_id, "role": False}, {"id": admin_role_id, "role": True}]},
+        'event_manager': {
+            "app": event_manager_app_channel_id,  "interview": event_manager_interview_vc_id, "parent": event_manager_parent_channel_id, 
+            "message": "**event_manager Application**\nOur staff has evaluated your event_manager application and has come to the conclusion that we are not in need of this lesson.",
+            "pings": [{"id": muffin_id, "role": False}]}
+    }
 
     @commands.Cog.listener(name="on_raw_reaction_add")
     async def on_raw_reaction_add_applications(self, payload) -> None:
@@ -33,56 +55,61 @@ class ApplicationsTable(commands.Cog):
             return
 
         guild = self.client.get_guild(payload.guild_id)
-        channel = await self.client.fetch_channel(payload.channel_id)
-        message = await channel.fetch_message(payload.message_id)
+        try:
+            channel = await self.client.fetch_channel(payload.channel_id)
+            message = await channel.fetch_message(payload.message_id)
+        except:
+            return
 
         adm = channel.permissions_for(payload.member).administrator
 
-        # Checks if it's in the teacher applications channel
-        if payload.channel_id == self.teacher_app_channel_id:
-            # ctx = self.client.get_context(message)
-            # ctx.author = member
-            if await utils.is_allowed([moderator_role_id, lesson_management_role_id]).predicate(channel=channel, member=payload.member):
-            # if mod_role in payload.member.roles or lesson_manager_role in payload.member.roles or adm:
-                await self.handle_teacher_application(guild, payload)
-            else:
-                await message.remove_reaction(payload.emoji, payload.member)
-                
+        # Checks if it's in an applications channel
+        if payload.channel_id in [self.moderator_app_channel_id, self.event_manager_app_channel_id, self.teacher_app_channel_id]:
 
-        # Checks if it's in the moderator applications channel
-        elif payload.channel_id == self.moderator_app_channel_id:
-            if adm:
-                await self.handle_moderator_application(guild, payload)
+            if payload.channel_id == self.teacher_app_channel_id: # User is an mod+ or lesson manager
+                if await utils.is_allowed([moderator_role_id, lesson_management_role_id]).predicate(channel=channel, member=payload.member):
+                    await self.handle_application(guild, payload)
+            elif adm: # User is an adm
+                await self.handle_application(guild, payload)
             else:
                 await message.remove_reaction(payload.emoji, payload.member)
 
-        elif payload.channel_id == self.event_manager_app_channel_id:
-            if adm:
-                await self.handle_event_manager_application(guild, payload)
-            else:
-                await message.remove_reaction(payload.emoji, payload.member)
 
+    async def format_application_pings(self, guild: discord.Guild, pings: List[Dict[str, Union[int, bool]]]) -> str:
+        """ Formats pings for a specific application title.
+        :param guild: The guild to get the users and roles from.
+        :param pings: The pings to format. """
+
+        ping_mentions: List[Union[discord.Member, discord.Role]] = []
+
+        for ping in pings:
+            if ping['role']:
+                role = discord.utils.get(guild.roles, id=ping['id'])
+                ping_mentions.append(role.mention)
+            else:
+                member = discord.utils.get(guild.members, id=ping['id'])
+                ping_mentions.append(member.mention)
+
+        return ', '.join(ping_mentions)
 
     # Applications
 
-    async def get_application_by_message(self, message_id: int, application_type: str) -> List[str]:
+    async def get_application_by_message(self, message_id: int) -> List[str]:
         """ Gets a application application from the database by message ID.
-        :param message_id: The message ID.
-        :param application_type: The type of the application. """
+        :param message_id: The message ID. """
 
         mycursor, _ = await the_database()
-        await mycursor.execute("SELECT * FROM Applications WHERE message_id = %s AND application_type = %s", (message_id, application_type))
+        await mycursor.execute("SELECT * FROM Applications WHERE message_id = %s", (message_id,))
         application_app = await mycursor.fetchone()
         await mycursor.close()
         return application_app
 
-    async def get_application_by_channel(self, channel_id: int, application_type: str) -> List[str]:
+    async def get_application_by_channel(self, channel_id: int) -> List[str]:
         """ Gets a application application from the database by channel ID.
-        :param channel_id: The text channel ID.
-        :param application_type: The type of the application. """
+        :param channel_id: The text channel ID. """
 
         mycursor, _ = await the_database()
-        await mycursor.execute("SELECT * FROM Applications WHERE txt_id = %s AND application_type = %s", (channel_id, application_type))
+        await mycursor.execute("SELECT * FROM Applications WHERE txt_id = %s", (channel_id,))
         application_app = await mycursor.fetchone()
         await mycursor.close()
         return application_app
@@ -118,13 +145,12 @@ class ApplicationsTable(commands.Cog):
         await db.commit()
         await mycursor.close()
 
-    async def delete_application(self, message_id: int, application_type: str) -> None:
+    async def delete_application(self, message_id: int) -> None:
         """ Deletes a application application from the database.
-        :param message_id: The application message's ID.
-        :param application_type: The type of application to delete. """
+        :param message_id: The application message's ID. """
 
         mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM Applications WHERE message_id = %s AND application_type = %s", (message_id, application_type))
+        await mycursor.execute("DELETE FROM Applications WHERE message_id = %s", (message_id,))
         await db.commit()
         await mycursor.close()
 

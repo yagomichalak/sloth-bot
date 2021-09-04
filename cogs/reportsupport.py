@@ -4,7 +4,7 @@ from discord.ext import commands
 from mysqldb import *
 import asyncio
 from extra.useful_variables import list_of_commands
-from extra.menu import ConfirmSkill
+from extra.prompt.menu import Confirm
 from extra.view import ReportSupportView
 from typing import List, Dict, Optional
 import os
@@ -54,7 +54,7 @@ class ReportSupport(*report_support_classes):
         print('ReportSupport cog is online!')
 
 
-    async def handle_teacher_application(self, guild, payload) -> None:
+    async def handle_application(self, guild, payload) -> None:
         """ Handles teacher applications.
         :param guild: The server in which the application is running.
         :param payload: Data about the Staff member who is opening the application. """
@@ -62,90 +62,27 @@ class ReportSupport(*report_support_classes):
         emoji = str(payload.emoji)
         if emoji == '✅':
             # Gets the teacher app and does the magic
-            teacher_app = await self.get_application_by_message(payload.message_id, 'teacher')
-            if not teacher_app:
+            if not (app := await self.get_application_by_message(payload.message_id)):
                 return
 
             # Checks if the person has not an open interview channel already
-            if not teacher_app[3]:
+            if not app[3]:
                 # Creates an interview room with the teacher and sends their application there (you can z!close there)
-                return await self.create_teacher_interview_room(guild, teacher_app)
+                return await self.create_interview_room(guild, app)
 
         elif emoji == '❌':
             # Tries to delete the teacher app from the db, in case it is registered
-            teacher_app = await self.get_application_by_message(payload.message_id, 'teacher')
-            if teacher_app and not teacher_app[3]:
-                await self.delete_application(payload.message_id, 'teacher')
-                teacher_app_channel = self.client.get_channel(self.teacher_app_channel_id)
-                app_msg = await teacher_app_channel.fetch_message(payload.message_id)
+            app = await self.get_application_by_message(payload.message_id)
+            if app and not app[3]:
+                await self.delete_application(payload.message_id)
+
+                interview_info = self.interview_info[app[2]]
+                app_channel = self.client.get_channel(interview_info['app'])
+                app_msg = await app_channel.fetch_message(payload.message_id)
                 await app_msg.add_reaction('🔏')
-                teacher = discord.utils.get(guild.members, id=teacher_app[1])
-                if teacher:
-                    msg = "**Teacher Application**\nOur staff has evaluated your teacher application and has come to the conclusion that we are not in need of this lesson."
-                    await teacher.send(embed=discord.Embed(description=msg))
-            return
-
-    async def handle_moderator_application(self, guild, payload) -> None:
-        """ Handles moderator applications.
-        :param guild: The server in which the application is running.
-        :param payload: Data about the Staff member who is opening the application. """
-
-        emoji = str(payload.emoji)
-        if emoji == '✅':
-            # Gets the moderator app and does the magic
-            moderator_app = await self.get_application_by_message(payload.message_id, 'moderator')
-            if not moderator_app:
-                return
-
-            # Checks if the person has not an open interview channel already
-            if not moderator_app[3]:
-                # Creates an interview room with the moderator and sends their application there (you can z!close there)
-                return await self.create_moderator_interview_room(guild, moderator_app)
-
-        elif emoji == '❌':
-            # Tries to delete the moderator app from the db, in case it is registered
-            moderator_app = await self.get_application_by_message(payload.message_id, 'moderator')
-            if moderator_app and not moderator_app[3]:
-                await self.delete_application(payload.message_id, 'moderator')
-                moderator_app_channel = self.client.get_channel(self.moderator_app_channel_id)
-                app_msg = await moderator_app_channel.fetch_message(payload.message_id)
-                await app_msg.add_reaction('🔏')
-                moderator = discord.utils.get(guild.members, id=moderator_app[1])
-                if moderator:
-                    msg = "**Moderator Application**\nOur staff has avaluated your moderator application and has come to a conclusion, and due to intern and unspecified reasons we are **declining** it. Thank you anyways"
-                    await moderator.send(embed=discord.Embed(description=msg))
-            return
-
-    async def handle_event_manager_application(self, guild, payload) -> None:
-        """ Handles event manager applications.
-        :param guild: The server in which the application is running.
-        :param payload: Data about the Staff member who is opening the application. """
-
-        emoji = str(payload.emoji)
-        if emoji == '✅':
-            # Gets the teacher app and does the magic
-            event_manager_app = await self.get_application_by_message(payload.message_id, 'event_manager')
-            if not event_manager_app:
-                return
-
-            # Checks if the person has not an open interview channel already
-            if not event_manager_app[3]:
-                # Creates an interview room with the event_manager and sends their application there (you can z!close there)
-                return await self.create_event_manager_interview_room(guild, event_manager_app)
-
-        elif emoji == '❌':
-            # Tries to delete the event_manager app from the db, in case it is registered
-            event_manager_app = await self.get_application_by_message(payload.message_id, 'event_manager')
-            if event_manager_app and not event_manager_app[3]:
-                await self.delete_application(payload.message_id, 'event_manager')
-                event_manager_app_channel = self.client.get_channel(self.event_manager_app_channel_id)
-                app_msg = await event_manager_app_channel.fetch_message(payload.message_id)
-                await app_msg.add_reaction('🔏')
-                event_manager = discord.utils.get(guild.members, id=event_manager_app[1])
-                if event_manager:
-                    msg = "**event_manager Application**\nOur staff has evaluated your event_manager application and has come to the conclusion that we are not in need of this lesson."
-                    await event_manager.send(embed=discord.Embed(description=msg))
-            return
+                
+                if applicant := discord.utils.get(guild.members, id=app[1]):
+                    return await applicant.send(embed=discord.Embed(description=interview_info['message']))
 
 
     async def send_teacher_application(self, member) -> None:
@@ -801,7 +738,7 @@ Please answer using one message only.."""
         user_channel = await self.get_case_channel(ctx.channel.id)
         if user_channel:
 
-            confirm = await ConfirmSkill(f"**Are you sure you want to allow {member.mention} as a witness in this case channel, {ctx.author.mention}?**").prompt(ctx)
+            confirm = await Confirm(f"**Are you sure you want to allow {member.mention} as a witness in this case channel, {ctx.author.mention}?**").prompt(ctx)
             if not confirm:
                 return await ctx.send(f"**Not allowing them, then!**")
 
@@ -829,7 +766,7 @@ Please answer using one message only.."""
         user_channel = await self.get_case_channel(ctx.channel.id)
         if user_channel:
 
-            confirm = await ConfirmSkill(f"**Are you sure you want to forbid {member.mention} from being a witness in this case channel, {ctx.author.mention}?**").prompt(ctx)
+            confirm = await Confirm(f"**Are you sure you want to forbid {member.mention} from being a witness in this case channel, {ctx.author.mention}?**").prompt(ctx)
             if not confirm:
                 return await ctx.send(f"**Not forbidding them, then!**")
 
@@ -933,104 +870,44 @@ Please answer using one message only.."""
                     continue
 
     # Discord methods
-    async def create_teacher_interview_room(self, guild: discord.Guild, teacher_app: List[str]) -> None:
-        """ Creates an interview room with the teacher.
+    async def create_interview_room(self, guild: discord.Guild, app: List[str]) -> None:
+        """ Creates an interview room for the given application.
         :param guild: The server in which the interview will be.
-        :param teacher_app: The teacher application info. """
+        :param app: The applicant info. """
 
-        teacher_app_cat = discord.utils.get(guild.categories, id=self.teacher_app_cat_id)
-        teacher = discord.utils.get(guild.members, id=teacher_app[1])
+        applicant = discord.utils.get(guild.members, id=app[1])
 
-        # moderator = discord.utils.get(guild.roles, id=moderator_role_id)
-        muffin = discord.utils.get(guild.members, id=self.muffin_id)
-        lesson_management = discord.utils.get(guild.roles, id=lesson_management_role_id)
+        interview_info = self.interview_info.get(app[2])
 
-        # Creates channels
-        overwrites: Dict = {guild.default_role: discord.PermissionOverwrite(
-            read_messages=False, send_messages=False, connect=False, view_channel=False),
-        teacher: discord.PermissionOverwrite(
-            read_messages=True, send_messages=True, connect=True, view_channel=True),
-        lesson_management: discord.PermissionOverwrite(
-            read_messages=True, send_messages=True, connect=True, view_channel=True),
-        }
-        # moderator: discord.PermissionOverwrite(read_messages=True, send_messages=True, connect=False, view_channel=True, manage_messages=True)
-        txt_channel = await guild.create_text_channel(name=f"{teacher.name}'s-interview", category=teacher_app_cat, overwrites=overwrites)
-        vc_channel = await teacher_app_cat.create_voice_channel(name=f"{teacher.name}'s Interview", overwrites=overwrites)
+        # Create Private Thread for the user
+        app_parent = self.client.get_channel(interview_info['parent'])
 
-        # Updates the teacher's application in the database, adding the channels ids
-        await self.update_application(teacher.id, txt_channel.id, vc_channel.id, 'teacher')
+        #delete this later
+        message = None
+        # message = await app_parent.send('Uncomment this in your development environment')
+
+        txt_channel = await app_parent.create_thread(name=f"{applicant.display_name}'s-interview", message=message, reason=f"{app[2].title()} Interview Room")
+
+        # Add permissions for the user in the interview room
+        interview_vc = self.client.get_channel(interview_info['interview'])
+
+        # Updates the applicant's application in the database, adding the channels ids
+        await self.update_application(applicant.id, txt_channel.id, interview_vc.id, app[2])
+
+        # Set voice channel perms for the user.
+        await interview_vc.set_permissions(applicant, speak=True, connect=True, view_channel=True)
 
         app_embed = discord.Embed(
-            title=f"{teacher.name}'s Interview",
+            title=f"{applicant.name}'s Interview",
             description=f"""
-            Hello, {teacher.mention}, we have received and reviewed your teacher application. In order to set up your lesson and explain how our system works we have to schedule a voice conversation with you.
+            Hello, {applicant.mention}, we have received and reviewed your `{app[2].title().replace('_', ' ')}` application. In order to explain how our system works we have to schedule a voice conversation with you.
             When would be the best time to talk to one of our staff?""",
-            color=teacher.color)
-        await txt_channel.send(content=f"{muffin.mention}, {lesson_management.mention}, {teacher.mention}", embed=app_embed)
+            color=applicant.color)
 
-    async def create_moderator_interview_room(self, guild: discord.Guild, moderator_app: List[str]) -> None:
-        """ Creates an interview room with the moderator.
-        :param guild: The server in which the interview will be.
-        :param moderator_app: The moderator application info. """
-
-        moderator_app_cat = discord.utils.get(guild.categories, id=self.moderator_app_cat_id)
-        moderator = discord.utils.get(guild.members, id=moderator_app[1])
-
-        cosmos = discord.utils.get(guild.members, id=self.cosmos_id)
-        admin = discord.utils.get(guild.roles, id=admin_role_id)
-
-        # Creates channels
-        overwrites: Dict = {guild.default_role: discord.PermissionOverwrite(
-            read_messages=False, send_messages=False, connect=False, view_channel=False),
-        moderator: discord.PermissionOverwrite(
-            read_messages=True, send_messages=True, connect=True, view_channel=True),
-        }
-        txt_channel = await guild.create_text_channel(name=f"{moderator.name}'s-interview", category=moderator_app_cat, overwrites=overwrites)
-        vc_channel = await moderator_app_cat.create_voice_channel(name=f"{moderator.name}'s Interview", overwrites=overwrites)
-
-        # Updates the moderator's application in the database, adding the channels ids
-        await self.update_application(moderator.id, txt_channel.id, vc_channel.id, 'moderator')
-
-        app_embed = discord.Embed(
-            title=f"{moderator.name}'s Interview",
-            description=f"""
-            Hello, {moderator.mention}, we have received and reviewed your moderator application. In order to set you up and explain how our moderation works we have to schedule a voice conversation with you.
-            When would be the best time to talk to one of our staff?""",
-            color=moderator.color)
-        await txt_channel.send(content=f"{cosmos.mention}, {admin.mention}, {moderator.mention}", embed=app_embed)
+        formatted_pings = await self.format_application_pings(guild, interview_info['pings'])
+        await txt_channel.send(content=f"{formatted_pings}, {applicant.mention}", embed=app_embed)
 
 
-        # Discord methods
-    
-    async def create_event_manager_interview_room(self, guild: discord.Guild, event_manager_app: List[str]) -> None:
-        """ Creates an interview room with the event manager.
-        :param guild: The server in which the interview will be.
-        :param event_manager_app: The moderator application info. """
-
-        event_manager_app_cat = discord.utils.get(guild.categories, id=self.event_manager_app_cat_id)
-        event_manager = discord.utils.get(guild.members, id=event_manager_app[1])
-
-        muffin = discord.utils.get(guild.members, id=self.muffin_id)
-
-        # Creates channels
-        overwrites: Dict = {guild.default_role: discord.PermissionOverwrite(
-            read_messages=False, send_messages=False, connect=False, view_channel=False),
-        event_manager: discord.PermissionOverwrite(
-            read_messages=True, send_messages=True, connect=True, view_channel=True),
-        }
-        txt_channel = await guild.create_text_channel(name=f"{event_manager.name}'s-interview", category=event_manager_app_cat, overwrites=overwrites)
-        vc_channel = await event_manager_app_cat.create_voice_channel(name=f"{event_manager.name}'s Interview", overwrites=overwrites)
-
-        # Updates the event_manager's application in the database, adding the channels ids
-        await self.update_application(event_manager.id, txt_channel.id, vc_channel.id, 'event_manager')
-
-        app_embed = discord.Embed(
-            title=f"{event_manager.name}'s Interview",
-            description=f"""
-            Hello, {event_manager.mention}, we have received and reviewed your event manager application. In order to set you up and explain how our system works we have to schedule a voice conversation with you.
-            When would be the best time to talk to one of our staff?""",
-            color=event_manager.color)
-        await txt_channel.send(content=f"{muffin.mention}, {event_manager.mention}", embed=app_embed)
     # In-game commands
     @commands.command()
     @commands.has_permissions(administrator=True)
@@ -1042,58 +919,33 @@ Please answer using one message only.."""
         guild = ctx.guild
 
         # Checks if the channel is in the teacher applications category
-        if not channel.category or not channel.category.id in [self.teacher_app_cat_id, self.moderator_app_cat_id, self.event_manager_app_cat_id]:
+        # if not channel.category or not channel.category.id in [self.teacher_app_cat_id, self.moderator_app_cat_id, self.event_manager_app_cat_id]:
+        #     return await ctx.send(f"**This is not an application channel, {member.mention}!**")
+
+        if not (app := await self.get_application_by_channel(channel.id)):
             return await ctx.send(f"**This is not an application channel, {member.mention}!**")
 
-        all_apps_channel = None
+        interview_info = self.interview_info[app[2]]
+        all_apps_channel = discord.utils.get(guild.text_channels, id=interview_info['app'])
 
-        if app_channel := await self.get_application_by_channel(channel.id, 'teacher'):
-            all_apps_channel = discord.utils.get(guild.text_channels, id=self.teacher_app_channel_id)
-
-        elif app_channel := await self.get_application_by_channel(channel.id, 'moderator'):
-            all_apps_channel = discord.utils.get(guild.text_channels, id=self.moderator_app_channel_id)
-
-        elif app_channel := await self.get_application_by_channel(channel.id, 'event_manager'):
-            all_apps_channel = discord.utils.get(guild.text_channels, id=self.event_manager_app_channel_id)
-
-        if app_channel:
-            txt_channel = discord.utils.get(guild.channels, id=app_channel[4])
-            vc_channel = discord.utils.get(guild.channels, id=app_channel[5])
-            embed = discord.Embed(title="Confirmation",
-                description="Are you sure that you want to delete this application channel?",
-                color=member.color,
-                timestamp=ctx.message.created_at)
-            confirmation = await ctx.send(content=member.mention, embed=embed)
-            await confirmation.add_reaction('✅')
-            await confirmation.add_reaction('❌')
-            try:
-                reaction, _ = await self.client.wait_for('reaction_add', timeout=20,
-                    check=lambda r, u: u == member and r.message.id == confirmation.id and str(r.emoji) in ['✅', '❌'])
-            except asyncio.TimeoutError:
-                embed = discord.Embed(title="Confirmation",
-                description="You took too long to answer the question; not deleting it!",
-                color=discord.Color.red(),
-                timestamp=ctx.message.created_at)
-                return await confirmation.edit(content=member.mention, embed=embed)
-            else:
-                if str(reaction.emoji) == '✅':
-                    embed.description = f"**Application channel {txt_channel.mention} is being deleted...**"
-                    await confirmation.edit(content=member.mention, embed=embed)
-                    await asyncio.sleep(3)
-                    await txt_channel.delete()
-                    await vc_channel.delete()
-                    await self.delete_application(app_channel[0], app_channel[2])
-                    try:
-                        msg = await all_apps_channel.fetch_message(app_channel[0])
-                        await msg.add_reaction('🔒')
-                    except Exception:
-                        pass
-                else:
-                    embed.description = "Not deleting it!"
-                    await confirmation.edit(content='', embed=embed)
-        else:
-            await ctx.send(f"**What do you think that you are doing? You cannot delete this channel, {member.mention}!**")
-
+        confirm = await Confirm(f"**Are you sure that you want to delete this application channel, {member.mention}?**").prompt(ctx)
+        if not confirm:
+            return await ctx.send(f"**Not deleting it, then, {member.mention}!**")
+    
+        applicant = guild.get_member(app[1])
+        interview_vc = discord.utils.get(guild.voice_channels, id=interview_info['interview'])
+        try:
+            await interview_vc.set_permissions(applicant, overwrite=None)
+        except:
+            pass
+        await channel.delete()
+        await self.delete_application(app[0])
+        try:
+            msg = await all_apps_channel.fetch_message(app[0])
+            await msg.add_reaction('🔒')
+        except:
+            pass
+            
 
     async def audio(self, member: discord.Member, audio_name: str) -> None:
         """ Plays an audio.
