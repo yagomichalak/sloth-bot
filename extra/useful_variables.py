@@ -132,7 +132,7 @@ different_class_roles = {
         "rusça" ,"russo" ,"russe" ,"russisch" 
     ],
     "mandarin": [
-        "mandarín", "粤语", "chinese", "cantonese"
+        "mandarín", "粤语", "chinese"
     ],
     "japanese": [
         "japonês", "japonais" ,"japanisch", "japonés", "日本語"
