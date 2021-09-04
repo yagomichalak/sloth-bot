@@ -239,11 +239,6 @@ class Metamorph(Player):
         if 'knocked_out' in perpetrator_effects:
             return await ctx.send(f"**{perpetrator.mention}, you can't use your skill, because you are knocked-out!**")
 
-        mirrored_skill = await self.get_skill_action_by_user_id_and_skill_type(user_id=perpetrator.id, skill_type='mirror')
-        if mirrored_skill:
-            target = perpetrator if not target else target
-            return await self.handle_mirrored_skill(ctx, perpetrator, target, mirrored_skill[8])
-
         if not target:
             return await ctx.send(f"**Please, inform a target to mirror, {perpetrator.mention}!**")
 
@@ -252,6 +247,11 @@ class Metamorph(Player):
 
         if target.bot:
             return await ctx.send(f"**{perpetrator.mention}, you cannot mirror a bot!**")
+
+        mirrored_skill = await self.get_skill_action_by_user_id_and_skill_type(user_id=perpetrator.id, skill_type='mirror')
+        if mirrored_skill:
+            target = perpetrator if not target else target
+            return await self.handle_mirrored_skill(ctx, perpetrator, target, mirrored_skill[8])
 
         target_sloth_profile = await self.get_sloth_profile(target.id)
         if not target_sloth_profile:
