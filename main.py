@@ -548,12 +548,25 @@ async def _speak(ctx, language: Option(str, name="language", description="The la
         color=member.color
     )
     await ctx.send(embed=embed)
+#@utils.is_allowed([moderator_role_id, admin_role_id])#
+
+@client.slash_command(name="rules", guild_ids=guild_ids)
+async def rules(ctx, 
+    rule_number: Option(int, name="rule_number", description="The number of the rule you wanna show.", choices=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], required=False), 
+    reply_message: Option(bool, name="reply_message", description="Weather the slash command should reply to your original message.", required=False, default=True)) -> None:
+    """ (MOD) Sends an embedded message containing all rules in it, or a specific rule. """
+
+    cog = client.get_cog('Show')
+    if rule_number:
+        await cog._rule(ctx, rule_number, reply_message)
+    else:
+        await cog._rules(ctx, reply_message)
 
 
 
 @client.user_command(name="click", guild_ids=guild_ids)
 async def _click(ctx, user: discord.Member) -> None:
-    await ctx.send(f"**Don't touch me, {ctx.author.mention}!**")
+    await ctx.send(f"**{ctx.author.mention} clicked on {user.mention}!**")
 
 
 for filename in os.listdir('./cogs'):
