@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 from mysqldb import the_database
 from extra.useful_variables import rules
+from extra import utils
 import os
 import subprocess
 import sys
@@ -83,13 +84,21 @@ class Show(commands.Cog):
 
     # Shows the specific rule
     @commands.command()
-    @commands.has_any_role(*allowed_roles)
-    async def rule(self, ctx, numb: int = None):
-        '''
-        Shows a specific server rule.
-        :param numb: The number of the rule to show.
-        '''
-        await ctx.message.delete()
+    @utils.is_allowed(allowed_roles)
+    async def _rule_command(self, ctx, numb: int = None) -> None:
+        """ Shows a specific server rule.
+        :param numb: The number of the rule to show. """
+
+        await self._rule(ctx, numb)
+
+
+    async def _rule(self, ctx, numb: int = None, reply: bool = True):
+        """ Shows a specific server rule.
+        :param numb: The number of the rule to show. """
+
+        if isinstance(ctx, commands.Context):
+            await ctx.message.delete()
+
         if numb is None:
             return await ctx.send('**Invalid parameter!**')
 
@@ -97,37 +106,50 @@ class Show(commands.Cog):
             return await ctx.send(f'**Inform a rule from `1-{len(rules)}` rules!**')
 
         rule_index = list(rules)[numb - 1]
-        embed = discord.Embed(title=f'Rule - {numb}# {rule_index}', description=rules[rule_index],
-                              colour=discord.Colour.dark_green())
+        embed = discord.Embed(title=f'Rule - {numb}# {rule_index}', description=rules[rule_index], color=discord.Color.green())
         embed.set_footer(text=ctx.author.guild.name)
-        await ctx.send(embed=embed)
 
-    @commands.command()
+        if reply:
+            await ctx.send(embed=embed)
+        else:
+            await ctx.delete()
+            await ctx.channel.send(embed=embed)
+
+    @commands.command(name="rules")
     @commands.has_any_role(*allowed_roles)
-    async def rules(self, ctx):
+    async def _rules_commands(self, ctx) -> None:
         """ (MOD) Sends an embedded message containing all rules in it. """
 
-        await ctx.message.delete()
-        embed = discord.Embed(title="Discord’s Terms of Service and Community Guidelines",
-                              description="Rules Of The Server", url='https://discordapp.com/guidelines',
-                              colour=1406210,
-                              timestamp=ctx.message.created_at)
+        await self._rules(ctx)
+
+    async def _rules(self, ctx, reply: bool = True):
+        """ (MOD) Sends an embedded message containing all rules in it. """
+
+        if isinstance(ctx, commands.Context):
+            await ctx.message.delete()
+
+
+        current_time = await utils.get_time_now()
+
+        discord.InteractionContext
+        guild = ctx.guild
+        embed = discord.Embed(
+            title="__Rules of the Server__", 
+            description="You must always abide by the rules and follow [Discord's Terms of Service](https://discord.com/terms) and [Community Guidelines](https://discordapp.com/guidelines)\n```Hello, The Language Sloth public discord server is meant for people all across the globe to meet, learn and share their love for languages. Here are our rules of conduct:```",
+            url='https://thelanguagesloth.com', color=discord.Color.green(), timestamp=current_time)
         i = 1
         for rule, rule_value in rules.items():
-            embed.add_field(name=f"{i} - {rule}", value=rule_value, inline=False)
+            embed.add_field(name=f"{i} - __{rule}__:", value=rule_value, inline=False)
             i += 1
 
-        embed.add_field(name="<:zzSloth:686237376510689327>", value="Have fun!", inline=True)
-        embed.add_field(name="<:zzSloth:686237376510689327>", value="Check our lessons!", inline=True)
-        embed.set_footer(text='Cosmos',
-                         icon_url='https://cdn.discordapp.com/avatars/423829836537135108/da15dea5017edf5567e531fc6b97f935.jpg?size=2048')
-        embed.set_thumbnail(
-            url='https://cdn.discordapp.com/attachments/562019489642709022/676564604087697439/ezgif.com-gif-maker_1.gif')
-        embed.set_author(name='The Language Sloth', url='https://discordapp.com',
-                         icon_url='https://cdn.discordapp.com/attachments/562019489642709022/676564604087697439/ezgif.com-gif-maker_1.gif')
-        await ctx.send(
-            content="Hello, **The Language Sloth** is a public Discord server for people all across the globe to meet, learn languages and exchange cultures. here are our rules of conduct.",
-            embed=embed)
+        embed.set_footer(text=guild.owner, icon_url=guild.owner.avatar.url)
+        embed.set_thumbnail(url=guild.icon.url)
+        embed.set_author(name='The Language Sloth', url='https://discordapp.com', icon_url=guild.icon.url)
+        if reply:
+            await ctx.send(embed=embed)
+        else:
+            await ctx.delete()
+            await ctx.channel.send(embed=embed)
 
     @commands.command(aliases=['ss'])
     @commands.cooldown(1, 10, commands.BucketType.user)
