@@ -93,7 +93,7 @@ class TeacherAPI(commands.Cog):
         :param teacher: The teacher from whom to get the profile picture.
         :returns: The teacher's profile picture in a Pillow Image object.
         """
-        async with self.session.get(str(teacher.avatar.url)) as response:
+        async with self.session.get(str(teacher.display_avatar)) as response:
             image_bytes = await response.content.read()
             with BytesIO(image_bytes) as pfp:
                 image = Image.open(pfp)

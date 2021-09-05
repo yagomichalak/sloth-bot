@@ -52,7 +52,7 @@ class Misc(commands.Cog):
         await ctx.message.delete()
         em = discord.Embed(color=ctx.author.color, title=f":game_die: **YOU GOT:** `{randint(1, 6)}` :game_die:",
                            timestamp=ctx.message.created_at)
-        em.set_footer(text=f"Dice rolled by {ctx.author}", icon_url=ctx.author.avatar.url)
+        em.set_footer(text=f"Dice rolled by {ctx.author}", icon_url=ctx.author.display_avatar)
         await ctx.send(embed=em)
 
     @commands.command(aliases=['8ball'])
@@ -92,7 +92,7 @@ class Misc(commands.Cog):
         choices = ['You got Heads', 'You got Tails']
         em = discord.Embed(color=ctx.author.color, title='Coinflip:', description=choice(choices),
                            timestamp=ctx.message.created_at)
-        em.set_author(name=ctx.author, icon_url=ctx.author.avatar.url)
+        em.set_author(name=ctx.author, icon_url=ctx.author.display_avatar)
         await ctx.send(embed=em)
 
     @commands.command(aliases=['lotto'])
@@ -188,7 +188,7 @@ class Misc(commands.Cog):
         await ctx.message.delete()
         em = discord.Embed(color=ctx.author.color, title=f"Don't ask to ask, just ask.",
                            timestamp=ctx.message.created_at, url='https://dontasktoask.com/')
-        em.set_footer(text=f"With ♥ from {ctx.author}", icon_url=ctx.author.avatar.url)
+        em.set_footer(text=f"With ♥ from {ctx.author}", icon_url=ctx.author.display_avatar)
         await ctx.send(embed=em)
 
 
@@ -379,8 +379,8 @@ class Misc(commands.Cog):
             timestamp=ctx.message.created_at
         )
 
-        embed.set_author(name=member, url=member.avatar.url, icon_url=member.avatar.url)
-        embed.set_thumbnail(url=member.avatar.url)
+        embed.set_author(name=member, url=member.display_avatar, icon_url=member.display_avatar)
+        embed.set_thumbnail(url=member.display_avatar)
         embed.set_footer(text="Requested at:", icon_url=member.guild.icon.url)
     
 

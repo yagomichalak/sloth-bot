@@ -73,7 +73,7 @@ class Show(commands.Cog):
 
         embed.set_author(name='DNK#6725', url='https://discord.gg/languages',
             icon_url='https://cdn.discordapp.com/attachments/719020754858934294/720289112040669284/DNK_icon.png')
-        embed.set_thumbnail(url=self.client.user.avatar.url)
+        embed.set_thumbnail(url=self.client.user.display_avatar)
         embed.set_footer(text=ctx.guild, icon_url=ctx.guild.icon.url)
 
         view = discord.ui.View()
@@ -183,7 +183,7 @@ class Show(commands.Cog):
             inline=False
         )
 
-        embed.set_author(name=member, icon_url=member.avatar.url)
+        embed.set_author(name=member, icon_url=member.display_avatar)
         embed.set_footer(text=member.guild, icon_url=member.guild.icon.url)
         await ctx.send(embed=embed)
 

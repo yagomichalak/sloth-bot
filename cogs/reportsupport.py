@@ -135,7 +135,7 @@ class ReportSupport(*report_support_classes):
             return await member.send(f"**Thank you anyways, bye!**")
 
         embed = discord.Embed(title=f"__Teacher Application__")
-        embed.set_footer(text=f"by {member}", icon_url=member.avatar.url)
+        embed.set_footer(text=f"by {member}", icon_url=member.display_avatar)
 
         embed.description = '''
         - Hello, there you've reacted to apply to become a teacher.
@@ -274,7 +274,7 @@ Entry requirements:
             return await member.send(f"**Thanks anyways, bye!**")
             
         embed = discord.Embed(title=f"__Moderator Application__")
-        embed.set_footer(text=f"by {member}", icon_url=member.avatar.url)
+        embed.set_footer(text=f"by {member}", icon_url=member.display_avatar)
 
         embed.description = "- What's your age?"
         q1 = await member.send(embed=embed)
@@ -436,7 +436,7 @@ Please answer using one message only.."""
             return await member.send(f"**Thank you anyways, bye!**")
 
         embed = discord.Embed(title=f"__Teacher Application__")
-        embed.set_footer(text=f"by {member}", icon_url=member.avatar.url)
+        embed.set_footer(text=f"by {member}", icon_url=member.display_avatar)
 
         embed.title = "Event manager Application"
         embed.description = '''
@@ -552,7 +552,7 @@ Please answer using one message only.."""
             description=f"""You have opened a verification request, if you would like to verify:\n
 **1.** Take a clear picture of yourself holding a piece of paper with today's date and time of verification, and your Discord server name written on it. Image links won't work, only image uploads!\n(You have 5 minutes to do so)"""
         )
-        embed.set_footer(text=f"by {member}", icon_url=member.avatar.url)
+        embed.set_footer(text=f"by {member}", icon_url=member.display_avatar)
 
         embed.set_image(url="https://cdn.discordapp.com/attachments/562019472257318943/882352621116096542/slothfacepopoo.png")
 
@@ -582,7 +582,7 @@ Please answer using one message only.."""
             timestamp=interaction.message.created_at
         )
 
-        verify_embed.set_thumbnail(url=member.avatar.url)
+        verify_embed.set_thumbnail(url=member.display_avatar)
         verify_embed.set_image(url=attachments[0])
         verify_req_channel_id = discord.utils.get(guild.text_channels, id=self.verify_reqs_channel_id)
         verify_msg = await verify_req_channel_id.send(content=member.mention, embed=verify_embed)
@@ -990,7 +990,7 @@ Please answer using one message only.."""
             timestamp=ctx.message.created_at,
             url="https://thelanguagesloth.com"
         )
-        embed.set_author(name=self.client.user.display_name, url=self.client.user.avatar.url, icon_url=self.client.user.avatar.url)
+        embed.set_author(name=self.client.user.display_name, url=self.client.user.display_avatar, icon_url=self.client.user.display_avatar)
         embed.set_thumbnail(url=guild.icon.url)
         embed.set_footer(text=guild.name, icon_url=guild.icon.url)
         view = ReportSupportView(self.client)

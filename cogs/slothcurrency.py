@@ -1037,7 +1037,7 @@ class SlothCurrency(commands.Cog):
             ctime, time_times = await self.convert_time(member_id, user_time)
 
         embed = discord.Embed(title="Exchange", colour=ctx.author.color, timestamp=ctx.message.created_at)
-        embed.set_author(name=ctx.author, url=ctx.author.avatar.url)
+        embed.set_author(name=ctx.author, url=ctx.author.display_avatar)
         if not cmsg == ctime == 0:
             if cmsg > 0:
                 embed.add_field(name="__**Messages:**__",
@@ -1174,8 +1174,8 @@ class SlothCurrency(commands.Cog):
             await ctx.send(f"You don't have {money}łł!")
 
     async def get_user_pfp(self, member, thumb_width: int = 59):
-        # im = Image.open(requests.get(member.avatar.url, stream=True).raw)
-        async with self.session.get(str(member.avatar.url)) as response:
+        # im = Image.open(requests.get(member.display_avatar, stream=True).raw)
+        async with self.session.get(str(member.display_avatar)) as response:
             image_bytes = await response.content.read()
             with BytesIO(image_bytes) as pfp:
                 image = Image.open(pfp)

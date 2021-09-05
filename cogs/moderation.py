@@ -128,8 +128,8 @@ class Moderation(*moderation_cogs):
 							embed = discord.Embed(
 								description=F"**Unmuted** {member.mention}\n**Reason:** Tempmute is over",
 								color=discord.Color.light_gray())
-							embed.set_author(name=f"{self.client.user} (ID {self.client.user.id})", icon_url=self.client.user.avatar.url)
-							embed.set_thumbnail(url=member.avatar.url)
+							embed.set_author(name=f"{self.client.user} (ID {self.client.user.id})", icon_url=self.client.user.display_avatar)
+							embed.set_thumbnail(url=member.display_avatar)
 							await moderation_log.send(embed=embed)
 							try:
 								await member.send(embed=embed)
@@ -210,7 +210,7 @@ class Moderation(*moderation_cogs):
 		if message:
 			message = message[0]
 			embed = discord.Embed(title="Sniped", description=f"**>>** {message.content}", color=message.author.color, timestamp=message.created_at)
-			embed.set_author(name=message.author, url=message.author.avatar.url, icon_url=message.author.avatar.url)
+			embed.set_author(name=message.author, url=message.author.display_avatar, icon_url=message.author.display_avatar)
 			await ctx.send(embed=embed)
 		else:
 			await ctx.send("**I couldn't snipe any messages!**")
@@ -326,7 +326,7 @@ class Moderation(*moderation_cogs):
 		else:
 			# General embed
 			general_embed = discord.Embed(description=f'**Reason:** {reason}', colour=discord.Colour.dark_gold())
-			general_embed.set_author(name=f'{member} has been warned', icon_url=member.avatar.url)
+			general_embed.set_author(name=f'{member} has been warned', icon_url=member.display_avatar)
 			await ctx.send(embed=general_embed)
 			# Moderation log embed
 			moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
@@ -336,8 +336,8 @@ class Moderation(*moderation_cogs):
 							inline=False)
 			embed.add_field(name='Reason:', value=f'```{reason}```')
 			embed.set_author(name=member)
-			embed.set_thumbnail(url=member.avatar.url)
-			embed.set_footer(text=f"Warned by {ctx.author}", icon_url=ctx.author.avatar.url)
+			embed.set_thumbnail(url=member.display_avatar)
+			embed.set_footer(text=f"Warned by {ctx.author}", icon_url=ctx.author.display_avatar)
 			await moderation_log.send(embed=embed)
 			# Inserts a infraction into the database
 			epoch = datetime.utcfromtimestamp(0)
@@ -457,7 +457,7 @@ class Moderation(*moderation_cogs):
 
 			# General embed
 			general_embed = discord.Embed(description=f'**Reason:** {reason}', colour=discord.Colour.dark_grey(), timestamp=ctx.message.created_at)
-			general_embed.set_author(name=f'{member} has been muted', icon_url=member.avatar.url)
+			general_embed.set_author(name=f'{member} has been muted', icon_url=member.display_avatar)
 			await ctx.send(embed=general_embed)
 			# Moderation log embed
 			moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
@@ -468,8 +468,8 @@ class Moderation(*moderation_cogs):
 			embed.add_field(name='Reason:', value=f'```{reason}```')
 
 			embed.set_author(name=member)
-			embed.set_thumbnail(url=member.avatar.url)
-			embed.set_footer(text=f"Muted by {ctx.author}", icon_url=ctx.author.avatar.url)
+			embed.set_thumbnail(url=member.display_avatar)
+			embed.set_footer(text=f"Muted by {ctx.author}", icon_url=ctx.author.display_avatar)
 			await moderation_log.send(embed=embed)
 			# Inserts a infraction into the database
 			await self.insert_user_infraction(
@@ -521,7 +521,7 @@ class Moderation(*moderation_cogs):
 
 			general_embed = discord.Embed(colour=discord.Colour.light_grey(),
 										  timestamp=ctx.message.created_at)
-			general_embed.set_author(name=f'{member} has been unmuted', icon_url=member.avatar.url)
+			general_embed.set_author(name=f'{member} has been unmuted', icon_url=member.display_avatar)
 			await ctx.send(embed=general_embed)
 			# Moderation log embed
 			moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
@@ -530,8 +530,8 @@ class Moderation(*moderation_cogs):
 			embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nId: {member.id}```',
 							inline=False)
 			embed.set_author(name=member)
-			embed.set_thumbnail(url=member.avatar.url)
-			embed.set_footer(text=f"Unmuted by {ctx.author}", icon_url=ctx.author.avatar.url)
+			embed.set_thumbnail(url=member.display_avatar)
+			embed.set_footer(text=f"Unmuted by {ctx.author}", icon_url=ctx.author.display_avatar)
 			await moderation_log.send(embed=embed)
 			try:
 				await member.send(embed=general_embed)
@@ -605,7 +605,7 @@ class Moderation(*moderation_cogs):
 
 			# General embed
 			general_embed = discord.Embed(description=f"**For:** `{time_dict['days']}d`, `{time_dict['hours']}h`, `{time_dict['minutes']}m` and `{time_dict['seconds']}s`\n**Reason:** {reason}", colour=discord.Colour.dark_grey(), timestamp=ctx.message.created_at)
-			general_embed.set_author(name=f"{member} has been tempmuted", icon_url=member.avatar.url)
+			general_embed.set_author(name=f"{member} has been tempmuted", icon_url=member.display_avatar)
 			await ctx.send(embed=general_embed)
 			# Moderation log embed
 			moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
@@ -613,8 +613,8 @@ class Moderation(*moderation_cogs):
 				description=F"**Tempmuted** {member.mention} for `{time_dict['days']}d`, `{time_dict['hours']}h`, `{time_dict['minutes']}m` and `{time_dict['seconds']}s`\n**Reason:** {reason}\n**Location:** {ctx.channel.mention}",
 				color=discord.Color.lighter_grey(),
 				timestamp=ctx.message.created_at)
-			embed.set_author(name=f"{ctx.author} (ID {ctx.author.id})", icon_url=ctx.author.avatar.url)
-			embed.set_thumbnail(url=member.avatar.url)
+			embed.set_author(name=f"{ctx.author} (ID {ctx.author.id})", icon_url=ctx.author.display_avatar)
+			embed.set_thumbnail(url=member.display_avatar)
 			await moderation_log.send(embed=embed)
 			# # Inserts a infraction into the database
 			await self.insert_user_infraction(
@@ -684,7 +684,7 @@ class Moderation(*moderation_cogs):
 					value=f'```apache\n{muted_text}```', 
 				inline=False)
 				embed.add_field(name='Reason:', value=f'```{reason}```')
-				embed.set_footer(text=f"Kicked by {perpetrator}", icon_url=perpetrator.avatar.url)
+				embed.set_footer(text=f"Kicked by {perpetrator}", icon_url=perpetrator.display_avatar)
 				await moderation_log.send(embed=embed)
 				
 			else:
@@ -711,7 +711,7 @@ class Moderation(*moderation_cogs):
 
 		# General embed
 		general_embed = discord.Embed(description=f'**Reason:** {reason}', colour=discord.Colour.magenta())
-		general_embed.set_author(name=f'{member} has been kicked', icon_url=member.avatar.url)
+		general_embed.set_author(name=f'{member} has been kicked', icon_url=member.display_avatar)
 		await ctx.send(embed=general_embed)
 		try:
 			await member.send(embed=general_embed)
@@ -731,8 +731,8 @@ class Moderation(*moderation_cogs):
 							inline=False)
 			embed.add_field(name='Reason:', value=f'```{reason}```')
 			embed.set_author(name=member)
-			embed.set_thumbnail(url=member.avatar.url)
-			embed.set_footer(text=f"Kicked by {ctx.author}", icon_url=ctx.author.avatar.url)
+			embed.set_thumbnail(url=member.display_avatar)
+			embed.set_footer(text=f"Kicked by {ctx.author}", icon_url=ctx.author.display_avatar)
 			await moderation_log.send(embed=embed)
 			# Inserts a infraction into the database
 			current_ts = await utils.get_timestamp()
@@ -769,7 +769,7 @@ class Moderation(*moderation_cogs):
 				{author.mention} wants to ban {member.mention}, it requires 4 more moderator ✅ reactions for it!
 				```Reason: {reason}```''',
 				colour=discord.Colour.dark_red(), timestamp=ctx.message.created_at)
-			mod_ban_embed.set_author(name=f'{member} is going to Brazil...', icon_url=member.avatar.url)
+			mod_ban_embed.set_author(name=f'{member} is going to Brazil...', icon_url=member.display_avatar)
 			msg = await ctx.send(embed=mod_ban_embed)
 			await msg.add_reaction('✅')
 
@@ -817,7 +817,7 @@ class Moderation(*moderation_cogs):
 		# Checks if it was a moderator ban request or just a normal ban
 		if len(confirmations) == 0:
 			perpetrators = ctx.author
-			icon = ctx.author.avatar.url
+			icon = ctx.author.display_avatar
 		else:
 			perpetrators = ', '.join(confirmations.values())
 			icon = ctx.guild.icon.url
@@ -825,7 +825,7 @@ class Moderation(*moderation_cogs):
 		# Bans and logs
 		# General embed
 		general_embed = discord.Embed(description=f'**Reason:** {reason}', colour=discord.Colour.dark_red())
-		general_embed.set_author(name=f'{member} has been banned', icon_url=member.avatar.url)
+		general_embed.set_author(name=f'{member} has been banned', icon_url=member.display_avatar)
 		await ctx.send(embed=general_embed)
 		try:
 			await member.send(content="If you think you should be unbanned, you can make a ban appeal here: https://discord.gg/f9B7FzYv8D", embed=general_embed)
@@ -844,7 +844,7 @@ class Moderation(*moderation_cogs):
 							inline=False)
 			embed.add_field(name='Reason:', value=f'```{reason}```')
 			embed.set_author(name=member)
-			embed.set_thumbnail(url=member.avatar.url)
+			embed.set_thumbnail(url=member.display_avatar)
 			embed.set_footer(text=f"Banned by {perpetrators}", icon_url=icon)
 			await moderation_log.send(embed=embed)
 			# Inserts a infraction into the database
@@ -870,7 +870,7 @@ class Moderation(*moderation_cogs):
 		else:
 			# General embed
 			general_embed = discord.Embed(description=f'**Reason:** {reason}', colour=discord.Colour.dark_red())
-			general_embed.set_author(name=f'{member} has been banned', icon_url=member.avatar.url)
+			general_embed.set_author(name=f'{member} has been banned', icon_url=member.display_avatar)
 			await ctx.send(embed=general_embed)
 
 	# Unbans a member
@@ -898,7 +898,7 @@ class Moderation(*moderation_cogs):
 				await ctx.guild.unban(user)
 				# General embed
 				general_embed = discord.Embed(colour=discord.Colour.red())
-				general_embed.set_author(name=f'{user} has been unbanned', icon_url=user.avatar.url)
+				general_embed.set_author(name=f'{user} has been unbanned', icon_url=user.display_avatar)
 				await ctx.send(embed=general_embed)
 				# Moderation log embed
 				moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
@@ -907,8 +907,8 @@ class Moderation(*moderation_cogs):
 				embed.add_field(name='User info:', value=f'```Name: {user.display_name}\nId: {user.id}```',
 								inline=False)
 				embed.set_author(name=user)
-				embed.set_thumbnail(url=user.avatar.url)
-				embed.set_footer(text=f"Unbanned by {ctx.author}", icon_url=ctx.author.avatar.url)
+				embed.set_thumbnail(url=user.display_avatar)
+				embed.set_footer(text=f"Unbanned by {ctx.author}", icon_url=ctx.author.display_avatar)
 				await moderation_log.send(embed=embed)
 				try:
 					await user.send(embed=general_embed)
@@ -946,7 +946,7 @@ class Moderation(*moderation_cogs):
 				{author.mention} wants to softban {member.mention}, it requires 2 more moderator ✅ reactions for it!
 				```Reason: {reason}```''',
 				colour=discord.Colour.dark_purple(), timestamp=ctx.message.created_at)
-			mod_softban_embed.set_author(name=f'{member} is going to Brazil, but will come back!', icon_url=member.avatar.url)
+			mod_softban_embed.set_author(name=f'{member} is going to Brazil, but will come back!', icon_url=member.display_avatar)
 			msg = await ctx.send(embed=mod_softban_embed)
 			await msg.add_reaction('✅')
 
@@ -994,7 +994,7 @@ class Moderation(*moderation_cogs):
 		# Checks if it was a moderator ban request or just a normal ban
 		if len(confirmations) == 0:
 			perpetrators = ctx.author
-			icon = ctx.author.avatar.url
+			icon = ctx.author.display_avatar
 		else:
 			perpetrators = ', '.join(confirmations.values())
 			icon = ctx.guild.icon.url
@@ -1002,7 +1002,7 @@ class Moderation(*moderation_cogs):
 		# Bans and logs
 		# General embed
 		general_embed = discord.Embed(description=f'**Reason:** {reason}', colour=discord.Colour.dark_purple())
-		general_embed.set_author(name=f'{member} has been softbanned', icon_url=member.avatar.url)
+		general_embed.set_author(name=f'{member} has been softbanned', icon_url=member.display_avatar)
 		await ctx.send(embed=general_embed)
 		try:
 			await member.send(content="https://discord.gg/languages", embed=general_embed)
@@ -1022,7 +1022,7 @@ class Moderation(*moderation_cogs):
 							inline=False)
 			embed.add_field(name='Reason:', value=f'```{reason}```')
 			embed.set_author(name=member)
-			embed.set_thumbnail(url=member.avatar.url)
+			embed.set_thumbnail(url=member.display_avatar)
 			embed.set_footer(text=f"Banned by {perpetrators}", icon_url=icon)
 			await moderation_log.send(embed=embed)
 			# Inserts a infraction into the database
@@ -1068,7 +1068,7 @@ class Moderation(*moderation_cogs):
 			embed.add_field(name='Reason:', value=f'```{reason}```')
 
 			embed.set_author(name=self.client.get_user(user_id))
-			embed.set_footer(text=f"HackBanned by {ctx.author}", icon_url=ctx.author.avatar.url)
+			embed.set_footer(text=f"HackBanned by {ctx.author}", icon_url=ctx.author.display_avatar)
 			await moderation_log.send(embed=embed)
 
 			# Inserts a infraction into the database
@@ -1132,8 +1132,8 @@ class Moderation(*moderation_cogs):
 			description=f"```ini\n[Warns]: {warns} | [Mutes]: {mutes} | [Kicks]: {kicks}\n[Bans]: {bans} | [Softbans]: {softbans} | [Hackbans]: {hackbans}```",
 			color=member.color,
 			timestamp=ctx.message.created_at)
-		embed.set_thumbnail(url=member.avatar.url)
-		embed.set_footer(text=f"Requested by: {ctx.author}", icon_url=ctx.author.avatar.url)
+		embed.set_thumbnail(url=member.display_avatar)
+		embed.set_footer(text=f"Requested by: {ctx.author}", icon_url=ctx.author.display_avatar)
 
 		# Loops through each infraction and adds a field to the embedded message
 		# 0-user_id, 1-infraction_type, 2-infraction_reason, 3-infraction_ts, 4-infraction_id, 5-perpetrator

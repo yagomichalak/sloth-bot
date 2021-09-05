@@ -219,7 +219,7 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
             timestamp=ctx.message.created_at
         )
         skills_embed.add_field(name=f"__Skills__:", value=f"```apache\n{cmds_text}```")
-        skills_embed.set_author(name=member, icon_url=member.avatar.url)
+        skills_embed.set_author(name=member, icon_url=member.display_avatar)
         skills_embed.set_thumbnail(url=f"https://thelanguagesloth.com/media/sloth_classes/{sloth_profile[1]}.png")
         skills_embed.set_footer(text=ctx.guild, icon_url=ctx.guild.icon.url)
         await ctx.send(embed=skills_embed)
@@ -241,9 +241,9 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
             description='\n'.join(formated_effects) if formated_effects else 'No effects.',
             color=member.color,
             timestamp=ctx.message.created_at,
-            url=member.avatar.url
+            url=member.display_avatar
         )
-        embed.set_thumbnail(url=member.avatar.url)
+        embed.set_thumbnail(url=member.display_avatar)
 
         await ctx.send(embed=embed)
 
@@ -264,8 +264,8 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
         )
 
         embed.set_thumbnail(url=guild.icon.url)
-        embed.set_author(name=self.client.user, url=self.client.user.avatar.url, icon_url=self.client.user.avatar.url)
-        embed.set_footer(text=f"Requested by {member}", icon_url=member.avatar.url)
+        embed.set_author(name=self.client.user, url=self.client.user.display_avatar, icon_url=self.client.user.display_avatar)
+        embed.set_footer(text=f"Requested by {member}", icon_url=member.display_avatar)
 
         embed.add_field(name="🔴 Agares' 4th Skill:", value="**Skill**: `Delay`.", inline=True)
         embed.add_field(name="🔴 Cybersloth's 4th Skill:", value="**Skill**: `Lock`.", inline=True)
@@ -311,7 +311,7 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
 
             skills_text = '\n'.join(skills)
             embed.add_field(name=f"__({sloth_class.emoji}) {name.title()}__:", value=f"```{skills_text}```")
-            embed.set_footer(text=f"Requested by {member}", icon_url=member.avatar.url)
+            embed.set_footer(text=f"Requested by {member}", icon_url=member.display_avatar)
 
         await ctx.send(embed=embed)
 

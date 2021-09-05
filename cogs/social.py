@@ -94,7 +94,7 @@ class Social(commands.Cog):
                     else:
                         return
 
-                embed.set_author(name=message.author, url=message.author.avatar.url, icon_url=message.author.avatar.url)
+                embed.set_author(name=message.author, url=message.author.display_avatar, icon_url=message.author.display_avatar)
                 # Post in #slothboard
                 await self.insert_slothboard_message(message.id, channel.id)
                 slothboard_channel = guild.get_channel(slothboard_channel_id)
@@ -237,8 +237,8 @@ class Social(commands.Cog):
         embed = discord.Embed(colour=member.color, timestamp=ctx.message.created_at)
 
         embed.set_author(name=f"User Info: {member}")
-        embed.set_thumbnail(url=member.avatar.url)
-        embed.set_footer(text=f"Requested by {ctx.author}", icon_url=ctx.author.avatar.url)
+        embed.set_thumbnail(url=member.display_avatar)
+        embed.set_footer(text=f"Requested by {ctx.author}", icon_url=ctx.author.display_avatar)
 
         embed.add_field(name="ID:", value=member.id, inline=False)
 
@@ -287,7 +287,7 @@ class Social(commands.Cog):
 
     #     meme_embed = discord.Embed(title="__**Meme**__", colour=ctx.author.colour, timestamp=ctx.message.created_at)
     #     meme_embed.set_image(url=submissions.url)
-    #     meme_embed.set_author(name=ctx.author, icon_url=ctx.author.avatar.url)
+    #     meme_embed.set_author(name=ctx.author, icon_url=ctx.author.display_avatar)
     #     await ctx.send(embed=meme_embed)
 
     @commands.command(aliases=['xkcd', 'comic'])

@@ -96,9 +96,9 @@ class ModerationFakeAccountsTable(commands.Cog):
             color=member.color
         )
 
-        embed.set_thumbnail(url=member.avatar.url)
-        embed.set_author(name=f"{member} ({member.id})", icon_url=member.avatar.url)
-        embed.set_footer(text=f"Requested by {author}", icon_url=author.avatar.url)
+        embed.set_thumbnail(url=member.display_avatar)
+        embed.set_author(name=f"{member} ({member.id})", icon_url=member.display_avatar)
+        embed.set_footer(text=f"Requested by {author}", icon_url=author.display_avatar)
         await ctx.send(embed=embed)
 
 

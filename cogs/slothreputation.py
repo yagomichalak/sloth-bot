@@ -184,8 +184,8 @@ class SlothReputation(commands.Cog):
                 if sloth_profile else '0 rings.', 
                 inline=False)
 
-        embed.set_thumbnail(url=member.avatar.url)
-        embed.set_author(name=member, icon_url=member.avatar.url, url=member.avatar.url)
+        embed.set_thumbnail(url=member.display_avatar)
+        embed.set_author(name=member, icon_url=member.display_avatar, url=member.display_avatar)
         embed.set_footer(text=ctx.guild, icon_url=ctx.guild.icon.url)
 
         if ctx.author.id != member.id:
@@ -215,7 +215,7 @@ class SlothReputation(commands.Cog):
         position = [[i+1, u[4]] for i, u in enumerate(all_users) if u[0] == ctx.author.id]
         position = [it for subpos in position for it in subpos] if position else ['??', 0]
 
-        leaderboard.set_footer(text=f"Your score: {position[1]} | #{position[0]}", icon_url=ctx.author.avatar.url)
+        leaderboard.set_footer(text=f"Your score: {position[1]} | #{position[0]}", icon_url=ctx.author.display_avatar)
         leaderboard.set_thumbnail(url=ctx.guild.icon.url)
 
         # Embeds each one of the top ten users.
@@ -242,7 +242,7 @@ class SlothReputation(commands.Cog):
         position = [[i+1, u[1]] for i, u in enumerate(all_users) if u[0] == ctx.author.id]
         position = [it for subpos in position for it in subpos] if position else ['??', 0]
 
-        leaderboard.set_footer(text=f"Your XP: {position[1]} | #{position[0]}", icon_url=ctx.author.avatar.url)
+        leaderboard.set_footer(text=f"Your XP: {position[1]} | #{position[0]}", icon_url=ctx.author.display_avatar)
         leaderboard.set_thumbnail(url=ctx.guild.icon.url)
 
         # Embeds each one of the top ten users.
@@ -266,7 +266,7 @@ class SlothReputation(commands.Cog):
         position = [[i+1, u[1]] for i, u in enumerate(all_users) if u[0] == ctx.author.id]
         position = [it for subpos in position for it in subpos] if position else ['??', 0]
 
-        leaderboard.set_footer(text=f"Your leaves: {position[1]} 🍃| #{position[0]}", icon_url=ctx.author.avatar.url)
+        leaderboard.set_footer(text=f"Your leaves: {position[1]} 🍃| #{position[0]}", icon_url=ctx.author.display_avatar)
         leaderboard.set_thumbnail(url=ctx.guild.icon.url)
 
         # Embeds each one of the top ten users.
