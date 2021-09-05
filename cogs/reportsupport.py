@@ -251,9 +251,10 @@ Before you can formally start applying for Staff in The Language Sloth, there ar
 
 Entry requirements:
 
-```》Must be at least 16 years of age
+```》Must be at least 18 years of age
 》Must have at least a conversational level of English
 》Must be an active member
+》Be a member of the server for at least a month
 》Must not have any warnings in the past 3 months.```""",
             color=member.color
         )
