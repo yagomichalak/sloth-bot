@@ -12,9 +12,7 @@ commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
 
 
 class SlothReputation(commands.Cog):
-    '''
-    Reputation commands
-    '''
+    """ Reputation commands. """
 
     def __init__(self, client):
         self.client = client

@@ -5,7 +5,7 @@ from pytz import timezone
 from dotenv import load_dotenv
 from discord.ext import commands, tasks, flags
 from extra import utils
-from typing import Dict
+from typing import Dict, Optional
 import json
 
 import os
@@ -569,10 +569,19 @@ async def _click(ctx, user: discord.Member) -> None:
     await ctx.send(f"**{ctx.author.mention} clicked on {user.mention}!**")
 
 @client.slash_command(name="info", guild_ids=guild_ids)
-async def _info_slash(ctx, member: discord.Member = None) -> None:
+@commands.cooldown(1, 5, commands.BucketType.user)
+async def _info_slash(ctx, member: Optional[discord.Member] = None) -> None:
     """ Shows the user's level and experience points. """
 
     await client.get_cog('SlothReputation')._info(ctx, member)
+
+@client.slash_command(name="profile", guild_ids=guild_ids)
+@commands.cooldown(1, 5, commands.BucketType.user)
+async def _profile_slash(ctx, member: Optional[discord.Member] = None) -> None:
+    """ Shows the member's profile with their custom sloth. """
+
+    await ctx.defer()
+    await client.get_cog('SlothCurrency')._profile(ctx, member)
 
 
 for filename in os.listdir('./cogs'):

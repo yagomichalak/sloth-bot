@@ -497,8 +497,15 @@ class SlothCurrency(commands.Cog):
         public_flag_names = list(map(lambda pf: pf.name, public_flags))
         return public_flag_names
 
-    @commands.command()
-    async def profile(self, ctx, member: discord.Member = None):
+    @commands.command(name="profile")
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def _profile_command(self, ctx, member: discord.Member = None):
+        """ Shows the member's profile with their custom sloth.
+        :param member: The member to see the profile. (Optional) """
+
+        await self._profile(ctx, member)
+
+    async def _profile(self, ctx, member: discord.Member = None):
         """ Shows the member's profile with their custom sloth.
         :param member: The member to see the profile. (Optional) """
 
@@ -614,19 +621,23 @@ class SlothCurrency(commands.Cog):
                 try:
                     gif_file_path = await self.make_gif_image(member_id=member.id, file_path=file_path, all_effects=all_effects)
                     # print('sending')
-                    await ctx.send(file=discord.File(gif_file_path))
-                    # print('sent')
+                    if isinstance(ctx, commands.Context):
+                        await ctx.send(file=discord.File(gif_file_path))
+                    else:
+                        await ctx.followup.send(file=discord.File(file_path))
+
                 except Exception as e:
                     print(e)
                     pass
                 finally:
-                    # pass
-                    # await asyncio.sleep(2)
                     os.remove(file_path)
                     os.remove(gif_file_path)
             else:
                 try:
-                    await ctx.send(file=discord.File(file_path))
+                    if isinstance(ctx, commands.Context):
+                        await ctx.send(file=discord.File(file_path))
+                    else:
+                        await ctx.followup.send(file=discord.File(file_path))
                 except:
                     pass
                 finally:
