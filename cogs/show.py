@@ -25,9 +25,8 @@ class Show(commands.Cog):
     # Shows how many members there are in the server
     @commands.command()
     async def members(self, ctx):
-        '''
-        Shows how many members there are in the server (including bots).
-        '''
+        """ Shows how many members there are in the server (including bots). """
+
         await ctx.message.delete()
         all_users = ctx.guild.members
         await ctx.send(f'{len(all_users)} members!')
@@ -116,7 +115,7 @@ class Show(commands.Cog):
             await ctx.channel.send(embed=embed)
 
     @commands.command(name="rules")
-    @commands.has_any_role(*allowed_roles)
+    @utils.is_allowed(allowed_roles)
     async def _rules_commands(self, ctx) -> None:
         """ (MOD) Sends an embedded message containing all rules in it. """
 

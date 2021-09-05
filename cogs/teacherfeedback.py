@@ -1003,14 +1003,10 @@ class TeacherFeedbackDatabaseInsert:
 
         sql = """INSERT INTO RewardStudents (
             reward_message, student_id, student_messages,
-            student_time, teacher_id, class_type,
-            language)
+            student_time, teacher_id, class_type, language)
             VALUES (%s, %s, %s, %s, %s, %s, %s)"""
 
-        await mycursor.executemany("""INSERT INTO RewardStudents (
-            reward_message, student_id, student_messages,
-            student_time, teacher_id, class_type, language)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)""", formatted_active_users)
+        await mycursor.executemany(sql, formatted_active_users)
         await db.commit()
         await mycursor.close()
 

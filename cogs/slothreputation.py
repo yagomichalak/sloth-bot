@@ -3,8 +3,9 @@ from discord.ext import commands
 from mysqldb import *
 from datetime import datetime
 import os
-from typing import List
+from typing import List, Optional
 from extra.view import ExchangeActivityView
+from extra import utils
 from .slothclass import classes
 
 commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
@@ -71,9 +72,15 @@ class SlothReputation(commands.Cog):
         progress_bar = f"{xp}xp / {goal_xp}xp\n{':blue_square:' * boxes}{':white_large_square:' * (length_progress_bar - boxes)}"
         return progress_bar
 
-    @commands.command(aliases=['status', 'exchange', 'level', 'lvl', 'exp', 'xp', 'money', 'balance'])
+    @commands.command(name="info", aliases=['status', 'exchange', 'level', 'lvl', 'exp', 'xp', 'money', 'balance'])
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def info(self, ctx, member: discord.Member = None):
+    async def _info_command(self, ctx, member: Optional[discord.Member] = None) -> None:
+        """ Shows the user's level and experience points.
+        :param member: The member to show the info. [Optional][Default=You] """
+
+        await self._info(ctx, member)
+
+    async def _info(self, ctx, member: discord.Member = None) -> None:
         """ Shows the user's level and experience points. """
 
         if not await self.check_table_exist():
@@ -129,8 +136,8 @@ class SlothReputation(commands.Cog):
         elif not user_info and not member.id == ctx.author.id:
             return await ctx.send("**Member not found in the system!**")
     
-
-        embed = discord.Embed(title="__All Information__", colour=member.color, timestamp=ctx.message.created_at)
+        current_time = await utils.get_time_now()
+        embed = discord.Embed(title="__All Information__", colour=member.color, timestamp=current_time)
         xp = user[0][1]
         goal_xp = ((user[0][2]+1)**5)
         lvl = user[0][2]
