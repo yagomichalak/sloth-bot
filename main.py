@@ -548,10 +548,10 @@ async def _speak(ctx, language: Option(str, name="language", description="The la
         color=member.color
     )
     await ctx.send(embed=embed)
-#@utils.is_allowed([moderator_role_id, admin_role_id])#
 
 @client.slash_command(name="rules", guild_ids=guild_ids)
-async def rules(ctx, 
+@utils.is_allowed([moderator_role_id, admin_role_id])
+async def _rules_slash(ctx, 
     rule_number: Option(int, name="rule_number", description="The number of the rule you wanna show.", choices=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], required=False), 
     reply_message: Option(bool, name="reply_message", description="Weather the slash command should reply to your original message.", required=False, default=True)) -> None:
     """ (MOD) Sends an embedded message containing all rules in it, or a specific rule. """
@@ -567,6 +567,12 @@ async def rules(ctx,
 @client.user_command(name="click", guild_ids=guild_ids)
 async def _click(ctx, user: discord.Member) -> None:
     await ctx.send(f"**{ctx.author.mention} clicked on {user.mention}!**")
+
+@client.slash_command(name="info", guild_ids=guild_ids)
+async def _info_slash(ctx, member: discord.Member = None) -> None:
+    """ Shows the user's level and experience points. """
+
+    await client.get_cog('SlothReputation')._info(ctx, member)
 
 
 for filename in os.listdir('./cogs'):
