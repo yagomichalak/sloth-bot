@@ -117,7 +117,7 @@ different_class_roles = {
     ],
     "german": [
         "almanca", "allemand", "aléman", "jerman", "deutsch", "آلمانی",
-        "ألماني", "德语"
+        "ألماني", "德语", 'niemiecki'
     ],
     "french": [
         "fransızca","francés", "francês", "français"
@@ -132,7 +132,10 @@ different_class_roles = {
         "rusça" ,"russo" ,"russe" ,"russisch" 
     ],
     "mandarin": [
-        "mandarín", "粤语", "chinese"
+        "mandarín", "chinese"
+    ],
+    "cantonese": [
+        "粤语"
     ],
     "japanese": [
         "japonês", "japonais" ,"japanisch", "japonés", "日本語"
