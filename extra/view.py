@@ -101,7 +101,7 @@ class ReportSupportView(discord.ui.View):
         embed = discord.Embed(title="New possible order!",
             description=f"{member.mention} ({member.id}) might be interested in buying something from you!",
             color=member.color)
-        embed.set_thumbnail(url=member.avatar.url)
+        embed.set_thumbnail(url=member.display_avatar)
         await dnk.send(embed=embed)
         await member.send(f"**If you are really interested in **buying** a custom bot, send a private message to {dnk.mention}!**")
         await self.cog.dnk_embed(member)

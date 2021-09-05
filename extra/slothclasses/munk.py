@@ -189,7 +189,7 @@ class Munk(Player):
             url=tribe['link']
         )
 
-        join_tribe_embed.set_author(name=inviter, icon_url=inviter.avatar.url)
+        join_tribe_embed.set_author(name=inviter, icon_url=inviter.display_avatar)
         if tribe['thumbnail']:
             join_tribe_embed.set_thumbnail(url=tribe['thumbnail'])
         join_tribe_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
@@ -489,7 +489,7 @@ class Munk(Player):
         if tribe['thumbnail']:
             tribe_embed.set_thumbnail(url=tribe['thumbnail'])
         if tribe_owner:
-            tribe_embed.set_author(name=f"Owner: {tribe_owner}", icon_url=tribe_owner.avatar.url, url=tribe_owner.avatar.url)
+            tribe_embed.set_author(name=f"Owner: {tribe_owner}", icon_url=tribe_owner.display_avatar, url=tribe_owner.display_avatar)
 
         tribe_embed.add_field(name="__Members:__", value=', '.join(entries), inline=False)
 
@@ -671,8 +671,8 @@ class Munk(Player):
             url=link
         )
 
-        tribe_embed.set_author(name=member, url=member.avatar.url, icon_url=member.avatar.url)
-        tribe_embed.set_thumbnail(url=member.avatar.url)
+        tribe_embed.set_author(name=member, url=member.display_avatar, icon_url=member.display_avatar)
+        tribe_embed.set_thumbnail(url=member.display_avatar)
         tribe_embed.set_footer(text=member.guild.name, icon_url=member.guild.icon.url)
 
         view = discord.ui.View()
@@ -942,7 +942,7 @@ class Munk(Player):
             timestamp=ctx.message.created_at,
             url=tribe['link']
         )
-        embed.set_author(name=member.display_name, url=member.avatar.url, icon_url=member.avatar.url)
+        embed.set_author(name=member.display_name, url=member.display_avatar, icon_url=member.display_avatar)
         if tribe['thumbnail']:
             embed.set_thumbnail(url=tribe['thumbnail'])
         embed.set_footer(text=ctx.guild.name, icon_url=ctx.guild.icon.url)

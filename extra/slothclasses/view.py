@@ -34,8 +34,8 @@ class HugView(discord.ui.View):
             timestamp=interaction.message.created_at
         )
 
-        embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
-        embed.set_thumbnail(url=self.target.avatar.url)
+        embed.set_author(name=self.member.display_name, url=self.member.display_avatar, icon_url=self.member.display_avatar)
+        embed.set_thumbnail(url=self.target.display_avatar)
         embed.set_image(url=choice(hugs))
         embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
 
@@ -97,8 +97,8 @@ class BootView(discord.ui.View):
             timestamp=interaction.message.created_at
         )
 
-        embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
-        embed.set_thumbnail(url=self.target.avatar.url)
+        embed.set_author(name=self.member.display_name, url=self.member.display_avatar, icon_url=self.member.display_avatar)
+        embed.set_thumbnail(url=self.target.display_avatar)
         embed.set_image(url=choice(general_kicks))
         embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
 
@@ -130,8 +130,8 @@ class BootView(discord.ui.View):
             timestamp=interaction.message.created_at
         )
 
-        embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
-        embed.set_thumbnail(url=self.target.avatar.url)
+        embed.set_author(name=self.member.display_name, url=self.member.display_avatar, icon_url=self.member.display_avatar)
+        embed.set_thumbnail(url=self.target.display_avatar)
         embed.set_image(url=choice(butt_kicks))
         embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
 
@@ -187,8 +187,8 @@ class SlapView(discord.ui.View):
             timestamp=interaction.message.created_at
         )
 
-        embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
-        embed.set_thumbnail(url=self.target.avatar.url)
+        embed.set_author(name=self.member.display_name, url=self.member.display_avatar, icon_url=self.member.display_avatar)
+        embed.set_thumbnail(url=self.target.display_avatar)
         embed.set_image(url=choice(slaps))
         embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
 
@@ -227,8 +227,8 @@ class SlapView(discord.ui.View):
             timestamp=interaction.message.created_at
         )
 
-        embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
-        embed.set_thumbnail(url=self.target.avatar.url)
+        embed.set_author(name=self.member.display_name, url=self.member.display_avatar, icon_url=self.member.display_avatar)
+        embed.set_thumbnail(url=self.target.display_avatar)
         embed.set_image(url=choice(slaps))
         embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
 
@@ -299,8 +299,8 @@ class KissView(discord.ui.View):
             timestamp=interaction.message.created_at
         )
 
-        embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
-        embed.set_thumbnail(url=self.target.avatar.url)
+        embed.set_author(name=self.member.display_name, url=self.member.display_avatar, icon_url=self.member.display_avatar)
+        embed.set_thumbnail(url=self.target.display_avatar)
         embed.set_image(url=choice(c_kisses))
         embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
 
@@ -345,8 +345,8 @@ class KissView(discord.ui.View):
             timestamp=interaction.message.created_at
         )
 
-        embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
-        embed.set_thumbnail(url=self.target.avatar.url)
+        embed.set_author(name=self.member.display_name, url=self.member.display_avatar, icon_url=self.member.display_avatar)
+        embed.set_thumbnail(url=self.target.display_avatar)
         embed.set_image(url=choice(m_kisses))
         embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
 
@@ -424,8 +424,8 @@ class CheatingView(discord.ui.View):
         )
 
         partner = await interaction.guild.fetch_member(self.marriage['partner'])
-        embed.set_author(name=partner.display_name, url=partner.avatar.url, icon_url=partner.avatar.url)
-        embed.set_thumbnail(url=self.lover.avatar.url)
+        embed.set_author(name=partner.display_name, url=partner.display_avatar, icon_url=partner.display_avatar)
+        embed.set_thumbnail(url=self.lover.display_avatar)
         embed.set_image(url=choice(catches))
         embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
         view = CheatingActionView(self.client, self.cheater, self.lover, self.marriage)
@@ -483,8 +483,8 @@ class CheatingActionView(discord.ui.View):
 
         partner = await interaction.guild.fetch_member(self.marriage['partner'])
 
-        embed.set_author(name=partner.display_name, url=partner.avatar.url, icon_url=partner.avatar.url)
-        embed.set_thumbnail(url=self.lover.avatar.url)
+        embed.set_author(name=partner.display_name, url=partner.display_avatar, icon_url=partner.display_avatar)
+        embed.set_thumbnail(url=self.lover.display_avatar)
         embed.set_image(url=choice(forgives))
         embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
 
@@ -514,8 +514,8 @@ class CheatingActionView(discord.ui.View):
 
         partner = await interaction.guild.fetch_member(self.marriage['partner'])
 
-        embed.set_author(name=partner.display_name, url=partner.avatar.url, icon_url=partner.avatar.url)
-        embed.set_thumbnail(url=self.lover.avatar.url)
+        embed.set_author(name=partner.display_name, url=partner.display_avatar, icon_url=partner.display_avatar)
+        embed.set_thumbnail(url=self.lover.display_avatar)
         embed.set_image(url=choice(divorces))
         embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
 
@@ -724,8 +724,8 @@ class PunchView(discord.ui.View):
             timestamp=interaction.message.created_at
         )
 
-        embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
-        embed.set_thumbnail(url=self.target.avatar.url)
+        embed.set_author(name=self.member.display_name, url=self.member.display_avatar, icon_url=self.member.display_avatar)
+        embed.set_thumbnail(url=self.target.display_avatar)
         embed.set_image(url=choice(face_punches))
         embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
 
@@ -755,8 +755,8 @@ class PunchView(discord.ui.View):
             timestamp=interaction.message.created_at
         )
 
-        embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
-        embed.set_thumbnail(url=self.target.avatar.url)
+        embed.set_author(name=self.member.display_name, url=self.member.display_avatar, icon_url=self.member.display_avatar)
+        embed.set_thumbnail(url=self.target.display_avatar)
         embed.set_image(url=choice(throat_punches))
         embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
 
@@ -788,8 +788,8 @@ class PunchView(discord.ui.View):
             timestamp=interaction.message.created_at
         )
 
-        embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
-        embed.set_thumbnail(url=self.target.avatar.url)
+        embed.set_author(name=self.member.display_name, url=self.member.display_avatar, icon_url=self.member.display_avatar)
+        embed.set_thumbnail(url=self.target.display_avatar)
         embed.set_image(url=choice(uppercuts))
         embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
 
@@ -821,8 +821,8 @@ class PunchView(discord.ui.View):
             timestamp=interaction.message.created_at
         )
 
-        embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
-        embed.set_thumbnail(url=self.target.avatar.url)
+        embed.set_author(name=self.member.display_name, url=self.member.display_avatar, icon_url=self.member.display_avatar)
+        embed.set_thumbnail(url=self.target.display_avatar)
         embed.set_image(url=choice(stomach_punches))
         embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
 
@@ -859,8 +859,8 @@ class PunchView(discord.ui.View):
             url='https://thoughtcatalog.com/january-nelson/2018/12/69-punchlines-so-stupid-they-are-actually-funny/'
         )
 
-        embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
-        embed.set_thumbnail(url=self.target.avatar.url)
+        embed.set_author(name=self.member.display_name, url=self.member.display_avatar, icon_url=self.member.display_avatar)
+        embed.set_thumbnail(url=self.target.display_avatar)
         embed.set_image(url=choice(punchline_images))
         embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
 
@@ -931,8 +931,8 @@ class GiveView(discord.ui.View):
             timestamp=interaction.message.created_at
         )
 
-        embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
-        embed.set_thumbnail(url=self.target.avatar.url)
+        embed.set_author(name=self.member.display_name, url=self.member.display_avatar, icon_url=self.member.display_avatar)
+        embed.set_thumbnail(url=self.target.display_avatar)
         embed.set_image(url=choice(option['gifs']))
         embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
 
@@ -995,8 +995,8 @@ class TickleView(discord.ui.View):
             timestamp=interaction.message.created_at
         )
 
-        embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
-        embed.set_thumbnail(url=self.target.avatar.url)
+        embed.set_author(name=self.member.display_name, url=self.member.display_avatar, icon_url=self.member.display_avatar)
+        embed.set_thumbnail(url=self.target.display_avatar)
         embed.set_image(url=choice(tickles))
         embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
 
@@ -1056,8 +1056,8 @@ class YeetView(discord.ui.View):
             timestamp=interaction.message.created_at
         )
 
-        embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
-        embed.set_thumbnail(url=self.target.avatar.url)
+        embed.set_author(name=self.member.display_name, url=self.member.display_avatar, icon_url=self.member.display_avatar)
+        embed.set_thumbnail(url=self.target.display_avatar)
         embed.set_image(url=choice(yeets))
         embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
 
@@ -1093,8 +1093,8 @@ class YeetView(discord.ui.View):
             timestamp=interaction.message.created_at
         )
 
-        embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
-        embed.set_thumbnail(url=self.target.avatar.url)
+        embed.set_author(name=self.member.display_name, url=self.member.display_avatar, icon_url=self.member.display_avatar)
+        embed.set_thumbnail(url=self.target.display_avatar)
         embed.set_image(url=choice(yeets))
         embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
 
@@ -1167,8 +1167,8 @@ class BegView(discord.ui.View):
             timestamp=interaction.message.created_at
         )
 
-        embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
-        embed.set_thumbnail(url=self.target.avatar.url)
+        embed.set_author(name=self.member.display_name, url=self.member.display_avatar, icon_url=self.member.display_avatar)
+        embed.set_thumbnail(url=self.target.display_avatar)
         embed.set_image(url=choice(begs))
         embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
 
@@ -1243,8 +1243,8 @@ class PatView(discord.ui.View):
             timestamp=interaction.message.created_at
         )
 
-        embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
-        embed.set_thumbnail(url=self.target.avatar.url)
+        embed.set_author(name=self.member.display_name, url=self.member.display_avatar, icon_url=self.member.display_avatar)
+        embed.set_thumbnail(url=self.target.display_avatar)
         embed.set_image(url=choice(pats))
         embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
 
@@ -1315,8 +1315,8 @@ class WhisperView(discord.ui.View):
             timestamp=interaction.message.created_at
         )
 
-        embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
-        embed.set_thumbnail(url=self.target.avatar.url)
+        embed.set_author(name=self.member.display_name, url=self.member.display_avatar, icon_url=self.member.display_avatar)
+        embed.set_thumbnail(url=self.target.display_avatar)
         embed.set_image(url=choice(whisperings))
         embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
 
@@ -1391,8 +1391,8 @@ class HandshakeView(discord.ui.View):
             timestamp=interaction.message.created_at
         )
 
-        embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
-        embed.set_thumbnail(url=self.target.avatar.url)
+        embed.set_author(name=self.member.display_name, url=self.member.display_avatar, icon_url=self.member.display_avatar)
+        embed.set_thumbnail(url=self.target.display_avatar)
         embed.set_image(url=choice(handshakes))
         embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
 
@@ -1467,8 +1467,8 @@ class PeekView(discord.ui.View):
             timestamp=interaction.message.created_at
         )
 
-        embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
-        embed.set_thumbnail(url=self.target.avatar.url)
+        embed.set_author(name=self.member.display_name, url=self.member.display_avatar, icon_url=self.member.display_avatar)
+        embed.set_thumbnail(url=self.target.display_avatar)
         embed.set_image(url=choice(peeks))
         embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
 
@@ -1530,8 +1530,8 @@ class DriveOverView(discord.ui.View):
             timestamp=interaction.message.created_at
         )
 
-        embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
-        embed.set_thumbnail(url=self.target.avatar.url)
+        embed.set_author(name=self.member.display_name, url=self.member.display_avatar, icon_url=self.member.display_avatar)
+        embed.set_thumbnail(url=self.target.display_avatar)
         embed.set_image(url=choice(runovers))
         embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
 
@@ -1612,8 +1612,8 @@ class HighFiveView(discord.ui.View):
             timestamp=interaction.message.created_at
         )
 
-        embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
-        embed.set_thumbnail(url=self.target.avatar.url)
+        embed.set_author(name=self.member.display_name, url=self.member.display_avatar, icon_url=self.member.display_avatar)
+        embed.set_thumbnail(url=self.target.display_avatar)
         embed.set_image(url=choice(runovers))
         embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
 

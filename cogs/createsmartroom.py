@@ -1122,7 +1122,7 @@ You can only add 1 additional channel. Voice **OR** Text."""))
 			color=ctx.author.color,
 			timestamp=ctx.message.created_at)
 
-		embed.set_thumbnail(url=ctx.author.avatar.url)
+		embed.set_thumbnail(url=ctx.author.display_avatar)
 		embed.set_footer(text="Requested")
 
 		seconds_left = deadline - the_time

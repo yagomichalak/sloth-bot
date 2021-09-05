@@ -189,7 +189,7 @@ class Giveaways(commands.Cog):
             timestamp=ctx.message.created_at
         )
 
-        embed.set_footer(text=f"Requested by: {member}", icon_url=member.avatar.url)
+        embed.set_footer(text=f"Requested by: {member}", icon_url=member.display_avatar)
 
         await ctx.send(embed=embed)
 

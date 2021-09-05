@@ -41,7 +41,7 @@ class RolePlay(commands.Cog):
             color=author.color,
             timestamp=ctx.message.created_at
         )
-        embed.set_footer(text=f"Requested by {author}", icon_url=author.avatar.url)
+        embed.set_footer(text=f"Requested by {author}", icon_url=author.display_avatar)
         view = HugView(member=author, target=member, timeout=60)
         await ctx.send(embed=embed, view=view)
 
@@ -71,7 +71,7 @@ class RolePlay(commands.Cog):
             color=author.color,
             timestamp=ctx.message.created_at
         )
-        embed.set_footer(text=f"Requested by {author}", icon_url=author.avatar.url)
+        embed.set_footer(text=f"Requested by {author}", icon_url=author.display_avatar)
         view = BootView(member=author, target=member, timeout=60)
         await ctx.send(embed=embed, view=view)
     
@@ -99,7 +99,7 @@ class RolePlay(commands.Cog):
             color=author.color,
             timestamp=ctx.message.created_at
         )
-        embed.set_footer(text=f"Requested by {author}", icon_url=author.avatar.url)
+        embed.set_footer(text=f"Requested by {author}", icon_url=author.display_avatar)
         view = KissView(self.client, member=author, target=member, timeout=60)
         await ctx.send(embed=embed, view=view)
 
@@ -127,7 +127,7 @@ class RolePlay(commands.Cog):
             color=author.color,
             timestamp=ctx.message.created_at
         )
-        embed.set_footer(text=f"Requested by {author}", icon_url=author.avatar.url)
+        embed.set_footer(text=f"Requested by {author}", icon_url=author.display_avatar)
         view = SlapView(self.client, member=author, target=member, timeout=60)
         await ctx.send(embed=embed, view=view)
 
@@ -166,8 +166,8 @@ class RolePlay(commands.Cog):
         )
         embed.set_thumbnail(url='https://i.pinimg.com/originals/87/35/53/873553eeb255e47b1b4b440e4302e17f.gif')
 
-        embed.set_author(name=partner, icon_url=partner.avatar.url, url=partner.avatar.url)
-        embed.set_footer(text=f"Requested by {member}", icon_url=member.avatar.url)
+        embed.set_author(name=partner, icon_url=partner.display_avatar, url=partner.display_avatar)
+        embed.set_footer(text=f"Requested by {member}", icon_url=member.display_avatar)
 
         # Honeymoon setup view
         view = HoneymoonView(member=member, target=member, timeout=300)
@@ -288,7 +288,7 @@ class RolePlay(commands.Cog):
             color=author.color,
             timestamp=ctx.message.created_at
         )
-        embed.set_footer(text=f"Requested by {author}", icon_url=author.avatar.url)
+        embed.set_footer(text=f"Requested by {author}", icon_url=author.display_avatar)
         view = PunchView(member=author, target=member, timeout=60)
         await ctx.send(embed=embed, view=view)
 
@@ -316,7 +316,7 @@ class RolePlay(commands.Cog):
             color=author.color,
             timestamp=ctx.message.created_at
         )
-        embed.set_footer(text=f"Requested by {author}", icon_url=author.avatar.url)
+        embed.set_footer(text=f"Requested by {author}", icon_url=author.display_avatar)
         view = GiveView(member=author, target=member, timeout=60)
         await ctx.send(embed=embed, view=view)
 
@@ -345,7 +345,7 @@ class RolePlay(commands.Cog):
             color=author.color,
             timestamp=ctx.message.created_at
         )
-        embed.set_footer(text=f"Requested by {author}", icon_url=author.avatar.url)
+        embed.set_footer(text=f"Requested by {author}", icon_url=author.display_avatar)
         view = TickleView(member=author, target=member, timeout=60)
         await ctx.send(embed=embed, view=view)
 
@@ -374,7 +374,7 @@ class RolePlay(commands.Cog):
             color=author.color,
             timestamp=ctx.message.created_at
         )
-        embed.set_footer(text=f"Requested by {author}", icon_url=author.avatar.url)
+        embed.set_footer(text=f"Requested by {author}", icon_url=author.display_avatar)
         view = YeetView(member=author, target=member, timeout=60)
         await ctx.send(embed=embed, view=view)
 
@@ -402,7 +402,7 @@ class RolePlay(commands.Cog):
             color=author.color,
             timestamp=ctx.message.created_at
         )
-        embed.set_footer(text=f"Requested by {author}", icon_url=author.avatar.url)
+        embed.set_footer(text=f"Requested by {author}", icon_url=author.display_avatar)
         view = PatView(member=author, target=member, timeout=60)
         await ctx.send(embed=embed, view=view)
 
@@ -431,7 +431,7 @@ class RolePlay(commands.Cog):
             color=author.color,
             timestamp=ctx.message.created_at
         )
-        embed.set_footer(text=f"Requested by {author}", icon_url=author.avatar.url)
+        embed.set_footer(text=f"Requested by {author}", icon_url=author.display_avatar)
         view = BegView(member=author, target=member, timeout=60)
         await ctx.send(embed=embed, view=view)
 
@@ -466,7 +466,7 @@ class RolePlay(commands.Cog):
             color=author.color,
             timestamp=ctx.message.created_at
         )
-        embed.set_footer(text=f"Requested by {author}", icon_url=author.avatar.url)
+        embed.set_footer(text=f"Requested by {author}", icon_url=author.display_avatar)
         view = WhisperView(member=author, target=member, text=text, timeout=60)
         await ctx.send(embed=embed, view=view)
 
@@ -495,7 +495,7 @@ class RolePlay(commands.Cog):
             color=author.color,
             timestamp=ctx.message.created_at
         )
-        embed.set_footer(text=f"Requested by {author}", icon_url=author.avatar.url)
+        embed.set_footer(text=f"Requested by {author}", icon_url=author.display_avatar)
         view = HandshakeView(member=author, target=member, timeout=60)
         await ctx.send(embed=embed, view=view)
 
@@ -524,7 +524,7 @@ class RolePlay(commands.Cog):
             color=author.color,
             timestamp=ctx.message.created_at
         )
-        embed.set_footer(text=f"Requested by {author}", icon_url=author.avatar.url)
+        embed.set_footer(text=f"Requested by {author}", icon_url=author.display_avatar)
         view = HighFiveView(member=author, target=member, timeout=60)
         await ctx.send(embed=embed, view=view)
 
@@ -552,7 +552,7 @@ class RolePlay(commands.Cog):
             color=author.color,
             timestamp=ctx.message.created_at
         )
-        embed.set_footer(text=f"Requested by {author}", icon_url=author.avatar.url)
+        embed.set_footer(text=f"Requested by {author}", icon_url=author.display_avatar)
         view = PeekView(member=author, target=member, timeout=60)
         await ctx.send(embed=embed, view=view)
 
@@ -581,7 +581,7 @@ class RolePlay(commands.Cog):
             color=author.color,
             timestamp=ctx.message.created_at
         )
-        embed.set_footer(text=f"Requested by {author}", icon_url=author.avatar.url)
+        embed.set_footer(text=f"Requested by {author}", icon_url=author.display_avatar)
         view = DriveOverView(member=author, target=member, timeout=60)
         await ctx.send(embed=embed, view=view)
 

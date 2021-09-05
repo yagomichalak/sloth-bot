@@ -95,7 +95,7 @@ async def on_member_remove(member):
     roles = [role for role in member.roles]
     channel = discord.utils.get(member.guild.channels, id=admin_commands_channel_id)
     embed = discord.Embed(title=member.name, description=f"User has left the server.", colour=discord.Colour.dark_red())
-    embed.set_thumbnail(url=member.avatar.url)
+    embed.set_thumbnail(url=member.display_avatar)
     embed.set_author(name=f"User Info: {member}")
     embed.add_field(name="ID:", value=member.id, inline=False)
     embed.add_field(name="Guild name:", value=member.display_name, inline=False)
@@ -251,7 +251,7 @@ async def on_voice_state_update(member, before, after):
                 embed.add_field(name='ID',
                                 value=f'```py\nUser = {member.id}\nPrevious Channel = {before.channel.id}\nCurrent Channel = {after.channel.id}```')
                 embed.set_footer(text=f"Guild name: {member.guild.name}")
-                embed.set_author(name=member, icon_url=member.avatar.url)
+                embed.set_author(name=member, icon_url=member.display_avatar)
                 await mod_log.send(embed=embed)
         # Entered a voice channel
         else:
@@ -262,7 +262,7 @@ async def on_voice_state_update(member, before, after):
                 embed.add_field(name='Channel', value=f'{after.channel.name}', inline=False)
                 embed.add_field(name='ID', value=f'```py\nUser = {member.id}\nChannel = {after.channel.id}```')
                 embed.set_footer(text=f"Guild name: {member.guild.name}")
-                embed.set_author(name=member, icon_url=member.avatar.url)
+                embed.set_author(name=member, icon_url=member.display_avatar)
                 await mod_log.send(embed=embed)
 
     # Left voice channel
@@ -274,7 +274,7 @@ async def on_voice_state_update(member, before, after):
             embed.add_field(name='Channel', value=f'{before.channel.name}', inline=False)
             embed.add_field(name='ID', value=f'```py\nUser = {member.id}\nChannel = {before.channel.id}```')
             embed.set_footer(text=f"Guild name: {member.guild.name}")
-            embed.set_author(name=member, icon_url=member.avatar.url)
+            embed.set_author(name=member, icon_url=member.display_avatar)
             await mod_log.send(embed=embed)
 
 start_time = datetime.now(timezone('Etc/GMT'))
