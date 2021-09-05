@@ -47,7 +47,7 @@ class Verify(commands.Cog):
             return
 
         # Gets the verify request and does the magic
-        verify_req = await self.get_application_by_message(payload.message_id, 'verify')
+        verify_req = await self.get_application_by_message(payload.message_id)
         if not verify_req:
             return
 
@@ -65,7 +65,7 @@ class Verify(commands.Cog):
             msg = "**Verification Request**\nOur staff has evaluated your verification request and has declined it for intern reasons."
 
         # Deletes the verify request/application
-        await self.delete_application(payload.message_id, 'verify')
+        await self.delete_application(payload.message_id)
         verify_req_channel = self.client.get_channel(self.verify_reqs_channel_id)
         app_msg = await verify_req_channel.fetch_message(payload.message_id)
         await app_msg.delete()
