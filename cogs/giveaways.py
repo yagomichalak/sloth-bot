@@ -77,7 +77,7 @@ class Giveaways(commands.Cog):
             await self.update_giveaway(giveaway[0])
 
     @commands.group(name="giveaway", aliases=['ga'])
-    @commands.has_permissions(administrator=True)
+    @commands.check_any(utils.is_allowed_members([878339296770281522]), utils.is_allowed())
     async def _giveaway(self, ctx) -> None:
         """ Giveaway manager command. """
 

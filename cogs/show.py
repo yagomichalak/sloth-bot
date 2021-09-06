@@ -82,7 +82,7 @@ class Show(commands.Cog):
         await ctx.send(embed=embed, view=view)
 
     # Shows the specific rule
-    @commands.command()
+    @commands.command(name="rule")
     @utils.is_allowed(allowed_roles)
     async def _rule_command(self, ctx, numb: int = None) -> None:
         """ Shows a specific server rule.
