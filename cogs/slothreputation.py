@@ -1,4 +1,5 @@
 import discord
+from discord.app import Option, OptionChoice
 from discord.ext import commands
 from mysqldb import *
 from datetime import datetime
@@ -7,6 +8,8 @@ from typing import List, Optional
 from extra.view import ExchangeActivityView
 from extra import utils
 from .slothclass import classes
+
+guild_ids = [int(os.getenv('SERVER_ID'))]
 
 commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
 
@@ -69,6 +72,15 @@ class SlothReputation(commands.Cog):
         boxes = int((percentage * length_progress_bar) / 100)
         progress_bar = f"{xp}xp / {goal_xp}xp\n{':blue_square:' * boxes}{':white_large_square:' * (length_progress_bar - boxes)}"
         return progress_bar
+
+    
+    @commands.slash_command(name="info", guild_ids=guild_ids)
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def _info_slash(self, ctx, 
+        member: Option(discord.Member, description="The member to show the info; [Default=Yours]", required=False)) -> None:
+        """ Shows the user's level and experience points. """
+
+        await self._info(ctx, member)
 
     @commands.command(name="info", aliases=['status', 'exchange', 'level', 'lvl', 'exp', 'xp', 'money', 'balance'])
     @commands.cooldown(1, 5, commands.BucketType.user)

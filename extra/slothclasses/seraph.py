@@ -1,8 +1,5 @@
 import discord
-from discord import user
 from discord.ext import commands
-from discord.ext.commands.errors import NoEntryPointError
-from discord.ext.commands.help import HelpCommand
 from .player import Player, Skill
 from mysqldb import the_database
 from extra.menu import ConfirmSkill
