@@ -11,6 +11,7 @@ from extra.prompt.menu import Confirm
 from mysqldb import the_database
 
 server_id = int(os.getenv('SERVER_ID'))
+giveaway_manager_role_id: int = int(os.getenv('GIVEAWAY_MANAGER_ROLE_ID'))
 
 class Giveaways(commands.Cog):
     """ Category for commands related to giveaways. """
@@ -77,7 +78,7 @@ class Giveaways(commands.Cog):
             await self.update_giveaway(giveaway[0])
 
     @commands.group(name="giveaway", aliases=['ga'])
-    @utils.is_allowed_members([878339296770281522]) # Pepsi's ID.
+    @utils.is_allowed([giveaway_manager_role_id])
     async def _giveaway(self, ctx) -> None:
         """ Giveaway manager command. """
 
