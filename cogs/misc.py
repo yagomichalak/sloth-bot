@@ -415,22 +415,22 @@ class Misc(commands.Cog):
         await self.delete_member_reminder(reminder_id)
         await ctx.send(f"**Successfully deleted reminder with ID `{reminder_id}`, {member.mention}!**")
 
-    @commands.slash_command(name="dnk", guild_ids=guild_ids)
-    async def _dnk(self, ctx) -> None:
-        """ Tells you something about DNK. """
-        await ctx.send(f"**DNK est toujours là pour les vrais !**")
+    # @commands.slash_command(name="dnk", guild_ids=guild_ids)
+    # async def _dnk(self, ctx) -> None:
+    #     """ Tells you something about DNK. """
+    #     await ctx.send(f"**DNK est toujours là pour les vrais !**")
 
-    @commands.slash_command(name="twiks", guild_ids=guild_ids)
-    async def _twiks(self, ctx) -> None:
-        """ Tells you something about Twiks. """
+    # @commands.slash_command(name="twiks", guild_ids=guild_ids)
+    # async def _twiks(self, ctx) -> None:
+    #     """ Tells you something about Twiks. """
 
-        await ctx.send(f"**Twiks est mon frérot !**")
+    #     await ctx.send(f"**Twiks est mon frérot !**")
 
-    @commands.user_command(name="click", guild_ids=guild_ids)
-    async def _click(self, ctx, user: discord.Member) -> None:
-        """ Clicks on a user. """
+    # @commands.user_command(name="click", guild_ids=guild_ids)
+    # async def _click(self, ctx, user: discord.Member) -> None:
+    #     """ Clicks on a user. """
 
-        await ctx.send(f"**{ctx.author.mention} clicked on {user.mention}!**")
+    #     await ctx.send(f"**{ctx.author.mention} clicked on {user.mention}!**")
 
 
 

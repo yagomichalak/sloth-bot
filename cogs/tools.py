@@ -836,51 +836,51 @@ class Tools(commands.Cog):
 
 		await ctx.reply(f"**We currently have `{len(ctx.guild.channels)}` channels!**")
 
-	@commands.slash_command(name="timestamp", guild_ids=guild_ids)
-	async def _timestamp(self, ctx, 
-			hour: Option(int, name="hour", description="Hour of time in 24 hour format.", required=False),
-			minute: Option(int, name="minute", description="Minute of time.", required=False),
-			day: Option(int, name="day", description="Day of date.", required=False),
-			month: Option(int, name="month", description="Month of date.", required=False),
-			year: Option(int, name="year", description="Year of date.", required=False)) -> None:
-		""" Gets a timestamp for a specific date and time. - Output will format according to your timezone. """
+	# @commands.slash_command(name="timestamp", guild_ids=guild_ids)
+	# async def _timestamp(self, ctx, 
+	# 		hour: Option(int, name="hour", description="Hour of time in 24 hour format.", required=False),
+	# 		minute: Option(int, name="minute", description="Minute of time.", required=False),
+	# 		day: Option(int, name="day", description="Day of date.", required=False),
+	# 		month: Option(int, name="month", description="Month of date.", required=False),
+	# 		year: Option(int, name="year", description="Year of date.", required=False)) -> None:
+	# 	""" Gets a timestamp for a specific date and time. - Output will format according to your timezone. """
 
-		current_date = await utils.get_time_now()
+	# 	current_date = await utils.get_time_now()
 
-		if hour: current_date = current_date.replace(hour=hour)
-		if minute: current_date = current_date.replace(minute=minute)
-		if day: current_date = current_date.replace(day=day)
-		if month: current_date = current_date.replace(month=month)
-		if year: current_date = current_date.replace(year=year)
+	# 	if hour: current_date = current_date.replace(hour=hour)
+	# 	if minute: current_date = current_date.replace(minute=minute)
+	# 	if day: current_date = current_date.replace(day=day)
+	# 	if month: current_date = current_date.replace(month=month)
+	# 	if year: current_date = current_date.replace(year=year)
 
-		embed = discord.Embed(
-			title="__Timestamp Created__",
-			description=f"Requested date: `{current_date.strftime('%m/%d/%Y %H:%M')}` (**GMT**)",
-			color=ctx.author.color
-		)
-		timestamp = int(current_date.timestamp())
-		embed.add_field(name="Output", value=f"<t:{timestamp}>")
-		embed.add_field(name="Copyable", value=f"\<t:{timestamp}>")
+	# 	embed = discord.Embed(
+	# 		title="__Timestamp Created__",
+	# 		description=f"Requested date: `{current_date.strftime('%m/%d/%Y %H:%M')}` (**GMT**)",
+	# 		color=ctx.author.color
+	# 	)
+	# 	timestamp = int(current_date.timestamp())
+	# 	embed.add_field(name="Output", value=f"<t:{timestamp}>")
+	# 	embed.add_field(name="Copyable", value=f"\<t:{timestamp}>")
 
-		await ctx.send(embed=embed, ephemeral=True)
+	# 	await ctx.send(embed=embed, ephemeral=True)
 
-	@commands.slash_command(name="mention", guild_ids=guild_ids)
-	@utils.is_allowed([mod_role_id, admin_role_id, owner_role_id])
-	async def _mention(self, ctx, 
-		member: Option(str, name="member", description="The Staff member to mention/ping.", required=True,
-			choices=[
-				OptionChoice(name="Cosmos", value=os.getenv('COSMOS_ID')), OptionChoice(name="Alex", value=os.getenv('ALEX_ID')),
-				OptionChoice(name="DNK", value=os.getenv('DNK_ID')), OptionChoice(name="Muffin", value=os.getenv('MUFFIN_ID')),
-				OptionChoice(name="Pretzel", value=os.getenv('PRETZEL_ID')), OptionChoice(name="Prisca", value=os.getenv('PRISCA_ID')),
-				OptionChoice(name="GuiBot", value=os.getenv('GUIBOT_ID'))
-			]
-		)) -> None:
-		""" (ADMIN) Used to mention staff members. """
+	# @commands.slash_command(name="mention", guild_ids=guild_ids)
+	# @utils.is_allowed([mod_role_id, admin_role_id, owner_role_id])
+	# async def _mention(self, ctx, 
+	# 	member: Option(str, name="member", description="The Staff member to mention/ping.", required=True,
+	# 		choices=[
+	# 			OptionChoice(name="Cosmos", value=os.getenv('COSMOS_ID')), OptionChoice(name="Alex", value=os.getenv('ALEX_ID')),
+	# 			OptionChoice(name="DNK", value=os.getenv('DNK_ID')), OptionChoice(name="Muffin", value=os.getenv('MUFFIN_ID')),
+	# 			OptionChoice(name="Pretzel", value=os.getenv('PRETZEL_ID')), OptionChoice(name="Prisca", value=os.getenv('PRISCA_ID')),
+	# 			OptionChoice(name="GuiBot", value=os.getenv('GUIBOT_ID'))
+	# 		]
+	# 	)) -> None:
+	# 	""" (ADMIN) Used to mention staff members. """
 
-		if staff_member := discord.utils.get(ctx.guild.members, id=int(member)):
-			await ctx.send(staff_member.mention)
-		else:
-			await ctx.send("**For some reason I couldn't ping them =\ **")
+	# 	if staff_member := discord.utils.get(ctx.guild.members, id=int(member)):
+	# 		await ctx.send(staff_member.mention)
+	# 	else:
+	# 		await ctx.send("**For some reason I couldn't ping them =\ **")
 
 def setup(client):
 	client.add_cog(Tools(client))

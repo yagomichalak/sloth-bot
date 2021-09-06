@@ -16,9 +16,6 @@ class Seraph(Player):
 
     emoji = '<:Seraph:839498018998976563>'
 
-    def __init__(self, client) -> None:
-        self.client = client
-
     @commands.command(aliases=['dp', 'divine', 'protection'])
     @Player.skill_on_cooldown()
     @Player.user_is_class('seraph')
