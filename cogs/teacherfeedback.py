@@ -1,15 +1,12 @@
 import discord
-from discord import user
-from discord.abc import _Overwrites
 from discord.ext import commands, menus
 from mysqldb import *
 from datetime import datetime
 import asyncio
-from typing import Dict, List, Union, Any
-import time
+from typing import Dict, List, Union
 import os
 from extra.useful_variables import different_class_roles
-from extra.menu import ConfirmSkill, prompt_message_guild, prompt_number, SwitchSavedClasses, SwitchSavedClassesButtons
+from extra.menu import ConfirmSkill, prompt_message_guild, SwitchSavedClasses, SwitchSavedClassesButtons
 
 # IDs from .env
 create_room_vc_id = int(os.getenv('CREATE_SMART_CLASSROOM_VC_ID'))
