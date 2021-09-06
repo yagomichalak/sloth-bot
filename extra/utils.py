@@ -29,10 +29,11 @@ async def parse_time(tz: str = 'Etc/GMT') -> str:
     return datetime(*map(int, re.split(r'[^\d]', str(datetime.now(tzone)).replace('+00:00', ''))))
 
 
-def is_allowed(roles: List[int], check_adm: Optional[bool] = True) -> bool:
+def is_allowed(roles: List[int], check_adm: Optional[bool] = True, throw_exc: Optional[bool] = False) -> bool:
     """ Checks whether the member has adm perms or has an allowed role.
     :param roles: The roles to check if the user has.
-    :param check_adm: Whether to check whether the user has adm perms or not. [Optional][Default=True] """
+    :param check_adm: Whether to check whether the user has adm perms or not. [Optional][Default=True]
+    :param throw_exec: Whether to throw an exception if it returns false. [Optional][Default=False] """
 
     async def real_check(ctx: Optional[commands.Context] = None, channel: Optional[discord.TextChannel] = None, 
         member: Optional[discord.Member] = None) -> bool:
@@ -49,15 +50,16 @@ def is_allowed(roles: List[int], check_adm: Optional[bool] = True) -> bool:
             if rid in [role.id for role in member.roles]:
                 return True
 
-        
-        raise commands.MissingAnyRole(roles)
+        if throw_exc:
+            raise commands.MissingAnyRole(roles)
 
     return commands.check(real_check)
 
-def is_allowed_members(members: List[int], check_adm: Optional[bool] = True) -> bool:
+def is_allowed_members(members: List[int], check_adm: Optional[bool] = True, throw_exc: Optional[bool] = False) -> bool:
     """ Checks whether the member is allowed to use a command or function.
     :param members: The list of members to check.
-    :param check_adm: Whether to check whether the user has adm perms or not. [Optional][Default=True] """
+    :param check_adm: Whether to check whether the user has adm perms or not. [Optional][Default=True]
+    :param throw_exec: Whether to throw an exception if it returns false. [Optional][Default=False] """
     
     async def real_check(ctx: Optional[commands.Context] = None, channel: Optional[discord.TextChannel] = None, 
         member: Optional[discord.Member] = None):
@@ -73,7 +75,8 @@ def is_allowed_members(members: List[int], check_adm: Optional[bool] = True) -> 
         if member.id in members:
             return True
 
-        raise commands.MissingPermissions(missing_permissions=['administrator'])
+        if throw_exc:
+            raise commands.MissingPermissions(missing_permissions=['administrator'])
 
     return commands.check(real_check)
 
