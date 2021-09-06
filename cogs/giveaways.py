@@ -119,6 +119,8 @@ class Giveaways(commands.Cog):
         
         PS: The total time summing up days, minutes and minutes MUST be greater than 0. """
 
+        await ctx.message.delete()
+
         member = ctx.author
         guild = ctx.guild
 
