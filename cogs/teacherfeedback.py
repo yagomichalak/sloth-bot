@@ -14,7 +14,7 @@ from extra import utils
 create_room_vc_id = int(os.getenv('CREATE_SMART_CLASSROOM_VC_ID'))
 create_room_txt_id = int(os.getenv('CREATE_CLASSROOM_CHANNEL_ID'))
 create_room_cat_id = int(os.getenv('CREATE_ROOM_CAT_ID'))
-create_private_room_vc_id: int = int(os.getenv('CREATE_PRIVATE_ROOM_VC_ID')) # CREATE_PRIVATE_ROOM_CAT_ID
+create_private_room_vc_id: int = int(os.getenv('CREATE_PRIVATE_ROOM_VC_ID'))
 
 mod_role_id = int(os.getenv('MOD_ROLE_ID'))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID'))
@@ -149,18 +149,18 @@ class TeacherFeedback(commands.Cog):
                 if len_users == 0 and user_voice_channel.id not in [create_room_vc_id, create_private_room_vc_id]:
 
                     private_rooms = await cog.get_premium_vc(before.channel.id)
-                    if not private_rooms: return
+                    if private_rooms:
                     
-                    private_vc = discord.utils.get(guild.voice_channels, id=private_rooms[0][1]) # Vc channel
-                    private_txt = discord.utils.get(guild.text_channels, id=private_rooms[0][2]) # Txt channel
+                        private_vc = discord.utils.get(guild.voice_channels, id=private_rooms[0][1]) # Vc channel
+                        private_txt = discord.utils.get(guild.text_channels, id=private_rooms[0][2]) # Txt channel
 
-                    try:
-                        await user_voice_channel.delete()
-                        await private_txt.delete()
-                    except:
-                        pass
-                    finally:
-                        await cog.delete_premium_vc(member.id, user_voice_channel.id)
+                        try:
+                            await user_voice_channel.delete()
+                            await private_txt.delete()
+                        except:
+                            pass
+                        finally:
+                            await cog.delete_premium_vc(member.id, user_voice_channel.id)
 
 
         if not after.channel:
