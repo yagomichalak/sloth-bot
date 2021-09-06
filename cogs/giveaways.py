@@ -127,7 +127,7 @@ class Giveaways(commands.Cog):
         giveaway_time = await self.get_giveaway_time(flags)
 
         if giveaway_time == 0:
-            return await ctx.send(f"**Please, inform the time, {member.mention}!**")
+            return await ctx.send(f"**Please, inform the time, {member.mention}!**", delete_after=3)
 
         current_ts = await utils.get_timestamp()
 
@@ -165,7 +165,7 @@ class Giveaways(commands.Cog):
             )
         except Exception as e:
             print(e)
-            await ctx.send(f"**Something went wrong with it, {member.mention}!**")
+            await ctx.send(f"**Something went wrong with it, {member.mention}!**", delete_after=3)
 
     @_giveaway.command(aliases=['view', 'visualize', 'show', 'list'])
     async def see(self, ctx) -> None:
@@ -175,9 +175,9 @@ class Giveaways(commands.Cog):
 
         giveaways = await self.get_giveaways()
         if not giveaways:
-            return await ctx.send(f"**There are no active giveaways registered, {member.mention}!**")
+            return await ctx.send(f"**There are no active giveaways registered, {member.mention}!**", delete_after=3)
 
-        message_url = 'https://canary.discord.com/channels/{server_id}/{channel_id}/{message_id}'
+        message_url = 'https://discord.com/channels/{server_id}/{channel_id}/{message_id}'
 
         formatted_giveaways: List[str] = '\n'.join([
             f"[Msg]({message_url.format(server_id=server_id, channel_id=ga[1], message_id=ga[0])}) - **P:** `{ga[2]}` **W:** `{ga[3]}` | <t:{ga[4]}:R>"
@@ -203,14 +203,14 @@ class Giveaways(commands.Cog):
         member = ctx.author
 
         if not message_id:
-            return await ctx.send(f"**Please, inform a message ID, {member.mention}!**")
+            return await ctx.send(f"**Please, inform a message ID, {member.mention}!**", delete_after=3)
 
         giveaway = await self.get_giveaway(message_id)
         if not giveaway:
-            return await ctx.send(f"**The specified giveaway doesn't exist, {member.mention}!**")
+            return await ctx.send(f"**The specified giveaway doesn't exist, {member.mention}!**", delete_after=3)
 
         if not giveaway[5]:
-            return await ctx.send(f"**This giveaway hasn't ended yet, you can't reroll it, {member.mention}!**")
+            return await ctx.send(f"**This giveaway hasn't ended yet, you can't reroll it, {member.mention}!**", delete_after=3)
 
         entries = await self.get_giveaway_entries(giveaway[0])
 
@@ -228,18 +228,18 @@ class Giveaways(commands.Cog):
 
         member = ctx.author
         if not message_id:
-            return await ctx.send(f"**Please, inform a message ID, {member.mention}!**")
+            return await ctx.send(f"**Please, inform a message ID, {member.mention}!**", delete_after=3)
 
         giveaway = await self.get_giveaway(message_id)
         if not giveaway:
-            return await ctx.send(f"**The specified giveaway message doesn't exist, {member.mention}!**")
+            return await ctx.send(f"**The specified giveaway message doesn't exist, {member.mention}!**", delete_after=3)
 
         confirm = await Confirm(f"**Are you sure you want to delete the giveaway with ID: `{giveaway[0]}`, {member.mention}?**").prompt(ctx)
         if not confirm:
-            return await ctx.send(f"**Not doing it, then, {member.mention}!**")
+            return await ctx.send(f"**Not doing it, then, {member.mention}!**", delete_after=3)
 
         await self.delete_giveaway(giveaway[0])
-        await ctx.send((f"**Successfully deleted the giveaway with ID: `{giveaway[0]}`, {member.mention}!**"))
+        await ctx.send(f"**Successfully deleted the giveaway with ID: `{giveaway[0]}`, {member.mention}!**", delete_after=3)
 
 
     async def get_giveaway_time(self, flags: Dict[str, Union[int, str]]) -> int:
