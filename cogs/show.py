@@ -1,4 +1,5 @@
 import discord
+from discord.app import Option, OptionChoice
 from discord.ext import commands
 from mysqldb import the_database
 from extra.useful_variables import rules
@@ -8,7 +9,7 @@ import subprocess
 import sys
 
 allowed_roles = [int(os.getenv('OWNER_ROLE_ID')), int(os.getenv('ADMIN_ROLE_ID')), int(os.getenv('MOD_ROLE_ID'))]
-
+guild_ids = [int(os.getenv('SERVER_ID'))]
 
 class Show(commands.Cog):
     '''
@@ -114,9 +115,21 @@ class Show(commands.Cog):
             await ctx.delete()
             await ctx.channel.send(embed=embed)
 
+    @commands.slash_command(name="rules", guild_ids=guild_ids)
+    @utils.is_allowed(allowed_roles)
+    async def _rules_slash(self, ctx, 
+        rule_number: Option(int, name="rule_number", description="The number of the rule you wanna show.", choices=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], required=False), 
+        reply_message: Option(bool, name="reply_message", description="Weather the slash command should reply to your original message.", required=False, default=True)) -> None:
+        """ (MOD) Sends an embedded message containing all rules in it, or a specific rule. """
+
+        if rule_number:
+            await self._rule(ctx, rule_number, reply_message)
+        else:
+            await self._rules(ctx, reply_message)
+
     @commands.command(name="rules")
     @utils.is_allowed(allowed_roles)
-    async def _rules_commands(self, ctx) -> None:
+    async def _rules_command(self, ctx) -> None:
         """ (MOD) Sends an embedded message containing all rules in it. """
 
         await self._rules(ctx)

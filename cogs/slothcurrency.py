@@ -1,5 +1,5 @@
 import discord
-from discord import user
+from discord.app import Option, OptionChoice
 from discord.ext import commands, menus
 from mysqldb import *
 from external_cons import the_drive
@@ -7,7 +7,7 @@ from datetime import datetime
 import random
 from PIL import Image, ImageDraw, ImageFont
 import os
-# import requests
+
 import shutil
 import asyncio
 import aiohttp
@@ -16,7 +16,7 @@ import glob
 from itertools import cycle
 
 from extra.menu import InventoryLoop
-from typing import List, Dict, Tuple, Union, Any
+from typing import List, Dict, Tuple, Union
 
 from extra.useful_variables import level_badges, flag_badges
 from extra.gif_manager import GIF
@@ -30,6 +30,7 @@ int(os.getenv('PATREONS_CHANNEL_ID'))
 ]
 afk_channel_id = int(os.getenv('AFK_CHANNEL_ID'))
 booster_role_id = int(os.getenv('BOOSTER_ROLE_ID'))
+guild_ids = [int(os.getenv('SERVER_ID'))]
 
 
 class SlothCurrency(commands.Cog):
@@ -496,6 +497,15 @@ class SlothCurrency(commands.Cog):
         public_flags = member.public_flags.all()
         public_flag_names = list(map(lambda pf: pf.name, public_flags))
         return public_flag_names
+
+    
+    @commands.slash_command(name="profile", guild_ids=guild_ids)
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def _profile_slash(self, ctx, member: Option(discord.Member, description="The member to show the info; [Default=Yours]", required=False)) -> None:
+        """ Shows the member's profile with their custom sloth. """
+
+        await ctx.defer()
+        await self._profile(ctx, member)
 
     @commands.command(name="profile")
     @commands.cooldown(1, 5, commands.BucketType.user)

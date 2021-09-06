@@ -1,4 +1,5 @@
 import discord
+from discord.app import Option, OptionChoice
 from discord.ext import commands, tasks
 from random import randint, choice
 from cogs.slothcurrency import SlothCurrency
@@ -15,11 +16,10 @@ allowed_roles = [
     int(os.getenv('SLOTH_EXPLORER_ROLE_ID')),int(os.getenv('SLOTH_NAPPER_ROLE_ID')), int(os.getenv('SLOTH_NATION_ROLE_ID')),
     int(os.getenv('SLOTH_SUPPORTER_ROLE_ID')), int(os.getenv('SLOTH_LOVERS_ROLE_ID')),
     ]
+guild_ids = [int(os.getenv('SERVER_ID'))]
 
 class Misc(commands.Cog):
-    '''
-    Miscellaneous related commands.
-    '''
+    """ Miscellaneous related commands. """
 
     def __init__(self, client):
         self.client = client
@@ -414,6 +414,25 @@ class Misc(commands.Cog):
 
         await self.delete_member_reminder(reminder_id)
         await ctx.send(f"**Successfully deleted reminder with ID `{reminder_id}`, {member.mention}!**")
+
+    @commands.slash_command(name="dnk", guild_ids=guild_ids)
+    async def _dnk(self, ctx) -> None:
+        """ Tells you something about DNK. """
+        await ctx.send(f"**DNK est toujours là pour les vrais !**")
+
+    @commands.slash_command(name="twiks", guild_ids=guild_ids)
+    async def _twiks(self, ctx) -> None:
+        """ Tells you something about Twiks. """
+
+        await ctx.send(f"**Twiks est mon frérot !**")
+
+    @commands.user_command(name="click", guild_ids=guild_ids)
+    async def _click(self, ctx, user: discord.Member) -> None:
+        """ Clicks on a user. """
+
+        await ctx.send(f"**{ctx.author.mention} clicked on {user.mention}!**")
+
+
 
 
 def setup(client):
