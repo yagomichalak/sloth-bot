@@ -736,6 +736,16 @@ You can only add 1 additional channel. Voice **OR** Text."""))
 		await mycursor.close()
 		return premium_vc
 
+	async def get_premium_txt(self, user_txt: int) -> List[List[int]]:
+		""" Gets a Premium Room by text channel ID.
+		:param user_txt: The text channel ID. """
+
+		mycursor, db = await the_database()
+		await mycursor.execute("SELECT * FROM PremiumVc WHERE user_txt = %s", (user_txt,))
+		premium_txt = await mycursor.fetchall()
+		await mycursor.close()
+		return premium_txt
+
 	async def delete_premium_vc(self, user_id: int, user_vc: int) -> None:
 		""" Deletes a Premium Room by voice channel ID.
 		:param user_id: The owner ID.
@@ -743,6 +753,16 @@ You can only add 1 additional channel. Voice **OR** Text."""))
 
 		mycursor, db = await the_database()
 		await mycursor.execute("DELETE FROM PremiumVc WHERE user_id = %s and user_vc = %s", (user_id, user_vc))
+		await db.commit()
+		await mycursor.close()
+
+	async def delete_premium_txt(self, user_id: int, user_txt: int) -> None:
+		""" Deletes a Premium Room by text channel ID.
+		:param user_id: The owner ID.
+		:param user_txt: The text channel ID. """
+
+		mycursor, db = await the_database()
+		await mycursor.execute("DELETE FROM PremiumVc WHERE user_id = %s and user_txt = %s", (user_id, user_txt))
 		await db.commit()
 		await mycursor.close()
 
