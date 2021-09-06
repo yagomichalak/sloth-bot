@@ -177,14 +177,14 @@ class QuickButtons(discord.ui.View):
         """ Shows the member's profile. """
         
         await interaction.response.defer()
-        await self.client.get_cog("SlothCurrency").profile(self.ctx, member=self.target_member)
+        await self.client.get_cog("SlothCurrency")._profile(self.ctx, member=self.target_member)
 
     @discord.ui.button(label="Info", style=2, emoji="ℹ️", custom_id=f"user_info")
     async def info_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
         """ Shows the member's info. """
 
         await interaction.response.defer()
-        await self.client.get_cog("SlothReputation").info(self.ctx, member=self.target_member)
+        await self.client.get_cog("SlothReputation")._info(self.ctx, member=self.target_member)
 
     @discord.ui.button(label="Fake Accounts", style=2, emoji="🥸", custom_id=f"user_fake_accounts")
     async def fake_accounts_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
