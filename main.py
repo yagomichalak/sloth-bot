@@ -401,6 +401,110 @@ async def reload(ctx, extension: str = None):
 
 
 
+# Slash commands
+
+@client.slash_command(name="embed", default_permission=False, guild_ids=guild_ids)
+@commands.has_permissions(administrator=True)
+async def _embed(ctx,
+    description: Option(str, name="description", description="Description.", required=False),
+    title: Option(str, name="title", description="Title.", required=False),
+    timestamp: Option(bool, name="timestamp", description="If timestamp is gonna be shown.", required=False),
+    url: Option(str, name="url", description="URL for the title.", required=False),
+    thumbnail: Option(str, name="thumbnail", description="Thumbnail for the embed.", required=False),
+    image: Option(str, name="image", description="Display image.", required=False),
+    color: Option(str, name="color", description="The color for the embed.", required=False,
+        choices=[
+            OptionChoice(name="Blue", value="0011ff"), OptionChoice(name="Red", value="ff0000"),
+            OptionChoice(name="Green", value="00ff67"), OptionChoice(name="Yellow", value="fcff00"),
+            OptionChoice(name="Black", value="000000"), OptionChoice(name="White", value="ffffff"),
+            OptionChoice(name="Orange", value="ff7100"), OptionChoice(name="Brown", value="522400"),
+            OptionChoice(name="Purple", value="380058")])) -> None:
+    """ (ADM) Makes an improved embedded message """
+
+    # Checks if there's a timestamp and sorts time
+    embed = discord.Embed()
+
+    # Adds optional parameters, if informed
+    if title: embed.title = title
+    if timestamp: embed.timestamp = await utils.parse_time()
+    if description: embed.description = description.replace(r'\n', '\n')
+    if color: embed.color = int(color, 16)
+    if thumbnail: embed.set_thumbnail(url=thumbnail)
+    if url: embed.url = url
+    if image: embed.set_image(url=image)
+
+    if not description and not image and not thumbnail:
+        return await ctx.send(
+            f"**{ctx.author.mention}, you must inform at least one of the following options: `description`, `image`, `thumbnail`**")
+
+    await ctx.send(embed=embed)
+
+
+
+
+@client.slash_command(name="timestamp", guild_ids=guild_ids)
+async def _timestamp(ctx, 
+        hour: Option(int, name="hour", description="Hour of time in 24 hour format.", required=False),
+        minute: Option(int, name="minute", description="Minute of time.", required=False),
+        day: Option(int, name="day", description="Day of date.", required=False),
+        month: Option(int, name="month", description="Month of date.", required=False),
+        year: Option(int, name="year", description="Year of date.", required=False)) -> None:
+    """ Gets a timestamp for a specific date and time. - Output will format according to your timezone. """
+
+    current_date = await utils.get_time_now()
+
+    if hour: current_date = current_date.replace(hour=hour)
+    if minute: current_date = current_date.replace(minute=minute)
+    if day: current_date = current_date.replace(day=day)
+    if month: current_date = current_date.replace(month=month)
+    if year: current_date = current_date.replace(year=year)
+
+    embed = discord.Embed(
+        title="__Timestamp Created__",
+        description=f"Requested date: `{current_date.strftime('%m/%d/%Y %H:%M')}` (**GMT**)",
+        color=ctx.author.color
+    )
+    timestamp = int(current_date.timestamp())
+    embed.add_field(name="Output", value=f"<t:{timestamp}>")
+    embed.add_field(name="Copyable", value=f"\<t:{timestamp}>")
+
+    await ctx.send(embed=embed, ephemeral=True)
+
+@client.slash_command(name="dnk", guild_ids=guild_ids)
+async def _dnk(ctx) -> None:
+    """ Tells you something about DNK. """
+    await ctx.send(f"**DNK est toujours là pour les vrais !**")
+
+@client.slash_command(name="twiks", guild_ids=guild_ids)
+async def _twiks(ctx) -> None:
+    """ Tells you something about Twiks. """
+
+    await ctx.send(f"**Twiks est mon frérot !**")
+
+
+@client.slash_command(name="mention", guild_ids=guild_ids)
+@utils.is_allowed([moderator_role_id, admin_role_id])
+async def _mention(ctx, 
+    member: Option(str, name="member", description="The Staff member to mention/ping.", required=True,
+		choices=[
+			OptionChoice(name="Cosmos", value=os.getenv('COSMOS_ID')), OptionChoice(name="Alex", value=os.getenv('ALEX_ID')),
+			OptionChoice(name="DNK", value=os.getenv('DNK_ID')), OptionChoice(name="Muffin", value=os.getenv('MUFFIN_ID')),
+			OptionChoice(name="Pretzel", value=os.getenv('PRETZEL_ID')), OptionChoice(name="Prisca", value=os.getenv('PRISCA_ID')),
+            OptionChoice(name="GuiBot", value=os.getenv('GUIBOT_ID'))
+		]
+	)) -> None:
+    """ (ADMIN) Used to mention staff members. """
+
+    if staff_member := discord.utils.get(ctx.guild.members, id=int(member)):
+        await ctx.send(staff_member.mention)
+    else:
+        await ctx.send("**For some reason I couldn't ping them =\ **")
+
+
+# End of slash commands
+
+
+
 _cnp = client.command_group(name="cnp", description="For copy and pasting stuff.", guild_ids=guild_ids)
 
 @_cnp.command(name="specific")
@@ -453,6 +557,42 @@ async def _speak(ctx, language: Option(str, name="language", description="The la
         color=member.color
     )
     await ctx.send(embed=embed)
+
+@client.slash_command(name="rules", guild_ids=guild_ids)
+@utils.is_allowed([moderator_role_id, admin_role_id])
+async def _rules_slash(ctx, 
+    rule_number: Option(int, name="rule_number", description="The number of the rule you wanna show.", choices=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], required=False), 
+    reply_message: Option(bool, name="reply_message", description="Weather the slash command should reply to your original message.", required=False, default=True)) -> None:
+    """ (MOD) Sends an embedded message containing all rules in it, or a specific rule. """
+
+    cog = client.get_cog('Show')
+    if rule_number:
+        await cog._rule(ctx, rule_number, reply_message)
+    else:
+        await cog._rules(ctx, reply_message)
+
+
+
+@client.user_command(name="click", guild_ids=guild_ids)
+async def _click(ctx, user: discord.Member) -> None:
+    await ctx.send(f"**{ctx.author.mention} clicked on {user.mention}!**")
+
+@client.slash_command(name="info", guild_ids=guild_ids)
+@commands.cooldown(1, 5, commands.BucketType.user)
+async def _info_slash(ctx, 
+    member: Option(discord.Member, description="The member to show the info; [Default=Yours]", required=False)) -> None:
+    """ Shows the user's level and experience points. """
+
+    await client.get_cog('SlothReputation')._info(ctx, member)
+
+@client.slash_command(name="profile", guild_ids=guild_ids)
+@commands.cooldown(1, 5, commands.BucketType.user)
+async def _profile_slash(ctx, member: Option(discord.Member, description="The member to show the info; [Default=Yours]", required=False)) -> None:
+    """ Shows the member's profile with their custom sloth. """
+
+    await ctx.defer()
+    await client.get_cog('SlothCurrency')._profile(ctx, member)
+
 
 for filename in os.listdir('./cogs'):
     if filename.endswith('.py'):

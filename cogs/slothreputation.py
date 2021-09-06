@@ -74,13 +74,13 @@ class SlothReputation(commands.Cog):
         return progress_bar
 
     
-    @commands.slash_command(name="info", guild_ids=guild_ids)
-    @commands.cooldown(1, 5, commands.BucketType.user)
-    async def _info_slash(self, ctx, 
-        member: Option(discord.Member, description="The member to show the info; [Default=Yours]", required=False)) -> None:
-        """ Shows the user's level and experience points. """
+    # @commands.slash_command(name="info", guild_ids=guild_ids)
+    # @commands.cooldown(1, 5, commands.BucketType.user)
+    # async def _info_slash(self, ctx, 
+    #     member: Option(discord.Member, description="The member to show the info; [Default=Yours]", required=False)) -> None:
+    #     """ Shows the user's level and experience points. """
 
-        await self._info(ctx, member)
+    #     await self._info(ctx, member)
 
     @commands.command(name="info", aliases=['status', 'exchange', 'level', 'lvl', 'exp', 'xp', 'money', 'balance'])
     @commands.cooldown(1, 5, commands.BucketType.user)

@@ -499,13 +499,13 @@ class SlothCurrency(commands.Cog):
         return public_flag_names
 
     
-    @commands.slash_command(name="profile", guild_ids=guild_ids)
-    @commands.cooldown(1, 5, commands.BucketType.user)
-    async def _profile_slash(self, ctx, member: Option(discord.Member, description="The member to show the info; [Default=Yours]", required=False)) -> None:
-        """ Shows the member's profile with their custom sloth. """
+    # @commands.slash_command(name="profile", guild_ids=guild_ids)
+    # @commands.cooldown(1, 5, commands.BucketType.user)
+    # async def _profile_slash(self, ctx, member: Option(discord.Member, description="The member to show the info; [Default=Yours]", required=False)) -> None:
+    #     """ Shows the member's profile with their custom sloth. """
 
-        await ctx.defer()
-        await self._profile(ctx, member)
+    #     await ctx.defer()
+    #     await self._profile(ctx, member)
 
     @commands.command(name="profile")
     @commands.cooldown(1, 5, commands.BucketType.user)
