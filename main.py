@@ -112,13 +112,13 @@ async def on_member_remove(member):
 @client.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.MissingPermissions):
-        await ctx.send("You can't do that!")
+        await ctx.send("**You can't do that!**")
 
     elif isinstance(error, commands.MissingRequiredArgument):
-        await ctx.send('Please, inform all parameters!')
+        await ctx.send('**Please, inform all parameters!**')
 
     elif isinstance(error, commands.NotOwner):
-        await ctx.send("You're not the bot's owner!")
+        await ctx.send("**You're not the bot's owner!**")
 
     elif isinstance(error, commands.CommandOnCooldown):
         await ctx.send(error)
@@ -141,6 +141,9 @@ async def on_command_error(ctx, error):
 
     elif isinstance(error, SkillsUsedRequirement):
         await ctx.send(f"**{error.error_message}**")
+
+    elif isinstance(error, commands.errors.CheckAnyFailure):
+        await ctx.send("**You can't do that!**")
 
     elif isinstance(error, commands.CheckAnyFailure):
         if isinstance(error.errors[0], ActionSkillOnCooldown):
@@ -168,16 +171,19 @@ async def on_command_error(ctx, error):
 async def on_application_command_error(ctx, error) -> None:
 
     if isinstance(error, commands.MissingPermissions):
-        await ctx.send("You can't do that!")
+        await ctx.send("**You can't do that!**")
 
     elif isinstance(error, commands.MissingRequiredArgument):
-        await ctx.send('Please, inform all parameters!')
+        await ctx.send('**Please, inform all parameters!**')
 
     elif isinstance(error, commands.NotOwner):
-        await ctx.send("You're not the bot's owner!")
+        await ctx.send("**You're not the bot's owner!**")
 
     elif isinstance(error, commands.CommandOnCooldown):
         await ctx.send(error)
+
+    elif isinstance(error, commands.errors.CheckAnyFailure):
+        await ctx.send("**You can't do that!**")
 
     elif isinstance(error, commands.MissingAnyRole):
         role_names = [f"**{str(discord.utils.get(ctx.guild.roles, id=role_id))}**" for role_id in error.missing_roles]
@@ -570,14 +576,15 @@ async def _click(ctx, user: discord.Member) -> None:
 
 @client.slash_command(name="info", guild_ids=guild_ids)
 @commands.cooldown(1, 5, commands.BucketType.user)
-async def _info_slash(ctx, member: Optional[discord.Member] = None) -> None:
+async def _info_slash(ctx, 
+    member: Option(discord.Member, description="The member to show the info; [Default=Yours]", required=False)) -> None:
     """ Shows the user's level and experience points. """
 
     await client.get_cog('SlothReputation')._info(ctx, member)
 
 @client.slash_command(name="profile", guild_ids=guild_ids)
 @commands.cooldown(1, 5, commands.BucketType.user)
-async def _profile_slash(ctx, member: Optional[discord.Member] = None) -> None:
+async def _profile_slash(ctx, member: Option(discord.Member, description="The member to show the info; [Default=Yours]", required=False)) -> None:
     """ Shows the member's profile with their custom sloth. """
 
     await ctx.defer()

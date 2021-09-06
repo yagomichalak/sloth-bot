@@ -29,7 +29,7 @@ async def parse_time(tz: str = 'Etc/GMT') -> str:
     return datetime(*map(int, re.split(r'[^\d]', str(datetime.now(tzone)).replace('+00:00', ''))))
 
 
-def is_allowed(roles: List[int]) -> bool:
+def is_allowed(roles: List[int] = []) -> bool:
     """ Checks whether the member has adm perms or has an allowed role. """
 
     async def real_check(ctx: Optional[commands.Context] = None, channel: Optional[discord.TextChannel] = None, 
@@ -46,8 +46,23 @@ def is_allowed(roles: List[int]) -> bool:
             if rid in [role.id for role in member.roles]:
                 return True
 
-        else:
-            return False
+        
+        raise commands.MissingAnyRole(roles)
+
+    return commands.check(real_check)
+
+def is_allowed_members(members: List[int]) -> bool:
+    """ Checks whether the member is allowed to use a command or function. """
+    
+    async def real_check(ctx: Optional[commands.Context] = None, member: Optional[discord.Member] = None):
+
+        member = member if not ctx else ctx.author
+
+        if member.id in members:
+            return True
+
+        raise commands.MissingPermissions(missing_permissions=['administrator'])
+
     return commands.check(real_check)
 
 
