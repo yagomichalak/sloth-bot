@@ -29,8 +29,10 @@ async def parse_time(tz: str = 'Etc/GMT') -> str:
     return datetime(*map(int, re.split(r'[^\d]', str(datetime.now(tzone)).replace('+00:00', ''))))
 
 
-def is_allowed(roles: List[int] = []) -> bool:
-    """ Checks whether the member has adm perms or has an allowed role. """
+def is_allowed(roles: List[int], check_adm: Optional[bool] = True) -> bool:
+    """ Checks whether the member has adm perms or has an allowed role.
+    :param roles: The roles to check if the user has.
+    :param check_adm: Whether to check whether the user has adm perms or not. [Optional][Default=True] """
 
     async def real_check(ctx: Optional[commands.Context] = None, channel: Optional[discord.TextChannel] = None, 
         member: Optional[discord.Member] = None) -> bool:
@@ -38,9 +40,10 @@ def is_allowed(roles: List[int] = []) -> bool:
         member = member if not ctx else ctx.author
         channel = channel if not ctx else ctx.channel
 
-        perms = channel.permissions_for(member)
-        if perms.administrator:
-            return True
+        if check_adm:
+            perms = channel.permissions_for(member)
+            if perms.administrator:
+                return True
 
         for rid in roles:
             if rid in [role.id for role in member.roles]:
@@ -51,12 +54,21 @@ def is_allowed(roles: List[int] = []) -> bool:
 
     return commands.check(real_check)
 
-def is_allowed_members(members: List[int]) -> bool:
-    """ Checks whether the member is allowed to use a command or function. """
+def is_allowed_members(members: List[int], check_adm: Optional[bool] = True) -> bool:
+    """ Checks whether the member is allowed to use a command or function.
+    :param members: The list of members to check.
+    :param check_adm: Whether to check whether the user has adm perms or not. [Optional][Default=True] """
     
-    async def real_check(ctx: Optional[commands.Context] = None, member: Optional[discord.Member] = None):
+    async def real_check(ctx: Optional[commands.Context] = None, channel: Optional[discord.TextChannel] = None, 
+        member: Optional[discord.Member] = None):
 
         member = member if not ctx else ctx.author
+        channel = channel if not ctx else ctx.channel
+
+        if check_adm:
+            perms = channel.permissions_for(member)
+            if perms.administrator:
+                return True
 
         if member.id in members:
             return True
