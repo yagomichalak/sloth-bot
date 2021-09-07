@@ -1,15 +1,16 @@
 import discord
+from discord.app.commands import Option
 from discord.ext import commands
 from random import randint
 import aiohttp
 import os
 from typing import List, Union
-from extra import utils
+
+from extra import utils, useful_variables
 from extra.view import QuickButtons
 from mysqldb import the_database
 from external_cons import the_reddit
-
-
+from discordTogether import DiscordTogether
 
 
 mod_role_id = int(os.getenv('MOD_ROLE_ID'))
@@ -17,12 +18,14 @@ admin_role_id = int(os.getenv('ADMIN_ROLE_ID'))
 teacher_role_id = int(os.getenv('TEACHER_ROLE_ID'))
 watchlist_channel_id = int(os.getenv('WATCHLIST_CHANNEL_ID'))
 slothboard_channel_id = int(os.getenv('SLOTHBOARD_CHANNEL_ID'))
+guild_ids = [int(os.getenv('SERVER_ID'))]
 
 class Social(commands.Cog):
     """ Social related commands. """
 
     def __init__(self, client):
         self.client = client
+        # self.togetherControl = DiscordTogether(client)
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -307,6 +310,32 @@ class Social(commands.Cog):
         em.set_footer(text=f"Published on {data['month']}/{data['day']}/{data['year']}")
         em.set_image(url=data['img'])
         await ctx.send(embed=em)
+
+    # @commands.slash_command(name="youtube_together", guild_ids=guild_ids)
+    # @utils.is_allowed([*useful_variables.patreon_roles.keys(), mod_role_id, admin_role_id, teacher_role_id], throw_exc=True)
+    # async def youtube_together(self, ctx: discord.InteractionContext,
+    #     voice_channel: Option(discord.abc.GuildChannel, description="The voice channel in which to create the party.")
+    # ) -> None:
+    #     """ Creates a YouTube Together session in a VC. """
+
+    #     member = ctx.author
+
+    #     if not isinstance(voice_channel, discord.VoiceChannel):
+    #         return await ctx.send(f"**Please, select a `Voice Channel`, {member.mention}!**")
+
+    #     link = await self.togetherControl.create_link(voice_channel.id, 'youtube')
+    #     current_time = await utils.get_time_now()
+
+    #     view = discord.ui.View()
+    #     view.add_item(discord.ui.Button(url=str(link), label="Start/Join the Party!", emoji="🔴"))
+    #     embed = discord.Embed(
+    #         title="__Youtube Together__",
+    #         color=discord.Color.red(),
+    #         timestamp=current_time,
+    #         url=link
+    #     )
+    #     embed.set_footer(text=f"Created by {member}", icon_url=member.display_avatar)
+    #     await ctx.send(embed=embed, view=view)
 
 
 def setup(client):
