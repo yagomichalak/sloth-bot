@@ -1,13 +1,13 @@
 import discord
 from discord.app import Option, OptionChoice
-from discord.utils import sleep_until
 from pytz import timezone
 from dotenv import load_dotenv
 from discord.ext import commands, tasks, flags
-from extra import utils
+
+from extra import utils, useful_variables
 from typing import Dict, Optional
 import json
-
+from discordTogether import DiscordTogether
 import os
 from datetime import datetime
 from itertools import cycle
@@ -47,6 +47,7 @@ shades_of_pink = cycle([(252, 15, 192), (255, 0, 255), (248, 24, 148),
 
 # Making the client variable
 client = commands.Bot(command_prefix='z!', intents=discord.Intents.all(), help_command=None)
+togetherControl = DiscordTogether(client)
 
 # Tells when the bot is online
 @client.event
@@ -322,9 +323,7 @@ async def help(ctx, *, cmd: str = None):
 
         for cog in client.cogs:
             cog = client.get_cog(cog)
-
             commands = [f"{client.command_prefix}{c.name}" for c in cog.get_commands() if not c.hidden]
-
             if commands:
                 embed.add_field(
                     name=f"__{cog.qualified_name}__",
@@ -336,15 +335,14 @@ async def help(ctx, *, cmd: str = None):
         for y in client.walk_commands():
             if not y.cog_name and not y.hidden:
                 cmds.append(f"{client.command_prefix}{y.name}")
-                
+
         embed.add_field(
             name='__Uncategorized Commands__',
             value=f"`Commands:` {', '.join(cmds)}",
             inline=False)
         await ctx.send(embed=embed)
 
-    else:
-            
+    else:  
         if command := client.get_command(cmd.lower()):
             command_embed = discord.Embed(title=f"__Command:__ {client.command_prefix}{command.qualified_name}", description=f"__**Description:**__\n```{command.help}```", color=ctx.author.color, timestamp=ctx.message.created_at)
             return await ctx.send(embed=command_embed)
@@ -359,7 +357,6 @@ async def help(ctx, *, cmd: str = None):
                         cog_embed.add_field(name=c.qualified_name, value=c.help, inline=False)
 
                 return await ctx.send(embed=cog_embed)
-
         # Otherwise, it's an invalid parameter (Not found)
         else:
             await ctx.send(f"**Invalid parameter! `{cmd}` is neither a command nor a cog!**")
@@ -592,6 +589,33 @@ async def _profile_slash(ctx, member: Option(discord.Member, description="The me
 
     await ctx.defer()
     await client.get_cog('SlothCurrency')._profile(ctx, member)
+
+
+@client.slash_command(name="youtube_together", guild_ids=guild_ids)
+@utils.is_allowed([*useful_variables.patreon_roles.keys(), moderator_role_id, admin_role_id, teacher_role_id], throw_exc=True)
+async def youtube_together(ctx: discord.InteractionContext,
+    voice_channel: Option(discord.abc.GuildChannel, description="The voice channel in which to create the party.")
+) -> None:
+    """ Creates a YouTube Together session in a VC. """
+
+    member = ctx.author
+
+    if not isinstance(voice_channel, discord.VoiceChannel):
+        return await ctx.send(f"**Please, select a `Voice Channel`, {member.mention}!**")
+
+    link = await togetherControl.create_link(voice_channel.id, 'youtube')
+    current_time = await utils.get_time_now()
+
+    view = discord.ui.View()
+    view.add_item(discord.ui.Button(url=str(link), label="Start/Join the Party!", emoji="🔴"))
+    embed = discord.Embed(
+        title="__Youtube Together__",
+        color=discord.Color.red(),
+        timestamp=current_time,
+        url=link
+    )
+    embed.set_footer(text=f"Created by {member}", icon_url=member.display_avatar)
+    await ctx.send(embed=embed, view=view)
 
 
 for filename in os.listdir('./cogs'):
