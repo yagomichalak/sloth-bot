@@ -278,10 +278,9 @@ Entry requirements:
         embed.set_footer(text=f"by {member}", icon_url=member.display_avatar)
 
         embed.description = "- What's your age?"
-        q1 = await member.send(embed=embed)
+        await member.send(embed=embed)
         a1 = await self.get_message_content(member, msg_check)
-        if not a1:
-            return
+        if not a1: return
 
         embed.description = """
         - Hello, there you've reacted to apply to become a moderator.
@@ -290,53 +289,56 @@ Question one:
 Do you have any experience moderating Discord servers?"""
         q2 = await member.send(embed=embed)
         a2 = await self.get_message_content(member, msg_check)
-        if not a2:
-            return
+        if not a2: return
 
         embed.description = """
         - What is your gender?
 Please answer with one message."""
-        q3 = await member.send(embed=embed)
+        await member.send(embed=embed)
         a3 = await self.get_message_content(member, msg_check)
-        if not a3:
-            return
+        if not a3: return
 
         embed.description = """
         - What's your English level? Are you able to express yourself using English?
 Please answer using one message only."""
-        q4 = await member.send(embed=embed)
+        await member.send(embed=embed)
         a4 = await self.get_message_content(member, msg_check)
-        if not a4:
-            return
+        if not a4: return
 
         embed.description = """
         - Why are you applying to be Staff? What is your motivation?
 Please answer using one message only."""
-        q5 = await member.send(embed=embed)
+        await member.send(embed=embed)
         a5 = await self.get_message_content(member, msg_check)
-        if not a5:
-            return
+        if not a5: return
 
         embed.description = """- How do you think The Language Sloth could be a better community?
 Please answer using one message only."""
-        q6 = await member.send(embed=embed)
+        await member.send(embed=embed)
         a6 = await self.get_message_content(member, msg_check)
-        if not a6:
-            return
+        if not a6: return
 
         embed.description = """- How active are you on Discord in general?
 Please answer using one message only."""
-        q7 = await member.send(embed=embed)
+        await member.send(embed=embed)
         a7 = await self.get_message_content(member, msg_check)
-        if not a7:
-            return
+        if not a7: return
 
         embed.description = """- What is your time zone?
 Please answer using one message only.."""
-        q8 = await member.send(embed=embed)
+        await member.send(embed=embed)
         a8 = await self.get_message_content(member, msg_check)
-        if not a8:
-            return
+        if not a8: return
+
+        embed.description = "- What is your country of origin?"
+        await member.send(embed=embed)
+        a9 = await self.get_message_content(member, msg_check)
+        if not a9: return
+
+        embed.description = "- Tell us about yourself?"
+        await member.send(embed=embed)
+        a10 = await self.get_message_content(member, msg_check)
+        if not a10: return
 
         # Get user's native roles
         user_native_roles = []
@@ -355,7 +357,9 @@ Please answer using one message only.."""
 [Reason & Motivation]: {a5.capitalize()}
 [How we can improve Sloth]: {a6.capitalize()}
 [Activity Status]: {a7.capitalize()}
-[Timezone]: {a8.title()}```"""
+[Timezone]: {a8.title()}
+[Origin Country]: {a9.title()}
+[About]: {a10.capitalize()}```"""
         await member.send(app)
         embed.description = """
         Are you sure you want to apply this? :white_check_mark: to send and :x: to Cancel
