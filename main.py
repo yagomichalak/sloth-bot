@@ -21,6 +21,7 @@ load_dotenv()
 user_cosmos_id = int(os.getenv('COSMOS_ID'))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID'))
 moderator_role_id = int(os.getenv('MOD_ROLE_ID'))
+booster_role_id = int(os.getenv('BOOSTER_ROLE_ID'))
 
 server_id = int(os.getenv('SERVER_ID'))
 teacher_role_id = int(os.getenv('TEACHER_ROLE_ID'))
@@ -589,7 +590,7 @@ async def _profile_slash(ctx, member: Option(discord.Member, description="The me
 
 
 @client.slash_command(name="youtube_together", guild_ids=guild_ids)
-@utils.is_allowed([*useful_variables.patreon_roles.keys(), moderator_role_id, admin_role_id, teacher_role_id], throw_exc=True)
+@utils.is_allowed([booster_role_id, *useful_variables.patreon_roles.keys(), moderator_role_id, admin_role_id, teacher_role_id], throw_exc=True)
 async def youtube_together(ctx: discord.InteractionContext,
     voice_channel: Option(discord.abc.GuildChannel, description="The voice channel in which to create the party.")
 ) -> None:
