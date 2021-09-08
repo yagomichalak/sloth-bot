@@ -49,13 +49,15 @@ class Giveaways(commands.Cog):
                continue 
 
             # Gets the channel and message
-            channel = await self.client.fetch_channel(giveaway[1])
-            if not channel:
+            try:
+                channel = await self.client.fetch_channel(giveaway[1])
+            except discord.errors.NotFound:
                 await self.delete_giveaway(giveaway[0])
                 continue
-
-            message = await channel.fetch_message(giveaway[0])
-            if not message:
+            
+            try:
+                message = await channel.fetch_message(giveaway[0])
+            except discord.errors.NotFound:
                 await self.delete_giveaway(giveaway[0])
                 continue
 
