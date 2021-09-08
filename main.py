@@ -568,9 +568,13 @@ async def _rules_slash(ctx,
 
 
 
-@client.user_command(name="click", guild_ids=guild_ids)
+@client.user_command(name="Click", guild_ids=guild_ids)
 async def _click(ctx, user: discord.Member) -> None:
     await ctx.send(f"**{ctx.author.mention} clicked on {user.mention}!**")
+
+@client.user_command(name="Help", guild_ids=guild_ids)
+async def _help(ctx, user: discord.Member) -> None:
+    await ctx.send(f"**{ctx.author.mention} needs your help, {user.mention}!**")
 
 @client.slash_command(name="info", guild_ids=guild_ids)
 @commands.cooldown(1, 5, commands.BucketType.user)
@@ -601,7 +605,11 @@ async def youtube_together(ctx: discord.InteractionContext,
     if not isinstance(voice_channel, discord.VoiceChannel):
         return await ctx.send(f"**Please, select a `Voice Channel`, {member.mention}!**")
 
-    link = await voice_channel.create_activity_invite('youtube')
+    try:
+        link = await voice_channel.create_activity_invite('youtube', max_age=600)
+    except Exception as e:
+        print("Invite creation error: ", e)
+        await ctx.send("**For some reason I couldn't create it, {member.mention}!**")
     current_time = await utils.get_time_now()
 
     view = discord.ui.View()
@@ -612,7 +620,8 @@ async def youtube_together(ctx: discord.InteractionContext,
         timestamp=current_time,
         url=link
     )
-    embed.set_footer(text=f"Created by {member}", icon_url=member.display_avatar)
+    embed.set_author(name=member, url=member.display_avatar, icon_url=member.display_avatar)
+    embed.set_footer(text=f"(Expires in 5 minutes)", icon_url=ctx.guild.icon.url)
     await ctx.send(embed=embed, view=view)
 
 
