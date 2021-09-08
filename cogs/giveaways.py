@@ -244,6 +244,12 @@ class Giveaways(commands.Cog):
 
         await self.delete_giveaway(giveaway[0])
         await ctx.send(f"**Successfully deleted the giveaway with ID: `{giveaway[0]}`, {member.mention}!**", delete_after=3)
+        try:
+            channel = discord.utils.get(ctx.guild.text_channels, id=giveaway[1])
+            message = await channel.fetch_message(giveaway[0])
+            await message.delete()
+        except:
+            pass
 
 
     async def get_giveaway_time(self, flags: Dict[str, Union[int, str]]) -> int:
