@@ -375,7 +375,7 @@ class Giveaways(commands.Cog):
         :param current_ts: The current timestamp to compare to registered giveaways' timestamps. """
 
         mycursor, _ = await the_database()
-        await mycursor.execute("SELECT * FROM Giveaways WHERE deadline_ts <= %s", (current_ts,))
+        await mycursor.execute("SELECT * FROM Giveaways WHERE deadline_ts <= %s AND notified = 0", (current_ts,))
         giveaways = await mycursor.fetchall()
         await mycursor.close()
         return giveaways
