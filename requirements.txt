@@ -14,4 +14,4 @@ Pillow==8.1.0
 python-dotenv==0.15.0
 treelib==1.6.1
 emoji==1.4.1
-git+https://github.com/Pycord-Development/pycord@slash
+git+https://github.com/Pycord-Development/pycord@master
