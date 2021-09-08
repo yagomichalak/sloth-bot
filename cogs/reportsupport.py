@@ -41,7 +41,6 @@ class ReportSupport(*report_support_classes):
         self.client = client
         self.cosmos_id: int = int(os.getenv('COSMOS_ID'))
         self.muffin_id: int = int(os.getenv('MUFFIN_ID'))
-        self.pretzel_id: int = int(os.getenv('PRETZEL_ID'))
         self.cache = {}
         self.report_cache = {}
         
@@ -524,8 +523,7 @@ Please answer using one message only.."""
             embed.description = "**Application successfully made, please, be patient now!**"
             await member.send(embed=embed)
             event_manager_channel = await self.client.fetch_channel(self.event_manager_app_channel_id)
-            pretzel = discord.utils.get(event_manager_channel.guild.members, id=self.pretzel_id)
-            app = await event_manager_channel.send(content=f"{pretzel.mention}, {member.mention}\n{app}")
+            app = await event_manager_channel.send(content=f"{member.mention}\n{app}")
             await app.add_reaction('✅')
             await app.add_reaction('❌')
             # Saves in the database
