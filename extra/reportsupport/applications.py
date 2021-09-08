@@ -7,7 +7,6 @@ import os
 
 cosmos_id: int = int(os.getenv('COSMOS_ID'))
 muffin_id: int = int(os.getenv('MUFFIN_ID'))
-pretzel_id: int = int(os.getenv('PRETZEL_ID'))
 
 moderator_role_id: int = int(os.getenv('MOD_ROLE_ID'))
 admin_role_id: int = int(os.getenv('ADMIN_ROLE_ID'))
@@ -48,7 +47,7 @@ class ApplicationsTable(commands.Cog):
             "app": event_manager_app_channel_id,  "interview": event_manager_interview_vc_id, "parent": event_manager_parent_channel_id, 
             "cat": event_manager_app_cat_id, 
             "message": "**event_manager Application**\nOur staff has evaluated your event_manager application and has come to the conclusion that we are not in need of this lesson.",
-            "pings": [{"id": pretzel_id, "role": False}]}
+            "pings": []}
     }
 
     @commands.Cog.listener(name="on_raw_reaction_add")
@@ -97,7 +96,10 @@ class ApplicationsTable(commands.Cog):
                 member = discord.utils.get(guild.members, id=ping['id'])
                 ping_mentions.append(member.mention)
 
-        return ', '.join(ping_mentions)
+        if ping_mentions:
+            return ', '.join(ping_mentions)
+
+        return ''
 
     # Applications
 

@@ -871,8 +871,7 @@ class Tools(commands.Cog):
 	# 		choices=[
 	# 			OptionChoice(name="Cosmos", value=os.getenv('COSMOS_ID')), OptionChoice(name="Alex", value=os.getenv('ALEX_ID')),
 	# 			OptionChoice(name="DNK", value=os.getenv('DNK_ID')), OptionChoice(name="Muffin", value=os.getenv('MUFFIN_ID')),
-	# 			OptionChoice(name="Pretzel", value=os.getenv('PRETZEL_ID')), OptionChoice(name="Prisca", value=os.getenv('PRISCA_ID')),
-	# 			OptionChoice(name="GuiBot", value=os.getenv('GUIBOT_ID'))
+	# 			OptionChoice(name="Prisca", value=os.getenv('PRISCA_ID')), OptionChoice(name="GuiBot", value=os.getenv('GUIBOT_ID'))
 	# 		]
 	# 	)) -> None:
 	# 	""" (ADMIN) Used to mention staff members. """
