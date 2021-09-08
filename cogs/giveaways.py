@@ -27,7 +27,10 @@ class Giveaways(commands.Cog):
         # Makes all registered giveaways consistent
         giveaways = await self.get_giveaways()
         for giveaway in giveaways:
-            self.client.add_view(view=GiveawayView(self.client), message_id=giveaway[0])
+            try:
+                self.client.add_view(view=GiveawayView(self.client), message_id=giveaway[0])
+            except:
+                pass
 
         self.check_due_giveaways.start()
         print('Giveaways cog is online!')
