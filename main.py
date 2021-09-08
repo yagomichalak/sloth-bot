@@ -7,7 +7,6 @@ from discord.ext import commands, tasks, flags
 from extra import utils, useful_variables
 from typing import Dict, Optional
 import json
-from discordTogether import DiscordTogether
 import os
 from datetime import datetime
 from itertools import cycle
@@ -47,7 +46,6 @@ shades_of_pink = cycle([(252, 15, 192), (255, 0, 255), (248, 24, 148),
 
 # Making the client variable
 client = commands.Bot(command_prefix='z!', intents=discord.Intents.all(), help_command=None)
-togetherControl = DiscordTogether(client)
 
 # Tells when the bot is online
 @client.event
@@ -603,7 +601,7 @@ async def youtube_together(ctx: discord.InteractionContext,
     if not isinstance(voice_channel, discord.VoiceChannel):
         return await ctx.send(f"**Please, select a `Voice Channel`, {member.mention}!**")
 
-    link = await togetherControl.create_link(voice_channel.id, 'youtube')
+    link = await voice_channel.create_activity_invite('youtube')
     current_time = await utils.get_time_now()
 
     view = discord.ui.View()

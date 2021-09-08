@@ -10,7 +10,6 @@ from extra import utils, useful_variables
 from extra.view import QuickButtons
 from mysqldb import the_database
 from external_cons import the_reddit
-from discordTogether import DiscordTogether
 
 
 mod_role_id = int(os.getenv('MOD_ROLE_ID'))
@@ -25,7 +24,6 @@ class Social(commands.Cog):
 
     def __init__(self, client):
         self.client = client
-        # self.togetherControl = DiscordTogether(client)
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -323,7 +321,7 @@ class Social(commands.Cog):
     #     if not isinstance(voice_channel, discord.VoiceChannel):
     #         return await ctx.send(f"**Please, select a `Voice Channel`, {member.mention}!**")
 
-    #     link = await self.togetherControl.create_link(voice_channel.id, 'youtube')
+    #     link = await voice_channel.create_activity_invite('youtube')
     #     current_time = await utils.get_time_now()
 
     #     view = discord.ui.View()
