@@ -881,5 +881,11 @@ class Tools(commands.Cog):
 	# 	else:
 	# 		await ctx.send("**For some reason I couldn't ping them =\ **")
 
+
+	@commands.slash_command(name="tetest", guild_ids=guild_ids)
+	async def _tetest(self, ctx) -> None:
+
+		await ctx.send("**Tetest**")
+
 def setup(client):
 	client.add_cog(Tools(client))

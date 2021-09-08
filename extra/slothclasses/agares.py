@@ -30,7 +30,7 @@ class Agares(Player):
             int(os.getenv('EVENT_MANAGER_APPLICATION_CAT_ID'))
         ]
 
-    @commands.command(aliases=['ma'])
+    @commands.command(aliases=['mp'])
     @Player.skill_on_cooldown(seconds=28800)
     @Player.user_is_class('agares')
     @Player.skill_mark()
