@@ -624,6 +624,35 @@ async def youtube_together(ctx: discord.InteractionContext,
     embed.set_footer(text=f"(Expires in 5 minutes)", icon_url=ctx.guild.icon.url)
     await ctx.send(embed=embed, view=view)
 
+@client.slash_command(name="poll", guild_ids=guild_ids)
+@utils.is_allowed([moderator_role_id, admin_role_id], throw_exc=True)
+async def _poll(ctx, 
+    description: Option(str, description="The description of the poll."),
+    title: Option(str, description="The title of the poll.", required=False, default="Poll"), 
+    role: Option(discord.Role, description="The role to tag in the poll.", required=False)) -> None:
+    """ Makes a poll.
+    :param title: The title of the poll.
+    :param description: The description of the poll. """
+
+    await ctx.defer()
+
+    member = ctx.author
+    current_time = await utils.get_time_now()
+
+    embed = discord.Embed(
+        title=f"__{title}__",
+        description=description,
+        color=member.color,
+        timestamp=current_time
+    )
+
+    if role:
+        msg = await ctx.followup.send(content=role.mention, embed=embed)
+    else:
+        msg = await ctx.followup.send(embed=embed)
+    await msg.add_reaction('✅')
+    await msg.add_reaction('❌')
+
 
 for filename in os.listdir('./cogs'):
     if filename.endswith('.py'):
