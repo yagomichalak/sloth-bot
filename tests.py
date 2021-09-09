@@ -73,7 +73,3 @@
 # )
 # await ctx.send(embed=embed, view=view)
 
-
-
-
-
