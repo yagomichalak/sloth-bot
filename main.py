@@ -496,9 +496,6 @@ async def _mention(ctx,
         await ctx.send("**For some reason I couldn't ping them =\ **")
 
 
-# End of slash commands
-
-
 
 _cnp = client.command_group(name="cnp", description="For copy and pasting stuff.", guild_ids=guild_ids)
 
@@ -506,7 +503,7 @@ _cnp = client.command_group(name="cnp", description="For copy and pasting stuff.
 @utils.is_allowed([moderator_role_id, admin_role_id])
 async def _specific(ctx, 
     text: Option(str, name="text", description="Pastes a text for specific purposes", required=True,
-        choices=['Muted/Purge', 'Nickname', 'Classes', 'Interview', 'Resources'])):
+        choices=['Muted/Purge', 'Nickname', 'Classes', 'Interview', 'Resources', 'Global', 'Searching Teachers'])):
     """ Posts a specific test of your choice """
     
     
@@ -653,6 +650,7 @@ async def _poll(ctx,
     await msg.add_reaction('✅')
     await msg.add_reaction('❌')
 
+# End of slash commands
 
 for filename in os.listdir('./cogs'):
     if filename.endswith('.py'):
