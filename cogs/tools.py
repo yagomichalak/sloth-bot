@@ -885,7 +885,7 @@ class Tools(commands.Cog):
 	# @commands.slash_command(name="tetest", guild_ids=guild_ids)
 	# async def _tetest(self, ctx) -> None:
 
-	# 	await ctx.send("**Tetest**")
+	# 	await ctx.respond("**Tetest**")
 
 def setup(client):
 	client.add_cog(Tools(client))

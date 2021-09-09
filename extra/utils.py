@@ -42,12 +42,11 @@ def is_allowed(roles: List[int], check_adm: Optional[bool] = True, throw_exc: Op
         member = member if not ctx else ctx.author
         channel = channel if not ctx else ctx.channel
 
-        # if check_adm:
-        #     perms = channel.permissions_for(member)
-        #     if perms.administrator:
-        #         return True
-
-        print('yeah')
+        if check_adm:
+            perms = channel.permissions_for(member)
+            if perms.administrator:
+                return True
+                
         for rid in roles:
             if rid in [role.id for role in member.roles]:
                 return True
