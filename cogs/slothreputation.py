@@ -206,13 +206,19 @@ class SlothReputation(commands.Cog):
         embed.set_footer(text=ctx.guild, icon_url=ctx.guild.icon.url)
 
         if ctx.author.id != member.id:
-            return await ctx.send(embed=embed)
+            if isinstance(ctx, commands.Context):
+                return await ctx.send(embed=embed)
+            else:
+                return await ctx.respond(embed=embed)
         else:
             view = ExchangeActivityView(self.client, user_info[0])
             if 'sabotaged' in effects:
                 view.children[0].disabled = True
 
-            await ctx.send(embed=embed, view=view)
+            if isinstance(ctx, commands.Context):
+                return await ctx.send(embed=embed)
+            else:
+                return await ctx.respond(embed=embed, view=view)
 
     @commands.command(aliases=['leaderboard', 'lb', 'scoreboard'])
     async def score(self, ctx):
