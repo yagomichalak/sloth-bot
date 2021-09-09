@@ -764,11 +764,10 @@ class Moderation(*moderation_cogs):
 	@commands.command()
 	@utils.is_allowed(allowed_roles, throw_exc=True)
 	async def ban(self, ctx, member: discord.Member = None, *, reason: Optional[str] = None) -> None:
-		'''
-		(ModTeam/ADM) Bans a member from the server.
+		""" (ModTeam/ADM) Bans a member from the server.
 		:param member: The @ or ID of the user to ban.
-		:param reason: The reason for banning the user. (Optional)
-		'''
+		:param reason: The reason for banning the user. (Optional) """
+
 		await ctx.message.delete()
 		if not member:
 			return await ctx.send('**Please, specify a member!**', delete_after=3)

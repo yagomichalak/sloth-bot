@@ -107,8 +107,6 @@ async def on_member_remove(member):
     embed.add_field(name="Bot?", value=member.bot)
     await channel.send(embed=embed)
 
-
-# Handles the errors
 @client.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.MissingPermissions):
@@ -171,32 +169,32 @@ async def on_command_error(ctx, error):
 async def on_application_command_error(ctx, error) -> None:
 
     if isinstance(error, commands.MissingPermissions):
-        await ctx.send("**You can't do that!**")
+        await ctx.respond("**You can't do that!**")
 
     elif isinstance(error, commands.MissingRequiredArgument):
-        await ctx.send('**Please, inform all parameters!**')
+        await ctx.respond('**Please, inform all parameters!**')
 
     elif isinstance(error, commands.NotOwner):
-        await ctx.send("**You're not the bot's owner!**")
+        await ctx.respond("**You're not the bot's owner!**")
 
     elif isinstance(error, commands.CommandOnCooldown):
-        await ctx.send(error)
+        await ctx.respond(error)
 
     elif isinstance(error, commands.errors.CheckAnyFailure):
-        await ctx.send("**You can't do that!**")
+        await ctx.respond("**You can't do that!**")
 
     elif isinstance(error, commands.MissingAnyRole):
         role_names = [f"**{str(discord.utils.get(ctx.guild.roles, id=role_id))}**" for role_id in error.missing_roles]
-        await ctx.send(f"You are missing at least one of the required roles: {', '.join(role_names)}")
+        await ctx.respond(f"You are missing at least one of the required roles: {', '.join(role_names)}")
 
     elif isinstance(error, commands.errors.RoleNotFound):
-        await ctx.send(f"**{error}**")
+        await ctx.respond(f"**{error}**")
 
     elif isinstance(error, commands.ChannelNotFound):
-        await ctx.send("**Channel not found!**")
+        await ctx.respond("**Channel not found!**")
 
     elif isinstance(error, discord.app.errors.CheckFailure):
-        await ctx.send("**It looks like you can't run this command!**")
+        await ctx.respond("**It looks like you can't run this command!**")
 
 
     print('='*10)
@@ -433,7 +431,7 @@ async def _embed(ctx,
         return await ctx.send(
             f"**{ctx.author.mention}, you must inform at least one of the following options: `description`, `image`, `thumbnail`**")
 
-    await ctx.send(embed=embed)
+    await ctx.respond(embed=embed)
 
 
 
@@ -464,18 +462,18 @@ async def _timestamp(ctx,
     embed.add_field(name="Output", value=f"<t:{timestamp}>")
     embed.add_field(name="Copyable", value=f"\<t:{timestamp}>")
 
-    await ctx.send(embed=embed, ephemeral=True)
+    await ctx.respond(embed=embed, ephemeral=True)
 
 @client.slash_command(name="dnk", guild_ids=guild_ids)
 async def _dnk(ctx) -> None:
     """ Tells you something about DNK. """
-    await ctx.send(f"**DNK est toujours là pour les vrais !**")
+    await ctx.respond(f"**DNK est toujours là pour les vrais !**")
 
 @client.slash_command(name="twiks", guild_ids=guild_ids)
 async def _twiks(ctx) -> None:
     """ Tells you something about Twiks. """
 
-    await ctx.send(f"**Twiks est mon frérot !**")
+    await ctx.respond(f"**Twiks est mon frérot !**")
 
 
 @client.slash_command(name="mention", guild_ids=guild_ids)
@@ -491,9 +489,9 @@ async def _mention(ctx,
     """ (ADMIN) Used to mention staff members. """
 
     if staff_member := discord.utils.get(ctx.guild.members, id=int(member)):
-        await ctx.send(staff_member.mention)
+        await ctx.respond(staff_member.mention)
     else:
-        await ctx.send("**For some reason I couldn't ping them =\ **")
+        await ctx.respond("**For some reason I couldn't ping them =\ **")
 
 
 
@@ -514,7 +512,7 @@ async def _specific(ctx,
         available_texts = json.loads(file.read())
 
     if not (selected_text := available_texts.get(text.lower())):
-        return await ctx.send(f"**Please, inform a supported language, {member.mention}!**\n{', '.join(available_texts)}")
+        return await ctx.respond(f"**Please, inform a supported language, {member.mention}!**\n{', '.join(available_texts)}")
 
     if selected_text['embed']:
         embed = discord.Embed(
@@ -524,9 +522,9 @@ async def _specific(ctx,
         )
         if selected_text["image"]:
             embed.set_image(url=selected_text["image"])
-        await ctx.send(embed=embed)
+        await ctx.respond(embed=embed)
     else:
-        await ctx.send(selected_text['text'])
+        await ctx.respond(selected_text['text'])
 
 
 @_cnp.command(name="speak")
@@ -541,14 +539,14 @@ async def _speak(ctx, language: Option(str, name="language", description="The la
         available_languages = json.loads(file.read())
 
     if not (language_text := available_languages.get(language.lower())):
-        return await ctx.send(f"**Please, inform a supported language, {member.mention}!**\n{', '.join(available_languages)}")
+        return await ctx.respond(f"**Please, inform a supported language, {member.mention}!**\n{', '.join(available_languages)}")
 
     embed = discord.Embed(
         title=f"__{language.title()}__",
         description=language_text,
         color=member.color
     )
-    await ctx.send(embed=embed)
+    await ctx.respond(embed=embed)
 
 @client.slash_command(name="rules", guild_ids=guild_ids)
 @utils.is_allowed([moderator_role_id, admin_role_id])
@@ -567,11 +565,11 @@ async def _rules_slash(ctx,
 
 @client.user_command(name="Click", guild_ids=guild_ids)
 async def _click(ctx, user: discord.Member) -> None:
-    await ctx.send(f"**{ctx.author.mention} clicked on {user.mention}!**")
+    await ctx.respond(f"**{ctx.author.mention} clicked on {user.mention}!**")
 
 @client.user_command(name="Help", guild_ids=guild_ids)
 async def _help(ctx, user: discord.Member) -> None:
-    await ctx.send(f"**{ctx.author.mention} needs your help, {user.mention}!**")
+    await ctx.respond(f"**{ctx.author.mention} needs your help, {user.mention}!**")
 
 @client.slash_command(name="info", guild_ids=guild_ids)
 @commands.cooldown(1, 5, commands.BucketType.user)
@@ -579,6 +577,7 @@ async def _info_slash(ctx,
     member: Option(discord.Member, description="The member to show the info; [Default=Yours]", required=False)) -> None:
     """ Shows the user's level and experience points. """
 
+    await ctx.defer()
     await client.get_cog('SlothReputation')._info(ctx, member)
 
 @client.slash_command(name="profile", guild_ids=guild_ids)
@@ -592,7 +591,7 @@ async def _profile_slash(ctx, member: Option(discord.Member, description="The me
 
 @client.slash_command(name="youtube_together", guild_ids=guild_ids)
 @utils.is_allowed([booster_role_id, *useful_variables.patreon_roles.keys(), moderator_role_id, admin_role_id, teacher_role_id], throw_exc=True)
-async def youtube_together(ctx: discord.InteractionContext,
+async def youtube_together(ctx: discord.ApplicationContext ,
     voice_channel: Option(discord.abc.GuildChannel, description="The voice channel in which to create the party.")
 ) -> None:
     """ Creates a YouTube Together session in a VC. """
@@ -600,13 +599,13 @@ async def youtube_together(ctx: discord.InteractionContext,
     member = ctx.author
 
     if not isinstance(voice_channel, discord.VoiceChannel):
-        return await ctx.send(f"**Please, select a `Voice Channel`, {member.mention}!**")
+        return await ctx.respond(f"**Please, select a `Voice Channel`, {member.mention}!**")
 
     try:
         link = await voice_channel.create_activity_invite('youtube', max_age=600)
     except Exception as e:
         print("Invite creation error: ", e)
-        await ctx.send(f"**For some reason I couldn't create it, {member.mention}!**")
+        await ctx.respond(f"**For some reason I couldn't create it, {member.mention}!**")
     current_time = await utils.get_time_now()
 
     view = discord.ui.View()
@@ -619,7 +618,7 @@ async def youtube_together(ctx: discord.InteractionContext,
     )
     embed.set_author(name=member, url=member.display_avatar, icon_url=member.display_avatar)
     embed.set_footer(text=f"(Expires in 5 minutes)", icon_url=ctx.guild.icon.url)
-    await ctx.send(embed=embed, view=view)
+    await ctx.respond(embed=embed, view=view)
 
 @client.slash_command(name="poll", guild_ids=guild_ids)
 @utils.is_allowed([moderator_role_id, admin_role_id], throw_exc=True)
@@ -644,9 +643,9 @@ async def _poll(ctx,
     )
 
     if role:
-        msg = await ctx.followup.send(content=role.mention, embed=embed)
+        msg = await ctx.respond(content=role.mention, embed=embed)
     else:
-        msg = await ctx.followup.send(embed=embed)
+        msg = await ctx.respond(embed=embed)
     await msg.add_reaction('✅')
     await msg.add_reaction('❌')
 

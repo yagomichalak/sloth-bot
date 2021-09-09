@@ -96,21 +96,25 @@ class Show(commands.Cog):
         """ Shows a specific server rule.
         :param numb: The number of the rule to show. """
 
+        answer: discord.PartialMessageable = None
         if isinstance(ctx, commands.Context):
             await ctx.message.delete()
+            answer = ctx.send
+        else:
+            answer = ctx.respond
 
         if numb is None:
-            return await ctx.send('**Invalid parameter!**')
+            return await answer('**Invalid parameter!**')
 
         if numb > len(rules) or numb <= 0:
-            return await ctx.send(f'**Inform a rule from `1-{len(rules)}` rules!**')
+            return await answer(f'**Inform a rule from `1-{len(rules)}` rules!**')
 
         rule_index = list(rules)[numb - 1]
         embed = discord.Embed(title=f'Rule - {numb}# {rule_index}', description=rules[rule_index], color=discord.Color.green())
         embed.set_footer(text=ctx.author.guild.name)
 
         if reply:
-            await ctx.send(embed=embed)
+            await answer(embed=embed)
         else:
             await ctx.delete()
             await ctx.channel.send(embed=embed)
@@ -137,13 +141,16 @@ class Show(commands.Cog):
     async def _rules(self, ctx, reply: bool = True):
         """ (MOD) Sends an embedded message containing all rules in it. """
 
+        answer: discord.PartialMessageable = None
         if isinstance(ctx, commands.Context):
             await ctx.message.delete()
+            answer = ctx.send
+        else:
+            answer = ctx.respond
 
 
         current_time = await utils.get_time_now()
 
-        discord.InteractionContext
         guild = ctx.guild
         embed = discord.Embed(
             title="__Rules of the Server__", 
@@ -158,7 +165,7 @@ class Show(commands.Cog):
         embed.set_thumbnail(url=guild.icon.url)
         embed.set_author(name='The Language Sloth', url='https://discordapp.com', icon_url=guild.icon.url)
         if reply:
-            await ctx.send(embed=embed)
+            await answer(embed=embed)
         else:
             await ctx.delete()
             await ctx.channel.send(embed=embed)

@@ -37,21 +37,25 @@ def is_allowed(roles: List[int], check_adm: Optional[bool] = True, throw_exc: Op
 
     async def real_check(ctx: Optional[commands.Context] = None, channel: Optional[discord.TextChannel] = None, 
         member: Optional[discord.Member] = None) -> bool:
+        print('yes')
 
         member = member if not ctx else ctx.author
         channel = channel if not ctx else ctx.channel
 
-        if check_adm:
-            perms = channel.permissions_for(member)
-            if perms.administrator:
-                return True
+        # if check_adm:
+        #     perms = channel.permissions_for(member)
+        #     if perms.administrator:
+        #         return True
 
+        print('yeah')
         for rid in roles:
             if rid in [role.id for role in member.roles]:
                 return True
 
         if throw_exc:
             raise commands.MissingAnyRole(roles)
+        
+        print('true')
 
     return commands.check(real_check)
 

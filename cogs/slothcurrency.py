@@ -430,9 +430,10 @@ class SlothCurrency(commands.Cog):
 
         return await ctx.send("**Table *UserCurrency* reseted!**", delete_after=3)
 
-    async def send_hacked_image(self, ctx: commands.Context, member: discord.Member) -> None:
+    async def send_hacked_image(self, answer: Union[discord.PartialMessageable], author: discord.Member, member: discord.Member) -> None:
         """ Makes and sends a hacked image.
-        :param ctx: The context.
+        :param answer: The answerable object.
+        :param author: The author of the action.
         :param member: The member who was hacked. """
 
         SlothClass = self.client.get_cog('SlothClass')
@@ -451,15 +452,16 @@ class SlothCurrency(commands.Cog):
             background.save(file_path, 'png', quality=90)
         except Exception as e:
             print(e)
-            return await ctx.send(f"**{ctx.author.mention}, something went wrong with it!**")
+            return await answer(f"**{author.mention}, something went wrong with it!**")
         else:
-            await ctx.send(file=discord.File(file_path))
+            await answer(file=discord.File(file_path))
             # await asyncio.sleep(0.5)
             return os.remove(file_path)
 
-    async def send_frogged_image(self, ctx: commands.Context, member: discord.Member, knocked_out: bool = False) -> None:
+    async def send_frogged_image(self, answer: Union[discord.PartialMessageable], author: discord.Member, member: discord.Member, knocked_out: bool = False) -> None:
         """ Makes and sends a frogged image.
-        :param ctx: The context.
+        :param answer: The answerable object.
+        :param author: The author of the action.
         :param member: The member who was frogged.
         :param knocked_out: Whether the user is knocked out"""
 
@@ -484,9 +486,9 @@ class SlothCurrency(commands.Cog):
             background.save(file_path, 'png', quality=90)
         except Exception as e:
             print(e)
-            return await ctx.send(f"**{ctx.author.mention}, something went wrong with it!**")
+            return await answer(f"**{author.mention}, something went wrong with it!**")
         else:
-            await ctx.send(file=discord.File(file_path))
+            await answer(file=discord.File(file_path))
             # await asyncio.sleep(0.5)
             return os.remove(file_path)
 
@@ -521,6 +523,12 @@ class SlothCurrency(commands.Cog):
 
         if not member:
             member = ctx.author
+        
+        answer = None
+        if isinstance(ctx, commands.Context):
+            answer = ctx.send
+        else:
+            answer = ctx.respond
 
         user_info = await self.get_user_currency(member.id)
         sloth_profile = await self.client.get_cog('SlothClass').get_sloth_profile(member.id)
@@ -530,20 +538,21 @@ class SlothCurrency(commands.Cog):
 
         if not user_info or not sloth_profile:
             if ctx.author.id == member.id:
-                return await ctx.send(
+                return await answer(
                     embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one, or in the button below!**"),
                     view=view)
             else:
-                return await ctx.send(f"**{member} doesn't have an account yet!**", delete_after=3)
+                return await answer(f"**{member} doesn't have an account yet!**", delete_after=3)
 
         if sloth_profile[1].lower() == 'default':
             if ctx.author.id == member.id:
-                return await ctx.send(
+                return await answer(
                     embed=discord.Embed(description=f"**{member.mention}, you don't have a Sloth class yet. Click [here](https://thelanguagesloth.com/profile/slothclass) to choose one, or in the button below!**"),
                     view=view)
+                    
             else:
-                return await ctx.send(f"**{member} has a default Sloth class, I cannot show their profile!**")
-
+                return await answer(f"**{member} has a default Sloth class, I cannot show their profile!**")
+                
         SlothClass = self.client.get_cog('SlothClass')
         effects = await SlothClass.get_user_effects(member=member)
 
@@ -630,11 +639,7 @@ class SlothCurrency(commands.Cog):
             if all_effects:
                 try:
                     gif_file_path = await self.make_gif_image(member_id=member.id, file_path=file_path, all_effects=all_effects)
-                    # print('sending')
-                    if isinstance(ctx, commands.Context):
-                        await ctx.send(file=discord.File(gif_file_path))
-                    else:
-                        await ctx.followup.send(file=discord.File(file_path))
+                    await answer(file=discord.File(gif_file_path))
 
                 except Exception as e:
                     print(e)
@@ -644,10 +649,7 @@ class SlothCurrency(commands.Cog):
                     os.remove(gif_file_path)
             else:
                 try:
-                    if isinstance(ctx, commands.Context):
-                        await ctx.send(file=discord.File(file_path))
-                    else:
-                        await ctx.followup.send(file=discord.File(file_path))
+                    await answer(file=discord.File(file_path))
                 except:
                     pass
                 finally:
