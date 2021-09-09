@@ -609,7 +609,7 @@ async def youtube_together(ctx: discord.InteractionContext,
         link = await voice_channel.create_activity_invite('youtube', max_age=600)
     except Exception as e:
         print("Invite creation error: ", e)
-        await ctx.send("**For some reason I couldn't create it, {member.mention}!**")
+        await ctx.send(f"**For some reason I couldn't create it, {member.mention}!**")
     current_time = await utils.get_time_now()
 
     view = discord.ui.View()

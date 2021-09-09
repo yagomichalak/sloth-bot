@@ -7,7 +7,7 @@ from typing import List, Union, Dict, Optional
 import os
 
 from extra.useful_variables import banned_links
-from extra.menu import ConfirmSkill
+from extra.prompt.menu import Confirm
 from extra.view import ReportSupportView
 from extra import utils
 
@@ -23,9 +23,10 @@ muted_role_id = int(os.getenv('MUTED_ROLE_ID'))
 welcome_channel_id = int(os.getenv('WELCOME_CHANNEL_ID'))
 last_deleted_message = []
 suspect_channel_id = int(os.getenv('SUSPECT_CHANNEL_ID'))
+
 mod_role_id = int(os.getenv('MOD_ROLE_ID'))
-senior_mod_role_id = int(os.getenv('SENIOR_MOD_ROLE_ID'))
-allowed_roles = [int(os.getenv('OWNER_ROLE_ID')), int(os.getenv('ADMIN_ROLE_ID')), mod_role_id]
+
+allowed_roles = [int(os.getenv('OWNER_ROLE_ID')), int(os.getenv('ADMIN_ROLE_ID')), int(os.getenv('SENIOR_MOD_ROLE_ID')), mod_role_id]
 server_id = int(os.getenv('SERVER_ID'))
 
 moderation_cogs: List[commands.Cog] = [
@@ -60,7 +61,7 @@ class Moderation(*moderation_cogs):
 		if 'discord.gg/' in msg.lower() or 'discord.com/invite/' in msg.lower():
 			invite_root = 'discord.gg/' if 'discord.gg/' in msg.lower() else 'discord.com/invite/'
 			ctx = await self.client.get_context(message)
-			if not await utils.is_allowed([mod_role_id, senior_mod_role_id]).predicate(ctx):
+			if not await utils.is_allowed(allowed_roles).predicate(ctx):
 				is_from_guild = await self.check_invite_guild(msg, message.guild, invite_root)
 
 				if not is_from_guild:
@@ -75,14 +76,14 @@ class Moderation(*moderation_cogs):
 		for video in videos:
 			if str(video) in banned_links:
 				ctx = await self.client.get_context(message)
-				if not await utils.is_allowed([mod_role_id, senior_mod_role_id]).predicate(ctx):
+				if not await utils.is_allowed(allowed_roles).predicate(ctx):
 					return await self.mute(ctx, member=message.author, reason="Banned Link")
 
 		# Checks it in the message content
 		for word in message.content.split():
 			if word in banned_links:
 				ctx = await self.client.get_context(message)
-				if not await utils.is_allowed([mod_role_id, senior_mod_role_id]).predicate(ctx):
+				if not await utils.is_allowed(allowed_roles).predicate(ctx):
 					return await self.mute(ctx, member=message.author, reason="Banned Link")
 
 	@tasks.loop(minutes=1)
@@ -408,14 +409,76 @@ class Moderation(*moderation_cogs):
 		else:
 			return the_time_dict, seconds
 
+	async def get_remove_roles(self, member: discord.Member, keep_roles: Optional[List[Union[int, discord.Role]]] = []
+	) -> List[List[discord.Role]]:
+		""" Gets a list of roles the user will have after removing their roles
+		and a list that will be removed from them.
+		:param keep_roles: The list of roles to keep. [Optional] """
+
+
+		bot = discord.utils.get(member.guild.members, id=self.client.user.id)
+
+		keep_roles: List[int] = [
+			keep_role if isinstance(keep_role, discord.Role) else 
+			discord.utils.get(member.guild.roles, id=keep_role)
+			for keep_role in keep_roles
+		]
+
+		keep_list = []
+		remove_list = []
+
+		for i, member_role in enumerate(member.roles):
+			if i == 0:
+				continue
+				
+			for role in keep_roles:
+				if member_role.id == role.id:
+					keep_list.append(role)
+					continue
+
+			if member_role < bot.top_role:
+				if not member_role.is_premium_subscriber():
+					remove_list.append(member_role)
+
+			if member_role.is_premium_subscriber():
+				keep_list.append(member_role)
+
+			if member_role >= bot.top_role:
+				keep_list.append(member_role)
+
+		return list(set(keep_list)), list(set(remove_list))
+
 	@commands.command()
-	@utils.is_allowed(allowed_roles)
+	@utils.is_allowed(allowed_roles, throw_exc=True)
+	async def rar(self, ctx: commands.Context, member: discord.Member = None) -> None:
+		""" Removes all roles from a user.
+		:param member: The member to rar from. """
+
+		author = ctx.author
+
+		if not member:
+			return await ctx.send(f"**Please, inform a member to rar, {author.mention}!**")
+
+		keep_roles, _ = await self.get_remove_roles(member, keep_roles=allowed_roles)
+
+		confirm = await Confirm(f"**Are you sure you wanna rar {member.mention}, {author.mention}?**").prompt(ctx)
+		if not confirm:
+			return await ctx.send(f"**Not doing it, then, {author.mention}!**")
+
+		try:
+			await member.edit(roles=keep_roles)
+		except:
+			await ctx.send(f"**For some reason I couldn't do it, {author.mention}!**")
+		else:
+			await ctx.send(f"**Successfully rar'd `{member}`, {author.mention}!**")
+
+	@commands.command()
+	@utils.is_allowed(allowed_roles, throw_exc=True)
 	async def mute(self, ctx: commands.Context, member: discord.Member = None, *, reason: Optional[str] = None):
-		'''
-		(MOD) Mutes a member.
+		""" (MOD) Mutes a member.
 		:param member: The @ or the ID of the user to mute.
-		:param reason: The reason for the mute.
-		'''
+		:param reason: The reason for the mute. """
+
 		try:
 			await ctx.message.delete()
 		except:
@@ -427,29 +490,10 @@ class Moderation(*moderation_cogs):
 		if role not in member.roles:
 			# await member.add_roles(role)
 			await member.move_to(None)
-			remove_roles = []
-			keep_roles = [role]
-
-			bot = discord.utils.get(ctx.guild.members, id=self.client.user.id)
+			keep_roles, remove_roles = await self.get_remove_roles(member, keep_roles=allowed_roles)
 
 			current_ts = await utils.get_timestamp()
-
-			for i, member_role in enumerate(member.roles):
-				if i == 0:
-					continue
-
-				if member_role.id == role.id:
-					continue
-
-				if member_role < bot.top_role:
-					if not member_role.is_premium_subscriber():
-						remove_roles.append(member_role)
-
-				if member_role.is_premium_subscriber():
-					keep_roles.append(member_role)
-
-				if member_role >= bot.top_role:
-					keep_roles.append(member_role)
+			keep_roles.append(role)
 
 			await member.edit(roles=keep_roles)
 			user_role_ids = [(member.id, rr.id, current_ts, None) for rr in remove_roles]
@@ -485,12 +529,11 @@ class Moderation(*moderation_cogs):
 
 	# Unmutes a member
 	@commands.command()
-	@utils.is_allowed(allowed_roles)
+	@utils.is_allowed(allowed_roles, throw_exc=True)
 	async def unmute(self, ctx, member: discord.Member = None):
-		'''
-		(MOD) Unmutes a member.
-		:param member: The @ or the ID of the user to unmute.
-		'''
+		""" (MOD) Unmutes a member.
+		:param member: The @ or the ID of the user to unmute. """
+
 		await ctx.message.delete()
 		role = discord.utils.get(ctx.guild.roles, id=muted_role_id)
 		if not member:
@@ -511,9 +554,8 @@ class Moderation(*moderation_cogs):
 					member_roles.remove(role)
 
 				await member.edit(roles=member_roles)
-				# user_role_ids = [(member.id, mrole[1]) for mrole in user_roles]
+
 				try:
-					# await self.remove_all_roles_from_system(user_role_ids)
 					await self.remove_all_roles_from_system(member.id)
 				except Exception as e:
 					print(e)
@@ -543,15 +585,13 @@ class Moderation(*moderation_cogs):
 
 	# Mutes a member temporarily
 	@commands.command()
-	@utils.is_allowed(allowed_roles)
+	@utils.is_allowed(allowed_roles, throw_exc=True)
 	async def tempmute(self, ctx, member: discord.Member = None, reason: str = None, *, time: str = None):
-		"""
-		Mutes a member for a determined amount of time.
+		""" Mutes a member for a determined amount of time.
 		:param member: The @ or the ID of the user to tempmute.
 		:param minutes: The amount of minutes that the user will be muted.
 		:param reason: The reason for the tempmute.
-		:param time: The time for the mute.
-		"""
+		:param time: The time for the mute. """
 		await ctx.message.delete()
 
 		role = discord.utils.get(ctx.guild.roles, id=muted_role_id)
@@ -575,29 +615,9 @@ class Moderation(*moderation_cogs):
 		# print(current_ts, seconds)
 
 		if role not in member.roles:
-			# await member.add_roles(role)
 			await member.move_to(None)
-			remove_roles = []
-			keep_roles = [role]
-
-			bot = discord.utils.get(ctx.guild.members, id=self.client.user.id)
-
-			for i, member_role in enumerate(member.roles):
-				if i == 0:
-					continue
-
-				if member_role.id == role.id:
-					continue
-
-				if member_role < bot.top_role:
-					if not member_role.is_premium_subscriber():
-						remove_roles.append(member_role)
-
-				if member_role.is_premium_subscriber():
-					keep_roles.append(member_role)
-
-				if member_role >= bot.top_role:
-					keep_roles.append(member_role)
+			keep_roles, remove_roles = await self.get_remove_roles(member, keep_roles=allowed_roles)
+			keep_roles.append(role)
 
 			await member.edit(roles=keep_roles)
 			user_role_ids = [(member.id, rr.id, current_ts, seconds) for rr in remove_roles]
@@ -628,7 +648,7 @@ class Moderation(*moderation_cogs):
 			await ctx.send(f'**{member} is already muted!**', delete_after=5)
 
 	@commands.command(aliases=['kick_muted_members', 'kickmuted'])
-	@utils.is_allowed(allowed_roles)
+	@utils.is_allowed(allowed_roles, throw_exc=True)
 	async def kick_muted(self, ctx, *, reason: Optional[str] = None) -> None:
 		""" Kicks all muted members from at least 2 days ago.
 		:param reason: The reason for kicking the muted members. [Optional] """
@@ -646,7 +666,7 @@ class Moderation(*moderation_cogs):
 		if len(muted_members) == 0:
 			return await ctx.send(f"**There are no muted members, {perpetrator.mention}!**")
 
-		confirm = await ConfirmSkill(
+		confirm = await Confirm(
 			f"**Are you sure you want to kick {len(muted_members)} muted members from at least 2 days ago, {perpetrator.mention}?**"
 			).prompt(ctx)
 
@@ -695,7 +715,7 @@ class Moderation(*moderation_cogs):
 
 
 	@commands.command()
-	@utils.is_allowed(allowed_roles)
+	@utils.is_allowed(allowed_roles, throw_exc=True)
 	async def kick(self, ctx, member: discord.Member = None, *, reason: Optional[str] = None):
 		""" (MOD) Kicks a member from the server.
 		:param member: The @ or ID of the user to kick.
@@ -705,7 +725,7 @@ class Moderation(*moderation_cogs):
 		if not member:
 			return await ctx.send('**Please, specify a member!**', delete_after=3)
 
-		confirm = await ConfirmSkill(f"**Are you sure you want to kick {member.mention} from the server, {ctx.author.mention}?**").prompt(ctx)
+		confirm = await Confirm(f"**Are you sure you want to kick {member.mention} from the server, {ctx.author.mention}?**").prompt(ctx)
 		if not confirm:
 			return
 
@@ -742,7 +762,7 @@ class Moderation(*moderation_cogs):
 
 	# Bans a member
 	@commands.command()
-	@utils.is_allowed(allowed_roles)
+	@utils.is_allowed(allowed_roles, throw_exc=True)
 	async def ban(self, ctx, member: discord.Member = None, *, reason: Optional[str] = None) -> None:
 		'''
 		(ModTeam/ADM) Bans a member from the server.
@@ -1092,13 +1112,13 @@ class Moderation(*moderation_cogs):
 			return await ctx.send(f"**It looks like the firewall is on maintenance, {member.mention}!**")
 
 		if await self.get_firewall_state():
-			confirm = await ConfirmSkill(f"The Firewall is activated, do you want to turn it off, {member.mention}?").prompt(ctx)
+			confirm = await Confirm(f"The Firewall is activated, do you want to turn it off, {member.mention}?").prompt(ctx)
 			if confirm:
 				await self.set_firewall_state(0)
 				await ctx.send(f"**Firewall deactivated, {member.mention}!**")
 				await self.client.get_cog('ReportSupport').audio(member, 'troll_firewall_off')
 		else:
-			confirm = await ConfirmSkill(f"The Firewall is deactivated, do you want to turn it on, {member.mention}?").prompt(ctx)
+			confirm = await Confirm(f"The Firewall is deactivated, do you want to turn it on, {member.mention}?").prompt(ctx)
 			if confirm:
 				await self.set_firewall_state(1)
 				await ctx.send(f"**Firewall activated, {member.mention}!**")
@@ -1232,7 +1252,7 @@ class Moderation(*moderation_cogs):
 			await ctx.send(f"**Event Manager applications are now {'closed' if buttons[2].disabled else 'open'}, {member.mention}!**")
 
 
-		confirm = await ConfirmSkill(f"**Do you wanna confirm the changes? Otherwise you can disregard the message above, {member.mention}.**").prompt(ctx)
+		confirm = await Confirm(f"**Do you wanna confirm the changes? Otherwise you can disregard the message above, {member.mention}.**").prompt(ctx)
 		if confirm:
 			await message.edit(view=view)
 			await ctx.send(f"**Done!**")
