@@ -64,7 +64,6 @@ class Analytics(commands.Cog):
                 await self.bump_data(info[0], info[1], info[2], len(members), len(online_members), str(complete_date))
             except Exception as e:
                 print('SlothAnalytics error', e)
-                print('aah')
 
     @commands.Cog.listener()
     async def on_member_join(self, member) -> None:

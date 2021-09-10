@@ -93,8 +93,15 @@ class SlothReputation(commands.Cog):
     async def _info(self, ctx, member: discord.Member = None) -> None:
         """ Shows the user's level and experience points. """
 
+        answer: discord.PartialMessageable = None
+        if isinstance(ctx, commands.Context):
+            answer = ctx.send
+        else:
+            answer = ctx.respond
+
+
         if not await self.check_table_exist():
-            return await ctx.send("**This command may be on maintenance!**")
+            return await answer("**This command may be on maintenance!**")
 
         if not member:
             member = ctx.author
@@ -106,22 +113,22 @@ class SlothReputation(commands.Cog):
         user = await self.get_specific_user(member.id)
         if not user:
             if ctx.author.id == member.id:
-                return await ctx.send(
+                return await answer(
                     embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one, or in the button below!**"),
                     view=view)
             else:
-                return await ctx.send(f"**{member} doesn't have an account yet!**")
+                return await answer(f"**{member} doesn't have an account yet!**")
 
         # Gets user's currency info, such as money balance, class participations, sloth class, etc.
         ucur = await self.get_user_currency(member.id)
         sloth_profile = await self.client.get_cog('SlothClass').get_sloth_profile(member.id)
         if not ucur or not sloth_profile:
             if ctx.author.id == member.id:
-                return await ctx.send(
+                return await answer(
                     embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one, or in the button below!**"),
                     view=view)
             else:
-                return await ctx.send(f"**{member} doesn't have an account yet!**")
+                return await answer(f"**{member} doesn't have an account yet!**")
 
         SlothCurrency = self.client.get_cog('SlothCurrency')
 
@@ -141,10 +148,10 @@ class SlothReputation(commands.Cog):
         # Gets user Server Activity info, such as messages sent and time in voice channels
         user_info = await SlothCurrency.get_user_activity_info(member.id)
         if not user_info and member.id == ctx.author.id:
-            return await ctx.send(f"**For some reason you are not in the system, {ctx.author.mention}! Try again**")
+            return await answer(f"**For some reason you are not in the system, {ctx.author.mention}! Try again**")
 
         elif not user_info and not member.id == ctx.author.id:
-            return await ctx.send("**Member not found in the system!**")
+            return await answer("**Member not found in the system!**")
     
         current_time = await utils.get_time_now()
         embed = discord.Embed(title="__All Information__", colour=member.color, timestamp=current_time)
@@ -206,19 +213,13 @@ class SlothReputation(commands.Cog):
         embed.set_footer(text=ctx.guild, icon_url=ctx.guild.icon.url)
 
         if ctx.author.id != member.id:
-            if isinstance(ctx, commands.Context):
-                return await ctx.send(embed=embed)
-            else:
-                return await ctx.respond(embed=embed)
+            return await answer(embed=embed)
         else:
             view = ExchangeActivityView(self.client, user_info[0])
             if 'sabotaged' in effects:
                 view.children[0].disabled = True
 
-            if isinstance(ctx, commands.Context):
-                return await ctx.send(embed=embed)
-            else:
-                return await ctx.respond(embed=embed, view=view)
+            return await answer(embed=embed, view=view)
 
     @commands.command(aliases=['leaderboard', 'lb', 'scoreboard'])
     async def score(self, ctx):
