@@ -59,10 +59,11 @@ class Analytics(commands.Cog):
                 await channel.send(file=fp)
 
             try:
-                await self.reset_table_sloth_analytics()
+                await self.reset_table_sloth_analytics_callback()
                 complete_date = time_now.strftime('%d/%m/%Y')
                 await self.bump_data(info[0], info[1], info[2], len(members), len(online_members), str(complete_date))
             except Exception as e:
+                print('SlothAnalytics error', e)
                 print('aah')
 
     @commands.Cog.listener()
@@ -149,11 +150,16 @@ class Analytics(commands.Cog):
 
     @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
-    async def reset_table_sloth_analytics(self, ctx=None) -> None:
-        """ (ADM) Resets the SlothAnalytics table. """
+    async def reset_table_sloth_analytics(self, ctx = None) -> None:
+        """ (ADM) Resets the SlothAnalytics table. (Callback)"""
 
-        if ctx:
-            await ctx.message.delete()
+
+        await ctx.message.delete()
+        await self.reset_table_sloth_analytics_callback()
+        return await ctx.send("**Table *SlothAnalytics* reset!**", delete_after=3)
+
+    async def reset_table_sloth_analytics_callback(self) -> None:
+        """ (ADM) Resets the SlothAnalytics table. (Callback)"""
 
         mycursor, db = await the_database()
         time_now = await utils.get_time_now()
@@ -163,8 +169,6 @@ class Analytics(commands.Cog):
         """, (time_now.day,))
         await db.commit()
         await mycursor.close()
-        if ctx:
-            return await ctx.send("**Table *SlothAnalytics* reset!**", delete_after=3)
 
     async def update_joined(self) -> None:
         """ Updates the joined members counting. """
