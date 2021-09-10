@@ -4,7 +4,6 @@ from discord.ext import commands, tasks
 from mysqldb import the_database
 
 from datetime import datetime, timedelta
-from pytz import timezone
 from extra import utils
 
 from PIL import Image, ImageFont, ImageDraw
@@ -36,8 +35,6 @@ class Analytics(commands.Cog):
     async def check_midnight(self) -> None:
         """ Checks whether it's midnight. """
 
-        # tzone = timezone("Etc/GMT-1")
-        # time_now = datetime.now(tzone)
         time_now = await utils.get_time_now()
         day = time_now.day
         if await self.check_relatory_time(day):
@@ -70,13 +67,12 @@ class Analytics(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_join(self, member) -> None:
-        """ Tells the newcomer to assign themselves a native language role, and updates the joined members counter.
-        """
+        """ Tells the newcomer to assign themselves a native language role, and updates the joined members counter. """
 
         channel = discord.utils.get(member.guild.channels, id=select_your_language_channel_id)
         await channel.send(
-            f'''Hello {member.mention} ! Scroll up and choose your Native Language by clicking in the flag that best represents it!
-<:zarrowup:688222444292669449> <:zarrowup:688222444292669449> <:zarrowup:688222444292669449> <:zarrowup:688222444292669449> <:zarrowup:688222444292669449> <:zarrowup:688222444292669449> <:zarrowup:688222444292669449> <:zarrowup:688222444292669449>''',
+            f"""Hello {member.mention} ! Scroll up and choose your Native Language by clicking in the flag that best represents it!
+<:zarrowup:688222444292669449> <:zarrowup:688222444292669449> <:zarrowup:688222444292669449> <:zarrowup:688222444292669449> <:zarrowup:688222444292669449> <:zarrowup:688222444292669449> <:zarrowup:688222444292669449> <:zarrowup:688222444292669449>""",
             delete_after=120)
         await self.update_joined()
 
@@ -126,19 +122,15 @@ class Analytics(commands.Cog):
     @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
     async def create_table_sloth_analytics(self, ctx) -> None:
-        '''
-        (ADM) Creates the SlothAnalytics table.
-        '''
+        """ (ADM) Creates the SlothAnalytics table. """
+
         await ctx.message.delete()
         mycursor, db = await the_database()
         await mycursor.execute(
             "CREATE TABLE SlothAnalytics (m_joined int default 0, m_left int default 0, messages_sent int default 0, day_now VARCHAR(2))")
         await db.commit()
-        time_now = datetime.now()
-        tzone = timezone("CET")
-        date_and_time = time_now.astimezone(tzone)
-        day = date_and_time.strftime('%d')
-        await mycursor.execute("INSERT INTO SlothAnalytics (day_now) VALUES (%s)", (day))
+        time_now = await utils.get_time_now()
+        await mycursor.execute("INSERT INTO SlothAnalytics (day_now) VALUES (%s)", (time_now.day))
         await db.commit()
         await mycursor.close()
         return await ctx.send("**Table *SlothAnalytics* created!**", delete_after=3)
@@ -162,13 +154,13 @@ class Analytics(commands.Cog):
 
         if ctx:
             await ctx.message.delete()
+
         mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM SlothAnalytics")
-        time_now = datetime.now()
-        tzone = timezone("CET")
-        date_and_time = time_now.astimezone(tzone)
-        day = date_and_time.strftime('%d')
-        await mycursor.execute("INSERT INTO SlothAnalytics (day_now) VALUES (%s)", (day,))
+        time_now = await utils.get_time_now()
+        await mycursor.execute("""
+            UPDATE SlothAnalytics SET day_now = %s, m_joined = 0, m_left = 0,
+            messages_sent = 0
+        """, (time_now.day,))
         await db.commit()
         await mycursor.close()
         if ctx:
@@ -389,11 +381,10 @@ class Analytics(commands.Cog):
         :param days: The amount of days to be incremented.
         :param hours: The amount of hours to be incremented. """
 
-        tzone = timezone('Etc/GMT-1')
-        current_date_and_time = datetime.now().astimezone(tzone)
-        future_date_and_time = current_date_and_time + timedelta(days=days, hours=hours)
+        time_now = await utils.get_time_now()
+        future_date_and_time = time_now + timedelta(days=days, hours=hours)
 
-        last_day = current_date_and_time.strftime('%d/%m/%Y at %H')
+        last_day = time_now.strftime('%d/%m/%Y at %H')
         future_day = future_date_and_time.strftime('%d/%m/%Y at %H')
         return last_day, future_day
 
@@ -407,8 +398,7 @@ class Analytics(commands.Cog):
         hours = 0
         current_compound = temp_value = present
         # print('-'*20)
-        tzone = timezone('Etc/GMT-1')
-        td = datetime.now().astimezone(tzone)
+        time_now = await utils.get_time_now()
 
         while True:
 
@@ -422,8 +412,8 @@ class Analytics(commands.Cog):
             if sum_both >= future:
                 pr_divided = pr_compound / 24
                 remaining_hours = 24
-                if td.hour != 0 and count == 0:
-                    remaining_hours = 24 - td.hour
+                if time_now.hour != 0 and count == 0:
+                    remaining_hours = 24 - time_now.hour
 
                 # Divides the remaining PR by 24 hours
                 remaining_pr = pr_compound / 24
@@ -453,7 +443,7 @@ class Analytics(commands.Cog):
     async def get_last_members_record(self) -> int:
         """ Gets the last record of total members. """
 
-        mycursor, db = await the_database()
+        mycursor, _ = await the_database()
         await mycursor.execute("SELECT members FROM DataBumps ORDER BY members DESC LIMIT 1")
         last_record = await mycursor.fetchone()
         await mycursor.close()
