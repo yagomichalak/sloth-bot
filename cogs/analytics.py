@@ -46,9 +46,9 @@ class Analytics(commands.Cog):
             small = ImageFont.truetype("built titling sb.ttf", 45)
             analytics = Image.open("./png/analytics.png").resize((500, 600))
             draw = ImageDraw.Draw(analytics)
-            draw.text((140, 270), f"{info[0][0]}", (255, 255, 255), font=small)
-            draw.text((140, 335), f"{info[0][1]}", (255, 255, 255), font=small)
-            draw.text((140, 395), f"{info[0][2]}", (255, 255, 255), font=small)
+            draw.text((140, 270), f"{info[0]}", (255, 255, 255), font=small)
+            draw.text((140, 335), f"{info[1]}", (255, 255, 255), font=small)
+            draw.text((140, 395), f"{info[2]}", (255, 255, 255), font=small)
             draw.text((140, 460), f"{len(members)}", (255, 255, 255), font=small)
             draw.text((140, 520), f"{len(online_members)}", (255, 255, 255), font=small)
 
@@ -61,7 +61,7 @@ class Analytics(commands.Cog):
             try:
                 await self.reset_table_sloth_analytics()
                 complete_date = time_now.strftime('%d/%m/%Y')
-                await self.bump_data(info[0][0], info[0][1], info[0][2], len(members), len(online_members), str(complete_date))
+                await self.bump_data(info[0], info[1], info[2], len(members), len(online_members), str(complete_date))
             except Exception as e:
                 print('aah')
 
@@ -218,7 +218,7 @@ class Analytics(commands.Cog):
 
         mycursor, db = await the_database()
         await mycursor.execute("SELECT * from SlothAnalytics")
-        info = await mycursor.fetchall()
+        info = await mycursor.fetchone()
         await mycursor.close()
         return info
 
