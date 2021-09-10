@@ -13,6 +13,8 @@ class HugView(discord.ui.View):
         super().__init__(timeout=timeout)
         self.member = member
         self.target = target
+        self.used: bool = False
+        self.used: bool = False
 
 
     @discord.ui.button(label='Hug', style=discord.ButtonStyle.blurple, custom_id='hug_id', emoji="🤗")
@@ -41,6 +43,7 @@ class HugView(discord.ui.View):
 
         await interaction.response.send_message(content=self.target.mention, embed=embed)
         await self.disable_buttons(interaction, followup=True)
+        self.used = True
         self.stop()
 
     @discord.ui.button(label='Nevermind', style=discord.ButtonStyle.red, custom_id='nevermind_id', emoji="❌")
@@ -71,6 +74,7 @@ class BootView(discord.ui.View):
         super().__init__(timeout=timeout)
         self.member = member
         self.target = target
+        self.used: bool = False
 
 
     @discord.ui.button(label='Where it hits', style=discord.ButtonStyle.blurple, custom_id='general_kick_id', emoji="🦵")
@@ -104,6 +108,7 @@ class BootView(discord.ui.View):
 
         await interaction.response.send_message(content=self.target.mention, embed=embed)
         await self.disable_buttons(interaction, followup=True)
+        self.used = True
         self.stop()
 
     @discord.ui.button(label='Butt Kick', style=discord.ButtonStyle.blurple, custom_id='butt_kick_id', emoji="<a:peepoHonkbutt:757358697033760918>")
@@ -137,6 +142,7 @@ class BootView(discord.ui.View):
 
         await interaction.response.send_message(content=self.target.mention, embed=embed)
         await self.disable_buttons(interaction, followup=True)
+        self.used = True
         self.stop()
 
     @discord.ui.button(label='Nevermind', style=discord.ButtonStyle.red, custom_id='nevermind_id', emoji="❌")
@@ -168,6 +174,7 @@ class SlapView(discord.ui.View):
         self.client = client
         self.member = member
         self.target = target
+        self.used: bool = False
 
 
     @discord.ui.button(label='Angry Slap', style=discord.ButtonStyle.blurple, custom_id='angry_slap_id', emoji="<:zslothree:695411876581867610>")
@@ -194,6 +201,7 @@ class SlapView(discord.ui.View):
 
         await interaction.response.send_message(content=self.target.mention, embed=embed)
         await self.disable_buttons(interaction, followup=True)
+        self.used = True
         self.stop()
 
     @discord.ui.button(label='Sexy Slap', style=discord.ButtonStyle.blurple, custom_id='sexy_slap_id', emoji="<:creep:676070700951273491>")
@@ -247,6 +255,7 @@ class SlapView(discord.ui.View):
                 content=self.target.mention, embed=embed)
             
         await self.disable_buttons(interaction, followup=True)
+        self.used = True
         self.stop()
 
     @discord.ui.button(label='Nevermind', style=discord.ButtonStyle.red, custom_id='nevermind_id', emoji="❌")
@@ -278,6 +287,7 @@ class KissView(discord.ui.View):
         self.client = client
         self.member = member
         self.target = target
+        self.used: bool = False
 
 
     @discord.ui.button(label='Kiss on the Cheek', style=discord.ButtonStyle.blurple, custom_id='cheek_kiss_id', emoji="☺️")
@@ -306,6 +316,7 @@ class KissView(discord.ui.View):
 
         await interaction.response.send_message(content=self.target.mention, embed=embed)
         await self.disable_buttons(interaction, followup=True)
+        self.used = True
         self.stop()
     
     @discord.ui.button(label='Mouth Kiss', style=discord.ButtonStyle.blurple, custom_id='mouth_kiss_id', emoji="💋")
@@ -365,6 +376,7 @@ class KissView(discord.ui.View):
                 content=self.target.mention, embed=embed)
             
         await self.disable_buttons(interaction, followup=True)
+        self.used = True
         self.stop()
 
 
@@ -490,6 +502,7 @@ class CheatingActionView(discord.ui.View):
 
         await interaction.response.send_message(content=self.cheater.mention, embed=embed)
         await self.disable_buttons(interaction, followup=True)
+        self.used = True
 
     @discord.ui.button(label="Force divorce", style=discord.ButtonStyle.red, custom_id='divorce_id', emoji='<:zslothtoxic:695420110420312125>')
     async def force_divorce_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
@@ -531,6 +544,7 @@ class CheatingActionView(discord.ui.View):
             await interaction.response.send_message(content=self.cheater.mention, embed=embed)
         finally:
             await self.disable_buttons(interaction, followup=True)
+            self.used = True
 
     @discord.ui.button(label="Knock 'em out!", style=discord.ButtonStyle.gray, custom_id='ko_id', emoji='<a:zslothgiveme:709909994203512902>')
     async def knock_out_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
@@ -551,6 +565,7 @@ class CheatingActionView(discord.ui.View):
             await interaction.response.send_message(content=self.cheater.mention, embed=embed)
         finally:
             await self.disable_buttons(interaction, followup=True)
+            self.used = True
 
 
     async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
@@ -576,6 +591,7 @@ class HoneymoonView(discord.ui.View):
         super().__init__(timeout=timeout)
         self.member = member
         self.target = target
+        self.used: bool = False
         self.value = None
         self.embed: discord.Embed = None
 
@@ -698,6 +714,7 @@ class PunchView(discord.ui.View):
         super().__init__(timeout=timeout)
         self.member = member
         self.target = target
+        self.used: bool = False
 
 
     @discord.ui.button(label='Punch Face', style=discord.ButtonStyle.blurple, custom_id='punch_face_id', emoji="👊")
@@ -731,6 +748,7 @@ class PunchView(discord.ui.View):
 
         await interaction.response.send_message(content=self.target.mention, embed=embed)
         await self.disable_buttons(interaction, followup=True)
+        self.used = True
         self.stop()
 
     @discord.ui.button(label='Punch Throat', style=discord.ButtonStyle.blurple, custom_id='throat_punch_id', emoji="<:zsimpysloth:737321065662906389>")
@@ -762,6 +780,7 @@ class PunchView(discord.ui.View):
 
         await interaction.response.send_message(content=self.target.mention, embed=embed)
         await self.disable_buttons(interaction, followup=True)
+        self.used = True
         self.stop()
 
     @discord.ui.button(label='Uppercut', style=discord.ButtonStyle.blurple, custom_id='uppercut_id', emoji="💪")
@@ -795,6 +814,7 @@ class PunchView(discord.ui.View):
 
         await interaction.response.send_message(content=self.target.mention, embed=embed)
         await self.disable_buttons(interaction, followup=True)
+        self.used = True
         self.stop()
 
     @discord.ui.button(label='Punch Stomach', style=discord.ButtonStyle.blurple, custom_id='punch_stomach_id', emoji="<:eau:875729754215571487>")
@@ -828,6 +848,7 @@ class PunchView(discord.ui.View):
 
         await interaction.response.send_message(content=self.target.mention, embed=embed)
         await self.disable_buttons(interaction, followup=True)
+        self.used = True
         self.stop()
 
     @discord.ui.button(label='Punchline', style=discord.ButtonStyle.gray, custom_id='punchline_id', emoji="<:I_smell_your_sins:666322848922599434>")
@@ -866,6 +887,7 @@ class PunchView(discord.ui.View):
 
         await interaction.response.send_message(content=self.target.mention, embed=embed)
         await self.disable_buttons(interaction, followup=True)
+        self.used = True
         self.stop()
 
     @discord.ui.button(label='Nevermind', style=discord.ButtonStyle.red, custom_id='nevermind_id', emoji="❌")
@@ -897,6 +919,7 @@ class GiveView(discord.ui.View):
         super().__init__(timeout=timeout)
         self.member = member
         self.target = target
+        self.used: bool = False
 
         self.foods: Dict[str, Dict[str, str]] = self.get_foods()
 
@@ -938,6 +961,7 @@ class GiveView(discord.ui.View):
 
         await interaction.response.send_message(content=self.target.mention, embed=embed)
         await self.disable_buttons(interaction, followup=True)
+        self.used = True
         self.stop()
 
     @discord.ui.button(label='Nothing', style=discord.ButtonStyle.red, custom_id='nothing_id', emoji="❌", row=2)
@@ -969,6 +993,7 @@ class TickleView(discord.ui.View):
         super().__init__(timeout=timeout)
         self.member = member
         self.target = target
+        self.used: bool = False
 
 
     @discord.ui.button(label='Tickle', style=discord.ButtonStyle.blurple, custom_id='tickle_id', emoji="<:zslothlmao:686697712074490055>")
@@ -1002,6 +1027,7 @@ class TickleView(discord.ui.View):
 
         await interaction.response.send_message(content=self.target.mention, embed=embed)
         await self.disable_buttons(interaction, followup=True)
+        self.used = True
         self.stop()
 
     @discord.ui.button(label='Nevermind', style=discord.ButtonStyle.red, custom_id='nevermind_id', emoji="❌")
@@ -1032,6 +1058,7 @@ class YeetView(discord.ui.View):
         super().__init__(timeout=timeout)
         self.member = member
         self.target = target
+        self.used: bool = False
 
 
     @discord.ui.button(label='Something', style=discord.ButtonStyle.blurple, custom_id='yeet_something_id', emoji="🤾‍♂️")
@@ -1063,6 +1090,7 @@ class YeetView(discord.ui.View):
 
         await interaction.response.send_message(content=self.target.mention, embed=embed)
         await self.disable_buttons(interaction, followup=True)
+        self.used = True
         self.stop()
 
     @discord.ui.button(label='Someone', style=discord.ButtonStyle.blurple, custom_id='yeet_someone_id', emoji="<:ytho:738497432693899275>")
@@ -1100,6 +1128,7 @@ class YeetView(discord.ui.View):
 
         await interaction.response.send_message(content=self.target.mention, embed=embed)
         await self.disable_buttons(interaction, followup=True)
+        self.used = True
         self.stop()
 
     @discord.ui.button(label='Nevermind', style=discord.ButtonStyle.red, custom_id='nevermind_id', emoji="❌")
@@ -1130,6 +1159,7 @@ class BegView(discord.ui.View):
         super().__init__(timeout=timeout)
         self.member = member
         self.target = target
+        self.used: bool = False
 
 
     @discord.ui.button(label='Beg', style=discord.ButtonStyle.blurple, custom_id='beg_id', emoji="🙏")
@@ -1174,6 +1204,7 @@ class BegView(discord.ui.View):
 
         await interaction.response.send_message(content=self.target.mention, embed=embed)
         await self.disable_buttons(interaction, followup=True)
+        self.used = True
         self.stop()
 
     @discord.ui.button(label='Nevermind', style=discord.ButtonStyle.red, custom_id='nevermind_id', emoji="❌")
@@ -1204,6 +1235,7 @@ class PatView(discord.ui.View):
         super().__init__(timeout=timeout)
         self.member = member
         self.target = target
+        self.used: bool = False
 
 
     @discord.ui.button(label='Pat', style=discord.ButtonStyle.blurple, custom_id='beg_id', emoji="🖐️")
@@ -1250,6 +1282,7 @@ class PatView(discord.ui.View):
 
         await interaction.response.send_message(content=self.target.mention, embed=embed)
         await self.disable_buttons(interaction, followup=True)
+        self.used = True
         self.stop()
 
     @discord.ui.button(label='Nevermind', style=discord.ButtonStyle.red, custom_id='nevermind_id', emoji="❌")
@@ -1280,6 +1313,7 @@ class WhisperView(discord.ui.View):
         super().__init__(timeout=timeout)
         self.member = member
         self.target = target
+        self.used: bool = False
         self.text = text
 
 
@@ -1322,6 +1356,7 @@ class WhisperView(discord.ui.View):
 
         await interaction.response.send_message(content=self.target.mention, embed=embed)
         await self.disable_buttons(interaction, followup=True)
+        self.used = True
         self.stop()
 
     @discord.ui.button(label='Nevermind', style=discord.ButtonStyle.red, custom_id='nevermind_id', emoji="❌")
@@ -1355,6 +1390,7 @@ class HandshakeView(discord.ui.View):
         super().__init__(timeout=timeout)
         self.member = member
         self.target = target
+        self.used: bool = False
 
 
     @discord.ui.button(label='Handshake', style=discord.ButtonStyle.blurple, custom_id='handshake_id', emoji="🤝")
@@ -1398,6 +1434,7 @@ class HandshakeView(discord.ui.View):
 
         await interaction.response.send_message(content=self.target.mention, embed=embed)
         await self.disable_buttons(interaction, followup=True)
+        self.used = True
         self.stop()
 
     @discord.ui.button(label='Nevermind', style=discord.ButtonStyle.red, custom_id='nevermind_id', emoji="❌")
@@ -1429,6 +1466,7 @@ class PeekView(discord.ui.View):
         super().__init__(timeout=timeout)
         self.member = member
         self.target = target
+        self.used: bool = False
 
 
     @discord.ui.button(label='Peek', style=discord.ButtonStyle.blurple, custom_id='peek_id', emoji="👀")
@@ -1474,6 +1512,7 @@ class PeekView(discord.ui.View):
 
         await interaction.response.send_message(content=self.target.mention, embed=embed)
         await self.disable_buttons(interaction, followup=True)
+        self.used = True
         self.stop()
 
     @discord.ui.button(label='Nevermind', style=discord.ButtonStyle.red, custom_id='nevermind_id', emoji="❌")
@@ -1504,6 +1543,7 @@ class DriveOverView(discord.ui.View):
         super().__init__(timeout=timeout)
         self.member = member
         self.target = target
+        self.used: bool = False
 
 
     @discord.ui.button(label='Drive Over', style=discord.ButtonStyle.blurple, custom_id='drive_over_id', emoji="🚗")
@@ -1537,6 +1577,7 @@ class DriveOverView(discord.ui.View):
 
         await interaction.response.send_message(content=self.target.mention, embed=embed)
         await self.disable_buttons(interaction, followup=True)
+        self.used = True
         self.stop()
 
     @discord.ui.button(label='Nevermind', style=discord.ButtonStyle.red, custom_id='nevermind_id', emoji="❌")
@@ -1568,6 +1609,7 @@ class HighFiveView(discord.ui.View):
         super().__init__(timeout=timeout)
         self.member = member
         self.target = target
+        self.used: bool = False
 
 
     @discord.ui.button(label='High Five', style=discord.ButtonStyle.blurple, custom_id='peek_id', emoji="🖐️")
@@ -1619,6 +1661,7 @@ class HighFiveView(discord.ui.View):
 
         await interaction.response.send_message(content=self.target.mention, embed=embed)
         await self.disable_buttons(interaction, followup=True)
+        self.used = True
         self.stop()
 
     @discord.ui.button(label='Nevermind', style=discord.ButtonStyle.red, custom_id='nevermind_id', emoji="❌")
