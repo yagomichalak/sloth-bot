@@ -601,6 +601,7 @@ async def youtube_together(ctx: discord.ApplicationContext ,
     if not isinstance(voice_channel, discord.VoiceChannel):
         return await ctx.respond(f"**Please, select a `Voice Channel`, {member.mention}!**")
 
+    link: str = ''
     try:
         link = await voice_channel.create_activity_invite('youtube', max_age=600)
     except Exception as e:
