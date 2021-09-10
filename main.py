@@ -651,7 +651,7 @@ async def _poll(ctx,
     await msg.add_reaction('❌')
 
 
-@client.message_command(name="translate", guild_ids=guild_ids)
+@client.message_command(name="Translate", guild_ids=guild_ids)
 async def _tr_slash(ctx, message: discord.Message) -> None:
     """ Translates a message into another language. """
 
