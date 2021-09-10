@@ -37,7 +37,6 @@ def is_allowed(roles: List[int], check_adm: Optional[bool] = True, throw_exc: Op
 
     async def real_check(ctx: Optional[commands.Context] = None, channel: Optional[discord.TextChannel] = None, 
         member: Optional[discord.Member] = None) -> bool:
-        print('yes')
 
         member = member if not ctx else ctx.author
         channel = channel if not ctx else ctx.channel
