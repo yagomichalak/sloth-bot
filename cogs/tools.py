@@ -172,29 +172,50 @@ class Tools(commands.Cog):
 		else:
 			await ctx.send("**The bot is in a different voice channel!**")
 
-	@commands.command()
-	async def tr(self, ctx, language: str = None, *, message: str = None):
-		'''
-		Translates a message into another language.
+	@commands.command(name="translate", aliases=["tr"])
+	async def _tr_command(self, ctx, language: str = None, *, message: str = None) -> None:
+		""" Translates a message into another language.
 		:param language: The language to translate the message to.
 		:param message: The message to translate.
-		:return: A translated message.
-		'''
+		:return: A translated message. """
+
 		await ctx.message.delete()
 		if not language:
 			return await ctx.send("**Please, inform a language!**", delete_after=5)
 		elif not message:
 			return await ctx.send("**Please, inform a message to translate!**", delete_after=5)
+
+		await self._tr_callback(ctx, language, message, True)
+
+
+	async def _tr_callback(self, ctx, language: str = None, message: str = None, show_src: bool = False) -> None:
+		""" Translates a message into another language.
+		:param language: The language to translate the message to.
+		:param message: The message to translate.
+		:param show_src: Whether to show the source message. """
+
+		answer: discord.PartialMessageable = None
+		if isinstance(ctx, commands.Context):
+			answer = ctx.send
+		else:
+			answer = ctx.respond
+
 		trans = Translator(service_urls=['translate.googleapis.com'])
+		current_time = await utils.get_time_now()
 		try:
 			translation = trans.translate(f'{message}', dest=f'{language}')
 		except ValueError:
-			return await ctx.send("**Invalid parameter for 'language'!**", delete_after=5)
-		embed = discord.Embed(title="__Sloth Translator__",
-							  description=f"**Translated from `{translation.src}` to `{translation.dest}`**\n\n{translation.text}",
-							  colour=ctx.author.color, timestamp=ctx.message.created_at)
+			return await answer("**Invalid parameter for 'language'!**", delete_after=5)
+
+		embed = discord.Embed(title="__Sloth Translator__", color=ctx.author.color, timestamp=current_time)
+
+		if show_src:
+			embed.add_field(name=f"__{translation.src}:__", value=f"```{message}```", inline=False)
+		embed.add_field(name=f"__{translation.dest}:__", value=f"```{translation.text}```", inline=False)
+
 		embed.set_author(name=ctx.author, icon_url=ctx.author.display_avatar)
-		await ctx.send(embed=embed)
+		embed.set_footer(text=f"{translation.src} -> {translation.dest}")
+		await answer(embed=embed)
 
 	@commands.command()
 	async def ping(self, ctx):
