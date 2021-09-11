@@ -67,6 +67,7 @@ class Tools(commands.Cog):
 				pass
 
 	@commands.command()
+	@commands.has_any_role(*[mod_role_id, admin_role_id, owner_role_id])
 	@commands.cooldown(1, 5, commands.BucketType.user)
 	async def inrole(self, ctx, *, role: discord.Role = None) -> None:
 		""" Shows everyone who have that role in the server.
@@ -89,7 +90,6 @@ class Tools(commands.Cog):
 				await pages.start(ctx)
 			else:
 				return await ctx.send(f"**No one has this role, {member.mention}!**")
-
 		else:
 			return await ctx.send(f"**No role with that name was found!**")
 
