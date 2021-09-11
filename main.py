@@ -356,7 +356,8 @@ async def help(ctx, *, cmd: str = None):
                 return await ctx.send(embed=cog_embed)
         # Otherwise, it's an invalid parameter (Not found)
         else:
-            await ctx.send(f"**Invalid parameter! `{cmd}` is neither a command nor a cog!**")
+            await ctx.send(f"**Invalid parameter! It is neither a command nor a cog!**")
+
 @client.command(hidden=True)
 @commands.has_permissions(administrator=True)
 async def load(ctx, extension: str = None):
