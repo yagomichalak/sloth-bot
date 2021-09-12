@@ -292,11 +292,8 @@ class Warrior(Player):
         view.add_item(WarriorUserItemSelect(target_items[:25]))
         await ctx.send(f"**{target.display_name}**'s items:", view=view)
         await view.wait()
-        item = getattr(view, 'selected_item')
-        if item is None:
+        if not hasattr(view, 'selected_item'):
             return await ctx.send(f"**Timeout, {attacker.mention}!**")
-        elif item is False:
-            return await ctx.send(f"**You canceled it, {attacker.mention}!**")
         
         cost = int(item[6]/2)
         confirm_view = ConfirmButton(attacker, timeout=60)
