@@ -49,6 +49,7 @@ class Giveaways(commands.Cog):
                continue 
 
             # Gets the channel and message
+            channel = message = None
             try:
                 channel = await self.client.fetch_channel(giveaway[1])
             except discord.errors.NotFound:
@@ -60,7 +61,6 @@ class Giveaways(commands.Cog):
             except discord.errors.NotFound:
                 await self.delete_giveaway(giveaway[0])
                 continue
-
 
             entries = await self.get_giveaway_entries(giveaway[0])
 
@@ -252,6 +252,63 @@ class Giveaways(commands.Cog):
             await message.delete()
         except:
             pass
+
+    @_giveaway.command(aliases=['finish', 'stop', 'terminate'])
+    async def end(self, ctx, message_id: int = None) -> None:
+        """ Force-ends an on-going giveaway.
+        :param message_id: The ID of the giveaway message. """
+
+        member = ctx.author
+        if not message_id:
+            return await ctx.send(f"**Please, inform a message ID, {member.mention}!**", delete_after=3)
+
+        giveaway = await self.get_giveaway(message_id)
+        if not giveaway:
+            return await ctx.send(f"**The specified giveaway message doesn't exist, {member.mention}!**", delete_after=3)
+
+        if giveaway[5]:
+            return await ctx.send(f"**This giveaway has been ended already, consider using rerolling or deleting it, {member.mention}!**", delete_after=3)
+
+        confirm = await Confirm(f"**Are you sure you want to end the giveaway with ID: `{giveaway[0]}`, {member.mention}?**").prompt(ctx)
+        if not confirm:
+            return await ctx.send(f"**Not doing it, then, {member.mention}!**", delete_after=3)
+
+         # Gets the channel and message
+        channel = message = None
+        try:
+            channel = await self.client.fetch_channel(giveaway[1])
+        except discord.errors.NotFound:
+            await self.delete_giveaway(giveaway[0])
+            return await ctx.send(f"**Channel of the given giveaway doesn't exist anymore, {member.mention}!**", delete_after=3)
+        
+        try:
+            message = await channel.fetch_message(giveaway[0])
+        except discord.errors.NotFound:
+            await self.delete_giveaway(giveaway[0])
+            return await ctx.send(f"**Message of the given giveaway doesn't exist anymore, {member.mention}!**", delete_after=3)
+
+        try:
+            entries = await self.get_giveaway_entries(giveaway[0])
+            winners = await self.get_winners(giveaway, entries)
+
+            # Edits the embed
+            embed = message.embeds[0]
+            embed.title += ' (Ended)'
+            embed.color = discord.Color.red()
+
+            view = discord.ui.View.from_message(message)
+
+            await utils.disable_buttons(view)
+            await message.edit(embed=embed, view=view)
+            # Sends last message
+            await message.reply(
+                f"**Giveaway is over, we had a total of `{len(entries)}` people participating, and the `{giveaway[3]}` winners are: {winners}!**"
+            )
+            # Notifies the giveaway's termination
+            await self.update_giveaway(giveaway[0])
+        except Exception as e:
+            print('Error at force-ending giveaway: ', e)
+            await ctx.send(f"**Something went wrong with it, please contact an admin, {member.mention}!**", delete_after=3)
 
 
     async def get_giveaway_time(self, flags: Dict[str, Union[int, str]]) -> int:
