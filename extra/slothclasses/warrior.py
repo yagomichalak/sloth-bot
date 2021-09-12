@@ -295,6 +295,7 @@ class Warrior(Player):
         if not hasattr(view, 'selected_item'):
             return await ctx.send(f"**Timeout, {attacker.mention}!**")
         
+        item = view.selected_item
         cost = int(item[6]/2)
         confirm_view = ConfirmButton(attacker, timeout=60)
         await ctx.send(embed=discord.Embed(
