@@ -93,6 +93,7 @@ class SlothReputation(commands.Cog):
     async def _info(self, ctx, member: discord.Member = None) -> None:
         """ Shows the user's level and experience points. """
 
+
         answer: discord.PartialMessageable = None
         if isinstance(ctx, commands.Context):
             answer = ctx.send
@@ -103,8 +104,10 @@ class SlothReputation(commands.Cog):
         if not await self.check_table_exist():
             return await answer("**This command may be on maintenance!**")
 
+        author = ctx.author
+
         if not member:
-            member = ctx.author
+            member = author
 
         view = discord.ui.View()
         view.add_item(discord.ui.Button(style=5, label="Create Account", emoji="🦥", url="https://thelanguagesloth.com/profile/update"))
@@ -112,7 +115,7 @@ class SlothReputation(commands.Cog):
         # Gets users ranking info, such as level and experience points
         user = await self.get_specific_user(member.id)
         if not user:
-            if ctx.author.id == member.id:
+            if author.id == member.id:
                 return await answer(
                     embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one, or in the button below!**"),
                     view=view)
@@ -123,7 +126,7 @@ class SlothReputation(commands.Cog):
         ucur = await self.get_user_currency(member.id)
         sloth_profile = await self.client.get_cog('SlothClass').get_sloth_profile(member.id)
         if not ucur or not sloth_profile:
-            if ctx.author.id == member.id:
+            if author.id == member.id:
                 return await answer(
                     embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one, or in the button below!**"),
                     view=view)
@@ -136,8 +139,8 @@ class SlothReputation(commands.Cog):
         effects = await SlothClass.get_user_effects(member=member)
 
         if 'hacked' in effects:
-            await SlothCurrency.send_hacked_image(ctx, member)
-            if ctx.author.id != member.id:
+            await SlothCurrency.send_hacked_image(ctx, author, member)
+            if author.id != member.id:
                  await SlothClass.check_virus(ctx=ctx, target=member)
             return
 
@@ -147,10 +150,10 @@ class SlothReputation(commands.Cog):
 
         # Gets user Server Activity info, such as messages sent and time in voice channels
         user_info = await SlothCurrency.get_user_activity_info(member.id)
-        if not user_info and member.id == ctx.author.id:
-            return await answer(f"**For some reason you are not in the system, {ctx.author.mention}! Try again**")
+        if not user_info and member.id == author.id:
+            return await answer(f"**For some reason you are not in the system, {author.mention}! Try again**")
 
-        elif not user_info and not member.id == ctx.author.id:
+        elif not user_info and not member.id == author.id:
             return await answer("**Member not found in the system!**")
     
         current_time = await utils.get_time_now()
@@ -212,7 +215,7 @@ class SlothReputation(commands.Cog):
         embed.set_author(name=member, icon_url=member.display_avatar, url=member.display_avatar)
         embed.set_footer(text=ctx.guild, icon_url=ctx.guild.icon.url)
 
-        if ctx.author.id != member.id:
+        if author.id != member.id:
             return await answer(embed=embed)
         else:
             view = ExchangeActivityView(self.client, user_info[0])

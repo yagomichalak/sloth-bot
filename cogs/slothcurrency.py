@@ -530,8 +530,6 @@ class SlothCurrency(commands.Cog):
         """ Shows the member's profile with their custom sloth.
         :param member: The member to see the profile. (Optional) """
 
-        if not member:
-            member = ctx.author
         
         answer = None
         if isinstance(ctx, commands.Context):
@@ -539,6 +537,11 @@ class SlothCurrency(commands.Cog):
         else:
             answer = ctx.respond
 
+        author = ctx.author
+
+        if not member:
+            member = author
+            
         user_info = await self.get_user_currency(member.id)
         sloth_profile = await self.client.get_cog('SlothClass').get_sloth_profile(member.id)
 
@@ -546,7 +549,7 @@ class SlothCurrency(commands.Cog):
         view.add_item(discord.ui.Button(style=5, label="Create Account", emoji="🦥", url="https://thelanguagesloth.com/profile/update"))
 
         if not user_info or not sloth_profile:
-            if ctx.author.id == member.id:
+            if author.id == member.id:
                 return await answer(
                     embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one, or in the button below!**"),
                     view=view)
@@ -554,7 +557,7 @@ class SlothCurrency(commands.Cog):
                 return await answer(f"**{member} doesn't have an account yet!**", delete_after=3)
 
         if sloth_profile[1].lower() == 'default':
-            if ctx.author.id == member.id:
+            if author.id == member.id:
                 return await answer(
                     embed=discord.Embed(description=f"**{member.mention}, you don't have a Sloth class yet. Click [here](https://thelanguagesloth.com/profile/slothclass) to choose one, or in the button below!**"),
                     view=view)
@@ -572,8 +575,8 @@ class SlothCurrency(commands.Cog):
 
         # Checks whether user is hacked
         if 'hacked' in effects:
-            await self.send_hacked_image(ctx, member)
-            if ctx.author.id != member.id:
+            await self.send_hacked_image(ctx, author, member)
+            if author.id != member.id:
                 await SlothClass.check_virus(ctx=ctx, target=member)
             return
 
