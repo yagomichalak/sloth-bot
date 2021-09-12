@@ -1,5 +1,6 @@
 import discord
 from discord.ext import commands
+from discord.utils import escape_mentions
 from typing import Any, List, Union, Dict
 from mysqldb import the_database
 import asyncio
@@ -163,6 +164,8 @@ class EmbedManagement(commands.Cog):
         """ Shows an embed.
         :param embed_name: The name of the embed that you want to show. """
 
+        embed_name = escape_mentions(embed_name)
+
         if not embed_name:
             embeds_list: List[str] = await self.get_embed_names()
 
@@ -318,6 +321,8 @@ class EmbedManagement(commands.Cog):
         :param icon_link: The author's icon link.
         """
 
+        embed_name = escape_mentions(embed_name)
+
         member = ctx.author
 
         if not embed_name:
@@ -367,6 +372,8 @@ class EmbedManagement(commands.Cog):
         :param title: The embed title.
         """
 
+        embed_name = escape_mentions(embed_name)
+
         member = ctx.author
 
         if not embed_name:
@@ -410,6 +417,8 @@ class EmbedManagement(commands.Cog):
         :param description_text: The embed description.
         """
 
+        embed_name = escape_mentions(embed_name)
+
         member = ctx.author
 
         if not embed_name:
@@ -451,6 +460,8 @@ class EmbedManagement(commands.Cog):
         :param embed_name: The name of the embed to insert.
         :param icon_link: The icon link for the thumbnail.
         """
+
+        embed_name = escape_mentions(embed_name)
 
         member = ctx.author
 
@@ -495,6 +506,8 @@ class EmbedManagement(commands.Cog):
         :param image_link: The embed image.
         """
 
+        embed_name = escape_mentions(embed_name)
+
         member = ctx.author
 
         if not embed_name:
@@ -536,6 +549,8 @@ class EmbedManagement(commands.Cog):
         :param embed_name: The name of the embed to insert.
         :param hex_color: The embed color.
         """
+
+        embed_name = escape_mentions(embed_name)
 
         member = ctx.author
 
@@ -579,6 +594,8 @@ class EmbedManagement(commands.Cog):
         :param icon_link: The link for the footer icon.
         :param text: The text for the footer.
         """
+
+        embed_name = escape_mentions(embed_name)
 
         member = ctx.author
 
@@ -628,6 +645,8 @@ class EmbedManagement(commands.Cog):
         :param yes_no: If you want the embed to have a timestamp.
         """
 
+        embed_name = escape_mentions(embed_name)
+
         member = ctx.author
 
         if not embed_name:
@@ -672,6 +691,8 @@ class EmbedManagement(commands.Cog):
         :param field_value: The embed's field value.
         :param field_inline: Whether the embed will be inline or not (yes/no).
         """
+
+        embed_name = escape_mentions(embed_name)
 
         member = ctx.author
 

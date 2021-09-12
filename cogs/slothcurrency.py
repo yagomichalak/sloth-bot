@@ -1,6 +1,7 @@
 import discord
 from discord.app import Option, OptionChoice
 from discord.ext import commands, menus
+from discord.utils import escape_mentions
 from mysqldb import *
 from external_cons import the_drive
 from datetime import datetime
@@ -128,6 +129,8 @@ class SlothCurrency(commands.Cog):
         Equips an item.
         :param item_name: The item to equip.
         '''
+        item_name = escape_mentions(item_name)
+
         await ctx.message.delete()
         if not item_name:
             return await ctx.send("**Inform an item to equip!**", delete_after=3)
@@ -147,6 +150,8 @@ class SlothCurrency(commands.Cog):
         Unequips an item.
         :param item_name: The item to unequip
         '''
+        item_name = escape_mentions(item_name)
+
         await ctx.message.delete()
         if not item_name:
             return await ctx.send("**Inform an item to unequip!**", delete_after=3)
@@ -217,6 +222,8 @@ class SlothCurrency(commands.Cog):
         :param member: The member to give the item.
         :param item_name: The name of the item.
         '''
+        item_name = escape_mentions(item_name)
+
         if not member:
             return await ctx.send("**Inform a member!**", delete_after=3)
 
@@ -274,6 +281,8 @@ class SlothCurrency(commands.Cog):
         :param member: The member to remove the item.
         :param item_name: The name of the item.
         '''
+        item_name = escape_mentions(item_name)
+
         if not member:
             return await ctx.send("**Inform a member!**", delete_after=3)
 
