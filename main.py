@@ -1,5 +1,6 @@
 import discord
 from discord.app import Option, OptionChoice
+from discord.utils import escape_mentions
 from pytz import timezone
 from dotenv import load_dotenv
 from discord.ext import commands, tasks, flags
@@ -309,6 +310,8 @@ async def uptime(ctx: commands.Context):
 async def help(ctx, *, cmd: str = None):
     """ Shows some information about commands and categories. 
     :param cmd: The command/category. """
+
+    cmd = escape_mentions(cmd)
 
     if not cmd:
         embed = discord.Embed(

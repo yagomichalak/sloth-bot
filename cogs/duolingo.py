@@ -1,5 +1,6 @@
 import discord
 from discord.ext import commands
+from discord.utils import escape_mentions
 import aiohttp
 import json
 from typing import List, Union, Optional
@@ -31,6 +32,8 @@ class Duolingo(commands.Cog):
     async def set_duo(self, ctx, *, duo_name: str = None) -> None:
         """ Sets a Duolingo account to your Discord account.
         :param duo_name: Your Duolingo's username. """
+
+        duo_name = escape_mentions(duo_name)
 
         member = ctx.author
 
@@ -64,6 +67,8 @@ class Duolingo(commands.Cog):
     async def update_duo(self, ctx, *, duo_name: str = None) -> None:
         """ Updates a Duolingo account to your Discord account.
         :param duo_name: Your new Duolingo's username. """
+
+        duo_name = escape_mentions(duo_name)
 
         member = ctx.author
 
