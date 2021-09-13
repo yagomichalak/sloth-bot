@@ -307,11 +307,10 @@ async def uptime(ctx: commands.Context):
 
 
 @client.command()
-async def help(ctx, *, cmd: str = None):
+async def help(ctx, *, cmd: str =  None):
     """ Shows some information about commands and categories. 
     :param cmd: The command/category. """
 
-    cmd = escape_mentions(cmd)
 
     if not cmd:
         embed = discord.Embed(
@@ -343,6 +342,7 @@ async def help(ctx, *, cmd: str = None):
         await ctx.send(embed=embed)
 
     else:  
+        cmd = escape_mentions(cmd)
         if command := client.get_command(cmd.lower()):
             command_embed = discord.Embed(title=f"__Command:__ {client.command_prefix}{command.qualified_name}", description=f"__**Description:**__\n```{command.help}```", color=ctx.author.color, timestamp=ctx.message.created_at)
             return await ctx.send(embed=command_embed)
