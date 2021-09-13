@@ -41,7 +41,7 @@ class ApplicationsTable(commands.Cog):
         'moderator': {
             "app": moderator_app_channel_id, "interview": moderator_interview_vc_id, "parent": moderator_parent_channel_id,
             "cat": moderator_app_cat_id, 
-            "message": "**Moderator Application**\nOur staff has avaluated your moderator application and has come to a conclusion, and due to intern and unspecified reasons we are **declining** it. Thank you anyways",
+            "message": "**Moderator Application**\nOur staff has evaluated your moderator application and has come to a conclusion, and due to intern and unspecified reasons we are **declining** it. Thank you anyways",
             "pings": [{"id": cosmos_id, "role": False}, {"id": admin_role_id, "role": True}]},
         'event_manager': {
             "app": event_manager_app_channel_id,  "interview": event_manager_interview_vc_id, "parent": event_manager_parent_channel_id, 
