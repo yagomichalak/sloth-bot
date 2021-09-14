@@ -1,6 +1,5 @@
 import discord
 from discord.app import Option, OptionChoice
-from discord.app.context import InteractionContext
 from discord.utils import escape_mentions
 from pytz import timezone
 from dotenv import load_dotenv
@@ -596,7 +595,7 @@ async def _profile_slash(ctx, member: Option(discord.Member, description="The me
 
 @client.slash_command(name="youtube_together", guild_ids=guild_ids)
 @utils.is_allowed([booster_role_id, *useful_variables.patreon_roles.keys(), moderator_role_id, admin_role_id, teacher_role_id], throw_exc=True)
-async def youtube_together(ctx: InteractionContext,
+async def youtube_together(ctx,
     voice_channel: Option(discord.abc.GuildChannel, description="The voice channel in which to create the party.")
 ) -> None:
     """ Creates a YouTube Together session in a VC. """
