@@ -1,5 +1,6 @@
 import discord
 from discord.app import Option, OptionChoice
+from discord.app.context import InteractionContext
 from discord.utils import escape_mentions
 from pytz import timezone
 from dotenv import load_dotenv
@@ -595,7 +596,7 @@ async def _profile_slash(ctx, member: Option(discord.Member, description="The me
 
 @client.slash_command(name="youtube_together", guild_ids=guild_ids)
 @utils.is_allowed([booster_role_id, *useful_variables.patreon_roles.keys(), moderator_role_id, admin_role_id, teacher_role_id], throw_exc=True)
-async def youtube_together(ctx: discord.ApplicationContext ,
+async def youtube_together(ctx: InteractionContext,
     voice_channel: Option(discord.abc.GuildChannel, description="The voice channel in which to create the party.")
 ) -> None:
     """ Creates a YouTube Together session in a VC. """
@@ -607,7 +608,7 @@ async def youtube_together(ctx: discord.ApplicationContext ,
 
     link: str = ''
     try:
-        link = await voice_channel.create_activity_invite('youtube', max_age=600)
+        link = await voice_channel.create_activity_invite(event='youtube', max_age=600)
     except Exception as e:
         print("Invite creation error: ", e)
         await ctx.respond(f"**For some reason I couldn't create it, {member.mention}!**")
