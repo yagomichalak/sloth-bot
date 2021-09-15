@@ -467,7 +467,7 @@ class SlothCurrency(commands.Cog):
             # await asyncio.sleep(0.5)
             return os.remove(file_path)
 
-    async def send_frogged_image(self, answer: Union[discord.PartialMessageable], author: discord.Member, member: discord.Member, knocked_out: bool = False) -> None:
+    async def send_frogged_image(self, answer: discord.PartialMessageable, author: discord.Member, member: discord.Member, knocked_out: bool = False) -> None:
         """ Makes and sends a frogged image.
         :param answer: The answerable object.
         :param author: The author of the action.
@@ -571,7 +571,7 @@ class SlothCurrency(commands.Cog):
         # Checks whether user is frogged
         if 'frogged' in effects:
             ko = 'knocked_out' in effects
-            return await self.send_frogged_image(ctx, member, ko)
+            return await self.send_frogged_image(answer, member, ko)
 
         # Checks whether user is hacked
         if 'hacked' in effects:
