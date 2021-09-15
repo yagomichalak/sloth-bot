@@ -310,6 +310,12 @@ class Cybersloth(Player):
         :param ctx: The context of the command.
         :param target: The target member. """
 
+        answer: discord.PartialMessageable = None
+        if isinstance(ctx, commands.Context):
+            answer = ctx.send
+        else:
+            answer = ctx.respond
+
         infected = ctx.author
 
         hack = await self.get_skill_action_by_target_id_and_skill_type(target.id, skill_type='hack')
@@ -340,7 +346,7 @@ class Cybersloth(Player):
         else:
             virus_embed = await self.get_virus_embed(
                 channel=ctx.channel, perpetrator_id=hack[0], target_id=target.id, infected_id=infected.id)
-            await ctx.send(embed=virus_embed)
+            await answer(embed=virus_embed)
 
     async def get_contagious_hack(self, channel: discord.TextChannel, perpetrator_id: int, lenhacks) -> discord.Embed:
         """ Makes an embedded message for a virus infection skill action.

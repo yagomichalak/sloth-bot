@@ -439,7 +439,7 @@ class SlothCurrency(commands.Cog):
 
         return await ctx.send("**Table *UserCurrency* reseted!**", delete_after=3)
 
-    async def send_hacked_image(self, answer: Union[discord.PartialMessageable], author: discord.Member, member: discord.Member) -> None:
+    async def send_hacked_image(self, answer: discord.PartialMessageable, author: discord.Member, member: discord.Member) -> None:
         """ Makes and sends a hacked image.
         :param answer: The answerable object.
         :param author: The author of the action.
@@ -575,7 +575,7 @@ class SlothCurrency(commands.Cog):
 
         # Checks whether user is hacked
         if 'hacked' in effects:
-            await self.send_hacked_image(ctx, author, member)
+            await self.send_hacked_image(answer, author, member)
             if author.id != member.id:
                 await SlothClass.check_virus(ctx=ctx, target=member)
             return
