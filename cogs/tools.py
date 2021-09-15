@@ -15,7 +15,7 @@ from treelib import Tree
 from cogs.createsmartroom import CreateSmartRoom
 import json
 
-from datetime import datetime
+from datetime import datetime, time
 import pytz
 from pytz import timezone
 from mysqldb import the_database
@@ -901,12 +901,6 @@ class Tools(commands.Cog):
 	# 		await ctx.send(staff_member.mention)
 	# 	else:
 	# 		await ctx.send("**For some reason I couldn't ping them =\ **")
-
-
-	# @commands.slash_command(name="tetest", guild_ids=guild_ids)
-	# async def _tetest(self, ctx) -> None:
-
-	# 	await ctx.respond("**Tetest**")
 
 def setup(client):
 	client.add_cog(Tools(client))

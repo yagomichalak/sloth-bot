@@ -14,7 +14,6 @@ class HugView(discord.ui.View):
         self.member = member
         self.target = target
         self.used: bool = False
-        self.used: bool = False
 
 
     @discord.ui.button(label='Hug', style=discord.ButtonStyle.blurple, custom_id='hug_id', emoji="🤗")
