@@ -189,8 +189,11 @@ class QuickButtons(discord.ui.View):
     async def fake_accounts_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
         """ Shows the member's fake accounts. """
 
-        await interaction.response.defer()
-        await self.client.get_cog("Moderation").fake_accounts(self.ctx, member=self.target_member)
+        new_ctx = self.ctx
+        new_ctx.author = interaction.user
+        if await utils.is_allowed([mod_role_id, admin_role_id]).predicate(new_ctx):
+            await interaction.response.defer()
+            await self.client.get_cog("Moderation").fake_accounts(self.ctx, member=self.target_member)
 
 
 
