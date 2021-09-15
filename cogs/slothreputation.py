@@ -139,7 +139,7 @@ class SlothReputation(commands.Cog):
         effects = await SlothClass.get_user_effects(member=member)
 
         if 'hacked' in effects:
-            await SlothCurrency.send_hacked_image(ctx, author, member)
+            await SlothCurrency.send_hacked_image(answer, author, member)
             if author.id != member.id:
                  await SlothClass.check_virus(ctx=ctx, target=member)
             return
