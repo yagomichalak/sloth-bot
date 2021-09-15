@@ -116,7 +116,7 @@ class SlothReputation(commands.Cog):
         user = await self.get_specific_user(member.id)
         if not user:
             if author.id == member.id:
-                return await answer(
+                return await answer("\u200b", 
                     embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one, or in the button below!**"),
                     view=view)
             else:
@@ -127,7 +127,7 @@ class SlothReputation(commands.Cog):
         sloth_profile = await self.client.get_cog('SlothClass').get_sloth_profile(member.id)
         if not ucur or not sloth_profile:
             if author.id == member.id:
-                return await answer(
+                return await answer("\u200b", 
                     embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one, or in the button below!**"),
                     view=view)
             else:
@@ -222,7 +222,7 @@ class SlothReputation(commands.Cog):
             if 'sabotaged' in effects:
                 view.children[0].disabled = True
 
-            return await answer(embed=embed, view=view)
+            return await answer("\u200b", embed=embed, view=view)
 
     @commands.command(aliases=['leaderboard', 'lb', 'scoreboard'])
     async def score(self, ctx):
@@ -330,7 +330,7 @@ class SlothReputation(commands.Cog):
 
                 view = discord.ui.View()
                 view.add_item(discord.ui.Button(style=5, label="Create Account", emoji="🦥", url="https://thelanguagesloth.com/profile/update"))
-                return await ctx.send(
+                return await ctx.send("\u200b", 
                     embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one, or in the button below!**"),
                     view=view)
             else:

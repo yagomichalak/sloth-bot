@@ -162,11 +162,11 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
         view.add_item(discord.ui.Button(style=5, label="Create Account", emoji="🦥", url="https://thelanguagesloth.com/profile/update"))
 
         if not sloth_profile:
-            return await ctx.send(
+            return await ctx.send("\u200b", 
                 embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one, or in the button below!**"),
                 view=view)
         if sloth_profile[1] == 'default':
-            return await ctx.send(
+            return await ctx.send("\u200b", 
                 embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one, or in the button below!**"),
                 view=view)
 

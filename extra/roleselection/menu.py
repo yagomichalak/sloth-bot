@@ -53,7 +53,7 @@ class ManageRoleSelectionMenu(discord.ui.View):
 
 			view = ConfirmButton(member)
 			embed = discord.Embed(description=f"**Wanna add more buttons into your menu, {member.mention}?**", color=member.color)
-			msg = await interaction.channel.send(embed=embed, view=view)
+			msg = await interaction.channel.send("\u200b", embed=embed, view=view)
 			
 			
 			await view.wait()
@@ -97,7 +97,7 @@ class ManageRoleSelectionMenu(discord.ui.View):
 			with the <@&{chosen_button.custom_id}> role attached to it, {member.mention}?**"""
 		)
 
-		msg = await interaction.channel.send(embed=embed, view=view)
+		msg = await interaction.channel.send("\u200b", embed=embed, view=view)
 		# Wait for the View to stop listening for input...
 		await view.wait()
 		if view.value is None:

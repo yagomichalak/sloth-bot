@@ -298,7 +298,7 @@ class Warrior(Player):
         item = view.selected_item
         cost = int(item[6]/2)
         confirm_view = ConfirmButton(attacker, timeout=60)
-        await ctx.send(embed=discord.Embed(
+        await ctx.send("\u200b", embed=discord.Embed(
             title="__Confirm__",
             description=f"**Do you really wanna rip off {target.mention}'s `{item[4]}` item for the cost of `{cost}łł`, {attacker.mention}?**",
             color=discord.Color.green()), view=confirm_view

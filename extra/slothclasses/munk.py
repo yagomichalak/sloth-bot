@@ -678,7 +678,7 @@ class Munk(Player):
         view = discord.ui.View()
         view.add_item(discord.ui.Button(style=5, label="Create Tribe", url=link, emoji="🏕️"))
 
-        await ctx.send(embed=tribe_embed, view=view)
+        await ctx.send("\u200b", embed=tribe_embed, view=view)
 
     @commands.command(aliases=['add_tribe_role', 'createtriberole', 'addtriberole'])
     @Player.skills_used(requirement=20)
