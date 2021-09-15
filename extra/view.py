@@ -169,7 +169,6 @@ class QuickButtons(discord.ui.View):
 
         if await utils.is_allowed([mod_role_id, admin_role_id]).predicate(new_ctx):
             await interaction.response.defer()
-            print(self.ctx)
             return await self.client.get_cog("Moderation").infractions(self.ctx, member=self.target_member)
     
     @discord.ui.button(label="Profile", style=1, emoji="👤", custom_id=f"user_profile")
@@ -192,6 +191,7 @@ class QuickButtons(discord.ui.View):
 
         await interaction.response.defer()
         await self.client.get_cog("Moderation").fake_accounts(self.ctx, member=self.target_member)
+
 
 
 class Test(discord.ui.View):
