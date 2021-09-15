@@ -269,7 +269,7 @@ class Social(commands.Cog):
             else:
                 view.children[4].disabled = True
 
-        await ctx.send(embed=embed, view=view)
+        await ctx.send("\u200b", embed=embed, view=view)
 
 
     # Sends a random post from the meme subreddit

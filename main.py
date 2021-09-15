@@ -623,7 +623,7 @@ async def youtube_together(ctx,
     )
     embed.set_author(name=member, url=member.display_avatar, icon_url=member.display_avatar)
     embed.set_footer(text=f"(Expires in 5 minutes)", icon_url=ctx.guild.icon.url)
-    await ctx.respond(embed=embed, view=view)
+    await ctx.respond("\u200b", embed=embed, view=view)
 
 @client.slash_command(name="poll", guild_ids=guild_ids)
 @utils.is_allowed([moderator_role_id, admin_role_id], throw_exc=True)

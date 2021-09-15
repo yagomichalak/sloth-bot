@@ -550,7 +550,7 @@ class SlothCurrency(commands.Cog):
 
         if not user_info or not sloth_profile:
             if author.id == member.id:
-                return await answer(
+                return await answer("\u200b", 
                     embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one, or in the button below!**"),
                     view=view)
             else:
@@ -558,7 +558,7 @@ class SlothCurrency(commands.Cog):
 
         if sloth_profile[1].lower() == 'default':
             if author.id == member.id:
-                return await answer(
+                return await answer("\u200b", 
                     embed=discord.Embed(description=f"**{member.mention}, you don't have a Sloth class yet. Click [here](https://thelanguagesloth.com/profile/slothclass) to choose one, or in the button below!**"),
                     view=view)
                     
@@ -1169,7 +1169,7 @@ class SlothCurrency(commands.Cog):
         if not the_user:
             view = discord.ui.View()
             view.add_item(discord.ui.Button(style=5, label="Create Account", emoji="🦥", url="https://thelanguagesloth.com/profile/update"))
-            return await ctx.send(
+            return await ctx.send("\u200b", 
                 embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one, or in the button below!**"),
                 view=view)
         elif not target_user:
