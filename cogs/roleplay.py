@@ -233,7 +233,7 @@ class RolePlay(commands.Cog):
             timestamp=ctx.message.created_at
         )
         confirmation_view = ConfirmButton(member, 60)
-        msg = await ctx.send(embed=confirm_embed, view=confirmation_view)
+        msg = await ctx.send("\u200b", embed=confirm_embed, view=confirmation_view)
         await confirmation_view.wait()
 
         if confirmation_view.value is None:
