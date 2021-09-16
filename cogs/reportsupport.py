@@ -997,7 +997,7 @@ Please answer using one message only.."""
         embed.set_thumbnail(url=guild.icon.url)
         embed.set_footer(text=guild.name, icon_url=guild.icon.url)
         view = ReportSupportView(self.client)
-        await ctx.send(embed=embed, view=view)
+        await ctx.send("\u200b", embed=embed, view=view)
         self.client.add_view(view=view)
 
 def setup(client):
