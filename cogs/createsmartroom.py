@@ -1289,8 +1289,8 @@ You can only add 1 additional channel. Voice **OR** Text."""))
 		)
 		await ctx.send(embed=embed)
 
-	@add_galaxy_channel.command(name='thread', aliases=['th', 'thread_channel', 'text', 'txt'])
-	# @commands.cooldown(1, 60, commands.BucketType.user)
+	@add_galaxy_channel.command(name='thread', aliases=['th', 'thread_channel', 'text', 'txt', 'text_channel'])
+	@commands.cooldown(1, 60, commands.BucketType.user)
 	async def add_thread(self, ctx, *, name: str = None) -> None:
 		""" Adds a Text Channel.
 		:param name: The name of the Text Channel. """
@@ -1346,7 +1346,7 @@ You can only add 1 additional channel. Voice **OR** Text."""))
 
 
 	@add_galaxy_channel.command(name='voice', aliases=['vc', 'voice_channel'])
-	# @commands.cooldown(1, 60, commands.BucketType.user)
+	@commands.cooldown(1, 60, commands.BucketType.user)
 	async def add_voice(self, ctx, limit: int = None, *, name: str = None) -> None:
 		""" Adds a Voice Channel.
 		:param limit: The user limit of the Voice Cchannel.
@@ -1429,7 +1429,7 @@ You can only add 1 additional channel. Voice **OR** Text."""))
 		await ctx.send(embed=embed)
 
 	@delete_galaxy_channel.command(name='thread', aliases=['thread_channel', 'th', 'text', 'txt', 'text_channel'])
-	# @commands.cooldown(1, 60, commands.BucketType.user)
+	@commands.cooldown(1, 60, commands.BucketType.user)
 	async def delete_thread(self, ctx) -> None:
 		""" Deletes the user's second Text Channel from their Galaxy Room. """
 
@@ -1467,7 +1467,7 @@ You can only add 1 additional channel. Voice **OR** Text."""))
 
 
 	@delete_galaxy_channel.command(name='voice', aliases=['vc', 'voice_channel'])
-	# @commands.cooldown(1, 60, commands.BucketType.user)
+	@commands.cooldown(1, 60, commands.BucketType.user)
 	async def delete_voice(self, ctx) -> None:
 		""" Deletes the user's second Voice Channel from their Galaxy Room. """
 
