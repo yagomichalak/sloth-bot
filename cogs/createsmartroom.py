@@ -1,4 +1,5 @@
 import discord
+from extra import utils
 from discord.ext import commands, tasks
 from datetime import datetime
 import asyncio
@@ -6,7 +7,7 @@ from PIL import Image, ImageFont, ImageDraw
 import os
 from cogs.slothcurrency import SlothCurrency
 from mysqldb import *
-from typing import List, Union, Callable, Any, Optional
+from typing import List, Union, Any, Optional
 from extra.menu import ConfirmSkill
 
 class CreateSmartRoom(commands.Cog):
@@ -33,8 +34,7 @@ class CreateSmartRoom(commands.Cog):
 		if not await self.table_galaxy_vc_exists():
 			return
 
-		epoch = datetime.utcfromtimestamp(0)
-		the_time = (datetime.utcnow() - epoch).total_seconds()
+		the_time = await utils.get_time_now()
 
 		# Looks for rooms that are soon going to be deleted (Danger zone)
 		danger_rooms = await self.get_all_galaxy_rooms_in_danger_zone(the_time)
@@ -103,8 +103,7 @@ class CreateSmartRoom(commands.Cog):
 			return
 
 		if after.channel.id == self.vc_id:
-			epoch = datetime.utcfromtimestamp(0)
-			the_time = (datetime.utcnow() - epoch).total_seconds()
+			the_time = await utils.get_time_now()
 			old_time = await self.get_user_vc_timestamp(member.id, the_time)
 			if not the_time - old_time >= 60:
 				await member.send(
@@ -374,7 +373,9 @@ class CreateSmartRoom(commands.Cog):
 			elif kind == 'category':
 				the_thing = await guild.create_category(**kwargs)
 			elif kind == 'thread':
-				the_thing = await channel.create_thread(**kwargs)
+				start_message = await channel.send(f"({kwargs['owner'].mention}): {kwargs['name']}")
+				await start_message.pin(reason="Galaxy Room's Thread Creation")
+				the_thing = await start_message.create_thread(**kwargs)
 		except Exception as e:
 			print(e)
 			return False
@@ -530,8 +531,7 @@ class CreateSmartRoom(commands.Cog):
 			await member.send(f"**You've been charged `1500łł`!**")
 
 			# Inserts the channels in the database
-			epoch = datetime.utcfromtimestamp(0)
-			the_time = (datetime.utcnow() - epoch).total_seconds()
+			the_time = await utils.get_time_now()
 			await self.insert_galaxy_vc(member.id, the_cat.id, vc_channel.id, txt_channel1.id, the_time)
 			await member.send(file=discord.File('./images/smart_vc/created.png'))
 			try:
@@ -925,19 +925,22 @@ You can only add 1 additional channel. Voice **OR** Text."""))
 
 		channels = [
 			discord.utils.get(ctx.guild.categories, id=user_galaxy[0][1]),
-			discord.utils.get(ctx.guild.channels, id=user_galaxy[0][2]),
-			discord.utils.get(ctx.guild.channels, id=user_galaxy[0][3]),
-			discord.utils.get(ctx.guild.channels, id=user_galaxy[0][4]),
-			discord.utils.get(ctx.guild.channels, id=user_galaxy[0][5])
+			discord.utils.get(ctx.guild.text_channels, id=user_galaxy[0][2]),
+			discord.utils.get(ctx.guild.threads, id=user_galaxy[0][3]),
+			discord.utils.get(ctx.guild.voice_channels, id=user_galaxy[0][4]),
+			discord.utils.get(ctx.guild.voice_channels, id=user_galaxy[0][5])
 		]
 		allowed = []
 
 		for m in members:
 			try:
 				for c in channels:
-					if c:
-						await c.set_permissions(
-							m, read_messages=True, send_messages=True, connect=True, speak=True, view_channel=True)
+					if not isinstance(c, discord.Thread):
+						if c:
+							await c.set_permissions(
+								m, read_messages=True, send_messages=True, connect=True, speak=True, view_channel=True)
+					else:
+						await c.add_user(m)
 
 			except:
 				pass
@@ -1007,19 +1010,22 @@ You can only add 1 additional channel. Voice **OR** Text."""))
 
 		channels = [
 			discord.utils.get(ctx.guild.categories, id=user_galaxy[0][1]),
-			discord.utils.get(ctx.guild.channels, id=user_galaxy[0][2]),
-			discord.utils.get(ctx.guild.channels, id=user_galaxy[0][3]),
-			discord.utils.get(ctx.guild.channels, id=user_galaxy[0][4]),
-			discord.utils.get(ctx.guild.channels, id=user_galaxy[0][5])
+			discord.utils.get(ctx.guild.text_channels, id=user_galaxy[0][2]),
+			discord.utils.get(ctx.guild.threads, id=user_galaxy[0][3]),
+			discord.utils.get(ctx.guild.voice_channels, id=user_galaxy[0][4]),
+			discord.utils.get(ctx.guild.voice_channels, id=user_galaxy[0][5])
 		]
 		forbid = []
 
 		for m in members:
 			try:
 				for c in channels:
-					if c:
-						await c.set_permissions(
-							m, read_messages=False, send_messages=False, connect=False, speak=False, view_channel=False)
+					if not isinstance(c, discord.Thread):
+						if c:
+							await c.set_permissions(
+								m, read_messages=False, send_messages=False, connect=False, speak=False, view_channel=False)
+					else:
+						await c.remove_user(m)
 			except:
 				pass
 			else:
@@ -1138,14 +1144,13 @@ You can only add 1 additional channel. Voice **OR** Text."""))
 			return await ctx.send("**You cannot run this command outside your rooms, in case you have them!**")
 
 		user_ts = user_galaxy[0][6]
-		epoch = datetime.utcfromtimestamp(0)
-		the_time = (datetime.utcnow() - epoch).total_seconds()
+		the_time = await utils.get_time_now()
 		deadline = user_ts + 1209600
 
 		embed = discord.Embed(
 			title=f"__{ctx.author.name}'s Rooms' Info__",
-			description=f'''**Created at:** {datetime.utcfromtimestamp(user_ts)}
-			**Expected expiration:** {datetime.utcfromtimestamp(deadline)}\n''',
+			description=f'''**Created at:** {datetime.fromtimestamp(user_ts)}
+			**Expected expiration:** {datetime.fromtimestamp(deadline)}\n''',
 			color=ctx.author.color,
 			timestamp=ctx.message.created_at)
 
@@ -1180,8 +1185,7 @@ You can only add 1 additional channel. Voice **OR** Text."""))
 			return await ctx.send(f"**You can only run this command in your Galaxy Room, {member.mention}!**")
 
 		user_ts = user_rooms[0]
-		epoch = datetime.utcfromtimestamp(0)
-		the_time = (datetime.utcnow() - epoch).total_seconds()
+		the_time = await utils.get_time_now()
 		seconds_left = (user_ts + 1209600) - the_time
 
 		# Checks rooms deletion time
@@ -1236,10 +1240,10 @@ You can only add 1 additional channel. Voice **OR** Text."""))
 
 		member = self.client.get_user(galaxy_room[0])
 		rooms = [
-			discord.utils.get(channel.guild.channels, id=galaxy_room[5]),
-			discord.utils.get(channel.guild.channels, id=galaxy_room[4]),
-			discord.utils.get(channel.guild.channels, id=galaxy_room[3]),
-			discord.utils.get(channel.guild.channels, id=galaxy_room[2]),
+			discord.utils.get(channel.guild.text_channels, id=galaxy_room[2]),
+			discord.utils.get(channel.guild.threads, id=galaxy_room[3]),
+			discord.utils.get(channel.guild.voice_channels, id=galaxy_room[5]),
+			discord.utils.get(channel.guild.voice_channels, id=galaxy_room[4]),
 			discord.utils.get(channel.guild.categories, id=galaxy_room[1])
 		]
 		try:
@@ -1282,9 +1286,9 @@ You can only add 1 additional channel. Voice **OR** Text."""))
 		)
 		await ctx.send(embed=embed)
 
-	@add_galaxy_channel.command(name='text', aliases=['txt', 'text_channel'])
+	@add_galaxy_channel.command(name='thread', aliases=['th', 'thread_channel', 'text', 'txt'])
 	# @commands.cooldown(1, 60, commands.BucketType.user)
-	async def add_text(self, ctx, *, name: str = None) -> None:
+	async def add_thread(self, ctx, *, name: str = None) -> None:
 		""" Adds a Text Channel.
 		:param name: The name of the Text Channel. """
 
@@ -1311,7 +1315,7 @@ You can only add 1 additional channel. Voice **OR** Text."""))
 			return await ctx.send(f"**You cannot add more text channels, {member.mention}!**")
 
 		confirm = await ConfirmSkill(
-			f"**Do you want to add an extra `Text Channel` for `500łł`, {member.mention}?**\n\n||From now on, you're gonna be charged `2000łł` in your next fortnight rents||"
+			f"**Do you want to add an extra `Thread` channel for `500łł`, {member.mention}?**\n\n||From now on, you're gonna be charged `2000łł` in your next fortnight rents||"
 			).prompt(ctx)
 		if not confirm:
 			return await ctx.send(f"**Not doing it then, {member.mention}!**")
@@ -1328,15 +1332,14 @@ You can only add 1 additional channel. Voice **OR** Text."""))
 		if user_currency[0][1] < 500:
 			return await ctx.send("**You don't have enough money to buy this service!**")
 
-
-		cat = discord.utils.get(ctx.guild.categories, id=user_rooms[1])
+		channel = discord.utils.get(ctx.guild.text_channels, id=user_rooms[2])
 			
-		if not (txt := await self.try_to_create(kind='text', category=cat, name=name)):
+		if not (thread := await self.try_to_create(kind='thread', channel=channel, name=name, owner=member)):
 			return await ctx.send(f"**Channels limit reached, creation cannot be completed, try again later!**")
 
-		await self.update_txt_2(member.id, txt.id)
+		await self.update_txt_2(member.id, thread.id)
 		await SlothCurrency.update_user_money(member.id, -500)
-		await ctx.send(f"**Text Channel created, {member.mention}!** ({txt.mention})")
+		await ctx.send(f"**Text Channel created, {member.mention}!** ({thread.mention})")
 
 
 	@add_galaxy_channel.command(name='voice', aliases=['vc', 'voice_channel'])
@@ -1422,9 +1425,9 @@ You can only add 1 additional channel. Voice **OR** Text."""))
 		)
 		await ctx.send(embed=embed)
 
-	@delete_galaxy_channel.command(name='text', aliases=['txt', 'text_channel'])
+	@delete_galaxy_channel.command(name='thread', aliases=['thread_channel', 'th', 'text', 'txt', 'text_channel'])
 	# @commands.cooldown(1, 60, commands.BucketType.user)
-	async def delete_text(self, ctx) -> None:
+	async def delete_thread(self, ctx) -> None:
 		""" Deletes the user's second Text Channel from their Galaxy Room. """
 
 		member = ctx.author
@@ -1439,7 +1442,7 @@ You can only add 1 additional channel. Voice **OR** Text."""))
 		_, txts = await self.order_rooms(user_rooms)
 
 		if len(txts) != 2:
-			return await ctx.send(f"**You don't have a second Text Channel to delete, {member.mention}!**")
+			return await ctx.send(f"**You don't have a Thread to delete, {member.mention}!**")
 
 		confirm = await ConfirmSkill(
 			f"**Are you sure you want to delete <#{txts[1]}>, {member.mention}?**\n\n||From now on, you're gonna be charged `1500łł` in your next fortnight rents||"
@@ -1453,7 +1456,7 @@ You can only add 1 additional channel. Voice **OR** Text."""))
 		except:
 			await ctx.send(f"**For some reason I couldn't delete it, try again, {member.mention}!**")
 		else:
-			if txt := discord.utils.get(ctx.guild.channels, id=txts[1]):
+			if txt := discord.utils.get(ctx.guild.threads, id=txts[1]):
 				await self.delete_things([txt])
 
 			await ctx.send(f"**Text Channel deleted, {member.mention}!**")
