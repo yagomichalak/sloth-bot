@@ -127,7 +127,7 @@ async def on_command_error(ctx, error):
         await ctx.send(f"You are missing at least one of the required roles: {', '.join(role_names)}")
 
     elif isinstance(error, commands.errors.RoleNotFound):
-        await ctx.send(f"**{error}**")
+        await ctx.send(f"**Role not found**")
 
     elif isinstance(error, commands.ChannelNotFound):
         await ctx.send("**Channel not found!**")
@@ -163,7 +163,7 @@ async def on_command_error(ctx, error):
     error_log = client.get_channel(error_log_channel_id)
     if error_log:
         await error_log.send('='*10)
-        await error_log.send(f"ERROR: {error} | Class: {error.__class__} | Cause: {error.__cause__}")
+        await error_log.send(f"ERROR: {escape_mentions(str(error))} | Class: {error.__class__} | Cause: {error.__cause__}")
         await error_log.send('='*10)
 
 @client.event
@@ -189,7 +189,7 @@ async def on_application_command_error(ctx, error) -> None:
         await ctx.respond(f"You are missing at least one of the required roles: {', '.join(role_names)}")
 
     elif isinstance(error, commands.errors.RoleNotFound):
-        await ctx.respond(f"**{error}**")
+        await ctx.respond(f"**Role not found**")
 
     elif isinstance(error, commands.ChannelNotFound):
         await ctx.respond("**Channel not found!**")
@@ -204,7 +204,7 @@ async def on_application_command_error(ctx, error) -> None:
     error_log = client.get_channel(error_log_channel_id)
     if error_log:
         await error_log.send('='*10)
-        await error_log.send(f"ERROR: {error} | Class: {error.__class__} | Cause: {error.__cause__}")
+        await error_log.send(f"ERROR: {escape_mentions(str(error))} | Class: {error.__class__} | Cause: {error.__cause__}")
         await error_log.send('='*10)
 
 # Members status update
