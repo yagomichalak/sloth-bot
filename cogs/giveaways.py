@@ -162,7 +162,7 @@ class Giveaways(commands.Cog):
 
         try:
             view = GiveawayView(self.client)
-            msg = await ctx.send(embed=embed, view=view)
+            msg = await ctx.send("\u200b", embed=embed, view=view)
             self.client.add_view(view=view, message_id=msg.id)
 
             await self.insert_giveaway(
