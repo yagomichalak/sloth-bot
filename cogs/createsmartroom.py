@@ -6,7 +6,7 @@ from PIL import Image, ImageFont, ImageDraw
 import os
 from cogs.slothcurrency import SlothCurrency
 from mysqldb import *
-from typing import List, Union, Callable, Any
+from typing import List, Union, Callable, Any, Optional
 from extra.menu import ConfirmSkill
 
 class CreateSmartRoom(commands.Cog):
@@ -353,12 +353,17 @@ class CreateSmartRoom(commands.Cog):
 		else:
 			return
 
-	async def try_to_create(self, kind: str, category: discord.CategoryChannel = None, guild: discord.Guild = None, **kwargs: Any) -> Union[bool, Any]:
+	async def try_to_create(
+		self, 
+		kind: str, category: discord.CategoryChannel = None, 
+		channel: discord.TextChannel = None, guild: Optional[discord.Guild] = None, **kwargs: Any
+		) -> Union[bool, discord.TextChannel, discord.VoiceChannel, discord.CategoryChannel, discord.Thread]:
 		""" Try to create something.
 		:param thing: The thing to try to create.
-		:param kind: Kind of creation. (txt, vc, cat)
+		:param kind: Kind of creation. (txt, vc, cat, thread)
 		:param category: The category in which it will be created. (Optional)
-		:param guild: The guild in which it will be created in. (Required for categories)
+		:param channel: The channel in which the thread be created in. (Optional)(Required for threads)
+		:param guild: The guild in which it will be created in. (Optional)(Required for categories)
 		:param kwargs: The arguments to inform the creations. """
 
 		try:
@@ -368,6 +373,8 @@ class CreateSmartRoom(commands.Cog):
 				the_thing = await category.create_voice_channel(**kwargs)
 			elif kind == 'category':
 				the_thing = await guild.create_category(**kwargs)
+			elif kind == 'thread':
+				the_thing = await channel.create_thread(**kwargs)
 		except Exception as e:
 			print(e)
 			return False

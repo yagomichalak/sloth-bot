@@ -49,7 +49,6 @@ class ReportSupport(*report_support_classes):
     async def on_ready(self) -> None:
 
         self.client.add_view(view=ReportSupportView(self.client))
-        print(self.client.persistent_views)
         print('ReportSupport cog is online!')
 
 
@@ -563,7 +562,7 @@ Please answer using one message only.."""
 
         while True:
             msg = await self.get_message(member, msg_check, 300)
-            if not msg:
+            if msg is None:
                 return await member.send(f"**Timeout, you didn't answer in time, try again later!**")
 
 
