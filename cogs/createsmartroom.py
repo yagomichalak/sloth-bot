@@ -34,7 +34,7 @@ class CreateSmartRoom(commands.Cog):
 		if not await self.table_galaxy_vc_exists():
 			return
 
-		the_time = await utils.get_time_now()
+		the_time = await utils.get_timestamp()
 
 		# Looks for rooms that are soon going to be deleted (Danger zone)
 		danger_rooms = await self.get_all_galaxy_rooms_in_danger_zone(the_time)
@@ -103,7 +103,7 @@ class CreateSmartRoom(commands.Cog):
 			return
 
 		if after.channel.id == self.vc_id:
-			the_time = await utils.get_time_now()
+			the_time = await utils.get_timestamp()
 			old_time = await self.get_user_vc_timestamp(member.id, the_time)
 			if not the_time - old_time >= 60:
 				await member.send(
@@ -355,7 +355,7 @@ class CreateSmartRoom(commands.Cog):
 	async def try_to_create(
 		self, 
 		kind: str, category: discord.CategoryChannel = None, 
-		channel: discord.TextChannel = None, guild: Optional[discord.Guild] = None, **kwargs: Any
+		channel: discord.TextChannel = None, guild: Optional[discord.Guild] = None, owner: Optional[discord.Member] = None, **kwargs: Any
 		) -> Union[bool, discord.TextChannel, discord.VoiceChannel, discord.CategoryChannel, discord.Thread]:
 		""" Try to create something.
 		:param thing: The thing to try to create.
@@ -363,6 +363,7 @@ class CreateSmartRoom(commands.Cog):
 		:param category: The category in which it will be created. (Optional)
 		:param channel: The channel in which the thread be created in. (Optional)(Required for threads)
 		:param guild: The guild in which it will be created in. (Optional)(Required for categories)
+		:param owner: The owner of the Galaxy Rooms. (Optional)
 		:param kwargs: The arguments to inform the creations. """
 
 		try:
@@ -373,9 +374,11 @@ class CreateSmartRoom(commands.Cog):
 			elif kind == 'category':
 				the_thing = await guild.create_category(**kwargs)
 			elif kind == 'thread':
-				start_message = await channel.send(f"({kwargs['owner'].mention}): {kwargs['name']}")
+				start_message = await channel.send(kwargs['name'])
 				await start_message.pin(reason="Galaxy Room's Thread Creation")
 				the_thing = await start_message.create_thread(**kwargs)
+				if owner:
+					await the_thing.add_user(owner)
 		except Exception as e:
 			print(e)
 			return False
@@ -531,7 +534,7 @@ class CreateSmartRoom(commands.Cog):
 			await member.send(f"**You've been charged `1500łł`!**")
 
 			# Inserts the channels in the database
-			the_time = await utils.get_time_now()
+			the_time = await utils.get_timestamp()
 			await self.insert_galaxy_vc(member.id, the_cat.id, vc_channel.id, txt_channel1.id, the_time)
 			await member.send(file=discord.File('./images/smart_vc/created.png'))
 			try:
@@ -1144,7 +1147,7 @@ You can only add 1 additional channel. Voice **OR** Text."""))
 			return await ctx.send("**You cannot run this command outside your rooms, in case you have them!**")
 
 		user_ts = user_galaxy[0][6]
-		the_time = await utils.get_time_now()
+		the_time = await utils.get_timestamp()
 		deadline = user_ts + 1209600
 
 		embed = discord.Embed(
@@ -1185,7 +1188,7 @@ You can only add 1 additional channel. Voice **OR** Text."""))
 			return await ctx.send(f"**You can only run this command in your Galaxy Room, {member.mention}!**")
 
 		user_ts = user_rooms[0]
-		the_time = await utils.get_time_now()
+		the_time = await utils.get_timestamp()
 		seconds_left = (user_ts + 1209600) - the_time
 
 		# Checks rooms deletion time
@@ -1240,10 +1243,10 @@ You can only add 1 additional channel. Voice **OR** Text."""))
 
 		member = self.client.get_user(galaxy_room[0])
 		rooms = [
-			discord.utils.get(channel.guild.text_channels, id=galaxy_room[2]),
-			discord.utils.get(channel.guild.threads, id=galaxy_room[3]),
+			discord.utils.get(channel.guild.voice_channels, id=galaxy_room[2]),
+			discord.utils.get(channel.guild.threads, id=galaxy_room[4]),
+			discord.utils.get(channel.guild.text_channels, id=galaxy_room[3]),
 			discord.utils.get(channel.guild.voice_channels, id=galaxy_room[5]),
-			discord.utils.get(channel.guild.voice_channels, id=galaxy_room[4]),
 			discord.utils.get(channel.guild.categories, id=galaxy_room[1])
 		]
 		try:
@@ -1334,7 +1337,7 @@ You can only add 1 additional channel. Voice **OR** Text."""))
 
 		channel = discord.utils.get(ctx.guild.text_channels, id=user_rooms[2])
 			
-		if not (thread := await self.try_to_create(kind='thread', channel=channel, name=name, owner=member)):
+		if not (thread := await self.try_to_create(kind='thread', channel=channel, owner=member, name=name)):
 			return await ctx.send(f"**Channels limit reached, creation cannot be completed, try again later!**")
 
 		await self.update_txt_2(member.id, thread.id)
