@@ -213,6 +213,10 @@ class SlothReputation(commands.Cog):
 
         embed.set_thumbnail(url=member.display_avatar)
         embed.set_author(name=member, icon_url=member.display_avatar, url=member.display_avatar)
+
+        user: discord.User = await self.client.fetch_user(member.id)
+        if banner := user.banner:
+            embed.set_image(url=banner.url)
         embed.set_footer(text=ctx.guild, icon_url=ctx.guild.icon.url)
 
         if author.id != member.id:
