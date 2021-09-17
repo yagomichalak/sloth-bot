@@ -1174,7 +1174,13 @@ You can only add 1 additional channel. Voice **OR** Text."""))
 
 	@commands.command(aliases=['rent', 'renew'])
 	async def pay_rent(self, ctx) -> None:
-		""" Delays the user's Galaxy Rooms deletion by 14 days for 350łł (2 channels) or for 500łł (3 channels). """
+		""" Delays the user's Galaxy Rooms deletion by 14 days.
+		
+		* Price:
+		- +250 for each Thread
+		- +500 for the additional Voice Channel, if there is one.
+		
+		Max Rent Possible: 3000łł """
 
 		if not ctx.guild:
 			return await ctx.send("**Don't use it here!**")
@@ -1197,9 +1203,10 @@ You can only add 1 additional channel. Voice **OR** Text."""))
 
 		vcs, txts = await self.order_rooms(user_rooms)
 		money = 1500
+		# Increases rent price based on the amount of channels in the Galaxy Room
+		money += (len(txts) - 1) * 250
+		money += (len(vcs) - 1) * 500
 
-		if len(vcs + txts) >= 3:
-			money = 2000
 
 		confirm = await ConfirmSkill(f"Are you sure you want to renew your Galaxy Room for `{money}łł`, {member.mention}?").prompt(ctx)
 		if not confirm:
@@ -1311,14 +1318,14 @@ You can only add 1 additional channel. Voice **OR** Text."""))
 
 		vcs, txts = await self.order_rooms(user_rooms)
 
-		if len(vcs) + len(txts) >= 3:
+		if len(vcs) + len(txts) >= 7:
 			return await ctx.send(f"**You reached your maximum amount of channels in your Galaxy Rooms, {member.mention}!**")
 
-		if len(txts) >= 2:
-			return await ctx.send(f"**You cannot add more text channels, {member.mention}!**")
+		if len(txts) >= 5:
+			return await ctx.send(f"**You cannot add more thread channels, {member.mention}!**")
 
 		confirm = await ConfirmSkill(
-			f"**Do you want to add an extra `Thread` channel for `500łł`, {member.mention}?**\n\n||From now on, you're gonna be charged `2000łł` in your next fortnight rents||"
+			f"**Do you want to add an extra `Thread` channel for `250łł`, {member.mention}?**\n\n||From now on, you're gonna be charged `2000łł` in your next fortnight rents||"
 			).prompt(ctx)
 		if not confirm:
 			return await ctx.send(f"**Not doing it then, {member.mention}!**")
@@ -1332,7 +1339,7 @@ You can only add 1 additional channel. Voice **OR** Text."""))
 				embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one, or in the button below!**"),
 				view=view)
 
-		if user_currency[0][1] < 500:
+		if user_currency[0][1] < 250:
 			return await ctx.send("**You don't have enough money to buy this service!**")
 
 		channel = discord.utils.get(ctx.guild.text_channels, id=user_rooms[2])
@@ -1341,8 +1348,8 @@ You can only add 1 additional channel. Voice **OR** Text."""))
 			return await ctx.send(f"**Channels limit reached, creation cannot be completed, try again later!**")
 
 		await self.update_txt_2(member.id, thread.id)
-		await SlothCurrency.update_user_money(member.id, -500)
-		await ctx.send(f"**Text Channel created, {member.mention}!** ({thread.mention})")
+		await SlothCurrency.update_user_money(member.id, -250)
+		await ctx.send(f"**Thread Channel created, {member.mention}!** ({thread.mention})")
 
 
 	@add_galaxy_channel.command(name='voice', aliases=['vc', 'voice_channel'])
@@ -1371,11 +1378,12 @@ You can only add 1 additional channel. Voice **OR** Text."""))
 
 		vcs, txts = await self.order_rooms(user_rooms)
 
-		if len(vcs) + len(txts) >= 3:
-			return await ctx.send(f"**You reached your maximum amount of channels in your Galaxy Rooms, {member.mention}!**")
-
 		if len(vcs) >= 2:
 			return await ctx.send(f"**You cannot add more voice channels, {member.mention}!**")
+			
+		if len(vcs) + len(txts) >= 7:
+			return await ctx.send(f"**You reached your maximum amount of channels in your Galaxy Rooms, {member.mention}!**")
+
 
 		confirm = await ConfirmSkill(
 			f"**Do you want to add an extra `Voice Channel` for `500łł`, {member.mention}?**\n\n||From now on, you're gonna be charged `2000łł` in your next fortnight rents||"
