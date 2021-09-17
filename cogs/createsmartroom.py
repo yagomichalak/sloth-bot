@@ -1332,10 +1332,7 @@ You can only add 1 additional channel. Voice **OR** Text."""))
 			return await ctx.send(f"**You can only renew your rooms at least 2 days before their deletion time, {member.mention}!**")
 
 		vcs, txts = await self.order_rooms(user_rooms)
-		money = 1500
-		# Increases rent price based on the amount of channels in the Galaxy Room
-		money += (len(txts) - 1) * 250
-		money += (len(vcs) - 1) * 500
+		money: int = await self.get_rent_price(len(txts), len(vcs))
 
 
 		confirm = await ConfirmSkill(f"Are you sure you want to renew your Galaxy Room for `{money}łł`, {member.mention}?").prompt(ctx)
@@ -1353,6 +1350,18 @@ You can only add 1 additional channel. Voice **OR** Text."""))
 		await self.increment_galaxy_ts(member.id, 1209600)
 		await self.user_notified_no(member.id)
 		await ctx.send(f"**{member.mention}, Galaxy Rooms renewed! `(-{money}łł)`**")
+
+	async def get_rent_price(self, txts: int, vcs: int) -> int:
+		""" Gets the rent price that the user has to pay, according to the amount of
+		channels that they have in their Galaxy Room.
+		:param txts: The amount of of text based channels the user has.
+		:param vcs: The amount of of voice channels the user has. """
+
+		money = 1500 # Minimum renting price
+		money += (txts - 1) * 250
+		money += (vcs - 1) * 500
+		return money
+
 
 	@commands.command(aliases=['cgr', 'close_galaxy', 'closegalaxy', 'delete_galaxy', 'deletegalaxy'])
 	async def close_galaxy_room(self, ctx) -> None:
@@ -1427,7 +1436,7 @@ You can only add 1 additional channel. Voice **OR** Text."""))
 		await ctx.send(embed=embed)
 
 	@add_galaxy_channel.command(name='thread', aliases=['th', 'thread_channel', 'text', 'txt', 'text_channel'])
-	# @commands.cooldown(1, 60, commands.BucketType.user)
+	@commands.cooldown(1, 60, commands.BucketType.user)
 	async def add_thread(self, ctx, *, name: str = None) -> None:
 		""" Adds a Text Channel.
 		:param name: The name of the Text Channel. """
@@ -1454,8 +1463,9 @@ You can only add 1 additional channel. Voice **OR** Text."""))
 		if len(txts) >= 5:
 			return await ctx.send(f"**You cannot add more thread channels, {member.mention}!**")
 
+		money: int = await self.get_rent_price(len(txts)+1, len(vcs))
 		confirm = await ConfirmSkill(
-			f"**Do you want to add an extra `Thread` channel for `250łł`, {member.mention}?**\n\n||From now on, you're gonna be charged `2000łł` in your next fortnight rents||"
+			f"**Do you want to add an extra `Thread` channel for `250łł`, {member.mention}?**\n\n||From now on, you're gonna be charged `{money}łł` in your next fortnight rents||"
 			).prompt(ctx)
 		if not confirm:
 			return await ctx.send(f"**Not doing it then, {member.mention}!**")
@@ -1485,7 +1495,7 @@ You can only add 1 additional channel. Voice **OR** Text."""))
 
 
 	@add_galaxy_channel.command(name='voice', aliases=['vc', 'voice_channel'])
-	# @commands.cooldown(1, 60, commands.BucketType.user)
+	@commands.cooldown(1, 60, commands.BucketType.user)
 	async def add_voice(self, ctx, limit: int = None, *, name: str = None) -> None:
 		""" Adds a Voice Channel.
 		:param limit: The user limit of the Voice Cchannel.
@@ -1509,6 +1519,7 @@ You can only add 1 additional channel. Voice **OR** Text."""))
 			return await ctx.send(f"**You can only use this command in your Galaxy Rooms, {member.mention}!**")
 
 		vcs, txts = await self.order_rooms(user_rooms)
+		money: int = await self.get_rent_price(len(txts), len(vcs)+1)
 
 		if len(vcs) >= 2:
 			return await ctx.send(f"**You cannot add more voice channels, {member.mention}!**")
@@ -1518,7 +1529,7 @@ You can only add 1 additional channel. Voice **OR** Text."""))
 
 
 		confirm = await ConfirmSkill(
-			f"**Do you want to add an extra `Voice Channel` for `500łł`, {member.mention}?**\n\n||From now on, you're gonna be charged `2000łł` in your next fortnight rents||"
+			f"**Do you want to add an extra `Voice Channel` for `500łł`, {member.mention}?**\n\n||From now on, you're gonna be charged `{money}łł` in your next fortnight rents||"
 			).prompt(ctx)
 		if not confirm:
 			return await ctx.send(f"**Not doing it then, {member.mention}!**")
@@ -1569,7 +1580,7 @@ You can only add 1 additional channel. Voice **OR** Text."""))
 		await ctx.send(embed=embed)
 
 	@delete_galaxy_channel.command(name='thread', aliases=['thread_channel', 'th', 'text', 'txt', 'text_channel'])
-	# @commands.cooldown(1, 60, commands.BucketType.user)
+	@commands.cooldown(1, 60, commands.BucketType.user)
 	async def delete_thread(self, ctx) -> None:
 		""" Deletes the user's second Text Channel from their Galaxy Room. """
 
@@ -1582,13 +1593,14 @@ You can only add 1 additional channel. Voice **OR** Text."""))
 			return await ctx.send(f"**You can only use this command in your Galaxy Rooms, {member.mention}!**")
 
 
-		_, txts = await self.order_rooms(user_rooms)
+		vcs, txts = await self.order_rooms(user_rooms)
+		money: int = await self.get_rent_price(len(txts)-1, len(vcs))
 
 		if len(txts) <= 1:
 			return await ctx.send(f"**You don't have a Thread to delete, {member.mention}!**")
 
 		confirm = await ConfirmSkill(
-			f"**Are you sure you want to delete <#{txts[1]}>, {member.mention}?**\n\n||From now on, you're gonna be charged `1500łł` in your next fortnight rents||"
+			f"**Are you sure you want to delete <#{txts[1]}>, {member.mention}?**\n\n||From now on, you're gonna be charged `{money}łł` in your next fortnight rents||"
 			).prompt(ctx)
 
 		if not confirm:
@@ -1601,13 +1613,15 @@ You can only add 1 additional channel. Voice **OR** Text."""))
 		else:
 			if txt := discord.utils.get(ctx.guild.threads, id=txts[len(txts)-1]):
 				await self.delete_things([txt])
+			elif txt := discord.utils.get(ctx.guild.text_channels, id=txts[len(txts)-1]):
+				await self.delete_things([txt])
 
 			await ctx.send(f"**Text Channel deleted, {member.mention}!**")
 		
 
 
 	@delete_galaxy_channel.command(name='voice', aliases=['vc', 'voice_channel'])
-	# @commands.cooldown(1, 60, commands.BucketType.user)
+	@commands.cooldown(1, 60, commands.BucketType.user)
 	async def delete_voice(self, ctx) -> None:
 		""" Deletes the user's second Voice Channel from their Galaxy Room. """
 
@@ -1619,13 +1633,14 @@ You can only add 1 additional channel. Voice **OR** Text."""))
 		if ctx.channel.id not in user_rooms:
 			return await ctx.send(f"**You can only use this command in your Galaxy Rooms, {member.mention}!**")
 
-		vcs, _ = await self.order_rooms(user_rooms)
+		vcs, txts = await self.order_rooms(user_rooms)
+		money: int = await self.get_rent_price(len(txts), len(vcs)-1)
 
 		if len(vcs) != 2:
 			return await ctx.send(f"**You don't have a second Voice Channel to delete, {member.mention}!**")
 
 		confirm = await ConfirmSkill(
-			f"**Are you sure you want to delete <#{vcs[1]}>, {member.mention}?**\n\n||From now on, you're gonna be charged `1500łł` in your next fortnight rents||"
+			f"**Are you sure you want to delete <#{vcs[1]}>, {member.mention}?**\n\n||From now on, you're gonna be charged `{money}łł` in your next fortnight rents||"
 			).prompt(ctx)
 		
 		if not confirm:
