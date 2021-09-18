@@ -1494,7 +1494,7 @@ You can only add either **threads** **OR** one **voice channel**"""))
 
 		channel = discord.utils.get(ctx.guild.text_channels, id=user_rooms[2])
 			
-		if not (thread := await self.try_to_create(kind='thread', channel=channel, owner=member, name=name)):
+		if not (thread := await self.try_to_create(kind='thread', channel=channel, owner=member, name=name, auto_archive_duration=10080)):
 			return await ctx.send(f"**Channels limit reached, creation cannot be completed, try again later!**")
 
 		print('texts', len(txts))
