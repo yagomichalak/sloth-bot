@@ -55,7 +55,7 @@ class Communication(commands.Cog):
     @commands.command()
     @commands.has_any_role(*allowed_roles)
     async def say(self, ctx):
-        """ (ADM) Makes the bot say something. """
+        """ (MOD) Makes the bot say something. """
 
         await ctx.message.delete()
         if len(ctx.message.content.split()) < 2:

@@ -1,15 +1,15 @@
 import discord
+from discord.app.commands import Option
 from discord.ext import commands
 from random import randint
 import aiohttp
 import os
 from typing import List, Union
-from extra import utils
+
+from extra import utils, useful_variables
 from extra.view import QuickButtons
 from mysqldb import the_database
 from external_cons import the_reddit
-
-
 
 
 mod_role_id = int(os.getenv('MOD_ROLE_ID'))
@@ -17,6 +17,7 @@ admin_role_id = int(os.getenv('ADMIN_ROLE_ID'))
 teacher_role_id = int(os.getenv('TEACHER_ROLE_ID'))
 watchlist_channel_id = int(os.getenv('WATCHLIST_CHANNEL_ID'))
 slothboard_channel_id = int(os.getenv('SLOTHBOARD_CHANNEL_ID'))
+guild_ids = [int(os.getenv('SERVER_ID'))]
 
 class Social(commands.Cog):
     """ Social related commands. """
@@ -46,7 +47,7 @@ class Social(commands.Cog):
         guild = self.client.get_guild(payload.guild_id)
         channel = guild.get_channel(payload.channel_id)
         message = await channel.fetch_message(payload.message_id)
-        if not message:
+        if message is None:
             return
 
         # Checks whether the message has enough reactions
@@ -94,7 +95,7 @@ class Social(commands.Cog):
                     else:
                         return
 
-                embed.set_author(name=message.author, url=message.author.avatar.url, icon_url=message.author.avatar.url)
+                embed.set_author(name=message.author, url=message.author.display_avatar, icon_url=message.author.display_avatar)
                 # Post in #slothboard
                 await self.insert_slothboard_message(message.id, channel.id)
                 slothboard_channel = guild.get_channel(slothboard_channel_id)
@@ -237,8 +238,8 @@ class Social(commands.Cog):
         embed = discord.Embed(colour=member.color, timestamp=ctx.message.created_at)
 
         embed.set_author(name=f"User Info: {member}")
-        embed.set_thumbnail(url=member.avatar.url)
-        embed.set_footer(text=f"Requested by {ctx.author}", icon_url=ctx.author.avatar.url)
+        embed.set_thumbnail(url=member.display_avatar)
+        embed.set_footer(text=f"Requested by {ctx.author}", icon_url=ctx.author.display_avatar)
 
         embed.add_field(name="ID:", value=member.id, inline=False)
 
@@ -268,7 +269,7 @@ class Social(commands.Cog):
             else:
                 view.children[4].disabled = True
 
-        await ctx.send(embed=embed, view=view)
+        await ctx.send("\u200b", embed=embed, view=view)
 
 
     # Sends a random post from the meme subreddit
@@ -287,7 +288,7 @@ class Social(commands.Cog):
 
     #     meme_embed = discord.Embed(title="__**Meme**__", colour=ctx.author.colour, timestamp=ctx.message.created_at)
     #     meme_embed.set_image(url=submissions.url)
-    #     meme_embed.set_author(name=ctx.author, icon_url=ctx.author.avatar.url)
+    #     meme_embed.set_author(name=ctx.author, icon_url=ctx.author.display_avatar)
     #     await ctx.send(embed=meme_embed)
 
     @commands.command(aliases=['xkcd', 'comic'])
@@ -307,6 +308,32 @@ class Social(commands.Cog):
         em.set_footer(text=f"Published on {data['month']}/{data['day']}/{data['year']}")
         em.set_image(url=data['img'])
         await ctx.send(embed=em)
+
+    # @commands.slash_command(name="youtube_together", guild_ids=guild_ids)
+    # @utils.is_allowed([*useful_variables.patreon_roles.keys(), mod_role_id, admin_role_id, teacher_role_id], throw_exc=True)
+    # async def youtube_together(self, ctx: discord.ApplicationContext,
+    #     voice_channel: Option(discord.abc.GuildChannel, description="The voice channel in which to create the party.")
+    # ) -> None:
+    #     """ Creates a YouTube Together session in a VC. """
+
+    #     member = ctx.author
+
+    #     if not isinstance(voice_channel, discord.VoiceChannel):
+    #         return await ctx.send(f"**Please, select a `Voice Channel`, {member.mention}!**")
+
+    #     link = await voice_channel.create_activity_invite('youtube')
+    #     current_time = await utils.get_time_now()
+
+    #     view = discord.ui.View()
+    #     view.add_item(discord.ui.Button(url=str(link), label="Start/Join the Party!", emoji="🔴"))
+    #     embed = discord.Embed(
+    #         title="__Youtube Together__",
+    #         color=discord.Color.red(),
+    #         timestamp=current_time,
+    #         url=link
+    #     )
+    #     embed.set_footer(text=f"Created by {member}", icon_url=member.display_avatar)
+    #     await ctx.send(embed=embed, view=view)
 
 
 def setup(client):

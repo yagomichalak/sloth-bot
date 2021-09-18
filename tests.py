@@ -75,3 +75,11 @@
 
 
 
+class Hello:
+    selected_item: list = []
+    pass
+
+
+hello = Hello()
+print(hasattr(hello, 'selected_item'))
+print(getattr(hello, 'selected_item') is True)

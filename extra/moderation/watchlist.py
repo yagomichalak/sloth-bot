@@ -39,11 +39,11 @@ class ModerationWatchlistTable(commands.Cog):
             description=f"{author.mention} watchlisted <@{member.id}>\n__**Reason:**__ ```{reason}```",
             color=member.color,
             timestamp=ctx.message.created_at,
-            url=member.avatar.url
+            url=member.display_avatar
         )
-        embed.set_thumbnail(url=member.avatar.url)
-        embed.set_author(name=f"{member} ({member.id})", icon_url=member.avatar.url, url=member.avatar.url)
-        embed.set_footer(text=f"Watchlisted by {author} ({author.id})", icon_url=author.avatar.url)
+        embed.set_thumbnail(url=member.display_avatar)
+        embed.set_author(name=f"{member} ({member.id})", icon_url=member.display_avatar, url=member.display_avatar)
+        embed.set_footer(text=f"Watchlisted by {author} ({author.id})", icon_url=author.display_avatar)
 
         msg = await watchlist_channel.send(embed=embed)
 

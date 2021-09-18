@@ -1,7 +1,9 @@
 import discord
+from discord.app import Option, OptionChoice
 from discord.ext import commands, menus
 import asyncio
 from gtts import gTTS
+
 from googletrans import Translator
 import inspect
 import io
@@ -9,30 +11,29 @@ import textwrap
 import traceback
 from contextlib import redirect_stdout
 import os
-from treelib import Node, Tree
-from extra.menu import ConfirmSkill, InroleLooping
+from treelib import Tree
 from cogs.createsmartroom import CreateSmartRoom
-from datetime import datetime
+import json
+
+from datetime import datetime, time
 import pytz
 from pytz import timezone
 from mysqldb import the_database
+
+from extra.menu import ConfirmSkill, InroleLooping
 from extra.useful_variables import patreon_roles
 from extra import utils
 
 guild_ids = [int(os.getenv('SERVER_ID'))]
-# from discord_slash import cog_ext, SlashContext
-# from discord_slash.model import SlashCommandPermissionType
-# from discord_slash.utils.manage_commands import create_option, create_choice, create_permission, create_multi_ids_permission
 
-from typing import List
+from typing import List, Dict
 
 mod_role_id = int(os.getenv('MOD_ROLE_ID'))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID'))
 owner_role_id = int(os.getenv('OWNER_ROLE_ID'))
 
-allowed_roles = [owner_role_id, admin_role_id, mod_role_id, int(os.getenv('SLOTH_LOVERS_ROLE_ID'))]
+allowed_roles = [owner_role_id, admin_role_id, mod_role_id, *patreon_roles.keys(), int(os.getenv('SLOTH_LOVERS_ROLE_ID'))]
 teacher_role_id = int(os.getenv('TEACHER_ROLE_ID'))
-
 
 class Tools(commands.Cog):
 	""" Some useful tool commands. """
@@ -88,7 +89,6 @@ class Tools(commands.Cog):
 				await pages.start(ctx)
 			else:
 				return await ctx.send(f"**No one has this role, {member.mention}!**")
-
 		else:
 			return await ctx.send(f"**No role with that name was found!**")
 
@@ -171,29 +171,50 @@ class Tools(commands.Cog):
 		else:
 			await ctx.send("**The bot is in a different voice channel!**")
 
-	@commands.command()
-	async def tr(self, ctx, language: str = None, *, message: str = None):
-		'''
-		Translates a message into another language.
+	@commands.command(name="translate", aliases=["tr"])
+	async def _tr_command(self, ctx, language: str = None, *, message: str = None) -> None:
+		""" Translates a message into another language.
 		:param language: The language to translate the message to.
 		:param message: The message to translate.
-		:return: A translated message.
-		'''
+		:return: A translated message. """
+
 		await ctx.message.delete()
 		if not language:
 			return await ctx.send("**Please, inform a language!**", delete_after=5)
 		elif not message:
 			return await ctx.send("**Please, inform a message to translate!**", delete_after=5)
+
+		await self._tr_callback(ctx, language, message, True)
+
+
+	async def _tr_callback(self, ctx, language: str = None, message: str = None, show_src: bool = False) -> None:
+		""" Translates a message into another language.
+		:param language: The language to translate the message to.
+		:param message: The message to translate.
+		:param show_src: Whether to show the source message. """
+
+		answer: discord.PartialMessageable = None
+		if isinstance(ctx, commands.Context):
+			answer = ctx.send
+		else:
+			answer = ctx.respond
+
 		trans = Translator(service_urls=['translate.googleapis.com'])
+		current_time = await utils.get_time_now()
 		try:
 			translation = trans.translate(f'{message}', dest=f'{language}')
 		except ValueError:
-			return await ctx.send("**Invalid parameter for 'language'!**", delete_after=5)
-		embed = discord.Embed(title="__Sloth Translator__",
-							  description=f"**Translated from `{translation.src}` to `{translation.dest}`**\n\n{translation.text}",
-							  colour=ctx.author.color, timestamp=ctx.message.created_at)
-		embed.set_author(name=ctx.author, icon_url=ctx.author.avatar.url)
-		await ctx.send(embed=embed)
+			return await answer("**Invalid parameter for 'language'!**", delete_after=5)
+
+		embed = discord.Embed(title="__Sloth Translator__", color=ctx.author.color, timestamp=current_time)
+
+		if show_src:
+			embed.add_field(name=f"__{translation.src}:__", value=f"```{message}```", inline=False)
+		embed.add_field(name=f"__{translation.dest}:__", value=f"```{translation.text}```", inline=False)
+
+		embed.set_author(name=ctx.author, icon_url=ctx.author.display_avatar)
+		embed.set_footer(text=f"{translation.src} -> {translation.dest}")
+		await answer(embed=embed)
 
 	@commands.command()
 	async def ping(self, ctx):
@@ -235,7 +256,7 @@ class Tools(commands.Cog):
 		embed = discord.Embed(title="__Math__",
 							  description=f"`{v1}` **{oper}** `{v2}` **=** `{operators[oper](v1, v2)}`",
 							  colour=ctx.author.color, timestamp=ctx.message.created_at)
-		embed.set_author(name=ctx.author, icon_url=ctx.author.avatar.url)
+		embed.set_author(name=ctx.author, icon_url=ctx.author.display_avatar)
 		return await ctx.send(embed=embed)
 
 	@commands.command()
@@ -827,6 +848,58 @@ class Tools(commands.Cog):
 					continue
 
 		await ctx.send(f"**All Patreons were paid!**")
+
+	@commands.command(alises=['count_channel', 'countchannel'])
+	@commands.cooldown(1, 5, commands.BucketType.user)
+	async def channels(self, ctx) -> None:
+		""" Counts how many channels there are in the server. """
+
+		await ctx.reply(f"**We currently have `{len(ctx.guild.channels)}` channels!**")
+
+	# @commands.slash_command(name="timestamp", guild_ids=guild_ids)
+	# async def _timestamp(self, ctx, 
+	# 		hour: Option(int, name="hour", description="Hour of time in 24 hour format.", required=False),
+	# 		minute: Option(int, name="minute", description="Minute of time.", required=False),
+	# 		day: Option(int, name="day", description="Day of date.", required=False),
+	# 		month: Option(int, name="month", description="Month of date.", required=False),
+	# 		year: Option(int, name="year", description="Year of date.", required=False)) -> None:
+	# 	""" Gets a timestamp for a specific date and time. - Output will format according to your timezone. """
+
+	# 	current_date = await utils.get_time_now()
+
+	# 	if hour: current_date = current_date.replace(hour=hour)
+	# 	if minute: current_date = current_date.replace(minute=minute)
+	# 	if day: current_date = current_date.replace(day=day)
+	# 	if month: current_date = current_date.replace(month=month)
+	# 	if year: current_date = current_date.replace(year=year)
+
+	# 	embed = discord.Embed(
+	# 		title="__Timestamp Created__",
+	# 		description=f"Requested date: `{current_date.strftime('%m/%d/%Y %H:%M')}` (**GMT**)",
+	# 		color=ctx.author.color
+	# 	)
+	# 	timestamp = int(current_date.timestamp())
+	# 	embed.add_field(name="Output", value=f"<t:{timestamp}>")
+	# 	embed.add_field(name="Copyable", value=f"\<t:{timestamp}>")
+
+	# 	await ctx.send(embed=embed, ephemeral=True)
+
+	# @commands.slash_command(name="mention", guild_ids=guild_ids)
+	# @utils.is_allowed([mod_role_id, admin_role_id, owner_role_id])
+	# async def _mention(self, ctx, 
+	# 	member: Option(str, name="member", description="The Staff member to mention/ping.", required=True,
+	# 		choices=[
+	# 			OptionChoice(name="Cosmos", value=os.getenv('COSMOS_ID')), OptionChoice(name="Alex", value=os.getenv('ALEX_ID')),
+	# 			OptionChoice(name="DNK", value=os.getenv('DNK_ID')), OptionChoice(name="Muffin", value=os.getenv('MUFFIN_ID')),
+	# 			OptionChoice(name="Prisca", value=os.getenv('PRISCA_ID')), OptionChoice(name="GuiBot", value=os.getenv('GUIBOT_ID'))
+	# 		]
+	# 	)) -> None:
+	# 	""" (ADMIN) Used to mention staff members. """
+
+	# 	if staff_member := discord.utils.get(ctx.guild.members, id=int(member)):
+	# 		await ctx.send(staff_member.mention)
+	# 	else:
+	# 		await ctx.send("**For some reason I couldn't ping them =\ **")
 
 def setup(client):
 	client.add_cog(Tools(client))

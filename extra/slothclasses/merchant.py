@@ -172,7 +172,7 @@ class Merchant(Player):
                             color=buyer.color,
                             timestamp=ctx.message.created_at)
                     if cybersloth:
-                        siphon_embed.set_thumbnail(url=cybersloth.avatar.url)
+                        siphon_embed.set_thumbnail(url=cybersloth.display_avatar)
 
                     await ctx.send(
                         content=f"{buyer.mention}, {member.mention}, <@{wired_user[0]}>",
@@ -258,7 +258,7 @@ class Merchant(Player):
                         color=buyer.color,
                         timestamp=ctx.message.created_at)
                 if cybersloth:
-                    siphon_embed.set_thumbnail(url=cybersloth.avatar.url)
+                    siphon_embed.set_thumbnail(url=cybersloth.display_avatar)
 
                 await ctx.send(
                     content=f"{buyer.mention}, {member.mention}, <@{wired_user[0]}>",
@@ -570,7 +570,7 @@ class Merchant(Player):
         embed = discord.Embed(
             title="__Confirmation__", color=member.color,
             description=f"**Are you sure you wanna marry {suitor.mention}, {member.mention}?**")
-        await ctx.send(embed=embed, view=confirm_view)
+        await ctx.send("\u200b", embed=embed, view=confirm_view)
 
         await confirm_view.wait()
         if confirm_view.value is None:
@@ -655,7 +655,7 @@ class Merchant(Player):
         embed = discord.Embed(
             title="__Confirmation__", color=member.color,
             description=f"**Are you really sure you wanna divorce <@{partner.id}>, {member.mention}?**")
-        await ctx.send(embed=embed, view=confirm_view)
+        await ctx.send("\u200b", embed=embed, view=confirm_view)
 
         await confirm_view.wait()
         if confirm_view.value is None:

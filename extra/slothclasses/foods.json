@@ -59,8 +59,8 @@
         "name": "Doughnut", "emoji": "🍩", "sentence": "{member.mention} gave {target.mention} a doughnut",
         "gifs": ["https://c.tenor.com/665l_KM-y24AAAAd/eating-hungry.gif", "https://c.tenor.com/ZJAL89-LRI8AAAAC/donuts-doughnuts.gif", "https://c.tenor.com/J3SD9nS0b5YAAAAC/dripping-doughnut-icing.gif", "https://c.tenor.com/7TAAgP5c5oUAAAAd/donuts-doughnuts.gif", "https://c.tenor.com/5HnIUHO6AM8AAAAC/donuts-doughnuts.gif", "https://c.tenor.com/r0n3SjC5640AAAAC/krispy-kreme-donuts.gif", "https://c.tenor.com/RJSf6rlxEM0AAAAC/donut-dog.gif", "https://c.tenor.com/A9KcAvn9Mx8AAAAC/donuts-doughnuts.gif", "https://c.tenor.com/yrow-omq9icAAAAd/glazing-doughnut.gif", "https://c.tenor.com/eh83B6QDF1UAAAAC/donuts-doughnuts.gif"]
     },
-    "Icecream": {
-        "name": "Icecream", "emoji": "🍦", "sentence": "{member.mention} gave {target.mention} some icecream",
+    "Ice Cream": {
+        "name": "Ice Cream", "emoji": "🍦", "sentence": "{member.mention} gave {target.mention} some ice cream",
         "gifs": ["https://c.tenor.com/yvmqZZ1lG-0AAAAC/icecream-day.gif", "https://c.tenor.com/86EuS9r-oLUAAAAC/ice-cream-ice-cream-cone.gif", "https://c.tenor.com/K5wRu-56t2EAAAAC/baby-ice-cream.gif", "https://c.tenor.com/xTs32UMhBoIAAAAC/kitten-ice-cream.gif", "https://c.tenor.com/pzJEO5jV6D4AAAAd/love-story.gif", "https://c.tenor.com/FIQdKZf2ycQAAAAd/dwinterlude.gif", "https://c.tenor.com/bwCPXqpBKDMAAAAC/ice-cream-cone.gif", "https://c.tenor.com/ZiZPDnoOpPQAAAAC/softsetve-soft-serve-ice-cream.gif", "https://c.tenor.com/43eB8PkzaLwAAAAC/ice-cream-dessert.gif", "https://c.tenor.com/E0JkjSC8YY4AAAAd/ice-cream-dessert.gif"]
     },
     "Beer": {

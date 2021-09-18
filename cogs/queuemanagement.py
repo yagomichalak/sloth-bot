@@ -62,7 +62,7 @@ class QueueManagement(commands.Cog):
             color=author.color,
             timestamp=ctx.message.created_at
         )
-        embed.set_thumbnail(url=author.avatar.url)
+        embed.set_thumbnail(url=author.display_avatar)
         embed.set_footer(text="0 - Not sorted | 1 - Sorted", icon_url=guild.icon.url)
         
         await ctx.send(embed=embed)

@@ -1,8 +1,5 @@
 import discord
-from discord import user
 from discord.ext import commands
-from discord.ext.commands.errors import NoEntryPointError
-from discord.ext.commands.help import HelpCommand
 from .player import Player, Skill
 from mysqldb import the_database
 from extra.menu import ConfirmSkill
@@ -18,9 +15,6 @@ bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
 class Seraph(Player):
 
     emoji = '<:Seraph:839498018998976563>'
-
-    def __init__(self, client) -> None:
-        self.client = client
 
     @commands.command(aliases=['dp', 'divine', 'protection'])
     @Player.skill_on_cooldown()
@@ -268,7 +262,7 @@ class Seraph(Player):
         reinforce_shields_embed.description = f"🛡️ <@{perpetrator_id}> reinforced `{shields_len}` active shields; now they have more 24 hours of duration! 🛡️💪"
         reinforce_shields_embed.color = discord.Color.green()
 
-        reinforce_shields_embed.set_author(name='50% of chance', url=self.client.user.avatar.url)
+        reinforce_shields_embed.set_author(name='50% of chance', url=self.client.user.display_avatar)
         reinforce_shields_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Seraph.png")
         reinforce_shields_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
 
@@ -289,7 +283,7 @@ class Seraph(Player):
         self_shield_embed.description = f"🛡️ <@{perpetrator_id}> got a shield for themselves for reinforcing other shields! 🛡️💪"
         self_shield_embed.color = discord.Color.green()
 
-        self_shield_embed.set_author(name='45% of chance', url=self.client.user.avatar.url)
+        self_shield_embed.set_author(name='45% of chance', url=self.client.user.display_avatar)
         self_shield_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Seraph.png")
         self_shield_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
 
@@ -410,9 +404,9 @@ class Seraph(Player):
             timestamp=parsed_time
         )
 
-        heal_embed.set_thumbnail(url=target.avatar.url)
+        heal_embed.set_thumbnail(url=target.display_avatar)
         heal_embed.set_image(url="https://cdn3.iconfinder.com/data/icons/role-playing-game-5/340/magic_game_rpg_human_healing_heal-512.png")
-        heal_embed.set_author(name=perpetrator, url=perpetrator.avatar.url, icon_url=perpetrator.avatar.url)
+        heal_embed.set_author(name=perpetrator, url=perpetrator.display_avatar, icon_url=perpetrator.display_avatar)
         heal_embed.set_footer(text=perpetrator.guild.name, icon_url=perpetrator.guild.icon.url)
 
         return heal_embed

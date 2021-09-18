@@ -1,11 +1,13 @@
-import pytz
 import discord
 from discord.app import Option, OptionChoice
+from discord.utils import escape_mentions
 from pytz import timezone
 from dotenv import load_dotenv
 from discord.ext import commands, tasks, flags
-from extra import utils
 
+from extra import utils, useful_variables
+from typing import Dict, Optional
+import json
 import os
 from datetime import datetime
 from itertools import cycle
@@ -20,6 +22,7 @@ load_dotenv()
 user_cosmos_id = int(os.getenv('COSMOS_ID'))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID'))
 moderator_role_id = int(os.getenv('MOD_ROLE_ID'))
+booster_role_id = int(os.getenv('BOOSTER_ROLE_ID'))
 
 server_id = int(os.getenv('SERVER_ID'))
 teacher_role_id = int(os.getenv('TEACHER_ROLE_ID'))
@@ -63,6 +66,8 @@ async def change_color():
 
 @client.event
 async def on_member_update(before, after):
+    """ Sends a messages to new patreons, as soon as they get their patreon roles. """
+
     if not after.guild:
         return
 
@@ -91,7 +96,7 @@ async def on_member_remove(member):
     roles = [role for role in member.roles]
     channel = discord.utils.get(member.guild.channels, id=admin_commands_channel_id)
     embed = discord.Embed(title=member.name, description=f"User has left the server.", colour=discord.Colour.dark_red())
-    embed.set_thumbnail(url=member.avatar.url)
+    embed.set_thumbnail(url=member.display_avatar)
     embed.set_author(name=f"User Info: {member}")
     embed.add_field(name="ID:", value=member.id, inline=False)
     embed.add_field(name="Guild name:", value=member.display_name, inline=False)
@@ -101,21 +106,18 @@ async def on_member_remove(member):
     embed.add_field(name=f"Roles: {len(roles)}", value=" ".join([role.mention for role in roles]), inline=False)
     embed.add_field(name="Top role:", value=member.top_role.mention, inline=False)
     embed.add_field(name="Bot?", value=member.bot)
-    # cosmos = discord.utils.get(member.guild.members, id=user_cosmos_id)
     await channel.send(embed=embed)
 
-
-# Handles the errors
 @client.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.MissingPermissions):
-        await ctx.send("You can't do that!")
+        await ctx.send("**You can't do that!**")
 
     elif isinstance(error, commands.MissingRequiredArgument):
-        await ctx.send('Please, inform all parameters!')
+        await ctx.send('**Please, inform all parameters!**')
 
     elif isinstance(error, commands.NotOwner):
-        await ctx.send("You're not the bot's owner!")
+        await ctx.send("**You're not the bot's owner!**")
 
     elif isinstance(error, commands.CommandOnCooldown):
         await ctx.send(error)
@@ -125,7 +127,7 @@ async def on_command_error(ctx, error):
         await ctx.send(f"You are missing at least one of the required roles: {', '.join(role_names)}")
 
     elif isinstance(error, commands.errors.RoleNotFound):
-        await ctx.send(f"**{error}**")
+        await ctx.send(f"**Role not found**")
 
     elif isinstance(error, commands.ChannelNotFound):
         await ctx.send("**Channel not found!**")
@@ -138,6 +140,9 @@ async def on_command_error(ctx, error):
 
     elif isinstance(error, SkillsUsedRequirement):
         await ctx.send(f"**{error.error_message}**")
+
+    elif isinstance(error, commands.errors.CheckAnyFailure):
+        await ctx.send("**You can't do that!**")
 
     elif isinstance(error, commands.CheckAnyFailure):
         if isinstance(error.errors[0], ActionSkillOnCooldown):
@@ -158,9 +163,49 @@ async def on_command_error(ctx, error):
     error_log = client.get_channel(error_log_channel_id)
     if error_log:
         await error_log.send('='*10)
-        await error_log.send(f"ERROR: {error} | Class: {error.__class__} | Cause: {error.__cause__}")
+        await error_log.send(f"ERROR: {escape_mentions(str(error))} | Class: {error.__class__} | Cause: {error.__cause__}")
         await error_log.send('='*10)
 
+@client.event
+async def on_application_command_error(ctx, error) -> None:
+
+    if isinstance(error, commands.MissingPermissions):
+        await ctx.respond("**You can't do that!**")
+
+    elif isinstance(error, commands.MissingRequiredArgument):
+        await ctx.respond('**Please, inform all parameters!**')
+
+    elif isinstance(error, commands.NotOwner):
+        await ctx.respond("**You're not the bot's owner!**")
+
+    elif isinstance(error, commands.CommandOnCooldown):
+        await ctx.respond(error)
+
+    elif isinstance(error, commands.errors.CheckAnyFailure):
+        await ctx.respond("**You can't do that!**")
+
+    elif isinstance(error, commands.MissingAnyRole):
+        role_names = [f"**{str(discord.utils.get(ctx.guild.roles, id=role_id))}**" for role_id in error.missing_roles]
+        await ctx.respond(f"You are missing at least one of the required roles: {', '.join(role_names)}")
+
+    elif isinstance(error, commands.errors.RoleNotFound):
+        await ctx.respond(f"**Role not found**")
+
+    elif isinstance(error, commands.ChannelNotFound):
+        await ctx.respond("**Channel not found!**")
+
+    elif isinstance(error, discord.app.errors.CheckFailure):
+        await ctx.respond("**It looks like you can't run this command!**")
+
+
+    print('='*10)
+    print(f"ERROR: {error} | Class: {error.__class__} | Cause: {error.__cause__}")
+    print('='*10)
+    error_log = client.get_channel(error_log_channel_id)
+    if error_log:
+        await error_log.send('='*10)
+        await error_log.send(f"ERROR: {escape_mentions(str(error))} | Class: {error.__class__} | Cause: {error.__cause__}")
+        await error_log.send('='*10)
 
 # Members status update
 @tasks.loop(seconds=10)
@@ -211,7 +256,7 @@ async def on_voice_state_update(member, before, after):
                 embed.add_field(name='ID',
                                 value=f'```py\nUser = {member.id}\nPrevious Channel = {before.channel.id}\nCurrent Channel = {after.channel.id}```')
                 embed.set_footer(text=f"Guild name: {member.guild.name}")
-                embed.set_author(name=member, icon_url=member.avatar.url)
+                embed.set_author(name=member, icon_url=member.display_avatar)
                 await mod_log.send(embed=embed)
         # Entered a voice channel
         else:
@@ -222,7 +267,7 @@ async def on_voice_state_update(member, before, after):
                 embed.add_field(name='Channel', value=f'{after.channel.name}', inline=False)
                 embed.add_field(name='ID', value=f'```py\nUser = {member.id}\nChannel = {after.channel.id}```')
                 embed.set_footer(text=f"Guild name: {member.guild.name}")
-                embed.set_author(name=member, icon_url=member.avatar.url)
+                embed.set_author(name=member, icon_url=member.display_avatar)
                 await mod_log.send(embed=embed)
 
     # Left voice channel
@@ -234,17 +279,17 @@ async def on_voice_state_update(member, before, after):
             embed.add_field(name='Channel', value=f'{before.channel.name}', inline=False)
             embed.add_field(name='ID', value=f'```py\nUser = {member.id}\nChannel = {before.channel.id}```')
             embed.set_footer(text=f"Guild name: {member.guild.name}")
-            embed.set_author(name=member, icon_url=member.avatar.url)
+            embed.set_author(name=member, icon_url=member.display_avatar)
             await mod_log.send(embed=embed)
 
-start_time = datetime.utcnow()
+start_time = datetime.now(timezone('Etc/GMT'))
 
 
 @client.command()
 async def uptime(ctx: commands.Context):
     """ Shows for how much time the bot is online. """
 
-    now = datetime.utcnow()  # Timestamp of when uptime function is run
+    now = await utils.get_time_now()  # Timestamp of when uptime function is run
     delta = now - start_time
     hours, remainder = divmod(int(delta.total_seconds()), 3600)
     minutes, seconds = divmod(remainder, 60)
@@ -262,57 +307,59 @@ async def uptime(ctx: commands.Context):
 
 
 @client.command()
-async def help(ctx: commands.Context, cmd: str = None) -> None:
-  """ Shows some information about commands and categories.
-  :param cmd: The command or cog to show info about. """
-  
-  if not cmd:
-      embed = discord.Embed(
-      title="All commands and categories",
-      description=f"```ini\nUse {client.command_prefix}help command or {client.command_prefix}help category to know more about a specific command or category\n\n[Examples]\n[1] Category: {client.command_prefix}help games\n[2] Command : {client.command_prefix}help play```",
-      timestamp=ctx.message.created_at,
-      color=ctx.author.color
-      )
+async def help(ctx, *, cmd: str =  None):
+    """ Shows some information about commands and categories. 
+    :param cmd: The command/category. """
 
-      for cog in client.cogs:
-          cog = client.get_cog(cog)
-          commands = [c.name for c in cog.get_commands() if not c.hidden]
-          if commands:
-            embed.add_field(
-            name=f"__{cog.qualified_name}__",
-            value=f"`Commands:` {', '.join(commands)}",
-            inline=False
+
+    if not cmd:
+        embed = discord.Embed(
+            title="All commands and categories",
+            description=f"```ini\nUse {client.command_prefix}help command or {client.command_prefix}help category to know more about a specific command or category\n\n[Examples]\n[1] Category: {client.command_prefix}help SlothCurrency\n[2] Command : {client.command_prefix}help rep```",
+            timestamp=ctx.message.created_at,
+            color=ctx.author.color
             )
 
-      cmds = []
-      for y in client.walk_commands():
-          if not y.cog_name and not y.hidden:
-              cmds.append(y.name)
-      embed.add_field(
-      name='__Uncategorized Commands__', 
-      value=f"`Commands:` {', '.join(cmds)}", 
-      inline=False)
-      await ctx.send(embed=embed)
+        for cog in client.cogs:
+            cog = client.get_cog(cog)
+            commands = [f"{client.command_prefix}{c.name}" for c in cog.get_commands() if not c.hidden]
+            if commands:
+                embed.add_field(
+                    name=f"__{cog.qualified_name}__",
+                    value=f"`Commands:` {', '.join(commands)}",
+                    inline=False
+                    )
 
-  else:
-    # Checks if it's a command
-    if command := client.get_command(cmd.lower()):
-      command_embed = discord.Embed(title=f"__Command:__ {command.name}", description=f"__**Description:**__\n```{command.help}```", color=ctx.author.color, timestamp=ctx.message.created_at)
-      return await ctx.send(embed=command_embed)
+        cmds = []
+        for y in client.walk_commands():
+            if not y.cog_name and not y.hidden:
+                cmds.append(f"{client.command_prefix}{y.name}")
 
-    for cog in client.cogs:
-      if str(cog).lower() == str(cmd).lower():
-          cog = client.get_cog(cog)
-          cog_embed = discord.Embed(title=f"__Cog:__ {cog.qualified_name}", description=f"__**Description:**__\n```{cog.description}```", color=ctx.author.color, timestamp=ctx.message.created_at)
-          for c in cog.get_commands():
-              if not c.hidden:
-                  cog_embed.add_field(name=c.name,value=c.help,inline=False)
+        embed.add_field(
+            name='__Uncategorized Commands__',
+            value=f"`Commands:` {', '.join(cmds)}",
+            inline=False)
+        await ctx.send(embed=embed)
 
-          return await ctx.send(embed=cog_embed)
+    else:  
+        cmd = escape_mentions(cmd)
+        if command := client.get_command(cmd.lower()):
+            command_embed = discord.Embed(title=f"__Command:__ {client.command_prefix}{command.qualified_name}", description=f"__**Description:**__\n```{command.help}```", color=ctx.author.color, timestamp=ctx.message.created_at)
+            return await ctx.send(embed=command_embed)
 
-    # Otherwise, it's an invalid parameter (Not found)
-    else:
-      await ctx.send(f"**Invalid parameter! `{cmd}` is neither a command nor a cog!**")
+        # Checks if it's a cog
+        for cog in client.cogs:
+            if str(cog).lower() == str(cmd).lower():
+                cog = client.get_cog(cog)
+                cog_embed = discord.Embed(title=f"__Cog:__ {cog.qualified_name}", description=f"__**Description:**__\n```{cog.description}```", color=ctx.author.color, timestamp=ctx.message.created_at)
+                for c in cog.get_commands():
+                    if not c.hidden:
+                        cog_embed.add_field(name=c.qualified_name, value=c.help, inline=False)
+
+                return await ctx.send(embed=cog_embed)
+        # Otherwise, it's an invalid parameter (Not found)
+        else:
+            await ctx.send(f"**Invalid parameter! It is neither a command nor a cog!**")
 
 @client.command(hidden=True)
 @commands.has_permissions(administrator=True)
@@ -388,7 +435,7 @@ async def _embed(ctx,
         return await ctx.send(
             f"**{ctx.author.mention}, you must inform at least one of the following options: `description`, `image`, `thumbnail`**")
 
-    await ctx.send(embed=embed)
+    await ctx.respond(embed=embed)
 
 
 
@@ -419,46 +466,204 @@ async def _timestamp(ctx,
     embed.add_field(name="Output", value=f"<t:{timestamp}>")
     embed.add_field(name="Copyable", value=f"\<t:{timestamp}>")
 
-    await ctx.send(embed=embed, ephemeral=True)
+    await ctx.respond(embed=embed, ephemeral=True)
 
 @client.slash_command(name="dnk", guild_ids=guild_ids)
 async def _dnk(ctx) -> None:
     """ Tells you something about DNK. """
-    await ctx.send(f"**DNK est toujours là pour les vrais !**")
+    await ctx.respond(f"**DNK est toujours là pour les vrais !**")
 
 @client.slash_command(name="twiks", guild_ids=guild_ids)
 async def _twiks(ctx) -> None:
     """ Tells you something about Twiks. """
 
-    await ctx.send(f"**Twiks est mon frérot !**")
+    await ctx.respond(f"**Twiks est mon frérot !**")
+
 
 @client.slash_command(name="mention", guild_ids=guild_ids)
-@commands.has_any_role(moderator_role_id, admin_role_id)
+@utils.is_allowed([moderator_role_id, admin_role_id])
 async def _mention(ctx, 
     member: Option(str, name="member", description="The Staff member to mention/ping.", required=True,
 		choices=[
 			OptionChoice(name="Cosmos", value=os.getenv('COSMOS_ID')), OptionChoice(name="Alex", value=os.getenv('ALEX_ID')),
 			OptionChoice(name="DNK", value=os.getenv('DNK_ID')), OptionChoice(name="Muffin", value=os.getenv('MUFFIN_ID')),
-			OptionChoice(name="Pretzel", value=os.getenv('PRETZEL_ID')), OptionChoice(name="Prisca", value=os.getenv('PRISCA_ID')),
-            OptionChoice(name="GuiBot", value=os.getenv('GUIBOT_ID'))
+			OptionChoice(name="Prisca", value=os.getenv('PRISCA_ID')), OptionChoice(name="GuiBot", value=os.getenv('GUIBOT_ID'))
 		]
 	)) -> None:
     """ (ADMIN) Used to mention staff members. """
 
     if staff_member := discord.utils.get(ctx.guild.members, id=int(member)):
-        await ctx.send(staff_member.mention)
+        await ctx.respond(staff_member.mention)
     else:
-        await ctx.send("**For some reason I couldn't ping them =\ **")
+        await ctx.respond("**For some reason I couldn't ping them =\ **")
 
+
+
+_cnp = client.command_group(name="cnp", description="For copy and pasting stuff.", guild_ids=guild_ids)
+
+@_cnp.command(name="specific")
+@utils.is_allowed([moderator_role_id, admin_role_id])
+async def _specific(ctx, 
+    text: Option(str, name="text", description="Pastes a text for specific purposes", required=True,
+        choices=['Muted/Purge', 'Nickname', 'Classes', 'Interview', 'Resources', 'Global', 'Searching Teachers'])):
+    """ Posts a specific test of your choice """
+    
+    
+    member = ctx.author
+
+    available_texts: Dict[str, str] = {}
+    with open(f"./extra/random/json/special_texts.json", 'r', encoding="utf-8") as file:
+        available_texts = json.loads(file.read())
+
+    if not (selected_text := available_texts.get(text.lower())):
+        return await ctx.respond(f"**Please, inform a supported language, {member.mention}!**\n{', '.join(available_texts)}")
+
+    if selected_text['embed']:
+        embed = discord.Embed(
+            title=f"__{text.title()}__",
+            description=selected_text['text'],
+            color=member.color
+        )
+        if selected_text["image"]:
+            embed.set_image(url=selected_text["image"])
+        await ctx.respond(embed=embed)
+    else:
+        await ctx.respond(selected_text['text'])
+
+
+@_cnp.command(name="speak")
+@utils.is_allowed([moderator_role_id, admin_role_id])
+async def _speak(ctx, language: Option(str, name="language", description="The language they should speak.", required=True)) -> None:
+    """ Pastes a 'speak in X language' text in different languages. """
+
+    member = ctx.author
+
+    available_languages: Dict[str, str] = {}
+    with open(f"./extra/random/json/speak_in.json", 'r', encoding="utf-8") as file:
+        available_languages = json.loads(file.read())
+
+    if not (language_text := available_languages.get(language.lower())):
+        return await ctx.respond(f"**Please, inform a supported language, {member.mention}!**\n{', '.join(available_languages)}")
+
+    embed = discord.Embed(
+        title=f"__{language.title()}__",
+        description=language_text,
+        color=member.color
+    )
+    await ctx.respond(embed=embed)
+
+@client.slash_command(name="rules", guild_ids=guild_ids)
+@utils.is_allowed([moderator_role_id, admin_role_id])
+async def _rules_slash(ctx, 
+    rule_number: Option(int, name="rule_number", description="The number of the rule you wanna show.", choices=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], required=False), 
+    reply_message: Option(bool, name="reply_message", description="Weather the slash command should reply to your original message.", required=False, default=True)) -> None:
+    """ (MOD) Sends an embedded message containing all rules in it, or a specific rule. """
+
+    cog = client.get_cog('Show')
+    if rule_number:
+        await cog._rule(ctx, rule_number, reply_message)
+    else:
+        await cog._rules(ctx, reply_message)
+
+
+
+@client.user_command(name="Click", guild_ids=guild_ids)
+async def _click(ctx, user: discord.Member) -> None:
+    await ctx.respond(f"**{ctx.author.mention} clicked on {user.mention}!**")
+
+@client.user_command(name="Help", guild_ids=guild_ids)
+async def _help(ctx, user: discord.Member) -> None:
+    await ctx.respond(f"**{ctx.author.mention} needs your help, {user.mention}!**")
+
+@client.slash_command(name="info", guild_ids=guild_ids)
+@commands.cooldown(1, 5, commands.BucketType.user)
+async def _info_slash(ctx, 
+    member: Option(discord.Member, description="The member to show the info; [Default=Yours]", required=False)) -> None:
+    """ Shows the user's level and experience points. """
+
+    await ctx.defer()
+    await client.get_cog('SlothReputation')._info(ctx, member)
+
+@client.slash_command(name="profile", guild_ids=guild_ids)
+@commands.cooldown(1, 5, commands.BucketType.user)
+async def _profile_slash(ctx, member: Option(discord.Member, description="The member to show the info; [Default=Yours]", required=False)) -> None:
+    """ Shows the member's profile with their custom sloth. """
+
+    await ctx.defer()
+    await client.get_cog('SlothCurrency')._profile(ctx, member)
+
+
+@client.slash_command(name="youtube_together", guild_ids=guild_ids)
+@utils.is_allowed([booster_role_id, *useful_variables.patreon_roles.keys(), moderator_role_id, admin_role_id, teacher_role_id], throw_exc=True)
+async def youtube_together(ctx,
+    voice_channel: Option(discord.abc.GuildChannel, description="The voice channel in which to create the party.")
+) -> None:
+    """ Creates a YouTube Together session in a VC. """
+
+    member = ctx.author
+
+    if not isinstance(voice_channel, discord.VoiceChannel):
+        return await ctx.respond(f"**Please, select a `Voice Channel`, {member.mention}!**")
+
+    link: str = ''
+    try:
+        link = await voice_channel.create_activity_invite(event='youtube', max_age=600)
+    except Exception as e:
+        print("Invite creation error: ", e)
+        await ctx.respond(f"**For some reason I couldn't create it, {member.mention}!**")
+    current_time = await utils.get_time_now()
+
+    view = discord.ui.View()
+    view.add_item(discord.ui.Button(url=str(link), label="Start/Join the Party!", emoji="🔴"))
+    embed = discord.Embed(
+        title="__Youtube Together__",
+        color=discord.Color.red(),
+        timestamp=current_time,
+        url=link
+    )
+    embed.set_author(name=member, url=member.display_avatar, icon_url=member.display_avatar)
+    embed.set_footer(text=f"(Expires in 5 minutes)", icon_url=ctx.guild.icon.url)
+    await ctx.respond("\u200b", embed=embed, view=view)
+
+@client.slash_command(name="poll", guild_ids=guild_ids)
+@utils.is_allowed([moderator_role_id, admin_role_id], throw_exc=True)
+async def _poll(ctx, 
+    description: Option(str, description="The description of the poll."),
+    title: Option(str, description="The title of the poll.", required=False, default="Poll"), 
+    role: Option(discord.Role, description="The role to tag in the poll.", required=False)) -> None:
+    """ Makes a poll.
+    :param title: The title of the poll.
+    :param description: The description of the poll. """
+
+    await ctx.defer()
+
+    member = ctx.author
+    current_time = await utils.get_time_now()
+
+    embed = discord.Embed(
+        title=f"__{title}__",
+        description=description,
+        color=member.color,
+        timestamp=current_time
+    )
+
+    if role:
+        msg = await ctx.respond(content=role.mention, embed=embed)
+    else:
+        msg = await ctx.respond(embed=embed)
+    await msg.add_reaction('✅')
+    await msg.add_reaction('❌')
+
+
+@client.message_command(name="Translate", guild_ids=guild_ids)
+async def _tr_slash(ctx, message: discord.Message) -> None:
+    """ Translates a message into another language. """
+
+    await ctx.defer(ephemeral=True)
+    language: str = 'en'    
+    await client.get_cog('Tools')._tr_callback(ctx, language, message.content)
 
 # End of slash commands
-
-
-
-
-
-
-
 
 for filename in os.listdir('./cogs'):
     if filename.endswith('.py'):

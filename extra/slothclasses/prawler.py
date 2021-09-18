@@ -357,7 +357,7 @@ class Prawler(Player):
 		rob_doubled_embed.description = f"<@{attacker_id}> managed to double their stealing, and got more `{double_amount}łł` 🔪🍃"
 		rob_doubled_embed.color = discord.Color.green()
 
-		rob_doubled_embed.set_author(name=f"Rob stack {rob_stack} (50% chance)", icon_url=self.client.user.avatar.url)
+		rob_doubled_embed.set_author(name=f"Rob stack {rob_stack} (50% chance)", icon_url=self.client.user.display_avatar)
 		rob_doubled_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Prawler.png")
 		rob_doubled_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
 

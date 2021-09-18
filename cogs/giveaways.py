@@ -11,6 +11,7 @@ from extra.prompt.menu import Confirm
 from mysqldb import the_database
 
 server_id = int(os.getenv('SERVER_ID'))
+giveaway_manager_role_id: int = int(os.getenv('GIVEAWAY_MANAGER_ROLE_ID'))
 
 class Giveaways(commands.Cog):
     """ Category for commands related to giveaways. """
@@ -26,7 +27,10 @@ class Giveaways(commands.Cog):
         # Makes all registered giveaways consistent
         giveaways = await self.get_giveaways()
         for giveaway in giveaways:
-            self.client.add_view(view=GiveawayView(self.client), message_id=giveaway[0])
+            try:
+                self.client.add_view(view=GiveawayView(self.client), message_id=giveaway[0])
+            except:
+                pass
 
         self.check_due_giveaways.start()
         print('Giveaways cog is online!')
@@ -45,16 +49,18 @@ class Giveaways(commands.Cog):
                continue 
 
             # Gets the channel and message
-            channel = await self.client.fetch_channel(giveaway[1])
-            if not channel:
+            channel = message = None
+            try:
+                channel = await self.client.fetch_channel(giveaway[1])
+            except discord.NotFound:
                 await self.delete_giveaway(giveaway[0])
                 continue
-
-            message = await channel.fetch_message(giveaway[0])
-            if not message:
+            
+            try:
+                message = await channel.fetch_message(giveaway[0])
+            except discord.NotFound:
                 await self.delete_giveaway(giveaway[0])
                 continue
-
 
             entries = await self.get_giveaway_entries(giveaway[0])
 
@@ -77,7 +83,7 @@ class Giveaways(commands.Cog):
             await self.update_giveaway(giveaway[0])
 
     @commands.group(name="giveaway", aliases=['ga'])
-    @commands.has_permissions(administrator=True)
+    @utils.is_allowed([giveaway_manager_role_id])
     async def _giveaway(self, ctx) -> None:
         """ Giveaway manager command. """
 
@@ -119,13 +125,15 @@ class Giveaways(commands.Cog):
         
         PS: The total time summing up days, minutes and minutes MUST be greater than 0. """
 
+        await ctx.message.delete()
+
         member = ctx.author
         guild = ctx.guild
 
         giveaway_time = await self.get_giveaway_time(flags)
 
         if giveaway_time == 0:
-            return await ctx.send(f"**Please, inform the time, {member.mention}!**")
+            return await ctx.send(f"**Please, inform the time, {member.mention}!**", delete_after=3)
 
         current_ts = await utils.get_timestamp()
 
@@ -154,7 +162,7 @@ class Giveaways(commands.Cog):
 
         try:
             view = GiveawayView(self.client)
-            msg = await ctx.send(embed=embed, view=view)
+            msg = await ctx.send("\u200b", embed=embed, view=view)
             self.client.add_view(view=view, message_id=msg.id)
 
             await self.insert_giveaway(
@@ -163,7 +171,7 @@ class Giveaways(commands.Cog):
             )
         except Exception as e:
             print(e)
-            await ctx.send(f"**Something went wrong with it, {member.mention}!**")
+            await ctx.send(f"**Something went wrong with it, {member.mention}!**", delete_after=3)
 
     @_giveaway.command(aliases=['view', 'visualize', 'show', 'list'])
     async def see(self, ctx) -> None:
@@ -173,9 +181,9 @@ class Giveaways(commands.Cog):
 
         giveaways = await self.get_giveaways()
         if not giveaways:
-            return await ctx.send(f"**There are no active giveaways registered, {member.mention}!**")
+            return await ctx.send(f"**There are no active giveaways registered, {member.mention}!**", delete_after=3)
 
-        message_url = 'https://canary.discord.com/channels/{server_id}/{channel_id}/{message_id}'
+        message_url = 'https://discord.com/channels/{server_id}/{channel_id}/{message_id}'
 
         formatted_giveaways: List[str] = '\n'.join([
             f"[Msg]({message_url.format(server_id=server_id, channel_id=ga[1], message_id=ga[0])}) - **P:** `{ga[2]}` **W:** `{ga[3]}` | <t:{ga[4]}:R>"
@@ -189,7 +197,7 @@ class Giveaways(commands.Cog):
             timestamp=ctx.message.created_at
         )
 
-        embed.set_footer(text=f"Requested by: {member}", icon_url=member.avatar.url)
+        embed.set_footer(text=f"Requested by: {member}", icon_url=member.display_avatar)
 
         await ctx.send(embed=embed)
 
@@ -201,14 +209,14 @@ class Giveaways(commands.Cog):
         member = ctx.author
 
         if not message_id:
-            return await ctx.send(f"**Please, inform a message ID, {member.mention}!**")
+            return await ctx.send(f"**Please, inform a message ID, {member.mention}!**", delete_after=3)
 
         giveaway = await self.get_giveaway(message_id)
         if not giveaway:
-            return await ctx.send(f"**The specified giveaway doesn't exist, {member.mention}!**")
+            return await ctx.send(f"**The specified giveaway doesn't exist, {member.mention}!**", delete_after=3)
 
         if not giveaway[5]:
-            return await ctx.send(f"**This giveaway hasn't ended yet, you can't reroll it, {member.mention}!**")
+            return await ctx.send(f"**This giveaway hasn't ended yet, you can't reroll it, {member.mention}!**", delete_after=3)
 
         entries = await self.get_giveaway_entries(giveaway[0])
 
@@ -226,18 +234,81 @@ class Giveaways(commands.Cog):
 
         member = ctx.author
         if not message_id:
-            return await ctx.send(f"**Please, inform a message ID, {member.mention}!**")
+            return await ctx.send(f"**Please, inform a message ID, {member.mention}!**", delete_after=3)
 
         giveaway = await self.get_giveaway(message_id)
         if not giveaway:
-            return await ctx.send(f"**The specified giveaway message doesn't exist, {member.mention}!**")
+            return await ctx.send(f"**The specified giveaway message doesn't exist, {member.mention}!**", delete_after=3)
 
         confirm = await Confirm(f"**Are you sure you want to delete the giveaway with ID: `{giveaway[0]}`, {member.mention}?**").prompt(ctx)
         if not confirm:
-            return await ctx.send(f"**Not doing it, then, {member.mention}!**")
+            return await ctx.send(f"**Not doing it, then, {member.mention}!**", delete_after=3)
 
         await self.delete_giveaway(giveaway[0])
-        await ctx.send((f"**Successfully deleted the giveaway with ID: `{giveaway[0]}`, {member.mention}!**"))
+        await ctx.send(f"**Successfully deleted the giveaway with ID: `{giveaway[0]}`, {member.mention}!**", delete_after=3)
+        try:
+            channel = discord.utils.get(ctx.guild.text_channels, id=giveaway[1])
+            message = await channel.fetch_message(giveaway[0])
+            await message.delete()
+        except:
+            pass
+
+    @_giveaway.command(aliases=['finish', 'stop', 'terminate'])
+    async def end(self, ctx, message_id: int = None) -> None:
+        """ Force-ends an on-going giveaway.
+        :param message_id: The ID of the giveaway message. """
+
+        member = ctx.author
+        if not message_id:
+            return await ctx.send(f"**Please, inform a message ID, {member.mention}!**", delete_after=3)
+
+        giveaway = await self.get_giveaway(message_id)
+        if not giveaway:
+            return await ctx.send(f"**The specified giveaway message doesn't exist, {member.mention}!**", delete_after=3)
+
+        if giveaway[5]:
+            return await ctx.send(f"**This giveaway has been ended already, consider using rerolling or deleting it, {member.mention}!**", delete_after=3)
+
+        confirm = await Confirm(f"**Are you sure you want to end the giveaway with ID: `{giveaway[0]}`, {member.mention}?**").prompt(ctx)
+        if not confirm:
+            return await ctx.send(f"**Not doing it, then, {member.mention}!**", delete_after=3)
+
+         # Gets the channel and message
+        channel = message = None
+        try:
+            channel = await self.client.fetch_channel(giveaway[1])
+        except discord.errors.NotFound:
+            await self.delete_giveaway(giveaway[0])
+            return await ctx.send(f"**Channel of the given giveaway doesn't exist anymore, {member.mention}!**", delete_after=3)
+        
+        try:
+            message = await channel.fetch_message(giveaway[0])
+        except discord.errors.NotFound:
+            await self.delete_giveaway(giveaway[0])
+            return await ctx.send(f"**Message of the given giveaway doesn't exist anymore, {member.mention}!**", delete_after=3)
+
+        try:
+            entries = await self.get_giveaway_entries(giveaway[0])
+            winners = await self.get_winners(giveaway, entries)
+
+            # Edits the embed
+            embed = message.embeds[0]
+            embed.title += ' (Ended)'
+            embed.color = discord.Color.red()
+
+            view = discord.ui.View.from_message(message)
+
+            await utils.disable_buttons(view)
+            await message.edit(embed=embed, view=view)
+            # Sends last message
+            await message.reply(
+                f"**Giveaway is over, we had a total of `{len(entries)}` people participating, and the `{giveaway[3]}` winners are: {winners}!**"
+            )
+            # Notifies the giveaway's termination
+            await self.update_giveaway(giveaway[0])
+        except Exception as e:
+            print('Error at force-ending giveaway: ', e)
+            await ctx.send(f"**Something went wrong with it, please contact an admin, {member.mention}!**", delete_after=3)
 
 
     async def get_giveaway_time(self, flags: Dict[str, Union[int, str]]) -> int:
@@ -369,7 +440,7 @@ class Giveaways(commands.Cog):
         :param current_ts: The current timestamp to compare to registered giveaways' timestamps. """
 
         mycursor, _ = await the_database()
-        await mycursor.execute("SELECT * FROM Giveaways WHERE deadline_ts <= %s", (current_ts,))
+        await mycursor.execute("SELECT * FROM Giveaways WHERE deadline_ts <= %s AND notified = 0", (current_ts,))
         giveaways = await mycursor.fetchall()
         await mycursor.close()
         return giveaways

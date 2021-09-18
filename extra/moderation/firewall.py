@@ -4,7 +4,8 @@ from mysqldb import the_database
 
 
 class ModerationFirewallTable(commands.Cog):
-    
+    """ Category for the Firewall system and its commands and methods. """
+
     def __init__(self, client) -> None:
         self.client = client
 

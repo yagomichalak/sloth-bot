@@ -292,15 +292,13 @@ class Warrior(Player):
         view.add_item(WarriorUserItemSelect(target_items[:25]))
         await ctx.send(f"**{target.display_name}**'s items:", view=view)
         await view.wait()
-        item = getattr(view, 'selected_item')
-        if item is None:
+        if not hasattr(view, 'selected_item'):
             return await ctx.send(f"**Timeout, {attacker.mention}!**")
-        elif item is False:
-            return await ctx.send(f"**You canceled it, {attacker.mention}!**")
         
+        item = view.selected_item
         cost = int(item[6]/2)
         confirm_view = ConfirmButton(attacker, timeout=60)
-        await ctx.send(embed=discord.Embed(
+        await ctx.send("\u200b", embed=discord.Embed(
             title="__Confirm__",
             description=f"**Do you really wanna rip off {target.mention}'s `{item[4]}` item for the cost of `{cost}łł`, {attacker.mention}?**",
             color=discord.Color.green()), view=confirm_view

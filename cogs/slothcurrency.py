@@ -1,13 +1,14 @@
 import discord
-from discord import user
+from discord.app import Option, OptionChoice
 from discord.ext import commands, menus
+from discord.utils import escape_mentions
 from mysqldb import *
 from external_cons import the_drive
 from datetime import datetime
 import random
 from PIL import Image, ImageDraw, ImageFont
 import os
-# import requests
+
 import shutil
 import asyncio
 import aiohttp
@@ -16,7 +17,7 @@ import glob
 from itertools import cycle
 
 from extra.menu import InventoryLoop
-from typing import List, Dict, Tuple, Union, Any
+from typing import List, Dict, Tuple, Union
 
 from extra.useful_variables import level_badges, flag_badges
 from extra.gif_manager import GIF
@@ -30,6 +31,7 @@ int(os.getenv('PATREONS_CHANNEL_ID'))
 ]
 afk_channel_id = int(os.getenv('AFK_CHANNEL_ID'))
 booster_role_id = int(os.getenv('BOOSTER_ROLE_ID'))
+guild_ids = [int(os.getenv('SERVER_ID'))]
 
 
 class SlothCurrency(commands.Cog):
@@ -127,6 +129,8 @@ class SlothCurrency(commands.Cog):
         Equips an item.
         :param item_name: The item to equip.
         '''
+        item_name = escape_mentions(item_name)
+
         await ctx.message.delete()
         if not item_name:
             return await ctx.send("**Inform an item to equip!**", delete_after=3)
@@ -146,6 +150,8 @@ class SlothCurrency(commands.Cog):
         Unequips an item.
         :param item_name: The item to unequip
         '''
+        item_name = escape_mentions(item_name)
+
         await ctx.message.delete()
         if not item_name:
             return await ctx.send("**Inform an item to unequip!**", delete_after=3)
@@ -216,6 +222,8 @@ class SlothCurrency(commands.Cog):
         :param member: The member to give the item.
         :param item_name: The name of the item.
         '''
+        item_name = escape_mentions(item_name)
+
         if not member:
             return await ctx.send("**Inform a member!**", delete_after=3)
 
@@ -273,6 +281,8 @@ class SlothCurrency(commands.Cog):
         :param member: The member to remove the item.
         :param item_name: The name of the item.
         '''
+        item_name = escape_mentions(item_name)
+
         if not member:
             return await ctx.send("**Inform a member!**", delete_after=3)
 
@@ -429,9 +439,10 @@ class SlothCurrency(commands.Cog):
 
         return await ctx.send("**Table *UserCurrency* reseted!**", delete_after=3)
 
-    async def send_hacked_image(self, ctx: commands.Context, member: discord.Member) -> None:
+    async def send_hacked_image(self, answer: discord.PartialMessageable, author: discord.Member, member: discord.Member) -> None:
         """ Makes and sends a hacked image.
-        :param ctx: The context.
+        :param answer: The answerable object.
+        :param author: The author of the action.
         :param member: The member who was hacked. """
 
         SlothClass = self.client.get_cog('SlothClass')
@@ -450,15 +461,16 @@ class SlothCurrency(commands.Cog):
             background.save(file_path, 'png', quality=90)
         except Exception as e:
             print(e)
-            return await ctx.send(f"**{ctx.author.mention}, something went wrong with it!**")
+            return await answer(f"**{author.mention}, something went wrong with it!**")
         else:
-            await ctx.send(file=discord.File(file_path))
+            await answer(file=discord.File(file_path))
             # await asyncio.sleep(0.5)
             return os.remove(file_path)
 
-    async def send_frogged_image(self, ctx: commands.Context, member: discord.Member, knocked_out: bool = False) -> None:
+    async def send_frogged_image(self, answer: discord.PartialMessageable, author: discord.Member, member: discord.Member, knocked_out: bool = False) -> None:
         """ Makes and sends a frogged image.
-        :param ctx: The context.
+        :param answer: The answerable object.
+        :param author: The author of the action.
         :param member: The member who was frogged.
         :param knocked_out: Whether the user is knocked out"""
 
@@ -483,9 +495,9 @@ class SlothCurrency(commands.Cog):
             background.save(file_path, 'png', quality=90)
         except Exception as e:
             print(e)
-            return await ctx.send(f"**{ctx.author.mention}, something went wrong with it!**")
+            return await answer(f"**{author.mention}, something went wrong with it!**")
         else:
-            await ctx.send(file=discord.File(file_path))
+            await answer(file=discord.File(file_path))
             # await asyncio.sleep(0.5)
             return os.remove(file_path)
 
@@ -497,14 +509,39 @@ class SlothCurrency(commands.Cog):
         public_flag_names = list(map(lambda pf: pf.name, public_flags))
         return public_flag_names
 
-    @commands.command()
-    async def profile(self, ctx, member: discord.Member = None):
+    
+    # @commands.slash_command(name="profile", guild_ids=guild_ids)
+    # @commands.cooldown(1, 5, commands.BucketType.user)
+    # async def _profile_slash(self, ctx, member: Option(discord.Member, description="The member to show the info; [Default=Yours]", required=False)) -> None:
+    #     """ Shows the member's profile with their custom sloth. """
+
+    #     await ctx.defer()
+    #     await self._profile(ctx, member)
+
+    @commands.command(name="profile")
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def _profile_command(self, ctx, member: discord.Member = None):
         """ Shows the member's profile with their custom sloth.
         :param member: The member to see the profile. (Optional) """
 
-        if not member:
-            member = ctx.author
+        await self._profile(ctx, member)
 
+    async def _profile(self, ctx, member: discord.Member = None):
+        """ Shows the member's profile with their custom sloth.
+        :param member: The member to see the profile. (Optional) """
+
+        
+        answer = None
+        if isinstance(ctx, commands.Context):
+            answer = ctx.send
+        else:
+            answer = ctx.respond
+
+        author = ctx.author
+
+        if not member:
+            member = author
+            
         user_info = await self.get_user_currency(member.id)
         sloth_profile = await self.client.get_cog('SlothClass').get_sloth_profile(member.id)
 
@@ -512,33 +549,34 @@ class SlothCurrency(commands.Cog):
         view.add_item(discord.ui.Button(style=5, label="Create Account", emoji="🦥", url="https://thelanguagesloth.com/profile/update"))
 
         if not user_info or not sloth_profile:
-            if ctx.author.id == member.id:
-                return await ctx.send(
+            if author.id == member.id:
+                return await answer("\u200b", 
                     embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one, or in the button below!**"),
                     view=view)
             else:
-                return await ctx.send(f"**{member} doesn't have an account yet!**", delete_after=3)
+                return await answer(f"**{member} doesn't have an account yet!**", delete_after=3)
 
         if sloth_profile[1].lower() == 'default':
-            if ctx.author.id == member.id:
-                return await ctx.send(
+            if author.id == member.id:
+                return await answer("\u200b", 
                     embed=discord.Embed(description=f"**{member.mention}, you don't have a Sloth class yet. Click [here](https://thelanguagesloth.com/profile/slothclass) to choose one, or in the button below!**"),
                     view=view)
+                    
             else:
-                return await ctx.send(f"**{member} has a default Sloth class, I cannot show their profile!**")
-
+                return await answer(f"**{member} has a default Sloth class, I cannot show their profile!**")
+                
         SlothClass = self.client.get_cog('SlothClass')
         effects = await SlothClass.get_user_effects(member=member)
 
         # Checks whether user is frogged
         if 'frogged' in effects:
             ko = 'knocked_out' in effects
-            return await self.send_frogged_image(ctx, member, ko)
+            return await self.send_frogged_image(answer, member, ko)
 
         # Checks whether user is hacked
         if 'hacked' in effects:
-            await self.send_hacked_image(ctx, member)
-            if ctx.author.id != member.id:
+            await self.send_hacked_image(answer, author, member)
+            if author.id != member.id:
                 await SlothClass.check_virus(ctx=ctx, target=member)
             return
 
@@ -613,20 +651,17 @@ class SlothCurrency(commands.Cog):
             if all_effects:
                 try:
                     gif_file_path = await self.make_gif_image(member_id=member.id, file_path=file_path, all_effects=all_effects)
-                    # print('sending')
-                    await ctx.send(file=discord.File(gif_file_path))
-                    # print('sent')
+                    await answer(file=discord.File(gif_file_path))
+
                 except Exception as e:
                     print(e)
                     pass
                 finally:
-                    # pass
-                    # await asyncio.sleep(2)
                     os.remove(file_path)
                     os.remove(gif_file_path)
             else:
                 try:
-                    await ctx.send(file=discord.File(file_path))
+                    await answer(file=discord.File(file_path))
                 except:
                     pass
                 finally:
@@ -1037,7 +1072,7 @@ class SlothCurrency(commands.Cog):
             ctime, time_times = await self.convert_time(member_id, user_time)
 
         embed = discord.Embed(title="Exchange", colour=ctx.author.color, timestamp=ctx.message.created_at)
-        embed.set_author(name=ctx.author, url=ctx.author.avatar.url)
+        embed.set_author(name=ctx.author, url=ctx.author.display_avatar)
         if not cmsg == ctime == 0:
             if cmsg > 0:
                 embed.add_field(name="__**Messages:**__",
@@ -1134,7 +1169,7 @@ class SlothCurrency(commands.Cog):
         if not the_user:
             view = discord.ui.View()
             view.add_item(discord.ui.Button(style=5, label="Create Account", emoji="🦥", url="https://thelanguagesloth.com/profile/update"))
-            return await ctx.send(
+            return await ctx.send("\u200b", 
                 embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one, or in the button below!**"),
                 view=view)
         elif not target_user:
@@ -1174,8 +1209,8 @@ class SlothCurrency(commands.Cog):
             await ctx.send(f"You don't have {money}łł!")
 
     async def get_user_pfp(self, member, thumb_width: int = 59):
-        # im = Image.open(requests.get(member.avatar.url, stream=True).raw)
-        async with self.session.get(str(member.avatar.url)) as response:
+        # im = Image.open(requests.get(member.display_avatar, stream=True).raw)
+        async with self.session.get(str(member.display_avatar)) as response:
             image_bytes = await response.content.read()
             with BytesIO(image_bytes) as pfp:
                 image = Image.open(pfp)

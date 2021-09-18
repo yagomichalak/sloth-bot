@@ -102,14 +102,6 @@ class Show(commands.Cog):
         embed.set_footer(text=ctx.author.guild.name)
         await ctx.send(embed=embed)
 
-    #CNP messages for mod team
-    @commands.command()
-    @commands.has_any_role(*allowed_roles)
-    async def cnp(self, ctx, param):
-        """ (MOD) Sends certain CNP message. """
-
-
-        await ctx.message.delete()
     @commands.command()
     @commands.has_any_role(*allowed_roles)
     async def rules(self, ctx):

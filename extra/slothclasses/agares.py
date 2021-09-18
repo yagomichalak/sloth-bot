@@ -5,6 +5,7 @@ from .player import Player, Skill
 from extra.menu import ConfirmSkill
 from extra import utils
 from mysqldb import the_database
+from typing import Union, Any
 
 import os
 from datetime import datetime
@@ -25,10 +26,12 @@ class Agares(Player):
             int(os.getenv('EVENTS_CAT_ID')),
             int(os.getenv('DEBATE_CAT_ID')),
             int(os.getenv('CULTURE_CAT_ID')),
-            int(os.getenv('TEACHER_APPLICATION_CAT_ID'))
+            int(os.getenv('TEACHER_APPLICATION_CAT_ID')),
+            int(os.getenv('MODERATOR_APPLICATION_CAT_ID')),
+            int(os.getenv('EVENT_MANAGER_APPLICATION_CAT_ID'))
         ]
 
-    @commands.command(aliases=['ma'])
+    @commands.command(aliases=['mp'])
     @Player.skill_on_cooldown(seconds=28800)
     @Player.user_is_class('agares')
     @Player.skill_mark()
@@ -282,7 +285,7 @@ class Agares(Player):
 
             await ctx.send(embed=reflect_embed)
 
-    async def reflect_attack(self, ctx: commands.Context, attacker: discord.Member, target: discord.Member, skill_type: str) -> None:
+    async def reflect_attack(self, ctx: Union[commands.Context, Any], attacker: discord.Member, target: discord.Member, skill_type: str) -> None:
         """ Reflects the attacker's skill to themselves.
         :param ctx: The context of the command.
         :param attacker: The perpetrator of the skill.
@@ -290,6 +293,11 @@ class Agares(Player):
         :param skill_type: The skill type """
 
         current_ts = await utils.get_timestamp()
+        answer: discord.PartialMessageable = None
+        if isinstance(ctx, commands.Context):
+            answer = ctx.send
+        else:
+            answer = ctx.respond
 
         try:
             if skill_type not in ['munk', 'smash']:
@@ -299,14 +307,14 @@ class Agares(Player):
                 await attacker.edit(nick=f"{attacker.display_name} Munk")
         except Exception as e:
             print(e)
-            await ctx.send(f"**Something went wrong with this skill!**")
+            await answer(f"**Something went wrong with this skill!**")
 
         else:
             # Sends embedded message into the channel
             reflected_attack_embed = await self.get_reflected_attack_embed(
                 channel=ctx.channel, attacker_id=attacker.id, target_id=target.id, skill_type=skill_type)
 
-            await ctx.send(embed=reflected_attack_embed)
+            await answer(embed=reflected_attack_embed)
 
 
 

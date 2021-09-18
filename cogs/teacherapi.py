@@ -93,7 +93,7 @@ class TeacherAPI(commands.Cog):
         :param teacher: The teacher from whom to get the profile picture.
         :returns: The teacher's profile picture in a Pillow Image object.
         """
-        async with self.session.get(str(teacher.avatar.url)) as response:
+        async with self.session.get(str(teacher.display_avatar)) as response:
             image_bytes = await response.content.read()
             with BytesIO(image_bytes) as pfp:
                 image = Image.open(pfp)
@@ -348,7 +348,7 @@ class TeacherAPI(commands.Cog):
             )
         view = discord.ui.View()
         view.add_item(discord.ui.Button(style=5, label="Access Profile!", url=f"{self.website_link}/profile", emoji="🧑‍🏫"))
-        await ctx.send(embed=teacher_embed, view=view)
+        await ctx.send("\u200b", embed=teacher_embed, view=view)
 
     @commands.command(aliases=['dt'])
     @commands.has_any_role(*[owner_role_id, admin_role_id, lesson_manager_role_id])

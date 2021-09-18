@@ -47,32 +47,34 @@ I'm open to new ideas, in other words, if you want a custom command designed spe
 ]
 
 rules = {
-    "NSFW is forbidden": """This applies to, among others, pornographic, gore, violent, foul, offensive content/conversations. They will not be tolerated in either VCs or text channels.
-This rule also applies to profile pictures, usernames, and discord status.""",
+    "NSFW is forbidden": """This applies to, among others, pornographic, gore, violent, foul, offensive content/conversations. They will not be tolerated in either VCs, text channels and DMs.
+This rule also applies to user profiles (avatar, banner, status, about me etc).""",
 
-    "Be respectful": """Discrimination on the grounds of race, nationality, religion, gender, or sexual orientation is forbidden. 
+    "Be respectful": """Discrimination on the grounds of race, nationality, religion, gender, or sexual orientation is forbidden.
 Do not insult other users.
+Do not troll.
 Do not harass other users.
 Do not swear mindlessly.
 Do not make people feel uncomfortable, or otherwise bother them in any unwanted way.
-This rule applies to both activity on the server and dms. """,
+This rule applies to both activity on the server and dms.""",
 
-    "Avoid Controversy": """As the Language Sloth is an international server of educational nature, we have people from all over the world here. To avoid unnecessary conflicts, topics considered controversial are only allowed in the Debate Club. 
+    "Avoid Controversy": """As the Language Sloth is an international server of educational nature, we have people from all over the world here. To avoid unnecessary conflicts, topics considered controversial are only allowed in the Debate Club.
 This applies to, among others, politics, religion, self-harm, suicide, gender identity, sexual orientation.
-This rule also applies to profile pictures.""",
+This rule also applies to user profiles.""",
 
     "Advertising is forbidden": """Advertising Discord servers or self-promoting via text/voice channels or dms is not allowed. If you would like to get permission, get in touch with our Staff.""",
 
     "Do not dox": "Do not share other users' personal information without their consent.",
 
-    "Do not spam": """Do not flood or spam text channels.
+    "Do not spam": """o not flood or spam text channels.
 Do not spam react in messages.
 Do not ping staff members repeatedly without a reason.
-Do not mic spam/earrape in voice channels.""",
+Do not mic spam/earrape/use soundboards in voice channels.""",
 
     "Do not impersonate others": "Do not impersonate other users or Staff members.",
 
-    "Do not beg": """No asking to be granted roles/moderator roles. You may apply for these positions by clicking the `apply to moderate` button in <#729454413290143774> but repeatedly begging the staff may result in warnings or ban."""
+    "Do not beg": """Do not ask to be granted roles such as moderator, teacher or event manager. You may apply for those roles in <#729454413290143774> 
+Repeatedly begging the Staff for things may result in warnings or a ban."""
 
 }
 
@@ -108,7 +110,8 @@ different_class_roles = {
         "brazilian portuguese", "portuguese from brazil", 
         "portuguese", "angolan portuguese",
         "portuguese from angola", "portuguese from portugal", 
-        "portuguese portuguese", "português", "portugués"
+        "portuguese portuguese", "português", "portugués",
+        "portugais"
     ],
     "english": [
         "english", "inglés", "inglês", "anglais",
@@ -117,13 +120,14 @@ different_class_roles = {
     ],
     "german": [
         "almanca", "allemand", "aléman", "jerman", "deutsch", "آلمانی",
-        "ألماني", "德语"
+        "ألماني", "德语", 'niemiecki', 'немецкий'
     ],
     "french": [
         "fransızca","francés", "francês", "français"
     ],
     "spanish": [
-        "ispanyolca", "espagnol", "spanisch", "español", "hiszpański "
+        "ispanyolca", "espagnol", "spanisch", "español", "hiszpański",
+        "espanhol"
     ],
     "dutch": [
         "felemenkçe", "holländisch", "néerlandais"
@@ -132,7 +136,10 @@ different_class_roles = {
         "rusça" ,"russo" ,"russe" ,"russisch" 
     ],
     "mandarin": [
-        "mandarín", "粤语", "chinese", "cantonese"
+        "mandarín", "chinese"
+    ],
+    "cantonese": [
+        "粤语"
     ],
     "japanese": [
         "japonês", "japonais" ,"japanisch", "japonés", "日本語"

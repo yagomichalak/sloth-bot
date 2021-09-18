@@ -98,7 +98,7 @@ class InventoryLoop(menus.ListPageSource):
             color=self.target.color,
             timestamp=menu.ctx.message.created_at 
         )
-        embed.set_thumbnail(url=self.target.avatar.url)
+        embed.set_thumbnail(url=self.target.display_avatar)
 
         for i, v in enumerate(entries, start=offset):
             embed.add_field(name=f"{i+1}. {v[1]}", value=f"**State:** `{v[2]}`\n**Kind:** `{v[3]}`", inline=True)
@@ -124,7 +124,7 @@ class OpenShopLoop(menus.ListPageSource):
             color=menu.ctx.author.color,
             timestamp=menu.ctx.message.created_at
         )
-        embed.set_author(name=menu.ctx.author, icon_url=menu.ctx.author.avatar.url)
+        embed.set_author(name=menu.ctx.author, icon_url=menu.ctx.author.display_avatar)
 
         for i, v in enumerate(entries, start=offset):
             embed.add_field(name=f"{i+1}.", value=f"**Merchant:** <@{v[0]}>\n**Item:** `{v[1]}` {v[6] if v[6] else ''}\n**Item Price:** `{v[7]}`", inline=True)

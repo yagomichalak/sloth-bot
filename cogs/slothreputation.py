@@ -1,19 +1,21 @@
 import discord
+from discord.app import Option, OptionChoice
 from discord.ext import commands
 from mysqldb import *
 from datetime import datetime
 import os
-from typing import List
+from typing import List, Optional
 from extra.view import ExchangeActivityView
+from extra import utils
 from .slothclass import classes
+
+guild_ids = [int(os.getenv('SERVER_ID'))]
 
 commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
 
 
 class SlothReputation(commands.Cog):
-    '''
-    Reputation commands
-    '''
+    """ Reputation commands. """
 
     def __init__(self, client):
         self.client = client
@@ -71,16 +73,41 @@ class SlothReputation(commands.Cog):
         progress_bar = f"{xp}xp / {goal_xp}xp\n{':blue_square:' * boxes}{':white_large_square:' * (length_progress_bar - boxes)}"
         return progress_bar
 
-    @commands.command(aliases=['status', 'exchange', 'level', 'lvl', 'exp', 'xp', 'money', 'balance'])
+    
+    # @commands.slash_command(name="info", guild_ids=guild_ids)
+    # @commands.cooldown(1, 5, commands.BucketType.user)
+    # async def _info_slash(self, ctx, 
+    #     member: Option(discord.Member, description="The member to show the info; [Default=Yours]", required=False)) -> None:
+    #     """ Shows the user's level and experience points. """
+
+    #     await self._info(ctx, member)
+
+    @commands.command(name="info", aliases=['status', 'exchange', 'level', 'lvl', 'exp', 'xp', 'money', 'balance'])
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def info(self, ctx, member: discord.Member = None):
+    async def _info_command(self, ctx, member: Optional[discord.Member] = None) -> None:
+        """ Shows the user's level and experience points.
+        :param member: The member to show the info. [Optional][Default=You] """
+
+        await self._info(ctx, member)
+
+    async def _info(self, ctx, member: discord.Member = None) -> None:
         """ Shows the user's level and experience points. """
 
+
+        answer: discord.PartialMessageable = None
+        if isinstance(ctx, commands.Context):
+            answer = ctx.send
+        else:
+            answer = ctx.respond
+
+
         if not await self.check_table_exist():
-            return await ctx.send("**This command may be on maintenance!**")
+            return await answer("**This command may be on maintenance!**")
+
+        author = ctx.author
 
         if not member:
-            member = ctx.author
+            member = author
 
         view = discord.ui.View()
         view.add_item(discord.ui.Button(style=5, label="Create Account", emoji="🦥", url="https://thelanguagesloth.com/profile/update"))
@@ -88,23 +115,23 @@ class SlothReputation(commands.Cog):
         # Gets users ranking info, such as level and experience points
         user = await self.get_specific_user(member.id)
         if not user:
-            if ctx.author.id == member.id:
-                return await ctx.send(
+            if author.id == member.id:
+                return await answer("\u200b", 
                     embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one, or in the button below!**"),
                     view=view)
             else:
-                return await ctx.send(f"**{member} doesn't have an account yet!**")
+                return await answer(f"**{member} doesn't have an account yet!**")
 
         # Gets user's currency info, such as money balance, class participations, sloth class, etc.
         ucur = await self.get_user_currency(member.id)
         sloth_profile = await self.client.get_cog('SlothClass').get_sloth_profile(member.id)
         if not ucur or not sloth_profile:
-            if ctx.author.id == member.id:
-                return await ctx.send(
+            if author.id == member.id:
+                return await answer("\u200b", 
                     embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one, or in the button below!**"),
                     view=view)
             else:
-                return await ctx.send(f"**{member} doesn't have an account yet!**")
+                return await answer(f"**{member} doesn't have an account yet!**")
 
         SlothCurrency = self.client.get_cog('SlothCurrency')
 
@@ -112,8 +139,8 @@ class SlothReputation(commands.Cog):
         effects = await SlothClass.get_user_effects(member=member)
 
         if 'hacked' in effects:
-            await SlothCurrency.send_hacked_image(ctx, member)
-            if ctx.author.id != member.id:
+            await SlothCurrency.send_hacked_image(answer, author, member)
+            if author.id != member.id:
                  await SlothClass.check_virus(ctx=ctx, target=member)
             return
 
@@ -123,14 +150,14 @@ class SlothReputation(commands.Cog):
 
         # Gets user Server Activity info, such as messages sent and time in voice channels
         user_info = await SlothCurrency.get_user_activity_info(member.id)
-        if not user_info and member.id == ctx.author.id:
-            return await ctx.send(f"**For some reason you are not in the system, {ctx.author.mention}! Try again**")
+        if not user_info and member.id == author.id:
+            return await answer(f"**For some reason you are not in the system, {author.mention}! Try again**")
 
-        elif not user_info and not member.id == ctx.author.id:
-            return await ctx.send("**Member not found in the system!**")
+        elif not user_info and not member.id == author.id:
+            return await answer("**Member not found in the system!**")
     
-
-        embed = discord.Embed(title="__All Information__", colour=member.color, timestamp=ctx.message.created_at)
+        current_time = await utils.get_time_now()
+        embed = discord.Embed(title="__All Information__", colour=member.color, timestamp=current_time)
         xp = user[0][1]
         goal_xp = ((user[0][2]+1)**5)
         lvl = user[0][2]
@@ -184,18 +211,22 @@ class SlothReputation(commands.Cog):
                 if sloth_profile else '0 rings.', 
                 inline=False)
 
-        embed.set_thumbnail(url=member.avatar.url)
-        embed.set_author(name=member, icon_url=member.avatar.url, url=member.avatar.url)
+        embed.set_thumbnail(url=member.display_avatar)
+        embed.set_author(name=member, icon_url=member.display_avatar, url=member.display_avatar)
+
+        user: discord.User = await self.client.fetch_user(member.id)
+        if banner := user.banner:
+            embed.set_image(url=banner.url)
         embed.set_footer(text=ctx.guild, icon_url=ctx.guild.icon.url)
 
-        if ctx.author.id != member.id:
-            return await ctx.send(embed=embed)
+        if author.id != member.id:
+            return await answer(embed=embed)
         else:
             view = ExchangeActivityView(self.client, user_info[0])
             if 'sabotaged' in effects:
                 view.children[0].disabled = True
 
-            await ctx.send(embed=embed, view=view)
+            return await answer("\u200b", embed=embed, view=view)
 
     @commands.command(aliases=['leaderboard', 'lb', 'scoreboard'])
     async def score(self, ctx):
@@ -215,7 +246,7 @@ class SlothReputation(commands.Cog):
         position = [[i+1, u[4]] for i, u in enumerate(all_users) if u[0] == ctx.author.id]
         position = [it for subpos in position for it in subpos] if position else ['??', 0]
 
-        leaderboard.set_footer(text=f"Your score: {position[1]} | #{position[0]}", icon_url=ctx.author.avatar.url)
+        leaderboard.set_footer(text=f"Your score: {position[1]} | #{position[0]}", icon_url=ctx.author.display_avatar)
         leaderboard.set_thumbnail(url=ctx.guild.icon.url)
 
         # Embeds each one of the top ten users.
@@ -242,7 +273,7 @@ class SlothReputation(commands.Cog):
         position = [[i+1, u[1]] for i, u in enumerate(all_users) if u[0] == ctx.author.id]
         position = [it for subpos in position for it in subpos] if position else ['??', 0]
 
-        leaderboard.set_footer(text=f"Your XP: {position[1]} | #{position[0]}", icon_url=ctx.author.avatar.url)
+        leaderboard.set_footer(text=f"Your XP: {position[1]} | #{position[0]}", icon_url=ctx.author.display_avatar)
         leaderboard.set_thumbnail(url=ctx.guild.icon.url)
 
         # Embeds each one of the top ten users.
@@ -266,7 +297,7 @@ class SlothReputation(commands.Cog):
         position = [[i+1, u[1]] for i, u in enumerate(all_users) if u[0] == ctx.author.id]
         position = [it for subpos in position for it in subpos] if position else ['??', 0]
 
-        leaderboard.set_footer(text=f"Your leaves: {position[1]} 🍃| #{position[0]}", icon_url=ctx.author.avatar.url)
+        leaderboard.set_footer(text=f"Your leaves: {position[1]} 🍃| #{position[0]}", icon_url=ctx.author.display_avatar)
         leaderboard.set_thumbnail(url=ctx.guild.icon.url)
 
         # Embeds each one of the top ten users.
@@ -303,7 +334,7 @@ class SlothReputation(commands.Cog):
 
                 view = discord.ui.View()
                 view.add_item(discord.ui.Button(style=5, label="Create Account", emoji="🦥", url="https://thelanguagesloth.com/profile/update"))
-                return await ctx.send(
+                return await ctx.send("\u200b", 
                     embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one, or in the button below!**"),
                     view=view)
             else:

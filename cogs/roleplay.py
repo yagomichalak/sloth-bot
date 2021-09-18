@@ -1,11 +1,12 @@
 import discord
 from discord.ext import commands
+from cogs.slothcurrency import SlothCurrency
 from extra.slothclasses.player import Player
 from extra.slothclasses.view import (
     HugView, BootView, KissView, SlapView, 
     HoneymoonView, PunchView, GiveView, TickleView,
      YeetView, BegView, PatView, WhisperView,
-     HandshakeView, PeekView, DriveOverView
+     HandshakeView, PeekView, DriveOverView, HighFiveView
 )
 from extra import utils
 from extra.prompt.menu import ConfirmButton
@@ -15,10 +16,30 @@ class RolePlay(commands.Cog):
 
     def __init__(self, client) -> None:
         self.client  = client
+    
+    def send_if_money(required_money: int = 5) -> bool:
+
+        async def real_check(ctx) -> bool:
+
+            author = ctx.author
+            currency = await SlothCurrency.get_user_currency(Player, author.id)
+            if not currency:
+                await ctx.send(f"**You don't have a Sloth Account, {author.mention}!**")
+                return False
+
+            if currency[0][1] < required_money:
+                await ctx.send(f"**You don't have 5łł to use this command, {author.mention}!**")
+                return False
+            
+            return True
+        
+        return commands.check(real_check)
+            
 
 
     @commands.command()
     @commands.cooldown(1, 120, commands.BucketType.user)
+    @send_if_money()
     async def hug(self, ctx, *, member: discord.Member = None) -> None:
         """ Hugs someone.
         :param member: The member to hug.
@@ -41,12 +62,18 @@ class RolePlay(commands.Cog):
             color=author.color,
             timestamp=ctx.message.created_at
         )
-        embed.set_footer(text=f"Requested by {author}", icon_url=author.avatar.url)
+        embed.set_author(name="This costs 5łł")
+        embed.set_footer(text=f"Requested by {author}", icon_url=author.display_avatar)
         view = HugView(member=author, target=member, timeout=60)
-        await ctx.send(embed=embed, view=view)
+
+        await ctx.send("\u200b", embed=embed, view=view)
+        await view.wait()
+        if view.used:
+            await self.client.get_cog('SlothCurrency').update_user_money(author.id, -5)
 
     @commands.command()
     @commands.cooldown(1, 120, commands.BucketType.user)
+    @send_if_money()
     async def boot(self, ctx, *, member: discord.Member = None) -> None:
         """ Boots/kicks someone.
         :param member: The member to kick.
@@ -71,12 +98,17 @@ class RolePlay(commands.Cog):
             color=author.color,
             timestamp=ctx.message.created_at
         )
-        embed.set_footer(text=f"Requested by {author}", icon_url=author.avatar.url)
+        embed.set_author(name="This costs 5łł")
+        embed.set_footer(text=f"Requested by {author}", icon_url=author.display_avatar)
         view = BootView(member=author, target=member, timeout=60)
-        await ctx.send(embed=embed, view=view)
+        await ctx.send("\u200b", embed=embed, view=view)
+        await view.wait()
+        if view.used:
+            await self.client.get_cog('SlothCurrency').update_user_money(author.id, -5)
     
     @commands.command()
     @commands.cooldown(1, 120, commands.BucketType.user)
+    @send_if_money()
     async def kiss(self, ctx, *, member: discord.Member = None) -> None:
         """ Kisses someone.
         :param member: The member to kiss.
@@ -99,12 +131,17 @@ class RolePlay(commands.Cog):
             color=author.color,
             timestamp=ctx.message.created_at
         )
-        embed.set_footer(text=f"Requested by {author}", icon_url=author.avatar.url)
+        embed.set_author(name="This costs 5łł")
+        embed.set_footer(text=f"Requested by {author}", icon_url=author.display_avatar)
         view = KissView(self.client, member=author, target=member, timeout=60)
-        await ctx.send(embed=embed, view=view)
+        await ctx.send("\u200b", embed=embed, view=view)
+        await view.wait()
+        if view.used:
+            await self.client.get_cog('SlothCurrency').update_user_money(author.id, -5)
 
     @commands.command()
     @commands.cooldown(1, 120, commands.BucketType.user)
+    @send_if_money()
     async def slap(self, ctx, *, member: discord.Member = None) -> None:
         """ Slaps someone.
         :param member: The member to slap.
@@ -127,9 +164,13 @@ class RolePlay(commands.Cog):
             color=author.color,
             timestamp=ctx.message.created_at
         )
-        embed.set_footer(text=f"Requested by {author}", icon_url=author.avatar.url)
+        embed.set_author(name="This costs 5łł")
+        embed.set_footer(text=f"Requested by {author}", icon_url=author.display_avatar)
         view = SlapView(self.client, member=author, target=member, timeout=60)
-        await ctx.send(embed=embed, view=view)
+        await ctx.send("\u200b", embed=embed, view=view)
+        await view.wait()
+        if view.used:
+            await self.client.get_cog('SlothCurrency').update_user_money(author.id, -5)
 
     @commands.command()
     @commands.cooldown(1, 300, commands.BucketType.user)
@@ -166,8 +207,8 @@ class RolePlay(commands.Cog):
         )
         embed.set_thumbnail(url='https://i.pinimg.com/originals/87/35/53/873553eeb255e47b1b4b440e4302e17f.gif')
 
-        embed.set_author(name=partner, icon_url=partner.avatar.url, url=partner.avatar.url)
-        embed.set_footer(text=f"Requested by {member}", icon_url=member.avatar.url)
+        embed.set_author(name=partner, icon_url=partner.display_avatar, url=partner.display_avatar)
+        embed.set_footer(text=f"Requested by {member}", icon_url=member.display_avatar)
 
         # Honeymoon setup view
         view = HoneymoonView(member=member, target=member, timeout=300)
@@ -192,7 +233,7 @@ class RolePlay(commands.Cog):
             timestamp=ctx.message.created_at
         )
         confirmation_view = ConfirmButton(member, 60)
-        msg = await ctx.send(embed=confirm_embed, view=confirmation_view)
+        msg = await ctx.send("\u200b", embed=confirm_embed, view=confirmation_view)
         await confirmation_view.wait()
 
         if confirmation_view.value is None:
@@ -266,6 +307,7 @@ class RolePlay(commands.Cog):
 
     @commands.command(aliases=['fist'])
     @commands.cooldown(1, 120, commands.BucketType.user)
+    @send_if_money()
     async def punch(self, ctx, *, member: discord.Member = None) -> None:
         """ Punches someone.
         :param member: The person to punch.
@@ -288,12 +330,17 @@ class RolePlay(commands.Cog):
             color=author.color,
             timestamp=ctx.message.created_at
         )
-        embed.set_footer(text=f"Requested by {author}", icon_url=author.avatar.url)
+        embed.set_author(name="This costs 5łł")
+        embed.set_footer(text=f"Requested by {author}", icon_url=author.display_avatar)
         view = PunchView(member=author, target=member, timeout=60)
-        await ctx.send(embed=embed, view=view)
+        await ctx.send("\u200b", embed=embed, view=view)
+        await view.wait()
+        if view.used:
+            await self.client.get_cog('SlothCurrency').update_user_money(author.id, -5)
 
     @commands.command()
     @commands.cooldown(1, 120, commands.BucketType.user)
+    @send_if_money()
     async def give(self, ctx, *, member: discord.Member = None) -> None:
         """ Gives someone something.
         :param member: The member to give something to.
@@ -316,12 +363,17 @@ class RolePlay(commands.Cog):
             color=author.color,
             timestamp=ctx.message.created_at
         )
-        embed.set_footer(text=f"Requested by {author}", icon_url=author.avatar.url)
+        embed.set_author(name="This costs 5łł")
+        embed.set_footer(text=f"Requested by {author}", icon_url=author.display_avatar)
         view = GiveView(member=author, target=member, timeout=60)
-        await ctx.send(embed=embed, view=view)
+        await ctx.send("\u200b", embed=embed, view=view)
+        await view.wait()
+        if view.used:
+            await self.client.get_cog('SlothCurrency').update_user_money(author.id, -5)
 
     @commands.command(aliases=['tickling'])
     @commands.cooldown(1, 120, commands.BucketType.user)
+    @send_if_money()
     async def tickle(self, ctx, *, member: discord.Member = None) -> None:
         """ Tickles someone.
         :param member: The member to tickle.
@@ -345,12 +397,17 @@ class RolePlay(commands.Cog):
             color=author.color,
             timestamp=ctx.message.created_at
         )
-        embed.set_footer(text=f"Requested by {author}", icon_url=author.avatar.url)
+        embed.set_author(name="This costs 5łł")
+        embed.set_footer(text=f"Requested by {author}", icon_url=author.display_avatar)
         view = TickleView(member=author, target=member, timeout=60)
-        await ctx.send(embed=embed, view=view)
+        await ctx.send("\u200b", embed=embed, view=view)
+        await view.wait()
+        if view.used:
+            await self.client.get_cog('SlothCurrency').update_user_money(author.id, -5)
 
     @commands.command(aliases=['throw', 'toss'])
     @commands.cooldown(1, 120, commands.BucketType.user)
+    @send_if_money()
     async def yeet(self, ctx, *, member: discord.Member = None) -> None:
         """ Yeets something at someone.
         :param member: The member to yeet or to yeet something at.
@@ -374,12 +431,17 @@ class RolePlay(commands.Cog):
             color=author.color,
             timestamp=ctx.message.created_at
         )
-        embed.set_footer(text=f"Requested by {author}", icon_url=author.avatar.url)
+        embed.set_author(name="This costs 5łł")
+        embed.set_footer(text=f"Requested by {author}", icon_url=author.display_avatar)
         view = YeetView(member=author, target=member, timeout=60)
-        await ctx.send(embed=embed, view=view)
+        await ctx.send("\u200b", embed=embed, view=view)
+        await view.wait()
+        if view.used:
+            await self.client.get_cog('SlothCurrency').update_user_money(author.id, -5)
 
     @commands.command()
     @commands.cooldown(1, 120, commands.BucketType.user)
+    @send_if_money()
     async def pat(self, ctx, *, member: discord.Member = None) -> None:
         """ Pats someone.
         :param member: The member to pat.
@@ -402,12 +464,17 @@ class RolePlay(commands.Cog):
             color=author.color,
             timestamp=ctx.message.created_at
         )
-        embed.set_footer(text=f"Requested by {author}", icon_url=author.avatar.url)
+        embed.set_author(name="This costs 5łł")
+        embed.set_footer(text=f"Requested by {author}", icon_url=author.display_avatar)
         view = PatView(member=author, target=member, timeout=60)
-        await ctx.send(embed=embed, view=view)
+        await ctx.send("\u200b", embed=embed, view=view)
+        await view.wait()
+        if view.used:
+            await self.client.get_cog('SlothCurrency').update_user_money(author.id, -5)
 
     @commands.command(aliases=['imbegging', 'imbeggin', 'beggin'])
     @commands.cooldown(1, 120, commands.BucketType.user)
+    @send_if_money()
     async def beg(self, ctx, *, member: discord.Member = None) -> None:
         """ Begs someone.
         :param member: The person to beg.
@@ -431,12 +498,17 @@ class RolePlay(commands.Cog):
             color=author.color,
             timestamp=ctx.message.created_at
         )
-        embed.set_footer(text=f"Requested by {author}", icon_url=author.avatar.url)
+        embed.set_author(name="This costs 5łł")
+        embed.set_footer(text=f"Requested by {author}", icon_url=author.display_avatar)
         view = BegView(member=author, target=member, timeout=60)
-        await ctx.send(embed=embed, view=view)
+        await ctx.send("\u200b", embed=embed, view=view)
+        await view.wait()
+        if view.used:
+            await self.client.get_cog('SlothCurrency').update_user_money(author.id, -5)
 
     @commands.command()
     @commands.cooldown(1, 120, commands.BucketType.user)
+    @send_if_money()
     async def whisper(self, ctx, member: discord.Member = None, *, text: str = None) -> None:
         """ Whispers to someone.
         :param member: The member to whisper to.
@@ -466,15 +538,20 @@ class RolePlay(commands.Cog):
             color=author.color,
             timestamp=ctx.message.created_at
         )
-        embed.set_footer(text=f"Requested by {author}", icon_url=author.avatar.url)
+        embed.set_author(name="This costs 5łł")
+        embed.set_footer(text=f"Requested by {author}", icon_url=author.display_avatar)
         view = WhisperView(member=author, target=member, text=text, timeout=60)
-        await ctx.send(embed=embed, view=view)
+        await ctx.send("\u200b", embed=embed, view=view)
+        await view.wait()
+        if view.used:
+            await self.client.get_cog('SlothCurrency').update_user_money(author.id, -5)
 
     @commands.command()
     @commands.cooldown(1, 120, commands.BucketType.user)
+    @send_if_money()
     async def handshake(self, ctx, *, member: discord.Member = None) -> None:
         """ Handshakes someone.
-        :param member: The member to whisper to.
+        :param member: The member to handshake.
         
         * Cooldown: 2 minutes """
 
@@ -495,16 +572,20 @@ class RolePlay(commands.Cog):
             color=author.color,
             timestamp=ctx.message.created_at
         )
-        embed.set_footer(text=f"Requested by {author}", icon_url=author.avatar.url)
+        embed.set_author(name="This costs 5łł")
+        embed.set_footer(text=f"Requested by {author}", icon_url=author.display_avatar)
         view = HandshakeView(member=author, target=member, timeout=60)
-        await ctx.send(embed=embed, view=view)
+        await ctx.send("\u200b", embed=embed, view=view)
+        await view.wait()
+        if view.used:
+            await self.client.get_cog('SlothCurrency').update_user_money(author.id, -5)
 
-    @commands.command()
+    @commands.command(aliases=['hi5', 'h5', 'high_five', 'highestfive', 'highest_five', 'hf'])
     @commands.cooldown(1, 120, commands.BucketType.user)
-    @Player.not_ready()
+    @send_if_money()
     async def highfive(self, ctx, *, member: discord.Member = None) -> None:
-        """ Handshakes someone.
-        :param member: The member to whisper to.
+        """ High fives someone.
+        :param member: The member to highfive.
         
         * Cooldown: 2 minutes """
 
@@ -517,20 +598,25 @@ class RolePlay(commands.Cog):
             
         if author.id == member.id:
             self.client.get_command(ctx.command.name).reset_cooldown(ctx)
-            return await ctx.send(f"**You can't handshake yourself, {author.mention}!**")
+            return await ctx.send(f"**You can't high five yourself, {author.mention}!**")
 
         embed = discord.Embed(
-            title="__Handshake Prompt__",
-            description=f"Are you sure you wanna handshake {member.mention}, {author.mention}?",
+            title="__Highfive Prompt__",
+            description=f"Are you sure you wanna high five {member.mention}, {author.mention}?",
             color=author.color,
             timestamp=ctx.message.created_at
         )
-        embed.set_footer(text=f"Requested by {author}", icon_url=author.avatar.url)
-        view = HandshakeView(member=author, target=member, timeout=60)
-        await ctx.send(embed=embed, view=view)
+        embed.set_author(name="This costs 5łł")
+        embed.set_footer(text=f"Requested by {author}", icon_url=author.display_avatar)
+        view = HighFiveView(member=author, target=member, timeout=60)
+        await ctx.send("\u200b", embed=embed, view=view)
+        await view.wait()
+        if view.used:
+            await self.client.get_cog('SlothCurrency').update_user_money(author.id, -5)
 
     @commands.command()
     @commands.cooldown(1, 120, commands.BucketType.user)
+    @send_if_money()
     async def peek(self, ctx, *, member: discord.Member = None) -> None:
         """ Peeks at someone.
         :param member: The member to peek at.
@@ -553,12 +639,17 @@ class RolePlay(commands.Cog):
             color=author.color,
             timestamp=ctx.message.created_at
         )
-        embed.set_footer(text=f"Requested by {author}", icon_url=author.avatar.url)
+        embed.set_author(name="This costs 5łł")
+        embed.set_footer(text=f"Requested by {author}", icon_url=author.display_avatar)
         view = PeekView(member=author, target=member, timeout=60)
-        await ctx.send(embed=embed, view=view)
+        await ctx.send("\u200b", embed=embed, view=view)
+        await view.wait()
+        if view.used:
+            await self.client.get_cog('SlothCurrency').update_user_money(author.id, -5)
 
     @commands.command(aliases=['driveover', 'run_over', 'runover'])
     @commands.cooldown(1, 120, commands.BucketType.user)
+    @send_if_money()
     async def drive_over(self, ctx, *, member: discord.Member = None) -> None:
         """ Drivers over someone.
         :param member: The member to drive over.
@@ -582,10 +673,13 @@ class RolePlay(commands.Cog):
             color=author.color,
             timestamp=ctx.message.created_at
         )
-        embed.set_footer(text=f"Requested by {author}", icon_url=author.avatar.url)
+        embed.set_author(name="This costs 5łł")
+        embed.set_footer(text=f"Requested by {author}", icon_url=author.display_avatar)
         view = DriveOverView(member=author, target=member, timeout=60)
-        await ctx.send(embed=embed, view=view)
-
+        await ctx.send("\u200b", embed=embed, view=view)
+        await view.wait()
+        if view.used:
+            await self.client.get_cog('SlothCurrency').update_user_money(author.id, -5)
 
 def setup(client):
     client.add_cog(RolePlay(client))

@@ -90,7 +90,7 @@ class RoleSelection(RoleSelectionDatabaseCommands):
 
 			confirm_view = ConfirmButton(member)
 			embed = discord.Embed(description=f"**Wanna add more buttons into your menu, {member.mention}?**", color=member.color)
-			confirm_msg = await ctx.channel.send(embed=embed, view=confirm_view)
+			confirm_msg = await ctx.channel.send("\u200b", embed=embed, view=confirm_view)
 			
 			
 			await confirm_view.wait()
@@ -136,11 +136,11 @@ class RoleSelection(RoleSelectionDatabaseCommands):
 		)
 
 		embed.set_author(name=guild.name, url=guild.icon.url, icon_url=guild.icon.url)
-		embed.set_footer(text=f"Being edited by {member}", icon_url=member.avatar.url)
+		embed.set_footer(text=f"Being edited by {member}", icon_url=member.display_avatar)
 
 		view = ManageRoleSelectionMenu(self.client, message)
 
-		msg = await ctx.send(embed=embed, view=view)
+		msg = await ctx.send("\u200b", embed=embed, view=view)
 		try:
 			await view.wait()
 			await msg.delete()
@@ -173,7 +173,7 @@ class RoleSelection(RoleSelectionDatabaseCommands):
 			timestamp=ctx.message.created_at
 		)
 		embed.set_author(name=guild.name, icon_url=guild.icon.url, url=guild.icon.url)
-		embed.set_footer(text=f"Requested by {member}", icon_url=member.avatar.url)
+		embed.set_footer(text=f"Requested by {member}", icon_url=member.display_avatar)
 
 		await ctx.send(embed=embed)
 

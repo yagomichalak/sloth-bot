@@ -1,20 +1,20 @@
 import discord
-from discord import user
-from discord.abc import _Overwrites
+from discord import utils
 from discord.ext import commands, menus
 from mysqldb import *
 from datetime import datetime
 import asyncio
-from typing import Dict, List, Union, Any
-import time
+from typing import Dict, List, Union
 import os
 from extra.useful_variables import different_class_roles
-from extra.menu import ConfirmSkill, prompt_message_guild, prompt_number, SwitchSavedClasses, SwitchSavedClassesButtons
+from extra.menu import ConfirmSkill, prompt_message_guild, SwitchSavedClasses, SwitchSavedClassesButtons
+from extra import utils
 
 # IDs from .env
 create_room_vc_id = int(os.getenv('CREATE_SMART_CLASSROOM_VC_ID'))
 create_room_txt_id = int(os.getenv('CREATE_CLASSROOM_CHANNEL_ID'))
 create_room_cat_id = int(os.getenv('CREATE_ROOM_CAT_ID'))
+create_private_room_vc_id: int = int(os.getenv('CREATE_PRIVATE_ROOM_VC_ID'))
 
 mod_role_id = int(os.getenv('MOD_ROLE_ID'))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID'))
@@ -129,8 +129,77 @@ class TeacherFeedback(commands.Cog):
             if await self.db.get_student_by_vc_id(member.id, the_class[2]):
                 await self.db.update_student_messages(member.id, the_class[2])
 
-    @commands.Cog.listener()
-    async def on_voice_state_update(self, member, before, after):
+
+    @commands.Cog.listener(name="on_voice_state_update")
+    async def on_voice_state_update_private(self, member, before, after) -> None:
+        """ For teachers to create private classes. """
+
+        cog = self.client.get_cog('CreateSmartRoom')
+
+        # # Checks if the user is leaving the vc and whether there still are people in there
+        guild = member.guild
+
+        # Checks whether user is leaving their private class
+        if before.channel:
+            if not before.channel.category: return
+
+            if before.channel.category.id == create_room_cat_id:
+                user_voice_channel = before.channel
+                len_users = len(user_voice_channel.members)
+                if len_users == 0 and user_voice_channel.id not in [create_room_vc_id, create_private_room_vc_id]:
+
+                    private_rooms = await cog.get_premium_vc(before.channel.id)
+                    if private_rooms:
+                    
+                        private_vc = discord.utils.get(guild.voice_channels, id=private_rooms[0][1]) # Vc channel
+                        private_txt = discord.utils.get(guild.text_channels, id=private_rooms[0][2]) # Txt channel
+
+                        try:
+                            await user_voice_channel.delete()
+                            await private_txt.delete()
+                        except:
+                            pass
+                        finally:
+                            await cog.delete_premium_vc(member.id, user_voice_channel.id)
+
+
+        if not after.channel:
+            return
+
+        # Checks if the user is joining the create a room VC
+        if after.channel.id == create_private_room_vc_id:
+
+            # Creates base overwrites for rooms (Txt and Vc)
+            overwrites: Dict[
+                Union[discord.Member, discord.Role],
+                discord.PermissionOverwrite
+            ] = {
+                guild.default_role: discord.PermissionOverwrite(
+				    read_messages=False, send_messages=False, connect=False, speak=False, view_channel=False),
+                member: discord.PermissionOverwrite(
+                    manage_permissions=True, read_messages=True, send_messages=True, view_channel=True, manage_channels=True,
+                    connect=True, speak=True)
+            }
+
+            class_category = discord.utils.get(guild.categories, id=create_room_cat_id)
+
+            # Creates Voice Channel
+            private_vc: discord.VoiceChannel = await class_category.create_voice_channel(
+                name=f"{member.display_name}'s Private Room", user_limit=2, overwrites=overwrites
+            )
+            # Creates Text Channel
+            private_txt: discord.TextChannel = await class_category.create_text_channel(
+                name=f"{member.display_name}'s Private Room", overwrites=overwrites
+            )
+
+            await cog.insert_premium_vc(member.id, private_vc.id, private_txt.id)
+            try:
+                await member.move_to(private_vc)
+            finally:
+                await private_txt.send(f"**Welcome to your private room, {member.mention} ({private_vc.mention})!**")
+
+    @commands.Cog.listener(name="on_voice_state_update")
+    async def on_voice_state_update_public(self, member, before, after) -> None:
         """ For when teachers are creating language class channels
         or for when students are joining the classes. """
 
@@ -291,7 +360,7 @@ class TeacherFeedback(commands.Cog):
                         inline=True)
         embed.add_field(name=f"__**Taught in:**__", value=saved_class[4].title(),
                         inline=True)
-        embed.set_thumbnail(url=member.avatar.url)
+        embed.set_thumbnail(url=member.display_avatar)
         embed.set_author(name=member)
         embed.set_footer(text=member.guild.name, icon_url=member.guild.icon.url)
         return embed
@@ -352,8 +421,6 @@ class TeacherFeedback(commands.Cog):
         :param class_vc: The class to leave. """
 
         current_ts = await TeacherFeedback.get_timestamp()
-
-        teacher_role = discord.utils.get(member.guild.roles, id=teacher_role_id)
 
         # Checks whether member is teacher and has an existing class
         if teacher_class := await self.db.get_active_teacher_class_by_teacher_and_vc_id(member.id, class_vc.id):
@@ -424,9 +491,9 @@ class TeacherFeedback(commands.Cog):
         class_embed.add_field(name=f"__**Joined:**__", value=f"{teacher_class[7]} members.", inline=False)
         class_embed.add_field(name=f"__**Type of class:**__", value=f"{teacher_class[4].title()}.", inline=False)
 
-        class_embed.set_thumbnail(url=member.avatar.url)
-        class_embed.set_author(name=member.name, url=member.avatar.url)
-        class_embed.set_footer(text='Class Report', icon_url=self.client.user.avatar.url)
+        class_embed.set_thumbnail(url=member.display_avatar)
+        class_embed.set_author(name=member.name, url=member.display_avatar)
+        class_embed.set_footer(text='Class Report', icon_url=self.client.user.display_avatar)
 
         await history_channel.send(embed=class_embed)
 
@@ -528,7 +595,7 @@ class TeacherFeedback(commands.Cog):
             description=f"**Sent:** {user[2]} messages.\n**Have been:** {h:d} hours, {m:02d} minutes and {s:02d} seconds in the voice channel.",
             color=discord.Color.green())
 
-        reward_embed.set_thumbnail(url=member.avatar.url)
+        reward_embed.set_thumbnail(url=member.display_avatar)
         reward_embed.set_author(name=f"ID: {member.id}")
         reward_embed.set_footer(text=guild.name, icon_url=guild.icon.url)
         await msg.edit(embed=reward_embed)
@@ -548,8 +615,8 @@ class TeacherFeedback(commands.Cog):
                 description=f"The following people got rewarded for participating and being active in {teacher.mention}'s __{language}__ {class_type} class!\n__Teacher__ **+50łł**; __students__ **+10łł**",
                 colour=discord.Colour.green())
             the_reward_embed.set_footer(text=teacher.guild.name, icon_url=teacher.guild.icon.url)
-            the_reward_embed.set_thumbnail(url=teacher.avatar.url)
-            the_reward_embed.set_author(name=teacher, icon_url=teacher.avatar.url)
+            the_reward_embed.set_thumbnail(url=teacher.display_avatar)
+            the_reward_embed.set_author(name=teacher, icon_url=teacher.display_avatar)
             the_reward_embed.set_image(
                 url="https://cdn.discordapp.com/attachments/668049600871006208/704406592400916510/emote.png")
 
@@ -879,8 +946,83 @@ class TeacherFeedback(commands.Cog):
             return False
 
     # ====== In-Discord commands ======
+    @commands.command(aliases=['allow_private', 'private_student', 'privatestudent', 'aps'])
+    @utils.is_allowed([teacher_role_id, mod_role_id, admin_role_id], throw_exc=True)
+    async def allow_private_student(self, ctx, *, member: discord.Member = None) -> None:
+        """ Allows a private student to an existing private class.
+        :param member: The member to allow. """
+
+        teacher = ctx.author
+        channel = ctx.channel
+        guild = channel.guild
+
+        if not member:
+            return await ctx.send(f"**Please, inform a member to allow into your private class, {teacher.mention}!**")
+
+
+        cog = self.client.get_cog('CreateSmartRoom')
+        private_room: List[List[int]] = await cog.get_premium_txt(channel.id)
+        if not private_room:
+            return await ctx.send(f"**This is not a private class, {teacher.mention}!**")
+
+        class_vc = discord.utils.get(guild.voice_channels, id=private_room[0][1]) # Voice channel
+        class_txt = discord.utils.get(guild.text_channels, id=private_room[0][2]) # Text channel
+
+        confirm = await ConfirmSkill(f"**Are you sure you want to allow {member.mention} in your private class, {teacher.mention}?**").prompt(ctx)
+        if not confirm:
+            return await ctx.send(f"**Not doing it, then, {teacher.mention}!**")
+
+        try:
+            await class_vc.set_permissions(member, view_channel=True, connect=True, speak=True)
+            await class_txt.set_permissions(member, view_channel=True, read_messages=True, send_messages=True)
+        except Exception as e:
+            print(e)
+            await ctx.send(f"**For some reason I couldn't give this user permissions, {teacher.mention}!**")
+        else:
+            await ctx.send(f"**Successfully given permissions to {member.mention}, {teacher.mention}!**")
+
+    @commands.command(aliases=['disallow_private', 'remove_private_student', 'removeprivatestudent', 'rps'])
+    @utils.is_allowed([teacher_role_id, mod_role_id, admin_role_id], throw_exc=True)
+    async def disallow_private_student(self, ctx, *, member: discord.Member = None) -> None:
+        """ Removes a private student from an existing private class.
+        :param member: The member to disallow. """
+
+        teacher = ctx.author
+        channel = ctx.channel
+        guild = channel.guild
+
+        if not member:
+            return await ctx.send(f"**Please, inform a member to disallow into your private class, {teacher.mention}!**")
+
+
+        cog = self.client.get_cog('CreateSmartRoom')
+        private_room: List[List[int]] = await cog.get_premium_txt(channel.id)
+        if not private_room:
+            return await ctx.send(f"**This is not a private class, {teacher.mention}!**")
+
+        if member.id == private_room[0][0]:
+            return await ctx.send(f"**You can't disallow the owner of the class, {teacher.mention}!**")
+
+        class_vc = discord.utils.get(guild.voice_channels, id=private_room[0][1]) # Voice channel
+        class_txt = discord.utils.get(guild.text_channels, id=private_room[0][2]) # Text channel
+
+        confirm = await ConfirmSkill(f"**Are you sure you want to allow {member.mention} in your private class, {teacher.mention}?**").prompt(ctx)
+        if not confirm:
+            return await ctx.send(f"**Not doing it, then, {teacher.mention}!**")
+
+        try:
+            await class_vc.set_permissions(member, overwrite=None)
+            await class_txt.set_permissions(member, overwrite=None)
+        except Exception as e:
+            print(e)
+            await ctx.send(f"**For some reason I couldn't give this user permissions, {teacher.mention}!**")
+        else:
+            await ctx.send(f"**Successfully given permissions to {member.mention}, {teacher.mention}!**")
+
+
+
     @commands.command(aliases=['showclass', 'view_class', 'viewclass', 'class_info', 'classinfo', 'class_status', 'classstatus'])
-    @commands.has_any_role(*[teacher_role_id, mod_role_id, admin_role_id])
+    @utils.is_allowed([teacher_role_id, mod_role_id, admin_role_id], throw_exc=True)
     async def show_class(self, ctx) -> None:
         """ (Teacher) Shows an on-going class. """
 
@@ -915,8 +1057,8 @@ class TeacherFeedback(commands.Cog):
         embed.add_field(name="PS²", value="If the `timestamp` field is **None**, it means the teacher is not in the voice channel, therefore users can't earn status.", inline=False)
 
         # Adds embelishment fields
-        embed.set_thumbnail(url=teacher.avatar.url)
-        embed.set_author(name=teacher, icon_url=teacher.avatar.url)
+        embed.set_thumbnail(url=teacher.display_avatar)
+        embed.set_author(name=teacher, icon_url=teacher.display_avatar)
         embed.set_footer(text=guild, icon_url=guild.icon.url)
         await ctx.send(embed=embed)
 
@@ -1003,14 +1145,10 @@ class TeacherFeedbackDatabaseInsert:
 
         sql = """INSERT INTO RewardStudents (
             reward_message, student_id, student_messages,
-            student_time, teacher_id, class_type,
-            language)
+            student_time, teacher_id, class_type, language)
             VALUES (%s, %s, %s, %s, %s, %s, %s)"""
 
-        await mycursor.executemany("""INSERT INTO RewardStudents (
-            reward_message, student_id, student_messages,
-            student_time, teacher_id, class_type, language)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)""", formatted_active_users)
+        await mycursor.executemany(sql, formatted_active_users)
         await db.commit()
         await mycursor.close()
 

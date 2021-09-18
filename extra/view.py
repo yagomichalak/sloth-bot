@@ -101,7 +101,7 @@ class ReportSupportView(discord.ui.View):
         embed = discord.Embed(title="New possible order!",
             description=f"{member.mention} ({member.id}) might be interested in buying something from you!",
             color=member.color)
-        embed.set_thumbnail(url=member.avatar.url)
+        embed.set_thumbnail(url=member.display_avatar)
         await dnk.send(embed=embed)
         await member.send(f"**If you are really interested in **buying** a custom bot, send a private message to {dnk.mention}!**")
         await self.cog.dnk_embed(member)
@@ -169,7 +169,6 @@ class QuickButtons(discord.ui.View):
 
         if await utils.is_allowed([mod_role_id, admin_role_id]).predicate(new_ctx):
             await interaction.response.defer()
-            print(self.ctx)
             return await self.client.get_cog("Moderation").infractions(self.ctx, member=self.target_member)
     
     @discord.ui.button(label="Profile", style=1, emoji="👤", custom_id=f"user_profile")
@@ -177,21 +176,25 @@ class QuickButtons(discord.ui.View):
         """ Shows the member's profile. """
         
         await interaction.response.defer()
-        await self.client.get_cog("SlothCurrency").profile(self.ctx, member=self.target_member)
+        await self.client.get_cog("SlothCurrency")._profile(self.ctx, member=self.target_member)
 
     @discord.ui.button(label="Info", style=2, emoji="ℹ️", custom_id=f"user_info")
     async def info_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
         """ Shows the member's info. """
 
         await interaction.response.defer()
-        await self.client.get_cog("SlothReputation").info(self.ctx, member=self.target_member)
+        await self.client.get_cog("SlothReputation")._info(self.ctx, member=self.target_member)
 
     @discord.ui.button(label="Fake Accounts", style=2, emoji="🥸", custom_id=f"user_fake_accounts")
     async def fake_accounts_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
         """ Shows the member's fake accounts. """
 
-        await interaction.response.defer()
-        await self.client.get_cog("Moderation").fake_accounts(self.ctx, member=self.target_member)
+        new_ctx = self.ctx
+        new_ctx.author = interaction.user
+        if await utils.is_allowed([mod_role_id, admin_role_id]).predicate(new_ctx):
+            await interaction.response.defer()
+            await self.client.get_cog("Moderation").fake_accounts(self.ctx, member=self.target_member)
+
 
 
 class Test(discord.ui.View):

@@ -13,6 +13,7 @@ class HugView(discord.ui.View):
         super().__init__(timeout=timeout)
         self.member = member
         self.target = target
+        self.used: bool = False
 
 
     @discord.ui.button(label='Hug', style=discord.ButtonStyle.blurple, custom_id='hug_id', emoji="🤗")
@@ -34,13 +35,14 @@ class HugView(discord.ui.View):
             timestamp=interaction.message.created_at
         )
 
-        embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
-        embed.set_thumbnail(url=self.target.avatar.url)
+        embed.set_author(name=self.member.display_name, url=self.member.display_avatar, icon_url=self.member.display_avatar)
+        embed.set_thumbnail(url=self.target.display_avatar)
         embed.set_image(url=choice(hugs))
         embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
 
         await interaction.response.send_message(content=self.target.mention, embed=embed)
         await self.disable_buttons(interaction, followup=True)
+        self.used = True
         self.stop()
 
     @discord.ui.button(label='Nevermind', style=discord.ButtonStyle.red, custom_id='nevermind_id', emoji="❌")
@@ -51,6 +53,7 @@ class HugView(discord.ui.View):
         self.stop()
 
     async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
+        """ Disables all buttons of the view menu. """
 
         for child in self.children:
             child.disabled = True
@@ -70,6 +73,7 @@ class BootView(discord.ui.View):
         super().__init__(timeout=timeout)
         self.member = member
         self.target = target
+        self.used: bool = False
 
 
     @discord.ui.button(label='Where it hits', style=discord.ButtonStyle.blurple, custom_id='general_kick_id', emoji="🦵")
@@ -96,13 +100,14 @@ class BootView(discord.ui.View):
             timestamp=interaction.message.created_at
         )
 
-        embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
-        embed.set_thumbnail(url=self.target.avatar.url)
+        embed.set_author(name=self.member.display_name, url=self.member.display_avatar, icon_url=self.member.display_avatar)
+        embed.set_thumbnail(url=self.target.display_avatar)
         embed.set_image(url=choice(general_kicks))
         embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
 
         await interaction.response.send_message(content=self.target.mention, embed=embed)
         await self.disable_buttons(interaction, followup=True)
+        self.used = True
         self.stop()
 
     @discord.ui.button(label='Butt Kick', style=discord.ButtonStyle.blurple, custom_id='butt_kick_id', emoji="<a:peepoHonkbutt:757358697033760918>")
@@ -129,13 +134,14 @@ class BootView(discord.ui.View):
             timestamp=interaction.message.created_at
         )
 
-        embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
-        embed.set_thumbnail(url=self.target.avatar.url)
+        embed.set_author(name=self.member.display_name, url=self.member.display_avatar, icon_url=self.member.display_avatar)
+        embed.set_thumbnail(url=self.target.display_avatar)
         embed.set_image(url=choice(butt_kicks))
         embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
 
         await interaction.response.send_message(content=self.target.mention, embed=embed)
         await self.disable_buttons(interaction, followup=True)
+        self.used = True
         self.stop()
 
     @discord.ui.button(label='Nevermind', style=discord.ButtonStyle.red, custom_id='nevermind_id', emoji="❌")
@@ -146,6 +152,7 @@ class BootView(discord.ui.View):
         self.stop()
 
     async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
+        """ Disables all buttons of the view menu. """
 
         for child in self.children:
             child.disabled = True
@@ -166,6 +173,7 @@ class SlapView(discord.ui.View):
         self.client = client
         self.member = member
         self.target = target
+        self.used: bool = False
 
 
     @discord.ui.button(label='Angry Slap', style=discord.ButtonStyle.blurple, custom_id='angry_slap_id', emoji="<:zslothree:695411876581867610>")
@@ -185,13 +193,14 @@ class SlapView(discord.ui.View):
             timestamp=interaction.message.created_at
         )
 
-        embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
-        embed.set_thumbnail(url=self.target.avatar.url)
+        embed.set_author(name=self.member.display_name, url=self.member.display_avatar, icon_url=self.member.display_avatar)
+        embed.set_thumbnail(url=self.target.display_avatar)
         embed.set_image(url=choice(slaps))
         embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
 
         await interaction.response.send_message(content=self.target.mention, embed=embed)
         await self.disable_buttons(interaction, followup=True)
+        self.used = True
         self.stop()
 
     @discord.ui.button(label='Sexy Slap', style=discord.ButtonStyle.blurple, custom_id='sexy_slap_id', emoji="<:creep:676070700951273491>")
@@ -225,8 +234,8 @@ class SlapView(discord.ui.View):
             timestamp=interaction.message.created_at
         )
 
-        embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
-        embed.set_thumbnail(url=self.target.avatar.url)
+        embed.set_author(name=self.member.display_name, url=self.member.display_avatar, icon_url=self.member.display_avatar)
+        embed.set_thumbnail(url=self.target.display_avatar)
         embed.set_image(url=choice(slaps))
         embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
 
@@ -245,6 +254,7 @@ class SlapView(discord.ui.View):
                 content=self.target.mention, embed=embed)
             
         await self.disable_buttons(interaction, followup=True)
+        self.used = True
         self.stop()
 
     @discord.ui.button(label='Nevermind', style=discord.ButtonStyle.red, custom_id='nevermind_id', emoji="❌")
@@ -255,6 +265,7 @@ class SlapView(discord.ui.View):
         self.stop()
 
     async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
+        """ Disables all buttons of the view menu. """
 
         for child in self.children:
             child.disabled = True
@@ -275,6 +286,7 @@ class KissView(discord.ui.View):
         self.client = client
         self.member = member
         self.target = target
+        self.used: bool = False
 
 
     @discord.ui.button(label='Kiss on the Cheek', style=discord.ButtonStyle.blurple, custom_id='cheek_kiss_id', emoji="☺️")
@@ -296,13 +308,14 @@ class KissView(discord.ui.View):
             timestamp=interaction.message.created_at
         )
 
-        embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
-        embed.set_thumbnail(url=self.target.avatar.url)
+        embed.set_author(name=self.member.display_name, url=self.member.display_avatar, icon_url=self.member.display_avatar)
+        embed.set_thumbnail(url=self.target.display_avatar)
         embed.set_image(url=choice(c_kisses))
         embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
 
         await interaction.response.send_message(content=self.target.mention, embed=embed)
         await self.disable_buttons(interaction, followup=True)
+        self.used = True
         self.stop()
     
     @discord.ui.button(label='Mouth Kiss', style=discord.ButtonStyle.blurple, custom_id='mouth_kiss_id', emoji="💋")
@@ -342,8 +355,8 @@ class KissView(discord.ui.View):
             timestamp=interaction.message.created_at
         )
 
-        embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
-        embed.set_thumbnail(url=self.target.avatar.url)
+        embed.set_author(name=self.member.display_name, url=self.member.display_avatar, icon_url=self.member.display_avatar)
+        embed.set_thumbnail(url=self.target.display_avatar)
         embed.set_image(url=choice(m_kisses))
         embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
 
@@ -362,6 +375,7 @@ class KissView(discord.ui.View):
                 content=self.target.mention, embed=embed)
             
         await self.disable_buttons(interaction, followup=True)
+        self.used = True
         self.stop()
 
 
@@ -374,6 +388,7 @@ class KissView(discord.ui.View):
 
 
     async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
+        """ Disables all buttons of the view menu. """
 
         for child in self.children:
             child.disabled = True
@@ -420,8 +435,8 @@ class CheatingView(discord.ui.View):
         )
 
         partner = await interaction.guild.fetch_member(self.marriage['partner'])
-        embed.set_author(name=partner.display_name, url=partner.avatar.url, icon_url=partner.avatar.url)
-        embed.set_thumbnail(url=self.lover.avatar.url)
+        embed.set_author(name=partner.display_name, url=partner.display_avatar, icon_url=partner.display_avatar)
+        embed.set_thumbnail(url=self.lover.display_avatar)
         embed.set_image(url=choice(catches))
         embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
         view = CheatingActionView(self.client, self.cheater, self.lover, self.marriage)
@@ -430,6 +445,7 @@ class CheatingView(discord.ui.View):
 
 
     async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
+        """ Disables all buttons of the view menu. """
 
         for child in self.children:
             child.disabled = True
@@ -478,13 +494,14 @@ class CheatingActionView(discord.ui.View):
 
         partner = await interaction.guild.fetch_member(self.marriage['partner'])
 
-        embed.set_author(name=partner.display_name, url=partner.avatar.url, icon_url=partner.avatar.url)
-        embed.set_thumbnail(url=self.lover.avatar.url)
+        embed.set_author(name=partner.display_name, url=partner.display_avatar, icon_url=partner.display_avatar)
+        embed.set_thumbnail(url=self.lover.display_avatar)
         embed.set_image(url=choice(forgives))
         embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
 
         await interaction.response.send_message(content=self.cheater.mention, embed=embed)
         await self.disable_buttons(interaction, followup=True)
+        self.used = True
 
     @discord.ui.button(label="Force divorce", style=discord.ButtonStyle.red, custom_id='divorce_id', emoji='<:zslothtoxic:695420110420312125>')
     async def force_divorce_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
@@ -509,8 +526,8 @@ class CheatingActionView(discord.ui.View):
 
         partner = await interaction.guild.fetch_member(self.marriage['partner'])
 
-        embed.set_author(name=partner.display_name, url=partner.avatar.url, icon_url=partner.avatar.url)
-        embed.set_thumbnail(url=self.lover.avatar.url)
+        embed.set_author(name=partner.display_name, url=partner.display_avatar, icon_url=partner.display_avatar)
+        embed.set_thumbnail(url=self.lover.display_avatar)
         embed.set_image(url=choice(divorces))
         embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
 
@@ -526,6 +543,7 @@ class CheatingActionView(discord.ui.View):
             await interaction.response.send_message(content=self.cheater.mention, embed=embed)
         finally:
             await self.disable_buttons(interaction, followup=True)
+            self.used = True
 
     @discord.ui.button(label="Knock 'em out!", style=discord.ButtonStyle.gray, custom_id='ko_id', emoji='<a:zslothgiveme:709909994203512902>')
     async def knock_out_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
@@ -546,9 +564,11 @@ class CheatingActionView(discord.ui.View):
             await interaction.response.send_message(content=self.cheater.mention, embed=embed)
         finally:
             await self.disable_buttons(interaction, followup=True)
+            self.used = True
 
 
     async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
+        """ Disables all buttons of the view menu. """
 
         for child in self.children:
             child.disabled = True
@@ -570,6 +590,7 @@ class HoneymoonView(discord.ui.View):
         super().__init__(timeout=timeout)
         self.member = member
         self.target = target
+        self.used: bool = False
         self.value = None
         self.embed: discord.Embed = None
 
@@ -671,6 +692,7 @@ class HoneymoonView(discord.ui.View):
 
 
     async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
+        """ Disables all buttons of the view menu. """
 
         for child in self.children:
             child.disabled = True
@@ -691,6 +713,7 @@ class PunchView(discord.ui.View):
         super().__init__(timeout=timeout)
         self.member = member
         self.target = target
+        self.used: bool = False
 
 
     @discord.ui.button(label='Punch Face', style=discord.ButtonStyle.blurple, custom_id='punch_face_id', emoji="👊")
@@ -717,13 +740,14 @@ class PunchView(discord.ui.View):
             timestamp=interaction.message.created_at
         )
 
-        embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
-        embed.set_thumbnail(url=self.target.avatar.url)
+        embed.set_author(name=self.member.display_name, url=self.member.display_avatar, icon_url=self.member.display_avatar)
+        embed.set_thumbnail(url=self.target.display_avatar)
         embed.set_image(url=choice(face_punches))
         embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
 
         await interaction.response.send_message(content=self.target.mention, embed=embed)
         await self.disable_buttons(interaction, followup=True)
+        self.used = True
         self.stop()
 
     @discord.ui.button(label='Punch Throat', style=discord.ButtonStyle.blurple, custom_id='throat_punch_id', emoji="<:zsimpysloth:737321065662906389>")
@@ -748,13 +772,14 @@ class PunchView(discord.ui.View):
             timestamp=interaction.message.created_at
         )
 
-        embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
-        embed.set_thumbnail(url=self.target.avatar.url)
+        embed.set_author(name=self.member.display_name, url=self.member.display_avatar, icon_url=self.member.display_avatar)
+        embed.set_thumbnail(url=self.target.display_avatar)
         embed.set_image(url=choice(throat_punches))
         embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
 
         await interaction.response.send_message(content=self.target.mention, embed=embed)
         await self.disable_buttons(interaction, followup=True)
+        self.used = True
         self.stop()
 
     @discord.ui.button(label='Uppercut', style=discord.ButtonStyle.blurple, custom_id='uppercut_id', emoji="💪")
@@ -781,13 +806,14 @@ class PunchView(discord.ui.View):
             timestamp=interaction.message.created_at
         )
 
-        embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
-        embed.set_thumbnail(url=self.target.avatar.url)
+        embed.set_author(name=self.member.display_name, url=self.member.display_avatar, icon_url=self.member.display_avatar)
+        embed.set_thumbnail(url=self.target.display_avatar)
         embed.set_image(url=choice(uppercuts))
         embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
 
         await interaction.response.send_message(content=self.target.mention, embed=embed)
         await self.disable_buttons(interaction, followup=True)
+        self.used = True
         self.stop()
 
     @discord.ui.button(label='Punch Stomach', style=discord.ButtonStyle.blurple, custom_id='punch_stomach_id', emoji="<:eau:875729754215571487>")
@@ -814,13 +840,14 @@ class PunchView(discord.ui.View):
             timestamp=interaction.message.created_at
         )
 
-        embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
-        embed.set_thumbnail(url=self.target.avatar.url)
+        embed.set_author(name=self.member.display_name, url=self.member.display_avatar, icon_url=self.member.display_avatar)
+        embed.set_thumbnail(url=self.target.display_avatar)
         embed.set_image(url=choice(stomach_punches))
         embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
 
         await interaction.response.send_message(content=self.target.mention, embed=embed)
         await self.disable_buttons(interaction, followup=True)
+        self.used = True
         self.stop()
 
     @discord.ui.button(label='Punchline', style=discord.ButtonStyle.gray, custom_id='punchline_id', emoji="<:I_smell_your_sins:666322848922599434>")
@@ -852,13 +879,14 @@ class PunchView(discord.ui.View):
             url='https://thoughtcatalog.com/january-nelson/2018/12/69-punchlines-so-stupid-they-are-actually-funny/'
         )
 
-        embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
-        embed.set_thumbnail(url=self.target.avatar.url)
+        embed.set_author(name=self.member.display_name, url=self.member.display_avatar, icon_url=self.member.display_avatar)
+        embed.set_thumbnail(url=self.target.display_avatar)
         embed.set_image(url=choice(punchline_images))
         embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
 
         await interaction.response.send_message(content=self.target.mention, embed=embed)
         await self.disable_buttons(interaction, followup=True)
+        self.used = True
         self.stop()
 
     @discord.ui.button(label='Nevermind', style=discord.ButtonStyle.red, custom_id='nevermind_id', emoji="❌")
@@ -869,6 +897,7 @@ class PunchView(discord.ui.View):
         self.stop()
 
     async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
+        """ Disables all buttons of the view menu. """
 
         for child in self.children:
             child.disabled = True
@@ -889,6 +918,7 @@ class GiveView(discord.ui.View):
         super().__init__(timeout=timeout)
         self.member = member
         self.target = target
+        self.used: bool = False
 
         self.foods: Dict[str, Dict[str, str]] = self.get_foods()
 
@@ -923,13 +953,14 @@ class GiveView(discord.ui.View):
             timestamp=interaction.message.created_at
         )
 
-        embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
-        embed.set_thumbnail(url=self.target.avatar.url)
+        embed.set_author(name=self.member.display_name, url=self.member.display_avatar, icon_url=self.member.display_avatar)
+        embed.set_thumbnail(url=self.target.display_avatar)
         embed.set_image(url=choice(option['gifs']))
         embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
 
         await interaction.response.send_message(content=self.target.mention, embed=embed)
         await self.disable_buttons(interaction, followup=True)
+        self.used = True
         self.stop()
 
     @discord.ui.button(label='Nothing', style=discord.ButtonStyle.red, custom_id='nothing_id', emoji="❌", row=2)
@@ -940,6 +971,7 @@ class GiveView(discord.ui.View):
         self.stop()
 
     async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
+        """ Disables all buttons of the view menu. """
 
         for child in self.children:
             child.disabled = True
@@ -960,6 +992,7 @@ class TickleView(discord.ui.View):
         super().__init__(timeout=timeout)
         self.member = member
         self.target = target
+        self.used: bool = False
 
 
     @discord.ui.button(label='Tickle', style=discord.ButtonStyle.blurple, custom_id='tickle_id', emoji="<:zslothlmao:686697712074490055>")
@@ -986,13 +1019,14 @@ class TickleView(discord.ui.View):
             timestamp=interaction.message.created_at
         )
 
-        embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
-        embed.set_thumbnail(url=self.target.avatar.url)
+        embed.set_author(name=self.member.display_name, url=self.member.display_avatar, icon_url=self.member.display_avatar)
+        embed.set_thumbnail(url=self.target.display_avatar)
         embed.set_image(url=choice(tickles))
         embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
 
         await interaction.response.send_message(content=self.target.mention, embed=embed)
         await self.disable_buttons(interaction, followup=True)
+        self.used = True
         self.stop()
 
     @discord.ui.button(label='Nevermind', style=discord.ButtonStyle.red, custom_id='nevermind_id', emoji="❌")
@@ -1003,6 +1037,7 @@ class TickleView(discord.ui.View):
         self.stop()
 
     async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
+        """ Disables all buttons of the view menu. """
 
         for child in self.children:
             child.disabled = True
@@ -1022,6 +1057,7 @@ class YeetView(discord.ui.View):
         super().__init__(timeout=timeout)
         self.member = member
         self.target = target
+        self.used: bool = False
 
 
     @discord.ui.button(label='Something', style=discord.ButtonStyle.blurple, custom_id='yeet_something_id', emoji="🤾‍♂️")
@@ -1046,13 +1082,14 @@ class YeetView(discord.ui.View):
             timestamp=interaction.message.created_at
         )
 
-        embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
-        embed.set_thumbnail(url=self.target.avatar.url)
+        embed.set_author(name=self.member.display_name, url=self.member.display_avatar, icon_url=self.member.display_avatar)
+        embed.set_thumbnail(url=self.target.display_avatar)
         embed.set_image(url=choice(yeets))
         embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
 
         await interaction.response.send_message(content=self.target.mention, embed=embed)
         await self.disable_buttons(interaction, followup=True)
+        self.used = True
         self.stop()
 
     @discord.ui.button(label='Someone', style=discord.ButtonStyle.blurple, custom_id='yeet_someone_id', emoji="<:ytho:738497432693899275>")
@@ -1083,13 +1120,14 @@ class YeetView(discord.ui.View):
             timestamp=interaction.message.created_at
         )
 
-        embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
-        embed.set_thumbnail(url=self.target.avatar.url)
+        embed.set_author(name=self.member.display_name, url=self.member.display_avatar, icon_url=self.member.display_avatar)
+        embed.set_thumbnail(url=self.target.display_avatar)
         embed.set_image(url=choice(yeets))
         embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
 
         await interaction.response.send_message(content=self.target.mention, embed=embed)
         await self.disable_buttons(interaction, followup=True)
+        self.used = True
         self.stop()
 
     @discord.ui.button(label='Nevermind', style=discord.ButtonStyle.red, custom_id='nevermind_id', emoji="❌")
@@ -1100,6 +1138,7 @@ class YeetView(discord.ui.View):
         self.stop()
 
     async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
+        """ Disables all buttons of the view menu. """
 
         for child in self.children:
             child.disabled = True
@@ -1119,6 +1158,7 @@ class BegView(discord.ui.View):
         super().__init__(timeout=timeout)
         self.member = member
         self.target = target
+        self.used: bool = False
 
 
     @discord.ui.button(label='Beg', style=discord.ButtonStyle.blurple, custom_id='beg_id', emoji="🙏")
@@ -1156,13 +1196,14 @@ class BegView(discord.ui.View):
             timestamp=interaction.message.created_at
         )
 
-        embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
-        embed.set_thumbnail(url=self.target.avatar.url)
+        embed.set_author(name=self.member.display_name, url=self.member.display_avatar, icon_url=self.member.display_avatar)
+        embed.set_thumbnail(url=self.target.display_avatar)
         embed.set_image(url=choice(begs))
         embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
 
         await interaction.response.send_message(content=self.target.mention, embed=embed)
         await self.disable_buttons(interaction, followup=True)
+        self.used = True
         self.stop()
 
     @discord.ui.button(label='Nevermind', style=discord.ButtonStyle.red, custom_id='nevermind_id', emoji="❌")
@@ -1173,6 +1214,7 @@ class BegView(discord.ui.View):
         self.stop()
 
     async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
+        """ Disables all buttons of the view menu. """
 
         for child in self.children:
             child.disabled = True
@@ -1192,6 +1234,7 @@ class PatView(discord.ui.View):
         super().__init__(timeout=timeout)
         self.member = member
         self.target = target
+        self.used: bool = False
 
 
     @discord.ui.button(label='Pat', style=discord.ButtonStyle.blurple, custom_id='beg_id', emoji="🖐️")
@@ -1231,13 +1274,14 @@ class PatView(discord.ui.View):
             timestamp=interaction.message.created_at
         )
 
-        embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
-        embed.set_thumbnail(url=self.target.avatar.url)
+        embed.set_author(name=self.member.display_name, url=self.member.display_avatar, icon_url=self.member.display_avatar)
+        embed.set_thumbnail(url=self.target.display_avatar)
         embed.set_image(url=choice(pats))
         embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
 
         await interaction.response.send_message(content=self.target.mention, embed=embed)
         await self.disable_buttons(interaction, followup=True)
+        self.used = True
         self.stop()
 
     @discord.ui.button(label='Nevermind', style=discord.ButtonStyle.red, custom_id='nevermind_id', emoji="❌")
@@ -1248,6 +1292,7 @@ class PatView(discord.ui.View):
         self.stop()
 
     async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
+        """ Disables all buttons of the view menu. """
 
         for child in self.children:
             child.disabled = True
@@ -1267,6 +1312,7 @@ class WhisperView(discord.ui.View):
         super().__init__(timeout=timeout)
         self.member = member
         self.target = target
+        self.used: bool = False
         self.text = text
 
 
@@ -1302,13 +1348,14 @@ class WhisperView(discord.ui.View):
             timestamp=interaction.message.created_at
         )
 
-        embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
-        embed.set_thumbnail(url=self.target.avatar.url)
+        embed.set_author(name=self.member.display_name, url=self.member.display_avatar, icon_url=self.member.display_avatar)
+        embed.set_thumbnail(url=self.target.display_avatar)
         embed.set_image(url=choice(whisperings))
         embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
 
         await interaction.response.send_message(content=self.target.mention, embed=embed)
         await self.disable_buttons(interaction, followup=True)
+        self.used = True
         self.stop()
 
     @discord.ui.button(label='Nevermind', style=discord.ButtonStyle.red, custom_id='nevermind_id', emoji="❌")
@@ -1319,6 +1366,7 @@ class WhisperView(discord.ui.View):
         self.stop()
 
     async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
+        """ Disables all buttons of the view menu. """
 
         for child in self.children:
             child.disabled = True
@@ -1341,6 +1389,7 @@ class HandshakeView(discord.ui.View):
         super().__init__(timeout=timeout)
         self.member = member
         self.target = target
+        self.used: bool = False
 
 
     @discord.ui.button(label='Handshake', style=discord.ButtonStyle.blurple, custom_id='handshake_id', emoji="🤝")
@@ -1377,13 +1426,14 @@ class HandshakeView(discord.ui.View):
             timestamp=interaction.message.created_at
         )
 
-        embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
-        embed.set_thumbnail(url=self.target.avatar.url)
+        embed.set_author(name=self.member.display_name, url=self.member.display_avatar, icon_url=self.member.display_avatar)
+        embed.set_thumbnail(url=self.target.display_avatar)
         embed.set_image(url=choice(handshakes))
         embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
 
         await interaction.response.send_message(content=self.target.mention, embed=embed)
         await self.disable_buttons(interaction, followup=True)
+        self.used = True
         self.stop()
 
     @discord.ui.button(label='Nevermind', style=discord.ButtonStyle.red, custom_id='nevermind_id', emoji="❌")
@@ -1394,6 +1444,7 @@ class HandshakeView(discord.ui.View):
         self.stop()
 
     async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
+        """ Disables all buttons of the view menu. """
 
         for child in self.children:
             child.disabled = True
@@ -1414,6 +1465,7 @@ class PeekView(discord.ui.View):
         super().__init__(timeout=timeout)
         self.member = member
         self.target = target
+        self.used: bool = False
 
 
     @discord.ui.button(label='Peek', style=discord.ButtonStyle.blurple, custom_id='peek_id', emoji="👀")
@@ -1452,13 +1504,14 @@ class PeekView(discord.ui.View):
             timestamp=interaction.message.created_at
         )
 
-        embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
-        embed.set_thumbnail(url=self.target.avatar.url)
+        embed.set_author(name=self.member.display_name, url=self.member.display_avatar, icon_url=self.member.display_avatar)
+        embed.set_thumbnail(url=self.target.display_avatar)
         embed.set_image(url=choice(peeks))
         embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
 
         await interaction.response.send_message(content=self.target.mention, embed=embed)
         await self.disable_buttons(interaction, followup=True)
+        self.used = True
         self.stop()
 
     @discord.ui.button(label='Nevermind', style=discord.ButtonStyle.red, custom_id='nevermind_id', emoji="❌")
@@ -1469,6 +1522,7 @@ class PeekView(discord.ui.View):
         self.stop()
 
     async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
+        """ Disables all buttons of the view menu. """
 
         for child in self.children:
             child.disabled = True
@@ -1488,9 +1542,10 @@ class DriveOverView(discord.ui.View):
         super().__init__(timeout=timeout)
         self.member = member
         self.target = target
+        self.used: bool = False
 
 
-    @discord.ui.button(label='Drive Over', style=discord.ButtonStyle.blurple, custom_id='peek_id', emoji="🚗")
+    @discord.ui.button(label='Drive Over', style=discord.ButtonStyle.blurple, custom_id='drive_over_id', emoji="🚗")
     async def drive_over_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
         """ Drives over someone. """
 
@@ -1514,13 +1569,14 @@ class DriveOverView(discord.ui.View):
             timestamp=interaction.message.created_at
         )
 
-        embed.set_author(name=self.member.display_name, url=self.member.avatar.url, icon_url=self.member.avatar.url)
-        embed.set_thumbnail(url=self.target.avatar.url)
+        embed.set_author(name=self.member.display_name, url=self.member.display_avatar, icon_url=self.member.display_avatar)
+        embed.set_thumbnail(url=self.target.display_avatar)
         embed.set_image(url=choice(runovers))
         embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
 
         await interaction.response.send_message(content=self.target.mention, embed=embed)
         await self.disable_buttons(interaction, followup=True)
+        self.used = True
         self.stop()
 
     @discord.ui.button(label='Nevermind', style=discord.ButtonStyle.red, custom_id='nevermind_id', emoji="❌")
@@ -1531,6 +1587,91 @@ class DriveOverView(discord.ui.View):
         self.stop()
 
     async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
+        """ Disables all buttons of the view menu. """
+
+        for child in self.children:
+            child.disabled = True
+
+        if followup:
+            await interaction.followup.edit_message(message_id=interaction.message.id, view=self)
+        else:
+            await interaction.response.edit_message(view=self)
+
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        return self.member.id == interaction.user.id
+
+
+class HighFiveView(discord.ui.View):
+    """ A view for the high five skill """
+
+    def __init__(self, member: discord.Member, target: discord.Member, timeout: Optional[float] = 180):
+        super().__init__(timeout=timeout)
+        self.member = member
+        self.target = target
+        self.used: bool = False
+
+
+    @discord.ui.button(label='High Five', style=discord.ButtonStyle.blurple, custom_id='peek_id', emoji="🖐️")
+    async def high_five_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ High fives someone. """
+
+        runovers: List[str] = [
+            'https://c.tenor.com/2oPrdhJpUpEAAAAC/kuzco-yzma.gif',
+            'https://c.tenor.com/EqX76RY5-IIAAAAC/high-five-apir.gif',
+            'https://c.tenor.com/RusIdB6WS-IAAAAC/cat-high-five.gif',
+            'https://c.tenor.com/dJD2iLU0qGEAAAAC/high-five-top-gun.gif',
+            'https://c.tenor.com/0jheLvur3C0AAAAC/new-girl-high-five.gif',
+            'https://c.tenor.com/mpCnVpX0xIYAAAAC/high-five-spongebob.gif',
+            'https://c.tenor.com/UYNQrtD9lxIAAAAC/high-five-fail.gif',
+            'https://c.tenor.com/zTpmKaMk25gAAAAC/high-five-lignon.gif',
+            'https://c.tenor.com/UtMb32NBztEAAAAC/neil-patrick-harris-high-five.gif',
+            'https://c.tenor.com/BtqMn35dvT4AAAAd/high-five.gif',
+            'https://c.tenor.com/EcTTHD9dnMUAAAAC/evan-and-katelyn-extreme-high-five.gif',
+            'https://c.tenor.com/MnWr1MLnL6gAAAAC/dream-team-tina-fey.gif',
+            'https://c.tenor.com/fmDOIOVxfVoAAAAC/seth-meyers-late-night-seth.gif',
+            'https://c.tenor.com/eCtm70W3J2QAAAAC/borat-high-five.gif',
+            'https://c.tenor.com/2vfPNlz8cHQAAAAd/highfive-puppy.gif',
+            'https://c.tenor.com/2vfPNlz8cHQAAAAd/highfive-puppy.gif',
+            'https://c.tenor.com/BGBoeXgLE44AAAAC/high-five.gif',
+            'https://c.tenor.com/Jj9Us-qY-UIAAAAC/lou-lignon.gif',
+            'https://c.tenor.com/VkzkUy84s5gAAAAC/sonic-x-tails-and-amy-high-five.gif',
+            'https://c.tenor.com/XKgfZjBlZd0AAAAC/jumping-happy.gif',
+            'https://c.tenor.com/ovJJAp83pmIAAAAC/high-five-lol.gif',
+            'https://c.tenor.com/eagcZFQbQsIAAAAd/high-five-emily-hampshire.gif',
+            'https://c.tenor.com/EvA9kafRz1kAAAAC/high-five-the-good-place.gif',
+            'https://c.tenor.com/ekBfsXahvWsAAAAC/bakabaka7-high-five.gif',
+            'https://c.tenor.com/lQjcsJCRA9sAAAAC/natsu-dragneel-lucy-heartfilia.gif',
+            'https://c.tenor.com/q6PnbtGXo5AAAAAC/tos-high-five.gif',
+            'https://c.tenor.com/825JM-UpUScAAAAC/cat-high-five.gif',
+            'https://c.tenor.com/8KZ4Jdu7A7IAAAAS/highfive-borat.gif'
+        ]
+
+        embed = discord.Embed(
+            title="__High Five__",
+            description=f"🖐️ {self.member.mention} high fived {self.target.mention} 🖐️",
+            color=discord.Color.dark_orange(),
+            timestamp=interaction.message.created_at
+        )
+
+        embed.set_author(name=self.member.display_name, url=self.member.display_avatar, icon_url=self.member.display_avatar)
+        embed.set_thumbnail(url=self.target.display_avatar)
+        embed.set_image(url=choice(runovers))
+        embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
+
+        await interaction.response.send_message(content=self.target.mention, embed=embed)
+        await self.disable_buttons(interaction, followup=True)
+        self.used = True
+        self.stop()
+
+    @discord.ui.button(label='Nevermind', style=discord.ButtonStyle.red, custom_id='nevermind_id', emoji="❌")
+    async def nevermind_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Cancels the high five action. """
+
+        await self.disable_buttons(interaction)
+        self.stop()
+
+    async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
+        """ Disables all buttons of the view menu. """
 
         for child in self.children:
             child.disabled = True
