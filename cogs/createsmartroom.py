@@ -1398,7 +1398,6 @@ You can only add 1 additional channel. Voice **OR** Text."""))
 		member = self.client.get_user(galaxy_room[0])
 		rooms = [
 			discord.utils.get(channel.guild.voice_channels, id=galaxy_room[2]),
-			discord.utils.get(channel.guild.threads, id=galaxy_room[4]),
 			discord.utils.get(channel.guild.text_channels, id=galaxy_room[3]),
 			discord.utils.get(channel.guild.voice_channels, id=galaxy_room[5]),
 			discord.utils.get(channel.guild.categories, id=galaxy_room[1])
