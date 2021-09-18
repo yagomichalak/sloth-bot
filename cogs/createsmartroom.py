@@ -1316,7 +1316,9 @@ You can only add 1 additional channel. Voice **OR** Text."""))
 		- +250 for each Thread
 		- +500 for the additional Voice Channel, if there is one.
 		
-		Max Rent Possible: 3000łł """
+		Max Rent Possible: 2500łł
+		
+		PS: You can either have an extra Voice Channel or up to 4 Threads. """
 
 		if not ctx.guild:
 			return await ctx.send("**Don't use it here!**")
@@ -1463,11 +1465,14 @@ You can only add 1 additional channel. Voice **OR** Text."""))
 
 		vcs, txts = await self.order_rooms(user_rooms)
 
-		if len(vcs) + len(txts) >= 7:
-			return await ctx.send(f"**You reached your maximum amount of channels in your Galaxy Rooms, {member.mention}!**")
+		if len(vcs) == 2:
+			return await ctx.send(f"**You cannot add threads because you chose to have a second Voice Channel instead, {member.mention}!**")
 
 		if len(txts) >= 5:
 			return await ctx.send(f"**You cannot add more thread channels, {member.mention}!**")
+
+		if len(vcs) + len(txts) >= 6:
+			return await ctx.send(f"**You reached your maximum amount of channels in your Galaxy Rooms, {member.mention}!**")
 
 		money: int = await self.get_rent_price(len(txts)+1, len(vcs))
 		confirm = await ConfirmSkill(
@@ -1527,11 +1532,11 @@ You can only add 1 additional channel. Voice **OR** Text."""))
 		vcs, txts = await self.order_rooms(user_rooms)
 		money: int = await self.get_rent_price(len(txts), len(vcs)+1)
 
-		if len(vcs) >= 2:
+		if len(vcs) == 2:
 			return await ctx.send(f"**You cannot add more voice channels, {member.mention}!**")
 			
-		if len(vcs) + len(txts) >= 7:
-			return await ctx.send(f"**You reached your maximum amount of channels in your Galaxy Rooms, {member.mention}!**")
+		if len(vcs) + len(txts) >= 3:
+			return await ctx.send(f"**You reached your maximum amount of channels in your Galaxy Room, {member.mention}!**")
 
 
 		confirm = await ConfirmSkill(
