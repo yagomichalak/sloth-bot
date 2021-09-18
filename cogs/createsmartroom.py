@@ -1023,8 +1023,8 @@ Here are some rules and rights:
 
 3) You have to allow a minimum of **10** users. (Bots or admins do not count) 
 
-4) You can add an additional channel for **500** :leaves: by writing **z!agc text (name of the channel)**  or **z!agc voice (user limit) (name of the channel)** for a voice channel. 
-You can only add 1 additional channel. Voice **OR** Text."""))
+4) You can add up to 4 **threads** each for **250 :leaves: **by writing **z!agc thread `name of the channel` ** **or** for **500** :leaves:  1 additional voice channel by writing **z!agc voice `user limit (0-25)` `name of the channel`** 
+You can only add either **threads** **OR** one **voice channel**"""))
 
 		else:
 			return
