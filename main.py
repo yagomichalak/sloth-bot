@@ -663,6 +663,25 @@ async def _tr_slash(ctx, message: discord.Message) -> None:
     language: str = 'en'    
     await client.get_cog('Tools')._tr_callback(ctx, language, message.content)
 
+
+@client.slash_command(name="leaderboard", guild_ids=guild_ids)
+async def _leaderboard(ctx, 
+    info_for: Option(str, description="The leaderboard to show the information for.", choices=[
+        'Reputation', 'Level', 'Leaves', 'Time'])) -> None:
+    """ Shows the leaderboard. """
+
+    cog = client.get_cog('SlothReputation')
+
+    if info_for == 'Reputation':
+        await cog.score(ctx)
+    elif info_for == 'Level':
+        await cog.level_score(ctx)
+    elif info_for == 'Leaves':
+        await cog.leaf_score(ctx)
+    elif info_for == 'Time':
+        await cog.time_score(ctx)
+
+
 # End of slash commands
 
 for filename in os.listdir('./cogs'):

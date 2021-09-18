@@ -228,20 +228,25 @@ class SlothReputation(commands.Cog):
 
             return await answer("\u200b", embed=embed, view=view)
 
+
+
     @commands.command(aliases=['leaderboard', 'lb', 'scoreboard'])
     async def score(self, ctx):
         """ Shows the top ten members in the reputation leaderboard. """
 
-        if not await self.check_table_exist():
-            return await ctx.send("**This command may be on maintenance!**")
+        answer: discord.PartialMessageable = None
+        if isinstance(ctx, commands.Context):
+            answer = ctx.send
+        else:
+            answer = ctx.respond
 
-        # users = await self.get_users()
+        if not await self.check_table_exist():
+            return await answer("**This command may be on maintenance!**")
+
         top_ten_users = await self.get_top_ten_users()
-        # sorted_members = sorted(users, key=lambda tup: tup[4], reverse=True)
+        current_time = await utils.get_time_now()
         leaderboard = discord.Embed(title="__The Language Sloth's Leaderboard__", colour=discord.Colour.dark_green(),
-                                    timestamp=ctx.message.created_at)
-        # user_score = await self.get_specific_user(ctx.author.id)
-        # user_score = await self.get_user_score_position(ctx.author.id)
+                                    timestamp=current_time)
         all_users = await self.get_all_users_by_score_points()
         position = [[i+1, u[4]] for i, u in enumerate(all_users) if u[0] == ctx.author.id]
         position = [it for subpos in position for it in subpos] if position else ['??', 0]
@@ -256,19 +261,22 @@ class SlothReputation(commands.Cog):
                                   inline=False)
             if i + 1 == 10:
                 break
-        return await ctx.send(embed=leaderboard)
+        return await answer(embed=leaderboard)
 
     @commands.command(aliases=['level_board', 'levelboard', 'levels'])
     async def level_score(self, ctx):
         """ Shows the top ten members in the level leaderboard. """
 
-        # users = await self.get_users()
+        answer: discord.PartialMessageable = None
+        if isinstance(ctx, commands.Context):
+            answer = ctx.send
+        else:
+            answer = ctx.respond
+
         top_ten_users = await self.get_top_ten_xp_users()
-        # sorted_members = sorted(users, key=lambda tup: tup[4], reverse=True)
+        current_time = await utils.get_time_now()
         leaderboard = discord.Embed(title="__The Language Sloth's Level Ranking Leaderboard__", colour=discord.Colour.dark_green(),
-                                    timestamp=ctx.message.created_at)
-        # user_score = await self.get_specific_user(ctx.author.id)
-        # user_score = await self.get_user_score_position(ctx.author.id)
+                                    timestamp=current_time)
         all_users = await self.get_all_users_by_xp()
         position = [[i+1, u[1]] for i, u in enumerate(all_users) if u[0] == ctx.author.id]
         position = [it for subpos in position for it in subpos] if position else ['??', 0]
@@ -283,15 +291,22 @@ class SlothReputation(commands.Cog):
                                   inline=False)
             if i + 1 == 10:
                 break
-        return await ctx.send(embed=leaderboard)
+        return await answer(embed=leaderboard)
 
     @commands.command(aliases=['leaf_board', 'leafboard', 'leaves', 'leaves_leaderboard', 'leavesleaderboard', 'll'])
     async def leaf_score(self, ctx):
         """ Shows the top ten members in the leaves leaderboard. """
 
+        answer: discord.PartialMessageable = None
+        if isinstance(ctx, commands.Context):
+            answer = ctx.send
+        else:
+            answer = ctx.respond
+
         top_ten_users = await self.get_top_ten_leaves_users()
+        current_time = await utils.get_time_now()
         leaderboard = discord.Embed(title="🍃 __The Language Sloth's Leaf Ranking Leaderboard__ 🍃", colour=discord.Colour.dark_green(),
-                                    timestamp=ctx.message.created_at)
+                                    timestamp=current_time)
 
         all_users = await self.get_all_leaves_users()
         position = [[i+1, u[1]] for i, u in enumerate(all_users) if u[0] == ctx.author.id]
@@ -307,15 +322,22 @@ class SlothReputation(commands.Cog):
                                   inline=False)
             if i + 1 == 10:
                 break
-        return await ctx.send(embed=leaderboard)
+        return await answer(embed=leaderboard)
 
     @commands.command(aliases=['time_board', 'timeboard', 'time_leaderboard', 'timeleaderboard', 'tl'])
     async def time_score(self, ctx):
         """ Shows the top ten members in the time leaderboard. """
 
+        answer: discord.PartialMessageable = None
+        if isinstance(ctx, commands.Context):
+            answer = ctx.send
+        else:
+            answer = ctx.respond
+
         top_ten_users = await self.get_top_ten_time_users()
+        current_time = await utils.get_time_now()
         leaderboard = discord.Embed(title="⏰ __The Language Sloth's Time Ranking Leaderboard__ ⏰", color=discord.Color.dark_green(),
-                                    timestamp=ctx.message.created_at)
+                                    timestamp=current_time)
 
         all_users = await self.get_all_time_users()
         position = [[i+1, u[2]] for i, u in enumerate(all_users) if u[0] == ctx.author.id]
@@ -336,7 +358,7 @@ class SlothReputation(commands.Cog):
                                   inline=False)
             if i + 1 == 10:
                 break
-        return await ctx.send(embed=leaderboard)
+        return await answer(embed=leaderboard)
 
     @commands.command()
     async def rep(self, ctx, member: discord.Member = None):
