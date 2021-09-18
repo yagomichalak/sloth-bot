@@ -309,6 +309,35 @@ class SlothReputation(commands.Cog):
                 break
         return await ctx.send(embed=leaderboard)
 
+    @commands.command(aliases=['time_board', 'timeboard', 'time_leaderboard', 'timeleaderboard', 'tl'])
+    async def time_score(self, ctx):
+        """ Shows the top ten members in the time leaderboard. """
+
+        top_ten_users = await self.get_top_ten_time_users()
+        leaderboard = discord.Embed(title="⏰ __The Language Sloth's Time Ranking Leaderboard__ ⏰", color=discord.Color.dark_green(),
+                                    timestamp=ctx.message.created_at)
+
+        all_users = await self.get_all_time_users()
+        position = [[i+1, u[2]] for i, u in enumerate(all_users) if u[0] == ctx.author.id]
+        position = [it for subpos in position for it in subpos] if position else ['??', 0]
+
+        m, s = divmod(position[1], 60)
+        h, m = divmod(m, 60)
+
+        leaderboard.set_footer(text=f"Your time: {h:d}h, {m:02d}m ⏰| #{position[0]}", icon_url=ctx.author.display_avatar)
+        leaderboard.set_thumbnail(url=ctx.guild.icon.url)
+
+        # Embeds each one of the top ten users.
+        for i, sm in enumerate(top_ten_users):
+            member = discord.utils.get(ctx.guild.members, id=sm[0])
+            m, s = divmod(sm[2], 60)
+            h, m = divmod(m, 60)
+            leaderboard.add_field(name=f"[{i + 1}]# - __**{member}**__", value=f"__**Time:**__ `{h:d}h, {m:02d}m.` ⏰",
+                                  inline=False)
+            if i + 1 == 10:
+                break
+        return await ctx.send(embed=leaderboard)
+
     @commands.command()
     async def rep(self, ctx, member: discord.Member = None):
         """ Gives someone reputation points.
@@ -501,6 +530,25 @@ class SlothReputation(commands.Cog):
 
         mycursor, db = await the_database()
         await mycursor.execute("SELECT * FROM UserCurrency ORDER BY user_money DESC")
+        top_ten_members = await mycursor.fetchall()
+        await mycursor.close()
+        return top_ten_members
+
+
+    async def get_top_ten_time_users(self) -> List[List[int]]:
+        """ Gets the top ten users with the most time. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("SELECT * FROM UserServerActivity ORDER BY user_time DESC LIMIT 10")
+        top_ten_members = await mycursor.fetchall()
+        await mycursor.close()
+        return top_ten_members
+
+    async def get_all_time_users(self) -> List[List[int]]:
+        """ Gets all users with the most time. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("SELECT * FROM UserServerActivity ORDER BY user_time DESC")
         top_ten_members = await mycursor.fetchall()
         await mycursor.close()
         return top_ten_members
