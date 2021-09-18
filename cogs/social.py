@@ -47,7 +47,7 @@ class Social(commands.Cog):
         guild = self.client.get_guild(payload.guild_id)
         channel = guild.get_channel(payload.channel_id)
         message = await channel.fetch_message(payload.message_id)
-        if not message:
+        if message is not None:
             return
 
         # Checks whether the message has enough reactions
