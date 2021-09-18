@@ -214,14 +214,14 @@ class SmartRoomDatabase(commands.Cog):
 		await mycursor.close()
 		return premium_txt
 
-	async def get_galaxy_txt(self, user_id: int, user_cat: int) -> List[List[int]]:
+	async def get_galaxy_txt(self, user_id: int, user_cat: int) -> List[int]:
 		""" Gets the Galaxy Room's channels by category ID.
 		:param user_id: The ID of the owner of the channels.
 		:param user_cat: The ID of the category. """
 
 		mycursor, db = await the_database()
 		await mycursor.execute("SELECT * FROM GalaxyVc WHERE user_id = %s and user_cat = %s", (user_id, user_cat))
-		galaxy_vc = await mycursor.fetchall()
+		galaxy_vc = await mycursor.fetchone()
 		await mycursor.close()
 		return galaxy_vc
 
@@ -1151,11 +1151,14 @@ You can only add 1 additional channel. Voice **OR** Text."""))
 			return await ctx.send(f"**This is not your room, so you cannot allow someone in it, {member.mention}!**")
 
 		channels = [
-			discord.utils.get(ctx.guild.categories, id=user_galaxy[0][1]),
-			discord.utils.get(ctx.guild.text_channels, id=user_galaxy[0][2]),
-			discord.utils.get(ctx.guild.threads, id=user_galaxy[0][3]),
-			discord.utils.get(ctx.guild.voice_channels, id=user_galaxy[0][4]),
-			discord.utils.get(ctx.guild.voice_channels, id=user_galaxy[0][5])
+			discord.utils.get(ctx.guild.categories, id=user_galaxy[1]),
+			discord.utils.get(ctx.guild.voice_channels, id=user_galaxy[2]),
+			discord.utils.get(ctx.guild.text_channels, id=user_galaxy[3]),
+			discord.utils.get(ctx.guild.threads, id=user_galaxy[4]),
+			discord.utils.get(ctx.guild.voice_channels, id=user_galaxy[5]),
+			discord.utils.get(ctx.guild.threads, id=user_galaxy[8]),
+			discord.utils.get(ctx.guild.threads, id=user_galaxy[9]),
+			discord.utils.get(ctx.guild.threads, id=user_galaxy[10])
 		]
 		allowed = []
 
@@ -1231,16 +1234,19 @@ You can only add 1 additional channel. Voice **OR** Text."""))
 		if not members:
 			return await ctx.send(f"**Inform one or more members to forbid, {member.mention}!**")
 
-		user_galaxy = await self.get_galaxy_txt(ctx.author.id, ctx.channel.category.id)
+		user_galaxy = await self.get_galaxy_txt(member.id, ctx.channel.category.id)
 		if not user_galaxy:
 			return await ctx.send(f"**This is not your room, so you cannot forbid someone from it, {member.mention}!**")
 
 		channels = [
-			discord.utils.get(ctx.guild.categories, id=user_galaxy[0][1]),
-			discord.utils.get(ctx.guild.text_channels, id=user_galaxy[0][2]),
-			discord.utils.get(ctx.guild.threads, id=user_galaxy[0][3]),
-			discord.utils.get(ctx.guild.voice_channels, id=user_galaxy[0][4]),
-			discord.utils.get(ctx.guild.voice_channels, id=user_galaxy[0][5])
+			discord.utils.get(ctx.guild.categories, id=user_galaxy[1]),
+			discord.utils.get(ctx.guild.voice_channels, id=user_galaxy[2]),
+			discord.utils.get(ctx.guild.text_channels, id=user_galaxy[3]),
+			discord.utils.get(ctx.guild.threads, id=user_galaxy[4]),
+			discord.utils.get(ctx.guild.voice_channels, id=user_galaxy[5]),
+			discord.utils.get(ctx.guild.threads, id=user_galaxy[8]),
+			discord.utils.get(ctx.guild.threads, id=user_galaxy[9]),
+			discord.utils.get(ctx.guild.threads, id=user_galaxy[10])
 		]
 		forbid = []
 
@@ -1276,7 +1282,7 @@ You can only add 1 additional channel. Voice **OR** Text."""))
 		if not user_galaxy:
 			return await ctx.send("**You cannot run this command outside your rooms, in case you have them!**")
 
-		user_ts = user_galaxy[0][6]
+		user_ts = user_galaxy[6]
 		the_time = await utils.get_timestamp()
 		deadline = user_ts + 1209600
 
