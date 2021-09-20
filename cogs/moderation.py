@@ -619,9 +619,9 @@ class Moderation(*moderation_cogs):
 	async def tempmute(self, ctx, member: discord.Member = None, reason: str = None, *, time: str = None):
 		""" Mutes a member for a determined amount of time.
 		:param member: The @ or the ID of the user to tempmute.
-		:param minutes: The amount of minutes that the user will be muted.
 		:param reason: The reason for the tempmute.
 		:param time: The time for the mute. """
+
 		await ctx.message.delete()
 
 		role = discord.utils.get(ctx.guild.roles, id=muted_role_id)
@@ -639,7 +639,6 @@ class Moderation(*moderation_cogs):
 		if not seconds:
 			return
 
-		# print('ah')
 		current_ts = await utils.get_timestamp()
 
 		# print(current_ts, seconds)
