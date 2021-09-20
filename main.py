@@ -681,6 +681,24 @@ async def _leaderboard(ctx,
     elif info_for == 'Time':
         await cog.time_score(ctx)
 
+@client.user_command(name="Mute", guild_ids=guild_ids)
+@utils.is_allowed([moderator_role_id, admin_role_id], throw_exc=True)
+async def _mute_slash(ctx, user: discord.Member) -> None:
+    """ (MOD) Mutes a member.
+    :param member: The @ or the ID of the user to mute.
+    :param reason: The reason for the mute. """
+
+    await client.get_cog('Moderation')._mute_callback(ctx, user)
+
+@client.user_command(name="Unmute", guild_ids=guild_ids)
+@utils.is_allowed([moderator_role_id, admin_role_id], throw_exc=True)
+async def _unmute_slash(ctx, user: discord.Member) -> None:
+    """ (MOD) Mutes a member.
+    :param member: The @ or the ID of the user to mute.
+    :param reason: The reason for the mute. """
+
+    await client.get_cog('Moderation')._unmute_callback(ctx, user)
+
 
 # End of slash commands
 
