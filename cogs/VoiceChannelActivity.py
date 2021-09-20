@@ -16,7 +16,7 @@ class VoiceChannelActivity(commands.Cog):
         """ Cog's initializing method. """
 
         self.client = client
-        self.server_id = 777886754761605140
+        self.server_id = int(os.getenv('SERVER_ID'))
 
     @commands.Cog.listener()
     async def on_ready(self) -> None:
