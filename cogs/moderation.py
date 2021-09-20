@@ -357,58 +357,6 @@ class Moderation(*moderation_cogs):
 				ctx.author = self.client.user
 				await self._mute_callback(ctx, member=member, reason=reason)
 
-	async def get_mute_time(self, ctx: commands.Context, time: List[str]) -> Dict[str, int]:
-		""" Gets the mute time in seconds.
-		:param ctx: The context.
-		:param time: The given time. """
-
-
-		keys = ['d', 'h', 'm', 's']
-		for k in keys:
-			if k in time:
-				break
-		else:
-			await ctx.send(f"**Inform a valid time, {ctx.author.mention}**", delete_after=3)
-			return False
-
-		the_time_dict = {
-			'days': 0,
-			'hours': 0,
-			'minutes': 0,
-			'seconds': 0,
-		}
-
-		seconds = 0
-
-		for t in time.split():
-
-			if (just_time := t[:-1]).isdigit():
-				just_time = int(t[:-1])
-
-			if 'd' in t and not the_time_dict.get('days'):
-
-				seconds += just_time * 86400
-				the_time_dict['days'] = just_time
-				continue
-			elif 'h' in t and not the_time_dict.get('hours'):
-				seconds += just_time * 3600
-				the_time_dict['hours'] = just_time
-				continue
-			elif 'm' in t and not the_time_dict.get('minutes'):
-				seconds += just_time * 60
-				the_time_dict['minutes'] = just_time
-				continue
-			elif 's' in t and not the_time_dict.get('seconds'):
-				seconds += just_time
-				the_time_dict['seconds'] = just_time
-				continue
-
-		if seconds <= 0:
-			await ctx.send(f"**Something is wrong with it, {ctx.author.mention}!**", delete_after=3)
-			return False, False
-		else:
-			return the_time_dict, seconds
-
 	async def get_remove_roles(self, member: discord.Member, keep_roles: Optional[List[Union[int, discord.Role]]] = []
 	) -> List[List[discord.Role]]:
 		""" Gets a list of roles the user will have after removing their roles
@@ -635,7 +583,7 @@ class Moderation(*moderation_cogs):
 		if not time:
 			return await ctx.send('**Inform a time!**', delete_after=3)
 
-		time_dict, seconds = await self.get_mute_time(ctx, time=time)
+		time_dict, seconds = await utils.get_time_from_text(ctx, time=time)
 		if not seconds:
 			return
 
