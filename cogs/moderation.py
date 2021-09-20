@@ -1,4 +1,6 @@
+from logging import exception
 import discord
+from discord import user
 from discord.ext import commands, tasks
 import asyncio
 from mysqldb import *
@@ -510,7 +512,6 @@ class Moderation(*moderation_cogs):
 			await member.edit(roles=keep_roles)
 			user_role_ids = [(member.id, rr.id, current_ts, None) for rr in remove_roles]
 			await self.insert_in_muted(user_role_ids)
-
 			# General embed
 			current_time = await utils.get_time_now()
 			general_embed = discord.Embed(description=f'**Reason:** {reason}', colour=discord.Colour.dark_grey(), timestamp=current_time)
@@ -1232,6 +1233,54 @@ class Moderation(*moderation_cogs):
 			await ctx.send(f"**Removed all infractions for {member.mention}!**")
 		else:
 			await ctx.send(f"**{member.mention} doesn't have any existent infractions!**")
+	
+
+	@commands.command(aliases=['ei'])
+	@utils.is_allowed(allowed_roles)
+	async def edit_infraction(self, ctx, infr_id: int = None, *, reason: str) -> None:
+		"""(MOD) Edits a specific infraction by ID.
+		:param infr_id: The infraction ID.
+		:param reason: New reason for the infraction."""
+
+		if not infr_id:
+			return await ctx.send("**Inform an infraction id!**")
+
+		if user_infraction := await self.get_user_infraction_by_infraction_id(infr_id):
+			
+			# Get user by id
+			member = self.client.get_user(user_infraction[0][0])
+
+			# General embed
+			general_embed = discord.Embed(description=f'**New Reason:** {reason}', colour=discord.Colour.lighter_grey())
+			general_embed.set_author(name=f"{member}'s {user_infraction[0][1].capitalize()} reason has been edited", icon_url=member.display_avatar)
+			general_embed.set_footer(text=f"Edited by {ctx.author}", icon_url=ctx.author.display_avatar)
+			
+			await ctx.send(embed=general_embed)
+			
+			# Moderation log embed
+			moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
+
+			embed = discord.Embed(title=f'__**{user_infraction[0][1].capitalize()} Edited**__', colour=discord.Colour.lighter_grey(),
+								  timestamp=ctx.message.created_at)
+
+			embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nId: {member.id}```',
+							inline=False)
+			embed.add_field(name='New reason:', value=f'```{reason}```')
+			embed.set_author(name=member)
+			embed.set_thumbnail(url=member.display_avatar)
+			embed.set_footer(text=f"Edited by {ctx.author}", icon_url=ctx.author.display_avatar)
+			await moderation_log.send(embed=embed)
+
+			try:
+				await member.send(embed=general_embed)
+			except Exception:
+				pass
+
+			return await self.edit_user_infractions(infr_id, reason)
+
+		else:
+			return await ctx.send(f"Infraction **{infr_id}** not found**")
+
 
 	@commands.command(aliases=['apps'])
 	@commands.has_permissions(administrator=True)

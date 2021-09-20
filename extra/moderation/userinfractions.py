@@ -124,3 +124,11 @@ class ModerationUserInfractionsTable(commands.Cog):
         await mycursor.execute("DELETE FROM UserInfractions WHERE user_id = %s", (user_id,))
         await db.commit()
         await mycursor.close()
+
+    async def edit_user_infractions(self, infraction_id: int, new_reason: str) -> None:
+        """ Edits a infraction of a user by ID. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute(f"UPDATE UserInfractions SET infraction_reason = %s WHERE infraction_id = %s", (new_reason, infraction_id,))
+        await db.commit()
+        await mycursor.close()
