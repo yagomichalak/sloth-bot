@@ -455,7 +455,7 @@ class Tools(commands.Cog):
 		member = ctx.author
 		channels = await CreateSmartRoom.get_voice_channel_mentions(message=ctx.message)
 
-		members = await CreateSmartRoom.get_mentions(message=ctx.message)
+		members = await utils.get_mentions(message=ctx.message)
 
 		moved = not_moved = 0
 		voice = voice.channel if (voice := member.voice) else None

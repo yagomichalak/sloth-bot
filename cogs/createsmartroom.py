@@ -1,6 +1,4 @@
 import discord
-from discord import channel
-from discord.ext.menus import Position
 from extra import utils
 from discord.ext import commands, tasks
 from datetime import datetime
@@ -1137,7 +1135,7 @@ You can only add either **threads** **OR** one **voice channel**"""))
 		""" Allows one or more members to join your channels.
 		:param members: The members to allow. """
 
-		members = await CreateSmartRoom.get_mentions(message=ctx.message)
+		members = await utils.get_mentions(message=ctx.message)
 		member = ctx.author
 
 		if member in members:
@@ -1184,25 +1182,6 @@ You can only add either **threads** **OR** one **voice channel**"""))
 		await ctx.send(f"**{allowed} {'have' if len(allowed) > 1 else 'has'} been allowed, {member.mention}!**")
 
 	@staticmethod
-	async def get_mentions(message: discord.Message) -> List[discord.Member]:
-		""" Get mentions from a specific message.
-		:param message: The message to get the mentions from. """
-
-		guild = message.guild
-
-		members = [
-			m for word in message.content.split()
-			if word.isdigit() and (m := discord.utils.get(guild.members, id=int(word)))
-			or (m := discord.utils.get(guild.members, name=str(word)))
-			or (m := discord.utils.get(guild.members, nick=str(word)))
-			or (m := discord.utils.get(guild.members, display_name=str(word)))
-		]
-		members.extend(message.mentions)
-		members = list(set(members))
-
-		return members
-
-	@staticmethod
 	async def get_voice_channel_mentions(message: discord.Message) -> List[discord.VoiceChannel]:
 		""" Get voice channel mentions from a specific message.
 		:param message: The message to get the mentions from. """
@@ -1225,7 +1204,7 @@ You can only add either **threads** **OR** one **voice channel**"""))
 		""" Forbids one or more members from joining your channels.
 		:param members: The members to forbid. """
 
-		members = await CreateSmartRoom.get_mentions(message=ctx.message)
+		members = await utils.get_mentions(message=ctx.message)
 		member = ctx.author
 
 		if member in members:
