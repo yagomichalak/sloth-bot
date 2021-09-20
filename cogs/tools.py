@@ -453,7 +453,7 @@ class Tools(commands.Cog):
 		Ps³: The members can be in the following formats: <@id>, id, name, nick, display_name. """
 
 		member = ctx.author
-		channels = await CreateSmartRoom.get_voice_channel_mentions(message=ctx.message)
+		channels = await utils.get_voice_channel_mentions(message=ctx.message)
 
 		members = await utils.get_mentions(message=ctx.message)
 
