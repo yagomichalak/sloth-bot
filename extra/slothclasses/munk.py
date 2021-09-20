@@ -1109,21 +1109,71 @@ class Munk(Player):
     async def transfer_ownership(self, ctx, *, member: discord.Member = None) -> None:
         """ Transfers the ownership of your tribe to someone else. """
 
-        perpetrator = ctx.author
+        author = ctx.author
 
         if not member:
-            return await ctx.send(f"**Please, inform a member, {perpetrator.mention}!**")
+            return await ctx.send(f"**Please, inform a member, {author.mention}!**")
 
-        user_tribe = await self.get_tribe_info_by_user_id(perpetrator.id)
+        user_tribe = await self.get_tribe_info_by_user_id(author.id)
         if not user_tribe['name']:
-            return await ctx.send(f"**You don't have a tribe, {perpetrator.mention}**!")
+            return await ctx.send(f"**You don't have a tribe, {author.mention}**!")
 
         confirm = await ConfirmSkill(
-            f"**Are you sure you want to transfer your ownership of `{user_tribe['name']}` to {member.mention}, {perpetrator.mention}?**"
+            f"**Are you sure you want to transfer your ownership of `{user_tribe['name']}` to {member.mention}, {author.mention}?**"
             ).prompt(ctx)
         if not confirm:
-            return await ctx.send(f"**Not doing it, then, {perpetrator.mention}!**")
+            return await ctx.send(f"**Not doing it, then, {author.mention}!**")
 
-        await self.update_user_tribe_owner(perpetrator.id, member.id)
-        await ctx.send(f"**Successfully transferred ownership of `{user_tribe['name']}` from {perpetrator.mention} to {member.mention}!**")
+        await self.update_user_tribe_owner(author.id, member.id)
+        await ctx.send(f"**Successfully transferred ownership of `{user_tribe['name']}` from {author.mention} to {member.mention}!**")
 
+
+    @tribe.command(aliases=["fto", "ftransfer", "force_transfer"])
+    @commands.cooldown(1, 60, commands.BucketType.user)
+    @commands.has_permissions(administrator=True)
+    async def force_transfer_ownership(self, ctx, tribe_name: str = None, member: discord.Member = None) -> None:
+        """ (ADMIN) Force-transfers the ownership of a Tribe to another user.
+        :param tribe_name: The name of the tribe from which to transfer ownership.
+        :param member: The member to transfer the Tribe to. """
+
+        author = ctx.author
+
+        if not member:
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.send(f"**Please, inform a member to transfer the tribe to, {author.mention}!**")
+
+        if not tribe_name:
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.send(f"**Please, inform the name of the tribe, {author.mention}!**")
+
+        user_tribe = await self.get_tribe_info_by_name(tribe_name)
+        if not user_tribe['name']:
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.send(f"**No tribes with that name were found, {author.mention}!**")
+
+        if user_tribe['owner_id'] == member.id:
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.send(f"**You can't transfer the tribe to the same user, {author.mention}!**")
+
+        tribe_member = await self.get_tribe_member(member.id)
+        if not tribe_member:
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.send(f"**{member.mention} is not even in a tribe, you can't transfer the tribe to them, {author.mention}!**")
+
+        if tribe_member[0] != user_tribe['owner_id']:
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.send(f"**{member.mention} is in a different tribe, you can't transfer the tribe to them, {author.mention}!**")
+
+        confirm = await ConfirmSkill(
+            f"**Are you sure you want to transfer ownership of `{user_tribe['name']}` from <@{user_tribe['owner_id']}> to {member.mention}, {author.mention}?**"
+            ).prompt(ctx)
+        if not confirm:
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.send(f"**Not doing it, then, {author.mention}!**")
+
+        try:
+            await self.update_user_tribe_owner(user_tribe['owner_id'], member.id)
+        except:
+            await ctx.send(f"**Something went wrong with it, {author.mention}!**")
+        else:
+            await ctx.send(f"**Successfully transferred ownership of `{user_tribe['name']}` from <@{user_tribe['owner_id']}> to {member.mention}!**")

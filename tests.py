@@ -128,21 +128,24 @@ UPDATE TribeMember OG
 """
 
 """
-UPDATE TribeMember as Gl, (
+```mysql
+UPDATE TribeMember as GL, (
     SELECT owner_id, member_id, tribe_role
     FROM TribeMember
-    WHERE member_id = 647452832852869120
+    WHERE member_id = %s
 ) OG, (
     SELECT owner_id, member_id, tribe_role
     FROM TribeMember
-    WHERE member_id = 657561152951156777
+    WHERE member_id = %s
 ) T
 SET GL.tribe_role = ( 
     CASE 
-        WHEN member_id = 647452832852869120 THEN T.tribe_role
-        WHEN member_id = 657561152951156777 THEN 'Owner'
+        WHEN GL.member_id = %s THEN T.tribe_role
+        WHEN GL.member_id = %s THEN OG.tribe_role
     END
-);
+)
+WHERE GL.member_id in (%s, %s);
+```
 """
 
 
