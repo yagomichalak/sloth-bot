@@ -52,8 +52,6 @@ def is_allowed(roles: List[int], check_adm: Optional[bool] = True, throw_exc: Op
 
         if throw_exc:
             raise commands.MissingAnyRole(roles)
-        
-        print('true')
 
     return commands.check(real_check)
 

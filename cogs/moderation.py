@@ -65,7 +65,7 @@ class Moderation(*moderation_cogs):
 				is_from_guild = await self.check_invite_guild(msg, message.guild, invite_root)
 
 				if not is_from_guild:
-					return await self.mute(ctx, member=message.author, reason="Invite Advertisement.")
+					return await self._mute_callback(ctx, member=message.author, reason="Invite Advertisement.")
 
 	async def check_banned_links(self, message: discord.Message) -> None:
 		""" Checks if the message sent was or contains a banned link. """
@@ -77,14 +77,14 @@ class Moderation(*moderation_cogs):
 			if str(video) in banned_links:
 				ctx = await self.client.get_context(message)
 				if not await utils.is_allowed(allowed_roles).predicate(ctx):
-					return await self.mute(ctx, member=message.author, reason="Banned Link")
+					return await self._mute_callback(ctx, member=message.author, reason="Banned Link")
 
 		# Checks it in the message content
 		for word in message.content.split():
 			if word in banned_links:
 				ctx = await self.client.get_context(message)
 				if not await utils.is_allowed(allowed_roles).predicate(ctx):
-					return await self.mute(ctx, member=message.author, reason="Banned Link")
+					return await self._mute_callback(ctx, member=message.author, reason="Banned Link")
 
 	@tasks.loop(minutes=1)
 	async def look_for_expired_tempmutes(self) -> None:
@@ -355,7 +355,7 @@ class Moderation(*moderation_cogs):
 			user_warns = [w for w in user_infractions if w[1] == 'warn']
 			if len(user_warns) >= 3:
 				ctx.author = self.client.user
-				await self.mute(ctx, member=member, reason=reason)
+				await self._mute_callback(ctx, member=member, reason=reason)
 
 	async def get_mute_time(self, ctx: commands.Context, time: List[str]) -> Dict[str, int]:
 		""" Gets the mute time in seconds.
@@ -472,17 +472,29 @@ class Moderation(*moderation_cogs):
 		else:
 			await ctx.send(f"**Successfully rar'd `{member}`, {author.mention}!**")
 
-	@commands.command()
+	@commands.command(name="mute")
 	@utils.is_allowed(allowed_roles, throw_exc=True)
-	async def mute(self, ctx: commands.Context, member: discord.Member = None, *, reason: Optional[str] = None):
+	async def _mute_command(self, ctx: commands.Context, member: discord.Member = None, *, reason: Optional[str] = None):
 		""" (MOD) Mutes a member.
 		:param member: The @ or the ID of the user to mute.
 		:param reason: The reason for the mute. """
 
-		try:
-			await ctx.message.delete()
-		except:
-			pass
+		await self._mute_callback(ctx, member, reason)
+
+	async def _mute_callback(self, ctx: commands.Context, member: discord.Member = None, reason: Optional[str] = None):
+		""" (MOD) Mutes a member.
+		:param member: The @ or the ID of the user to mute.
+		:param reason: The reason for the mute. """
+
+		answer: discord.PartialMessageable = None
+		if isinstance(ctx, commands.Context):
+			answer = ctx.send
+			try:
+				await ctx.message.delete()
+			except:
+				pass
+		else:
+			answer = ctx.respond
 
 		role = discord.utils.get(ctx.guild.roles, id=muted_role_id)
 		if not member:
@@ -500,13 +512,15 @@ class Moderation(*moderation_cogs):
 			await self.insert_in_muted(user_role_ids)
 
 			# General embed
-			general_embed = discord.Embed(description=f'**Reason:** {reason}', colour=discord.Colour.dark_grey(), timestamp=ctx.message.created_at)
+			current_time = await utils.get_time_now()
+			general_embed = discord.Embed(description=f'**Reason:** {reason}', colour=discord.Colour.dark_grey(), timestamp=current_time)
 			general_embed.set_author(name=f'{member} has been muted', icon_url=member.display_avatar)
-			await ctx.send(embed=general_embed)
+			await answer(embed=general_embed)
+
 			# Moderation log embed
 			moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
-			embed = discord.Embed(title='__**Mute**__', colour=discord.Colour.dark_grey(),
-								  timestamp=ctx.message.created_at)
+			embed = discord.Embed(title='__**Mute**__', color=discord.Color.dark_grey(),
+								  timestamp=current_time)
 			embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nId: {member.id}```',
 							inline=False)
 			embed.add_field(name='Reason:', value=f'```{reason}```')
@@ -525,19 +539,34 @@ class Moderation(*moderation_cogs):
 				pass
 
 		else:
-			await ctx.send(f'**{member} is already muted!**')
+			await answer(f'**{member} is already muted!**')
 
 	# Unmutes a member
-	@commands.command()
+	@commands.command(name="unmute")
 	@utils.is_allowed(allowed_roles, throw_exc=True)
-	async def unmute(self, ctx, member: discord.Member = None):
+	async def _unmute_command(self, ctx, member: discord.Member = None) -> None:
 		""" (MOD) Unmutes a member.
 		:param member: The @ or the ID of the user to unmute. """
 
-		await ctx.message.delete()
+		await self._unmute_callback(ctx, member)
+
+	async def _unmute_callback(self, ctx, member: discord.Member = None) -> None:
+		""" (MOD) Unmutes a member.
+		:param member: The @ or the ID of the user to unmute. """
+
+		answer: discord.PartialMessageable = None
+		if isinstance(ctx, commands.Context):
+			answer = ctx.send
+			try:
+				await ctx.message.delete()
+			except:
+				pass
+		else:
+			answer = ctx.respond
+
 		role = discord.utils.get(ctx.guild.roles, id=muted_role_id)
 		if not member:
-			return await ctx.send("**Please, specify a member!**", delete_after=3)
+			return await answer("**Please, specify a member!**", delete_after=3)
 		if role in member.roles:
 			if user_roles := await self.get_muted_roles(member.id):
 
@@ -561,14 +590,15 @@ class Moderation(*moderation_cogs):
 					print(e)
 					pass
 
+			current_time = await utils.get_time_now()
 			general_embed = discord.Embed(colour=discord.Colour.light_grey(),
-										  timestamp=ctx.message.created_at)
+										  timestamp=current_time)
 			general_embed.set_author(name=f'{member} has been unmuted', icon_url=member.display_avatar)
-			await ctx.send(embed=general_embed)
+			await answer(embed=general_embed)
 			# Moderation log embed
 			moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
 			embed = discord.Embed(title='__**Unmute**__', colour=discord.Colour.light_grey(),
-								  timestamp=ctx.message.created_at)
+								  timestamp=current_time)
 			embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nId: {member.id}```',
 							inline=False)
 			embed.set_author(name=member)
@@ -581,7 +611,7 @@ class Moderation(*moderation_cogs):
 				pass
 
 		else:
-			await ctx.send(f'**{member} is not even muted!**', delete_after=5)
+			await answer(f'**{member} is not even muted!**', delete_after=5)
 
 	# Mutes a member temporarily
 	@commands.command()
