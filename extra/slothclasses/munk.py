@@ -295,7 +295,29 @@ class Munk(Player):
 
         return tribe_members
 
-    @commands.command(aliases=['request_logo', 'ask_thumbnail', 'ask_logo'])
+    @commands.group(aliases=['tb'])
+    async def tribe(self, ctx) -> None:
+        """ Command for managing and interacting with a tribe.
+        (Use this without a subcommand to see all subcommands available) """
+        if ctx.invoked_subcommand:
+            return
+
+        cmd = self.client.get_command('tribe')
+        prefix = self.client.command_prefix
+        subcommands = [f"{prefix}{c.qualified_name}" for c in cmd.commands
+            ]
+
+        subcommands = '\n'.join(subcommands)
+        items_embed = discord.Embed(
+            title="__Subcommads__:",
+            description=f"```apache\n{subcommands}```",
+            color=ctx.author.color,
+            timestamp=ctx.message.created_at
+        )
+
+        await ctx.send(embed=items_embed)
+
+    @tribe.command(aliases=['request_logo', 'ask_thumbnail', 'ask_logo'])
     @commands.cooldown(1, 3600, commands.BucketType.user)
     async def request_thumbnail(self, ctx, image_url: str = None) -> None:
         """ Request a thumbnail for your tribe.
@@ -355,30 +377,6 @@ class Munk(Player):
         else:
             self.client.get_command('request_thumbnail').reset_cooldown(ctx)
             await ctx.send(f"**Not doing requesting it, then, {requester.mention}!**")
-
-
-
-    @commands.group(aliases=['tb'])
-    async def tribe(self, ctx) -> None:
-        """ Command for managing and interacting with a tribe.
-        (Use this without a subcommand to see all subcommands available) """
-        if ctx.invoked_subcommand:
-            return
-
-        cmd = self.client.get_command('tribe')
-        prefix = self.client.command_prefix
-        subcommands = [f"{prefix}{c.qualified_name}" for c in cmd.commands
-            ]
-
-        subcommands = '\n'.join(subcommands)
-        items_embed = discord.Embed(
-            title="__Subcommads__:",
-            description=f"```apache\n{subcommands}```",
-            color=ctx.author.color,
-            timestamp=ctx.message.created_at
-        )
-
-        await ctx.send(embed=items_embed)
 
     @tribe.command(aliases=['inv'])
     @commands.cooldown(1, 10, commands.BucketType.user)
