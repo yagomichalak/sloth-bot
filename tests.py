@@ -74,12 +74,20 @@
 # await ctx.send(embed=embed, view=view)
 
 
+z!eval
 
-class Hello:
-    selected_item: list = []
-    pass
+embed = discord.Embed(
+title="Nitro", description="Expires in 46 hours", color=int('36393F', 16))
+space = '\u2800 '*8
+embed.set_author(name="A WILD GIFT APPEARS")
+view = discord.ui.View(timeout=None)
+class MyButton(discord.ui.Button):
+    def __init__(self) -> None:
+        super().__init__(style=discord.ButtonStyle.success, label=f"{space}ACCEPT{space}", custom_id="nitro_id")
 
+    async def callback(self, interaction: discord.Interaction) -> None:
+        await interaction.response.send_message("https://c.tenor.com/Z6gmDPeM6dgAAAAM/dance-moves.gif")
 
-hello = Hello()
-print(hasattr(hello, 'selected_item'))
-print(getattr(hello, 'selected_item') is True)
+view.add_item(MyButton())
+embed.set_thumbnail(url="https://pbs.twimg.com/media/EmSIbDzXYAAb4R7.png")
+await ctx.send(content="\u200b", embed=embed, view=view)
