@@ -1112,16 +1112,32 @@ class Munk(Player):
         author = ctx.author
 
         if not member:
+            ctx.command.reset_cooldown(ctx)
             return await ctx.send(f"**Please, inform a member, {author.mention}!**")
 
         user_tribe = await self.get_tribe_info_by_user_id(author.id)
         if not user_tribe['name']:
+            ctx.command.reset_cooldown(ctx)
             return await ctx.send(f"**You don't have a tribe, {author.mention}**!")
+
+        if user_tribe['owner_id'] == member.id:
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.send(f"**You can't transfer the tribe to yourself, {author.mention}!**")
+
+        tribe_member = await self.get_tribe_member(member.id)
+        if not tribe_member:
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.send(f"**{member.mention} is not even in a tribe, you can't transfer the tribe to them, {author.mention}!**")
+
+        if tribe_member[0] != user_tribe['owner_id']:
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.send(f"**{member.mention} is in a different tribe, you can't transfer the tribe to them, {author.mention}!**")
 
         confirm = await ConfirmSkill(
             f"**Are you sure you want to transfer your ownership of `{user_tribe['name']}` to {member.mention}, {author.mention}?**"
             ).prompt(ctx)
         if not confirm:
+            ctx.command.reset_cooldown(ctx)
             return await ctx.send(f"**Not doing it, then, {author.mention}!**")
 
         await self.update_user_tribe_owner(author.id, member.id)
