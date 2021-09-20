@@ -204,3 +204,40 @@ async def disable_buttons(view: discord.ui.View) -> None:
 
     for child in view.children:
         child.disabled = True
+
+
+
+async def audio(client: commands.Bot, voice_channel: discord.VoiceChannel, member: discord.Member, audio_path: str) -> None:
+    """ Plays an audio.
+    :param client: The client.
+    :param voice_channel: The voice channel in which to play the audio.
+    :param member: A member to get guild context from.
+    :param audio_path: The path of the audio to play. """
+
+    # Resolves bot's channel state
+    bot_state = member.guild.voice_client
+
+    try:
+        if bot_state and bot_state.channel and bot_state.channel != voice_channel:
+            await bot_state.disconnect()
+            await bot_state.move_to(voice_channel)
+        elif not bot_state:
+            voicechannel = discord.utils.get(member.guild.channels, id=voice_channel.id)
+            vc = await voicechannel.connect()
+
+        # await asyncio.sleep(2)
+        voice_client: discord.VoiceClient = discord.utils.get(client.voice_clients, guild=member.guild)
+        try:
+            voice_client.stop()
+        except Exception as e:
+            pass
+
+        if voice_client and not voice_client.is_playing():
+            audio_source = discord.FFmpegPCMAudio(audio_path)
+            voice_client.play(audio_source)
+        else:
+            print('couldnt play it!')
+
+    except Exception as e:
+        print(e)
+        return

@@ -23,6 +23,7 @@ from mysqldb import the_database
 from extra.menu import ConfirmSkill, InroleLooping
 from extra.useful_variables import patreon_roles
 from extra import utils
+from extra.view import SoundBoardView
 
 guild_ids = [int(os.getenv('SERVER_ID'))]
 
@@ -900,6 +901,31 @@ class Tools(commands.Cog):
 	# 		await ctx.send(staff_member.mention)
 	# 	else:
 	# 		await ctx.send("**For some reason I couldn't ping them =\ **")
+
+	@commands.command(aliases=['sound', 'board', 'sound_board'])
+	@utils.is_allowed([mod_role_id, admin_role_id, owner_role_id], throw_exc=True)
+	@commands.cooldown(1, 60, commands.BucketType.user)
+	async def soundboard(self, ctx) -> None:
+		""" Sends a soundboard into the channel. """
+
+		author = ctx.author
+
+		author_state = author.voice
+		if not (vc := author_state and author_state.channel):
+			ctx.command.reset_cooldown(ctx)
+			return await ctx.send(f"**You're not in a VC!**")
+
+		embed = discord.Embed(
+			title="__Soundboard__",
+			description="Click any of the buttons below to play different sounds in the Voice Channel.",
+			color=author.color,
+			timestamp=ctx.message.created_at
+		)
+		embed.add_field(name="Info:", value=f"Soundboard is bound to the {vc.mention} `Voice Channel`.")
+		embed.set_footer(text=f"Started by {author}", icon_url=author.display_avatar)
+		view: discord.ui.View = SoundBoardView(ctx, self.client)
+
+		await ctx.send(content="\u200b", embed=embed, view=view)
 
 def setup(client):
 	client.add_cog(Tools(client))
