@@ -345,7 +345,7 @@ class Misc(commands.Cog):
         if not time:
             return await ctx.send(f"**Inform a time, {member.mention}!**")
 
-        time_dict, seconds = await self.client.get_cog('Moderation').get_mute_time(ctx=ctx, time=time)
+        time_dict, seconds = await utils.get_time_from_text(ctx=ctx, time=time)
         if not seconds:
             return
 
