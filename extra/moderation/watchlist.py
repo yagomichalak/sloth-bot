@@ -18,7 +18,7 @@ class ModerationWatchlistTable(commands.Cog):
 
 
     @commands.command(aliases=['wl'])
-    @utils.is_allowed(allowed_roles)
+    @utils.is_allowed(allowed_roles, throw_exc=True)
     async def watchlist(self, ctx, members: commands.Greedy[discord.Member] or commands.Greedy[discord.User] = None, *, reason: str = None) -> None:
         """ Puts 1 or more members in the watchlist.
         :param member: The member to put in the watchlist.
@@ -57,7 +57,7 @@ class ModerationWatchlistTable(commands.Cog):
 
 
     @commands.command(aliases=['remove_watchlist', 'delete_watchlist', 'del_watchlist', 'uwl'])
-    @utils.is_allowed(allowed_roles)
+    @utils.is_allowed(allowed_roles, throw_exc=True)
     async def unwatchlist(self, ctx, members: commands.Greedy[discord.Member] or commands.Greedy[discord.User] = None) -> None:
         """ Removes the members from the watchlist.
         :param member: The members to remove of the watchlist. """
