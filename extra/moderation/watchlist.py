@@ -19,7 +19,7 @@ class ModerationWatchlistTable(commands.Cog):
 
     @commands.command()
     @utils.is_allowed(allowed_roles)
-    async def watchlist(self, ctx, members: commands.Greedy[discord.Member] = None, *, reason: str = None) -> None:
+    async def watchlist(self, ctx, members: commands.Greedy[discord.Member] or commands.Greedy[discord.User] = None, *, reason: str = None) -> None:
         """ Puts 1 or more members in the watchlist.
         :param member: The member to put in the watchlist.
         :param reason: The reason for putting the member(s) in the watchist. """
