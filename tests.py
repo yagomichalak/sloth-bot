@@ -74,20 +74,81 @@
 # await ctx.send(embed=embed, view=view)
 
 
-z!eval
+# z!eval
 
-embed = discord.Embed(
-title="Nitro", description="Expires in 46 hours", color=int('36393F', 16))
-space = '\u2800 '*8
-embed.set_author(name="A WILD GIFT APPEARS")
-view = discord.ui.View(timeout=None)
-class MyButton(discord.ui.Button):
-    def __init__(self) -> None:
-        super().__init__(style=discord.ButtonStyle.success, label=f"{space}ACCEPT{space}", custom_id="nitro_id")
+# embed = discord.Embed(
+# title="Nitro", description="Expires in 46 hours", color=int('36393F', 16))
+# space = '\u2800 '*8
+# embed.set_author(name="A WILD GIFT APPEARS")
+# view = discord.ui.View(timeout=None)
+# class MyButton(discord.ui.Button):
+#     def __init__(self) -> None:
+#         super().__init__(style=discord.ButtonStyle.success, label=f"{space}ACCEPT{space}", custom_id="nitro_id")
 
-    async def callback(self, interaction: discord.Interaction) -> None:
-        await interaction.response.send_message("https://c.tenor.com/Z6gmDPeM6dgAAAAM/dance-moves.gif")
+#     async def callback(self, interaction: discord.Interaction) -> None:
+#         await interaction.response.send_message(f"{interaction.user.mention}\nhttps://c.tenor.com/Z6gmDPeM6dgAAAAM/dance-moves.gif")
 
-view.add_item(MyButton())
-embed.set_thumbnail(url="https://pbs.twimg.com/media/EmSIbDzXYAAb4R7.png")
-await ctx.send(content="\u200b", embed=embed, view=view)
+# view.add_item(MyButton())
+# embed.set_thumbnail(url="https://pbs.twimg.com/media/EmSIbDzXYAAb4R7.png")
+# await ctx.send(content="\u200b", embed=embed, view=view)
+
+"""
+UPDATE UserCurrency AS OG,
+     (SELECT user_id, user_money FROM UserCurrency WHERE user_id = 814130010260373515) T
+    SET OG.user_money = OG.user_money + T.user_money
+ WHERE OG.user_id = 754678627265675325;
+
+"""
+
+"""
+UPDATE TribeMember AS OG,
+    (SELECT member_id, tribe_role FROM TribeMember WHERE member_id =  657561152951156777) T
+SET OG.tribe_role = T.tribe_role, T.tribe_role = 'Owner'
+WHERE OG.member_id = 647452832852869120
+"""
+"""
+SELECT * FROM TribeMember AS OG, (SELECT member_id, tribe_role FROM TribeMember T WHERE T.member_id = 657561152951156777) T WHERE OG.member_id = 647452832852869120
+"""
+
+
+"""
+SELECT OG.member_id, OG.tribe_role FROM TribeMember AS OG, (SELECT member_id, tribe_role FROM TribeMember WHERE member_id = 657561152951156777) T WHERE OG.member_id = 647452832852869120;
+"""
+
+"""
+UPDATE TribeMember OG 
+    JOIN (
+           SELECT owner_id, member_id, tribe_role
+           FROM TribeMember
+           WHERE member_id in (657561152951156777, 647452832852869120)
+          ) T
+    ON T.owner_id = OG.owner_id
+    SET OG.tribe_role = T.tribe_role, T.tribe_role = 'Owner' 
+    WHERE OG.member_id in (657561152951156777, 647452832852869120)
+"""
+
+"""
+UPDATE TribeMember as Gl, (
+    SELECT owner_id, member_id, tribe_role
+    FROM TribeMember
+    WHERE member_id = 647452832852869120
+) OG, (
+    SELECT owner_id, member_id, tribe_role
+    FROM TribeMember
+    WHERE member_id = 657561152951156777
+) T
+SET GL.tribe_role = ( 
+    CASE 
+        WHEN member_id = 647452832852869120 THEN T.tribe_role
+        WHEN member_id = 657561152951156777 THEN 'Owner'
+    END
+);
+"""
+
+
+"""
+
+UPDATE TribeMember as OG
+    JOIN TribeMember as T ON OG.member_id = T.
+    SET OG.tribe_role = T.tribe_role, T.tribe_role = 'Owner';
+"""

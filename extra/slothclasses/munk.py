@@ -1055,6 +1055,39 @@ class Munk(Player):
 
         return tribe_role_embed
 
+    async def update_user_tribe_owner(self, old_owner_id: int, new_owner_id: int) -> None:
+        """ Updates the user's Tribe Role.
+        :param old_owner_id: The old Tribe owner's ID.
+        :param new_owner_id: The new Tribe owner's ID. """
+
+        mycursor1, db1 = await the_database()
+        await mycursor1.execute("UPDATE UserTribe SET user_id = %s WHERE user_id = %s", (new_owner_id, old_owner_id))
+        await mycursor1.execute("""
+            UPDATE TribeMember as GL, (
+                SELECT owner_id, member_id, tribe_role
+                FROM TribeMember
+                WHERE member_id = %s
+            ) OG, (
+                SELECT owner_id, member_id, tribe_role
+                FROM TribeMember
+                WHERE member_id = %s
+            ) T
+            SET GL.tribe_role = ( 
+                CASE 
+                    WHEN GL.member_id = %s THEN T.tribe_role
+                    WHEN GL.member_id = %s THEN OG.tribe_role
+                END
+            )
+            WHERE GL.member_id in (%s, %s);
+        """, (new_owner_id, old_owner_id, new_owner_id, old_owner_id, new_owner_id, old_owner_id))
+        await db1.commit()
+        await mycursor1.close()
+
+        mycursor2, db2 = await the_django_database()
+        await mycursor2.execute("UPDATE tribe_tribe SET owner_id = %s WHERE owner_id = %s", (new_owner_id, old_owner_id))
+        await db2.commit()
+        await mycursor2.close()
+
     async def update_user_tribe_role(self, user_id: int, role_name: Optional[str] = None) -> None:
         """ Updates the user's Tribe Role.
         :param user_id: The Tribe Member's ID.
@@ -1070,3 +1103,27 @@ class Munk(Player):
         await db.commit()
         await mycursor.close()
     
+
+    @tribe.command(aliases=['to', 'transfer'])
+    @commands.cooldown(1, 60, commands.BucketType.user)
+    async def transfer_ownership(self, ctx, *, member: discord.Member = None) -> None:
+        """ Transfers the ownership of your tribe to someone else. """
+
+        perpetrator = ctx.author
+
+        if not member:
+            return await ctx.send(f"**Please, inform a member, {perpetrator.mention}!**")
+
+        user_tribe = await self.get_tribe_info_by_user_id(perpetrator.id)
+        if not user_tribe['name']:
+            return await ctx.send(f"**You don't have a tribe, {perpetrator.mention}**!")
+
+        confirm = await ConfirmSkill(
+            f"**Are you sure you want to transfer your ownership of `{user_tribe['name']}` to {member.mention}, {perpetrator.mention}?**"
+            ).prompt(ctx)
+        if not confirm:
+            return await ctx.send(f"**Not doing it, then, {perpetrator.mention}!**")
+
+        await self.update_user_tribe_owner(perpetrator.id, member.id)
+        await ctx.send(f"**Successfully transferred ownership of `{user_tribe['name']}` from {perpetrator.mention} to {member.mention}!**")
+
