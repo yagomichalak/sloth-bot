@@ -17,7 +17,7 @@ class ModerationWatchlistTable(commands.Cog):
         self.client = client
 
 
-    @commands.command()
+    @commands.command(aliases=['wl'])
     @utils.is_allowed(allowed_roles)
     async def watchlist(self, ctx, members: commands.Greedy[discord.Member] or commands.Greedy[discord.User] = None, *, reason: str = None) -> None:
         """ Puts 1 or more members in the watchlist.
@@ -56,33 +56,31 @@ class ModerationWatchlistTable(commands.Cog):
                 await ctx.send(f"**{member} is already in the watchlist, {author.mention}**")
 
 
-    @commands.command(aliases=['remove_watchlist', 'delete_watchlist', 'del_watchlist'])
+    @commands.command(aliases=['remove_watchlist', 'delete_watchlist', 'del_watchlist', 'uwl'])
     @utils.is_allowed(allowed_roles)
-    async def unwatchlist(self, ctx, member: Union[discord.Member, discord.User] = None) -> None:
-        """ Removes a member from the watchlist.
-        :param member: The member to put in the watchlist. """
+    async def unwatchlist(self, ctx, members: commands.Greedy[discord.Member] or commands.Greedy[discord.User] = None) -> None:
+        """ Removes the members from the watchlist.
+        :param member: The members to remove of the watchlist. """
 
         author = ctx.author
-        if not member:
+
+        if not members:
             return await ctx.send(f"**Please, inform a member to remove from the watchlist, {author.mention}!**")
 
-        if not (wl_entry := await self.get_user_watchlist(member.id)):
-            return await ctx.send(f"**{member} is not in the watchlist, {author.mention}**")
+        for member in members:
+            if (wl_entry := await self.get_user_watchlist(member.id)):
+                try:
+                    watchlist_channel = self.client.get_channel(watchlist_channel_id)
+                    msg = await watchlist_channel.fetch_message(wl_entry[1])
+                    await msg.delete()
+                except:
+                    pass
 
-        try:
-            watchlist_channel = self.client.get_channel(watchlist_channel_id)
-            msg = await watchlist_channel.fetch_message(wl_entry[1])
-            await msg.delete()
-        except:
-            pass
+                await self.delete_user_watchlist(member.id)
+                await ctx.send(f"**Successfully removed `{member}` from the watchlist, {author.mention}!**")
 
-        confirm = await Confirm(f"**Are you sure you want to remove `{member}` from the watchlist, {author.mention}?**").prompt(ctx)
-        if not confirm:
-            return await ctx.send(f"**Not doing it, then, {author.mention}!**")
-
-        await self.delete_user_watchlist(member.id)
-        await ctx.send(f"**Successfully removed `{member}` from the watchlist, {author.mention}!**")
-
+            else:
+                await ctx.send(f"**{member} is not in the watchlist, {author.mention}**")
 
 
     @commands.command(hidden=True)
