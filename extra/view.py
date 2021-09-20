@@ -2,10 +2,11 @@ import discord
 from discord.components import SelectOption
 from extra import utils
 from discord.ext import commands
-from typing import List, Union, Optional
+from typing import List, Union, Optional, Dict
 from .menu import ConfirmSkill
 from .select import ReportSupportSelect
 import os
+import json
 
 
 mod_role_id = int(os.getenv('MOD_ROLE_ID'))
@@ -283,3 +284,61 @@ class GiveawayView(discord.ui.View):
             await cog.insert_giveaway_entry(user.id, message.id)
             await interaction.followup.send(f"**Thank you for participating, {user.mention}!** ✅", ephemeral=True)
 
+
+
+class SoundBoardButton(discord.ui.Button):
+    """ Button of the soundboard. """
+
+    def __init__(self, *, custom_id: Optional[str] = None, row: Optional[int] = None) -> None:
+        super().__init__(style=discord.ButtonStyle.blurple, label='\u200b', custom_id=custom_id, row=row)
+
+
+    async def callback(self, interaction: discord.Interaction) -> None:
+        """ Soundboard's button callback. """
+
+        await interaction.response.defer()
+        sound: Dict[str, str] = self.view.sounds.get(self.custom_id)
+        await self.play_sound(interaction, sound)
+
+    async def play_sound(self, interaction: discord.Interaction, sound: Dict[str, str]) -> None:
+        """ Plays a sound in the voice channel. """
+
+        author = interaction.user
+
+        author_state = author.voice
+        if not (vc := author_state and author_state.channel):
+            return await interaction.followup.send(f"**You're not in a VC!**", ephemeral=True)
+
+        if (ovc := author.guild.voice_client) and ovc.channel.id != vc.id:
+            return await interaction.followup.send(f"**You are not in the origin voice channel ({ovc.channel.mention})!**", ephemeral=True)
+
+        await utils.audio(self.view.client, vc, author, sound)
+
+
+class SoundBoardView(discord.ui.View):
+    """ View for the soundboard. """
+
+    def __init__(self, ctx: commands.Context, client: commands.Bot, timeout: Optional[float] = 180) -> None:
+        super().__init__(timeout=timeout)
+        self.ctx = ctx
+        self.client = client
+        self.sounds: List[Dict[str, str]] = self.get_sounds()
+
+        counter: int = 0
+        for i in range(5):
+            for _ in range(5):
+                counter += 1
+                button = SoundBoardButton(custom_id=f"sb_btn_{counter}_id", row=i)
+                self.add_item(button)
+
+    def get_sounds(self) -> List[Dict[str, str]]:
+        """ Gets a list of sounds to play on the soundboard. """
+
+        data = {}
+        with open('extra/random/json/sounds.json', 'r', encoding='utf-8') as file:
+            data = json.loads(file.read())
+
+        return data
+
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        return interaction.user.id == self.ctx.author.id
