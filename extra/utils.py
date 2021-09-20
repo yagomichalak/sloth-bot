@@ -181,6 +181,23 @@ async def get_mentions(message: discord.Message) -> List[discord.Member]:
 
     return members
 
+async def get_voice_channel_mentions(message: discord.Message) -> List[discord.VoiceChannel]:
+    """ Get voice channel mentions from a specific message.
+    :param message: The message to get the mentions from. """
+
+    guild = message.guild
+
+    channel_mentions = [
+        m for word in message.content.split()
+        if word.isdigit() and (m := discord.utils.get(guild.voice_channels, id=int(word)))
+        or (m := discord.utils.get(guild.voice_channels, name=str(word)))
+    ]
+
+    channel_mentions.extend(list(map(lambda c: isinstance(c, discord.VoiceChannel), message.channel_mentions)))
+    channel_mentions = list(set(channel_mentions))
+
+    return channel_mentions
+
 async def disable_buttons(view: discord.ui.View) -> None:
     """ Disables all buttons from a view.
     :param view: The view from which to disable the buttons. """
