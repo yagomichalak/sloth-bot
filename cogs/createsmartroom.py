@@ -1181,24 +1181,6 @@ You can only add either **threads** **OR** one **voice channel**"""))
 		allowed = ', '.join(allowed)
 		await ctx.send(f"**{allowed} {'have' if len(allowed) > 1 else 'has'} been allowed, {member.mention}!**")
 
-	@staticmethod
-	async def get_voice_channel_mentions(message: discord.Message) -> List[discord.VoiceChannel]:
-		""" Get voice channel mentions from a specific message.
-		:param message: The message to get the mentions from. """
-
-		guild = message.guild
-
-		channel_mentions = [
-			m for word in message.content.split()
-			if word.isdigit() and (m := discord.utils.get(guild.voice_channels, id=int(word)))
-			or (m := discord.utils.get(guild.voice_channels, name=str(word)))
-		]
-
-		channel_mentions.extend(list(map(lambda c: isinstance(c, discord.VoiceChannel), message.channel_mentions)))
-		channel_mentions = list(set(channel_mentions))
-
-		return channel_mentions
-
 	@commands.command(aliases=['prohibit'])
 	async def forbid(self, ctx) -> None:
 		""" Forbids one or more members from joining your channels.
