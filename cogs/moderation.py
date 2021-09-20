@@ -204,7 +204,7 @@ class Moderation(*moderation_cogs):
 		last_deleted_message.append(message)
 
 	@commands.command()
-	@utils.is_allowed(allowed_roles)
+	@utils.is_allowed(allowed_roles, throw_exc=True)
 	async def snipe(self, ctx):
 		'''
 		(MOD) Snipes the last deleted message.
@@ -253,7 +253,7 @@ class Moderation(*moderation_cogs):
 			await ctx.channel.purge(limit=amount)
 
 	@commands.command()
-	@utils.is_allowed(allowed_roles)
+	@utils.is_allowed(allowed_roles, throw_exc=True)
 	async def clear(self, ctx):
 		'''
 		(MOD) Clears the whole channel.
@@ -316,7 +316,7 @@ class Moderation(*moderation_cogs):
 
 	# Warns a member
 	@commands.command()
-	@utils.is_allowed(allowed_roles)
+	@utils.is_allowed(allowed_roles, throw_exc=True)
 	async def warn(self, ctx, member: discord.Member = None, *, reason: Optional[str] = None):
 		'''
 		(MOD) Warns a member.
@@ -970,7 +970,7 @@ class Moderation(*moderation_cogs):
 
 	# Bans a member
 	@commands.command()
-	@utils.is_allowed(allowed_roles)
+	@utils.is_allowed(allowed_roles, throw_exc=True)
 	async def softban(self, ctx, member: discord.Member = None, *, reason: Optional[str] = None):
 		""" (ModTeam/ADM) Softbans a member from the server.
 		:param member: The @ or ID of the user to ban.
@@ -1157,7 +1157,7 @@ class Moderation(*moderation_cogs):
 
 	# Infraction methods
 	@commands.command(aliases=['infr', 'show_warnings', 'sw', 'show_bans', 'sb', 'show_muted', 'sm'])
-	@utils.is_allowed(allowed_roles)
+	@utils.is_allowed(allowed_roles, throw_exc=True)
 	async def infractions(self, ctx, member: Optional[Union[discord.User, discord.Member]] = None) -> None:
 		""" Shows all infractions of a specific user.
 		:param member: The member to show the infractions from. [Optional] [Default = You] """
@@ -1200,7 +1200,7 @@ class Moderation(*moderation_cogs):
 		await ctx.send(embed=embed)
 
 	@commands.command(aliases=['ri', 'remove_warn', 'remove_warning'])
-	@utils.is_allowed(allowed_roles)
+	@utils.is_allowed(allowed_roles, throw_exc=True)
 	async def remove_infraction(self, ctx, infr_id: int = None):
 		"""
 		(MOD) Removes a specific infraction by ID.
@@ -1218,7 +1218,7 @@ class Moderation(*moderation_cogs):
 			await ctx.send(f"**Infraction with ID `{infr_id}` was not found!**")
 
 	@commands.command(aliases=['ris', 'remove_warns', 'remove_warnings'])
-	@utils.is_allowed(allowed_roles)
+	@utils.is_allowed(allowed_roles, throw_exc=True)
 	async def remove_infractions(self, ctx, member: discord.Member = None):
 		"""
 		(MOD) Removes all infractions for a specific user.
@@ -1236,7 +1236,7 @@ class Moderation(*moderation_cogs):
 	
 
 	@commands.command(aliases=['ei'])
-	@utils.is_allowed(allowed_roles)
+	@utils.is_allowed(allowed_roles, throw_exc=True)
 	async def edit_infraction(self, ctx, infr_id: int = None, *, reason: str) -> None:
 		"""(MOD) Edits a specific infraction by ID.
 		:param infr_id: The infraction ID.
