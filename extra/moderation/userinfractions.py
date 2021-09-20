@@ -129,6 +129,6 @@ class ModerationUserInfractionsTable(commands.Cog):
         """ Edits a infraction of a user by ID. """
 
         mycursor, db = await the_database()
-        await mycursor.execute(f"UPDATE UserInfractions SET infraction_reason = %s WHERE infraction_id = %s", (new_reason, infraction_id,))
+        await mycursor.execute("UPDATE UserInfractions SET infraction_reason = %s WHERE infraction_id = %s", (new_reason, infraction_id,))
         await db.commit()
         await mycursor.close()
