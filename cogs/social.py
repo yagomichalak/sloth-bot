@@ -1,5 +1,5 @@
 import discord
-from discord.app.commands import Option
+from discord.app.commands import Option, slash_command
 from discord.ext import commands
 from random import randint
 import aiohttp
@@ -17,6 +17,7 @@ admin_role_id = int(os.getenv('ADMIN_ROLE_ID'))
 teacher_role_id = int(os.getenv('TEACHER_ROLE_ID'))
 watchlist_channel_id = int(os.getenv('WATCHLIST_CHANNEL_ID'))
 slothboard_channel_id = int(os.getenv('SLOTHBOARD_CHANNEL_ID'))
+booster_role_id = int(os.getenv('BOOSTER_ROLE_ID'))
 guild_ids = [int(os.getenv('SERVER_ID'))]
 
 class Social(commands.Cog):
@@ -309,31 +310,37 @@ class Social(commands.Cog):
         em.set_image(url=data['img'])
         await ctx.send(embed=em)
 
-    # @commands.slash_command(name="youtube_together", guild_ids=guild_ids)
-    # @utils.is_allowed([*useful_variables.patreon_roles.keys(), mod_role_id, admin_role_id, teacher_role_id], throw_exc=True)
-    # async def youtube_together(self, ctx: discord.ApplicationContext,
-    #     voice_channel: Option(discord.abc.GuildChannel, description="The voice channel in which to create the party.")
-    # ) -> None:
-    #     """ Creates a YouTube Together session in a VC. """
+    @slash_command(name="youtube_together", guild_ids=guild_ids)
+    @utils.is_allowed([booster_role_id, *useful_variables.patreon_roles.keys(), mod_role_id, admin_role_id, teacher_role_id], throw_exc=True)
+    async def youtube_together(self, ctx,
+        voice_channel: Option(discord.abc.GuildChannel, description="The voice channel in which to create the party.")
+    ) -> None:
+        """ Creates a YouTube Together session in a VC. """
 
-    #     member = ctx.author
+        member = ctx.author
 
-    #     if not isinstance(voice_channel, discord.VoiceChannel):
-    #         return await ctx.send(f"**Please, select a `Voice Channel`, {member.mention}!**")
+        if not isinstance(voice_channel, discord.VoiceChannel):
+            return await ctx.respond(f"**Please, select a `Voice Channel`, {member.mention}!**")
 
-    #     link = await voice_channel.create_activity_invite('youtube')
-    #     current_time = await utils.get_time_now()
+        link: str = ''
+        try:
+            link = await voice_channel.create_activity_invite(event='youtube', max_age=600)
+        except Exception as e:
+            print("Invite creation error: ", e)
+            await ctx.respond(f"**For some reason I couldn't create it, {member.mention}!**")
+        current_time = await utils.get_time_now()
 
-    #     view = discord.ui.View()
-    #     view.add_item(discord.ui.Button(url=str(link), label="Start/Join the Party!", emoji="🔴"))
-    #     embed = discord.Embed(
-    #         title="__Youtube Together__",
-    #         color=discord.Color.red(),
-    #         timestamp=current_time,
-    #         url=link
-    #     )
-    #     embed.set_footer(text=f"Created by {member}", icon_url=member.display_avatar)
-    #     await ctx.send(embed=embed, view=view)
+        view = discord.ui.View()
+        view.add_item(discord.ui.Button(url=str(link), label="Start/Join the Party!", emoji="🔴"))
+        embed = discord.Embed(
+            title="__Youtube Together__",
+            color=discord.Color.red(),
+            timestamp=current_time,
+            url=link
+        )
+        embed.set_author(name=member, url=member.display_avatar, icon_url=member.display_avatar)
+        embed.set_footer(text=f"(Expires in 5 minutes)", icon_url=ctx.guild.icon.url)
+        await ctx.respond("\u200b", embed=embed, view=view)
 
 
 def setup(client):

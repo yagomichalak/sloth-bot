@@ -1,5 +1,6 @@
 import discord
 from discord.app import Option, OptionChoice
+from discord.app.commands import slash_command
 from discord.ext import commands, menus
 from discord.utils import escape_mentions
 from mysqldb import *
@@ -524,6 +525,14 @@ class SlothCurrency(commands.Cog):
         """ Shows the member's profile with their custom sloth.
         :param member: The member to see the profile. (Optional) """
 
+        await self._profile(ctx, member)
+
+    @slash_command(name="profile", guild_ids=guild_ids)
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def _profile_slash(self, ctx, member: Option(discord.Member, description="The member to show the info; [Default=Yours]", required=False)) -> None:
+        """ Shows the member's profile with their custom sloth. """
+
+        await ctx.defer()
         await self._profile(ctx, member)
 
     async def _profile(self, ctx, member: discord.Member = None):

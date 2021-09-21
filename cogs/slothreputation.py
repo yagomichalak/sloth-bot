@@ -1,5 +1,6 @@
 import discord
 from discord.app import Option, OptionChoice
+from discord.app.commands import slash_command
 from discord.ext import commands
 from mysqldb import *
 from datetime import datetime
@@ -12,6 +13,8 @@ from .slothclass import classes
 guild_ids = [int(os.getenv('SERVER_ID'))]
 
 commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
+
+# grupao = SlashCommandGroup.command(name="testeee", description="soh um testeee")
 
 
 class SlothReputation(commands.Cog):
@@ -88,6 +91,15 @@ class SlothReputation(commands.Cog):
         """ Shows the user's level and experience points.
         :param member: The member to show the info. [Optional][Default=You] """
 
+        await self._info(ctx, member)
+
+    @slash_command(name="info", guild_ids=guild_ids)
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def _info_slash(self, ctx, 
+        member: Option(discord.Member, description="The member to show the info; [Default=Yours]", required=False)) -> None:
+        """ Shows the user's level and experience points. """
+
+        await ctx.defer()
         await self._info(ctx, member)
 
     async def _info(self, ctx, member: discord.Member = None) -> None:
@@ -228,6 +240,21 @@ class SlothReputation(commands.Cog):
 
             return await answer("\u200b", embed=embed, view=view)
 
+
+    @slash_command(name="leaderboard", guild_ids=guild_ids)
+    async def _leaderboard(self, ctx, 
+        info_for: Option(str, description="The leaderboard to show the information for.", choices=[
+            'Reputation', 'Level', 'Leaves', 'Time'])) -> None:
+        """ Shows the leaderboard. """
+
+        if info_for == 'Reputation':
+            await self.score(ctx)
+        elif info_for == 'Level':
+            await self.level_score(ctx)
+        elif info_for == 'Leaves':
+            await self.leaf_score(ctx)
+        elif info_for == 'Time':
+            await self.time_score(ctx)
 
 
     @commands.command(aliases=['leaderboard', 'lb', 'scoreboard'])

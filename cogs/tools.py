@@ -1,6 +1,6 @@
 import discord
 from discord.app import Option, OptionChoice
-from discord.app.commands import slash_command, user_command, message_command
+from discord.app.commands import slash_command, message_command
 from discord.ext import commands, menus
 import asyncio
 from gtts import gTTS
@@ -115,15 +115,13 @@ class Tools(commands.Cog):
 
 	# Bot leaves
 	@commands.command()
-	@commands.has_any_role(*[mod_role_id, admin_role_id, owner_role_id])
+	@utils.is_allowed([mod_role_id, admin_role_id, owner_role_id], throw_exc=True)
 	async def leave(self, ctx):
-		'''
-		(MOD) Makes the bot leave the voice channel.
-		'''
+		""" (MOD) Makes the bot leave the voice channel. """
+
 		guild = ctx.message.guild
 		voice_client = guild.voice_client
 		user_voice = ctx.message.author.voice
-		# voice_client: discord.VoiceClient = discord.utils.get(self.client.voice_clients, guild=ctx.guild)
 
 		if voice_client:
 			if user_voice.channel == voice_client.channel:
@@ -136,7 +134,7 @@ class Tools(commands.Cog):
 
 	@commands.command()
 	@commands.cooldown(1, 5, type=commands.BucketType.guild)
-	@commands.has_any_role(*allowed_roles)
+	@utils.is_allowed(allowed_roles, throw_exc=True)
 	async def tts(self, ctx, language: str = None, *, message: str = None):
 		'''
 		(BOOSTER) Reproduces a Text-to-Speech message in the voice channel.
@@ -187,6 +185,15 @@ class Tools(commands.Cog):
 			return await ctx.send("**Please, inform a message to translate!**", delete_after=5)
 
 		await self._tr_callback(ctx, language, message, True)
+
+
+	@message_command(name="Translate", guild_ids=guild_ids)
+	async def _tr_slash(self, ctx, message: discord.Message) -> None:
+		""" Translates a message into another language. """
+
+		await ctx.defer(ephemeral=True)
+		language: str = 'en'    
+		await self._tr_callback(ctx, language, message.content)
 
 
 	async def _tr_callback(self, ctx, language: str = None, message: str = None, show_src: bool = False) -> None:
@@ -858,50 +865,50 @@ class Tools(commands.Cog):
 
 		await ctx.reply(f"**We currently have `{len(ctx.guild.channels)}` channels!**")
 
-	# @commands.slash_command(name="timestamp", guild_ids=guild_ids)
-	# async def _timestamp(self, ctx, 
-	# 		hour: Option(int, name="hour", description="Hour of time in 24 hour format.", required=False),
-	# 		minute: Option(int, name="minute", description="Minute of time.", required=False),
-	# 		day: Option(int, name="day", description="Day of date.", required=False),
-	# 		month: Option(int, name="month", description="Month of date.", required=False),
-	# 		year: Option(int, name="year", description="Year of date.", required=False)) -> None:
-	# 	""" Gets a timestamp for a specific date and time. - Output will format according to your timezone. """
+	@commands.slash_command(name="timestamp", guild_ids=guild_ids)
+	async def _timestamp(self, ctx, 
+			hour: Option(int, name="hour", description="Hour of time in 24 hour format.", required=False),
+			minute: Option(int, name="minute", description="Minute of time.", required=False),
+			day: Option(int, name="day", description="Day of date.", required=False),
+			month: Option(int, name="month", description="Month of date.", required=False),
+			year: Option(int, name="year", description="Year of date.", required=False)) -> None:
+		""" Gets a timestamp for a specific date and time. - Output will format according to your timezone. """
 
-	# 	current_date = await utils.get_time_now()
+		current_date = await utils.get_time_now()
 
-	# 	if hour: current_date = current_date.replace(hour=hour)
-	# 	if minute: current_date = current_date.replace(minute=minute)
-	# 	if day: current_date = current_date.replace(day=day)
-	# 	if month: current_date = current_date.replace(month=month)
-	# 	if year: current_date = current_date.replace(year=year)
+		if hour: current_date = current_date.replace(hour=hour)
+		if minute: current_date = current_date.replace(minute=minute)
+		if day: current_date = current_date.replace(day=day)
+		if month: current_date = current_date.replace(month=month)
+		if year: current_date = current_date.replace(year=year)
 
-	# 	embed = discord.Embed(
-	# 		title="__Timestamp Created__",
-	# 		description=f"Requested date: `{current_date.strftime('%m/%d/%Y %H:%M')}` (**GMT**)",
-	# 		color=ctx.author.color
-	# 	)
-	# 	timestamp = int(current_date.timestamp())
-	# 	embed.add_field(name="Output", value=f"<t:{timestamp}>")
-	# 	embed.add_field(name="Copyable", value=f"\<t:{timestamp}>")
+		embed = discord.Embed(
+			title="__Timestamp Created__",
+			description=f"Requested date: `{current_date.strftime('%m/%d/%Y %H:%M')}` (**GMT**)",
+			color=ctx.author.color
+		)
+		timestamp = int(current_date.timestamp())
+		embed.add_field(name="Output", value=f"<t:{timestamp}>")
+		embed.add_field(name="Copyable", value=f"\<t:{timestamp}>")
 
-	# 	await ctx.send(embed=embed, ephemeral=True)
+		await ctx.respond(embed=embed, ephemeral=True)
 
-	# @commands.slash_command(name="mention", guild_ids=guild_ids)
-	# @utils.is_allowed([mod_role_id, admin_role_id, owner_role_id])
-	# async def _mention(self, ctx, 
-	# 	member: Option(str, name="member", description="The Staff member to mention/ping.", required=True,
-	# 		choices=[
-	# 			OptionChoice(name="Cosmos", value=os.getenv('COSMOS_ID')), OptionChoice(name="Alex", value=os.getenv('ALEX_ID')),
-	# 			OptionChoice(name="DNK", value=os.getenv('DNK_ID')), OptionChoice(name="Muffin", value=os.getenv('MUFFIN_ID')),
-	# 			OptionChoice(name="Prisca", value=os.getenv('PRISCA_ID')), OptionChoice(name="GuiBot", value=os.getenv('GUIBOT_ID'))
-	# 		]
-	# 	)) -> None:
-	# 	""" (ADMIN) Used to mention staff members. """
+	@commands.slash_command(name="mention", guild_ids=guild_ids)
+	@utils.is_allowed([mod_role_id, admin_role_id, owner_role_id])
+	async def _mention(self, ctx, 
+		member: Option(str, name="member", description="The Staff member to mention/ping.", required=True,
+			choices=[
+				OptionChoice(name="Cosmos", value=os.getenv('COSMOS_ID')), OptionChoice(name="Alex", value=os.getenv('ALEX_ID')),
+				OptionChoice(name="DNK", value=os.getenv('DNK_ID')), OptionChoice(name="Muffin", value=os.getenv('MUFFIN_ID')),
+				OptionChoice(name="Prisca", value=os.getenv('PRISCA_ID')), OptionChoice(name="GuiBot", value=os.getenv('GUIBOT_ID'))
+			]
+		)) -> None:
+		""" (ADMIN) Used to mention staff members. """
 
-	# 	if staff_member := discord.utils.get(ctx.guild.members, id=int(member)):
-	# 		await ctx.send(staff_member.mention)
-	# 	else:
-	# 		await ctx.send("**For some reason I couldn't ping them =\ **")
+		if staff_member := discord.utils.get(ctx.guild.members, id=int(member)):
+			await ctx.respond(staff_member.mention)
+		else:
+			await ctx.respond("**For some reason I couldn't ping them =\ **")
 
 	@commands.command(aliases=['sound', 'board', 'sound_board'])
 	@utils.is_allowed([mod_role_id, admin_role_id, owner_role_id], throw_exc=True)
@@ -928,10 +935,34 @@ class Tools(commands.Cog):
 
 		await ctx.send(content="\u200b", embed=embed, view=view)
 
-	@slash_command(name="dest", guild_ids=guild_ids)
-	async def _dest(self, ctx) -> None:
+	@slash_command(name="poll", guild_ids=guild_ids)
+	@utils.is_allowed(allowed_roles, throw_exc=True)
+	async def _poll(self, ctx, 
+		description: Option(str, description="The description of the poll."),
+		title: Option(str, description="The title of the poll.", required=False, default="Poll"), 
+		role: Option(discord.Role, description="The role to tag in the poll.", required=False)) -> None:
+		""" Makes a poll.
+		:param title: The title of the poll.
+		:param description: The description of the poll. """
 
-		await ctx.respond("Dest")
+		await ctx.defer()
+
+		member = ctx.author
+		current_time = await utils.get_time_now()
+
+		embed = discord.Embed(
+			title=f"__{title}__",
+			description=description,
+			color=member.color,
+			timestamp=current_time
+		)
+
+		if role:
+			msg = await ctx.respond(content=role.mention, embed=embed)
+		else:
+			msg = await ctx.respond(embed=embed)
+		await msg.add_reaction('✅')
+		await msg.add_reaction('❌')
 
 def setup(client):
 	client.add_cog(Tools(client))

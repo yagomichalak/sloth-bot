@@ -1,5 +1,6 @@
 import discord
-from discord.app import Option, OptionChoice
+from discord.app import Option, OptionChoice, slash_command
+from discord.app.commands import slash_command
 from discord.ext import commands
 from extra import utils
 import os
@@ -71,41 +72,41 @@ class Embeds(commands.Cog):
                          icon_url='https://cdn.discordapp.com/attachments/562019489642709022/676564701399744512/jungle_2.gif')
         await ctx.send(embed=embed)
 
-    # @commands.slash_command(name="embed", default_permission=False, guild_ids=guild_ids)
-    # @commands.has_permissions(administrator=True)
-    # async def _embed(self, ctx,
-    #     description: Option(str, name="description", description="Description.", required=False),
-    #     title: Option(str, name="title", description="Title.", required=False),
-    #     timestamp: Option(bool, name="timestamp", description="If timestamp is gonna be shown.", required=False),
-    #     url: Option(str, name="url", description="URL for the title.", required=False),
-    #     thumbnail: Option(str, name="thumbnail", description="Thumbnail for the embed.", required=False),
-    #     image: Option(str, name="image", description="Display image.", required=False),
-    #     color: Option(str, name="color", description="The color for the embed.", required=False,
-    #         choices=[
-    #             OptionChoice(name="Blue", value="0011ff"), OptionChoice(name="Red", value="ff0000"),
-    #             OptionChoice(name="Green", value="00ff67"), OptionChoice(name="Yellow", value="fcff00"),
-    #             OptionChoice(name="Black", value="000000"), OptionChoice(name="White", value="ffffff"),
-    #             OptionChoice(name="Orange", value="ff7100"), OptionChoice(name="Brown", value="522400"),
-    #             OptionChoice(name="Purple", value="380058")])) -> None:
-    #     """ (ADM) Makes an improved embedded message """
+    @slash_command(name="embed", default_permission=False, guild_ids=guild_ids)
+    @commands.has_permissions(administrator=True)
+    async def _embed(self, ctx,
+        description: Option(str, name="description", description="Description.", required=False),
+        title: Option(str, name="title", description="Title.", required=False),
+        timestamp: Option(bool, name="timestamp", description="If timestamp is gonna be shown.", required=False),
+        url: Option(str, name="url", description="URL for the title.", required=False),
+        thumbnail: Option(str, name="thumbnail", description="Thumbnail for the embed.", required=False),
+        image: Option(str, name="image", description="Display image.", required=False),
+        color: Option(str, name="color", description="The color for the embed.", required=False,
+            choices=[
+                OptionChoice(name="Blue", value="0011ff"), OptionChoice(name="Red", value="ff0000"),
+                OptionChoice(name="Green", value="00ff67"), OptionChoice(name="Yellow", value="fcff00"),
+                OptionChoice(name="Black", value="000000"), OptionChoice(name="White", value="ffffff"),
+                OptionChoice(name="Orange", value="ff7100"), OptionChoice(name="Brown", value="522400"),
+                OptionChoice(name="Purple", value="380058")])) -> None:
+        """ (ADM) Makes an improved embedded message """
 
-    #     # Checks if there's a timestamp and sorts time
-    #     embed = discord.Embed()
+        # Checks if there's a timestamp and sorts time
+        embed = discord.Embed()
 
-    #     # Adds optional parameters, if informed
-    #     if title: embed.title = title
-    #     if timestamp: embed.timestamp = await utils.parse_time()
-    #     if description: embed.description = description.replace(r'\n', '\n')
-    #     if color: embed.color = int(color, 16)
-    #     if thumbnail: embed.set_thumbnail(url=thumbnail)
-    #     if url: embed.url = url
-    #     if image: embed.set_image(url=image)
+        # Adds optional parameters, if informed
+        if title: embed.title = title
+        if timestamp: embed.timestamp = await utils.parse_time()
+        if description: embed.description = description.replace(r'\n', '\n')
+        if color: embed.color = int(color, 16)
+        if thumbnail: embed.set_thumbnail(url=thumbnail)
+        if url: embed.url = url
+        if image: embed.set_image(url=image)
 
-    #     if not description and not image and not thumbnail:
-    #         return await ctx.send(
-    #             f"**{ctx.author.mention}, you must inform at least one of the following options: `description`, `image`, `thumbnail`**")
+        if not description and not image and not thumbnail:
+            return await ctx.respond(
+                f"**{ctx.author.mention}, you must inform at least one of the following options: `description`, `image`, `thumbnail`**")
 
-    #     await ctx.send(embed=embed)
+        await ctx.respond(embed=embed)
 
 
 def setup(client):
