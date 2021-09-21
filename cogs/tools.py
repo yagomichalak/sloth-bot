@@ -1,5 +1,6 @@
 import discord
 from discord.app import Option, OptionChoice
+from discord.app.commands import slash_command, user_command, message_command
 from discord.ext import commands, menus
 import asyncio
 from gtts import gTTS
@@ -926,6 +927,11 @@ class Tools(commands.Cog):
 		view: discord.ui.View = SoundBoardView(ctx, self.client)
 
 		await ctx.send(content="\u200b", embed=embed, view=view)
+
+	@slash_command(name="dest", guild_ids=guild_ids)
+	async def _dest(self, ctx) -> None:
+
+		await ctx.respond("Dest")
 
 def setup(client):
 	client.add_cog(Tools(client))
