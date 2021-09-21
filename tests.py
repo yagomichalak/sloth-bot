@@ -155,3 +155,14 @@ UPDATE TribeMember as OG
     JOIN TribeMember as T ON OG.member_id = T.
     SET OG.tribe_role = T.tribe_role, T.tribe_role = 'Owner';
 """
+
+
+# SELECT USA.user_id, USA.user_time
+# FROM UserServerActivity USA
+# LEFT JOIN SlothProfile SP ON SP.user_id = USA.user_id
+# WHERE SP.user_id IS NULL;
+
+
+# SELECT USA.user_id, round(USA.user_time/60/60) FROM UserServerActivity USA LEFT JOIN SlothProfile SP ON SP.user_id = USA.user_id WHERE SP.user_id IS NULL AND round(USA.user_time/60/60) >= 3000 ORDER BY USA.user_time DESC;
+
+# UPDATE UserServerActivity USA LEFT JOIN SlothProfile SP ON SP.user_id = USA.user_id SET USA.user_time = 0 WHERE SP.user_id IS NULL AND round(USA.user_time/60/60) >= 0;

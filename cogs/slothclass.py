@@ -296,7 +296,8 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
         # Loops all Sloth Classes
         for name, sloth_class in classes.items():
 
-            class_cmds = sloth_class.get_commands(sloth_class)
+            cog_commands = [c for c in sloth_class.__cog_commands__ if hasattr(c, 'parent') and c.parent is None]
+            class_cmds = cog_commands
             skills = []
 
             # Loops all commands of the Sloth Class
