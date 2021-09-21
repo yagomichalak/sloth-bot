@@ -2,6 +2,7 @@ from logging import exception
 import discord
 from discord import user
 from discord.ext import commands, tasks
+from discord.app import user_command
 import asyncio
 from mysqldb import *
 from datetime import datetime
@@ -30,6 +31,7 @@ mod_role_id = int(os.getenv('MOD_ROLE_ID'))
 
 allowed_roles = [int(os.getenv('OWNER_ROLE_ID')), int(os.getenv('ADMIN_ROLE_ID')), int(os.getenv('SENIOR_MOD_ROLE_ID')), mod_role_id]
 server_id = int(os.getenv('SERVER_ID'))
+guild_ids: List[int] = [server_id]
 
 moderation_cogs: List[commands.Cog] = [
 	ModerationFirewallTable, ModerationMutedMemberTable, ModerationUserInfractionsTable,
@@ -431,6 +433,16 @@ class Moderation(*moderation_cogs):
 
 		await self._mute_callback(ctx, member, reason)
 
+		
+	@user_command(name="Mute", guild_ids=guild_ids)
+	@utils.is_allowed(allowed_roles, throw_exc=True)
+	async def _mute_slash(self, ctx, user: discord.Member) -> None:
+		""" (MOD) Mutes a member.
+		:param member: The @ or the ID of the user to mute.
+		:param reason: The reason for the mute. """
+
+		await self._mute_callback(ctx, user)
+
 	async def _mute_callback(self, ctx: commands.Context, member: discord.Member = None, reason: Optional[str] = None):
 		""" (MOD) Mutes a member.
 		:param member: The @ or the ID of the user to mute.
@@ -498,6 +510,15 @@ class Moderation(*moderation_cogs):
 		:param member: The @ or the ID of the user to unmute. """
 
 		await self._unmute_callback(ctx, member)
+
+	@user_command(name="Unmute", guild_ids=guild_ids)
+	@utils.is_allowed(allowed_roles, throw_exc=True)
+	async def _unmute_slash(self, ctx, user: discord.Member) -> None:
+		""" (MOD) Mutes a member.
+		:param member: The @ or the ID of the user to mute.
+		:param reason: The reason for the mute. """
+
+		await self._unmute_callback(ctx, user)
 
 	async def _unmute_callback(self, ctx, member: discord.Member = None) -> None:
 		""" (MOD) Unmutes a member.

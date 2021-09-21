@@ -1,5 +1,6 @@
 import discord
 from discord.app import Option, OptionChoice
+from discord.app.commands import slash_command, user_command
 from discord.ext import commands, tasks
 from random import randint, choice
 from cogs.slothcurrency import SlothCurrency
@@ -415,22 +416,26 @@ class Misc(commands.Cog):
         await self.delete_member_reminder(reminder_id)
         await ctx.send(f"**Successfully deleted reminder with ID `{reminder_id}`, {member.mention}!**")
 
-    # @commands.slash_command(name="dnk", guild_ids=guild_ids)
-    # async def _dnk(self, ctx) -> None:
-    #     """ Tells you something about DNK. """
-    #     await ctx.send(f"**DNK est toujours là pour les vrais !**")
+    @slash_command(name="dnk", guild_ids=guild_ids)
+    async def _dnk(self, ctx) -> None:
+        """ Tells you something about DNK. """
+        await ctx.respond(f"**DNK est toujours là pour les vrais !**")
 
-    # @commands.slash_command(name="twiks", guild_ids=guild_ids)
-    # async def _twiks(self, ctx) -> None:
-    #     """ Tells you something about Twiks. """
+    @slash_command(name="twiks", guild_ids=guild_ids)
+    async def _twiks(self, ctx) -> None:
+        """ Tells you something about Twiks. """
 
-    #     await ctx.send(f"**Twiks est mon frérot !**")
+        await ctx.respond(f"**Twiks est mon frérot !**")
 
-    # @commands.user_command(name="click", guild_ids=guild_ids)
-    # async def _click(self, ctx, user: discord.Member) -> None:
-    #     """ Clicks on a user. """
+    @user_command(name="Click", guild_ids=guild_ids)
+    async def _click(self, ctx, user: discord.Member) -> None:
+        """ Clicks on a user. """
 
-    #     await ctx.send(f"**{ctx.author.mention} clicked on {user.mention}!**")
+        await ctx.respond(f"**{ctx.author.mention} clicked on {user.mention}!**")
+
+    @user_command(name="Help", guild_ids=guild_ids)
+    async def _help(self, ctx, user: discord.Member) -> None:
+        await ctx.respond(f"**{ctx.author.mention} needs your help, {user.mention}!**")
 
 
 
