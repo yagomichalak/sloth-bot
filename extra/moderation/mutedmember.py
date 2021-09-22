@@ -130,3 +130,9 @@ class ModerationMutedMemberTable(commands.Cog):
         await mycursor.executemany("DELETE FROM mutedmember WHERE user_id = %s", (user_id,))
         await db.commit()
         await mycursor.close()
+
+    async def update_mute_time(self, user_id: int, current_time: int, time: int):
+        mycursor, db = await the_database()
+        await mycursor.execute("UPDATE mutedmember SET mute_ts = %s, muted_for_seconds = %s WHERE user_id = %s", (current_time, time, user_id))
+        await db.commit()
+        await mycursor.close()

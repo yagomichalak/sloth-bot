@@ -24,6 +24,8 @@ class ModerationWatchlistTable(commands.Cog):
         :param member: The member to put in the watchlist.
         :param reason: The reason for putting the member(s) in the watchist. """
         
+        members, reason = await utils.ignore_usernames(ctx, members, reason)
+
         author = ctx.author
 
         if not members:
