@@ -270,7 +270,7 @@ class Munk(Player):
         await mycursor.close()
         return tribe_member
 
-    async def get_tribe_members(self, tribe_owner_id: int = None, tribe_name: str = None) -> Dict[str, List[int]]:
+    async def get_tribe_members(self, tribe_owner_id: int = None, tribe_name: str = None) -> List[List[Union[int, str]]]:
         """ Gets a list of IDs of members of a particular tribe.
         :param tribe_owner_id: The ID of the owner of the tribe (Optional).
         :param tribe_name: The name of the tribe. (Optional).
@@ -278,7 +278,7 @@ class Munk(Player):
 
         mycursor, _ = await the_database()
 
-        tribe_members: Dict[str, List[int]] = {}
+        tribe_members: List[int] = []
 
         if tribe_owner_id:
             await mycursor.execute("SELECT tribe_name FROM UserTribe WHERE user_id = %s", (tribe_owner_id,))
@@ -289,7 +289,6 @@ class Munk(Player):
         elif tribe_name:
             await mycursor.execute("SELECT member_id, tribe_role FROM TribeMember WHERE tribe_name = %s", (tribe_name,))
             tribe_members = await mycursor.fetchall()
-            # tribe_members = list(map(lambda mid: (mid[0], mid[1]), await mycursor.fetchall()))
 
         await mycursor.close()
 
