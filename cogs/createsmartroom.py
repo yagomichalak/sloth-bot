@@ -1189,8 +1189,28 @@ You can only add either **threads** **OR** one **voice channel**"""))
 				actioned.append(m.mention)
 
 
-	@commands.command(aliases=['permit'])
-	async def allow(self, ctx) -> None:
+	@commands.group(aliases=['gr', 'galaxy_room', 'galaxyroom'])
+	async def galaxy(self, ctx) -> None:
+		""" Command for managing Galaxy Rooms. """
+
+		if ctx.invoked_subcommand:
+			return
+
+		cmd = ctx.command
+		prefix = self.client.command_prefix
+		subcommands = [f"{prefix}{c.qualified_name}" for c in cmd.commands]
+
+		subcommands = '\n'.join(subcommands)
+		embed = discord.Embed(
+		  title="Subcommads",
+		  description=f"```apache\n{subcommands}```",
+		  color=ctx.author.color,
+		  timestamp=ctx.message.created_at
+		)
+		await ctx.send(embed=embed)
+
+	@galaxy.command(name="allow", aliases=['permit'])
+	async def _galaxy_allow(self, ctx) -> None:
 		""" Allows one or more members to join your channels.
 		:param members: The members to allow. """
 
@@ -1215,8 +1235,8 @@ You can only add either **threads** **OR** one **voice channel**"""))
 		allowed = ', '.join(allowed)
 		await ctx.send(f"**{allowed} {'have' if len(allowed) > 1 else 'has'} been allowed, {member.mention}!**")
 
-	@commands.command(aliases=['prohibit'])
-	async def forbid(self, ctx) -> None:
+	@galaxy.command(name="forbid", aliases=['prohibit'])
+	async def _galaxy_forbid(self, ctx) -> None:
 		""" Forbids one or more members from joining your channels.
 		:param members: The members to forbid. """
 
@@ -1245,8 +1265,8 @@ You can only add either **threads** **OR** one **voice channel**"""))
 
 
 	# Other useful commands
-	@commands.command(aliases=['creation', 'expiration'])
-	async def galaxy_info(self, ctx) -> None:
+	@galaxy.command(name="info", aliases=['creation', 'expiration'])
+	async def _galaxy_info(self, ctx) -> None:
 		""" Shows the creation and expiration time of the user's Galaxy Rooms. """
 
 		user_galaxy = await self.get_galaxy_txt(ctx.author.id, ctx.channel.category.id)
@@ -1279,8 +1299,8 @@ You can only add either **threads** **OR** one **voice channel**"""))
 
 		await ctx.send(embed=embed)
 
-	@commands.command(aliases=['rent', 'renew'])
-	async def pay_rent(self, ctx) -> None:
+	@galaxy.command(name="pay_rent", aliases=['pr', 'payrent', 'rent', 'renew'])
+	async def _galaxy_pay_rent(self, ctx) -> None:
 		""" Delays the user's Galaxy Rooms deletion by 14 days.
 		
 		* Price:
@@ -1341,10 +1361,9 @@ You can only add either **threads** **OR** one **voice channel**"""))
 		money += (vcs - 1) * 500
 		return money
 
-	# @commands.command(aliases=['transfer_ownership', 'transfer'])
-	@commands.command()
+	@galaxy.command(name="transfer_ownership", aliases=['transfer', 'to', 'transferownership'])
 	@commands.cooldown(1, 60, commands.BucketType.user)
-	async def galaxy_transfer_ownership(self, ctx, member: discord.Member = None) -> None:
+	async def _galaxy_transfer_ownership(self, ctx, member: discord.Member = None) -> None:
 		""" Transfer the Galaxy Room's ownership  to someone else.
 		:param member: The member to transfer the Galaxy Room to.
 		
@@ -1400,8 +1419,8 @@ You can only add either **threads** **OR** one **voice channel**"""))
 			await ctx.send(f"**Successfully transferred the ownership of this Galaxy Room from <@{galaxy_room[0]}> to {member.mention}!**")
 
 
-	@commands.command(aliases=['cgr', 'close_galaxy', 'closegalaxy', 'delete_galaxy', 'deletegalaxy'])
-	async def close_galaxy_room(self, ctx) -> None:
+	@galaxy.command(name="close", aliases=['close_room', 'closeroom', 'kill', 'terminate', 'delete', 'del'])
+	async def _galaxy_close(self, ctx) -> None:
 		""" Deletes a Galaxy Room. """
 
 		if not ctx.guild:
@@ -1450,15 +1469,15 @@ You can only add either **threads** **OR** one **voice channel**"""))
 		return vcs, txts
 
 
-	@commands.group(aliases=['agc'])
-	async def add_galaxy_channel(self, ctx) -> None:
+	@galaxy.group(name="add_channel", aliases=['ac'])
+	async def _galaxy_add_channel(self, ctx) -> None:
 		""" Adds either a Text or a Voice Channel to
 		the user's Galaxy Room. """
 
 		if ctx.invoked_subcommand:
 			return
 
-		cmd = self.client.get_command('add_galaxy_channel')
+		cmd = ctx.command
 		prefix = self.client.command_prefix
 		subcommands = [f"{prefix}{c.qualified_name}" for c in cmd.commands]
 
@@ -1471,9 +1490,9 @@ You can only add either **threads** **OR** one **voice channel**"""))
 		)
 		await ctx.send(embed=embed)
 
-	@add_galaxy_channel.command(name='thread', aliases=['th', 'thread_channel', 'text', 'txt', 'text_channel'])
+	@_galaxy_add_channel.command(name='thread', aliases=['th', 'thread_channel', 'text', 'txt', 'text_channel'])
 	@commands.cooldown(1, 60, commands.BucketType.user)
-	async def add_thread(self, ctx, *, name: str = None) -> None:
+	async def _galaxy_add_channel_thread(self, ctx, *, name: str = None) -> None:
 		""" Adds a Text Channel.
 		:param name: The name of the Text Channel. """
 
@@ -1533,9 +1552,9 @@ You can only add either **threads** **OR** one **voice channel**"""))
 		await ctx.send(f"**Thread Channel created, {member.mention}!** ({thread.mention})")
 
 
-	@add_galaxy_channel.command(name='voice', aliases=['vc', 'voice_channel'])
+	@_galaxy_add_channel.command(name='voice', aliases=['vc', 'voice_channel'])
 	@commands.cooldown(1, 60, commands.BucketType.user)
-	async def add_voice(self, ctx, limit: int = None, *, name: str = None) -> None:
+	async def _galaxy_add_channel_voice(self, ctx, limit: int = None, *, name: str = None) -> None:
 		""" Adds a Voice Channel.
 		:param limit: The user limit of the Voice Cchannel.
 		:param name: The name of the Voice Channel. """
@@ -1597,15 +1616,15 @@ You can only add either **threads** **OR** one **voice channel**"""))
 
 
 
-	@commands.group(aliases=['dgc', 'remove_galaxy_channel', 'rgc'])
-	async def delete_galaxy_channel(self, ctx) -> None:
+	@galaxy.group(name="delete_channel", aliases=['dc', 'deletechannel', 'remove_channel', 'removechannel', 'rc'])
+	async def _galaxy_delete_channel(self, ctx) -> None:
 		""" Deletes either a Text or a Voice Channel from
 		the user's Galaxy Room. """
 
 		if ctx.invoked_subcommand:
 			return
 
-		cmd = self.client.get_command('delete_galaxy_channel')
+		cmd = ctx.command
 		prefix = self.client.command_prefix
 		subcommands = [f"{prefix}{c.qualified_name}" for c in cmd.commands]
 
@@ -1618,9 +1637,9 @@ You can only add either **threads** **OR** one **voice channel**"""))
 		)
 		await ctx.send(embed=embed)
 
-	@delete_galaxy_channel.command(name='thread', aliases=['thread_channel', 'th', 'text', 'txt', 'text_channel'])
+	@_galaxy_delete_channel.command(name='thread', aliases=['thread_channel', 'th', 'text', 'txt', 'text_channel'])
 	@commands.cooldown(1, 60, commands.BucketType.user)
-	async def delete_thread(self, ctx) -> None:
+	async def _galaxy_delete_channel_thread(self, ctx) -> None:
 		""" Deletes the user's second Text Channel from their Galaxy Room. """
 
 		member = ctx.author
@@ -1659,9 +1678,9 @@ You can only add either **threads** **OR** one **voice channel**"""))
 		
 
 
-	@delete_galaxy_channel.command(name='voice', aliases=['vc', 'voice_channel'])
+	@_galaxy_delete_channel.command(name='voice', aliases=['vc', 'voice_channel'])
 	@commands.cooldown(1, 60, commands.BucketType.user)
-	async def delete_voice(self, ctx) -> None:
+	async def _galaxy_delete_channel_voice(self, ctx) -> None:
 		""" Deletes the user's second Voice Channel from their Galaxy Room. """
 
 		member = ctx.author
