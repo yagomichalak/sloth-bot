@@ -131,6 +131,16 @@ class SmartRoomDatabase(commands.Cog):
 		await db.commit()
 		await mycursor.close()
 
+	async def update_galaxy_user(self, old_owner_id: int, new_owner_id: int) -> None:
+		""" Updates the Galaxy Room's owner ID.
+		:param old_owner_id: The old owner's ID.
+		:param new_owner_id: The new owner's ID. """
+
+		mycursor, db = await the_database()
+		await mycursor.execute("UPDATE GalaxyVc SET user_id = %s WHERE user_id = %s", (new_owner_id, old_owner_id))
+		await db.commit()
+		await mycursor.close()
+
 	# ===== INSERT =====
 
 	async def insert_user_vc(self, user_id: int, the_time: int) -> None:
@@ -229,6 +239,16 @@ class SmartRoomDatabase(commands.Cog):
 
 		mycursor, db = await the_database()
 		await mycursor.execute("SELECT * FROM GalaxyVc WHERE user_cat = %s", (cat_id,))
+		galaxy_vc = await mycursor.fetchone()
+		await mycursor.close()
+		return galaxy_vc
+
+	async def get_galaxy_by_user_id(self, user_id: int) -> List[Union[int, str]]:
+		""" Gets a Galaxy Room by user ID.
+		:param user_id: The user ID. """
+
+		mycursor, _ = await the_database()
+		await mycursor.execute("SELECT * FROM GalaxyVc WHERE user_id = %s", (user_id,))
 		galaxy_vc = await mycursor.fetchone()
 		await mycursor.close()
 		return galaxy_vc
@@ -1130,6 +1150,45 @@ You can only add either **threads** **OR** one **voice channel**"""))
 
 
 
+
+	async def handle_permissions(self, members: List[discord.Member], galaxy_room: List[Union[int, str]], guild: discord.Guild, allow: bool = True) -> List[str]:
+		""" Handles permissions for a member in one's Galaxy Room.
+		:param members: The list of members to handle permissions for.
+		:param galaxy_room: The Galaxy Room info.
+		:param guild: The guild of the Galaxy Room.
+		:param allow: Whether to allow or disallow the member and their permissions from the Galaxy Room. [Default=True]"""
+
+
+		channels: List[Union[discord.abc.GuildChannel, discord.Thread]] = [
+			discord.utils.get(guild.categories, id=galaxy_room[1]),
+			discord.utils.get(guild.voice_channels, id=galaxy_room[2]),
+			discord.utils.get(guild.text_channels, id=galaxy_room[3]),
+			discord.utils.get(guild.threads, id=galaxy_room[4]),
+			discord.utils.get(guild.voice_channels, id=galaxy_room[5]),
+			discord.utils.get(guild.threads, id=galaxy_room[8]),
+			discord.utils.get(guild.threads, id=galaxy_room[9]),
+			discord.utils.get(guild.threads, id=galaxy_room[10])
+		]
+
+		actioned: List[str] = []
+
+		for m in members:
+			try:
+				for c in channels:
+					if not isinstance(c, discord.Thread):
+						if c:
+							await c.set_permissions(
+								m, read_messages=allow, send_messages=allow, connect=allow, speak=allow, view_channel=allow)
+					else:
+						await c.add_user(m)
+
+			except Exception as e:
+				print(e)
+				pass
+			else:
+				actioned.append(m.mention)
+
+
 	@commands.command(aliases=['permit'])
 	async def allow(self, ctx) -> None:
 		""" Allows one or more members to join your channels.
@@ -1148,33 +1207,8 @@ You can only add either **threads** **OR** one **voice channel**"""))
 		if not user_galaxy:
 			return await ctx.send(f"**This is not your room, so you cannot allow someone in it, {member.mention}!**")
 
-		channels = [
-			discord.utils.get(ctx.guild.categories, id=user_galaxy[1]),
-			discord.utils.get(ctx.guild.voice_channels, id=user_galaxy[2]),
-			discord.utils.get(ctx.guild.text_channels, id=user_galaxy[3]),
-			discord.utils.get(ctx.guild.threads, id=user_galaxy[4]),
-			discord.utils.get(ctx.guild.voice_channels, id=user_galaxy[5]),
-			discord.utils.get(ctx.guild.threads, id=user_galaxy[8]),
-			discord.utils.get(ctx.guild.threads, id=user_galaxy[9]),
-			discord.utils.get(ctx.guild.threads, id=user_galaxy[10])
-		]
-		allowed = []
-
-		for m in members:
-			try:
-				for c in channels:
-					if not isinstance(c, discord.Thread):
-						if c:
-							await c.set_permissions(
-								m, read_messages=True, send_messages=True, connect=True, speak=True, view_channel=True)
-					else:
-						await c.add_user(m)
-
-			except:
-				pass
-			else:
-				allowed.append(m.mention)
-
+		allowed = await self.handle_permissions(members, user_galaxy, ctx.guild)
+	
 		if not allowed:
 			return await ctx.send(f"**For some reason, I couldn't allow any of those members, {member.mention}!**")
 
@@ -1199,31 +1233,7 @@ You can only add either **threads** **OR** one **voice channel**"""))
 		if not user_galaxy:
 			return await ctx.send(f"**This is not your room, so you cannot forbid someone from it, {member.mention}!**")
 
-		channels = [
-			discord.utils.get(ctx.guild.categories, id=user_galaxy[1]),
-			discord.utils.get(ctx.guild.voice_channels, id=user_galaxy[2]),
-			discord.utils.get(ctx.guild.text_channels, id=user_galaxy[3]),
-			discord.utils.get(ctx.guild.threads, id=user_galaxy[4]),
-			discord.utils.get(ctx.guild.voice_channels, id=user_galaxy[5]),
-			discord.utils.get(ctx.guild.threads, id=user_galaxy[8]),
-			discord.utils.get(ctx.guild.threads, id=user_galaxy[9]),
-			discord.utils.get(ctx.guild.threads, id=user_galaxy[10])
-		]
-		forbid = []
-
-		for m in members:
-			try:
-				for c in channels:
-					if not isinstance(c, discord.Thread):
-						if c:
-							await c.set_permissions(
-								m, read_messages=False, send_messages=False, connect=False, speak=False, view_channel=False)
-					else:
-						await c.remove_user(m)
-			except:
-				pass
-			else:
-				forbid.append(m.mention)
+		forbid = await self.handle_permissions(members, user_galaxy, ctx.guild, allow=False)
 
 		if not forbid:
 			return await ctx.send(f"**For some reason, I couldn't forbid any of those members, {member.mention}!**")
@@ -1330,6 +1340,64 @@ You can only add either **threads** **OR** one **voice channel**"""))
 		money += (txts - 1) * 250
 		money += (vcs - 1) * 500
 		return money
+
+	# @commands.command(aliases=['transfer_ownership', 'transfer'])
+	@commands.command()
+	@commands.cooldown(1, 60, commands.BucketType.user)
+	async def galaxy_transfer_ownership(self, ctx, member: discord.Member = None) -> None:
+		""" Transfer the Galaxy Room's ownership  to someone else.
+		:param member: The member to transfer the Galaxy Room to.
+		
+		PS: Only the owner of the Galaxy Room and admins can use this. """
+
+		if not ctx.guild:
+			ctx.command.reset_cooldown(ctx)
+			return await ctx.send("**Don't use it here!**")
+
+		author = ctx.author
+		channel = ctx.channel
+
+		if not member:
+			ctx.command.reset_cooldown(ctx)
+			return await ctx.send(f"**Please, inform a member, {author.mention}!**")
+
+		if not (cat := channel.category):
+			ctx.command.reset_cooldown(ctx)
+			return await ctx.send(f"**This is definitely not a Galaxy Room, {author.mention}!**")
+
+		if not (galaxy_room := await self.get_galaxy_by_cat_id(cat.id)):
+			ctx.command.reset_cooldown(ctx)
+			return await ctx.send(f"**This is not a Galaxy Room, {author.mention}!**")
+
+		perms = channel.permissions_for(author)
+		if author.id != galaxy_room[0] and not perms.administrator:
+			ctx.command.reset_cooldown(ctx)
+			return await ctx.send(f"**You don't have permission to do this, {author.mention}!**")
+		
+		if member.id == galaxy_room[0]:
+			ctx.command.reset_cooldown(ctx)
+			return await ctx.send(f"**You cannot transfer the Galaxy Room to the same owner, {author.mention}!**")
+
+		if await self.get_galaxy_by_user_id(member.id):
+			ctx.command.reset_cooldown(ctx)
+			return await ctx.send(f"**You cannot transfer the Galaxy Room to {member.mention} because they have one already, {author.mention}!**")
+
+		confirm = await ConfirmSkill(
+			f"**Are you sure you want to transfer the ownership of this Galaxy Room from <@{galaxy_room[0]}> to {member.mention}, {author.mention}?**"
+			).prompt(ctx)
+		if not confirm:
+			ctx.command.reset_cooldown(ctx)
+			return await ctx.send(f"**Not deleting it then, {author.mention}!**")
+
+
+		try:
+			await self.update_galaxy_user(galaxy_room[0], member.id)
+			await self.handle_permissions([member], galaxy_room, ctx.guild)
+		except:
+			ctx.command.reset_cooldown(ctx)
+			await ctx.send(f"**Something went wrong with it, please contact an admin, {author.mention}!**")
+		else:
+			await ctx.send(f"**Successfully transferred the ownership of this Galaxy Room from <@{galaxy_room[0]}> to {member.mention}!**")
 
 
 	@commands.command(aliases=['cgr', 'close_galaxy', 'closegalaxy', 'delete_galaxy', 'deletegalaxy'])
