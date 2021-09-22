@@ -1177,16 +1177,24 @@ You can only add either **threads** **OR** one **voice channel**"""))
 				for c in channels:
 					if not isinstance(c, discord.Thread):
 						if c:
-							await c.set_permissions(
-								m, read_messages=allow, send_messages=allow, connect=allow, speak=allow, view_channel=allow)
+							if allow:
+								await c.set_permissions(
+									m, read_messages=True, send_messages=True, connect=True, speak=True, view_channel=True)
+							else:
+								await c.set_permissions(m, overwrite=None)
 					else:
-						await c.add_user(m)
+						if allow:
+							await c.add_user(m)
+						else:
+							await c.remove_user(m)
 
 			except Exception as e:
 				print(e)
 				pass
 			else:
 				actioned.append(m.mention)
+
+		return actioned
 
 
 	@commands.group(aliases=['gr', 'galaxy_room', 'galaxyroom'])
@@ -1232,8 +1240,8 @@ You can only add either **threads** **OR** one **voice channel**"""))
 		if not allowed:
 			return await ctx.send(f"**For some reason, I couldn't allow any of those members, {member.mention}!**")
 
-		allowed = ', '.join(allowed)
-		await ctx.send(f"**{allowed} {'have' if len(allowed) > 1 else 'has'} been allowed, {member.mention}!**")
+		allowed_members = ', '.join(allowed)
+		await ctx.send(f"**{allowed_members} {'have' if len(allowed) > 1 else 'has'} been allowed, {member.mention}!**")
 
 	@galaxy.command(name="forbid", aliases=['prohibit'])
 	async def _galaxy_forbid(self, ctx) -> None:
@@ -1258,9 +1266,9 @@ You can only add either **threads** **OR** one **voice channel**"""))
 		if not forbid:
 			return await ctx.send(f"**For some reason, I couldn't forbid any of those members, {member.mention}!**")
 
-		forbid = ', '.join(forbid)
+		forbidden_members = ', '.join(forbid)
 
-		await ctx.send(f"**{forbid} {'have' if len(forbid) > 1 else 'has'} been forbidden, {member.mention}!**")
+		await ctx.send(f"**{forbidden_members} {'have' if len(forbid) > 1 else 'has'} been forbidden, {member.mention}!**")
 
 
 
@@ -1713,6 +1721,90 @@ You can only add either **threads** **OR** one **voice channel**"""))
 				await self.delete_things([vc])
 
 			await ctx.send(f"**Voice Channel deleted, {member.mention}!**")
+
+
+
+	@galaxy.command(name="allow_tribe", aliases=['at', 'permit_tribe', 'add_tribe', 'allowtribe', 'permittribe', 'addtribe'])
+	@commands.cooldown(1, 60, commands.BucketType.user)
+	async def _galaxy_allow_tribe(self, ctx) -> None:
+		""" Allows your Tribe members into your Galaxy Room.  """
+
+		member = ctx.author
+
+		user_galaxy = await self.get_galaxy_txt(member.id, ctx.channel.category.id)
+		if not user_galaxy:
+			return await ctx.send(f"**This is not your room, so you cannot allow people in it, {member.mention}!**")
+
+		SlothClass = self.client.get_cog('SlothClass')
+		user_tribe = await SlothClass.get_tribe_info_by_user_id(member.id)
+		if not user_tribe['name']:
+			return await ctx.send(f"**You don't even have a tribe, you cannot do this, {member.mention}!**")
+
+		members: List[List[Union[int, str]]] = await SlothClass.get_tribe_members(tribe_name=user_tribe['name'])
+		members: List[discord.Member] = [m for m_id in members if (m := discord.utils.get(ctx.guild.members, id=m_id[0]))]
+
+		if member in members:
+			members.remove(member)
+
+		if not members:
+			return await ctx.send(f"**You don't have members in your tribe, {member.mention}!**")
+
+		async with ctx.typing():
+			allowed = await self.handle_permissions(members, user_galaxy, ctx.guild)
+	
+			if not allowed:
+				return await ctx.send(f"**For some reason, I couldn't allow any of those members, {member.mention}!**")
+
+			text: str = "**{lendisa} {subjplural} from {tribe_name} {verbplural} been allowed, {mention}!**".format(
+				lendisa=len(allowed),
+				subjplural='people' if len(allowed) > 1 else 'person',
+				tribe_name=user_tribe['name'],
+				verbplural='have' if len(allowed) > 1 else 'has',
+				mention=member.mention)
+
+			await ctx.send(text)
+
+	@galaxy.command(name="forbid_tribe", aliases=[
+		'dt', 'disallow_tribe', 'delete_tribe', 'removetribe', 'disallowtribe', 'deletetribe', 'deltribe',
+		'forbidtribe', 'remove_tribe', 'ft'])
+	@commands.cooldown(1, 60, commands.BucketType.user)
+	async def _galaxy_remove_tribe(self, ctx) -> None:
+		""" Removes your Tribe members from your Galaxy Room.. """
+
+		member = ctx.author
+
+		user_galaxy = await self.get_galaxy_txt(member.id, ctx.channel.category.id)
+		if not user_galaxy:
+			return await ctx.send(f"**This is not your room, so you cannot allow people in it, {member.mention}!**")
+
+		SlothClass = self.client.get_cog('SlothClass')
+		user_tribe = await SlothClass.get_tribe_info_by_user_id(member.id)
+		if not user_tribe['name']:
+			return await ctx.send(f"**You don't even have a tribe, you cannot do this, {member.mention}!**")
+
+		members: List[List[Union[int, str]]]  = await SlothClass.get_tribe_members(tribe_name=user_tribe['name'])
+		members: List[discord.Member] = [m for m_id in members if (m := discord.utils.get(ctx.guild.members, id=m_id[0]))]
+
+		if member in members:
+			members.remove(member)
+
+		if not members:
+			return await ctx.send(f"**You don't have members in your tribe, {member.mention}!**")
+
+		async with ctx.typing():
+			disallowed = await self.handle_permissions(members, user_galaxy, ctx.guild, allow=False)
+		
+			if not disallowed:
+				return await ctx.send(f"**For some reason, I couldn't allow any of those members, {member.mention}!**")
+
+			text: str = "**{lendisa} {subjplural} from {tribe_name} {verbplural} been disallowed, {mention}!**".format(
+				lendisa=len(disallowed),
+				subjplural='people' if len(disallowed) > 1 else 'person',
+				tribe_name=user_tribe['name'],
+				verbplural='have' if len(disallowed) > 1 else 'has',
+				mention=member.mention)
+
+			await ctx.send(text)
 
 
 
