@@ -206,8 +206,8 @@ class Misc(commands.Cog):
         except ValueError:
             sides = 6
 
-        if sides > 1000000000000000 or sides < 0:
-            await ctx.send("Enter a valid integer value", delete_after=3)
+        if sides > 1000000000000 or sides < 0:
+            return await ctx.send("Enter a valid integer value", delete_after=3)
         
         embed = discord.Embed(color=ctx.author.color, title=f":game_die: **YOU GOT:** `{randint(1, sides)}` :game_die: (1 - {sides})",
             timestamp=ctx.message.created_at)
