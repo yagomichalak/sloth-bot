@@ -209,9 +209,8 @@ class Moderation(*moderation_cogs):
 	@commands.command()
 	@utils.is_allowed(allowed_roles, throw_exc=True)
 	async def snipe(self, ctx):
-		'''
-		(MOD) Snipes the last deleted message.
-		'''
+		""" (MOD) Snipes the last deleted message. """
+
 		message = last_deleted_message
 		if message:
 			message = message[0]
@@ -225,11 +224,9 @@ class Moderation(*moderation_cogs):
 	@commands.command()
 	@commands.has_permissions(manage_messages=True)
 	async def purge(self, ctx, amount=0, member: discord.Member = None):
-		'''
-		(MOD) Purges messages.
+		""" (MOD) Purges messages.
 		:param amount: The amount of messages to purge.
-		:param member: The member from whom to purge the messages. (Optional)
-		'''
+		:param member: The member from whom to purge the messages. (Optional) """
 
 		perms = ctx.channel.permissions_for(ctx.author)
 		if not perms.administrator:
@@ -258,9 +255,7 @@ class Moderation(*moderation_cogs):
 	@commands.command()
 	@utils.is_allowed(allowed_roles, throw_exc=True)
 	async def clear(self, ctx):
-		'''
-		(MOD) Clears the whole channel.
-		'''
+		""" (MOD) Clears the whole channel. """
 
 		special_channels = {
 		  int(os.getenv('MUTED_CHANNEL_ID')): 'https://cdn.discordapp.com/attachments/746478846466981938/748605295122448534/Muted.png',
@@ -755,11 +750,17 @@ class Moderation(*moderation_cogs):
 		:param member: The @ or the ID of one or more users to kick. 
 		:param reason: The reason for kicking one or all users. (Optional) """
 
-		members, reason = await utils.ignore_usernames(ctx, members, reason)
-
 		await ctx.message.delete()
+		all_members, reason = await utils.ignore_usernames(ctx, members, reason)
+
+		members: List[discord.Member] = []
+
+		for member in all_members:
+			if not await utils.is_allowed(allowed_roles).predicate(ctx=ctx, member=member):
+				members.append(member)
+
 		if not members:
-			return await ctx.send('**Please, specify a member!**', delete_after=3)
+			return await ctx.send('**Please, specify one or more members!**', delete_after=3)
 
 		for member in members:
 			confirm = await Confirm(f"**Are you sure you want to kick {member.mention} from the server, {ctx.author.mention}?**").prompt(ctx)
@@ -806,11 +807,16 @@ class Moderation(*moderation_cogs):
 		:param reason: The reason for banning the user. (Optional) """
 
 		await ctx.message.delete()
-		if not member:
-			return await ctx.send('**Please, specify a member!**', delete_after=3)
 
 		channel = ctx.channel
 		author = ctx.author
+
+		if not member:
+			return await ctx.send('**Please, specify a member!**', delete_after=3)
+
+		if await utils.is_allowed(allowed_roles).predicate(ctx=ctx, member=member):
+			return await ctx.send(f"**You cannot ban a staff member, {author.mention}!**")
+
 
 		perpetrators = []
 		confirmations = {}
@@ -915,11 +921,9 @@ class Moderation(*moderation_cogs):
 	@commands.command()
 	@commands.has_permissions(administrator=True)
 	async def fban(self, ctx, members: commands.Greedy[discord.Member] = None, *, reason: Optional[str] = None):
-		'''
-		(ADM) Bansn't a member from the server.
+		""" (ADM) Bansn't a member from the server.
 		:param member: The @ or ID of the user to ban.
-		:param reason: The reason for banning the user. (Optional)
-		'''
+		:param reason: The reason for banning the user. (Optional) """
 
 		members, reason = await utils.ignore_usernames(ctx, members, reason)
 
@@ -937,10 +941,9 @@ class Moderation(*moderation_cogs):
 	@commands.command()
 	@commands.has_permissions(administrator=True)
 	async def unban(self, ctx, *, member=None):
-		'''
-		(ADM) Unbans a member from the server.
-		:param member: The full nickname and # of the user to unban.
-		'''
+		""" (ADM) Unbans a member from the server.
+		:param member: The full nickname and # of the user to unban. """
+
 		await ctx.message.delete()
 		if not member:
 			return await ctx.send('**Please, inform a member!**', delete_after=3)
@@ -987,11 +990,15 @@ class Moderation(*moderation_cogs):
 		:param reason: The reason for banning the user. (Optional) """
 
 		await ctx.message.delete()
-		if not member:
-			return await ctx.send('**Please, specify a member!**', delete_after=3)
 
 		channel = ctx.channel
 		author = ctx.author
+
+		if not member:
+			return await ctx.send(f"**Please, specify a member, {member.mention}!**", delete_after=3)
+
+		if await utils.is_allowed(allowed_roles).predicate(ctx=ctx, member=member):
+			return await ctx.send(f"**You cannot softban a staff member, {author.mention}!**")
 
 		perpetrators = []
 		confirmations = {}
@@ -1094,19 +1101,23 @@ class Moderation(*moderation_cogs):
 	@commands.command()
 	@commands.has_permissions(administrator=True)
 	async def hackban(self, ctx, user_id: int = None, *, reason: Optional[str] = None):
-		"""
-		(ADM) Bans a user that is currently not in the server.
+		""" (ADM) Bans a user that is currently not in the server.
 		Only accepts user IDs.
 		:param user_id: Member ID
-		:param reason: The reason for hackbanning the user. (Optional)
-		"""
+		:param reason: The reason for hackbanning the user. (Optional) """
 
 		await ctx.message.delete()
 		if not user_id:
 			return await ctx.send("**Inform the user id!**", delete_after=3)
+
 		member = discord.Object(id=user_id)
 		if not member:
 			return await ctx.send("**Invalid user id!**", delete_after=3)
+
+		guild_member = discord.utils.get(ctx.guild.members, id=member.id)
+		if guild_member:
+			if await utils.is_allowed(allowed_roles).predicate(ctx=ctx, member=guild_member):
+				return await ctx.send(f"**You cannot hackban a staff member, {ctx.author}!**", delete_after=3)
 		try:
 			await ctx.guild.ban(member, reason=reason)
 			# General embed
@@ -1212,10 +1223,8 @@ class Moderation(*moderation_cogs):
 	@commands.command(aliases=['ri', 'remove_warn', 'remove_warning'])
 	@utils.is_allowed(allowed_roles, throw_exc=True)
 	async def remove_infraction(self, ctx, *, infrs_id: str = None):
-		"""
-		(MOD) Removes one or more infractions by their IDs.
-		:param infr_id: The infraction(s) IDs.
-		"""
+		""" (MOD) Removes one or more infractions by their IDs.
+		:param infr_id: The infraction(s) IDs. """
 
 		if not infrs_id:
 			return await ctx.send("**Inform the infraction ID!**")
@@ -1231,10 +1240,8 @@ class Moderation(*moderation_cogs):
 	@commands.command(aliases=['ris', 'remove_warns', 'remove_warnings'])
 	@utils.is_allowed(allowed_roles, throw_exc=True)
 	async def remove_infractions(self, ctx, members: commands.Greedy[discord.Member] = None):
-		"""
-		(MOD) Removes all infractions for one or more users.
-		:param member: The member(s) to get the infractions from.
-		"""
+		""" (MOD) Removes all infractions for one or more users.
+		:param member: The member(s) to get the infractions from. """
 
 		if not members:
 			return await ctx.send("**Inform a member!**")
