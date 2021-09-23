@@ -1272,13 +1272,12 @@ class Moderation(*moderation_cogs):
 
 	@commands.command(aliases=['ei'])
 	@utils.is_allowed(allowed_roles, throw_exc=True)
-	async def edit_infraction(self, ctx, infractions_ids : commands.Greedy[int] = None, *, reason: str) -> None:
+	async def edit_infraction(self, ctx, infractions_ids : commands.Greedy[int] = None, *, reason: Optional[str] = None) -> None:
 		"""(MOD) Edits one or more infractions by their IDs.
 		:param infr_id: The infraction(s) ID(s).
 		:param reason: The updated reason of the infraction(s)."""
 
 		await ctx.message.delete()
-	
 		if not infractions_ids:
 			return await ctx.send("**Please, inform an infraction id!**", delete_after=3)
 
