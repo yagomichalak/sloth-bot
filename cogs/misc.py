@@ -450,12 +450,6 @@ class Misc(commands.Cog):
 
         await ctx.respond(f"**Twiks est mon frérot !**")
 
-    @user_command(name="Click", guild_ids=guild_ids)
-    async def _click(self, ctx, user: discord.Member) -> None:
-        """ Clicks on a user. """
-
-        await ctx.respond(f"**{ctx.author.mention} clicked on {user.mention}!**")
-
     @user_command(name="Help", guild_ids=guild_ids)
     async def _help(self, ctx, user: discord.Member) -> None:
         await ctx.respond(f"**{ctx.author.mention} needs your help, {user.mention}!**")
