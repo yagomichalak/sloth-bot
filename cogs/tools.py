@@ -985,6 +985,27 @@ class Tools(commands.Cog):
 		else:
 			await ctx.respond(f"**You got moved to {user_vc.channel.mention}!**")
 
+	@user_command(name="Pull", guild_ids=guild_ids)
+	@utils.is_allowed(allowed_roles, throw_exc=True)
+	async def _pull(self, ctx, user: discord.Member) -> None:
+		""" Pulls a user by moving them to the Voice Channel you are in. """
+
+		author = ctx.author
+		user_vc = user.voice
+		if not user_vc or not user_vc.channel:
+			return await ctx.respond(f"**{user} is not in a VC, {author.mention}!**")
+
+		author_vc = author.voice
+		if not author_vc or not author_vc.channel:
+			return await ctx.respond(f"**You're not in a VC, I cannot bring them here, {author.mention}!**")
+
+		try:
+			await user.move_to(author_vc.channel)
+		except:
+			await ctx.respond(f"**For some reason I couldn't bring them here, {author.mention}!**")
+		else:
+			await ctx.respond(f"**They were brought to {user_vc.channel.mention}!**")
+
 
 
 def setup(client):
