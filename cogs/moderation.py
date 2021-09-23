@@ -1116,7 +1116,7 @@ class Moderation(*moderation_cogs):
 
 		guild_member = discord.utils.get(ctx.guild.members, id=member.id)
 		if guild_member:
-			if await utils.is_allowed(allowed_roles).predicate(ctx=ctx, member=guild_member):
+			if await utils.is_allowed(allowed_roles).predicate(channel=ctx.channel, member=guild_member):
 				return await ctx.send(f"**You cannot hackban a staff member, {ctx.author}!**", delete_after=3)
 		try:
 			await ctx.guild.ban(member, reason=reason)
