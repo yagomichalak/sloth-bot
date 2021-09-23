@@ -756,7 +756,7 @@ class Moderation(*moderation_cogs):
 		members: List[discord.Member] = []
 
 		for member in all_members:
-			if not await utils.is_allowed(allowed_roles).predicate(ctx=ctx, member=member):
+			if not await utils.is_allowed(allowed_roles).predicate(channel=ctx.channel, member=member):
 				members.append(member)
 
 		if not members:
@@ -814,7 +814,7 @@ class Moderation(*moderation_cogs):
 		if not member:
 			return await ctx.send('**Please, specify a member!**', delete_after=3)
 
-		if await utils.is_allowed(allowed_roles).predicate(ctx=ctx, member=member):
+		if await utils.is_allowed(allowed_roles).predicate(channel=ctx.channel, member=member):
 			return await ctx.send(f"**You cannot ban a staff member, {author.mention}!**")
 
 
@@ -997,7 +997,7 @@ class Moderation(*moderation_cogs):
 		if not member:
 			return await ctx.send(f"**Please, specify a member, {member.mention}!**", delete_after=3)
 
-		if await utils.is_allowed(allowed_roles).predicate(ctx=ctx, member=member):
+		if await utils.is_allowed(allowed_roles).predicate(channel=ctx.channel, member=member):
 			return await ctx.send(f"**You cannot softban a staff member, {author.mention}!**")
 
 		perpetrators = []
