@@ -192,6 +192,29 @@ class Misc(commands.Cog):
         em.set_footer(text=f"With ♥ from {ctx.author}", icon_url=ctx.author.display_avatar)
         await ctx.send(embed=em)
 
+    @commands.command()
+    async def roll(self, ctx, sides=None):
+        """roll a die with the number of faces given"""
+        
+        await ctx.message.delete()
+
+        if not sides:
+            sides = 6
+
+        try:
+            sides = int(sides)
+        except ValueError:
+            sides = 6
+
+        if sides > 1000000000000000 or sides < 0:
+            await ctx.send("Enter a valid integer value", delete_after=3)
+        
+        embed = discord.Embed(color=ctx.author.color, title=f":game_die: **YOU GOT:** `{randint(1, sides)}` :game_die: (1 - {sides})",
+            timestamp=ctx.message.created_at)
+        embed.set_footer(text=f"Rolled by {ctx.author}", icon_url=ctx.author.display_avatar)
+        await ctx.send(embed=embed)
+
+  
 
     # ===========
 
