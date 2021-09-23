@@ -1,6 +1,6 @@
 import discord
 from discord.app import Option, OptionChoice
-from discord.app.commands import slash_command, message_command
+from discord.app.commands import slash_command, message_command, user_command
 from discord.ext import commands, menus
 import asyncio
 from gtts import gTTS
@@ -963,6 +963,29 @@ class Tools(commands.Cog):
 			msg = await ctx.respond(embed=embed)
 		await msg.add_reaction('✅')
 		await msg.add_reaction('❌')
+
+	@user_command(name="Follow", guild_ids=guild_ids)
+	@utils.is_allowed(allowed_roles, throw_exc=True)
+	async def _follow(self, ctx, user: discord.Member) -> None:
+		""" Follows a user by moving yourself to the Voice Channel they are in. """
+
+		author = ctx.author
+		user_vc = user.voice
+		if not user_vc or not user_vc.channel:
+			return await ctx.respond(f"**{user} is not in a VC, {author.mention}!**")
+
+		author_vc = author.voice
+		if not author_vc or not author_vc.channel:
+			return await ctx.respond(f"**You're not in a VC, I cannot move you to there, {author.mention}!**")
+
+		try:
+			await author.move_to(user_vc.channel)
+		except:
+			await ctx.respond(f"**For some reason I couldn't move you to there, {author.mention}!**")
+		else:
+			await ctx.respond(f"**You got moved to {user_vc.channel.mention}!**")
+
+
 
 def setup(client):
 	client.add_cog(Tools(client))
