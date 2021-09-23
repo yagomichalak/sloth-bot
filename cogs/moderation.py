@@ -319,14 +319,15 @@ class Moderation(*moderation_cogs):
 		"""(MOD) Warns one or more members.
 		:param member: The @ or the ID of one or more users to warn. 
 		:param reason: The reason for warning one or all users. (Optional)"""
-
-		members, reason = await utils.ignore_usernames(ctx, members, reason)
-
+		
 		await ctx.message.delete()
-		if not members:
-			await ctx.send("Please, specify a member!", delete_after=3)
+
+		all_members, reason = await utils.ignore_usernames(ctx, members, reason)
+	
+		if not all_members:
+			await ctx.send("**Please, specify a member!**", delete_after=3)
 		else:
-			for member in members:
+			for member in all_members:
 				# General embed
 				general_embed = discord.Embed(description=f'**Reason:** {reason}', colour=discord.Colour.dark_gold())
 				general_embed.set_author(name=f'{member} has been warned', icon_url=member.display_avatar)
@@ -429,9 +430,13 @@ class Moderation(*moderation_cogs):
 		:param member: The @ or the ID of one or more users to mute. 
 		:param reason: The reason for muting one or all users. (Optional)"""
 		
-		members, reason = await utils.ignore_usernames(ctx, members, reason)
+		all_members, reason = await utils.ignore_usernames(ctx, members, reason)
 
-		for member in members:
+		if not all_members:
+			await ctx.message.delete()
+			return await ctx.send("**Please, specify a member!**", delete_after=3)
+		
+		for member in all_members:
 			await self._mute_callback(ctx, member, reason)
 		
 	@user_command(name="Mute", guild_ids=guild_ids)
@@ -509,6 +514,8 @@ class Moderation(*moderation_cogs):
 		"""(MOD) Unmutes one or more members instantly or after a determined amount of time.
 		:param member: The @ or the ID of one or more users to unmute. 
 		:param time: The time before unmuting one or all users. (Optional)"""
+		
+		await ctx.message.delete()
 		
 		if not members:
 			return await ctx.send("**Please, specify a member!**", delete_after=3)
@@ -925,13 +932,14 @@ class Moderation(*moderation_cogs):
 		:param member: The @ or ID of the user to ban.
 		:param reason: The reason for banning the user. (Optional) """
 
-		members, reason = await utils.ignore_usernames(ctx, members, reason)
-
 		await ctx.message.delete()
-		if not members:
+
+		all_members, reason = await utils.ignore_usernames(ctx, members, reason)
+
+		if not all_members:
 			await ctx.send('**Please, specify a member!**', delete_after=3)
 		else:
-			for member in members:
+			for member in all_members:
 				# General embed
 				general_embed = discord.Embed(description=f'**Reason:** {reason}', colour=discord.Colour.dark_red())
 				general_embed.set_author(name=f'{member} has been banned', icon_url=member.display_avatar)
@@ -1182,9 +1190,11 @@ class Moderation(*moderation_cogs):
 	async def infractions(self, ctx, member: Optional[Union[discord.User, discord.Member]] = None) -> None:
 		""" Shows all infractions of a specific user.
 		:param member: The member to show the infractions from. [Optional] [Default = You] """
+		
+		await ctx.message.delete()
 
 		if not member:
-			return await ctx.send("**Inform a member!**")
+			return await ctx.send("**Please, specify a member!**", delete_after=3)
 
 		# Try to get user infractions
 		if user_infractions := await self.get_user_infractions(member.id):
@@ -1222,19 +1232,23 @@ class Moderation(*moderation_cogs):
 
 	@commands.command(aliases=['ri', 'remove_warn', 'remove_warning'])
 	@utils.is_allowed(allowed_roles, throw_exc=True)
-	async def remove_infraction(self, ctx, *, infrs_id: str = None):
+	async def remove_infraction(self, ctx, infrs_id : commands.Greedy[int] = None):
 		""" (MOD) Removes one or more infractions by their IDs.
 		:param infr_id: The infraction(s) IDs. """
 
+		await ctx.message.delete()
+
 		if not infrs_id:
-			return await ctx.send("**Inform the infraction ID!**")
-		for infr_id in infrs_id.split(' '):
+			return await ctx.send("**Please, inform an infraction ID!**", delete_after = 3)
+
+		for infr_id in infrs_id:
 			if user_infractions := await self.get_user_infraction_by_infraction_id(infr_id):
 				await self.remove_user_infraction(int(infr_id))
 				member = discord.utils.get(ctx.guild.members, id=user_infractions[0][0])
 				await ctx.send(f"**Removed infraction with ID `{infr_id}` for {member}**")
 			else:
 				await ctx.send(f"**Infraction with ID `{infr_id}` was not found!**")
+			
 
 
 	@commands.command(aliases=['ris', 'remove_warns', 'remove_warnings'])
@@ -1243,8 +1257,10 @@ class Moderation(*moderation_cogs):
 		""" (MOD) Removes all infractions for one or more users.
 		:param member: The member(s) to get the infractions from. """
 
+		await ctx.message.delete()
+
 		if not members:
-			return await ctx.send("**Inform a member!**")
+			return await ctx.send("**Please, specify a member!**", delete_after=3)
 
 		for member in members:
 			if await self.get_user_infractions(member.id):
@@ -1256,13 +1272,14 @@ class Moderation(*moderation_cogs):
 
 	@commands.command(aliases=['ei'])
 	@utils.is_allowed(allowed_roles, throw_exc=True)
-	async def edit_infraction(self, ctx, infractions_ids : commands.Greedy[int] = None, *, reason: str) -> None:
+	async def edit_infraction(self, ctx, infractions_ids : commands.Greedy[int] = None, *, reason: Optional[str] = None) -> None:
 		"""(MOD) Edits one or more infractions by their IDs.
 		:param infr_id: The infraction(s) ID(s).
 		:param reason: The updated reason of the infraction(s)."""
 
+		await ctx.message.delete()
 		if not infractions_ids:
-			return await ctx.send("**Inform an infraction id!**")
+			return await ctx.send("**Please, inform an infraction id!**", delete_after=3)
 
 		for infr_id in infractions_ids:
 			if user_infraction := await self.get_user_infraction_by_infraction_id(infr_id):

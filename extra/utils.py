@@ -244,6 +244,8 @@ async def audio(client: commands.Bot, voice_channel: discord.VoiceChannel, membe
 
 # Converts in reason members collected by greedy that are not id or mention 
 async def ignore_usernames(ctx, members : List[discord.Member] = None, reason : str = None):
+    if not members:
+        return members, reason
     for id, member in enumerate(members):
         word = ctx.message.content.split()[id + 1]
         if member.name == word:
