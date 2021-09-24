@@ -146,6 +146,9 @@ different_class_roles = {
     ],
     "korean": [
         "한국어"
+    ],
+    "celtic": [
+        "irish"
     ]
 }
 
