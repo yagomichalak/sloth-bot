@@ -207,9 +207,9 @@ class Misc(commands.Cog):
             sides = 6
 
         if sides > 1000000000000 or sides < 0:
-            return await ctx.send("Enter a valid integer value", delete_after=3)
+            return await ctx.send("**Enter a valid integer value**", delete_after=3)
         
-        embed = discord.Embed(color=ctx.author.color, title=f":game_die: **YOU GOT:** `{randint(1, sides)}` :game_die: (1 - {sides})",
+        embed = discord.Embed(color=ctx.author.color, title=f":game_die: **YOU GOT:** **{randint(1, sides)}** :game_die: `(1 - {sides})`",
             timestamp=ctx.message.created_at)
         embed.set_footer(text=f"Rolled by {ctx.author}", icon_url=ctx.author.display_avatar)
         await ctx.send(embed=embed)
