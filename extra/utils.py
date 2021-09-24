@@ -248,7 +248,7 @@ async def ignore_usernames(ctx, members : List[discord.Member] = None, reason : 
         return members, reason
     for id, member in enumerate(members):
         word = ctx.message.content.split()[id + 1]
-        if member.name == word or member.nick == word:
+        if member.name == word or member.nickname == word:
             reason = ' '.join(ctx.message.content.split()[1 + id:])
             for i in range(len(members) - 1, id - 1, -1):
                     del members[i]
