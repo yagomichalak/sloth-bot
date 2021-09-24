@@ -289,8 +289,8 @@ class GiveawayView(discord.ui.View):
 class SoundBoardButton(discord.ui.Button):
     """ Button of the soundboard. """
 
-    def __init__(self, *, custom_id: Optional[str] = None, row: Optional[int] = None) -> None:
-        super().__init__(style=discord.ButtonStyle.blurple, label='\u200b', custom_id=custom_id, row=row)
+    def __init__(self, style: discord.ButtonStyle = discord.ButtonStyle.blurple, emoji: Optional[Union[str, discord.Emoji, discord.PartialEmoji]] = None, custom_id: Optional[str] = None, row: Optional[int] = None) -> None:
+        super().__init__(style=style, label='\u200b', emoji=emoji, custom_id=custom_id, row=row)
 
 
     async def callback(self, interaction: discord.Interaction) -> None:
@@ -300,7 +300,7 @@ class SoundBoardButton(discord.ui.Button):
         sound: Dict[str, str] = self.view.sounds.get(self.custom_id)
         await self.play_sound(interaction, sound)
 
-    async def play_sound(self, interaction: discord.Interaction, sound: Dict[str, str]) -> None:
+    async def play_sound(self, interaction: discord.Interaction, sound: Dict[str, Dict[str, str]]) -> None:
         """ Plays a sound in the voice channel. """
 
         author = interaction.user
@@ -312,7 +312,7 @@ class SoundBoardButton(discord.ui.Button):
         if (ovc := author.guild.voice_client) and ovc.channel.id != vc.id:
             return await interaction.followup.send(f"**You are not in the origin voice channel ({ovc.channel.mention})!**", ephemeral=True)
 
-        await utils.audio(self.view.client, vc, author, sound)
+        await utils.audio(self.view.client, vc, author, sound['path'])
 
 
 class SoundBoardView(discord.ui.View):
@@ -327,8 +327,9 @@ class SoundBoardView(discord.ui.View):
         counter: int = 0
         for i in range(5):
             for _ in range(5):
+                current_sound: Dict[str, str] = list(self.sounds.items())[counter][1]
                 counter += 1
-                button = SoundBoardButton(custom_id=f"sb_btn_{counter}_id", row=i)
+                button = SoundBoardButton(style=current_sound['style'], custom_id=f"sb_btn_{counter}_id", emoji=current_sound['emoji'], row=i)
                 self.add_item(button)
 
     def get_sounds(self) -> List[Dict[str, str]]:
