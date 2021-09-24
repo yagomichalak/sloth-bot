@@ -2,7 +2,7 @@ from datetime import datetime
 import re
 from pytz import timezone
 from discord.ext import commands
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Union
 import discord
 
 async def get_timestamp(tz: str = 'Etc/GMT') -> int:
@@ -243,14 +243,21 @@ async def audio(client: commands.Bot, voice_channel: discord.VoiceChannel, membe
         return
 
 # Converts in reason members collected by greedy that are not id or mention 
-async def ignore_usernames(ctx, members : List[discord.Member] = None, reason : str = None):
+async def ignore_usernames(ctx, members : List[Union[discord.Member, discord.User]] = None, reason : str = None):
     if not members:
         return members, reason
     for id, member in enumerate(members):
         word = ctx.message.content.split()[id + 1]
-        if member.name == word or member.nickname == word:
+        if member.name == word:
             reason = ' '.join(ctx.message.content.split()[1 + id:])
             for i in range(len(members) - 1, id - 1, -1):
                     del members[i]
             return members, reason
+
+        elif isinstance(member, discord.Member) and member.nickname == word:
+            reason = ' '.join(ctx.message.content.split()[1 + id:])
+            for i in range(len(members) - 1, id - 1, -1):
+                    del members[i]
+            return members, reason
+
     return members, reason
