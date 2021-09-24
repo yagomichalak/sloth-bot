@@ -919,9 +919,9 @@ class Tools(commands.Cog):
 		author = ctx.author
 
 		author_state = author.voice
-		# if not (vc := author_state and author_state.channel):
-		# 	ctx.command.reset_cooldown(ctx)
-		# 	return await ctx.send(f"**You're not in a VC!**")
+		if not (vc := author_state and author_state.channel):
+			ctx.command.reset_cooldown(ctx)
+			return await ctx.send(f"**You're not in a VC!**")
 
 		embed = discord.Embed(
 			title="__Soundboard__",
@@ -929,7 +929,7 @@ class Tools(commands.Cog):
 			color=author.color,
 			timestamp=ctx.message.created_at
 		)
-		# embed.add_field(name="Info:", value=f"Soundboard is bound to the {vc.mention} `Voice Channel`.")
+		embed.add_field(name="Info:", value=f"Soundboard is bound to the {vc.mention} `Voice Channel`.")
 		embed.set_footer(text=f"Started by {author}", icon_url=author.display_avatar)
 		view: discord.ui.View = SoundBoardView(ctx, self.client)
 
