@@ -442,7 +442,8 @@ class Misc(commands.Cog):
     @slash_command(name="dnk", guild_ids=guild_ids)
     async def _dnk(self, ctx) -> None:
         """ Tells you something about DNK. """
-        await ctx.respond(f"**DNK est toujours là pour les vrais !**")
+        
+        await ctx.respond(f"**`Sapristi! C'est qui ? Oui, c'est lui le plus grave et inouï keum qu'on n'a jamais ouï-dire, tandis qu'on était si abasourdi et épris de lui d'être ici affranchi lorsqu'il a pris son joli gui qui ne nie ni être suivi par un souris sur son nid ni être mis ici un beau lundi. !`**")
 
     @slash_command(name="twiks", guild_ids=guild_ids)
     async def _twiks(self, ctx) -> None:
