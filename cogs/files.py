@@ -4,9 +4,7 @@ import os
 
 
 class Files(commands.Cog):
-    '''
-    File related commands; showing, sending files.
-    '''
+    """ File related commands; showing, sending files. """
 
     def __init__(self, client):
         self.client = client
