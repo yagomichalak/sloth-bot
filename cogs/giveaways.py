@@ -181,7 +181,7 @@ class Giveaways(commands.Cog):
         message_url = 'https://discord.com/channels/{server_id}/{channel_id}/{message_id}'
 
         formatted_giveaways: List[str] = '\n'.join([
-            f"[Msg]({message_url.format(server_id=server_id, channel_id=ga[1], message_id=ga[0])}) - **P:** `{ga[2]}` **W:** `{ga[3]}` | <t:{ga[4]}:R>"
+            f"Msg • [{ga[0]}]({message_url.format(server_id=server_id, channel_id=ga[1], message_id=ga[0])}) - **P:** `{ga[2]}` **W:** `{ga[3]}` | <t:{ga[4]}:R>"
             for ga in giveaways
         ])
 
