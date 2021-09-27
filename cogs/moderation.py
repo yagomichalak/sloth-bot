@@ -32,21 +32,23 @@ mod_role_id = int(os.getenv('MOD_ROLE_ID'))
 allowed_roles = [int(os.getenv('OWNER_ROLE_ID')), int(os.getenv('ADMIN_ROLE_ID')), int(os.getenv('SENIOR_MOD_ROLE_ID')), mod_role_id]
 server_id = int(os.getenv('SERVER_ID'))
 guild_ids: List[int] = [server_id]
-
+ 
 moderation_cogs: List[commands.Cog] = [
 	ModerationFirewallTable, ModerationMutedMemberTable, ModerationUserInfractionsTable,
 	ModerationWatchlistTable, ModerationFakeAccountsTable
 ]
+member_converter = commands.MemberConverter()
 
 class Moderation(*moderation_cogs):
 	""" Moderation related commands. """
 
 	def __init__(self, client):
 		self.client = client
-
+		
 	@commands.Cog.listener()
 	async def on_ready(self):
 		self.look_for_expired_tempmutes.start()
+		self.guild = self.client.get_guild(server_id)
 		print('Moderation cog is ready!')
 
 	@commands.Cog.listener()
@@ -315,7 +317,7 @@ class Moderation(*moderation_cogs):
 	# Warns a member
 	@commands.command()
 	@utils.is_allowed(allowed_roles, throw_exc=True)
-	async def warn(self, ctx, members: commands.Greedy[discord.Member] = None, *, reason: Optional[str] = None):
+	async def warn(self, ctx, members: commands.Greedy[discord.Member] or commands.Greedy[discord.User] = None, *, reason: Optional[str] = None):
 		"""(MOD) Warns one or more members.
 		:param member: The @ or the ID of one or more users to warn. 
 		:param reason: The reason for warning one or all users. (Optional)"""
@@ -323,42 +325,46 @@ class Moderation(*moderation_cogs):
 		await ctx.message.delete()
 
 		all_members, reason = await utils.ignore_usernames(ctx, members, reason)
-	
 		if not all_members:
 			await ctx.send("**Please, specify a member!**", delete_after=3)
 		else:
 			for member in all_members:
-				# General embed
-				general_embed = discord.Embed(description=f'**Reason:** {reason}', colour=discord.Colour.dark_gold())
-				general_embed.set_author(name=f'{member} has been warned', icon_url=member.display_avatar)
-				await ctx.send(embed=general_embed)
-				# Moderation log embed
-				moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
-				embed = discord.Embed(title='__**Warning**__', colour=discord.Colour.dark_gold(),
-									timestamp=ctx.message.created_at)
-				embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nId: {member.id}```',
-								inline=False)
-				embed.add_field(name='Reason:', value=f'```{reason}```')
-				embed.set_author(name=member)
-				embed.set_thumbnail(url=member.display_avatar)
-				embed.set_footer(text=f"Warned by {ctx.author}", icon_url=ctx.author.display_avatar)
-				await moderation_log.send(embed=embed)
-				# Inserts a infraction into the database
-				epoch = datetime.utcfromtimestamp(0)
-				current_ts = (datetime.utcnow() - epoch).total_seconds()
-				await self.insert_user_infraction(
-					user_id=member.id, infr_type="warn", reason=reason,
-					timestamp=current_ts, perpetrator=ctx.author.id)
-				try:
-					await member.send(embed=general_embed)
-				except:
-					pass
+				if self.guild.get_member(member.id):
+					member = await member_converter.convert(ctx, member.name)
+					# General embed
+					general_embed = discord.Embed(description=f'**Reason:** {reason}', colour=discord.Colour.dark_gold())
+					general_embed.set_author(name=f'{member} has been warned', icon_url=member.display_avatar)
+					await ctx.send(embed=general_embed)
+					# Moderation log embed
+					moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
+					embed = discord.Embed(title='__**Warning**__', colour=discord.Colour.dark_gold(),
+										timestamp=ctx.message.created_at)
+					embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nId: {member.id}```',
+									inline=False)
+					embed.add_field(name='Reason:', value=f'```{reason}```')
+					embed.set_author(name=member)
+					embed.set_thumbnail(url=member.display_avatar)
+					embed.set_footer(text=f"Warned by {ctx.author}", icon_url=ctx.author.display_avatar)
+					await moderation_log.send(embed=embed)
+					# Inserts a infraction into the database
+					epoch = datetime.utcfromtimestamp(0)
+					current_ts = (datetime.utcnow() - epoch).total_seconds()
+					await self.insert_user_infraction(
+						user_id=member.id, infr_type="warn", reason=reason,
+						timestamp=current_ts, perpetrator=ctx.author.id)
+					try:
+						await member.send(embed=general_embed)
+					except:
+						pass
 
-				user_infractions = await self.get_user_infractions(member.id)
-				user_warns = [w for w in user_infractions if w[1] == 'warn']
-				if len(user_warns) >= 3:
-					ctx.author = self.client.user
-					await self._mute_callback(ctx, member=member, reason=reason)
+					user_infractions = await self.get_user_infractions(member.id)
+					user_warns = [w for w in user_infractions if w[1] == 'warn']
+					if len(user_warns) >= 3:
+						ctx.author = self.client.user
+						await self._mute_callback(ctx, member=member, reason=reason)
+				
+				else:
+					await ctx.send(f"**The user {member} is not on the server**")
 
 	async def get_remove_roles(self, member: discord.Member, keep_roles: Optional[List[Union[int, discord.Role]]] = []
 	) -> List[List[discord.Role]]:
@@ -425,7 +431,7 @@ class Moderation(*moderation_cogs):
 
 	@commands.command(name="mute")
 	@utils.is_allowed(allowed_roles, throw_exc=True)
-	async def _mute_command(self, ctx: commands.Context, members: commands.Greedy[discord.Member] = None, *, reason: Optional[str] = None) -> None:
+	async def _mute_command(self, ctx: commands.Context, members: commands.Greedy[discord.Member] or commands.Greedy[discord.User] = None, *, reason: Optional[str] = None) -> None:
 		"""(MOD) Mutes one or more members.
 		:param member: The @ or the ID of one or more users to mute. 
 		:param reason: The reason for muting one or all users. (Optional)"""
@@ -437,8 +443,12 @@ class Moderation(*moderation_cogs):
 			return await ctx.send("**Please, specify a member!**", delete_after=3)
 		
 		for member in all_members:
-			await self._mute_callback(ctx, member, reason)
-		
+			if self.guild.get_member(member.id):
+				member = await member_converter.convert(ctx, member.name)
+				await self._mute_callback(ctx, member, reason)
+			else:
+				await ctx.send(f"**The user {member} is not on the server**")
+
 	@user_command(name="Mute", guild_ids=guild_ids)
 	@utils.is_allowed(allowed_roles, throw_exc=True)
 	async def _mute_slash(self, ctx, user: discord.Member) -> None:
@@ -510,7 +520,7 @@ class Moderation(*moderation_cogs):
 	# Unmutes a member
 	@commands.command(name="unmute")
 	@utils.is_allowed(allowed_roles, throw_exc=True)
-	async def _unmute_command(self, ctx: commands.Context, members: commands.Greedy[discord.Member] = None, time : Optional[str] = None) -> None:
+	async def _unmute_command(self, ctx: commands.Context, members: commands.Greedy[discord.Member] or commands.Greedy[discord.User] = None, time : Optional[str] = None) -> None:
 		"""(MOD) Unmutes one or more members instantly or after a determined amount of time.
 		:param member: The @ or the ID of one or more users to unmute. 
 		:param time: The time before unmuting one or all users. (Optional)"""
@@ -522,33 +532,39 @@ class Moderation(*moderation_cogs):
 
 		if time == None:
 			for member in members:
-				await self._unmute_callback(ctx, member)
-
+				if self.guild.get_member(member.id):
+					member = await member_converter.convert(ctx, member.name)
+					await self._unmute_callback(ctx, member)
+				else:
+					await ctx.send(f"**The user {member} is not on the server**")
 		else:
 			role = discord.utils.get(ctx.guild.roles, id=muted_role_id)
 			for member in members:
-				if role in member.roles:
-					current_ts = await utils.get_timestamp()
-					time_dict, seconds = await utils.get_time_from_text(ctx, time)
+				if self.guild.get_member(member.id):
+					member = await member_converter.convert(ctx, member.name)
+					if role in member.roles:
+						current_ts = await utils.get_timestamp()
+						time_dict, seconds = await utils.get_time_from_text(ctx, time)
 
-					general_embed = discord.Embed(description=f"**In:** `{time_dict['days']}d`, `{time_dict['hours']}h`, `{time_dict['minutes']}m`\n", colour=discord.Colour.dark_grey(), timestamp=ctx.message.created_at)
-					general_embed.set_author(name=f"{member} will be unmuted", icon_url=member.display_avatar)
-					await ctx.send(embed=general_embed)
+						general_embed = discord.Embed(description=f"**In:** `{time_dict['days']}d`, `{time_dict['hours']}h`, `{time_dict['minutes']}m`\n", colour=discord.Colour.dark_grey(), timestamp=ctx.message.created_at)
+						general_embed.set_author(name=f"{member} will be unmuted", icon_url=member.display_avatar)
+						await ctx.send(embed=general_embed)
 
-					moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
-					embed = discord.Embed(
-						description=F"**Unmuting** {member.mention}\n **In:** `{time_dict['days']}d`, `{time_dict['hours']}h`, `{time_dict['minutes']}m`\n**Location:** {ctx.channel.mention}",
-						color=discord.Color.lighter_grey(),
-						timestamp=ctx.message.created_at)
-					embed.set_author(name=f"{ctx.author} (ID {ctx.author.id})", icon_url=ctx.author.display_avatar)
-					embed.set_thumbnail(url=member.display_avatar)
-					await moderation_log.send(embed=embed)
+						moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
+						embed = discord.Embed(
+							description=F"**Unmuting** {member.mention}\n **In:** `{time_dict['days']}d`, `{time_dict['hours']}h`, `{time_dict['minutes']}m`\n**Location:** {ctx.channel.mention}",
+							color=discord.Color.lighter_grey(),
+							timestamp=ctx.message.created_at)
+						embed.set_author(name=f"{ctx.author} (ID {ctx.author.id})", icon_url=ctx.author.display_avatar)
+						embed.set_thumbnail(url=member.display_avatar)
+						await moderation_log.send(embed=embed)
 
-					# Updating the member muted database
-					await ModerationMutedMemberTable.update_mute_time(ctx, member.id, current_ts, seconds)
+						# Updating the member muted database
+						await ModerationMutedMemberTable.update_mute_time(ctx, member.id, current_ts, seconds)
+					else:
+						await ctx.send(f"User {member} is not muted")
 				else:
-					await ctx.send(f"User {member} is not muted")
-
+					await ctx.send(f"**The user {member} is not on the server**")
 
 	@user_command(name="Unmute", guild_ids=guild_ids)
 	@utils.is_allowed(allowed_roles, throw_exc=True)
@@ -752,63 +768,65 @@ class Moderation(*moderation_cogs):
 
 	@commands.command()
 	@utils.is_allowed(allowed_roles, throw_exc=True)
-	async def kick(self, ctx, members: commands.Greedy[discord.Member] = None, *, reason: Optional[str] = None):
+	async def kick(self, ctx, members: commands.Greedy[discord.Member] or commands.Greedy[discord.User] = None, *, reason: Optional[str] = None):
 		""" (MOD) Kicks one or more members from the server.
 		:param member: The @ or the ID of one or more users to kick. 
 		:param reason: The reason for kicking one or all users. (Optional) """
 
 		await ctx.message.delete()
 		all_members, reason = await utils.ignore_usernames(ctx, members, reason)
-
-		members: List[discord.Member] = []
-
-		for member in all_members:
-			if not await utils.is_allowed(allowed_roles).predicate(channel=ctx.channel, member=member):
-				members.append(member)
-
-		if not members:
+		
+		if not all_members:
 			return await ctx.send('**Please, specify one or more members!**', delete_after=3)
 
-		for member in members:
-			confirm = await Confirm(f"**Are you sure you want to kick {member.mention} from the server, {ctx.author.mention}?**").prompt(ctx)
-			if not confirm:
-				return
+		for member in all_members:
+			if self.guild.get_member(member.id):
+				member = await member_converter.convert(ctx, member.name)
+				if not await utils.is_allowed(allowed_roles).predicate(channel=ctx.channel, member=member):
+					confirm = await Confirm(f"**Are you sure you want to kick {member.mention} from the server, {ctx.author.mention}?**").prompt(ctx)
+					if not confirm:
+						continue
 
-			# General embed
-			general_embed = discord.Embed(description=f'**Reason:** {reason}', colour=discord.Colour.magenta())
-			general_embed.set_author(name=f'{member} has been kicked', icon_url=member.display_avatar)
-			await ctx.send(embed=general_embed)
-			try:
-				await member.send(embed=general_embed)
-			except:
-				pass
+					# General embed
+					general_embed = discord.Embed(description=f'**Reason:** {reason}', colour=discord.Colour.magenta())
+					general_embed.set_author(name=f'{member} has been kicked', icon_url=member.display_avatar)
+					await ctx.send(embed=general_embed)
+					try:
+						await member.send(embed=general_embed)
+					except:
+						pass
 
-			try:
-				await member.kick(reason=reason)
-			except Exception:
-				await ctx.send('**You cannot do that!**', delete_after=3)
+					try:
+						await member.kick(reason=reason)
+					except Exception:
+						await ctx.send('**You cannot do that!**', delete_after=3)
+					else:
+						# Moderation log embed
+						moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
+						embed = discord.Embed(title='__**Kick**__', colour=discord.Colour.magenta(),
+												timestamp=ctx.message.created_at)
+						embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nId: {member.id}```',
+										inline=False)
+						embed.add_field(name='Reason:', value=f'```{reason}```')
+						embed.set_author(name=member)
+						embed.set_thumbnail(url=member.display_avatar)
+						embed.set_footer(text=f"Kicked by {ctx.author}", icon_url=ctx.author.display_avatar)
+						await moderation_log.send(embed=embed)
+						# Inserts a infraction into the database
+						current_ts = await utils.get_timestamp()
+						await self.insert_user_infraction(
+							user_id=member.id, infr_type="kick", reason=reason,
+							timestamp=current_ts, perpetrator=ctx.author.id)
+				else:
+					await ctx.send(f"**You cannot kick a staff member, {ctx.author.mention}!**")
+
 			else:
-				# Moderation log embed
-				moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
-				embed = discord.Embed(title='__**Kick**__', colour=discord.Colour.magenta(),
-										timestamp=ctx.message.created_at)
-				embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nId: {member.id}```',
-								inline=False)
-				embed.add_field(name='Reason:', value=f'```{reason}```')
-				embed.set_author(name=member)
-				embed.set_thumbnail(url=member.display_avatar)
-				embed.set_footer(text=f"Kicked by {ctx.author}", icon_url=ctx.author.display_avatar)
-				await moderation_log.send(embed=embed)
-				# Inserts a infraction into the database
-				current_ts = await utils.get_timestamp()
-				await self.insert_user_infraction(
-					user_id=member.id, infr_type="kick", reason=reason,
-					timestamp=current_ts, perpetrator=ctx.author.id)
-
+				await ctx.send(f"** The user {member} is not on the server**")	
+	
 	# Bans a member
 	@commands.command()
 	@utils.is_allowed(allowed_roles, throw_exc=True)
-	async def ban(self, ctx, member: discord.Member = None, *, reason: Optional[str] = None) -> None:
+	async def ban(self, ctx, member: Union[discord.Member, discord.User] = None, *, reason: Optional[str] = None) -> None:
 		""" (ModTeam/ADM) Bans a member from the server.
 		:param member: The @ or ID of the user to ban.
 		:param reason: The reason for banning the user. (Optional) """
@@ -821,108 +839,109 @@ class Moderation(*moderation_cogs):
 		if not member:
 			return await ctx.send('**Please, specify a member!**', delete_after=3)
 
-		if await utils.is_allowed(allowed_roles).predicate(channel=ctx.channel, member=member):
-			return await ctx.send(f"**You cannot ban a staff member, {author.mention}!**")
+		if self.guild.get_member(member.id):
+			member = await member_converter.convert(ctx, member.name)
+			if not await utils.is_allowed(allowed_roles).predicate(channel=ctx.channel, member=member):
+				perpetrators = []
+				confirmations = {}
 
+				perms = channel.permissions_for(author)
 
-		perpetrators = []
-		confirmations = {}
+				if not perms.administrator:
+					confirmations[author.id] = author.name
+					mod_ban_embed = discord.Embed(
+						title=f"Ban Request ({len(confirmations)}/5) → (5mins)",
+						description=f'''
+						{author.mention} wants to ban {member.mention}, it requires 4 more moderator ✅ reactions for it!
+						```Reason: {reason}```''',
+						colour=discord.Colour.dark_red(), timestamp=ctx.message.created_at)
+					mod_ban_embed.set_author(name=f'{member} is going to Brazil...', icon_url=member.display_avatar)
+					msg = await ctx.send(embed=mod_ban_embed)
+					await msg.add_reaction('✅')
 
-		perms = channel.permissions_for(author)
+					# Prompts for 3 moderator reactions
+					def check_mod(r, u):
+						if u.bot:
+							return False
+						if r.message.id != msg.id:
+							return
 
-		if not perms.administrator:
-			confirmations[author.id] = author.name
-			mod_ban_embed = discord.Embed(
-				title=f"Ban Request ({len(confirmations)}/5) → (5mins)",
-				description=f'''
-				{author.mention} wants to ban {member.mention}, it requires 4 more moderator ✅ reactions for it!
-				```Reason: {reason}```''',
-				colour=discord.Colour.dark_red(), timestamp=ctx.message.created_at)
-			mod_ban_embed.set_author(name=f'{member} is going to Brazil...', icon_url=member.display_avatar)
-			msg = await ctx.send(embed=mod_ban_embed)
-			await msg.add_reaction('✅')
+						if str(r.emoji) == '✅':
+							perms = channel.permissions_for(u)
+							if mod_role_id in [r.id for r in u.roles] or perms.administrator:
+								confirmations[u.id] = u.name
+								return True
+							else:
+								self.client.loop.create_task(
+									msg.remove_reaction('✅', u)
+									)
+								return False
 
-			# Prompts for 3 moderator reactions
-			def check_mod(r, u):
-				if u.bot:
-					return False
-				if r.message.id != msg.id:
-					return
+						else:
+							self.client.loop.create_task(
+								msg.remove_reaction(r.emoji, u)
+								)
+							return False
 
-				if str(r.emoji) == '✅':
-					perms = channel.permissions_for(u)
-					if mod_role_id in [r.id for r in u.roles] or perms.administrator:
-						confirmations[u.id] = u.name
-						return True
-					else:
-						self.client.loop.create_task(
-							msg.remove_reaction('✅', u)
-							)
-						return False
+					while True:
+						try:
+							r, u = await self.client.wait_for('reaction_add', timeout=300, check=check_mod)
+						except asyncio.TimeoutError:
+							mod_ban_embed.description = f'Timeout, {member} is not getting banned!'
+							await msg.remove_reaction('✅', self.client.user)
+							return await msg.edit(embed=mod_ban_embed)
+						else:
+							mod_ban_embed.title = f"Ban Request ({len(confirmations)}/5) → (5mins)"
+							await msg.edit(embed=mod_ban_embed)
+							if channel.permissions_for(u).administrator:
+								break
+							elif len(confirmations) < 5:
+								continue
+							else:
+								break
 
+				# Checks if it was a moderator ban request or just a normal ban
+				if len(confirmations) == 0:
+					perpetrators = ctx.author
+					icon = ctx.author.display_avatar
 				else:
-					self.client.loop.create_task(
-						msg.remove_reaction(r.emoji, u)
-						)
-					return False
+					perpetrators = ', '.join(confirmations.values())
+					icon = ctx.guild.icon.url
 
-			while True:
+				# Bans and logs
+				# General embed
+				general_embed = discord.Embed(description=f'**Reason:** {reason}', colour=discord.Colour.dark_red())
+				general_embed.set_author(name=f'{member} has been banned', icon_url=member.display_avatar)
+				await ctx.send(embed=general_embed)
 				try:
-					r, u = await self.client.wait_for('reaction_add', timeout=300, check=check_mod)
-				except asyncio.TimeoutError:
-					mod_ban_embed.description = f'Timeout, {member} is not getting banned!'
-					await msg.remove_reaction('✅', self.client.user)
-					return await msg.edit(embed=mod_ban_embed)
+					await member.send(content="If you think you should be unbanned, you can make a ban appeal here: https://discord.gg/f9B7FzYv8D", embed=general_embed)
+				except Exception as e:
+					pass
+				try:
+					await member.ban(delete_message_days=7, reason=reason)
+				except Exception:
+					await ctx.send('**You cannot do that!**', delete_after=3)
 				else:
-					mod_ban_embed.title = f"Ban Request ({len(confirmations)}/5) → (5mins)"
-					await msg.edit(embed=mod_ban_embed)
-					if channel.permissions_for(u).administrator:
-						break
-					elif len(confirmations) < 5:
-						continue
-					else:
-						break
-
-		# Checks if it was a moderator ban request or just a normal ban
-		if len(confirmations) == 0:
-			perpetrators = ctx.author
-			icon = ctx.author.display_avatar
+					# Moderation log embed
+					moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
+					embed = discord.Embed(title='__**Banishment**__', colour=discord.Colour.dark_red(),
+										timestamp=ctx.message.created_at)
+					embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nId: {member.id}```',
+									inline=False)
+					embed.add_field(name='Reason:', value=f'```{reason}```')
+					embed.set_author(name=member)
+					embed.set_thumbnail(url=member.display_avatar)
+					embed.set_footer(text=f"Banned by {perpetrators}", icon_url=icon)
+					await moderation_log.send(embed=embed)
+					# Inserts a infraction into the database
+					current_ts = await utils.get_timestamp()
+					await self.insert_user_infraction(
+					user_id=member.id, infr_type="ban", reason=reason,
+					timestamp=current_ts, perpetrator=ctx.author.id)
+			else:
+				await ctx.send(f"**You cannot ban a staff member, {author.mention}!**")
 		else:
-			perpetrators = ', '.join(confirmations.values())
-			icon = ctx.guild.icon.url
-
-		# Bans and logs
-		# General embed
-		general_embed = discord.Embed(description=f'**Reason:** {reason}', colour=discord.Colour.dark_red())
-		general_embed.set_author(name=f'{member} has been banned', icon_url=member.display_avatar)
-		await ctx.send(embed=general_embed)
-		try:
-			await member.send(content="If you think you should be unbanned, you can make a ban appeal here: https://discord.gg/f9B7FzYv8D", embed=general_embed)
-		except Exception as e:
-			pass
-		try:
-			await member.ban(delete_message_days=7, reason=reason)
-		except Exception:
-			await ctx.send('**You cannot do that!**', delete_after=3)
-		else:
-			# Moderation log embed
-			moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
-			embed = discord.Embed(title='__**Banishment**__', colour=discord.Colour.dark_red(),
-								  timestamp=ctx.message.created_at)
-			embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nId: {member.id}```',
-							inline=False)
-			embed.add_field(name='Reason:', value=f'```{reason}```')
-			embed.set_author(name=member)
-			embed.set_thumbnail(url=member.display_avatar)
-			embed.set_footer(text=f"Banned by {perpetrators}", icon_url=icon)
-			await moderation_log.send(embed=embed)
-			# Inserts a infraction into the database
-			current_ts = await utils.get_timestamp()
-			await self.insert_user_infraction(
-				user_id=member.id, infr_type="ban", reason=reason,
-				timestamp=current_ts, perpetrator=ctx.author.id)
-
-			
+			await ctx.send(f"**The user {member} is not on the server**")	
 
 	# Bans a member
 	@commands.command()
@@ -992,119 +1011,123 @@ class Moderation(*moderation_cogs):
 	# Bans a member
 	@commands.command()
 	@utils.is_allowed(allowed_roles, throw_exc=True)
-	async def softban(self, ctx, member: discord.Member = None, *, reason: Optional[str] = None):
+	async def softban(self, ctx, member: Union[discord.Member, discord.User] = None, *, reason: Optional[str] = None):
 		""" (ModTeam/ADM) Softbans a member from the server.
 		:param member: The @ or ID of the user to ban.
 		:param reason: The reason for banning the user. (Optional) """
-
+	
 		await ctx.message.delete()
 
 		channel = ctx.channel
 		author = ctx.author
 
 		if not member:
-			return await ctx.send(f"**Please, specify a member, {member.mention}!**", delete_after=3)
+			return await ctx.send(f"**Please, specify a member, {author.mention}!**", delete_after=3)
 
-		if await utils.is_allowed(allowed_roles).predicate(channel=ctx.channel, member=member):
-			return await ctx.send(f"**You cannot softban a staff member, {author.mention}!**")
+		if self.guild.get_member(member.id):
+			member = await member_converter.convert(ctx, member.name)
+			if not await utils.is_allowed(allowed_roles).predicate(channel=ctx.channel, member=member):
+				perpetrators = []
+				confirmations = {}
 
-		perpetrators = []
-		confirmations = {}
+				perms = channel.permissions_for(author)
 
-		perms = channel.permissions_for(author)
+				if not perms.administrator:
+					confirmations[author.id] = author.name
+					mod_softban_embed = discord.Embed(
+						title=f"Softban Request ({len(confirmations)}/3) → (5mins)",
+						description=f'''
+						{author.mention} wants to softban {member.mention}, it requires 2 more moderator ✅ reactions for it!
+						```Reason: {reason}```''',
+						colour=discord.Colour.dark_purple(), timestamp=ctx.message.created_at)
+					mod_softban_embed.set_author(name=f'{member} is going to Brazil, but will come back!', icon_url=member.display_avatar)
+					msg = await ctx.send(embed=mod_softban_embed)
+					await msg.add_reaction('✅')
 
-		if not perms.administrator:
-			confirmations[author.id] = author.name
-			mod_softban_embed = discord.Embed(
-				title=f"Softban Request ({len(confirmations)}/3) → (5mins)",
-				description=f'''
-				{author.mention} wants to softban {member.mention}, it requires 2 more moderator ✅ reactions for it!
-				```Reason: {reason}```''',
-				colour=discord.Colour.dark_purple(), timestamp=ctx.message.created_at)
-			mod_softban_embed.set_author(name=f'{member} is going to Brazil, but will come back!', icon_url=member.display_avatar)
-			msg = await ctx.send(embed=mod_softban_embed)
-			await msg.add_reaction('✅')
+					# Prompts for 3 moderator reactions
+					def check_mod(r, u):
+						if u.bot:
+							return False
+						if r.message.id != msg.id:
+							return
 
-			# Prompts for 3 moderator reactions
-			def check_mod(r, u):
-				if u.bot:
-					return False
-				if r.message.id != msg.id:
-					return
+						if str(r.emoji) == '✅':
+							perms = channel.permissions_for(u)
+							if mod_role_id in [r.id for r in u.roles] or perms.administrator:
+								confirmations[u.id] = u.name
+								return True
+							else:
+								self.client.loop.create_task(
+									msg.remove_reaction('✅', u)
+									)
+								return False
 
-				if str(r.emoji) == '✅':
-					perms = channel.permissions_for(u)
-					if mod_role_id in [r.id for r in u.roles] or perms.administrator:
-						confirmations[u.id] = u.name
-						return True
-					else:
-						self.client.loop.create_task(
-							msg.remove_reaction('✅', u)
-							)
-						return False
+						else:
+							self.client.loop.create_task(
+								msg.remove_reaction(r.emoji, u)
+								)
+							return False
 
+					while True:
+						try:
+							r, u = await self.client.wait_for('reaction_add', timeout=300, check=check_mod)
+						except asyncio.TimeoutError:
+							mod_softban_embed.description = f'Timeout, {member} is not getting softbanned!'
+							await msg.remove_reaction('✅', self.client.user)
+							return await msg.edit(embed=mod_softban_embed)
+						else:
+							mod_softban_embed.title = f"Softban Request ({len(confirmations)}/3) → (5mins)"
+							await msg.edit(embed=mod_softban_embed)
+							if channel.permissions_for(u).administrator:
+								break
+							elif len(confirmations) < 3:
+								continue
+							else:
+								break
+
+				# Checks if it was a moderator ban request or just a normal ban
+				if len(confirmations) == 0:
+					perpetrators = ctx.author
+					icon = ctx.author.display_avatar
 				else:
-					self.client.loop.create_task(
-						msg.remove_reaction(r.emoji, u)
-						)
-					return False
+					perpetrators = ', '.join(confirmations.values())
+					icon = ctx.guild.icon.url
 
-			while True:
+				# Bans and logs
+				# General embed
+				general_embed = discord.Embed(description=f'**Reason:** {reason}', colour=discord.Colour.dark_purple())
+				general_embed.set_author(name=f'{member} has been softbanned', icon_url=member.display_avatar)
+				await ctx.send(embed=general_embed)
 				try:
-					r, u = await self.client.wait_for('reaction_add', timeout=300, check=check_mod)
-				except asyncio.TimeoutError:
-					mod_softban_embed.description = f'Timeout, {member} is not getting softbanned!'
-					await msg.remove_reaction('✅', self.client.user)
-					return await msg.edit(embed=mod_softban_embed)
+					await member.send(content="https://discord.gg/languages", embed=general_embed)
+				except Exception as e:
+					pass
+				try:
+					await member.ban(delete_message_days=7, reason=reason)
+					await member.unban(reason=reason)
+				except Exception:
+					await ctx.send('**You cannot do that!**', delete_after=3)
 				else:
-					mod_softban_embed.title = f"Softban Request ({len(confirmations)}/3) → (5mins)"
-					await msg.edit(embed=mod_softban_embed)
-					if channel.permissions_for(u).administrator:
-						break
-					elif len(confirmations) < 3:
-						continue
-					else:
-						break
-
-		# Checks if it was a moderator ban request or just a normal ban
-		if len(confirmations) == 0:
-			perpetrators = ctx.author
-			icon = ctx.author.display_avatar
+					# Moderation log embed
+					moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
+					embed = discord.Embed(title='__**SoftBanishment**__', colour=discord.Colour.dark_purple(),
+										timestamp=ctx.message.created_at)
+					embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nId: {member.id}```',
+									inline=False)
+					embed.add_field(name='Reason:', value=f'```{reason}```')
+					embed.set_author(name=member)
+					embed.set_thumbnail(url=member.display_avatar)
+					embed.set_footer(text=f"Banned by {perpetrators}", icon_url=icon)
+					await moderation_log.send(embed=embed)
+					# Inserts a infraction into the database
+					current_ts = await utils.get_timestamp()
+					await self.insert_user_infraction(
+						user_id=member.id, infr_type="kick", reason=reason,
+						timestamp=current_ts, perpetrator=ctx.author.id)
+			else:
+					await ctx.send(f"**You cannot softban a staff member, {author.mention}!**")
 		else:
-			perpetrators = ', '.join(confirmations.values())
-			icon = ctx.guild.icon.url
-
-		# Bans and logs
-		# General embed
-		general_embed = discord.Embed(description=f'**Reason:** {reason}', colour=discord.Colour.dark_purple())
-		general_embed.set_author(name=f'{member} has been softbanned', icon_url=member.display_avatar)
-		await ctx.send(embed=general_embed)
-		try:
-			await member.send(content="https://discord.gg/languages", embed=general_embed)
-		except Exception as e:
-			pass
-		try:
-			await member.ban(delete_message_days=7, reason=reason)
-			await member.unban(reason=reason)
-		except Exception:
-			await ctx.send('**You cannot do that!**', delete_after=3)
-		else:
-			# Moderation log embed
-			moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
-			embed = discord.Embed(title='__**SoftBanishment**__', colour=discord.Colour.dark_purple(),
-								  timestamp=ctx.message.created_at)
-			embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nId: {member.id}```',
-							inline=False)
-			embed.add_field(name='Reason:', value=f'```{reason}```')
-			embed.set_author(name=member)
-			embed.set_thumbnail(url=member.display_avatar)
-			embed.set_footer(text=f"Banned by {perpetrators}", icon_url=icon)
-			await moderation_log.send(embed=embed)
-			# Inserts a infraction into the database
-			current_ts = await utils.get_timestamp()
-			await self.insert_user_infraction(
-				user_id=member.id, infr_type="kick", reason=reason,
-				timestamp=current_ts, perpetrator=ctx.author.id)
+			await ctx.send(f"** The user {member} is not on the server**")	
 
 	@commands.command()
 	@commands.has_permissions(administrator=True)
@@ -1187,48 +1210,50 @@ class Moderation(*moderation_cogs):
 	# Infraction methods
 	@commands.command(aliases=['infr', 'show_warnings', 'sw', 'show_bans', 'sb', 'show_muted', 'sm'])
 	@utils.is_allowed(allowed_roles, throw_exc=True)
-	async def infractions(self, ctx, member: Optional[Union[discord.User, discord.Member]] = None) -> None:
+	async def infractions(self, ctx, members: commands.Greedy[discord.Member] or commands.Greedy[discord.User] = None) -> None:
 		""" Shows all infractions of a specific user.
 		:param member: The member to show the infractions from. [Optional] [Default = You] """
 		
 		await ctx.message.delete()
 
-		if not member:
-			return await ctx.send("**Please, specify a member!**", delete_after=3)
+		if not members:
+			members = [ctx.author]
 
-		# Try to get user infractions
-		if user_infractions := await self.get_user_infractions(member.id):
-			warns = len([w for w in user_infractions if w[1] == 'warn'])
-			mutes = len([m for m in user_infractions if m[1] == 'mute'])
-			kicks = len([k for k in user_infractions if k[1] == 'kick'])
-			bans = len([b for b in user_infractions if b[1] == 'ban'])
-			softbans = len([sb for sb in user_infractions if sb[1] == 'softban'])
-			hackbans = len([hb for hb in user_infractions if hb[1] == 'hackban'])
-		else:
-			return await ctx.send(f"**<@{member.id}> doesn't have any existent infractions!**")
+		for member in members:
+			# Try to get user infractions
+			if user_infractions := await self.get_user_infractions(member.id):
+				warns = len([w for w in user_infractions if w[1] == 'warn'])
+				mutes = len([m for m in user_infractions if m[1] == 'mute'])
+				kicks = len([k for k in user_infractions if k[1] == 'kick'])
+				bans = len([b for b in user_infractions if b[1] == 'ban'])
+				softbans = len([sb for sb in user_infractions if sb[1] == 'softban'])
+				hackbans = len([hb for hb in user_infractions if hb[1] == 'hackban'])
+			else:
+				await ctx.send(f"**<@{member.id}> doesn't have any existent infractions!**")
+				continue
 
-		# Makes the initial embed with their amount of infractions
-		embed = discord.Embed(
-			title=f"Infractions for {member}",
-			description=f"```ini\n[Warns]: {warns} | [Mutes]: {mutes} | [Kicks]: {kicks}\n[Bans]: {bans} | [Softbans]: {softbans} | [Hackbans]: {hackbans}```",
-			color=member.color,
-			timestamp=ctx.message.created_at)
-		embed.set_thumbnail(url=member.display_avatar)
-		embed.set_footer(text=f"Requested by: {ctx.author}", icon_url=ctx.author.display_avatar)
+			# Makes the initial embed with their amount of infractions
+			embed = discord.Embed(
+				title=f"Infractions for {member}",
+				description=f"```ini\n[Warns]: {warns} | [Mutes]: {mutes} | [Kicks]: {kicks}\n[Bans]: {bans} | [Softbans]: {softbans} | [Hackbans]: {hackbans}```",
+				color=member.color,
+				timestamp=ctx.message.created_at)
+			embed.set_thumbnail(url=member.display_avatar)
+			embed.set_footer(text=f"Requested by: {ctx.author}", icon_url=ctx.author.display_avatar)
 
-		# Loops through each infraction and adds a field to the embedded message
-		# 0-user_id, 1-infraction_type, 2-infraction_reason, 3-infraction_ts, 4-infraction_id, 5-perpetrator
-		for infr in user_infractions:
-			if (infr_type := infr[1]) in ['mute', 'warn']:
-				infr_date = datetime.fromtimestamp(infr[3]).strftime('%Y/%m/%d at %H:%M:%S')
-				perpetrator = discord.utils.get(ctx.guild.members, id=infr[5])
-				embed.add_field(
-					name=f"{infr_type} ID: {infr[4]}",
-					value=f"```apache\nGiven on {infr_date}\nBy {perpetrator}\nReason: {infr[2]}```",
-					inline=True)
+			# Loops through each infraction and adds a field to the embedded message
+			# 0-user_id, 1-infraction_type, 2-infraction_reason, 3-infraction_ts, 4-infraction_id, 5-perpetrator
+			for infr in user_infractions:
+				if (infr_type := infr[1]) in ['mute', 'warn']:
+					infr_date = datetime.fromtimestamp(infr[3]).strftime('%Y/%m/%d at %H:%M:%S')
+					perpetrator = discord.utils.get(ctx.guild.members, id=infr[5])
+					embed.add_field(
+						name=f"{infr_type} ID: {infr[4]}",
+						value=f"```apache\nGiven on {infr_date}\nBy {perpetrator}\nReason: {infr[2]}```",
+						inline=True)
 
-		# Shows the infractions
-		await ctx.send(embed=embed)
+			# Shows the infractions
+			await ctx.send(embed=embed)
 
 	@commands.command(aliases=['ri', 'remove_warn', 'remove_warning'])
 	@utils.is_allowed(allowed_roles, throw_exc=True)
@@ -1253,30 +1278,39 @@ class Moderation(*moderation_cogs):
 
 	@commands.command(aliases=['ris', 'remove_warns', 'remove_warnings'])
 	@utils.is_allowed(allowed_roles, throw_exc=True)
-	async def remove_infractions(self, ctx, members: commands.Greedy[discord.Member] = None):
+	async def remove_infractions(self, ctx, members: commands.Greedy[discord.Member] or commands.Greedy[discord.User] = None):
 		""" (MOD) Removes all infractions for one or more users.
 		:param member: The member(s) to get the infractions from. """
 
 		await ctx.message.delete()
 
 		if not members:
-			return await ctx.send("**Please, specify a member!**", delete_after=3)
+			members = [ctx.author]
 
 		for member in members:
+			member = await member_converter.convert(ctx, member.name)
 			if await self.get_user_infractions(member.id):
 				await self.remove_user_infractions(member.id)
 				await ctx.send(f"**Removed all infractions for {member.mention}!**")
 			else:
-				await ctx.send(f"**{member.mention} doesn't have any existent infractions!**")
-	
+				await ctx.send(f"**{member.mention} doesn't have any existent infractions!**")		
+
 
 	@commands.command(aliases=['ei'])
 	@utils.is_allowed(allowed_roles, throw_exc=True)
-	async def edit_infraction(self, ctx, infractions_ids : commands.Greedy[int] = None, *, reason: Optional[str] = None) -> None:
+	async def edit_infraction(self, ctx, infractions_ids : commands.Greedy[int] = None, *, reason: Optional[str] = ' ') -> None:
 		"""(MOD) Edits one or more infractions by their IDs.
 		:param infr_id: The infraction(s) ID(s).
 		:param reason: The updated reason of the infraction(s)."""
-
+		
+		# Remove numbers that are less than 5 digits long to not be considered ids
+		string_ids = [str(int_id) for int_id in infractions_ids]
+		for i, infr in enumerate(string_ids):
+			if len(infr) < 5:
+				reason = ' '.join(string_ids[i:]) + ' ' + reason
+				del infractions_ids[i:]
+				break
+	
 		await ctx.message.delete()
 		if not infractions_ids:
 			return await ctx.send("**Please, inform an infraction id!**", delete_after=3)
@@ -1297,7 +1331,7 @@ class Moderation(*moderation_cogs):
 				# Moderation log embed
 				moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
 
-				embed = discord.Embed(title=f'__**{user_infraction[0][1].capitalize()} Edited**__', colour=discord.Colour.lighter_grey(),
+				embed = discord.Embed(title=f'__**{user_infraction[0][1].lower()} Edited**__', colour=discord.Colour.lighter_grey(),
 									timestamp=ctx.message.created_at)
 
 				embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nId: {member.id}```',
