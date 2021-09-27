@@ -82,8 +82,11 @@ class Giveaways(commands.Cog):
             # Notifies the giveaway's termination
             await self.update_giveaway(giveaway[0])
 
-    async def _giveaway_start_callback(self, ctx, title: str, description: str, prize: str, winners: int = 1, days: int = 0, hours: int = 0, minutes: int = 0, role: discord.Role = None) -> None:
+    async def _giveaway_start_callback(
+        self, ctx, host: discord.Member, title: str, description: str, prize: str, winners: int = 1, days: int = 0, 
+        hours: int = 0, minutes: int = 0, role: discord.Role = None) -> None:
         """ Callback for the giveaway command.
+        :param host: The host of the giveaway..
         :param title: Title for the giveaway.
         :param description: Description of giveaway.
         :param prize: Prize giveaway.
@@ -126,6 +129,7 @@ class Giveaways(commands.Cog):
         embed.add_field(
             name="__Info__:",
             value=f"""
+            **Hosted by:** {host.mention}
             **Ends:** <t:{deadline_ts}:R>
             **Winners:** {winners}
             **Prize:** {prize}
@@ -139,8 +143,8 @@ class Giveaways(commands.Cog):
             self.client.add_view(view=view, message_id=msg.id)
 
             await self.insert_giveaway(
-                message_id=msg.id, channel_id=msg.channel.id, prize=prize,
-                winners=winners, deadline_ts=deadline_ts, role_id=role.id if role else None
+                message_id=msg.id, channel_id=msg.channel.id, user_id=host.id, prize=prize,
+                winners=winners, deadline_ts=deadline_ts, role_id=role.id if role else None,
             )
         except Exception as e:
             print(e)
@@ -329,6 +333,8 @@ class Giveaways(commands.Cog):
                 winners INT DEFAULT 1,
                 deadline_ts BIGINT NOT NULL,
                 notified TINYINT(1) DEFAULT 0,
+                role_id BIGINT DEFAULT NULL,
+                user_id BIGINT NOT NULL,
                 PRIMARY KEY(message_id)
             )""")
         await db.commit()
@@ -386,7 +392,9 @@ class Giveaways(commands.Cog):
             return False
 
 
-    async def insert_giveaway(self, message_id: int, channel_id: int, prize: str, winners: int, deadline_ts: int, role_id: Optional[int] = None) -> None:
+    async def insert_giveaway(
+        self, message_id: int, channel_id: int, user_id: int, 
+        prize: str, winners: int, deadline_ts: int, role_id: Optional[int] = None) -> None:
         """ Inserts a giveaway.
         :param message_id: The ID of the message in which the giveaway is attached to.
         :param channel_id: The ID of the channel in which the giveaway is made.
@@ -397,8 +405,9 @@ class Giveaways(commands.Cog):
 
         mycursor, db = await the_database()
         await mycursor.execute("""
-            INSERT INTO Giveaways (message_id, channel_id, prize, winners, deadline_ts, role_id)
-            VALUES (%s, %s, %s, %s, %s, %s)""", (message_id, channel_id, prize, winners, deadline_ts, role_id))
+            INSERT INTO Giveaways (message_id, channel_id, prize, winners, deadline_ts, role_id, user_id)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)""", (
+                message_id, channel_id, prize, winners, deadline_ts, role_id, user_id))
         await db.commit()
         await mycursor.close()
 
