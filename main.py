@@ -494,17 +494,21 @@ _giveaway = client.command_group(name="giveaway", description="For copy and past
 @option(type=int, name="hours", description="The title for the giveaway.", required=False)
 @option(type=int, name="minutes", description="The title for the giveaway.", required=False)
 @option(type=discord.Role, name="role", description="The role for role-only giveaways.", required=False)
-async def _giveaway_start_slash(ctx, prize: str, title: str, description: str, winners: int, days: int, hours: int, minutes: int, role: discord.Role) -> None:
+@option(type=discord.Member, name="host", description="The person hosting the giveaway.", required=False)
+async def _giveaway_start_slash(
+    ctx, prize: str, title: str, description: str, winners: int,
+     days: int, hours: int, minutes: int, role: discord.Role, host: discord.Member) -> None:
     """ Starts a giveaway. """
 
     winners = 1 if not winners else winners
     minutes = 0 if minutes is None else minutes
     hours = 0 if hours is None else hours
     days = 0 if days is None else days
+    host = host if host else ctx.author
 
     await client.get_cog('Giveaways')._giveaway_start_callback(ctx=ctx,
-        prize=prize, title=title, description=description, winners=winners,
-        days=days, hours=hours, minutes=minutes, role=role
+        host=host, prize=prize, title=title, description=description, 
+        winners=winners, days=days, hours=hours, minutes=minutes, role=role
     )
 
 @utils.is_allowed([giveaway_manager_role_id, moderator_role_id, admin_role_id], throw_exc=True)
