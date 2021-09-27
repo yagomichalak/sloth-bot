@@ -12,6 +12,7 @@ from mysqldb import the_database
 
 server_id = int(os.getenv('SERVER_ID'))
 giveaway_manager_role_id: int = int(os.getenv('GIVEAWAY_MANAGER_ROLE_ID'))
+mod_role_id = int(os.getenv('MOD_ROLE_ID'))
 
 class Giveaways(commands.Cog):
     """ Category for commands related to giveaways. """
@@ -155,9 +156,9 @@ class Giveaways(commands.Cog):
 
         member = ctx.author
 
-        giveaways = await self.get_giveaways()
+        giveaways = await self.get_user_giveaways(member.id)
         if not giveaways:
-            return await ctx.respond(f"**There are no active giveaways registered, {member.mention}!**", ephemeral=True)
+            return await ctx.respond(f"**You have no active giveaways registered, {member.mention}!**", ephemeral=True)
 
         message_url = 'https://discord.com/channels/{server_id}/{channel_id}/{message_id}'
 
@@ -215,7 +216,9 @@ class Giveaways(commands.Cog):
         if not giveaway:
             return await ctx.respond(f"**The specified giveaway message doesn't exist, {member.mention}!**", ephemeral=True)
 
-
+        if giveaway[7] != member.id and not await utils.is_allowed([mod_role_id]).predicate(ctx):
+            return await ctx.send(f"**You cannot delete someone else's giveaway, {member.mention}!**")
+            
         confirm_view = ConfirmButton(member, timeout=60)
         embed = discord.Embed(description=f"**Are you sure you wanna delete the giveaway with ID `{giveaway[0]}`, {member.mention}?**", color=member.color)
         await ctx.respond("\u200b", embed=embed, view=confirm_view, ephemeral=True)
@@ -416,6 +419,16 @@ class Giveaways(commands.Cog):
 
         mycursor, _ = await the_database()
         await mycursor.execute("SELECT * FROM Giveaways")
+        giveaways = await mycursor.fetchall()
+        await mycursor.close()
+        return giveaways
+
+    async def get_user_giveaways(self, user_id: int) -> List[List[Union[str, int]]]:
+        """ Gets all active giveaways from a specific user.
+        :param user_id: The ID of the user to get giveaways from. """
+
+        mycursor, _ = await the_database()
+        await mycursor.execute("SELECT * FROM Giveaways WHERE user_id = %s")
         giveaways = await mycursor.fetchall()
         await mycursor.close()
         return giveaways
