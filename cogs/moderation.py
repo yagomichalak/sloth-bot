@@ -1285,7 +1285,7 @@ class Moderation(*moderation_cogs):
 		await ctx.message.delete()
 
 		if not members:
-			members = [ctx.author]
+			return await ctx.send('**Please, specify a member!**', delete_after=3)
 
 		for member in members:
 			member = await member_converter.convert(ctx, member.name)
