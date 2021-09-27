@@ -6,7 +6,7 @@ import os
 
 from extra import utils
 from extra.view import GiveawayView
-from extra.prompt.menu import Confirm
+from extra.prompt.menu import Confirm, ConfirmButton
 
 from mysqldb import the_database
 
@@ -28,7 +28,7 @@ class Giveaways(commands.Cog):
         giveaways = await self.get_giveaways()
         for giveaway in giveaways:
             try:
-                self.client.add_view(view=GiveawayView(self.client), message_id=giveaway[0])
+                self.client.add_view(view=GiveawayView(self.client, giveaway[6]), message_id=giveaway[0])
             except:
                 pass
 
@@ -82,67 +82,39 @@ class Giveaways(commands.Cog):
             # Notifies the giveaway's termination
             await self.update_giveaway(giveaway[0])
 
-    @commands.group(name="giveaway", aliases=['ga'])
-    @utils.is_allowed([giveaway_manager_role_id])
-    async def _giveaway(self, ctx) -> None:
-        """ Giveaway manager command. """
-
-        if ctx.invoked_subcommand:
-            return
-
-        cmd = self.client.get_command(ctx.command.name)
-        prefix = self.client.command_prefix
-        subcommands = [f"{prefix}{c.qualified_name}" for c in cmd.commands]
-
-        subcommands = '\n'.join(subcommands)
-        embed = discord.Embed(
-            title="Subcommads",
-            description=f"```apache\n{subcommands}```",
-            color=ctx.author.color,
-            timestamp=ctx.message.created_at
-        )
-
-        await ctx.send(embed=embed)
-
-
-    @flags.add_flag("-t", default='Giveaway')
-    @flags.add_flag("-des", default=None)
-    @flags.add_flag("-p", default=None)
-    @flags.add_flag("-w", type=int, default=1)
-    @flags.add_flag("-d", type=int, default=0)
-    @flags.add_flag("-h", type=int, default=0)
-    @flags.add_flag("-m", type=int, default=0)
-    @_giveaway.command(cls=flags.FlagCommand)
-    async def start(self, ctx, **flags) -> None:
-        """ Starts a giveaway.
-        :param t: Title for the giveaway.
-        :param des: Description of giveaway.
-        :param p: Prize giveaway.
-        :param w: Amount of winners. [Optional] [Default = 1]
-        :param d: Amount of days until the giveaway ends. [Optional]
-        :param h: Amount of hours until the giveaway ends. [Optional]
-        :param m: Amount of minutes until the giveaway ends. [Optional]
+    async def _giveaway_start_callback(self, ctx, title: str, description: str, prize: str, winners: int = 1, days: int = 0, hours: int = 0, minutes: int = 0, role: discord.Role = None) -> None:
+        """ Callback for the giveaway command.
+        :param title: Title for the giveaway.
+        :param description: Description of giveaway.
+        :param prize: Prize giveaway.
+        :param winners: Amount of winners. [Optional] [Default = 1]
+        :param days: Amount of days until the giveaway ends. [Optional]
+        :param hours: Amount of hours until the giveaway ends. [Optional]
+        :param minutes: Amount of minutes until the giveaway ends. [Optional]
+        :param role: The role for role-only giveaways. [Optional]
         
         PS: The total time summing up days, minutes and minutes MUST be greater than 0. """
 
-        await ctx.message.delete()
+        await ctx.defer()
 
         member = ctx.author
         guild = ctx.guild
 
-        giveaway_time = await self.get_giveaway_time(flags)
+        giveaway_time = await self.get_giveaway_time(minutes, hours, days)
 
         if giveaway_time == 0:
-            return await ctx.send(f"**Please, inform the time, {member.mention}!**", delete_after=3)
+            return await ctx.respond(f"**Please, inform the time, {member.mention}!**", ephemeral=True)
 
-        current_ts = await utils.get_timestamp()
+        current_time = await utils.get_time_now()
+        current_ts = current_time.timestamp()
 
         embed = discord.Embed(
-            title=f"__{flags['t']}__",
-            description=flags['des'],
+            title=f"__{title}__",
+            description=description,
             color=member.color,
-            timestamp=ctx.message.created_at
+            timestamp=current_time
         )
+
 
         embed.set_thumbnail(url=guild.icon.url)
         if guild.banner:
@@ -155,33 +127,33 @@ class Giveaways(commands.Cog):
             name="__Info__:",
             value=f"""
             **Ends:** <t:{deadline_ts}:R>
-            **Winners:** {flags['w']}
-            **Prize:** {flags['p']}
-            """
+            **Winners:** {winners}
+            **Prize:** {prize}
+            **Required Role:** {role.mention if role else None}
+            """, inline=False
         )
 
         try:
-            view = GiveawayView(self.client)
-            msg = await ctx.send("\u200b", embed=embed, view=view)
+            view = GiveawayView(self.client, role.id if role else None)
+            msg = await ctx.respond("\u200b", embed=embed, view=view)
             self.client.add_view(view=view, message_id=msg.id)
 
             await self.insert_giveaway(
-                message_id=msg.id, channel_id=msg.channel.id, prize=flags['p'],
-                winners=flags['w'], deadline_ts=deadline_ts
+                message_id=msg.id, channel_id=msg.channel.id, prize=prize,
+                winners=winners, deadline_ts=deadline_ts, role_id=role.id if role else None
             )
         except Exception as e:
             print(e)
-            await ctx.send(f"**Something went wrong with it, {member.mention}!**", delete_after=3)
+            await ctx.respond(f"**Something went wrong with it, {member.mention}!**", ephemeral=True)
 
-    @_giveaway.command(aliases=['view', 'visualize', 'show', 'list'])
-    async def see(self, ctx) -> None:
+    async def _giveaway_list_callback(self, ctx) -> None:
         """ Deletes an existing giveaway. """
 
         member = ctx.author
 
         giveaways = await self.get_giveaways()
         if not giveaways:
-            return await ctx.send(f"**There are no active giveaways registered, {member.mention}!**", delete_after=3)
+            return await ctx.respond(f"**There are no active giveaways registered, {member.mention}!**", ephemeral=True)
 
         message_url = 'https://discord.com/channels/{server_id}/{channel_id}/{message_id}'
 
@@ -190,62 +162,68 @@ class Giveaways(commands.Cog):
             for ga in giveaways
         ])
 
+        current_time = await utils.get_time_now()
         embed = discord.Embed(
             title="__Registered Giveaways__",
             description=f"**Msg** = `Message`\n**P** = `Prize`\n**W** = `Winners`\n\n{formatted_giveaways}",
             color=member.color,
-            timestamp=ctx.message.created_at
+            timestamp=current_time
         )
 
         embed.set_footer(text=f"Requested by: {member}", icon_url=member.display_avatar)
 
-        await ctx.send(embed=embed)
+        await ctx.respond(embed=embed, ephemeral=True)
 
-    @_giveaway.command(aliases=['roll', 'sort', 'resort'])
-    async def reroll(self, ctx, message_id: int) -> None:
+    async def _giveaway_reroll_callback(self, ctx, message_id: int) -> None:
         """ Rerolls a giveaway.
         :param message_id: The ID of the giveaway message. """
 
         member = ctx.author
 
         if not message_id:
-            return await ctx.send(f"**Please, inform a message ID, {member.mention}!**", delete_after=3)
+            return await ctx.respond(f"**Please, inform a message ID, {member.mention}!**", ephemeral=True)
 
         giveaway = await self.get_giveaway(message_id)
         if not giveaway:
-            return await ctx.send(f"**The specified giveaway doesn't exist, {member.mention}!**", delete_after=3)
+            return await ctx.respond(f"**The specified giveaway doesn't exist, {member.mention}!**", ephemeral=True)
 
         if not giveaway[5]:
-            return await ctx.send(f"**This giveaway hasn't ended yet, you can't reroll it, {member.mention}!**", delete_after=3)
+            return await ctx.respond(f"**This giveaway hasn't ended yet, you can't reroll it, {member.mention}!**", ephemeral=True)
 
         entries = await self.get_giveaway_entries(giveaway[0])
 
         winners = await self.get_winners(giveaway, entries)
 
         # Sends last message
-        await ctx.send(
+        await ctx.respond(
             f"**Rerolling giveaway with `{len(entries)}` people participating, and the new `{giveaway[3]}` winners are: {winners}!**"
         )
 
-    @_giveaway.command(aliases=['del', 'remove', 'rem', 'rm'])
-    async def delete(self, ctx, message_id: int = None) -> None:
+    async def _giveaway_delete_callback(self, ctx, message_id: int) -> None:
         """ Deletes an existing giveaway.
         :param message_id: The ID of the giveaway message. """
 
         member = ctx.author
         if not message_id:
-            return await ctx.send(f"**Please, inform a message ID, {member.mention}!**", delete_after=3)
+            return await ctx.respond(f"**Please, inform a message ID, {member.mention}!**", ephemeral=True)
 
         giveaway = await self.get_giveaway(message_id)
         if not giveaway:
-            return await ctx.send(f"**The specified giveaway message doesn't exist, {member.mention}!**", delete_after=3)
+            return await ctx.respond(f"**The specified giveaway message doesn't exist, {member.mention}!**", ephemeral=True)
 
-        confirm = await Confirm(f"**Are you sure you want to delete the giveaway with ID: `{giveaway[0]}`, {member.mention}?**").prompt(ctx)
-        if not confirm:
-            return await ctx.send(f"**Not doing it, then, {member.mention}!**", delete_after=3)
+
+        confirm_view = ConfirmButton(member, timeout=60)
+        embed = discord.Embed(description=f"**Are you sure you wanna delete the giveaway with ID `{giveaway[0]}`, {member.mention}?**", color=member.color)
+        await ctx.respond("\u200b", embed=embed, view=confirm_view, ephemeral=True)
+        await confirm_view.wait()
+        if confirm_view.value is None:
+            return await ctx.respond(f"**{member.mention}, you took too long to answer...**", ephemeral=True)
+
+        if not confirm_view.value:
+            return await ctx.respond(f"**Not doing it then, {member.mention}!**", ephemeral=True)
 
         await self.delete_giveaway(giveaway[0])
-        await ctx.send(f"**Successfully deleted the giveaway with ID: `{giveaway[0]}`, {member.mention}!**", delete_after=3)
+        await ctx.respond(f"**Successfully deleted the giveaway with ID: `{giveaway[0]}`, {member.mention}!**", ephemeral=True)
         try:
             channel = discord.utils.get(ctx.guild.text_channels, id=giveaway[1])
             message = await channel.fetch_message(giveaway[0])
@@ -253,25 +231,30 @@ class Giveaways(commands.Cog):
         except:
             pass
 
-    @_giveaway.command(aliases=['finish', 'stop', 'terminate'])
-    async def end(self, ctx, message_id: int = None) -> None:
+    async def _giveaway_end_callback(self, ctx, message_id: int = None) -> None:
         """ Force-ends an on-going giveaway.
         :param message_id: The ID of the giveaway message. """
 
         member = ctx.author
         if not message_id:
-            return await ctx.send(f"**Please, inform a message ID, {member.mention}!**", delete_after=3)
+            return await ctx.respond(f"**Please, inform a message ID, {member.mention}!**", ephemeral=True)
 
         giveaway = await self.get_giveaway(message_id)
         if not giveaway:
-            return await ctx.send(f"**The specified giveaway message doesn't exist, {member.mention}!**", delete_after=3)
+            return await ctx.respond(f"**The specified giveaway message doesn't exist, {member.mention}!**", ephemeral=True)
 
         if giveaway[5]:
-            return await ctx.send(f"**This giveaway has been ended already, consider using rerolling or deleting it, {member.mention}!**", delete_after=3)
+            return await ctx.respond(f"**This giveaway has been ended already, consider using rerolling or deleting it, {member.mention}!**", ephemeral=True)
 
-        confirm = await Confirm(f"**Are you sure you want to end the giveaway with ID: `{giveaway[0]}`, {member.mention}?**").prompt(ctx)
-        if not confirm:
-            return await ctx.send(f"**Not doing it, then, {member.mention}!**", delete_after=3)
+        confirm_view = ConfirmButton(member, timeout=60)
+        embed = discord.Embed(description=f"**Are you sure you want to end the giveaway with ID: `{giveaway[0]}`, {member.mention}?**", color=member.color)
+        await ctx.respond("\u200b", embed=embed, view=confirm_view, ephemeral=True)
+        await confirm_view.wait()
+        if confirm_view.value is None:
+            return await ctx.respond(f"**{member.mention}, you took too long to answer...**", ephemeral=True)
+
+        if not confirm_view.value:
+            return await ctx.respond(f"**Not doing it then, {member.mention}!**", ephemeral=True)
 
          # Gets the channel and message
         channel = message = None
@@ -279,13 +262,13 @@ class Giveaways(commands.Cog):
             channel = await self.client.fetch_channel(giveaway[1])
         except discord.errors.NotFound:
             await self.delete_giveaway(giveaway[0])
-            return await ctx.send(f"**Channel of the given giveaway doesn't exist anymore, {member.mention}!**", delete_after=3)
+            return await ctx.respond(f"**Channel of the given giveaway doesn't exist anymore, {member.mention}!**", ephemeral=True)
         
         try:
             message = await channel.fetch_message(giveaway[0])
         except discord.errors.NotFound:
             await self.delete_giveaway(giveaway[0])
-            return await ctx.send(f"**Message of the given giveaway doesn't exist anymore, {member.mention}!**", delete_after=3)
+            return await ctx.respond(f"**Message of the given giveaway doesn't exist anymore, {member.mention}!**", ephemeral=True)
 
         try:
             entries = await self.get_giveaway_entries(giveaway[0])
@@ -308,16 +291,18 @@ class Giveaways(commands.Cog):
             await self.update_giveaway(giveaway[0])
         except Exception as e:
             print('Error at force-ending giveaway: ', e)
-            await ctx.send(f"**Something went wrong with it, please contact an admin, {member.mention}!**", delete_after=3)
+            await ctx.respond(f"**Something went wrong with it, please contact an admin, {member.mention}!**", ephemeral=True)
 
 
-    async def get_giveaway_time(self, flags: Dict[str, Union[int, str]]) -> int:
+    async def get_giveaway_time(self, minutes: int, hours: int, days: int) -> int:
         """ Gets the giveaway timeout time in seconds.
-        :param flags: The giveaway dict containing the configuration flags. """
+        :param minutes: The amount of minutes.
+        :param hours: The amount of hours.
+        :param dayss: The amount of days. """
 
-        minutes = flags['m'] * 60
-        hours = flags['h'] * 3600
-        days = flags['d'] * 86400
+        minutes  *= 60
+        hours  *= 3600
+        days  *= 86400
 
         return minutes + hours + days
 
@@ -401,18 +386,19 @@ class Giveaways(commands.Cog):
             return False
 
 
-    async def insert_giveaway(self, message_id: int, channel_id: int, prize: str, winners: int, deadline_ts: int) -> None:
+    async def insert_giveaway(self, message_id: int, channel_id: int, prize: str, winners: int, deadline_ts: int, role_id: Optional[int] = None) -> None:
         """ Inserts a giveaway.
         :param message_id: The ID of the message in which the giveaway is attached to.
         :param channel_id: The ID of the channel in which the giveaway is made.
         :param prize: The prize of the giveaway.
         :param winners: The amount of winners for the giveaway.
-        :param deadline_ts: The deadline timestamp of the giveaway. """
+        :param deadline_ts: The deadline timestamp of the giveaway.
+        :param role_id: The ID of the role for role-only giveaways. [Optional] """
 
         mycursor, db = await the_database()
         await mycursor.execute("""
-            INSERT INTO Giveaways (message_id, channel_id, prize, winners, deadline_ts)
-            VALUES (%s, %s, %s, %s, %s)""", (message_id, channel_id, prize, winners, deadline_ts))
+            INSERT INTO Giveaways (message_id, channel_id, prize, winners, deadline_ts, role_id)
+            VALUES (%s, %s, %s, %s, %s, %s)""", (message_id, channel_id, prize, winners, deadline_ts, role_id))
         await db.commit()
         await mycursor.close()
 

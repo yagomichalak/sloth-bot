@@ -1,5 +1,6 @@
 import discord
-from discord.app import Option
+from discord.enums import OptionType
+from discord.app import Option, option
 from discord.utils import escape_mentions
 from pytz import timezone
 from dotenv import load_dotenv
@@ -23,9 +24,11 @@ user_cosmos_id = int(os.getenv('COSMOS_ID'))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID'))
 moderator_role_id = int(os.getenv('MOD_ROLE_ID'))
 booster_role_id = int(os.getenv('BOOSTER_ROLE_ID'))
+teacher_role_id = int(os.getenv('TEACHER_ROLE_ID'))
+giveaway_manager_role_id: int = int(os.getenv('GIVEAWAY_MANAGER_ROLE_ID'))
 
 server_id = int(os.getenv('SERVER_ID'))
-teacher_role_id = int(os.getenv('TEACHER_ROLE_ID'))
+
 moderation_log_channel_id = int(os.getenv('MOD_LOG_CHANNEL_ID'))
 lesson_category_id = int(os.getenv('LESSON_CAT_ID'))
 clock_voice_channel_id = int(os.getenv('CLOCK_VC_ID'))
@@ -407,7 +410,7 @@ async def reload(ctx, extension: str = None):
 _cnp = client.command_group(name="cnp", description="For copy and pasting stuff.", guild_ids=guild_ids)
 
 @_cnp.command(name="specific")
-@utils.is_allowed([moderator_role_id, admin_role_id])
+@utils.is_allowed([moderator_role_id, admin_role_id], throw_exc=True)
 async def _specific(ctx, 
     text: Option(str, name="text", description="Pastes a text for specific purposes", required=True,
         choices=['Muted/Purge', 'Nickname', 'Classes', 'Interview', 'Resources', 'Global', 'Searching Teachers'])):
@@ -437,7 +440,7 @@ async def _specific(ctx,
 
 
 @_cnp.command(name="speak")
-@utils.is_allowed([moderator_role_id, admin_role_id])
+@utils.is_allowed([moderator_role_id, admin_role_id], throw_exc=True)
 async def _speak(ctx, language: Option(str, name="language", description="The language they should speak.", required=True)) -> None:
     """ Pastes a 'speak in X language' text in different languages. """
 
@@ -458,6 +461,97 @@ async def _speak(ctx, language: Option(str, name="language", description="The la
     await ctx.respond(embed=embed)
 
 
+# @flags.add_flag("-t", default='Giveaway')
+# @flags.add_flag("-des", default=None)
+# @flags.add_flag("-p", default=None)
+# @flags.add_flag("-w", type=int, default=1)
+# @flags.add_flag("-d", type=int, default=0)
+# @flags.add_flag("-h", type=int, default=0)
+# @flags.add_flag("-m", type=int, default=0)
+# @_giveaway.command(cls=flags.FlagCommand)
+
+
+"""
+    :param t: Title for the giveaway.
+    :param des: Description of giveaway.
+    :param p: Prize giveaway.
+    :param w: Amount of winners. [Optional] [Default = 1]
+    :param d: Amount of days until the giveaway ends. [Optional]
+    :param h: Amount of hours until the giveaway ends. [Optional]
+    :param m: Amount of minutes until the giveaway ends. [Optional]
+"""
+
+_giveaway = client.command_group(name="giveaway", description="For copy and pasting stuff.", guild_ids=guild_ids)
+
+
+@utils.is_allowed([giveaway_manager_role_id, moderator_role_id, admin_role_id], throw_exc=True)
+@_giveaway.command(name="start", guild_ids=guild_ids)
+@option(type=str, name="prize", description="The prize of the giveaway.", required=True)
+@option(type=str, name="title", description="The title for the giveaway.", required=False, default="Giveaway")
+@option(type=str, name="description", description="The description of the giveaway.", required=False)
+@option(type=int, name="winners", description="The amount of winners.", required=False, default=1)
+@option(type=int, name="days", description="The title for the giveaway.", required=False)
+@option(type=int, name="hours", description="The title for the giveaway.", required=False)
+@option(type=int, name="minutes", description="The title for the giveaway.", required=False)
+@option(type=discord.Role, name="role", description="The role for role-only giveaways.", required=False)
+async def _giveaway_start_slash(ctx, prize: str, title: str, description: str, winners: int, days: int, hours: int, minutes: int, role: discord.Role) -> None:
+    """ Starts a giveaway. """
+
+    winners = 1 if not winners else winners
+    minutes = 0 if minutes is None else minutes
+    hours = 0 if hours is None else hours
+    days = 0 if days is None else days
+
+    await client.get_cog('Giveaways')._giveaway_start_callback(ctx=ctx,
+        prize=prize, title=title, description=description, winners=winners,
+        days=days, hours=hours, minutes=minutes, role=role
+    )
+
+@utils.is_allowed([giveaway_manager_role_id, moderator_role_id, admin_role_id], throw_exc=True)
+@_giveaway.command(name="reroll", guild_ids=guild_ids)
+@option("message_id", str, description="The message ID of the giveaway to reroll.")
+async def _giveaway_reroll_slash(ctx, message_id: str) -> None:
+    """ Rerolls a giveaway. """
+
+    try:
+        message_id: int = int(message_id)
+    except ValueError:
+        await ctx.respond(f"**This is not a valid message ID, {ctx.author.mention}!**", ephemeral=True)
+    else:
+        await client.get_cog('Giveaways')._giveaway_reroll_callback(ctx=ctx, message_id=message_id)
+
+@utils.is_allowed([giveaway_manager_role_id, moderator_role_id, admin_role_id], throw_exc=True)
+@_giveaway.command(name="delete", guild_ids=guild_ids)
+@option("message_id", str, description="The message ID of the giveaway to delete.")
+async def _giveaway_delete_slash(ctx, message_id: str) -> None:
+    """ Deletes a giveaway. """
+
+    try:
+        message_id: int = int(message_id)
+    except ValueError:
+        await ctx.respond(f"**This is not a valid message ID, {ctx.author.mention}!**", ephemeral=True)
+    else:
+        await client.get_cog('Giveaways')._giveaway_delete_callback(ctx=ctx, message_id=message_id)
+
+@utils.is_allowed([giveaway_manager_role_id, moderator_role_id, admin_role_id], throw_exc=True)
+@_giveaway.command(name="end", guild_ids=guild_ids)
+@option("message_id", str, description="The message ID of the giveaway to end.")
+async def _giveaway_end_slash(ctx, message_id: str) -> None:
+    """ Ends a giveaway. """
+
+    try:
+        message_id: int = int(message_id)
+    except ValueError:
+        await ctx.respond(f"**This is not a valid message ID, {ctx.author.mention}!**", ephemeral=True)
+    else:
+        await client.get_cog('Giveaways')._giveaway_end_callback(ctx=ctx, message_id=message_id)
+
+@utils.is_allowed([giveaway_manager_role_id, moderator_role_id, admin_role_id], throw_exc=True)
+@_giveaway.command(name="list", guild_ids=guild_ids)
+async def _giveaway_list_slash(ctx) -> None:
+    """ Lists all giveaways. """
+
+    await client.get_cog('Giveaways')._giveaway_list_callback(ctx=ctx)
 
 # End of slash commands
 
