@@ -33,7 +33,8 @@ class Giveaways(commands.Cog):
             except:
                 pass
 
-        self.check_due_giveaways.start()
+        self.check_old_giveaways.start() # Deletes old giveaways
+        self.check_due_giveaways.start() # Checks due giveaways
         print('Giveaways cog is online!')
 
 
@@ -82,6 +83,17 @@ class Giveaways(commands.Cog):
             )
             # Notifies the giveaway's termination
             await self.update_giveaway(giveaway[0])
+
+
+
+    @tasks.loop(minutes=1)
+    async def check_old_giveaways(self) -> None:
+        """ Looks for old giveaways and deletes them.
+        
+        PS: It looks for giveaways that ended at least 2 days ago. """
+
+        current_ts: int = await utils.get_timestamp()
+        await self.delete_old_giveaways(current_ts)
 
     async def _giveaway_start_callback(
         self, ctx, host: discord.Member, title: str, description: str, prize: str, winners: int = 1, days: int = 0, 
@@ -156,7 +168,13 @@ class Giveaways(commands.Cog):
 
         member = ctx.author
 
-        giveaways = await self.get_user_giveaways(member.id)
+        giveaways: List[List[Union[str, int]]] = []
+
+        if await utils.is_allowed([mod_role_id]).predicate(ctx):
+            giveaways = await self.get_giveaways()
+        else:
+            giveaways = await self.get_user_giveaways(member.id)
+
         if not giveaways:
             return await ctx.respond(f"**You have no active giveaways registered, {member.mention}!**", ephemeral=True)
 
@@ -191,6 +209,9 @@ class Giveaways(commands.Cog):
         giveaway = await self.get_giveaway(message_id)
         if not giveaway:
             return await ctx.respond(f"**The specified giveaway doesn't exist, {member.mention}!**", ephemeral=True)
+
+        if giveaway[7] != member.id and not await utils.is_allowed([mod_role_id]).predicate(ctx):
+            return await ctx.send(f"**You cannot reroll someone else's giveaway, {member.mention}!**", ephemeral=True)
 
         if not giveaway[5]:
             return await ctx.respond(f"**This giveaway hasn't ended yet, you can't reroll it, {member.mention}!**", ephemeral=True)
@@ -296,6 +317,8 @@ class Giveaways(commands.Cog):
             )
             # Notifies the giveaway's termination
             await self.update_giveaway(giveaway[0])
+            current_ts: int = await utils.get_timestamp()
+            await self.update_giveaway_deadline(giveaway[0], current_ts)
         except Exception as e:
             print('Error at force-ending giveaway: ', e)
             await ctx.respond(f"**Something went wrong with it, please contact an admin, {member.mention}!**", ephemeral=True)
@@ -428,7 +451,7 @@ class Giveaways(commands.Cog):
         :param user_id: The ID of the user to get giveaways from. """
 
         mycursor, _ = await the_database()
-        await mycursor.execute("SELECT * FROM Giveaways WHERE user_id = %s")
+        await mycursor.execute("SELECT * FROM Giveaways WHERE user_id = %s", (user_id,))
         giveaways = await mycursor.fetchall()
         await mycursor.close()
         return giveaways
@@ -463,6 +486,16 @@ class Giveaways(commands.Cog):
         await db.commit()
         await mycursor.close()
 
+    async def update_giveaway_deadline(self, message_id: int, current_ts: int) -> None:
+        """ Updates the giveaway's deadline timestamp..
+        :param message_id: The ID of the message of the giveaway.
+        :param current_ts: The current timestamp. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("UPDATE Giveaways SET deadline_ts = %s WHERE message_id = %s", (current_ts, message_id))
+        await db.commit()
+        await mycursor.close()
+
 
     async def delete_giveaway(self, message_id: int) -> None:
         """ Deletes a giveaway.
@@ -473,6 +506,14 @@ class Giveaways(commands.Cog):
         await db.commit()
         await mycursor.close()
 
+    async def delete_old_giveaways(self, current_ts: int) -> None:
+        """ Deletes old ended giveaways of at least 2 days ago. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("""
+            DELETE FROM Giveaways WHERE notified = 1 AND %s - deadline_ts >= 172800""", (current_ts,))
+        await db.commit()
+        await mycursor.close()
 
     # Database - GiveawayEntries
     @commands.command(hidden=True)
