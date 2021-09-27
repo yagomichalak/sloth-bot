@@ -261,9 +261,10 @@ class ExchangeActivityView(discord.ui.View):
 class GiveawayView(discord.ui.View):
     """ View for giveaway entries """
 
-    def __init__(self, client: commands.Bot) -> None:
+    def __init__(self, client: commands.Bot, role_id: int = None) -> None:
         super().__init__(timeout=None)
         self.client = client
+        self.role_id = role_id
 
 
     @discord.ui.button(label="Participate", emoji="🎉", custom_id="giveaway_btn_id", style=discord.ButtonStyle.success)
@@ -284,6 +285,21 @@ class GiveawayView(discord.ui.View):
             await cog.insert_giveaway_entry(user.id, message.id)
             await interaction.followup.send(f"**Thank you for participating, {user.mention}!** ✅", ephemeral=True)
 
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        """ Checks whether the user has permissions to interact with this view. """
+
+        member = interaction.user
+
+        if self.role_id is not None:
+            if await utils.is_allowed([self.role_id], check_adm=False).predicate(member=member, channel=interaction.channel):
+                return True
+            else:
+                await interaction.response.send_message(
+                    f"**You don't have the required role to interact with this giveaway, {member.mention}!** ⚠️", 
+                    ephemeral=True)
+                return False
+        else:
+            return True
 
 
 class SoundBoardButton(discord.ui.Button):
