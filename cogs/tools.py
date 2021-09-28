@@ -21,7 +21,8 @@ import pytz
 from pytz import timezone
 from mysqldb import the_database
 
-from extra.menu import ConfirmSkill, InroleLooping
+from extra.menu import InroleLooping
+from extra.prompt.menu import ConfirmButton
 from extra.useful_variables import patreon_roles
 from extra import utils
 from extra.view import SoundBoardView
@@ -36,6 +37,10 @@ owner_role_id = int(os.getenv('OWNER_ROLE_ID'))
 
 allowed_roles = [owner_role_id, admin_role_id, mod_role_id, *patreon_roles.keys(), int(os.getenv('SLOTH_LOVERS_ROLE_ID'))]
 teacher_role_id = int(os.getenv('TEACHER_ROLE_ID'))
+
+
+from extra.menu import prompt_message
+
 
 class Tools(commands.Cog):
 	""" Some useful tool commands. """
@@ -410,7 +415,7 @@ class Tools(commands.Cog):
 			self.client.get_command('magnet').reset_cooldown(ctx)
 			return await ctx.send("**You are not in a vc!**")
 
-		confirm = await ConfirmSkill(f"{ctx.author.mention}, you sure you want to magnet everyone into `{user_state.channel}`?").prompt(ctx)
+		confirm = await ConfirmButton(f"{ctx.author.mention}, you sure you want to magnet everyone into `{user_state.channel}`?").prompt(ctx)
 		if not confirm:
 			self.client.get_command('magnet').reset_cooldown(ctx)
 			return await ctx.send("**Not doing it, then!**")
@@ -1005,8 +1010,6 @@ class Tools(commands.Cog):
 			await ctx.respond(f"**For some reason I couldn't bring them here, {author.mention}!**")
 		else:
 			await ctx.respond(f"**They were brought to {user_vc.channel.mention}!**")
-
-
 
 def setup(client):
 	client.add_cog(Tools(client))

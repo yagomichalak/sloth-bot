@@ -1,8 +1,7 @@
 import discord
-from discord.components import SelectOption
 from extra import utils
 from discord.ext import commands
-from typing import List, Union, Optional, Dict
+from typing import List, Union, Optional, Dict, Any
 from .menu import ConfirmSkill
 from .select import ReportSupportSelect
 import os
@@ -359,3 +358,27 @@ class SoundBoardView(discord.ui.View):
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
         return interaction.user.id == self.ctx.author.id
+
+    
+
+# class ClassUserFeedbackView(discord.ui.View):
+#     """ View for the getting feedback from users
+#     regarding the class they have participated and have
+#     been rewarded in. """
+
+#     def __init__(self, class_info: Dict[str, Any], timeout: Optional[float] = 180):
+#         super().__init__(timeout=timeout)
+#         self.class_info = class_info
+
+
+#     @discord.ui.button(label=discord.ButtonStyle.success, custom_id="give_class_feedback_id")
+#     async def give_feedback_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+#         """ Prompts the user for a feedback messages regarding the teacher class they've been into. """
+
+#         pass
+
+#     @discord.ui.button(label=discord.ButtonStyle.success, custom_id="give_class_feedback_id")
+#     async def deny_feedback_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+#         """ Denies the prompt for the teacher class feedback. """
+
+#         pass
