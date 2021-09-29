@@ -1185,50 +1185,48 @@ class Moderation(*moderation_cogs):
 	# Infraction methods
 	@commands.command(aliases=['infr', 'show_warnings', 'sw', 'show_bans', 'sb', 'show_muted', 'sm'])
 	@utils.is_allowed(allowed_roles, throw_exc=True)
-	async def infractions(self, ctx, members: commands.Greedy[discord.Member]) -> None:
+	async def infractions(self, ctx, member: Union[discord.Member, discord.User] = None) -> None:
 		""" Shows all infractions of a specific user.
 		:param member: The member to show the infractions from. [Optional] [Default = You] """
 		
 		await ctx.message.delete()
 
-		if not members:
-			members = [ctx.author]
+		if not member:
+			member = ctx.author
 
-		for member in members:
-			# Try to get user infractions
-			if user_infractions := await self.get_user_infractions(member.id):
-				warns = len([w for w in user_infractions if w[1] == 'warn'])
-				mutes = len([m for m in user_infractions if m[1] == 'mute'])
-				kicks = len([k for k in user_infractions if k[1] == 'kick'])
-				bans = len([b for b in user_infractions if b[1] == 'ban'])
-				softbans = len([sb for sb in user_infractions if sb[1] == 'softban'])
-				hackbans = len([hb for hb in user_infractions if hb[1] == 'hackban'])
-			else:
-				await ctx.send(f"**<@{member.id}> doesn't have any existent infractions!**")
-				continue
+		# Try to get user infractions
+		if user_infractions := await self.get_user_infractions(member.id):
+			warns = len([w for w in user_infractions if w[1] == 'warn'])
+			mutes = len([m for m in user_infractions if m[1] == 'mute'])
+			kicks = len([k for k in user_infractions if k[1] == 'kick'])
+			bans = len([b for b in user_infractions if b[1] == 'ban'])
+			softbans = len([sb for sb in user_infractions if sb[1] == 'softban'])
+			hackbans = len([hb for hb in user_infractions if hb[1] == 'hackban'])
+		else:
+			return await ctx.send(f"**<@{member.id}> doesn't have any existent infractions!**")
 
-			# Makes the initial embed with their amount of infractions
-			embed = discord.Embed(
-				title=f"Infractions for {member}",
-				description=f"```ini\n[Warns]: {warns} | [Mutes]: {mutes} | [Kicks]: {kicks}\n[Bans]: {bans} | [Softbans]: {softbans} | [Hackbans]: {hackbans}```",
-				color=member.color,
-				timestamp=ctx.message.created_at)
-			embed.set_thumbnail(url=member.display_avatar)
-			embed.set_footer(text=f"Requested by: {ctx.author}", icon_url=ctx.author.display_avatar)
+		# Makes the initial embed with their amount of infractions
+		embed = discord.Embed(
+			title=f"Infractions for {member}",
+			description=f"```ini\n[Warns]: {warns} | [Mutes]: {mutes} | [Kicks]: {kicks}\n[Bans]: {bans} | [Softbans]: {softbans} | [Hackbans]: {hackbans}```",
+			color=member.color,
+			timestamp=ctx.message.created_at)
+		embed.set_thumbnail(url=member.display_avatar)
+		embed.set_footer(text=f"Requested by: {ctx.author}", icon_url=ctx.author.display_avatar)
 
-			# Loops through each infraction and adds a field to the embedded message
-			# 0-user_id, 1-infraction_type, 2-infraction_reason, 3-infraction_ts, 4-infraction_id, 5-perpetrator
-			for infr in user_infractions:
-				if (infr_type := infr[1]) in ['mute', 'warn']:
-					infr_date = datetime.fromtimestamp(infr[3]).strftime('%Y/%m/%d at %H:%M:%S')
-					perpetrator = discord.utils.get(ctx.guild.members, id=infr[5])
-					embed.add_field(
-						name=f"{infr_type} ID: {infr[4]}",
-						value=f"```apache\nGiven on {infr_date}\nBy {perpetrator}\nReason: {infr[2]}```",
-						inline=True)
+		# Loops through each infraction and adds a field to the embedded message
+		# 0-user_id, 1-infraction_type, 2-infraction_reason, 3-infraction_ts, 4-infraction_id, 5-perpetrator
+		for infr in user_infractions:
+			if (infr_type := infr[1]) in ['mute', 'warn']:
+				infr_date = datetime.fromtimestamp(infr[3]).strftime('%Y/%m/%d at %H:%M:%S')
+				perpetrator = discord.utils.get(ctx.guild.members, id=infr[5])
+				embed.add_field(
+					name=f"{infr_type} ID: {infr[4]}",
+					value=f"```apache\nGiven on {infr_date}\nBy {perpetrator}\nReason: {infr[2]}```",
+					inline=True)
 
-			# Shows the infractions
-			await ctx.send(embed=embed)
+		# Shows the infractions
+		await ctx.send(embed=embed)
 
 	@commands.command(aliases=['ri', 'remove_warn', 'remove_warning'])
 	@utils.is_allowed(allowed_roles, throw_exc=True)
