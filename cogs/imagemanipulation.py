@@ -6,6 +6,7 @@ from PIL import Image, ImageDraw, ImageFont
 from typing import Union, List, Any, Optional
 import os
 from io import BytesIO
+from random import choice
 
 class ImageManipulation(commands.Cog):
     """ Categories for image manipulations and visualization. """
@@ -118,12 +119,35 @@ class ImageManipulation(commands.Cog):
         pass
 
     @commands.command()
-    @utils.not_ready()
-    async def rotates(self, ctx, member: Optional[discord.Member] = None) -> None:
+    async def rotate(self, ctx, member: Optional[discord.Member] = None, scale: Optional[int] = None) -> None:
         """ Rotates an image.
-        :param member: The member to rotate the profile picture from. [Optional][Default = Cached Image] """
+        :param member: The member to rotate the profile picture from. [Optional][Default = Cached Image]
+        :param scale: The scale to rotate the image. [Optional][Default = Random] """
 
-        pass
+        file: Any = None
+
+        if member:
+            file = member.display_avatar
+        else:
+            if self.cached_image:
+                file = self.cached_image
+            else:
+                file = ctx.author.display_avatar
+
+
+        image = file if isinstance(file, Image.Image) else Image.open(BytesIO(await file.read()))
+
+        if not scale:
+            scale = choice([90, 180, 50, 45, 270, 120, 80])
+
+        image = image.rotate(int(scale))
+        self.cached_image = image
+        embed = discord.Embed(
+            color=int('36393F', 16)
+        )
+        embed.set_image(url='attachment://rotated_image.png')
+        bytes_image = await self.image_to_byte_array(image)
+        await ctx.reply(embed=embed, file=discord.File(BytesIO(bytes_image), 'rotated_image.png'))
 
     @commands.command(aliases=['light', 'brighten', 'bright'])
     @commands.cooldown(1, 5, commands.BucketType.user)
