@@ -1,9 +1,10 @@
 from datetime import datetime
 import re
 from pytz import timezone
+import discord
 from discord.ext import commands
 from typing import List, Dict, Optional, Union
-import discord
+from extra.customerrors import CommandNotReady
 
 async def get_timestamp(tz: str = 'Etc/GMT') -> int:
     """ Gets the current timestamp.
@@ -261,3 +262,13 @@ async def ignore_usernames(ctx, members : List[Union[discord.Member, discord.Use
             return members, reason
 
     return members, reason
+
+
+def not_ready():
+    """ Makes a command not be usable. """
+
+    async def real_check(ctx):
+        """ Performs the real check. """
+        raise CommandNotReady()
+
+    return commands.check(real_check)
