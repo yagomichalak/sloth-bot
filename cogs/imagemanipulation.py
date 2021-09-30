@@ -2,11 +2,13 @@ import discord
 from discord.ext import commands
 from extra import utils
 
-from PIL import Image, ImageDraw, ImageFont, ImageOps
-from typing import Union, List, Any, Optional
 import os
+from typing import Union, List, Any, Optional
+
+from PIL import Image, ImageDraw, ImageFont, ImageOps
 from io import BytesIO
 from random import choice
+import math
 
 class ImageManipulation(commands.Cog):
     """ Categories for image manipulations and visualization. """
@@ -297,9 +299,6 @@ class ImageManipulation(commands.Cog):
         new_image.putdata(new_image_list)
         return new_image
 
-
-    
-
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def red(self, ctx, member: Optional[discord.Member] = None, percentage: int = 55) -> None:
@@ -449,6 +448,58 @@ class ImageManipulation(commands.Cog):
         embed.set_image(url='attachment://green_image.png')
         bytes_image = await self.image_to_byte_array(image)
         await ctx.reply(embed=embed, file=discord.File(BytesIO(bytes_image), 'green_image.png'))
+
+
+    @commands.command()
+    async def wave(self, ctx, member: Optional[discord.Member] = None) -> None:
+        """ Waves an image.
+        :param member: The member to wave the profile picture. [Optional][Default = Cached Image] """
+
+        file: Any = None
+
+        if member:
+            file = member.display_avatar
+        else:
+            if self.cached_image:
+                file = self.cached_image
+            else:
+                file = ctx.author.display_avatar
+
+        image = file if isinstance(file, Image.Image) else Image.open(BytesIO(await file.read()))
+        class WaveDeformer:
+
+            def transform(self, x, y):
+                y = y + 10*math.sin(x/20)
+                return x, y
+
+            def transform_rectangle(self, x0, y0, x1, y1):
+                return (*self.transform(x0, y0),
+                        *self.transform(x0, y1),
+                        *self.transform(x1, y1),
+                        *self.transform(x1, y0),
+                        )
+
+            def getmesh(self, img):
+                self.w, self.h = img.size
+                gridspace = 20
+
+                target_grid = []
+                for x in range(0, self.w, gridspace):
+                    for y in range(0, self.h, gridspace):
+                        target_grid.append((x, y, x + gridspace, y + gridspace))
+
+                source_grid = [self.transform_rectangle(*rect) for rect in target_grid]
+
+                return [t for t in zip(target_grid, source_grid)]
+        
+        wave_image = ImageOps.deform(image, WaveDeformer())
+        self.cached_image = image
+        embed = discord.Embed(
+            color=int('36393F', 16)
+        )
+        embed.set_image(url='attachment://wave_image.png')
+        bytes_image = await self.image_to_byte_array(wave_image)
+        await ctx.reply(embed=embed, file=discord.File(BytesIO(bytes_image), 'wave_image.png'))
 
 def setup(client: commands.Cog) -> None:
     """ Cog's setup function. """
