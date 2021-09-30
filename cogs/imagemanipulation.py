@@ -77,16 +77,20 @@ class ImageManipulation(commands.Cog):
     async def cached(self, ctx) -> None:
         """ Shows the cached image. """
 
-        if not self.cached_image:
+        file = self.cached_image
+
+        if not file:
             return await ctx.reply(f"**There isn't a cached image, {ctx.author.mention}!**")
 
         embed = discord.Embed(
-            description=f"[Cached Image]({self.cached_image})",
             color=int('36393F', 16)
         )
 
-        embed.set_image(url=self.cached_image)
-        await ctx.reply(embed=embed)
+        image = file if isinstance(file, Image.Image) else Image.open(BytesIO(await file.read()))
+
+        embed.set_image(url='attachment://cached_image.png')
+        bytes_image = await self.image_to_byte_array(image)
+        await ctx.reply(embed=embed, file=discord.File(BytesIO(bytes_image), 'cached_image.png'))
 
     @commands.command(aliases=["invert"])
     async def flip(self, ctx, member: Optional[discord.Member] = None) -> None:
