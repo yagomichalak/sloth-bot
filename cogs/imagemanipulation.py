@@ -543,7 +543,7 @@ class ImageManipulation(commands.Cog):
                 return [t for t in zip(target_grid, source_grid)]
         
         wave_image = ImageOps.deform(image, WaveDeformer())
-        self.cached_image = image
+        self.cached_image = wave_image
         embed = discord.Embed(
             color=int('36393F', 16)
         )
