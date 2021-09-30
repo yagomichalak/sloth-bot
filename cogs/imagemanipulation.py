@@ -27,7 +27,7 @@ class ImageManipulation(commands.Cog):
     @commands.command()
     async def avatar(self, ctx, member: Optional[discord.Member] = None) -> None:
         """ Shows the user avatar picture.
-        :param member: The member to show. [Optional] [Default = You]. """
+        :param member: The member to show. [Optional][Default = You]. """
 
         if not member:
             member = ctx.author
@@ -47,7 +47,7 @@ class ImageManipulation(commands.Cog):
     @commands.command()
     async def banner(self, ctx, member: Optional[discord.Member] = None) -> None:
         """ Shows the user banner picture if they have one
-        :param member: The member to show. [Optional] [Default = You]. """
+        :param member: The member to show. [Optional][Default = You]. """
 
         if not member:
             member = ctx.author
@@ -84,6 +84,39 @@ class ImageManipulation(commands.Cog):
 
         embed.set_image(url=self.cached_image)
         await ctx.reply(embed=embed)
+
+    @commands.command(aliases=["invert"])
+    @utils.not_ready()
+    async def flip(self, ctx, member: Optional[discord.Member] = None) -> None:
+        """ Flips an image.
+        :param member: The member to flip the profile picture. [Optional][Default = Cached Image] """
+
+        pass
+
+    @commands.command()
+    @utils.not_ready()
+    async def rain(self, ctx, member: Optional[discord.Member] = None) -> None:
+        """ Rains on an image, making its colors look different.
+        :param member: The member to rain on the profile picture. [Optional][Default = Cached Image] """
+
+        pass
+
+    @commands.command()
+    @utils.not_ready()
+    async def explode(self, ctx, member: Optional[discord.Member] = None) -> None:
+        """ Explodes an image.
+        :param member: The member to explode the profile picture. [Optional][Default = Cached Image] """
+
+        pass
+
+    @commands.command()
+    @utils.not_ready()
+    async def implode(self, ctx, member: Optional[discord.Member] = None) -> None:
+        """ Implodes an image.
+        :param member: The member to implode the profile picture. [Optional][Default = Cached Image] """
+
+        pass
+
 
 def setup(client: commands.Cog) -> None:
     """ Cog's setup function. """
