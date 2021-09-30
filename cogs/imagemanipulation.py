@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 from extra import utils
 
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageOps
 from typing import Union, List, Any, Optional
 import os
 from io import BytesIO
@@ -87,12 +87,56 @@ class ImageManipulation(commands.Cog):
         await ctx.reply(embed=embed)
 
     @commands.command(aliases=["invert"])
-    @utils.not_ready()
     async def flip(self, ctx, member: Optional[discord.Member] = None) -> None:
-        """ Flips an image.
+        """ Flips an image upside down.
         :param member: The member to flip the profile picture. [Optional][Default = Cached Image] """
 
-        pass
+        file: Any = None
+
+        if member:
+            file = member.display_avatar
+        else:
+            if self.cached_image:
+                file = self.cached_image
+            else:
+                file = ctx.author.display_avatar
+
+
+        image = file if isinstance(file, Image.Image) else Image.open(BytesIO(await file.read()))
+        image = ImageOps.flip(image)
+        self.cached_image = image
+        embed = discord.Embed(
+            color=int('36393F', 16)
+        )
+        embed.set_image(url='attachment://flipped_image.png')
+        bytes_image = await self.image_to_byte_array(image)
+        await ctx.reply(embed=embed, file=discord.File(BytesIO(bytes_image), 'flipped_image.png'))
+
+    @commands.command(aliases=["side"])
+    async def sideways(self, ctx, member: Optional[discord.Member] = None) -> None:
+        """ Flips an image sideways.
+        :param member: The member to flip the profile picture. [Optional][Default = Cached Image] """
+
+        file: Any = None
+
+        if member:
+            file = member.display_avatar
+        else:
+            if self.cached_image:
+                file = self.cached_image
+            else:
+                file = ctx.author.display_avatar
+
+
+        image = file if isinstance(file, Image.Image) else Image.open(BytesIO(await file.read()))
+        image = ImageOps.mirror(image)
+        self.cached_image = image
+        embed = discord.Embed(
+            color=int('36393F', 16)
+        )
+        embed.set_image(url='attachment://mirrored_image.png')
+        bytes_image = await self.image_to_byte_array(image)
+        await ctx.reply(embed=embed, file=discord.File(BytesIO(bytes_image), 'mirrored_image.png'))
 
     @commands.command()
     @utils.not_ready()
