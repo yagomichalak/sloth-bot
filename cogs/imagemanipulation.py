@@ -141,7 +141,7 @@ class ImageManipulation(commands.Cog):
         await ctx.reply(embed=embed, file=discord.File(BytesIO(bytes_image), 'mirrored_image.png'))
 
     @commands.command()
-    @utils.not_ready()
+    @commands.cooldown(1, 5, commands.BucketType.user)
     async def rain(self, ctx, member: Optional[discord.Member] = None) -> None:
         """ Rains on an image, making its colors look different.
         :param member: The member of whom to rain on the profile picture. [Optional][Default = Cached Image] """
@@ -500,6 +500,7 @@ class ImageManipulation(commands.Cog):
 
 
     @commands.command()
+    @commands.cooldown(1, 5, commands.BucketType.user)
     async def wave(self, ctx, member: Optional[discord.Member] = None) -> None:
         """ Waves an image.
         :param member: The member to wave the profile picture. [Optional][Default = Cached Image] """
