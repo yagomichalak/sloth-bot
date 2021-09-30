@@ -144,9 +144,30 @@ class ImageManipulation(commands.Cog):
     @utils.not_ready()
     async def rain(self, ctx, member: Optional[discord.Member] = None) -> None:
         """ Rains on an image, making its colors look different.
-        :param member: The member to rain on the profile picture. [Optional][Default = Cached Image] """
+        :param member: The member of whom to rain on the profile picture. [Optional][Default = Cached Image] """
 
-        pass
+        file: Any = None
+
+        if member:
+            file = member.display_avatar
+        else:
+            if self.cached_image:
+                file = self.cached_image
+            else:
+                file = ctx.author.display_avatar
+
+        image = file if isinstance(file, Image.Image) else Image.open(BytesIO(await file.read()))
+        image: Image.Image = ImageOps.posterize(image, 2)
+
+        self.cached_image = image
+        embed = discord.Embed(
+            color=int('36393F', 16)
+        )
+
+        embed.set_image(url='attachment://rain_image.png')
+        bytes_image = await self.image_to_byte_array(image)
+        await ctx.reply(embed=embed, file=discord.File(BytesIO(bytes_image), 'rain_image.png'))
+
 
     @commands.command()
     @utils.not_ready()
@@ -448,6 +469,34 @@ class ImageManipulation(commands.Cog):
         embed.set_image(url='attachment://green_image.png')
         bytes_image = await self.image_to_byte_array(image)
         await ctx.reply(embed=embed, file=discord.File(BytesIO(bytes_image), 'green_image.png'))
+
+    @commands.command(aliases=['grey'])
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def gray(self, ctx, member: Optional[discord.Member] = None, percentage: int = 55) -> None:
+        """ Makes an image grayer/greyer.
+        :param member: The member of whom to increase the gray/grey values of the profile picture. [Optional][Default = Cached Image] """
+
+        file: Any = None
+
+        if member:
+            file = member.display_avatar
+        else:
+            if self.cached_image:
+                file = self.cached_image
+            else:
+                file = ctx.author.display_avatar
+
+        image = file if isinstance(file, Image.Image) else Image.open(BytesIO(await file.read()))
+        image: Image.Image = ImageOps.grayscale(image)
+
+        self.cached_image = image
+        embed = discord.Embed(
+            color=int('36393F', 16)
+        )
+
+        embed.set_image(url='attachment://gray_image.png')
+        bytes_image = await self.image_to_byte_array(image)
+        await ctx.reply(embed=embed, file=discord.File(BytesIO(bytes_image), 'gray_image.png'))
 
 
     @commands.command()
