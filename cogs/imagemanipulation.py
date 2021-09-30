@@ -184,7 +184,8 @@ class ImageManipulation(commands.Cog):
         imgByteArr = imgByteArr.getvalue()
         return imgByteArr
 
-    async def change_image_brightness(self, file: Any, action: str, percentage: int) -> None:
+    async def change_image_brightness(self, file: Any, action: str, percentage: int,
+        r: bool = True, g: bool = True, b: bool = True) -> None:
         """ Changes the brightness level of each pixel of the image.
         :param file: The file to execute the task on.
         :param action: Whether to lighten or darken the image.
@@ -209,9 +210,11 @@ class ImageManipulation(commands.Cog):
 
         #for each pixel, append the brightened or darkened version to the new image list
         for pixel in pixels:
-            new_pixel = (int(pixel[0] * brightness_multiplier),
-                        int(pixel[1] * brightness_multiplier),
-                        int(pixel[2] * brightness_multiplier))
+            new_pixel = (
+                int(pixel[0] * brightness_multiplier) if r else int(pixel[0]),
+                int(pixel[1] * brightness_multiplier) if g else int(pixel[1]),
+                int(pixel[2] * brightness_multiplier) if b else int(pixel[2])
+            )
 
             #check the new pixel values are within rgb range
             for pixel in new_pixel:
@@ -226,6 +229,83 @@ class ImageManipulation(commands.Cog):
         new_image.putdata(new_image_list)
         return new_image
 
+
+    
+
+    @commands.command()
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def red(self, ctx, member: Optional[discord.Member] = None, percentage: int = 55) -> None:
+        """ Makes an image redder.
+        :param member: The member of whom to increase the red values of the profile picture. [Optional][Default = Cached Image] """
+
+        file: Any = None
+
+        if member:
+            file = member.display_avatar
+        else:
+            if self.cached_image:
+                file = self.cached_image
+            else:
+                file = ctx.author.display_avatar
+        image: Image.Image = await self.change_image_brightness(file=file, action='lighten', percentage=percentage, r=False)
+        self.cached_image = image
+        embed = discord.Embed(
+            color=int('36393F', 16)
+        )
+
+        embed.set_image(url='attachment://red_image.png')
+        bytes_image = await self.image_to_byte_array(image)
+        await ctx.reply(embed=embed, file=discord.File(BytesIO(bytes_image), 'red_image.png'))
+
+    @commands.command()
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def blue(self, ctx, member: Optional[discord.Member] = None, percentage: int = 55) -> None:
+        """ Makes an image bluer.
+        :param member: The member of whom to increase the bluer values of the profile picture. [Optional][Default = Cached Image] """
+
+        file: Any = None
+
+        if member:
+            file = member.display_avatar
+        else:
+            if self.cached_image:
+                file = self.cached_image
+            else:
+                file = ctx.author.display_avatar
+        image: Image.Image = await self.change_image_brightness(file=file, action='lighten', percentage=percentage, g=False)
+        self.cached_image = image
+        embed = discord.Embed(
+            color=int('36393F', 16)
+        )
+
+        embed.set_image(url='attachment://blue_image.png')
+        bytes_image = await self.image_to_byte_array(image)
+        await ctx.reply(embed=embed, file=discord.File(BytesIO(bytes_image), 'blue_image.png'))
+
+    @commands.command()
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def yellow(self, ctx, member: Optional[discord.Member] = None, percentage: int = 55) -> None:
+        """ Makes an image yellower.
+        :param member: The member of whom to increase the yellow values of the profile picture. [Optional][Default = Cached Image] """
+
+        file: Any = None
+
+        if member:
+            file = member.display_avatar
+        else:
+            if self.cached_image:
+                file = self.cached_image
+            else:
+                file = ctx.author.display_avatar
+        image: Image.Image = await self.change_image_brightness(file=file, action='lighten', percentage=percentage, b=False)
+        self.cached_image = image
+        embed = discord.Embed(
+            color=int('36393F', 16)
+        )
+
+        embed.set_image(url='attachment://yellow_image.png')
+        bytes_image = await self.image_to_byte_array(image)
+        await ctx.reply(embed=embed, file=discord.File(BytesIO(bytes_image), 'yellow_image.png'))
 
 def setup(client: commands.Cog) -> None:
     """ Cog's setup function. """
