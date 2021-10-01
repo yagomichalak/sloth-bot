@@ -12,25 +12,25 @@ watchlist_channel_id: int = int(os.getenv('WATCHLIST_CHANNEL_ID'))
 
 
 class ModerationWatchlistTable(commands.Cog):
-    
+
     def __init__(self, client: commands.Bot) -> None:
         self.client = client
 
 
     @commands.command(aliases=['wl'])
     @utils.is_allowed(allowed_roles, throw_exc=True)
-    async def watchlist(self, ctx, members: commands.Greedy[discord.Member] or commands.Greedy[discord.User] = None, *, reason: str = None) -> None:
+    async def watchlist(self, ctx, *, message: str = None) -> None:
         """ Puts 1 or more members in the watchlist.
         :param member: The member to put in the watchlist.
         :param reason: The reason for putting the member(s) in the watchist. """
-        
-        members, reason = await utils.ignore_usernames(ctx, members, reason)
+
+        members, reason = await utils.greedy_member_reason(ctx, message)
 
         author = ctx.author
 
         if not members:
             return await ctx.send(f"**Please, inform a member to put in the watchlist, {author.mention}!**")
-        
+
         for member in members:
             if not await self.get_user_watchlist(member.id):
                 watchlist_channel = self.client.get_channel(watchlist_channel_id)
@@ -60,11 +60,13 @@ class ModerationWatchlistTable(commands.Cog):
 
     @commands.command(aliases=['remove_watchlist', 'delete_watchlist', 'del_watchlist', 'uwl'])
     @utils.is_allowed(allowed_roles, throw_exc=True)
-    async def unwatchlist(self, ctx, members: commands.Greedy[discord.Member] or commands.Greedy[discord.User] = None) -> None:
+    async def unwatchlist(self, ctx, *, message: str = None) -> None:
         """ Removes the members from the watchlist.
         :param member: The members to remove of the watchlist. """
 
         author = ctx.author
+
+        members, _ = await utils.greedy_member_reason(ctx, message)
 
         if not members:
             return await ctx.send(f"**Please, inform a member to remove from the watchlist, {author.mention}!**")
