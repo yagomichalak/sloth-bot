@@ -92,7 +92,7 @@ class ImageManipulation(commands.Cog):
         bytes_image = await self.image_to_byte_array(image)
         await ctx.reply(embed=embed, file=discord.File(BytesIO(bytes_image), 'cached_image.png'))
 
-    @commands.command(aliases=["invert"])
+    @commands.command()
     async def flip(self, ctx, member: Optional[discord.Member] = None) -> None:
         """ Flips an image upside down.
         :param member: The member to flip the profile picture. [Optional][Default = Cached Image] """
@@ -302,6 +302,11 @@ class ImageManipulation(commands.Cog):
             brightness_multiplier += (percentage/100)
         else:
             brightness_multiplier -= (percentage/100)
+
+
+        # Fixes non tuple pixel sets
+        if isinstance(pixels[0], int):
+            pixels = [(px, px, px, px) for px in pixels]
 
         #for each pixel, append the brightened or darkened version to the new image list
         for pixel in pixels:
@@ -554,6 +559,7 @@ class ImageManipulation(commands.Cog):
         embed.set_image(url='attachment://wave_image.png')
         bytes_image = await self.image_to_byte_array(wave_image)
         await ctx.reply(embed=embed, file=discord.File(BytesIO(bytes_image), 'wave_image.png'))
+
 
 def setup(client: commands.Cog) -> None:
     """ Cog's setup function. """
