@@ -6,7 +6,7 @@ from extra.menu import ConfirmSkill
 from extra import utils
 import os
 from datetime import datetime
-from typing import List, Union, Tuple, Any
+from typing import List, Union, Tuple, Any, Optional
 
 bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
 
@@ -340,3 +340,20 @@ class Metamorph(Player):
         except Exception as e:
             print(e)
             await ctx.send(f"**Something went wrong with it, {perpetrator.mention}!**")
+
+    
+    @commands.command()
+    @Player.skills_used(requirement=50)
+    @Player.skill_on_cooldown(skill=Skill.FOUR, seconds=172800)
+    @Player.user_is_class('metamorph')
+    @Player.skill_mark()
+    @Player.not_ready()
+    async def reborn(self, ctx, member: Optional[discord.Member] = None) -> None:
+        """ Reborns someone's pet or baby, but this time you can select a different 
+        breed for pets and a different Sloth Class for babies.
+        :param member: The member from whom to get the pet/baby to reborn. [Optional][Default=You]
+        
+        • Delay = 2 days
+        • Cost = 400łł """
+
+        pass

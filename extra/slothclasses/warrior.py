@@ -356,3 +356,23 @@ class Warrior(Player):
         rip_off_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
 
         return rip_off_embed
+
+
+    @commands.command(aliases=['disorient', 'disorientate'])
+    @Player.skills_used(requirement=50)
+    @Player.skill_on_cooldown(skill=Skill.FOUR, seconds=172800)
+    @Player.user_is_class('warrior')
+    @Player.skill_mark()
+    @Player.not_ready()
+    async def poison(self, ctx, member: discord.Member = None) -> None:
+        """ Poisons someone so they get dizzy, disoriented to the point
+        they can barely use skills, Social, Currency and RolePlay commands.
+        :param member: The member to poison.
+        
+        PS: Members who were held hostages cannot interact with their tribe
+        during that time.
+
+        • Delay = 2 days
+        • Cost = 100łł  """
+
+        pass
