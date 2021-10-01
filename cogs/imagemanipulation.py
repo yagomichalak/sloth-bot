@@ -575,7 +575,11 @@ class ImageManipulation(commands.Cog):
             else:
                 file = ctx.author.display_avatar
 
-        image = file if isinstance(file, Image.Image) else Image.open(BytesIO(await file.read())).convert('RGB')
+        image = file if isinstance(file, Image.Image) else Image.open(BytesIO(await file.read()))
+        
+        if isinstance(image, Image.Image):
+            image = image.convert('RGB')
+        
         image = ImageOps.invert(image)
         self.cached_image = image
         embed = discord.Embed(
