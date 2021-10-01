@@ -560,6 +560,31 @@ class ImageManipulation(commands.Cog):
         bytes_image = await self.image_to_byte_array(wave_image)
         await ctx.reply(embed=embed, file=discord.File(BytesIO(bytes_image), 'wave_image.png'))
 
+    @commands.command(aliases=["negative", "negate"])
+    async def invert(self, ctx, member: Optional[discord.Member] = None) -> None:
+        """ Inverts an image to its negative form..
+        :param member: The member to invert the profile picture. [Optional][Default = Cached Image] """
+
+        file: Any = None
+
+        if member:
+            file = member.display_avatar
+        else:
+            if self.cached_image:
+                file = self.cached_image
+            else:
+                file = ctx.author.display_avatar
+
+        image = file if isinstance(file, Image.Image) else Image.open(BytesIO(await file.read())).convert('RGB')
+        image = ImageOps.invert(image)
+        self.cached_image = image
+        embed = discord.Embed(
+            color=int('36393F', 16)
+        )
+        embed.set_image(url='attachment://inverted_image.png')
+        bytes_image = await self.image_to_byte_array(image)
+        await ctx.reply(embed=embed, file=discord.File(BytesIO(bytes_image), 'inverted_image.png'))
+
 
 def setup(client: commands.Cog) -> None:
     """ Cog's setup function. """
