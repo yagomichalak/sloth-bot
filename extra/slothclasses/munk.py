@@ -1192,3 +1192,20 @@ class Munk(Player):
             await ctx.send(f"**Something went wrong with it, {author.mention}!**")
         else:
             await ctx.send(f"**Successfully transferred ownership of `{user_tribe['name']}` from <@{user_tribe['owner_id']}> to {member.mention}!**")
+
+
+
+    @commands.command(aliases=['get_mission', 'gq', 'gm'])
+    @Player.skills_used(requirement=50)
+    @Player.skill_on_cooldown(skill=Skill.FOUR, seconds=172800)
+    @Player.user_is_class('munk')
+    @Player.skill_mark()
+    @Player.not_ready()
+    async def get_quest(self, ctx) -> None:
+        """ Gets a Quest for you and your Tribe to complete, and if so,
+        the involved people will get rewarded.
+        
+        • Delay = 2 days
+        • Cost = Free  """
+
+        pass

@@ -392,3 +392,19 @@ class Cybersloth(Player):
         wire_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
 
         return wire_embed
+
+    
+    @commands.command()
+    @Player.skills_used(requirement=50)
+    @Player.skill_on_cooldown(skill=Skill.FOUR, seconds=172800)
+    @Player.user_is_class('cybersloth')
+    @Player.skill_mark()
+    @Player.not_ready()
+    async def lock(self, ctx, member: discord.Member = None) -> None:
+        """ Locks someone else's set of skills until they complete a Quest.
+        :param member: The member of whom to lock the skills.
+        
+        • Delay = 2 days
+        • Cost = 150łł  """
+
+        pass
