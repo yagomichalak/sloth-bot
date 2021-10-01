@@ -586,6 +586,72 @@ class ImageManipulation(commands.Cog):
         await ctx.reply(embed=embed, file=discord.File(BytesIO(bytes_image), 'inverted_image.png'))
 
 
+    async def get_font(self, image: Image.Image, text: str, font_name: str = None) -> ImageFont:
+        """ Gets the font sized proportionally to the image size.
+        :param image: The image to proportion the font to.
+        :param text: The base text. """
+
+        fontsize = 1  # starting font size
+
+        if not font_name:
+            font_name = 'built titling sb.ttf'
+        font_path: str = f'media/fonts/{font_name}'
+
+        # Portion of image width you want text width to be
+        img_fraction = 0.50
+
+        font = ImageFont.truetype(font_path, fontsize)
+
+        while font.getsize(text)[0] < img_fraction*image.size[0]:
+            # Iterates until the text size is just larger than the criteria
+            fontsize += 1
+            font = ImageFont.truetype(font_path, fontsize)
+
+        # Optionally de-increments to be sure it is less than criteria
+        fontsize -= 1
+        font = ImageFont.truetype(font_path, fontsize)
+
+        return font
+
+    @commands.command(aliases=['write', 'cap'])
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def caption(self, ctx, member: Optional[discord.Member] = None, *, text: str = None) -> None:
+        """ Puts a caption on an image.
+        :param member: The member to put the caption on the profile picture. [Optional][Default = Cached Image].
+        :param text: The caption text to put on the image. """
+
+        file: Any = None
+
+        if member:
+            file = member.display_avatar
+        else:
+            if self.cached_image:
+                file = self.cached_image
+            else:
+                file = ctx.author.display_avatar
+
+        image = file if isinstance(file, Image.Image) else Image.open(BytesIO(await file.read()))
+        
+        # Puts the caption
+        # small = ImageFont.truetype("media/fonts/built titling sb.ttf", 30)
+        font = await self.get_font(image, text)
+        W, H = image.size
+        draw = ImageDraw.Draw(image)
+        w, h = draw.textsize(text, font=font)
+        draw.text(((W-w)/2,(H-h)/2), text, fill="white", font=font)
+        # draw.text(((W-w)/2,(H-h)/2-120), text, fill="white", font=small)
+
+
+        self.cached_image = image
+        embed = discord.Embed(
+            color=int('36393F', 16)
+        )
+
+        embed.set_image(url='attachment://captioned_image.png')
+        bytes_image = await self.image_to_byte_array(image)
+        await ctx.reply(embed=embed, file=discord.File(BytesIO(bytes_image), 'captioned_image.png'))
+
+
 def setup(client: commands.Cog) -> None:
     """ Cog's setup function. """
 
