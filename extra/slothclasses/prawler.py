@@ -512,8 +512,8 @@ class Prawler(Player):
 		
 		PS: Members who were held hostages cannot interact with their tribe
 		during that time.
-
+		
 		• Delay = 2 days
-        • Cost = 200łł  """
+		• Cost = 200łł  """
 
 		pass

@@ -368,9 +368,6 @@ class Warrior(Player):
         """ Poisons someone so they get dizzy, disoriented to the point
         they can barely use skills, Social, Currency and RolePlay commands.
         :param member: The member to poison.
-        
-        PS: Members who were held hostages cannot interact with their tribe
-        during that time.
 
         • Delay = 2 days
         • Cost = 100łł  """
