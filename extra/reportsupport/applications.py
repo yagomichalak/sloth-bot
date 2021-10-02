@@ -7,6 +7,7 @@ import os
 
 cosmos_id: int = int(os.getenv('COSMOS_ID'))
 muffin_id: int = int(os.getenv('MUFFIN_ID'))
+cent_id: int = int(os.getenv('CENT_ID'))
 
 moderator_role_id: int = int(os.getenv('MOD_ROLE_ID'))
 admin_role_id: int = int(os.getenv('ADMIN_ROLE_ID'))
@@ -31,23 +32,33 @@ class ApplicationsTable(commands.Cog):
     event_manager_parent_channel_id: int = int(os.getenv('EVENT_MANAGER_CHANNEL_ID'))
     event_manager_interview_vc_id: int = int(os.getenv('EVENT_MANAGER_INTERVIEW_VC_ID'))
 
+    debate_manager_app_channel_id: int = int(os.getenv('DEBATE_MANAGER_APPLICATION_CHANNEL_ID'))
+    debate_manager_app_cat_id: int = int(os.getenv('DEBATE_MANAGER_APPLICATION_CAT_ID'))
+    debate_manager_parent_channel_id: int = int(os.getenv('DEBATE_MANAGER_CHANNEL_ID'))
+    debate_manager_interview_vc_id: int = int(os.getenv('DEBATE_MANAGER_INTERVIEW_VC_ID'))
+
 
     interview_info: Dict[str, Any] = {
         'teacher': {
             "app": teacher_app_channel_id, "interview": teacher_interview_vc_id, "parent": teacher_parent_channel_id, 
-            "message": "**Teacher Application**\nOur staff has evaluated your teacher application and has come to the conclusion that we are not in need of this lesson.",
+            "message": "**Teacher Application**\nOur staff has evaluated your Teacher application and has come to the conclusion that we are not in need of this lesson.",
             "cat": teacher_app_cat_id, 
             "pings": [{"id": muffin_id, "role": False}, {"id": lesson_management_role_id, "role": True}]},
         'moderator': {
             "app": moderator_app_channel_id, "interview": moderator_interview_vc_id, "parent": moderator_parent_channel_id,
             "cat": moderator_app_cat_id, 
-            "message": "**Moderator Application**\nOur staff has evaluated your moderator application and has come to a conclusion, and due to intern and unspecified reasons we are **declining** it. Thank you anyways",
+            "message": "**Moderator Application**\nOur staff has evaluated your Moderator application and has come to a conclusion, and due to intern and unspecified reasons we are **declining** it. Thank you anyways",
             "pings": [{"id": cosmos_id, "role": False}, {"id": admin_role_id, "role": True}]},
         'event_manager': {
             "app": event_manager_app_channel_id,  "interview": event_manager_interview_vc_id, "parent": event_manager_parent_channel_id, 
             "cat": event_manager_app_cat_id, 
-            "message": "**event_manager Application**\nOur staff has evaluated your event_manager application and has come to the conclusion that we are not in need of this lesson.",
-            "pings": []}
+            "message": "**Event Manager Application**\nOur staff has evaluated your Event Manager application and has come to the conclusion that we are not in need of this lesson.",
+            "pings": []},
+        'debate_manager': {
+            "app": debate_manager_app_channel_id,  "interview": debate_manager_interview_vc_id, "parent": debate_manager_parent_channel_id, 
+            "cat": debate_manager_app_cat_id, 
+            "message": "**Debate Manager Application**\nOur staff has evaluated your Debate Manager application and has come to the conclusion that we are **declining** your application for intern reasons.",
+            "pings": [{"id": cent_id, "role": False}]}
     }
 
     @commands.Cog.listener(name="on_raw_reaction_add")
@@ -70,7 +81,7 @@ class ApplicationsTable(commands.Cog):
         adm = channel.permissions_for(payload.member).administrator
 
         # Checks if it's in an applications channel
-        if payload.channel_id in [self.moderator_app_channel_id, self.event_manager_app_channel_id, self.teacher_app_channel_id]:
+        if payload.channel_id in [self.moderator_app_channel_id, self.event_manager_app_channel_id, self.teacher_app_channel_id, self.debate_manager_app_channel_id]:
 
             if payload.channel_id == self.teacher_app_channel_id: # User is an mod+ or lesson manager
                 if await utils.is_allowed([moderator_role_id, lesson_management_role_id]).predicate(channel=channel, member=payload.member):
