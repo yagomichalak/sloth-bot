@@ -88,7 +88,7 @@ different_class_roles = {
         "javascript and typescript", "sql", "programming",
         "computer science", "cs50", "cs", "web dev",
         "web development", "comp sci", "cyber security",
-        "security"
+        "security", "haskell"
     ],
     "conlangs": [
         "esperanto", "toki pona"
