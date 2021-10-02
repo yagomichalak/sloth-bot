@@ -18,7 +18,7 @@ class ReportSupportView(discord.ui.View):
         self.client = client
         self.cog = client.get_cog('ReportSupport')
         patreon_button = discord.ui.Button(style=5, label="Support us on Patreon!", url="https://www.patreon.com/Languagesloth", emoji="<:patreon:831401582426980422>", row=2)
-        self.children.insert(3, patreon_button)
+        self.children.insert(4, patreon_button)
 
 
     @discord.ui.button(label="Apply for Teacher!", style=3, custom_id=f"apply_to_teach", emoji="🧑‍🏫")
@@ -28,7 +28,7 @@ class ReportSupportView(discord.ui.View):
         await interaction.response.defer()
         member = interaction.user
 
-        # Apply to be a teacher
+        # Apply to be a Teacher
         member_ts = self.cog.cache.get(member.id)
         time_now = await utils.get_timestamp()
         if member_ts:
@@ -47,7 +47,7 @@ class ReportSupportView(discord.ui.View):
         await interaction.response.defer()
         member = interaction.user
 
-        # Apply to be a teacher
+        # Apply to be a Moderator
         member_ts = self.cog.cache.get(member.id)
         time_now = await utils.get_timestamp()
         if member_ts:
@@ -66,7 +66,7 @@ class ReportSupportView(discord.ui.View):
         await interaction.response.defer()
         member = interaction.user
 
-        # Apply to be a teacher
+        # Apply to be an Event Manager
         member_ts = self.cog.cache.get(member.id)
         time_now = await utils.get_timestamp()
         if member_ts:
@@ -77,6 +77,25 @@ class ReportSupportView(discord.ui.View):
 
         self.cog.cache[member.id] = time_now
         await self.cog.send_event_manager_application(member)
+
+    @discord.ui.button(label="Apply for Debate Manager!", style=3, custom_id=f"apply_to_manage_debates", emoji="🌐")
+    async def apply_to_debate_manager_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Button for starting the Debate Manager application. """
+
+        await interaction.response.defer()
+        member = interaction.user
+
+        # Apply to be a Debate Manager
+        member_ts = self.cog.cache.get(member.id)
+        time_now = await utils.get_timestamp()
+        if member_ts:
+            sub = time_now - member_ts
+            if sub <= 1800:
+                return await interaction.followup.send(
+                    f"**You are on cooldown to apply, try again in {(1800-sub)/60:.1f} minutes**", ephemeral=True)
+
+        self.cog.cache[member.id] = time_now
+        await self.cog.send_debate_manager_application(member)
 
 
     @discord.ui.button(label="Get your own Custom Bot (not for free)", style=1, custom_id=f"get_custom_bot", emoji="🤖", disabled=True, row=2)
