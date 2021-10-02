@@ -83,6 +83,9 @@ class ApplicationsTable(commands.Cog):
         # Checks if it's in an applications channel
         if payload.channel_id in [self.moderator_app_channel_id, self.event_manager_app_channel_id, self.teacher_app_channel_id, self.debate_manager_app_channel_id]:
 
+            if payload.channel_id == self.debate_manager_app_channel_id: # User is an mod+ or lesson manager
+                if await utils.is_allowed_members([cent_id]).predicate(channel=channel, member=payload.member):
+                    await self.handle_application(guild, payload)
             if payload.channel_id == self.teacher_app_channel_id: # User is an mod+ or lesson manager
                 if await utils.is_allowed([moderator_role_id, lesson_management_role_id]).predicate(channel=channel, member=payload.member):
                     await self.handle_application(guild, payload)
