@@ -636,8 +636,8 @@ class ImageManipulation(commands.Cog):
 
         image = file if isinstance(file, Image.Image) else Image.open(BytesIO(await file.read()))
         
+        text = text.strip()
         # Puts the caption
-        # small = ImageFont.truetype("media/fonts/built titling sb.ttf", 30)
         font = await self.get_font(image, text)
         W, H = image.size
         draw = ImageDraw.Draw(image)
