@@ -243,25 +243,55 @@ async def audio(client: commands.Bot, voice_channel: discord.VoiceChannel, membe
         print(e)
         return
 
-# Converts in reason members collected by greedy that are not id or mention 
-async def ignore_usernames(ctx, members : List[Union[discord.Member, discord.User]] = None, reason : str = None):
-    if not members:
-        return members, reason
-    for id, member in enumerate(members):
-        word = ctx.message.content.split()[id + 1]
-        if member.name == word:
-            reason = ' '.join(ctx.message.content.split()[1 + id:])
-            for i in range(len(members) - 1, id - 1, -1):
-                    del members[i]
-            return members, reason
+async def greedy_member_reason(ctx, message : str = None):
+    """A converter that greedily member or users until it can't.
+    The member search ends on the first member not found or when the string does not match a member identifier.
+    Everything else is considered a reason."""
 
-        elif isinstance(member, discord.Member) and member.nick == word:
-            reason = ' '.join(ctx.message.content.split()[1 + id:])
-            for i in range(len(members) - 1, id - 1, -1):
-                    del members[i]
-            return members, reason
+    users = []
+    reason = None
 
-    return members, reason
+    if not message:
+        return users, reason
+
+    message = message.split()
+
+    for pos, word in enumerate(message):
+        # Checks if it is an ID, a mention or name#discriminator
+        if (len(word) >= 15 and len(word) <= 20 and word.isdigit()) or re.match(r'<@!?([0-9]{15,20})>$', word) or (len(word) > 5 and word[-5] == '#'):
+
+            # Member search
+            try:
+                user = await commands.MemberConverter().convert(ctx, word)
+                # Ignores member if found by username
+                if user.name == word or user.nick == word:
+                    del user
+
+            except commands.errors.BadArgument:
+                user = None
+            # User search (if cannot found a member)
+            if not user:
+                try:
+                    user = await commands.UserConverter().convert(ctx, word)
+                    # Ignores member if found by username
+                    if user.name == word:
+                        del user
+
+                except commands.errors.BadArgument:
+                    user = None
+
+            if not user:
+                reason = ' '.join(message[pos:])
+                return users, reason
+
+            users.append(user)
+
+        # When does not find a string in the member format
+        else:
+            reason = ' '.join(message[pos:])
+            return users, reason
+
+    return users, reason
 
 
 def not_ready():
