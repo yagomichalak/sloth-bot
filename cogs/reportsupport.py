@@ -1,6 +1,4 @@
 import discord
-from discord import member
-from discord import guild
 from discord.ext import commands
 from mysqldb import *
 import asyncio
@@ -17,6 +15,7 @@ cent_id = int(os.getenv('CENT_ID'))
 moderator_role_id = int(os.getenv('MOD_ROLE_ID'))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID'))
 lesson_management_role_id = int(os.getenv('LESSON_MANAGEMENT_ROLE_ID'))
+server_id = int(os.getenv('SERVER_ID'))
 
 staff_vc_id = int(os.getenv('STAFF_VC_ID'))
 
@@ -671,6 +670,7 @@ Entry requirements:
             embed.description = "**Application successfully made, please, be patient now!**"
             await member.send(embed=embed)
             debate_manager_channel = await self.client.fetch_channel(self.debate_manager_app_channel_id)
+            guild = self.client.get_guild(server_id)
             cent = discord.utils.get(guild.members, id=cent_id)
             app = await debate_manager_channel.send(content=f"{cent.mention}, {member.mention}\n{app}")
             await app.add_reaction('✅')
