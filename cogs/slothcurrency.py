@@ -784,6 +784,15 @@ class SlothCurrency(commands.Cog):
         await db.commit()
         await mycursor.close()
 
+    async def update_user_many_money(self, users: List[int]) -> None:
+        """ Updates many the money of many users.
+        :param users: The users to update the money. """
+
+        mycursor, db = await the_database()
+        await mycursor.executemany("UPDATE UserCurrency SET user_money = user_money + %s WHERE user_id = %s", users)
+        await db.commit()
+        await mycursor.close()
+
     async def update_user_purchase_ts(self, user_id: int, the_time: int) -> None:
         """ Updates the user purchase timestamp.
         :param user_id: The user's ID.
