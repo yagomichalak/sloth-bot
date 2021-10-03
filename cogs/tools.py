@@ -10,6 +10,7 @@ import inspect
 import io
 import textwrap
 import traceback
+import collections
 from contextlib import redirect_stdout
 import os
 from treelib import Tree
@@ -37,7 +38,7 @@ owner_role_id = int(os.getenv('OWNER_ROLE_ID'))
 
 allowed_roles = [owner_role_id, admin_role_id, mod_role_id, *patreon_roles.keys(), int(os.getenv('SLOTH_LOVERS_ROLE_ID'))]
 teacher_role_id = int(os.getenv('TEACHER_ROLE_ID'))
-
+patreon_channel_id = int(os.getenv('PATREONS_CHANNEL_ID'))
 
 from extra.menu import prompt_message
 
@@ -850,21 +851,33 @@ class Tools(commands.Cog):
 
 		SlothCurrency = self.client.get_cog('SlothCurrency')
 
+		members = collections.defaultdict(list)
+
 		people_count: int = 0
 		# Loops through each Patreon role and gets a list containing members that have them
 		async with ctx.typing():
-			for patreon_role, values in patreon_roles.items():
-				members = [m for m in ctx.guild.members if discord.utils.get(ctx.guild.roles, id=patreon_role) in m.roles]
-				users = [(m.id, values[3]) for m in members]
-				people_count += len(members)
+			for member in ctx.guild.members:
+				for role_id in patreon_roles:  # dict.keys
+					if discord.utils.get(member.roles, id=role_id):
+						members[role_id].append(member)
+
+			for role_id, role_members in members.items():
+				values = patreon_roles[role_id]
+				users = list((values[3], m.id) for m in members)
+
+				people_count += len(role_members)
 				# Give them money
 				await SlothCurrency.update_user_many_money(users)
-				# Send them a message
-				for member in members:
-					try:
-						await member.send(values[2])
-					except:
-						continue
+
+				channel = discord.utils.get(ctx.guild.text_channels, id=patreon_channel_id)
+				m_mentions = ', '.join([m.mention for m in role_members])
+				embed = discord.Embed(
+					title=f"__Payday__",
+					description=f"The members below were paid off according to their <@&{role_id}> role!\n\n{m_mentions}",
+					color=discord.Color.green()
+				)
+				embed.add_field(name="Reward", value=f"You all just got your monthly **300łł** :leaves:")
+				await channel.send(embed=embed)
 
 		await ctx.send(f"**{people_count} Patreons were paid!**")
 
