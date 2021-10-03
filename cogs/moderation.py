@@ -257,7 +257,7 @@ class Moderation(*moderation_cogs):
 				await msgs.pop(0).delete()
 				deleted += 1
 
-			await ctx.send(f"**`{deleted}` messages deleted from `{' and '.join([member.name for member in members])}`**",
+			await ctx.send(f"**`{deleted}` messages deleted from `{' and '.join(member.name for member in members)}`**",
 				delete_after=5)
 
 		else:
