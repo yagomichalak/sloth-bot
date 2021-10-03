@@ -863,7 +863,7 @@ class Tools(commands.Cog):
 
 			for role_id, members in members.items():
 				values = patreon_roles[role_id]
-				users = list((m, values[2]) for m in members)
+				users = list((m, values[3]) for m in members)
 
 				people_count += len(members)
 				# Give them money
