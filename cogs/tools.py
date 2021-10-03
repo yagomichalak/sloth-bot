@@ -38,7 +38,7 @@ owner_role_id = int(os.getenv('OWNER_ROLE_ID'))
 
 allowed_roles = [owner_role_id, admin_role_id, mod_role_id, *patreon_roles.keys(), int(os.getenv('SLOTH_LOVERS_ROLE_ID'))]
 teacher_role_id = int(os.getenv('TEACHER_ROLE_ID'))
-
+patreon_channel_id = int(os.getenv('PATREONS_CHANNEL_ID'))
 
 from extra.menu import prompt_message
 
@@ -869,7 +869,7 @@ class Tools(commands.Cog):
 				# Give them money
 				await SlothCurrency.update_user_many_money(users)
 
-				channel = discord.utils.get(ctx.guild.channels, name="patreons")
+				channel = discord.utils.get(ctx.guild.channels, id=patreon_channel_id)
 				await channel.send(values[2])
 
 		await ctx.send(f"**{people_count} Patreons were paid!**")
