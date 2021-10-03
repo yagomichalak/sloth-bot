@@ -850,18 +850,23 @@ class Tools(commands.Cog):
 
 		SlothCurrency = self.client.get_cog('SlothCurrency')
 
+		people_count: int = 0
 		# Loops through each Patreon role and gets a list containing members that have them
-		for patreon_role, values in patreon_roles.items():
-			members = [m for m in ctx.guild.members if discord.utils.get(ctx.guild.roles, id=patreon_role) in m.roles]
-			# Give them money
-			for member in members:
-				try:
-					await SlothCurrency.update_user_money(member.id, values[3])
-					await member.send(values[2])
-				except:
-					continue
+		async with ctx.typing():
+			for patreon_role, values in patreon_roles.items():
+				members = [m for m in ctx.guild.members if discord.utils.get(ctx.guild.roles, id=patreon_role) in m.roles]
+				users = [(m.id, values[3]) for m in members]
+				people_count += len(members)
+				# Give them money
+				await SlothCurrency.update_user_many_money(users)
+				# Send them a message
+				for member in members:
+					try:
+						await member.send(values[2])
+					except:
+						continue
 
-		await ctx.send(f"**All Patreons were paid!**")
+		await ctx.send(f"**{people_count} Patreons were paid!**")
 
 	@commands.command(alises=['count_channel', 'countchannel'])
 	@commands.cooldown(1, 5, commands.BucketType.user)
