@@ -10,6 +10,7 @@ import inspect
 import io
 import textwrap
 import traceback
+import collections
 from contextlib import redirect_stdout
 import os
 from treelib import Tree
@@ -850,21 +851,26 @@ class Tools(commands.Cog):
 
 		SlothCurrency = self.client.get_cog('SlothCurrency')
 
+		members = collections.defaultdict(list)
+
 		people_count: int = 0
 		# Loops through each Patreon role and gets a list containing members that have them
 		async with ctx.typing():
-			for patreon_role, values in patreon_roles.items():
-				members = [m for m in ctx.guild.members if discord.utils.get(ctx.guild.roles, id=patreon_role) in m.roles]
-				users = [(m.id, values[3]) for m in members]
+			for member in ctx.guild.members:
+				for role_id in patreon_roles:  # dict.keys
+					if discord.utils.get(member.roles, id=role_id):
+						members[role_id].append(member)
+
+			for role_id, members in members.items():
+				values = patreon_roles[role_id]
+				users = list((m, values[2]) for m in members)
+
 				people_count += len(members)
 				# Give them money
 				await SlothCurrency.update_user_many_money(users)
-				# Send them a message
-				for member in members:
-					try:
-						await member.send(values[2])
-					except:
-						continue
+
+				channel = discord.utils.get(ctx.guild.channels, name="patreons")
+				await channel.send(values[2])
 
 		await ctx.send(f"**{people_count} Patreons were paid!**")
 
