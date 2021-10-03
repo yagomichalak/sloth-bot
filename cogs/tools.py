@@ -861,16 +861,23 @@ class Tools(commands.Cog):
 					if discord.utils.get(member.roles, id=role_id):
 						members[role_id].append(member)
 
-			for role_id, members in members.items():
+			for role_id, role_members in members.items():
 				values = patreon_roles[role_id]
 				users = list((values[3], m.id) for m in members)
 
-				people_count += len(members)
+				people_count += len(role_members)
 				# Give them money
 				await SlothCurrency.update_user_many_money(users)
 
-				channel = discord.utils.get(ctx.guild.channels, id=patreon_channel_id)
-				await channel.send(values[2])
+				channel = discord.utils.get(ctx.guild.text_channels, id=patreon_channel_id)
+				m_mentions = ', '.join([m.mention for m in role_members])
+				embed = discord.Embed(
+					title=f"__Payday__",
+					description=f"The members below were paid off according to their <@&{role_id}> role!\n\n{m_mentions}",
+					color=discord.Color.green()
+				)
+				embed.add_field(name="Reward", value=f"You all just got your monthly **300łł** :leaves:")
+				await channel.send(embed=embed)
 
 		await ctx.send(f"**{people_count} Patreons were paid!**")
 
