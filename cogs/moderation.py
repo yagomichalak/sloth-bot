@@ -224,34 +224,44 @@ class Moderation(*moderation_cogs):
 	# Purge command
 	@commands.command()
 	@commands.has_permissions(manage_messages=True)
-	async def purge(self, ctx, amount=0, member: discord.Member = None):
+	async def purge(self, ctx, *, message : str = None):
 		""" (MOD) Purges messages.
-		:param amount: The amount of messages to purge.
-		:param member: The member from whom to purge the messages. (Optional) """
+		:param member: The member from whom to purge the messages. (Optional)
+		:param amount: The amount of messages to purge. """
+
+		await ctx.message.delete()
+
+		members, amount = await utils.greedy_member_reason(ctx, message)
+
+		if not members and len(ctx.message.content.split()) > 2:
+			return await ctx.send(f"**Use z!purge Member[Optional] amount**", delete_after=5)
+
+		if not amount or not amount.isdigit() or int(amount) < 1:
+			return await ctx.send("**Please, insert a valid amount of messages to delete**", delete_after=5)
 
 		perms = ctx.channel.permissions_for(ctx.author)
 		if not perms.administrator:
-			if amount >= 30:
+			if int(amount) > 30:
 				return await ctx.send(f"**You cannot delete more than `30` messages at a time, {ctx.author.mention}!**")
 
-		await ctx.message.delete()
 		# global deleted
 		deleted = 0
-		if member:
+		if members:
+			members_id = [member.id for member in members]
 			channel = ctx.channel
 			msgs = list(filter(
-				lambda m: m.author.id == member.id,
+				lambda m: m.author.id in members_id,
 				await channel.history(limit=200).flatten()
 			))
-			for _ in range(amount):
+			for _ in range(int(amount)):
 				await msgs.pop(0).delete()
 				deleted += 1
 
-			await ctx.send(f"**`{deleted}` messages deleted for `{member}`**",
+			await ctx.send(f"**`{deleted}` messages deleted from `{' and '.join(member.name for member in members)}`**",
 				delete_after=5)
 
 		else:
-			await ctx.channel.purge(limit=amount)
+			await ctx.channel.purge(limit=int(amount))
 
 	@commands.command()
 	@utils.is_allowed(allowed_roles, throw_exc=True)
