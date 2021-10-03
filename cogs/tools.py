@@ -863,7 +863,7 @@ class Tools(commands.Cog):
 
 			for role_id, role_members in members.items():
 				values = patreon_roles[role_id]
-				users = list((values[3], m.id) for m in members)
+				users = list((values[3], m.id) for m in role_members)
 
 				people_count += len(role_members)
 				# Give them money
@@ -876,8 +876,8 @@ class Tools(commands.Cog):
 					description=f"The members below were paid off according to their <@&{role_id}> role!\n\n{m_mentions}",
 					color=discord.Color.green()
 				)
-				embed.add_field(name="Reward", value=f"You all just got your monthly **300łł** :leaves:")
-				await channel.send(embed=embed)
+				embed.add_field(name="Reward", value=f"You all just got your monthly **{values[3]}łł** :leaves:")
+				await channel.send(content=f"<@&{role_id}>", embed=embed)
 
 		await ctx.send(f"**{people_count} Patreons were paid!**")
 
