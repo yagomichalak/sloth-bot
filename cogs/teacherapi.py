@@ -30,6 +30,7 @@ class TeacherAPI(commands.Cog):
 
         self.client = client
         self.teacher_role_id: int = int(os.getenv('TEACHER_ROLE_ID'))
+        self.teacher_fun_role_id: int = int(os.getenv('TEACHER_FUN_ROLE_ID'))
         self.session = aiohttp.ClientSession(loop=client.loop)
         self.classes_channel_id: int = int(os.getenv('CLASSES_CHANNEL_ID'))
         self.website_link: str = 'https://thelanguagesloth.com'
@@ -363,6 +364,13 @@ class TeacherAPI(commands.Cog):
         if teacher_role in member.roles:
             try:
                 await member.remove_roles(teacher_role)
+            except:
+                pass
+
+        teacher_fun_role = discord.utils.get(ctx.guild.roles, id=self.teacher_fun_role_id)
+        if teacher_fun_role in member.roles:
+            try:
+                await member.remove_roles(teacher_fun_role)
             except:
                 pass
 

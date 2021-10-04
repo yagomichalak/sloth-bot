@@ -80,3 +80,21 @@ class WarriorUserItemSelect(discord.ui.Select):
     async def callback(self, interaction: discord.Interaction) -> None:
         self.view.selected_item = [item for item in self.items if interaction.data['values'][0] == item[4]][0]
         self.view.stop()
+
+
+# class SoundBoardSelect(discord.ui.Select):
+#     def __init__(self, items: List[Union[int, str]]) -> None:
+#         super().__init__(
+#             custom_id="warrior_select_user_item", placeholder="Select the item that you wanna rip off.", 
+#             min_values=1, max_values=1, 
+#             options=[
+#                 discord.SelectOption(
+#                     label=item[4], description=f"Type: {item[5]} | Rip Off Cost: {int(item[6]/2)}🍃",
+#                     value=item[4],
+#                     emoji="<:warrior_scratch:869221184925995079>") for item in items])
+#         self.items = items
+
+    
+#     async def callback(self, interaction: discord.Interaction) -> None:
+#         self.view.selected_item = [item for item in self.items if interaction.data['values'][0] == item[4]][0]
+#         self.view.stop()
