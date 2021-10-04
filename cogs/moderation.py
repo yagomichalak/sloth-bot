@@ -437,7 +437,7 @@ class Moderation(*moderation_cogs):
 		else:
 			await ctx.send(f"**Successfully rar'd `{member}`, {author.mention}!**")
 
-	@commands.command(name="mute")
+	@commands.command(name="mute", aliases=["shutup", "shut_up", "stfu", "zitto", "zitta", "shh"])
 	@utils.is_allowed(allowed_roles, throw_exc=True)
 	async def _mute_command(self, ctx, *, message : str = None) -> None:
 		"""(MOD) Mutes one or more members.
