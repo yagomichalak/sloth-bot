@@ -392,7 +392,7 @@ class Tools(commands.Cog):
 		:param member: The member you are looking for. """
 
 		if not member:
-			return await ctx.send(f"**Please, inform a member, {ctx.author.mention}!**")
+			member = ctx.author
 
 		member_state = member.voice
 		if channel := member_state and member_state.channel:
