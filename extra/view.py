@@ -351,25 +351,26 @@ class SoundBoardButton(discord.ui.Button):
 class SoundBoardView(discord.ui.View):
     """ View for the soundboard. """
 
-    def __init__(self, ctx: commands.Context, client: commands.Bot, timeout: Optional[float] = 180) -> None:
+    def __init__(self, ctx: commands.Context, client: commands.Bot, setting: str, timeout: Optional[float] = 180) -> None:
         super().__init__(timeout=timeout)
         self.ctx = ctx
         self.client = client
-        self.sounds: List[Dict[str, str]] = self.get_sounds()
+        self.setting = setting
+        self.sounds: List[Dict[str, str]] = self.get_sounds(self.setting)
 
         counter: int = 0
-        for i in range(5):
+        for i in range(4):
             for _ in range(5):
                 current_sound: Dict[str, str] = list(self.sounds.items())[counter][1]
                 counter += 1
                 button = SoundBoardButton(style=current_sound['style'], custom_id=f"sb_btn_{counter}_id", emoji=current_sound['emoji'], row=i)
                 self.add_item(button)
 
-    def get_sounds(self) -> List[Dict[str, str]]:
+    def get_sounds(self, json_name: str = 'sounds') -> List[Dict[str, str]]:
         """ Gets a list of sounds to play on the soundboard. """
 
         data = {}
-        with open('extra/random/json/sounds.json', 'r', encoding='utf-8') as file:
+        with open(f'extra/random/json/{json_name}.json', 'r', encoding='utf-8') as file:
             data = json.loads(file.read())
 
         return data

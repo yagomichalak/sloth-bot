@@ -26,7 +26,9 @@ from extra.menu import InroleLooping
 from extra.prompt.menu import ConfirmButton
 from extra.useful_variables import patreon_roles
 from extra import utils
-from extra.view import SoundBoardView
+
+from extra.view import SoundBoardView, BasicUserCheckView
+from extra.select import SoundBoardSelect
 
 guild_ids = [int(os.getenv('SERVER_ID'))]
 
@@ -954,9 +956,13 @@ class Tools(commands.Cog):
 		)
 		embed.add_field(name="Info:", value=f"Soundboard is bound to the {vc.mention} `Voice Channel`.")
 		embed.set_footer(text=f"Started by {author}", icon_url=author.display_avatar)
-		view: discord.ui.View = SoundBoardView(ctx, self.client)
-
+		view: discord.ui.View = BasicUserCheckView(author)
+		select: discord.ui.Select = SoundBoardSelect(ctx, self.client, sb_view=SoundBoardView, settings=[
+			['General', 'sounds'], ['General 2', 'sounds2'], ['Cosmos', 'cosmos']
+		])
+		view.add_item(select)
 		await ctx.send(content="\u200b", embed=embed, view=view)
+
 
 	@slash_command(name="poll", guild_ids=guild_ids)
 	@utils.is_allowed(allowed_roles, throw_exc=True)
