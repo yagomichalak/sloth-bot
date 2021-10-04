@@ -656,25 +656,26 @@ class SlothCurrency(commands.Cog):
         background.save(file_path, 'png', quality=90)
 
         all_effects = {key: value for (key, value) in effects.items() if value.get('has_gif')}
-        async with ctx.typing():
-            if all_effects:
-                try:
-                    gif_file_path = await self.make_gif_image(member_id=member.id, file_path=file_path, all_effects=all_effects)
-                    await answer(file=discord.File(gif_file_path))
+        # async with ctx.typing():
 
-                except Exception as e:
-                    print(e)
-                    pass
-                finally:
-                    os.remove(file_path)
-                    os.remove(gif_file_path)
-            else:
-                try:
-                    await answer(file=discord.File(file_path))
-                except:
-                    pass
-                finally:
-                    os.remove(file_path)
+        if all_effects:
+            try:
+                gif_file_path = await self.make_gif_image(member_id=member.id, file_path=file_path, all_effects=all_effects)
+                await answer(file=discord.File(gif_file_path))
+
+            except Exception as e:
+                print(e)
+                pass
+            finally:
+                os.remove(file_path)
+                os.remove(gif_file_path)
+        else:
+            try:
+                await answer(file=discord.File(file_path))
+            except:
+                pass
+            finally:
+                os.remove(file_path)
 
     async def make_gif_image(self, member_id: int, file_path: str, all_effects: Dict[str, Dict[str, Union[List[str], Tuple[int]]]]) -> None:
         """ Makes a gif image out a profile image.
@@ -1085,9 +1086,9 @@ class SlothCurrency(commands.Cog):
         user_message = user_info[0][1]
         user_time = user_info[0][2]
         member_id = ctx.author.id
-        async with ctx.typing():
-            cmsg, message_times = await self.convert_messages(member_id, user_message)
-            ctime, time_times = await self.convert_time(member_id, user_time)
+        # async with ctx.typing():
+        cmsg, message_times = await self.convert_messages(member_id, user_message)
+        ctime, time_times = await self.convert_time(member_id, user_time)
 
         embed = discord.Embed(title="Exchange", colour=ctx.author.color, timestamp=ctx.message.created_at)
         embed.set_author(name=ctx.author, url=ctx.author.display_avatar)
