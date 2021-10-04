@@ -82,19 +82,34 @@ class WarriorUserItemSelect(discord.ui.Select):
         self.view.stop()
 
 
-# class SoundBoardSelect(discord.ui.Select):
-#     def __init__(self, items: List[Union[int, str]]) -> None:
-#         super().__init__(
-#             custom_id="warrior_select_user_item", placeholder="Select the item that you wanna rip off.", 
-#             min_values=1, max_values=1, 
-#             options=[
-#                 discord.SelectOption(
-#                     label=item[4], description=f"Type: {item[5]} | Rip Off Cost: {int(item[6]/2)}🍃",
-#                     value=item[4],
-#                     emoji="<:warrior_scratch:869221184925995079>") for item in items])
-#         self.items = items
+class SoundBoardSelect(discord.ui.Select):
+    """ Select for selecting different soundboard settings. """
+
+    def __init__(self, ctx: commands.Context, client: commands.Bot, sb_view: discord.ui.View, settings: List[Union[int, str]]) -> None:
+        super().__init__(
+            custom_id="select_soundboard_id", placeholder="Select the soundboard you wanna use.", 
+            min_values=1, max_values=1, row=4, 
+            options=[
+                discord.SelectOption(label=item[0], value=item[1], emoji="⚙️") for item in settings])
+        self.ctx = ctx
+        self.client = client
+        self.sb_view = sb_view
+        self.settings = settings
 
     
-#     async def callback(self, interaction: discord.Interaction) -> None:
-#         self.view.selected_item = [item for item in self.items if interaction.data['values'][0] == item[4]][0]
-#         self.view.stop()
+    async def callback(self, interaction: discord.Interaction) -> None:
+        setting = [setting for setting in self.settings if interaction.data['values'][0] == setting[1]][0]
+        self.view.stop()
+
+        # Updates view
+        view = self.sb_view(ctx=self.ctx, client=self.client, setting=setting[1])
+        view.add_item(self)
+
+        # Updates embed
+
+        embed = interaction.message.embeds[0]
+        embed.remove_field(1)
+        embed.add_field(name="__Current Setting:__", value=setting[0], inline=False)
+
+        await interaction.response.edit_message(embed=embed, view=view)
+

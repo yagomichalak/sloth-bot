@@ -18,10 +18,5 @@
     "sb_btn_17_id": {"style": 2, "path": "media/audios/gato_miando.m4a", "emoji": "🐱"},
     "sb_btn_18_id": {"style": 3, "path": "media/audios/tarzan.mp3", "emoji": "🌿"},
     "sb_btn_19_id": {"style": 2, "path": "media/audios/quack.mp3", "emoji": "🦆"},
-    "sb_btn_20_id": {"style": 1, "path": "media/audios/rapaiz.mp3", "emoji": "🔉"},
-    "sb_btn_21_id": {"style": 1, "path": "media/audios/windows_xp_crash_error.m4a", "emoji": "🔉"},
-    "sb_btn_22_id": {"style": 1, "path": "media/audios/birl.m4a", "emoji": "🔉"},
-    "sb_btn_23_id": {"style": 1, "path": "media/audios/boom.m4a", "emoji": "💥"},
-    "sb_btn_24_id": {"style": 1, "path": "media/audios/que_isso_meu_filho_calma.mp3", "emoji": "🔉"},
-    "sb_btn_25_id": {"style": 1, "path": "media/audios/oh_potência.mp3", "emoji": "🔉"}
+    "sb_btn_20_id": {"style": 1, "path": "media/audios/rapaiz.mp3", "emoji": "🔉"}
 }
