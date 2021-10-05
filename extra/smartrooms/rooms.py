@@ -1,14 +1,21 @@
-
+import discord
+from discord.ext import commands
 from mysqldb import the_database
 from abc import abstractclassmethod, ABC
-from typing import Any
+from typing import Any, Union, Tuple
 import asyncio
+import os
+import __future__
+
+
+server_id: int = int(os.getenv('SERVER_ID'))
 
 class SmartRoom(ABC):
     """ Base class for SmartRooms. """
 
     @abstractclassmethod
-    async def format_data(cls) -> Any: pass
+    async def format_data(cls) -> Any:
+        return cls
 
     @abstractclassmethod
     async def insert(cls) -> Any: pass
@@ -23,39 +30,116 @@ class SmartRoom(ABC):
 class BasicRoom(SmartRoom):
     """ Class for BasicRooms. """
 
-    async def format_data(cls) -> Any: pass
+    def __init__(self, 
+        owner: Union[discord.Member, discord.User], vc: discord.VoiceChannel, creation_ts: int, edited_ts: int
+        ) -> None:
 
-    async def insert(cls) -> Any: pass
+        self.owner = owner
+        self.vc = vc
+        self.creation_ts = creation_ts
+        self.edited_ts = edited_ts
 
-    async def update(cls) -> Any: pass
+    @staticmethod
+    async def format_data(client: commands.Bot, data: Tuple[Union[int, str]]) -> SmartRoom:
+        """ Formats the database data into Discord objects. """
 
-    async def delete(cls) -> Any: pass
+        guild: discord.Guild = client.get_guild(server_id)
+        owner: Union[discord.Member, discord.User] = guild.get_member(data[0])
+        vc: discord.VoiceChannel = discord.utils.get(guild.voice_channels, id=data[2])
+
+        return BasicRoom(
+            owner=owner, vc=vc, creation_ts=data[9], edited_ts=data[10]
+        )
+
+    async def insert(self) -> Any: pass
+
+    async def update(self) -> Any: pass
+
+    async def delete(self) -> Any: pass
 
 class PremiumRoom(SmartRoom):
     """ Class for PremiumRooms. """
 
-    async def format_data(cls) -> Any: pass
 
-    async def insert(cls) -> Any:
+    def __init__(self, 
+        owner: Union[discord.Member, discord.User], vc: discord.VoiceChannel, txt: discord.TextChannel, creation_ts: int, edited_ts: int
+        ) -> None:
+        self.owner = owner
+        self.vc = vc
+        self.txt = txt
+        self.creation_ts = creation_ts
+        self.edited_ts = edited_ts
+
+    @staticmethod
+    async def format_data(client: commands.Bot, data: Tuple[Union[int, str]]) -> SmartRoom:
+        """ Formats the database data into Discord objects. """
+
+        guild: discord.Guild = client.get_guild(server_id)
+        owner: Union[discord.Member, discord.User] = guild.get_member(data[0])
+        txt: discord.TextChannel = discord.utils.get(guild.text_channels, id=data[4])
+        vc: discord.VoiceChannel = discord.utils.get(guild.voice_channels, id=data[2])
+        
+        return PremiumRoom(
+            owner=owner, vc=vc, txt=txt, creation_ts=data[9], edited_ts=data[10]
+        )
+
+    async def insert(self) -> Any:
 
         print('Inserting Premium Room into the database...')
 
-    async def update(cls) -> Any: pass
+    async def update(self) -> Any: pass
 
-    async def delete(cls) -> Any: pass
+    async def delete(self) -> Any: pass
 
 class GalaxyRoom(SmartRoom):
     """ Class for GalaxyRooms. """
 
-    async def format_data(cls) -> Any: pass
+    def __init__(self, 
+        owner: Union[discord.Member, discord.User], vc: discord.VoiceChannel, vc2: discord.VoiceChannel,
+        txt: discord.TextChannel, th: discord.Thread, th2: discord.Thread, th3: discord.Thread, th4: discord.Thread,
+        creation_ts: int, edited_ts: int
+        ) -> None:
 
-    async def insert(cls) -> Any:
+        self.owner = owner
+        self.vc = vc
+        self.vc2 = vc2
+        self.txt = txt
+        self.th = th
+        self.th2 = th2
+        self.th3 = th3
+        self.th4 = th4
+        self.creation_ts = creation_ts
+        self.edited_ts = edited_ts
+
+    @staticmethod
+    async def format_data(client: commands.Bot, data: Tuple[Union[int, str]]) -> SmartRoom:
+        """ Formats the database data into Discord objects. """
+
+        guild: discord.Guild = client.get_guild(server_id)
+        owner: Union[discord.Member, discord.User] = guild.get_member(data[0])
+
+        vc: discord.VoiceChannel = discord.utils.get(guild.voice_channels, id=data[2])
+        vc2: discord.VoiceChannel = discord.utils.get(guild.voice_channels, id=data[3])
+
+        txt: discord.VoiceChannel = discord.utils.get(guild.voice_channels, id=data[4])
+        th: discord.VoiceChannel = discord.utils.get(guild.voice_channels, id=data[5])
+        th2: discord.VoiceChannel = discord.utils.get(guild.voice_channels, id=data[6])
+        th3: discord.VoiceChannel = discord.utils.get(guild.voice_channels, id=data[7])
+        th4: discord.VoiceChannel = discord.utils.get(guild.voice_channels, id=data[8])
+        
+        return GalaxyRoom(
+            owner=owner, vc=vc, vc2=vc2, 
+            txt=txt, th=th, th2=th2, th3=th3, th4=th4,
+            creation_ts=data[9], edited_ts=data[10]
+        )
+
+    async def insert(self) -> Any:
 
         print('Inserting Galaxy Room into the database...')
 
-    async def update(cls) -> Any: pass
+    async def update(self) -> Any: pass
 
-    async def delete(cls) -> Any: pass
+    async def delete(self) -> Any: pass
 
 
 # galaxy_room = GalaxyRoom()

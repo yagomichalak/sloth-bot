@@ -14,7 +14,6 @@ import collections
 from contextlib import redirect_stdout
 import os
 from treelib import Tree
-from cogs.createsmartroom import CreateSmartRoom
 import json
 
 from datetime import datetime, time

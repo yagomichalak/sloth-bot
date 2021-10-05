@@ -22,12 +22,40 @@ class SmartRoomDatabase(commands.Cog):
     """ Class containing database methods
     for the SmartRooms. """
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, client: commands.Bot) -> None:
+        self.client = client
     
     # =====  CRUD  =====
 
     # ===== CREATE =====
+    async def insert_smartroom(self, 
+        user_id: int, room_type: str, vc_id: int, creation_ts: int, txt_id: Optional[int] = None,
+        vc2_id: Optional[int] = None, th_id: Optional[int] = None, th2_id: Optional[int] = None, 
+        th3_id: Optional[int] = None, th4_id: Optional[int] = None
+    ) -> None:
+        """ Inserts a SmartRoom into the database.
+        :param user_id: The ID of the owner of the SmartRoom.
+        :param room_type: The type of the SmartRoom. (Basic/Premium/Galaxy)
+        :param vc_id: The Voice Channel ID.
+        :param creation_ts: The creation timestamp.
+        :param txt_id: The Text Channel ID. [Optional]
+        :param vc2_id: The 2nd Voice Channel ID. [Optional].
+        :param th2_id: The Thread Channel ID. [Optional].
+        :param th3_id: The 2nd Thread Channel ID. [Optional].
+        :param th4_id: The 3rd Thread Channel ID. [Optional]. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("""
+            INSERT INTO SmartRooms (
+                user_id, room_type, vc_id, vc2_id,
+                txt_id, th_id, th2_id, th3_id, th4_id,
+                creation_ts
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (user_id, room_type, vc_id, vc2_id, txt_id, th_id, th2_id, th3_id, th4_id, creation_ts))
+        await db.commit()
+        await mycursor.close()
+
+
     # =====  READ  =====
     async def get_smartroom(self, user_id: Optional[int] = None, 
         vc_id: Optional[int] = None, txt_id: Optional[int] = None, cat_id: Optional[int] = None,
@@ -43,28 +71,30 @@ class SmartRoomDatabase(commands.Cog):
 
         mycursor, _ = await the_database()
 
-        if user_id:
-            await mycursor.execute("SELECT * FROM SmartRooms WHERE user_id = %s", (user_id,))
-        elif vc_id:
+        if vc_id:
             await mycursor.execute("SELECT * FROM SmartRooms WHERE vc_id = %s", (vc_id,))
         elif txt_id:
             await mycursor.execute("SELECT * FROM SmartRooms WHERE txt_id = %s", (txt_id,))
         elif cat_id:
             await mycursor.execute("SELECT * FROM SmartRooms WHERE cat_id = %s", (cat_id,))
+        elif user_id:
+            await mycursor.execute("SELECT * FROM SmartRooms WHERE user_id = %s", (user_id,))
 
         if multiple:
             results = await mycursor.fetchall()
             smart_rooms: List[SmartRoom] = [
-                SmartRoomEnum.__getitem__(name=result[1]).format_data(result)
+                await SmartRoomEnum.__getitem__(name=result[1]).value.format_data(self.client, result)
                 for result in results
             ]
             await mycursor.close()
             return smart_rooms
         else:
             result = await mycursor.fetchone()
-            smart_room: SmartRoom = SmartRoomEnum.__getitem__(name=result[1]).format_data(result)
+            print('result', result)
+            smart_room: SmartRoom = SmartRoomEnum.__getitem__(name=result[1]).value
+            formatted_smart_room: SmartRoom = await smart_room.format_data(client=self.client, data=result)
             await mycursor.close()
-            return smart_room
+            return formatted_smart_room
     
     # ===== UPDATE =====
     # ===== DELETE =====
@@ -87,7 +117,7 @@ class SmartRoomDatabase(commands.Cog):
             room_type VARCHAR(7) NOT NULL,
             vc_id BIGINT NOT NULL,
             vc2_id BIGINT DEFAULT NULL,
-            txt_id BIGINT NOT NULL,
+            txt_id BIGINT DEFAULT NULL,
             th_id BIGINT DEFAULT NULL,
             th2_id BIGINT DEFAULT NULL,
             th3_id BIGINT DEFAULT NULL,
