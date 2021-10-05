@@ -634,9 +634,12 @@ class ImageManipulation(commands.Cog):
             else:
                 file = ctx.author.display_avatar
 
+        if not text:
+            return await ctx.reply("**Please, inform a `caption text`!**")
+
         image = file if isinstance(file, Image.Image) else Image.open(BytesIO(await file.read()))
         
-        text = text.strip()
+        text = str(text).strip() if text else None
         # Puts the caption
         font = await self.get_font(image, text)
         W, H = image.size
