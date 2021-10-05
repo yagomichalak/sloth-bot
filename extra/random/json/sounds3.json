@@ -1,0 +1,22 @@
+{
+    "sb_btn_1_id": {"style": 1, "path": "media/audios/splat.mp3", "emoji": "🔉"},
+    "sb_btn_2_id": {"style": 1, "path": "media/audios/he_fucked_up.mp3", "emoji": "🔉"},
+    "sb_btn_3_id": {"style": 1, "path": "media/audios/deez_nuts.mp3", "emoji": "🥜"},
+    "sb_btn_4_id": {"style": 1, "path": "media/audios/skrra.mp3", "emoji": "🔉"},
+    "sb_btn_5_id": {"style": 1, "path": "media/audios/we_got_him.mp3", "emoji": "🔉"},
+    "sb_btn_6_id": {"style": 1, "path": "media/audios/aaah.mp3", "emoji": "🔉"},
+    "sb_btn_7_id": {"style": 2, "path": "media/audios/somebody_toucha_ma_spaghetti.mp3", "emoji": "🍝"},
+    "sb_btn_8_id": {"style": 3, "path": "media/audios/wasted.mp3", "emoji": "<:tony:686282295141072950>"},
+    "sb_btn_9_id": {"style": 2, "path": "media/audios/roblox_death_sound.mp3", "emoji": "<:dead:888589375150096394>"},
+    "sb_btn_10_id": {"style": 1, "path": "media/audios/crickets.mp3", "emoji": "🔉"},
+    "sb_btn_11_id": {"style": 1, "path": "media/audios/angola_arista.mp3", "emoji": "🖐️"},
+    "sb_btn_12_id": {"style": 3, "path": "media/audios/oh_hell_no.mp3", "emoji": "❌"},
+    "sb_btn_13_id": {"style": 1, "path": "media/audios/hu_waa_waa.mp3", "emoji": "🥴"},
+    "sb_btn_14_id": {"style": 3, "path": "media/audios/wrong_answer.mp3", "emoji": "<:wrong:735204715415076954>"},
+    "sb_btn_15_id": {"style": 1, "path": "media/audios/tadaah.mp3", "emoji": "🎉"},
+    "sb_btn_16_id": {"style": 1, "path": "media/audios/sad_trombone.mp3", "emoji": "🔉"},
+    "sb_btn_17_id": {"style": 2, "path": "media/audios/gotta_go_fast.mp3", "emoji": "⏩"},
+    "sb_btn_18_id": {"style": 3, "path": "media/audios/crickets.mp3", "emoji": "🦗"},
+    "sb_btn_19_id": {"style": 2, "path": "media/audios/enemy_spotted.mp3", "emoji": "❗"},
+    "sb_btn_20_id": {"style": 1, "path": "media/audios/hey_thats_pretty_good.mp3", "emoji": "🔉"}
+}
