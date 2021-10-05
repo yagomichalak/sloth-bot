@@ -9,7 +9,6 @@ class CreateSnartRoom(SmartRoomDatabase):
 
 	def __init__(self, client: commands.Cog) -> None:
 		self.client = client
-		# self.db: SmartRoomDatabase = SmartRoomDatabase()
 
 
 	@commands.command()
@@ -40,13 +39,26 @@ class CreateSnartRoom(SmartRoomDatabase):
 		author: discord.Member = ctx.author
 
 		if not room_id: return
-
 		
-		smart_room: SmartRoom = await self.get_smartroom(
-			user_id=author.id, vc_id=room_id
-		)
+		smart_room: SmartRoom = await self.get_smartroom(vc_id=room_id)
 
 		print('dsauhdsahu', type(smart_room))
+		print(smart_room.creation_ts)
+		print(smart_room.edited_ts)
+
+	@commands.command()
+	async def delete_room(self, ctx, room_id: int = None) -> None:
+		""" Test command for deleting rooms. """
+
+		author: discord.Member = ctx.author
+
+		if not room_id: return
+		
+		smart_room: SmartRoom = await self.get_smartroom(vc_id=room_id)
+
+		print('dsauhdsahu', type(smart_room))
+		print(smart_room.creation_ts)
+		print(smart_room.edited_ts)
 
 
 def setup(client: commands.Bot) -> None:

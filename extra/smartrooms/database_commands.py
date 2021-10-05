@@ -31,7 +31,7 @@ class SmartRoomDatabase(commands.Cog):
     async def insert_smartroom(self, 
         user_id: int, room_type: str, vc_id: int, creation_ts: int, txt_id: Optional[int] = None,
         vc2_id: Optional[int] = None, th_id: Optional[int] = None, th2_id: Optional[int] = None, 
-        th3_id: Optional[int] = None, th4_id: Optional[int] = None
+        th3_id: Optional[int] = None, th4_id: Optional[int] = None, cat_id: Optional[int] = None
     ) -> None:
         """ Inserts a SmartRoom into the database.
         :param user_id: The ID of the owner of the SmartRoom.
@@ -42,16 +42,17 @@ class SmartRoomDatabase(commands.Cog):
         :param vc2_id: The 2nd Voice Channel ID. [Optional].
         :param th2_id: The Thread Channel ID. [Optional].
         :param th3_id: The 2nd Thread Channel ID. [Optional].
-        :param th4_id: The 3rd Thread Channel ID. [Optional]. """
+        :param th4_id: The 3rd Thread Channel ID. [Optional]. 
+        :param cat_id: The 3rd Category ID. [Optional]. """
 
         mycursor, db = await the_database()
         await mycursor.execute("""
             INSERT INTO SmartRooms (
                 user_id, room_type, vc_id, vc2_id,
                 txt_id, th_id, th2_id, th3_id, th4_id,
-                creation_ts
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-            """, (user_id, room_type, vc_id, vc2_id, txt_id, th_id, th2_id, th3_id, th4_id, creation_ts))
+                cat_id, creation_ts
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (user_id, room_type, vc_id, vc2_id, txt_id, th_id, th2_id, th3_id, th4_id, cat_id, creation_ts))
         await db.commit()
         await mycursor.close()
 
@@ -90,7 +91,6 @@ class SmartRoomDatabase(commands.Cog):
             return smart_rooms
         else:
             result = await mycursor.fetchone()
-            print('result', result)
             smart_room: SmartRoom = SmartRoomEnum.__getitem__(name=result[1]).value
             formatted_smart_room: SmartRoom = await smart_room.format_data(client=self.client, data=result)
             await mycursor.close()
@@ -122,6 +122,7 @@ class SmartRoomDatabase(commands.Cog):
             th2_id BIGINT DEFAULT NULL,
             th3_id BIGINT DEFAULT NULL,
             th4_id BIGINT DEFAULT NULL,
+            cat_id BIGINT DEFAULT NULL,
             creation_ts BIGINT NOT NULL,
             edited_ts BIGINT DEFAULT NULL,
             PRIMARY KEY(user_id, room_type)

@@ -48,7 +48,7 @@ class BasicRoom(SmartRoom):
         vc: discord.VoiceChannel = discord.utils.get(guild.voice_channels, id=data[2])
 
         return BasicRoom(
-            owner=owner, vc=vc, creation_ts=data[9], edited_ts=data[10]
+            owner=owner, vc=vc, creation_ts=data[10], edited_ts=data[11]
         )
 
     async def insert(self) -> Any: pass
@@ -76,11 +76,11 @@ class PremiumRoom(SmartRoom):
 
         guild: discord.Guild = client.get_guild(server_id)
         owner: Union[discord.Member, discord.User] = guild.get_member(data[0])
-        txt: discord.TextChannel = discord.utils.get(guild.text_channels, id=data[4])
         vc: discord.VoiceChannel = discord.utils.get(guild.voice_channels, id=data[2])
+        txt: discord.TextChannel = discord.utils.get(guild.text_channels, id=data[4])
         
         return PremiumRoom(
-            owner=owner, vc=vc, txt=txt, creation_ts=data[9], edited_ts=data[10]
+            owner=owner, vc=vc, txt=txt, creation_ts=data[10], edited_ts=data[11]
         )
 
     async def insert(self) -> Any:
@@ -97,7 +97,7 @@ class GalaxyRoom(SmartRoom):
     def __init__(self, 
         owner: Union[discord.Member, discord.User], vc: discord.VoiceChannel, vc2: discord.VoiceChannel,
         txt: discord.TextChannel, th: discord.Thread, th2: discord.Thread, th3: discord.Thread, th4: discord.Thread,
-        creation_ts: int, edited_ts: int
+        cat: discord.CategoryChannel, creation_ts: int, edited_ts: int
         ) -> None:
 
         self.owner = owner
@@ -108,6 +108,7 @@ class GalaxyRoom(SmartRoom):
         self.th2 = th2
         self.th3 = th3
         self.th4 = th4
+        self.cat = cat
         self.creation_ts = creation_ts
         self.edited_ts = edited_ts
 
@@ -121,16 +122,18 @@ class GalaxyRoom(SmartRoom):
         vc: discord.VoiceChannel = discord.utils.get(guild.voice_channels, id=data[2])
         vc2: discord.VoiceChannel = discord.utils.get(guild.voice_channels, id=data[3])
 
-        txt: discord.VoiceChannel = discord.utils.get(guild.voice_channels, id=data[4])
-        th: discord.VoiceChannel = discord.utils.get(guild.voice_channels, id=data[5])
-        th2: discord.VoiceChannel = discord.utils.get(guild.voice_channels, id=data[6])
-        th3: discord.VoiceChannel = discord.utils.get(guild.voice_channels, id=data[7])
-        th4: discord.VoiceChannel = discord.utils.get(guild.voice_channels, id=data[8])
+        txt: discord.TextChannel = discord.utils.get(guild.text_channels, id=data[4])
+        th: discord.Thread = discord.utils.get(guild.threads, id=data[5])
+        th2: discord.Thread = discord.utils.get(guild.threads, id=data[6])
+        th3: discord.Thread = discord.utils.get(guild.threads, id=data[7])
+        th4: discord.Thread = discord.utils.get(guild.threads, id=data[8])
+
+        cat: discord.CategoryChannel = discord.utils.get(guild.categories, id=data[9])
         
         return GalaxyRoom(
             owner=owner, vc=vc, vc2=vc2, 
             txt=txt, th=th, th2=th2, th3=th3, th4=th4,
-            creation_ts=data[9], edited_ts=data[10]
+            cat=cat, creation_ts=data[10], edited_ts=data[11]
         )
 
     async def insert(self) -> Any:
