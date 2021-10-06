@@ -5,7 +5,7 @@ from discord.ext import commands
 from mysqldb import *
 from datetime import datetime
 import os
-from typing import List, Optional
+from typing import List, Optional, Union
 from extra.view import ExchangeActivityView
 from extra import utils
 from .slothclass import classes
@@ -87,7 +87,7 @@ class SlothReputation(commands.Cog):
 
     @commands.command(name="info", aliases=['status', 'exchange', 'level', 'lvl', 'exp', 'xp', 'money', 'balance'])
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def _info_command(self, ctx, member: Optional[discord.Member] = None) -> None:
+    async def _info_command(self, ctx, member: Optional[Union[discord.Member, discord.User]] = None) -> None:
         """ Shows the user's level and experience points.
         :param member: The member to show the info. [Optional][Default=You] """
 
@@ -102,7 +102,7 @@ class SlothReputation(commands.Cog):
         await ctx.defer()
         await self._info(ctx, member)
 
-    async def _info(self, ctx, member: discord.Member = None) -> None:
+    async def _info(self, ctx, member: Union[discord.Member, discord.User] = None) -> None:
         """ Shows the user's level and experience points. """
 
 

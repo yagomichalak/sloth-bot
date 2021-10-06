@@ -167,7 +167,7 @@ class ReportSupportView(discord.ui.View):
 
 class QuickButtons(discord.ui.View):
 
-    def __init__(self, client: commands.Bot, ctx: commands.Context, target_member: discord.Member) -> None:
+    def __init__(self, client: commands.Bot, ctx: commands.Context, target_member: Union[discord.Member, discord.User]) -> None:
         super().__init__(timeout=60)
         self.client = client
         self.ctx = ctx
