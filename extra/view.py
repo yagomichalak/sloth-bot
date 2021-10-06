@@ -4,6 +4,7 @@ from discord.ext import commands
 from typing import List, Union, Optional, Dict, Any
 from .menu import ConfirmSkill
 from .select import ReportSupportSelect
+from .smartrooms.rooms import BasicRoom, PremiumRoom, GalaxyRoom
 import os
 import json
 
@@ -377,3 +378,39 @@ class SoundBoardView(discord.ui.View):
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
         return interaction.user.id == self.ctx.author.id
+
+class GalaxyRoomView(discord.ui.View):
+
+    def __init__(self, *, timeout: Optional[float] = 180):
+        super().__init__(timeout=timeout)
+
+    @discord.ui.button(label="Basic", custom_id="basic_room", style=discord.ButtonStyle.blurple, emoji="1️⃣")
+    async def basic_room_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Starts the creation of a BasicRoom. """
+
+        await interaction.response.defer()
+        # basic_room = BasicRoom.insert()
+        self.stop()
+
+    @discord.ui.button(label="Premium", custom_id="premium_room", style=discord.ButtonStyle.blurple, emoji="2️⃣")
+    async def premium_room_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Starts the creation of a PremiumRoom. """
+
+        await interaction.response.defer()
+        self.stop()
+
+    @discord.ui.button(label="Galaxy", custom_id="galaxy_room", style=discord.ButtonStyle.blurple, emoji="3️⃣")
+    async def galaxy_room_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Starts the creation of a GalaxyRoom. """
+
+        await interaction.response.defer()
+        self.stop()
+
+    @discord.ui.button(label="Cancel", custom_id="cancel_btn", style=discord.ButtonStyle.danger, emoji="❌")
+    async def cancel_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Starts the creation of a BasicRoom. """
+
+        self.stop()
+
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        return await super().interaction_check(interaction)

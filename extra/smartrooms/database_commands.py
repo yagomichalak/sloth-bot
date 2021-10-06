@@ -97,10 +97,26 @@ class SmartRoomDatabase(commands.Cog):
             return formatted_smart_room
     
     # ===== UPDATE =====
+
     # ===== DELETE =====
+    async def delete_smartroom(self,
+        room_type: str, owner_id: Optional[int] = None, vc_id: Optional[int] = None) -> None:
+        """ Deletes SmartRoom.
+        :param room_type: The type of room. (Basic/Premium/Galaxy)
+        :param owner_id: The owner ID. [Optional]
+        :param vc_id: The Voice Channel ID. [Optional] """
+
+        mycursor, db = await the_database()
+        if owner_id:
+            await mycursor.execute("DELETE FROM SmartRooms WHERE owner_id = %s AND room_type = %s", (owner_id, room_type))
+        if vc_id:
+            await mycursor.execute("DELETE FROM SmartRooms WHERE vc_id = %s AND room_type = %s", (owner_id, room_type))
+
+
+        await db.commit()
+        await mycursor.close()
 
     # ===== OTHER  =====
-
 
     @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
