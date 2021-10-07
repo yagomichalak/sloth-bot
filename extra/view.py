@@ -379,18 +379,37 @@ class SoundBoardView(discord.ui.View):
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
         return interaction.user.id == self.ctx.author.id
 
-class GalaxyRoomView(discord.ui.View):
+class SmartRoomView(discord.ui.View):
 
-    def __init__(self, *, timeout: Optional[float] = 180):
+    def __init__(self, member: discord.Member, cog: commands.Cog, category: discord.CategoryChannel, *, timeout: Optional[float] = 180):
         super().__init__(timeout=timeout)
+        self.member = member
+        self.cog = cog
+        self.category = category
 
     @discord.ui.button(label="Basic", custom_id="basic_room", style=discord.ButtonStyle.blurple, emoji="1️⃣")
     async def basic_room_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
         """ Starts the creation of a BasicRoom. """
 
         await interaction.response.defer()
-        # basic_room = BasicRoom.insert()
         self.stop()
+        author: discord.User = interaction.user
+
+        current_ts: int = await utils.get_timestamp()
+
+        try:
+            vc: discord.VoiceChannel = await self.member.guild.create_voice_channel(name=str(author), category=self.category)
+            await BasicRoom.insert(self.cog, user_id=author.id, vc_id=vc.id, creation_ts=current_ts)
+        except Exception as e:
+            print('ERROR ', e)
+            await interaction.followup.send("**Couldn't do it for some reason!**")
+        else:
+            try:
+                await self.member.move_to(vc)
+            except:
+                await interaction.followup.send(f"**Couldn't move you to {vc.mention}!**")
+            else:
+                await interaction.followup.send(f"**I moved you to {vc.mention}!**")
 
     @discord.ui.button(label="Premium", custom_id="premium_room", style=discord.ButtonStyle.blurple, emoji="2️⃣")
     async def premium_room_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:

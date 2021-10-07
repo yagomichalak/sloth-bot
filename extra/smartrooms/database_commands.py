@@ -110,7 +110,7 @@ class SmartRoomDatabase(commands.Cog):
         if owner_id:
             await mycursor.execute("DELETE FROM SmartRooms WHERE owner_id = %s AND room_type = %s", (owner_id, room_type))
         if vc_id:
-            await mycursor.execute("DELETE FROM SmartRooms WHERE vc_id = %s AND room_type = %s", (owner_id, room_type))
+            await mycursor.execute("DELETE FROM SmartRooms WHERE vc_id = %s AND room_type = %s", (vc_id, room_type))
 
 
         await db.commit()

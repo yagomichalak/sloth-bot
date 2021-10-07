@@ -31,13 +31,14 @@ class BasicRoom(SmartRoom):
     """ Class for BasicRooms. """
 
     def __init__(self, 
-        owner: Union[discord.Member, discord.User], vc: discord.VoiceChannel, creation_ts: int, edited_ts: int
+        owner: Union[discord.Member, discord.User], room_type: str, vc: discord.VoiceChannel, creation_ts: int, edited_ts: int
         ) -> None:
 
         self.owner = owner
         self.vc = vc
         self.creation_ts = creation_ts
         self.edited_ts = edited_ts
+        self.room_type = room_type
 
     @staticmethod
     async def format_data(client: commands.Bot, data: Tuple[Union[int, str]]) -> SmartRoom:
@@ -48,23 +49,33 @@ class BasicRoom(SmartRoom):
         vc: discord.VoiceChannel = discord.utils.get(guild.voice_channels, id=data[2])
 
         return BasicRoom(
-            owner=owner, vc=vc, creation_ts=data[10], edited_ts=data[11]
+            owner=owner, room_type='basic', vc=vc, creation_ts=data[10], edited_ts=data[11]
         )
 
-    async def insert(self) -> Any: pass
+    @staticmethod
+    async def insert(cog: commands.Cog, user_id: int, vc_id: int, creation_ts: int) -> None:
+        """ Inserts a BasicRoom into the database.
+        :param user_id: The ID of the owner of the room.
+        :param vc_id: The Voice Channel ID.
+        :param creation_ts: The current timestamp. """
 
-    async def update(self) -> Any: pass
+        await cog.insert_smartroom(user_id=user_id, room_type='basic', vc_id=vc_id, creation_ts=creation_ts)
 
-    async def delete(self) -> Any: pass
+    @staticmethod
+    async def update() -> None: pass
+
+    @staticmethod
+    async def delete() -> None: pass
 
 class PremiumRoom(SmartRoom):
     """ Class for PremiumRooms. """
 
 
     def __init__(self, 
-        owner: Union[discord.Member, discord.User], vc: discord.VoiceChannel, txt: discord.TextChannel, creation_ts: int, edited_ts: int
+        owner: Union[discord.Member, discord.User],  room_type: str, vc: discord.VoiceChannel, txt: discord.TextChannel, creation_ts: int, edited_ts: int
         ) -> None:
         self.owner = owner
+        self.room_type = room_type
         self.vc = vc
         self.txt = txt
         self.creation_ts = creation_ts
@@ -80,7 +91,7 @@ class PremiumRoom(SmartRoom):
         txt: discord.TextChannel = discord.utils.get(guild.text_channels, id=data[4])
         
         return PremiumRoom(
-            owner=owner, vc=vc, txt=txt, creation_ts=data[10], edited_ts=data[11]
+            owner=owner, room_type='premium', vc=vc, txt=txt, creation_ts=data[10], edited_ts=data[11]
         )
 
     async def insert(self) -> Any:
@@ -95,12 +106,13 @@ class GalaxyRoom(SmartRoom):
     """ Class for GalaxyRooms. """
 
     def __init__(self, 
-        owner: Union[discord.Member, discord.User], vc: discord.VoiceChannel, vc2: discord.VoiceChannel,
+        owner: Union[discord.Member, discord.User],  room_type: str, vc: discord.VoiceChannel, vc2: discord.VoiceChannel,
         txt: discord.TextChannel, th: discord.Thread, th2: discord.Thread, th3: discord.Thread, th4: discord.Thread,
         cat: discord.CategoryChannel, creation_ts: int, edited_ts: int
         ) -> None:
 
         self.owner = owner
+        self.room_type = room_type
         self.vc = vc
         self.vc2 = vc2
         self.txt = txt
@@ -131,7 +143,7 @@ class GalaxyRoom(SmartRoom):
         cat: discord.CategoryChannel = discord.utils.get(guild.categories, id=data[9])
         
         return GalaxyRoom(
-            owner=owner, vc=vc, vc2=vc2, 
+            owner=owner, room_type='galaxy', vc=vc, vc2=vc2, 
             txt=txt, th=th, th2=th2, th3=th3, th4=th4,
             cat=cat, creation_ts=data[10], edited_ts=data[11]
         )

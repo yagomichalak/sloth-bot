@@ -3,7 +3,7 @@ from discord.ext import commands
 
 from extra.smartrooms.rooms import BasicRoom, PremiumRoom, GalaxyRoom, SmartRoom
 from extra.smartrooms.database_commands import SmartRoomDatabase
-from extra.view import GalaxyRoomView
+from extra.view import SmartRoomView
 from extra import utils
 
 import os
@@ -25,20 +25,23 @@ class CreateSmartRoom(SmartRoomDatabase):
 		if before.channel and before.channel.category and before.channel.category.id == self.cat_id:
 			user_voice_channel = discord.utils.get(member.guild.channels, id=before.channel.id)
 			len_users = len(user_voice_channel.members)
-			print('dsadsa')
 			if len_users == 0 and user_voice_channel.id != self.vc_id:
 				try:
-					print('brooooooo')
-					premium_channel = await self.get_smartroom(user_voice_channel.id)
-					if premium_channel:
-						the_txt = discord.utils.get(member.guild.channels, id=premium_channel[4])
-						await self.delete_room(premium_channel[1], vc_id=premium_channel[2])
+					smart_room = await self.get_smartroom(vc_id=user_voice_channel.id)
+
+					if isinstance(smart_room, BasicRoom):
+						await self.delete_smartroom(room_type=smart_room.room_type, vc_id=smart_room.vc.id)
+						
+					elif isinstance(smart_room, PremiumRoom):
+						the_txt = discord.utils.get(member.guild.channels, id=smart_room.txt.id)
+						await self.delete_smartroom(room_type=smart_room.room_type, vc_id=smart_room.vc.id)
 						await the_txt.delete()
-				except Exception:
+
+				except Exception as e:
+					print('dsahudhsau e', e)
 					pass
 				await user_voice_channel.delete()
 
-		print('kek')
 		# Checks if the user is joining the create a room VC
 		if not after.channel:
 			return
@@ -56,13 +59,16 @@ class CreateSmartRoom(SmartRoomDatabase):
 
 			embed = discord.Embed(color=member.color)
 			embed.set_image(url="attachment://create_galaxy_room.png")
-			view: discord.ui.View = GalaxyRoomView()
-			df_msg = await member.send(content="\u200b",
+
+			category: discord.CategoryChannel = discord.utils.get(member.guild.categories, id=self.cat_id)
+			view: discord.ui.View = SmartRoomView(member=member, cog=self, category=category)
+			create_room_msg = await member.send(content="\u200b",
 				embed=embed, file=discord.File('./images/smart_vc/selection_menu.png', filename='create_galaxy_room.png'), view=view)
 
 
 			await view.wait()
-			print('Pampa')
+			await utils.disable_buttons(view)
+			await create_room_msg.edit(view=view)
 
 
 	@commands.command()
