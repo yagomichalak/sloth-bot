@@ -4,7 +4,9 @@ from datetime import datetime
 from mysqldb import *
 import asyncio
 import os
+from extra import utils
 
+senior_mod_role_id: int = int(os.getenv('SENIOR_MOD_ROLE_ID'))
 mod_role_id = int(os.getenv('MOD_ROLE_ID'))
 guild_id = int(os.getenv('SERVER_ID'))
 
@@ -116,12 +118,11 @@ class ModActivity(commands.Cog):
         await db.commit()
         await mycursor.close()
 
-    @commands.has_permissions(administrator=True)
+    @utils.is_allowed([senior_mod_role_id], throw_exc=True)
     @commands.command()
     async def modrep(self, ctx):
-        '''
-        (ADM) Shows all the moderators and their statuses in an embedded message.
-        '''
+        """ (ADM) Shows all the moderators and their statuses in an embedded message. """
+
         mycursor, db = await the_database()
         await mycursor.execute('SELECT * FROM ModActivity')
         mods = await mycursor.fetchall()

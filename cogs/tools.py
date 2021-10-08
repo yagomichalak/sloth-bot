@@ -34,6 +34,7 @@ guild_ids = [int(os.getenv('SERVER_ID'))]
 from typing import List, Optional
 
 mod_role_id = int(os.getenv('MOD_ROLE_ID'))
+senior_mod_role_id: int = int(os.getenv('SENIOR_MOD_ROLE_ID'))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID'))
 owner_role_id = int(os.getenv('OWNER_ROLE_ID'))
 
@@ -107,12 +108,11 @@ class Tools(commands.Cog):
 
 	# Countsdown from a given number
 	@commands.command()
-	@commands.has_permissions(administrator=True)
+	@utils.is_allowed([senior_mod_role_id], throw_exc=True)
 	async def count(self, ctx, amount=0):
-		'''
-		(ADM) Countsdown by a given number
-		:param amount: The start point.
-		'''
+		""" (ADM) Countsdown by a given number
+		:param amount: The start point. """
+
 		await ctx.message.delete()
 		if amount > 0:
 			msg = await ctx.send(f'**{amount}**')
@@ -508,7 +508,7 @@ class Tools(commands.Cog):
 		await ctx.send(' '.join(text))
 
 	@commands.command(aliases=['tp', 'beam'])
-	@commands.has_permissions(administrator=True)
+	@utils.is_allowed([senior_mod_role_id], throw_exc=True)
 	async def teleport(self, ctx, vc_1: discord.VoiceChannel = None, vc_2: discord.VoiceChannel = None) -> None:
 		""" Teleports all members in a given voice channel to another one.
 		:param vc_1: The origin vc.

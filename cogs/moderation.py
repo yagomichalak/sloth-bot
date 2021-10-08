@@ -1186,7 +1186,7 @@ class Moderation(*moderation_cogs):
 			return await ctx.send("**Invalid user id!**", delete_after=3)
 
 	@commands.command(aliases=['fire', 'wall', 'fire_wall'])
-	@commands.has_permissions(administrator=True)
+	@utils.is_allowed([senior_mod_role_id], throw_exc=True)
 	async def firewall(self, ctx) -> None:
 		""" Turns on and off the firewall.
 		When turned on, it'll kick new members having accounts created in less than 4 days. """
