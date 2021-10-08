@@ -182,6 +182,22 @@ async def get_mentions(message: discord.Message) -> List[discord.Member]:
 
     return members
 
+async def get_roles(message: discord.Message) -> List[discord.Role]:
+    """ Get role mentions from a specific message.
+    :param message: The message to get the mentions from. """
+
+    guild = message.guild
+
+    roles = [
+        m for word in message.content.split()
+        if word.isdigit() and (m := discord.utils.get(guild.roles, id=int(word)))
+        or (m := discord.utils.get(guild.roles, name=str(word)))
+    ]
+    # roles.extend(message.mentions)
+    roles = list(set(roles))
+
+    return roles
+
 async def get_voice_channel_mentions(message: discord.Message) -> List[discord.VoiceChannel]:
     """ Get voice channel mentions from a specific message.
     :param message: The message to get the mentions from. """
