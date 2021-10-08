@@ -77,29 +77,33 @@ class Tools(commands.Cog):
 
 	@commands.command()
 	@commands.cooldown(1, 5, commands.BucketType.user)
-	async def inrole(self, ctx, *, role: discord.Role = None) -> None:
+	async def inrole(self, ctx) -> None:
 		""" Shows everyone who have that role in the server.
-		:param role: The role you want to check. """
+		:param roles: The set of roles you want to check. """
 
 		member = ctx.author
 
-		if not role:
-			return await ctx.send(f"**Please, inform a role, {member.mention}!**")
+		roles = await utils.get_roles(ctx.message)
 
-		if role:
-			members = [
-				m.mention for m in ctx.guild.members if role in m.roles
-			]
-			if members:
-				additional = {
-					'role': role
-				}
-				pages = menus.MenuPages(source=InroleLooping(members, **additional), clear_reactions_after=True)
-				await pages.start(ctx)
-			else:
-				return await ctx.send(f"**No one has this role, {member.mention}!**")
-		else:
+		if not roles:
+			return await ctx.send(f"**Please, inform at least one role, {member.mention}!**")
+
+		if not roles:
 			return await ctx.send(f"**No role with that name was found!**")
+		
+		members = [
+			m.mention for m in ctx.guild.members
+			if (m_inter := set(m.roles).intersection(set(roles))) and len(m_inter) == len(roles)
+		]
+
+		if members:
+			additional = {
+				'roles': roles
+			}
+			pages = menus.MenuPages(source=InroleLooping(members, **additional), clear_reactions_after=True)
+			await pages.start(ctx)
+		else:
+			return await ctx.send(f"**No one has this role, {member.mention}!**")
 
 	# Countsdown from a given number
 	@commands.command()

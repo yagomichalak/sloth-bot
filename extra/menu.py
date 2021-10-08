@@ -215,14 +215,17 @@ async def prompt_number(client, ctx: commands.Context, the_msg: discord.Message,
 class InroleLooping(menus.ListPageSource):
     def __init__(self, members, **kwargs):
         super().__init__(members, per_page=15)
-        self.role = kwargs.get('role')
+        self.roles = kwargs.get('roles')
 
     async def format_page(self, menu, entries):
         start = menu.current_page * self.per_page
+
+        formatted_roles = ', '.join([role.mention for role in self.roles])
+        description = f'\n'.join(f"`{i+1}` - **{v}**" for i, v in enumerate(entries, start=start))
         embed = discord.Embed(
-            title=f"__{self.role}__ ({self.role.id})",
-            description=f'\n'.join(f"`{i+1}` - **{v}**" for i, v in enumerate(entries, start=start)),
-            color=self.role.color,
+            title=f"__Inroling {len(self.roles)} Roles:__",
+            description=f"{formatted_roles}\n\n{description}",
+            color=menu.ctx.author.color,
             timestamp=menu.ctx.message.created_at
             )
         for i, v in enumerate(entries, start=start):
