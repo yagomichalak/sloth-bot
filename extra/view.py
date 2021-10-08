@@ -59,14 +59,14 @@ class ReportSupportView(discord.ui.View):
         self.cog.cache[member.id] = time_now
         await self.cog.send_moderator_application(member)
 
-    @discord.ui.button(label="Apply for Event Manager!", style=3, custom_id=f"apply_to_manage_events", emoji="🎉")
-    async def apply_to_event_manager_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
-        """ Button for starting the Event Manager application. """
+    @discord.ui.button(label="Apply for Event Host!", style=3, custom_id=f"apply_to_host_events", emoji="🎉")
+    async def apply_to_event_host_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Button for starting the Event Host application. """
 
         await interaction.response.defer()
         member = interaction.user
 
-        # Apply to be an Event Manager
+        # Apply to be an Event Host
         member_ts = self.cog.cache.get(member.id)
         time_now = await utils.get_timestamp()
         if member_ts:
@@ -76,7 +76,7 @@ class ReportSupportView(discord.ui.View):
                     f"**You are on cooldown to apply, try again in {(1800-sub)/60:.1f} minutes**", ephemeral=True)
 
         self.cog.cache[member.id] = time_now
-        await self.cog.send_event_manager_application(member)
+        await self.cog.send_event_host_application(member)
 
     @discord.ui.button(label="Apply for Debate Manager!", style=3, custom_id=f"apply_to_manage_debates", emoji="🌐")
     async def apply_to_debate_manager_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:

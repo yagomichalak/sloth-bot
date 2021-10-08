@@ -8,10 +8,12 @@ import os
 cosmos_id: int = int(os.getenv('COSMOS_ID'))
 muffin_id: int = int(os.getenv('MUFFIN_ID'))
 cent_id: int = int(os.getenv('CENT_ID'))
+guibot_id: int = int(os.getenv('GUIBOT_ID'))
 
 moderator_role_id: int = int(os.getenv('MOD_ROLE_ID'))
 admin_role_id: int = int(os.getenv('ADMIN_ROLE_ID'))
 lesson_management_role_id: int = int(os.getenv('LESSON_MANAGEMENT_ROLE_ID'))
+real_event_manager_role_id: int = int(os.getenv('REAL_EVENT_MANAGER_ROLE_ID'))
 
 class ApplicationsTable(commands.Cog):
     """ Cog for managing applications. """
@@ -27,10 +29,10 @@ class ApplicationsTable(commands.Cog):
     moderator_parent_channel_id: int = int(os.getenv('MODERATOR_CHANNEL_ID'))
     moderator_interview_vc_id: int = int(os.getenv('MODERATOR_INTERVIEW_VC_ID'))
 
-    event_manager_app_channel_id: int = int(os.getenv('EVENT_MANAGER_APPLICATION_CHANNEL_ID'))
-    event_manager_app_cat_id: int = int(os.getenv('EVENT_MANAGER_APPLICATION_CAT_ID'))
-    event_manager_parent_channel_id: int = int(os.getenv('EVENT_MANAGER_CHANNEL_ID'))
-    event_manager_interview_vc_id: int = int(os.getenv('EVENT_MANAGER_INTERVIEW_VC_ID'))
+    event_host_app_channel_id: int = int(os.getenv('EVENT_MANAGER_APPLICATION_CHANNEL_ID'))
+    event_host_app_cat_id: int = int(os.getenv('EVENT_MANAGER_APPLICATION_CAT_ID'))
+    event_host_parent_channel_id: int = int(os.getenv('EVENT_MANAGER_CHANNEL_ID'))
+    event_host_interview_vc_id: int = int(os.getenv('EVENT_MANAGER_INTERVIEW_VC_ID'))
 
     debate_manager_app_channel_id: int = int(os.getenv('DEBATE_MANAGER_APPLICATION_CHANNEL_ID'))
     debate_manager_app_cat_id: int = int(os.getenv('DEBATE_MANAGER_APPLICATION_CAT_ID'))
@@ -49,11 +51,11 @@ class ApplicationsTable(commands.Cog):
             "cat": moderator_app_cat_id, 
             "message": "**Moderator Application**\nOur staff has evaluated your Moderator application and has come to a conclusion, and due to intern and unspecified reasons we are **declining** it. Thank you anyways",
             "pings": [{"id": cosmos_id, "role": False}, {"id": admin_role_id, "role": True}]},
-        'event_manager': {
-            "app": event_manager_app_channel_id,  "interview": event_manager_interview_vc_id, "parent": event_manager_parent_channel_id, 
-            "cat": event_manager_app_cat_id, 
-            "message": "**Event Manager Application**\nOur staff has evaluated your Event Manager application and has come to the conclusion that we are not in need of this lesson.",
-            "pings": []},
+        'event_host': {
+            "app": event_host_app_channel_id,  "interview": event_host_interview_vc_id, "parent": event_host_parent_channel_id, 
+            "cat": event_host_app_cat_id, 
+            "message": "**Event Host Application**\nOur staff has evaluated your Event Host application and has come to the conclusion that we are not in need of this lesson.",
+            "pings": [{"id": guibot_id, "role": False}, {"id": real_event_manager_role_id, "role": True}]},
         'debate_manager': {
             "app": debate_manager_app_channel_id,  "interview": debate_manager_interview_vc_id, "parent": debate_manager_parent_channel_id, 
             "cat": debate_manager_app_cat_id, 
@@ -81,7 +83,7 @@ class ApplicationsTable(commands.Cog):
         adm = channel.permissions_for(payload.member).administrator
 
         # Checks if it's in an applications channel
-        if payload.channel_id in [self.moderator_app_channel_id, self.event_manager_app_channel_id, self.teacher_app_channel_id, self.debate_manager_app_channel_id]:
+        if payload.channel_id in [self.moderator_app_channel_id, self.event_host_app_channel_id, self.teacher_app_channel_id, self.debate_manager_app_channel_id]:
 
             if payload.channel_id == self.debate_manager_app_channel_id: # User is an mod+ or lesson manager
                 if await utils.is_allowed_members([cent_id]).predicate(channel=channel, member=payload.member):
