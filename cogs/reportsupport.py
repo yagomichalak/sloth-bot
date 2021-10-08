@@ -391,8 +391,8 @@ Please answer using one message only.."""
             return await member.send("**Thank you anyways!**")
 
 
-    async def send_event_manager_application(self, member):
-        """ Sends a event manager application form to the user.
+    async def send_event_host_application(self, member):
+        """ Sends a event host application form to the user.
         :param member: The member to send the application to. """
 
         def msg_check(message):
@@ -412,7 +412,7 @@ Please answer using one message only.."""
             description="""Hello there!
             Thank you for applying for hosting events here,
             Before you can formally start applying to host events in The Language Sloth, there are a couple things we would like you to know. The Language Sloth is a free of charge language learning platform which is meant to be accessible and open for anyone who is interested in languages from any background. We do not charge for any kind of service, nor do we pay for any services for hosting events. We are a community that shares the same interest: Languages.
-            We do not require professional skills, however, we have a set numbers of requirements for our event managers
+            We do not require professional skills, however, we have a set numbers of requirements for our event hosts.
             Entry requirements:
 
             》Must be at least 16 years of age
@@ -442,9 +442,9 @@ Please answer using one message only.."""
         embed = discord.Embed(title=f"__Teacher Application__")
         embed.set_footer(text=f"by {member}", icon_url=member.display_avatar)
 
-        embed.title = "Event manager Application"
+        embed.title = "Event Host Application"
         embed.description = '''
-        - Hello, there you've reacted to apply to become an event manager.
+        - Hello, there you've reacted to apply to become an Event Host.
         To apply please answer to these following questions with One message at a time
 
         Question one:
@@ -522,12 +522,12 @@ Please answer using one message only.."""
         if r == '✅':
             embed.description = "**Application successfully made, please, be patient now!**"
             await member.send(embed=embed)
-            event_manager_channel = await self.client.fetch_channel(self.event_manager_app_channel_id)
-            app = await event_manager_channel.send(content=f"{member.mention}\n{app}")
+            event_host_channel = await self.client.fetch_channel(self.event_host_app_channel_id)
+            app = await event_host_channel.send(content=f"{member.mention}\n{app}")
             await app.add_reaction('✅')
             await app.add_reaction('❌')
             # Saves in the database
-            await self.insert_application(app.id, member.id, 'event_manager')
+            await self.insert_application(app.id, member.id, 'event_host')
 
         else:
             self.cache[member.id] = 0
