@@ -1237,10 +1237,17 @@ class Moderation(*moderation_cogs):
 				await ctx.send(f"**<@{member.id}> doesn't have any existent infractions!**")
 				continue
 
+			# Alerts if the user already was unmuted with temporizer
+			unmute_alert = ''
+			if await self.get_muted_roles(member.id):
+				times = await self.get_mute_time(member.id)
+				if times[1] != None:
+					unmute_alert = f"\u200b\n**	♦️ This user will be unmuted <t:{times[0] + times[1]}:R>**\n\n"
+
 			# Makes the initial embed with their amount of infractions
 			embed = discord.Embed(
 				title=f"Infractions for {member}",
-				description=f"```ini\n[Warns]: {warns} | [Mutes]: {mutes} | [Kicks]: {kicks}\n[Bans]: {bans} | [Softbans]: {softbans} | [Hackbans]: {hackbans}```",
+				description=f"{unmute_alert}```ini\n[Warns]: {warns} | [Mutes]: {mutes} | [Kicks]: {kicks}\n[Bans]: {bans} | [Softbans]: {softbans} | [Hackbans]: {hackbans}```",
 				color=member.color,
 				timestamp=ctx.message.created_at)
 			embed.set_thumbnail(url=member.display_avatar)
@@ -1249,7 +1256,7 @@ class Moderation(*moderation_cogs):
 			# Loops through each infraction and adds a field to the embedded message
 			# 0-user_id, 1-infraction_type, 2-infraction_reason, 3-infraction_ts, 4-infraction_id, 5-perpetrator
 			for infr in user_infractions:
-				if (infr_type := infr[1]) in ['mute', 'warn']:
+				if (infr_type := infr[1]) in ['mute', 'warn', 'ban', 'hackban']:
 					infr_date = datetime.fromtimestamp(infr[3]).strftime('%Y/%m/%d at %H:%M:%S')
 					perpetrator = discord.utils.get(ctx.guild.members, id=infr[5])
 					embed.add_field(
