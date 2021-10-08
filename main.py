@@ -460,27 +460,6 @@ async def _speak(ctx, language: Option(str, name="language", description="The la
     )
     await ctx.respond(embed=embed)
 
-
-# @flags.add_flag("-t", default='Giveaway')
-# @flags.add_flag("-des", default=None)
-# @flags.add_flag("-p", default=None)
-# @flags.add_flag("-w", type=int, default=1)
-# @flags.add_flag("-d", type=int, default=0)
-# @flags.add_flag("-h", type=int, default=0)
-# @flags.add_flag("-m", type=int, default=0)
-# @_giveaway.command(cls=flags.FlagCommand)
-
-
-"""
-    :param t: Title for the giveaway.
-    :param des: Description of giveaway.
-    :param p: Prize giveaway.
-    :param w: Amount of winners. [Optional] [Default = 1]
-    :param d: Amount of days until the giveaway ends. [Optional]
-    :param h: Amount of hours until the giveaway ends. [Optional]
-    :param m: Amount of minutes until the giveaway ends. [Optional]
-"""
-
 _giveaway = client.command_group(name="giveaway", description="For copy and pasting stuff.", guild_ids=guild_ids)
 
 
@@ -490,9 +469,9 @@ _giveaway = client.command_group(name="giveaway", description="For copy and past
 @option(type=str, name="title", description="The title for the giveaway.", required=False, default="Giveaway")
 @option(type=str, name="description", description="The description of the giveaway.", required=False)
 @option(type=int, name="winners", description="The amount of winners.", required=False, default=1)
-@option(type=int, name="days", description="The title for the giveaway.", required=False)
-@option(type=int, name="hours", description="The title for the giveaway.", required=False)
-@option(type=int, name="minutes", description="The title for the giveaway.", required=False)
+@option(type=int, name="days", description="The days for the giveaway.", required=False)
+@option(type=int, name="hours", description="The hours for the giveaway.", required=False)
+@option(type=int, name="minutes", description="The minutes for the giveaway.", required=False)
 @option(type=discord.Role, name="role", description="The role for role-only giveaways.", required=False)
 @option(type=discord.Member, name="host", description="The person hosting the giveaway.", required=False)
 async def _giveaway_start_slash(
