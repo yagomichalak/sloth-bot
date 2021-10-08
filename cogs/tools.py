@@ -14,10 +14,9 @@ import collections
 from contextlib import redirect_stdout
 import os
 from treelib import Tree
-from cogs.createsmartroom import CreateSmartRoom
 import json
 
-from datetime import datetime, time
+from datetime import datetime
 import pytz
 from pytz import timezone
 from mysqldb import the_database
@@ -32,7 +31,7 @@ from extra.select import SoundBoardSelect
 
 guild_ids = [int(os.getenv('SERVER_ID'))]
 
-from typing import List, Dict
+from typing import List, Optional
 
 mod_role_id = int(os.getenv('MOD_ROLE_ID'))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID'))
@@ -380,12 +379,16 @@ class Tools(commands.Cog):
 
 	@commands.command(aliases=['mivc'])
 	@commands.cooldown(1, 5, commands.BucketType.user)
-	async def member_in_vc(self, ctx) -> None:
-		""" Tells how many users are in the voice channel. """
+	async def member_in_vc(self, ctx, vc: Optional[discord.VoiceChannel] = None) -> None:
+		""" Tells how many users are in the voice channel.
+		:param vc: The Voice Channel to check. [Optional][Default = all vcs] """
 
-		vcs = ctx.guild.voice_channels
-		all_members = [m.name for vc in vcs for m in vc.members]
-		await ctx.send(f"**`{len(all_members)}` members are in a vc atm!**")
+		if vc:
+			await ctx.send(f"**`{len(vc.members)}` members are in the {vc.mention} vc atm!**")
+		else:
+			vcs = ctx.guild.voice_channels
+			all_members = [m.name for vc in vcs for m in vc.members]
+			await ctx.send(f"**`{len(all_members)}` members are in a vc atm!**")
 
 	@commands.command()
 	@commands.has_any_role(*allowed_roles)
