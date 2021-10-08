@@ -29,7 +29,8 @@ suspect_channel_id = int(os.getenv('SUSPECT_CHANNEL_ID'))
 
 mod_role_id = int(os.getenv('MOD_ROLE_ID'))
 
-allowed_roles = [int(os.getenv('OWNER_ROLE_ID')), int(os.getenv('ADMIN_ROLE_ID')), int(os.getenv('SENIOR_MOD_ROLE_ID')), mod_role_id]
+senior_mod_role_id: int = int(os.getenv('SENIOR_MOD_ROLE_ID'))
+allowed_roles = [int(os.getenv('OWNER_ROLE_ID')), int(os.getenv('ADMIN_ROLE_ID')), senior_mod_role_id, mod_role_id]
 server_id = int(os.getenv('SERVER_ID'))
 guild_ids: List[int] = [server_id]
 
@@ -836,7 +837,9 @@ class Moderation(*moderation_cogs):
 	async def ban(self, ctx, member: Optional[discord.Member] = None, *, reason: Optional[str] = None):
 		""" (ModTeam/ADM) Bans a member from the server.
 		:param member: The @ or ID of the user to ban.
-		:param reason: The reason for banning the user. (Optional) """
+		:param reason: The reason for banning the user. (Optional)
+		
+		PS: Needs 4 mods to ban, in a ModTeam ban. """
 
 		await ctx.message.delete()
 
@@ -855,9 +858,9 @@ class Moderation(*moderation_cogs):
 			if not perms.administrator:
 				confirmations[author.id] = author.name
 				mod_ban_embed = discord.Embed(
-					title=f"Ban Request ({len(confirmations)}/5) → (5mins)",
+					title=f"Ban Request ({len(confirmations)}/4) → (5mins)",
 					description=f'''
-					{author.mention} wants to ban {member.mention}, it requires 4 more moderator ✅ reactions for it!
+					{author.mention} wants to ban {member.mention}, it requires 3 more moderator ✅ reactions for it!
 					```Reason: {reason}```''',
 					colour=discord.Colour.dark_red(), timestamp=ctx.message.created_at)
 				mod_ban_embed.set_author(name=f'{member} is going to Brazil...', icon_url=member.display_avatar)
@@ -896,11 +899,11 @@ class Moderation(*moderation_cogs):
 						await msg.remove_reaction('✅', self.client.user)
 						return await msg.edit(embed=mod_ban_embed)
 					else:
-						mod_ban_embed.title = f"Ban Request ({len(confirmations)}/5) → (5mins)"
+						mod_ban_embed.title = f"Ban Request ({len(confirmations)}/4) → (5mins)"
 						await msg.edit(embed=mod_ban_embed)
 						if channel.permissions_for(u).administrator:
 							break
-						elif len(confirmations) < 5:
+						elif len(confirmations) < 4:
 							continue
 						else:
 							break
@@ -1130,7 +1133,7 @@ class Moderation(*moderation_cogs):
 
 
 	@commands.command()
-	@commands.has_permissions(administrator=True)
+	@utils.is_allowed([senior_mod_role_id], throw_exc=True)
 	async def hackban(self, ctx, user_id: int = None, *, reason: Optional[str] = None):
 		""" (ADM) Bans a user that is currently not in the server.
 		Only accepts user IDs.
