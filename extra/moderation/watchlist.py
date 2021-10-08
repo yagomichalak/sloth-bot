@@ -20,7 +20,8 @@ class ModerationWatchlistTable(commands.Cog):
     @commands.command(aliases=['wl'])
     @utils.is_allowed(allowed_roles, throw_exc=True)
     async def watchlist(self, ctx, *, message: str = None) -> None:
-        """ Puts 1 or more members in the watchlist.
+        """ Puts one or more members in the watchlist. If the user is already in the watchlist another reason will be added.
+
         :param member: The member to put in the watchlist.
         :param reason: The reason for putting the member(s) in the watchist. """
 
@@ -36,16 +37,14 @@ class ModerationWatchlistTable(commands.Cog):
                 watchlist_channel = self.client.get_channel(watchlist_channel_id)
 
                 embed = discord.Embed(
-                    title="__Watchlist__:",
-                    description=f"{author.mention} watchlisted <@{member.id}>\n__**Reason:**__ ```{reason}```",
+                    description=f"<@{member.id}>\n\n**Reason 1:** ```{reason}```",
                     color=member.color,
                     timestamp=ctx.message.created_at,
                     url=member.display_avatar
                 )
                 embed.set_thumbnail(url=member.display_avatar)
-                embed.set_author(name=f"{member} ({member.id})", icon_url=member.display_avatar, url=member.display_avatar)
-                embed.set_footer(text=f"Watchlisted by {author} ({author.id})", icon_url=author.display_avatar)
-
+                embed.set_author(name=f"{member}", icon_url=member.display_avatar, url=member.display_avatar)
+                embed.set_footer(text=f"Watchlisted by {author}", icon_url=author.display_avatar)
                 msg = await watchlist_channel.send(embed=embed)
 
                 await self.insert_user_watchlist(member.id, msg.id)
@@ -55,7 +54,24 @@ class ModerationWatchlistTable(commands.Cog):
                 await ctx.send(f"**Successfully put `{member}` into the watchlist, {author.mention}!**", view=view)
 
             else:
-                await ctx.send(f"**{member} is already in the watchlist, {author.mention}**")
+                watchlist_channel = self.client.get_channel(watchlist_channel_id)
+                msg_id = (await self.get_user_watchlist(member.id))[1]
+                msg = await watchlist_channel.fetch_message(msg_id)
+                embeds = msg.embeds
+
+                embed = discord.Embed(
+                    description=f"\n**Reason {len(embeds) + 1}:** ```{reason}```",
+                    color=member.color,
+                    timestamp=ctx.message.created_at,
+                )
+                embed.set_footer(text=f"Watchlisted by {author}", icon_url=author.display_avatar)
+
+                embeds.append(embed)
+                await msg.edit(embeds=embeds)
+
+                view = discord.ui.View()
+                view.add_item(discord.ui.Button(style=discord.ButtonStyle.url, label="Check WL Entry!", emoji="⚠️", url=msg.jump_url))
+                await ctx.send(f"**Successfully added another reason to `{member}`'s watchlist, {author.mention}!**", view=view)
 
 
     @commands.command(aliases=['remove_watchlist', 'delete_watchlist', 'del_watchlist', 'uwl'])
@@ -86,6 +102,67 @@ class ModerationWatchlistTable(commands.Cog):
             else:
                 await ctx.send(f"**{member} is not in the watchlist, {author.mention}**")
 
+    @commands.command(aliases=['e_watchlist', 'change_watchlist', 'ewl'])
+    @utils.is_allowed(allowed_roles, throw_exc=True)
+    async def edit_watchlist(self, ctx, *, message: str = None) -> None:
+        """ Edits a specific reason from the user's watchlist.
+        :param member: The members to remove from the watchlist.
+        :param index: Number of the reason.
+        :param reason: The new reason."""
+
+        author = ctx.author
+
+        members, reason = await utils.greedy_member_reason(ctx, message)
+
+        if not members:
+            return await ctx.send(f"**Please, inform a member to edit the watchlist, {author.mention}!**", delete_after=3)
+
+        if reason:
+            index = (reason.split())[0]
+            if not index.isdigit() or int(index) <= 0:
+                return await ctx.send("**Use z!edit_watchlist [member] [reason_number] [new_reason]**", delete_after=5)
+        else:
+            return await ctx.send("**Use z!edit_watchlist [member] [reason_number] [new_reason]**", delete_after=5)
+
+        index = int(index)
+        reason = ' '.join(reason.split()[1:])
+
+        if reason == ' ':
+            reason = None
+
+        for member in members:
+            if (wl_entry := await self.get_user_watchlist(member.id)):
+                watchlist_channel = self.client.get_channel(watchlist_channel_id)
+                msg = await watchlist_channel.fetch_message(wl_entry[1])
+                embeds = msg.embeds
+
+                if index <= len(embeds):
+                    embed=(embeds[index-1]).to_dict()
+
+                    # Changes the reason
+                    if index == 1:
+                        # include the member mention for the first embed in the watchlist
+                        embed["description"] = f"<@{member.id}>\n\n**Reason 1:** ```{reason}```",
+                        embed["description"] = embed["description"][0]
+                    else:
+                        embed["description"] = f"\n**Reason {index}:** ```{reason}```",
+                        embed["description"] = embed["description"][0]
+
+                    # Removes the title for the old members
+                    embed["title"] = ''
+
+                    embeds[index-1] = (discord.Embed.from_dict(embed))
+
+                    await msg.edit(embeds=embeds)
+
+                    view = discord.ui.View()
+                    view.add_item(discord.ui.Button(style=discord.ButtonStyle.url, label="Check WL Entry!", emoji="⚠️", url=msg.jump_url))
+                    await ctx.send(f"**The reason `{index}` for `{member}` was successfully edited, {author.mention}!**", view=view)
+
+                else:
+                    await ctx.send(f"**The reason {index} for the user was not found, {author.mention}**", delete_after=3)
+            else:
+                await ctx.send(f"**{member} is not in the watchlist, {author.mention}**")
 
     @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)

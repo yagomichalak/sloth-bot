@@ -1,3 +1,4 @@
+from datetime import time
 import discord
 from discord.ext import commands
 from mysqldb import the_database
@@ -136,3 +137,10 @@ class ModerationMutedMemberTable(commands.Cog):
         await mycursor.execute("UPDATE mutedmember SET mute_ts = %s, muted_for_seconds = %s WHERE user_id = %s", (current_time, time, user_id))
         await db.commit()
         await mycursor.close()
+
+    async def get_mute_time(self, user_id: int):
+        mycursor, db = await the_database()
+        await mycursor.executemany("SELECT mute_ts, muted_for_seconds FROM mutedmember WHERE user_id = %s", (user_id,))
+        times = await mycursor.fetchone()
+        await mycursor.close()
+        return times
