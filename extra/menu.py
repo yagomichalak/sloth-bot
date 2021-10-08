@@ -133,7 +133,7 @@ class OpenShopLoop(menus.ListPageSource):
         return embed
 
 
-async def prompt_message(client, member: discord.Member, channel: discord.TextChannel, limit: int = 100) -> str:
+async def prompt_message(client, member: discord.Member, channel: discord.TextChannel, limit: int = 100, timeout: int = 240) -> str:
     def msg_check(message):
         if message.author == member and not message.guild:
             if len(message.content) <= limit:
@@ -143,7 +143,7 @@ async def prompt_message(client, member: discord.Member, channel: discord.TextCh
         else:
             return False
     try:
-        message = await client.wait_for('message', timeout=240,
+        message = await client.wait_for('message', timeout=timeout,
         check=msg_check)
     except asyncio.TimeoutError:
         await channel.send(f"**Timeout! Try again, {member.mention}...**")
