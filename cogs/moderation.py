@@ -1253,7 +1253,7 @@ class Moderation(*moderation_cogs):
 			# Loops through each infraction and adds a field to the embedded message
 			# 0-user_id, 1-infraction_type, 2-infraction_reason, 3-infraction_ts, 4-infraction_id, 5-perpetrator
 			for infr in user_infractions:
-				if (infr_type := infr[1]) in ['mute', 'warn']:
+				if (infr_type := infr[1]) in ['mute', 'warn', 'ban', 'hackban']:
 					infr_date = datetime.fromtimestamp(infr[3]).strftime('%Y/%m/%d at %H:%M:%S')
 					perpetrator = discord.utils.get(ctx.guild.members, id=infr[5])
 					embed.add_field(
