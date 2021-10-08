@@ -673,8 +673,11 @@ class TeacherFeedback(commands.Cog):
             > Do you wanna do it?""",
             color=teacher.color
         )
+
+        teacher_feedback_embed.set_footer(text="(You have 10 minutes to click on this)")
+
         # View
-        confirm_view: discord.ui.View = ConfirmButton(member, timeout=600)
+        confirm_view: discord.ui.View = ConfirmButton(member, timeout=6000)
         await member.send("\u200b", embed=teacher_feedback_embed, view=confirm_view)
 
         # Waits for prompt confirmation
@@ -686,7 +689,7 @@ class TeacherFeedback(commands.Cog):
         if confirm_view.value:
             # Prompts for a feedback
             await member.send("Please, send a feedback message containing a maximum of `200` characeters.")
-            feedback_message = await prompt_message(self.client, member, member, limit=200)
+            feedback_message = await prompt_message(self.client, member, member, limit=200, timeout=6000)
             # Feedback embed
             user_response_embed = discord.Embed(
                 title="__Feedback__:",
