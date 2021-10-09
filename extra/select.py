@@ -80,3 +80,20 @@ class WarriorUserItemSelect(discord.ui.Select):
     async def callback(self, interaction: discord.Interaction) -> None:
         self.view.selected_item = [item for item in self.items if interaction.data['values'][0] == item[4]][0]
         self.view.stop()
+
+class LanguageRoomSelect(discord.ui.Select):
+	def __init__(self, client: commands.Bot, select_options=[]):
+		super().__init__(
+			custom_id="language_room_select", placeholder="Select language room from list", 
+			min_values=1, max_values=1, 
+			options=select_options)
+		self.client = client
+	
+	async def callback(self, interaction: discord.Interaction):
+		await interaction.response.defer()
+
+		option = interaction.data['values'][0]
+
+		self.view.chosen_room = option
+
+		self.view.stop()
