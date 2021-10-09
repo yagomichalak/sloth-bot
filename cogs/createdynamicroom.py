@@ -269,6 +269,18 @@ class DynamicRoomDatabase:
         await db.commit()
         await mycursor.close()
 
+    async def get_count_by_room_ids(self, room_ids: List[int], object_form: bool=False) -> List[List[object]]:
+        """ Returns count of room given ids.
+        :room_ids: The room name.
+        :param object_form: If the result should be in object form. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("SELECT COUNT(room_id), room_id FROM DynamicRoom GROUP BY room_id HAVING room_id IN %s", (room_ids,))
+        rooms = await mycursor.fetchall()
+        await mycursor.close()
+
+        return rooms
+
 class LanguageRoom:
     def __init__(self, room_id: int, english_name: str, room_name: str, room_quant: int, room_capacity: int):
         self.room_id = room_id
@@ -326,15 +338,6 @@ class LanguageRoomDatabase:
         await mycursor.close()
 
         return await ctx.send("**Table __LanguageRoom__ dropped!**")
-
-    async def insert_language_room(self, english_name: str, room_name: str, room_quant: str = None, room_capacity: str = None) -> None:
-        """ Inserts a Language Room entry.
-        :param room_name: The room name. """
-
-        mycursor, db = await the_database()
-        await mycursor.execute("INSERT INTO LanguageRoom (room_id, role_id, permission_name, permission_value) VALUES (%s, %s, %s, %s)", (room_id, role_id, permission_name, permission_value))
-        await db.commit()
-        await mycursor.close()
 
     async def table_language_room_exists(self) -> bool:
         """ Checks whether the LanguageRoom table exists. """
@@ -635,16 +638,6 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
 
         return None
 
-    @commands.command(hidden=True)
-    @commands.has_permissions(administrator=True)
-    async def insert_language_room(self, ctx, *args) -> None:
-        """ Inserts a Language Room entry.
-        :param room_name: The room name. """
-
-        await super().insert_language_room(ctx, args)
-
-        await self.prefetch_language_room()
-
     async def delete_things(self, things: List[Any]) -> None:
         """ Deletes a list of things.
         :param things: The things to delete. """
@@ -714,8 +707,7 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
                     **{"target": m_member, m_perm_name: m_perm_value}))
 
     async def get_language_rooms_list_member(self, member: discord.Member) -> List[DynamicRoom]:
-        roles = [role for role in member.roles]
-        roles_tuple = tuple([role.id for role in roles])
+        roles_tuple = tuple([role.id for role in member.roles])
         can_see_everything = any([int(os.getenv('SHOW_ME_EVERYTHING_ROLE_ID')) in roles_tuple])
 
         permissions_rooms = await self.get_available_rooms(roles_tuple, see_everything=can_see_everything, object_form=True)
@@ -724,8 +716,21 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
 
         return available_rooms
 
-    async def get_capped_rooms(self, room_list: List[DynamicRoom]) -> List[DynamicRoom]:
-        
+    async def get_room_quantity(self, room_list: List[DynamicRoom]) -> List[DynamicRoom]:
+        room_ids = [room.room_id for room in room_list]
+
+        for r in room_list:
+            r.current_quantity = 0
+
+        room_quants = await self.get_count_by_room_ids(tuple(room_ids))
+
+        for room_data in room_quants:
+            quant, room_id = room_data
+            for r in room_list:
+                if r.room_id == room_id:
+                    r.current_quantity = quant
+
+
         return room_list
 
     async def initiate_member_room_interaction(self, member: discord.Member) -> Union[List[DynamicRoom], None]:
@@ -733,21 +738,24 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
         :param member: Member to initiate interaction. """
         available_rooms_list = await self.get_language_rooms_list_member(member)
 
-        available_rooms_list = await self.get_capped_rooms(available_rooms_list)
+        available_rooms_list = await self.get_room_quantity(available_rooms_list)
 
         def create_option(room, index):
-            return discord.SelectOption(label=room.room_name.decode("utf-8"), value=index, description=room.english_name)
+            m_description = room.english_name
+            if room.current_quantity >= room.room_quant:
+                m_description = "MAXXED - " + m_description
+            return discord.SelectOption(label=room.room_name.decode("utf-8"), value=index, description=m_description)
 
         available_options = [create_option(room, str(index)) for index, room in enumerate(available_rooms_list)]
 
         if len(available_options) == 1:
-            return available_options[0]
+            return available_rooms_list[0]
 
         # create view with selects with the available languages
         view = discord.ui.View()
         select_limit = 25
-        for i in range(0, len(available_options), 25):
-            row_num = int((i+1)/25)
+        for i in range(0, len(available_options), select_limit):
+            row_num = int((i+1)/select_limit)
             #print(row_num)
             if row_num < 5:
                 view.add_item(LanguageRoomSelect(self.client, custom_id="select_lr_"+str(row_num), row=row_num, select_options=available_options[i:i + select_limit]))
@@ -758,7 +766,11 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
         # print(available_options[int(view.chosen_room)])
 
         if hasattr(view, 'chosen_room'):
-            return available_rooms_list[int(view.chosen_room)]
+            chosen_room = available_rooms_list[int(view.chosen_room)]
+            if chosen_room.current_quantity < chosen_room.room_quant:
+                return chosen_room
+            else:
+                await member.send(f"**Max number of this room was reached ({chosen_room.room_quant})**")
 
         return None
 
