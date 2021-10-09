@@ -27,7 +27,7 @@ class ImageManipulation(commands.Cog):
 
         print('ImageManipulation cog is ready!')
 
-    @commands.command(aliases=['avatar', 'pfp', 'pic', 'picture', 'profile_picture'])
+    @commands.command(aliases=['av', 'pfp', 'pic', 'picture', 'profile_picture'])
     async def avatar(self, ctx, member: Optional[discord.Member] = None) -> None:
         """ Shows the user avatar picture.
         :param member: The member to show. [Optional][Default = You]. """
