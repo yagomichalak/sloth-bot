@@ -504,18 +504,18 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
 
         print("CreateDynamicRoom cog is online")
 
-        self.check_dynamicroom_expiration.start()
+        self.check_empty_dynamic_rooms.start()
 
         await self.prefetch_language_room()
 
     @tasks.loop(minutes=10)
-    async def check_dynamicroom_expiration(self):
+    async def check_empty_dynamic_rooms(self):
         """ Task that checks Dynamic Rooms expirations. """
 
         if not await self.table_dynamic_rooms_exists():
             return
 
-        # Looks for expired rooms to delete
+        # Looks for empy nonperma rooms to delete
         all_rooms = await self.get_all_dynamic_rooms(object_form=True)
         for room in all_rooms:
             guild = self.client.get_guild(room.guild_id)
@@ -627,7 +627,7 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
             if len(vc_channel.members) == 0:
                 await vc_channel.delete()
 
-    def get_language_room_id(self, room_id) -> List[List[int]]:
+    async def get_language_room_id(self, room_id) -> List[List[int]]:
         if self.language_rooms:
             for room in self.language_rooms:
                 if room.room_id == room_id:
@@ -644,22 +644,6 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
         await super().insert_language_room(ctx, args)
 
         await self.prefetch_language_room()
-
-    async def get_reaction_response(self, member, check) -> List[Union[discord.Reaction, discord.User]]:
-        """ Gets a reaction response from the member.
-        :param member: The member.
-        :param check: The check that is gonna be used. """
-
-        try:
-            reaction, user = await self.client.wait_for('reaction_add', timeout=60.0, check=check)
-        except asyncio.TimeoutError:
-            timeout = discord.Embed(title='Timeout',
-                                    description='You took too long to answer the questions, try again later.',
-                                    colour=discord.Colour.dark_red())
-            await member.send(file=discord.File('./images/smart_vc/timeout.png'))
-            return None, None
-        else:
-            return reaction, user
 
     async def delete_things(self, things: List[Any]) -> None:
         """ Deletes a list of things.
@@ -729,7 +713,7 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
                 asyncio.create_task(vc.set_permissions(
                     **{"target": m_member, m_perm_name: m_perm_value}))
 
-    async def get_language_rooms_list_member(self, member: discord.Member):
+    async def get_language_rooms_list_member(self, member: discord.Member) -> List[DynamicRoom]:
         roles = [role for role in member.roles]
         roles_tuple = tuple([role.id for role in roles])
         can_see_everything = any([int(os.getenv('SHOW_ME_EVERYTHING_ROLE_ID')) in roles_tuple])
@@ -740,7 +724,9 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
 
         return available_rooms
 
-    async def initiate_member_room_interaction(self, member: discord.Member):
+    async def initiate_member_room_interaction(self, member: discord.Member) -> Union[List[DynamicRoom], None]:
+        """ initiate interaction with user to create room
+        :param member: Member to initiate interaction. """
         available_rooms_list = await self.get_language_rooms_list_member(member)
 
         def create_option(room, index):
@@ -748,16 +734,21 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
 
         available_options = [create_option(room, str(index)) for index, room in enumerate(available_rooms_list)]
 
-        # print(self.client.cogs)
-
+        # create view with selects with the available languages
         view = discord.ui.View()
-        view.add_item(LanguageRoomSelect(self.client, select_options=available_options))
+        select_limit = 25
+        for i in range(0, len(available_options), select_limit):
+            view.add_item(LanguageRoomSelect(self.client, select_options=available_options[i:i + select_limit]))
+
         await member.send(f"**Select a Room**", view=view)
         await view.wait()
 
         # print(available_options[int(view.chosen_room)])
 
-        return available_rooms_list[int(view.chosen_room)]
+        if hasattr(view, 'chosen_room'):
+            return available_rooms_list[int(view.chosen_room)]
+
+        return None
 
     @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
@@ -765,7 +756,6 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
         await ctx.message.delete()
         await ctx.send("**Done!**", delete_after=3)
         await super().make_perma_dynamic_room(vc_id=vc_id)
-
 
 def setup(client):
     """ Cog's setup function. """
