@@ -82,11 +82,11 @@ class WarriorUserItemSelect(discord.ui.Select):
         self.view.stop()
 
 class LanguageRoomSelect(discord.ui.Select):
-	def __init__(self, client: commands.Bot, select_options=[]):
+	def __init__(self, client: commands.Bot, custom_id: str, row: int, select_options=[]):
 		super().__init__(
-			custom_id="language_room_select", placeholder="Select language room from list", 
+			custom_id=custom_id, placeholder="Select language room from list", 
 			min_values=1, max_values=1, 
-			options=select_options)
+			options=select_options, row=row)
 		self.client = client
 	
 	async def callback(self, interaction: discord.Interaction):
