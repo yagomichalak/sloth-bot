@@ -77,27 +77,51 @@ class ModerationWatchlistTable(commands.Cog):
     @commands.command(aliases=['remove_watchlist', 'delete_watchlist', 'del_watchlist', 'uwl'])
     @utils.is_allowed(allowed_roles, throw_exc=True)
     async def unwatchlist(self, ctx, *, message: str = None) -> None:
-        """ Removes the members from the watchlist.
-        :param member: The members to remove of the watchlist. """
+        """ Removes the members from the watchlist or remove just one reason.
+        :param member: The members to remove of the watchlist.
+        :param index: The reason number to delete (Optional). """
 
         author = ctx.author
 
-        members, _ = await utils.greedy_member_reason(ctx, message)
+        members, reason_id = await utils.greedy_member_reason(ctx, message)
 
         if not members:
             return await ctx.send(f"**Please, inform a member to remove from the watchlist, {author.mention}!**")
 
         for member in members:
             if (wl_entry := await self.get_user_watchlist(member.id)):
-                try:
+                if not reason_id:
+                    try:
+                        watchlist_channel = self.client.get_channel(watchlist_channel_id)
+                        msg = await watchlist_channel.fetch_message(wl_entry[1])
+                        await msg.delete()
+                    except:
+                        pass
+
+                    await self.delete_user_watchlist(member.id)
+                    await ctx.send(f"**Successfully removed `{member}` from the watchlist, {author.mention}!**")
+                else:
                     watchlist_channel = self.client.get_channel(watchlist_channel_id)
                     msg = await watchlist_channel.fetch_message(wl_entry[1])
-                    await msg.delete()
-                except:
-                    pass
+                    embeds = msg.embeds
 
-                await self.delete_user_watchlist(member.id)
-                await ctx.send(f"**Successfully removed `{member}` from the watchlist, {author.mention}!**")
+                    reason_id = int(reason_id)
+
+                    del embeds[reason_id - 1]
+
+                    for i, embed in enumerate(embeds[reason_id - 1:], start=reason_id):
+                        if i - 1 == 0:
+                            embed.description = embed.description.replace(f"**Reason {i + 1}:**", f"<@{member.id}>\n\n**Reason {i}:**")
+                            embed.set_thumbnail(url=member.display_avatar)
+                            embed.set_author(name=f"{member}", icon_url=member.display_avatar, url=member.display_avatar)
+                        else:
+                            embed.description = embed.description.replace(f"**Reason {i + 1}:**", f"**Reason {i}:**")
+
+                    await msg.edit(embeds=embeds)
+
+                    view = discord.ui.View()
+                    view.add_item(discord.ui.Button(style=discord.ButtonStyle.url, label="Check WL Entry!", emoji="⚠️", url=msg.jump_url))
+                    await ctx.send(f"**Successfully removed the reason `{reason_id}` from `{member}`, {author.mention}!**", view=view)
 
             else:
                 await ctx.send(f"**{member} is not in the watchlist, {author.mention}**")
@@ -120,9 +144,9 @@ class ModerationWatchlistTable(commands.Cog):
         if reason:
             index = (reason.split())[0]
             if not index.isdigit() or int(index) <= 0:
-                return await ctx.send("**Use z!edit_watchlist [member] [reason_number] [new_reason]**", delete_after=5)
+                return await ctx.send("**Usage: z!edit_watchlist [member] [reason_number] [new_reason]**", delete_after=5)
         else:
-            return await ctx.send("**Use z!edit_watchlist [member] [reason_number] [new_reason]**", delete_after=5)
+            return await ctx.send("**Usage: z!edit_watchlist [member] [reason_number] [new_reason]**", delete_after=5)
 
         index = int(index)
         reason = ' '.join(reason.split()[1:])
@@ -137,21 +161,19 @@ class ModerationWatchlistTable(commands.Cog):
                 embeds = msg.embeds
 
                 if index <= len(embeds):
-                    embed=(embeds[index-1]).to_dict()
+                    embed=embeds[index-1]
 
                     # Changes the reason
                     if index == 1:
                         # include the member mention for the first embed in the watchlist
-                        embed["description"] = f"<@{member.id}>\n\n**Reason 1:** ```{reason}```",
-                        embed["description"] = embed["description"][0]
+                        embed.description = f"<@{member.id}>\n\n**Reason 1:** ```{reason}```"
                     else:
-                        embed["description"] = f"\n**Reason {index}:** ```{reason}```",
-                        embed["description"] = embed["description"][0]
+                        embed.description = f"\n**Reason {index}:** ```{reason}```"
 
                     # Removes the title for the old members
-                    embed["title"] = ''
+                    embed.title = ''
 
-                    embeds[index-1] = (discord.Embed.from_dict(embed))
+                    embeds[index-1] = embed
 
                     await msg.edit(embeds=embeds)
 
