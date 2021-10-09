@@ -78,19 +78,16 @@ class Tools(commands.Cog):
 
 	@commands.command()
 	@commands.cooldown(1, 5, commands.BucketType.user)
-	async def inrole(self, ctx) -> None:
+	async def inrole(self, ctx, roles: commands.Greedy[discord.Role] = None) -> None:
 		""" Shows everyone who have that role in the server.
 		:param roles: The set of roles you want to check. """
 
 		member = ctx.author
 
-		roles = await utils.get_roles(ctx.message)
-
 		if not roles:
 			return await ctx.send(f"**Please, inform at least one role, {member.mention}!**")
 
-		if not roles:
-			return await ctx.send(f"**No role with that name was found!**")
+		roles: List[discord.Role] = list(set(roles))
 		
 		members = [
 			m.mention for m in ctx.guild.members
