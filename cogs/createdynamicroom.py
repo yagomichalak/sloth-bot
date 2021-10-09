@@ -724,21 +724,33 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
 
         return available_rooms
 
+    async def get_capped_rooms(self, room_list: List[DynamicRoom]) -> List[DynamicRoom]:
+        
+        return room_list
+
     async def initiate_member_room_interaction(self, member: discord.Member) -> Union[List[DynamicRoom], None]:
         """ initiate interaction with user to create room
         :param member: Member to initiate interaction. """
         available_rooms_list = await self.get_language_rooms_list_member(member)
+
+        available_rooms_list = await self.get_capped_rooms(available_rooms_list)
 
         def create_option(room, index):
             return discord.SelectOption(label=room.room_name.decode("utf-8"), value=index, description=room.english_name)
 
         available_options = [create_option(room, str(index)) for index, room in enumerate(available_rooms_list)]
 
+        if len(available_options) == 1:
+            return available_options[0]
+
         # create view with selects with the available languages
         view = discord.ui.View()
         select_limit = 25
-        for i in range(0, len(available_options), select_limit):
-            view.add_item(LanguageRoomSelect(self.client, select_options=available_options[i:i + select_limit]))
+        for i in range(0, len(available_options), 25):
+            row_num = int((i+1)/25)
+            #print(row_num)
+            if row_num < 5:
+                view.add_item(LanguageRoomSelect(self.client, custom_id="select_lr_"+str(row_num), row=row_num, select_options=available_options[i:i + select_limit]))
 
         await member.send(f"**Select a Room**", view=view)
         await view.wait()
