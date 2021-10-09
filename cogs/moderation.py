@@ -438,6 +438,36 @@ class Moderation(*moderation_cogs):
 		else:
 			await ctx.send(f"**Successfully rar'd `{member}`, {author.mention}!**")
 
+	@commands.command(aliases=['check_muted', 'muted_roles', 'removed_roles'])
+	@utils.is_allowed(allowed_roles, throw_exc=True)
+	async def show_muted_roles(self, ctx, member: Union[discord.Member, discord.User] = None) -> None:
+		""" Shows the roles that were taken off from the user when they got muted.
+		:param member: The member to check it. """
+
+		author = ctx.author
+		if not member:
+			return await ctx.send(f"**Please, inform the member to check the roles, {author.mention}!**")
+
+		if not member.get_role(muted_role_id):
+			return await ctx.send(f"**The given user is not even muted, {author.mention}!**")
+
+		roles = await self.get_muted_roles(member.id)
+		if not roles:
+			return await ctx.send(f"**User had no roles, {author.mention}!**")
+
+		roles = ', '.join([f"<@&{rid[1]}>" for rid in roles])
+
+		embed: discord.Embed = discord.Embed(
+			title="__Removed Roles__",
+			description=f"{member.mention} got the following roles removed after being muted:\n\n{roles}",
+			color=member.color,
+			timestamp=ctx.message.created_at
+		)
+
+		await ctx.send(embed=embed)
+
+
+
 	@commands.command(name="mute", aliases=["shutup", "shut_up", "stfu", "zitto", "zitta", "shh", "tg", "ta_gueule", "tagueule"])
 	@utils.is_allowed(allowed_roles, throw_exc=True)
 	async def _mute_command(self, ctx, *, message : str = None) -> None:
