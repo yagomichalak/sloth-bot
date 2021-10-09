@@ -438,7 +438,7 @@ class Moderation(*moderation_cogs):
 		else:
 			await ctx.send(f"**Successfully rar'd `{member}`, {author.mention}!**")
 
-	@commands.command(aliases=['check_muted', 'muted_roles', 'removed_roles', 'rr'])
+	@commands.command(aliases=['check_muted', 'muted_roles', 'removed_roles', 'srr'])
 	@utils.is_allowed(allowed_roles, throw_exc=True)
 	async def show_muted_roles(self, ctx, member: Union[discord.Member, discord.User] = None) -> None:
 		""" Shows the roles that were taken off from the user when they got muted.
