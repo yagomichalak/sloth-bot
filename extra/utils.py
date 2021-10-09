@@ -188,11 +188,18 @@ async def get_roles(message: discord.Message) -> List[discord.Role]:
 
     guild = message.guild
 
-    roles = [
+    roles: List[discord.Role] = [
         m for word in message.content.split()
         if word.isdigit() and (m := discord.utils.get(guild.roles, id=int(word)))
-        or (m := discord.utils.get(guild.roles, name=str(word)))
+        or (m := discord.utils.get(guild.roles, name=str(word))
+        # or (m := await commands.RoleConverter().convert(message, message.content))
+        )
     ]
+    for role_id in re.findall(r'<@&([0-9]{15,20})>$', message.content):
+        if role := discord.utils.get(guild.roles, id=int(role_id)):
+            roles.append(role)
+
+    # print('ihi', list(message.role_mentions))
     # roles.extend(message.mentions)
     roles = list(set(roles))
 
