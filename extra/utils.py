@@ -270,9 +270,15 @@ async def greedy_member_reason(ctx, message : str = None):
     if not message:
         return users, reason
 
+    # Temporarily converts spaces between quotes by colons
+    if message.rfind('"') != -1:
+        for word in re.findall('"([^"]*)"', message):
+            message = message.replace('"' + word + '"', word.replace(" ", ":"))
+
     message = message.split()
 
     for pos, word in enumerate(message):
+        word = word.replace(":", " ")
         # Checks if it is an ID, a mention or name#discriminator
         if (len(word) >= 15 and len(word) <= 20 and word.isdigit()) or re.match(r'<@!?([0-9]{15,20})>$', word) or (len(word) > 5 and word[-5] == '#'):
 
@@ -298,16 +304,16 @@ async def greedy_member_reason(ctx, message : str = None):
 
             if not user:
                 reason = ' '.join(message[pos:])
-                return users, reason
+                return list(set(users)), reason
 
             users.append(user)
 
         # When does not find a string in the member format
         else:
             reason = ' '.join(message[pos:])
-            return users, reason
+            return list(set(users)), reason
 
-    return users, reason
+    return list(set(users)), reason
 
 
 def not_ready():
