@@ -1,4 +1,5 @@
 import discord
+from discord.errors import NotFound
 from discord.ext import commands, tasks
 import os
 from extra import utils
@@ -64,6 +65,59 @@ class Communication(commands.Cog):
 
         msg = ctx.message.content.split('!say', 1)
         await ctx.send(msg[1])
+
+
+    # Edits a message sent by the bot
+    @commands.command()
+    @commands.has_any_role(*allowed_roles)
+    async def edit(self, ctx, message_id : int = None, *, text : str = None):
+        """ (Mod) Edits a message sent by the bot.
+        :param nessage_id: The message id."""
+
+        await ctx.message.delete()
+
+        if not message_id:
+            return await ctx.send("**Please, insert a message id**", delete_after=3)
+
+        if not text:
+            return await ctx.send("**Please, insert a message**", delete_after=3)
+        
+        channel = ctx.message.channel
+        
+        try:
+            message = await channel.fetch_message(message_id)
+            await message.edit(text)
+
+        except NotFound:
+            return await ctx.send("**Message not found. Send the command in the same channel as the original message.**", delete_after=5)
+
+
+
+    # Replies a message by using the bot
+    @commands.command()
+    @commands.has_any_role(*allowed_roles)
+    async def reply(self, ctx, message_id : int = None, *, text : str = None):
+        """ (Mod) Replies a message with the bot.
+        :param message_id: The message id to reply.
+        :param message: The message to send"""
+
+        await ctx.message.delete()
+
+        if not message_id:
+            return await ctx.send("**Please, insert a message id to reply to it**", delete_after=3)
+        
+        if not text:
+            return await ctx.send("**Please, insert a message**", delete_after=3)
+
+        channel = ctx.message.channel
+        
+        try:
+            message = await channel.fetch_message(message_id)
+            await message.reply(text)
+
+        except NotFound:
+            return await ctx.send("**Message not found. Send the command in the same channel as the original message.**", delete_after=5)
+
 
     # Spies a channel
     @commands.command()
