@@ -712,6 +712,9 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
 
         permissions_rooms = await self.get_available_rooms(roles_tuple, see_everything=can_see_everything, object_form=True)
 
+        if not permissions_rooms:
+            return None
+
         available_rooms = await self.get_rooms_by_ids(tuple([permission.room_id for permission in permissions_rooms]), object_form=True)
 
         return available_rooms
@@ -737,6 +740,10 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
         """ initiate interaction with user to create room
         :param member: Member to initiate interaction. """
         available_rooms_list = await self.get_language_rooms_list_member(member)
+
+        if not available_rooms_list:
+            await member.send(f"**Nothing to see here**")
+            return None
 
         available_rooms_list = await self.get_room_quantity(available_rooms_list)
 
