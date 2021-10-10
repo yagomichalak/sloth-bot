@@ -578,7 +578,7 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
                 await member.send(
                     f"**You're on a cooldown, try again in {round(60 - (the_time - old_time))} seconds!**",)
                 # return await member.move_to(None)
-                # return
+                return
             if the_time - old_time >= 60:
                 await self.update_user_dr_vc_ts(member.id, the_time)
 
@@ -714,6 +714,9 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
         if not permissions_rooms:
             return None
 
+        if not permissions_rooms:
+            return None
+
         available_rooms = await self.get_rooms_by_ids(tuple([permission.room_id for permission in permissions_rooms]), object_form=True)
 
         return available_rooms
@@ -740,6 +743,10 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
         """ initiate interaction with user to create room
         :param member: Member to initiate interaction. """
         available_rooms_list = await self.get_language_rooms_list_member(member)
+
+        if not available_rooms_list:
+            await member.send(f"**Nothing to see here**")
+            return None
 
         available_rooms_list = await self.get_room_quantity(available_rooms_list)
 
