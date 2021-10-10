@@ -412,3 +412,21 @@ class Seraph(Player):
         return heal_embed
         
 
+    @commands.command(aliases=['conceive_grace', 'give_grace', 'provide_grace'])
+    @Player.skills_used(requirement=50)
+    @Player.skill_on_cooldown(skill=Skill.FOUR)
+    @Player.user_is_class('seraph')
+    @Player.skill_mark()
+    @Player.not_ready()
+    async def attain_grace(self, ctx, member: Optional[discord.Member] = None) -> None:
+        """ Tries with a 10% chance of success to attain the grace from the deity
+         so the person, who must be honeymoon'd receives a baby to take care of, 
+         together with their spouse.
+        :param member: The member to attain the grace to. [Optional][Default=You]
+        
+        PS: Don't forget to feed your baby, that's crucial and vital.
+
+        • Delay = 1 day
+        • Cost = 500łł  """
+
+        pass

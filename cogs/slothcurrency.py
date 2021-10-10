@@ -1,5 +1,6 @@
 import discord
 from discord.app import Option, OptionChoice
+from discord.app.commands import slash_command
 from discord.ext import commands, menus
 from discord.utils import escape_mentions
 from mysqldb import *
@@ -526,6 +527,14 @@ class SlothCurrency(commands.Cog):
 
         await self._profile(ctx, member)
 
+    @slash_command(name="profile", guild_ids=guild_ids)
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def _profile_slash(self, ctx, member: Option(discord.Member, description="The member to show the info; [Default=Yours]", required=False)) -> None:
+        """ Shows the member's profile with their custom sloth. """
+
+        await ctx.defer()
+        await self._profile(ctx, member)
+
     async def _profile(self, ctx, member: discord.Member = None):
         """ Shows the member's profile with their custom sloth.
         :param member: The member to see the profile. (Optional) """
@@ -647,25 +656,26 @@ class SlothCurrency(commands.Cog):
         background.save(file_path, 'png', quality=90)
 
         all_effects = {key: value for (key, value) in effects.items() if value.get('has_gif')}
-        async with ctx.typing():
-            if all_effects:
-                try:
-                    gif_file_path = await self.make_gif_image(member_id=member.id, file_path=file_path, all_effects=all_effects)
-                    await answer(file=discord.File(gif_file_path))
+        # async with ctx.typing():
 
-                except Exception as e:
-                    print(e)
-                    pass
-                finally:
-                    os.remove(file_path)
-                    os.remove(gif_file_path)
-            else:
-                try:
-                    await answer(file=discord.File(file_path))
-                except:
-                    pass
-                finally:
-                    os.remove(file_path)
+        if all_effects:
+            try:
+                gif_file_path = await self.make_gif_image(member_id=member.id, file_path=file_path, all_effects=all_effects)
+                await answer(file=discord.File(gif_file_path))
+
+            except Exception as e:
+                print(e)
+                pass
+            finally:
+                os.remove(file_path)
+                os.remove(gif_file_path)
+        else:
+            try:
+                await answer(file=discord.File(file_path))
+            except:
+                pass
+            finally:
+                os.remove(file_path)
 
     async def make_gif_image(self, member_id: int, file_path: str, all_effects: Dict[str, Dict[str, Union[List[str], Tuple[int]]]]) -> None:
         """ Makes a gif image out a profile image.
@@ -772,6 +782,15 @@ class SlothCurrency(commands.Cog):
 
         mycursor, db = await the_database()
         await mycursor.execute("UPDATE UserCurrency SET user_money = user_money + %s WHERE user_id = %s", (money, user_id))
+        await db.commit()
+        await mycursor.close()
+
+    async def update_user_many_money(self, users: List[int]) -> None:
+        """ Updates many the money of many users.
+        :param users: The users to update the money. """
+
+        mycursor, db = await the_database()
+        await mycursor.executemany("UPDATE UserCurrency SET user_money = user_money + %s WHERE user_id = %s", users)
         await db.commit()
         await mycursor.close()
 
@@ -1067,9 +1086,9 @@ class SlothCurrency(commands.Cog):
         user_message = user_info[0][1]
         user_time = user_info[0][2]
         member_id = ctx.author.id
-        async with ctx.typing():
-            cmsg, message_times = await self.convert_messages(member_id, user_message)
-            ctime, time_times = await self.convert_time(member_id, user_time)
+        # async with ctx.typing():
+        cmsg, message_times = await self.convert_messages(member_id, user_message)
+        ctime, time_times = await self.convert_time(member_id, user_time)
 
         embed = discord.Embed(title="Exchange", colour=ctx.author.color, timestamp=ctx.message.created_at)
         embed.set_author(name=ctx.author, url=ctx.author.display_avatar)

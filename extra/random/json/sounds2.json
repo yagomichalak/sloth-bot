@@ -1,0 +1,22 @@
+{
+    "sb_btn_1_id": {"style": 1, "path": "media/audios/windows_xp_crash_error.m4a", "emoji": "🔉"},
+    "sb_btn_2_id": {"style": 1, "path": "media/audios/birl.m4a", "emoji": "🔉"},
+    "sb_btn_3_id": {"style": 1, "path": "media/audios/boom.m4a", "emoji": "💥"},
+    "sb_btn_4_id": {"style": 1, "path": "media/audios/que_isso_meu_filho_calma.mp3", "emoji": "🔉"},
+    "sb_btn_5_id": {"style": 1, "path": "media/audios/oh_potência.mp3", "emoji": "🔉"},
+    "sb_btn_6_id": {"style": 1, "path": "media/audios/law_and_order.mp3", "emoji": "🔉"},
+    "sb_btn_7_id": {"style": 2, "path": "media/audios/macaco.mp3", "emoji": "🐵"},
+    "sb_btn_8_id": {"style": 3, "path": "media/audios/ha_gay.mp3", "emoji": "<:open_eye_crying_laughing:674304001029963824>"},
+    "sb_btn_9_id": {"style": 2, "path": "media/audios/nice.mp3", "emoji": "<:Frog_Ok:784369251808182275>"},
+    "sb_btn_10_id": {"style": 1, "path": "media/audios/nein.mp3", "emoji": "🔉"},
+    "sb_btn_11_id": {"style": 4, "path": "media/audios/john_cena.mp3", "emoji": "🔉"},
+    "sb_btn_12_id": {"style": 3, "path": "media/audios/hhhh.mp3", "emoji": "<:open_eye_crying_laughing:674304001029963824>"},
+    "sb_btn_13_id": {"style": 4, "path": "media/audios/oh_shit.m4a", "emoji": "<:I_smell_your_sins:666322848922599434>"},
+    "sb_btn_14_id": {"style": 3, "path": "media/audios/hahahaha.mp3", "emoji": "<:open_eye_crying_laughing:674304001029963824>"},
+    "sb_btn_15_id": {"style": 4, "path": "media/audios/ninja_rage.mp3", "emoji": "🔉"},
+    "sb_btn_16_id": {"style": 1, "path": "media/audios/derp.mp3", "emoji": "🔉"},
+    "sb_btn_17_id": {"style": 2, "path": "media/audios/buonasera_natasha.mp3", "emoji": "💁‍♀️"},
+    "sb_btn_18_id": {"style": 3, "path": "media/audios/hehe_boi.mp3", "emoji": "<:open_eye_crying_laughing:674304001029963824>"},
+    "sb_btn_19_id": {"style": 2, "path": "media/audios/buonasera_catusha.mp3", "emoji": "💁‍♀️"},
+    "sb_btn_20_id": {"style": 1, "path": "media/audios/just_do_it.mp3", "emoji": "🔉"}
+}

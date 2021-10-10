@@ -1,6 +1,4 @@
 import discord
-from discord import channel
-from discord.ext.menus import Position
 from extra import utils
 from discord.ext import commands, tasks
 from datetime import datetime
@@ -133,6 +131,16 @@ class SmartRoomDatabase(commands.Cog):
 		await db.commit()
 		await mycursor.close()
 
+	async def update_galaxy_user(self, old_owner_id: int, new_owner_id: int) -> None:
+		""" Updates the Galaxy Room's owner ID.
+		:param old_owner_id: The old owner's ID.
+		:param new_owner_id: The new owner's ID. """
+
+		mycursor, db = await the_database()
+		await mycursor.execute("UPDATE GalaxyVc SET user_id = %s WHERE user_id = %s", (new_owner_id, old_owner_id))
+		await db.commit()
+		await mycursor.close()
+
 	# ===== INSERT =====
 
 	async def insert_user_vc(self, user_id: int, the_time: int) -> None:
@@ -231,6 +239,16 @@ class SmartRoomDatabase(commands.Cog):
 
 		mycursor, db = await the_database()
 		await mycursor.execute("SELECT * FROM GalaxyVc WHERE user_cat = %s", (cat_id,))
+		galaxy_vc = await mycursor.fetchone()
+		await mycursor.close()
+		return galaxy_vc
+
+	async def get_galaxy_by_user_id(self, user_id: int) -> List[Union[int, str]]:
+		""" Gets a Galaxy Room by user ID.
+		:param user_id: The user ID. """
+
+		mycursor, _ = await the_database()
+		await mycursor.execute("SELECT * FROM GalaxyVc WHERE user_id = %s", (user_id,))
 		galaxy_vc = await mycursor.fetchone()
 		await mycursor.close()
 		return galaxy_vc
@@ -1019,11 +1037,13 @@ Here are some rules and rights:
 
 1) Your galaxy room costs **1500** :leaves: every **14 days**. You will get a reminder to pay your rent in the galaxy room a few days before it's due. If you don't pay using the **z!renew** command, the galaxy room gets deleted. 
 
-2) You can **allow** or **unallow** any user to see and use your galaxy room by using the command **z!allow @User/ID** and **z!forbid @User/ID**
+2) You can **allow** or **unallow** any user to see and use your galaxy room by using the command **z!galaxy allow @User/ID** and **z!galaxy forbid @User/ID**
 
 3) You have to allow a minimum of **10** users. (Bots or admins do not count) 
 
-4) You can add up to 4 **threads** each for **250 :leaves: **by writing **z!agc thread `name of the channel` ** **or** for **500** :leaves:  1 additional voice channel by writing **z!agc voice `user limit (0-25)` `name of the channel`** 
+4) You can check all Galaxy Room related commands using the **z!galaxy** command in the channel
+
+5) You can add up to 4 **threads** each for **250 :leaves: **by writing **z!agc thread `name of the channel` ** **or** for **500** :leaves:  1 additional voice channel by writing **z!agc voice `user limit (0-25)` `name of the channel`** 
 You can only add either **threads** **OR** one **voice channel**"""))
 
 		else:
@@ -1132,12 +1152,79 @@ You can only add either **threads** **OR** one **voice channel**"""))
 
 
 
-	@commands.command(aliases=['permit'])
-	async def allow(self, ctx) -> None:
+
+	async def handle_permissions(self, members: List[discord.Member], galaxy_room: List[Union[int, str]], guild: discord.Guild, allow: bool = True) -> List[str]:
+		""" Handles permissions for a member in one's Galaxy Room.
+		:param members: The list of members to handle permissions for.
+		:param galaxy_room: The Galaxy Room info.
+		:param guild: The guild of the Galaxy Room.
+		:param allow: Whether to allow or disallow the member and their permissions from the Galaxy Room. [Default=True]"""
+
+
+		channels: List[Union[discord.abc.GuildChannel, discord.Thread]] = [
+			discord.utils.get(guild.categories, id=galaxy_room[1]),
+			discord.utils.get(guild.voice_channels, id=galaxy_room[2]),
+			discord.utils.get(guild.text_channels, id=galaxy_room[3]),
+			discord.utils.get(guild.threads, id=galaxy_room[4]),
+			discord.utils.get(guild.voice_channels, id=galaxy_room[5]),
+			discord.utils.get(guild.threads, id=galaxy_room[8]),
+			discord.utils.get(guild.threads, id=galaxy_room[9]),
+			discord.utils.get(guild.threads, id=galaxy_room[10])
+		]
+
+		actioned: List[str] = []
+
+		for m in members:
+			try:
+				for c in channels:
+					if not isinstance(c, discord.Thread):
+						if c:
+							if allow:
+								await c.set_permissions(
+									m, read_messages=True, send_messages=True, connect=True, speak=True, view_channel=True)
+							else:
+								await c.set_permissions(m, overwrite=None)
+					else:
+						if allow:
+							await c.add_user(m)
+						else:
+							await c.remove_user(m)
+
+			except Exception as e:
+				print(e)
+				pass
+			else:
+				actioned.append(m.mention)
+
+		return actioned
+
+
+	@commands.group(aliases=['gr', 'galaxy_room', 'galaxyroom'])
+	async def galaxy(self, ctx) -> None:
+		""" Command for managing Galaxy Rooms. """
+
+		if ctx.invoked_subcommand:
+			return
+
+		cmd = ctx.command
+		prefix = self.client.command_prefix
+		subcommands = [f"{prefix}{c.qualified_name}" for c in cmd.commands]
+
+		subcommands = '\n'.join(subcommands)
+		embed = discord.Embed(
+		  title="Subcommads",
+		  description=f"```apache\n{subcommands}```",
+		  color=ctx.author.color,
+		  timestamp=ctx.message.created_at
+		)
+		await ctx.send(embed=embed)
+
+	@galaxy.command(name="allow", aliases=['permit'])
+	async def _galaxy_allow(self, ctx) -> None:
 		""" Allows one or more members to join your channels.
 		:param members: The members to allow. """
 
-		members = await CreateSmartRoom.get_mentions(message=ctx.message)
+		members = await utils.get_mentions(message=ctx.message)
 		member = ctx.author
 
 		if member in members:
@@ -1150,82 +1237,20 @@ You can only add either **threads** **OR** one **voice channel**"""))
 		if not user_galaxy:
 			return await ctx.send(f"**This is not your room, so you cannot allow someone in it, {member.mention}!**")
 
-		channels = [
-			discord.utils.get(ctx.guild.categories, id=user_galaxy[1]),
-			discord.utils.get(ctx.guild.voice_channels, id=user_galaxy[2]),
-			discord.utils.get(ctx.guild.text_channels, id=user_galaxy[3]),
-			discord.utils.get(ctx.guild.threads, id=user_galaxy[4]),
-			discord.utils.get(ctx.guild.voice_channels, id=user_galaxy[5]),
-			discord.utils.get(ctx.guild.threads, id=user_galaxy[8]),
-			discord.utils.get(ctx.guild.threads, id=user_galaxy[9]),
-			discord.utils.get(ctx.guild.threads, id=user_galaxy[10])
-		]
-		allowed = []
-
-		for m in members:
-			try:
-				for c in channels:
-					if not isinstance(c, discord.Thread):
-						if c:
-							await c.set_permissions(
-								m, read_messages=True, send_messages=True, connect=True, speak=True, view_channel=True)
-					else:
-						await c.add_user(m)
-
-			except:
-				pass
-			else:
-				allowed.append(m.mention)
-
+		allowed = await self.handle_permissions(members, user_galaxy, ctx.guild)
+	
 		if not allowed:
 			return await ctx.send(f"**For some reason, I couldn't allow any of those members, {member.mention}!**")
 
-		allowed = ', '.join(allowed)
-		await ctx.send(f"**{allowed} {'have' if len(allowed) > 1 else 'has'} been allowed, {member.mention}!**")
+		allowed_members = ', '.join(allowed)
+		await ctx.send(f"**{allowed_members} {'have' if len(allowed) > 1 else 'has'} been allowed, {member.mention}!**")
 
-	@staticmethod
-	async def get_mentions(message: discord.Message) -> List[discord.Member]:
-		""" Get mentions from a specific message.
-		:param message: The message to get the mentions from. """
-
-		guild = message.guild
-
-		members = [
-			m for word in message.content.split()
-			if word.isdigit() and (m := discord.utils.get(guild.members, id=int(word)))
-			or (m := discord.utils.get(guild.members, name=str(word)))
-			or (m := discord.utils.get(guild.members, nick=str(word)))
-			or (m := discord.utils.get(guild.members, display_name=str(word)))
-		]
-		members.extend(message.mentions)
-		members = list(set(members))
-
-		return members
-
-	@staticmethod
-	async def get_voice_channel_mentions(message: discord.Message) -> List[discord.VoiceChannel]:
-		""" Get voice channel mentions from a specific message.
-		:param message: The message to get the mentions from. """
-
-		guild = message.guild
-
-		channel_mentions = [
-			m for word in message.content.split()
-			if word.isdigit() and (m := discord.utils.get(guild.voice_channels, id=int(word)))
-			or (m := discord.utils.get(guild.voice_channels, name=str(word)))
-		]
-
-		channel_mentions.extend(list(map(lambda c: isinstance(c, discord.VoiceChannel), message.channel_mentions)))
-		channel_mentions = list(set(channel_mentions))
-
-		return channel_mentions
-
-	@commands.command(aliases=['prohibit'])
-	async def forbid(self, ctx) -> None:
+	@galaxy.command(name="forbid", aliases=['prohibit'])
+	async def _galaxy_forbid(self, ctx) -> None:
 		""" Forbids one or more members from joining your channels.
 		:param members: The members to forbid. """
 
-		members = await CreateSmartRoom.get_mentions(message=ctx.message)
+		members = await utils.get_mentions(message=ctx.message)
 		member = ctx.author
 
 		if member in members:
@@ -1238,44 +1263,20 @@ You can only add either **threads** **OR** one **voice channel**"""))
 		if not user_galaxy:
 			return await ctx.send(f"**This is not your room, so you cannot forbid someone from it, {member.mention}!**")
 
-		channels = [
-			discord.utils.get(ctx.guild.categories, id=user_galaxy[1]),
-			discord.utils.get(ctx.guild.voice_channels, id=user_galaxy[2]),
-			discord.utils.get(ctx.guild.text_channels, id=user_galaxy[3]),
-			discord.utils.get(ctx.guild.threads, id=user_galaxy[4]),
-			discord.utils.get(ctx.guild.voice_channels, id=user_galaxy[5]),
-			discord.utils.get(ctx.guild.threads, id=user_galaxy[8]),
-			discord.utils.get(ctx.guild.threads, id=user_galaxy[9]),
-			discord.utils.get(ctx.guild.threads, id=user_galaxy[10])
-		]
-		forbid = []
-
-		for m in members:
-			try:
-				for c in channels:
-					if not isinstance(c, discord.Thread):
-						if c:
-							await c.set_permissions(
-								m, read_messages=False, send_messages=False, connect=False, speak=False, view_channel=False)
-					else:
-						await c.remove_user(m)
-			except:
-				pass
-			else:
-				forbid.append(m.mention)
+		forbid = await self.handle_permissions(members, user_galaxy, ctx.guild, allow=False)
 
 		if not forbid:
 			return await ctx.send(f"**For some reason, I couldn't forbid any of those members, {member.mention}!**")
 
-		forbid = ', '.join(forbid)
+		forbidden_members = ', '.join(forbid)
 
-		await ctx.send(f"**{forbid} {'have' if len(forbid) > 1 else 'has'} been forbidden, {member.mention}!**")
+		await ctx.send(f"**{forbidden_members} {'have' if len(forbid) > 1 else 'has'} been forbidden, {member.mention}!**")
 
 
 
 	# Other useful commands
-	@commands.command(aliases=['creation', 'expiration'])
-	async def galaxy_info(self, ctx) -> None:
+	@galaxy.command(name="info", aliases=['creation', 'expiration'])
+	async def _galaxy_info(self, ctx) -> None:
 		""" Shows the creation and expiration time of the user's Galaxy Rooms. """
 
 		user_galaxy = await self.get_galaxy_txt(ctx.author.id, ctx.channel.category.id)
@@ -1308,8 +1309,8 @@ You can only add either **threads** **OR** one **voice channel**"""))
 
 		await ctx.send(embed=embed)
 
-	@commands.command(aliases=['rent', 'renew'])
-	async def pay_rent(self, ctx) -> None:
+	@galaxy.command(name="pay_rent", aliases=['pr', 'payrent', 'rent', 'renew'])
+	async def _galaxy_pay_rent(self, ctx) -> None:
 		""" Delays the user's Galaxy Rooms deletion by 14 days.
 		
 		* Price:
@@ -1370,9 +1371,66 @@ You can only add either **threads** **OR** one **voice channel**"""))
 		money += (vcs - 1) * 500
 		return money
 
+	@galaxy.command(name="transfer_ownership", aliases=['transfer', 'to', 'transferownership'])
+	@commands.cooldown(1, 60, commands.BucketType.user)
+	async def _galaxy_transfer_ownership(self, ctx, member: discord.Member = None) -> None:
+		""" Transfer the Galaxy Room's ownership  to someone else.
+		:param member: The member to transfer the Galaxy Room to.
+		
+		PS: Only the owner of the Galaxy Room and admins can use this. """
 
-	@commands.command(aliases=['cgr', 'close_galaxy', 'closegalaxy', 'delete_galaxy', 'deletegalaxy'])
-	async def close_galaxy_room(self, ctx) -> None:
+		if not ctx.guild:
+			ctx.command.reset_cooldown(ctx)
+			return await ctx.send("**Don't use it here!**")
+
+		author = ctx.author
+		channel = ctx.channel
+
+		if not member:
+			ctx.command.reset_cooldown(ctx)
+			return await ctx.send(f"**Please, inform a member, {author.mention}!**")
+
+		if not (cat := channel.category):
+			ctx.command.reset_cooldown(ctx)
+			return await ctx.send(f"**This is definitely not a Galaxy Room, {author.mention}!**")
+
+		if not (galaxy_room := await self.get_galaxy_by_cat_id(cat.id)):
+			ctx.command.reset_cooldown(ctx)
+			return await ctx.send(f"**This is not a Galaxy Room, {author.mention}!**")
+
+		perms = channel.permissions_for(author)
+		if author.id != galaxy_room[0] and not perms.administrator:
+			ctx.command.reset_cooldown(ctx)
+			return await ctx.send(f"**You don't have permission to do this, {author.mention}!**")
+		
+		if member.id == galaxy_room[0]:
+			ctx.command.reset_cooldown(ctx)
+			return await ctx.send(f"**You cannot transfer the Galaxy Room to the same owner, {author.mention}!**")
+
+		if await self.get_galaxy_by_user_id(member.id):
+			ctx.command.reset_cooldown(ctx)
+			return await ctx.send(f"**You cannot transfer the Galaxy Room to {member.mention} because they have one already, {author.mention}!**")
+
+		confirm = await ConfirmSkill(
+			f"**Are you sure you want to transfer the ownership of this Galaxy Room from <@{galaxy_room[0]}> to {member.mention}, {author.mention}?**"
+			).prompt(ctx)
+		if not confirm:
+			ctx.command.reset_cooldown(ctx)
+			return await ctx.send(f"**Not deleting it then, {author.mention}!**")
+
+
+		try:
+			await self.update_galaxy_user(galaxy_room[0], member.id)
+			await self.handle_permissions([member], galaxy_room, ctx.guild)
+		except:
+			ctx.command.reset_cooldown(ctx)
+			await ctx.send(f"**Something went wrong with it, please contact an admin, {author.mention}!**")
+		else:
+			await ctx.send(f"**Successfully transferred the ownership of this Galaxy Room from <@{galaxy_room[0]}> to {member.mention}!**")
+
+
+	@galaxy.command(name="close", aliases=['close_room', 'closeroom', 'kill', 'terminate', 'delete', 'del'])
+	async def _galaxy_close(self, ctx) -> None:
 		""" Deletes a Galaxy Room. """
 
 		if not ctx.guild:
@@ -1421,15 +1479,15 @@ You can only add either **threads** **OR** one **voice channel**"""))
 		return vcs, txts
 
 
-	@commands.group(aliases=['agc'])
-	async def add_galaxy_channel(self, ctx) -> None:
+	@galaxy.group(name="add_channel", aliases=['ac'])
+	async def _galaxy_add_channel(self, ctx) -> None:
 		""" Adds either a Text or a Voice Channel to
 		the user's Galaxy Room. """
 
 		if ctx.invoked_subcommand:
 			return
 
-		cmd = self.client.get_command('add_galaxy_channel')
+		cmd = ctx.command
 		prefix = self.client.command_prefix
 		subcommands = [f"{prefix}{c.qualified_name}" for c in cmd.commands]
 
@@ -1442,9 +1500,9 @@ You can only add either **threads** **OR** one **voice channel**"""))
 		)
 		await ctx.send(embed=embed)
 
-	@add_galaxy_channel.command(name='thread', aliases=['th', 'thread_channel', 'text', 'txt', 'text_channel'])
+	@_galaxy_add_channel.command(name='thread', aliases=['th', 'thread_channel', 'text', 'txt', 'text_channel'])
 	@commands.cooldown(1, 60, commands.BucketType.user)
-	async def add_thread(self, ctx, *, name: str = None) -> None:
+	async def _galaxy_add_channel_thread(self, ctx, *, name: str = None) -> None:
 		""" Adds a Text Channel.
 		:param name: The name of the Text Channel. """
 
@@ -1504,9 +1562,9 @@ You can only add either **threads** **OR** one **voice channel**"""))
 		await ctx.send(f"**Thread Channel created, {member.mention}!** ({thread.mention})")
 
 
-	@add_galaxy_channel.command(name='voice', aliases=['vc', 'voice_channel'])
+	@_galaxy_add_channel.command(name='voice', aliases=['vc', 'voice_channel'])
 	@commands.cooldown(1, 60, commands.BucketType.user)
-	async def add_voice(self, ctx, limit: int = None, *, name: str = None) -> None:
+	async def _galaxy_add_channel_voice(self, ctx, limit: int = None, *, name: str = None) -> None:
 		""" Adds a Voice Channel.
 		:param limit: The user limit of the Voice Cchannel.
 		:param name: The name of the Voice Channel. """
@@ -1568,15 +1626,15 @@ You can only add either **threads** **OR** one **voice channel**"""))
 
 
 
-	@commands.group(aliases=['dgc', 'remove_galaxy_channel', 'rgc'])
-	async def delete_galaxy_channel(self, ctx) -> None:
+	@galaxy.group(name="delete_channel", aliases=['dc', 'deletechannel', 'remove_channel', 'removechannel', 'rc'])
+	async def _galaxy_delete_channel(self, ctx) -> None:
 		""" Deletes either a Text or a Voice Channel from
 		the user's Galaxy Room. """
 
 		if ctx.invoked_subcommand:
 			return
 
-		cmd = self.client.get_command('delete_galaxy_channel')
+		cmd = ctx.command
 		prefix = self.client.command_prefix
 		subcommands = [f"{prefix}{c.qualified_name}" for c in cmd.commands]
 
@@ -1589,9 +1647,9 @@ You can only add either **threads** **OR** one **voice channel**"""))
 		)
 		await ctx.send(embed=embed)
 
-	@delete_galaxy_channel.command(name='thread', aliases=['thread_channel', 'th', 'text', 'txt', 'text_channel'])
+	@_galaxy_delete_channel.command(name='thread', aliases=['thread_channel', 'th', 'text', 'txt', 'text_channel'])
 	@commands.cooldown(1, 60, commands.BucketType.user)
-	async def delete_thread(self, ctx) -> None:
+	async def _galaxy_delete_channel_thread(self, ctx) -> None:
 		""" Deletes the user's second Text Channel from their Galaxy Room. """
 
 		member = ctx.author
@@ -1630,9 +1688,9 @@ You can only add either **threads** **OR** one **voice channel**"""))
 		
 
 
-	@delete_galaxy_channel.command(name='voice', aliases=['vc', 'voice_channel'])
+	@_galaxy_delete_channel.command(name='voice', aliases=['vc', 'voice_channel'])
 	@commands.cooldown(1, 60, commands.BucketType.user)
-	async def delete_voice(self, ctx) -> None:
+	async def _galaxy_delete_channel_voice(self, ctx) -> None:
 		""" Deletes the user's second Voice Channel from their Galaxy Room. """
 
 		member = ctx.author
@@ -1665,6 +1723,90 @@ You can only add either **threads** **OR** one **voice channel**"""))
 				await self.delete_things([vc])
 
 			await ctx.send(f"**Voice Channel deleted, {member.mention}!**")
+
+
+
+	@galaxy.command(name="allow_tribe", aliases=['at', 'permit_tribe', 'add_tribe', 'allowtribe', 'permittribe', 'addtribe'])
+	@commands.cooldown(1, 60, commands.BucketType.user)
+	async def _galaxy_allow_tribe(self, ctx) -> None:
+		""" Allows your Tribe members into your Galaxy Room.  """
+
+		member = ctx.author
+
+		user_galaxy = await self.get_galaxy_txt(member.id, ctx.channel.category.id)
+		if not user_galaxy:
+			return await ctx.send(f"**This is not your room, so you cannot allow people in it, {member.mention}!**")
+
+		SlothClass = self.client.get_cog('SlothClass')
+		user_tribe = await SlothClass.get_tribe_info_by_user_id(member.id)
+		if not user_tribe['name']:
+			return await ctx.send(f"**You don't even have a tribe, you cannot do this, {member.mention}!**")
+
+		members: List[List[Union[int, str]]] = await SlothClass.get_tribe_members(tribe_name=user_tribe['name'])
+		members: List[discord.Member] = [m for m_id in members if (m := discord.utils.get(ctx.guild.members, id=m_id[0]))]
+
+		if member in members:
+			members.remove(member)
+
+		if not members:
+			return await ctx.send(f"**You don't have members in your tribe, {member.mention}!**")
+
+		# async with ctx.typing():
+		allowed = await self.handle_permissions(members, user_galaxy, ctx.guild)
+
+		if not allowed:
+			return await ctx.send(f"**For some reason, I couldn't allow any of those members, {member.mention}!**")
+
+		text: str = "**{lendisa} {subjplural} from {tribe_name} {verbplural} been allowed, {mention}!**".format(
+			lendisa=len(allowed),
+			subjplural='people' if len(allowed) > 1 else 'person',
+			tribe_name=user_tribe['name'],
+			verbplural='have' if len(allowed) > 1 else 'has',
+			mention=member.mention)
+
+		await ctx.send(text)
+
+	@galaxy.command(name="forbid_tribe", aliases=[
+		'dt', 'disallow_tribe', 'delete_tribe', 'removetribe', 'disallowtribe', 'deletetribe', 'deltribe',
+		'forbidtribe', 'remove_tribe', 'ft'])
+	@commands.cooldown(1, 60, commands.BucketType.user)
+	async def _galaxy_remove_tribe(self, ctx) -> None:
+		""" Removes your Tribe members from your Galaxy Room.. """
+
+		member = ctx.author
+
+		user_galaxy = await self.get_galaxy_txt(member.id, ctx.channel.category.id)
+		if not user_galaxy:
+			return await ctx.send(f"**This is not your room, so you cannot allow people in it, {member.mention}!**")
+
+		SlothClass = self.client.get_cog('SlothClass')
+		user_tribe = await SlothClass.get_tribe_info_by_user_id(member.id)
+		if not user_tribe['name']:
+			return await ctx.send(f"**You don't even have a tribe, you cannot do this, {member.mention}!**")
+
+		members: List[List[Union[int, str]]]  = await SlothClass.get_tribe_members(tribe_name=user_tribe['name'])
+		members: List[discord.Member] = [m for m_id in members if (m := discord.utils.get(ctx.guild.members, id=m_id[0]))]
+
+		if member in members:
+			members.remove(member)
+
+		if not members:
+			return await ctx.send(f"**You don't have members in your tribe, {member.mention}!**")
+
+		# async with ctx.typing():
+		disallowed = await self.handle_permissions(members, user_galaxy, ctx.guild, allow=False)
+	
+		if not disallowed:
+			return await ctx.send(f"**For some reason, I couldn't allow any of those members, {member.mention}!**")
+
+		text: str = "**{lendisa} {subjplural} from {tribe_name} {verbplural} been disallowed, {mention}!**".format(
+			lendisa=len(disallowed),
+			subjplural='people' if len(disallowed) > 1 else 'person',
+			tribe_name=user_tribe['name'],
+			verbplural='have' if len(disallowed) > 1 else 'has',
+			mention=member.mention)
+
+		await ctx.send(text)
 
 
 

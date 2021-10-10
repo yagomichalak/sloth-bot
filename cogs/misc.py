@@ -1,5 +1,6 @@
 import discord
 from discord.app import Option, OptionChoice
+from discord.app.commands import slash_command, user_command
 from discord.ext import commands, tasks
 from random import randint, choice
 from cogs.slothcurrency import SlothCurrency
@@ -191,6 +192,29 @@ class Misc(commands.Cog):
         em.set_footer(text=f"With ♥ from {ctx.author}", icon_url=ctx.author.display_avatar)
         await ctx.send(embed=em)
 
+    @commands.command()
+    async def roll(self, ctx, sides=None):
+        """roll a die with the number of faces given"""
+        
+        await ctx.message.delete()
+
+        if not sides:
+            sides = 6
+
+        try:
+            sides = int(sides)
+        except ValueError:
+            sides = 6
+
+        if sides > 1000000000000 or sides < 0:
+            return await ctx.send("**Enter a valid integer value**", delete_after=3)
+        
+        embed = discord.Embed(color=ctx.author.color, title=f":game_die: **YOU GOT:** **{randint(1, sides)}** :game_die: `(1 - {sides})`",
+            timestamp=ctx.message.created_at)
+        embed.set_footer(text=f"Rolled by {ctx.author}", icon_url=ctx.author.display_avatar)
+        await ctx.send(embed=embed)
+
+  
 
     # ===========
 
@@ -345,7 +369,7 @@ class Misc(commands.Cog):
         if not time:
             return await ctx.send(f"**Inform a time, {member.mention}!**")
 
-        time_dict, seconds = await self.client.get_cog('Moderation').get_mute_time(ctx=ctx, time=time)
+        time_dict, seconds = await utils.get_time_from_text(ctx=ctx, time=time)
         if not seconds:
             return
 
@@ -415,22 +439,21 @@ class Misc(commands.Cog):
         await self.delete_member_reminder(reminder_id)
         await ctx.send(f"**Successfully deleted reminder with ID `{reminder_id}`, {member.mention}!**")
 
-    # @commands.slash_command(name="dnk", guild_ids=guild_ids)
-    # async def _dnk(self, ctx) -> None:
-    #     """ Tells you something about DNK. """
-    #     await ctx.send(f"**DNK est toujours là pour les vrais !**")
+    @slash_command(name="dnk", guild_ids=guild_ids)
+    async def _dnk(self, ctx) -> None:
+        """ Tells you something about DNK. """
+        
+        await ctx.respond(f"**`Sapristi! C'est qui ? Oui, c'est lui le plus grave et inouï keum qu'on n'a jamais ouï-dire, tandis qu'on était si abasourdi et épris de lui d'être ici affranchi lorsqu'il a pris son joli gui qui ne nie ni être suivi par un souris sur son nid ni être mis ici un beau lundi !`**")
 
-    # @commands.slash_command(name="twiks", guild_ids=guild_ids)
-    # async def _twiks(self, ctx) -> None:
-    #     """ Tells you something about Twiks. """
+    @slash_command(name="twiks", guild_ids=guild_ids)
+    async def _twiks(self, ctx) -> None:
+        """ Tells you something about Twiks. """
 
-    #     await ctx.send(f"**Twiks est mon frérot !**")
+        await ctx.respond(f"**Twiks est mon frérot !**")
 
-    # @commands.user_command(name="click", guild_ids=guild_ids)
-    # async def _click(self, ctx, user: discord.Member) -> None:
-    #     """ Clicks on a user. """
-
-    #     await ctx.send(f"**{ctx.author.mention} clicked on {user.mention}!**")
+    @user_command(name="Help", guild_ids=guild_ids)
+    async def _help(self, ctx, user: discord.Member) -> None:
+        await ctx.respond(f"**{ctx.author.mention} needs your help, {user.mention}!**")
 
 
 
