@@ -2,6 +2,7 @@ import discord
 from discord.app import Option, OptionChoice
 from discord.app.commands import slash_command
 from discord.ext import commands
+from cogs.slothcurrency import SlothCurrency
 from mysqldb import *
 from datetime import datetime
 import os
@@ -390,7 +391,11 @@ class SlothReputation(commands.Cog):
     @commands.command()
     async def rep(self, ctx, member: discord.Member = None):
         """ Gives someone reputation points.
-        :param member: The member to give the reputation. """
+        :param member: The member to give the reputation.
+        
+        * Cost: 1łł 
+
+        Ps: The repped person gets 3łł and 100 reputation points. """
         
         if not member:
             await ctx.message.delete()
@@ -428,18 +433,23 @@ class SlothReputation(commands.Cog):
         if 'sabotaged' in target_fx:
             return await ctx.send(f"**You can't rep {member.mention} because they have been sabotaged, {ctx.author.mention}!**")
 
-        epoch = datetime.utcfromtimestamp(0)
-        time_xp = (datetime.utcnow() - epoch).total_seconds()
+        SlothCurrency = self.client.get_cog('SlothCurrency')
+        user_currency = await SlothCurrency.get_user_currency(ctx.author.id)
+        if user_currency[0][1] >= 1:
+            await SlothCurrency.update_user_money(ctx.author.id, -1)
+        else:
+            return await ctx.send(f"**You need 1łł to rep someone, {ctx.author.mention}!**")
+
+        time_xp = await utils.get_timestamp()
         sub_time = time_xp - user[0][5]
         cooldown = 36000
         if int(sub_time) >= int(cooldown):
             await self.update_user_score_points(ctx.author.id, 100)
             await self.update_user_score_points(member.id, 100)
             await self.update_user_rep_time(ctx.author.id, time_xp)
-            await self.update_user_money(ctx.author.id, 5)
-            await self.update_user_money(member.id, 5)
+            await SlothCurrency.update_user_money(member.id, 3)
             return await ctx.send(
-                f"**{ctx.author.mention} repped {member.mention}! :leaves:Both of them got 5łł:leaves:**")
+                f"**{ctx.author.mention} repped {member.mention}! 🍃The repped person got 3łł🍃**")
         else:
             m, s = divmod(int(cooldown) - int(sub_time), 60)
             h, m = divmod(m, 60)
