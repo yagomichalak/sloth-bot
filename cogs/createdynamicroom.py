@@ -46,7 +46,7 @@ class DynRoomUserVCstampDatabase:
 
     @commands.has_permissions(administrator=True)
     @commands.command(hidden=True)
-    async def drop_table_user_vc_ts(self, ctx) -> None:
+    async def drop_table_user_dr_vc_ts(self, ctx) -> None:
         """ (ADM) Drops the DynRoomUserVCstamp table. """
 
         await ctx.message.delete()
@@ -711,12 +711,15 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
         can_see_everything = any([int(os.getenv('SHOW_ME_EVERYTHING_ROLE_ID')) in roles_tuple])
 
         permissions_rooms = await self.get_available_rooms(roles_tuple, see_everything=can_see_everything, object_form=True)
+        if not permissions_rooms:
+            return None
 
         available_rooms = await self.get_rooms_by_ids(tuple([permission.room_id for permission in permissions_rooms]), object_form=True)
 
         return available_rooms
 
     async def get_room_quantity(self, room_list: List[DynamicRoom]) -> List[DynamicRoom]:
+        
         room_ids = [room.room_id for room in room_list]
 
         for r in room_list:
