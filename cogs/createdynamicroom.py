@@ -578,7 +578,7 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
                 await member.send(
                     f"**You're on a cooldown, try again in {round(60 - (the_time - old_time))} seconds!**",)
                 # return await member.move_to(None)
-                # return
+                return
             if the_time - old_time >= 60:
                 await self.update_user_dr_vc_ts(member.id, the_time)
 
