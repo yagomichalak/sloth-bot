@@ -1,0 +1,22 @@
+{
+    "sb_btn_1_id": {"style": 1, "path": "media/audios/", "emoji": "🔉"},
+    "sb_btn_2_id": {"style": 1, "path": "media/audios/", "emoji": "🔉"},
+    "sb_btn_3_id": {"style": 1, "path": "media/audios/", "emoji": "🔉"},
+    "sb_btn_4_id": {"style": 1, "path": "media/audios/", "emoji": "🔉"},
+    "sb_btn_5_id": {"style": 1, "path": "media/audios/", "emoji": "🔉"},
+    "sb_btn_6_id": {"style": 1, "path": "media/audios/", "emoji": "🔉"},
+    "sb_btn_7_id": {"style": 2, "path": "media/audios/", "emoji": "👾"},
+    "sb_btn_8_id": {"style": 3, "path": "media/audios/", "emoji": "🧑‍🚀"},
+    "sb_btn_9_id": {"style": 2, "path": "media/audios/", "emoji": "👾"},
+    "sb_btn_10_id": {"style": 1, "path": "media/audios/", "emoji": "🔉"},
+    "sb_btn_11_id": {"style": 1, "path": "media/audios/", "emoji": "🔉"},
+    "sb_btn_12_id": {"style": 3, "path": "media/audios/", "emoji": "🧑‍🚀"},
+    "sb_btn_13_id": {"style": 4, "path": "media/audios/violets.mp3", "emoji": "🟣"},
+    "sb_btn_14_id": {"style": 3, "path": "media/audios/", "emoji": "🧑‍🚀"},
+    "sb_btn_15_id": {"style": 1, "path": "media/audios/", "emoji": "🔉"},
+    "sb_btn_16_id": {"style": 1, "path": "media/audios/", "emoji": "🔉"},
+    "sb_btn_17_id": {"style": 2, "path": "media/audios/", "emoji": "👾"},
+    "sb_btn_18_id": {"style": 3, "path": "media/audios/", "emoji": "🧑‍🚀"},
+    "sb_btn_19_id": {"style": 2, "path": "media/audios/", "emoji": "👾"},
+    "sb_btn_20_id": {"style": 1, "path": "media/audios/", "emoji": "🔉"}
+}

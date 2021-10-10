@@ -1,9 +1,10 @@
 from datetime import datetime
 import re
 from pytz import timezone
-from discord.ext import commands
-from typing import List, Dict, Optional
 import discord
+from discord.ext import commands
+from typing import List, Dict, Optional, Union
+from extra.customerrors import CommandNotReady
 
 async def get_timestamp(tz: str = 'Etc/GMT') -> int:
     """ Gets the current timestamp.
@@ -52,8 +53,6 @@ def is_allowed(roles: List[int], check_adm: Optional[bool] = True, throw_exc: Op
 
         if throw_exc:
             raise commands.MissingAnyRole(roles)
-        
-        print('true')
 
     return commands.check(real_check)
 
@@ -183,9 +182,152 @@ async def get_mentions(message: discord.Message) -> List[discord.Member]:
 
     return members
 
+async def get_roles(message: discord.Message) -> List[discord.Role]:
+    """ Get role mentions from a specific message.
+    :param message: The message to get the mentions from. """
+
+    guild = message.guild
+
+    roles: List[discord.Role] = [
+        m for word in message.content.split()
+        if word.isdigit() and (m := discord.utils.get(guild.roles, id=int(word)))
+        or (m := discord.utils.get(guild.roles, name=str(word))
+        # or (m := await commands.RoleConverter().convert(message, message.content))
+        )
+    ]
+    for role_id in re.findall(r'<@&([0-9]{15,20})>$', message.content):
+        if role := discord.utils.get(guild.roles, id=int(role_id)):
+            roles.append(role)
+
+    # print('ihi', list(message.role_mentions))
+    # roles.extend(message.mentions)
+    roles = list(set(roles))
+
+    return roles
+
+async def get_voice_channel_mentions(message: discord.Message) -> List[discord.VoiceChannel]:
+    """ Get voice channel mentions from a specific message.
+    :param message: The message to get the mentions from. """
+
+    guild = message.guild
+
+    channel_mentions = [
+        m for word in message.content.split()
+        if word.isdigit() and (m := discord.utils.get(guild.voice_channels, id=int(word)))
+        or (m := discord.utils.get(guild.voice_channels, name=str(word)))
+    ]
+
+    channel_mentions.extend(list(map(lambda c: isinstance(c, discord.VoiceChannel), message.channel_mentions)))
+    channel_mentions = list(set(channel_mentions))
+
+    return channel_mentions
+
 async def disable_buttons(view: discord.ui.View) -> None:
     """ Disables all buttons from a view.
     :param view: The view from which to disable the buttons. """
 
     for child in view.children:
         child.disabled = True
+
+
+
+async def audio(client: commands.Bot, voice_channel: discord.VoiceChannel, member: discord.Member, audio_path: str) -> None:
+    """ Plays an audio.
+    :param client: The client.
+    :param voice_channel: The voice channel in which to play the audio.
+    :param member: A member to get guild context from.
+    :param audio_path: The path of the audio to play. """
+
+    # Resolves bot's channel state
+    bot_state = member.guild.voice_client
+
+    try:
+        if bot_state and bot_state.channel and bot_state.channel != voice_channel:
+            await bot_state.disconnect()
+            await bot_state.move_to(voice_channel)
+        elif not bot_state:
+            voicechannel = discord.utils.get(member.guild.channels, id=voice_channel.id)
+            vc = await voicechannel.connect()
+
+        # await asyncio.sleep(2)
+        voice_client: discord.VoiceClient = discord.utils.get(client.voice_clients, guild=member.guild)
+        try:
+            voice_client.stop()
+        except Exception as e:
+            pass
+
+        if voice_client and not voice_client.is_playing():
+            audio_source = discord.FFmpegPCMAudio(audio_path)
+            voice_client.play(audio_source)
+        else:
+            print('couldnt play it!')
+
+    except Exception as e:
+        print(e)
+        return
+
+async def greedy_member_reason(ctx, message : str = None):
+    """A converter that greedily member or users until it can't.
+    The member search ends on the first member not found or when the string does not match a member identifier.
+    Everything else is considered a reason."""
+
+    users = []
+    reason = None
+
+    if not message:
+        return users, reason
+
+    # Temporarily converts spaces between quotes by colons
+    if message.rfind('"') != -1:
+        for word in re.findall('"([^"]*)"', message):
+            message = message.replace('"' + word + '"', word.replace(" ", ":"))
+
+    message = message.split()
+
+    for pos, word in enumerate(message):
+        word = word.replace(":", " ")
+        # Checks if it is an ID, a mention or name#discriminator
+        if (len(word) >= 15 and len(word) <= 20 and word.isdigit()) or re.match(r'<@!?([0-9]{15,20})>$', word) or (len(word) > 5 and word[-5] == '#'):
+
+            # Member search
+            try:
+                user = await commands.MemberConverter().convert(ctx, word)
+                # Ignores member if found by username
+                if user.name == word or user.nick == word:
+                    del user
+
+            except commands.errors.BadArgument:
+                user = None
+            # User search (if cannot found a member)
+            if not user:
+                try:
+                    user = await commands.UserConverter().convert(ctx, word)
+                    # Ignores member if found by username
+                    if user.name == word:
+                        del user
+
+                except commands.errors.BadArgument:
+                    user = None
+
+            if not user:
+                reason = ' '.join(message[pos:])
+                return list(set(users)), reason
+
+            users.append(user)
+
+        # When does not find a string in the member format
+        else:
+            reason = ' '.join(message[pos:])
+            return list(set(users)), reason
+
+    return list(set(users)), reason
+
+
+def not_ready():
+    """ Makes a command not be usable. """
+
+    async def real_check(ctx):
+        """ Performs the real check. """
+        raise CommandNotReady()
+
+    return commands.check(real_check)

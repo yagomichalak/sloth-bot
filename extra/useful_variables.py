@@ -88,7 +88,7 @@ different_class_roles = {
         "javascript and typescript", "sql", "programming",
         "computer science", "cs50", "cs", "web dev",
         "web development", "comp sci", "cyber security",
-        "security"
+        "security", "haskell"
     ],
     "conlangs": [
         "esperanto", "toki pona"
@@ -146,6 +146,15 @@ different_class_roles = {
     ],
     "korean": [
         "한국어"
+    ], 
+    "celtic": [
+        "irish"
+    ], 
+    "filipino": [
+        "tagalog"
+    ], 
+    "cebuano-bisaya": [
+        "cebuano", "bisaya"
     ]
 }
 
@@ -164,7 +173,8 @@ flag_badges = {
     "hypesquad_bravery": ['badge_hypesquad_bravery.png', (595, 10)],
     "verified_bot_developer": ['badge_bot_dev.png', (645, 10)],
     "partner": ['badge_discord_partnered.png', (695, 10)],
-    "staff": ['badge_discord_partnered.png', (745, 10)],
+    "discord_certified_moderator": ["badge_discord_certified_moderator.png", (745, 10)],
+    "staff": ['badge_discord_partnered.png', (745, 530)]
 }
 
 banned_links = [

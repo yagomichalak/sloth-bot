@@ -10,6 +10,7 @@ from random import choice
 bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
 announcement_channel_id = int(os.getenv('ANNOUNCEMENT_CHANNEL_ID'))
 mod_role_id = int(os.getenv('MOD_ROLE_ID'))
+senior_mod_role_id = int(os.getenv('SENIOR_MOD_ROLE_ID'))
 allowed_roles = [int(os.getenv('OWNER_ROLE_ID')), int(os.getenv('ADMIN_ROLE_ID')), mod_role_id]
 general_channel_id = int(os.getenv('GENERAL_CHANNEL_ID'))
 
@@ -134,9 +135,9 @@ If you have any questions feel free to ask! And if you experience any type of pr
         await announce_channel.send(msg[1])
 
     @commands.command()
-    @commands.has_permissions(administrator=True)
+    @utils.is_allowed([senior_mod_role_id], throw_exc=True)
     async def dm(self, ctx, member: discord.Member = None, *, message=None):
-        """ (ADM) Sends a Direct Message to someone.
+        """ (SeniorMod) Sends a Direct Message to someone.
         :param member: The member to send the message to.
         :param message: The message to send. """
 

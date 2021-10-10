@@ -1,10 +1,10 @@
 import discord
 from discord.ext import commands, tasks, menus
 from mysqldb import the_database
-from typing import Union, List, Any, Dict, Optional
-from extra.customerrors import MissingRequiredSlothClass, ActionSkillOnCooldown, SkillsUsedRequirement, CommandNotReady
-from extra.menu import ConfirmSkill, prompt_message, prompt_number, SlothClassPagination
-from extra.slothclasses.player import Skill, Player
+from typing import Union, List, Dict, Optional
+from extra.customerrors import ActionSkillOnCooldown, SkillsUsedRequirement, CommandNotReady
+from extra.menu import SlothClassPagination
+from extra.slothclasses.player import Skill
 from extra import utils
 import os
 
@@ -177,7 +177,7 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
 
         ctx.author = member
         for c in class_commands:
-            if c.hidden or c.parent or not c.checks:
+            if c.hidden or (hasattr(c, 'parent') and c.parent) or not c.checks:
                 continue
 
             elif not [check for check in c.checks if check.__qualname__ == 'Player.skill_mark.<locals>.real_check']:
@@ -274,7 +274,7 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
         embed.add_field(name="🔴 Munk's 4th Skill:", value="**Skill**: `Get Quest`.", inline=True)
         embed.add_field(name="🔴 Prawler's 4th Skill:", value="**Skill**: `Kidnap`.", inline=False)
         embed.add_field(name="🔴 Seraph's 4th Skill:", value="**Skill**: `Attain Grace`.", inline=True)
-        embed.add_field(name="🔴 Warrior's 4th Skill:", value="**Skill**: `??`.", inline=True)
+        embed.add_field(name="🔴 Warrior's 4th Skill:", value="**Skill**: `Poison`.", inline=True)
 
         await ctx.send(embed=embed)
 
@@ -296,7 +296,8 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
         # Loops all Sloth Classes
         for name, sloth_class in classes.items():
 
-            class_cmds = sloth_class.get_commands(sloth_class)
+            cog_commands = [c for c in sloth_class.__cog_commands__ if hasattr(c, 'parent') and c.parent is None]
+            class_cmds = cog_commands
             skills = []
 
             # Loops all commands of the Sloth Class
