@@ -1070,7 +1070,6 @@ class SlothCurrency(commands.Cog):
             return True
 
     async def exchange(self, ctx):
-
         """ Exchange your status into leaves (łł) """
 
         user_info = await self.get_user_activity_info(ctx.author.id)
@@ -1079,9 +1078,8 @@ class SlothCurrency(commands.Cog):
 
         user_found = await self.get_user_currency(ctx.author.id)
         if not user_found:
-            epoch = datetime.utcfromtimestamp(0)
-            the_time = (datetime.utcnow() - epoch).total_seconds()
-            await self.insert_user_currency(ctx.author.id, the_time - 61)
+            current_ts = await utils.get_timestamp()
+            await self.insert_user_currency(ctx.author.id, current_ts - 61)
 
         user_message = user_info[0][1]
         user_time = user_info[0][2]
@@ -1095,10 +1093,10 @@ class SlothCurrency(commands.Cog):
         if not cmsg == ctime == 0:
             if cmsg > 0:
                 embed.add_field(name="__**Messages:**__",
-                                value=f"Exchanged `{message_times * 50}` messages for `{cmsg}`łł;", inline=False)
+                                value=f"Exchanged `{message_times * 100}` messages for `{cmsg}`łł;", inline=False)
             if ctime > 0:
                 embed.add_field(name="__**Time:**__",
-                                value=f"Exchanged `{(time_times * 1800) / 60}` minutes for `{ctime}`łł;", inline=False)
+                                value=f"Exchanged `{(time_times * 3600) / 60}` minutes for `{ctime}`łł;", inline=False)
             return await ctx.send(embed=embed)
         else:
             return await ctx.send("**You have nothing to exchange!**")
@@ -1108,15 +1106,15 @@ class SlothCurrency(commands.Cog):
         exchanged_money = times = 0
 
         while True:
-            if messages_left >= 50:
+            if messages_left >= 100:
                 times += 1
-                messages_left -= 50
+                messages_left -= 100
                 exchanged_money += 3
                 await asyncio.sleep(0)
                 continue
                 # return await self.convert_messages(member_id, messages_left, exchanged_money, times)
             else:
-                await self.update_user_server_messages(member_id, -times * 50)
+                await self.update_user_server_messages(member_id, -times * 100)
                 await self.update_user_money(member_id, exchanged_money)
                 return exchanged_money, times
 
