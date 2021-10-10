@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 from discord.ext import commands, tasks, flags
 
 from extra import utils
-from typing import Dict
+from typing import Dict, List
 import json
 import os
 from datetime import datetime
@@ -538,7 +538,7 @@ async def _giveaway_list_slash(ctx) -> None:
 
 # End of slash commands
 
-forbidden_files: list[str] = [
+forbidden_files: List[str] = [
     'createdynamicroom.py'
 ]
 
