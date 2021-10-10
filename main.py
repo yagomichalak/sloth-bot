@@ -538,8 +538,12 @@ async def _giveaway_list_slash(ctx) -> None:
 
 # End of slash commands
 
+forbidden_files: list[str] = [
+    'createdynamicroom.py'
+]
+
 for filename in os.listdir('./cogs'):
-    if filename.endswith('.py'):
+    if filename.endswith('.py') and filename not in forbidden_files:
         client.load_extension(f'cogs.{filename[:-3]}')
 
 client.run(os.getenv('TOKEN'))
