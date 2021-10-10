@@ -3,7 +3,6 @@ from discord.app import Option, OptionChoice
 from discord.app.commands import slash_command, user_command
 from discord.ext import commands, tasks
 from random import randint, choice
-from cogs.slothcurrency import SlothCurrency
 from datetime import datetime
 import aiohttp
 from pytz import timezone
@@ -98,12 +97,15 @@ class Misc(commands.Cog):
 
     @commands.command(aliases=['lotto'])
     async def lottery(self, ctx, g1=None, g2=None, g3=None):
-        '''
-        Enter the lottery and see if you win!
+        """ Enter the lottery and see if you win!
         :param g1: Guess 1.
         :param g2: Guess 2.
         :param g3: Guess 3.
-        '''
+        
+        * Cost: 5łł. """
+
+        author = ctx.author
+
         await ctx.message.delete()
         if not g1:
             return await ctx.send("**You informed 0 guesses, 3 guesses are needed!**", delete_after=3)
@@ -123,18 +125,19 @@ class Misc(commands.Cog):
             if n <= 0 or n > 5:
                 return await ctx.send(f"**Each number must be between 1-5!**", delete_after=3)
 
+        SlothCurrency = self.client.get_cog('SlothCurrency')
+
         # Check if user is not on cooldown
-        user_secs = await SlothCurrency.get_user_currency(ctx, ctx.author.id)
-        epoch = datetime.utcfromtimestamp(0)
-        the_time = (datetime.utcnow() - epoch).total_seconds()
+        user_secs = await SlothCurrency.get_user_currency(author.id)
+        current_ts = await utils.get_timestamp()
         if not user_secs:
-            await SlothCurrency.insert_user_currency(ctx, ctx.author.id, the_time - 61)
-            user_secs = await SlothCurrency.get_user_currency(ctx, ctx.author.id)
+            await SlothCurrency.insert_user_currency(author.id, current_ts - 61)
+            user_secs = await SlothCurrency.get_user_currency(author.id)
 
         if user_secs[0][6]:
-            sub_time = the_time - user_secs[0][6]
+            sub_time = current_ts - user_secs[0][6]
             if sub_time >= 1200:
-                await SlothCurrency.update_user_lotto_ts(ctx, ctx.author.id, the_time)
+                await SlothCurrency.update_user_lotto_ts(author.id, current_ts)
             else:
                 m, s = divmod(1200 - int(sub_time), 60)
                 h, m = divmod(m, 60)
@@ -149,9 +152,14 @@ class Misc(commands.Cog):
                         f"**You're on cooldown, try again in {s:02d} seconds.**",
                         delete_after=5)
         else:
-            await SlothCurrency.update_user_lotto_ts(ctx, ctx.author.id, the_time)
+            await SlothCurrency.update_user_lotto_ts(author.id, current_ts)
 
-        author = ctx.author
+        if user_secs[0][1] >= 5:
+            await SlothCurrency.update_user_money(author.id, -5)
+        else:
+            return await ctx.send(f"**You need 5łł to play the lottery, {author.mention}!**")
+
+        author = author
         numbers = []
         for x in range(3):
             numbers.append(randint(1, 5))
@@ -159,10 +167,10 @@ class Misc(commands.Cog):
         string_numbers = [str(i) for i in numbers]
         if g1 == numbers[0] and g2 == numbers[1] and g3 == numbers[2]:
             await ctx.send(f'**{author.mention} You won! Congratulations on winning the lottery with the numbers ({g1}, {g2},{g3})!🍃+100łł!**')
-            if not await SlothCurrency.get_user_currency(ctx, ctx.author.id):
+            if not await SlothCurrency.get_user_currency(author.id):
 
-                await SlothCurrency.insert_user_currency(ctx, ctx.author.id, the_time - 61)
-            await SlothCurrency.update_user_money(ctx, ctx.author.id, 100)
+                await SlothCurrency.insert_user_currency(author.id, current_ts - 61)
+            await SlothCurrency.update_user_money(author.id, 100)
 
         else:
             await ctx.send(
