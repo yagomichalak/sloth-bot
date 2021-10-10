@@ -518,7 +518,7 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
         if not await self.table_dynamic_rooms_exists():
             return
 
-        # Looks for empy nonperma rooms to delete
+        # Looks for empty nonperma rooms to delete
         all_rooms = await self.get_all_dynamic_rooms(object_form=True)
         for room in all_rooms:
             guild = self.client.get_guild(room.guild_id)
