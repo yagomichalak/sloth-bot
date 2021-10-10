@@ -28,6 +28,7 @@ last_deleted_message = []
 suspect_channel_id = int(os.getenv('SUSPECT_CHANNEL_ID'))
 
 mod_role_id = int(os.getenv('MOD_ROLE_ID'))
+preference_role_id = int(os.getenv('PREFERENCE_ROLE_ID'))
 
 senior_mod_role_id: int = int(os.getenv('SENIOR_MOD_ROLE_ID'))
 allowed_roles = [int(os.getenv('OWNER_ROLE_ID')), int(os.getenv('ADMIN_ROLE_ID')), senior_mod_role_id, mod_role_id]
@@ -455,7 +456,7 @@ class Moderation(*moderation_cogs):
 		if not roles:
 			return await ctx.send(f"**User had no roles, {author.mention}!**")
 
-		roles = ', '.join([f"<@&{rid[1]}>" for rid in roles])
+		roles = ', '.join([f"<@&{rid[1]}>" for rid in roles if rid[1] != preference_role_id])
 
 		embed: discord.Embed = discord.Embed(
 			title="__Removed Roles__",
