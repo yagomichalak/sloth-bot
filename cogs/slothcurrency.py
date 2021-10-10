@@ -1200,8 +1200,8 @@ class SlothCurrency(commands.Cog):
 
         tax_percentage: int = 5
 
-        bank_money = round((money*tax_percentage)/100)
-        taxed_money = money - bank_money
+        bank_money = round((money*tax_percentage)/100) if money >= 20 else 1
+        taxed_money = money - bank_money if money >= 20 else money -1
 
 
         SlothClass = self.client.get_cog('SlothClass')
@@ -1216,16 +1216,23 @@ class SlothCurrency(commands.Cog):
             await self.update_user_money(member.id, target_money)
             await self.update_user_money(ctx.author.id, -money)
             await self.update_user_money(wired_user[0], cybersloth_money)
+
+            if money >= 20:
+                description: str = f"{ctx.author.mention} tried to transfer `{money}łł` to {member.mention}, "\
+                            f"but the **Sloth Bank** taxed `{tax_percentage}%` of it; `{bank_money}` "\
+                            f"and <@{wired_user[0]}> siphoned off `{siphon_percentage}%` of it; `{cybersloth_money}łł`! "\
+                            f"So {member.mention} actually got `{target_money}łł`!"
+            else:
+                description: str = f"{ctx.author.mention} tried to transfer `{money}łł` to {member.mention}, "\
+                            f"but the **Sloth Bank** taxed {bank_money}łł from it "\
+                            f"and <@{wired_user[0]}> siphoned off `{siphon_percentage}%` of it; `{cybersloth_money}łł`! "\
+                            f"So {member.mention} actually got `{target_money}łł`!"
+
             await ctx.send(
                 content=f"{ctx.author.mention}, {member.mention}, <@{wired_user[0]}>",
                 embed=discord.Embed(
                     title="__Intercepted Transfer__",
-                    description=(
-                        f"{ctx.author.mention} tried to transfer `{money}łł` to {member.mention}, "
-                        f"but the **Sloth Bank** taxed `5%` of it; `{bank_money}`"
-                        f"and <@{wired_user[0]}> siphoned off `{siphon_percentage}%` of it; `{cybersloth_money}łł`! "
-                        f"So {member.mention} actually got `{target_money}łł`!"
-                    ),
+                    description=description,
                     color=ctx.author.color,
                     timestamp=ctx.message.created_at)
             )
@@ -1233,11 +1240,19 @@ class SlothCurrency(commands.Cog):
         else:
             await self.update_user_money(member.id, taxed_money)
             await self.update_user_money(ctx.author.id, -money)
-            await ctx.send(
-                f"{ctx.author.mention} transferred `{money}łł` to {member.mention}! "
-                f"but the **Sloth Bank** taxed `5%` of it; `{bank_money}łł`. "
-                f"So {member.mention} actually got `{taxed_money}łł`!"
-            )
+
+            if money >= 20:
+                await ctx.send(
+                    f"{ctx.author.mention} transferred `{money}łł` to {member.mention}! "
+                    f"but the **Sloth Bank** taxed `{tax_percentage}%` of it; `{bank_money}łł`. "
+                    f"So {member.mention} actually got `{taxed_money}łł`!"
+                )
+            else:
+                await ctx.send(
+                    f"{ctx.author.mention} transferred `{money}łł` to {member.mention}! "
+                    f"but the **Sloth Bank** taxed `{bank_money}łł` from it. "
+                    f"So {member.mention} actually got `{taxed_money}łł`!"
+                )
 
     async def get_user_pfp(self, member, thumb_width: int = 59):
         # im = Image.open(requests.get(member.display_avatar, stream=True).raw)
