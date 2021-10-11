@@ -541,6 +541,7 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
                 await self.delete_dynamic_rooms(room_id)
 
     async def prefetch_language_room(self):
+        """ Prefetch language rooms from database """
         self.language_rooms = await super().get_all_language_room(object_form=True)
 
     @commands.Cog.listener()
@@ -556,16 +557,14 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
                 len_users = len(user_voice_channel.members)
                 if len_users == 0 and user_voice_channel.id != self.lr_vc_id:
                     room_data = await self.get_dynamic_room_vc_id(user_voice_channel.id, object_form=True)
-                    # print(room_data)
 
                     if not room_data or not room_data.is_perma_room:
                         if room_data:
                             await self.delete_dynamic_rooms(room_data.room_id)
-                        await self.delete_things([user_voice_channel])
-                    try:
-                        pass
-                    except Exception as e:
-                        print(e)
+                        try:
+                            await self.delete_things([user_voice_channel])
+                        except Exception as e:
+                            print(e)
 
         # Checks if the user is joining the create a room VC
         if not after.channel:
@@ -586,7 +585,7 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
             await self.create_dynamic_room(member)
             # await self.initiate_member_room_interaction(member)
 
-    async def create_dynamic_room(self, member: discord.member) -> None:
+    async def create_dynamic_room(self, member: discord.Member) -> None:
         """ Prompts member to create a dynamic room.
         :param member: The member to prompt. """
 
@@ -630,7 +629,10 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
             if len(vc_channel.members) == 0:
                 await vc_channel.delete()
 
-    async def get_language_room_id(self, room_id) -> List[List[int]]:
+    async def get_language_room_id(self, room_id: int) -> List[List[int]]:
+        """ Returns language room from given id
+        :param room_id: Id of the room to be fetched. """
+
         if self.language_rooms:
             for room in self.language_rooms:
                 if room.room_id == room_id:
@@ -648,11 +650,7 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
             except:
                 pass
 
-    async def try_to_create(
-            self,
-            kind: str, category: discord.CategoryChannel = None,
-            channel: discord.TextChannel = None, guild: Optional[discord.Guild] = None, owner: Optional[discord.Member] = None, **kwargs: Any
-    ) -> Union[bool, discord.TextChannel, discord.VoiceChannel, discord.CategoryChannel, discord.Thread]:
+    async def try_to_create(self, kind: str, category: discord.CategoryChannel = None, **kwargs: Any) -> Union[bool, discord.VoiceChannel]:
         """ Try to create something.
         :param thing: The thing to try to create.
         :param kind: Kind of creation. (txt, vc, cat, thread)
@@ -663,25 +661,15 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
         :param kwargs: The arguments to inform the creations. """
 
         try:
-            if kind == 'text':
-                the_thing = await category.create_text_channel(**kwargs)
-            elif kind == 'voice':
+            if kind == 'voice':
                 the_thing = await category.create_voice_channel(**kwargs)
-            elif kind == 'category':
-                the_thing = await guild.create_category(**kwargs)
-            elif kind == 'thread':
-                start_message = await channel.send(kwargs['name'])
-                await start_message.pin(reason="Galaxy Room's Thread Creation")
-                the_thing = await start_message.create_thread(**kwargs)
-                if owner:
-                    await the_thing.add_user(owner)
         except Exception as e:
             print(e)
             return False
         else:
             return the_thing
 
-    async def set_language_channel_permissions(self, guild, room_id, vc):
+    async def set_language_channel_permissions(self, guild: discord.Guild, room_id: int, vc):
         """ set channel permissions given room_id and the voice channel
         :param guild: discord server instance.
         :param room_id: id of the language room.
@@ -720,6 +708,9 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
         return available_rooms
 
     async def get_room_quantity(self, room_list: List[DynamicRoom]) -> List[DynamicRoom]:
+        """ Returns room quantity from given IDs
+        :param room_list: list of room ids """
+
         room_ids = [room.room_id for room in room_list]
 
         for r in room_list:
@@ -733,16 +724,16 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
                 if r.room_id == room_id:
                     r.current_quantity = quant
 
-
         return room_list
 
     async def initiate_member_room_interaction(self, member: discord.Member) -> Union[List[DynamicRoom], None]:
         """ initiate interaction with user to create room
         :param member: Member to initiate interaction. """
+
         available_rooms_list = await self.get_language_rooms_list_member(member)
 
         if not available_rooms_list:
-            await member.send(f"**Nothing to see here**")
+            await member.send(f"**Nothing to see here, don't bother waiting.**")
             return None
 
         available_rooms_list = await self.get_room_quantity(available_rooms_list)
