@@ -539,7 +539,7 @@ async def _giveaway_list_slash(ctx) -> None:
 # End of slash commands
 
 forbidden_files: List[str] = [
-    'createdynamicroom.py'
+    # 'createdynamicroom.py'
 ]
 
 for filename in os.listdir('./cogs'):
