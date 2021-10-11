@@ -229,48 +229,51 @@ class Social(commands.Cog):
 
     # Shows all the info about a user
     @commands.command(aliases=['user', 'whois', 'who_is'])
-    async def userinfo(self, ctx, member: Union[discord.Member, discord.User] = None):
+    async def userinfo(self, ctx, *, message : str = None):
         """ Shows all the information about a member.
         :param member: The member to show the info.
         :return: An embedded message with the user's information """
+    
+        members, _ = await utils.greedy_member_reason(ctx, message)
 
-        member = ctx.author if not member else member
+        members = [ctx.author] if not members else members
 
-        embed = discord.Embed(colour=member.color, timestamp=ctx.message.created_at)
+        for member in members:
+            embed = discord.Embed(colour=member.color, timestamp=ctx.message.created_at, description=f"\n<@{member.id}>")
 
-        embed.set_author(name=f"User Info: {member}")
-        embed.set_thumbnail(url=member.display_avatar)
-        embed.set_footer(text=f"Requested by {ctx.author}", icon_url=ctx.author.display_avatar)
+            embed.set_author(name=f"User Info: {member}")
+            embed.set_thumbnail(url=member.display_avatar)
+            embed.set_footer(text=f"Requested by {ctx.author}", icon_url=ctx.author.display_avatar)
 
-        embed.add_field(name="ID:", value=member.id, inline=False)
+            embed.add_field(name="ID:", value=member.id, inline=False)
 
-        if hasattr(member, 'guild'):
-            embed.add_field(name="Guild name:", value=member.display_name, inline=False)
-            sorted_time_create = f"<t:{int(member.created_at.timestamp())}:R>"
-            sorted_time_join = f"<t:{int(member.joined_at.timestamp())}:R>"
+            if hasattr(member, 'guild'):
+                embed.add_field(name="Guild name:", value=member.display_name, inline=False)
+                sorted_time_create = f"<t:{int(member.created_at.timestamp())}:R>"
+                sorted_time_join = f"<t:{int(member.joined_at.timestamp())}:R>"
 
-            embed.add_field(name="Created at:", value=f"{member.created_at.strftime('%d/%m/%y')} ({sorted_time_create}) **GMT**",
-                            inline=False)
-            embed.add_field(name="Joined at:", value=f"{member.joined_at.strftime('%d/%m/%y')} ({sorted_time_join}) **GMT**", inline=False)
+                embed.add_field(name="Created at:", value=f"{member.created_at.strftime('%d/%m/%y')} ({sorted_time_create}) **GMT**",
+                                inline=False)
+                embed.add_field(name="Joined at:", value=f"{member.joined_at.strftime('%d/%m/%y')} ({sorted_time_join}) **GMT**", inline=False)
 
-            embed.add_field(name="Top role:", value=member.top_role.mention, inline=False)
+                embed.add_field(name="Top role:", value=member.top_role.mention, inline=False)
 
-        embed.add_field(name="Bot?", value=member.bot)
+            embed.add_field(name="Bot?", value=member.bot)
 
-        view = QuickButtons(client=self.client, ctx=ctx, target_member=member)
-        if not await utils.is_allowed([mod_role_id, admin_role_id]).predicate(ctx):
-            view.children.remove(view.children[4])
-            view.children.remove(view.infractions_button)
-            view.children.remove(view.fake_accounts_button)
-        else:
-            watchlist = await self.client.get_cog('Moderation').get_user_watchlist(member.id)
-            if watchlist:
-                message_url = f"https://discord.com/channels/{ctx.guild.id}/{watchlist_channel_id}/{watchlist[1]}"
-                view.children[4].url = message_url
+            view = QuickButtons(client=self.client, ctx=ctx, target_member=member)
+            if not await utils.is_allowed([mod_role_id, admin_role_id]).predicate(ctx):
+                view.children.remove(view.children[4])
+                view.children.remove(view.infractions_button)
+                view.children.remove(view.fake_accounts_button)
             else:
-                view.children[4].disabled = True
+                watchlist = await self.client.get_cog('Moderation').get_user_watchlist(member.id)
+                if watchlist:
+                    message_url = f"https://discord.com/channels/{ctx.guild.id}/{watchlist_channel_id}/{watchlist[1]}"
+                    view.children[4].url = message_url
+                else:
+                    view.children[4].disabled = True
 
-        await ctx.send("\u200b", embed=embed, view=view)
+            await ctx.send("\u200b", embed=embed, view=view)
 
 
     # Sends a random post from the meme subreddit

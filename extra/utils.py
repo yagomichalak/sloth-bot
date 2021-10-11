@@ -5,6 +5,7 @@ import discord
 from discord.ext import commands
 from typing import List, Dict, Optional, Union
 from extra.customerrors import CommandNotReady
+from collections import OrderedDict
 
 async def get_timestamp(tz: str = 'Etc/GMT') -> int:
     """ Gets the current timestamp.
@@ -311,16 +312,16 @@ async def greedy_member_reason(ctx, message : str = None):
 
             if not user:
                 reason = ' '.join(message[pos:])
-                return list(set(users)), reason
+                return list(OrderedDict.fromkeys(users)), reason
 
             users.append(user)
 
         # When does not find a string in the member format
         else:
             reason = ' '.join(message[pos:])
-            return list(set(users)), reason
+            return list(OrderedDict.fromkeys(users)), reason
 
-    return list(set(users)), reason
+    return list(OrderedDict.fromkeys(users)), reason
 
 
 def not_ready():
