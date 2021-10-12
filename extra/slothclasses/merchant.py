@@ -793,3 +793,22 @@ class Merchant(Player):
         """, (member_id, member_id))
         await db.commit()
         await mycursor.close()
+
+    @commands.command(aliases=['sell_mascot'])
+    @Player.skills_used(requirement=50)
+    @Player.skill_on_cooldown(skill=Skill.FOUR)
+    @Player.user_is_class('merchant')
+    @Player.skill_mark()
+    @Player.not_ready()
+    async def sell_pet(self, ctx) -> None:
+        """ Sells one pet of your choice from a set of options.
+        
+        PS: You must be a responsible parent, otherwise your pet will 'vanish'.
+        
+        • Delay = 1 day
+        • Cost = 500łł
+        • You can only sell pets costing more than 500łł as well
+        • Pets stay up to 5 days in the Sloth Shop
+        • You cannot sell more than 3 pets at the time.  """
+
+        pass

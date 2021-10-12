@@ -1,10 +1,12 @@
 import discord
 from discord.app import Option, OptionChoice
+from discord.app.commands import slash_command
 from discord.ext import commands
+from cogs.slothcurrency import SlothCurrency
 from mysqldb import *
 from datetime import datetime
 import os
-from typing import List, Optional
+from typing import List, Optional, Union
 from extra.view import ExchangeActivityView
 from extra import utils
 from .slothclass import classes
@@ -12,6 +14,8 @@ from .slothclass import classes
 guild_ids = [int(os.getenv('SERVER_ID'))]
 
 commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
+
+# grupao = SlashCommandGroup.command(name="testeee", description="soh um testeee")
 
 
 class SlothReputation(commands.Cog):
@@ -84,13 +88,22 @@ class SlothReputation(commands.Cog):
 
     @commands.command(name="info", aliases=['status', 'exchange', 'level', 'lvl', 'exp', 'xp', 'money', 'balance'])
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def _info_command(self, ctx, member: Optional[discord.Member] = None) -> None:
+    async def _info_command(self, ctx, member: Optional[Union[discord.Member, discord.User]] = None) -> None:
         """ Shows the user's level and experience points.
         :param member: The member to show the info. [Optional][Default=You] """
 
         await self._info(ctx, member)
 
-    async def _info(self, ctx, member: discord.Member = None) -> None:
+    @slash_command(name="info", guild_ids=guild_ids)
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def _info_slash(self, ctx, 
+        member: Option(discord.Member, description="The member to show the info; [Default=Yours]", required=False)) -> None:
+        """ Shows the user's level and experience points. """
+
+        await ctx.defer()
+        await self._info(ctx, member)
+
+    async def _info(self, ctx, member: Union[discord.Member, discord.User] = None) -> None:
         """ Shows the user's level and experience points. """
 
 
@@ -229,6 +242,21 @@ class SlothReputation(commands.Cog):
             return await answer("\u200b", embed=embed, view=view)
 
 
+    @slash_command(name="leaderboard", guild_ids=guild_ids)
+    async def _leaderboard(self, ctx, 
+        info_for: Option(str, description="The leaderboard to show the information for.", choices=[
+            'Reputation', 'Level', 'Leaves', 'Time'])) -> None:
+        """ Shows the leaderboard. """
+
+        if info_for == 'Reputation':
+            await self.score(ctx)
+        elif info_for == 'Level':
+            await self.level_score(ctx)
+        elif info_for == 'Leaves':
+            await self.leaf_score(ctx)
+        elif info_for == 'Time':
+            await self.time_score(ctx)
+
 
     @commands.command(aliases=['leaderboard', 'lb', 'scoreboard'])
     async def score(self, ctx):
@@ -363,7 +391,11 @@ class SlothReputation(commands.Cog):
     @commands.command()
     async def rep(self, ctx, member: discord.Member = None):
         """ Gives someone reputation points.
-        :param member: The member to give the reputation. """
+        :param member: The member to give the reputation.
+        
+        * Cost: 1łł 
+
+        Ps: The repped person gets 3łł and 100 reputation points. """
         
         if not member:
             await ctx.message.delete()
@@ -401,19 +433,11 @@ class SlothReputation(commands.Cog):
         if 'sabotaged' in target_fx:
             return await ctx.send(f"**You can't rep {member.mention} because they have been sabotaged, {ctx.author.mention}!**")
 
-        epoch = datetime.utcfromtimestamp(0)
-        time_xp = (datetime.utcnow() - epoch).total_seconds()
+
+        time_xp = await utils.get_timestamp()
         sub_time = time_xp - user[0][5]
         cooldown = 36000
-        if int(sub_time) >= int(cooldown):
-            await self.update_user_score_points(ctx.author.id, 100)
-            await self.update_user_score_points(member.id, 100)
-            await self.update_user_rep_time(ctx.author.id, time_xp)
-            await self.update_user_money(ctx.author.id, 5)
-            await self.update_user_money(member.id, 5)
-            return await ctx.send(
-                f"**{ctx.author.mention} repped {member.mention}! :leaves:Both of them got 5łł:leaves:**")
-        else:
+        if int(sub_time) < int(cooldown):
             m, s = divmod(int(cooldown) - int(sub_time), 60)
             h, m = divmod(m, 60)
             if h > 0:
@@ -423,6 +447,23 @@ class SlothReputation(commands.Cog):
                 return await ctx.send(f"**Rep again in {m:02d} minutes and {s:02d} seconds!**", delete_after=10)
             elif s > 0:
                 return await ctx.send(f"**Rep again in {s:02d} seconds!**", delete_after=10)
+
+
+        SlothCurrency = self.client.get_cog('SlothCurrency')
+        user_currency = await SlothCurrency.get_user_currency(ctx.author.id)
+        if user_currency[0][1] >= 1:
+            await SlothCurrency.update_user_money(ctx.author.id, -1)
+        else:
+            return await ctx.send(f"**You need 1łł to rep someone, {ctx.author.mention}!**")
+
+        await self.update_user_score_points(ctx.author.id, 100)
+        await self.update_user_score_points(member.id, 100)
+        await self.update_user_rep_time(ctx.author.id, time_xp)
+        await SlothCurrency.update_user_money(member.id, 3)
+        return await ctx.send(
+            f"**{ctx.author.mention} repped {member.mention}! 🍃The repped person got 3łł🍃**")
+
+
 
     # Database commands
 

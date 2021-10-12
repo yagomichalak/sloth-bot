@@ -1,5 +1,5 @@
 import discord
-from discord.ext import commands, menus
+from discord.ext import commands
 from extra.menu import ConfirmSkill
 import os
 from typing import Dict, Any, List

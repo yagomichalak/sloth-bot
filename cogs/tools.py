@@ -1,5 +1,6 @@
 import discord
 from discord.app import Option, OptionChoice
+from discord.app.commands import slash_command, message_command, user_command
 from discord.ext import commands, menus
 import asyncio
 from gtts import gTTS
@@ -9,31 +10,40 @@ import inspect
 import io
 import textwrap
 import traceback
+import collections
 from contextlib import redirect_stdout
 import os
 from treelib import Tree
-from cogs.createsmartroom import CreateSmartRoom
 import json
 
-from datetime import datetime, time
+from datetime import datetime
 import pytz
 from pytz import timezone
 from mysqldb import the_database
 
-from extra.menu import ConfirmSkill, InroleLooping
+from extra.menu import InroleLooping
+from extra.prompt.menu import ConfirmButton
 from extra.useful_variables import patreon_roles
 from extra import utils
 
+from extra.view import SoundBoardView, BasicUserCheckView
+from extra.select import SoundBoardSelect
+
 guild_ids = [int(os.getenv('SERVER_ID'))]
 
-from typing import List, Dict
+from typing import List, Optional
 
 mod_role_id = int(os.getenv('MOD_ROLE_ID'))
+senior_mod_role_id: int = int(os.getenv('SENIOR_MOD_ROLE_ID'))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID'))
 owner_role_id = int(os.getenv('OWNER_ROLE_ID'))
 
 allowed_roles = [owner_role_id, admin_role_id, mod_role_id, *patreon_roles.keys(), int(os.getenv('SLOTH_LOVERS_ROLE_ID'))]
 teacher_role_id = int(os.getenv('TEACHER_ROLE_ID'))
+patreon_channel_id = int(os.getenv('PATREONS_CHANNEL_ID'))
+
+from extra.menu import prompt_message
+
 
 class Tools(commands.Cog):
 	""" Some useful tool commands. """
@@ -68,38 +78,38 @@ class Tools(commands.Cog):
 
 	@commands.command()
 	@commands.cooldown(1, 5, commands.BucketType.user)
-	async def inrole(self, ctx, *, role: discord.Role = None) -> None:
+	async def inrole(self, ctx, roles: commands.Greedy[discord.Role] = None) -> None:
 		""" Shows everyone who have that role in the server.
-		:param role: The role you want to check. """
+		:param roles: The set of roles you want to check. """
 
 		member = ctx.author
 
-		if not role:
-			return await ctx.send(f"**Please, inform a role, {member.mention}!**")
+		if not roles:
+			return await ctx.send(f"**Please, inform at least one role, {member.mention}!**")
 
-		if role:
-			members = [
-				m.mention for m in ctx.guild.members if role in m.roles
-			]
-			if members:
-				additional = {
-					'role': role
-				}
-				pages = menus.MenuPages(source=InroleLooping(members, **additional), clear_reactions_after=True)
-				await pages.start(ctx)
-			else:
-				return await ctx.send(f"**No one has this role, {member.mention}!**")
+		roles: List[discord.Role] = list(set(roles))
+		
+		members = [
+			m.mention for m in ctx.guild.members
+			if (m_inter := set(m.roles).intersection(set(roles))) and len(m_inter) == len(roles)
+		]
+
+		if members:
+			additional = {
+				'roles': roles
+			}
+			pages = menus.MenuPages(source=InroleLooping(members, **additional), clear_reactions_after=True)
+			await pages.start(ctx)
 		else:
-			return await ctx.send(f"**No role with that name was found!**")
+			return await ctx.send(f"**No one has this role, {member.mention}!**")
 
 	# Countsdown from a given number
 	@commands.command()
-	@commands.has_permissions(administrator=True)
+	@utils.is_allowed([senior_mod_role_id], throw_exc=True)
 	async def count(self, ctx, amount=0):
-		'''
-		(ADM) Countsdown by a given number
-		:param amount: The start point.
-		'''
+		""" (ADM) Countsdown by a given number
+		:param amount: The start point. """
+
 		await ctx.message.delete()
 		if amount > 0:
 			msg = await ctx.send(f'**{amount}**')
@@ -113,15 +123,13 @@ class Tools(commands.Cog):
 
 	# Bot leaves
 	@commands.command()
-	@commands.has_any_role(*[mod_role_id, admin_role_id, owner_role_id])
+	@utils.is_allowed([mod_role_id, admin_role_id, owner_role_id], throw_exc=True)
 	async def leave(self, ctx):
-		'''
-		(MOD) Makes the bot leave the voice channel.
-		'''
+		""" (MOD) Makes the bot leave the voice channel. """
+
 		guild = ctx.message.guild
 		voice_client = guild.voice_client
 		user_voice = ctx.message.author.voice
-		# voice_client: discord.VoiceClient = discord.utils.get(self.client.voice_clients, guild=ctx.guild)
 
 		if voice_client:
 			if user_voice.channel == voice_client.channel:
@@ -134,7 +142,7 @@ class Tools(commands.Cog):
 
 	@commands.command()
 	@commands.cooldown(1, 5, type=commands.BucketType.guild)
-	@commands.has_any_role(*allowed_roles)
+	@utils.is_allowed(allowed_roles, throw_exc=True)
 	async def tts(self, ctx, language: str = None, *, message: str = None):
 		'''
 		(BOOSTER) Reproduces a Text-to-Speech message in the voice channel.
@@ -185,6 +193,15 @@ class Tools(commands.Cog):
 			return await ctx.send("**Please, inform a message to translate!**", delete_after=5)
 
 		await self._tr_callback(ctx, language, message, True)
+
+
+	@message_command(name="Translate", guild_ids=guild_ids)
+	async def _tr_slash(self, ctx, message: discord.Message) -> None:
+		""" Translates a message into another language. """
+
+		await ctx.defer(ephemeral=True)
+		language: str = 'en'    
+		await self._tr_callback(ctx, language, message.content)
 
 
 	async def _tr_callback(self, ctx, language: str = None, message: str = None, show_src: bool = False) -> None:
@@ -363,12 +380,16 @@ class Tools(commands.Cog):
 
 	@commands.command(aliases=['mivc'])
 	@commands.cooldown(1, 5, commands.BucketType.user)
-	async def member_in_vc(self, ctx) -> None:
-		""" Tells how many users are in the voice channel. """
+	async def member_in_vc(self, ctx, vc: Optional[discord.VoiceChannel] = None) -> None:
+		""" Tells how many users are in the voice channel.
+		:param vc: The Voice Channel to check. [Optional][Default = all vcs] """
 
-		vcs = ctx.guild.voice_channels
-		all_members = [m.name for vc in vcs for m in vc.members]
-		await ctx.send(f"**`{len(all_members)}` members are in a vc atm!**")
+		if vc:
+			await ctx.send(f"**`{len(vc.members)}` members are in the {vc.mention} vc atm!**")
+		else:
+			vcs = ctx.guild.voice_channels
+			all_members = [m.name for vc in vcs for m in vc.members]
+			await ctx.send(f"**`{len(all_members)}` members are in a vc atm!**")
 
 	@commands.command()
 	@commands.has_any_role(*allowed_roles)
@@ -377,7 +398,7 @@ class Tools(commands.Cog):
 		:param member: The member you are looking for. """
 
 		if not member:
-			return await ctx.send(f"**Please, inform a member, {ctx.author.mention}!**")
+			member = ctx.author
 
 		member_state = member.voice
 		if channel := member_state and member_state.channel:
@@ -401,7 +422,7 @@ class Tools(commands.Cog):
 			self.client.get_command('magnet').reset_cooldown(ctx)
 			return await ctx.send("**You are not in a vc!**")
 
-		confirm = await ConfirmSkill(f"{ctx.author.mention}, you sure you want to magnet everyone into `{user_state.channel}`?").prompt(ctx)
+		confirm = await ConfirmButton(f"{ctx.author.mention}, you sure you want to magnet everyone into `{user_state.channel}`?").prompt(ctx)
 		if not confirm:
 			self.client.get_command('magnet').reset_cooldown(ctx)
 			return await ctx.send("**Not doing it, then!**")
@@ -453,9 +474,9 @@ class Tools(commands.Cog):
 		Ps³: The members can be in the following formats: <@id>, id, name, nick, display_name. """
 
 		member = ctx.author
-		channels = await CreateSmartRoom.get_voice_channel_mentions(message=ctx.message)
+		channels = await utils.get_voice_channel_mentions(message=ctx.message)
 
-		members = await CreateSmartRoom.get_mentions(message=ctx.message)
+		members = await utils.get_mentions(message=ctx.message)
 
 		moved = not_moved = 0
 		voice = voice.channel if (voice := member.voice) else None
@@ -484,7 +505,7 @@ class Tools(commands.Cog):
 		await ctx.send(' '.join(text))
 
 	@commands.command(aliases=['tp', 'beam'])
-	@commands.has_permissions(administrator=True)
+	@utils.is_allowed([senior_mod_role_id], throw_exc=True)
 	async def teleport(self, ctx, vc_1: discord.VoiceChannel = None, vc_2: discord.VoiceChannel = None) -> None:
 		""" Teleports all members in a given voice channel to another one.
 		:param vc_1: The origin vc.
@@ -836,18 +857,35 @@ class Tools(commands.Cog):
 
 		SlothCurrency = self.client.get_cog('SlothCurrency')
 
-		# Loops through each Patreon role and gets a list containing members that have them
-		for patreon_role, values in patreon_roles.items():
-			members = [m for m in ctx.guild.members if discord.utils.get(ctx.guild.roles, id=patreon_role) in m.roles]
-			# Give them money
-			for member in members:
-				try:
-					await SlothCurrency.update_user_money(member.id, values[3])
-					await member.send(values[2])
-				except:
-					continue
+		members = collections.defaultdict(list)
 
-		await ctx.send(f"**All Patreons were paid!**")
+		people_count: int = 0
+		# Loops through each Patreon role and gets a list containing members that have them
+		# async with ctx.typing():
+		for member in ctx.guild.members:
+			for role_id in patreon_roles:  # dict.keys
+				if discord.utils.get(member.roles, id=role_id):
+					members[role_id].append(member)
+
+		for role_id, role_members in members.items():
+			values = patreon_roles[role_id]
+			users = list((values[3], m.id) for m in role_members)
+
+			people_count += len(role_members)
+			# Give them money
+			await SlothCurrency.update_user_many_money(users)
+
+			channel = discord.utils.get(ctx.guild.text_channels, id=patreon_channel_id)
+			m_mentions = ', '.join([m.mention for m in role_members])
+			embed = discord.Embed(
+				title=f"__Payday__",
+				description=f"The members below were paid off according to their <@&{role_id}> role!\n\n{m_mentions}",
+				color=discord.Color.green()
+			)
+			embed.add_field(name="Reward", value=f"You all just got your monthly **{values[3]}łł** :leaves:")
+			await channel.send(content=f"<@&{role_id}>", embed=embed)
+
+		await ctx.send(f"**{people_count} Patreons were paid!**")
 
 	@commands.command(alises=['count_channel', 'countchannel'])
 	@commands.cooldown(1, 5, commands.BucketType.user)
@@ -856,50 +894,150 @@ class Tools(commands.Cog):
 
 		await ctx.reply(f"**We currently have `{len(ctx.guild.channels)}` channels!**")
 
-	# @commands.slash_command(name="timestamp", guild_ids=guild_ids)
-	# async def _timestamp(self, ctx, 
-	# 		hour: Option(int, name="hour", description="Hour of time in 24 hour format.", required=False),
-	# 		minute: Option(int, name="minute", description="Minute of time.", required=False),
-	# 		day: Option(int, name="day", description="Day of date.", required=False),
-	# 		month: Option(int, name="month", description="Month of date.", required=False),
-	# 		year: Option(int, name="year", description="Year of date.", required=False)) -> None:
-	# 	""" Gets a timestamp for a specific date and time. - Output will format according to your timezone. """
+	@commands.slash_command(name="timestamp", guild_ids=guild_ids)
+	async def _timestamp(self, ctx, 
+			hour: Option(int, name="hour", description="Hour of time in 24 hour format.", required=False),
+			minute: Option(int, name="minute", description="Minute of time.", required=False),
+			day: Option(int, name="day", description="Day of date.", required=False),
+			month: Option(int, name="month", description="Month of date.", required=False),
+			year: Option(int, name="year", description="Year of date.", required=False)) -> None:
+		""" Gets a timestamp for a specific date and time. - Output will format according to your timezone. """
 
-	# 	current_date = await utils.get_time_now()
+		current_date = await utils.get_time_now()
 
-	# 	if hour: current_date = current_date.replace(hour=hour)
-	# 	if minute: current_date = current_date.replace(minute=minute)
-	# 	if day: current_date = current_date.replace(day=day)
-	# 	if month: current_date = current_date.replace(month=month)
-	# 	if year: current_date = current_date.replace(year=year)
+		if hour: current_date = current_date.replace(hour=hour)
+		if minute: current_date = current_date.replace(minute=minute)
+		if day: current_date = current_date.replace(day=day)
+		if month: current_date = current_date.replace(month=month)
+		if year: current_date = current_date.replace(year=year)
 
-	# 	embed = discord.Embed(
-	# 		title="__Timestamp Created__",
-	# 		description=f"Requested date: `{current_date.strftime('%m/%d/%Y %H:%M')}` (**GMT**)",
-	# 		color=ctx.author.color
-	# 	)
-	# 	timestamp = int(current_date.timestamp())
-	# 	embed.add_field(name="Output", value=f"<t:{timestamp}>")
-	# 	embed.add_field(name="Copyable", value=f"\<t:{timestamp}>")
+		embed = discord.Embed(
+			title="__Timestamp Created__",
+			description=f"Requested date: `{current_date.strftime('%m/%d/%Y %H:%M')}` (**GMT**)",
+			color=ctx.author.color
+		)
+		timestamp = int(current_date.timestamp())
+		embed.add_field(name="Output", value=f"<t:{timestamp}>")
+		embed.add_field(name="Copyable", value=f"\<t:{timestamp}>")
 
-	# 	await ctx.send(embed=embed, ephemeral=True)
+		await ctx.respond(embed=embed, ephemeral=True)
 
-	# @commands.slash_command(name="mention", guild_ids=guild_ids)
-	# @utils.is_allowed([mod_role_id, admin_role_id, owner_role_id])
-	# async def _mention(self, ctx, 
-	# 	member: Option(str, name="member", description="The Staff member to mention/ping.", required=True,
-	# 		choices=[
-	# 			OptionChoice(name="Cosmos", value=os.getenv('COSMOS_ID')), OptionChoice(name="Alex", value=os.getenv('ALEX_ID')),
-	# 			OptionChoice(name="DNK", value=os.getenv('DNK_ID')), OptionChoice(name="Muffin", value=os.getenv('MUFFIN_ID')),
-	# 			OptionChoice(name="Prisca", value=os.getenv('PRISCA_ID')), OptionChoice(name="GuiBot", value=os.getenv('GUIBOT_ID'))
-	# 		]
-	# 	)) -> None:
-	# 	""" (ADMIN) Used to mention staff members. """
+	@commands.slash_command(name="mention", guild_ids=guild_ids)
+	@utils.is_allowed([mod_role_id, admin_role_id, owner_role_id])
+	async def _mention(self, ctx, 
+		member: Option(str, name="member", description="The Staff member to mention/ping.", required=True,
+			choices=[
+				OptionChoice(name="Cosmos", value=os.getenv('COSMOS_ID')), OptionChoice(name="Alex", value=os.getenv('ALEX_ID')),
+				OptionChoice(name="DNK", value=os.getenv('DNK_ID')), OptionChoice(name="Muffin", value=os.getenv('MUFFIN_ID')),
+				OptionChoice(name="Prisca", value=os.getenv('PRISCA_ID')), OptionChoice(name="GuiBot", value=os.getenv('GUIBOT_ID'))
+			]
+		)) -> None:
+		""" (ADMIN) Used to mention staff members. """
 
-	# 	if staff_member := discord.utils.get(ctx.guild.members, id=int(member)):
-	# 		await ctx.send(staff_member.mention)
-	# 	else:
-	# 		await ctx.send("**For some reason I couldn't ping them =\ **")
+		if staff_member := discord.utils.get(ctx.guild.members, id=int(member)):
+			await ctx.respond(staff_member.mention)
+		else:
+			await ctx.respond("**For some reason I couldn't ping them =\ **")
+
+	@commands.command(aliases=['sound', 'board', 'sound_board'])
+	@utils.is_allowed([mod_role_id, admin_role_id, owner_role_id], throw_exc=True)
+	@commands.cooldown(1, 60, commands.BucketType.user)
+	async def soundboard(self, ctx) -> None:
+		""" Sends a soundboard into the channel. """
+
+		author = ctx.author
+
+		author_state = author.voice
+		if not (vc := author_state and author_state.channel):
+			ctx.command.reset_cooldown(ctx)
+			return await ctx.send(f"**You're not in a VC!**")
+
+		embed = discord.Embed(
+			title="__Soundboard__",
+			description="Click any of the buttons below to play different sounds in the Voice Channel.",
+			color=author.color,
+			timestamp=ctx.message.created_at
+		)
+		embed.add_field(name="Info:", value=f"Soundboard is bound to the {vc.mention} `Voice Channel`.")
+		embed.set_footer(text=f"Started by {author}", icon_url=author.display_avatar)
+		view: discord.ui.View = BasicUserCheckView(author)
+		select: discord.ui.Select = SoundBoardSelect(ctx, self.client, sb_view=SoundBoardView, settings=[
+			['General', 'sounds'], ['General 2', 'sounds2'], ['General 3', 'sounds3'], ['Cosmos', 'cosmos']
+		])
+		view.add_item(select)
+		await ctx.send(content="\u200b", embed=embed, view=view)
+
+
+	@slash_command(name="poll", guild_ids=guild_ids)
+	@utils.is_allowed(allowed_roles, throw_exc=True)
+	async def _poll(self, ctx, 
+		description: Option(str, description="The description of the poll."),
+		title: Option(str, description="The title of the poll.", required=False, default="Poll"), 
+		role: Option(discord.Role, description="The role to tag in the poll.", required=False)) -> None:
+		""" Makes a poll.
+		:param title: The title of the poll.
+		:param description: The description of the poll. """
+
+		await ctx.defer()
+
+		member = ctx.author
+		current_time = await utils.get_time_now()
+
+		embed = discord.Embed(
+			title=f"__{title}__",
+			description=description,
+			color=member.color,
+			timestamp=current_time
+		)
+
+		if role:
+			msg = await ctx.respond(content=role.mention, embed=embed)
+		else:
+			msg = await ctx.respond(embed=embed)
+		await msg.add_reaction('✅')
+		await msg.add_reaction('❌')
+
+	@user_command(name="Follow", guild_ids=guild_ids)
+	@utils.is_allowed(allowed_roles, throw_exc=True)
+	async def _follow(self, ctx, user: discord.Member) -> None:
+		""" Follows a user by moving yourself to the Voice Channel they are in. """
+
+		author = ctx.author
+		user_vc = user.voice
+		if not user_vc or not user_vc.channel:
+			return await ctx.respond(f"**{user} is not in a VC, {author.mention}!**")
+
+		author_vc = author.voice
+		if not author_vc or not author_vc.channel:
+			return await ctx.respond(f"**You're not in a VC, I cannot move you to there, {author.mention}!**")
+
+		try:
+			await author.move_to(user_vc.channel)
+		except:
+			await ctx.respond(f"**For some reason I couldn't move you to there, {author.mention}!**")
+		else:
+			await ctx.respond(f"**You got moved to {user_vc.channel.mention}!**")
+
+	@user_command(name="Pull", guild_ids=guild_ids)
+	@utils.is_allowed(allowed_roles, throw_exc=True)
+	async def _pull(self, ctx, user: discord.Member) -> None:
+		""" Pulls a user by moving them to the Voice Channel you are in. """
+
+		author = ctx.author
+		user_vc = user.voice
+		if not user_vc or not user_vc.channel:
+			return await ctx.respond(f"**{user} is not in a VC, {author.mention}!**")
+
+		author_vc = author.voice
+		if not author_vc or not author_vc.channel:
+			return await ctx.respond(f"**You're not in a VC, I cannot bring them here, {author.mention}!**")
+
+		try:
+			await user.move_to(author_vc.channel)
+		except:
+			await ctx.respond(f"**For some reason I couldn't bring them here, {author.mention}!**")
+		else:
+			await ctx.respond(f"**They were brought to {user_vc.channel.mention}!**")
 
 def setup(client):
 	client.add_cog(Tools(client))

@@ -499,3 +499,21 @@ class Prawler(Player):
 		sabotages = await mycursor.fetchall()
 		await mycursor.close()
 		return sabotages
+
+	@commands.command(aliases=['kn'])
+	@Player.skills_used(requirement=50)
+	@Player.skill_on_cooldown(skill=Skill.FOUR, seconds=172800)
+	@Player.user_is_class('prawler')
+	@Player.skill_mark()
+	@Player.not_ready()
+	async def kidnap(self, ctx, member: discord.Member = None) -> None:
+		""" Kidnaps someone from a Tribe to yours and takes them hostage for 2 days.
+		:param member: The member to kidnap.
+		
+		PS: Members who were held hostages cannot interact with their tribe
+		during that time.
+		
+		• Delay = 2 days
+		• Cost = 200łł  """
+
+		pass
