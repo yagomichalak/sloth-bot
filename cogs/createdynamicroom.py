@@ -282,7 +282,8 @@ class DynamicRoomDatabase:
         return rooms
 
 class LanguageRoom:
-    def __init__(self, room_id: int, english_name: str, room_name: str, room_quant: int, room_capacity: int):
+    def __init__(self, category: str, room_id: int, english_name: str, room_name: str, room_quant: int, room_capacity: int):
+        self.category = category
         self.room_id = room_id
         self.english_name = english_name
         self.room_name = room_name
@@ -291,7 +292,7 @@ class LanguageRoom:
 
     @staticmethod
     def instance_from_dict(attr_dict):
-        return LanguageRoom(attr_dict['room_id'], attr_dict['english_name'], attr_dict['room_name'], attr_dict['room_quant'], attr_dict['room_capacity'])
+        return LanguageRoom(attr_dict['category'], attr_dict['room_id'], attr_dict['english_name'], attr_dict['room_name'], attr_dict['room_quant'], attr_dict['room_capacity'])
 
 class LanguageRoomDatabase:
     def __init__(self):
@@ -349,15 +350,17 @@ class LanguageRoomDatabase:
 
         return len(table_info) != 0
 
-    async def get_rooms_by_ids(self, ids, object_form: bool=False) -> Union[List[List[object]], List[DynamicRoom]]:
+    async def get_rooms_by_ids(self, ids: set, object_form: bool=False) -> Union[List[List[object]], List[DynamicRoom]]:
         """ Returns room data from given ids.
         :param ids: The room name.
         :param object_form: If the result should be in object form. """
 
         mycursor, db = await the_database()
-        await mycursor.execute("SELECT * FROM LanguageRoom WHERE room_id IN %s", (ids,))
+        await mycursor.execute("SELECT * FROM LanguageRoom WHERE room_id IN %s", (tuple(ids),))
         rooms = await mycursor.fetchall()
         await mycursor.close()
+
+        # print("rooms:", rooms)
 
         if object_form:
             # this will extract row headers
@@ -497,8 +500,8 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
         """ Class initializing method. """
 
         self.client = client
-        self.lr_vc_id = int(os.getenv('CREATE_DYNAMIC_ROOM_VC_ID'))
-        self.lr_cat_id = int(os.getenv('CREATE_DYNAMIC_ROOM_CAT_ID'))
+        self.dr_vc_id = int(os.getenv('CREATE_DYNAMIC_ROOM_VC_ID'))
+        self.dr_cat_id = int(os.getenv('CREATE_DYNAMIC_ROOM_CAT_ID'))
         self.language_rooms = None
 
     @commands.Cog.listener()
@@ -510,6 +513,18 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
         self.check_empty_dynamic_rooms.start()
 
         await self.prefetch_language_room()
+
+    async def set_up_category(self):
+        channel = discord.utils.get(guild.channels, id=self.dr_cat_id)
+
+        # clear permissions
+        await channel.set_permissions(member, overwrite=None)
+
+    async def set_up_waiting_room(self):
+        channel = discord.utils.get(guild.channels, id=self.dr_vc_id)
+
+        # clear permissions
+        await channel.set_permissions(member, overwrite=None)
 
     @tasks.loop(minutes=10)
     async def check_empty_dynamic_rooms(self):
@@ -551,33 +566,34 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
 
         # Checks if the user is leaving the vc and whether there still are people in there
         if before.channel and before.channel.category:
-            if before.channel.category.id == self.lr_cat_id:
+            if before.channel.category.id == self.dr_cat_id:
                 user_voice_channel = discord.utils.get(
                     member.guild.channels, id=before.channel.id)
                 len_users = len(user_voice_channel.members)
-                if len_users == 0 and user_voice_channel.id != self.lr_vc_id:
+                if len_users == 0 and user_voice_channel.id != self.dr_vc_id:
                     room_data = await self.get_dynamic_room_vc_id(user_voice_channel.id, object_form=True)
-
                     if not room_data or not room_data.is_perma_room:
-                        if room_data:
-                            await self.delete_dynamic_rooms(room_data.room_id)
-                        try:
-                            await self.delete_things([user_voice_channel])
-                        except Exception as e:
-                            print(e)
+                        await asyncio.sleep(60)
+                        if len(user_voice_channel.members) == 0:
+                            if room_data:
+                                await self.delete_dynamic_rooms(room_data.room_id)
+                            try:
+                                await self.delete_things([user_voice_channel])
+                            except Exception as e:
+                                print(e)
 
         # Checks if the user is joining the create a room VC
         if not after.channel:
             return
 
-        if after.channel.id == self.lr_vc_id:
+        if after.channel.id == self.dr_vc_id:
             the_time = await utils.get_timestamp()
             old_time = (await self.upsert_user_dr_vc_ts(member.id, the_time, object_form=True)).user_vc_ts
             if not the_time - old_time >= 60:
                 await member.send(
                     f"**You're on a cooldown, try again in {round(60 - (the_time - old_time))} seconds!**",)
                 # return await member.move_to(None)
-                return
+                # return
             if the_time - old_time >= 60:
                 await self.update_user_dr_vc_ts(member.id, the_time)
 
@@ -604,7 +620,7 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
         failed = False
 
         the_category_test = discord.utils.get(
-            member.guild.categories, id=self.lr_cat_id)
+            member.guild.categories, id=self.dr_cat_id)
 
         if vc_channel := await self.try_to_create(kind='voice', category=the_category_test, name=room_name, user_limit=room_capacity):
             creations.append(vc_channel)
@@ -619,10 +635,11 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
 
         # Puts the channels ids in the database
         await self.insert_dynamic_rooms(member.guild.id, room_id, vc_channel.id, room_ts)
-        await member.send(f"**🦥 good chatting 🦥**")
+        await member.send(f"**You are being moved to {room_name}** ...")
 
         try:
             await member.move_to(vc_channel)
+            await member.send(f"**🦥 good chatting 🦥**")
         except discord.errors.HTTPException:
             await member.send("**You cannot be moved because you are not in a Voice-Channel! You have one minute to join the room before it gets deleted.**")
             await asyncio.sleep(60)
@@ -694,30 +711,42 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
                 asyncio.create_task(vc.set_permissions(
                     **{"target": m_member, m_perm_name: m_perm_value}))
 
-    async def get_language_rooms_list_member(self, member: discord.Member) -> List[DynamicRoom]:
+    async def get_language_rooms_from_member(self, member: discord.Member) -> List[LanguageRoom]:
         roles_tuple = tuple([role.id for role in member.roles])
-        can_see_everything = any([int(os.getenv('SHOW_ME_EVERYTHING_ROLE_ID')) in roles_tuple])
+        show_me_everything = any([int(os.getenv('SHOW_ME_EVERYTHING_ROLE_ID')) in roles_tuple])
+        is_admin = any([int(os.getenv('ADMIN_ROLE_ID')) in roles_tuple])
+        can_see_everything = any([show_me_everything, is_admin])
+
+        # print("can_see_everything:", can_see_everything)
 
         permissions_rooms = await self.get_available_rooms(roles_tuple, see_everything=can_see_everything, object_form=True)
+        # print("permissions_rooms:", permissions_rooms)
 
         if not permissions_rooms:
             return None
 
-        available_rooms = await self.get_rooms_by_ids(tuple([permission.room_id for permission in permissions_rooms]), object_form=True)
+        room_ids = set([permission.room_id for permission in permissions_rooms])
+        # print("room_ids:", room_ids)
+        available_rooms = await self.get_rooms_by_ids(room_ids, object_form=True)
+        # print("available_rooms:", available_rooms)
 
         return available_rooms
 
-    async def get_room_quantity(self, room_list: List[DynamicRoom]) -> List[DynamicRoom]:
+    async def get_room_quantity(self, room_list: List[LanguageRoom]) -> List[LanguageRoom]:
         """ Returns room quantity from given IDs
         :param room_list: list of room ids """
 
-        room_ids = [room.room_id for room in room_list]
+        # sset of room ids
+        room_ids = set([room.room_id for room in room_list])
 
+        # initializing variables
         for r in room_list:
             r.current_quantity = 0
 
+        # fetch quantity of rooms spawned
         room_quants = await self.get_count_by_room_ids(tuple(room_ids))
 
+        # update the LanguageRoom object so it has the quantity info
         for room_data in room_quants:
             quant, room_id = room_data
             for r in room_list:
@@ -726,49 +755,118 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
 
         return room_list
 
-    async def initiate_member_room_interaction(self, member: discord.Member) -> Union[List[DynamicRoom], None]:
-        """ initiate interaction with user to create room
-        :param member: Member to initiate interaction. """
+    async def get_available_options_from_member(self, member: discord.Member) -> dict[str, List[LanguageRoom]]:
+        """ Get's available rooms for given member
+        :param member: specified member to check available rooms. """
 
-        available_rooms_list = await self.get_language_rooms_list_member(member)
+        # get all **language** rooms from member
+        available_rooms_list = await self.get_language_rooms_from_member(member)
+        # print(available_rooms_list)
 
+        # if list is empty, return empty
         if not available_rooms_list:
-            await member.send(f"**Nothing to see here, don't bother waiting.**")
-            return None
+            return []
 
+        # updates rooms with quantity
         available_rooms_list = await self.get_room_quantity(available_rooms_list)
+        # print("available_rooms_list:", available_rooms_list)
+
+        # options
+
+        available_options = {}
 
         def create_option(room, index):
             m_description = room.english_name
             if room.current_quantity >= room.room_quant:
-                m_description = "MAXXED - " + m_description
+                m_description = "(MAX) " + m_description
             return discord.SelectOption(label=room.room_name.decode("utf-8"), value=index, description=m_description)
 
-        available_options = [create_option(room, str(index)) for index, room in enumerate(available_rooms_list)]
+        # for every room in available room list
+        for index, room in enumerate(available_rooms_list):
+            if not room.category in available_options:
+                available_options[room.category] = []
 
+            # create and add option to room category dict
+            available_options[room.category].append(create_option(room, str(index)))
+
+        # available_options = [create_option(room, str(index)) for index, room in enumerate(available_rooms_list)]
+
+        return available_rooms_list, available_options
+
+    async def initiate_member_room_interaction(self, member: discord.Member) -> Union[List[DynamicRoom], None]:
+        """ initiate interaction with user to create room
+        :param member: Member to initiate interaction. """
+
+        available_rooms_list, available_options = await self.get_available_options_from_member(member)
+
+        # if no rooms available
+        if len(available_options) == 0:
+            await member.send(f"**Nothing to see here.** <:zslothblind:695418950477152286>")
+            return None
+
+        # if there's one category available
         if len(available_options) == 1:
-            return available_rooms_list[0]
+            first_cat = available_options[available_options.keys()[0]]
+            # if there's one room available, no need to choose
+            if len(first_cat) == 1:
+                return first_cat[0]
 
         # create view with selects with the available languages
         view = discord.ui.View()
-        select_limit = 25
-        for i in range(0, len(available_options), select_limit):
-            row_num = int((i+1)/select_limit)
-            #print(row_num)
-            if row_num < 5:
-                view.add_item(LanguageRoomSelect(self.client, custom_id="select_lr_"+str(row_num), row=row_num, select_options=available_options[i:i + select_limit]))
 
-        await member.send(f"**Select a Room**", view=view)
-        await view.wait()
+        if len(available_options) <= 5:
+            # show each category with a separated select
+            for index, category in enumerate(available_options):
+                cat_options = available_options[category]
+                # view.add_item(select_title)
+                select_title = category.capitalize() + " Languages"
+                view.add_item(LanguageRoomSelect(self.client, custom_id="select_lr_"+category,
+                    row=index+1, select_options=cat_options, placeholder=select_title))
+            await member.send(f"**Select from the following Categories:**", view=view)
+            await view.wait()
+        else:
+            def create_cat_option(index, cat):
+                option_label = cat.capitalize() + " Languages"
+                return discord.SelectOption(label=option_label, value=cat)
 
-        # print(available_options[int(view.chosen_room)])
+            # show a select for categories first
+            categories_options = [create_cat_option(index, cat) for index, cat in enumerate(available_options)]
+            # print("categories_options: ", categories_options)
 
-        if hasattr(view, 'chosen_room'):
-            chosen_room = available_rooms_list[int(view.chosen_room)]
-            if chosen_room.current_quantity < chosen_room.room_quant:
-                return chosen_room
+            select_title = "Language Categories"
+            view.add_item(LanguageRoomSelect(self.client, custom_id="select_lr_category",
+                row=1, select_options=categories_options, placeholder=select_title))
+            await member.send(f"**Select a Category:**", view=view)
+            await view.wait()
+
+            # if did not timeout
+            if hasattr(view, 'chosen_option'):
+                # get chosen rooms
+                category = view.chosen_option
+                cat_options = available_options[category]
+
+                # if there's only one channel in category
+                if len(cat_options) == 1:
+                    return available_rooms_list[int(cat_options[0].value)]
+
+                # create select for the chosen language category
+                view = discord.ui.View()
+                select_title = category.capitalize() + " Languages"
+                view.add_item(LanguageRoomSelect(self.client, custom_id="select_lr_"+category,
+                    row=1, select_options=cat_options, placeholder=select_title))
+                await member.send(f"**Select a Category:**", view=view)
+                await view.wait()
+            else:
+                await member.send(f"**Timed out!**")
+
+        if hasattr(view, 'chosen_option'):
+            chosen_option = available_rooms_list[int(view.chosen_option)]
+            if chosen_option.current_quantity < chosen_option.room_quant:
+                return chosen_option
             else:
                 await member.send(f"**Max number of this room was reached ({chosen_room.room_quant})**")
+        else:
+            await member.send(f"**Timed out!**")
 
         return None
 
