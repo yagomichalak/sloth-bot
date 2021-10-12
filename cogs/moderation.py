@@ -517,7 +517,6 @@ class Moderation(*moderation_cogs):
 		if not member:
 			return await ctx.send("**Please, specify a member!**")
 		if role not in member.roles:
-			# await member.add_roles(role)
 			await member.move_to(None)
 			keep_roles, remove_roles = await self.get_remove_roles(member, keep_roles=allowed_roles)
 

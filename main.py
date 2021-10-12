@@ -4,7 +4,7 @@ from discord.app import Option, option
 from discord.utils import escape_mentions
 from pytz import timezone
 from dotenv import load_dotenv
-from discord.ext import commands, tasks, flags
+from discord.ext import commands, tasks
 
 from extra import utils
 from typing import Dict, List
