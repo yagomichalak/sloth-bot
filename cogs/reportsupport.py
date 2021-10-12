@@ -191,6 +191,18 @@ class ReportSupport(*report_support_classes):
         if not a7:
             return
 
+        embed.description = "- Where are you from?"
+        q8 = await member.send(embed=embed)
+        a8 = await self.get_message_content(member, msg_check)
+        if not a8:
+            return
+
+        embed.description = "- Where are you residing?"
+        q9 = await member.send(embed=embed)
+        a9 = await self.get_message_content(member, msg_check)
+        if not a9:
+            return
+
         # Get user's native roles
         user_native_roles = []
         for role in member.roles:
@@ -198,11 +210,22 @@ class ReportSupport(*report_support_classes):
                 user_native_roles.append(role.name.title())
 
         # Application result
-        app = f"""```ini\n[Username]: {member} ({member.id})\n[Joined the server]: {member.joined_at.strftime("%a, %d %B %y, %I %M %p UTC")}\n[Applying to teach]: {a1.title()}\n[Native roles]: {', '.join(user_native_roles)}\n[Motivation for teaching]: {a2.capitalize()}\n[Applying to teach on]: {a3.upper()}\n[English level]: {a4.capitalize()}\n[Experience teaching]: {a5.capitalize()}\n[Description]:{a6.capitalize()}\n[Age]: {a7}```"""
+        app = f"```ini\n"\
+            f"[Username]: {member} ({member.id})\n" \
+            f"[Joined the server]: {member.joined_at.strftime('%a, %d %B %y, %I %M %p UTC')}\n" \
+            f"[Applying to teach]: {a1.title()}\n[Native roles]: {', '.join(user_native_roles)}\n" \
+            f"[Motivation for teaching]: {a2.capitalize()}\n" \
+            f"[Applying to teach on]: {a3.upper()}\n" \
+            f"[English level]: {a4.capitalize()}\n" \
+            f"[Experience teaching]: {a5.capitalize()}\n" \
+            f"[Description]:{a6.capitalize()}\n" \
+            f"[Age]: {a7}\n" \
+            f"[Lives in]: {a8.capitalize()}\n" \
+            f"[Resides in]: {a9.capitalize()}" \
+            f"```"
         await member.send(app)
-        embed.description = '''
-        Are you sure you want to apply this? :white_check_mark: to send and :x: to Cancel
-        '''
+        embed.description = "Are you sure you want to apply this? :white_check_mark: to send and :x: to Cancel"
+
         app_conf = await member.send(embed=embed)
         await app_conf.add_reaction('✅')
         await app_conf.add_reaction('❌')
