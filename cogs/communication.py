@@ -1,4 +1,5 @@
 import discord
+from discord.errors import NotFound
 from discord.ext import commands, tasks
 import os
 from extra import utils
@@ -10,6 +11,7 @@ from random import choice
 bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
 announcement_channel_id = int(os.getenv('ANNOUNCEMENT_CHANNEL_ID'))
 mod_role_id = int(os.getenv('MOD_ROLE_ID'))
+senior_mod_role_id = int(os.getenv('SENIOR_MOD_ROLE_ID'))
 allowed_roles = [int(os.getenv('OWNER_ROLE_ID')), int(os.getenv('ADMIN_ROLE_ID')), mod_role_id]
 general_channel_id = int(os.getenv('GENERAL_CHANNEL_ID'))
 
@@ -63,6 +65,59 @@ class Communication(commands.Cog):
 
         msg = ctx.message.content.split('!say', 1)
         await ctx.send(msg[1])
+
+
+    # Edits a message sent by the bot
+    @commands.command()
+    @commands.has_any_role(*allowed_roles)
+    async def edit(self, ctx, message_id : int = None, *, text : str = None):
+        """ (Mod) Edits a message sent by the bot.
+        :param nessage_id: The message id."""
+
+        await ctx.message.delete()
+
+        if not message_id:
+            return await ctx.send("**Please, insert a message id**", delete_after=3)
+
+        if not text:
+            return await ctx.send("**Please, insert a message**", delete_after=3)
+        
+        channel = ctx.message.channel
+        
+        try:
+            message = await channel.fetch_message(message_id)
+            await message.edit(text)
+
+        except NotFound:
+            return await ctx.send("**Message not found. Send the command in the same channel as the original message.**", delete_after=5)
+
+
+
+    # Replies a message by using the bot
+    @commands.command()
+    @commands.has_any_role(*allowed_roles)
+    async def reply(self, ctx, message_id : int = None, *, text : str = None):
+        """ (Mod) Replies a message with the bot.
+        :param message_id: The message id to reply.
+        :param message: The message to send"""
+
+        await ctx.message.delete()
+
+        if not message_id:
+            return await ctx.send("**Please, insert a message id to reply to it**", delete_after=3)
+        
+        if not text:
+            return await ctx.send("**Please, insert a message**", delete_after=3)
+
+        channel = ctx.message.channel
+        
+        try:
+            message = await channel.fetch_message(message_id)
+            await message.reply(text)
+
+        except NotFound:
+            return await ctx.send("**Message not found. Send the command in the same channel as the original message.**", delete_after=5)
+
 
     # Spies a channel
     @commands.command()
@@ -134,9 +189,9 @@ If you have any questions feel free to ask! And if you experience any type of pr
         await announce_channel.send(msg[1])
 
     @commands.command()
-    @commands.has_permissions(administrator=True)
+    @utils.is_allowed([senior_mod_role_id], throw_exc=True)
     async def dm(self, ctx, member: discord.Member = None, *, message=None):
-        """ (ADM) Sends a Direct Message to someone.
+        """ (SeniorMod) Sends a Direct Message to someone.
         :param member: The member to send the message to.
         :param message: The message to send. """
 

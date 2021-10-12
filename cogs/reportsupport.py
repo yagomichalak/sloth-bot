@@ -1,5 +1,4 @@
 import discord
-from discord import member
 from discord.ext import commands
 from mysqldb import *
 import asyncio
@@ -12,9 +11,11 @@ import os
 case_cat_id = int(os.getenv('CASE_CAT_ID'))
 reportsupport_channel_id = int(os.getenv('REPORT_CHANNEL_ID'))
 dnk_id = int(os.getenv('DNK_ID'))
+cent_id = int(os.getenv('CENT_ID'))
 moderator_role_id = int(os.getenv('MOD_ROLE_ID'))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID'))
 lesson_management_role_id = int(os.getenv('LESSON_MANAGEMENT_ROLE_ID'))
+server_id = int(os.getenv('SERVER_ID'))
 
 staff_vc_id = int(os.getenv('STAFF_VC_ID'))
 
@@ -190,6 +191,18 @@ class ReportSupport(*report_support_classes):
         if not a7:
             return
 
+        embed.description = "- Where are you from?"
+        q8 = await member.send(embed=embed)
+        a8 = await self.get_message_content(member, msg_check)
+        if not a8:
+            return
+
+        embed.description = "- Where are you residing?"
+        q9 = await member.send(embed=embed)
+        a9 = await self.get_message_content(member, msg_check)
+        if not a9:
+            return
+
         # Get user's native roles
         user_native_roles = []
         for role in member.roles:
@@ -197,11 +210,22 @@ class ReportSupport(*report_support_classes):
                 user_native_roles.append(role.name.title())
 
         # Application result
-        app = f"""```ini\n[Username]: {member} ({member.id})\n[Joined the server]: {member.joined_at.strftime("%a, %d %B %y, %I %M %p UTC")}\n[Applying to teach]: {a1.title()}\n[Native roles]: {', '.join(user_native_roles)}\n[Motivation for teaching]: {a2.capitalize()}\n[Applying to teach on]: {a3.upper()}\n[English level]: {a4.capitalize()}\n[Experience teaching]: {a5.capitalize()}\n[Description]:{a6.capitalize()}\n[Age]: {a7}```"""
+        app = f"```ini\n"\
+            f"[Username]: {member} ({member.id})\n" \
+            f"[Joined the server]: {member.joined_at.strftime('%a, %d %B %y, %I %M %p UTC')}\n" \
+            f"[Applying to teach]: {a1.title()}\n[Native roles]: {', '.join(user_native_roles)}\n" \
+            f"[Motivation for teaching]: {a2.capitalize()}\n" \
+            f"[Applying to teach on]: {a3.upper()}\n" \
+            f"[English level]: {a4.capitalize()}\n" \
+            f"[Experience teaching]: {a5.capitalize()}\n" \
+            f"[Description]:{a6.capitalize()}\n" \
+            f"[Age]: {a7}\n" \
+            f"[Lives in]: {a8.capitalize()}\n" \
+            f"[Resides in]: {a9.capitalize()}" \
+            f"```"
         await member.send(app)
-        embed.description = '''
-        Are you sure you want to apply this? :white_check_mark: to send and :x: to Cancel
-        '''
+        embed.description = "Are you sure you want to apply this? :white_check_mark: to send and :x: to Cancel"
+
         app_conf = await member.send(embed=embed)
         await app_conf.add_reaction('✅')
         await app_conf.add_reaction('❌')
@@ -390,8 +414,8 @@ Please answer using one message only.."""
             return await member.send("**Thank you anyways!**")
 
 
-    async def send_event_manager_application(self, member):
-        """ Sends a event manager application form to the user.
+    async def send_event_host_application(self, member):
+        """ Sends a event host application form to the user.
         :param member: The member to send the application to. """
 
         def msg_check(message):
@@ -411,7 +435,7 @@ Please answer using one message only.."""
             description="""Hello there!
             Thank you for applying for hosting events here,
             Before you can formally start applying to host events in The Language Sloth, there are a couple things we would like you to know. The Language Sloth is a free of charge language learning platform which is meant to be accessible and open for anyone who is interested in languages from any background. We do not charge for any kind of service, nor do we pay for any services for hosting events. We are a community that shares the same interest: Languages.
-            We do not require professional skills, however, we have a set numbers of requirements for our event managers
+            We do not require professional skills, however, we have a set numbers of requirements for our event hosts.
             Entry requirements:
 
             》Must be at least 16 years of age
@@ -441,9 +465,9 @@ Please answer using one message only.."""
         embed = discord.Embed(title=f"__Teacher Application__")
         embed.set_footer(text=f"by {member}", icon_url=member.display_avatar)
 
-        embed.title = "Event manager Application"
+        embed.title = "Event Host Application"
         embed.description = '''
-        - Hello, there you've reacted to apply to become an event manager.
+        - Hello, there you've reacted to apply to become an Event Host.
         To apply please answer to these following questions with One message at a time
 
         Question one:
@@ -521,12 +545,161 @@ Please answer using one message only.."""
         if r == '✅':
             embed.description = "**Application successfully made, please, be patient now!**"
             await member.send(embed=embed)
-            event_manager_channel = await self.client.fetch_channel(self.event_manager_app_channel_id)
-            app = await event_manager_channel.send(content=f"{member.mention}\n{app}")
+            event_host_channel = await self.client.fetch_channel(self.event_host_app_channel_id)
+            app = await event_host_channel.send(content=f"{member.mention}\n{app}")
             await app.add_reaction('✅')
             await app.add_reaction('❌')
             # Saves in the database
-            await self.insert_application(app.id, member.id, 'event_manager')
+            await self.insert_application(app.id, member.id, 'event_host')
+
+        else:
+            self.cache[member.id] = 0
+            return await member.send("**Thank you anyways!**")
+
+    async def send_debate_manager_application(self, member):
+        """ Sends a Debate Manager application form to the user.
+        :param member: The member to send the application to. """
+
+        def msg_check(message):
+            if message.author == member and not message.guild:
+                if len(message.content) <= 100:
+                    return True
+                else:
+                    self.client.loop.create_task(member.send("**Your answer must be within 100 characters**"))
+            else:
+                return False
+
+        def check_reaction(r, u):
+            return u.id == member.id and not r.message.guild and str(r.emoji) in ['✅', '❌']
+
+        terms_embed = discord.Embed(
+            title="Terms of Application",
+            description="""Hello there! 
+Before you can formally start applying for Debate Moderator in The Language Sloth, there are a couple requirements we would like you to know we feel necessity for:
+
+Entry requirements:
+
+》Must be at least 18 years of age.
+
+》Must have at least a conversational level of English.
+
+》Must be able to host a debate once a two week period.
+
+》Must not have any warnings in the past 3 months.
+
+》Must be in the server for at least 2 weeks.
+            ``` ✅ To agree with our terms```""",
+            color=member.color
+        )
+
+        terms = await member.send(embed=terms_embed)
+        await terms.add_reaction('✅')
+        await terms.add_reaction('❌')
+
+        # Waits for reaction confirmation to the terms of application
+        terms_r = await self.get_reaction(member, check_reaction)
+
+        if terms_r is None:
+            self.cache[member.id] = 0
+            return
+
+        if terms_r != '✅':
+            self.cache[member.id] = 0
+            return await member.send(f"**Thank you anyways, bye!**")
+
+        embed = discord.Embed(title=f"__Teacher Application__")
+        embed.set_footer(text=f"by {member}", icon_url=member.display_avatar)
+
+        embed.title = "Debate Manager Application"
+        embed.description = '''
+        - Hello, there you've reacted to apply to become a Debate Manager.
+        To apply please answer to these following questions with One message at a time
+
+        Question one:
+        - How old are you?'''
+        q1 = await member.send(embed=embed)
+        a1 = await self.get_message_content(member, msg_check)
+        if not a1:
+            return
+
+        embed.description = "- Do you have any experience moderating debates?"
+        q2 = await member.send(embed=embed)
+        a2 = await self.get_message_content(member, msg_check)
+        if not a2:
+            return
+
+        embed.description = "- Do you have any experience organizing events?"
+        q3 = await member.send(embed=embed)
+        a3 = await self.get_message_content(member, msg_check)
+        if not a3:
+            return
+
+        embed.description = "- Why are you applying to be a Debate Mod?"
+        q4 = await member.send(embed=embed)
+        a4 = await self.get_message_content(member, msg_check)
+        if not a4:
+            return
+
+        embed.description = "- What would you change in the Debate Club?"
+        q5 = await member.send(embed=embed)
+        a5 = await self.get_message_content(member, msg_check)
+        if not a5:
+            return
+
+        embed.description = "- How active are you on Discord in general?"
+        q6 = await member.send(embed=embed)
+        a6 = await self.get_message_content(member, msg_check)
+        if not a6:
+            return
+
+        embed.description = "- What is your time zone?"
+        q7 = await member.send(embed=embed)
+        a7 = await self.get_message_content(member, msg_check)
+        if not a7:
+            return
+
+        embed.description = "- Would you like to host events in your native language other than in English?"
+        q8 = await member.send(embed=embed)
+        a8 = await self.get_message_content(member, msg_check)
+        if not a8:
+            return
+
+        embed.description = "- If yes, what’s your native language?"
+        q9 = await member.send(embed=embed)
+        a9 = await self.get_message_content(member, msg_check)
+        if not a9:
+            return
+
+        # Get user's native roles
+        user_native_roles = []
+        for role in member.roles:
+            if str(role.name).lower().startswith('native'):
+                user_native_roles.append(role.name.title())
+
+        # Application result
+        app = f"""```ini\n[Username]: {member} ({member.id})\n[Joined the server]: {member.joined_at.strftime("%a, %d %B %y, %I %M %p UTC")}\n[Age]: {a1}\n[Native roles]: {', '.join(user_native_roles)}\n[Experience moderating]: {a2.capitalize()}\n[Experience organizing]: {a3.capitalize()}\n[Motivation]: {a4}\n[What would you change]:{a5.capitalize()}\n[How active]: {a6}\n[Timezone]: {a7}\n[Host in native language]: {a8.title()}\n[Native language]: {a9}```"""
+        await member.send(app)
+        embed.description = "Are you sure you want to apply this? :white_check_mark: to send and :x: to Cancel"
+        app_conf = await member.send(embed=embed)
+        await app_conf.add_reaction('✅')
+        await app_conf.add_reaction('❌')
+
+        # Waits for reaction confirmation
+        r = await self.get_reaction(member, check_reaction)
+        if r is None:
+            return
+
+        if r == '✅':
+            embed.description = "**Application successfully made, please, be patient now!**"
+            await member.send(embed=embed)
+            debate_manager_channel = await self.client.fetch_channel(self.debate_manager_app_channel_id)
+            guild = self.client.get_guild(server_id)
+            cent = discord.utils.get(guild.members, id=cent_id)
+            app = await debate_manager_channel.send(content=f"{cent.mention}, {member.mention}\n{app}")
+            await app.add_reaction('✅')
+            await app.add_reaction('❌')
+            # Saves in the database
+            await self.insert_application(app.id, member.id, 'debate_manager')
 
         else:
             self.cache[member.id] = 0

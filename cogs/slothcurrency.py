@@ -1,5 +1,6 @@
 import discord
 from discord.app import Option, OptionChoice
+from discord.app.commands import slash_command
 from discord.ext import commands, menus
 from discord.utils import escape_mentions
 from mysqldb import *
@@ -526,6 +527,14 @@ class SlothCurrency(commands.Cog):
 
         await self._profile(ctx, member)
 
+    @slash_command(name="profile", guild_ids=guild_ids)
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def _profile_slash(self, ctx, member: Option(discord.Member, description="The member to show the info; [Default=Yours]", required=False)) -> None:
+        """ Shows the member's profile with their custom sloth. """
+
+        await ctx.defer()
+        await self._profile(ctx, member)
+
     async def _profile(self, ctx, member: discord.Member = None):
         """ Shows the member's profile with their custom sloth.
         :param member: The member to see the profile. (Optional) """
@@ -647,25 +656,26 @@ class SlothCurrency(commands.Cog):
         background.save(file_path, 'png', quality=90)
 
         all_effects = {key: value for (key, value) in effects.items() if value.get('has_gif')}
-        async with ctx.typing():
-            if all_effects:
-                try:
-                    gif_file_path = await self.make_gif_image(member_id=member.id, file_path=file_path, all_effects=all_effects)
-                    await answer(file=discord.File(gif_file_path))
+        # async with ctx.typing():
 
-                except Exception as e:
-                    print(e)
-                    pass
-                finally:
-                    os.remove(file_path)
-                    os.remove(gif_file_path)
-            else:
-                try:
-                    await answer(file=discord.File(file_path))
-                except:
-                    pass
-                finally:
-                    os.remove(file_path)
+        if all_effects:
+            try:
+                gif_file_path = await self.make_gif_image(member_id=member.id, file_path=file_path, all_effects=all_effects)
+                await answer(file=discord.File(gif_file_path))
+
+            except Exception as e:
+                print(e)
+                pass
+            finally:
+                os.remove(file_path)
+                os.remove(gif_file_path)
+        else:
+            try:
+                await answer(file=discord.File(file_path))
+            except:
+                pass
+            finally:
+                os.remove(file_path)
 
     async def make_gif_image(self, member_id: int, file_path: str, all_effects: Dict[str, Dict[str, Union[List[str], Tuple[int]]]]) -> None:
         """ Makes a gif image out a profile image.
@@ -772,6 +782,15 @@ class SlothCurrency(commands.Cog):
 
         mycursor, db = await the_database()
         await mycursor.execute("UPDATE UserCurrency SET user_money = user_money + %s WHERE user_id = %s", (money, user_id))
+        await db.commit()
+        await mycursor.close()
+
+    async def update_user_many_money(self, users: List[int]) -> None:
+        """ Updates many the money of many users.
+        :param users: The users to update the money. """
+
+        mycursor, db = await the_database()
+        await mycursor.executemany("UPDATE UserCurrency SET user_money = user_money + %s WHERE user_id = %s", users)
         await db.commit()
         await mycursor.close()
 
@@ -1051,7 +1070,6 @@ class SlothCurrency(commands.Cog):
             return True
 
     async def exchange(self, ctx):
-
         """ Exchange your status into leaves (łł) """
 
         user_info = await self.get_user_activity_info(ctx.author.id)
@@ -1060,26 +1078,25 @@ class SlothCurrency(commands.Cog):
 
         user_found = await self.get_user_currency(ctx.author.id)
         if not user_found:
-            epoch = datetime.utcfromtimestamp(0)
-            the_time = (datetime.utcnow() - epoch).total_seconds()
-            await self.insert_user_currency(ctx.author.id, the_time - 61)
+            current_ts = await utils.get_timestamp()
+            await self.insert_user_currency(ctx.author.id, current_ts - 61)
 
         user_message = user_info[0][1]
         user_time = user_info[0][2]
         member_id = ctx.author.id
-        async with ctx.typing():
-            cmsg, message_times = await self.convert_messages(member_id, user_message)
-            ctime, time_times = await self.convert_time(member_id, user_time)
+        # async with ctx.typing():
+        cmsg, message_times = await self.convert_messages(member_id, user_message)
+        ctime, time_times = await self.convert_time(member_id, user_time)
 
         embed = discord.Embed(title="Exchange", colour=ctx.author.color, timestamp=ctx.message.created_at)
         embed.set_author(name=ctx.author, url=ctx.author.display_avatar)
         if not cmsg == ctime == 0:
             if cmsg > 0:
                 embed.add_field(name="__**Messages:**__",
-                                value=f"Exchanged `{message_times * 50}` messages for `{cmsg}`łł;", inline=False)
+                                value=f"Exchanged `{message_times * 100}` messages for `{cmsg}`łł;", inline=False)
             if ctime > 0:
                 embed.add_field(name="__**Time:**__",
-                                value=f"Exchanged `{(time_times * 1800) / 60}` minutes for `{ctime}`łł;", inline=False)
+                                value=f"Exchanged `{(time_times * 3600) / 60}` minutes for `{ctime}`łł;", inline=False)
             return await ctx.send(embed=embed)
         else:
             return await ctx.send("**You have nothing to exchange!**")
@@ -1089,15 +1106,15 @@ class SlothCurrency(commands.Cog):
         exchanged_money = times = 0
 
         while True:
-            if messages_left >= 50:
+            if messages_left >= 100:
                 times += 1
-                messages_left -= 50
+                messages_left -= 100
                 exchanged_money += 3
                 await asyncio.sleep(0)
                 continue
                 # return await self.convert_messages(member_id, messages_left, exchanged_money, times)
             else:
-                await self.update_user_server_messages(member_id, -times * 50)
+                await self.update_user_server_messages(member_id, -times * 100)
                 await self.update_user_money(member_id, exchanged_money)
                 return exchanged_money, times
 
@@ -1149,12 +1166,15 @@ class SlothCurrency(commands.Cog):
         return await ctx.send(f"Added {add_time} seconds to {member}")
 
     @commands.command()
+    @commands.cooldown(1, 10, commands.BucketType.user)
     async def transfer(self, ctx, member: discord.Member = None, money: int = None):
-        '''
-        Transfers money from one member to another member.
+        """ Transfers money from one member to another member.
         :param member: The member to transfer the money to.
         :param money: The amount of money to transfer.
-        '''
+        
+        * Cooldown: 10 secs.
+        * Transfer tax: 5%. """
+
         if not member:
             return await ctx.send('**Inform the member!**', delete_after=3)
         elif member.id == ctx.author.id:
@@ -1175,38 +1195,64 @@ class SlothCurrency(commands.Cog):
         elif not target_user:
             return await ctx.send(f"**{member} does not have a bank account yet!**", delete_after=5)
 
-        if the_user[0][1] >= int(money):
-            SlothClass = self.client.get_cog('SlothClass')
+        if the_user[0][1] < int(money):
+            return await ctx.send(f"You don't have {money}łł!")
 
-            wired_user = await SlothClass.get_skill_action_by_target_id_and_skill_type(
-                target_id=ctx.author.id, skill_type='wire')
+        tax_percentage: int = 5
 
-            if wired_user:
-                siphon_percentage = 35
-                cybersloth_money = round((money*siphon_percentage)/100)
-                target_money = money - cybersloth_money
-                await self.update_user_money(member.id, target_money)
-                await self.update_user_money(ctx.author.id, -money)
-                await self.update_user_money(wired_user[0], cybersloth_money)
-                await ctx.send(
-                    content=f"{ctx.author.mention}, {member.mention}, <@{wired_user[0]}>",
-                    embed=discord.Embed(
-                        title="__Intercepted Transfer__",
-                        description=(
-                            f"{ctx.author.mention} tried to transfer `{money}łł` to {member.mention}, "
-                            f"but <@{wired_user[0]}> siphoned off `{siphon_percentage}%` of it; `{cybersloth_money}łł`! "
+        bank_money = round((money*tax_percentage)/100) if money >= 20 else 1
+        taxed_money = money - bank_money if money >= 20 else money -1
+
+
+        SlothClass = self.client.get_cog('SlothClass')
+
+        wired_user = await SlothClass.get_skill_action_by_target_id_and_skill_type(
+            target_id=ctx.author.id, skill_type='wire')
+
+        if wired_user:
+            siphon_percentage = 35
+            cybersloth_money = round((taxed_money*siphon_percentage)/100)
+            target_money = taxed_money - cybersloth_money
+            await self.update_user_money(member.id, target_money)
+            await self.update_user_money(ctx.author.id, -money)
+            await self.update_user_money(wired_user[0], cybersloth_money)
+
+            if money >= 20:
+                description: str = f"{ctx.author.mention} tried to transfer `{money}łł` to {member.mention}, "\
+                            f"but the **Sloth Bank** taxed `{tax_percentage}%` of it; `{bank_money}` "\
+                            f"and <@{wired_user[0]}> siphoned off `{siphon_percentage}%` of it; `{cybersloth_money}łł`! "\
                             f"So {member.mention} actually got `{target_money}łł`!"
-                        ),
-                        color=ctx.author.color,
-                        timestamp=ctx.message.created_at)
-                )
-
             else:
-                await self.update_user_money(member.id, money)
-                await self.update_user_money(ctx.author.id, -money)
-                await ctx.send(f"**{ctx.author.mention} transferred {money}łł to {member.mention}!**")
+                description: str = f"{ctx.author.mention} tried to transfer `{money}łł` to {member.mention}, "\
+                            f"but the **Sloth Bank** taxed {bank_money}łł from it "\
+                            f"and <@{wired_user[0]}> siphoned off `{siphon_percentage}%` of it; `{cybersloth_money}łł`! "\
+                            f"So {member.mention} actually got `{target_money}łł`!"
+
+            await ctx.send(
+                content=f"{ctx.author.mention}, {member.mention}, <@{wired_user[0]}>",
+                embed=discord.Embed(
+                    title="__Intercepted Transfer__",
+                    description=description,
+                    color=ctx.author.color,
+                    timestamp=ctx.message.created_at)
+            )
+
         else:
-            await ctx.send(f"You don't have {money}łł!")
+            await self.update_user_money(member.id, taxed_money)
+            await self.update_user_money(ctx.author.id, -money)
+
+            if money >= 20:
+                await ctx.send(
+                    f"{ctx.author.mention} transferred `{money}łł` to {member.mention}! "
+                    f"but the **Sloth Bank** taxed `{tax_percentage}%` of it; `{bank_money}łł`. "
+                    f"So {member.mention} actually got `{taxed_money}łł`!"
+                )
+            else:
+                await ctx.send(
+                    f"{ctx.author.mention} transferred `{money}łł` to {member.mention}! "
+                    f"but the **Sloth Bank** taxed `{bank_money}łł` from it. "
+                    f"So {member.mention} actually got `{taxed_money}łł`!"
+                )
 
     async def get_user_pfp(self, member, thumb_width: int = 59):
         # im = Image.open(requests.get(member.display_avatar, stream=True).raw)

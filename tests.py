@@ -74,12 +74,118 @@
 # await ctx.send(embed=embed, view=view)
 
 
+# z!eval
 
-class Hello:
-    selected_item: list = []
-    pass
+# embed = discord.Embed(
+# title="Nitro", description="Expires in 46 hours", color=int('36393F', 16))
+# space = '\u2800 '*8
+# embed.set_author(name="A WILD GIFT APPEARS")
+# view = discord.ui.View(timeout=None)
+# class MyButton(discord.ui.Button):
+#     def __init__(self) -> None:
+#         super().__init__(style=discord.ButtonStyle.success, label=f"{space}ACCEPT{space}", custom_id="nitro_id")
+
+#     async def callback(self, interaction: discord.Interaction) -> None:
+#         await interaction.response.send_message(f"{interaction.user.mention}\nhttps://c.tenor.com/Z6gmDPeM6dgAAAAM/dance-moves.gif")
+
+# view.add_item(MyButton())
+# embed.set_thumbnail(url="https://pbs.twimg.com/media/EmSIbDzXYAAb4R7.png")
+# await ctx.send(content="\u200b", embed=embed, view=view)
+
+"""
+UPDATE UserCurrency AS OG,
+     (SELECT user_id, user_money FROM UserCurrency WHERE user_id = 814130010260373515) T
+    SET OG.user_money = OG.user_money + T.user_money
+ WHERE OG.user_id = 754678627265675325;
+
+"""
+
+"""
+UPDATE TribeMember AS OG,
+    (SELECT member_id, tribe_role FROM TribeMember WHERE member_id =  657561152951156777) T
+SET OG.tribe_role = T.tribe_role, T.tribe_role = 'Owner'
+WHERE OG.member_id = 647452832852869120
+"""
+"""
+SELECT * FROM TribeMember AS OG, (SELECT member_id, tribe_role FROM TribeMember T WHERE T.member_id = 657561152951156777) T WHERE OG.member_id = 647452832852869120
+"""
 
 
-hello = Hello()
-print(hasattr(hello, 'selected_item'))
-print(getattr(hello, 'selected_item') is True)
+"""
+SELECT OG.member_id, OG.tribe_role FROM TribeMember AS OG, (SELECT member_id, tribe_role FROM TribeMember WHERE member_id = 657561152951156777) T WHERE OG.member_id = 647452832852869120;
+"""
+
+"""
+UPDATE TribeMember OG 
+    JOIN (
+           SELECT owner_id, member_id, tribe_role
+           FROM TribeMember
+           WHERE member_id in (657561152951156777, 647452832852869120)
+          ) T
+    ON T.owner_id = OG.owner_id
+    SET OG.tribe_role = T.tribe_role, T.tribe_role = 'Owner' 
+    WHERE OG.member_id in (657561152951156777, 647452832852869120)
+"""
+
+"""
+```mysql
+UPDATE TribeMember as GL, (
+    SELECT owner_id, member_id, tribe_role
+    FROM TribeMember
+    WHERE member_id = %s
+) OG, (
+    SELECT owner_id, member_id, tribe_role
+    FROM TribeMember
+    WHERE member_id = %s
+) T
+SET GL.tribe_role = ( 
+    CASE 
+        WHEN GL.member_id = %s THEN T.tribe_role
+        WHEN GL.member_id = %s THEN OG.tribe_role
+    END
+)
+WHERE GL.member_id in (%s, %s);
+```
+"""
+
+
+"""
+
+UPDATE TribeMember as OG
+    JOIN TribeMember as T ON OG.member_id = T.
+    SET OG.tribe_role = T.tribe_role, T.tribe_role = 'Owner';
+"""
+
+
+# SELECT USA.user_id, USA.user_time
+# FROM UserServerActivity USA
+# LEFT JOIN SlothProfile SP ON SP.user_id = USA.user_id
+# WHERE SP.user_id IS NULL;
+
+
+# SELECT USA.user_id, round(USA.user_time/60/60) FROM UserServerActivity USA LEFT JOIN SlothProfile SP ON SP.user_id = USA.user_id WHERE SP.user_id IS NULL AND round(USA.user_time/60/60) >= 3000 ORDER BY USA.user_time DESC;
+
+# UPDATE UserServerActivity USA LEFT JOIN SlothProfile SP ON SP.user_id = USA.user_id SET USA.user_time = 0 WHERE SP.user_id IS NULL AND round(USA.user_time/60/60) >= 0;
+
+
+import re
+
+text: str = 'niiiiiiiiceee work'
+text: str = 'cool words'
+
+# found = re.findall(r'[<]?[a]?:[!_\-\w]+:[0-9]{0,18}[>]?', text)
+
+
+regexes: list[str] = [
+    re.compile(r'go{2,99}d wo{1,99}r[!_\-\w]s{0,99}', text),
+    re.compile(r'co{2,99}l wo{1,99}r[!_\-\w]s{0,99}', text),
+    re.compile(r'n[!_\-\w]{1,99}c[!_\-\w]{1,99} wo{1,99}r[!_\-\w]s{0,99}', text)
+]
+
+for regex in regexes:
+    print(regex)
+    print()
+
+
+
+

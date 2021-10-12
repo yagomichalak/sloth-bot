@@ -7,7 +7,8 @@ import asyncio
 from typing import Dict, List, Union
 import os
 from extra.useful_variables import different_class_roles
-from extra.menu import ConfirmSkill, prompt_message_guild, SwitchSavedClasses, SwitchSavedClassesButtons
+from extra.menu import ConfirmSkill, prompt_message_guild, SwitchSavedClasses, SwitchSavedClassesButtons, prompt_message
+from extra.prompt.menu import ConfirmButton
 from extra import utils
 
 # IDs from .env
@@ -25,6 +26,7 @@ sloth_explorer_role_id = int(os.getenv('SLOTH_EXPLORER_ROLE_ID'))
 show_me_everything_role_id = int(os.getenv('SHOW_ME_EVERYTHING_ROLE_ID'))
 sloth_pass_role_id = int(os.getenv('SLOTH_PASS_ROLE_ID'))
 
+teacher_feedback_thread_id = int(os.getenv('TEACHER_FEEDBACK_THREAD_ID'))
 class_history_channel_id = int(os.getenv('CLASS_HISTORY_CHANNEL_ID'))
 reward_channel_id = int(os.getenv('REWARD_CHANNEL_ID'))
 bot_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
@@ -609,11 +611,13 @@ class TeacherFeedback(commands.Cog):
         class_type = users_to_reward[0][2]
         msg_id = users_to_reward[0][3]
 
+        teacher_feedback_thread: discord.Thread = discord.utils.get(teacher.guild.threads, id=teacher_feedback_thread_id)
+
         if users_to_reward:
             the_reward_embed = discord.Embed(
                 title="__**Class Activity Reward**__",
                 description=f"The following people got rewarded for participating and being active in {teacher.mention}'s __{language}__ {class_type} class!\n__Teacher__ **+50łł**; __students__ **+10łł**",
-                colour=discord.Colour.green())
+                color=discord.Color.green())
             the_reward_embed.set_footer(text=teacher.guild.name, icon_url=teacher.guild.icon.url)
             the_reward_embed.set_thumbnail(url=teacher.display_avatar)
             the_reward_embed.set_author(name=teacher, icon_url=teacher.display_avatar)
@@ -630,6 +634,9 @@ class TeacherFeedback(commands.Cog):
                     if await SlothCurrency.get_user_currency(member.id):
                         await SlothCurrency.update_user_money(member.id, 10)
                         await SlothCurrency.update_user_class_reward(ru[0])
+                    
+                    await self.client.loop.create_task(self.ask_for_user_feedback(
+                        teacher, language, class_type, member, teacher_feedback_thread))
                 except Exception as e:
                     print('e', e)
                     pass
@@ -648,6 +655,57 @@ class TeacherFeedback(commands.Cog):
             commands_channel = discord.utils.get(teacher.guild.channels, id=bot_commands_channel_id)
             await commands_channel.send(embed=the_reward_embed)
             return await self.db.delete_rewarded_users(msg_id)
+
+    async def ask_for_user_feedback(
+        self, teacher: discord.Member, language: str, class_type: str, 
+        member: discord.Member, teacher_feedback_thread: discord.Thread) -> None:
+        """ Asks for user feedback regarding a specific teacher class.
+        :param teacher: The teacher of that class.
+        :param language: The language taught in the class.
+        :param class_type: The type of class. [Pronunciation/grammar/programming]
+        :param teacher_feedback_thread: The thread channel to send the user feedback message to. """
+
+        # Embed
+        teacher_feedback_embed: discord.Embed = discord.Embed(
+            title="__Teacher Class Feedback Prompt__",
+            description=f"""You participated in **{teacher}**'s __{language}__ {class_type} class, and
+            for being rewarded in there, we want to give you an option to give it a feedback.
+            > Do you wanna do it?""",
+            color=teacher.color
+        )
+
+        teacher_feedback_embed.set_footer(text="(You have 10 minutes to click on this)")
+
+        # View
+        confirm_view: discord.ui.View = ConfirmButton(member, timeout=6000)
+        await member.send("\u200b", embed=teacher_feedback_embed, view=confirm_view)
+
+        # Waits for prompt confirmation
+        await confirm_view.wait()
+
+        if confirm_view.value is None:
+            return
+
+        if confirm_view.value:
+            # Prompts for a feedback
+            await member.send("Please, send a feedback message containing a maximum of `200` characeters.")
+            feedback_message = await prompt_message(self.client, member, member, limit=200, timeout=6000)
+            # Feedback embed
+            user_response_embed = discord.Embed(
+                title="__Feedback__:",
+                description=f"A user gave a feedback to **{teacher}**'s __{language}__ {class_type} class:\n\n**Message**:\n{feedback_message}",
+                color=teacher.color
+            )
+            # Sends feedback into the Teachers Feedback thread channel
+            try:
+                await teacher_feedback_thread.send(embed=user_response_embed)
+            except:
+                await member.send(f"**For some reason I couldn't send this, please, contact an admin!**")
+            else:
+                await member.send(f"✅ **Successfully sent your feedback, thank you!**")
+        else:
+            await member.send(f"**Thank you anyways, bye!**")
+            
 
     # ===== Channel management =====
 

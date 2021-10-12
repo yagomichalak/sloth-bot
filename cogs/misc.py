@@ -1,8 +1,8 @@
 import discord
 from discord.app import Option, OptionChoice
+from discord.app.commands import slash_command, user_command
 from discord.ext import commands, tasks
 from random import randint, choice
-from cogs.slothcurrency import SlothCurrency
 from datetime import datetime
 import aiohttp
 from pytz import timezone
@@ -97,12 +97,15 @@ class Misc(commands.Cog):
 
     @commands.command(aliases=['lotto'])
     async def lottery(self, ctx, g1=None, g2=None, g3=None):
-        '''
-        Enter the lottery and see if you win!
+        """ Enter the lottery and see if you win!
         :param g1: Guess 1.
         :param g2: Guess 2.
         :param g3: Guess 3.
-        '''
+        
+        * Cost: 5łł. """
+
+        author = ctx.author
+
         await ctx.message.delete()
         if not g1:
             return await ctx.send("**You informed 0 guesses, 3 guesses are needed!**", delete_after=3)
@@ -122,18 +125,19 @@ class Misc(commands.Cog):
             if n <= 0 or n > 5:
                 return await ctx.send(f"**Each number must be between 1-5!**", delete_after=3)
 
+        SlothCurrency = self.client.get_cog('SlothCurrency')
+
         # Check if user is not on cooldown
-        user_secs = await SlothCurrency.get_user_currency(ctx, ctx.author.id)
-        epoch = datetime.utcfromtimestamp(0)
-        the_time = (datetime.utcnow() - epoch).total_seconds()
+        user_secs = await SlothCurrency.get_user_currency(author.id)
+        current_ts = await utils.get_timestamp()
         if not user_secs:
-            await SlothCurrency.insert_user_currency(ctx, ctx.author.id, the_time - 61)
-            user_secs = await SlothCurrency.get_user_currency(ctx, ctx.author.id)
+            await SlothCurrency.insert_user_currency(author.id, current_ts - 61)
+            user_secs = await SlothCurrency.get_user_currency(author.id)
 
         if user_secs[0][6]:
-            sub_time = the_time - user_secs[0][6]
+            sub_time = current_ts - user_secs[0][6]
             if sub_time >= 1200:
-                await SlothCurrency.update_user_lotto_ts(ctx, ctx.author.id, the_time)
+                await SlothCurrency.update_user_lotto_ts(author.id, current_ts)
             else:
                 m, s = divmod(1200 - int(sub_time), 60)
                 h, m = divmod(m, 60)
@@ -148,9 +152,14 @@ class Misc(commands.Cog):
                         f"**You're on cooldown, try again in {s:02d} seconds.**",
                         delete_after=5)
         else:
-            await SlothCurrency.update_user_lotto_ts(ctx, ctx.author.id, the_time)
+            await SlothCurrency.update_user_lotto_ts(author.id, current_ts)
 
-        author = ctx.author
+        if user_secs[0][1] >= 5:
+            await SlothCurrency.update_user_money(author.id, -5)
+        else:
+            return await ctx.send(f"**You need 5łł to play the lottery, {author.mention}!**")
+
+        author = author
         numbers = []
         for x in range(3):
             numbers.append(randint(1, 5))
@@ -158,10 +167,10 @@ class Misc(commands.Cog):
         string_numbers = [str(i) for i in numbers]
         if g1 == numbers[0] and g2 == numbers[1] and g3 == numbers[2]:
             await ctx.send(f'**{author.mention} You won! Congratulations on winning the lottery with the numbers ({g1}, {g2},{g3})!🍃+100łł!**')
-            if not await SlothCurrency.get_user_currency(ctx, ctx.author.id):
+            if not await SlothCurrency.get_user_currency(author.id):
 
-                await SlothCurrency.insert_user_currency(ctx, ctx.author.id, the_time - 61)
-            await SlothCurrency.update_user_money(ctx, ctx.author.id, 100)
+                await SlothCurrency.insert_user_currency(author.id, current_ts - 61)
+            await SlothCurrency.update_user_money(author.id, 100)
 
         else:
             await ctx.send(
@@ -191,6 +200,29 @@ class Misc(commands.Cog):
         em.set_footer(text=f"With ♥ from {ctx.author}", icon_url=ctx.author.display_avatar)
         await ctx.send(embed=em)
 
+    @commands.command()
+    async def roll(self, ctx, sides=None):
+        """roll a die with the number of faces given"""
+        
+        await ctx.message.delete()
+
+        if not sides:
+            sides = 6
+
+        try:
+            sides = int(sides)
+        except ValueError:
+            sides = 6
+
+        if sides > 1000000000000 or sides < 0:
+            return await ctx.send("**Enter a valid integer value**", delete_after=3)
+        
+        embed = discord.Embed(color=ctx.author.color, title=f":game_die: **YOU GOT:** **{randint(1, sides)}** :game_die: `(1 - {sides})`",
+            timestamp=ctx.message.created_at)
+        embed.set_footer(text=f"Rolled by {ctx.author}", icon_url=ctx.author.display_avatar)
+        await ctx.send(embed=embed)
+
+  
 
     # ===========
 
@@ -345,7 +377,7 @@ class Misc(commands.Cog):
         if not time:
             return await ctx.send(f"**Inform a time, {member.mention}!**")
 
-        time_dict, seconds = await self.client.get_cog('Moderation').get_mute_time(ctx=ctx, time=time)
+        time_dict, seconds = await utils.get_time_from_text(ctx=ctx, time=time)
         if not seconds:
             return
 
@@ -415,22 +447,21 @@ class Misc(commands.Cog):
         await self.delete_member_reminder(reminder_id)
         await ctx.send(f"**Successfully deleted reminder with ID `{reminder_id}`, {member.mention}!**")
 
-    # @commands.slash_command(name="dnk", guild_ids=guild_ids)
-    # async def _dnk(self, ctx) -> None:
-    #     """ Tells you something about DNK. """
-    #     await ctx.send(f"**DNK est toujours là pour les vrais !**")
+    @slash_command(name="dnk", guild_ids=guild_ids)
+    async def _dnk(self, ctx) -> None:
+        """ Tells you something about DNK. """
+        
+        await ctx.respond(f"**`Sapristi! C'est qui ? Oui, c'est lui le plus grave et inouï keum qu'on n'a jamais ouï-dire, tandis qu'on était si abasourdi et épris de lui d'être ici affranchi lorsqu'il a pris son joli gui qui ne nie ni être suivi par un souris sur son nid ni être mis ici un beau lundi !`**")
 
-    # @commands.slash_command(name="twiks", guild_ids=guild_ids)
-    # async def _twiks(self, ctx) -> None:
-    #     """ Tells you something about Twiks. """
+    @slash_command(name="twiks", guild_ids=guild_ids)
+    async def _twiks(self, ctx) -> None:
+        """ Tells you something about Twiks. """
 
-    #     await ctx.send(f"**Twiks est mon frérot !**")
+        await ctx.respond(f"**Twiks est mon frérot !**")
 
-    # @commands.user_command(name="click", guild_ids=guild_ids)
-    # async def _click(self, ctx, user: discord.Member) -> None:
-    #     """ Clicks on a user. """
-
-    #     await ctx.send(f"**{ctx.author.mention} clicked on {user.mention}!**")
+    @user_command(name="Help", guild_ids=guild_ids)
+    async def _help(self, ctx, user: discord.Member) -> None:
+        await ctx.respond(f"**{ctx.author.mention} needs your help, {user.mention}!**")
 
 
 

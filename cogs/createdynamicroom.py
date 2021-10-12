@@ -46,7 +46,7 @@ class DynRoomUserVCstampDatabase:
 
     @commands.has_permissions(administrator=True)
     @commands.command(hidden=True)
-    async def drop_table_user_vc_ts(self, ctx) -> None:
+    async def drop_table_user_dr_vc_ts(self, ctx) -> None:
         """ (ADM) Drops the DynRoomUserVCstamp table. """
 
         await ctx.message.delete()
@@ -533,7 +533,7 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
         if not await self.table_dynamic_rooms_exists():
             return
 
-        # Looks for empy nonperma rooms to delete
+        # Looks for empty nonperma rooms to delete
         all_rooms = await self.get_all_dynamic_rooms(object_form=True)
         for room in all_rooms:
             guild = self.client.get_guild(room.guild_id)
@@ -592,8 +592,7 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
             if not the_time - old_time >= 60:
                 await member.send(
                     f"**You're on a cooldown, try again in {round(60 - (the_time - old_time))} seconds!**",)
-                # return await member.move_to(None)
-                # return
+                return
             if the_time - old_time >= 60:
                 await self.update_user_dr_vc_ts(member.id, the_time)
 

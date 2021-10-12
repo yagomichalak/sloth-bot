@@ -392,3 +392,18 @@ class Agares(Player):
         return reflects
 
 
+
+    @commands.command()
+    @Player.skills_used(requirement=50)
+    @Player.skill_on_cooldown(skill=Skill.FOUR, seconds=172800)
+    @Player.user_is_class('agares')
+    @Player.skill_mark()
+    @Player.not_ready()
+    async def delay(self, ctx, member: discord.Member = None) -> None:
+        """ Delays someone else's set of skills for 1 day.
+        :param member: The member of whom to delay the skills.
+        
+        • Delay = 2 days
+        • Cost = 150łł """
+
+        pass

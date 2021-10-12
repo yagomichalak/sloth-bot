@@ -270,7 +270,7 @@ class Munk(Player):
         await mycursor.close()
         return tribe_member
 
-    async def get_tribe_members(self, tribe_owner_id: int = None, tribe_name: str = None) -> Dict[str, List[int]]:
+    async def get_tribe_members(self, tribe_owner_id: int = None, tribe_name: str = None) -> List[List[Union[int, str]]]:
         """ Gets a list of IDs of members of a particular tribe.
         :param tribe_owner_id: The ID of the owner of the tribe (Optional).
         :param tribe_name: The name of the tribe. (Optional).
@@ -278,7 +278,7 @@ class Munk(Player):
 
         mycursor, _ = await the_database()
 
-        tribe_members: Dict[str, List[int]] = {}
+        tribe_members: List[int] = []
 
         if tribe_owner_id:
             await mycursor.execute("SELECT tribe_name FROM UserTribe WHERE user_id = %s", (tribe_owner_id,))
@@ -289,13 +289,34 @@ class Munk(Player):
         elif tribe_name:
             await mycursor.execute("SELECT member_id, tribe_role FROM TribeMember WHERE tribe_name = %s", (tribe_name,))
             tribe_members = await mycursor.fetchall()
-            # tribe_members = list(map(lambda mid: (mid[0], mid[1]), await mycursor.fetchall()))
 
         await mycursor.close()
 
         return tribe_members
 
-    @commands.command(aliases=['request_logo', 'ask_thumbnail', 'ask_logo'])
+    @commands.group(aliases=['tb'])
+    async def tribe(self, ctx) -> None:
+        """ Command for managing and interacting with a tribe.
+        (Use this without a subcommand to see all subcommands available) """
+        if ctx.invoked_subcommand:
+            return
+
+        cmd = self.client.get_command('tribe')
+        prefix = self.client.command_prefix
+        subcommands = [f"{prefix}{c.qualified_name}" for c in cmd.commands
+            ]
+
+        subcommands = '\n'.join(subcommands)
+        items_embed = discord.Embed(
+            title="__Subcommads__:",
+            description=f"```apache\n{subcommands}```",
+            color=ctx.author.color,
+            timestamp=ctx.message.created_at
+        )
+
+        await ctx.send(embed=items_embed)
+
+    @tribe.command(aliases=['request_logo', 'ask_thumbnail', 'ask_logo'])
     @commands.cooldown(1, 3600, commands.BucketType.user)
     async def request_thumbnail(self, ctx, image_url: str = None) -> None:
         """ Request a thumbnail for your tribe.
@@ -355,30 +376,6 @@ class Munk(Player):
         else:
             self.client.get_command('request_thumbnail').reset_cooldown(ctx)
             await ctx.send(f"**Not doing requesting it, then, {requester.mention}!**")
-
-
-
-    @commands.group(aliases=['tb'])
-    async def tribe(self, ctx) -> None:
-        """ Command for managing and interacting with a tribe.
-        (Use this without a subcommand to see all subcommands available) """
-        if ctx.invoked_subcommand:
-            return
-
-        cmd = self.client.get_command('tribe')
-        prefix = self.client.command_prefix
-        subcommands = [f"{prefix}{c.qualified_name}" for c in cmd.commands
-            ]
-
-        subcommands = '\n'.join(subcommands)
-        items_embed = discord.Embed(
-            title="__Subcommads__:",
-            description=f"```apache\n{subcommands}```",
-            color=ctx.author.color,
-            timestamp=ctx.message.created_at
-        )
-
-        await ctx.send(embed=items_embed)
 
     @tribe.command(aliases=['inv'])
     @commands.cooldown(1, 10, commands.BucketType.user)
@@ -1057,6 +1054,39 @@ class Munk(Player):
 
         return tribe_role_embed
 
+    async def update_user_tribe_owner(self, old_owner_id: int, new_owner_id: int) -> None:
+        """ Updates the user's Tribe Role.
+        :param old_owner_id: The old Tribe owner's ID.
+        :param new_owner_id: The new Tribe owner's ID. """
+
+        mycursor1, db1 = await the_database()
+        await mycursor1.execute("UPDATE UserTribe SET user_id = %s WHERE user_id = %s", (new_owner_id, old_owner_id))
+        await mycursor1.execute("""
+            UPDATE TribeMember as GL, (
+                SELECT owner_id, member_id, tribe_role
+                FROM TribeMember
+                WHERE member_id = %s
+            ) OG, (
+                SELECT owner_id, member_id, tribe_role
+                FROM TribeMember
+                WHERE member_id = %s
+            ) T
+            SET GL.tribe_role = ( 
+                CASE 
+                    WHEN GL.member_id = %s THEN T.tribe_role
+                    WHEN GL.member_id = %s THEN OG.tribe_role
+                END
+            )
+            WHERE GL.member_id in (%s, %s);
+        """, (new_owner_id, old_owner_id, new_owner_id, old_owner_id, new_owner_id, old_owner_id))
+        await db1.commit()
+        await mycursor1.close()
+
+        mycursor2, db2 = await the_django_database()
+        await mycursor2.execute("UPDATE tribe_tribe SET owner_id = %s WHERE owner_id = %s", (new_owner_id, old_owner_id))
+        await db2.commit()
+        await mycursor2.close()
+
     async def update_user_tribe_role(self, user_id: int, role_name: Optional[str] = None) -> None:
         """ Updates the user's Tribe Role.
         :param user_id: The Tribe Member's ID.
@@ -1072,3 +1102,110 @@ class Munk(Player):
         await db.commit()
         await mycursor.close()
     
+
+    @tribe.command(aliases=['to', 'transfer'])
+    @commands.cooldown(1, 60, commands.BucketType.user)
+    async def transfer_ownership(self, ctx, *, member: discord.Member = None) -> None:
+        """ Transfers the ownership of your tribe to someone else. """
+
+        author = ctx.author
+
+        if not member:
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.send(f"**Please, inform a member, {author.mention}!**")
+
+        user_tribe = await self.get_tribe_info_by_user_id(author.id)
+        if not user_tribe['name']:
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.send(f"**You don't have a tribe, {author.mention}**!")
+
+        if user_tribe['owner_id'] == member.id:
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.send(f"**You can't transfer the tribe to yourself, {author.mention}!**")
+
+        tribe_member = await self.get_tribe_member(member.id)
+        if not tribe_member:
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.send(f"**{member.mention} is not even in a tribe, you can't transfer the tribe to them, {author.mention}!**")
+
+        if tribe_member[0] != user_tribe['owner_id']:
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.send(f"**{member.mention} is in a different tribe, you can't transfer the tribe to them, {author.mention}!**")
+
+        confirm = await ConfirmSkill(
+            f"**Are you sure you want to transfer your ownership of `{user_tribe['name']}` to {member.mention}, {author.mention}?**"
+            ).prompt(ctx)
+        if not confirm:
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.send(f"**Not doing it, then, {author.mention}!**")
+
+        await self.update_user_tribe_owner(author.id, member.id)
+        await ctx.send(f"**Successfully transferred ownership of `{user_tribe['name']}` from {author.mention} to {member.mention}!**")
+
+
+    @tribe.command(aliases=["fto", "ftransfer", "force_transfer"])
+    @commands.cooldown(1, 60, commands.BucketType.user)
+    @commands.has_permissions(administrator=True)
+    async def force_transfer_ownership(self, ctx, tribe_name: str = None, member: discord.Member = None) -> None:
+        """ (ADMIN) Force-transfers the ownership of a Tribe to another user.
+        :param tribe_name: The name of the tribe from which to transfer ownership.
+        :param member: The member to transfer the Tribe to. """
+
+        author = ctx.author
+
+        if not member:
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.send(f"**Please, inform a member to transfer the tribe to, {author.mention}!**")
+
+        if not tribe_name:
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.send(f"**Please, inform the name of the tribe, {author.mention}!**")
+
+        user_tribe = await self.get_tribe_info_by_name(tribe_name)
+        if not user_tribe['name']:
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.send(f"**No tribes with that name were found, {author.mention}!**")
+
+        if user_tribe['owner_id'] == member.id:
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.send(f"**You can't transfer the tribe to the same user, {author.mention}!**")
+
+        tribe_member = await self.get_tribe_member(member.id)
+        if not tribe_member:
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.send(f"**{member.mention} is not even in a tribe, you can't transfer the tribe to them, {author.mention}!**")
+
+        if tribe_member[0] != user_tribe['owner_id']:
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.send(f"**{member.mention} is in a different tribe, you can't transfer the tribe to them, {author.mention}!**")
+
+        confirm = await ConfirmSkill(
+            f"**Are you sure you want to transfer ownership of `{user_tribe['name']}` from <@{user_tribe['owner_id']}> to {member.mention}, {author.mention}?**"
+            ).prompt(ctx)
+        if not confirm:
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.send(f"**Not doing it, then, {author.mention}!**")
+
+        try:
+            await self.update_user_tribe_owner(user_tribe['owner_id'], member.id)
+        except:
+            await ctx.send(f"**Something went wrong with it, {author.mention}!**")
+        else:
+            await ctx.send(f"**Successfully transferred ownership of `{user_tribe['name']}` from <@{user_tribe['owner_id']}> to {member.mention}!**")
+
+
+
+    @commands.command(aliases=['get_mission', 'gq', 'gm'])
+    @Player.skills_used(requirement=50)
+    @Player.skill_on_cooldown(skill=Skill.FOUR, seconds=172800)
+    @Player.user_is_class('munk')
+    @Player.skill_mark()
+    @Player.not_ready()
+    async def get_quest(self, ctx) -> None:
+        """ Gets a Quest for you and your Tribe to complete, and if so,
+        the involved people will get rewarded.
+        
+        • Delay = 2 days
+        • Cost = Free  """
+
+        pass
