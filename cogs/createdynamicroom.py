@@ -796,11 +796,8 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
             return None
 
         # if there's one category available
-        if len(available_options) == 1:
-            first_cat = available_options[available_options.keys()[0]]
-            # if there's one room available, no need to choose
-            if len(first_cat) == 1:
-                return first_cat[0]
+        if len(available_rooms_list) == 1:
+            return available_rooms_list[0]
 
         # creates view with selects with the available languages
         view = discord.ui.View()
@@ -845,7 +842,7 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
                 select_title = category.capitalize() + " Languages"
                 view.add_item(LanguageRoomSelect(self.client, custom_id="select_lr_"+category,
                     row=1, select_options=cat_options, placeholder=select_title))
-                await member.send(f"**Select a Category:**", view=view)
+                await member.send(f"**Select a Language:**", view=view)
                 await view.wait()
             else:
                 await member.send(f"**Timed out!**")

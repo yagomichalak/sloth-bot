@@ -7,115 +7,149 @@ CREATE TABLE DynamicRoom (guild_id BIGINT, room_id BIGINT, vc_id BIGINT, room_ts
 DROP TABLE IF EXISTS `LanguageRoom`;
 CREATE TABLE LanguageRoom (category VARCHAR(32), room_id SERIAL, english_name VARCHAR(32), room_name BLOB, room_quant INT, room_capacity INT);
 INSERT INTO LanguageRoom (category, english_name, room_name, room_quant, room_capacity) VALUES 
-/* 01 */('germanic', 'Swedish', 'Svenska 🪑🇸🇪', 2, 10),
-/* 02 */('germanic', 'Norwegian', 'Norsk ⛷🇳🇴', 2, 10),
-/* 03 */('germanic', 'Danish', 'Dansk 🥔🇩🇰', 2, 10),
-/* 04 */('germanic', 'Dutch', 'Nederlands 🚴🇧🇪🇳🇱', 2, 10),
-/* 05 */('sub-saharan', 'Afrikaans', 'Afrikaans 🦁🇿🇦', 2, 10),
-/* 06 */('uralic', 'Finnish', 'Suomi ❄🇫🇮', 2, 10),
-/* 07 */('uralic', 'Hungarian', 'Magyar 🌶🇭🇺', 2, 10),
-/* 08 */('romance', 'Catalan', 'català', 2, 10),
-/* 09 */('romance', 'Romanian', 'Română 🧛🇷🇴', 2, 10),
-/* 10 */('baltic', 'Latvian', 'Latviešu 🥔🇱🇹', 2, 10),
-/* 11 */('slavic', 'Polish', 'Polski 🧅🇵🇱', 2, 10),
-/* 12 */('slavic', 'Czech', 'česko 🇨🇿🇸🇰', 2, 10),
-/* 13 */('slavic', 'Ukrainian', 'Українська 🥣🇺🇦', 2, 10),
-/* 14 */('balkan', 'Macedonian', 'Македонски 🇲🇰', 2, 10),
-/* 15 */('slavic', 'Bulgarian', 'Български 🌹🇧🇬', 2, 10),
-/* 16 */('semitic', 'Hebrew', 'עִברִית 🕎🇮🇱', 2, 10),
-/* 17 */('turkic', 'Kazakh', 'Қазақ 🐎🇰🇿', 2, 10),
-/* 18 */('turkic', 'Azerbaijani', 'Azərbaycan 🔥🇦🇿', 2, 10),
-/* 19 */('iranian', 'Kurdish', 'كوردی🥪', 2, 10),
-/* 20 */('iranian', 'Iran', 'فارسی🐈🇮🇷', 2, 10),
-/* 21 */('asian', 'Vietnamese', 'Tiếng Việt🛵🇻🇳', 2, 10),
-/* 22 */('asian', 'Khmer', 'ខ្មែរ🇰🇭', 2, 10),
-/* 23 */('asian', 'Thai', 'ภาษาไทย 🥘🇹🇭', 2, 10),
-/* 24 */('asian', 'Mongolian', 'Монгол хэл 🇲🇳', 2, 10),
-/* 25 */('asian', 'Cantonese', '粤语 🍚🇭🇰', 2, 10),
-/* 26 */('asian', 'South Asian Languages', 'South Asian languages🧘🇮🇳🇵🇰🇳🇵', 2, 10),
-/* 27 */('asian', 'Hindi', 'हिन्दी 🏏🇮🇳', 2, 10),
-/* 28 */('unafiliated', 'Greek', 'Ελληνικά 🏛️🇬🇷', 2, 10),
-/* 29 */('germanic', 'Luxembourgish', 'lëtzebuergesch 🇱🇺', 2, 10),
+/* 001 */('germanic', 'Swedish', 'Svenska 🪑🇸🇪', 2, 10),
+/* 002 */('germanic', 'Norwegian', 'Norsk ⛷🇳🇴', 2, 10),
+/* 003 */('germanic', 'Danish', 'Dansk 🥔🇩🇰', 2, 10),
+/* 004 */('germanic', 'Dutch', 'Nederlands 🚴🇧🇪🇳🇱', 2, 10),
+/* 005 */('sub-saharan', 'Afrikaans', 'Afrikaans 🦁🇿🇦', 2, 10),
+/* 006 */('uralic', 'Finnish', 'Suomi ❄🇫🇮', 2, 10),
+/* 007 */('uralic', 'Hungarian', 'Magyar 🌶🇭🇺', 2, 10),
+/* 008 */('romance', 'Catalan', 'català', 2, 10),
+/* 009 */('romance', 'Romanian', 'Română 🧛🇷🇴', 2, 10),
+/* 010 */('baltic', 'Latvian', 'Latviešu 🥔🇱🇹', 2, 10),
+/* 011 */('slavic', 'Polish', 'Polski 🧅🇵🇱', 2, 10),
+/* 012 */('slavic', 'Czech', 'česko 🇨🇿🇸🇰', 2, 10),
+/* 013 */('slavic', 'Ukrainian', 'Українська 🥣🇺🇦', 2, 10),
+/* 014 */('balkan', 'Macedonian', 'Македонски 🇲🇰', 2, 10),
+/* 015 */('slavic', 'Bulgarian', 'Български 🌹🇧🇬', 2, 10),
+/* 016 */('semitic', 'Hebrew', 'עִברִית 🕎🇮🇱', 2, 10),
+/* 017 */('turkic', 'Kazakh', 'Қазақ 🐎🇰🇿', 2, 10),
+/* 018 */('turkic', 'Azerbaijani', 'Azərbaycan 🔥🇦🇿', 2, 10),
+/* 019 */('iranian', 'Kurdish', 'كوردی🥪', 2, 10),
+/* 020 */('iranian', 'Iran', 'فارسی🐈🇮🇷', 2, 10),
+/* 021 */('south-east asian', 'Vietnamese', 'Tiếng Việt🛵🇻🇳', 2, 10),
+/* 022 */('south-east asian', 'Khmer', 'ខ្មែរ🇰🇭', 2, 10),
+/* 023 */('south-east asian', 'Thai', 'ภาษาไทย 🥘🇹🇭', 2, 10),
+/* 024 */('east asian', 'Mongolian', 'Монгол хэл 🇲🇳', 2, 10),
+/* 025 */('east asian', 'Cantonese', '粤语 🍚🇭🇰', 2, 10),
+/* 026 */('south asian', 'South Asian Languages', 'South Asian languages🧘🇮🇳🇵🇰🇳🇵', 2, 10),
+/* 027 */('south asian', 'Hindi', 'हिन्दी 🏏🇮🇳', 2, 10),
+/* 028 */('unafiliated', 'Greek', 'Ελληνικά 🏛️🇬🇷', 2, 10),
+/* 029 */('germanic', 'Luxembourgish', 'lëtzebuergesch 🇱🇺', 2, 10),
 
-/* 30 */('asian', 'Tamil', ' தமிழ் (Tamil)', 2, 10),
-/* 31 */('asian', 'Punjabi', ' پنجاب (Punjabi) ', 2, 10),
-/* 32 */('asian', 'Gujarati', 'ગુજરાતી (Gujarati)', 2, 10),
-/* 33 */('asian', 'Marathi', 'मराठी (Marathi)', 2, 10),
-/* 34 */('asian', 'Sanskrit', 'संस्कृत (Sanskrit)', 2, 10),
-/* 35 */('asian', 'Malayalam', 'മലയാളം (Malayalam)', 2, 10),
-/* 36 */('asian', 'Telugu', 'తెలుగు (Telugu)', 2, 10),
-/* 37 */('asian', 'Kannada', 'ಕನ್ನಡ (Kannada)', 2, 10),
-/* 38 */('asian', 'Bengali', 'বাংলা (Bengali)', 2, 10),
-/* 39 */('asian', 'Nepali', 'ལྷོ་མཚམས་མའི་ཁ (Nepali)', 2, 10),
+/* 030 */('south asian', 'Tamil', 'தமிழ் (Tamil)', 2, 10),
+/* 031 */('south asian', 'Punjabi', 'پنجاب (Punjabi) ', 2, 10),
+/* 032 */('south asian', 'Gujarati', 'ગુજરાતી (Gujarati)', 2, 10),
+/* 033 */('south asian', 'Marathi', 'मराठी (Marathi)', 2, 10),
+/* 034 */('south asian', 'Sanskrit', 'संस्कृत (Sanskrit)', 2, 10),
+/* 035 */('south asian', 'Malayalam', 'മലയാളം (Malayalam)', 2, 10),
+/* 036 */('south asian', 'Telugu', 'తెలుగు (Telugu)', 2, 10),
+/* 037 */('south asian', 'Kannada', 'ಕನ್ನಡ (Kannada)', 2, 10),
+/* 038 */('south asian', 'Bengali', 'বাংলা (Bengali)', 2, 10),
+/* 039 */('south asian', 'Nepali', 'ལྷོ་མཚམས་མའི་ཁ (Nepali)', 2, 10),
 
-/* 40 */('asian', 'Urdu', 'اردو Urdu 🇵🇰', 2, 10),
+/* 040 */('south asian', 'Urdu', 'اردو Urdu 🇵🇰', 2, 10),
 
-/* 41 */('germanic', 'Swiss German', 'Schwyzerdütsch (Swiss German)', 2, 10),
+/* 041 */('germanic', 'Swiss German', 'Schwyzerdütsch (Swiss German)', 2, 10),
 
-/* 42 */('romance', 'Basque', 'Euskara', 2, 10),
-/* 43 */('romance', 'Galician', 'Galego', 2, 10),
+/* 042 */('romance', 'Basque', 'Euskara', 2, 10),
+/* 043 */('romance', 'Galician', 'Galego', 2, 10),
 
-/* 44 */('sub-saharan', 'Yoruba', 'عِدعِ يوْرُبا', 2, 10),
-/* 45 */('sub-saharan', 'Hausa', 'هَوْسَ', 2, 10),
+/* 044 */('sub-saharan', 'Yoruba', 'عِدعِ يوْرُبا (Yorúbà)', 2, 10),
+/* 045 */('sub-saharan', 'Hausa', 'هَوْسَ (Hausa)', 2, 10),
 
-/* 46 */('sub-saharan', 'Igbo', 'Ṇ́dị́ Ìgbò', 2, 10),
-/* 47 */('sub-saharan', 'Somali', 'صومالي', 2, 10),
-/* 48 */('sub-saharan', 'Swahili', 'Kiswahili', 2, 10),
-/* 49 */('sub-saharan', 'Twi', 'Akan kasa', 2, 10),
-/* 50 */('sub-saharan', 'Tigrinya', 'ትግርኛ', 2, 10),
-/* 51 */('sub-saharan', 'Lingala', 'Lingála', 2, 10),
-/* 52 */('sub-saharan', 'Zulu', 'isiZulu', 2, 10),
-/* 53 */('sub-saharan', 'Wolof', 'ولوفل', 2, 10),
-/* 54 */('sub-saharan', 'Xhosa', 'isiXhosa', 2, 10),
-/* 55 */('sub-saharan', 'Ndebele', 'Ndebele', 2, 10),
-/* 56 */('sub-saharan', 'Shona', 'chiShona', 2, 10),
-/* 57 */('sub-saharan', 'Oromo', 'Afaan Oromoo', 2, 10),
+/* 046 */('sub-saharan', 'Igbo', 'Ṇ́dị́ Ìgbò (Igbo)', 2, 10),
+/* 047 */('sub-saharan', 'Somali', 'صومالي (Somali)', 2, 10),
+/* 048 */('sub-saharan', 'Swahili', 'Kiswahili', 2, 10),
+/* 049 */('sub-saharan', 'Twi', 'Akan kasa', 2, 10),
+/* 050 */('sub-saharan', 'Tigrinya', 'ትግርኛ (Tigrinya)', 2, 10),
+/* 051 */('sub-saharan', 'Lingala', 'Lingála', 2, 10),
+/* 052 */('sub-saharan', 'Zulu', 'isiZulu', 2, 10),
+/* 053 */('sub-saharan', 'Wolof', 'ولوفل (Wolof)', 2, 10),
+/* 054 */('sub-saharan', 'Xhosa', 'isiXhosa', 2, 10),
+/* 055 */('sub-saharan', 'Ndebele', 'Ndebele', 2, 10),
+/* 056 */('sub-saharan', 'Shona', 'chiShona', 2, 10),
+/* 057 */('sub-saharan', 'Oromo', 'Afaan Oromoo', 2, 10),
 
-/* 58 */('sub-saharan', 'Amharic', 'አማርኛ', 2, 10),
+/* 058 */('sub-saharan', 'Amharic', 'አማርኛ', 2, 10),
 
-/* 59 */('romance', 'Lombard', 'Lumbard', 2, 10),
-/* 60 */('romance', 'Sicilian', 'Sicilianu ', 2, 10),
-/* 61 */('romance', 'Neapolitan', 'Napulitan', 2, 10),
-/* 62 */('romance', 'Salentino', 'Salentinu', 2, 10),
-/* 63 */('romance', 'Venetian', 'Vèneto ', 2, 10),
-/* 64 */('romance', 'Ligurian', 'Lìgure ', 2, 10),
-/* 65 */('romance', 'Sardinian', 'Sard', 2, 10),
-/* 66 */('romance', 'Romanesco', 'Romanesco', 2, 10),
+/* 059 */('romance', 'Lombard', 'Lumbard', 2, 10),
+/* 060 */('romance', 'Sicilian', 'Sicilianu ', 2, 10),
+/* 061 */('romance', 'Neapolitan', 'Napulitan', 2, 10),
+/* 062 */('romance', 'Salentino', 'Salentinu', 2, 10),
+/* 063 */('romance', 'Venetian', 'Vèneto ', 2, 10),
+/* 064 */('romance', 'Ligurian', 'Lìgure ', 2, 10),
+/* 065 */('romance', 'Sardinian', 'Sard', 2, 10),
+/* 066 */('romance', 'Romanesco', 'Romanesco', 2, 10),
 
-/* 67 */('germanic', 'Icelandic', 'íslenska', 2, 10),
+/* 067 */('germanic', 'Icelandic', 'íslenska', 2, 10),
 
-/* 68 */('slavic', 'Albanian', 'shqip 🇦🇱', 2, 10),
+/* 068 */('slavic', 'Albanian', 'shqip 🇦🇱', 2, 10),
 
-/* 69 */('slavic', 'Slovak', 'slovenský', 2, 10),
+/* 069 */('slavic', 'Slovak', 'slovenský', 2, 10),
 
-/* 70 */('balkan', 'Croatian', 'Hrvatski 🇭🇷', 2, 10),
-/* 71 */('balkan', 'Montenegrin', 'Crnogorski 🇧🇦', 2, 10),
-/* 72 */('balkan', 'Serbian', 'Srpski 🇷🇸', 2, 10),
+/* 070 */('balkan', 'Croatian', 'Hrvatski 🇭🇷', 2, 10),
+/* 071 */('balkan', 'Montenegrin', 'Crnogorski 🇧🇦', 2, 10),
+/* 072 */('balkan', 'Serbian', 'Srpski 🇷🇸', 2, 10),
 
-/* 73 */('baltic', 'Lithuanian', 'Lietuvių', 2, 10),
+/* 073 */('baltic', 'Lithuanian', 'Lietuvių', 2, 10),
 
-/* 74 */('asian', 'Wenzhounese', '溫州話 ', 2, 10),
-/* 75 */('asian', 'Taishanese', '台山話 ', 2, 10),
-/* 76 */('asian', 'Sichuanese', '四川話 ', 2, 10),
-/* 77 */('asian', 'Hakka', '客家話 ', 2, 10),
-/* 78 */('asian', 'Hainanese', '海南話 ', 2, 10),
+/* 074 */('east asian', 'Wenzhounese', '溫州話 ', 2, 10),
+/* 075 */('east asian', 'Taishanese', '台山話 ', 2, 10),
+/* 076 */('east asian', 'Sichuanese', '四川話 ', 2, 10),
+/* 077 */('east asian', 'Hakka', '客家話 ', 2, 10),
+/* 078 */('east asian', 'Hainanese', '海南話 ', 2, 10),
 
-/* 79 */('asian', 'Taiwanese', '閩南語 ', 2, 10),
-/* 80 */('asian', 'Teochew', 'Teochew', 2, 10),
-/* 81 */('asian', 'Hockchew', 'Hockchew', 2, 10),
+/* 079 */('east asian', 'Taiwanese', '閩南語 ', 2, 10),
+/* 080 */('east asian', 'Teochew', 'Teochew', 2, 10),
+/* 081 */('east asian', 'Hockchew', 'Hockchew', 2, 10),
 
-/* 82 */('asian', 'Bisaya', 'Bisaya', 2, 10),
-/* 83 */('asian', 'Waray-waray', 'Waray-waray', 2, 10),
-/* 84 */('asian', 'Kapampangan', 'Kapampangan', 2, 10),
-/* 85 */('asian', 'Cebuano', 'Cebuano', 2, 10),
-/* 86 */('asian', 'Ilocano', 'Ilocano', 2, 10),
+/* 082 */('south-east asian', 'Bisaya', 'Bisaya', 2, 10),
+/* 083 */('south-east asian', 'Waray-waray', 'Waray-waray', 2, 10),
+/* 084 */('south-east asian', 'Kapampangan', 'Kapampangan', 2, 10),
+/* 085 */('south-east asian', 'Cebuano', 'Cebuano', 2, 10),
+/* 086 */('south-east asian', 'Ilocano', 'Ilocano', 2, 10),
 
-/* 87 */('asian', 'Javanese', 'Bahasa Jawa', 2, 10),
-/* 88 */('asian', 'Lao', 'ພາສາລາວ ', 2, 10),
+/* 087 */('south-east asian', 'Javanese', 'Bahasa Jawa', 2, 10),
+/* 088 */('south-east asian', 'Lao', 'ພາສາລາວ ', 2, 10),
 
-/* 89 */('romance', 'portunhol', 'Portunhol 🧉🌎', 2, 10),
+/* 089 */('romance', 'Portunhol', 'Portuñol 🧉🌎', 2, 10),
 
-/* ?? */('category', 'english_name', 'room_name', 2, 10)
+/* 090 */('semitic', 'Amazigh', 'ⵎⵣⵗⵏ (Amazigh)', 2, 10),
+
+/* 091 */('conlang', 'Esperanto', 'Esperanto', 2, 10)
+/* 092 */('conlang', 'Toki Pona', 'Toki Pona', 2, 10)
+
+/* 093 */('sign languages', 'American sign l.', 'ASL (American sign l.)', 2, 10)
+/* 094 */('sign languages', 'British sign l.', 'BSL (British sign l.)', 2, 10)
+/* 095 */('sign languages', 'Langue des signes française', 'Libra (langue des signes)  ', 2, 10)
+/* 096 */('sign languages', 'Deutsche Gebärdensprache', 'DGS (Deutsche Gebärdensprache l.)', 2, 10)
+/* 097 */('sign languages', 'Língua brasileira de sinais', 'Libras (Língua brasileira de sinais)', 2, 10)
+/* 098 */('sign languages', 'CSL (Chinese sign l.)', 'CSL (中国手语)', 2, 10)
+
+/* 099 */('unafiliated', 'Ancient Greek', 'αρχαία ελληνικά (Ancient Greek)', 2, 10)
+/* 100 */('iranian', 'Pashto', 'پښتو (Pashto)', 2, 10)
+/* 101 */('germanic', 'Faroese', 'Føroyskt (Faroese)', 2, 10)
+/* 102 */('slavic', 'Belarusian', 'беларуская (Belarusian)', 2, 10)
+/* 103 */('turkic', 'Turkmen', 'Türkmençe (Turkmen)', 2, 10)
+/* 104 */('turkic', 'Kyrgyz', 'кыргыз тили (Kyrgyz)', 2, 10)
+/* 105 */('turkic', 'Uzbek', 'Oʻzbek tili (Uzbek)', 2, 10)
+
+/* 106 */('indigenous', 'Sami', 'Sámi (Sami)', 2, 10)
+/* 107 */('indigenous', 'Quechua', 'Runasimi (Quechua)', 2, 10)
+/* 108 */('indigenous', 'Guarani', 'Avañeʼẽ (Guarani)', 2, 10)
+/* 109 */('indigenous', 'Greenlandic', 'Kalaallisut (Greenlandic)', 2, 10)
+/* 110 */('indigenous', 'Nahuatl', 'Aztec (Nahuatl)', 2, 10)
+/* 111 */('indigenous', 'Yucatec', 'Maya (Yucatec)', 2, 10)
+
+/* 112 */('unafiliated', 'Armenian', 'հայերեն (Armenian)', 2, 10)
+/* 113 */('unafiliated', 'Georgian', 'ქართული ენა (Georgian)', 2, 10)
+
+/* 114 */('south-east asian', 'Kelantanese', 'Kelantanese', 2, 10)
+/* 115 */('south-east asian', 'Sarawak Malay', 'Bahasa Sarawak', 2, 10)
+/* 116 */('south-east asian', 'Kedahan', 'Bahasa Melayu Kedah', 2, 10)
+
+/* ??? */('category', 'english_name', 'room_name', 2, 10)
 
 ;
 
@@ -159,8 +193,6 @@ INSERT INTO LanguageRoomPermissions (room_id, role_id, permission_name, permissi
 (5, /*Native Afrikaans*/ 531854806525018112, 'speaker', true),
 (5, /*Fluent Afrikaans*/ 531855093817933834, 'speaker', true),
 (5, /*Studying Afrikaans*/ 531855141352112139, 'speaker', true),
-(5, /*Native Luxembourgish*/ 475240440501633034, 'speaker', true),
-(5, /*Studying Luxembourgish*/ 490132397078347800, 'speaker', true),
 
 /* Finnish channel */
 (6, /*Native Finnish*/ 476018604240928779, 'speaker', true),
@@ -595,6 +627,104 @@ INSERT INTO LanguageRoomPermissions (room_id, role_id, permission_name, permissi
 (89, /*Native Spanish*/ 474726084638670848, 'speaker', true),
 (89, /*Fluent Spanish*/ 474720724125351937, 'speaker', true),
 (89, /*Studying Spanish*/ 474745895796342784, 'speaker', true),
+
+/* Amazigh Channel */
+(90, /*Native Amazigh*/ 658059163041267722, 'speaker', true),
+
+/* Esperanto Channel */
+(91, /*Studying Conlang*/ 591576844042502193, 'speaker', true),
+
+/* Toki Pona Channel */
+(92, /*Studying Conlang*/ 591576844042502193, 'speaker', true),
+
+/* American sign l. Channel */
+(93, /*Native Sign Languages*/ 822155795475070977, 'speaker', true),
+
+/* British sign l. Channel */
+(94, /*Native Sign Languages*/ 822155795475070977, 'speaker', true),
+
+/* Langue des signes française Channel */
+(95, /*Native Sign Languages*/ 822155795475070977, 'speaker', true),
+
+/* Deutsche Gebärdensprache Channel */
+(96, /*Native Sign Languages*/ 822155795475070977, 'speaker', true),
+
+/* Língua brasileira de sinais Channel */
+(97, /*Native Sign Languages*/ 822155795475070977, 'speaker', true),
+
+/* CSL (Chinese sign l.) Channel */
+(98, /*Native Sign Languages*/ 822155795475070977, 'speaker', true),
+
+/* Ancient Greek Channel */
+(99, /*Studying Language*/ 885823354152570880, 'speaker', true),
+
+/* Pashto Channel */
+(100, /*Native Farsi*/ 478178098437685248, 'speaker', true),
+(100, /*Fluent Farsi*/ 478178529368866826, 'speaker', true),
+(100, /*Studying Farsi*/ 563369533440655360, 'speaker', true),
+
+/* Faroese Channel */
+(101, /*Native German*/ 471921967499444225, 'speaker', true),
+(101, /*Fluent Language*/ 490131150879195138, 'speaker', true),
+(101, /*Studying Language*/ 475241077578924053, 'speaker', true),
+
+/* Belarusian Channel */
+(102, /*Native Belarusian*/ 476505043315458049, 'speaker', true),
+(102, /*Studying Belarusian*/ 476631439241117698, 'speaker', true),
+
+/* Turkmen Channel */
+(103, /*Native Turkic Languages*/ 810441635418079233, 'speaker', true),
+
+/* Kyrgyz Channel */
+(104, /*Native Turkic Languages*/ 810441635418079233, 'speaker', true),
+
+/* Uzbek Channel */
+(105, /*Native Turkic Languages*/ 810441635418079233, 'speaker', true),
+
+/* Sami Channel */
+(106, /*Native Indigenous Languages*/ 490171186198741012, 'speaker', true),
+(106, /*Studying Indigenous Languages*/ 821440812671041626, 'speaker', true),
+
+/* Quechua Channel */
+(107, /*Native Indigenous Languages*/ 490171186198741012, 'speaker', true),
+(107, /*Studying Indigenous Languages*/ 821440812671041626, 'speaker', true),
+
+/* Guarani Channel */
+(108, /*Native Indigenous Languages*/ 490171186198741012, 'speaker', true),
+(108, /*Studying Indigenous Languages*/ 821440812671041626, 'speaker', true),
+
+/* Greenlandic Channel */
+(109, /*Native Indigenous Languages*/ 490171186198741012, 'speaker', true),
+(109, /*Studying Indigenous Languages*/ 821440812671041626, 'speaker', true),
+
+/* Nahuatl Channel */
+(110, /*Native Indigenous Languages*/ 490171186198741012, 'speaker', true),
+(110, /*Studying Indigenous Languages*/ 821440812671041626, 'speaker', true),
+
+/* Yucatec Channel */
+(111, /*Native Indigenous Languages*/ 490171186198741012, 'speaker', true),
+(111, /*Studying Indigenous Languages*/ 821440812671041626, 'speaker', true),
+
+/* Armenian Channel */
+(112, /*Native Armenian*/ 481141297659248651, 'speaker', true),
+(112, /*Studying Armenian*/ 563373263355379723, 'speaker', true),
+
+/* Georgian Channel */
+(113, /*Native Georgian*/ 486664331719737363, 'speaker', true),
+(113, /*Studying Georgian*/ 483848214122987541, 'speaker', true),
+
+/* Kelantanese Channel */
+(114, /*Native Malay*/ 481139094001549338, 'speaker', true),
+(114, /*Studying Malay*/ 562043669440364555, 'speaker', true),
+
+/* Kelantanese Channel */
+(115, /*Native Malay*/ 481139094001549338, 'speaker', true),
+(115, /*Studying Malay*/ 562043669440364555, 'speaker', true),
+
+/* Kedahan Malay Channel */
+(116, /*Native Malay*/ 481139094001549338, 'speaker', true),
+(116, /*Studying Malay*/ 562043669440364555, 'speaker', true),
+
 
 /* Language Channel */
 (00, /*Native Language*/ 0000000000000000000, 'speaker', true),
