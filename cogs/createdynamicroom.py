@@ -812,7 +812,7 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
                 # view.add_item(select_title)
                 select_title = category.capitalize() + " Languages"
                 view.add_item(LanguageRoomSelect(self.client, custom_id="select_lr_"+category,
-                    row=index+1, select_options=cat_options, placeholder=select_title))
+                    row=index+1, select_options=cat_options[:25], placeholder=select_title))
             await member.send(f"**Select from the following Categories:**", view=view)
             await view.wait()
         else:
@@ -826,7 +826,7 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
 
             select_title = "Language Categories"
             view.add_item(LanguageRoomSelect(self.client, custom_id="select_lr_category",
-                row=1, select_options=categories_options, placeholder=select_title))
+                row=1, select_options=categories_options[:25], placeholder=select_title))
             await member.send(f"**Select a Category:**", view=view)
             await view.wait()
 
