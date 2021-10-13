@@ -9,7 +9,7 @@ from PIL import Image, ImageFont, ImageDraw
 import os
 from cogs.slothcurrency import SlothCurrency
 from mysqldb import *
-from typing import List, Union, Any, Optional
+from typing import List, Union, Any, Optional, Dict
 from extra.menu import ConfirmSkill
 from extra.select import LanguageRoomSelect
 import json
@@ -749,7 +749,7 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
 
         return room_list
 
-    async def get_available_options_from_member(self, member: discord.Member) -> dict[str, List[LanguageRoom]]:
+    async def get_available_options_from_member(self, member: discord.Member) -> Dict[str, List[LanguageRoom]]:
         """ Gets available rooms for given member
         :param member: specified member to check available rooms. """
 
