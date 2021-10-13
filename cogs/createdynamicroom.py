@@ -555,6 +555,22 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
 
                 await self.delete_dynamic_rooms(room_id)
 
+    @commands.has_permissions(administrator=True)
+    @commands.command(hidden=True)
+    async def setup_dynamic_rooms(self, ctx):
+        """ Set's up dynamic room database entries from sql file """
+
+        await ctx.message.delete()
+        mycursor, db = await the_database()
+        sql_file = open("./sql/create_dynamic_room_setup.sql")
+        sql_as_string = sql_file.read()
+        sql_file.close()
+        await mycursor.execute(sql_as_string)
+        await db.commit()
+        await mycursor.close()
+
+        await ctx.send(f"**SQL file ran with no hitches 👌**")
+
     async def prefetch_language_room(self):
         """ Prefetches language rooms from database """
         
