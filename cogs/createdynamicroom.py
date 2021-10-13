@@ -842,7 +842,7 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
                 select_title = category.capitalize() + " Languages"
                 view.add_item(LanguageRoomSelect(self.client, custom_id="select_lr_"+category,
                     row=1, select_options=cat_options, placeholder=select_title))
-                await member.send(f"**Select a Category:**", view=view)
+                await member.send(f"**Select a Language:**", view=view)
                 await view.wait()
             else:
                 await member.send(f"**Timed out!**")
