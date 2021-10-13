@@ -117,37 +117,37 @@ INSERT INTO LanguageRoom (category, english_name, room_name, room_quant, room_ca
 
 /* 090 */('semitic', 'Amazigh', 'ⵎⵣⵗⵏ (Amazigh)', 2, 10),
 
-/* 091 */('conlang', 'Esperanto', 'Esperanto', 2, 10)
-/* 092 */('conlang', 'Toki Pona', 'Toki Pona', 2, 10)
+/* 091 */('conlang', 'Esperanto', 'Esperanto', 2, 10),
+/* 092 */('conlang', 'Toki Pona', 'Toki Pona', 2, 10),
 
-/* 093 */('sign languages', 'American sign l.', 'ASL (American sign l.)', 2, 10)
-/* 094 */('sign languages', 'British sign l.', 'BSL (British sign l.)', 2, 10)
-/* 095 */('sign languages', 'Langue des signes française', 'Libra (langue des signes)  ', 2, 10)
-/* 096 */('sign languages', 'Deutsche Gebärdensprache', 'DGS (Deutsche Gebärdensprache l.)', 2, 10)
-/* 097 */('sign languages', 'Língua brasileira de sinais', 'Libras (Língua brasileira de sinais)', 2, 10)
-/* 098 */('sign languages', 'CSL (Chinese sign l.)', 'CSL (中国手语)', 2, 10)
+/* 093 */('sign languages', 'American sign l.', 'ASL (American sign l.)', 2, 10),
+/* 094 */('sign languages', 'British sign l.', 'BSL (British sign l.)', 2, 10),
+/* 095 */('sign languages', 'Langue des signes française', 'Libra (langue des signes)  ', 2, 10),
+/* 096 */('sign languages', 'Deutsche Gebärdensprache', 'DGS (Deutsche Gebärdensprache l.)', 2, 10),
+/* 097 */('sign languages', 'Língua brasileira de sinais', 'Libras (Língua brasileira de sinais)', 2, 10),
+/* 098 */('sign languages', 'CSL (Chinese sign l.)', 'CSL (中国手语)', 2, 10),
 
-/* 099 */('unafiliated', 'Ancient Greek', 'αρχαία ελληνικά (Ancient Greek)', 2, 10)
-/* 100 */('iranian', 'Pashto', 'پښتو (Pashto)', 2, 10)
-/* 101 */('germanic', 'Faroese', 'Føroyskt (Faroese)', 2, 10)
-/* 102 */('slavic', 'Belarusian', 'беларуская (Belarusian)', 2, 10)
-/* 103 */('turkic', 'Turkmen', 'Türkmençe (Turkmen)', 2, 10)
-/* 104 */('turkic', 'Kyrgyz', 'кыргыз тили (Kyrgyz)', 2, 10)
-/* 105 */('turkic', 'Uzbek', 'Oʻzbek tili (Uzbek)', 2, 10)
+/* 099 */('unafiliated', 'Ancient Greek', 'αρχαία ελληνικά (Ancient Greek)', 2, 10),
+/* 100 */('iranian', 'Pashto', 'پښتو (Pashto)', 2, 10),
+/* 101 */('germanic', 'Faroese', 'Føroyskt (Faroese)', 2, 10),
+/* 102 */('slavic', 'Belarusian', 'беларуская (Belarusian)', 2, 10),
+/* 103 */('turkic', 'Turkmen', 'Türkmençe (Turkmen)', 2, 10),
+/* 104 */('turkic', 'Kyrgyz', 'кыргыз тили (Kyrgyz)', 2, 10),
+/* 105 */('turkic', 'Uzbek', 'Oʻzbek tili (Uzbek)', 2, 10),
 
-/* 106 */('indigenous', 'Sami', 'Sámi (Sami)', 2, 10)
-/* 107 */('indigenous', 'Quechua', 'Runasimi (Quechua)', 2, 10)
-/* 108 */('indigenous', 'Guarani', 'Avañeʼẽ (Guarani)', 2, 10)
-/* 109 */('indigenous', 'Greenlandic', 'Kalaallisut (Greenlandic)', 2, 10)
-/* 110 */('indigenous', 'Nahuatl', 'Aztec (Nahuatl)', 2, 10)
-/* 111 */('indigenous', 'Yucatec', 'Maya (Yucatec)', 2, 10)
+/* 106 */('indigenous', 'Sami', 'Sámi (Sami)', 2, 10),
+/* 107 */('indigenous', 'Quechua', 'Runasimi (Quechua)', 2, 10),
+/* 108 */('indigenous', 'Guarani', 'Avañeʼẽ (Guarani)', 2, 10),
+/* 109 */('indigenous', 'Greenlandic', 'Kalaallisut (Greenlandic)', 2, 10),
+/* 110 */('indigenous', 'Nahuatl', 'Aztec (Nahuatl)', 2, 10),
+/* 111 */('indigenous', 'Yucatec', 'Maya (Yucatec)', 2, 10),
 
-/* 112 */('unafiliated', 'Armenian', 'հայերեն (Armenian)', 2, 10)
-/* 113 */('unafiliated', 'Georgian', 'ქართული ენა (Georgian)', 2, 10)
+/* 112 */('unafiliated', 'Armenian', 'հայերեն (Armenian)', 2, 10),
+/* 113 */('unafiliated', 'Georgian', 'ქართული ენა (Georgian)', 2, 10),
 
-/* 114 */('south-east asian', 'Kelantanese', 'Kelantanese', 2, 10)
-/* 115 */('south-east asian', 'Sarawak Malay', 'Bahasa Sarawak', 2, 10)
-/* 116 */('south-east asian', 'Kedahan', 'Bahasa Melayu Kedah', 2, 10)
+/* 114 */('south-east asian', 'Kelantanese', 'Kelantanese', 2, 10),
+/* 115 */('south-east asian', 'Sarawak Malay', 'Bahasa Sarawak', 2, 10),
+/* 116 */('south-east asian', 'Kedahan', 'Bahasa Melayu Kedah', 2, 10),
 
 /* ??? */('category', 'english_name', 'room_name', 2, 10)
 
