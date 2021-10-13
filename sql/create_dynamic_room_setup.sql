@@ -145,9 +145,9 @@ INSERT INTO LanguageRoom (category, english_name, room_name, room_quant, room_ca
 /* 112 */('unafiliated', 'Armenian', 'հայերեն (Armenian)', 2, 10)
 /* 113 */('unafiliated', 'Georgian', 'ქართული ენა (Georgian)', 2, 10)
 
-/* ??? */('south-east asian', 'Kelantanese', 'Kelantanese', 2, 10)
-/* ??? */('south-east asian', 'Sarawak Malay', 'Bahasa Sarawak', 2, 10)
-/* ??? */('south-east asian', 'Kedahan', 'Bahasa Melayu Kedah', 2, 10)
+/* 114 */('south-east asian', 'Kelantanese', 'Kelantanese', 2, 10)
+/* 115 */('south-east asian', 'Sarawak Malay', 'Bahasa Sarawak', 2, 10)
+/* 116 */('south-east asian', 'Kedahan', 'Bahasa Melayu Kedah', 2, 10)
 
 /* ??? */('category', 'english_name', 'room_name', 2, 10)
 
@@ -705,17 +705,25 @@ INSERT INTO LanguageRoomPermissions (room_id, role_id, permission_name, permissi
 (111, /*Native Indigenous Languages*/ 490171186198741012, 'speaker', true),
 (111, /*Studying Indigenous Languages*/ 821440812671041626, 'speaker', true),
 
-/* Kelantanese Channel */
-(112, /*Native Malay*/ 481139094001549338, 'speaker', true),
-(112, /*Studying Malay*/ 562043669440364555, 'speaker', true),
+/* Armenian Channel */
+(112, /*Native Armenian*/ 481141297659248651, 'speaker', true),
+(112, /*Studying Armenian*/ 563373263355379723, 'speaker', true),
+
+/* Georgian Channel */
+(113, /*Native Georgian*/ 486664331719737363, 'speaker', true),
+(113, /*Studying Georgian*/ 483848214122987541, 'speaker', true),
 
 /* Kelantanese Channel */
-(113, /*Native Malay*/ 481139094001549338, 'speaker', true),
-(113, /*Studying Malay*/ 562043669440364555, 'speaker', true),
-
-/* Kedahan Malay Channel */
 (114, /*Native Malay*/ 481139094001549338, 'speaker', true),
 (114, /*Studying Malay*/ 562043669440364555, 'speaker', true),
+
+/* Kelantanese Channel */
+(115, /*Native Malay*/ 481139094001549338, 'speaker', true),
+(115, /*Studying Malay*/ 562043669440364555, 'speaker', true),
+
+/* Kedahan Malay Channel */
+(116, /*Native Malay*/ 481139094001549338, 'speaker', true),
+(116, /*Studying Malay*/ 562043669440364555, 'speaker', true),
 
 
 /* Language Channel */
