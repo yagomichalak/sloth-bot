@@ -661,7 +661,7 @@ INSERT INTO LanguageRoomPermissions (room_id, role_id, permission_name, permissi
 /* Pashto Channel */
 (100, /*Native Farsi*/ 478178098437685248, 'speaker', true),
 (100, /*Fluent Farsi*/ 478178529368866826, 'speaker', true),
-(100, /*Studying Farsi*/ 563369533440655360, 'speaker', true)
+(100, /*Studying Farsi*/ 563369533440655360, 'speaker', true),
 
 /* Faroese Channel */
 (101, /*Native German*/ 471921967499444225, 'speaker', true),
@@ -670,7 +670,7 @@ INSERT INTO LanguageRoomPermissions (room_id, role_id, permission_name, permissi
 
 /* Belarusian Channel */
 (102, /*Native Belarusian*/ 476505043315458049, 'speaker', true),
-(102, /*Studying Belarusian*/ 476631439241117698, 'speaker', true)
+(102, /*Studying Belarusian*/ 476631439241117698, 'speaker', true),
 
 /* Turkmen Channel */
 (103, /*Native Turkic Languages*/ 810441635418079233, 'speaker', true),
@@ -683,27 +683,27 @@ INSERT INTO LanguageRoomPermissions (room_id, role_id, permission_name, permissi
 
 /* Sami Channel */
 (106, /*Native Indigenous Languages*/ 490171186198741012, 'speaker', true),
-(106, /*Studying Indigenous Languages*/ 821440812671041626, 'speaker', true)
+(106, /*Studying Indigenous Languages*/ 821440812671041626, 'speaker', true),
 
 /* Quechua Channel */
 (107, /*Native Indigenous Languages*/ 490171186198741012, 'speaker', true),
-(107, /*Studying Indigenous Languages*/ 821440812671041626, 'speaker', true)
+(107, /*Studying Indigenous Languages*/ 821440812671041626, 'speaker', true),
 
 /* Guarani Channel */
 (108, /*Native Indigenous Languages*/ 490171186198741012, 'speaker', true),
-(108, /*Studying Indigenous Languages*/ 821440812671041626, 'speaker', true)
+(108, /*Studying Indigenous Languages*/ 821440812671041626, 'speaker', true),
 
 /* Greenlandic Channel */
 (109, /*Native Indigenous Languages*/ 490171186198741012, 'speaker', true),
-(109, /*Studying Indigenous Languages*/ 821440812671041626, 'speaker', true)
+(109, /*Studying Indigenous Languages*/ 821440812671041626, 'speaker', true),
 
 /* Nahuatl Channel */
 (110, /*Native Indigenous Languages*/ 490171186198741012, 'speaker', true),
-(110, /*Studying Indigenous Languages*/ 821440812671041626, 'speaker', true)
+(110, /*Studying Indigenous Languages*/ 821440812671041626, 'speaker', true),
 
 /* Yucatec Channel */
 (111, /*Native Indigenous Languages*/ 490171186198741012, 'speaker', true),
-(111, /*Studying Indigenous Languages*/ 821440812671041626, 'speaker', true)
+(111, /*Studying Indigenous Languages*/ 821440812671041626, 'speaker', true),
 
 /* Kelantanese Channel */
 (112, /*Native Malay*/ 481139094001549338, 'speaker', true),
