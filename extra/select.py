@@ -91,7 +91,6 @@ class LanguageRoomSelect(discord.ui.Select):
     
     async def callback(self, interaction: discord.Interaction):
         await interaction.response.defer()
-
         option = interaction.data['values'][0]
 
         self.view.chosen_option = option
