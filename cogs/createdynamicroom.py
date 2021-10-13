@@ -556,7 +556,8 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
                 await self.delete_dynamic_rooms(room_id)
 
     async def prefetch_language_room(self):
-        """ Prefetch language rooms from database """
+        """ Prefetches language rooms from database """
+        
         self.language_rooms = await super().get_all_language_room(object_form=True)
 
     @commands.Cog.listener()
@@ -686,14 +687,13 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
             return the_thing
 
     async def set_language_channel_permissions(self, guild: discord.Guild, room_id: int, vc):
-        """ set channel permissions given room_id and the voice channel
-        :param guild: discord server instance.
-        :param room_id: id of the language room.
-        :param vc: voice channel to be modified.
+        """ Sets channel permissions when given the room_id and the voice channel
+        :param guild: Discord server instance.
+        :param room_id: ID of the language room.
+        :param vc: Voice Channel to be modified.
         """
 
         channel_permission = await self.get_language_channel_permission(room_id, object_form=True)
-        # print(str(channel_permission))
         await vc.edit(sync_permissions=True)
         await vc.edit(sync_permissions=False)
 
@@ -716,18 +716,13 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
         is_admin = any([int(os.getenv('ADMIN_ROLE_ID')) in roles_tuple])
         can_see_everything = any([show_me_everything, is_admin])
 
-        # print("can_see_everything:", can_see_everything)
-
         permissions_rooms = await self.get_available_rooms(roles_tuple, see_everything=can_see_everything, object_form=True)
-        # print("permissions_rooms:", permissions_rooms)
 
         if not permissions_rooms:
             return None
 
         room_ids = set([permission.room_id for permission in permissions_rooms])
-        # print("room_ids:", room_ids)
         available_rooms = await self.get_rooms_by_ids(room_ids, object_form=True)
-        # print("available_rooms:", available_rooms)
 
         return available_rooms
 
@@ -735,17 +730,17 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
         """ Returns room quantity from given IDs
         :param room_list: list of room ids """
 
-        # sset of room ids
+        # Set of room ids
         room_ids = set([room.room_id for room in room_list])
 
         # initializing variables
         for r in room_list:
             r.current_quantity = 0
 
-        # fetch quantity of rooms spawned
+        # Fetches quantity of rooms spawned
         room_quants = await self.get_count_by_room_ids(tuple(room_ids))
 
-        # update the LanguageRoom object so it has the quantity info
+        # Updates the LanguageRoom object so it has the quantity info
         for room_data in room_quants:
             quant, room_id = room_data
             for r in room_list:
@@ -755,22 +750,21 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
         return room_list
 
     async def get_available_options_from_member(self, member: discord.Member) -> dict[str, List[LanguageRoom]]:
-        """ Get's available rooms for given member
+        """ Gets available rooms for given member
         :param member: specified member to check available rooms. """
 
-        # get all **language** rooms from member
+        # Gets all **language** rooms from member
         available_rooms_list = await self.get_language_rooms_from_member(member)
-        # print(available_rooms_list)
 
-        # if list is empty, return empty
+        # If list is empty, return empty
         if not available_rooms_list:
             return []
 
-        # updates rooms with quantity
+        # Updates rooms with quantity
         available_rooms_list = await self.get_room_quantity(available_rooms_list)
         # print("available_rooms_list:", available_rooms_list)
 
-        # options
+        # Options
 
         available_options = {}
 
@@ -780,7 +774,7 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
                 m_description = "(MAX) " + m_description
             return discord.SelectOption(label=room.room_name.decode("utf-8"), value=index, description=m_description)
 
-        # for every room in available room list
+        # For every room in available room list
         for index, room in enumerate(available_rooms_list):
             if not room.category in available_options:
                 available_options[room.category] = []
@@ -788,12 +782,10 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
             # create and add option to room category dict
             available_options[room.category].append(create_option(room, str(index)))
 
-        # available_options = [create_option(room, str(index)) for index, room in enumerate(available_rooms_list)]
-
         return available_rooms_list, available_options
 
     async def initiate_member_room_interaction(self, member: discord.Member) -> Union[List[DynamicRoom], None]:
-        """ initiate interaction with user to create room
+        """ Initiates interaction with user to create room
         :param member: Member to initiate interaction. """
 
         available_rooms_list, available_options = await self.get_available_options_from_member(member)
@@ -810,7 +802,7 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
             if len(first_cat) == 1:
                 return first_cat[0]
 
-        # create view with selects with the available languages
+        # creates view with selects with the available languages
         view = discord.ui.View()
 
         if len(available_options) <= 5:
@@ -871,7 +863,10 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
 
     @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
-    async def make_perma(self, ctx, vc_id):
+    async def make_perma(self, ctx, vc_id) -> None:
+        """ Makes a Dynamic Room permanent.
+        :param vc_id: The ID of the Dynamic Room. """ 
+        
         await ctx.message.delete()
         await ctx.send("**Done!**", delete_after=3)
         await super().make_perma_dynamic_room(vc_id=vc_id)
