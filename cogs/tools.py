@@ -103,6 +103,45 @@ class Tools(commands.Cog):
 		else:
 			return await ctx.send(f"**No one has this role, {member.mention}!**")
 
+	@commands.command(aliases=["ping_inrole"])
+	@commands.cooldown(1, 5, commands.BucketType.user)
+	@utils.is_allowed(allowed_roles)
+	async def ping_intersection_role(self, ctx, roles: commands.Greedy[discord.Role] = None) -> None:
+		""" Shows everyone who have that role in the server.
+		:param roles: The set of roles you want to check. """
+
+		member = ctx.author
+
+		await ctx.message.delete()
+
+		if not roles:
+			return await ctx.send(f"**Please, inform at least one role, {member.mention}!**")
+
+		roles: List[discord.Role] = list(set(roles))
+		
+		members = [
+			m for m in ctx.guild.members
+			if (m_inter := set(m.roles).intersection(set(roles))) and len(m_inter) == len(roles)
+		]
+
+		if members:
+			# create role
+			temp_role = await ctx.guild.create_role(name="temporary role")
+
+			# add role to members
+			for member in members:
+				await member.add_roles(temp_role)
+
+			# send ping
+			tmp_message = await ctx.send(f"{temp_role.mention}")
+
+			# remove message and role
+			await tmp_message.delete()
+			await temp_role.delete()
+		else:
+			return await ctx.send(f"**No one has this role, {member.mention}!**")
+
+
 	# Countsdown from a given number
 	@commands.command()
 	@utils.is_allowed([senior_mod_role_id], throw_exc=True)
