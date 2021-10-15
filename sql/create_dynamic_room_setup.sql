@@ -2,40 +2,40 @@ DROP TABLE IF EXISTS `DynRoomUserVCstamp`;
 CREATE TABLE DynRoomUserVCstamp (user_id bigint, user_vc_ts bigint);
 
 DROP TABLE IF EXISTS `DynamicRoom`;
-CREATE TABLE DynamicRoom (guild_id BIGINT, room_id BIGINT, vc_id BIGINT, room_ts BIGINT, is_perma_room BOOLEAN);
+CREATE TABLE DynamicRoom (guild_id BIGINT, room_id BIGINT, vc_id BIGINT, room_ts BIGINT, is_perma_room BOOLEAN, empty_since_ts INT);
 
 DROP TABLE IF EXISTS `LanguageRoom`;
-CREATE TABLE LanguageRoom (category VARCHAR(32), room_id SERIAL, english_name VARCHAR(32), room_name BLOB, room_quant INT, room_capacity INT, max_empty_time INT);
+CREATE TABLE LanguageRoom (room_id SERIAL, category VARCHAR(32), english_name VARCHAR(32), room_name BLOB, room_quant INT, room_capacity INT, max_empty_time INT);
 INSERT INTO LanguageRoom (category, english_name, room_name, room_quant, room_capacity, max_empty_time) VALUES 
-/* 001 */('germanic', 'Swedish', 'Svenska 🪑🇸🇪', 2, 10, 60),
-/* 002 */('germanic', 'Norwegian', 'Norsk ⛷🇳🇴', 2, 10, 60),
-/* 003 */('germanic', 'Danish', 'Dansk 🥔🇩🇰', 2, 10, 60),
-/* 004 */('germanic', 'Dutch', 'Nederlands 🚴🇧🇪🇳🇱', 2, 10, 60),
-/* 005 */('sub-saharan', 'Afrikaans', 'Afrikaans 🦁🇿🇦', 2, 10, 60),
-/* 006 */('uralic', 'Finnish', 'Suomi ❄🇫🇮', 2, 10, 60),
+/* 001 */('germanic', 'Swedish', 'Svenska 🪑🇸🇪', 2, 10, 60 * 60 * 6),
+/* 002 */('germanic', 'Norwegian', 'Norsk ⛷🇳🇴', 2, 10, 60 * 60 * 6),
+/* 003 */('germanic', 'Danish', 'Dansk 🥔🇩🇰', 2, 10, 60 * 60 * 6),
+/* 004 */('germanic', 'Dutch', 'Nederlands 🚴🇧🇪🇳🇱', 2, 10, 60 * 60 * 6),
+/* 005 */('sub-saharan', 'Afrikaans', 'Afrikaans 🦁🇿🇦', 2, 10, 60 * 60 * 6),
+/* 006 */('uralic', 'Finnish', 'Suomi ❄🇫🇮', 2, 10, 60 * 60 * 6),
 /* 007 */('uralic', 'Hungarian', 'Magyar 🌶🇭🇺', 2, 10, 60),
-/* 008 */('romance', 'Catalan', 'català', 2, 10, 60),
-/* 009 */('romance', 'Romanian', 'Română 🧛🇷🇴', 2, 10, 60),
+/* 008 */('romance', 'Catalan', 'català', 2, 10, 60 * 60 * 6),
+/* 009 */('romance', 'Romanian', 'Română 🧛🇷🇴', 2, 10, 60 * 60 * 6),
 /* 010 */('baltic', 'Latvian', 'Latviešu 🥔🇱🇹', 2, 10, 60),
-/* 011 */('slavic', 'Polish', 'Polski 🧅🇵🇱', 2, 10, 60),
+/* 011 */('slavic', 'Polish', 'Polski 🧅🇵🇱', 2, 10, 60 * 60 * 6),
 /* 012 */('slavic', 'Czech', 'česko 🇨🇿🇸🇰', 2, 10, 60),
 /* 013 */('slavic', 'Ukrainian', 'Українська 🥣🇺🇦', 2, 10, 60),
 /* 014 */('balkan', 'Macedonian', 'Македонски 🇲🇰', 2, 10, 60),
 /* 015 */('slavic', 'Bulgarian', 'Български 🌹🇧🇬', 2, 10, 60),
-/* 016 */('semitic', 'Hebrew', 'עִברִית 🕎🇮🇱', 2, 10, 60),
+/* 016 */('semitic', 'Hebrew', 'עִברִית 🕎🇮🇱', 2, 10, 60 * 60 * 6),
 /* 017 */('turkic', 'Kazakh', 'Қазақ 🐎🇰🇿', 2, 10, 60),
 /* 018 */('turkic', 'Azerbaijani', 'Azərbaycan 🔥🇦🇿', 2, 10, 60),
-/* 019 */('iranian', 'Kurdish', 'كوردی🥪', 2, 10, 60),
+/* 019 */('iranian', 'Kurdish', 'كوردی🥪 (kurdish)', 2, 10, 60),
 /* 020 */('iranian', 'Iran', 'فارسی🐈🇮🇷', 2, 10, 60),
-/* 021 */('south-east asian', 'Vietnamese', 'Tiếng Việt🛵🇻🇳', 2, 10, 60),
+/* 021 */('south-east asian', 'Vietnamese', 'Tiếng Việt🛵🇻🇳', 2, 10, 60 * 60 * 6),
 /* 022 */('south-east asian', 'Khmer', 'ខ្មែរ🇰🇭', 2, 10, 60),
 /* 023 */('south-east asian', 'Thai', 'ภาษาไทย 🥘🇹🇭', 2, 10, 60),
 /* 024 */('east asian', 'Mongolian', 'Монгол хэл 🇲🇳', 2, 10, 60),
 /* 025 */('east asian', 'Cantonese', '粤语 🍚🇭🇰', 2, 10, 60),
 /* 026 */('south asian', 'South Asian Languages', 'South Asian languages🧘🇮🇳🇵🇰🇳🇵', 2, 10, 60),
-/* 027 */('south asian', 'Hindi', 'हिन्दी 🏏🇮🇳', 2, 10, 60),
-/* 028 */('unafiliated', 'Greek', 'Ελληνικά 🏛️🇬🇷', 2, 10, 60),
-/* 029 */('germanic', 'Luxembourgish', 'lëtzebuergesch 🇱🇺', 2, 10, 60),
+/* 027 */('south asian', 'Hindi', 'हिन्दी 🏏🇮🇳', 2, 10, 60 * 60 * 6),
+/* 028 */('unafiliated', 'Greek', 'Ελληνικά 🏛️🇬🇷', 2, 10, 60 * 60 * 6),
+/* 029 */('germanic', 'Luxembourgish', 'lëtzebuergesch 🇱🇺', 2, 10, 60 * 60 * 6),
 
 /* 030 */('south asian', 'Tamil', 'தமிழ் (Tamil)', 2, 10, 60),
 /* 031 */('south asian', 'Punjabi', 'پنجاب (Punjabi) ', 2, 10, 60),
@@ -82,7 +82,7 @@ INSERT INTO LanguageRoom (category, english_name, room_name, room_quant, room_ca
 /* 065 */('romance', 'Sardinian', 'Sard', 2, 10, 60),
 /* 066 */('romance', 'Romanesco', 'Romanesco', 2, 10, 60),
 
-/* 067 */('germanic', 'Icelandic', 'íslenska', 2, 10, 60),
+/* 067 */('germanic', 'Icelandic', 'íslenska', 2, 10, 60 * 60 * 6),
 
 /* 068 */('slavic', 'Albanian', 'shqip 🇦🇱', 2, 10, 60),
 
@@ -149,7 +149,7 @@ INSERT INTO LanguageRoom (category, english_name, room_name, room_quant, room_ca
 /* 115 */('south-east asian', 'Sarawak Malay', 'Bahasa Sarawak', 2, 10, 60),
 /* 116 */('south-east asian', 'Kedahan', 'Bahasa Melayu Kedah', 2, 10, 60),
 
-/* ??? */('category', 'english_name', 'room_name', 2, 10)
+/* ??? */('category', 'english_name', 'room_name', 2, 10, 60)
 
 ;
 
