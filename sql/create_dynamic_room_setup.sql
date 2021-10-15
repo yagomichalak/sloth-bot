@@ -115,7 +115,7 @@ INSERT INTO LanguageRoom (category, english_name, room_name, room_quant, room_ca
 
 /* 089 */('romance', 'Portunhol', 'Portuñol 🧉🌎', 2, 10, 60),
 
-/* 090 */('semitic', 'Amazigh', 'ⵎⵣⵗⵏ (Amazigh)', 2, 10, 60),
+/* 090 */('semitic', 'Amazigh', 'ⵎⵣⵗⵏ (Amazigh)', 2, 10, 60 * 60 * 6),
 
 /* 091 */('conlang', 'Esperanto', 'Esperanto', 2, 10, 60),
 /* 092 */('conlang', 'Toki Pona', 'Toki Pona', 2, 10, 60),
@@ -148,6 +148,12 @@ INSERT INTO LanguageRoom (category, english_name, room_name, room_quant, room_ca
 /* 114 */('south-east asian', 'Kelantanese', 'Kelantanese', 2, 10, 60),
 /* 115 */('south-east asian', 'Sarawak Malay', 'Bahasa Sarawak', 2, 10, 60),
 /* 116 */('south-east asian', 'Kedahan', 'Bahasa Melayu Kedah', 2, 10, 60),
+
+/* 117 */('category', 'Latin', 'Latin', 2, 10, 60 * 60 * 6),
+
+/* 118 */('category', 'Estonian', 'Estonian', 2, 10, 60 * 60 * 6),
+
+/* 119 */('category', 'Bahasa Batak', 'Bahasa Batak', 2, 10, 60),
 
 /* ??? */('category', 'english_name', 'room_name', 2, 10, 60)
 
@@ -724,6 +730,18 @@ INSERT INTO LanguageRoomPermissions (room_id, role_id, permission_name, permissi
 /* Kedahan Malay Channel */
 (116, /*Native Malay*/ 481139094001549338, 'speaker', true),
 (116, /*Studying Malay*/ 562043669440364555, 'speaker', true),
+
+/* Latin Channel */
+
+/* Estonian Channel */
+(117, /*Native Finnish*/ 476018604240928779, 'speaker', true),
+(117, /*Fluent Finnish*/ 476741198149713935, 'speaker', true),
+(117, /*Studying Finnish*/ 476741389112180737, 'speaker', true),
+
+/* Bahasa Batak Channel */
+(118, /*Native Indonesian*/ 476379670334406686, 'speaker', true),
+(118, /*Fluent Indonesian*/ 562043546924744733, 'speaker', true),
+(118, /*Studying Indonesian*/ 562043546924744733, 'speaker', true),
 
 
 /* Language Channel */
