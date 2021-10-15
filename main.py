@@ -157,9 +157,6 @@ async def on_command_error(ctx, error):
         cooldown = error.skill_ts + error.cooldown
         await ctx.send(f"**You can use your skill again <t:{int(cooldown)}:R>!**")
 
-    elif isinstance(error, flags._parser.ArgumentParsingError):
-        await ctx.send("**Unrecognized arguments!**")
-
     print('='*10)
     print(f"ERROR: {error} | Class: {error.__class__} | Cause: {error.__cause__}")
     print('='*10)
