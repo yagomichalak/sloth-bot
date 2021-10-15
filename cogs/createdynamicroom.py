@@ -622,16 +622,6 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
                     the_time = await utils.get_timestamp()
                     await self.upsert_dynamic_room_empty_ts(user_voice_channel.id, the_time)
 
-                    # if not room_data or not room_data.is_perma_room:
-                    #     # await asyncio.sleep(60)
-                    #     if self.upsert_dynamic_room_empty_ts(user_voice_channel.id):
-                    #         if room_data:
-                    #             await self.delete_dynamic_rooms(room_data.room_id)
-                    #         try:
-                    #             await self.delete_things([user_voice_channel])
-                    #         except Exception as e:
-                    #             print(e)
-
         # Checks if the user is joining the create a room VC
         if not after.channel:
             return
