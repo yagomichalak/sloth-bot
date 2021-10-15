@@ -149,11 +149,11 @@ INSERT INTO LanguageRoom (category, english_name, room_name, room_quant, room_ca
 /* 115 */('south-east asian', 'Sarawak Malay', 'Bahasa Sarawak', 2, 10, 60),
 /* 116 */('south-east asian', 'Kedahan', 'Bahasa Melayu Kedah', 2, 10, 60),
 
-/* 117 */('category', 'Latin', 'Latin', 2, 10, 60 * 60 * 6),
+/* 117 */('romance', 'Latin', 'Latin', 2, 10, 60 * 60 * 6),
 
-/* 118 */('category', 'Estonian', 'Estonian', 2, 10, 60 * 60 * 6),
+/* 118 */('uralic', 'Estonian', 'Estonian', 2, 10, 60 * 60 * 6),
 
-/* 119 */('category', 'Bahasa Batak', 'Bahasa Batak', 2, 10, 60),
+/* 119 */('south-east asian', 'Bahasa Batak', 'Bahasa Batak', 2, 10, 60),
 
 /* ??? */('category', 'english_name', 'room_name', 2, 10, 60)
 
