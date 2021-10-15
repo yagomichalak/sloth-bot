@@ -734,14 +734,14 @@ INSERT INTO LanguageRoomPermissions (room_id, role_id, permission_name, permissi
 /* Latin Channel */
 
 /* Estonian Channel */
-(117, /*Native Finnish*/ 476018604240928779, 'speaker', true),
-(117, /*Fluent Finnish*/ 476741198149713935, 'speaker', true),
-(117, /*Studying Finnish*/ 476741389112180737, 'speaker', true),
+(118, /*Native Finnish*/ 476018604240928779, 'speaker', true),
+(118, /*Fluent Finnish*/ 476741198149713935, 'speaker', true),
+(118, /*Studying Finnish*/ 476741389112180737, 'speaker', true),
 
 /* Bahasa Batak Channel */
-(118, /*Native Indonesian*/ 476379670334406686, 'speaker', true),
-(118, /*Fluent Indonesian*/ 562043546924744733, 'speaker', true),
-(118, /*Studying Indonesian*/ 562043546924744733, 'speaker', true),
+(119, /*Native Indonesian*/ 476379670334406686, 'speaker', true),
+(119, /*Fluent Indonesian*/ 562043546924744733, 'speaker', true),
+(119, /*Studying Indonesian*/ 562043546924744733, 'speaker', true),
 
 
 /* Language Channel */
