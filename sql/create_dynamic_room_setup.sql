@@ -82,7 +82,7 @@ INSERT INTO Sloth.LanguageRoom (category, english_name, room_name, room_quant, r
 /* 065 */("romance", "Sardinian", "Sard 🇮🇹", 2, 10, 60),
 /* 066 */("romance", "Romanesco", "Romanesco 🇮🇹", 2, 10, 60),
 
-/* 067 */("germanic", "Icelandic", "íslenska", 2, 10, 60 * 60 * 6),
+/* 067 */("germanic", "Icelandic", "íslenska 🇮🇸", 2, 10, 60 * 60 * 6),
 
 /* 068 */("slavic", "Albanian", "shqip 🇦🇱", 2, 10, 60),
 
