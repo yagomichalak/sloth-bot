@@ -584,7 +584,7 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
 
         await ctx.message.delete()
         mycursor, db = await the_database()
-        sql_file = open("./sql/create_dynamic_room_setup.sql", encoding="utf-8")
+        sql_file = open("./sql/create_dynamic_room_setup.sql", encoding='utf-8')
         sql_as_string = sql_file.read()
         sql_file.close()
         await mycursor.execute(sql_as_string)
