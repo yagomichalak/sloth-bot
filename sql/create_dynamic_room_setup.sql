@@ -735,9 +735,8 @@ INSERT INTO Sloth.LanguageRoomPermissions (room_id, role_id, permission_name, pe
 (117, /*Studying Latin*/ 562043075229122563, "speaker", true),
 
 /* Estonian Channel */
-(118, /*Native Finnish*/ 476018604240928779, "speaker", true),
-(118, /*Fluent Finnish*/ 476741198149713935, "speaker", true),
-(118, /*Studying Finnish*/ 476741389112180737, "speaker", true),
+(118, /*Native Estonian*/ 898439786602299452, "speaker", true),
+(118, /*Studying Estonian*/ 476764995460530188, "speaker", true),
 
 /* Bahasa Batak Channel */
 (119, /*Native Indonesian*/ 476379670334406686, "speaker", true),
