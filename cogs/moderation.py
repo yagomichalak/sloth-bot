@@ -169,6 +169,9 @@ class Moderation(*moderation_cogs):
 		if inv_code == 'languages':
 			return True
 
+		if inv_code in ['TE6hPrn65a']:
+			return True
+
 		guild_inv = discord.utils.get(await guild.invites(), code=inv_code)
 		if guild_inv:
 			return True
