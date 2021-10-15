@@ -133,16 +133,18 @@ class DynRoomUserVCstampDatabase:
         return row
 
 class DynamicRoom:
-    def __init__(self, guild_id, room_id, vc_id, room_ts, is_perma_room):
+    def __init__(self, guild_id: int, room_id: int, vc_id: int, room_ts: int, is_perma_room: bool, empty_since_ts: int):
         self.guild_id = guild_id
         self.room_id = room_id
         self.vc_id = vc_id
         self.room_ts = room_ts
         self.is_perma_room = is_perma_room
+        self.empty_since_ts = empty_since_ts
     
     @staticmethod
     def instance_from_dict(attr_dict):
-        return DynamicRoom(attr_dict['guild_id'], attr_dict['room_id'], attr_dict['vc_id'], attr_dict['room_ts'], attr_dict['is_perma_room'])
+        return DynamicRoom(attr_dict['guild_id'], attr_dict['room_id'], attr_dict['vc_id'],
+        attr_dict['room_ts'], attr_dict['is_perma_room'], attr_dict['empty_since_ts'])
 
 class DynamicRoomDatabase:
     def __init__(self):
@@ -173,6 +175,16 @@ class DynamicRoomDatabase:
             return DynamicRoom.instance_from_dict(json_data[0])
             
         return dynamic_rooms
+
+    async def upsert_dynamic_room_empty_ts(self, vc_id: int, the_time: int) -> None:
+        """ Updates dynamic room empty timestamp
+        :param vc_id: The voice channel ID.
+        :param the_time: time time to upsert. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("UPDATE DynamicRoom SET empty_since_ts = %s WHERE vc_id = %s", (the_time, vc_id))
+        await db.commit()
+        await mycursor.close()
 
     async def get_all_dynamic_rooms(self, object_form: bool=False) -> Union[List[List[object]], List[DynamicRoom]]:
         """ Get all rows from DynamicRoom table.
@@ -282,17 +294,19 @@ class DynamicRoomDatabase:
         return rooms
 
 class LanguageRoom:
-    def __init__(self, category: str, room_id: int, english_name: str, room_name: str, room_quant: int, room_capacity: int):
+    def __init__(self, category: str, room_id: int, english_name: str, room_name: str, room_quant: int, room_capacity: int, max_empty_time: int):
         self.category = category
         self.room_id = room_id
         self.english_name = english_name
         self.room_name = room_name
         self.room_quant = room_quant
         self.room_capacity = room_capacity
+        self.max_empty_time = max_empty_time
 
     @staticmethod
     def instance_from_dict(attr_dict):
-        return LanguageRoom(attr_dict['category'], attr_dict['room_id'], attr_dict['english_name'], attr_dict['room_name'], attr_dict['room_quant'], attr_dict['room_capacity'])
+        return LanguageRoom(attr_dict['category'], attr_dict['room_id'], attr_dict['english_name'],
+            attr_dict['room_name'], attr_dict['room_quant'], attr_dict['room_capacity'], attr_dict['max_empty_time'])
 
 class LanguageRoomDatabase:
     def __init__(self):
@@ -394,9 +408,9 @@ class LanguageRoomDatabase:
             # this will extract row headers
             row_headers = [x[0] for x in mycursor.description]
             json_data = []
-            for result in rooms:
+            for result in row:
                 json_data.append(dict(zip(row_headers, result)))
-            return [LanguageRoom.instance_from_dict(room_dict) for room_dict in json_data]
+            return LanguageRoom.instance_from_dict(json_data[0])
 
         # room_id, room_name
         return row
@@ -526,12 +540,15 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
         # clear permissions
         await channel.set_permissions(member, overwrite=None)
 
-    @tasks.loop(minutes=10)
+    @tasks.loop(minutes=1)
     async def check_empty_dynamic_rooms(self):
         """ Task that checks Dynamic Rooms expirations. """
 
         if not await self.table_dynamic_rooms_exists():
             return
+
+        # get current time
+        the_time = await utils.get_timestamp()
 
         # Looks for empty nonperma rooms to delete
         all_rooms = await self.get_all_dynamic_rooms(object_form=True)
@@ -541,19 +558,24 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
             channel = discord.utils.get(guild.channels, id=room.vc_id)
             is_perma_room = room.is_perma_room
 
+            # if channel is no more
             if not channel:
                 await self.delete_dynamic_rooms(room_id)
                 return
 
             len_users = len(channel.members)
+            empty_since_ts = room.empty_since_ts
+            language_room_data = await self.get_language_room_by_id(room.room_id, object_form=True)
+            # if empty room
+            if len_users == 0:
+                # check if room expired
+                if not is_perma_room and the_time >= room.empty_since_ts + language_room_data.max_empty_time:
+                    try:
+                        await channel.delete()
+                    except Exception:
+                        pass
 
-            if not is_perma_room and len_users == 0:
-                try:
-                    await channel.delete()
-                except Exception:
-                    pass
-
-                await self.delete_dynamic_rooms(room_id)
+                    await self.delete_dynamic_rooms(room_id)
 
     @commands.has_permissions(administrator=True)
     @commands.command(hidden=True)
@@ -586,18 +608,29 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
             if before.channel.category.id == self.dr_cat_id:
                 user_voice_channel = discord.utils.get(
                     member.guild.channels, id=before.channel.id)
+                # get quant of users in room
                 len_users = len(user_voice_channel.members)
+                # if empty and not waiting room
                 if len_users == 0 and user_voice_channel.id != self.dr_vc_id:
+
                     room_data = await self.get_dynamic_room_vc_id(user_voice_channel.id, object_form=True)
-                    if not room_data or not room_data.is_perma_room:
-                        await asyncio.sleep(60)
-                        if len(user_voice_channel.members) == 0:
-                            if room_data:
-                                await self.delete_dynamic_rooms(room_data.room_id)
-                            try:
-                                await self.delete_things([user_voice_channel])
-                            except Exception as e:
-                                print(e)
+
+                    if not room_data:
+                        await self.delete_things([user_voice_channel])
+
+                    # upsert empty ts
+                    the_time = await utils.get_timestamp()
+                    await self.upsert_dynamic_room_empty_ts(user_voice_channel.id, the_time)
+
+                    # if not room_data or not room_data.is_perma_room:
+                    #     # await asyncio.sleep(60)
+                    #     if self.upsert_dynamic_room_empty_ts(user_voice_channel.id):
+                    #         if room_data:
+                    #             await self.delete_dynamic_rooms(room_data.room_id)
+                    #         try:
+                    #             await self.delete_things([user_voice_channel])
+                    #         except Exception as e:
+                    #             print(e)
 
         # Checks if the user is joining the create a room VC
         if not after.channel:
