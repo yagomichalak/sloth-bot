@@ -281,15 +281,35 @@ class DynamicRoomDatabase:
         await db.commit()
         await mycursor.close()
 
-    async def get_count_by_room_ids(self, room_ids: List[int], object_form: bool=False) -> List[List[object]]:
+    async def get_count_by_room_ids(self, room_ids: List[int]) -> List[List[object]]:
         """ Returns count of room given ids.
-        :room_ids: The room name.
+        :param room_ids: The room ids.
         :param object_form: If the result should be in object form. """
 
         mycursor, db = await the_database()
         await mycursor.execute("SELECT COUNT(room_id), room_id FROM DynamicRoom GROUP BY room_id HAVING room_id IN %s", (room_ids,))
         rooms = await mycursor.fetchall()
         await mycursor.close()
+
+        return rooms
+
+    async def get_dynamic_room_by_room_id(self, room_id: int, object_form: bool=False):
+        """ Return dynamic room given room id.
+        :param room_id: The room id.
+        :param object_form: If the result should be in object form. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("SELECT * FROM DynamicRoom WHERE room_id = %s", (room_id,))
+        rooms = await mycursor.fetchall()
+        await mycursor.close()
+
+        if object_form:
+            # this will extract row headers
+            row_headers = [x[0] for x in mycursor.description]
+            json_data = []
+            for result in rooms:
+                json_data.append(dict(zip(row_headers, result)))
+            return [DynamicRoom.instance_from_dict(room_dict) for room_dict in json_data]
 
         return rooms
 
@@ -567,15 +587,18 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
             empty_since_ts = room.empty_since_ts
             language_room_data = await self.get_language_room_by_id(room.room_id, object_form=True)
             # if empty room
-            if len_users == 0:
+            if len_users == 0 and not is_perma_room:
                 # check if room expired
-                if not is_perma_room and the_time >= room.empty_since_ts + language_room_data.max_empty_time:
-                    try:
-                        await channel.delete()
-                    except Exception:
-                        pass
+                is_expired = the_time >= room.empty_since_ts + language_room_data.max_empty_time
+                # check if duplicated
+                is_duplicated = any(await self.get_dynamic_room_by_room_id(room_id, object_form=True))
 
+                if is_expired or is_duplicated:
+                    if channel:
+                        await channel.delete()
                     await self.delete_dynamic_rooms(room_id)
+
+
 
     @commands.has_permissions(administrator=True)
     @commands.command(hidden=True)
@@ -738,13 +761,14 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
 
         for permission in channel_permission:
             m_perm_name = permission.permission_name
+            m_room_id = permission.room_id
             m_perm_value = permission.permission_value
             m_role_id = permission.role_id
             m_member = guild.get_role(m_role_id)
 
             if m_perm_name == "speaker":
                 asyncio.create_task(vc.set_permissions(
-                    target=m_member, view_channel=True, connect=True, speak=True))
+                    target=m_member, view_channel=True, connect=True, speak=True), name=f"set_{m_room_id}_permission")
             else:
                 asyncio.create_task(vc.set_permissions(
                     **{"target": m_member, m_perm_name: m_perm_value}))
