@@ -406,13 +406,12 @@ class LanguageRoomDatabase:
 
         return rooms
 
-    async def delete_dynamic_rooms(self, room_id: int) -> None:
+    async def delete_dynamic_rooms_by_vc_id(self, vc_id: int) -> None:
         """ Deletes a a Dynamic Room by room ID.
-        :param user_id: The user ID.
-        :param user_vc: The voice channel ID. """
+        :param vc_id: The vc_id of the channel. """
 
         mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM DynamicRoom WHERE room_id = %s", (room_id,))
+        await mycursor.execute("DELETE FROM DynamicRoom WHERE vc_id = %s", (vc_id,))
         await db.commit()
         await mycursor.close()
 
@@ -537,32 +536,25 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
         self.dr_vc_id = int(os.getenv('CREATE_DYNAMIC_ROOM_VC_ID'))
         self.dr_cat_id = int(os.getenv('CREATE_DYNAMIC_ROOM_CAT_ID'))
         self.language_rooms = None
+        self.error_log = None
+        self.error_log_id = int(os.getenv('ERROR_LOG_CHANNEL_ID'))
 
     @commands.Cog.listener()
     async def on_ready(self):
         """ Tells when the cog is ready to be used. """
-
+        
         print("CreateDynamicRoom cog is online")
 
+        self.error_log = self.client.get_channel(self.error_log_id)
         self.check_empty_dynamic_rooms.start()
 
         await self.prefetch_language_room()
 
-    async def set_up_category(self):
-        channel = discord.utils.get(guild.channels, id=self.dr_cat_id)
-
-        # clear permissions
-        await channel.set_permissions(member, overwrite=None)
-
-    async def set_up_waiting_room(self):
-        channel = discord.utils.get(guild.channels, id=self.dr_vc_id)
-
-        # clear permissions
-        await channel.set_permissions(member, overwrite=None)
-
     @tasks.loop(minutes=1)
     async def check_empty_dynamic_rooms(self):
         """ Task that checks Dynamic Rooms expirations. """
+
+        await self.error_log.send("check_empty_dynamic_rooms is running smoothly 👌.")
 
         if not await self.table_dynamic_rooms_exists():
             return
@@ -574,13 +566,12 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
         all_rooms = await self.get_all_dynamic_rooms(object_form=True)
         for room in all_rooms:
             guild = self.client.get_guild(room.guild_id)
-            room_id = room.room_id
             channel = discord.utils.get(guild.channels, id=room.vc_id)
             is_perma_room = room.is_perma_room
 
             # if channel is no more
             if not channel:
-                await self.delete_dynamic_rooms(room_id)
+                await self.delete_dynamic_rooms_by_vc_id(room.vc_id)
                 return
 
             len_users = len(channel.members)
@@ -591,14 +582,12 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
                 # check if room expired
                 is_expired = the_time >= room.empty_since_ts + language_room_data.max_empty_time
                 # check if duplicated
-                is_duplicated = any(await self.get_dynamic_room_by_room_id(room_id, object_form=True))
+                is_duplicated = len(await self.get_dynamic_room_by_room_id(room.room_id)) > 1
 
                 if is_expired or is_duplicated:
                     if channel:
                         await channel.delete()
-                    await self.delete_dynamic_rooms(room_id)
-
-
+                    await self.delete_dynamic_rooms_by_vc_id(room.vc_id)
 
     @commands.has_permissions(administrator=True)
     @commands.command(hidden=True)
