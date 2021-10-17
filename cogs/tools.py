@@ -1002,7 +1002,8 @@ class Tools(commands.Cog):
 		embed.set_footer(text=f"Started by {author}", icon_url=author.display_avatar)
 		view: discord.ui.View = BasicUserCheckView(author)
 		select: discord.ui.Select = SoundBoardSelect(ctx, self.client, sb_view=SoundBoardView, settings=[
-			['General', 'sounds'], ['General 2', 'sounds2'], ['General 3', 'sounds3'], ['Cosmos', 'cosmos']
+			['General', 'sounds'], ['General 2', 'sounds2'], ['General 3', 'sounds3'], ['Cosmos', 'cosmos'],
+			['Other', 'other']
 		])
 		view.add_item(select)
 		await ctx.send(content="\u200b", embed=embed, view=view)
