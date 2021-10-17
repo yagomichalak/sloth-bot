@@ -144,3 +144,10 @@ class ModerationMutedMemberTable(commands.Cog):
         times = await mycursor.fetchone()
         await mycursor.close()
         return times
+    
+    async def get_not_unmuted_members(self):
+        mycursor, db = await the_database()
+        await mycursor.execute("SELECT user_id, mute_ts FROM mutedmember WHERE muted_for_seconds IS NULL")
+        muted_members = await mycursor.fetchall()
+        await mycursor.close()
+        return set(muted_members)
