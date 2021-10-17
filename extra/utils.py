@@ -6,6 +6,7 @@ from discord.ext import commands
 from typing import List, Dict, Optional, Union
 from extra.customerrors import CommandNotReady
 from collections import OrderedDict
+import shlex
 
 async def get_timestamp(tz: str = 'Etc/GMT') -> int:
     """ Gets the current timestamp.
@@ -278,15 +279,11 @@ async def greedy_member_reason(ctx, message : str = None):
     if not message:
         return users, reason
 
-    # Temporarily converts spaces between quotes by colons
-    if message.rfind('"') != -1:
-        for word in re.findall('"([^"]*)"', message):
-            message = message.replace('"' + word + '"', word.replace(" ", ":"))
-
-    message = message.split()
-
+    message = shlex.split(message, posix=False)       
     for pos, word in enumerate(message):
-        word = word.replace(":", " ")
+        if '"' in word:
+            word = word[1:-1]
+
         # Checks if it is an ID, a mention or name#discriminator
         if (len(word) >= 15 and len(word) <= 20 and word.isdigit()) or re.match(r'<@!?([0-9]{15,20})>$', word) or (len(word) > 5 and word[-5] == '#'):
 

@@ -1250,7 +1250,10 @@ class Moderation(*moderation_cogs):
 		""" Shows all infractions of a specific user.
 		:param member: The member to show the infractions from. [Optional] [Default = You] """
 
-		await ctx.message.delete()
+		try:
+			await ctx.message.delete()
+		except:
+			pass
 
 		members, _ = await utils.greedy_member_reason(ctx, message)
 
