@@ -11,6 +11,8 @@ from extra.view import QuickButtons
 from mysqldb import the_database
 from external_cons import the_reddit
 
+from extra.moderation.userinfractions import ModerationUserInfractionsTable
+from extra.moderation.fakeaccounts import ModerationFakeAccountsTable
 
 mod_role_id = int(os.getenv('MOD_ROLE_ID'))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID'))
@@ -233,7 +235,11 @@ class Social(commands.Cog):
         """ Shows all the information about a member.
         :param member: The member to show the info.
         :return: An embedded message with the user's information """
-    
+
+        if not await utils.is_allowed([mod_role_id, admin_role_id]).predicate(ctx):
+            if len(message.split()) > 1:
+                message = message.split()[0]
+
         members, _ = await utils.greedy_member_reason(ctx, message)
 
         members = [ctx.author] if not members else members
@@ -266,12 +272,22 @@ class Social(commands.Cog):
                 view.children.remove(view.infractions_button)
                 view.children.remove(view.fake_accounts_button)
             else:
+                view.children.remove(view.info_button)
+                view.children.remove(view.profile_button)
+
+                if not await ModerationUserInfractionsTable.get_user_infractions(ctx, member.id):
+                    view.children[0].disabled = True
+
+                if not await ModerationFakeAccountsTable.get_fake_accounts(ctx, member.id):
+                    view.children[1].disabled = True
+                
                 watchlist = await self.client.get_cog('Moderation').get_user_watchlist(member.id)
+                
                 if watchlist:
                     message_url = f"https://discord.com/channels/{ctx.guild.id}/{watchlist_channel_id}/{watchlist[1]}"
-                    view.children[4].url = message_url
+                    view.children[2].url = message_url
                 else:
-                    view.children[4].disabled = True
+                    view.children[2].disabled = True
 
             await ctx.send("\u200b", embed=embed, view=view)
 
