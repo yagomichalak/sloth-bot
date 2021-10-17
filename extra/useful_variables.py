@@ -116,7 +116,7 @@ different_class_roles = {
     "english": [
         "english", "inglés", "inglês", "anglais",
         "angielski", "englisch", "ingleze",
-        "ingilizce", "inggris", "영어", " الإنكليزية" ,"الإنكليزِيَّة," ,"الإنجليزية",
+        "ingilizce", "inggris", "영어", "الإنكليزية" ,"الإنكليزِيَّة" ,"الإنجليزية",
         "AL-إنجليزية", "الإنكليزية-Al", "الإنكليزِيَّة-AL"
     ],
     "german": [
