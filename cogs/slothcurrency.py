@@ -1173,7 +1173,7 @@ class SlothCurrency(commands.Cog):
         :param money: The amount of money to transfer.
         
         * Cooldown: 10 secs.
-        * Transfer tax: 5%. """
+        * Transfer tax: 2.5%. """
 
         if not member:
             return await ctx.send('**Inform the member!**', delete_after=3)
@@ -1198,7 +1198,7 @@ class SlothCurrency(commands.Cog):
         if the_user[0][1] < int(money):
             return await ctx.send(f"You don't have {money}łł!")
 
-        tax_percentage: int = 5
+        tax_percentage: int = 2.5
 
         bank_money = round((money*tax_percentage)/100) if money >= 20 else 1
         taxed_money = money - bank_money if money >= 20 else money -1
