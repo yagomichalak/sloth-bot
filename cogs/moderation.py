@@ -1458,7 +1458,10 @@ class Moderation(*moderation_cogs):
 
 	@commands.command()
 	@utils.is_allowed(allowed_roles, throw_exc=True)
-	async def cases(self, ctx, *, message: str = None):
+	async def cases(self, ctx, *, message: str = None) -> None:
+		""" Shows people that you muted that don't have an unmute time set,
+		in other words, people that you still have to deal with their case.
+		:param member: The member to show the cases from. [Optional][Default=You] """
 		
 		await ctx.message.delete()
 
@@ -1497,7 +1500,7 @@ class Moderation(*moderation_cogs):
 						description = '\u200b\n' + ' '.join([f"<@{user_id}> **muted on <t:{mute_ts}:d> at <t:{mute_ts}:t>**\n\n" for user_id, mute_ts in cases]),
 						timestamp=ctx.message.created_at
 					)
-					embed.set_thumbnail(url=ctx.author.display_avatar)
+					embed.set_thumbnail(url=member.display_avatar)
 					embed.set_footer(text=f"Requested by {ctx.author}", icon_url=ctx.author.display_avatar)
 					await ctx.send(embeds=[embed])
 
