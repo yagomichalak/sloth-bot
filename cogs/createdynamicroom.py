@@ -14,6 +14,8 @@ from extra.menu import ConfirmSkill
 from extra.select import LanguageRoomSelect
 import json
 
+analyst_debugger_role_id = int(os.getenv('ANALYST_DEBUGGER_ROLE_ID'))
+
 class DynRoomUserVCstamp:
     def __init__(self, user_id: int, user_vc_ts: int):
         self.user_id = user_id
@@ -554,8 +556,6 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
     async def check_empty_dynamic_rooms(self):
         """ Task that checks Dynamic Rooms expirations. """
 
-        await self.error_log.send("check_empty_dynamic_rooms is running smoothly 👌.")
-
         if not await self.table_dynamic_rooms_exists():
             return
 
@@ -591,6 +591,7 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
 
     @commands.has_permissions(administrator=True)
     @commands.command(hidden=True)
+    @utils.is_allowed([analyst_debugger_role_id], throw_exc=True)
     async def setup_dynamic_rooms(self, ctx):
         """ Set's up dynamic room database entries from sql file """
 
@@ -614,6 +615,9 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
     async def on_voice_state_update(self, member, before, after) -> None:
         """ Handler for voice channel activity, that's eventually gonna be used
         for creating a DynamicRoom. """
+
+        if not self.check_empty_dynamic_rooms.is_running():
+            self.check_empty_dynamic_rooms.start()
 
         # Checks if the user is leaving the vc and whether there still are people in there
         if before.channel and before.channel.category:
