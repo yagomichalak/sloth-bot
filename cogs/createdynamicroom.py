@@ -591,10 +591,11 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
 
     @commands.command(hidden=True)
     @utils.is_allowed([analyst_debugger_role_id], throw_exc=True)
-    async def undie_check_empty_dynamic_rooms(self):
+    async def undie_check_empty_dynamic_rooms(self, ctx):
         """ Restarts check_empty_dynamic_rooms task. """
 
         self.check_empty_dynamic_rooms.restart()
+        await ctx.send("**Checked**")
 
     @commands.has_permissions(administrator=True)
     @commands.command(hidden=True)
