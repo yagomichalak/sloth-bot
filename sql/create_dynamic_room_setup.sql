@@ -7,35 +7,35 @@ CREATE TABLE Sloth.DynamicRoom (guild_id BIGINT, room_id BIGINT, vc_id BIGINT, r
 DROP TABLE IF EXISTS `LanguageRoom`;
 CREATE TABLE Sloth.LanguageRoom (room_id SERIAL, category VARCHAR(32), english_name VARCHAR(32), room_name BLOB, room_quant INT, room_capacity INT, max_empty_time INT);
 INSERT INTO Sloth.LanguageRoom (category, english_name, room_name, room_quant, room_capacity, max_empty_time) VALUES 
-/* 001 */("germanic", "Swedish", "Svenska 🪑🇸🇪", 2, 10, 60 * 60 * 6),
-/* 002 */("germanic", "Norwegian", "Norsk ⛷🇳🇴", 2, 10, 60 * 60 * 6),
-/* 003 */("germanic", "Danish", "Dansk 🥔🇩🇰", 2, 10, 60 * 60 * 6),
-/* 004 */("germanic", "Dutch", "Nederlands 🚴🇧🇪🇳🇱", 2, 10, 60 * 60 * 6),
-/* 005 */("sub-saharan", "Afrikaans", "Afrikaans 🦁🇿🇦", 2, 10, 60 * 60 * 6),
-/* 006 */("uralic", "Finnish", "Suomi ❄🇫🇮", 2, 10, 60 * 60 * 6),
+/* 001 */("germanic", "Swedish", "Svenska 🪑🇸🇪", 2, 10, 60 * 60 * 1),
+/* 002 */("germanic", "Norwegian", "Norsk ⛷🇳🇴", 2, 10, 60 * 60 * 1),
+/* 003 */("germanic", "Danish", "Dansk 🥔🇩🇰", 2, 10, 60 * 60 * 1),
+/* 004 */("germanic", "Dutch", "Nederlands 🚴🇧🇪🇳🇱", 2, 10, 60 * 60 * 1),
+/* 005 */("sub-saharan", "Afrikaans", "Afrikaans 🦁🇿🇦", 2, 10, 60 * 60 * 1),
+/* 006 */("uralic", "Finnish", "Suomi ❄🇫🇮", 2, 10, 60 * 60 * 1),
 /* 007 */("uralic", "Hungarian", "Magyar 🌶🇭🇺", 2, 10, 60),
-/* 008 */("romance", "Catalan", "català", 2, 10, 60 * 60 * 6),
-/* 009 */("romance", "Romanian", "Română 🧛🇷🇴", 2, 10, 60 * 60 * 6),
+/* 008 */("romance", "Catalan", "català", 2, 10, 60 * 60 * 1),
+/* 009 */("romance", "Romanian", "Română 🧛🇷🇴", 2, 10, 60 * 60 * 1),
 /* 010 */("baltic", "Latvian", "Latviešu", 2, 10, 60),
-/* 011 */("slavic", "Polish", "Polski 🧅🇵🇱", 2, 10, 60 * 60 * 6),
+/* 011 */("slavic", "Polish", "Polski 🧅🇵🇱", 2, 10, 60 * 60 * 1),
 /* 012 */("slavic", "Czech", "česko 🇨🇿🇸🇰", 2, 10, 60),
 /* 013 */("slavic", "Ukrainian", "Українська 🥣🇺🇦", 2, 10, 60),
 /* 014 */("balkan", "Macedonian", "Македонски 🇲🇰", 2, 10, 60),
 /* 015 */("slavic", "Bulgarian", "Български 🌹🇧🇬", 2, 10, 60),
-/* 016 */("semitic", "Hebrew", "עִברִית 🕎🇮🇱", 2, 10, 60 * 60 * 6),
+/* 016 */("semitic", "Hebrew", "עִברִית 🕎🇮🇱", 2, 10, 60 * 60 * 1),
 /* 017 */("turkic", "Kazakh", "Қазақ 🐎🇰🇿", 2, 10, 60),
 /* 018 */("turkic", "Azerbaijani", "Azərbaycan 🔥🇦🇿", 2, 10, 60),
 /* 019 */("iranian", "Kurdish", "كوردی🥪 (kurdish)", 2, 10, 60),
 /* 020 */("iranian", "Iran", "فارسی🐈🇮🇷", 2, 10, 60),
-/* 021 */("south-east asian", "Vietnamese", "Tiếng Việt🛵🇻🇳", 2, 10, 60 * 60 * 6),
+/* 021 */("south-east asian", "Vietnamese", "Tiếng Việt🛵🇻🇳", 2, 10, 60 * 60 * 1),
 /* 022 */("south-east asian", "Khmer", "ខ្មែរ🇰🇭", 2, 10, 60),
 /* 023 */("south-east asian", "Thai", "ภาษาไทย 🥘🇹🇭", 2, 10, 60),
 /* 024 */("east asian", "Mongolian", "Монгол хэл 🇲🇳", 2, 10, 60),
 /* 025 */("east asian", "Cantonese", "粤语 🍚🇭🇰", 2, 10, 60),
 /* 026 */("south asian", "South Asian Languages", "South Asian languages🧘🇮🇳🇵🇰🇳🇵", 2, 10, 60),
-/* 027 */("south asian", "Hindi", "हिन्दी 🏏🇮🇳", 2, 10, 60 * 60 * 6),
-/* 028 */("unafiliated", "Greek", "Ελληνικά 🏛️🇬🇷", 2, 10, 60 * 60 * 6),
-/* 029 */("germanic", "Luxembourgish", "lëtzebuergesch 🇱🇺", 2, 10, 60 * 60 * 6),
+/* 027 */("south asian", "Hindi", "हिन्दी 🏏🇮🇳", 2, 10, 60 * 60 * 1),
+/* 028 */("unafiliated", "Greek", "Ελληνικά 🏛️🇬🇷", 2, 10, 60 * 60 * 1),
+/* 029 */("germanic", "Luxembourgish", "lëtzebuergesch 🇱🇺", 2, 10, 60 * 60 * 1),
 
 /* 030 */("south asian", "Tamil", "தமிழ் (Tamil)", 2, 10, 60),
 /* 031 */("south asian", "Punjabi", "پنجاب (Punjabi) ", 2, 10, 60),
@@ -82,7 +82,7 @@ INSERT INTO Sloth.LanguageRoom (category, english_name, room_name, room_quant, r
 /* 065 */("romance", "Sardinian", "Sard 🇮🇹", 2, 10, 60),
 /* 066 */("romance", "Romanesco", "Romanesco 🇮🇹", 2, 10, 60),
 
-/* 067 */("germanic", "Icelandic", "íslenska 🇮🇸", 2, 10, 60 * 60 * 6),
+/* 067 */("germanic", "Icelandic", "íslenska 🇮🇸", 2, 10, 60 * 60 * 1),
 
 /* 068 */("slavic", "Albanian", "shqip 🇦🇱", 2, 10, 60),
 
@@ -115,7 +115,7 @@ INSERT INTO Sloth.LanguageRoom (category, english_name, room_name, room_quant, r
 
 /* 089 */("romance", "Portunhol", "Portuñol 🧉🌎", 2, 10, 60),
 
-/* 090 */("semitic", "Amazigh", "ⵎⵣⵗⵏ (Amazigh)", 2, 10, 60 * 60 * 6),
+/* 090 */("semitic", "Amazigh", "ⵎⵣⵗⵏ (Amazigh)", 2, 10, 60 * 60 * 1),
 
 /* 091 */("conlang", "Esperanto", "Esperanto", 2, 10, 60),
 /* 092 */("conlang", "Toki Pona", "Toki Pona", 2, 10, 60),
@@ -149,9 +149,9 @@ INSERT INTO Sloth.LanguageRoom (category, english_name, room_name, room_quant, r
 /* 115 */("south-east asian", "Sarawak Malay", "Bahasa Sarawak", 2, 10, 60),
 /* 116 */("south-east asian", "Kedahan", "Bahasa Melayu Kedah", 2, 10, 60),
 
-/* 117 */("romance", "Latin", "Latin", 2, 10, 60 * 60 * 6),
+/* 117 */("romance", "Latin", "Latin", 2, 10, 60 * 60 * 1),
 
-/* 118 */("uralic", "Estonian", "Estonian", 2, 10, 60 * 60 * 6),
+/* 118 */("uralic", "Estonian", "Estonian", 2, 10, 60 * 60 * 1),
 
 /* 119 */("south-east asian", "Bahasa Batak", "Bahasa Batak", 2, 10, 60),
 
