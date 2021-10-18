@@ -1506,9 +1506,9 @@ class Moderation(*moderation_cogs):
 
 				else:
 					if member == ctx.author:
-						await ctx.send(f"**You don't not have any open case**", delete_after=3)
+						await ctx.send(f"**You don't have any open case**", delete_after=3)
 					else:
-						await ctx.send(f"**{member} does not have any open case**", delete_after=3)
+						await ctx.send(f"**{member} don't have any open case**", delete_after=3)
 			else:
 				await ctx.send(f"**The user {member} is not a staff member**", delete_after=3)
 		
