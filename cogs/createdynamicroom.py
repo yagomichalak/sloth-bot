@@ -592,9 +592,9 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
     @commands.command(hidden=True)
     @utils.is_allowed([analyst_debugger_role_id], throw_exc=True)
     async def undie_check_empty_dynamic_rooms(self):
-        """ Restarts check_empty_dynamic_rooms task."""
+        """ Restarts check_empty_dynamic_rooms task. """
 
-        self.check_empty_dynamic_rooms.start()
+        self.check_empty_dynamic_rooms.restart()
 
     @commands.has_permissions(administrator=True)
     @commands.command(hidden=True)
@@ -624,7 +624,7 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
         for creating a DynamicRoom. """
 
         if not self.check_empty_dynamic_rooms.is_running():
-            self.check_empty_dynamic_rooms.start()
+            self.check_empty_dynamic_rooms.restart()
             self.error_log.send(f"check_empty_dynamic_rooms was restarted 👌.")
 
         # Checks if the user is leaving the vc and whether there still are people in there
