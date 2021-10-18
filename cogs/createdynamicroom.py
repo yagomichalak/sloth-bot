@@ -552,7 +552,7 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
 
         await self.prefetch_language_room()
 
-    @tasks.loop(minutes=1)
+    @tasks.loop(seconds=60)
     async def check_empty_dynamic_rooms(self):
         """ Task that checks Dynamic Rooms expirations. """
 
@@ -589,6 +589,13 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
                         await channel.delete()
                     await self.delete_dynamic_rooms_by_vc_id(room.vc_id)
 
+    @commands.command(hidden=True)
+    @utils.is_allowed([analyst_debugger_role_id], throw_exc=True)
+    async def undie_check_empty_dynamic_rooms(self):
+        """ Restarts check_empty_dynamic_rooms task."""
+
+        self.check_empty_dynamic_rooms.start()
+
     @commands.has_permissions(administrator=True)
     @commands.command(hidden=True)
     @utils.is_allowed([analyst_debugger_role_id], throw_exc=True)
@@ -618,6 +625,7 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
 
         if not self.check_empty_dynamic_rooms.is_running():
             self.check_empty_dynamic_rooms.start()
+            self.error_log.send(f"check_empty_dynamic_rooms was restarted 👌.")
 
         # Checks if the user is leaving the vc and whether there still are people in there
         if before.channel and before.channel.category:
