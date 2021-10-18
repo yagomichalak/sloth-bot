@@ -102,7 +102,8 @@ class Misc(commands.Cog):
         :param g2: Guess 2.
         :param g3: Guess 3.
         
-        * Cost: 5łł. """
+        * Cost: 1łł.
+        * Prize: 500łł """
 
         author = ctx.author
 
@@ -154,10 +155,10 @@ class Misc(commands.Cog):
         else:
             await SlothCurrency.update_user_lotto_ts(author.id, current_ts)
 
-        if user_secs[0][1] >= 5:
-            await SlothCurrency.update_user_money(author.id, -5)
+        if user_secs[0][1] >= 1:
+            await SlothCurrency.update_user_money(author.id, -1)
         else:
-            return await ctx.send(f"**You need 5łł to play the lottery, {author.mention}!**")
+            return await ctx.send(f"**You need 1łł to play the lottery, {author.mention}!**")
 
         author = author
         numbers = []
@@ -166,11 +167,11 @@ class Misc(commands.Cog):
 
         string_numbers = [str(i) for i in numbers]
         if g1 == numbers[0] and g2 == numbers[1] and g3 == numbers[2]:
-            await ctx.send(f'**{author.mention} You won! Congratulations on winning the lottery with the numbers ({g1}, {g2},{g3})!🍃+100łł!**')
+            await ctx.send(f'**{author.mention} You won! Congratulations on winning the lottery with the numbers ({g1}, {g2},{g3})!🍃+500łł!**')
             if not await SlothCurrency.get_user_currency(author.id):
 
                 await SlothCurrency.insert_user_currency(author.id, current_ts - 61)
-            await SlothCurrency.update_user_money(author.id, 100)
+            await SlothCurrency.update_user_money(author.id, 500)
 
         else:
             await ctx.send(

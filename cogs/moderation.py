@@ -169,6 +169,9 @@ class Moderation(*moderation_cogs):
 		if inv_code == 'languages':
 			return True
 
+		if inv_code in ['TE6hPrn65a']:
+			return True
+
 		guild_inv = discord.utils.get(await guild.invites(), code=inv_code)
 		if guild_inv:
 			return True
@@ -371,7 +374,6 @@ class Moderation(*moderation_cogs):
 					user_infractions = await self.get_user_infractions(member.id)
 					user_warns = [w for w in user_infractions if w[1] == 'warn']
 					if len(user_warns) >= 3:
-						ctx.author = self.client.user
 						await self._mute_callback(ctx, member=member, reason=reason)
 				else:
 					await ctx.send(f"**The user `{member}` is not on the server**", delete_after = 5)
@@ -1247,7 +1249,10 @@ class Moderation(*moderation_cogs):
 		""" Shows all infractions of a specific user.
 		:param member: The member to show the infractions from. [Optional] [Default = You] """
 
-		await ctx.message.delete()
+		try:
+			await ctx.message.delete()
+		except:
+			pass
 
 		members, _ = await utils.greedy_member_reason(ctx, message)
 
@@ -1451,6 +1456,61 @@ class Moderation(*moderation_cogs):
 			await ctx.send("**Not changing it, then...**")
 
 
+	@commands.command()
+	@utils.is_allowed(allowed_roles, throw_exc=True)
+	async def cases(self, ctx, *, message: str = None) -> None:
+		""" Shows people that you muted that don't have an unmute time set,
+		in other words, people that you still have to deal with their case.
+		:param member: The member to show the cases from. [Optional][Default=You] """
+		
+		await ctx.message.delete()
 
+		perms = ctx.channel.permissions_for(ctx.author)
+
+		senior_mod_role = discord.utils.get(ctx.guild.roles, id=senior_mod_role_id)
+
+		if perms.administrator or senior_mod_role in ctx.author.roles:
+			members, _ = await utils.greedy_member_reason(ctx, message)
+			members = members if members else [ctx.message.author]
+		else:
+			members = [ctx.message.author]
+
+		for member in members:
+			if await utils.is_allowed(allowed_roles).predicate(channel=ctx.channel, member=member):
+				# Gets muted members
+				muted_members = await self.get_not_unmuted_members()
+				cases = []
+
+				for user_id, mute_ts in muted_members:
+					if ctx.guild.get_member(user_id):
+
+						# Gets user infractions
+						user_infractions = await self.get_user_infractions(user_id)
+						
+						for _, infraction_type, _, infraction_ts, infraction_id, perpetrator in user_infractions:
+							# If the infraction has the same time as the mute timestamp and the perpetrator is the member add to the cases
+							if infraction_type == 'mute' and infraction_ts == mute_ts and perpetrator == member.id:
+								cases.append([user_id, mute_ts])
+								break
+						
+				if cases:
+					# General embed
+					embed = discord.Embed(
+						title = f"Open cases for: {member}",
+						description = '\u200b\n' + ' '.join([f"<@{user_id}> **muted on <t:{mute_ts}:d> at <t:{mute_ts}:t>**\n\n" for user_id, mute_ts in cases]),
+						timestamp=ctx.message.created_at
+					)
+					embed.set_thumbnail(url=member.display_avatar)
+					embed.set_footer(text=f"Requested by {ctx.author}", icon_url=ctx.author.display_avatar)
+					await ctx.send(embeds=[embed])
+
+				else:
+					if member == ctx.author:
+						await ctx.send(f"**You don't not have any open case**", delete_after=3)
+					else:
+						await ctx.send(f"**{member} does not have any open case**", delete_after=3)
+			else:
+				await ctx.send(f"**The user {member} is not a staff member**", delete_after=3)
+		
 def setup(client):
 	client.add_cog(Moderation(client))

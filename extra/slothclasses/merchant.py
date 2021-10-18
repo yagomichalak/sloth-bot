@@ -339,7 +339,7 @@ class Merchant(Player):
             if user_has_item:
                 # Gives the user the price of the item
                 await self.update_user_money(merchant.id, random_item[6])
-                await ctx.send(f"**{merchant.mention}, you already have the `{random_item[4]}` item, so you got it worth of leaves instead; `{random_item[5]}łł`**")
+                await ctx.send(f"**{merchant.mention}, you already have the `{random_item[4]}` item, so you got it worth of leaves instead; `{random_item[6]}łł`**")
 
             else:
                 # Gives the user the item

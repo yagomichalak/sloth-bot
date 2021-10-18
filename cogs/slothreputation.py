@@ -395,7 +395,7 @@ class SlothReputation(commands.Cog):
         
         * Cost: 1łł 
 
-        Ps: The repped person gets 3łł and 100 reputation points. """
+        Ps: The repped person gets 4łł and 100 reputation points. """
         
         if not member:
             await ctx.message.delete()
@@ -459,9 +459,9 @@ class SlothReputation(commands.Cog):
         await self.update_user_score_points(ctx.author.id, 100)
         await self.update_user_score_points(member.id, 100)
         await self.update_user_rep_time(ctx.author.id, time_xp)
-        await SlothCurrency.update_user_money(member.id, 3)
+        await SlothCurrency.update_user_money(member.id, 4)
         return await ctx.send(
-            f"**{ctx.author.mention} repped {member.mention}! 🍃The repped person got 3łł🍃**")
+            f"**{ctx.author.mention} repped {member.mention}! 🍃The repped person got 4łł🍃**")
 
 
 
