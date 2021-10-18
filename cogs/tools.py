@@ -37,6 +37,7 @@ mod_role_id = int(os.getenv('MOD_ROLE_ID'))
 senior_mod_role_id: int = int(os.getenv('SENIOR_MOD_ROLE_ID'))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID'))
 owner_role_id = int(os.getenv('OWNER_ROLE_ID'))
+analyst_debugger_role_id: int = int(os.getenv('ANALYST_DEBUGGER_ROLE_ID'))
 
 allowed_roles = [owner_role_id, admin_role_id, mod_role_id, *patreon_roles.keys(), int(os.getenv('SLOTH_LOVERS_ROLE_ID'))]
 teacher_role_id = int(os.getenv('TEACHER_ROLE_ID'))
@@ -182,7 +183,7 @@ class Tools(commands.Cog):
 
 	@commands.command()
 	@commands.cooldown(1, 5, type=commands.BucketType.guild)
-	@utils.is_allowed(allowed_roles, throw_exc=True)
+	@utils.is_allowed([*allowed_roles, analyst_debugger_role_id], throw_exc=True)
 	async def tts(self, ctx, language: str = None, *, message: str = None):
 		'''
 		(BOOSTER) Reproduces a Text-to-Speech message in the voice channel.
@@ -506,7 +507,7 @@ class Tools(commands.Cog):
 				await ctx.send(f"**They stopped comming, but we've gathered `{magneted_members}/{len(all_members)}` members!**")
 
 	@commands.command(aliases=['mv', 'drag'])
-	@utils.is_allowed([mod_role_id, admin_role_id, owner_role_id])
+	@utils.is_allowed([mod_role_id, admin_role_id, owner_role_id, analyst_debugger_role_id])
 	async def move(self, ctx) -> None:
 		""" Moves 1 or more people to a voice channel.
 		Ps¹: If no channel is provided, the channel you are in will be used.
