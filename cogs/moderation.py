@@ -1477,24 +1477,24 @@ class Moderation(*moderation_cogs):
 
 		for member in members:
 			if await utils.is_allowed(allowed_roles).predicate(channel=ctx.channel, member=member):
-				# Get muted members
+				# Gets muted members
 				muted_members = await self.get_not_unmuted_members()
 				cases = []
 
 				for user_id, mute_ts in muted_members:
 					if ctx.guild.get_member(user_id):
 
-						# Get user infractions
+						# Gets user infractions
 						user_infractions = await self.get_user_infractions(user_id)
 						
 						for _, infraction_type, _, infraction_ts, infraction_id, perpetrator in user_infractions:
-							# if the infraction have the same time as the mute timestamp and the perpetrator is the member add to the cases
+							# If the infraction has the same time as the mute timestamp and the perpetrator is the member add to the cases
 							if infraction_type == 'mute' and infraction_ts == mute_ts and perpetrator == member.id:
 								cases.append([user_id, mute_ts])
 								break
 						
 				if cases:
-					# general embed
+					# General embed
 					embed = discord.Embed(
 						title = f"Open cases for: {member}",
 						description = '\u200b\n' + ' '.join([f"<@{user_id}> **muted on <t:{mute_ts}:d> at <t:{mute_ts}:t>**\n\n" for user_id, mute_ts in cases]),
@@ -1506,7 +1506,7 @@ class Moderation(*moderation_cogs):
 
 				else:
 					if member == ctx.author:
-						await ctx.send(f"**You does not have any open case**", delete_after=3)
+						await ctx.send(f"**You don't not have any open case**", delete_after=3)
 					else:
 						await ctx.send(f"**{member} does not have any open case**", delete_after=3)
 			else:
