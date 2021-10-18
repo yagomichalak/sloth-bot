@@ -37,6 +37,7 @@ mod_role_id = int(os.getenv('MOD_ROLE_ID'))
 senior_mod_role_id: int = int(os.getenv('SENIOR_MOD_ROLE_ID'))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID'))
 owner_role_id = int(os.getenv('OWNER_ROLE_ID'))
+analyst_debugger_role_id: int = int(os.getenv('ANALYST_DEBUGGER_ROLE_ID'))
 
 allowed_roles = [owner_role_id, admin_role_id, mod_role_id, *patreon_roles.keys(), int(os.getenv('SLOTH_LOVERS_ROLE_ID'))]
 teacher_role_id = int(os.getenv('TEACHER_ROLE_ID'))
@@ -67,7 +68,8 @@ class Tools(commands.Cog):
 		announcement_channels: List[int] = [
 			576793212304228352, 801514509424525363, 799394160096444456,
 			761303171833790464, 784499538366824488, 760958206683643975, 
-			852918933786066984, 860637056682426388
+			852918933786066984, 860637056682426388, 890621139297128548,
+			872477233179152414, 871785544361840690, 870437619522236427
 		]
 
 		if channel.id in announcement_channels:
@@ -187,7 +189,7 @@ class Tools(commands.Cog):
 
 	@commands.command()
 	@commands.cooldown(1, 5, type=commands.BucketType.guild)
-	@utils.is_allowed(allowed_roles, throw_exc=True)
+	@utils.is_allowed([*allowed_roles, analyst_debugger_role_id], throw_exc=True)
 	async def tts(self, ctx, language: str = None, *, message: str = None):
 		'''
 		(BOOSTER) Reproduces a Text-to-Speech message in the voice channel.
@@ -511,7 +513,7 @@ class Tools(commands.Cog):
 				await ctx.send(f"**They stopped comming, but we've gathered `{magneted_members}/{len(all_members)}` members!**")
 
 	@commands.command(aliases=['mv', 'drag'])
-	@utils.is_allowed([mod_role_id, admin_role_id, owner_role_id])
+	@utils.is_allowed([mod_role_id, admin_role_id, owner_role_id, analyst_debugger_role_id])
 	async def move(self, ctx) -> None:
 		""" Moves 1 or more people to a voice channel.
 		Ps¹: If no channel is provided, the channel you are in will be used.
@@ -1007,7 +1009,8 @@ class Tools(commands.Cog):
 		embed.set_footer(text=f"Started by {author}", icon_url=author.display_avatar)
 		view: discord.ui.View = BasicUserCheckView(author)
 		select: discord.ui.Select = SoundBoardSelect(ctx, self.client, sb_view=SoundBoardView, settings=[
-			['General', 'sounds'], ['General 2', 'sounds2'], ['General 3', 'sounds3'], ['Cosmos', 'cosmos']
+			['General', 'sounds'], ['General 2', 'sounds2'], ['General 3', 'sounds3'], ['Cosmos', 'cosmos'],
+			['Other', 'other']
 		])
 		view.add_item(select)
 		await ctx.send(content="\u200b", embed=embed, view=view)

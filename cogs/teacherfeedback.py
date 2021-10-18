@@ -540,12 +540,7 @@ class TeacherFeedback(commands.Cog):
         # Checks the class' requirements based on the type of the class (Grammar, Pronunciation)
         active_users = []
         if users_feedback:
-            if class_type.title() == 'Pronunciation':
-                active_users = [uf for uf in users_feedback if uf[3] >= 1800]
-            elif class_type.title() == 'Grammar':
-                active_users = [uf for uf in users_feedback if uf[1] >= 5]
-            elif class_type.title() == 'Programming':
-                active_users = [uf for uf in users_feedback if uf[3] >= 1800]
+            active_users = [uf for uf in users_feedback if uf[3] >= 1800]
 
         formatted_active_users = [
             (msg.id, u[0], u[1], u[3], teacher.id, class_type, language) for u in active_users
