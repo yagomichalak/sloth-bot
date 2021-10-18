@@ -237,7 +237,7 @@ class Social(commands.Cog):
         :return: An embedded message with the user's information """
 
         if not await utils.is_allowed([mod_role_id, admin_role_id]).predicate(ctx):
-            if len(message.split()) > 1:
+            if message and len(message.split()) > 1:
                 message = message.split()[0]
 
         members, _ = await utils.greedy_member_reason(ctx, message)
