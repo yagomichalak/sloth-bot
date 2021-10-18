@@ -130,9 +130,15 @@ class Tools(commands.Cog):
 			# create role
 			temp_role = await ctx.guild.create_role(name="temporary role")
 
+			# send disclaimer message
+			tmp_message = await ctx.send(f"Wait! this command may take several minutes...")
+
 			# add role to members
 			for member in members:
 				await member.add_roles(temp_role)
+
+			# delete disclaimer message
+			tmp_message.delete()
 
 			# send ping
 			tmp_message = await ctx.send(f"{temp_role.mention}")
