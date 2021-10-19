@@ -810,7 +810,22 @@ Entry requirements:
                 color=discord.Color.red())
             message = await the_channel.send(content=f"{member.mention}, {moderator.mention}, {cosmos.mention}", embed=embed)
             ctx = await self.client.get_context(message)
-            return await self.client.get_cog('Tools').vc(ctx, member=member)
+
+            if member.voice:
+                channel = member.voice.channel
+                members = member.voice.channel.members
+
+                for id, member_in_vc in enumerate(members):
+                    if member == member_in_vc:
+                        del members[id]
+
+                if not members:
+                    await ctx.send(f"**{member.mention} is in the {channel.mention} voice channel alone!**")
+                else:
+                    await ctx.send(f"**{member.mention} is in the {channel.mention} voice channel with other {len(channel.members) - 1} members:** {', '.join([member_in_vc.mention for member_in_vc in members])}")
+
+            else:
+                await ctx.send(f"**{member.mention} is not in a VC!**")
 
     # - Report someone
     async def generic_help(self, interaction: discord.Interaction, type_help: str, message: str, ping: bool = True) -> None:
