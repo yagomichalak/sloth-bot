@@ -841,7 +841,7 @@ class Munk(Player):
         if tribe_member[1] != user_tribe['name']:
             return await ctx.send(f"**{member.mention} is not even from your tribe, {owner.mention}!**")
         
-        if tribe_member[3].lower() == role_name.lower():
+        if str(tribe_member[3]).lower() == role_name.lower():
             return await ctx.send(f"**{member.mention} already has this Tribe Role, {owner.mention}!**")
 
         tribe_role = await self.get_tribe_role(owner.id, role_name)
@@ -1094,10 +1094,10 @@ class Munk(Player):
 
         mycursor, db = await the_database()
 
-        if role_name:
-            await mycursor.execute("UPDATE TribeMember SET tribe_role = %s WHERE member_id = %s", (role_name, user_id))
-        else:
+        if not role_name:
             await mycursor.execute("UPDATE TribeMember SET tribe_role = DEFAULT(tribe_role) WHERE member_id = %s", (user_id,))
+        else:
+            await mycursor.execute("UPDATE TribeMember SET tribe_role = %s WHERE member_id = %s", (role_name, user_id))
 
         await db.commit()
         await mycursor.close()
