@@ -1469,10 +1469,15 @@ class Moderation(*moderation_cogs):
 
 		senior_mod_role = discord.utils.get(ctx.guild.roles, id=senior_mod_role_id)
 
+		members, _ = await utils.greedy_member_reason(ctx, message)
+
 		if perms.administrator or senior_mod_role in ctx.author.roles:
-			members, _ = await utils.greedy_member_reason(ctx, message)
 			members = members if members else [ctx.message.author]
 		else:
+			if members:
+				if members[0] != ctx.message.author:
+					return await ctx.send("**You can't do that!**", delete_after=3)
+
 			members = [ctx.message.author]
 
 		for member in members:
@@ -1506,10 +1511,11 @@ class Moderation(*moderation_cogs):
 
 				else:
 					if member == ctx.author:
-						await ctx.send(f"**You don't not have any open case**", delete_after=3)
+						await ctx.send(f"**You don't have any open cases**", delete_after=3)
 					else:
-						await ctx.send(f"**{member} does not have any open case**", delete_after=3)
+						await ctx.send(f"**{member} does not have any open cases**", delete_after=3)
 			else:
+
 				await ctx.send(f"**The user {member} is not a staff member**", delete_after=3)
 		
 def setup(client):
