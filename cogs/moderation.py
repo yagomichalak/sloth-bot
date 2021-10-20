@@ -1413,7 +1413,7 @@ class Moderation(*moderation_cogs):
 
 		teacher_app = ['teacher', 't', 'tchr', 'teaching']
 
-		event_manager_app = ['eventmanager', 'event manager', 'em', 'evnt mng']
+		event_host_app = ['eventhost', 'event host', 'em', 'evnt mng']
 
 		if not message_id:
 			return await ctx.send(f"**Please, inform a message ID, {member.mention}!**")
@@ -1421,7 +1421,7 @@ class Moderation(*moderation_cogs):
 		if not title:
 			return await ctx.send(f"**Please, inform a `title`, {member.mention}!**")
 
-		if title.lower() not in mod_app + teacher_app + event_manager_app:
+		if title.lower() not in mod_app + teacher_app + event_host_app:
 			return await ctx.send(f"**Invalid title, {member.mention}!**")
 
 		channel = discord.utils.get(ctx.guild.text_channels, id=int(os.getenv('REPORT_CHANNEL_ID')))
@@ -1442,7 +1442,7 @@ class Moderation(*moderation_cogs):
 
 			await ctx.send(f"**Teacher applications are now {'closed' if buttons[0].disabled else 'open'}, {member.mention}!**")
 		
-		elif title.lower() in event_manager_app:
+		elif title.lower() in event_host_app:
 			buttons[2].disabled = False if buttons[2].disabled else True
 
 			await ctx.send(f"**Event Manager applications are now {'closed' if buttons[2].disabled else 'open'}, {member.mention}!**")
