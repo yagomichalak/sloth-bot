@@ -107,7 +107,7 @@ INSERT INTO Sloth.LanguageRoom (category, english_name, room_name, room_quant, r
 /* 082 */("south-east asian", "Bisaya", "Bisaya", 2, 10, 60),
 /* 083 */("south-east asian", "Waray-waray", "Waray-waray", 2, 10, 60),
 /* 084 */("south-east asian", "Kapampangan", "Kapampangan", 2, 10, 60),
-/* 085 */("south-east asian", "Cebuano", "Cebuano", 2, 10, 60),
+/* 085 */("south-east asian", "Cebuano", "Cebuano 🥥🇵🇭", 2, 10, 60),
 /* 086 */("south-east asian", "Ilocano", "Ilocano", 2, 10, 60),
 
 /* 087 */("south-east asian", "Javanese", "Bahasa Jawa 🇮🇩", 2, 10, 60),
