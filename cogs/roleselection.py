@@ -127,7 +127,7 @@ class RoleSelection(RoleSelectionDatabaseCommands):
             await msg.edit(view=view)
             confirm_view = ConfirmButton(member)
             embed = discord.Embed(description=f"**Wanna add more options into your select menu, {member.mention}?**", color=member.color)
-            confirm_msg = await ctx.channel.send("\u200b", embed=embed, view=confirm_view)
+            confirm_msg = await ctx.channel.send(embed=embed, view=confirm_view)
             
             
             await confirm_view.wait()
@@ -178,7 +178,7 @@ class RoleSelection(RoleSelectionDatabaseCommands):
 
         view = ManageRoleSelectionMenu(self.client, message)
 
-        msg = await ctx.send("\u200b", embed=embed, view=view)
+        msg = await ctx.send(embed=embed, view=view)
         try:
             await view.wait()
             await msg.delete()

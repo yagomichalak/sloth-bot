@@ -152,7 +152,7 @@ class Giveaways(commands.Cog):
 
         try:
             view = GiveawayView(self.client, role.id if role else None)
-            msg = await ctx.respond("\u200b", embed=embed, view=view)
+            msg = await ctx.respond(embed=embed, view=view)
             self.client.add_view(view=view, message_id=msg.id)
 
             await self.insert_giveaway(
@@ -242,7 +242,7 @@ class Giveaways(commands.Cog):
             
         confirm_view = ConfirmButton(member, timeout=60)
         embed = discord.Embed(description=f"**Are you sure you wanna delete the giveaway with ID `{giveaway[0]}`, {member.mention}?**", color=member.color)
-        await ctx.respond("\u200b", embed=embed, view=confirm_view, ephemeral=True)
+        await ctx.respond(embed=embed, view=confirm_view, ephemeral=True)
         await confirm_view.wait()
         if confirm_view.value is None:
             return await ctx.respond(f"**{member.mention}, you took too long to answer...**", ephemeral=True)
@@ -276,7 +276,7 @@ class Giveaways(commands.Cog):
 
         confirm_view = ConfirmButton(member, timeout=60)
         embed = discord.Embed(description=f"**Are you sure you want to end the giveaway with ID: `{giveaway[0]}`, {member.mention}?**", color=member.color)
-        await ctx.respond("\u200b", embed=embed, view=confirm_view, ephemeral=True)
+        await ctx.respond(embed=embed, view=confirm_view, ephemeral=True)
         await confirm_view.wait()
         if confirm_view.value is None:
             return await ctx.respond(f"**{member.mention}, you took too long to answer...**", ephemeral=True)

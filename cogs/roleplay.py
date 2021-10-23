@@ -66,7 +66,7 @@ class RolePlay(commands.Cog):
         embed.set_footer(text=f"Requested by {author}", icon_url=author.display_avatar)
         view = HugView(member=author, target=member, timeout=60)
 
-        await ctx.send("\u200b", embed=embed, view=view)
+        await ctx.send(embed=embed, view=view)
         await view.wait()
         if view.used:
             await self.client.get_cog('SlothCurrency').update_user_money(author.id, -5)
@@ -101,7 +101,7 @@ class RolePlay(commands.Cog):
         embed.set_author(name="This costs 5łł")
         embed.set_footer(text=f"Requested by {author}", icon_url=author.display_avatar)
         view = BootView(member=author, target=member, timeout=60)
-        await ctx.send("\u200b", embed=embed, view=view)
+        await ctx.send(embed=embed, view=view)
         await view.wait()
         if view.used:
             await self.client.get_cog('SlothCurrency').update_user_money(author.id, -5)
@@ -134,7 +134,7 @@ class RolePlay(commands.Cog):
         embed.set_author(name="This costs 5łł")
         embed.set_footer(text=f"Requested by {author}", icon_url=author.display_avatar)
         view = KissView(self.client, member=author, target=member, timeout=60)
-        await ctx.send("\u200b", embed=embed, view=view)
+        await ctx.send(embed=embed, view=view)
         await view.wait()
         if view.used:
             await self.client.get_cog('SlothCurrency').update_user_money(author.id, -5)
@@ -167,7 +167,7 @@ class RolePlay(commands.Cog):
         embed.set_author(name="This costs 5łł")
         embed.set_footer(text=f"Requested by {author}", icon_url=author.display_avatar)
         view = SlapView(self.client, member=author, target=member, timeout=60)
-        await ctx.send("\u200b", embed=embed, view=view)
+        await ctx.send(embed=embed, view=view)
         await view.wait()
         if view.used:
             await self.client.get_cog('SlothCurrency').update_user_money(author.id, -5)
@@ -233,7 +233,7 @@ class RolePlay(commands.Cog):
             timestamp=ctx.message.created_at
         )
         confirmation_view = ConfirmButton(member, 60)
-        msg = await ctx.send("\u200b", embed=confirm_embed, view=confirmation_view)
+        msg = await ctx.send(embed=confirm_embed, view=confirmation_view)
         await confirmation_view.wait()
 
         if confirmation_view.value is None:
@@ -333,7 +333,7 @@ class RolePlay(commands.Cog):
         embed.set_author(name="This costs 5łł")
         embed.set_footer(text=f"Requested by {author}", icon_url=author.display_avatar)
         view = PunchView(member=author, target=member, timeout=60)
-        await ctx.send("\u200b", embed=embed, view=view)
+        await ctx.send(embed=embed, view=view)
         await view.wait()
         if view.used:
             await self.client.get_cog('SlothCurrency').update_user_money(author.id, -5)
@@ -366,7 +366,7 @@ class RolePlay(commands.Cog):
         embed.set_author(name="This costs 5łł")
         embed.set_footer(text=f"Requested by {author}", icon_url=author.display_avatar)
         view = GiveView(member=author, target=member, timeout=60)
-        await ctx.send("\u200b", embed=embed, view=view)
+        await ctx.send(embed=embed, view=view)
         await view.wait()
         if view.used:
             await self.client.get_cog('SlothCurrency').update_user_money(author.id, -5)
@@ -400,7 +400,7 @@ class RolePlay(commands.Cog):
         embed.set_author(name="This costs 5łł")
         embed.set_footer(text=f"Requested by {author}", icon_url=author.display_avatar)
         view = TickleView(member=author, target=member, timeout=60)
-        await ctx.send("\u200b", embed=embed, view=view)
+        await ctx.send(embed=embed, view=view)
         await view.wait()
         if view.used:
             await self.client.get_cog('SlothCurrency').update_user_money(author.id, -5)
@@ -434,7 +434,7 @@ class RolePlay(commands.Cog):
         embed.set_author(name="This costs 5łł")
         embed.set_footer(text=f"Requested by {author}", icon_url=author.display_avatar)
         view = YeetView(member=author, target=member, timeout=60)
-        await ctx.send("\u200b", embed=embed, view=view)
+        await ctx.send(embed=embed, view=view)
         await view.wait()
         if view.used:
             await self.client.get_cog('SlothCurrency').update_user_money(author.id, -5)
@@ -467,7 +467,7 @@ class RolePlay(commands.Cog):
         embed.set_author(name="This costs 5łł")
         embed.set_footer(text=f"Requested by {author}", icon_url=author.display_avatar)
         view = PatView(member=author, target=member, timeout=60)
-        await ctx.send("\u200b", embed=embed, view=view)
+        await ctx.send(embed=embed, view=view)
         await view.wait()
         if view.used:
             await self.client.get_cog('SlothCurrency').update_user_money(author.id, -5)
@@ -501,7 +501,7 @@ class RolePlay(commands.Cog):
         embed.set_author(name="This costs 5łł")
         embed.set_footer(text=f"Requested by {author}", icon_url=author.display_avatar)
         view = BegView(member=author, target=member, timeout=60)
-        await ctx.send("\u200b", embed=embed, view=view)
+        await ctx.send(embed=embed, view=view)
         await view.wait()
         if view.used:
             await self.client.get_cog('SlothCurrency').update_user_money(author.id, -5)
@@ -541,7 +541,7 @@ class RolePlay(commands.Cog):
         embed.set_author(name="This costs 5łł")
         embed.set_footer(text=f"Requested by {author}", icon_url=author.display_avatar)
         view = WhisperView(member=author, target=member, text=text, timeout=60)
-        await ctx.send("\u200b", embed=embed, view=view)
+        await ctx.send(embed=embed, view=view)
         await view.wait()
         if view.used:
             await self.client.get_cog('SlothCurrency').update_user_money(author.id, -5)
@@ -575,7 +575,7 @@ class RolePlay(commands.Cog):
         embed.set_author(name="This costs 5łł")
         embed.set_footer(text=f"Requested by {author}", icon_url=author.display_avatar)
         view = HandshakeView(member=author, target=member, timeout=60)
-        await ctx.send("\u200b", embed=embed, view=view)
+        await ctx.send(embed=embed, view=view)
         await view.wait()
         if view.used:
             await self.client.get_cog('SlothCurrency').update_user_money(author.id, -5)
@@ -609,7 +609,7 @@ class RolePlay(commands.Cog):
         embed.set_author(name="This costs 5łł")
         embed.set_footer(text=f"Requested by {author}", icon_url=author.display_avatar)
         view = HighFiveView(member=author, target=member, timeout=60)
-        await ctx.send("\u200b", embed=embed, view=view)
+        await ctx.send(embed=embed, view=view)
         await view.wait()
         if view.used:
             await self.client.get_cog('SlothCurrency').update_user_money(author.id, -5)
@@ -642,7 +642,7 @@ class RolePlay(commands.Cog):
         embed.set_author(name="This costs 5łł")
         embed.set_footer(text=f"Requested by {author}", icon_url=author.display_avatar)
         view = PeekView(member=author, target=member, timeout=60)
-        await ctx.send("\u200b", embed=embed, view=view)
+        await ctx.send(embed=embed, view=view)
         await view.wait()
         if view.used:
             await self.client.get_cog('SlothCurrency').update_user_money(author.id, -5)
@@ -676,7 +676,7 @@ class RolePlay(commands.Cog):
         embed.set_author(name="This costs 5łł")
         embed.set_footer(text=f"Requested by {author}", icon_url=author.display_avatar)
         view = DriveOverView(member=author, target=member, timeout=60)
-        await ctx.send("\u200b", embed=embed, view=view)
+        await ctx.send(embed=embed, view=view)
         await view.wait()
         if view.used:
             await self.client.get_cog('SlothCurrency').update_user_money(author.id, -5)
