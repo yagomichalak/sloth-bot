@@ -1,6 +1,5 @@
 import discord
-from discord.app import Option, OptionChoice
-from discord.app.commands import slash_command, user_command
+from discord.commands import slash_command, user_command
 from discord.ext import commands, tasks
 from random import randint, choice
 from datetime import datetime
