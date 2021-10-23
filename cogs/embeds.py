@@ -1,5 +1,5 @@
 import discord
-from discord.commands import Option, OptionChoice, slash_command
+from discord.app.commands import Option, OptionChoice, slash_command
 from discord.ext import commands
 from extra import utils
 import os

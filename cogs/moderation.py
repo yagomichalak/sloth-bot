@@ -2,7 +2,7 @@ from logging import exception
 import discord
 from discord import user
 from discord.ext import commands, tasks
-from discord.commands import user_command
+from discord.app.commands import user_command
 import asyncio
 from mysqldb import *
 from datetime import datetime

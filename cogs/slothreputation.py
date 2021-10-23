@@ -1,5 +1,5 @@
 import discord
-from discord.commands import slash_command, Option
+from discord.app.commands import slash_command, Option
 from discord.ext import commands
 from cogs.slothcurrency import SlothCurrency
 from mysqldb import *
