@@ -1,5 +1,4 @@
 import discord
-from discord.enums import OptionType
 from discord.app import Option, option
 from discord.utils import escape_mentions
 from pytz import timezone
