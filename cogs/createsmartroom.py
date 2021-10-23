@@ -1751,20 +1751,20 @@ You can only add either **threads** **OR** one **voice channel**"""))
 		if not members:
 			return await ctx.send(f"**You don't have members in your tribe, {member.mention}!**")
 
-		# async with ctx.typing():
-		allowed = await self.handle_permissions(members, user_galaxy, ctx.guild)
+		async with ctx.typing():
+			allowed = await self.handle_permissions(members, user_galaxy, ctx.guild)
 
-		if not allowed:
-			return await ctx.send(f"**For some reason, I couldn't allow any of those members, {member.mention}!**")
+			if not allowed:
+				return await ctx.send(f"**For some reason, I couldn't allow any of those members, {member.mention}!**")
 
-		text: str = "**{lendisa} {subjplural} from {tribe_name} {verbplural} been allowed, {mention}!**".format(
-			lendisa=len(allowed),
-			subjplural='people' if len(allowed) > 1 else 'person',
-			tribe_name=user_tribe['name'],
-			verbplural='have' if len(allowed) > 1 else 'has',
-			mention=member.mention)
+			text: str = "**{lendisa} {subjplural} from {tribe_name} {verbplural} been allowed, {mention}!**".format(
+				lendisa=len(allowed),
+				subjplural='people' if len(allowed) > 1 else 'person',
+				tribe_name=user_tribe['name'],
+				verbplural='have' if len(allowed) > 1 else 'has',
+				mention=member.mention)
 
-		await ctx.send(text)
+			await ctx.send(text)
 
 	@galaxy.command(name="forbid_tribe", aliases=[
 		'dt', 'disallow_tribe', 'delete_tribe', 'removetribe', 'disallowtribe', 'deletetribe', 'deltribe',
@@ -1793,20 +1793,20 @@ You can only add either **threads** **OR** one **voice channel**"""))
 		if not members:
 			return await ctx.send(f"**You don't have members in your tribe, {member.mention}!**")
 
-		# async with ctx.typing():
-		disallowed = await self.handle_permissions(members, user_galaxy, ctx.guild, allow=False)
-	
-		if not disallowed:
-			return await ctx.send(f"**For some reason, I couldn't allow any of those members, {member.mention}!**")
+		async with ctx.typing():
+			disallowed = await self.handle_permissions(members, user_galaxy, ctx.guild, allow=False)
+		
+			if not disallowed:
+				return await ctx.send(f"**For some reason, I couldn't allow any of those members, {member.mention}!**")
 
-		text: str = "**{lendisa} {subjplural} from {tribe_name} {verbplural} been disallowed, {mention}!**".format(
-			lendisa=len(disallowed),
-			subjplural='people' if len(disallowed) > 1 else 'person',
-			tribe_name=user_tribe['name'],
-			verbplural='have' if len(disallowed) > 1 else 'has',
-			mention=member.mention)
+			text: str = "**{lendisa} {subjplural} from {tribe_name} {verbplural} been disallowed, {mention}!**".format(
+				lendisa=len(disallowed),
+				subjplural='people' if len(disallowed) > 1 else 'person',
+				tribe_name=user_tribe['name'],
+				verbplural='have' if len(disallowed) > 1 else 'has',
+				mention=member.mention)
 
-		await ctx.send(text)
+			await ctx.send(text)
 
 
 

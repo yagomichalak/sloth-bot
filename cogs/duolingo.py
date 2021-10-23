@@ -136,89 +136,89 @@ class Duolingo(commands.Cog):
         headers = {'content-type': 'application/json'}
         
         url = "https://www.duolingo.com/2017-06-30/login?fields="
-        # async with ctx.typing():
-        async with self.session.post(url, headers=headers, data=json.dumps(self.authentication)) as response:
-            if response.status != 200:
-                return await ctx.send(f"**Request failed!**")
+        async with ctx.typing():
+            async with self.session.post(url, headers=headers, data=json.dumps(self.authentication)) as response:
+                if response.status != 200:
+                    return await ctx.send(f"**Request failed!**")
 
-        async with self.session.get(request) as response:
-            if response.status == 404:
-                return await ctx.send(f"**User not found, {author.mention}!**")
+            async with self.session.get(request) as response:
+                if response.status == 404:
+                    return await ctx.send(f"**User not found, {author.mention}!**")
 
-            elif response.status != 200:
-                return await ctx.send(f"**Something went wrong with it, {author.mention}! ({response.status})**")
+                elif response.status != 200:
+                    return await ctx.send(f"**Something went wrong with it, {author.mention}! ({response.status})**")
 
-            data = json.loads(await response.read())
-            lang_data = data['language_data'][list(data['language_data'].keys())[0]]
+                data = json.loads(await response.read())
+                lang_data = data['language_data'][list(data['language_data'].keys())[0]]
 
-            finished_skills = [s for s in lang_data['skills'] if s['progress_percent'] == 100]
-            embed = discord.Embed(
-                title=f"__{duo_profile[1]}__",
-                description=f"""
-                **Streak**: `{data['languages'][0]['streak']} days` 🔥
-                **Indexed language:** `{data['learning_language_string']}`
-                **Finished skills for indexed language:** `{len(finished_skills)}`
-                **Timezone:** `{data.get('timezone')}`
-                **Following:** `{len(lang_data['points_ranking_data']) -1} people`
-                """,
-                # **Skills Learned:**: `{data['num_skills_learned']}k`
-                color=member.color,
-                timestamp=ctx.message.created_at,
-                url=f"{self.root}/profile/{duo_profile[1]}"
-            )
-
-            languages = sorted(data['languages'], key=lambda k: k['level'], reverse=True) 
-
-            for language in languages[:6]:
-                
-                flag = await self.get_flag(language['language_string'])
-
-                embed.add_field(
-                    name=f"__{language['language_string']} ({flag})__:",
-                    value=f"""
-                    **Level:** `{language['level']}`
-                    **To next level:** `{language['to_next_level']}xp`
-                    **Points:** `{language['points']} pts`
-                    **Learning:** `{language['current_learning']}`""",
-                    inline=True
+                finished_skills = [s for s in lang_data['skills'] if s['progress_percent'] == 100]
+                embed = discord.Embed(
+                    title=f"__{duo_profile[1]}__",
+                    description=f"""
+                    **Streak**: `{data['languages'][0]['streak']} days` 🔥
+                    **Indexed language:** `{data['learning_language_string']}`
+                    **Finished skills for indexed language:** `{len(finished_skills)}`
+                    **Timezone:** `{data.get('timezone')}`
+                    **Following:** `{len(lang_data['points_ranking_data']) -1} people`
+                    """,
+                    # **Skills Learned:**: `{data['num_skills_learned']}k`
+                    color=member.color,
+                    timestamp=ctx.message.created_at,
+                    url=f"{self.root}/profile/{duo_profile[1]}"
                 )
 
-            if properties := data.get('tracking_properties'):
-                creation_ts = int(properties['creation_date_millis']/1000)
-                embed.description += f"**Followers:** `{properties['num_followers']} people`"
-                embed.add_field(
-                    name="__Properties__:",
-                    value=f"""
-                    **Creation Date:** <t:{creation_ts}> (<t:{creation_ts}:R>)
-                    **Gems:** `{properties['gems']}` 💎
-                    **Achievements:** `{len(properties['achievements'])}`
-                    """,
-                    inline=False)
-            
-            unfinished_skills = [
-                unf for unf in lang_data['skills']
-                if 0 < unf['progress_percent'] < 100
-            ]
+                languages = sorted(data['languages'], key=lambda k: k['level'], reverse=True) 
 
-            if unfinished_skills:
-                last = unfinished_skills[-1]
-                embed.add_field(name=f"__Last Lesson__", value=f"""
-                **Language:** `{last['language_string']}`
-                **Title:** `{last['title']}`
-                **Progress Percent:** `{round(last['progress_percent'])}%` `({last['progress_level_session_index']}/{last['num_sessions_for_level']})`
-                """, inline=True)
+                for language in languages[:6]:
+                    
+                    flag = await self.get_flag(language['language_string'])
 
-            
-            if next := lang_data.get('next_lesson'):
-                embed.add_field(name=f"__Next Lesson__:", value=f"""
-                **Title:** `{next['skill_title']}`
-                **Modules:** `{next['lesson_number']}`
-                """, inline=True)
+                    embed.add_field(
+                        name=f"__{language['language_string']} ({flag})__:",
+                        value=f"""
+                        **Level:** `{language['level']}`
+                        **To next level:** `{language['to_next_level']}xp`
+                        **Points:** `{language['points']} pts`
+                        **Learning:** `{language['current_learning']}`""",
+                        inline=True
+                    )
+
+                if properties := data.get('tracking_properties'):
+                    creation_ts = int(properties['creation_date_millis']/1000)
+                    embed.description += f"**Followers:** `{properties['num_followers']} people`"
+                    embed.add_field(
+                        name="__Properties__:",
+                        value=f"""
+                        **Creation Date:** <t:{creation_ts}> (<t:{creation_ts}:R>)
+                        **Gems:** `{properties['gems']}` 💎
+                        **Achievements:** `{len(properties['achievements'])}`
+                        """,
+                        inline=False)
                 
+                unfinished_skills = [
+                    unf for unf in lang_data['skills']
+                    if 0 < unf['progress_percent'] < 100
+                ]
 
-            embed.set_thumbnail(url=f"https:{data['avatar']}/xxlarge")
+                if unfinished_skills:
+                    last = unfinished_skills[-1]
+                    embed.add_field(name=f"__Last Lesson__", value=f"""
+                    **Language:** `{last['language_string']}`
+                    **Title:** `{last['title']}`
+                    **Progress Percent:** `{round(last['progress_percent'])}%` `({last['progress_level_session_index']}/{last['num_sessions_for_level']})`
+                    """, inline=True)
 
-            await ctx.send(embed=embed)
+                
+                if next := lang_data.get('next_lesson'):
+                    embed.add_field(name=f"__Next Lesson__:", value=f"""
+                    **Title:** `{next['skill_title']}`
+                    **Modules:** `{next['lesson_number']}`
+                    """, inline=True)
+                    
+
+                embed.set_thumbnail(url=f"https:{data['avatar']}/xxlarge")
+
+                await ctx.send(embed=embed)
 
     async def get_flag(self, language: str) -> str:
         """ Gets a language flag emoji.
