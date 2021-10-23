@@ -673,7 +673,7 @@ class TeacherFeedback(commands.Cog):
 
         # View
         confirm_view: discord.ui.View = ConfirmButton(member, timeout=6000)
-        await member.send("\u200b", embed=teacher_feedback_embed, view=confirm_view)
+        await member.send(embed=teacher_feedback_embed, view=confirm_view)
 
         # Waits for prompt confirmation
         await confirm_view.wait()

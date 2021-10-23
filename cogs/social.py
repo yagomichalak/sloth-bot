@@ -289,7 +289,7 @@ class Social(commands.Cog):
                 else:
                     view.children[2].disabled = True
 
-            await ctx.send("\u200b", embed=embed, view=view)
+            await ctx.send(embed=embed, view=view)
 
 
     # Sends a random post from the meme subreddit
@@ -359,7 +359,7 @@ class Social(commands.Cog):
         )
         embed.set_author(name=member, url=member.display_avatar, icon_url=member.display_avatar)
         embed.set_footer(text=f"(Expires in 5 minutes)", icon_url=ctx.guild.icon.url)
-        await ctx.respond("\u200b", embed=embed, view=view)
+        await ctx.respond(embed=embed, view=view)
 
 
 def setup(client):

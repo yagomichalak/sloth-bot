@@ -570,7 +570,7 @@ class Merchant(Player):
         embed = discord.Embed(
             title="__Confirmation__", color=member.color,
             description=f"**Are you sure you wanna marry {suitor.mention}, {member.mention}?**")
-        await ctx.send("\u200b", embed=embed, view=confirm_view)
+        await ctx.send(embed=embed, view=confirm_view)
 
         await confirm_view.wait()
         if confirm_view.value is None:
@@ -655,7 +655,7 @@ class Merchant(Player):
         embed = discord.Embed(
             title="__Confirmation__", color=member.color,
             description=f"**Are you really sure you wanna divorce <@{partner.id}>, {member.mention}?**")
-        await ctx.send("\u200b", embed=embed, view=confirm_view)
+        await ctx.send(embed=embed, view=confirm_view)
 
         await confirm_view.wait()
         if confirm_view.value is None:

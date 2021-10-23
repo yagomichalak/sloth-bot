@@ -686,7 +686,7 @@ class CreateSmartRoom(SmartRoomDatabase):
 			if not user_currency:
 				view = discord.ui.View()
 				view.add_item(discord.ui.Button(style=5, label="Create Account", emoji="🦥", url="https://thelanguagesloth.com/profile/update"))
-				return await member.send("\u200b", 
+				return await member.send( 
 					embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one, or in the button below!**"),
 					view=view)
 
@@ -783,7 +783,7 @@ class CreateSmartRoom(SmartRoomDatabase):
 			if not user_currency:
 				view = discord.ui.View()
 				view.add_item(discord.ui.Button(style=5, label="Create Account", emoji="🦥", url="https://thelanguagesloth.com/profile/update"))
-				return await member.send("\u200b", 
+				return await member.send( 
 					embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one, or in the button below!**"),
 					view=view)
 
@@ -978,7 +978,7 @@ class CreateSmartRoom(SmartRoomDatabase):
 			if not user_currency:
 				view = discord.ui.View()
 				view.add_item(discord.ui.Button(style=5, label="Create Account", emoji="🦥", url="https://thelanguagesloth.com/profile/update"))
-				return await member.send("\u200b", 
+				return await member.send( 
 					embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one, or in the button below!**"),
 					view=view)
 
@@ -1543,7 +1543,7 @@ You can only add either **threads** **OR** one **voice channel**"""))
 		if not (user_currency := await SlothCurrency.get_user_currency(member.id)):
 			view = discord.ui.View()
 			view.add_item(discord.ui.Button(style=5, label="Create Account", emoji="🦥", url="https://thelanguagesloth.com/profile/update"))
-			return await member.send("\u200b", 
+			return await member.send( 
 				embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one, or in the button below!**"),
 				view=view)
 
@@ -1607,7 +1607,7 @@ You can only add either **threads** **OR** one **voice channel**"""))
 		if not (user_currency := await SlothCurrency.get_user_currency(member.id)):
 			view = discord.ui.View()
 			view.add_item(discord.ui.Button(style=5, label="Create Account", emoji="🦥", url="https://thelanguagesloth.com/profile/update"))
-			return await member.send("\u200b", 
+			return await member.send( 
 				embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one, or in the button below!**"),
 				view=view)
 

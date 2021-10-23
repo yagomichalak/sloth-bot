@@ -1011,7 +1011,7 @@ class Tools(commands.Cog):
 			['Other', 'other']
 		])
 		view.add_item(select)
-		await ctx.send(content="\u200b", embed=embed, view=view)
+		await ctx.send(embed=embed, view=view)
 
 
 	@slash_command(name="poll", guild_ids=guild_ids)

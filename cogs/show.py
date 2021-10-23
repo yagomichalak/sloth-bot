@@ -80,7 +80,7 @@ class Show(commands.Cog):
         view = discord.ui.View()
         view.add_item(discord.ui.Button(style=5, label='GitHub', emoji="🔗", url=github_link))
         view.add_item(discord.ui.Button(style=5, label="Patreon", emoji="<:patreon:831401582426980422>", url="https://www.patreon.com/Languagesloth"))
-        await ctx.send("\u200b", embed=embed, view=view)
+        await ctx.send(embed=embed, view=view)
 
     # Shows the specific rule
 
