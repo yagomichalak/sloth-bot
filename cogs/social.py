@@ -1,5 +1,5 @@
 import discord
-from discord.app.commands import Option, slash_command
+from discord.commands import Option, slash_command
 from discord.ext import commands
 from random import randint
 import aiohttp
