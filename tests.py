@@ -168,24 +168,60 @@ UPDATE TribeMember as OG
 # UPDATE UserServerActivity USA LEFT JOIN SlothProfile SP ON SP.user_id = USA.user_id SET USA.user_time = 0 WHERE SP.user_id IS NULL AND round(USA.user_time/60/60) >= 0;
 
 
-import re
+# import re
 
-text: str = 'niiiiiiiiceee work'
-text: str = 'cool words'
+# text: str = 'niiiiiiiiceee work'
+# text: str = 'cool words'
 
-# found = re.findall(r'[<]?[a]?:[!_\-\w]+:[0-9]{0,18}[>]?', text)
+# # found = re.findall(r'[<]?[a]?:[!_\-\w]+:[0-9]{0,18}[>]?', text)
 
 
-regexes: list[str] = [
-    re.compile(r'go{2,99}d wo{1,99}r[!_\-\w]s{0,99}', text),
-    re.compile(r'co{2,99}l wo{1,99}r[!_\-\w]s{0,99}', text),
-    re.compile(r'n[!_\-\w]{1,99}c[!_\-\w]{1,99} wo{1,99}r[!_\-\w]s{0,99}', text)
+# regexes: list[str] = [
+#     re.compile(r'go{2,99}d wo{1,99}r[!_\-\w]s{0,99}', text),
+#     re.compile(r'co{2,99}l wo{1,99}r[!_\-\w]s{0,99}', text),
+#     re.compile(r'n[!_\-\w]{1,99}c[!_\-\w]{1,99} wo{1,99}r[!_\-\w]s{0,99}', text)
+# ]
+
+# for regex in regexes:
+#     print(regex)
+#     print()
+
+
+
+
+
+
+
+cases = [
+    # Upper horizontal
+    [(0, 0), (0, 1), (0, 2)],
+    # Middle horizontal
+    [(1, 0), (1, 1), (1, 2)],
+    # Bottom horizontal
+    [(2, 0), (2, 1), (2, 2)],
+
+    # Upper vertical
+    [(0, 0), (1, 0), (2, 0)],
+    # Middle vertical
+    [(1, 0), (1, 1), (1, 2)],
+    # Bottom vertical
+    [(2, 0), (2, 1), (2, 2)],
+
+    # Right diagonal
+    [(0, 0), (1, 1), (2, 2)],
+    # Left diagonal
+    [(0, 2), (1, 1), (2, 0)],
+
 ]
 
-for regex in regexes:
-    print(regex)
-    print()
+you = [
+    (0, 0), (2, 0), (0, 1), (2, 2), (0, 2)
+]
 
 
+# print(set([0, 0]))
 
-
+for case in cases:
+    if len(inter := set(you).intersection(set(case))) >= 3:
+        print('You won with: ', case)
+        break
