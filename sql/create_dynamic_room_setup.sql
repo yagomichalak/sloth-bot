@@ -14,7 +14,7 @@ INSERT INTO Sloth.LanguageRoom (category, english_name, room_name, room_quant, r
 /* 005 */("sub-saharan", "Afrikaans", "Afrikaans 🦁🇿🇦", 2, 10, 60 * 60 * 1),
 /* 006 */("uralic", "Finnish", "Suomi ❄🇫🇮", 2, 10, 60 * 60 * 1),
 /* 007 */("uralic", "Hungarian", "Magyar 🌶🇭🇺", 2, 10, 60),
-/* 008 */("romance", "Catalan", "català", 2, 10, 60 * 60 * 1),
+/* 008 */("romance", "Catalan", "Català", 2, 10, 60 * 60 * 1),
 /* 009 */("romance", "Romanian", "Română 🧛🇷🇴", 2, 10, 60 * 60 * 1),
 /* 010 */("baltic", "Latvian", "Latviešu", 2, 10, 60),
 /* 011 */("slavic", "Polish", "Polski 🧅🇵🇱", 2, 10, 60 * 60 * 1),
@@ -94,11 +94,11 @@ INSERT INTO Sloth.LanguageRoom (category, english_name, room_name, room_quant, r
 
 /* 073 */("baltic", "Lithuanian", "Lietuvių 🇱🇹🥔", 2, 10, 60),
 
-/* 074 */("east asian", "Wenzhounese", "溫州話  🇨🇳", 2, 10, 60),
-/* 075 */("east asian", "Taishanese", "台山話  🇨🇳", 2, 10, 60),
-/* 076 */("east asian", "Sichuanese", "四川話  🇨🇳", 2, 10, 60),
-/* 077 */("east asian", "Hakka", "客家話  🇨🇳", 2, 10, 60),
-/* 078 */("east asian", "Hainanese", "海南話  🇨🇳", 2, 10, 60),
+/* 074 */("east asian", "Wenzhounese", "溫州話 🇨🇳", 2, 10, 60),
+/* 075 */("east asian", "Taishanese", "台山話 🇨🇳", 2, 10, 60),
+/* 076 */("east asian", "Sichuanese", "四川話 🇨🇳", 2, 10, 60),
+/* 077 */("east asian", "Hakka", "客家話 🇨🇳", 2, 10, 60),
+/* 078 */("east asian", "Hainanese", "海南話 🇨🇳", 2, 10, 60),
 
 /* 079 */("east asian", "Taiwanese", "閩南語 ", 2, 10, 60),
 /* 080 */("east asian", "Teochew", "Teochew", 2, 10, 60),
@@ -111,7 +111,7 @@ INSERT INTO Sloth.LanguageRoom (category, english_name, room_name, room_quant, r
 /* 086 */("south-east asian", "Ilocano", "Ilocano", 2, 10, 60),
 
 /* 087 */("south-east asian", "Javanese", "Bahasa Jawa 🇮🇩", 2, 10, 60),
-/* 088 */("south-east asian", "Lao", "ພາສາລາວ ", 2, 10, 60),
+/* 088 */("south-east asian", "Lao", "ພາສາລາວ", 2, 10, 60),
 
 /* 089 */("romance", "Portunhol", "Portuñol 🧉🌎", 2, 10, 60),
 
@@ -368,8 +368,8 @@ INSERT INTO Sloth.LanguageRoomPermissions (room_id, role_id, permission_name, pe
 
 /* Swiss German Channel */
 (41, /*Native German*/ 471921967499444225, "speaker", true),
-(41, /*Fluent Language*/ 490131150879195138, "speaker", true),
-(41, /*Studying Language*/ 475241077578924053, "speaker", true),
+(41, /*Fluent German*/ 490131150879195138, "speaker", true),
+(41, /*Studying German*/ 475241077578924053, "speaker", true),
 
 /* Basque Channel */
 (42, /*Native Basque*/ 480754000275177483, "speaker", true),

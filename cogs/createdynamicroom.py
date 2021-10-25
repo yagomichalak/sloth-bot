@@ -226,7 +226,7 @@ class DynamicRoomDatabase:
         table_info = await mycursor.fetchall()
         await mycursor.close()
 
-        return len(table_info) != 0
+        return any(table_info)
 
     @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
@@ -556,9 +556,6 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
     async def check_empty_dynamic_rooms(self):
         """ Task that checks Dynamic Rooms expirations. """
 
-        if not await self.table_dynamic_rooms_exists():
-            return
-
         # get current time
         the_time = await utils.get_timestamp()
 
@@ -594,10 +591,11 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
     async def undie_check_empty_dynamic_rooms(self, ctx):
         """ Restarts check_empty_dynamic_rooms task. """
 
+        self.check_empty_dynamic_rooms.stop()
         self.check_empty_dynamic_rooms.restart()
-        await ctx.send("**Checked**")
 
-    @commands.has_permissions(administrator=True)
+        await ctx.send("**Attempted revive!**")
+
     @commands.command(hidden=True)
     @utils.is_allowed([analyst_debugger_role_id], throw_exc=True)
     async def setup_dynamic_rooms(self, ctx):
@@ -623,10 +621,6 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
     async def on_voice_state_update(self, member, before, after) -> None:
         """ Handler for voice channel activity, that's eventually gonna be used
         for creating a DynamicRoom. """
-
-        if not self.check_empty_dynamic_rooms.is_running():
-            self.check_empty_dynamic_rooms.restart()
-            self.error_log.send(f"check_empty_dynamic_rooms was restarted 👌.")
 
         # Checks if the user is leaving the vc and whether there still are people in there
         if before.channel and before.channel.category:
@@ -823,7 +817,7 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
 
         # If list is empty, return empty
         if not available_rooms_list:
-            return []
+            return [None, None]
 
         # Updates rooms with quantity
         available_rooms_list = await self.get_room_quantity(available_rooms_list)
@@ -856,7 +850,7 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
         available_rooms_list, available_options = await self.get_available_options_from_member(member)
 
         # if no rooms available
-        if len(available_options) == 0:
+        if not available_options or len(available_options) == 0:
             await member.send(f"**Nothing to see here.** <:zslothblind:695418950477152286>")
             return None
 
@@ -874,7 +868,7 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
                 # view.add_item(select_title)
                 select_title = category.capitalize() + " Languages"
                 view.add_item(LanguageRoomSelect(self.client, custom_id="select_lr_"+category,
-                    row=index+1, select_options=cat_options[:25], placeholder=select_title))
+                    row=index, select_options=cat_options[:25], placeholder=select_title))
             await member.send(f"**Select from the following Categories:**", view=view)
             await view.wait()
         else:
