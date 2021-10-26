@@ -456,6 +456,18 @@ async def _speak(ctx, language: Option(str, name="language", description="The la
     )
     await ctx.respond(embed=embed)
 
+@_cnp.command(name="club_speak")
+@utils.is_allowed([moderator_role_id, admin_role_id], throw_exc=True)
+async def _club_speak(ctx) -> None:
+    """ Tells people that they must speak in English in club channels. """
+
+    embed = discord.Embed(
+        title="__Speak English__",
+        description="**This is an English-only channel. Please do not use other languages in the club channels.**",
+        color=ctx.author.color
+    )
+    await ctx.respond(embed=embed)
+
 _giveaway = client.command_group(name="giveaway", description="For copy and pasting stuff.", guild_ids=guild_ids)
 
 @utils.is_allowed([giveaway_manager_role_id, moderator_role_id, admin_role_id], throw_exc=True)
