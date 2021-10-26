@@ -33,6 +33,12 @@ class MiniGames(commands.Cog):
             ctx.command.reset_cooldown(ctx)
             return await ctx.send(f"**Please, inform a member to play against, {author.mention}!**")
 
+        if author.id == member.id:
+            return await ctx.send(f"**You cannot play with yourself, {author.mention}! <:sheesh:872621063987679243>**")
+
+        if member.bot:
+            return await ctx.send(f"**You cannot play against a bot, {author.mention}! 🤖**")
+
         embed: discord.Embed = discord.Embed(
             title="__Tic Tac Toe__",
             color=member.color,
@@ -48,8 +54,6 @@ class MiniGames(commands.Cog):
         embed.add_field(name="__Turn__:", value=f"Now it's {view.turn_member.mention}'s turn!")
 
         await ctx.send(embed=embed, view=view)
-
-
 
 def setup(client: commands.Bot) -> None:
     """ Cog's setup function. """
