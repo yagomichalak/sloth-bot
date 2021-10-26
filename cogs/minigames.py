@@ -34,9 +34,11 @@ class MiniGames(commands.Cog):
             return await ctx.send(f"**Please, inform a member to play against, {author.mention}!**")
 
         if author.id == member.id:
+            ctx.command.reset_cooldown(ctx)
             return await ctx.send(f"**You cannot play with yourself, {author.mention}! <:sheesh:872621063987679243>**")
 
         if member.bot:
+            ctx.command.reset_cooldown(ctx)
             return await ctx.send(f"**You cannot play against a bot, {author.mention}! 🤖**")
 
         embed: discord.Embed = discord.Embed(
