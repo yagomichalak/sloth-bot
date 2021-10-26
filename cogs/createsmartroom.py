@@ -529,7 +529,7 @@ class CreateSmartRoom(SmartRoomDatabase):
 				title="__Galaxy Rooms in Danger Zone__",
 				description=(
 					"Your Galaxy rooms will be deleted within two days, in case you wanna keep them,"
-					" consider renewing them for `1500łł` (2 channels) or for `2000łł` (3 channels) by using the **z!pay_rent** command in any of your rooms!"
+					" consider renewing them for `1500łł` (2 channels) or for `2000łł` (3 channels) by using the **z!galaxy pay_rent** command in any of your rooms!"
 				),
 				color=discord.Color.red())
 			try:
