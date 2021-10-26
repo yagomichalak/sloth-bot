@@ -115,7 +115,7 @@ INSERT INTO Sloth.LanguageRoom (category, english_name, room_name, room_quant, r
 
 /* 089 */("romance", "Portunhol", "Portuñol 🧉🌎", 2, 10, 60),
 
-/* 090 */("semitic", "Amazigh", "ⵎⵣⵗⵏ (Amazigh)", 2, 10, 60 * 60 * 1),
+/* 090 */("semitic", "Amazigh", "ⵜⴰⵎⴰⵣⵉⵖⵜ (Tamazigh)", 2, 10, 60 * 60 * 1),
 
 /* 091 */("conlang", "Esperanto", "Esperanto", 2, 10, 60),
 /* 092 */("conlang", "Toki Pona", "Toki Pona", 2, 10, 60),
