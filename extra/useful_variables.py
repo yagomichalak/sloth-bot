@@ -66,7 +66,7 @@ This rule also applies to user profiles.""",
 
     "Do not dox": "Do not share other users' personal information without their consent.",
 
-    "Do not spam": """o not flood or spam text channels.
+    "Do not spam": """Do not flood or spam text channels.
 Do not spam react in messages.
 Do not ping staff members repeatedly without a reason.
 Do not mic spam/earrape/use soundboards in voice channels.""",
