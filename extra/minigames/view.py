@@ -32,3 +32,4 @@ class TicTacToeView(discord.ui.View):
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
         return interaction.user.id == self.turn_member.id
+
