@@ -4,7 +4,7 @@ from discord.ext import commands
 from extra.minigames.view import MoveObjectGameView, TicTacToeView
 
 
-class Game(commands.Cog):
+class Games(commands.Cog):
     """ A category for a minigames. """
 
     def __init__(self, client) -> None:
@@ -85,4 +85,4 @@ class Game(commands.Cog):
 def setup(client) -> None:
     """ Cog's setup function. """
 
-    client.add_cog(Game(client))
+    client.add_cog(Games(client))
