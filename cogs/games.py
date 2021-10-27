@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 
 from extra.minigames.view import MoveObjectGameView, TicTacToeView, FlagsGameView
-from random import randint, sample, shuffle
+from random import randint, sample, shuffle, choice
 from extra import utils
 import os
 import json
@@ -180,6 +180,125 @@ class Games(commands.Cog):
             embed = discord.Embed()
             embed.set_image(url=flag['link'] + '.png')
             await ctx.send(flag['name'], embed=embed)
+
+    
+    @commands.command(aliases=['lotto'])
+    async def lottery(self, ctx, g1 = None, g2 = None, g3 = None):
+        """ Enter the lottery and see if you win!
+        :param g1: Guess 1.
+        :param g2: Guess 2.
+        :param g3: Guess 3.
+        
+        * Cost: 1łł.
+        * Prize: 500łł """
+
+        author = ctx.author
+
+        await ctx.message.delete()
+        if not g1:
+            return await ctx.send("**You informed 0 guesses, 3 guesses are needed!**", delete_after=3)
+        elif not g2:
+            return await ctx.send("**You informed 1 guess, 3 guesses are needed!**", delete_after=3)
+        elif not g3:
+            return await ctx.send("**You informed 2 guesses, 3 guesses are needed!**", delete_after=3)
+
+        try:
+            g1 = int(g1)
+            g2 = int(g2)
+            g3 = int(g3)
+        except ValueError:
+            return await ctx.send("**All guesses must be integers!**", delete_after=3)
+
+        for n in [g1, g2, g3]:
+            if n <= 0 or n > 5:
+                return await ctx.send(f"**Each number must be between 1-5!**", delete_after=3)
+
+        SlothCurrency = self.client.get_cog('SlothCurrency')
+
+        # Check if user is not on cooldown
+        user_secs = await SlothCurrency.get_user_currency(author.id)
+        current_ts = await utils.get_timestamp()
+        if not user_secs:
+            await SlothCurrency.insert_user_currency(author.id, current_ts - 61)
+            user_secs = await SlothCurrency.get_user_currency(author.id)
+
+        if user_secs[0][6]:
+            sub_time = current_ts - user_secs[0][6]
+            if sub_time >= 1200:
+                await SlothCurrency.update_user_lotto_ts(author.id, current_ts)
+            else:
+                m, s = divmod(1200 - int(sub_time), 60)
+                h, m = divmod(m, 60)
+                if h > 0:
+                    return await ctx.send(f"**You're on cooldown, try again in {h:d} hours, {m:02d} minutes and {s:02d} seconds.**", delete_after=5)
+                elif m > 0:
+                    return await ctx.send(
+                        f"**You're on cooldown, try again in {m:02d} minutes and {s:02d} seconds.**",
+                        delete_after=5)
+                else:
+                    return await ctx.send(
+                        f"**You're on cooldown, try again in {s:02d} seconds.**",
+                        delete_after=5)
+        else:
+            await SlothCurrency.update_user_lotto_ts(author.id, current_ts)
+
+        if user_secs[0][1] >= 1:
+            await SlothCurrency.update_user_money(author.id, -1)
+        else:
+            return await ctx.send(f"**You need 1łł to play the lottery, {author.mention}!**")
+
+        author = author
+        numbers = []
+        for x in range(3):
+            numbers.append(randint(1, 5))
+
+        string_numbers = [str(i) for i in numbers]
+        if g1 == numbers[0] and g2 == numbers[1] and g3 == numbers[2]:
+            await ctx.send(f'**{author.mention} You won! Congratulations on winning the lottery with the numbers ({g1}, {g2},{g3})!🍃+500łł!**')
+            if not await SlothCurrency.get_user_currency(author.id):
+
+                await SlothCurrency.insert_user_currency(author.id, current_ts - 61)
+            await SlothCurrency.update_user_money(author.id, 500)
+
+        else:
+            await ctx.send(
+                f"**{author.mention}, better luck next time... You guessed {g1}, {g2}, {g3}...\nThe numbers were:** `{', '.join(string_numbers)}`")
+
+    
+    @commands.command(aliases=['dice'])
+    async def roll(self, ctx, sides = None):
+        """ Roll a dice with the number of faces given.
+        :param sides: The number of faces to roll. """
+        
+        await ctx.message.delete()
+
+        if not sides:
+            sides = 6
+
+        try:
+            sides = int(sides)
+        except ValueError:
+            sides = 6
+
+        if sides > 1000000000000 or sides < 0:
+            return await ctx.send("**Enter a valid integer value**", delete_after=3)
+        
+        embed = discord.Embed(color=ctx.author.color, title=f":game_die: **YOU GOT:** **{randint(1, sides)}** :game_die: `(1 - {sides})`",
+            timestamp=ctx.message.created_at)
+        embed.set_footer(text=f"Rolled by {ctx.author}", icon_url=ctx.author.display_avatar)
+        await ctx.send(embed=embed)
+
+
+    @commands.command(aliases=['coin'])
+    async def flipcoin(self, ctx):
+        """ Flips a coin. """
+        
+        await ctx.message.delete()
+        choices = ['You got Heads', 'You got Tails']
+        em = discord.Embed(color=ctx.author.color, title='Coinflip:', description=choice(choices),
+                           timestamp=ctx.message.created_at)
+        em.set_author(name=ctx.author, icon_url=ctx.author.display_avatar)
+        await ctx.send(embed=em)
 
 def setup(client) -> None:
     """ Cog's setup function. """
