@@ -7,7 +7,7 @@ from extra import utils
 import os
 import json
 
-from typing import List, Union, Dict, Optional
+from typing import List, Union, Dict, Optional, Any
 import asyncio
 from extra.minigames.view import TicTacToeView, FlagsGameView
 from random import randint, sample, shuffle
@@ -102,7 +102,7 @@ class Games(commands.Cog):
         await self.generate_flag_game(ctx=ctx, points=0, round=0, flags=flags)
 
 
-    async def generate_flag_game(self, ctx: commands.Context, message: Optional[discord.Message] = None, points: int = 0, round: int = 0, flags: List = None):
+    async def generate_flag_game(self, ctx: commands.Context, message: Optional[discord.Message] = None, points: int = 0, round: int = 0, flags: List[Any] = None):
         # Open JSON file
         json_flags = json.load(open("extra/random/json/flag_game.json"))
 
