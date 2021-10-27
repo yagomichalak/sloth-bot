@@ -246,7 +246,6 @@ class MoveObjectGameView(discord.ui.View):
                 if item_x - 1 > 0:
 
                     self.inserted['item'] = (item_x+xadd, item_y+yadd, item_emj)
-                    print((item_x+xadd, item_y+yadd, item_emj))
                     moved = True
                 else:
                     moved = None
@@ -255,7 +254,6 @@ class MoveObjectGameView(discord.ui.View):
                 if item_x + 1 < self.columns - 1:
 
                     self.inserted['item'] = (item_x+xadd, item_y+yadd, item_emj)
-                    print((item_x+xadd, item_y+yadd, item_emj))
                     moved = True
                 else:
                     moved = None
@@ -264,7 +262,6 @@ class MoveObjectGameView(discord.ui.View):
                 if item_y + 1 < self.rows - 1:
 
                     self.inserted['item'] = (item_x+xadd, item_y+yadd, item_emj)
-                    print((item_x+xadd, item_y+yadd, item_emj))
                     moved = True
                 else:
                     moved = None
@@ -273,7 +270,6 @@ class MoveObjectGameView(discord.ui.View):
                 if item_y - 1 > 0:
 
                     self.inserted['item'] = (item_x+xadd, item_y+yadd, item_emj)
-                    print((item_x+xadd, item_y+yadd, item_emj))
                     moved = True
                 else:
                     moved = None
@@ -297,7 +293,7 @@ class FlagsGameView(discord.ui.View):
         self.countries_names = countries_names
         self.points = points
         self.round = round
-        self.cog = self.client.get_cog('Game')
+        self.cog = self.client.get_cog('Games')
         self.used = False
 
         counter: int = 0

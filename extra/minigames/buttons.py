@@ -5,7 +5,6 @@ from typing import Dict, List, Tuple, Optional
 
 import asyncio
 
-from discord.interactions import Interaction
 
 class TicTacToeButton(discord.ui.Button):
     """ Button for the TicTacToe game. """
