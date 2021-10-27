@@ -2,15 +2,13 @@ import discord
 from discord.ext import commands
 
 from extra.minigames.view import MoveObjectGameView, TicTacToeView, FlagsGameView
-from random import randint, sample, shuffle, choice
 from extra import utils
+
+from random import randint, sample, shuffle, choice
 import os
 import json
-
 from typing import List, Union, Dict, Optional, Any
 import asyncio
-from extra.minigames.view import TicTacToeView, FlagsGameView
-from random import randint, sample, shuffle
 
 from extra.slothclasses.player import Player
 

@@ -1139,7 +1139,7 @@ class Moderation(*moderation_cogs):
 			except Exception as e:
 				pass
 			try:
-				await member.ban(delete_message_days=7, reason=reason)
+				await member.ban(delete_message_days=1, reason=reason)
 				await member.unban(reason=reason)
 			except Exception:
 				await ctx.send('**You cannot do that!**', delete_after=3)
