@@ -317,7 +317,7 @@ class Games(commands.Cog):
             return await ctx.reply("**You don't even have a Profile!**")
 
         if user_currency[0][1] < bet:
-            return await ctx.reply(f"**You don't have `{bet} bolts` to bet!**")
+            return await ctx.reply(f"**You don't have `{bet} leaves` to bet!**")
 
         side_options: Dict[str, List[str]] = {
             'Tail': {'aliases': ['t', 'tail', 'tails'], 'image': 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/2021_Native_American_%241_Coin_Reverse.png/220px-2021_Native_American_%241_Coin_Reverse.png'},
@@ -336,14 +336,14 @@ class Games(commands.Cog):
         embed: discord.Embed = discord.Embed(
             description = f"It's **{coin_var}**",
         )
-        embed.add_field(name=f"Amount {win_var}", value=f"{bet} bolts", inline=False)
+        embed.add_field(name=f"Amount {win_var}", value=f"{bet} leaves", inline=False)
         if win_var == 'won':
             embed.color=discord.Color.green()
-            embed.add_field(name="New balance", value=f"{user_currency[0][1]+bet} bolts")
+            embed.add_field(name="New balance", value=f"{user_currency[0][1]+bet} leaves")
             await SlothCurrency.update_user_money(member.id, bet)
         else:
             embed.color=discord.Color.dark_red()
-            embed.add_field(name="New balance", value=f"{user_currency[0][1]-bet} bolts")
+            embed.add_field(name="New balance", value=f"{user_currency[0][1]-bet} leaves")
             await SlothCurrency.update_user_money(member.id, -bet)
 
 
@@ -354,7 +354,7 @@ class Games(commands.Cog):
 
 
     @commands.command()
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.cooldown(1, 15, commands.BucketType.user)
     async def slots(self, ctx, bet: int = None) -> None:
         """ Command for playing Slots.
         :param bet: The amount you wanna bet. """
@@ -389,7 +389,7 @@ class Games(commands.Cog):
         if bet < 0:
             return await ctx.reply(f"**You must inform a positive amount to bet, {author.mention}**")
 
-        slots = ['bus', 'train', 'horse', 'heart', 'monkey', 'cow']
+        slots = ['bus', 'train', 'horse', 'heart', 'monkey', 'cow', 'parrot', 'leaves', 'money_mouth']
         slot1 = slots[randint(0, 5)]
         slot2 = slots[randint(0, 5)]
         slot3 = slots[randint(0, 5)]
@@ -420,7 +420,7 @@ class Games(commands.Cog):
             await SlothCurrency.update_user_money(ctx.author.id, 3 * bet)
             return await msg.edit(embed = won)
 
-        if slot1 == slot2 or slot2 == slot3:
+        if slot1 == slot2:
             await SlothCurrency.update_user_money(ctx.author.id, 2 * bet)
             return await msg.edit(embed = ok)
 
