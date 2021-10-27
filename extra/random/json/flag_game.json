@@ -1,0 +1,1272 @@
+[
+    {
+        "code": "ad",
+        "name": "Andorra",
+        "link": "https://i.imgur.com/V6ZOB7X.png"
+    },
+    {
+        "code": "ae",
+        "name": "United Arab Emirates",
+        "link": "https://i.imgur.com/35gfqqA.png"
+    },
+    {
+        "code": "af",
+        "name": "Afghanistan",
+        "link": "https://i.imgur.com/aVBjrI4.png"
+    },
+    {
+        "code": "ag",
+        "name": "Antigua and Barbuda",
+        "link": "https://i.imgur.com/DOrqBmu.png"
+    },
+    {
+        "code": "ai",
+        "name": "Anguilla",
+        "link": "https://i.imgur.com/ixT4qjE.png"
+    },
+    {
+        "code": "al",
+        "name": "Albania",
+        "link": "https://i.imgur.com/zgsdB4m.png"
+    },
+    {
+        "code": "am",
+        "name": "Armenia",
+        "link": "https://i.imgur.com/TqFz5IZ.png"
+    },
+    {
+        "code": "ao",
+        "name": "Angola",
+        "link": "https://i.imgur.com/0277VUr.png"
+    },
+    {
+        "code": "aq",
+        "name": "Antarctica",
+        "link": "https://i.imgur.com/F44DshV.png"
+    },
+    {
+        "code": "ar",
+        "name": "Argentina",
+        "link": "https://i.imgur.com/kaLYDbI.png"
+    },
+    {
+        "code": "as",
+        "name": "American Samoa",
+        "link": "https://i.imgur.com/xLAiRyx.png"
+    },
+    {
+        "code": "at",
+        "name": "Austria",
+        "link": "https://i.imgur.com/7L2SkWG.png"
+    },
+    {
+        "code": "au",
+        "name": "Australia",
+        "link": "https://i.imgur.com/ZrJpmYr.png"
+    },
+    {
+        "code": "aw",
+        "name": "Aruba",
+        "link": "https://i.imgur.com/bsktCPA.png"
+    },
+    {
+        "code": "ax",
+        "name": "\u00c5land Islands",
+        "link": "https://i.imgur.com/UADfMEl.png"
+    },
+    {
+        "code": "az",
+        "name": "Azerbaijan",
+        "link": "https://i.imgur.com/RGAFZu8.png"
+    },
+    {
+        "code": "ba",
+        "name": "Bosnia and Herzegovina",
+        "link": "https://i.imgur.com/HFAcjND.png"
+    },
+    {
+        "code": "bb",
+        "name": "Barbados",
+        "link": "https://i.imgur.com/qK3eJGZ.png"
+    },
+    {
+        "code": "bd",
+        "name": "Bangladesh",
+        "link": "https://i.imgur.com/C1eY46W.png"
+    },
+    {
+        "code": "bf",
+        "name": "Burkina Faso",
+        "link": "https://i.imgur.com/lNTyA2U.png"
+    },
+    {
+        "code": "bg",
+        "name": "Bulgaria",
+        "link": "https://i.imgur.com/1TTlEs3.png"
+    },
+    {
+        "code": "bh",
+        "name": "Bahrain",
+        "link": "https://i.imgur.com/X9D7qvz.png"
+    },
+    {
+        "code": "bi",
+        "name": "Burundi",
+        "link": "https://i.imgur.com/cSEz3TS.png"
+    },
+    {
+        "code": "bj",
+        "name": "Benin",
+        "link": "https://i.imgur.com/zuXFnAk.png"
+    },
+    {
+        "code": "bl",
+        "name": "Saint Barth\u00e9lemy",
+        "link": "https://i.imgur.com/RbI7uO2.png"
+    },
+    {
+        "code": "bm",
+        "name": "Bermuda",
+        "link": "https://i.imgur.com/kDLPUAk.png"
+    },
+    {
+        "code": "bn",
+        "name": "Brunei",
+        "link": "https://i.imgur.com/ssCLZ9K.png"
+    },
+    {
+        "code": "bo",
+        "name": "Bolivia",
+        "link": "https://i.imgur.com/eFhQR3A.png"
+    },
+    {
+        "code": "bq",
+        "name": "Caribbean Netherlands",
+        "link": "https://i.imgur.com/98KdOUK.png"
+    },
+    {
+        "code": "br",
+        "name": "Brazil",
+        "link": "https://i.imgur.com/2RgTw7R.png"
+    },
+    {
+        "code": "bs",
+        "name": "Bahamas",
+        "link": "https://i.imgur.com/gXbfCrL.png"
+    },
+    {
+        "code": "bt",
+        "name": "Bhutan",
+        "link": "https://i.imgur.com/Ss89Bgb.png"
+    },
+    {
+        "code": "bv",
+        "name": "Bouvet Island",
+        "link": "https://i.imgur.com/aKz7lEG.png"
+    },
+    {
+        "code": "bw",
+        "name": "Botswana",
+        "link": "https://i.imgur.com/ZBPIBE4.png"
+    },
+    {
+        "code": "by",
+        "name": "Belarus",
+        "link": "https://i.imgur.com/JEuQPbP.png"
+    },
+    {
+        "code": "bz",
+        "name": "Belize",
+        "link": "https://i.imgur.com/3XmMtAJ.png"
+    },
+    {
+        "code": "ca",
+        "name": "Canada",
+        "link": "https://i.imgur.com/zptjAjM.png"
+    },
+    {
+        "code": "cc",
+        "name": "Cocos (Keeling) Islands",
+        "link": "https://i.imgur.com/QbFN9KF.png"
+    },
+    {
+        "code": "cd",
+        "name": "DR Congo",
+        "link": "https://i.imgur.com/LPtPvyv.png"
+    },
+    {
+        "code": "cg",
+        "name": "Republic of the Congo",
+        "link": "https://i.imgur.com/XUzW7xd.png"
+    },
+    {
+        "code": "ch",
+        "name": "Switzerland",
+        "link": "https://i.imgur.com/N2flLtm.png"
+    },
+    {
+        "code": "ci",
+        "name": "C\u00f4te d'Ivoire (Ivory Coast)",
+        "link": "https://i.imgur.com/vteGHAi.png"
+    },
+    {
+        "code": "ck",
+        "name": "Cook Islands",
+        "link": "https://i.imgur.com/k8YYMPT.png"
+    },
+    {
+        "code": "cl",
+        "name": "Chile",
+        "link": "https://i.imgur.com/rLR17xH.png"
+    },
+    {
+        "code": "cm",
+        "name": "Cameroon",
+        "link": "https://i.imgur.com/20khyTk.png"
+    },
+    {
+        "code": "cn",
+        "name": "China",
+        "link": "https://i.imgur.com/e1rEoKr.png"
+    },
+    {
+        "code": "co",
+        "name": "Colombia",
+        "link": "https://i.imgur.com/Tc8OxsL.png"
+    },
+    {
+        "code": "cr",
+        "name": "Costa Rica",
+        "link": "https://i.imgur.com/3HB9bCL.png"
+    },
+    {
+        "code": "cu",
+        "name": "Cuba",
+        "link": "https://i.imgur.com/IO5mrH5.png"
+    },
+    {
+        "code": "cv",
+        "name": "Cape Verde",
+        "link": "https://i.imgur.com/tmvk93H.png"
+    },
+    {
+        "code": "cw",
+        "name": "Cura\u00e7ao",
+        "link": "https://i.imgur.com/F9CQxR8.png"
+    },
+    {
+        "code": "cx",
+        "name": "Christmas Island",
+        "link": "https://i.imgur.com/dXvahUY.png"
+    },
+    {
+        "code": "cy",
+        "name": "Cyprus",
+        "link": "https://i.imgur.com/aNai1sH.png"
+    },
+    {
+        "code": "cz",
+        "name": "Czechia",
+        "link": "https://i.imgur.com/ii1siRU.png"
+    },
+    {
+        "code": "de",
+        "name": "Germany",
+        "link": "https://i.imgur.com/6d3NJRf.png"
+    },
+    {
+        "code": "dj",
+        "name": "Djibouti",
+        "link": "https://i.imgur.com/MLftbJn.png"
+    },
+    {
+        "code": "dk",
+        "name": "Denmark",
+        "link": "https://i.imgur.com/rRAL5kC.png"
+    },
+    {
+        "code": "dm",
+        "name": "Dominica",
+        "link": "https://i.imgur.com/6xG5rdm.png"
+    },
+    {
+        "code": "do",
+        "name": "Dominican Republic",
+        "link": "https://i.imgur.com/iQVEVfO.png"
+    },
+    {
+        "code": "ec",
+        "name": "Ecuador",
+        "link": "https://i.imgur.com/dPuLbWU.png"
+    },
+    {
+        "code": "ee",
+        "name": "Estonia",
+        "link": "https://i.imgur.com/1huaZv6.png"
+    },
+    {
+        "code": "eg",
+        "name": "Egypt",
+        "link": "https://i.imgur.com/qztBM0v.png"
+    },
+    {
+        "code": "eh",
+        "name": "Western Sahara",
+        "link": "https://i.imgur.com/Nzt5fqg.png"
+    },
+    {
+        "code": "er",
+        "name": "Eritrea",
+        "link": "https://i.imgur.com/eRCdIcD.png"
+    },
+    {
+        "code": "es",
+        "name": "Spain",
+        "link": "https://i.imgur.com/Q6DMriu.png"
+    },
+    {
+        "code": "et",
+        "name": "Ethiopia",
+        "link": "https://i.imgur.com/Y8srE1s.png"
+    },
+    {
+        "code": "fi",
+        "name": "Finland",
+        "link": "https://i.imgur.com/fuwc78M.png"
+    },
+    {
+        "code": "fj",
+        "name": "Fiji",
+        "link": "https://i.imgur.com/cIfTNrm.png"
+    },
+    {
+        "code": "fk",
+        "name": "Falkland Islands",
+        "link": "https://i.imgur.com/DHob9Av.png"
+    },
+    {
+        "code": "fm",
+        "name": "Micronesia",
+        "link": "https://i.imgur.com/JV42hkJ.png"
+    },
+    {
+        "code": "fo",
+        "name": "Faroe Islands",
+        "link": "https://i.imgur.com/OzrwSBr.png"
+    },
+    {
+        "code": "fr",
+        "name": "France",
+        "link": "https://i.imgur.com/KzP4lqz.png"
+    },
+    {
+        "code": "ga",
+        "name": "Gabon",
+        "link": "https://i.imgur.com/9xTKxfG.png"
+    },
+    {
+        "code": "gb-eng",
+        "name": "England",
+        "link": "https://i.imgur.com/4qGa7Im.png"
+    },
+    {
+        "code": "gb-nir",
+        "name": "Northern Ireland",
+        "link": "https://i.imgur.com/f0Tvc8X.png"
+    },
+    {
+        "code": "gb-sct",
+        "name": "Scotland",
+        "link": "https://i.imgur.com/HT07hqW.png"
+    },
+    {
+        "code": "gb-wls",
+        "name": "Wales",
+        "link": "https://i.imgur.com/I9CqvbK.png"
+    },
+    {
+        "code": "gb",
+        "name": "United Kingdom",
+        "link": "https://i.imgur.com/dYvVien.png"
+    },
+    {
+        "code": "gd",
+        "name": "Grenada",
+        "link": "https://i.imgur.com/mn8yPZf.png"
+    },
+    {
+        "code": "be",
+        "name": "Belgium",
+        "link": "https://i.imgur.com/dQaVY2s.png"
+    },
+    {
+        "code": "cf",
+        "name": "Central African Republic",
+        "link": "https://i.imgur.com/sWbjdFk.png"
+    },
+    {
+        "code": "dz",
+        "name": "Algeria",
+        "link": "https://i.imgur.com/rKElygH.png"
+    },
+    {
+        "code": "ge",
+        "name": "Georgia",
+        "link": "https://i.imgur.com/PqYE1Xu.png"
+    },
+    {
+        "code": "hu",
+        "name": "Hungary",
+        "link": "https://i.imgur.com/QD0JAWA.png"
+    },
+    {
+        "code": "kp",
+        "name": "North Korea",
+        "link": "https://i.imgur.com/PGwYnuV.png"
+    },
+    {
+        "code": "mg",
+        "name": "Madagascar",
+        "link": "https://imgur.com/v1z0fJt"
+    },
+    {
+        "code": "nf",
+        "name": "Norfolk Island",
+        "link": "https://i.imgur.com/OYLAiW8.png"
+    },
+    {
+        "code": "pt",
+        "name": "Portugal",
+        "link": "https://i.imgur.com/nULmxfs.png"
+    },
+    {
+        "code": "tr",
+        "name": "Turkey",
+        "link": "https://i.imgur.com/nwdiWZl.png"
+    },
+    {
+        "code": "gf",
+        "name": "French Guiana",
+        "link": "https://i.imgur.com/FXsVdNX.png"
+    },
+    {
+        "code": "gg",
+        "name": "Guernsey",
+        "link": "https://i.imgur.com/UJCHPPJ.png"
+    },
+    {
+        "code": "gh",
+        "name": "Ghana",
+        "link": "https://i.imgur.com/SzkGE3r.png"
+    },
+    {
+        "code": "gi",
+        "name": "Gibraltar",
+        "link": "https://i.imgur.com/yiikbul.png"
+    },
+    {
+        "code": "gl",
+        "name": "Greenland",
+        "link": "https://i.imgur.com/0GfnTmL.png"
+    },
+    {
+        "code": "gm",
+        "name": "Gambia",
+        "link": "https://i.imgur.com/SJle8Is.png"
+    },
+    {
+        "code": "gn",
+        "name": "Guinea",
+        "link": "https://i.imgur.com/1wJtCrr.png"
+    },
+    {
+        "code": "gp",
+        "name": "Guadeloupe",
+        "link": "https://i.imgur.com/0eYHHFG.png"
+    },
+    {
+        "code": "gq",
+        "name": "Equatorial Guinea",
+        "link": "https://i.imgur.com/aAl5f4W.png"
+    },
+    {
+        "code": "gr",
+        "name": "Greece",
+        "link": "https://i.imgur.com/U1Xj8yY.png"
+    },
+    {
+        "code": "gs",
+        "name": "South Georgia",
+        "link": "https://i.imgur.com/adYc8SZ.png"
+    },
+    {
+        "code": "gt",
+        "name": "Guatemala",
+        "link": "https://i.imgur.com/44Pt9xE.png"
+    },
+    {
+        "code": "gu",
+        "name": "Guam",
+        "link": "https://i.imgur.com/xahxMi5.png"
+    },
+    {
+        "code": "gw",
+        "name": "Guinea-Bissau",
+        "link": "https://i.imgur.com/eXsu5FK.png"
+    },
+    {
+        "code": "gy",
+        "name": "Guyana",
+        "link": "https://i.imgur.com/ExbOumA.png"
+    },
+    {
+        "code": "hk",
+        "name": "Hong Kong",
+        "link": "https://i.imgur.com/6W4pD2t.png"
+    },
+    {
+        "code": "hm",
+        "name": "Heard Island and McDonald Islands",
+        "link": "https://i.imgur.com/R4kgoj5.png"
+    },
+    {
+        "code": "hn",
+        "name": "Honduras",
+        "link": "https://i.imgur.com/Dwc2znX.png"
+    },
+    {
+        "code": "hr",
+        "name": "Croatia",
+        "link": "https://i.imgur.com/9Tc0Wp2.png"
+    },
+    {
+        "code": "ht",
+        "name": "Haiti",
+        "link": "https://i.imgur.com/3HjuKn1.png"
+    },
+    {
+        "code": "id",
+        "name": "Indonesia",
+        "link": "https://i.imgur.com/HMjVDBs.png"
+    },
+    {
+        "code": "ie",
+        "name": "Ireland",
+        "link": "https://i.imgur.com/3RTKZBM.png"
+    },
+    {
+        "code": "il",
+        "name": "Israel",
+        "link": "https://i.imgur.com/LoM3srM.png"
+    },
+    {
+        "code": "im",
+        "name": "Isle of Man",
+        "link": "https://i.imgur.com/TOuUZh4.png"
+    },
+    {
+        "code": "in",
+        "name": "India",
+        "link": "https://i.imgur.com/OZCFRKl.png"
+    },
+    {
+        "code": "io",
+        "name": "British Indian Ocean Territory",
+        "link": "https://i.imgur.com/xF6djdL.png"
+    },
+    {
+        "code": "iq",
+        "name": "Iraq",
+        "link": "https://i.imgur.com/s4RILyL.png"
+    },
+    {
+        "code": "ir",
+        "name": "Iran",
+        "link": "https://i.imgur.com/TJLd8KE.png"
+    },
+    {
+        "code": "is",
+        "name": "Iceland",
+        "link": "https://i.imgur.com/xAXJqE8.png"
+    },
+    {
+        "code": "it",
+        "name": "Italy",
+        "link": "https://i.imgur.com/GOmoe0m.png"
+    },
+    {
+        "code": "je",
+        "name": "Jersey",
+        "link": "https://i.imgur.com/kBGC5Wc.png"
+    },
+    {
+        "code": "jm",
+        "name": "Jamaica",
+        "link": "https://i.imgur.com/Q5kOH1U.png"
+    },
+    {
+        "code": "jo",
+        "name": "Jordan",
+        "link": "https://i.imgur.com/0JYR1cK.png"
+    },
+    {
+        "code": "jp",
+        "name": "Japan",
+        "link": "https://i.imgur.com/uV1aiRr.png"
+    },
+    {
+        "code": "ke",
+        "name": "Kenya",
+        "link": "https://i.imgur.com/BtcsGTt.png"
+    },
+    {
+        "code": "kg",
+        "name": "Kyrgyzstan",
+        "link": "https://i.imgur.com/YpcjxUb.png"
+    },
+    {
+        "code": "kh",
+        "name": "Cambodia",
+        "link": "https://i.imgur.com/SOJOFLe.png"
+    },
+    {
+        "code": "ki",
+        "name": "Kiribati",
+        "link": "https://imgur.com/09NC4Ia"
+    },
+    {
+        "code": "km",
+        "name": "Comoros",
+        "link": "https://i.imgur.com/E64XtOM.png"
+    },
+    {
+        "code": "kn",
+        "name": "Saint Kitts and Nevis",
+        "link": "https://imgur.com/27YXaOv"
+    },
+    {
+        "code": "kr",
+        "name": "South Korea",
+        "link": "https://i.imgur.com/A19CQLh.png"
+    },
+    {
+        "code": "kw",
+        "name": "Kuwait",
+        "link": "https://i.imgur.com/GfkdirN.png"
+    },
+    {
+        "code": "ky",
+        "name": "Cayman Islands",
+        "link": "https://i.imgur.com/j77ZoeM.png"
+    },
+    {
+        "code": "kz",
+        "name": "Kazakhstan",
+        "link": "https://i.imgur.com/f2cvOvA.png"
+    },
+    {
+        "code": "la",
+        "name": "Laos",
+        "link": "https://i.imgur.com/7FvzDJN.png"
+    },
+    {
+        "code": "lb",
+        "name": "Lebanon",
+        "link": "https://i.imgur.com/8mvdvyp.png"
+    },
+    {
+        "code": "lc",
+        "name": "Saint Lucia",
+        "link": "https://i.imgur.com/Ciksc1m.png"
+    },
+    {
+        "code": "li",
+        "name": "Liechtenstein",
+        "link": "https://i.imgur.com/8C4wkDt.png"
+    },
+    {
+        "code": "lk",
+        "name": "Sri Lanka",
+        "link": "https://i.imgur.com/Di7GYih.png"
+    },
+    {
+        "code": "lr",
+        "name": "Liberia",
+        "link": "https://i.imgur.com/eoTVR0r.png"
+    },
+    {
+        "code": "ls",
+        "name": "Lesotho",
+        "link": "https://i.imgur.com/Pxbi4Sa.png"
+    },
+    {
+        "code": "lt",
+        "name": "Lithuania",
+        "link": "https://i.imgur.com/SxVh8ym.png"
+    },
+    {
+        "code": "lu",
+        "name": "Luxembourg",
+        "link": "https://i.imgur.com/wsJBbfJ.png"
+    },
+    {
+        "code": "lv",
+        "name": "Latvia",
+        "link": "https://imgur.com/xK4SPua.png"
+    },
+    {
+        "code": "ly",
+        "name": "Libya",
+        "link": "https://i.imgur.com/NLw4qnk.png"
+    },
+    {
+        "code": "ma",
+        "name": "Morocco",
+        "link": "https://i.imgur.com/Lf97PMq.png"
+    },
+    {
+        "code": "mc",
+        "name": "Monaco",
+        "link": "https://i.imgur.com/NVaahoZ.png"
+    },
+    {
+        "code": "md",
+        "name": "Moldova",
+        "link": "https://i.imgur.com/1s2T1zh.png"
+    },
+    {
+        "code": "me",
+        "name": "Montenegro",
+        "link": "https://i.imgur.com/OHZmIif.png"
+    },
+    {
+        "code": "mf",
+        "name": "Saint Martin",
+        "link": "https://i.imgur.com/1HQAWrX.png"
+    },
+    {
+        "code": "mh",
+        "name": "Marshall Islands",
+        "link": "https://i.imgur.com/iDtqwNl.png"
+    },
+    {
+        "code": "mk",
+        "name": "North Macedonia",
+        "link": "https://i.imgur.com/qANUs4g.png"
+    },
+    {
+        "code": "ml",
+        "name": "Mali",
+        "link": "https://imgur.com/gpFddZX"
+    },
+    {
+        "code": "mm",
+        "name": "Myanmar",
+        "link": "https://i.imgur.com/sNsb5LC.png"
+    },
+    {
+        "code": "mn",
+        "name": "Mongolia",
+        "link": "https://i.imgur.com/UiqZlVk.png"
+    },
+    {
+        "code": "mo",
+        "name": "Macau",
+        "link": "https://i.imgur.com/MqT3OY4.png"
+    },
+    {
+        "code": "mp",
+        "name": "Northern Mariana Islands",
+        "link": "https://i.imgur.com/MzH3gG1.png"
+    },
+    {
+        "code": "mq",
+        "name": "Martinique",
+        "link": "https://i.imgur.com/pigJCHd.png"
+    },
+    {
+        "code": "mr",
+        "name": "Mauritania",
+        "link": "https://i.imgur.com/ygEbwtT.png"
+    },
+    {
+        "code": "ms",
+        "name": "Montserrat",
+        "link": "https://i.imgur.com/XtG9IK5.png"
+    },
+    {
+        "code": "mt",
+        "name": "Malta",
+        "link": "https://i.imgur.com/aRMFeKO.png"
+    },
+    {
+        "code": "mu",
+        "name": "Mauritius",
+        "link": "https://i.imgur.com/0jEhRJI.png"
+    },
+    {
+        "code": "mv",
+        "name": "Maldives",
+        "link": "https://i.imgur.com/ATAkGqj.png"
+    },
+    {
+        "code": "mw",
+        "name": "Malawi",
+        "link": "https://i.imgur.com/bpKJ20N.png"
+    },
+    {
+        "code": "mx",
+        "name": "Mexico",
+        "link": "https://i.imgur.com/Gd9bBeT.png"
+    },
+    {
+        "code": "my",
+        "name": "Malaysia",
+        "link": "https://i.imgur.com/hI8Lovd.png"
+    },
+    {
+        "code": "mz",
+        "name": "Mozambique",
+        "link": "https://i.imgur.com/umAELFL.png"
+    },
+    {
+        "code": "na",
+        "name": "Namibia",
+        "link": "https://i.imgur.com/1ftfQSE.png"
+    },
+    {
+        "code": "nc",
+        "name": "New Caledonia",
+        "link": "https://i.imgur.com/nMCAr7H.png"
+    },
+    {
+        "code": "ne",
+        "name": "Niger",
+        "link": "https://i.imgur.com/11CBGpL.png"
+    },
+    {
+        "code": "ng",
+        "name": "Nigeria",
+        "link": "https://i.imgur.com/mGXVsiB.png"
+    },
+    {
+        "code": "ni",
+        "name": "Nicaragua",
+        "link": "https://i.imgur.com/uyESYKE.png"
+    },
+    {
+        "code": "nl",
+        "name": "Netherlands",
+        "link": "https://i.imgur.com/8zH3BDx.png"
+    },
+    {
+        "code": "no",
+        "name": "Norway",
+        "link": "https://i.imgur.com/ZBoemaG.png"
+    },
+    {
+        "code": "np",
+        "name": "Nepal",
+        "link": "https://i.imgur.com/BMsL2w0.png"
+    },
+    {
+        "code": "nr",
+        "name": "Nauru",
+        "link": "https://i.imgur.com/PKxATVT.png"
+    },
+    {
+        "code": "nu",
+        "name": "Niue",
+        "link": "https://i.imgur.com/xqgHQsi.png"
+    },
+    {
+        "code": "nz",
+        "name": "New Zealand",
+        "link": "https://i.imgur.com/WKokjaF.png"
+    },
+    {
+        "code": "om",
+        "name": "Oman",
+        "link": "https://i.imgur.com/4Drr1v3.png"
+    },
+    {
+        "code": "pa",
+        "name": "Panama",
+        "link": "https://i.imgur.com/dIbA8dJ.png"
+    },
+    {
+        "code": "pe",
+        "name": "Peru",
+        "link": "https://i.imgur.com/GJpCBtb.png"
+    },
+    {
+        "code": "pf",
+        "name": "French Polynesia",
+        "link": "https://i.imgur.com/OB3JlXb.png"
+    },
+    {
+        "code": "pg",
+        "name": "Papua New Guinea",
+        "link": "https://i.imgur.com/rhl0xGr.png"
+    },
+    {
+        "code": "ph",
+        "name": "Philippines",
+        "link": "https://i.imgur.com/o20vPDS.png"
+    },
+    {
+        "code": "pk",
+        "name": "Pakistan",
+        "link": "https://i.imgur.com/o77o5jp.png"
+    },
+    {
+        "code": "pl",
+        "name": "Poland",
+        "link": "https://i.imgur.com/W0w2NGu.png"
+    },
+    {
+        "code": "pm",
+        "name": "Saint Pierre and Miquelon",
+        "link": "https://i.imgur.com/uSJgJmn.png"
+    },
+    {
+        "code": "pn",
+        "name": "Pitcairn Islands",
+        "link": "https://i.imgur.com/s9tG1OH.png"
+    },
+    {
+        "code": "pr",
+        "name": "Puerto Rico",
+        "link": "https://i.imgur.com/XpiR016.png"
+    },
+    {
+        "code": "ps",
+        "name": "Palestine",
+        "link": "https://i.imgur.com/NxOCHN8.png"
+    },
+    {
+        "code": "pw",
+        "name": "Palau",
+        "link": "https://i.imgur.com/F6l8115.png"
+    },
+    {
+        "code": "py",
+        "name": "Paraguay",
+        "link": "https://i.imgur.com/n1AKYiZ.png"
+    },
+    {
+        "code": "qa",
+        "name": "Qatar",
+        "link": "https://i.imgur.com/ex7eOeh.png"
+    },
+    {
+        "code": "re",
+        "name": "Réunion",
+        "link": "https://i.imgur.com/aLTn7Wx.png"
+    },
+    {
+        "code": "ro",
+        "name": "Romania",
+        "link": "https://i.imgur.com/Z2mZsf0.png"
+    },
+    {
+        "code": "rs",
+        "name": "Serbia",
+        "link": "https://i.imgur.com/U2C0Jnj.png"
+    },
+    {
+        "code": "ru",
+        "name": "Russia",
+        "link": "https://i.imgur.com/Qqj1ZpG.png"
+    },
+    {
+        "code": "rw",
+        "name": "Rwanda",
+        "link": "https://i.imgur.com/G0WkJlR.png"
+    },
+    {
+        "code": "sa",
+        "name": "Saudi Arabia",
+        "link": "https://i.imgur.com/LLy8qBH.png"
+    },
+    {
+        "code": "sb",
+        "name": "Solomon Islands",
+        "link": "https://i.imgur.com/v2TnA61.png"
+    },
+    {
+        "code": "sc",
+        "name": "Seychelles",
+        "link": "https://i.imgur.com/qJg8Lg5.png"
+    },
+    {
+        "code": "sd",
+        "name": "Sudan",
+        "link": "https://i.imgur.com/akEpttr.png"
+    },
+    {
+        "code": "se",
+        "name": "Sweden",
+        "link": "https://i.imgur.com/rXACqc9.png"
+    },
+    {
+        "code": "sg",
+        "name": "Singapore",
+        "link": "https://i.imgur.com/npLGzpE.png"
+    },
+    {
+        "code": "sh",
+        "name": "Saint Helena, Ascension and Tristan da Cunha",
+        "link": "https://i.imgur.com/09GPeDG.png"
+    },
+    {
+        "code": "si",
+        "name": "Slovenia",
+        "link": "https://i.imgur.com/3YnqXHr.png"
+    },
+    {
+        "code": "sj",
+        "name": "Svalbard and Jan Mayen",
+        "link": "https://i.imgur.com/n85ui6Z.png"
+    },
+    {
+        "code": "sk",
+        "name": "Slovakia",
+        "link": "https://i.imgur.com/D6hbvd1.png"
+    },
+    {
+        "code": "sl",
+        "name": "Sierra Leone",
+        "link": "https://i.imgur.com/l6dGCuM.png"
+    },
+    {
+        "code": "sm",
+        "name": "San Marino",
+        "link": "https://i.imgur.com/HIG94Ex.png"
+    },
+    {
+        "code": "sn",
+        "name": "Senegal",
+        "link": "https://i.imgur.com/fqXuRq3.png"
+    },
+    {
+        "code": "so",
+        "name": "Somalia",
+        "link": "https://i.imgur.com/z6vN6xW.png"
+    },
+    {
+        "code": "sr",
+        "name": "Suriname",
+        "link": "https://i.imgur.com/uwem9zl.png"
+    },
+    {
+        "code": "ss",
+        "name": "South Sudan",
+        "link": "https://i.imgur.com/EfQQISM.png"
+    },
+    {
+        "code": "st",
+        "name": "S\u00e3o Tom\u00e9 and Pr\u00edncipe",
+        "link": "https://i.imgur.com/ourLVlJ.png"
+    },
+    {
+        "code": "sv",
+        "name": "El Salvador",
+        "link": "https://i.imgur.com/FYYx3Se.png"
+    },
+    {
+        "code": "sx",
+        "name": "Sint Maarten",
+        "link": "https://i.imgur.com/IAg8BOh.png"
+    },
+    {
+        "code": "sy",
+        "name": "Syria",
+        "link": "https://i.imgur.com/WBDTtS4.png"
+    },
+    {
+        "code": "sz",
+        "name": "Eswatini (Swaziland)",
+        "link": "https://i.imgur.com/gWIfO1z.png"
+    },
+    {
+        "code": "tc",
+        "name": "Turks and Caicos Islands",
+        "link": "https://i.imgur.com/Vz26Sgl.png"
+    },
+    {
+        "code": "td",
+        "name": "Chad",
+        "link": "https://i.imgur.com/Z1M7bS9.png"
+    },
+    {
+        "code": "tf",
+        "name": "French Southern and Antarctic Lands",
+        "link": "https://i.imgur.com/KHxOK2i.png"
+    },
+    {
+        "code": "tg",
+        "name": "Togo",
+        "link": "https://i.imgur.com/TjOpX1d.png"
+    },
+    {
+        "code": "th",
+        "name": "Thailand",
+        "link": "https://i.imgur.com/8rU0BsS.png"
+    },
+    {
+        "code": "tj",
+        "name": "Tajikistan",
+        "link": "https://i.imgur.com/YKVWuRf.png"
+    },
+    {
+        "code": "tk",
+        "name": "Tokelau",
+        "link": "https://i.imgur.com/qTXnwaY.png"
+    },
+    {
+        "code": "tl",
+        "name": "Timor-Leste",
+        "link": "https://i.imgur.com/WCGEshj.png"
+    },
+    {
+        "code": "tm",
+        "name": "Turkmenistan",
+        "link": "https://i.imgur.com/t90sYmL.png"
+    },
+    {
+        "code": "tn",
+        "name": "Tunisia",
+        "link": "https://i.imgur.com/FPjPFaA.png"
+    },
+    {
+        "code": "to",
+        "name": "Tonga",
+        "link": "https://i.imgur.com/7sbmoCD.png"
+    },
+    {
+        "code": "tt",
+        "name": "Trinidad and Tobago",
+        "link": "https://i.imgur.com/H3tanpJ.png"
+    },
+    {
+        "code": "tv",
+        "name": "Tuvalu",
+        "link": "https://i.imgur.com/xEpJTun.png"
+    },
+    {
+        "code": "tw",
+        "name": "Taiwan",
+        "link": "https://i.imgur.com/HCqkkoU.png"
+    },
+    {
+        "code": "tz",
+        "name": "Tanzania",
+        "link": "https://i.imgur.com/GEO9Q1X.png"
+    },
+    {
+        "code": "ua",
+        "name": "Ukraine",
+        "link": "https://i.imgur.com/HBomF4v.png"
+    },
+    {
+        "code": "ug",
+        "name": "Uganda",
+        "link": "https://i.imgur.com/sF7iDFl.png"
+    },
+    {
+        "code": "um",
+        "name": "United States Minor Outlying Islands",
+        "link": "https://i.imgur.com/W9EHEje.png"
+    },
+    {
+        "code": "us",
+        "name": "United States",
+        "link": "https://i.imgur.com/haiHHaX.png"
+    },
+    {
+        "code": "uy",
+        "name": "Uruguay",
+        "link": "https://i.imgur.com/ipKWMGY.png"
+    },
+    {
+        "code": "uz",
+        "name": "Uzbekistan",
+        "link": "https://i.imgur.com/hPm3mdv.png"
+    },
+    {
+        "code": "va",
+        "name": "Vatican City (Holy See)",
+        "link": "https://i.imgur.com/PojpLDk.png"
+    },
+    {
+        "code": "vc",
+        "name": "Saint Vincent and the Grenadines",
+        "link": "https://i.imgur.com/DfJsiq2.png"
+    },
+    {
+        "code": "ve",
+        "name": "Venezuela",
+        "link": "https://i.imgur.com/k4atsdO.png"
+    },
+    {
+        "code": "vg",
+        "name": "British Virgin Islands",
+        "link": "https://i.imgur.com/cvKeJUk.png"
+    },
+    {
+        "code": "vi",
+        "name": "United States Virgin Islands",
+        "link": "https://i.imgur.com/aAJ8nKC.png"
+    },
+    {
+        "code": "vn",
+        "name": "Vietnam",
+        "link": "https://i.imgur.com/Tii1R85.png"
+    },
+    {
+        "code": "vu",
+        "name": "Vanuatu",
+        "link": "https://i.imgur.com/YvmdjvH.png"
+    },
+    {
+        "code": "wf",
+        "name": "Wallis and Futuna",
+        "link": "https://i.imgur.com/qV3TiYv.png"
+    },
+    {
+        "code": "ws",
+        "name": "Samoa",
+        "link": "https://i.imgur.com/6cemySm.png"
+    },
+    {
+        "code": "xk",
+        "name": "Kosovo",
+        "link": "https://i.imgur.com/HsJOkoh.png"
+    },
+    {
+        "code": "ye",
+        "name": "Yemen",
+        "link": "https://i.imgur.com/wl3gp73.png"
+    },
+    {
+        "code": "yt",
+        "name": "Mayotte",
+        "link": "https://i.imgur.com/GAH0ilV.png"
+    },
+    {
+        "code": "za",
+        "name": "South Africa",
+        "link": "https://i.imgur.com/uK778Fw.png"
+    },
+    {
+        "code": "zm",
+        "name": "Zambia",
+        "link": "https://imgur.com/XKgYlfR.png"
+    },
+    {
+        "code": "zw",
+        "name": "Zimbabwe",
+        "link": "https://i.imgur.com/qshVDt4.png"
+    }
+]
