@@ -1,8 +1,16 @@
 import discord
 from discord.ext import commands
 
-from extra.minigames.view import MoveObjectGameView, TicTacToeView
+from extra.minigames.view import MoveObjectGameView, TicTacToeView, FlagsGameView
+from random import randint, sample, shuffle
+from extra import utils
+import os
+import json
 
+from typing import List, Union, Dict, Optional
+import asyncio
+from extra.minigames.view import TicTacToeView, FlagsGameView
+from random import randint, sample, shuffle
 
 class Games(commands.Cog):
     """ A category for a minigames. """
@@ -81,6 +89,96 @@ class Games(commands.Cog):
         await ctx.send(embed=embed, view=view)
         
 
+    @commands.command(aliases=['flag', 'flag_game', 'flags'])
+    @commands.cooldown(1, 60, commands.BucketType.user)
+    async def flag_quiz(self, ctx) -> None:
+        """ Plays Country Flags Quiz"""
+        
+        json_flags = json.load(open("extra/random/json/flag_game.json"))
+        
+        # Select twenty unique flags
+        flags = [json_flags[number] for number in sample(range(0, len(json_flags)), 20)]
+
+        await self.generate_flag_game(ctx=ctx, points=0, round=0, flags=flags)
+
+
+    async def generate_flag_game(self, ctx: commands.Context, message: Optional[discord.Message] = None, points: int = 0, round: int = 0, flags: List = None):
+        # Open JSON file
+        json_flags = json.load(open("extra/random/json/flag_game.json"))
+
+        # Creates the name options
+        countries_options = []
+
+        # Gets three random countries name
+        while len(countries_options) != 3:
+            name = json_flags[randint(0, len(json_flags) - 1)]['name']
+            if name + '0' not in countries_options and name != flags[round]['name']:
+                countries_options.append(name + '0')
+        
+        countries_options.append(flags[round]['name'] + '1')
+        shuffle(countries_options)
+
+        # Game embed
+        embed = discord.Embed(
+            title='__Guess the flag__',
+            description= f"\u200b\n**🪙 Points: {points}**",
+            colour=1,
+        )
+        embed.set_image(url=flags[round]['link'] + ".png")
+        embed.set_author(name=ctx.author, icon_url=ctx.author.display_avatar)
+        embed.set_footer(text=f"Round {round + 1} of 20")
+
+        # Creates the buttons
+        view = FlagsGameView(ctx=ctx, client=self.client, countries_names=countries_options, flags=flags, points=points, round=round)
+    
+        if message:
+            await message.edit('\u200b', embed=embed, view=view)  
+        else:
+            message = await ctx.send('\u200b', embed=embed, view=view) 
+
+        await view.wait()
+
+        # Timeout
+        if not view.used:
+            view.stop()
+
+            # Shows the correct button
+            correct_button = [button for button in view.children if button.label == flags[round]['name']]
+            correct_button[0].style = discord.ButtonStyle.primary
+
+            embed.description = f"\n** 🪙 Points: {points}**\n\n**🔺 Timeout!**"
+            
+            await message.edit('\u200b', embed=embed, view=view)    
+
+            await asyncio.sleep(1)
+
+            if round >= 19:
+                return await self.end_flag_game(ctx=ctx, message=message, member=ctx.message.author, points=points)
+    
+            await self.generate_flag_game(ctx=ctx, message=message, points=points, round=round + 1, flags=flags)
+
+
+    async def end_flag_game(self, ctx: commands.Context, message: discord.Message, member: discord.Member, points: int):
+        # Generates the end game embed
+        embed = discord.Embed(
+            title='__Guess the flag__',
+            description= f"✅ Correct Answers: {points}/20.",
+        )
+        embed.set_author(name=member, icon_url=member.display_avatar)
+
+        await message.edit('\u200b', embed=embed, view=None)
+
+
+    #=== Flag games settings ===#
+    @commands.has_permissions(administrator=True)
+    @commands.command(hidden=True)
+    async def check_flags(self, ctx) -> None:
+        """ Shows all flags and their names. This command is used to check the link of the images"""
+        json_flags = json.load(open("extra/random/json/flag_game.json", encoding='utf-8'))
+        for flag in json_flags:
+            embed = discord.Embed()
+            embed.set_image(url=flag['link'] + '.png')
+            await ctx.send(flag['name'], embed=embed)
 
 def setup(client) -> None:
     """ Cog's setup function. """

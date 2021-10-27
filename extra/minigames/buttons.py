@@ -1,7 +1,11 @@
 import discord
 from discord.ext import commands
 
-from typing import List, Tuple
+from typing import Dict, List, Tuple, Optional
+
+import asyncio
+
+from discord.interactions import Interaction
 
 class TicTacToeButton(discord.ui.Button):
     """ Button for the TicTacToe game. """
@@ -95,3 +99,66 @@ class TicTacToeButton(discord.ui.Button):
                 return True
 
         return False
+
+class FlagsGameButton(discord.ui.Button):
+    """ Button of the FlagGame. """
+
+    def __init__(self, style: discord.ButtonStyle = discord.ButtonStyle.secondary, custom_id: Optional[str] = None, label: Optional[str]=None, row: Optional[int] = None) -> None:
+        super().__init__(style=style, label=label, custom_id=custom_id, row=row)
+    
+
+    async def callback(self, interaction: discord.Interaction) -> None:
+        """ FlagGame's button callback. """
+
+        await interaction.response.defer()
+        await self.check_answer(interaction, self.custom_id)
+
+
+    async def check_answer(self, interaction: discord.Interaction, custom_id: str) -> None:
+        """ Checks the user answer. """
+
+        self.view.used = True
+        self.view.stop()
+        embed = interaction.message.embeds[0]
+
+        # Correct answer
+        if custom_id[-1] == '1':
+            self.view.points += 1
+            if self.view.round >= 19:
+                return await self.view.cog.end_flag_game(self.view.ctx, interaction.message, interaction.user, self.view.points)
+
+            await self.view_correct_answer(interaction=interaction, embed=embed)
+
+        # Wrong answer
+        if custom_id[-1] == '0':
+            if self.view.round >= 19:
+                return await self.view.cog.end_flag_game(self.view.ctx, interaction.message, interaction.user, self.view.points)
+
+            await self.view_wrong_answer(interaction=interaction, embed=embed)
+
+
+    async def view_correct_answer(self, interaction: discord.Interaction, embed: discord.Embed):
+        # Changes the clicked button to green
+        self.style = discord.ButtonStyle.success
+        await interaction.message.edit('\u200b', embed=embed, view=self.view)    
+
+        await asyncio.sleep(0.8)
+
+        # Generates a new guess
+        await self.view.cog.generate_flag_game(self.view.ctx, message=interaction.message, points=self.view.points, round=self.view.round + 1, flags=self.view.flags)
+    
+
+    async def view_wrong_answer(self, interaction: discord.interactions, embed: discord.Embed):
+        # Changes the wrong button to red
+        self.style = discord.ButtonStyle.danger
+
+        # Changes the correct button to green
+        correct_button = [button for button in self.view.children if button.label == self.view.flags[self.view.round]['name']]
+        correct_button[0].style = discord.ButtonStyle.success
+        await interaction.message.edit(embed=embed, view=self.view)
+        
+        await asyncio.sleep(0.8)
+
+        # Generates a new guess
+        await self.view.cog.generate_flag_game(self.view.ctx, message=interaction.message, points=self.view.points, round=self.view.round + 1, flags=self.view.flags)
+
