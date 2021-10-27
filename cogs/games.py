@@ -305,7 +305,7 @@ class Games(commands.Cog):
         bet_limit: int = 5000
         if bet > bet_limit:
             ctx.command.reset_cooldown(ctx)
-            return await ctx.reply(f"**You cannot bet more than {bet_limit}łł, {member.mention}!**")
+            return await ctx.reply(f"**You cannot bet more than {bet_limit}łł at a time, {member.mention}!**")
 
         if not side:
             ctx.command.reset_cooldown(ctx)
@@ -363,6 +363,11 @@ class Games(commands.Cog):
 
         if not bet:
             return await ctx.reply(f"**Please inform how much you wanna bet, {author.mention}**")
+
+        bet_limit: int = 5000
+        if bet > bet_limit:
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.reply(f"**You cannot bet more than {bet_limit}łł at a time, {author.mention}!**")
 
         SlothCurrency = self.client.get_cog('SlothCurrency')
         user_currency = await SlothCurrency.get_user_currency(author.id)
