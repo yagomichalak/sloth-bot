@@ -285,7 +285,7 @@ class MoveObjectGameView(discord.ui.View):
 class FlagsGameView(discord.ui.View):
     """ View for the FlagGame. """
 
-    def __init__(self, ctx: commands.Context, client: commands.Bot, countries_names: list[str], flags: list, points: int, round: int) -> None:
+    def __init__(self, ctx: commands.Context, client: commands.Bot, countries_names: List[str], flags: list, points: int, round: int) -> None:
         super().__init__(timeout=30)
         self.ctx = ctx
         self.client = client
