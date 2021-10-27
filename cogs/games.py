@@ -403,16 +403,16 @@ class Games(commands.Cog):
         await asyncio.sleep(2)
         ok.remove_image()
 
-        ok.add_field(name="{}\nWon".format(slotOutput), value=f'You won {2*bet} coins')
+        ok.add_field(name="{}\nWon".format(slotOutput), value=f'You won {2*bet} leaves')
 
 
         won = discord.Embed(title = "Slots Machine", color = discord.Color(0xFFEC))
-        won.add_field(name="{}\nWon".format(slotOutput), value=f'You won {3*bet} coins')
+        won.add_field(name="{}\nWon".format(slotOutput), value=f'You won {3*bet} leaves')
         won.set_footer(text=f"Bet from {author}", icon_url=author.display_avatar)
         
 
         lost = discord.Embed(title = "Slots Machine", color = discord.Color(0xFFEC))
-        lost.add_field(name="{}\nLost".format(slotOutput), value=f'You lost {1*bet} coins')
+        lost.add_field(name="{}\nLost".format(slotOutput), value=f'You lost {1*bet} leaves')
         lost.set_footer(text=f"Bet from {author}", icon_url=author.display_avatar)
 
 
