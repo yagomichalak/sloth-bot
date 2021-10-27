@@ -170,10 +170,11 @@ class Games(commands.Cog):
 
 
     #=== Flag games settings ===#
-    @commands.has_permissions(administrator=True)
     @commands.command(hidden=True)
+    @commands.is_owner()
     async def check_flags(self, ctx) -> None:
-        """ Shows all flags and their names. This command is used to check the link of the images"""
+        """ Shows all flags and their names. This command is used to check the link of the images. """
+
         json_flags = json.load(open("extra/random/json/flag_game.json", encoding='utf-8'))
         for flag in json_flags:
             embed = discord.Embed()
