@@ -12,6 +12,8 @@ import asyncio
 from extra.minigames.view import TicTacToeView, FlagsGameView
 from random import randint, sample, shuffle
 
+from extra.slothclasses.player import Player
+
 class Games(commands.Cog):
     """ A category for a minigames. """
 
@@ -354,7 +356,8 @@ class Games(commands.Cog):
 
 
     @commands.command()
-    @commands.cooldown(1, 15, commands.BucketType.user)
+    @commands.cooldown(1, 3600, commands.BucketType.user)
+    @Player.not_ready()
     async def slots(self, ctx, bet: int = None) -> None:
         """ Command for playing Slots.
         :param bet: The amount you wanna bet. """
