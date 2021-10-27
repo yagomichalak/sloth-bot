@@ -300,6 +300,78 @@ class Games(commands.Cog):
         em.set_author(name=ctx.author, icon_url=ctx.author.display_avatar)
         await ctx.send(embed=em)
 
+
+    @commands.command()
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def slots(self, ctx, bet: int = None) -> None:
+        """ Command for playing Slots.
+        :param bet: The amount you wanna bet. """
+
+        author: discord.Member = ctx.author
+
+        if not bet:
+            return await ctx.reply(f"**Please inform how much you wanna bet, {author.mention}**")
+
+        SlothCurrency = self.client.get_cog('SlothCurrency')
+        user_currency = await SlothCurrency.get_user_currency(author.id)
+        if not user_currency:
+            view = discord.ui.View()
+            view.add_item(discord.ui.Button(style=5, label="Create Account", emoji="🦥", url="https://thelanguagesloth.com/profile/update"))
+            return await ctx.reply( 
+                embed=discord.Embed(description=f"**{author.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one, or in the button below!**"),
+                view=view)
+
+        try:
+            bet = int(bet)
+        except ValueError:
+            return await ctx.reply(f"**Please, inform a valid bet value, {author.mention}!**")
+
+        if bet > user_currency[0][1]:
+            return await ctx.reply(f"**You don't have {bet} to bet, {author.mention}!**")
+
+        if bet < 0:
+            return await ctx.reply(f"**You must inform a positive amount to bet, {author.mention}**")
+
+        slots = ['bus', 'train', 'horse', 'heart', 'monkey', 'cow']
+        slot1 = slots[randint(0, 5)]
+        slot2 = slots[randint(0, 5)]
+        slot3 = slots[randint(0, 5)]
+
+        slotOutput = '| :{}: | :{}: | :{}: |\n'.format(slot1, slot2, slot3)
+
+        ok = discord.Embed(title="__Slots Machine__", color=discord.Color(0xFFEC))
+        ok.set_image(url='https://i.stack.imgur.com/bEkT7.gif')
+        ok.set_footer(text=f"Bet from {author}", icon_url=author.display_avatar)
+        msg = await ctx.send(embed=ok)
+        await asyncio.sleep(2)
+        ok.remove_image()
+
+        ok.add_field(name="{}\nWon".format(slotOutput), value=f'You won {2*bet} coins')
+
+
+        won = discord.Embed(title = "Slots Machine", color = discord.Color(0xFFEC))
+        won.add_field(name="{}\nWon".format(slotOutput), value=f'You won {3*bet} coins')
+        won.set_footer(text=f"Bet from {author}", icon_url=author.display_avatar)
+        
+
+        lost = discord.Embed(title = "Slots Machine", color = discord.Color(0xFFEC))
+        lost.add_field(name="{}\nLost".format(slotOutput), value=f'You lost {1*bet} coins')
+        lost.set_footer(text=f"Bet from {author}", icon_url=author.display_avatar)
+
+
+        if slot1 == slot2 == slot3:
+            await SlothCurrency.update_user_money(ctx.author.id, 3 * bet)
+            return await msg.edit(embed = won)
+
+        if slot1 == slot2 or slot2 == slot3:
+            await SlothCurrency.update_user_money(ctx.author.id, 2 * bet)
+            return await msg.edit(embed = ok)
+
+        else:
+            await SlothCurrency.update_user_money(ctx.author.id, -1 * bet)
+            return await msg.edit(embed = lost)
+
+
 def setup(client) -> None:
     """ Cog's setup function. """
 
