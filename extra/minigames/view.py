@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-from .buttons import TicTacToeButton
+from .buttons import TicTacToeButton, FlagsGameButton
 
 from typing import Dict, List, Tuple, Union
 from random import randint
@@ -286,3 +286,26 @@ class MoveObjectGameView(discord.ui.View):
 
         return moved, gg
 
+class FlagsGameView(discord.ui.View):
+    """ View for the FlagGame. """
+
+    def __init__(self, ctx: commands.Context, client: commands.Bot, countries_names: list[str], flags: list, points: int, round: int) -> None:
+        super().__init__(timeout=30)
+        self.ctx = ctx
+        self.client = client
+        self.flags = flags
+        self.countries_names = countries_names
+        self.points = points
+        self.round = round
+        self.cog = self.client.get_cog('Game')
+        self.used = False
+
+        counter: int = 0
+        for i in range(2):
+            for _ in range(2):
+                counter += 1
+                button = FlagsGameButton(style=discord.ButtonStyle.secondary, custom_id=self.countries_names[counter-1], label=self.countries_names[counter-1][:-1],  row=i)
+                self.add_item(button)
+
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        return interaction.user.id == self.ctx.author.id
