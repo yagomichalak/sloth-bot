@@ -289,16 +289,68 @@ class Games(commands.Cog):
         await ctx.send(embed=embed)
 
 
-    @commands.command(aliases=['coin'])
-    async def flipcoin(self, ctx):
-        """ Flips a coin. """
-        
-        await ctx.message.delete()
-        choices = ['You got Heads', 'You got Tails']
-        em = discord.Embed(color=ctx.author.color, title='Coinflip:', description=choice(choices),
-                           timestamp=ctx.message.created_at)
-        em.set_author(name=ctx.author, icon_url=ctx.author.display_avatar)
-        await ctx.send(embed=em)
+    @commands.command(aliases=['flip_coin', 'flipcoin', 'coinflip', 'cf', 'fc'])
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def coin_flip(self, ctx, bet: int = None, side: str = None) -> None:
+        """ Command for flipping a coin.
+        :param bet: The amount of money you want to bet.
+        :param side: The side you wanna bet on. (Heads/Tail) """
+
+        member: discord.Member = ctx.author
+
+        if not bet:
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.reply("**Please, inform how much you wanna bet!**")
+
+        bet_limit: int = 5000
+        if bet > bet_limit:
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.reply(f"**You cannot bet more than {bet_limit}łł, {member.mention}!**")
+
+        if not side:
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.reply("**Please, inform the side you wanna bet on!**")
+
+        SlothCurrency = self.client.get_cog('SlothCurrency')
+        user_currency: List[int] = await SlothCurrency.get_user_currency(member.id)
+        if not user_currency:
+            return await ctx.reply("**You don't even have a Profile!**")
+
+        if user_currency[0][1] < bet:
+            return await ctx.reply(f"**You don't have `{bet} bolts` to bet!**")
+
+        side_options: Dict[str, List[str]] = {
+            'Tail': {'aliases': ['t', 'tail', 'tails'], 'image': 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/2021_Native_American_%241_Coin_Reverse.png/220px-2021_Native_American_%241_Coin_Reverse.png'},
+            'Heads': {'aliases': ['h', 'head', 'heads'], 'image': 'https://upload.wikimedia.org/wikipedia/en/f/fe/Sacagawea_dollar_obverse.png'}
+        }
+
+        if side.lower() not in side_options['Tail']['aliases'] + side_options['Heads']['aliases']:
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.reply("**Please, inform a valid side!**")
+
+        side = 'Tail' if side.lower() in side_options['Tail'] else 'Heads'
+
+        coin_var: str = choice(['Tail', 'Heads'])
+        win_var: str = 'won' if side.lower() == coin_var.lower() else 'lost'
+        # Makes the embed
+        embed: discord.Embed = discord.Embed(
+            description = f"It's **{coin_var}**",
+        )
+        embed.add_field(name=f"Amount {win_var}", value=f"{bet} bolts", inline=False)
+        if win_var == 'won':
+            embed.color=discord.Color.green()
+            embed.add_field(name="New balance", value=f"{user_currency[0][1]+bet} bolts")
+            await SlothCurrency.update_user_money(member.id, bet)
+        else:
+            embed.color=discord.Color.dark_red()
+            embed.add_field(name="New balance", value=f"{user_currency[0][1]-bet} bolts")
+            await SlothCurrency.update_user_money(member.id, -bet)
+
+
+        embed.set_author(name=f"You've {win_var}!", icon_url=member.display_avatar)
+        embed.set_thumbnail(url=side_options[coin_var]['image'])
+        embed.set_footer(text=f"Command by {member}")
+        await ctx.reply(embed=embed)
 
 
     @commands.command()
