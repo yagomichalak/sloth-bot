@@ -11,13 +11,20 @@ from typing import List, Union, Dict, Optional, Any
 import asyncio
 
 from extra.slothclasses.player import Player
+from extra.minigames.connect_four import ConnectFour
 
-class Games(commands.Cog):
+minigames_cogs: List[commands.Cog] = [
+    ConnectFour
+]
+
+class Games(*minigames_cogs):
     """ A category for a minigames. """
 
     def __init__(self, client) -> None:
         """ Class init method. """
 
+        for minigame_cog in minigames_cogs:
+            minigame_cog.__init__(self, client)
         self.client = client
 
     @commands.Cog.listener()
@@ -354,7 +361,7 @@ class Games(commands.Cog):
 
 
     @commands.command()
-    @commands.cooldown(1, 3600, commands.BucketType.user)
+    @commands.cooldown(1, 20, commands.BucketType.user)
     @Player.not_ready()
     async def slots(self, ctx, bet: int = None) -> None:
         """ Command for playing Slots.
