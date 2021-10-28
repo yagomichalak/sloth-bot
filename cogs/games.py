@@ -398,13 +398,27 @@ class Games(commands.Cog):
         slotOutput = '| :{}: | :{}: | :{}: |\n'.format(slot1, slot2, slot3)
 
         ok = discord.Embed(title="__Slots Machine__", color=discord.Color(0xFFEC))
-        ok.set_image(url='https://i.stack.imgur.com/bEkT7.gif')
+        # ok.set_image(url='https://i.stack.imgur.com/bEkT7.gif')
         ok.set_footer(text=f"Bet from {author}", icon_url=author.display_avatar)
+
+
+        rolling_emoji: str = '<a:slots_emoji:903103730113712198>'
+        ok.add_field(name='Rolling...', value='| {} | {} | {} |\n'.format(rolling_emoji, rolling_emoji, rolling_emoji))
         msg = await ctx.send(embed=ok)
-        await asyncio.sleep(2)
+        await asyncio.sleep(0.8)
+
+        ok.set_field_at(0, name='Rolling...', value='| :{}: | {} | {} |\n'.format(slot1, rolling_emoji, rolling_emoji))
+        await msg.edit(embed=ok)
+        await asyncio.sleep(0.8)
+
+        ok.set_field_at(0, name='Rolling...', value='| :{}: | :{}: | {} |\n'.format(slot1, slot2, rolling_emoji))
+        await msg.edit(embed=ok)
+        await asyncio.sleep(0.8)
+
+
         ok.remove_image()
 
-        ok.add_field(name="{}\nWon".format(slotOutput), value=f'You won {2*bet} leaves')
+        ok.set_field_at(0, name="{}\nWon".format(slotOutput), value=f'You won {2*bet} leaves')
 
 
         won = discord.Embed(title = "Slots Machine", color = discord.Color(0xFFEC))
