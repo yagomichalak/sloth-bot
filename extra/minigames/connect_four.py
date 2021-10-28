@@ -18,7 +18,7 @@ EMOJI_CHECK = Union[discord.Emoji, str]
 
 
 class Game:
-    """A Connect 4 Game."""
+    """ A class for the sConnect 4 Game."""
 
     def __init__(
         self,
@@ -28,7 +28,9 @@ class Game:
         player2: Optional[discord.Member],
         tokens: List[str],
         size: int = 7
-    ):
+    ) -> None:
+        """ Class init method. """
+
         self.client = client
         self.channel = channel
         self.player1 = player1
@@ -47,11 +49,14 @@ class Game:
 
     @staticmethod
     def generate_board(size: int) -> List[List[int]]:
-        """Generate the connect 4 board."""
+        """ Generate the connect 4 game board.
+        :param size: The size of the board. """
+
         return [[0 for _ in range(size)] for _ in range(size)]
 
     async def print_grid(self) -> None:
-        """Formats and outputs the Connect Four grid to the channel."""
+        """ Formats and outputs the Connect Four grid to the channel. """
+
         title = (
             f"Connect 4: {self.player1.display_name}"
             f" VS {self.client.user.display_name if isinstance(self.player2, AI) else self.player2.display_name}"
@@ -72,11 +77,13 @@ class Game:
             await self.message.edit(content=None, embed=embed)
 
     async def game_over(self, action: str, player1: discord.User, player2: discord.User) -> None:
-        """Announces to public chat."""
+        """ Sends a message when the game is over, telling who won.
+        :param action: The action of the game. (win/draw/quit)
+        :param player1: The player 1. (always the winner)
+        :param player2? The player 2. """
 
         if action == "win":
             await self.channel.send(f"**Game Over! {player1.mention} won against {player2.mention}!**")
-
         elif action == "draw":
             await self.channel.send(f"**Game Over! {player1.mention} {player2.mention} It's A Draw 🎉**")
         elif action == "quit":
@@ -84,7 +91,8 @@ class Game:
         await self.print_grid()
 
     async def start_game(self) -> None:
-        """Begins the game."""
+        """ Begins the game. """
+
         self.player_active, self.player_inactive = self.player1, self.player2
 
         while True:
@@ -115,7 +123,10 @@ class Game:
             self.player_active, self.player_inactive = self.player_inactive, self.player_active
 
     def predicate(self, reaction: discord.Reaction, user: discord.Member) -> bool:
-        """The predicate to check for the player's reaction."""
+        """ The predicate to check for the player's reaction.
+        :param reaction: The reaction to check.
+        :param user: The user who reacted. """
+
         return (
             reaction.message.id == self.message.id
             and user.id == self.player_active.id
@@ -123,7 +134,8 @@ class Game:
         )
 
     async def player_turn(self) -> Coordinate:
-        """Initiate the player's turn."""
+        """ Initiates the player's turn. """
+
         message = await self.channel.send(
             f"{self.player_active.mention}, it's your turn! React with the column you want to place your token in."
         )
@@ -152,7 +164,10 @@ class Game:
                 message = await self.channel.send(f"Column {column_num + 1} is full. Try again")
 
     def check_win(self, coords: Coordinate, player_num: int) -> bool:
-        """Check that placing a counter here would cause the player to win."""
+        """ Checks whether placing a piece in a specific coordinate would make the player win.
+        :param coords: The coordinates of the recently put piece.
+        :param player_num: The player number. (1/2) """
+
         vertical = [(-1, 0), (1, 0)]
         horizontal = [(0, 1), (0, -1)]
         forward_diag = [(-1, 1), (1, -1)]
@@ -179,14 +194,17 @@ class Game:
 
 
 class AI:
-    """The Computer Player for Single-Player games."""
+    """ The Computer Player class for the Single-Player games. """
 
-    def __init__(self, client: commands.Bot, game: Game):
+    def __init__(self, client: commands.Bot, game: Game) -> None:
+        """ Class init method. """
+
         self.game = game
         self.mention = client.user.mention
 
     def get_possible_places(self) -> List[Coordinate]:
-        """Gets all the coordinates where the AI could possibly place a counter."""
+        """ Gets all the coordinates where the AI could possibly place a counter. """
+
         possible_coords = []
         for column_num in range(self.game.grid_size):
             column = [row[column_num] for row in self.game.grid]
@@ -197,12 +215,12 @@ class AI:
         return possible_coords
 
     def check_ai_win(self, coord_list: List[Coordinate]) -> Optional[Coordinate]:
-        """
-        Check AI win.
+        """ Check AI win.
 
         Check if placing a counter in any possible coordinate would cause the AI to win
-        with 10% chance of not winning and returning None
-        """
+        with 10% chance of not winning and returning None.
+        :param coord_list: The list of coordinates. """
+
         if random.randint(1, 10) == 1:
             return
         for coords in coord_list:
@@ -210,12 +228,12 @@ class AI:
                 return coords
 
     def check_player_win(self, coord_list: List[Coordinate]) -> Optional[Coordinate]:
-        """
-        Check Player win.
+        """ Check Player win.
 
         Check if placing a counter in possible coordinates would stop the player
         from winning with 25% of not blocking them  and returning None.
-        """
+        :param coord_list: The list of coordinates. """
+
         if random.randint(1, 4) == 1:
             return
         for coords in coord_list:
@@ -224,19 +242,20 @@ class AI:
 
     @staticmethod
     def random_coords(coord_list: List[Coordinate]) -> Coordinate:
-        """Picks a random coordinate from the possible ones."""
+        """ Picks a random coordinate from the possible ones.
+        :param coord_list: The list of coordinates. """
+
         return random.choice(coord_list)
 
     def play(self) -> Union[Coordinate, bool]:
-        """
-        Plays for the AI.
+        """ Plays for the AI.
 
         Gets all possible coords, and determins the move:
         1. coords where it can win.
         2. coords where the player can win.
         3. Random coord
-        The first possible value is choosen.
-        """
+        The first possible value is choosen. """
+
         possible_coords = self.get_possible_places()
 
         if not possible_coords:
@@ -254,9 +273,11 @@ class AI:
 
 
 class ConnectFour(commands.Cog):
-    """Connect Four. The Classic Vertical Four-in-a-row Game!"""
+    """ Category for the Connect Four game. """
 
-    def __init__(self, client: commands.Bot):
+    def __init__(self, client: commands.Bot) -> None:
+        """ Class init method. """
+
         self.client = client
         self.games: List[Game] = []
         self.waiting: List[discord.Member] = []
@@ -267,7 +288,10 @@ class ConnectFour(commands.Cog):
         self.min_board_size = 5
 
     async def check_author(self, ctx: commands.Context, board_size: int) -> bool:
-        """Check if the requester is free and the board size is correct."""
+        """ Checks whether the requester is free and the board size is correct.
+        :param ctx: The context.
+        :param board_size: The size of the game board. """
+
         if self.already_playing(ctx.author):
             await ctx.send("You're already playing a game!")
             return False
@@ -292,9 +316,14 @@ class ConnectFour(commands.Cog):
         reaction: discord.Reaction,
         user: discord.Member
     ) -> bool:
-        """Predicate checking the criteria for the announcement message."""
+        """ Predicate checking the criteria for the announcement message.
+        :param ctx: The context.
+        :param announcement: The message.
+        :param reaction: The reaction used.
+        :param user: The user to get. """
+
         if self.already_playing(ctx.author):  # If they've joined a game since requesting a player 2
-            return True  # Is dealt with later on
+            return True  # It's dealt with later on
 
         if (
             user.id not in (ctx.me.id, ctx.author.id)
@@ -324,14 +353,19 @@ class ConnectFour(commands.Cog):
         return False
 
     def already_playing(self, player: discord.Member) -> bool:
-        """Check if someone is already in a game."""
+        """ Checks whether someone is already in a game.
+        :param player: The person to check. """
+
         return any(player in (game.player1, game.player2) for game in self.games)
 
     @staticmethod
     def check_emojis(
         e1: EMOJI_CHECK, e2: EMOJI_CHECK
     ) -> Tuple[bool, Optional[str]]:
-        """Validate the emojis, the user put."""
+        """ Validates the emojis the user put.
+        :param e1: The first emoji.
+        :param e2: The second emoji. """
+
         if isinstance(e1, str) and emojis.count(e1) != 1:
             return False, e1
         if isinstance(e2, str) and emojis.count(e2) != 1:
@@ -346,9 +380,15 @@ class ConnectFour(commands.Cog):
         emoji1: str,
         emoji2: str
     ) -> None:
-        """Helper for playing a game of connect four."""
+        """ Helpers for playing a game of connect four.
+        :param ctx: The context.
+        :param user: The user user playing. [Optional]
+        :param board_size: The size of the game board.
+        :param emoji1: The first emoji.
+        :param emoji2: The second emoji. """
+
         self.tokens = [":white_circle:", str(emoji1), str(emoji2)]
-        game = None  # if game fails to intialize in try...except
+        game = None  # If game fails to intialize in try...except
 
         try:
             game = Game(self.client, ctx.channel, ctx.author, user, self.tokens, size=board_size)
@@ -375,11 +415,15 @@ class ConnectFour(commands.Cog):
         emoji1: EMOJI_CHECK = "\U0001f535",
         emoji2: EMOJI_CHECK = "\U0001f534"
     ) -> None:
-        """ Play the classic game of Connect Four with someone!
+        """ Plays the classic game of Connect Four with someone!
 
         Sets up a message waiting for someone else to react and play along.
         The game will start once someone has reacted.
-        All inputs will be through reactions. """
+        All inputs will be through reactions.
+        :param ctx: The context.
+        :param board_size: The size of the game board.
+        :param emoji1: The first emoji.
+        :param emoji2: The second emoji. """
 
         check, emoji = self.check_emojis(emoji1, emoji2)
         if not check:
@@ -435,7 +479,11 @@ class ConnectFour(commands.Cog):
         emoji1: EMOJI_CHECK = "\U0001f535",
         emoji2: EMOJI_CHECK = "\U0001f534"
     ) -> None:
-        """Play Connect Four against a computer player."""
+        """ Plays  Connect Four against a computer player.
+        :param ctx: The context.
+        :param board_size: The size of the game board.
+        :param emoji1: The first emoji.
+        :param emoji2: The second emoji. """
 
         check, emoji = self.check_emojis(emoji1, emoji2)
         if not check:
