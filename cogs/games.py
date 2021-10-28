@@ -7,7 +7,7 @@ from extra import utils
 from random import randint, sample, shuffle, choice
 import os
 import json
-from typing import List, Union, Dict, Optional, Any
+from typing import List, Dict, Optional, Any
 import asyncio
 
 from extra.slothclasses.player import Player
@@ -23,12 +23,15 @@ class Games(*minigames_cogs):
     def __init__(self, client) -> None:
         """ Class init method. """
 
+        # Initiates all inherited cogs
         for minigame_cog in minigames_cogs:
             minigame_cog.__init__(self, client)
         self.client = client
 
     @commands.Cog.listener()
     async def on_ready(self) -> None:
+        """ Tells when the Games cog is ready to go. """
+
         print("Game cog is online!")
 
     @commands.command()
