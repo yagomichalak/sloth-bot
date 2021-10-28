@@ -65,16 +65,16 @@ class Game:
         rows = [" ".join(self.tokens[s] for s in row) for row in self.grid]
         first_row = " ".join(x for x in NUMBERS[:self.grid_size])
         formatted_grid = "\n".join([first_row] + rows)
-        embed = discord.Embed(title=title, description=formatted_grid)
+        embed = discord.Embed(title=title, description=formatted_grid, color=self.player_active.color)
 
         if self.message:
-            await self.message.edit(embed=embed)
+            self.message = await self.message.edit(embed=embed)
         else:
             self.message = await self.channel.send(content="Loading...")
             for emoji in self.unicode_numbers:
                 await self.message.add_reaction(emoji)
             await self.message.add_reaction(CROSS_EMOJI)
-            await self.message.edit(content=None, embed=embed)
+            self.message = await self.message.edit(content=None, embed=embed)
 
     async def game_over(self, action: str, player1: discord.User, player2: discord.User) -> None:
         """ Sends a message when the game is over, telling who won.
@@ -83,11 +83,11 @@ class Game:
         :param player2? The player 2. """
 
         if action == "win":
-            await self.channel.send(f"**Game Over! {player1.mention} won against {player2.mention}!**")
+            await self.message.reply(f"**Game Over! {player1.mention} won against {player2.mention}!**")
         elif action == "draw":
-            await self.channel.send(f"**Game Over! {player1.mention} {player2.mention} It's A Draw 🎉**")
+            await self.message.reply(f"**Game Over! {player1.mention} {player2.mention} It's A Draw 🎉**")
         elif action == "quit":
-            await self.channel.send(f"**{self.player1.mention} surrendered. Game over!**")
+            await self.message.reply(f"**{self.player1.mention} surrendered. Game over!**")
         await self.print_grid()
 
     async def start_game(self) -> None:
@@ -136,18 +136,22 @@ class Game:
     async def player_turn(self) -> Coordinate:
         """ Initiates the player's turn. """
 
-        message = await self.channel.send(
-            f"{self.player_active.mention}, it's your turn! React with the column you want to place your token in."
-        )
+        embed = self.message.embeds[0]
+        # embed.color = self.player_active.color
+        embed.add_field(name="__Game State__", value=f"{self.player_active.mention}, it's your turn! React with the column you want to place your token in.")
+        self.message = await self.message.edit(embed=embed)
+
         player_num = 1 if self.player_active == self.player1 else 2
         while True:
             try:
                 reaction, user = await self.client.wait_for("reaction_add", check=self.predicate, timeout=30.0)
             except asyncio.TimeoutError:
-                await self.channel.send(f"{self.player_active.mention}, you took too long. Game over!")
+                embed.set_field_at(0, name="__Game__", value=f"{self.player_active.mention}, you took too long. Game over!")
+                embed.color = discord.Color.brand_red()
+                self.message = await self.message.edit(embed=embed)
                 return
             else:
-                await message.delete()
+                # await message.delete()
                 if str(reaction.emoji) == CROSS_EMOJI:
                     await self.game_over("quit", self.player_active, self.player_inactive)
                     return
@@ -201,6 +205,7 @@ class AI:
 
         self.game = game
         self.mention = client.user.mention
+        self.color = client.user.color
 
     def get_possible_places(self) -> List[Coordinate]:
         """ Gets all the coordinates where the AI could possibly place a counter. """

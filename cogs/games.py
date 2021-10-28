@@ -408,7 +408,6 @@ class Games(*minigames_cogs):
         slotOutput = '| :{}: | :{}: | :{}: |\n'.format(slot1, slot2, slot3)
 
         ok = discord.Embed(title="__Slots Machine__", color=discord.Color(0xFFEC))
-        # ok.set_image(url='https://i.stack.imgur.com/bEkT7.gif')
         ok.set_footer(text=f"Bet from {author}", icon_url=author.display_avatar)
 
 
