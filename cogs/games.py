@@ -35,7 +35,7 @@ class Games(*minigames_cogs):
         print("Game cog is online!")
 
     @commands.command()
-    @commands.cooldown(1, 3600, commands.BucketType.user)
+    @commands.cooldown(1, 600, commands.BucketType.user)
     async def destiny(self, ctx) -> None:
         """ Plays the Destiny game. """
 
@@ -412,7 +412,7 @@ class Games(*minigames_cogs):
         ok.set_footer(text=f"Bet from {author}", icon_url=author.display_avatar)
 
 
-        rolling_emoji: str = '<a:slots_emoji:903103730113712198>'
+        rolling_emoji: str = '<a:slots_emoji:903335419725373490>'
         ok.add_field(name='Rolling...', value='| {} | {} | {} |\n'.format(rolling_emoji, rolling_emoji, rolling_emoji))
         msg = await ctx.send(embed=ok)
         await asyncio.sleep(0.8)
