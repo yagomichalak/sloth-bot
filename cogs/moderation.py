@@ -1174,6 +1174,8 @@ class Moderation(*moderation_cogs):
 		channel = ctx.channel
 		author = ctx.author
 
+		current_ts: int = await utils.get_timestamp()
+
 		reason = 'Nitro Scam'
 
 		if not member:
@@ -1247,7 +1249,7 @@ class Moderation(*moderation_cogs):
 
 			# Bans and logs
 			# General embed
-			general_embed = discord.Embed(description=f'**Reason:** {reason}', colour=discord.Colour.nitro_pink())
+			general_embed = discord.Embed(description=f'**Reason:** {reason}', color=discord.Color.nitro_pink())
 			general_embed.set_author(name=f'{member} has been nitrokicked', icon_url=member.display_avatar)
 			await ctx.send(embed=general_embed)
 			try:
@@ -1255,6 +1257,12 @@ class Moderation(*moderation_cogs):
 			except Exception as e:
 				pass
 			try:
+
+				keep_roles, remove_roles = await self.get_remove_roles(member, keep_roles=allowed_roles)
+
+				await member.edit(roles=keep_roles)
+				user_role_ids = [(member.id, rr.id, current_ts, None) for rr in remove_roles]
+				await self.insert_in_muted(user_role_ids)
 				await member.ban(delete_message_days=1, reason=reason)
 				await member.unban(reason=reason)
 			except Exception:
@@ -1262,7 +1270,7 @@ class Moderation(*moderation_cogs):
 			else:
 				# Moderation log embed
 				moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
-				embed = discord.Embed(title='__**NitroKick**__', colour=discord.Colour.nitro_pink(),
+				embed = discord.Embed(title='__**NitroKick**__', color=discord.Color.nitro_pink(),
 									timestamp=ctx.message.created_at)
 				embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nId: {member.id}```',
 								inline=False)
@@ -1284,7 +1292,7 @@ class Moderation(*moderation_cogs):
 
 
 	@commands.command()
-	@commands.has_permissions(administrator=True)
+	@utils.is_allowed([senior_mod_role_id], throw_exc=True)
 	async def hackban(self, ctx, user_id: int = None, *, reason: Optional[str] = None):
 		""" (ADM) Bans a user that is currently not in the server.
 		Only accepts user IDs.

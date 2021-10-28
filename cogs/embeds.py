@@ -7,6 +7,7 @@ import os
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID'))
 owner_role_id = int(os.getenv('OWNER_ROLE_ID'))
 mod_role_id = int(os.getenv('MOD_ROLE_ID'))
+senior_mod_role_id = int(os.getenv('SENIOR_MOD_ROLE_ID'))
 allowed_roles = [owner_role_id, admin_role_id, mod_role_id]
 
 guild_ids = [int(os.getenv('SERVER_ID'))]
@@ -39,9 +40,8 @@ class Embeds(commands.Cog):
     @commands.command()
     @commands.has_permissions(administrator=True)
     async def embed_join_us(self, ctx):
-        '''
-        (ADM) Sends the join-us embedded message.
-        '''
+        """ (ADM) Sends the join-us embedded message. """
+
         await ctx.message.delete()
         embed = discord.Embed(title="Join our Staff!",
                               description="```We depend on people like you to keep this community running, and any help is welcome. if you feel like you would like to contribute apply to any of the positions below: ```",
@@ -72,7 +72,7 @@ class Embeds(commands.Cog):
         await ctx.send(embed=embed)
 
     @slash_command(name="embed", default_permission=False, guild_ids=guild_ids)
-    @commands.has_permissions(administrator=True)
+    @utils.is_allowed([senior_mod_role_id], throw_exc=True)
     async def _embed(self, ctx,
         description: Option(str, name="description", description="Description.", required=False),
         title: Option(str, name="title", description="Title.", required=False),
