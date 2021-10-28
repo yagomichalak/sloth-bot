@@ -338,6 +338,8 @@ class Misc(commands.Cog):
 
     @user_command(name="Help", guild_ids=guild_ids)
     async def _help(self, ctx, user: discord.Member) -> None:
+        """ Help! """
+
         await ctx.respond(f"**{ctx.author.mention} needs your help, {user.mention}!**")
 
 

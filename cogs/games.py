@@ -96,7 +96,14 @@ class Games(*minigames_cogs):
         embed.add_field(name="__Players__:", value=f"{author.mention} = ❌ | {member.mention} = ⭕", inline=False)
         embed.add_field(name="__Turn__:", value=f"Now it's {view.turn_member.mention}'s turn!")
 
-        await ctx.send(embed=embed, view=view)
+        msg = await ctx.send(embed=embed, view=view)
+        await view.wait()
+        await asyncio.sleep(0.3)
+
+        if view.state is False:
+            embed.color = discord.Color.brand_red()
+            embed.set_field_at(1, name="__Timeout__", value="The game has timeouted!")
+            await msg.edit(embed=embed)
         
 
     @commands.command(aliases=['flag', 'flag_game', 'flags'])

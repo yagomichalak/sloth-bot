@@ -12,11 +12,12 @@ class TicTacToeView(discord.ui.View):
     def __init__(self, client: commands.Bot, player: discord.Member, opponent: discord.Member) -> None:
         """ Class init method. """
 
-        super().__init__(timeout=None)
+        super().__init__(timeout=60)
         self.client = client
         self.player = player
         self.opponent = opponent
 
+        self.state = True
 
         self.coords: Dict[int, List[Tuple[int, int]]] = {}
 
@@ -35,6 +36,8 @@ class TicTacToeView(discord.ui.View):
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
         return interaction.user.id == self.turn_member.id
 
+    async def on_timeout(self) -> None:
+        self.state = False
 
 class MoveObjectGameView(discord.ui.View):
     """ View for the MoveObject minigame. """
