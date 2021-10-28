@@ -165,7 +165,7 @@ class Game:
         player_num = 1 if self.player_active == self.player1 else 2
         while True:
             try:
-                reaction, user = await self.client.wait_for("reaction_add", check=self.predicate, timeout=30.0)
+                reaction, user = await self.client.wait_for("reaction_add", check=self.predicate, timeout=120)
             except asyncio.TimeoutError:
                 embed.set_field_at(0, name="__Game State__", value=f"{self.player_active.mention}, you took too long. Game over!")
                 embed.color = discord.Color.brand_red()
