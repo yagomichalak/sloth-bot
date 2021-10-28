@@ -58,19 +58,25 @@ class Game:
         """ Formats and outputs the Connect Four grid to the channel. """
 
         title = (
-            f"Connect 4: {self.player1.display_name}"
-            f" VS {self.client.user.display_name if isinstance(self.player2, AI) else self.player2.display_name}"
+            f"__Connect 4__: `{self.player1.display_name}`"
+            f" VS `{self.client.user.display_name if isinstance(self.player2, AI) else self.player2.display_name}`"
         )
 
         rows = [" ".join(self.tokens[s] for s in row) for row in self.grid]
         first_row = " ".join(x for x in NUMBERS[:self.grid_size])
         formatted_grid = "\n".join([first_row] + rows)
-        embed = discord.Embed(title=title, description=formatted_grid, color=self.player_active.color)
+
+        if not self.message or not (embeds := self.message.embeds):
+            embed = discord.Embed(title=title, description=formatted_grid)
+        else:
+            embed = embeds[0]
+            embed.title = title
+            embed.description = formatted_grid
 
         if self.message:
             self.message = await self.message.edit(embed=embed)
         else:
-            self.message = await self.channel.send(content="Loading...")
+            self.message = await self.channel.send(content="**Loading...**")
             for emoji in self.unicode_numbers:
                 await self.message.add_reaction(emoji)
             await self.message.add_reaction(CROSS_EMOJI)
@@ -82,12 +88,26 @@ class Game:
         :param player1: The player 1. (always the winner)
         :param player2? The player 2. """
 
+        embed = self.message.embeds[0]
+
         if action == "win":
+            embed.color = discord.Color.green()
+            embed.set_field_at(0, name="__Game State__", value=f"{player1.mention} won!")
             await self.message.reply(f"**Game Over! {player1.mention} won against {player2.mention}!**")
         elif action == "draw":
+            embed.color = discord.Color.orange()
+            embed.set_field_at(0, name="__Game State__", value="The game has drawn!")
             await self.message.reply(f"**Game Over! {player1.mention} {player2.mention} It's A Draw 🎉**")
         elif action == "quit":
+            embed.color = int("ffffff", 16)
+            embed.set_field_at(0, name="__Game State__", value=f"{player1.mention} surrendered!")
+
             await self.message.reply(f"**{self.player1.mention} surrendered. Game over!**")
+        await self.message.edit(embed=embed)
+        try:
+            await self.message.clear_reactions()
+        except:
+            pass
         await self.print_grid()
 
     async def start_game(self) -> None:
@@ -137,7 +157,8 @@ class Game:
         """ Initiates the player's turn. """
 
         embed = self.message.embeds[0]
-        # embed.color = self.player_active.color
+        embed.color = self.player_active.color
+        embed.remove_field(0)
         embed.add_field(name="__Game State__", value=f"{self.player_active.mention}, it's your turn! React with the column you want to place your token in.")
         self.message = await self.message.edit(embed=embed)
 
@@ -146,7 +167,7 @@ class Game:
             try:
                 reaction, user = await self.client.wait_for("reaction_add", check=self.predicate, timeout=30.0)
             except asyncio.TimeoutError:
-                embed.set_field_at(0, name="__Game__", value=f"{self.player_active.mention}, you took too long. Game over!")
+                embed.set_field_at(0, name="__Game State__", value=f"{self.player_active.mention}, you took too long. Game over!")
                 embed.color = discord.Color.brand_red()
                 self.message = await self.message.edit(embed=embed)
                 return
@@ -416,6 +437,7 @@ class ConnectFour(commands.Cog):
     async def connect_four(
         self,
         ctx: commands.Context,
+        member: discord.Member = None,
         board_size: int = 7,
         emoji1: EMOJI_CHECK = "\U0001f535",
         emoji2: EMOJI_CHECK = "\U0001f534"
@@ -430,6 +452,9 @@ class ConnectFour(commands.Cog):
         :param emoji1: The first emoji.
         :param emoji2: The second emoji. """
 
+        if not member or member.bot:
+            return await self.ai(ctx)
+
         check, emoji = self.check_emojis(emoji1, emoji2)
         if not check:
             raise commands.EmojiNotFound(emoji)
@@ -438,45 +463,19 @@ class ConnectFour(commands.Cog):
         if not check_author_result:
             return
 
-        announcement = await ctx.send(
-            "**Connect Four**: A new game is about to start!\n"
-            f"Press {Emojis.hand_raised} to play against {ctx.author.mention}!\n"
-            f"(Cancel the game with {CROSS_EMOJI}.)"
-        )
-        self.waiting.append(ctx.author)
-        await announcement.add_reaction(Emojis.hand_raised)
-        await announcement.add_reaction(CROSS_EMOJI)
+        # self.get_player()
 
-        try:
-            reaction, user = await self.client.wait_for(
-                "reaction_add",
-                check=partial(self.get_player, ctx, announcement),
-                timeout=60.0
-            )
-        except asyncio.TimeoutError:
-            self.waiting.remove(ctx.author)
-            await announcement.delete()
-            await ctx.send(
-                f"{ctx.author.mention} Seems like there's no one here to play. "
-                f"Use `{ctx.prefix}{ctx.invoked_with} ai` to play against a computer."
-            )
-            return
-
-        if str(reaction.emoji) == CROSS_EMOJI:
-            self.waiting.remove(ctx.author)
-            await announcement.delete()
-            await ctx.send(f"{ctx.author.mention} Game cancelled.")
-            return
-
-        await announcement.delete()
-        self.waiting.remove(ctx.author)
         if self.already_playing(ctx.author):
             return
 
-        await self._play_game(ctx, user, board_size, str(emoji1), str(emoji2))
+        if self.already_playing(member):
+            return await ctx.reply("**This member is already playing!**")
 
-    @guild_only()
-    @connect_four.command(aliases=("bot", "computer", "cpu"))
+        await self._play_game(ctx, member, board_size, str(emoji1), str(emoji2))
+
+    # @guild_only()
+    # @connect_four.command(aliases=("bot", "computer", "cpu"))
+
     async def ai(
         self,
         ctx: commands.Context,
