@@ -22,8 +22,6 @@ class TicTacToeButton(discord.ui.Button):
         i, ii = tuple(self.custom_id.replace('ttt_button:', '').split('_'))
         coords_played: Tuple[int, int, int] = (int(i), int(ii))
 
-
-
         all_coords_played = [
             coord for key in self.view.coords.keys() for coord in self.view.coords[key]
         ]
@@ -68,6 +66,16 @@ class TicTacToeButton(discord.ui.Button):
     async def check_win_state(self, user: discord.Member) -> None:
         """ Checks whether someone won the game. """
 
+        #  ___    ___    ___
+        # |   |  |   |  |   |
+        # |___|  |___|  |___|
+        #  ___    ___    ___
+        # |   |  |   |  |   |
+        # |___|  |___|  |___|
+        #  ___    ___    ___
+        # |   |  |   |  |   |
+        # |___|  |___|  |___|
+        #
 
         cases: List[List[Tuple[int, int]]] = [
             # Upper horizontal
@@ -77,12 +85,12 @@ class TicTacToeButton(discord.ui.Button):
             # Bottom horizontal
             [(2, 0), (2, 1), (2, 2)],
 
-            # Upper vertical
+            # Left vertical
             [(0, 0), (1, 0), (2, 0)],
             # Middle vertical
-            [(1, 0), (1, 1), (1, 2)],
-            # Bottom vertical
-            [(2, 0), (2, 1), (2, 2)],
+            [(0, 1), (1, 1), (2, 1)],
+            # Right vertical
+            [(0, 2), (1, 2), (2, 2)],
 
             # Right diagonal
             [(0, 0), (1, 1), (2, 2)],
