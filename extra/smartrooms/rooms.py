@@ -157,9 +157,15 @@ class GalaxyRoom(SmartRoom):
         )
 
     @staticmethod
-    async def insert() -> Any:
+    async def insert(cog: commands.Cog, user_id: int, vc_id: int, txt_id: int, cat_id: int, creation_ts: int) -> Any:
+        """ Inserts a PremiumRoom into the database.
+        :param user_id: The ID of the owner of the room.
+        :param vc_id: The Voice Channel ID.
+        :param txt_id: The Text Channel ID.
+        :param cat_id: The Category ID.
+        :param creation_ts: The current timestamp. """
 
-        print('Inserting Galaxy Room into the database...')
+        await cog.insert_smartroom(user_id=user_id, room_type='galaxy', vc_id=vc_id, txt_id=txt_id, cat_id=cat_id, creation_ts=creation_ts)
 
     @staticmethod
     async def update() -> Any: pass

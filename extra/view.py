@@ -403,7 +403,16 @@ class SmartRoomView(discord.ui.View):
         current_ts: int = await utils.get_timestamp()
 
         try:
-            vc: discord.VoiceChannel = await self.member.guild.create_voice_channel(name=str(author), category=self.category)
+            answers: Dict[str, Union[str, int]] = await self.ask_creation_questions(self.member,
+                questions={
+                    'vc_name': {'message': "**Type the name of your `Voice Channel!`**", 'check': prompt_message, 'kwargs': {'client': self.client, 'member': author, 'channel': author, 'limit': 99, 'timeout': 120}}, 
+                    'vc_user_limit': {'message': '**Type the user limit of your `Voice Channel! (0-99)`**', 'check': prompt_number, 'kwargs': {'client': self.client, 'channel': author.dm_channel, 'member': author, 'limit': 99, 'timeout': 120, 'delete_message': False}}
+                }
+            )
+            if not answers:
+                return await interaction.followup.send("**SmartRoom creation process has been terminated!**")
+
+            vc: discord.VoiceChannel = await self.member.guild.create_voice_channel(name=answers['vc_name'], user_limit=answers['vc_user_limit'], category=self.category)
             await BasicRoom.insert(self.cog, user_id=author.id, vc_id=vc.id, creation_ts=current_ts)
         except Exception as e:
             print('ERROR ', e)
@@ -458,6 +467,44 @@ class SmartRoomView(discord.ui.View):
 
         await interaction.response.defer()
         self.stop()
+        author: discord.User = interaction.user
+
+        current_ts: int = await utils.get_timestamp()
+
+        try:
+            answers: Dict[str, Union[str, int]] = await self.ask_creation_questions(self.member,
+                questions={
+                    'cat_name': {'message': "**Type the name of your `Category`!**", 'check': prompt_message, 'kwargs': {'client': self.client, 'member': author, 'channel': author, 'limit': 25, 'timeout': 120}}, 
+                    'vc_name': {'message': "**Type the name of your `Voice Channel`!**", 'check': prompt_message, 'kwargs': {'client': self.client, 'member': author, 'channel': author, 'limit': 25, 'timeout': 120}}, 
+                    'vc_user_limit': {'message': '**Type the user limit of your `Voice Channel`! (0-99)**', 'check': prompt_number, 'kwargs': {'client': self.client, 'channel': author.dm_channel, 'member': author, 'limit': 99, 'timeout': 120, 'delete_message': False}}, 
+                    'txt_name': {'message': '**Type the name of your `Text Channel!`**', 'check': prompt_message, 'kwargs': {'client': self.client, 'member': author, 'channel': author, 'limit': 25, 'timeout': 120}}
+                }
+            )
+            if not answers:
+                return await interaction.followup.send("**SmartRoom creation process has been terminated!**")
+
+            overwrites = {
+                self.member.guild.default_role: discord.PermissionOverwrite(
+                    read_messages=False, send_messages=False, connect=False, speak=False, view_channel=False),
+                self.member: discord.PermissionOverwrite(
+                    read_messages=True, send_messages=True, connect=True, speak=True, view_channel=True, manage_messages=True)
+			}
+
+            cat: discord.CategoryChannel = await self.member.guild.create_category(name=answers['cat_name'], overwrites=overwrites)
+            vc: discord.VoiceChannel = await self.member.guild.create_voice_channel(name=answers['vc_name'], user_limit=answers['vc_user_limit'], category=cat)
+            text: discord.TextChannel = await self.member.guild.create_text_channel(name=answers['txt_name'], category=cat)
+
+            await GalaxyRoom.insert(self.cog, user_id=author.id, vc_id=vc.id, txt_id=text.id, cat_id=cat.id, creation_ts=current_ts)
+        except Exception as e:
+            print('ERROR ', e)
+            await interaction.followup.send("**Couldn't do it for some reason!**")
+        else:
+            try:
+                await self.member.move_to(vc)
+            except:
+                await interaction.followup.send(f"**Couldn't move you to {vc.mention}!**")
+            else:
+                await interaction.followup.send(f"**I moved you to {vc.mention}!**")
 
     @discord.ui.button(label="Cancel", custom_id="cancel_btn", style=discord.ButtonStyle.danger, emoji="❌")
     async def cancel_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
