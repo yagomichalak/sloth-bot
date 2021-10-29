@@ -131,14 +131,15 @@ async def prompt_message_guild(client, member: discord.Member, channel: discord.
 
 # ===== Reaction-based =====
 
-async def prompt_number(client, channel: discord.TextChannel, member: discord.Member, limit: int = 1000) -> Union[int, None]:
+async def prompt_number(client: commands.Bot, channel: discord.TextChannel, member: discord.Member, limit: int = 1000, timeout: int = 60, delete_message: bool = True) -> Union[int, None]:
 	""" Prompts the user for a number.
 	:param channel: The channel.
 	:param member: The member that is gonna be prompted. """
 
 	def check(m) -> bool:
 		if m.author.id == member.id and channel.id == m.channel.id:
-			client.loop.create_task(m.delete())
+			if delete_message:
+				client.loop.create_task(m.delete())
 			if len(m.content.strip()) <= len(str(limit)):
 				if m.content.strip().isdigit():
 					if int(m.content.strip()) > 0 and int(m.content.strip()) <= limit:
@@ -156,8 +157,9 @@ async def prompt_number(client, channel: discord.TextChannel, member: discord.Me
 		else:
 			return False
 
+
 	try:
-		m = await client.wait_for('message', timeout=60, check=check)
+		m = await client.wait_for('message', timeout=timeout, check=check)
 		content = m.content
 	except asyncio.TimeoutError:
 		await channel.send("**Timeout!**", delete_after=3)

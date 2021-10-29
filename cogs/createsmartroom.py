@@ -33,9 +33,9 @@ class CreateSmartRoom(SmartRoomDatabase):
 						await self.delete_smartroom(room_type=smart_room.room_type, vc_id=smart_room.vc.id)
 						
 					elif isinstance(smart_room, PremiumRoom):
-						the_txt = discord.utils.get(member.guild.channels, id=smart_room.txt.id)
+						# the_txt = discord.utils.get(member.guild.channels, id=smart_room.txt.id)
 						await self.delete_smartroom(room_type=smart_room.room_type, vc_id=smart_room.vc.id)
-						await the_txt.delete()
+						await smart_room.txt.delete()
 
 				except Exception as e:
 					print('dsahudhsau e', e)
@@ -61,9 +61,8 @@ class CreateSmartRoom(SmartRoomDatabase):
 			embed.set_image(url="attachment://create_galaxy_room.png")
 
 			category: discord.CategoryChannel = discord.utils.get(member.guild.categories, id=self.cat_id)
-			view: discord.ui.View = SmartRoomView(member=member, cog=self, category=category)
-			create_room_msg = await member.send(content="\u200b",
-				embed=embed, file=discord.File('./images/smart_vc/selection_menu.png', filename='create_galaxy_room.png'), view=view)
+			view: discord.ui.View = SmartRoomView(self.client, member=member, cog=self, category=category)
+			create_room_msg = await member.send(embed=embed, file=discord.File('./images/smart_vc/selection_menu.png', filename='create_galaxy_room.png'), view=view)
 
 
 			await view.wait()

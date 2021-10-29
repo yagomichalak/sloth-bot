@@ -94,13 +94,21 @@ class PremiumRoom(SmartRoom):
             owner=owner, room_type='premium', vc=vc, txt=txt, creation_ts=data[10], edited_ts=data[11]
         )
 
-    async def insert(self) -> Any:
+    @staticmethod
+    async def insert(cog: commands.Cog, user_id: int, vc_id: int, txt_id: int, creation_ts: int) -> Any:
+        """ Inserts a PremiumRoom into the database.
+        :param user_id: The ID of the owner of the room.
+        :param vc_id: The Voice Channel ID.
+        :param txt_id: The Text Channel ID.
+        :param creation_ts: The current timestamp. """
 
-        print('Inserting Premium Room into the database...')
+        await cog.insert_smartroom(user_id=user_id, room_type='premium', vc_id=vc_id, txt_id=txt_id, creation_ts=creation_ts)
 
-    async def update(self) -> Any: pass
+    @staticmethod
+    async def update() -> Any: pass
 
-    async def delete(self) -> Any: pass
+    @staticmethod
+    async def delete() -> Any: pass
 
 class GalaxyRoom(SmartRoom):
     """ Class for GalaxyRooms. """
@@ -148,13 +156,16 @@ class GalaxyRoom(SmartRoom):
             cat=cat, creation_ts=data[10], edited_ts=data[11]
         )
 
-    async def insert(self) -> Any:
+    @staticmethod
+    async def insert() -> Any:
 
         print('Inserting Galaxy Room into the database...')
 
-    async def update(self) -> Any: pass
+    @staticmethod
+    async def update() -> Any: pass
 
-    async def delete(self) -> Any: pass
+    @staticmethod
+    async def delete() -> Any: pass
 
 
 # galaxy_room = GalaxyRoom()

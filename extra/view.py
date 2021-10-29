@@ -1,13 +1,17 @@
 import discord
-from extra import utils
 from discord.ext import commands
-from typing import List, Union, Optional, Dict, Any
+
+from extra.prompt.menu import prompt_number
+from extra.menu import prompt_message
 from .menu import ConfirmSkill
 from .select import ReportSupportSelect
 from .smartrooms.rooms import BasicRoom, PremiumRoom, GalaxyRoom
+
+from extra import utils
+from typing import Callable, List, Union, Optional, Dict, Union
 import os
 import json
-
+import asyncio
 
 mod_role_id = int(os.getenv('MOD_ROLE_ID'))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID'))
@@ -381,8 +385,9 @@ class SoundBoardView(discord.ui.View):
 
 class SmartRoomView(discord.ui.View):
 
-    def __init__(self, member: discord.Member, cog: commands.Cog, category: discord.CategoryChannel, *, timeout: Optional[float] = 180):
+    def __init__(self, client: commands.Bot, member: discord.Member, cog: commands.Cog, category: discord.CategoryChannel, *, timeout: Optional[float] = 180):
         super().__init__(timeout=timeout)
+        self.client = client
         self.member = member
         self.cog = cog
         self.category = category
@@ -417,6 +422,35 @@ class SmartRoomView(discord.ui.View):
 
         await interaction.response.defer()
         self.stop()
+        author: discord.User = interaction.user
+
+        current_ts: int = await utils.get_timestamp()
+
+        try:
+            answers: Dict[str, Union[str, int]] = await self.ask_creation_questions(self.member,
+                questions={
+                    'vc_name': {'message': "**Type the name of your `Voice Channel!`**", 'check': prompt_message, 'kwargs': {'client': self.client, 'member': author, 'channel': author, 'limit': 99, 'timeout': 120}}, 
+                    'vc_user_limit': {'message': '**Type the user limit of your `Voice Channel! (0-99)`**', 'check': prompt_number, 'kwargs': {'client': self.client, 'channel': author.dm_channel, 'member': author, 'limit': 99, 'timeout': 120, 'delete_message': False}}, 
+                    'txt_name': {'message': '**Type the name of your `Text Channel!`**', 'check': prompt_message, 'kwargs': {'client': self.client, 'member': author, 'channel': author, 'limit': 99, 'timeout': 120}}
+                }
+            )
+            if not answers:
+                return await interaction.followup.send("**SmartRoom creation process has been terminated!**")
+
+            vc: discord.VoiceChannel = await self.member.guild.create_voice_channel(name=answers['vc_name'], user_limit=answers['vc_user_limit'], category=self.category)
+            text: discord.TextChannel = await self.member.guild.create_text_channel(name=answers['txt_name'], category=self.category)
+
+            await PremiumRoom.insert(self.cog, user_id=author.id, vc_id=vc.id, txt_id=text.id, creation_ts=current_ts)
+        except Exception as e:
+            print('ERROR ', e)
+            await interaction.followup.send("**Couldn't do it for some reason!**")
+        else:
+            try:
+                await self.member.move_to(vc)
+            except:
+                await interaction.followup.send(f"**Couldn't move you to {vc.mention}!**")
+            else:
+                await interaction.followup.send(f"**I moved you to {vc.mention}!**")
 
     @discord.ui.button(label="Galaxy", custom_id="galaxy_room", style=discord.ButtonStyle.blurple, emoji="3️⃣")
     async def galaxy_room_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
@@ -433,3 +467,29 @@ class SmartRoomView(discord.ui.View):
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
         return await super().interaction_check(interaction)
+
+
+    async def ask_creation_questions(self, member: Union[discord.Member, discord.User], questions: Dict[str, Callable]
+    ) -> Dict[str, Union[str, int]]:
+        """ Asks questions to a user.
+        :param member: The member to whom ask the questions.
+        :param questions: The questions to ask to the member. """
+
+
+        answers: Dict[str, Union[str, int]] = {}
+        success: bool = True
+
+        for question, info in questions.items():
+            answer: Union[str, int] = None
+            try:
+                await member.send(info['message'])
+                answer = await info['check'](**info['kwargs'])
+            except asyncio.TimeoutError:
+                success = False
+            else:
+                answers[question] = answer
+
+        if success:
+            return answers
+
+        return False
