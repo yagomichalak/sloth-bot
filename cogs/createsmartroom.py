@@ -120,6 +120,9 @@ class CreateSmartRoom(SmartRoomDatabase):
 		print(smart_room.edited_ts)
 
 
+	
+
+
 def setup(client: commands.Bot) -> None:
 	""" Cog's setup function. """
 

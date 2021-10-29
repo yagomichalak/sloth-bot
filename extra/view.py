@@ -401,6 +401,8 @@ class SmartRoomView(discord.ui.View):
         author: discord.User = interaction.user
 
         current_ts: int = await utils.get_timestamp()
+        if not await self.check_if_can_create(interaction, 5, 'basic'):
+            return
 
         try:
             answers: Dict[str, Union[str, int]] = await self.ask_creation_questions(self.member,
@@ -434,6 +436,8 @@ class SmartRoomView(discord.ui.View):
         author: discord.User = interaction.user
 
         current_ts: int = await utils.get_timestamp()
+        if not await self.check_if_can_create(interaction, 1500, 'premiun'):
+            return
 
         try:
             answers: Dict[str, Union[str, int]] = await self.ask_creation_questions(self.member,
@@ -470,6 +474,8 @@ class SmartRoomView(discord.ui.View):
         author: discord.User = interaction.user
 
         current_ts: int = await utils.get_timestamp()
+        if not await self.check_if_can_create(interaction, 100, 'galaxy'):
+            return
 
         try:
             answers: Dict[str, Union[str, int]] = await self.ask_creation_questions(self.member,
@@ -540,3 +546,26 @@ class SmartRoomView(discord.ui.View):
             return answers
 
         return False
+
+
+    async def check_if_can_create(self, interaction: discord.Interaction, required_money: int, room_type: str) -> bool:
+        """ Checks whether the member can create a SmartRoom of a specific type, and if they have money for it.
+
+        :param required_money: The required money to create the SmartRoom.
+        :param room_type: The type of the room. (basic/premium/galaxy) """
+
+
+        smart_rooms = await self.cog.get_smartroom(user_id=self.member.id, multiple=True)
+        if [sr for sr in smart_rooms if sr.room_type == room_type]:
+            await interaction.followup.send(f"**You already have an open `{room_type.title()}Room`!**")
+            return False
+
+        SlothCurrency = self.client.get_cog('SlothCurrency')
+        user_currency = await SlothCurrency.get_user_currency(self.member.id)
+        if not user_currency:
+            return False
+        
+        if user_currency[0][1] < required_money:
+            return await interaction.followup.send(f"**You don't have `{required_money}łł` to pay this service!**")
+
+        return True
