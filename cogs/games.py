@@ -12,9 +12,10 @@ import asyncio
 
 from extra.slothclasses.player import Player
 from extra.minigames.connect_four import ConnectFour
+from extra.minigames.blackjack.blackjack import BlackJack
 
 minigames_cogs: List[commands.Cog] = [
-    ConnectFour
+    ConnectFour, BlackJack
 ]
 
 class Games(*minigames_cogs):
