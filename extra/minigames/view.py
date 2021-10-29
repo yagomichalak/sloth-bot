@@ -308,3 +308,133 @@ class FlagsGameView(discord.ui.View):
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
         return interaction.user.id == self.ctx.author.id
+
+class BlackJackActionView(discord.ui.View):
+    """ View for the BlackJack game actions. """
+
+    def __init__(self, client: commands.Bot, player: discord.Member) -> None:
+        """ Class init method. """
+
+        super().__init__(timeout=120)
+        self.client = client
+        self.player = player
+
+    @discord.ui.button(label="hit", style=discord.ButtonStyle.blurple, custom_id="bj_hit_id")
+    async def black_jack_hit_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Button for hitting in the BlackJack game. """
+
+        await interaction.response.defer()
+
+        guild_id = interaction.guild.id
+        cog = self.client.get_cog('Games')
+
+        if cog.blackjack_games.get(guild_id) is None:
+            cog.blackjack_games[guild_id] = {}
+
+        if interaction.user.id in cog.blackjack_games[guild_id]:
+            current_game = cog.blackjack_games[guild_id].get(interaction.user.id)
+            current_game.hit_a_card()
+            if current_game.status == 'finished':
+                del cog.blackjack_games[guild_id][interaction.user.id]
+                await self.end_game(interaction)
+            await interaction.followup.edit_message(interaction.message.id, embed=current_game.embed())
+        else:
+            await interaction.followup.send("**You must be in a blackjack game!**")
+
+    @discord.ui.button(label="stand", style=discord.ButtonStyle.blurple, custom_id="bj_stand_id")
+    async def black_jack_stand_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Button for standing in the BlackJack game. """
+
+        await interaction.response.defer()
+
+        guild_id = interaction.guild.id
+        cog = self.client.get_cog('Games')
+
+
+        if cog.blackjack_games.get(guild_id) is None:
+            cog.blackjack_games[guild_id] = {}
+
+        if interaction.user.id in cog.blackjack_games[guild_id]:
+            current_game = cog.blackjack_games[guild_id].get(interaction.user.id)
+            current_game.stand()
+            if current_game.status == 'finished':
+                del cog.blackjack_games[guild_id][interaction.user.id]
+                await self.end_game(interaction)
+            await interaction.followup.edit_message(interaction.message.id, embed=current_game.embed())
+        else:
+            await interaction.followup.send("**You must be in a blackjack game!**")
+
+    @discord.ui.button(label="double", style=discord.ButtonStyle.blurple, custom_id="bj_double_id")
+    async def black_jack_double_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Button for doubling in the BlackJack game. """
+
+        await interaction.response.defer()
+
+
+        player_id = interaction.user.id
+        guild_id = interaction.guild.id
+        cog = self.client.get_cog('Games')
+
+        Economy = self.client.get_cog('Economy')
+        user_economy = await Economy.get_user_economy(player_id)
+        player_bal = user_economy[1]
+
+        if cog.blackjack_games.get(guild_id) is None:
+            cog.blackjack_games[guild_id] = {}
+
+        # Check if player's blackjack game is active
+        if interaction.user.id in cog.blackjack_games[guild_id]:
+            current_game = cog.blackjack_games[guild_id].get(interaction.user.id)
+            # Checks whether the player has more than 2 cards
+            if len(current_game.player_cards) > 2:
+                await interaction.followup.send("**You can double only in the first round!**")
+
+            # Checks whether the player has sufficient funds for double
+            elif player_bal < current_game.bet:
+                await interaction.followup.send("**You have insufficient funds!**")
+            else:
+                current_game.double()
+                if current_game.status == 'finished':
+                    del cog.blackjack_games[guild_id][interaction.user.id]
+                    await self.end_game(interaction)
+
+            await interaction.followup.edit_message(interaction.message.id, embed=current_game.embed())
+        else:
+            await interaction.followup.send("**You must be in a blackjack game!**")
+
+    @discord.ui.button(label="surrender", style=discord.ButtonStyle.gray, custom_id="bj_surrender_id")
+    async def black_jack_surrender_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Button for surrendering in the BlackJack game. """
+
+        await interaction.response.defer()
+
+        cog = self.client.get_cog('Games')
+
+        guild_id = interaction.guild.id
+        if cog.blackjack_games.get(guild_id) is None:
+            cog.blackjack_games[guild_id] = {}
+
+        # Check whether the player's blackjack game is active
+        if interaction.user.id in cog.blackjack_games[guild_id]:
+            current_game = cog.blackjack_games[guild_id].get(interaction.user.id)
+            current_game.lose_event()
+            if current_game.status == 'finished':
+                del cog.blackjack_games[guild_id][interaction.user.id]
+                await self.end_game(interaction)
+
+            embed = current_game.embed()
+            embed.color = int('ffffff', 16)
+            await interaction.followup.edit_message(interaction.message.id, embed=embed)
+        else:
+            await interaction.followup.send("**You must be in a blackjack game!**")
+
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        return self.player.id == interaction.user.id
+
+    async def end_game(self, interaction: discord.Interaction) -> None:
+        """ Ends the game.
+        :param interaction: The interaction. """
+
+        await utils.disable_buttons(self)
+        await interaction.followup.edit_message(interaction.message.id, view=self)
+        self.stop()

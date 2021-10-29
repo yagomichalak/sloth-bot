@@ -172,7 +172,6 @@ class Game:
                 self.message = await self.message.edit(embed=embed)
                 return
             else:
-                # await message.delete()
                 if str(reaction.emoji) == CROSS_EMOJI:
                     await self.game_over("quit", self.player_active, self.player_inactive)
                     return
@@ -455,6 +454,9 @@ class ConnectFour(commands.Cog):
         if not member or member.bot:
             return await self.ai(ctx)
 
+        if member.id == ctx.author.id:
+            return await ctx.send("**You cannot play against yourself!**")
+
         check, emoji = self.check_emojis(emoji1, emoji2)
         if not check:
             raise commands.EmojiNotFound(emoji)
@@ -462,8 +464,6 @@ class ConnectFour(commands.Cog):
         check_author_result = await self.check_author(ctx, board_size)
         if not check_author_result:
             return
-
-        # self.get_player()
 
         if self.already_playing(ctx.author):
             return
