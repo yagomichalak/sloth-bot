@@ -563,6 +563,7 @@ class SmartRoomView(discord.ui.View):
         SlothCurrency = self.client.get_cog('SlothCurrency')
         user_currency = await SlothCurrency.get_user_currency(self.member.id)
         if not user_currency:
+            await interaction.followup.send(f"**You don't have a Sloth Account!**")
             return False
         
         if user_currency[0][1] < required_money:
