@@ -41,6 +41,12 @@ class VoiceManagement(commands.Cog):
                     msg = f"**Hey, I saw you are in the `Video Calls` channel and didn't turn on your camera. Please, do it or you will soon get disconnected!**"
                     try:
                         member = guild.get_member(user_id)
+                        if not member.voice or not (vc := member.voice.channel):
+                            continue
+
+                        if self.vcc_id != vc.id:
+                            continue
+
                         await member.send(msg)
                         self.people[user_id]['notified'] = True
                     except:
@@ -51,8 +57,13 @@ class VoiceManagement(commands.Cog):
                     del self.people[user_id]
                     # Disconnects users with cameras off
                     try:
-                        msg = f"**You got disconnected for not turning on your camera in the `Video Calls` voice channel!**"
                         member = guild.get_member(user_id)
+                        if not member.voice or not (vc := member.voice.channel):
+                            continue
+
+                        if self.vcc_id != vc.id:
+                            continue
+                        msg = f"**You got disconnected for not turning on your camera in the `Video Calls` voice channel!**"
                         await member.move_to(None)
                         await member.send(msg)
                     except:
