@@ -48,7 +48,11 @@ class BlackJack(commands.Cog):
         user_currency = await SlothCurrency.get_user_currency(player.id)
         if not user_currency:
             ctx.command.reset_cooldown(ctx)
-            return await ctx.reply("**You don't have an account yet, use `!text_rank` or `!vc_rank` to create one!**")
+            view = discord.ui.View()
+            view.add_item(discord.ui.Button(style=5, label="Create Account", emoji="🦥", url="https://thelanguagesloth.com/profile/update"))
+            return await ctx.send( 
+                embed=discord.Embed(description=f"**{player.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one, or in the button below!**"),
+                view=view)
 
 
         player_bal = user_currency[0][1]
