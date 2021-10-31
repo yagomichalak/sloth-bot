@@ -31,46 +31,42 @@ class BlackJack(commands.Cog):
         guild_id = ctx.guild.id
 
         if not bet:
+            ctx.command.reset_cooldown(ctx)
             return await ctx.reply("**Please, inform an amount to bet!**")
 
         try:
             bet = int(bet)
         except ValueError:
+            ctx.command.reset_cooldown(ctx)
             return await ctx.reply("**Please, inform an integer value!**")
 
         if bet > 1000:
+            ctx.command.reset_cooldown(ctx)
             return await ctx.reply("**The betting limit is `1000łł`!**")
 
         SlothCurrency = self.client.get_cog('SlothCurrency')
         user_currency = await SlothCurrency.get_user_currency(player.id)
         if not user_currency:
+            ctx.command.reset_cooldown(ctx)
             return await ctx.reply("**You don't have an account yet, use `!text_rank` or `!vc_rank` to create one!**")
 
 
         player_bal = user_currency[0][1]
         minimum_bet = 50
 
-        try:
-            bet = int(bet)
-        except ValueError:
-            raise commands.UserInputError
-
-        if user_currency[0][1] < minimum_bet:
-            return await ctx.reply("**The minimum bet is `50 leaves`!**")
-
-        if user_currency[0][1] < bet:
-            return await ctx.reply(f"**You don't have `{bet}`!**")
-
         if self.blackjack_games.get(guild_id) is None:
             self.blackjack_games[guild_id] = {}
 
         # Check if player's blackjack game is active
         if player.id in self.blackjack_games[guild_id]:
+            ctx.command.reset_cooldown(ctx)
             await ctx.send("**You are already in a game!**")
         elif bet < minimum_bet:
+            ctx.command.reset_cooldown(ctx)
             await ctx.send(f"**The minimum bet is `{minimum_bet} leaves`!**")
         elif player_bal < bet:
-            await ctx.send("**You have insufficient funds!**")
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.reply(f"**You don't have `{bet}`!**")
         else:
             await SlothCurrency.update_user_money(player.id, -bet)
 
