@@ -206,6 +206,11 @@ async def on_application_command_error(ctx, error) -> None:
         await error_log.send(f"ERROR: {escape_mentions(str(error))} | Class: {error.__class__} | Cause: {error.__cause__}")
         await error_log.send('='*10)
 
+# @client.event
+# async def on_typing(channel, user, when) -> None:
+#     await channel.send("**I smell you... 👀**")
+    
+
 # Members status update
 @tasks.loop(seconds=10)
 async def change_status():
