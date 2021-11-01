@@ -503,6 +503,59 @@ class EventManagement(commands.Cog):
         else:
             await ctx.send(f"**{member.mention}, {text_channel.mention} is up and running!**")
 
+    @create_event.command()
+    @commands.has_any_role(*[event_manager_role_id, mod_role_id, admin_role_id, owner_role_id])
+    @commands.cooldown(1, 60, commands.BucketType.user)
+    async def sport(self, ctx) -> None:
+        """ Creates a Sport Event voice and text channel. """
+
+        member = ctx.author
+        guild = ctx.guild
+        room = await self.get_event_room_by_user_id(member.id)
+        channel = discord.utils.get(guild.text_channels, id=room[2]) if room else None
+
+        if room and channel:
+            return await ctx.send(f"**{member.mention}, you already have an event room going on! ({channel.mention})**")
+        elif room and not channel:
+            await self.delete_event_room_by_txt_id(room[2])
+
+        confirm = await ConfirmSkill("Do you want to create a `Sport Event`?").prompt(ctx)
+        if not confirm:
+            return await ctx.send("**Not creating it then!**")
+
+        overwrites = await self.get_event_permissions(guild)
+
+        gamer_role = discord.utils.get(
+            guild.roles, id=int(os.getenv('SPORT_CLUB_ROLE_ID'))
+        )
+        # Adds some perms to the Karaoke Club role
+        overwrites[gamer_role] = discord.PermissionOverwrite(
+            read_messages=True, send_messages=True,
+            connect=True, speak=True, view_channel=True)
+
+        events_category = discord.utils.get(
+            guild.categories, id=int(os.getenv('EVENTS_CAT_ID')))
+
+        try:
+            # Creating text channel
+            text_channel = await events_category.create_text_channel(
+                name=f"🏃 Sport Event 🏃",
+                overwrites=overwrites)
+            # Creating voice channel
+            voice_channel = await events_category.create_voice_channel(
+                name=f"🏃 Sport Event 🏃",
+                user_limit=None,
+                overwrites=overwrites)
+            # Inserts it into the database
+            await self.insert_event_room(
+                user_id=member.id, vc_id=voice_channel.id, txt_id=text_channel.id)
+        except Exception as e:
+            print(e)
+            await ctx.send(f"**{member.mention}, something went wrong, try again later!**")
+
+        else:
+            await ctx.send(f"**{member.mention}, {text_channel.mention} is up and running!**")
+
 
     # DELETE EVENT
 
