@@ -881,105 +881,106 @@ class Moderation(*moderation_cogs):
 		if not member:
 			return await ctx.send('**Member not found!**', delete_after=3)
 
-		if not await utils.is_allowed(allowed_roles).predicate(channel=ctx.channel, member=member):
-			perpetrators = []
-			confirmations = {}
+		if await utils.is_allowed(allowed_roles).predicate(channel=ctx.channel, member=member):
+			return await ctx.send(f"**You cannot ban a staff member, {author.mention}!**")
+			
+		perpetrators = []
+		confirmations = {}
 
-			perms = channel.permissions_for(author)
+		perms = channel.permissions_for(author)
 
-			if not perms.administrator:
-				confirmations[author.id] = author.name
-				mod_ban_embed = discord.Embed(
-					title=f"Ban Request ({len(confirmations)}/4) → (5mins)",
-					description=f'''
-					{author.mention} wants to ban {member.mention}, it requires 3 more moderator ✅ reactions for it!
-					```Reason: {reason}```''',
-					colour=discord.Colour.dark_red(), timestamp=ctx.message.created_at)
-				mod_ban_embed.set_author(name=f'{member} is going to Brazil...', icon_url=member.display_avatar)
-				msg = await ctx.send(embed=mod_ban_embed)
-				await msg.add_reaction('✅')
+		if not perms.administrator:
+			confirmations[author.id] = author.name
+			mod_ban_embed = discord.Embed(
+				title=f"Ban Request ({len(confirmations)}/4) → (5mins)",
+				description=f'''
+				{author.mention} wants to ban {member.mention}, it requires 3 more moderator ✅ reactions for it!
+				```Reason: {reason}```''',
+				colour=discord.Colour.dark_red(), timestamp=ctx.message.created_at)
+			mod_ban_embed.set_author(name=f'{member} is going to Brazil...', icon_url=member.display_avatar)
+			msg = await ctx.send(embed=mod_ban_embed)
+			await msg.add_reaction('✅')
 
-				# Prompts for 3 moderator reactions
-				def check_mod(r, u):
-					if u.bot:
-						return False
-					if r.message.id != msg.id:
-						return
+			# Prompts for 3 moderator reactions
+			def check_mod(r, u):
+				if u.bot:
+					return False
+				if r.message.id != msg.id:
+					return
 
-					if str(r.emoji) == '✅':
-						perms = channel.permissions_for(u)
-						if mod_role_id in [r.id for r in u.roles] or perms.administrator:
-							confirmations[u.id] = u.name
-							return True
-						else:
-							self.client.loop.create_task(
-								msg.remove_reaction('✅', u)
-								)
-							return False
-
+				if str(r.emoji) == '✅':
+					perms = channel.permissions_for(u)
+					if mod_role_id in [r.id for r in u.roles] or perms.administrator:
+						confirmations[u.id] = u.name
+						return True
 					else:
 						self.client.loop.create_task(
-							msg.remove_reaction(r.emoji, u)
+							msg.remove_reaction('✅', u)
 							)
 						return False
 
-				while True:
-					try:
-						r, u = await self.client.wait_for('reaction_add', timeout=300, check=check_mod)
-					except asyncio.TimeoutError:
-						mod_ban_embed.description = f'Timeout, {member} is not getting banned!'
-						await msg.remove_reaction('✅', self.client.user)
-						return await msg.edit(embed=mod_ban_embed)
+				else:
+					self.client.loop.create_task(
+						msg.remove_reaction(r.emoji, u)
+						)
+					return False
+
+			while True:
+				try:
+					r, u = await self.client.wait_for('reaction_add', timeout=300, check=check_mod)
+				except asyncio.TimeoutError:
+					mod_ban_embed.description = f'Timeout, {member} is not getting banned!'
+					await msg.remove_reaction('✅', self.client.user)
+					return await msg.edit(embed=mod_ban_embed)
+				else:
+					mod_ban_embed.title = f"Ban Request ({len(confirmations)}/4) → (5mins)"
+					await msg.edit(embed=mod_ban_embed)
+					if channel.permissions_for(u).administrator:
+						break
+					elif len(confirmations) < 4:
+						continue
 					else:
-						mod_ban_embed.title = f"Ban Request ({len(confirmations)}/4) → (5mins)"
-						await msg.edit(embed=mod_ban_embed)
-						if channel.permissions_for(u).administrator:
-							break
-						elif len(confirmations) < 4:
-							continue
-						else:
-							break
+						break
 
-			# Checks if it was a moderator ban request or just a normal ban
-			if len(confirmations) == 0:
-				perpetrators = ctx.author
-				icon = ctx.author.display_avatar
-			else:
-				perpetrators = ', '.join(confirmations.values())
-				icon = ctx.guild.icon.url
-
-			# Bans and logs
-			# General embed
-			general_embed = discord.Embed(description=f'**Reason:** {reason}', colour=discord.Colour.dark_red())
-			general_embed.set_author(name=f'{member} has been banned', icon_url=member.display_avatar)
-			await ctx.send(embed=general_embed)
-			try:
-				await member.send(content="If you think you should be unbanned, you can make a ban appeal here: https://discord.gg/f9B7FzYv8D", embed=general_embed)
-			except Exception as e:
-				pass
-			try:
-				await member.ban(delete_message_days=7, reason=reason)
-			except Exception:
-				await ctx.send('**You cannot do that!**', delete_after=3)
-			else:
-				# Moderation log embed
-				moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
-				embed = discord.Embed(title='__**Banishment**__', colour=discord.Colour.dark_red(),
-									timestamp=ctx.message.created_at)
-				embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nId: {member.id}```',
-								inline=False)
-				embed.add_field(name='Reason:', value=f'```{reason}```')
-				embed.set_author(name=member)
-				embed.set_thumbnail(url=member.display_avatar)
-				embed.set_footer(text=f"Banned by {perpetrators}", icon_url=icon)
-				await moderation_log.send(embed=embed)
-				# Inserts a infraction into the database
-				current_ts = await utils.get_timestamp()
-				await self.insert_user_infraction(
-				user_id=member.id, infr_type="ban", reason=reason,
-				timestamp=current_ts, perpetrator=ctx.author.id)
+		# Checks if it was a moderator ban request or just a normal ban
+		if len(confirmations) == 0:
+			perpetrators = ctx.author
+			icon = ctx.author.display_avatar
 		else:
-			await ctx.send(f"**You cannot ban a staff member, {author.mention}!**")
+			perpetrators = ', '.join(confirmations.values())
+			icon = ctx.guild.icon.url
+
+		# Bans and logs
+		# General embed
+		general_embed = discord.Embed(description=f'**Reason:** {reason}', colour=discord.Colour.dark_red())
+		general_embed.set_author(name=f'{member} has been banned', icon_url=member.display_avatar)
+		await ctx.send(embed=general_embed)
+		try:
+			await member.send(content="If you think you should be unbanned, you can make a ban appeal here: https://discord.gg/f9B7FzYv8D", embed=general_embed)
+		except Exception as e:
+			pass
+		try:
+			await member.ban(delete_message_days=7, reason=reason)
+		except Exception:
+			await ctx.send('**You cannot do that!**', delete_after=3)
+		else:
+			# Moderation log embed
+			moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
+			embed = discord.Embed(title='__**Banishment**__', colour=discord.Colour.dark_red(),
+								timestamp=ctx.message.created_at)
+			embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nId: {member.id}```',
+							inline=False)
+			embed.add_field(name='Reason:', value=f'```{reason}```')
+			embed.set_author(name=member)
+			embed.set_thumbnail(url=member.display_avatar)
+			embed.set_footer(text=f"Banned by {perpetrators}", icon_url=icon)
+			await moderation_log.send(embed=embed)
+			# Inserts a infraction into the database
+			current_ts = await utils.get_timestamp()
+			await self.insert_user_infraction(
+			user_id=member.id, infr_type="ban", reason=reason,
+			timestamp=current_ts, perpetrator=ctx.author.id)
+			
 
 	# Bans a member
 	@commands.command()
