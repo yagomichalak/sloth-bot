@@ -131,8 +131,8 @@ class BlackJackGame:
         secret_card = self.dealer_cards[0]
         if secret_card.number == '1':
             secret_card.number = 'A'
-        secret_card.symbol = secret_card.original_symbol
-        # secret_card.symbol = f"<:{secret_card.number}{secret_card.card_type}>"
+        secret_card.symbol = '`' + secret_card.number + secret_card.card_type + '`'
+        
         self.dealer_cards[0] = secret_card
         self.dealer_total_showed = self.dealer_total
 
