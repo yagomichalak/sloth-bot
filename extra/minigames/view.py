@@ -375,9 +375,9 @@ class BlackJackActionView(discord.ui.View):
         guild_id = interaction.guild.id
         cog = self.client.get_cog('Games')
 
-        Economy = self.client.get_cog('Economy')
-        user_economy = await Economy.get_user_economy(player_id)
-        player_bal = user_economy[1]
+        SlothCurrency = self.client.get_cog('SlothCurrency')
+        user_economy = await SlothCurrency.get_user_currency(player_id)
+        player_bal = user_economy[0][1]
 
         if cog.blackjack_games.get(guild_id) is None:
             cog.blackjack_games[guild_id] = {}
