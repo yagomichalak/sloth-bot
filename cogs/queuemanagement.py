@@ -11,7 +11,7 @@ moderator_role_id = int(os.getenv('MOD_ROLE_ID'))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID'))
 owner_role_id = int(os.getenv('OWNER_ROLE_ID'))
 teacher_role_id = int(os.getenv('TEACHER_ROLE_ID'))
-
+event_host_role_id = int(os.getenv('EVENT_MANAGER_ROLE_ID'))
 
 class QueueManagement(commands.Cog):
     """ Category for creating, managing and interacting with queues. """
@@ -24,7 +24,7 @@ class QueueManagement(commands.Cog):
         print('QueueManagement cog is online!')
 
     @commands.group()
-    @utils.is_allowed([teacher_role_id, moderator_role_id, admin_role_id, owner_role_id])
+    @utils.is_allowed([event_host_role_id, teacher_role_id, moderator_role_id, admin_role_id, owner_role_id], throw_exc=True)
     async def queue(self, ctx) -> None:
         """ Command for managing and interacting with a queue.
         (Use this without a subcommand to see all subcommands available) """
