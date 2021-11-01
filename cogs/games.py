@@ -120,9 +120,9 @@ class Games(*minigames_cogs):
         await self.generate_flag_game(ctx=ctx, points=0, round=0, flags=flags)
 
 
-    async def generate_flag_game(self, ctx: commands.Context, message: Optional[discord.Message] = None, points: int = 0, round: int = 0, flags: List[Any] = None):
+    async def generate_flag_game(self, ctx: commands.Context, message: Optional[discord.Message] = None, points: int = 0, round: int = 0, flags: List[Any] = None, timeout_count: int = 0):
         # Open JSON file
-        json_flags = json.load(open("extra/random/json/flag_game.json"))
+        json_flags = json.load(open("extra/random/json/flag_game.json", encoding='utf-8'))
 
         # Creates the name options
         countries_options = []
@@ -147,7 +147,7 @@ class Games(*minigames_cogs):
         embed.set_footer(text=f"Round {round + 1} of 20")
 
         # Creates the buttons
-        view = FlagsGameView(ctx=ctx, client=self.client, countries_names=countries_options, flags=flags, points=points, round=round)
+        view = FlagsGameView(ctx=ctx, client=self.client, countries_names=countries_options, flags=flags, points=points, round=round, timeout_count=timeout_count)
     
         if message:
             await message.edit('\u200b', embed=embed, view=view)  
@@ -170,11 +170,19 @@ class Games(*minigames_cogs):
 
             await asyncio.sleep(1)
 
+            if view.timeout_count == 3:
+                return await self.end_flag_game(ctx=ctx, message=message, member=ctx.message.author, points=points)
+
+            else:
+                view.timeout_count += 1
+
             if round >= 19:
                 return await self.end_flag_game(ctx=ctx, message=message, member=ctx.message.author, points=points)
     
-            await self.generate_flag_game(ctx=ctx, message=message, points=points, round=round + 1, flags=flags)
+            await self.generate_flag_game(ctx=ctx, message=message, points=points, round=round + 1, flags=flags, timeout_count=view.timeout_count)
 
+        else:
+            view.timeout_count = 0
 
     async def end_flag_game(self, ctx: commands.Context, message: discord.Message, member: discord.Member, points: int):
         # Generates the end game embed

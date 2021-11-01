@@ -288,7 +288,7 @@ class MoveObjectGameView(discord.ui.View):
 class FlagsGameView(discord.ui.View):
     """ View for the FlagGame. """
 
-    def __init__(self, ctx: commands.Context, client: commands.Bot, countries_names: List[str], flags: list, points: int, round: int) -> None:
+    def __init__(self, ctx: commands.Context, client: commands.Bot, countries_names: List[str], flags: list, points: int, round: int, timeout_count: int = 0) -> None:
         super().__init__(timeout=30)
         self.ctx = ctx
         self.client = client
@@ -298,13 +298,13 @@ class FlagsGameView(discord.ui.View):
         self.round = round
         self.cog = self.client.get_cog('Games')
         self.used = False
+        self.timeout_count = timeout_count
 
         counter: int = 0
-        for i in range(2):
-            for _ in range(2):
-                counter += 1
-                button = FlagsGameButton(style=discord.ButtonStyle.secondary, custom_id=self.countries_names[counter-1], label=self.countries_names[counter-1][:-1],  row=i)
-                self.add_item(button)
+        for _ in range(4):
+            counter += 1
+            button = FlagsGameButton(style=discord.ButtonStyle.secondary, custom_id=self.countries_names[counter-1], label=self.countries_names[counter-1][:-1],  row=1)
+            self.add_item(button)
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
         return interaction.user.id == self.ctx.author.id
