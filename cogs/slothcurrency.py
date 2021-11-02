@@ -4,8 +4,6 @@ from discord.ext import commands, menus
 from discord.utils import escape_mentions
 from mysqldb import *
 from external_cons import the_drive
-from datetime import datetime
-import random
 from PIL import Image, ImageDraw, ImageFont
 import os
 
@@ -17,7 +15,7 @@ import glob
 from itertools import cycle
 
 from extra.menu import InventoryLoop
-from typing import List, Dict, Tuple, Union
+from typing import List, Dict, Tuple, Union, Any
 
 from extra.useful_variables import level_badges, flag_badges
 from extra.gif_manager import GIF
@@ -37,24 +35,30 @@ guild_ids = [int(os.getenv('SERVER_ID'))]
 class SlothCurrency(commands.Cog):
     """ Sloth Currency commands. """
 
-    def __init__(self, client):
+    def __init__(self, client) -> None:
+        """ Class init method. """
+
         self.client = client
         self.session = aiohttp.ClientSession()
 
     @commands.Cog.listener()
-    async def on_ready(self):
+    async def on_ready(self) -> None:
+        """ Tells when the cog is ready to go. """
+
         print("SlothCurrency cog is online!")
         # await self.download_update()
         # await self.text_download_update()
 
     @commands.Cog.listener()
-    async def on_message(self, message):
+    async def on_message(self, message) -> None:
+        """ Updates the user's message counter and gives them XP. """
+
         if not message.guild:
             return
 
         if message.author.bot:
             return
-        if not await self.check_table_exist():
+        if not await self.check_user_server_activity_table_exists():
             return
 
         user_info = await self.get_user_activity_info(message.author.id)
@@ -66,10 +70,12 @@ class SlothCurrency(commands.Cog):
             await self.update_user_server_messages(message.author.id, 1)
 
     @commands.Cog.listener()
-    async def on_voice_state_update(self, member, before, after):
+    async def on_voice_state_update(self, member, before, after) -> None:
+        """ Updates the user's server time counter. """
+
         if member.bot:
             return
-        if not await self.check_table_exist():
+        if not await self.check_user_server_activity_table_exists():
             return
 
         the_time = await utils.get_timestamp()
@@ -106,11 +112,10 @@ class SlothCurrency(commands.Cog):
         await mid.add_reaction(reaction)
 
     @commands.command(aliases=['inv'])
-    async def inventory(self, ctx, member: discord.Member = None):
-        '''
-        Shows the member's item inventory.
-        :param member: The member to show.
-        '''
+    async def inventory(self, ctx, member: discord.Member = None) -> None:
+        """ Shows the member's item inventory.
+        :param member: The member to show. """
+
         await ctx.message.delete()
         if not member:
             member = discord.utils.get(ctx.guild.members, id=ctx.author.id)
@@ -124,11 +129,10 @@ class SlothCurrency(commands.Cog):
         await the_menu.start(ctx)
 
     @commands.command()
-    async def equip(self, ctx, *, item_name: str = None):
-        '''
-        Equips an item.
-        :param item_name: The item to equip.
-        '''
+    async def equip(self, ctx, *, item_name: str = None) -> None:
+        """ Equips an item.
+        :param item_name: The item to equip. """
+
         item_name = escape_mentions(item_name)
 
         await ctx.message.delete()
@@ -145,11 +149,10 @@ class SlothCurrency(commands.Cog):
             return await ctx.send(f"**You don't have an item named __{item_name.title()}__!**", delete_after=3)
 
     @commands.command()
-    async def unequip(self, ctx, *, item_name: str = None):
-        '''
-        Unequips an item.
-        :param item_name: The item to unequip
-        '''
+    async def unequip(self, ctx, *, item_name: str = None) -> None:
+        """ Unequips an item.
+        :param item_name: The item to unequip """
+
         item_name = escape_mentions(item_name)
 
         await ctx.message.delete()
@@ -171,10 +174,9 @@ class SlothCurrency(commands.Cog):
     # Database commands
     @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
-    async def create_table_user_items(self, ctx):
-        '''
-        (ADM) Creates the UserItems table.
-        '''
+    async def create_table_user_items(self, ctx) -> None:
+        """ (ADM) Creates the UserItems table. """
+
         await ctx.message.delete()
         mycursor, db = await the_database()
         await mycursor.execute("""
@@ -184,44 +186,41 @@ class SlothCurrency(commands.Cog):
         await db.commit()
         await mycursor.close()
 
-        return await ctx.send("**Table *UserItems* created!**", delete_after=3)
+        return await ctx.send("**Table `UserItems` created!**", delete_after=3)
 
     @commands.has_permissions(administrator=True)
     @commands.command(hidden=True)
-    async def drop_table_user_items(self, ctx):
-        '''
-        (ADM) Drops the UserItems table.
-        '''
+    async def drop_table_user_items(self, ctx) -> None:
+        """ (ADM) Drops the UserItems table. """
+
         await ctx.message.delete()
         mycursor, db = await the_database()
         await mycursor.execute("DROP TABLE UserItems")
         await db.commit()
         await mycursor.close()
 
-        return await ctx.send("**Table *UserItems* dropped!**", delete_after=3)
+        return await ctx.send("**Table `UserItems` dropped!**", delete_after=3)
 
     @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
-    async def reset_table_user_items(self, ctx):
-        '''
-        (ADM) Resets the UserItems table.
-        '''
+    async def reset_table_user_items(self, ctx) -> None:
+        """ (ADM) Resets the UserItems table. """
+
         await ctx.message.delete()
         mycursor, db = await the_database()
         await mycursor.execute("DELETE FROM UserItems")
         await db.commit()
         await mycursor.close()
 
-        return await ctx.send("**Table *UserItems* reseted!**", delete_after=3)
+        return await ctx.send("**Table `UserItems` reset!**", delete_after=3)
 
     @commands.command()
     @commands.has_permissions(administrator=True)
-    async def add_member(self, ctx, member: discord.Member = None, *, item_name: str = None):
-        '''
-        (ADM) Gives a member an item.
+    async def add_member(self, ctx, member: discord.Member = None, *, item_name: str = None) -> None:
+        """ (ADM) Gives a member an item.
         :param member: The member to give the item.
-        :param item_name: The name of the item.
-        '''
+        :param item_name: The name of the item. """
+
         item_name = escape_mentions(item_name)
 
         if not member:
@@ -263,11 +262,11 @@ class SlothCurrency(commands.Cog):
         """ Gets all UserItems that are registered on the website.
         :param user_id: The ID of the user to get the items from. """
 
-        mycursor, db = await the_database()
+        mycursor, _ = await the_database()
         await mycursor.execute("""
-        SELECT SSI.* FROM UserItems AS UI 
-        LEFT JOIN slothdjango.shop_shopitem AS SSI ON UI.item_name = SSI.item_name
-        WHERE user_id = %s
+            SELECT SSI.* FROM UserItems AS UI 
+            LEFT JOIN slothdjango.shop_shopitem AS SSI ON UI.item_name = SSI.item_name
+            WHERE user_id = %s
         """, (user_id,))
         user_items = await mycursor.fetchall()
         await mycursor.close()
@@ -275,12 +274,11 @@ class SlothCurrency(commands.Cog):
 
     @commands.command()
     @commands.has_permissions(administrator=True)
-    async def remove_member_item(self, ctx, member: discord.Member = None, *, item_name: str = None):
-        '''
-        (ADM) Removes an item from the member.
+    async def remove_member_item(self, ctx, member: discord.Member = None, *, item_name: str = None) -> None:
+        """ (ADM) Removes an item from the member.
         :param member: The member to remove the item.
-        :param item_name: The name of the item.
-        '''
+        :param item_name: The name of the item. """
+
         item_name = escape_mentions(item_name)
 
         if not member:
@@ -296,44 +294,69 @@ class SlothCurrency(commands.Cog):
         else:
             return await ctx.send(f"**{member.name} doesn't have that item!**", delete_after=3)
 
-    async def insert_user_item(self, user_id: int, item_name: str, enable: str, item_type: str, item_image: str):
+    async def insert_user_item(self, user_id: int, item_name: str, enable: str, item_type: str, item_image: str) -> None:
+        """ Inserts an item to the user inventory.
+        :param user_id: The ID of the user.
+        :param item_name: The name of the item to insert.
+        :param enable: Whether to insert it as equipped or unequipped.
+        :param item_type: The type of the item. (head/foot/hand/body/background)
+        :param item_image: The name of the image that illustrates the item. """
+
         mycursor, db = await the_database()
         await mycursor.execute("INSERT INTO UserItems (user_id, item_name, enable, item_type, image_name) VALUES (%s, %s, %s, %s, %s)",
                                (user_id, item_name.title(), enable, item_type.lower(), item_image))
         await db.commit()
         await mycursor.close()
 
-    async def remove_user_item(self, user_id: int, item_name: str):
+    async def remove_user_item(self, user_id: int, item_name: str) -> None:
+        """ Removes an item from the user's inventory.
+        :param user_id: The ID of the user from whom to remove the item.
+        :param item_name: The name of the item to remove. """
+
         mycursor, db = await the_database()
-        await mycursor.execute(f"DELETE FROM UserItems WHERE item_name = '{item_name}' and user_id = {user_id}")
+        await mycursor.execute("DELETE FROM UserItems WHERE item_name = %s and user_id = %s", (item_name, user_id))
         await db.commit()
         await mycursor.close()
 
-    async def update_user_item_info(self, user_id: int, item_name: str, enable: str):
+    async def update_user_item_info(self, user_id: int, item_name: str, enable: str) -> None:
+        """ Updates the user's item enabled state.
+        :param user_id: The ID of the user owner of the item.
+        :param item_name: The name of the item.
+        :param enable: The new state to set the item to. (equipped/unequipped) """
+
         mycursor, db = await the_database()
-        await mycursor.execute(
-            f"UPDATE UserItems SET enable = '{enable}' WHERE user_id = {user_id} and item_name = '{item_name}'")
+        await mycursor.execute("UPDATE UserItems SET enable = %s WHERE user_id = %s and item_name = %s", (enable, user_id, item_name))
         await db.commit()
         await mycursor.close()
 
-    async def get_user_item(self, user_id: int, item_name: str):
-        mycursor, db = await the_database()
+    async def get_user_item(self, user_id: int, item_name: str) -> List[Union[int, str]]:
+        """ Gets a specific item from the user's inventory.
+        :param user_id: The ID of the user from whom to get the item.
+        :param item_name: The name of the item to get. """
+
+        mycursor, _ = await the_database()
         await mycursor.execute("SELECT * FROM UserItems WHERE user_id = %s AND item_name = %s", (user_id, item_name))
         item_system = await mycursor.fetchone()
         await mycursor.close()
         return item_system
 
-    async def get_user_items(self, user_id: int):
-        mycursor, db = await the_database()
+    async def get_user_items(self, user_id: int) -> List[List[Union[int, str]]]:
+        """ Gets all items from the user's inventory.
+        :param user_id: The ID of the user from whom to get the items. """
+
+        mycursor, _ = await the_database()
         await mycursor.execute("SELECT * FROM UserItems WHERE user_id = %s ORDER BY user_id", (user_id,))
         item_system = await mycursor.fetchall()
         await mycursor.close()
         return item_system
 
-    async def get_user_specific_type_item(self, user_id, item_type):
-        mycursor, db = await the_database()
-        await mycursor.execute(
-            f"SELECT item_name, image_name FROM UserItems WHERE user_id = {user_id} and item_type = '{item_type}' and enable = 'equipped'")
+    async def get_user_specific_type_item(self, user_id, item_type) -> str:
+        """ Gets a random item of a specific type from the user.
+        :param user_id: The ID of the user from whom to get the item.
+        :param item_type: The type of the item to get. """
+
+        mycursor, _ = await the_database()
+        await mycursor.execute("SELECT item_name, image_name FROM UserItems WHERE user_id = %s and item_type = %s and enable = 'equipped'", (user_id, item_type))
         spec_type_items = await mycursor.fetchone()
         await mycursor.close()
         if spec_type_items and spec_type_items[1]:
@@ -343,7 +366,11 @@ class SlothCurrency(commands.Cog):
             return f'./sloth_custom_images/{item_type}/base_{item_type}.png'
 
     async def check_user_can_equip(self, user_id: int, item_name: str) -> bool:
-        mycursor, db = await the_database()
+        """ Checks whether a user can equip a specific item.
+        :param user_id: The ID of the user to check.
+        :param item_name: The name of the item. """
+
+        mycursor, _ = await the_database()
         await mycursor.execute("SELECT item_type FROM UserItems WHERE user_id = %s AND item_name = %s", (user_id, item_name))
         item_type = await mycursor.fetchone()
         
@@ -359,7 +386,11 @@ class SlothCurrency(commands.Cog):
             return True
 
     async def check_user_can_unequip(self, user_id, item_name: str) -> bool:
-        mycursor, db = await the_database()
+        """ Checks whether a user can unequip a specific item.
+        :param user_id: The ID of the user to check.
+        :param item_name: The name of the item. """
+
+        mycursor, _ = await the_database()
         await mycursor.execute(
             "SELECT * FROM UserItems WHERE user_id = %s and item_name = %s and enable = 'unequipped'", (user_id, item_name.title()))
         unequipped_item = await mycursor.fetchall()
@@ -371,16 +402,22 @@ class SlothCurrency(commands.Cog):
             return True
 
     async def get_user_specific_item(self, user_id: int, item_name: str) -> List[Union[str, int]]:
-        mycursor, db = await the_database()
+        """ Gets a user's specific item.
+        :param user_id: The ID of the user from whom to get the item.
+        :param item_name: The name of the item to get. """
+
+        mycursor, _ = await the_database()
         await mycursor.execute("SELECT * FROM UserItems WHERE user_id = %s and item_name = %s", (user_id, item_name))
         item_system = await mycursor.fetchone()
         await mycursor.close()
         return item_system
 
-    async def check_user_has_item(self, user_id: int, item_name: str):
+    async def check_user_has_item(self, user_id: int, item_name: str) -> bool:
+        """ Checks whether the user has an item.
+        :param user_id: The ID of the user to check.
+        :param item_name: The name of the item to check. """
 
         user_item = await self.get_user_specific_item(user_id, item_name)
-        # print(user_items)
         if user_item:
             return True
         else:
@@ -389,10 +426,9 @@ class SlothCurrency(commands.Cog):
     # Table UserCurrency
     @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
-    async def create_table_user_currency(self, ctx):
-        '''
-        (ADM) Creates the UserCurrency table.
-        '''
+    async def create_table_user_currency(self, ctx) -> None:
+        """ (ADM) Creates the UserCurrency table. """
+
         await ctx.message.delete()
         mycursor, db = await the_database()
         await mycursor.execute("""
@@ -413,10 +449,9 @@ class SlothCurrency(commands.Cog):
 
     @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
-    async def drop_table_user_currency(self, ctx):
-        '''
-        (ADM) Drops the UserCurrency table.
-        '''
+    async def drop_table_user_currency(self, ctx) -> None:
+        """ (ADM) Drops the UserCurrency table. """
+
         await ctx.message.delete()
         mycursor, db = await the_database()
         await mycursor.execute("DROP TABLE UserCurrency")
@@ -427,10 +462,9 @@ class SlothCurrency(commands.Cog):
 
     @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
-    async def reset_table_user_currency(self, ctx):
-        '''
-        (ADM) Resets the UserCurrency table.
-        '''
+    async def reset_table_user_currency(self, ctx) -> None:
+        """ (ADM) Resets the UserCurrency table. """
+
         await ctx.message.delete()
         mycursor, db = await the_database()
         await mycursor.execute("DELETE FROM UserCurrency")
@@ -509,15 +543,6 @@ class SlothCurrency(commands.Cog):
         public_flag_names = list(map(lambda pf: pf.name, public_flags))
         return public_flag_names
 
-    
-    # @commands.slash_command(name="profile", guild_ids=guild_ids)
-    # @commands.cooldown(1, 5, commands.BucketType.user)
-    # async def _profile_slash(self, ctx, member: Option(discord.Member, description="The member to show the info; [Default=Yours]", required=False)) -> None:
-    #     """ Shows the member's profile with their custom sloth. """
-
-    #     await ctx.defer()
-    #     await self._profile(ctx, member)
-
     @commands.command(name="profile")
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def _profile_command(self, ctx, member: discord.Member = None):
@@ -538,7 +563,6 @@ class SlothCurrency(commands.Cog):
         """ Shows the member's profile with their custom sloth.
         :param member: The member to see the profile. (Optional) """
 
-        
         answer = None
         if isinstance(ctx, commands.Context):
             answer = ctx.send
@@ -721,33 +745,26 @@ class SlothCurrency(commands.Cog):
                     # print(efx, frame)
                     base.paste(frame, cords, frame)
                     gif.add_frame(base)
-                # print()
 
                 if i >= 400:
-                    # print('nah')
                     break
 
             else:
-                # print('saving...')
                 gif.export(gif_file_path)
-                # print('Finished!')
 
         except Exception as e:
-            # print('gaaa')
             print(e)
             pass
         finally:
-            # print('returning...')
             return gif_file_path
 
     @commands.command()
     @commands.has_permissions(administrator=True)
-    async def add_money(self, ctx, member: discord.Member = None, money: int = None):
-        '''
-        (ADM) Adds money to a member.
+    async def add_money(self, ctx, member: discord.Member = None, money: int = None) -> None:
+        """ (ADM) Adds money to a member.
         :param member: The member to add money to.
-        :param money: The amount of money to add.
-        '''
+        :param money: The amount of money to add. """
+
         if not member:
             return await ctx.send("**Inform a member!**", delete_after=3)
         elif not money:
@@ -756,9 +773,12 @@ class SlothCurrency(commands.Cog):
         await self.update_user_money(member.id, money)
         return await ctx.send(f"**{money} added to {member.name}'s bank account!**", delete_after=5)
 
-    async def get_user_currency(self, user_id: int):
-        mycursor, db = await the_database()
-        await mycursor.execute(f"SELECT * FROM UserCurrency WHERE user_id = {user_id}")
+    async def get_user_currency(self, user_id: int) -> List[List[int]]:
+        """ Gets the user's currency info.
+        :param user_id: The ID of the user to get. """
+
+        mycursor, _ = await the_database()
+        await mycursor.execute("SELECT * FROM UserCurrency WHERE user_id = %s", (user_id,))
         user_currency = await mycursor.fetchall()
         await mycursor.close()
         return user_currency
@@ -844,9 +864,8 @@ class SlothCurrency(commands.Cog):
     @commands.command()
     @commands.has_permissions(administrator=True)
     async def download_update(self, ctx=None, rall: str = 'no'):
-        """
-        (ADM) Downloads all shop images from the Google Drive.
-        """
+        """ (ADM) Downloads all shop images from the Google Drive. """
+
         if ctx:
             await ctx.message.delete()
 
@@ -854,7 +873,6 @@ class SlothCurrency(commands.Cog):
 
         if rall.lower() == 'yes':
             try:
-                # os.removedirs('./sloth_custom_images')
                 shutil.rmtree('./sloth_custom_images')
             except Exception:
                 pass
@@ -965,7 +983,7 @@ class SlothCurrency(commands.Cog):
 
             for key, item in all_folders.items():
                 if image_suffix == key:
-                    embed = discord.Embed(title=f"Category: {image_suffix}", colour=discord.Colour.dark_green(),
+                    embed = discord.Embed(title=f"Category: {image_suffix}", color=discord.Color.dark_green(),
                                           timestamp=ctx.message.created_at)
                     files = drive.ListFile({'q': "'%s' in parents and trashed=false" % item}).GetList()
                     print(f"\033[35mCategory:\033[m {image_suffix}")
@@ -979,36 +997,12 @@ class SlothCurrency(commands.Cog):
 
     # UserServerActivity
 
-    @commands.command(hidden=True)
-    @commands.has_permissions(administrator=True)
-    async def create_table_server_activity(self, ctx):
-        '''
-        (ADM) Creates the UserServerActivity table.
-        '''
-        await ctx.message.delete()
-        mycursor, db = await the_database()
-        await mycursor.execute(
-            "CREATE TABLE UserServerActivity (user_id bigint, user_messages bigint, user_time bigint, user_timestamp bigint DEFAULT NULL)")
-        await db.commit()
-        await mycursor.close()
+    async def insert_user_server_activity(self, user_id: int, add_msg: int, new_ts: int = None) -> None:
+        """ Inserts a user into the UserServerActivity table.
+        :param user_id: The ID of the user to insert.
+        :param add_msg: The initial message counter for the user to have.
+        :param new_ts: The current timestamp. """
 
-        return await ctx.send("**Table *UserServerActivity* created!**", delete_after=3)
-
-    @commands.command(hidden=True)
-    @commands.has_permissions(administrator=True)
-    async def drop_table_server_activity(self, ctx):
-        '''
-        (ADM) Drops the UserServerActivity table.
-        '''
-        await ctx.message.delete()
-        mycursor, db = await the_database()
-        await mycursor.execute("DROP TABLE UserServerActivity")
-        await db.commit()
-        await mycursor.close()
-
-        return await ctx.send("**Table *UserServerActivity* dropped!**", delete_after=3)
-
-    async def insert_user_server_activity(self, user_id: int, add_msg: int, new_ts: int = None):
         mycursor, db = await the_database()
         await mycursor.execute(
             "INSERT INTO UserServerActivity (user_id, user_messages, user_time, user_timestamp) VALUES (%s, %s, %s, %s)",
@@ -1016,55 +1010,103 @@ class SlothCurrency(commands.Cog):
         await db.commit()
         await mycursor.close()
 
-    async def get_user_activity_info(self, user_id: int):
-        mycursor, db = await the_database()
+    async def get_user_activity_info(self, user_id: int) -> List[List[int]]:
+        """ Gets a user from the UserServerActivity table.
+        :param user_id: The ID of the user to get. """
+
+        mycursor, _ = await the_database()
         await mycursor.execute(f"SELECT * FROM UserServerActivity WHERE user_id = {user_id}")
         user_info = await mycursor.fetchall()
         await mycursor.close()
         return user_info
 
-    async def update_user_server_messages(self, user_id: int, add_msg: int):
+    async def update_user_server_messages(self, user_id: int, add_msg: int) -> None:
+        """ Updates the user's message counter.
+        :param user_id: The ID of the user to update.
+        :param add_msg: The increment to apply to their current message counter. """
+
         mycursor, db = await the_database()
-        await mycursor.execute(
-            f"UPDATE UserServerActivity SET user_messages = user_messages + {add_msg} WHERE user_id = {user_id}")
+        await mycursor.execute("UPDATE UserServerActivity SET user_messages = user_messages + %s WHERE user_id = %s", (add_msg, user_id))
         await db.commit()
         await mycursor.close()
 
-    async def update_user_server_time(self, user_id: int, add_time: int):
+    @commands.command(hidden=True)
+    @commands.has_permissions(administrator=True)
+    async def create_table_server_activity(self, ctx):
+        """ (ADM) Creates the UserServerActivity table. """
+
+        await ctx.message.delete()
+        if await self.check_user_server_activity_table_exists():
+            return await ctx.send("The `UserServerActivity` already exists!**")
+
         mycursor, db = await the_database()
-        await mycursor.execute(
-            f"UPDATE UserServerActivity SET user_time = user_time + {add_time} WHERE user_id = {user_id}")
+        await mycursor.execute("CREATE TABLE UserServerActivity (user_id bigint, user_messages bigint, user_time bigint, user_timestamp bigint DEFAULT NULL)")
         await db.commit()
         await mycursor.close()
 
-    async def update_user_server_timestamp(self, user_id: int, new_ts: int):
+        return await ctx.send("**Table `UserServerActivity` created!**", delete_after=3)
+
+    @commands.command(hidden=True)
+    @commands.has_permissions(administrator=True)
+    async def drop_table_server_activity(self, ctx):
+        """ (ADM) Drops the UserServerActivity table. """
+
+        await ctx.message.delete()
+
+        if not await self.check_user_server_activity_table_exists():
+            return await ctx.send("The `UserServerActivity` doesn't exist!**")
+
         mycursor, db = await the_database()
-        await mycursor.execute(f"UPDATE UserServerActivity SET user_timestamp = {new_ts} WHERE user_id = {user_id}")
+        await mycursor.execute("DROP TABLE UserServerActivity")
+        await db.commit()
+        await mycursor.close()
+
+        return await ctx.send("**Table `UserServerActivity` dropped!**", delete_after=3)
+
+    async def update_user_server_time(self, user_id: int, add_time: int) -> None:
+        """ Updates the user's time counter.
+        :param user_id: The ID of the user to update.
+        :param add_time: The increment value to apply to the user's current time counter. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("UPDATE UserServerActivity SET user_time = user_time + %s WHERE user_id = %s", (add_time, user_id))
+        await db.commit()
+        await mycursor.close()
+
+    async def update_user_server_timestamp(self, user_id: int, new_ts: int) -> None:
+        """ Updates the user's Server Activity timestamp.
+        :param user_id: The ID of the user to update.
+        :param new_ts: The new timestamp to set to. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("UPDATE UserServerActivity SET user_timestamp = %s WHERE user_id = %s", (new_ts, user_id))
         await db.commit()
         await mycursor.close()
 
     @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
     async def reset_table_server_activity(self, ctx):
-        '''
-        (ADM) Resets the UserServerActivity table.
-        '''
+        """ (ADM) Resets the UserServerActivity table. """
+
         await ctx.message.delete()
+        if not await self.check_user_server_activity_table_exists():
+            return await ctx.send("The `UserServerActivity` doesn't exist yet!**")
+
         mycursor, db = await the_database()
         await mycursor.execute("DELETE FROM UserServerActivity")
         await db.commit()
         await mycursor.close()
-        return await ctx.send("**Table *UserServerActivity* reseted!**", delete_after=3)
+        return await ctx.send("**Table `UserServerActivity` reset!**", delete_after=3)
 
-    async def check_table_exist(self) -> bool:
-        mycursor, db = await the_database()
+    async def check_user_server_activity_table_exists(self) -> bool:
+        """ Checks whether the UserServerActivity table exists. """
+        
+        mycursor, _ = await the_database()
         await mycursor.execute("SHOW TABLE STATUS LIKE 'UserServerActivity'")
-        table_info = await mycursor.fetchall()
+        exists = await mycursor.fetchone()
         await mycursor.close()
-
-        if len(table_info) == 0:
+        if exists:
             return False
-
         else:
             return True
 
@@ -1086,37 +1128,6 @@ class SlothCurrency(commands.Cog):
                             value=f"Exchanged `{(time_times * 3600) / 60}` minutes for `{ctime}`łł;", inline=False)
         return await ctx.send(embed=embed)
 
-    # async def exchange(self, ctx):
-    #     """ Exchange your status into leaves (łł) """
-
-    #     user_info = await self.get_user_activity_info(ctx.author.id)
-    #     if not user_info:
-    #         return await ctx.send("**You have nothing to exchange!**")
-
-    #     user_found = await self.get_user_currency(ctx.author.id)
-    #     if not user_found:
-    #         current_ts = await utils.get_timestamp()
-    #         await self.insert_user_currency(ctx.author.id, current_ts - 61)
-
-    #     user_message = user_info[0][1]
-    #     user_time = user_info[0][2]
-    #     member_id = ctx.author.id
-    #     async with ctx.typing():
-    #         cmsg, message_times = await self.convert_messages(member_id, user_message)
-    #         ctime, time_times = await self.convert_time(member_id, user_time)
-
-    #         embed = discord.Embed(title="Exchange", color=ctx.author.color, timestamp=ctx.message.created_at)
-    #         embed.set_author(name=ctx.author, url=ctx.author.display_avatar)
-    #         if not cmsg == ctime == 0:
-    #             if cmsg > 0:
-    #                 embed.add_field(name="__**Messages:**__",
-    #                                 value=f"Exchanged `{message_times * 100}` messages for `{cmsg}`łł;", inline=False)
-    #             if ctime > 0:
-    #                 embed.add_field(name="__**Time:**__",
-    #                                 value=f"Exchanged `{(time_times * 3600) / 60}` minutes for `{ctime}`łł;", inline=False)
-    #             return await ctx.send(embed=embed)
-    #         else:
-    #             return await ctx.send("**You have nothing to exchange!**")
 
     async def convert_messages(self, user_message: int) -> List[int]:
         """ Converts the user's message counter to leaves.
@@ -1170,11 +1181,10 @@ class SlothCurrency(commands.Cog):
     @commands.command()
     @commands.has_permissions(administrator=True)
     async def add_time(self, ctx, member: discord.Member = None, add_time: int = None):
-        '''
-        (ADM) Adds time to the member's status.
+        """ (ADM) Adds time to the member's status.
         :param member: The member to add time to.
-        :param add_time: The amount of time to add. (in secs)
-        '''
+        :param add_time: The amount of time to add. (in secs) """
+
         if not add_time:
             return await ctx.send(f"**Inform an amount of seconds to add!**", delete_after=3)
         if not member:
@@ -1271,8 +1281,11 @@ class SlothCurrency(commands.Cog):
                     f"So {member.mention} actually got `{taxed_money}łł`!"
                 )
 
-    async def get_user_pfp(self, member, thumb_width: int = 59):
-        # im = Image.open(requests.get(member.display_avatar, stream=True).raw)
+    async def get_user_pfp(self, member, thumb_width: int = 59) -> Any:
+        """ Gets the user's profile picture.
+        :param member: The member from whom to get the profile picture.
+        :param thumb_width: The width of the thumbnail. [Default = 59] """
+
         async with self.session.get(str(member.display_avatar)) as response:
             image_bytes = await response.content.read()
             with BytesIO(image_bytes) as pfp:
@@ -1302,11 +1315,13 @@ class SlothCurrency(commands.Cog):
 
         im_square = crop_max_square(im).resize((thumb_width, thumb_width), Image.LANCZOS)
         im_thumb = mask_circle_transparent(im_square, 4)
-        # im_thumb.save('png/user_pfp.png', 'png', quality=90)
         return im_thumb
 
-    async def get_specific_user(self, user_id: int):
-        mycursor, db = await the_database()
+    async def get_specific_user(self, user_id: int) -> List[List[int]]:
+        """ Gets a specific user from the MembersScore table.
+        :param user_id: The ID of the user to get. """
+
+        mycursor, _ = await the_database()
         await mycursor.execute("SELECT * FROM MembersScore WHERE user_id = %s", (user_id,))
         member = await mycursor.fetchall()
         await mycursor.close()
