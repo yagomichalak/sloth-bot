@@ -6,8 +6,12 @@ import random
 
 
 class BlackJackGame:
+    """ Class for the BlackJack game. """
+
     def __init__(self, client: commands.Bot, bet: int, player: discord.Member, player_cards: list, dealer_cards: list,
                  game_pack: list, guild_id: int) -> None:
+        """ Class init method. """
+
         self.client = client
 
         # Initial settings for a blackjack game

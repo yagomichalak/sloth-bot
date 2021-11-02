@@ -5,6 +5,7 @@ from .create_cards_pack import cards_pack
 
 from extra.minigames.view import BlackJackActionView
 from extra import utils
+import asyncio
 
 class BlackJack(commands.Cog):
     """ To start a blackjack game in your channel use the 'blackjack <bet>' command,
@@ -82,4 +83,9 @@ class BlackJack(commands.Cog):
             view: discord.ui.View = BlackJackActionView(self.client, player)
             if current_game.status == 'finished':
                 await utils.disable_buttons(view)
-            await ctx.send(embed=current_game.embed(), view=view)
+            msg = await ctx.send(embed=current_game.embed(), view=view)
+
+            await view.wait()
+            await asyncio.sleep(0.3)
+            await utils.disable_buttons(view)
+            await msg.edit(embed=current_game.embed(), view=view)
