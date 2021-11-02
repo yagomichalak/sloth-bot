@@ -2,9 +2,12 @@ import discord
 from discord.ext import commands
 from .buttons import TicTacToeButton, FlagsGameButton
 
-from typing import Dict, List, Tuple, Union
+from typing import Dict, List, Tuple
 from random import randint
 from extra import utils
+import os
+
+server_id: int = int(os.getenv('SERVER_ID'))
 
 class TicTacToeView(discord.ui.View):
     """ View for the TicTacToe minigame. """
@@ -315,7 +318,7 @@ class BlackJackActionView(discord.ui.View):
     def __init__(self, client: commands.Bot, player: discord.Member) -> None:
         """ Class init method. """
 
-        super().__init__(timeout=120)
+        super().__init__(timeout=10)
         self.client = client
         self.player = player
 
@@ -376,8 +379,8 @@ class BlackJackActionView(discord.ui.View):
         cog = self.client.get_cog('Games')
 
         SlothCurrency = self.client.get_cog('SlothCurrency')
-        user_economy = await SlothCurrency.get_user_currency(player_id)
-        player_bal = user_economy[0][1]
+        user_currency = await SlothCurrency.get_user_currency(player_id)
+        player_bal = user_currency[0][1]
 
         if cog.blackjack_games.get(guild_id) is None:
             cog.blackjack_games[guild_id] = {}
@@ -438,3 +441,10 @@ class BlackJackActionView(discord.ui.View):
         await utils.disable_buttons(self)
         await interaction.followup.edit_message(interaction.message.id, view=self)
         self.stop()
+
+    async def on_timeout(self) -> None:
+        """ Puts the game status as finished when the game timeouts. """
+
+        cog = self.client.get_cog('Games')
+        del cog.blackjack_games[server_id][self.player.id]
+        return
