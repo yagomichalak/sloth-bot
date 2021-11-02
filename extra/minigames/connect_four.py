@@ -46,6 +46,7 @@ class Game:
 
         self.player_active = None
         self.player_inactive = None
+        self.last_move: str = None # Last piece played, the string emoji
 
     @staticmethod
     def generate_board(size: int) -> List[List[int]]:
@@ -72,6 +73,7 @@ class Game:
             embed = embeds[0]
             embed.title = title
             embed.description = formatted_grid
+
 
         if self.message:
             self.message = await self.message.edit(embed=embed)
@@ -126,6 +128,10 @@ class Game:
                         self.client.user if isinstance(self.player_active, AI) else self.player_active,
                         self.client.user if isinstance(self.player_inactive, AI) else self.player_inactive,
                     )
+                else:
+                    column_num = coords[1]
+                    self.last_move = NUMBERS[column_num]
+                    
             else:
                 coords = await self.player_turn()
 
@@ -158,8 +164,10 @@ class Game:
 
         embed = self.message.embeds[0]
         embed.color = self.player_active.color
-        embed.remove_field(0)
+        embed.clear_fields()
         embed.add_field(name="__Game State__", value=f"{self.player_active.mention}, it's your turn! React with the column you want to place your token in.")
+        if self.last_move:
+            embed.add_field(name="__Last Move__", value=f"Last piece played was: {self.last_move}", inline=False)
         self.message = await self.message.edit(embed=embed)
 
         player_num = 1 if self.player_active == self.player1 else 2
@@ -172,6 +180,7 @@ class Game:
                 self.message = await self.message.edit(embed=embed)
                 return
             else:
+                self.last_move = str(reaction.emoji)
                 if str(reaction.emoji) == CROSS_EMOJI:
                     await self.game_over("quit", self.player_active, self.player_inactive)
                     return
