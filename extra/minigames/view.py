@@ -318,7 +318,7 @@ class BlackJackActionView(discord.ui.View):
     def __init__(self, client: commands.Bot, player: discord.Member) -> None:
         """ Class init method. """
 
-        super().__init__(timeout=10)
+        super().__init__(timeout=120)
         self.client = client
         self.player = player
 
