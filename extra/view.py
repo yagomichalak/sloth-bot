@@ -261,11 +261,23 @@ class ExchangeActivityView(discord.ui.View):
         h, m = divmod(m, 60)
 
         await interaction.response.defer()
+        SlothCurrency = self.client.get_cog('SlothCurrency')
+        cmsg, message_times = await SlothCurrency.convert_messages(self.user_info[1])
+        ctime, time_times = await SlothCurrency.convert_time(self.user_info[2])
+
+        if cmsg == ctime == 0:
+            self.stop()
+            return await interaction.followup.send(f"**You have nothing to exchange, {member.mention}!**")
+
+        expected_money: int = cmsg + ctime
         
-        confirmed = await ConfirmSkill(f"**{member.mention}, are you sure you want to exchange your {h:d} hours, {m:02d} minutes and {self.user_info[1]} messages?**").prompt(ctx)
+        confirmed = await ConfirmSkill(f"**{member.mention}, are you sure you want to exchange your `{h:d}h`, `{m:02d}m` and `{self.user_info[1]} messages` for `{expected_money}łł`?**").prompt(ctx)
         if confirmed:
-            SlothCurrency = self.client.get_cog('SlothCurrency')
-            await SlothCurrency.exchange(ctx)
+            await SlothCurrency.exchange(ctx, cmsg, message_times, ctime, time_times)
+            # Updates user Activity Status and Money
+            await SlothCurrency.update_user_server_messages(member.id, -message_times * 100)
+            await SlothCurrency.update_user_server_time(member.id, -time_times * 1800)
+            await SlothCurrency.update_user_money(member.id, expected_money)
         else:
             await interaction.followup.send(f"**{member.mention}, not exchanging, then!**")
 

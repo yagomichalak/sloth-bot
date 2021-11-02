@@ -939,11 +939,9 @@ class SlothCurrency(commands.Cog):
     @commands.command()
     @commands.has_permissions(administrator=True)
     async def list_folder(self, ctx, image_suffix: str = None, item_name: str = None):
-        '''
-        (ADM) Lists a shop image folder from Google Drive.
-        :param image_suffix: The image/folder category.
+        """ (ADM) Lists a shop image folder from Google Drive.
+        :param image_suffix: The image/folder category. """
 
-        '''
         await ctx.message.delete()
         all_folders = {"background": "1V8l391o3-vsF9H2Jv24lDmy8e2erlHyI",
                        "sloth": "16DB_lNrnrmvxu2E7RGu01rQGQk7z-zRy",
@@ -953,6 +951,8 @@ class SlothCurrency(commands.Cog):
                        "badge": "1k8NRfwwLzIY5ALK5bUObAcrKr_eUlfjd",
                        "foot": "1Frfra1tQ49dKM6Dg4DIbrfYbtXadv9zj",
                        "head": "1Y9kSOayw4NDehbqfmvPXKZLrXnIjeblP"}
+
+        drive = await the_drive()
 
         if not image_suffix:
             for folder, folder_id in all_folders.items():
@@ -1068,39 +1068,60 @@ class SlothCurrency(commands.Cog):
         else:
             return True
 
-    async def exchange(self, ctx):
-        """ Exchange your status into leaves (łł) """
+    async def exchange(self, ctx, cmsg, message_times, ctime, time_times):
+        """ Exchange your status into leaves (łł).
+        :param ctx: The context of the command.
+        :param cmsg: The amount of leaves gotten from messages.
+        :param message_times: The amount of loops it took to get to the messages result.
+        :param ctime: The amount of leaves gotten from time.
+        :param time_times: The amount of loops it took to get to the time result. """
+        
+        embed = discord.Embed(title="Exchange", color=ctx.author.color, timestamp=ctx.message.created_at)
+        embed.set_author(name=ctx.author, url=ctx.author.display_avatar)
+        if cmsg > 0:
+            embed.add_field(name="__**Messages:**__",
+                            value=f"Exchanged `{message_times * 100}` messages for `{cmsg}`łł;", inline=False)
+        if ctime > 0:
+            embed.add_field(name="__**Time:**__",
+                            value=f"Exchanged `{(time_times * 3600) / 60}` minutes for `{ctime}`łł;", inline=False)
+        return await ctx.send(embed=embed)
 
-        user_info = await self.get_user_activity_info(ctx.author.id)
-        if not user_info:
-            return await ctx.send("**You have nothing to exchange!**")
+    # async def exchange(self, ctx):
+    #     """ Exchange your status into leaves (łł) """
 
-        user_found = await self.get_user_currency(ctx.author.id)
-        if not user_found:
-            current_ts = await utils.get_timestamp()
-            await self.insert_user_currency(ctx.author.id, current_ts - 61)
+    #     user_info = await self.get_user_activity_info(ctx.author.id)
+    #     if not user_info:
+    #         return await ctx.send("**You have nothing to exchange!**")
 
-        user_message = user_info[0][1]
-        user_time = user_info[0][2]
-        member_id = ctx.author.id
-        async with ctx.typing():
-            cmsg, message_times = await self.convert_messages(member_id, user_message)
-            ctime, time_times = await self.convert_time(member_id, user_time)
+    #     user_found = await self.get_user_currency(ctx.author.id)
+    #     if not user_found:
+    #         current_ts = await utils.get_timestamp()
+    #         await self.insert_user_currency(ctx.author.id, current_ts - 61)
 
-            embed = discord.Embed(title="Exchange", colour=ctx.author.color, timestamp=ctx.message.created_at)
-            embed.set_author(name=ctx.author, url=ctx.author.display_avatar)
-            if not cmsg == ctime == 0:
-                if cmsg > 0:
-                    embed.add_field(name="__**Messages:**__",
-                                    value=f"Exchanged `{message_times * 100}` messages for `{cmsg}`łł;", inline=False)
-                if ctime > 0:
-                    embed.add_field(name="__**Time:**__",
-                                    value=f"Exchanged `{(time_times * 3600) / 60}` minutes for `{ctime}`łł;", inline=False)
-                return await ctx.send(embed=embed)
-            else:
-                return await ctx.send("**You have nothing to exchange!**")
+    #     user_message = user_info[0][1]
+    #     user_time = user_info[0][2]
+    #     member_id = ctx.author.id
+    #     async with ctx.typing():
+    #         cmsg, message_times = await self.convert_messages(member_id, user_message)
+    #         ctime, time_times = await self.convert_time(member_id, user_time)
 
-    async def convert_messages(self, member_id, user_message: int):
+    #         embed = discord.Embed(title="Exchange", color=ctx.author.color, timestamp=ctx.message.created_at)
+    #         embed.set_author(name=ctx.author, url=ctx.author.display_avatar)
+    #         if not cmsg == ctime == 0:
+    #             if cmsg > 0:
+    #                 embed.add_field(name="__**Messages:**__",
+    #                                 value=f"Exchanged `{message_times * 100}` messages for `{cmsg}`łł;", inline=False)
+    #             if ctime > 0:
+    #                 embed.add_field(name="__**Time:**__",
+    #                                 value=f"Exchanged `{(time_times * 3600) / 60}` minutes for `{ctime}`łł;", inline=False)
+    #             return await ctx.send(embed=embed)
+    #         else:
+    #             return await ctx.send("**You have nothing to exchange!**")
+
+    async def convert_messages(self, user_message: int) -> List[int]:
+        """ Converts the user's message counter to leaves.
+        :param user_message: The message counter the user has. """
+
         messages_left = user_message
         exchanged_money = times = 0
 
@@ -1111,13 +1132,14 @@ class SlothCurrency(commands.Cog):
                 exchanged_money += 3
                 await asyncio.sleep(0)
                 continue
-                # return await self.convert_messages(member_id, messages_left, exchanged_money, times)
             else:
-                await self.update_user_server_messages(member_id, -times * 100)
-                await self.update_user_money(member_id, exchanged_money)
+                
                 return exchanged_money, times
 
-    async def convert_time(self, member_id, user_time: int):
+    async def convert_time(self, user_time: int) -> List[int]:
+        """ Converts the user's time counter to leaves.
+        :param user_time: The amount of time in seconds the user has. """
+
         time_left = user_time
         exchanged_money = times = 0
 
@@ -1128,20 +1150,16 @@ class SlothCurrency(commands.Cog):
                 exchanged_money += 3
                 await asyncio.sleep(0)
                 continue
-                # return await self.convert_time(member_id, time_left, exchanged_money, times)
             else:
-                await self.update_user_server_time(member_id, -times * 1800)
-                await self.update_user_money(member_id, exchanged_money)
                 return exchanged_money, times
 
     @commands.command()
     @commands.has_permissions(administrator=True)
     async def add_message(self, ctx, member: discord.Member = None, add_message: int = None):
-        '''
-        (ADM) Adds messages to the member's status.
+        """ (ADM) Adds messages to the member's status.
         :param member: The member to add the messages to.
-        :param add_message: The amount of messages to add.
-        '''
+        :param add_message: The amount of messages to add. """
+
         if not add_message:
             return await ctx.send(f"**Inform an amount of messages to add!**", delete_after=3)
         if not member:

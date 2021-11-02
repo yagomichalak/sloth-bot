@@ -238,7 +238,7 @@ class SlothReputation(commands.Cog):
             if 'sabotaged' in effects:
                 view.children[0].disabled = True
 
-            return await answer( embed=embed, view=view)
+            return await answer(embed=embed, view=view)
 
 
     @slash_command(name="leaderboard", guild_ids=guild_ids)
