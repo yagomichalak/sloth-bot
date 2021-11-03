@@ -8,7 +8,7 @@ from extra.view import SmartRoomView
 from extra import utils
 
 import os
-from typing import List
+from typing import List, Dict
 
 smartroom_cogs: List[commands.Cog] = [
 	SmartRoomDatabase, GalaxyRoomCommands
@@ -20,6 +20,8 @@ class CreateSmartRoom(*smartroom_cogs):
 		self.client = client
 		self.vc_id = int(os.getenv('CREATE_SMART_ROOM_VC_ID'))
 		self.cat_id = int(os.getenv('CREATE_SMART_ROOM_CAT_ID'))
+
+		self.user_cooldowns: Dict[int, int]
 
 
 	@commands.Cog.listener()
@@ -53,15 +55,16 @@ class CreateSmartRoom(*smartroom_cogs):
 			return
 
 		if after.channel.id == self.vc_id:
-			# the_time = await utils.get_timestamp()
-			# old_time = await self.get_user_vc_timestamp(member.id, the_time)
-			# if not the_time - old_time >= 60:
-			# 	await member.send(
-			# 		f"**You're on a cooldown, try again in {round(60 - (the_time - old_time))} seconds!**",)
-			# 	# return await member.move_to(None)
-			# 	return
-			# if the_time - old_time >= 60:
-			# 	await self.update_user_vc_ts(member.id, the_time)
+			the_time = await utils.get_timestamp()
+			old_time = await self.user_cooldowns.get(member.id)
+			if old_time:
+				if the_time - old_time < 60:
+					return await member.send(f"**You're on a cooldown, try again in {round(60 - (the_time - old_time))} seconds!**")
+
+				if the_time - old_time >= 60:
+					self.user_cooldowns[member.id] = the_time
+			else:
+				self.user_cooldowns[member.id] = the_time
 
 			embed = discord.Embed(color=member.color)
 			embed.set_image(url="attachment://create_galaxy_room.png")

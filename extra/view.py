@@ -554,7 +554,6 @@ class SmartRoomView(discord.ui.View):
         :param required_money: The required money to create the SmartRoom.
         :param room_type: The type of the room. (basic/premium/galaxy) """
 
-
         smart_rooms = await self.cog.get_smartroom(user_id=self.member.id, multiple=True)
         if [sr for sr in smart_rooms if sr.room_type == room_type]:
             await interaction.followup.send(f"**You already have an open `{room_type.title()}Room`!**")
