@@ -354,7 +354,7 @@ class Games(*minigames_cogs):
             ctx.command.reset_cooldown(ctx)
             return await ctx.reply("**Please, inform a valid side!**")
 
-        side = 'Tail' if side.lower() in side_options['Tail'] else 'Heads'
+        side = 'Tail' if side.lower() in side_options['Tail']['aliases'] else 'Heads'
 
         coin_var: str = choice(['Tail', 'Heads'])
         win_var: str = 'won' if side.lower() == coin_var.lower() else 'lost'
