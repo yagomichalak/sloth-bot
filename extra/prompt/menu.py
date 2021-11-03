@@ -167,6 +167,43 @@ async def prompt_number(client: commands.Bot, channel: discord.TextChannel, memb
 	else:
 		return int(content)
 
+async def prompt_number_user_limit(client: commands.Bot, channel: discord.TextChannel, member: discord.Member, limit: int = 1000, timeout: int = 60, delete_message: bool = True) -> Union[int, None]:
+	""" Prompts the user for a number.
+	:param channel: The channel.
+	:param member: The member that is gonna be prompted. """
+
+	def check(m) -> bool:
+		if m.author.id == member.id and channel.id == m.channel.id:
+			if delete_message:
+				client.loop.create_task(m.delete())
+			if len(m.content.strip()) <= len(str(limit)):
+				if m.content.strip().isdigit():
+					number: int = int(m.content.strip())
+					if number >= 0 and number <= limit and number != 1:
+						return True
+					else:
+						client.loop.create_task(channel.send(f"**The number has to be between 0-{limit} and different than 1, {member.mention}!**"))
+						return False
+				else:
+					client.loop.create_task(channel.send(f"**The number `MUST` be an integer value, {member.mention}!**"))
+					return False
+			else:
+				client.loop.create_task(channel.send(f"**The number has a maximum length of 2, {member.mention}!**"))
+				return False
+
+		else:
+			return False
+
+
+	try:
+		m = await client.wait_for('message', timeout=timeout, check=check)
+		content = m.content
+	except asyncio.TimeoutError:
+		await channel.send("**Timeout!**", delete_after=3)
+		return None
+	else:
+		return int(content)
+
 
 class Confirm(menus.Menu):
 	""" Reaction-role menu for confirming an action. """

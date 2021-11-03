@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 
-from extra.prompt.menu import prompt_number
+from extra.prompt.menu import prompt_number_user_limit
 from extra.menu import prompt_message
 from .menu import ConfirmSkill
 from .select import ReportSupportSelect
@@ -408,7 +408,7 @@ class SmartRoomView(discord.ui.View):
             answers: Dict[str, Union[str, int]] = await self.ask_creation_questions(self.member,
                 questions={
                     'vc_name': {'message': "**Type the name of your `Voice Channel!`**", 'check': prompt_message, 'kwargs': {'client': self.client, 'member': author, 'channel': author, 'limit': 99, 'timeout': 120}}, 
-                    'vc_user_limit': {'message': '**Type the user limit of your `Voice Channel! (0-99)`**', 'check': prompt_number, 'kwargs': {'client': self.client, 'channel': author.dm_channel, 'member': author, 'limit': 99, 'timeout': 120, 'delete_message': False}}
+                    'vc_user_limit': {'message': '**Type the user limit of your `Voice Channel! (0-99)`**', 'check': prompt_number_user_limit, 'kwargs': {'client': self.client, 'channel': author.dm_channel, 'member': author, 'limit': 99, 'timeout': 120, 'delete_message': False}}
                 }
             )
             if not answers:
@@ -443,7 +443,7 @@ class SmartRoomView(discord.ui.View):
             answers: Dict[str, Union[str, int]] = await self.ask_creation_questions(self.member,
                 questions={
                     'vc_name': {'message': "**Type the name of your `Voice Channel!`**", 'check': prompt_message, 'kwargs': {'client': self.client, 'member': author, 'channel': author, 'limit': 99, 'timeout': 120}}, 
-                    'vc_user_limit': {'message': '**Type the user limit of your `Voice Channel! (0-99)`**', 'check': prompt_number, 'kwargs': {'client': self.client, 'channel': author.dm_channel, 'member': author, 'limit': 99, 'timeout': 120, 'delete_message': False}}, 
+                    'vc_user_limit': {'message': '**Type the user limit of your `Voice Channel! (0-99)`**', 'check': prompt_number_user_limit, 'kwargs': {'client': self.client, 'channel': author.dm_channel, 'member': author, 'limit': 99, 'timeout': 120, 'delete_message': False}}, 
                     'txt_name': {'message': '**Type the name of your `Text Channel!`**', 'check': prompt_message, 'kwargs': {'client': self.client, 'member': author, 'channel': author, 'limit': 99, 'timeout': 120}}
                 }
             )
@@ -482,7 +482,7 @@ class SmartRoomView(discord.ui.View):
                 questions={
                     'cat_name': {'message': "**Type the name of your `Category`!**", 'check': prompt_message, 'kwargs': {'client': self.client, 'member': author, 'channel': author, 'limit': 25, 'timeout': 120}}, 
                     'vc_name': {'message': "**Type the name of your `Voice Channel`!**", 'check': prompt_message, 'kwargs': {'client': self.client, 'member': author, 'channel': author, 'limit': 25, 'timeout': 120}}, 
-                    'vc_user_limit': {'message': '**Type the user limit of your `Voice Channel`! (0-99)**', 'check': prompt_number, 'kwargs': {'client': self.client, 'channel': author.dm_channel, 'member': author, 'limit': 99, 'timeout': 120, 'delete_message': False}}, 
+                    'vc_user_limit': {'message': '**Type the user limit of your `Voice Channel`! (0-99)**', 'check': prompt_number_user_limit, 'kwargs': {'client': self.client, 'channel': author.dm_channel, 'member': author, 'limit': 99, 'timeout': 120, 'delete_message': False}}, 
                     'txt_name': {'message': '**Type the name of your `Text Channel!`**', 'check': prompt_message, 'kwargs': {'client': self.client, 'member': author, 'channel': author, 'limit': 25, 'timeout': 120}}
                 }
             )
@@ -540,7 +540,10 @@ class SmartRoomView(discord.ui.View):
             except asyncio.TimeoutError:
                 success = False
             else:
-                answers[question] = answer
+                if answer is not None:
+                    answers[question] = answer
+                else:
+                    success = False
 
         if success:
             return answers
@@ -555,7 +558,7 @@ class SmartRoomView(discord.ui.View):
         :param room_type: The type of the room. (basic/premium/galaxy) """
 
         smart_rooms = await self.cog.get_smartroom(user_id=self.member.id, multiple=True)
-        if [sr for sr in smart_rooms if sr.room_type == room_type]:
+        if smart_rooms and [sr for sr in smart_rooms if sr.room_type == room_type]:
             await interaction.followup.send(f"**You already have an open `{room_type.title()}Room`!**")
             return False
 
@@ -566,6 +569,7 @@ class SmartRoomView(discord.ui.View):
             return False
         
         if user_currency[0][1] < required_money:
-            return await interaction.followup.send(f"**You don't have `{required_money}łł` to pay this service!**")
+            await interaction.followup.send(f"**You don't have `{required_money}łł` to pay this service!**")
+            return False
 
         return True

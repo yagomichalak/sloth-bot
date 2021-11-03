@@ -21,7 +21,7 @@ class CreateSmartRoom(*smartroom_cogs):
 		self.vc_id = int(os.getenv('CREATE_SMART_ROOM_VC_ID'))
 		self.cat_id = int(os.getenv('CREATE_SMART_ROOM_CAT_ID'))
 
-		self.user_cooldowns: Dict[int, int]
+		self.user_cooldowns: Dict[int, int] = {}
 
 
 	@commands.Cog.listener()
@@ -56,7 +56,8 @@ class CreateSmartRoom(*smartroom_cogs):
 
 		if after.channel.id == self.vc_id:
 			the_time = await utils.get_timestamp()
-			old_time = await self.user_cooldowns.get(member.id)
+			
+			old_time = self.user_cooldowns.get(member.id)
 			if old_time:
 				if the_time - old_time < 60:
 					return await member.send(f"**You're on a cooldown, try again in {round(60 - (the_time - old_time))} seconds!**")

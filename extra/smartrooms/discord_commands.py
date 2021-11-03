@@ -273,14 +273,11 @@ class GalaxyRoomCommands(commands.Cog):
             return await ctx.send(f"**Not deleting it then, {member.mention}!**")
 
         member = self.client.get_user(galaxy_room.owner.id)
-        rooms = galaxy_room.channels
         try:
-            await self.delete_things(rooms)
+            await galaxy_room.delete(self)
             await member.send(f"**Hey! Your rooms got deleted!**")
         except Exception:
             pass
-        finally:
-            await galaxy_room.delete()
 
 
     @galaxy.group(name="add_channel", aliases=['ac'])
