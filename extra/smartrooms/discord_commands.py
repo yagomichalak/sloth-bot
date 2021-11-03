@@ -7,8 +7,6 @@ from extra import utils
 
 from datetime import datetime
 
-from extra.smartrooms.rooms import SmartRoom
-
 class GalaxyRoomCommands(commands.Cog):
     """ Class for GalaxyRoom management related commands. """
 
@@ -118,8 +116,9 @@ class GalaxyRoomCommands(commands.Cog):
 
         embed = discord.Embed(
             title=f"__{ctx.author.name}'s Rooms' Info__",
-            description=f'''**Created at:** {datetime.fromtimestamp(user_ts)}
-            **Expected expiration:** {datetime.fromtimestamp(deadline)}\n''',
+            description=f"**Created at:** `{datetime.fromtimestamp(smart_room.creation_ts)}`\n" \
+                f"**Edited at:** `{datetime.fromtimestamp(user_ts)}`\n" \
+                f"**Expected expiration:** `{datetime.fromtimestamp(deadline)}`\n",
             color=ctx.author.color,
             timestamp=ctx.message.created_at)
 
@@ -128,13 +127,13 @@ class GalaxyRoomCommands(commands.Cog):
 
         seconds_left = deadline - the_time
         if seconds_left >= 86400:
-            embed.description += f"**Time left:** {round(seconds_left/3600/24)} days left"
+            embed.description += f"**Time left:** `{round(seconds_left/3600/24)} days left`"
         elif seconds_left >= 3600:
-            embed.description += f"**Time left:** {round(seconds_left/3600)} hours left"
+            embed.description += f"**Time left:** `{round(seconds_left/3600)} hours left`"
         elif seconds_left >= 60:
-            embed.description += f"**Time left:** {round(seconds_left/60)} minutes left"
+            embed.description += f"**Time left:** `{round(seconds_left/60)} minutes left`"
         else:
-            embed.description += f"**Time left:** {round(seconds_left)} seconds left"
+            embed.description += f"**Time left:** `{round(seconds_left)} seconds left`"
 
         await ctx.send(embed=embed)
 

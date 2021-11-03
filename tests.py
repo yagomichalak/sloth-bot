@@ -185,9 +185,3 @@ UPDATE TribeMember as OG
 # for regex in regexes:
 #     print(regex)
 #     print()
-
-
-
-keks = {'yago': 20, 'angel': 17, 'carol': 21}
-
-print([kek for kek in keks.items()])

@@ -312,8 +312,3 @@ class GalaxyRoom(SmartRoom):
                 await channel.delete()
             except:
                 pass
-
-
-# galaxy_room = GalaxyRoom()
-
-# asyncio.run(galaxy_room.insert())
