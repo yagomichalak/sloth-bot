@@ -1015,7 +1015,7 @@ class SlothCurrency(commands.Cog):
         :param user_id: The ID of the user to get. """
 
         mycursor, _ = await the_database()
-        await mycursor.execute(f"SELECT * FROM UserServerActivity WHERE user_id = {user_id}")
+        await mycursor.execute("SELECT * FROM UserServerActivity WHERE user_id = %s", (user_id,))
         user_info = await mycursor.fetchall()
         await mycursor.close()
         return user_info
@@ -1106,9 +1106,9 @@ class SlothCurrency(commands.Cog):
         exists = await mycursor.fetchone()
         await mycursor.close()
         if exists:
-            return False
-        else:
             return True
+        else:
+            return False
 
     async def exchange(self, ctx, cmsg, message_times, ctime, time_times):
         """ Exchange your status into leaves (łł).
