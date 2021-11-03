@@ -217,12 +217,21 @@ class BlackJackGame:
         self.dealer_final_show()
         # update player bal
 
-    # Lose in blackjack
+    # Surrender in blackjack
+    def surrender_event(self):
+        # Change title and end the game
+        
+        self.title = f"Surrender - **{self.player_name}** lost {int(self.bet/2)} leaves 🍃"
+        self.color = int("ffffff", 16)
+        self.status = 'finished'
+        self.dealer_final_show()
+
     def lose_event(self):
         # Change title and end the game
+
         self.title = f"Lose - **{self.player_name}** lost {self.bet} leaves 🍃"
-        self.status = 'finished'
         self.color = discord.Color.brand_red()
+        self.status = 'finished'
         self.dealer_final_show()
 
     # Draw in blackjack

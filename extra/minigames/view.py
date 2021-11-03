@@ -420,12 +420,12 @@ class BlackJackActionView(discord.ui.View):
         # Check whether the player's blackjack game is active
         if interaction.user.id in cog.blackjack_games[guild_id]:
             current_game = cog.blackjack_games[guild_id].get(interaction.user.id)
-            current_game.lose_event()
+            current_game.surrender_event()
             if current_game.status == 'finished':
                 del cog.blackjack_games[guild_id][interaction.user.id]
                 await self.end_game(interaction)
 
-            await self.client.get_cog('SlothCurrency').update_user_money(self.player_id, int(self.bet/2))
+            await self.client.get_cog('SlothCurrency').update_user_money(self.player.id, int(current_game.bet/2))
             embed = current_game.embed()
             embed.color = int('ffffff', 16)
             await interaction.followup.edit_message(interaction.message.id, embed=embed)
