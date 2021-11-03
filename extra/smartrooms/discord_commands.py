@@ -579,84 +579,94 @@ class GalaxyRoomCommands(commands.Cog):
 
 
 
-    # @galaxy.command(name="allow_tribe", aliases=['at', 'permit_tribe', 'add_tribe', 'allowtribe', 'permittribe', 'addtribe'])
-    # @commands.cooldown(1, 60, commands.BucketType.user)
-    # async def _galaxy_allow_tribe(self, ctx) -> None:
-    #     """ Allows your Tribe members into your Galaxy Room.  """
+    @galaxy.command(name="allow_tribe", aliases=['at', 'permit_tribe', 'add_tribe', 'allowtribe', 'permittribe', 'addtribe'])
+    @commands.cooldown(1, 60, commands.BucketType.user)
+    async def _galaxy_allow_tribe(self, ctx) -> None:
+        """ Allows your Tribe members into your Galaxy Room.  """
 
-    #     member = ctx.author
+        member = ctx.author
 
-    #     user_galaxy = await self.get_galaxy_txt(member.id, ctx.channel.category.id)
-    #     if not user_galaxy:
-    #         return await ctx.send(f"**This is not your room, so you cannot allow people in it, {member.mention}!**")
+        if not (category := ctx.channel.category):
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.send(f"**This is definitely not a GalaxyRoom, {member.mention}!**")
 
-    #     SlothClass = self.client.get_cog('SlothClass')
-    #     user_tribe = await SlothClass.get_tribe_info_by_user_id(member.id)
-    #     if not user_tribe['name']:
-    #         return await ctx.send(f"**You don't even have a tribe, you cannot do this, {member.mention}!**")
+        smart_room = await self.get_smartroom(cat_id=category.id)
+        if not smart_room or smart_room.room_type != 'galaxy':
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.send(f"**This is not a GalaxyRoom, {member.mention} !**")
 
-    #     members: List[List[Union[int, str]]] = await SlothClass.get_tribe_members(tribe_name=user_tribe['name'])
-    #     members: List[discord.Member] = [m for m_id in members if (m := discord.utils.get(ctx.guild.members, id=m_id[0]))]
+        SlothClass = self.client.get_cog('SlothClass')
+        user_tribe = await SlothClass.get_tribe_info_by_user_id(member.id)
+        if not user_tribe['name']:
+            return await ctx.send(f"**You don't even have a tribe, you cannot do this, {member.mention}!**")
 
-    #     if member in members:
-    #         members.remove(member)
+        members: List[List[Union[int, str]]] = await SlothClass.get_tribe_members(tribe_name=user_tribe['name'])
+        members: List[discord.Member] = [m for m_id in members if (m := discord.utils.get(ctx.guild.members, id=m_id[0]))]
 
-    #     if not members:
-    #         return await ctx.send(f"**You don't have members in your tribe, {member.mention}!**")
+        if member in members:
+            members.remove(member)
 
-    #     async with ctx.typing():
-    #         allowed = await self.handle_permissions(members, user_galaxy, ctx.guild)
+        if not members:
+            return await ctx.send(f"**You don't have members in your tribe, {member.mention}!**")
 
-    #         if not allowed:
-    #             return await ctx.send(f"**For some reason, I couldn't allow any of those members, {member.mention}!**")
+        async with ctx.typing():
+            allowed = await smart_room.handle_permissions(members)
 
-    #         text: str = "**{lendisa} {subjplural} from {tribe_name} {verbplural} been allowed, {mention}!**".format(
-    #             lendisa=len(allowed),
-    #             subjplural='people' if len(allowed) > 1 else 'person',
-    #             tribe_name=user_tribe['name'],
-    #             verbplural='have' if len(allowed) > 1 else 'has',
-    #             mention=member.mention)
+            if not allowed:
+                return await ctx.send(f"**For some reason, I couldn't allow any of those members, {member.mention}!**")
 
-    #         await ctx.send(text)
+            text: str = "**{lendisa} {subjplural} from {tribe_name} {verbplural} been allowed, {mention}!**".format(
+                lendisa=len(allowed),
+                subjplural='people' if len(allowed) > 1 else 'person',
+                tribe_name=user_tribe['name'],
+                verbplural='have' if len(allowed) > 1 else 'has',
+                mention=member.mention)
 
-    # @galaxy.command(name="forbid_tribe", aliases=[
-    #     'dt', 'disallow_tribe', 'delete_tribe', 'removetribe', 'disallowtribe', 'deletetribe', 'deltribe',
-    #     'forbidtribe', 'remove_tribe', 'ft'])
-    # @commands.cooldown(1, 60, commands.BucketType.user)
-    # async def _galaxy_remove_tribe(self, ctx) -> None:
-    #     """ Removes your Tribe members from your Galaxy Room.. """
+            await ctx.send(text)
 
-    #     member = ctx.author
+    @galaxy.command(name="forbid_tribe", aliases=[
+        'dt', 'disallow_tribe', 'delete_tribe', 'removetribe', 'disallowtribe', 'deletetribe', 'deltribe',
+        'forbidtribe', 'remove_tribe', 'ft'])
+    @commands.cooldown(1, 60, commands.BucketType.user)
+    async def _galaxy_remove_tribe(self, ctx) -> None:
+        """ Removes your Tribe members from your Galaxy Room.. """
 
-    #     user_galaxy = await self.get_galaxy_txt(member.id, ctx.channel.category.id)
-    #     if not user_galaxy:
-    #         return await ctx.send(f"**This is not your room, so you cannot allow people in it, {member.mention}!**")
+        member = ctx.author
 
-    #     SlothClass = self.client.get_cog('SlothClass')
-    #     user_tribe = await SlothClass.get_tribe_info_by_user_id(member.id)
-    #     if not user_tribe['name']:
-    #         return await ctx.send(f"**You don't even have a tribe, you cannot do this, {member.mention}!**")
+        if not (category := ctx.channel.category):
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.send(f"**This is definitely not a GalaxyRoom, {member.mention}!**")
 
-    #     members: List[List[Union[int, str]]]  = await SlothClass.get_tribe_members(tribe_name=user_tribe['name'])
-    #     members: List[discord.Member] = [m for m_id in members if (m := discord.utils.get(ctx.guild.members, id=m_id[0]))]
+        smart_room = await self.get_smartroom(cat_id=category.id)
+        if not smart_room or smart_room.room_type != 'galaxy':
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.send(f"**This is not a GalaxyRoom, {member.mention} !**")
 
-    #     if member in members:
-    #         members.remove(member)
+        SlothClass = self.client.get_cog('SlothClass')
+        user_tribe = await SlothClass.get_tribe_info_by_user_id(member.id)
+        if not user_tribe['name']:
+            return await ctx.send(f"**You don't even have a tribe, you cannot do this, {member.mention}!**")
 
-    #     if not members:
-    #         return await ctx.send(f"**You don't have members in your tribe, {member.mention}!**")
+        members: List[List[Union[int, str]]]  = await SlothClass.get_tribe_members(tribe_name=user_tribe['name'])
+        members: List[discord.Member] = [m for m_id in members if (m := discord.utils.get(ctx.guild.members, id=m_id[0]))]
 
-    #     async with ctx.typing():
-    #         disallowed = await self.handle_permissions(members, user_galaxy, ctx.guild, allow=False)
+        if member in members:
+            members.remove(member)
+
+        if not members:
+            return await ctx.send(f"**You don't have members in your tribe, {member.mention}!**")
+
+        async with ctx.typing():
+            disallowed = await smart_room.handle_permissions(members, allow=False)
         
-    #         if not disallowed:
-    #             return await ctx.send(f"**For some reason, I couldn't allow any of those members, {member.mention}!**")
+            if not disallowed:
+                return await ctx.send(f"**For some reason, I couldn't allow any of those members, {member.mention}!**")
 
-    #         text: str = "**{lendisa} {subjplural} from {tribe_name} {verbplural} been disallowed, {mention}!**".format(
-    #             lendisa=len(disallowed),
-    #             subjplural='people' if len(disallowed) > 1 else 'person',
-    #             tribe_name=user_tribe['name'],
-    #             verbplural='have' if len(disallowed) > 1 else 'has',
-    #             mention=member.mention)
+            text: str = "**{lendisa} {subjplural} from {tribe_name} {verbplural} been disallowed, {mention}!**".format(
+                lendisa=len(disallowed),
+                subjplural='people' if len(disallowed) > 1 else 'person',
+                tribe_name=user_tribe['name'],
+                verbplural='have' if len(disallowed) > 1 else 'has',
+                mention=member.mention)
 
-    #         await ctx.send(text)
+            await ctx.send(text)
