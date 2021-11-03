@@ -1199,8 +1199,7 @@ class SlothCurrency(commands.Cog):
         :param member: The member to transfer the money to.
         :param money: The amount of money to transfer.
         
-        * Cooldown: 10 secs.
-        * Transfer tax: 2.5%. """
+        * Cooldown: 10 secs. """
 
         if not member:
             return await ctx.send('**Inform the member!**', delete_after=3)
@@ -1225,11 +1224,6 @@ class SlothCurrency(commands.Cog):
         if the_user[0][1] < int(money):
             return await ctx.send(f"You don't have {money}łł!")
 
-        tax_percentage: int = 2.5
-
-        bank_money = round((money*tax_percentage)/100) if money >= 20 else 1
-        taxed_money = money - bank_money if money >= 20 else money -1
-
 
         SlothClass = self.client.get_cog('SlothClass')
 
@@ -1238,22 +1232,13 @@ class SlothCurrency(commands.Cog):
 
         if wired_user:
             siphon_percentage = 35
-            cybersloth_money = round((taxed_money*siphon_percentage)/100)
-            target_money = taxed_money - cybersloth_money
-            await self.update_user_money(member.id, target_money)
+            cybersloth_money = round((money*siphon_percentage)/100)
+            await self.update_user_money(member.id, money-cybersloth_money)
             await self.update_user_money(ctx.author.id, -money)
             await self.update_user_money(wired_user[0], cybersloth_money)
-
-            if money >= 20:
-                description: str = f"{ctx.author.mention} tried to transfer `{money}łł` to {member.mention}, "\
-                            f"but the **Sloth Bank** taxed `{tax_percentage}%` of it; `{bank_money}` "\
-                            f"and <@{wired_user[0]}> siphoned off `{siphon_percentage}%` of it; `{cybersloth_money}łł`! "\
-                            f"So {member.mention} actually got `{target_money}łł`!"
-            else:
-                description: str = f"{ctx.author.mention} tried to transfer `{money}łł` to {member.mention}, "\
-                            f"but the **Sloth Bank** taxed {bank_money}łł from it "\
-                            f"and <@{wired_user[0]}> siphoned off `{siphon_percentage}%` of it; `{cybersloth_money}łł`! "\
-                            f"So {member.mention} actually got `{target_money}łł`!"
+            description: str = f"{ctx.author.mention} tried to transfer `{money}łł` to {member.mention}, "\
+                f"and <@{wired_user[0]}> siphoned off `{siphon_percentage}%` of it; `{cybersloth_money}łł`! "\
+                f"So {member.mention} actually got `{money-cybersloth_money}łł`!"
 
             await ctx.send(
                 content=f"{ctx.author.mention}, {member.mention}, <@{wired_user[0]}>",
@@ -1265,21 +1250,9 @@ class SlothCurrency(commands.Cog):
             )
 
         else:
-            await self.update_user_money(member.id, taxed_money)
+            await self.update_user_money(member.id, money)
             await self.update_user_money(ctx.author.id, -money)
-
-            if money >= 20:
-                await ctx.send(
-                    f"{ctx.author.mention} transferred `{money}łł` to {member.mention}! "
-                    f"but the **Sloth Bank** taxed `{tax_percentage}%` of it; `{bank_money}łł`. "
-                    f"So {member.mention} actually got `{taxed_money}łł`!"
-                )
-            else:
-                await ctx.send(
-                    f"{ctx.author.mention} transferred `{money}łł` to {member.mention}! "
-                    f"but the **Sloth Bank** taxed `{bank_money}łł` from it. "
-                    f"So {member.mention} actually got `{taxed_money}łł`!"
-                )
+            await ctx.send(f"{ctx.author.mention} transferred `{money}łł` to {member.mention}! ")
 
     async def get_user_pfp(self, member, thumb_width: int = 59) -> Any:
         """ Gets the user's profile picture.
