@@ -97,6 +97,14 @@ class SmartRoomDatabase(commands.Cog):
             return formatted_smart_room
     
     # ===== UPDATE =====
+    async def update_smartroom(self, sql: str) -> None:
+        """ Updates one or more values of a SmartRoom.
+        :param sql: The SQL to run. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute(sql)
+        await db.commit()
+        await mycursor.close()
 
     # ===== DELETE =====
     async def delete_smartroom(self,
@@ -141,6 +149,7 @@ class SmartRoomDatabase(commands.Cog):
             cat_id BIGINT DEFAULT NULL,
             creation_ts BIGINT NOT NULL,
             edited_ts BIGINT DEFAULT NULL,
+            notified TINYINT(1) DEFAULT 0,
             PRIMARY KEY(user_id, room_type)
         )""")
         await db.commit()

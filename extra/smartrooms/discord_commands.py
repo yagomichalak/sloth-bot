@@ -164,11 +164,11 @@ class GalaxyRoomCommands(commands.Cog):
         user_ts = smart_room.creation_ts if not smart_room.edited_ts else smart_room.edited_ts
         seconds_left = (user_ts + 1209600) - the_time
 
-        # Checks rooms deletion time
+        # # Checks rooms deletion time
         if seconds_left > 172800:
             return await ctx.send(f"**You can only renew your rooms at least 2 days before their deletion time, {member.mention}!**")
 
-        vcs, txts = await smart_room.voice_channels, smart_room.text_channels
+        vcs, txts = smart_room.voice_channels, smart_room.text_channels
         money: int = await self.get_rent_price(len(txts), len(vcs))
 
 
@@ -179,13 +179,12 @@ class GalaxyRoomCommands(commands.Cog):
         # Checks if the user has money for it (1500-2000łł)
         SlothCurrency = self.client.get_cog('SlothCurrency')
         user_currency = await SlothCurrency.get_user_currency(member.id)
-        if user_currency[0][1] >= money:
-            await SlothCurrency.update_user_money(member.id, -money)
-        else:
+        if user_currency[0][1] < money:
             return await ctx.send(f"**You don't have enough money to renew your rooms, {member.mention}!** `({money}łł)`")
 
-        # await self.increment_galaxy_ts(member.id, 1209600)
-        # await self.user_notified_no(member.id)
+        await smart_room.update(self, edited_ts=the_time, notified=1)
+        await SlothCurrency.update_user_money(member.id, -money)
+
         await ctx.send(f"**{member.mention}, Galaxy Rooms renewed! `(-{money}łł)`**")
 
     async def get_rent_price(self, txts: int, vcs: int) -> int:

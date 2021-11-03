@@ -1,10 +1,7 @@
 import discord
 from discord.ext import commands
-from extra.prompt.menu import prompt_emoji_guild
-from mysqldb import the_database
 from abc import abstractclassmethod, ABC
 from typing import Any, Union, Tuple, List
-import asyncio
 import os
 import __future__
 
@@ -160,8 +157,8 @@ class GalaxyRoom(SmartRoom):
         )
 
     @staticmethod
-    async def insert(cog: commands.Cog, user_id: int, vc_id: int, txt_id: int, cat_id: int, creation_ts: int) -> Any:
-        """ Inserts a PremiumRoom into the database.
+    async def insert(cog: commands.Cog, user_id: int, vc_id: int, txt_id: int, cat_id: int, creation_ts: int) -> None:
+        """ Inserts a GalaxyRoom into the database.
         :param user_id: The ID of the owner of the room.
         :param vc_id: The Voice Channel ID.
         :param txt_id: The Text Channel ID.
@@ -170,43 +167,55 @@ class GalaxyRoom(SmartRoom):
 
         await cog.insert_smartroom(user_id=user_id, room_type='galaxy', vc_id=vc_id, txt_id=txt_id, cat_id=cat_id, creation_ts=creation_ts)
 
-    @staticmethod
-    async def update() -> Any: pass
+    async def update(self, cog: commands.Cog, **kwargs) -> None:
+        """ Updates a GalaxyRoom value.
+        :param cog: The cog to get database methods from.
+        :param kwargs: The keyword arguments to update. """
+
+        """
+        user_id: int,
+        vc_id: int = None, vc2_id: int = None, txt_id: int = None, th_id: int = None, 
+        th2_id: int = None, th3_id: int = None, th4_id: int = None, cat_id: int = None
+        """
+
+        set_keywords: List[str] = list(map(lambda kw: f"{kw[0]} = {kw[1]}", list(kwargs.items())))
+        set_clauses: str = 'SET ' + ', '.join(set_keywords)
+
+        sql: str = "UPDATE SmartRooms " + set_clauses + f" WHERE user_id = {self.owner.id} AND room_type = 'galaxy'"
+
+        await cog.update_smartroom(sql)
 
     @staticmethod
-    async def delete() -> Any: pass
-
+    async def delete() -> None: pass
 
     @property
     def voice_channels(self):
+        """ Gets all Voice Channels from the GalaxyRoom. """
 
-        """I'm the 'channels' property."""
-        return filter(lambda vc: vc is not None, [self.vc, self.vc2])
+        return list(filter(lambda vc: vc is not None, [self.vc, self.vc2]))
 
     @property
     def text_channels(self):
+        """ Gets all Text Channels from the GalaxyRoom. """
 
-        """I'm the 'channels' property."""
-        return filter(lambda txt: txt is not None, [
+        return list(filter(lambda txt: txt is not None, [
             self.vc, self.vc2, self.txt, self.th, self.th2, self.th3, self.th4
-        ])
+        ]))
+
     @property
     def channels(self):
+        """ Gets all Guild Channels from the GalaxyRoom. """
 
-        """I'm the 'channels' property."""
-        return filter(lambda channel: channel is not None, [
+        return list(filter(lambda channel: channel is not None, [
             self.vc, self.vc2, self.txt, self.th, self.th2, self.th3, self.th4, self.cat
-        ])
+        ]))
 
     async def handle_permissions(self, members: List[discord.Member], allow: bool = True) -> List[str]:
         """ Handles permissions for a member in one's Galaxy Room.
         :param members: The list of members to handle permissions for.
         :param allow: Whether to allow or disallow the member and their permissions from the Galaxy Room. [Default=True]"""
 
-
         channels = self.channels
-
-        print(channels)
         actioned: List[str] = []
 
         for m in members:
