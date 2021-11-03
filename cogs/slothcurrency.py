@@ -1252,7 +1252,7 @@ class SlothCurrency(commands.Cog):
         else:
             await self.update_user_money(member.id, money)
             await self.update_user_money(ctx.author.id, -money)
-            await ctx.send(f"{ctx.author.mention} transferred `{money}łł` to {member.mention}! ")
+            await ctx.send(f"**{ctx.author.mention} transferred {money}łł to {member.mention}!**")
 
     async def get_user_pfp(self, member, thumb_width: int = 59) -> Any:
         """ Gets the user's profile picture.
