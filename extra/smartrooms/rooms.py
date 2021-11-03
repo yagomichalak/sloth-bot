@@ -172,17 +172,10 @@ class GalaxyRoom(SmartRoom):
         :param cog: The cog to get database methods from.
         :param kwargs: The keyword arguments to update. """
 
-        """
-        user_id: int,
-        vc_id: int = None, vc2_id: int = None, txt_id: int = None, th_id: int = None, 
-        th2_id: int = None, th3_id: int = None, th4_id: int = None, cat_id: int = None
-        """
-
-        set_keywords: List[str] = list(map(lambda kw: f"{kw[0]} = {kw[1]}", list(kwargs.items())))
+        set_keywords: List[str] = list(map(lambda kw: "{k} = {v}".format(k=kw[0], v=kw[1]), list(kwargs.items())))
         set_clauses: str = 'SET ' + ', '.join(set_keywords)
 
         sql: str = "UPDATE SmartRooms " + set_clauses + f" WHERE user_id = {self.owner.id} AND room_type = 'galaxy'"
-
         await cog.update_smartroom(sql)
 
     async def delete(self, cog: commands.Cog) -> None:
@@ -197,10 +190,22 @@ class GalaxyRoom(SmartRoom):
         await cog.delete_smartroom(room_type='galaxy', owner_id=self.owner.id)
 
     @property
+    def raw_voice_channels(self):
+        """ Gets all Voice Channels from the GalaxyRoom. """
+
+        return [self.vc, self.vc2]
+
+    @property
     def voice_channels(self):
         """ Gets all Voice Channels from the GalaxyRoom. """
 
         return list(filter(lambda vc: vc is not None, [self.vc, self.vc2]))
+
+    @property
+    def raw_text_channels(self):
+        """ Gets all Text Channels from the GalaxyRoom. """
+
+        return [self.txt, self.th, self.th2, self.th3, self.th4]
 
     @property
     def text_channels(self):
@@ -209,6 +214,12 @@ class GalaxyRoom(SmartRoom):
         return list(filter(lambda txt: txt is not None, [
             self.txt, self.th, self.th2, self.th3, self.th4
         ]))
+
+    @property
+    def raw_channels(self):
+        """ Gets all Guild Channels from the GalaxyRoom. """
+
+        return [self.vc, self.vc2, self.txt, self.th, self.th2, self.th3, self.th4, self.cat]
 
     @property
     def channels(self):

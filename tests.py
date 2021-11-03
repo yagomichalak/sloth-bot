@@ -168,21 +168,26 @@ UPDATE TribeMember as OG
 # UPDATE UserServerActivity USA LEFT JOIN SlothProfile SP ON SP.user_id = USA.user_id SET USA.user_time = 0 WHERE SP.user_id IS NULL AND round(USA.user_time/60/60) >= 0;
 
 
-import re
+# import re
 
-text: str = 'niiiiiiiiceee work'
-text: str = 'cool words'
+# text: str = 'niiiiiiiiceee work'
+# text: str = 'cool words'
 
-# found = re.findall(r'[<]?[a]?:[!_\-\w]+:[0-9]{0,18}[>]?', text)
+# # found = re.findall(r'[<]?[a]?:[!_\-\w]+:[0-9]{0,18}[>]?', text)
 
 
-regexes: list[str] = [
-    re.compile(r'go{2,99}d wo{1,99}r[!_\-\w]s{0,99}', text),
-    re.compile(r'co{2,99}l wo{1,99}r[!_\-\w]s{0,99}', text),
-    re.compile(r'n[!_\-\w]{1,99}c[!_\-\w]{1,99} wo{1,99}r[!_\-\w]s{0,99}', text)
-]
+# regexes: list[str] = [
+#     re.compile(r'go{2,99}d wo{1,99}r[!_\-\w]s{0,99}', text),
+#     re.compile(r'co{2,99}l wo{1,99}r[!_\-\w]s{0,99}', text),
+#     re.compile(r'n[!_\-\w]{1,99}c[!_\-\w]{1,99} wo{1,99}r[!_\-\w]s{0,99}', text)
+# ]
 
-for regex in regexes:
-    print(regex)
-    print()
+# for regex in regexes:
+#     print(regex)
+#     print()
 
+
+
+keks = {'yago': 20, 'angel': 17, 'carol': 21}
+
+print([kek for kek in keks.items()])
