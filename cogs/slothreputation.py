@@ -391,10 +391,8 @@ class SlothReputation(commands.Cog):
     async def rep(self, ctx, member: discord.Member = None):
         """ Gives someone reputation points.
         :param member: The member to give the reputation.
-        
-        * Cost: 1łł 
 
-        Ps: The repped person gets 4łł and 100 reputation points. """
+        Ps: The repped person gets 5łł and 100 reputation points. """
         
         if not member:
             await ctx.message.delete()
@@ -447,20 +445,12 @@ class SlothReputation(commands.Cog):
             elif s > 0:
                 return await ctx.send(f"**Rep again in {s:02d} seconds!**", delete_after=10)
 
-
-        SlothCurrency = self.client.get_cog('SlothCurrency')
-        user_currency = await SlothCurrency.get_user_currency(ctx.author.id)
-        if user_currency[0][1] >= 1:
-            await SlothCurrency.update_user_money(ctx.author.id, -1)
-        else:
-            return await ctx.send(f"**You need 1łł to rep someone, {ctx.author.mention}!**")
-
         await self.update_user_score_points(ctx.author.id, 100)
         await self.update_user_score_points(member.id, 100)
         await self.update_user_rep_time(ctx.author.id, time_xp)
-        await SlothCurrency.update_user_money(member.id, 4)
+        await SlothCurrency.update_user_money(member.id, 5)
         return await ctx.send(
-            f"**{ctx.author.mention} repped {member.mention}! 🍃The repped person got 4łł🍃**")
+            f"**{ctx.author.mention} repped {member.mention}! 🍃The repped person got 5łł🍃**")
 
 
 
