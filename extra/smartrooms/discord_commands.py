@@ -350,7 +350,7 @@ class GalaxyRoomCommands(commands.Cog):
 
         money: int = await smart_room.get_rent_price()
         confirm = await Confirm(
-            f"**Do you want to add an extra `Thread` channel for `250łł`, {member.mention}?**\n\n||From now on, you're gonna be charged `{money}łł` in your next fortnight rents||"
+            f"**Do you want to add an extra `Thread` channel for `250łł`, {member.mention}?**\n\n||From now on, you're gonna be charged `{money+250}łł` in your next fortnight rents||"
             ).prompt(ctx)
         if not confirm:
             ctx.command.reset_cooldown(ctx)
@@ -434,7 +434,7 @@ class GalaxyRoomCommands(commands.Cog):
             return await ctx.send(f"**You reached your maximum amount of channels in your Galaxy Room, {member.mention}!**")
 
         confirm = await Confirm(
-            f"**Do you want to add an extra `Voice Channel` for `500łł`, {member.mention}?**\n\n||From now on, you're gonna be charged `{money}łł` in your next fortnight rents||"
+            f"**Do you want to add an extra `Voice Channel` for `500łł`, {member.mention}?**\n\n||From now on, you're gonna be charged `{money+500}łł` in your next fortnight rents||"
             ).prompt(ctx)
         if not confirm:
             ctx.command.reset_cooldown(ctx)
@@ -518,7 +518,7 @@ class GalaxyRoomCommands(commands.Cog):
         threads = {'th_id': smart_room.th, 'th2_id': smart_room.th2, 'th3_id': smart_room.th3, 'th4_id': smart_room.th4}
         selected_thread: str = list(filter(lambda th: th[1] and th[1].id == ctx.channel.id, threads.items()))[0]
         confirm = await Confirm(
-            f"**Are you sure you want to delete {selected_thread[1].mention}, {member.mention}?**\n\n||From now on, you're gonna be charged `{money}łł` in your next fortnight rents||"
+            f"**Are you sure you want to delete {selected_thread[1].mention}, {member.mention}?**\n\n||From now on, you're gonna be charged `{money-250}łł` in your next fortnight rents||"
             ).prompt(ctx)
 
         if not confirm:
@@ -562,7 +562,7 @@ class GalaxyRoomCommands(commands.Cog):
             return await ctx.send(f"**You don't have a second Voice Channel to delete, {member.mention}!**")
 
         confirm = await Confirm(
-            f"**Are you sure you want to delete {vc2.mention}, {member.mention}?**\n\n||From now on, you're gonna be charged `{money}łł` in your next fortnight rents||"
+            f"**Are you sure you want to delete {vc2.mention}, {member.mention}?**\n\n||From now on, you're gonna be charged `{money-500}łł` in your next fortnight rents||"
             ).prompt(ctx)
         
         if not confirm:
