@@ -388,21 +388,33 @@ class GalaxyRoomCommands(commands.Cog):
 
         if limit is None:
             return await ctx.send(f"**Please, inform a user limit for your vc, {member.mention}!** `(0 for limitless)`")
+        
+        if limit < 0 or limit > 99:
+            return await ctx.send(f"**Please, inform a user limit between `0-99`, {member.mention}!**")
 
         if not name:
+            ctx.command.reset_cooldown(ctx)
             return await ctx.send(f"**Please, inform a channel name, {member.mention}!**")
 
         if len(name) > 20:
+            ctx.command.reset_cooldown(ctx)
             return await ctx.send("**Please inform a name having 1-20 characters!**")
 
-        if not (user_rooms := await self.get_user_all_galaxy_rooms(member.id)):
-            return await ctx.send(f"**You don't have any Galaxy Rooms!**")
+        if not (category := ctx.channel.category):
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.send(f"**This is definitely not a GalaxyRoom, {member.mention}!**")
 
-        if ctx.channel.id not in user_rooms:
-            return await ctx.send(f"**You can only use this command in your Galaxy Rooms, {member.mention}!**")
+        smart_room = await self.get_smartroom(cat_id=category.id)
+        if not smart_room or smart_room.room_type != 'galaxy':
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.send(f"**This is not a GalaxyRoom, {member.mention} !**")
 
-        vcs, txts = await self.order_rooms(user_rooms)
-        money: int = await self.get_rent_price(len(txts), len(vcs)+1)
+        if smart_room.owner.id != member.id:
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.send(f"**This is not your GalaxyRoom, {member.mention}!**")
+
+        vcs, txts = smart_room.voice_channels, smart_room.text_channels
+        money: int = await smart_room.get_rent_price()
 
         if len(vcs) == 2:
             return await ctx.send(f"**You cannot add more voice channels, {member.mention}!**")
@@ -410,13 +422,11 @@ class GalaxyRoomCommands(commands.Cog):
         if len(vcs) + len(txts) >= 3:
             return await ctx.send(f"**You reached your maximum amount of channels in your Galaxy Room, {member.mention}!**")
 
-
         confirm = await Confirm(
             f"**Do you want to add an extra `Voice Channel` for `500łł`, {member.mention}?**\n\n||From now on, you're gonna be charged `{money}łł` in your next fortnight rents||"
             ).prompt(ctx)
         if not confirm:
             return await ctx.send(f"**Not doing it then, {member.mention}!**")
-
 
         SlothCurrency = self.client.get_cog('SlothCurrency')
         if not (user_currency := await SlothCurrency.get_user_currency(member.id)):
@@ -430,16 +440,14 @@ class GalaxyRoomCommands(commands.Cog):
             return await ctx.send("**You don't have enough money to buy this service!**")
 
 
-        cat = discord.utils.get(ctx.guild.categories, id=user_rooms[1])
+        cat = smart_room.cat
             
         if not (vc := await self.try_to_create(kind='voice', category=cat, name=name, user_limit=limit)):
             return await ctx.send(f"**Channels limit reached, creation cannot be completed, try again later!**")
 
-        await self.update_vc_2(member.id, vc.id)
+        await smart_room.update(self, vc2_id=vc.id)
         await SlothCurrency.update_user_money(member.id, -500)
         await ctx.send(f"**Voice Channel created, {member.mention}!** ({vc.mention})")
-
-
 
     @galaxy.group(name="delete_channel", aliases=['dc', 'deletechannel', 'remove_channel', 'removechannel', 'rc'])
     async def _galaxy_delete_channel(self, ctx) -> None:
