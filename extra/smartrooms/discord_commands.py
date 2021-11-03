@@ -7,6 +7,8 @@ from extra import utils
 
 from datetime import datetime
 
+from extra.smartrooms.rooms import SmartRoom
+
 class GalaxyRoomCommands(commands.Cog):
     """ Class for GalaxyRoom management related commands. """
 
@@ -180,13 +182,12 @@ class GalaxyRoomCommands(commands.Cog):
         if user_currency[0][1] < money:
             return await ctx.send(f"**You don't have enough money to renew your rooms, {member.mention}!** `({money}łł)`")
 
-        await smart_room.update(self, edited_ts=the_time, notified=1)
+        await smart_room.update(self, edited_ts=the_time, notified=0)
         await SlothCurrency.update_user_money(member.id, -money)
 
         await ctx.send(f"**{member.mention}, Galaxy Rooms renewed! `(-{money}łł)`**")
 
     
-
     @galaxy.command(name="transfer_ownership", aliases=['transfer', 'to', 'transferownership'])
     @commands.cooldown(1, 60, commands.BucketType.user)
     async def _galaxy_transfer_ownership(self, ctx, member: discord.Member = None) -> None:
@@ -234,9 +235,8 @@ class GalaxyRoomCommands(commands.Cog):
             ctx.command.reset_cooldown(ctx)
             return await ctx.send(f"**Not deleting it then, {author.mention}!**")
 
-
         try:
-            await self.update_galaxy_user(galaxy_room.owner.id, member.id)
+            await galaxy_room.update(self, user_id=member.id)
             await galaxy_room.handle_permissions([member])
         except:
             ctx.command.reset_cooldown(ctx)

@@ -83,17 +83,23 @@ class SmartRoomDatabase(commands.Cog):
 
         if multiple:
             results = await mycursor.fetchall()
+            await mycursor.close()
+            if not results:
+                return
+
             smart_rooms: List[SmartRoom] = [
                 await SmartRoomEnum.__getitem__(name=result[1]).value.format_data(self.client, result)
                 for result in results
             ]
-            await mycursor.close()
             return smart_rooms
         else:
             result = await mycursor.fetchone()
+            await mycursor.close()
+            if not result:
+                return
+                
             smart_room: SmartRoom = SmartRoomEnum.__getitem__(name=result[1]).value
             formatted_smart_room: SmartRoom = await smart_room.format_data(client=self.client, data=result)
-            await mycursor.close()
             return formatted_smart_room
     
     # ===== UPDATE =====
