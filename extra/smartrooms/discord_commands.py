@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 
-from typing import List, Union
+from typing import List, Dict, Union
 from extra.prompt.menu import Confirm
 from extra import utils
 
@@ -280,250 +280,264 @@ class GalaxyRoomCommands(commands.Cog):
             await galaxy_room.delete()
 
 
-    # @galaxy.group(name="add_channel", aliases=['ac'])
-    # async def _galaxy_add_channel(self, ctx) -> None:
-    #     """ Adds either a Text or a Voice Channel to
-    #     the user's Galaxy Room. """
+    @galaxy.group(name="add_channel", aliases=['ac'])
+    async def _galaxy_add_channel(self, ctx) -> None:
+        """ Adds either a Text or a Voice Channel to
+        the user's Galaxy Room. """
 
-    #     if ctx.invoked_subcommand:
-    #         return
+        if ctx.invoked_subcommand:
+            return
 
-    #     cmd = ctx.command
-    #     prefix = self.client.command_prefix
-    #     subcommands = [f"{prefix}{c.qualified_name}" for c in cmd.commands]
+        cmd = ctx.command
+        prefix = self.client.command_prefix
+        subcommands = [f"{prefix}{c.qualified_name}" for c in cmd.commands]
 
-    #     subcommands = '\n'.join(subcommands)
-    #     embed = discord.Embed(
-    #         title="Subcommads",
-    #         description=f"```apache\n{subcommands}```",
-    #         color=ctx.author.color,
-    #         timestamp=ctx.message.created_at
-    #         )
-    #     await ctx.send(embed=embed)
+        subcommands = '\n'.join(subcommands)
+        embed = discord.Embed(
+            title="Subcommads",
+            description=f"```apache\n{subcommands}```",
+            color=ctx.author.color,
+            timestamp=ctx.message.created_at
+            )
+        await ctx.send(embed=embed)
 
-    # @_galaxy_add_channel.command(name='thread', aliases=['th', 'thread_channel', 'text', 'txt', 'text_channel'])
-    # @commands.cooldown(1, 60, commands.BucketType.user)
-    # async def _galaxy_add_channel_thread(self, ctx, *, name: str = None) -> None:
-    #     """ Adds a Text Channel.
-    #     :param name: The name of the Text Channel. """
+    @_galaxy_add_channel.command(name='thread', aliases=['th', 'thread_channel', 'text', 'txt', 'text_channel'])
+    @commands.cooldown(1, 60, commands.BucketType.user)
+    async def _galaxy_add_channel_thread(self, ctx, *, name: str = None) -> None:
+        """ Adds a Text Channel.
+        :param name: The name of the Text Channel. """
 
-    #     member = ctx.author
+        member = ctx.author
 
-    #     if not name:
-    #         return await ctx.send(f"**Please, inform a channel name, {member.mention}!**")
+        if not name:
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.send(f"**Please, inform a channel name, {member.mention}!**")
 
-    #     if len(name) > 20:
-    #         return await ctx.send("**Please inform a name having 1-20 characters!**")
+        if len(name) > 20:
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.send("**Please inform a name having 1-20 characters!**")
 
-    #     if not (user_rooms := await self.get_user_all_galaxy_rooms(member.id)):
-    #         return await ctx.send(f"**You don't have any Galaxy Rooms!**")
+        if not (category := ctx.channel.category):
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.send(f"**This is definitely not a GalaxyRoom, {member.mention}!**")
 
-    #     if ctx.channel.id not in user_rooms:
-    #         return await ctx.send(f"**You can only use this command in your Galaxy Rooms, {member.mention}!**")
+        smart_room = await self.get_smartroom(cat_id=category.id)
+        if not smart_room or smart_room.room_type != 'galaxy':
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.send(f"**This is not a GalaxyRoom, {member.mention} !**")
 
-    #     vcs, txts = await self.order_rooms(user_rooms)
+        if smart_room.owner.id != member.id:
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.send(f"**This is not your GalaxyRoom, {member.mention}!**")
 
-    #     if len(vcs) == 2:
-    #         return await ctx.send(f"**You cannot add threads because you chose to have a second Voice Channel instead, {member.mention}!**")
+        vcs, txts = smart_room.voice_channels, smart_room.text_channels
 
-    #     if len(txts) >= 5:
-    #         return await ctx.send(f"**You cannot add more thread channels, {member.mention}!**")
+        if len(vcs) == 2:
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.send(f"**You cannot add threads because you chose to have a second Voice Channel instead, {member.mention}!**")
 
-    #     if len(vcs) + len(txts) >= 6:
-    #         return await ctx.send(f"**You reached your maximum amount of channels in your Galaxy Rooms, {member.mention}!**")
+        if len(txts) >= 5:
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.send(f"**You cannot add more thread channels, {member.mention}!**")
 
-    #     money: int = await self.get_rent_price(len(txts)+1, len(vcs))
-    #     confirm = await Confirm(
-    #         f"**Do you want to add an extra `Thread` channel for `250łł`, {member.mention}?**\n\n||From now on, you're gonna be charged `{money}łł` in your next fortnight rents||"
-    #         ).prompt(ctx)
-    #     if not confirm:
-    #         return await ctx.send(f"**Not doing it then, {member.mention}!**")
+        if len(vcs) + len(txts) >= 6:
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.send(f"**You reached your maximum amount of channels in your Galaxy Rooms, {member.mention}!**")
 
+        money: int = await smart_room.get_rent_price()
+        confirm = await Confirm(
+            f"**Do you want to add an extra `Thread` channel for `250łł`, {member.mention}?**\n\n||From now on, you're gonna be charged `{money}łł` in your next fortnight rents||"
+            ).prompt(ctx)
+        if not confirm:
+            return await ctx.send(f"**Not doing it then, {member.mention}!**")
 
-    #     SlothCurrency = self.client.get_cog('SlothCurrency')
-    #     if not (user_currency := await SlothCurrency.get_user_currency(member.id)):
-    #         view = discord.ui.View()
-    #         view.add_item(discord.ui.Button(style=5, label="Create Account", emoji="🦥", url="https://thelanguagesloth.com/profile/update"))
-    #         return await member.send( 
-    #             embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one, or in the button below!**"),
-    #             view=view)
+        SlothCurrency = self.client.get_cog('SlothCurrency')
+        if not (user_currency := await SlothCurrency.get_user_currency(member.id)):
+            view = discord.ui.View()
+            view.add_item(discord.ui.Button(style=5, label="Create Account", emoji="🦥", url="https://thelanguagesloth.com/profile/update"))
+            return await member.send( 
+                embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one, or in the button below!**"),
+                view=view)
 
-    #     if user_currency[0][1] < 250:
-    #         return await ctx.send("**You don't have enough money to buy this service!**")
+        if user_currency[0][1] < 250:
+            return await ctx.send("**You don't have enough money to buy this service!**")
 
-    #     channel = discord.utils.get(ctx.guild.text_channels, id=user_rooms[2])
+        channel = smart_room.txt
             
-    #     if not (thread := await self.try_to_create(kind='thread', channel=channel, owner=member, name=name, auto_archive_duration=10080)):
-    #         return await ctx.send(f"**Channels limit reached, creation cannot be completed, try again later!**")
+        #, auto_archive_duration=10080
+        if not (thread := await smart_room.try_to_create(kind='thread', channel=channel, owner=member, name=name)):
+            return await ctx.send(f"**Channels limit reached, creation cannot be completed, try again later!**")
 
-    #     print('texts', len(txts))
-    #     await self.update_txt(user_id=member.id, position=len(txts)+1, channel_id=thread.id)
-    #     # await self.update_txt_2(member.id, thread.id)
-    #     await SlothCurrency.update_user_money(member.id, -250)
-    #     await ctx.send(f"**Thread Channel created, {member.mention}!** ({thread.mention})")
+        threads = {'th_id': smart_room.th, 'th2_id': smart_room.th2, 'th3_id': smart_room.th3, 'th4_id': smart_room.th4}
+        available_thread: str = list(th[0] for th in threads.items() if not th[1])[0]
+        formatted_keyword: Dict[str, int] = {available_thread:thread.id}
+
+        await smart_room.update(self, **formatted_keyword)
+        await SlothCurrency.update_user_money(member.id, -250)
+        await ctx.send(f"**Thread Channel created, {member.mention}!** ({thread.mention})")
 
 
-    # @_galaxy_add_channel.command(name='voice', aliases=['vc', 'voice_channel'])
-    # @commands.cooldown(1, 60, commands.BucketType.user)
-    # async def _galaxy_add_channel_voice(self, ctx, limit: int = None, *, name: str = None) -> None:
-    #     """ Adds a Voice Channel.
-    #     :param limit: The user limit of the Voice Cchannel.
-    #     :param name: The name of the Voice Channel. """
+    @_galaxy_add_channel.command(name='voice', aliases=['vc', 'voice_channel'])
+    @commands.cooldown(1, 60, commands.BucketType.user)
+    async def _galaxy_add_channel_voice(self, ctx, limit: int = None, *, name: str = None) -> None:
+        """ Adds a Voice Channel.
+        :param limit: The user limit of the Voice Cchannel.
+        :param name: The name of the Voice Channel. """
 
-    #     member = ctx.author
+        member = ctx.author
 
-    #     if limit is None:
-    #         return await ctx.send(f"**Please, inform a user limit for your vc, {member.mention}!** `(0 for limitless)`")
+        if limit is None:
+            return await ctx.send(f"**Please, inform a user limit for your vc, {member.mention}!** `(0 for limitless)`")
 
-    #     if not name:
-    #         return await ctx.send(f"**Please, inform a channel name, {member.mention}!**")
+        if not name:
+            return await ctx.send(f"**Please, inform a channel name, {member.mention}!**")
 
-    #     if len(name) > 20:
-    #         return await ctx.send("**Please inform a name having 1-20 characters!**")
+        if len(name) > 20:
+            return await ctx.send("**Please inform a name having 1-20 characters!**")
 
-    #     if not (user_rooms := await self.get_user_all_galaxy_rooms(member.id)):
-    #         return await ctx.send(f"**You don't have any Galaxy Rooms!**")
+        if not (user_rooms := await self.get_user_all_galaxy_rooms(member.id)):
+            return await ctx.send(f"**You don't have any Galaxy Rooms!**")
 
-    #     if ctx.channel.id not in user_rooms:
-    #         return await ctx.send(f"**You can only use this command in your Galaxy Rooms, {member.mention}!**")
+        if ctx.channel.id not in user_rooms:
+            return await ctx.send(f"**You can only use this command in your Galaxy Rooms, {member.mention}!**")
 
-    #     vcs, txts = await self.order_rooms(user_rooms)
-    #     money: int = await self.get_rent_price(len(txts), len(vcs)+1)
+        vcs, txts = await self.order_rooms(user_rooms)
+        money: int = await self.get_rent_price(len(txts), len(vcs)+1)
 
-    #     if len(vcs) == 2:
-    #         return await ctx.send(f"**You cannot add more voice channels, {member.mention}!**")
+        if len(vcs) == 2:
+            return await ctx.send(f"**You cannot add more voice channels, {member.mention}!**")
             
-    #     if len(vcs) + len(txts) >= 3:
-    #         return await ctx.send(f"**You reached your maximum amount of channels in your Galaxy Room, {member.mention}!**")
+        if len(vcs) + len(txts) >= 3:
+            return await ctx.send(f"**You reached your maximum amount of channels in your Galaxy Room, {member.mention}!**")
 
 
-    #     confirm = await Confirm(
-    #         f"**Do you want to add an extra `Voice Channel` for `500łł`, {member.mention}?**\n\n||From now on, you're gonna be charged `{money}łł` in your next fortnight rents||"
-    #         ).prompt(ctx)
-    #     if not confirm:
-    #         return await ctx.send(f"**Not doing it then, {member.mention}!**")
+        confirm = await Confirm(
+            f"**Do you want to add an extra `Voice Channel` for `500łł`, {member.mention}?**\n\n||From now on, you're gonna be charged `{money}łł` in your next fortnight rents||"
+            ).prompt(ctx)
+        if not confirm:
+            return await ctx.send(f"**Not doing it then, {member.mention}!**")
 
 
-    #     SlothCurrency = self.client.get_cog('SlothCurrency')
-    #     if not (user_currency := await SlothCurrency.get_user_currency(member.id)):
-    #         view = discord.ui.View()
-    #         view.add_item(discord.ui.Button(style=5, label="Create Account", emoji="🦥", url="https://thelanguagesloth.com/profile/update"))
-    #         return await member.send( 
-    #             embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one, or in the button below!**"),
-    #             view=view)
+        SlothCurrency = self.client.get_cog('SlothCurrency')
+        if not (user_currency := await SlothCurrency.get_user_currency(member.id)):
+            view = discord.ui.View()
+            view.add_item(discord.ui.Button(style=5, label="Create Account", emoji="🦥", url="https://thelanguagesloth.com/profile/update"))
+            return await member.send( 
+                embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one, or in the button below!**"),
+                view=view)
 
-    #     if user_currency[0][1] < 500:
-    #         return await ctx.send("**You don't have enough money to buy this service!**")
+        if user_currency[0][1] < 500:
+            return await ctx.send("**You don't have enough money to buy this service!**")
 
 
-    #     cat = discord.utils.get(ctx.guild.categories, id=user_rooms[1])
+        cat = discord.utils.get(ctx.guild.categories, id=user_rooms[1])
             
-    #     if not (vc := await self.try_to_create(kind='voice', category=cat, name=name, user_limit=limit)):
-    #         return await ctx.send(f"**Channels limit reached, creation cannot be completed, try again later!**")
+        if not (vc := await self.try_to_create(kind='voice', category=cat, name=name, user_limit=limit)):
+            return await ctx.send(f"**Channels limit reached, creation cannot be completed, try again later!**")
 
-    #     await self.update_vc_2(member.id, vc.id)
-    #     await SlothCurrency.update_user_money(member.id, -500)
-    #     await ctx.send(f"**Voice Channel created, {member.mention}!** ({vc.mention})")
-
-
-
-    # @galaxy.group(name="delete_channel", aliases=['dc', 'deletechannel', 'remove_channel', 'removechannel', 'rc'])
-    # async def _galaxy_delete_channel(self, ctx) -> None:
-    #     """ Deletes either a Text or a Voice Channel from
-    #     the user's Galaxy Room. """
-
-    #     if ctx.invoked_subcommand:
-    #         return
-
-    #     cmd = ctx.command
-    #     prefix = self.client.command_prefix
-    #     subcommands = [f"{prefix}{c.qualified_name}" for c in cmd.commands]
-
-    #     subcommands = '\n'.join(subcommands)
-    #     embed = discord.Embed(
-    #     title="Subcommads",
-    #     description=f"```apache\n{subcommands}```",
-    #     color=ctx.author.color,
-    #     timestamp=ctx.message.created_at
-    #     )
-    #     await ctx.send(embed=embed)
-
-    # @_galaxy_delete_channel.command(name='thread', aliases=['thread_channel', 'th', 'text', 'txt', 'text_channel'])
-    # @commands.cooldown(1, 60, commands.BucketType.user)
-    # async def _galaxy_delete_channel_thread(self, ctx) -> None:
-    #     """ Deletes the user's second Text Channel from their Galaxy Room. """
-
-    #     member = ctx.author
-
-    #     if not (user_rooms := await self.get_user_all_galaxy_rooms(member.id)):
-    #         return await ctx.send(f"**You don't have any Galaxy Rooms!**")
-
-    #     if ctx.channel.id not in user_rooms:
-    #         return await ctx.send(f"**You can only use this command in your Galaxy Rooms, {member.mention}!**")
+        await self.update_vc_2(member.id, vc.id)
+        await SlothCurrency.update_user_money(member.id, -500)
+        await ctx.send(f"**Voice Channel created, {member.mention}!** ({vc.mention})")
 
 
-    #     vcs, txts = await self.order_rooms(user_rooms)
-    #     money: int = await self.get_rent_price(len(txts)-1, len(vcs))
 
-    #     if len(txts) <= 1:
-    #         return await ctx.send(f"**You don't have a Thread to delete, {member.mention}!**")
+    @galaxy.group(name="delete_channel", aliases=['dc', 'deletechannel', 'remove_channel', 'removechannel', 'rc'])
+    async def _galaxy_delete_channel(self, ctx) -> None:
+        """ Deletes either a Text or a Voice Channel from
+        the user's Galaxy Room. """
 
-    #     confirm = await Confirm(
-    #         f"**Are you sure you want to delete <#{txts[1]}>, {member.mention}?**\n\n||From now on, you're gonna be charged `{money}łł` in your next fortnight rents||"
-    #         ).prompt(ctx)
+        if ctx.invoked_subcommand:
+            return
 
-    #     if not confirm:
-    #         return await ctx.send(f"**Not doing it then, {member.mention}!**")
+        cmd = ctx.command
+        prefix = self.client.command_prefix
+        subcommands = [f"{prefix}{c.qualified_name}" for c in cmd.commands]
 
-    #     try:
-    #         await self.update_txt(user_id=member.id, position=len(txts))
-    #     except:
-    #         await ctx.send(f"**For some reason I couldn't delete it, try again, {member.mention}!**")
-    #     else:
-    #         if txt := discord.utils.get(ctx.guild.threads, id=txts[len(txts)-1]):
-    #             await self.delete_things([txt])
-    #         elif txt := discord.utils.get(ctx.guild.text_channels, id=txts[len(txts)-1]):
-    #             await self.delete_things([txt])
+        subcommands = '\n'.join(subcommands)
+        embed = discord.Embed(
+        title="Subcommads",
+        description=f"```apache\n{subcommands}```",
+        color=ctx.author.color,
+        timestamp=ctx.message.created_at
+        )
+        await ctx.send(embed=embed)
 
-    #         await ctx.send(f"**Text Channel deleted, {member.mention}!**")
+    @_galaxy_delete_channel.command(name='thread', aliases=['thread_channel', 'th', 'text', 'txt', 'text_channel'])
+    @commands.cooldown(1, 60, commands.BucketType.user)
+    async def _galaxy_delete_channel_thread(self, ctx) -> None:
+        """ Deletes the user's second Text Channel from their Galaxy Room. """
+
+        member = ctx.author
+
+        if not (user_rooms := await self.get_user_all_galaxy_rooms(member.id)):
+            return await ctx.send(f"**You don't have any Galaxy Rooms!**")
+
+        if ctx.channel.id not in user_rooms:
+            return await ctx.send(f"**You can only use this command in your Galaxy Rooms, {member.mention}!**")
+
+
+        vcs, txts = await self.order_rooms(user_rooms)
+        money: int = await self.get_rent_price(len(txts)-1, len(vcs))
+
+        if len(txts) <= 1:
+            return await ctx.send(f"**You don't have a Thread to delete, {member.mention}!**")
+
+        confirm = await Confirm(
+            f"**Are you sure you want to delete <#{txts[1]}>, {member.mention}?**\n\n||From now on, you're gonna be charged `{money}łł` in your next fortnight rents||"
+            ).prompt(ctx)
+
+        if not confirm:
+            return await ctx.send(f"**Not doing it then, {member.mention}!**")
+
+        try:
+            await self.update_txt(user_id=member.id, position=len(txts))
+        except:
+            await ctx.send(f"**For some reason I couldn't delete it, try again, {member.mention}!**")
+        else:
+            if txt := discord.utils.get(ctx.guild.threads, id=txts[len(txts)-1]):
+                await self.delete_things([txt])
+            elif txt := discord.utils.get(ctx.guild.text_channels, id=txts[len(txts)-1]):
+                await self.delete_things([txt])
+
+            await ctx.send(f"**Text Channel deleted, {member.mention}!**")
         
 
 
-    # @_galaxy_delete_channel.command(name='voice', aliases=['vc', 'voice_channel'])
-    # @commands.cooldown(1, 60, commands.BucketType.user)
-    # async def _galaxy_delete_channel_voice(self, ctx) -> None:
-    #     """ Deletes the user's second Voice Channel from their Galaxy Room. """
+    @_galaxy_delete_channel.command(name='voice', aliases=['vc', 'voice_channel'])
+    @commands.cooldown(1, 60, commands.BucketType.user)
+    async def _galaxy_delete_channel_voice(self, ctx) -> None:
+        """ Deletes the user's second Voice Channel from their Galaxy Room. """
 
-    #     member = ctx.author
+        member = ctx.author
 
-    #     if not (user_rooms := await self.get_user_all_galaxy_rooms(member.id)):
-    #         return await ctx.send(f"**You don't have any Galaxy Rooms!**")
+        if not (user_rooms := await self.get_user_all_galaxy_rooms(member.id)):
+            return await ctx.send(f"**You don't have any Galaxy Rooms!**")
 
-    #     if ctx.channel.id not in user_rooms:
-    #         return await ctx.send(f"**You can only use this command in your Galaxy Rooms, {member.mention}!**")
+        if ctx.channel.id not in user_rooms:
+            return await ctx.send(f"**You can only use this command in your Galaxy Rooms, {member.mention}!**")
 
-    #     vcs, txts = await self.order_rooms(user_rooms)
-    #     money: int = await self.get_rent_price(len(txts), len(vcs)-1)
+        vcs, txts = await self.order_rooms(user_rooms)
+        money: int = await self.get_rent_price(len(txts), len(vcs)-1)
 
-    #     if len(vcs) != 2:
-    #         return await ctx.send(f"**You don't have a second Voice Channel to delete, {member.mention}!**")
+        if len(vcs) != 2:
+            return await ctx.send(f"**You don't have a second Voice Channel to delete, {member.mention}!**")
 
-    #     confirm = await Confirm(
-    #         f"**Are you sure you want to delete <#{vcs[1]}>, {member.mention}?**\n\n||From now on, you're gonna be charged `{money}łł` in your next fortnight rents||"
-    #         ).prompt(ctx)
+        confirm = await Confirm(
+            f"**Are you sure you want to delete <#{vcs[1]}>, {member.mention}?**\n\n||From now on, you're gonna be charged `{money}łł` in your next fortnight rents||"
+            ).prompt(ctx)
         
-    #     if not confirm:
-    #         return await ctx.send(f"**Not doing it then, {member.mention}!**")
+        if not confirm:
+            return await ctx.send(f"**Not doing it then, {member.mention}!**")
 
-    #     try:
-    #         await self.update_vc_2(member.id)
-    #     except:
-    #         await ctx.send(f"**For some reason I couldn't delete it, try again, {member.mention}!**")
-    #     else:
-    #         if vc := discord.utils.get(ctx.guild.channels, id=vcs[1]):
-    #             await self.delete_things([vc])
+        try:
+            await self.update_vc_2(member.id)
+        except:
+            await ctx.send(f"**For some reason I couldn't delete it, try again, {member.mention}!**")
+        else:
+            if vc := discord.utils.get(ctx.guild.channels, id=vcs[1]):
+                await self.delete_things([vc])
 
-    #         await ctx.send(f"**Voice Channel deleted, {member.mention}!**")
+            await ctx.send(f"**Voice Channel deleted, {member.mention}!**")
 
 
 

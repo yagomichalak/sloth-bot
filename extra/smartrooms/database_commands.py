@@ -97,7 +97,7 @@ class SmartRoomDatabase(commands.Cog):
             await mycursor.close()
             if not result:
                 return
-                
+
             smart_room: SmartRoom = SmartRoomEnum.__getitem__(name=result[1]).value
             formatted_smart_room: SmartRoom = await smart_room.format_data(client=self.client, data=result)
             return formatted_smart_room
@@ -122,7 +122,7 @@ class SmartRoomDatabase(commands.Cog):
 
         mycursor, db = await the_database()
         if owner_id:
-            await mycursor.execute("DELETE FROM SmartRooms WHERE owner_id = %s AND room_type = %s", (owner_id, room_type))
+            await mycursor.execute("DELETE FROM SmartRooms WHERE user_id = %s AND room_type = %s", (owner_id, room_type))
         if vc_id:
             await mycursor.execute("DELETE FROM SmartRooms WHERE vc_id = %s AND room_type = %s", (vc_id, room_type))
 

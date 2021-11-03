@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 from abc import abstractclassmethod, ABC
-from typing import Any, Union, Tuple, List
+from typing import Any, Union, Tuple, List, Optional
 import os
 import __future__
 
@@ -185,8 +185,16 @@ class GalaxyRoom(SmartRoom):
 
         await cog.update_smartroom(sql)
 
-    @staticmethod
-    async def delete() -> None: pass
+    async def delete(self, cog: commands.Cog) -> None:
+        """ Deletes the GalaxyRoom from Discord and from the database. """
+
+        for channel in self.channels:
+            try:
+                await channel.delete()
+            except:
+                pass
+
+        await cog.delete_smartroom(room_type='galaxy', owner_id=self.owner.id)
 
     @property
     def voice_channels(self):
@@ -250,6 +258,49 @@ class GalaxyRoom(SmartRoom):
         money += (len(self.text_channels) - 1) * 250
         money += (len(self.voice_channels) - 1) * 500
         return money
+
+    async def try_to_create(
+        self, 
+        kind: str, category: discord.CategoryChannel = None, 
+        channel: discord.TextChannel = None, guild: Optional[discord.Guild] = None, owner: Optional[discord.Member] = None, **kwargs: Any
+        ) -> Union[bool, discord.TextChannel, discord.VoiceChannel, discord.CategoryChannel, discord.Thread]:
+        """ Try to create something.
+        :param thing: The thing to try to create.
+        :param kind: Kind of creation. (txt, vc, cat, thread)
+        :param category: The category in which it will be created. (Optional)
+        :param channel: The channel in which the thread be created in. (Optional)(Required for threads)
+        :param guild: The guild in which it will be created in. (Optional)(Required for categories)
+        :param owner: The owner of the Galaxy Rooms. (Optional)
+        :param kwargs: The arguments to inform the creations. """
+
+        try:
+            if kind == 'text':
+                the_thing = await category.create_text_channel(**kwargs)
+            elif kind == 'voice':
+                the_thing = await category.create_voice_channel(**kwargs)
+            elif kind == 'category':
+                the_thing = await guild.create_category(**kwargs)
+            elif kind == 'thread':
+                start_message = await channel.send(kwargs['name'])
+                await start_message.pin(reason="Galaxy Room's Thread Creation")
+                the_thing = await start_message.create_thread(**kwargs)
+                if owner:
+                    await the_thing.add_user(owner)
+        except Exception as e:
+            print(e)
+            return False
+        else:
+            return the_thing
+
+    async def delete_channels(self, channels: List[discord.abc.GuildChannel]) -> None:
+        """ Deletes a list of Guild Channels.
+        :param channels: The channels to delete. """
+
+        for channel in channels:
+            try:
+                await channel.delete()
+            except:
+                pass
 
 
 # galaxy_room = GalaxyRoom()
