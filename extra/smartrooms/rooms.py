@@ -1,8 +1,9 @@
 import discord
 from discord.ext import commands
+from extra.prompt.menu import prompt_emoji_guild
 from mysqldb import the_database
 from abc import abstractclassmethod, ABC
-from typing import Any, Union, Tuple
+from typing import Any, Union, Tuple, List
 import asyncio
 import os
 import __future__
@@ -132,6 +133,8 @@ class GalaxyRoom(SmartRoom):
         self.creation_ts = creation_ts
         self.edited_ts = edited_ts
 
+        self._channels: List[discord.abc.GuildChannel] = []
+
     @staticmethod
     async def format_data(client: commands.Bot, data: Tuple[Union[int, str]]) -> SmartRoom:
         """ Formats the database data into Discord objects. """
@@ -172,6 +175,63 @@ class GalaxyRoom(SmartRoom):
 
     @staticmethod
     async def delete() -> Any: pass
+
+
+    @property
+    def voice_channels(self):
+
+        """I'm the 'channels' property."""
+        return filter(lambda vc: vc is not None, [self.vc, self.vc2])
+
+    @property
+    def text_channels(self):
+
+        """I'm the 'channels' property."""
+        return filter(lambda txt: txt is not None, [
+            self.vc, self.vc2, self.txt, self.th, self.th2, self.th3, self.th4
+        ])
+    @property
+    def channels(self):
+
+        """I'm the 'channels' property."""
+        return filter(lambda channel: channel is not None, [
+            self.vc, self.vc2, self.txt, self.th, self.th2, self.th3, self.th4, self.cat
+        ])
+
+    async def handle_permissions(self, members: List[discord.Member], allow: bool = True) -> List[str]:
+        """ Handles permissions for a member in one's Galaxy Room.
+        :param members: The list of members to handle permissions for.
+        :param allow: Whether to allow or disallow the member and their permissions from the Galaxy Room. [Default=True]"""
+
+
+        channels = self.channels
+
+        print(channels)
+        actioned: List[str] = []
+
+        for m in members:
+            try:
+                for c in channels:
+                    if not isinstance(c, discord.Thread):
+                        if c:
+                            if allow:
+                                await c.set_permissions(
+                                    m, read_messages=True, send_messages=True, connect=True, speak=True, view_channel=True)
+                            else:
+                                await c.set_permissions(m, overwrite=None)
+                    else:
+                        if allow:
+                            await c.add_user(m)
+                        else:
+                            await c.remove_user(m)
+
+            except Exception as e:
+                print(e)
+                pass
+            else:
+                actioned.append(m.mention)
+
+        return actioned
 
 
 # galaxy_room = GalaxyRoom()

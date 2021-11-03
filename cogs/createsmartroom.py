@@ -2,13 +2,19 @@ import discord
 from discord.ext import commands
 
 from extra.smartrooms.rooms import BasicRoom, PremiumRoom, GalaxyRoom, SmartRoom
+from extra.smartrooms.discord_commands import GalaxyRoomCommands
 from extra.smartrooms.database_commands import SmartRoomDatabase
 from extra.view import SmartRoomView
 from extra import utils
 
 import os
+from typing import List
 
-class CreateSmartRoom(SmartRoomDatabase):
+smartroom_cogs: List[commands.Cog] = [
+	SmartRoomDatabase, GalaxyRoomCommands
+]
+
+class CreateSmartRoom(*smartroom_cogs):
 
 	def __init__(self, client: commands.Cog) -> None:
 		self.client = client
