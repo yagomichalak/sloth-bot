@@ -199,7 +199,7 @@ class GalaxyRoom(SmartRoom):
         """ Gets all Text Channels from the GalaxyRoom. """
 
         return list(filter(lambda txt: txt is not None, [
-            self.vc, self.vc2, self.txt, self.th, self.th2, self.th3, self.th4
+            self.txt, self.th, self.th2, self.th3, self.th4
         ]))
 
     @property
@@ -241,6 +241,15 @@ class GalaxyRoom(SmartRoom):
                 actioned.append(m.mention)
 
         return actioned
+
+    async def get_rent_price(self) -> int:
+        """ Gets the rent price that the user has to pay, according to the amount of
+        channels that they have in their Galaxy Room. """
+
+        money = 1500 # Minimum renting price
+        money += (len(self.text_channels) - 1) * 250
+        money += (len(self.voice_channels) - 1) * 500
+        return money
 
 
 # galaxy_room = GalaxyRoom()

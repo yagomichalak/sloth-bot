@@ -168,9 +168,7 @@ class GalaxyRoomCommands(commands.Cog):
         if seconds_left > 172800:
             return await ctx.send(f"**You can only renew your rooms at least 2 days before their deletion time, {member.mention}!**")
 
-        vcs, txts = smart_room.voice_channels, smart_room.text_channels
-        money: int = await self.get_rent_price(len(txts), len(vcs))
-
+        money: int = await smart_room.get_rent_price()
 
         confirm = await Confirm(f"Are you sure you want to renew your Galaxy Room for `{money}łł`, {member.mention}?").prompt(ctx)
         if not confirm:
@@ -187,16 +185,7 @@ class GalaxyRoomCommands(commands.Cog):
 
         await ctx.send(f"**{member.mention}, Galaxy Rooms renewed! `(-{money}łł)`**")
 
-    async def get_rent_price(self, txts: int, vcs: int) -> int:
-        """ Gets the rent price that the user has to pay, according to the amount of
-        channels that they have in their Galaxy Room.
-        :param txts: The amount of of text based channels the user has.
-        :param vcs: The amount of of voice channels the user has. """
-
-        money = 1500 # Minimum renting price
-        money += (txts - 1) * 250
-        money += (vcs - 1) * 500
-        return money
+    
 
     @galaxy.command(name="transfer_ownership", aliases=['transfer', 'to', 'transferownership'])
     @commands.cooldown(1, 60, commands.BucketType.user)
