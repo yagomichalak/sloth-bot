@@ -31,3 +31,8 @@ class SkillsUsedRequirement(commands.CheckFailure):
     def __init__(self, error_message: str, skills_required: int) -> None:
         self.error_message = error_message
         self.skills_required = skills_required
+
+class ActionSkillsLocked(commands.CheckFailure):
+
+    def __init__(self, error_message: str) -> None:
+        self.error_message = error_message

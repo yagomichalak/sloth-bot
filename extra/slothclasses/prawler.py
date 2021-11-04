@@ -61,6 +61,7 @@ class Prawler(Player):
 
 	@commands.command(aliases=['stl', 'rob'])
 	@Player.skill_on_cooldown()
+	@Player.skills_locked()
 	@Player.user_is_class('prawler')
 	@Player.skill_mark()
 	async def steal(self, ctx, target: discord.Member = None) -> None:
@@ -143,6 +144,7 @@ class Prawler(Player):
 	@commands.command()
 	@Player.skills_used(requirement=5)
 	@Player.skill_on_cooldown(skill=Skill.TWO, seconds=2592000)
+	@Player.skills_locked()
 	@Player.user_is_class('prawler')
 	@Player.skill_mark()
 	async def sharpen(self, ctx) -> None:
@@ -367,6 +369,7 @@ class Prawler(Player):
 	@commands.command()
 	@Player.skills_used(requirement=20)
 	@Player.skill_on_cooldown(Skill.THREE)
+	@Player.skills_locked()
 	@Player.user_is_class('prawler')
 	@Player.skill_mark()
 	async def sabotage(self, ctx, *, target: discord.Member = None) -> None:
@@ -503,6 +506,7 @@ class Prawler(Player):
 	@commands.command(aliases=['kn'])
 	@Player.skills_used(requirement=50)
 	@Player.skill_on_cooldown(skill=Skill.FOUR, seconds=172800)
+	@Player.skills_locked()
 	@Player.user_is_class('prawler')
 	@Player.skill_mark()
 	@Player.not_ready()

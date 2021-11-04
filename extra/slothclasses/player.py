@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 from discord.ext.commands.core import cooldown
 
-from extra.customerrors import MissingRequiredSlothClass, ActionSkillOnCooldown, CommandNotReady, SkillsUsedRequirement
+from extra.customerrors import MissingRequiredSlothClass, ActionSkillOnCooldown, CommandNotReady, SkillsUsedRequirement, ActionSkillsLocked
 from extra import utils
 
 from mysqldb import the_database, the_django_database
@@ -78,6 +78,20 @@ class Player(commands.Cog):
 
             raise ActionSkillOnCooldown(
                 try_after=cooldown_in_seconds, error_message="Action skill on cooldown!", skill_ts=skill_ts, cooldown=seconds)
+
+        return commands.check(real_check)
+
+    def skills_locked():
+        """ Checks whether the user's set of skills are locked. """
+
+        async def real_check(ctx):
+            """ Perfoms the real check. """
+
+            locked = await Player.get_skill_action_by_target_id_and_skill_type(Player, target_id=ctx.author.id, skill_type='lock')
+            if not locked:
+                return True
+
+            raise ActionSkillsLocked(error_message="Action Skills are locked until completing a Quest!")
 
         return commands.check(real_check)
 
@@ -222,6 +236,14 @@ class Player(commands.Cog):
             effects['sabotaged']['cords'] = (0, 0)
             effects['sabotaged']['resize'] = None
             effects['sabotaged']['debuff'] = True
+
+        if then := await self.get_skill_action_by_target_id_and_skill_type(target_id=member.id, skill_type='lock'):
+            effects['locked'] = {}
+            effects['locked']['cooldown'] = "Ends when completing a Quest"
+            effects['locked']['frames'] = []
+            effects['locked']['cords'] = (0, 0)
+            effects['locked']['resize'] = None
+            effects['locked']['debuff'] = True
 
         return effects
 

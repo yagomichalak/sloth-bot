@@ -78,6 +78,7 @@ class Munk(Player):
 
     @commands.command()
     @Player.skill_on_cooldown()
+    @Player.skills_locked()
     @Player.user_is_class('munk')
     @Player.skill_mark()
     async def munk(self, ctx, target: discord.Member = None) -> None:
@@ -650,6 +651,7 @@ class Munk(Player):
     @commands.command()
     @Player.skills_used(requirement=5)
     @Player.skill_on_cooldown(skill=Skill.TWO)
+    @Player.skills_locked()
     @Player.user_is_class('munk')
     @Player.skill_mark()
     async def create_tribe(self, ctx) -> None:
@@ -680,6 +682,7 @@ class Munk(Player):
     @commands.command(aliases=['add_tribe_role', 'createtriberole', 'addtriberole'])
     @Player.skills_used(requirement=20)
     @Player.skill_on_cooldown(skill=Skill.THREE, seconds=36000)
+    @Player.skills_locked()
     @Player.user_is_class('munk')
     @Player.skill_mark()
     async def create_tribe_role(self, ctx, role_name: str = None) -> None:
@@ -1198,6 +1201,7 @@ class Munk(Player):
     @commands.command(aliases=['get_mission', 'gq', 'gm'])
     @Player.skills_used(requirement=50)
     @Player.skill_on_cooldown(skill=Skill.FOUR, seconds=172800)
+    @Player.skills_locked()
     @Player.user_is_class('munk')
     @Player.skill_mark()
     @Player.not_ready()

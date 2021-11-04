@@ -24,6 +24,7 @@ class Warrior(Player):
 
     @commands.command(aliases=['ko', 'knock-out', 'knock_out', 'knock'])
     @Player.skill_on_cooldown()
+    @Player.skills_locked()
     @Player.user_is_class('warrior')
     @Player.skill_mark()
     async def hit(self, ctx, target: discord.Member = None) -> None:
@@ -103,6 +104,7 @@ class Warrior(Player):
     @commands.command(aliases=['crush', 'break'])
     @Player.skills_used(requirement=5)
     @Player.skill_on_cooldown(skill=Skill.TWO)
+    @Player.skills_locked()
     @Player.user_is_class('warrior')
     @Player.skill_mark()
     async def smash(self, ctx, target: discord.Member = None) -> None:
@@ -238,6 +240,7 @@ class Warrior(Player):
     @commands.command(aliases=['ripoff', 'rip', 'shred'])
     @Player.skills_used(requirement=20)
     @Player.skill_on_cooldown(Skill.THREE, seconds=172800)
+    @Player.skills_locked()
     @Player.user_is_class('warrior')
     @Player.skill_mark()
     async def rip_off(self, ctx, target: discord.Member = None) -> None:
@@ -361,6 +364,7 @@ class Warrior(Player):
     @commands.command(aliases=['disorient', 'disorientate'])
     @Player.skills_used(requirement=50)
     @Player.skill_on_cooldown(skill=Skill.FOUR, seconds=172800)
+    @Player.skills_locked()
     @Player.user_is_class('warrior')
     @Player.skill_mark()
     @Player.not_ready()

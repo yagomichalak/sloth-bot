@@ -18,6 +18,7 @@ class Seraph(Player):
 
     @commands.command(aliases=['dp', 'divine', 'protection'])
     @Player.skill_on_cooldown()
+    @Player.skills_locked()
     @Player.user_is_class('seraph')
     @Player.skill_mark()
     async def divine_protection(self, ctx, target: discord.Member = None) -> None:
@@ -87,6 +88,7 @@ class Seraph(Player):
     @commands.command()
     @Player.skills_used(requirement=5)
     @Player.skill_on_cooldown(skill=Skill.TWO)
+    @Player.skills_locked()
     @Player.user_is_class('seraph')
     @Player.skill_mark()
     async def reinforce(self, ctx) -> None:
@@ -292,6 +294,7 @@ class Seraph(Player):
     @commands.command()
     @Player.skills_used(requirement=20)
     @Player.skill_on_cooldown(skill=Skill.THREE)
+    @Player.skills_locked()
     @Player.user_is_class('seraph')
     @Player.skill_mark()
     async def heal(self, ctx, target: discord.Member = None) -> None:
@@ -415,6 +418,7 @@ class Seraph(Player):
     @commands.command(aliases=['conceive_grace', 'give_grace', 'provide_grace'])
     @Player.skills_used(requirement=50)
     @Player.skill_on_cooldown(skill=Skill.FOUR)
+    @Player.skills_locked()
     @Player.user_is_class('seraph')
     @Player.skill_mark()
     @Player.not_ready()
