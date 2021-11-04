@@ -20,6 +20,7 @@ class Metamorph(Player):
 
     @commands.command(aliases=['transmutate', 'trans'])
     @Player.skill_on_cooldown()
+    @Player.skills_locked()
     @Player.user_is_class('metamorph')
     @Player.skill_mark()
     async def transmutation(self, ctx) -> None:
@@ -105,6 +106,7 @@ class Metamorph(Player):
     @commands.command(aliases=['frogify'])
     @Player.skills_used(requirement=5)
     @Player.skill_on_cooldown(skill=Skill.TWO)
+    @Player.skills_locked()
     @Player.user_is_class('metamorph')
     @Player.skill_mark()
     async def frog(self, ctx, target: discord.Member = None) -> None:
@@ -218,6 +220,7 @@ class Metamorph(Player):
     @commands.command()
     @Player.skills_used(requirement=20)
     @commands.check_any(Player.mirrored_skill(), Player.skill_on_cooldown(skill=Skill.THREE))
+    @Player.skills_locked()
     @Player.user_is_class('metamorph')
     @Player.skill_mark()
     async def mirror(self, ctx, target: discord.Member = None) -> None:
@@ -345,6 +348,7 @@ class Metamorph(Player):
     @commands.command()
     @Player.skills_used(requirement=50)
     @Player.skill_on_cooldown(skill=Skill.FOUR, seconds=172800)
+    @Player.skills_locked()
     @Player.user_is_class('metamorph')
     @Player.skill_mark()
     @Player.not_ready()

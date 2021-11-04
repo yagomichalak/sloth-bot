@@ -34,6 +34,7 @@ class Agares(Player):
 
     @commands.command(aliases=['mp'])
     @Player.skill_on_cooldown(seconds=28800)
+    @Player.skills_locked()
     @Player.user_is_class('agares')
     @Player.skill_mark()
     async def magic_pull(self, ctx, target: discord.Member = None) -> None:
@@ -116,6 +117,7 @@ class Agares(Player):
     @commands.command()
     @Player.skills_used(requirement=5)
     @Player.skill_on_cooldown(skill=Skill.TWO)
+    @Player.skills_locked()
     @Player.user_is_class('agares')
     @Player.skill_mark()
     async def recharge(self, ctx, target: discord.Member = None) -> None:
@@ -214,6 +216,7 @@ class Agares(Player):
     @commands.command(aliases=['reflection'])
     @Player.skills_used(requirement=20)
     @Player.skill_on_cooldown(skill=Skill.THREE)
+    @Player.skills_locked()
     @Player.user_is_class('agares')
     @Player.skill_mark()
     async def reflect(self, ctx, target: discord.Member = None) -> None:
@@ -397,6 +400,7 @@ class Agares(Player):
     @commands.command()
     @Player.skills_used(requirement=50)
     @Player.skill_on_cooldown(skill=Skill.FOUR, seconds=172800)
+    @Player.skills_locked()
     @Player.user_is_class('agares')
     @Player.skill_mark()
     @Player.not_ready()

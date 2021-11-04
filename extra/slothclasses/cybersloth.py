@@ -20,6 +20,7 @@ class Cybersloth(Player):
 
     @commands.command(aliases=['eb', 'energy', 'boost'])
     @Player.skill_on_cooldown()
+    @Player.skills_locked()
     @Player.user_is_class('cybersloth')
     @Player.skill_mark()
     async def hack(self, ctx, target: discord.Member = None) -> None:
@@ -98,6 +99,7 @@ class Cybersloth(Player):
     @commands.command()
     @Player.skills_used(requirement=5)
     @Player.skill_on_cooldown(skill=Skill.TWO)
+    @Player.skills_locked()
     @Player.user_is_class('cybersloth')
     @Player.skill_mark()
     async def wire(self, ctx, target: discord.Member = None) -> None:
@@ -246,6 +248,7 @@ class Cybersloth(Player):
     @commands.command()
     @Player.skills_used(requirement=20)
     @Player.skill_on_cooldown(skill=Skill.THREE)
+    @Player.skills_locked()
     @Player.user_is_class('cybersloth')
     @Player.skill_mark()
     async def virus(self, ctx) -> None:
@@ -397,6 +400,7 @@ class Cybersloth(Player):
     @commands.command()
     @Player.skills_used(requirement=50)
     @Player.skill_on_cooldown(skill=Skill.FOUR, seconds=172800)
+    @Player.skills_locked()
     @Player.user_is_class('cybersloth')
     @Player.skill_mark()
     @Player.not_ready()

@@ -24,6 +24,7 @@ class Merchant(Player):
 
     @commands.command(aliases=['sellpotion', 'potion'])
     @Player.skill_on_cooldown()
+    @Player.skills_locked()
     @Player.user_is_class('merchant')
     @Player.skill_mark()
     async def sell_potion(self, ctx) -> None:
@@ -293,6 +294,7 @@ class Merchant(Player):
     @commands.command()
     @Player.skills_used(requirement=5)
     @Player.skill_on_cooldown(skill=Skill.TWO)
+    @Player.skills_locked()
     @Player.user_is_class('merchant')
     @Player.skill_mark()
     async def package(self, ctx) -> None:
@@ -449,6 +451,7 @@ class Merchant(Player):
     @commands.command(aliases=["sellring", "ring"])
     @Player.skills_used(requirement=20)
     @Player.skill_on_cooldown(Skill.THREE, 36000)
+    @Player.skills_locked()
     @Player.user_is_class('merchant')
     @Player.skill_mark()
     async def sell_ring(self, ctx) -> None:
@@ -797,6 +800,7 @@ class Merchant(Player):
     @commands.command(aliases=['sell_mascot'])
     @Player.skills_used(requirement=50)
     @Player.skill_on_cooldown(skill=Skill.FOUR)
+    @Player.skills_locked()
     @Player.user_is_class('merchant')
     @Player.skill_mark()
     @Player.not_ready()

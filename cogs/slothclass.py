@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands, tasks, menus
 from mysqldb import the_database
 from typing import Union, List, Dict, Optional
-from extra.customerrors import ActionSkillOnCooldown, SkillsUsedRequirement, CommandNotReady
+from extra.customerrors import ActionSkillOnCooldown, ActionSkillsLocked, SkillsUsedRequirement, CommandNotReady
 from extra.menu import SlothClassPagination
 from extra.slothclasses.player import Skill
 from extra import utils
@@ -195,6 +195,8 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
             except commands.CommandError as e:
                 if isinstance(e, ActionSkillOnCooldown):
                     cmds.append(f"{prefix}{c.qualified_name:<18} [On cooldown]")
+                elif isinstance(e, ActionSkillsLocked):
+                    cmds.append(f"{prefix}{c.qualified_name:<18} [Locked]")
                 elif isinstance(e, SkillsUsedRequirement):
                     cmds.append(f"{prefix}{c.qualified_name:<18} [Requires {e.skills_required} used skills]")
                 elif isinstance(e, CommandNotReady):

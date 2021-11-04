@@ -14,7 +14,7 @@ from itertools import cycle
 
 from extra.useful_variables import patreon_roles
 
-from extra.customerrors import MissingRequiredSlothClass, ActionSkillOnCooldown, CommandNotReady, SkillsUsedRequirement
+from extra.customerrors import MissingRequiredSlothClass, ActionSkillOnCooldown, CommandNotReady, SkillsUsedRequirement, ActionSkillsLocked
 
 load_dotenv()
 
@@ -155,6 +155,9 @@ async def on_command_error(ctx, error):
     elif isinstance(error, ActionSkillOnCooldown):
         cooldown = error.skill_ts + error.cooldown
         await ctx.send(f"**You can use your skill again <t:{int(cooldown)}:R>!**")
+
+    elif isinstance(error, ActionSkillsLocked):
+        await ctx.send(error.error_message)
 
     print('='*10)
     print(f"ERROR: {error} | Class: {error.__class__} | Cause: {error.__cause__}")
