@@ -435,6 +435,11 @@ class Agares(Player):
         if sloth_profile[1] == 'default':
             return await ctx.send(f"**You cannot use this skill on someone who has a default Sloth Class, {perpetrator.mention}!**")
 
+        target_fx = await self.get_user_effects(target)
+
+        if 'protected' in target_fx:
+            return await ctx.send(f"**{perpetrator.mention}, {target.mention} is protected, you can't delay their skills!**")
+
         current_ts = await utils.get_timestamp()
         user_currency = await self.get_user_currency(perpetrator.id)
         if user_currency[1] < 150:
@@ -465,8 +470,9 @@ class Agares(Player):
             # Sends embedded message into the channel
             delay_embed = await self.get_delay_embed(
                 channel=ctx.channel, perpetrator_id=perpetrator.id, target_id=target.id)
-
             await ctx.send(embed=delay_embed)
+            if 'reflect' in target_fx:
+                await self.update_user_skills_ts_increment(perpetrator.id, 86400)
 
 
     async def get_delay_embed(self, channel, perpetrator_id: int, target_id: int) -> discord.Embed:
