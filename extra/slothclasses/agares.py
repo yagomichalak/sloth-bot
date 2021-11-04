@@ -443,7 +443,7 @@ class Agares(Player):
         current_ts = await utils.get_timestamp()
         user_currency = await self.get_user_currency(perpetrator.id)
         if user_currency[1] < 150:
-            return await ctx.send(f"**You don't have 100łł to use this skill, {perpetrator.mention}!**")
+            return await ctx.send(f"**You don't have 150łł to use this skill, {perpetrator.mention}!**")
 
         confirm = await ConfirmSkill(f"**Are you sure you want to use your delay skill on {target.mention} for `150łł`, {perpetrator.mention}?**").prompt(ctx)
         if not confirm:
