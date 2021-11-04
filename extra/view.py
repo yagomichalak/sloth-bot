@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 
-from extra.prompt.menu import prompt_number_user_limit
+from extra.prompt.menu import prompt_number_user_limit, ConfirmButton
 from extra.menu import prompt_message
 from .menu import ConfirmSkill
 from .select import ReportSupportSelect
@@ -407,15 +407,29 @@ class SmartRoomView(discord.ui.View):
         try:
             answers: Dict[str, Union[str, int]] = await self.ask_creation_questions(self.member,
                 questions={
-                    'vc_name': {'message': "**Type the name of your `Voice Channel!`**", 'check': prompt_message, 'kwargs': {'client': self.client, 'member': author, 'channel': author, 'limit': 99, 'timeout': 120}}, 
-                    'vc_user_limit': {'message': '**Type the user limit of your `Voice Channel! (0-99)`**', 'check': prompt_number_user_limit, 'kwargs': {'client': self.client, 'channel': author.dm_channel, 'member': author, 'limit': 99, 'timeout': 120, 'delete_message': False}}
+                    'vc_name': {'message': "**Type the name of your `Voice Channel!`**", 'check': prompt_message, 'kwargs': {'client': self.client, 'member': author, 'channel': author, 'limit': 25, 'timeout': 120}}, 
+                    'vc_user_limit': {'message': '**Type the user limit of your `Voice Channel! (0-25)`**', 'check': prompt_number_user_limit, 'kwargs': {'client': self.client, 'channel': author.dm_channel, 'member': author, 'limit': 25, 'timeout': 120, 'delete_message': False}}
                 }
             )
             if not answers:
                 return await interaction.followup.send("**SmartRoom creation process has been terminated!**")
 
+            # Asks for confirmation
+            await BasicRoom.image_preview(self.member.id, answers['vc_name'], answers['vc_user_limit'])
+            confirm_view = ConfirmButton(self.member, timeout=60)
+            await self.member.send(file=discord.File(f'./images/smart_vc/user_previews/{self.member.id}.png'), view=confirm_view)
+            await confirm_view.wait()
+            if confirm_view.value is None:
+                return await self.member.send("**You took too long to answer...**")
+
+            if not confirm_view.value:
+                return await self.member.send("**Not doing it, then!**")
+
+            # Creates and saves the channel
             vc: discord.VoiceChannel = await self.member.guild.create_voice_channel(name=answers['vc_name'], user_limit=answers['vc_user_limit'], category=self.category)
             await BasicRoom.insert(self.cog, user_id=author.id, vc_id=vc.id, creation_ts=current_ts)
+            await self.client.get_cog('SlothCurrency').update_user_money(self.member.id, -5)
+            await self.member.send("**BasicRoom created! (`-5🍃`)**")
         except Exception as e:
             print('ERROR ', e)
             await interaction.followup.send("**Couldn't do it for some reason!**")
@@ -442,18 +456,32 @@ class SmartRoomView(discord.ui.View):
         try:
             answers: Dict[str, Union[str, int]] = await self.ask_creation_questions(self.member,
                 questions={
-                    'vc_name': {'message': "**Type the name of your `Voice Channel!`**", 'check': prompt_message, 'kwargs': {'client': self.client, 'member': author, 'channel': author, 'limit': 99, 'timeout': 120}}, 
-                    'vc_user_limit': {'message': '**Type the user limit of your `Voice Channel! (0-99)`**', 'check': prompt_number_user_limit, 'kwargs': {'client': self.client, 'channel': author.dm_channel, 'member': author, 'limit': 99, 'timeout': 120, 'delete_message': False}}, 
-                    'txt_name': {'message': '**Type the name of your `Text Channel!`**', 'check': prompt_message, 'kwargs': {'client': self.client, 'member': author, 'channel': author, 'limit': 99, 'timeout': 120}}
+                    'vc_name': {'message': "**Type the name of your `Voice Channel!`**", 'check': prompt_message, 'kwargs': {'client': self.client, 'member': author, 'channel': author, 'limit': 25, 'timeout': 120}}, 
+                    'vc_user_limit': {'message': '**Type the user limit of your `Voice Channel! (0-25)`**', 'check': prompt_number_user_limit, 'kwargs': {'client': self.client, 'channel': author.dm_channel, 'member': author, 'limit': 25, 'timeout': 120, 'delete_message': False}}, 
+                    'txt_name': {'message': '**Type the name of your `Text Channel!`**', 'check': prompt_message, 'kwargs': {'client': self.client, 'member': author, 'channel': author, 'limit': 25, 'timeout': 120}}
                 }
             )
             if not answers:
                 return await interaction.followup.send("**SmartRoom creation process has been terminated!**")
 
+            # Asks for confirmation
+            await PremiumRoom.image_preview(self.member.id, answers['vc_name'], answers['vc_user_limit'], answers['txt_name'])
+            confirm_view = ConfirmButton(self.member, timeout=60)
+            await self.member.send(file=discord.File(f'./images/smart_vc/user_previews/{self.member.id}.png'), view=confirm_view)
+            await confirm_view.wait()
+            if confirm_view.value is None:
+                return await self.member.send("**You took too long to answer...**")
+
+            if not confirm_view.value:
+                return await self.member.send("**Not doing it, then!**")
+
+            # Creates and saves the channel
             vc: discord.VoiceChannel = await self.member.guild.create_voice_channel(name=answers['vc_name'], user_limit=answers['vc_user_limit'], category=self.category)
             text: discord.TextChannel = await self.member.guild.create_text_channel(name=answers['txt_name'], category=self.category)
 
             await PremiumRoom.insert(self.cog, user_id=author.id, vc_id=vc.id, txt_id=text.id, creation_ts=current_ts)
+            await self.client.get_cog('SlothCurrency').update_user_money(self.member.id, -100)
+            await self.member.send("**PremiumRoom created! (`-100🍃`)**")
         except Exception as e:
             print('ERROR ', e)
             await interaction.followup.send("**Couldn't do it for some reason!**")
@@ -482,13 +510,26 @@ class SmartRoomView(discord.ui.View):
                 questions={
                     'cat_name': {'message': "**Type the name of your `Category`!**", 'check': prompt_message, 'kwargs': {'client': self.client, 'member': author, 'channel': author, 'limit': 25, 'timeout': 120}}, 
                     'vc_name': {'message': "**Type the name of your `Voice Channel`!**", 'check': prompt_message, 'kwargs': {'client': self.client, 'member': author, 'channel': author, 'limit': 25, 'timeout': 120}}, 
-                    'vc_user_limit': {'message': '**Type the user limit of your `Voice Channel`! (0-99)**', 'check': prompt_number_user_limit, 'kwargs': {'client': self.client, 'channel': author.dm_channel, 'member': author, 'limit': 99, 'timeout': 120, 'delete_message': False}}, 
+                    'vc_user_limit': {'message': '**Type the user limit of your `Voice Channel`! (0-25)**', 'check': prompt_number_user_limit, 'kwargs': {'client': self.client, 'channel': author.dm_channel, 'member': author, 'limit': 25, 'timeout': 120, 'delete_message': False}}, 
                     'txt_name': {'message': '**Type the name of your `Text Channel!`**', 'check': prompt_message, 'kwargs': {'client': self.client, 'member': author, 'channel': author, 'limit': 25, 'timeout': 120}}
                 }
             )
             if not answers:
                 return await interaction.followup.send("**SmartRoom creation process has been terminated!**")
 
+
+            # Asks for confirmation
+            await GalaxyRoom.image_preview(self.member.id, answers['vc_name'], answers['vc_user_limit'], answers['txt_name'], answers['cat_name'])
+            confirm_view = ConfirmButton(self.member, timeout=60)
+            await self.member.send(file=discord.File(f'./images/smart_vc/user_previews/{self.member.id}.png'), view=confirm_view)
+            await confirm_view.wait()
+            if confirm_view.value is None:
+                return await self.member.send(f"**You took too long to answer...**")
+
+            if not confirm_view.value:
+                return await self.member.send(f"**Not doing it, then!**")
+
+            # Gets permissions for the rooms
             overwrites = {
                 self.member.guild.default_role: discord.PermissionOverwrite(
                     read_messages=False, send_messages=False, connect=False, speak=False, view_channel=False),
@@ -496,11 +537,14 @@ class SmartRoomView(discord.ui.View):
                     read_messages=True, send_messages=True, connect=True, speak=True, view_channel=True, manage_messages=True)
 			}
 
+            # Creates and saves the channel
             cat: discord.CategoryChannel = await self.member.guild.create_category(name=answers['cat_name'], overwrites=overwrites)
             vc: discord.VoiceChannel = await self.member.guild.create_voice_channel(name=answers['vc_name'], user_limit=answers['vc_user_limit'], category=cat)
             text: discord.TextChannel = await self.member.guild.create_text_channel(name=answers['txt_name'], category=cat)
 
             await GalaxyRoom.insert(self.cog, user_id=author.id, vc_id=vc.id, txt_id=text.id, cat_id=cat.id, creation_ts=current_ts)
+            await self.client.get_cog('SlothCurrency').update_user_money(self.member.id, -1500)
+            await self.member.send("**GalaxyRoom created! (`-1500🍃`)**")
         except Exception as e:
             print('ERROR ', e)
             await interaction.followup.send("**Couldn't do it for some reason!**")

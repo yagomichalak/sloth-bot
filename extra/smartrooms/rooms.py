@@ -4,16 +4,16 @@ from abc import abstractclassmethod, ABC
 from typing import Any, Union, Tuple, List, Optional
 import os
 import __future__
-
+from PIL import Image, ImageDraw, ImageFont
 
 server_id: int = int(os.getenv('SERVER_ID'))
 
 class SmartRoom(ABC):
     """ Base class for SmartRooms. """
 
+    
     @abstractclassmethod
-    async def format_data(cls) -> Any:
-        return cls
+    async def format_data(cls) -> Any: pass
 
     @abstractclassmethod
     async def insert(cls) -> Any: pass
@@ -24,6 +24,37 @@ class SmartRoom(ABC):
     @abstractclassmethod
     async def delete(cls) -> Any: pass
 
+    @abstractclassmethod
+    async def image_preview(cls) -> Any: pass
+
+    @staticmethod
+    async def overwrite_image(member_id, text, coords, color, image) -> None:
+        """ Writes a text on a Smartroom's image preview, and overwrites the original one.
+        :param member_id: The ID of the user who's creating it.
+        :param text: The text that's gonna be written.
+        :param coords: The coordinates for the text.
+        :param color: The color of the text.
+        :param image: The image to write on. """
+
+        small = ImageFont.truetype("./images/smart_vc/uni-sans-regular.ttf", 40)
+        base = Image.open(image)
+        draw = ImageDraw.Draw(base)
+        draw.text(coords, text, color, font=small)
+        base.save(f'./images/smart_vc/user_previews/{member_id}.png')
+
+    @staticmethod
+    async def overwrite_image_with_image(member_id, coords, size) -> None:
+        """ Pastes a voice channel image on top of a SmartRoom's image preview
+        and overwrites the original one.
+        :param member_id: The ID of the user who's creating it.
+        :param coords: The coordinates for the image that's gonna be pasted on top of it.
+        :param size: The size of the voice channel. """
+
+        path = f'./images/smart_vc/user_previews/{member_id}.png'
+        user_preview = Image.open(path)
+        size_image = Image.open(size).resize((78, 44), Image.LANCZOS)
+        user_preview.paste(size_image, coords, size_image)
+        user_preview.save(path)
 
 class BasicRoom(SmartRoom):
     """ Class for BasicRooms. """
@@ -64,6 +95,19 @@ class BasicRoom(SmartRoom):
 
     @staticmethod
     async def delete() -> None: pass
+
+    @classmethod
+    async def image_preview(cls, user_id: int, vc_name: str, vc_user_limit: int) -> Image:
+        """ Makes a creation preview image for a Basic Room.
+        :param user_id: The ID of the user who's creating it.
+        :param vc_name: The Voice Channel name.
+        :param vc_user_limit: The Voice Channel size; user limit. """
+
+        preview_template = './images/smart_vc/basic/1 preview2.png'
+        color = (132, 142, 142)
+        await cls.overwrite_image(user_id, vc_name, (585, 870), color, preview_template)
+        if int(vc_user_limit) != 0:
+            await cls.overwrite_image_with_image(user_id, (405, 870), f'./images/smart_vc/sizes/voice channel ({vc_user_limit}).png')
 
 class PremiumRoom(SmartRoom):
     """ Class for PremiumRooms. """
@@ -107,6 +151,21 @@ class PremiumRoom(SmartRoom):
 
     @staticmethod
     async def delete() -> Any: pass
+
+    @classmethod
+    async def image_preview(cls, user_id, vc_name, vc_user_limit, txt_name) -> None:
+        """ Makes a creation preview image for a Premium Room.
+        :param user_id: The ID of the user who's creating it.
+        :param vc_name: The voice channel name.
+        :param vc_user_limit: The voice channel size; user limit.
+        :param txt_name: The name o the first text channel. """
+
+        preview_template = './images/smart_vc/premium/2 preview2.png'
+        color = (132, 142, 142)
+        await cls.overwrite_image(user_id, txt_name.lower(), (585, 760), color, preview_template)
+        await cls.overwrite_image(user_id, vc_name, (585, 955), color, f'./images/smart_vc/user_previews/{user_id}.png')
+        if int(vc_user_limit) != 0:
+            await cls.overwrite_image_with_image(user_id, (405, 955), f'./images/smart_vc/sizes/voice channel ({vc_user_limit}).png')
 
 class GalaxyRoom(SmartRoom):
     """ Class for GalaxyRooms. """
@@ -312,3 +371,20 @@ class GalaxyRoom(SmartRoom):
                 await channel.delete()
             except:
                 pass
+
+    @classmethod
+    async def image_preview(cls, user_id: int, vc_name: str, vc_user_limit: int, txt_name: str, cat_name: str) -> None:
+        """ Makes a creation preview for a Galaxy Room.
+        :param user_id: The ID of the user who's creating it.
+        :param vc_name: The main Voice Channel name.
+        :param vc_user_limit: The Voice Channel size; user limit. 
+        :param txt_name: The name of the Text Channel.
+        :param cat_name: The category name. """
+
+        preview_template = './images/smart_vc/galaxy/3 preview2.png'
+        color = (132, 142, 142)
+        await cls.overwrite_image(user_id, cat_name, (505, 730), color, preview_template)
+        await cls.overwrite_image(user_id, txt_name.lower(), (585, 840), color, f'./images/smart_vc/user_previews/{user_id}.png')
+        await cls.overwrite_image(user_id, vc_name, (585, 970), color, f'./images/smart_vc/user_previews/{user_id}.png')
+        if int(vc_user_limit) != 0:
+            await cls.overwrite_image_with_image(user_id, (375, 965), f'./images/smart_vc/sizes/voice channel ({vc_user_limit}).png')
