@@ -400,11 +400,92 @@ class Agares(Player):
     @Player.user_is_class('agares')
     @Player.skill_mark()
     @Player.not_ready()
-    async def delay(self, ctx, member: discord.Member = None) -> None:
+    async def delay(self, ctx, target: discord.Member = None) -> None:
         """ Delays someone else's set of skills for 1 day.
-        :param member: The member of whom to delay the skills.
+        :param target: The member of whom to delay the skills.
         
         • Delay = 2 days
-        • Cost = 150łł """
+        • Cost = 150łł
+        
+        PS: It only works on skills that the member used at least once. """
 
-        pass
+        perpetrator = ctx.author
+
+        if ctx.channel.id != bots_and_commands_channel_id:
+            return await ctx.send(f"**{perpetrator.mention}, you can only use this command in {self.bots_txt.mention}!**")
+
+        if not target:
+            return await ctx.send(f"**Please, inform a target, {perpetrator.mention}!**")
+
+        if target.id == perpetrator.id:
+            return await ctx.send(f"**You cannot use this skill on yourself, {perpetrator.mention}!**")
+
+        perpetrator_fx = await self.get_user_effects(perpetrator)
+
+        if 'knocked_out' in perpetrator_fx:
+            return await ctx.send(f"**{perpetrator.mention}, you can't use your skill, because you are knocked-out!**")
+
+        if target.bot:
+            return await ctx.send(f"**{perpetrator.mention}, you cannot use this on a bot!**")
+
+        sloth_profile = await self.get_sloth_profile(target.id)
+        if not sloth_profile:
+            return await ctx.send(f"**You cannot use this skill on someone who doesn't have a Sloth Profile, {perpetrator.mention}!**")
+
+        if sloth_profile[1] == 'default':
+            return await ctx.send(f"**You cannot use this skill on someone who has a default Sloth Class, {perpetrator.mention}!**")
+
+        current_ts = await utils.get_timestamp()
+        user_currency = await self.get_user_currency(perpetrator.id)
+        if user_currency[1] < 150:
+            return await ctx.send(f"**You don't have 100łł to use this skill, {perpetrator.mention}!**")
+
+        confirm = await ConfirmSkill(f"**Are you sure you want to use your delay skill on {target.mention} for `150łł`, {perpetrator.mention}?**").prompt(ctx)
+        if not confirm:
+            return await ctx.send(f"**Not doing it then, {perpetrator.mention}!**")
+
+        _, exists = await Player.skill_on_cooldown(skill=Skill.FOUR, seconds=172800).predicate(ctx)
+        try:
+
+            await self.update_user_skills_ts_increment(target.id, 86400)
+            await self.update_user_money(perpetrator.id, -100)
+
+            if exists:
+                await self.update_user_skill_ts(perpetrator.id, Skill.FOUR, current_ts)
+            else:
+                await self.insert_user_skill_cooldown(perpetrator.id, Skill.FOUR, current_ts)
+
+            await self.update_user_skills_used(user_id=perpetrator.id)
+
+        except Exception as e:
+            print(e)
+            await ctx.send(f"**Something went wrong with this skill!**")
+
+        else:
+            # Sends embedded message into the channel
+            delay_embed = await self.get_delay_embed(
+                channel=ctx.channel, perpetrator_id=perpetrator.id, target_id=target.id)
+
+            await ctx.send(embed=delay_embed)
+
+
+    async def get_delay_embed(self, channel, perpetrator_id: int, target_id: int) -> discord.Embed:
+        """ Makes an embedded message for a delay action.
+        :param channel: The context channel.
+        :param perpetrator_id: The ID of the perpetrator of the delay.
+        :param target_id: The ID of the target of the delay. """
+
+        timestamp = await utils.get_timestamp()
+
+        delay_embed = discord.Embed(
+            title="Cooldowns just got Delayed!",
+            timestamp=datetime.fromtimestamp(timestamp)
+        )
+        delay_embed.description = f"**<@{perpetrator_id}> delayed <@{target_id}>'s set of skills by a day!** ↕️"
+        delay_embed.color = discord.Color.green()
+
+        delay_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Agares.png")
+        delay_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
+        delay_embed.set_image(url='https://c.tenor.com/PSGLSYMPNJEAAAAd/sorry-for-the-delay-tom-felton.gif')
+
+        return delay_embed
