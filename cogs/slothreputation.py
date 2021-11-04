@@ -448,7 +448,7 @@ class SlothReputation(commands.Cog):
         await self.update_user_score_points(ctx.author.id, 100)
         await self.update_user_score_points(member.id, 100)
         await self.update_user_rep_time(ctx.author.id, time_xp)
-        await SlothCurrency.update_user_money(member.id, 5)
+        await self.client.get_cog('SlothCurrency').update_user_money(member.id, 5)
         return await ctx.send(
             f"**{ctx.author.mention} repped {member.mention}! 🍃The repped person got 5łł🍃**")
 
