@@ -192,36 +192,36 @@ UPDATE TribeMember as OG
 
 
 
-cases = [
-    # Upper horizontal
-    [(0, 0), (0, 1), (0, 2)],
-    # Middle horizontal
-    [(1, 0), (1, 1), (1, 2)],
-    # Bottom horizontal
-    [(2, 0), (2, 1), (2, 2)],
+# cases = [
+#     # Upper horizontal
+#     [(0, 0), (0, 1), (0, 2)],
+#     # Middle horizontal
+#     [(1, 0), (1, 1), (1, 2)],
+#     # Bottom horizontal
+#     [(2, 0), (2, 1), (2, 2)],
 
-    # Upper vertical
-    [(0, 0), (1, 0), (2, 0)],
-    # Middle vertical
-    [(1, 0), (1, 1), (1, 2)],
-    # Bottom vertical
-    [(2, 0), (2, 1), (2, 2)],
+#     # Upper vertical
+#     [(0, 0), (1, 0), (2, 0)],
+#     # Middle vertical
+#     [(1, 0), (1, 1), (1, 2)],
+#     # Bottom vertical
+#     [(2, 0), (2, 1), (2, 2)],
 
-    # Right diagonal
-    [(0, 0), (1, 1), (2, 2)],
-    # Left diagonal
-    [(0, 2), (1, 1), (2, 0)],
+#     # Right diagonal
+#     [(0, 0), (1, 1), (2, 2)],
+#     # Left diagonal
+#     [(0, 2), (1, 1), (2, 0)],
 
-]
+# ]
 
-you = [
-    (0, 0), (2, 0), (0, 1), (2, 2), (0, 2)
-]
+# you = [
+#     (0, 0), (2, 0), (0, 1), (2, 2), (0, 2)
+# ]
 
 
-# print(set([0, 0]))
+# # print(set([0, 0]))
 
-for case in cases:
-    if len(inter := set(you).intersection(set(case))) >= 3:
-        print('You won with: ', case)
-        break
+# for case in cases:
+#     if len(inter := set(you).intersection(set(case))) >= 3:
+#         print('You won with: ', case)
+#         break
