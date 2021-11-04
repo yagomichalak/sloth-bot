@@ -608,6 +608,22 @@ class Player(commands.Cog):
         await db.commit()
         await mycursor.close()
 
+    async def update_user_skills_ts_increment(self, user_id: int, increment: int) -> None:
+        """ Updates the timestamps of the user's skills by incrementing them.
+        :parma user_id: The ID of the user.
+        :param increment: The increment to apply to the cooldowns. (Can be negative) """
+
+        mycursor, db = await the_database()
+        sql = """
+        UPDATE SkillsCooldown SET 
+        skill_one_ts = skill_one_ts + %s, skill_two_ts = skill_two_ts + %s,
+        skill_three_ts = skill_three_ts + %s, skill_four_ts = skill_four_ts + %s,
+        skill_five_ts = skill_five_ts + %s WHERE user_id = %s
+        """
+        await mycursor.execute(sql, (increment, increment, increment, increment, increment, user_id))
+        await db.commit()
+        await mycursor.close()
+
     async def update_change_class_ts(self, user_id: int, new_ts: int) -> None:
         """ Updates the user's changing-Sloth-class cooldown.
         :param user_id: The ID of the user.
