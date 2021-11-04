@@ -157,7 +157,7 @@ async def on_command_error(ctx, error):
         await ctx.send(f"**You can use your skill again <t:{int(cooldown)}:R>!**")
 
     elif isinstance(error, ActionSkillsLocked):
-        await ctx.send(error.error_message)
+        await ctx.send(f"**{error.error_message}**")
 
     print('='*10)
     print(f"ERROR: {error} | Class: {error.__class__} | Cause: {error.__cause__}")
