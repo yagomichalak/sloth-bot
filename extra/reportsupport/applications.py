@@ -5,7 +5,7 @@ from typing import Any, List, Dict, Union
 from extra import utils
 import os
 
-cosmos_id: int = int(os.getenv('COSMOS_ID'))
+cosmos_role_id: int = int(os.getenv('COSMOS_ROLE_ID'))
 muffin_id: int = int(os.getenv('MUFFIN_ID'))
 cent_id: int = int(os.getenv('CENT_ID'))
 guibot_id: int = int(os.getenv('GUIBOT_ID'))
@@ -50,7 +50,7 @@ class ApplicationsTable(commands.Cog):
             "app": moderator_app_channel_id, "interview": moderator_interview_vc_id, "parent": moderator_parent_channel_id,
             "cat": moderator_app_cat_id, 
             "message": "**Moderator Application**\nOur staff has evaluated your Moderator application and has come to a conclusion, and due to intern and unspecified reasons we are **declining** it. Thank you anyways",
-            "pings": [{"id": cosmos_id, "role": False}, {"id": admin_role_id, "role": True}]},
+            "pings": [{"id": cosmos_role_id, "role": True}, {"id": admin_role_id, "role": True}]},
         'event_host': {
             "app": event_host_app_channel_id,  "interview": event_host_interview_vc_id, "parent": event_host_parent_channel_id, 
             "cat": event_host_app_cat_id, 
