@@ -283,7 +283,7 @@ class Games(*minigames_cogs):
 
         string_numbers = [str(i) for i in numbers]
         if g1 == numbers[0] and g2 == numbers[1] and g3 == numbers[2]:
-            await ctx.send(f'**{author.mention} You won! Congratulations on winning the lottery with the numbers ({g1}, {g2},{g3})!🍃+500łł!**')
+            await ctx.send(f'**{author.mention} You won! Congratulations on winning the lottery with the numbers ({g1}, {g2}, {g3})!🍃+500łł!**')
             if not await SlothCurrency.get_user_currency(author.id):
 
                 await SlothCurrency.insert_user_currency(author.id, current_ts - 61)
