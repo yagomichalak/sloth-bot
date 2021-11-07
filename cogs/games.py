@@ -355,7 +355,7 @@ class Games(*minigames_cogs):
 
         if bet < minimum_bet:
             ctx.command.reset_cooldown(ctx)
-            await ctx.send(f"**The minimum bet is `{minimum_bet} leaves`!**")
+            return await ctx.send(f"**The minimum bet is `{minimum_bet} leaves`!**")
 
         side_options: Dict[str, List[str]] = {
             'Tail': {'aliases': ['t', 'tail', 'tails'], 'image': 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/2021_Native_American_%241_Coin_Reverse.png/220px-2021_Native_American_%241_Coin_Reverse.png'},
@@ -433,7 +433,7 @@ class Games(*minigames_cogs):
 
         if bet < minimum_bet:
             ctx.command.reset_cooldown(ctx)
-            await ctx.send(f"**The minimum bet is `{minimum_bet} leaves`!**")
+            return await ctx.send(f"**The minimum bet is `{minimum_bet} leaves`!**")
 
         if bet < 0:
             ctx.command.reset_cooldown(ctx)
