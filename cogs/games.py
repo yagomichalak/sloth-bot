@@ -325,7 +325,9 @@ class Games(*minigames_cogs):
     async def coin_flip(self, ctx, bet: int = None, side: str = None) -> None:
         """ Command for flipping a coin.
         :param bet: The amount of money you want to bet.
-        :param side: The side you wanna bet on. (Heads/Tail) """
+        :param side: The side you wanna bet on. (Heads/Tail)
+        
+        * Minimum bet: 50łł """
 
         member: discord.Member = ctx.author
 
@@ -333,6 +335,7 @@ class Games(*minigames_cogs):
             ctx.command.reset_cooldown(ctx)
             return await ctx.reply("**Please, inform how much you wanna bet!**")
 
+        minimum_bet: int = 50
         bet_limit: int = 5000
         if bet > bet_limit:
             ctx.command.reset_cooldown(ctx)
@@ -349,6 +352,10 @@ class Games(*minigames_cogs):
 
         if user_currency[0][1] < bet:
             return await ctx.reply(f"**You don't have `{bet} leaves` to bet!**")
+
+        if bet < minimum_bet:
+            ctx.command.reset_cooldown(ctx)
+            await ctx.send(f"**The minimum bet is `{minimum_bet} leaves`!**")
 
         side_options: Dict[str, List[str]] = {
             'Tail': {'aliases': ['t', 'tail', 'tails'], 'image': 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/2021_Native_American_%241_Coin_Reverse.png/220px-2021_Native_American_%241_Coin_Reverse.png'},
@@ -389,7 +396,9 @@ class Games(*minigames_cogs):
     @commands.cooldown(1, 25, commands.BucketType.user)
     async def slots(self, ctx, bet: int = None) -> None:
         """ Command for playing Slots.
-        :param bet: The amount you wanna bet. """
+        :param bet: The amount you wanna bet.
+        
+        * Minimum bet: 50łł """
 
         author: discord.Member = ctx.author
 
@@ -397,6 +406,7 @@ class Games(*minigames_cogs):
             ctx.command.reset_cooldown(ctx)
             return await ctx.reply(f"**Please inform how much you wanna bet, {author.mention}**")
 
+        minimum_bet: int = 50
         bet_limit: int = 5000
         if bet > bet_limit:
             ctx.command.reset_cooldown(ctx)
@@ -420,6 +430,10 @@ class Games(*minigames_cogs):
         if bet > user_currency[0][1]:
             ctx.command.reset_cooldown(ctx)
             return await ctx.reply(f"**You don't have {bet} to bet, {author.mention}!**")
+
+        if bet < minimum_bet:
+            ctx.command.reset_cooldown(ctx)
+            await ctx.send(f"**The minimum bet is `{minimum_bet} leaves`!**")
 
         if bet < 0:
             ctx.command.reset_cooldown(ctx)
@@ -468,7 +482,7 @@ class Games(*minigames_cogs):
 
         # User broke even with 2
         be = discord.Embed(title = "Slots Machine", color = discord.Color(0xFFEC))
-        be.add_field(name="{}\nBroke even".format(slotOutput), value=f'You broke even, so you got your {bet} leaves back')
+        be.add_field(name="{}\nBroke even".format(slotOutput), value=f'You broke even, so you keep your {bet} leaves')
         be.set_footer(text=f"Bet from {author}", icon_url=author.display_avatar)
 
         # User lost
@@ -481,7 +495,6 @@ class Games(*minigames_cogs):
             await SlothCurrency.update_user_money(ctx.author.id, money_won)
             return await msg.edit(embed=won)
         elif slot1["emoji"] == slot2["emoji"] or slot2["emoji"] == slot3["emoji"]:
-            await SlothCurrency.update_user_money(ctx.author.id, bet)
             return await msg.edit(embed=be)
         else:
             await SlothCurrency.update_user_money(ctx.author.id, -bet)
