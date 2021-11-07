@@ -4,7 +4,7 @@ from discord.ext import commands
 from random import randint, sample, shuffle, choice
 import os
 import json
-from typing import List, Dict, Optional, Any
+from typing import List, Dict, Optional, Any, Union
 import asyncio
 
 from extra import utils
@@ -386,8 +386,7 @@ class Games(*minigames_cogs):
 
     @commands.command()
     @Player.poisoned()
-    @commands.cooldown(1, 20, commands.BucketType.user)
-    @Player.not_ready()
+    @commands.cooldown(1, 25, commands.BucketType.user)
     async def slots(self, ctx, bet: int = None) -> None:
         """ Command for playing Slots.
         :param bet: The amount you wanna bet. """
@@ -395,6 +394,7 @@ class Games(*minigames_cogs):
         author: discord.Member = ctx.author
 
         if not bet:
+            ctx.command.reset_cooldown(ctx)
             return await ctx.reply(f"**Please inform how much you wanna bet, {author.mention}**")
 
         bet_limit: int = 5000
@@ -414,20 +414,33 @@ class Games(*minigames_cogs):
         try:
             bet = int(bet)
         except ValueError:
+            ctx.command.reset_cooldown(ctx)
             return await ctx.reply(f"**Please, inform a valid bet value, {author.mention}!**")
 
         if bet > user_currency[0][1]:
+            ctx.command.reset_cooldown(ctx)
             return await ctx.reply(f"**You don't have {bet} to bet, {author.mention}!**")
 
         if bet < 0:
+            ctx.command.reset_cooldown(ctx)
             return await ctx.reply(f"**You must inform a positive amount to bet, {author.mention}**")
 
-        slots = ['bus', 'train', 'horse', 'heart', 'monkey', 'cow', 'parrot', 'leaves', 'money_mouth']
+        # slots = ['bus', 'train', 'horse', 'heart', 'monkey', 'cow', 'parrot', 'leaves', 'money_mouth']
+        slots: List[Dict[str, Union[str, int, float]]] = [
+            {"emoji": ':bus:', "multiplier": 2}, 
+            {"emoji": ':train:', "multiplier": 2}, 
+            {"emoji": ':heart:', "multiplier": 4}, 
+            {"emoji": ':monkey:', "multiplier": 2}, 
+            {"emoji": ':cow:', "multiplier": 2}, 
+            {"emoji": ':money_mouth:', "multiplier": 3},
+        ]
+
+
         slot1 = slots[randint(0, 5)]
         slot2 = slots[randint(0, 5)]
         slot3 = slots[randint(0, 5)]
 
-        slotOutput = '| :{}: | :{}: | :{}: |\n'.format(slot1, slot2, slot3)
+        slotOutput = '| {} | {} | {} |\n'.format(slot1["emoji"], slot2["emoji"], slot3["emoji"])
 
         ok = discord.Embed(title="__Slots Machine__", color=discord.Color(0xFFEC))
         ok.set_footer(text=f"Bet from {author}", icon_url=author.display_avatar)
@@ -438,41 +451,41 @@ class Games(*minigames_cogs):
         msg = await ctx.send(embed=ok)
         await asyncio.sleep(0.8)
 
-        ok.set_field_at(0, name='Rolling...', value='| :{}: | {} | {} |\n'.format(slot1, rolling_emoji, rolling_emoji))
+        ok.set_field_at(0, name='Rolling...', value='| {} | {} | {} |\n'.format(slot1["emoji"], rolling_emoji, rolling_emoji))
         await msg.edit(embed=ok)
         await asyncio.sleep(0.8)
 
-        ok.set_field_at(0, name='Rolling...', value='| :{}: | :{}: | {} |\n'.format(slot1, slot2, rolling_emoji))
+        ok.set_field_at(0, name='Rolling...', value='| {} | {} | {} |\n'.format(slot1["emoji"], slot2["emoji"], rolling_emoji))
         await msg.edit(embed=ok)
         await asyncio.sleep(0.8)
 
+        money_won: int = bet * slot1['multiplier']
 
-        ok.remove_image()
-
-        ok.set_field_at(0, name="{}\nWon".format(slotOutput), value=f'You won {2*bet} leaves')
-
-
+        # User won with 3
         won = discord.Embed(title = "Slots Machine", color = discord.Color(0xFFEC))
-        won.add_field(name="{}\nWon".format(slotOutput), value=f'You won {3*bet} leaves')
+        won.add_field(name="{}\nWon".format(slotOutput), value=f'You won {money_won} leaves')
         won.set_footer(text=f"Bet from {author}", icon_url=author.display_avatar)
-        
 
+        # User broke even with 2
+        be = discord.Embed(title = "Slots Machine", color = discord.Color(0xFFEC))
+        be.add_field(name="{}\nBroke even".format(slotOutput), value=f'You broke even, so you got your {bet} leaves back')
+        be.set_footer(text=f"Bet from {author}", icon_url=author.display_avatar)
+
+        # User lost
         lost = discord.Embed(title = "Slots Machine", color = discord.Color(0xFFEC))
-        lost.add_field(name="{}\nLost".format(slotOutput), value=f'You lost {1*bet} leaves')
+        lost.add_field(name="{}\nLost".format(slotOutput), value=f'You lost {bet} leaves')
         lost.set_footer(text=f"Bet from {author}", icon_url=author.display_avatar)
 
 
-        if slot1 == slot2 == slot3:
-            await SlothCurrency.update_user_money(ctx.author.id, 3 * bet)
-            return await msg.edit(embed = won)
-
-        if slot1 == slot2:
-            await SlothCurrency.update_user_money(ctx.author.id, 2 * bet)
-            return await msg.edit(embed = ok)
-
+        if slot1["emoji"] == slot2["emoji"] == slot3["emoji"]:
+            await SlothCurrency.update_user_money(ctx.author.id, money_won)
+            return await msg.edit(embed=won)
+        elif slot1["emoji"] == slot2["emoji"] or slot2["emoji"] == slot3["emoji"]:
+            await SlothCurrency.update_user_money(ctx.author.id, bet)
+            return await msg.edit(embed=be)
         else:
-            await SlothCurrency.update_user_money(ctx.author.id, -1 * bet)
-            return await msg.edit(embed = lost)
+            await SlothCurrency.update_user_money(ctx.author.id, -bet)
+            return await msg.edit(embed=lost)
 
 
 def setup(client) -> None:
