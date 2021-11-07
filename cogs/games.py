@@ -449,7 +449,6 @@ class Games(*minigames_cogs):
             {"emoji": ':money_mouth:', "multiplier": 3},
         ]
 
-
         slot1 = slots[randint(0, 5)]
         slot2 = slots[randint(0, 5)]
         slot3 = slots[randint(0, 5)]

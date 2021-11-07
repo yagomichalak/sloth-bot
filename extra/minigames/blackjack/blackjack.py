@@ -7,6 +7,9 @@ from extra.slothclasses.player import Player
 from extra.minigames.view import BlackJackActionView
 from extra import utils
 import asyncio
+import os
+
+server_id: int = int(os.getenv('SERVER_ID'))
 
 class BlackJack(commands.Cog):
     """ To start a blackjack game in your channel use the 'blackjack <bet>' command,
@@ -19,7 +22,7 @@ class BlackJack(commands.Cog):
     def __init__(self, client: commands.Bot) -> None:
         self.client = client
         self.cards_pack = cards_pack
-        self.blackjack_games = {}
+        self.blackjack_games = {server_id: {}}
 
     @commands.command(name='blackjack', aliases=['bj'])
     @Player.poisoned()
@@ -60,9 +63,6 @@ class BlackJack(commands.Cog):
 
         player_bal = user_currency[0][1]
         minimum_bet = 50
-
-        if self.blackjack_games.get(guild_id) is None:
-            self.blackjack_games[guild_id] = {}
 
         # Check if player's blackjack game is active
         if player.id in self.blackjack_games[guild_id]:
