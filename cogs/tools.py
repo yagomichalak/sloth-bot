@@ -279,9 +279,8 @@ class Tools(commands.Cog):
 
 	@commands.command()
 	async def ping(self, ctx):
-		'''
-		Show the latency.
-		'''
+		""" Show the latency. """
+
 		await ctx.send(f"**:ping_pong: Pong! {round(self.client.latency * 1000)}ms.**")
 
 	@commands.command()

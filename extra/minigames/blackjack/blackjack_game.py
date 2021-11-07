@@ -215,7 +215,6 @@ class BlackJackGame:
         self.status = 'finished'
         self.color = discord.Color.green()
         self.dealer_final_show()
-        # update player bal
 
     # Surrender in blackjack
     def surrender_event(self):

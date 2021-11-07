@@ -489,10 +489,10 @@ class Agares(Player):
 
         delay_embed = discord.Embed(
             title="Cooldowns just got Delayed!",
+            description=f"**<@{perpetrator_id}> delayed <@{target_id}>'s set of skills by a day!** ↕️",
+            color=discord.Color.green(),
             timestamp=datetime.fromtimestamp(timestamp)
         )
-        delay_embed.description = f"**<@{perpetrator_id}> delayed <@{target_id}>'s set of skills by a day!** ↕️"
-        delay_embed.color = discord.Color.green()
 
         delay_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Agares.png")
         delay_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)

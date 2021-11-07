@@ -8,6 +8,7 @@ from extra import utils
 from mysqldb import the_database, the_django_database
 from typing import Union, List, Dict, Any
 from datetime import datetime
+from random import random, choice
 import os
 from pytz import timezone
 
@@ -139,6 +140,38 @@ class Player(commands.Cog):
 
         return commands.check(real_check)
 
+    def poisoned() -> bool:
+        """ Checks whether the user is poisoned and disorients the command. """
+
+        async def real_check(ctx):
+            """ Perfoms the real check. """
+
+            poisoned = await Player.get_skill_action_by_target_id_and_skill_type(Player, target_id=ctx.author.id, skill_type='poison')
+            if not poisoned:
+                return True
+
+            # 35% chance of messing with the user when they're poisoned
+            if random() > 0.35:
+                return True
+
+            poisoned_messages: List[Dict[str, Any]] = [
+                {"name": "Normal", "message": "I can't... 😵‍💫", "reply": True, "command": None, "kwargs": None},
+                {"name": "Normal", "message": "YOU asked for a fun fact? Aight, did you know that if u eat 70 bananas in less than 10 minutes, you'll die of radiation?", "reply": True, "command": None, "kwargs": None},
+                {"name": "Normal", "message": "I can't... 😵‍💫", "reply": True, "command": None, "kwargs": None},
+            ]
+
+            random_poisoned_msg = choice(poisoned_messages)
+            answer: discord.PartialMessageable = ctx.reply if random_poisoned_msg['reply'] else ctx.send
+
+            await answer(content=random_poisoned_msg["message"])
+
+
+            return False
+            
+
+        return commands.check(real_check)
+
+
     async def has_effect(self, effects: Dict[str, Dict[str, Any]], effect: str) -> Union[str, bool]:
         if effect in effects:
             return effects[effect]['cooldown']
@@ -244,6 +277,14 @@ class Player(commands.Cog):
             effects['locked']['cords'] = (0, 0)
             effects['locked']['resize'] = None
             effects['locked']['debuff'] = True
+
+        if then := await self.get_skill_action_by_target_id_and_skill_type(target_id=member.id, skill_type='poison'):
+            effects['poisoned'] = {}
+            effects['poisoned']['cooldown'] = f"Ends <t:{int(then[2]) + general_cooldown}:R>" if then else 'Ends in ??'
+            effects['poisoned']['frames'] = []
+            effects['poisoned']['cords'] = (0, 0)
+            effects['poisoned']['resize'] = None
+            effects['poisoned']['debuff'] = True
 
         return effects
 
