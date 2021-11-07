@@ -321,7 +321,7 @@ class Games(*minigames_cogs):
 
     @commands.command(aliases=['flip_coin', 'flipcoin', 'coinflip', 'cf', 'fc'])
     @Player.poisoned()
-    # @commands.cooldown(1, 25, commands.BucketType.user)
+    @commands.cooldown(1, 25, commands.BucketType.user)
     async def coin_flip(self, ctx, bet: int = None, side: str = None) -> None:
         """ Command for flipping a coin.
         :param bet: The amount of money you want to bet.
@@ -393,7 +393,7 @@ class Games(*minigames_cogs):
 
     @commands.command()
     @Player.poisoned()
-    # @commands.cooldown(1, 25, commands.BucketType.user)
+    @commands.cooldown(1, 25, commands.BucketType.user)
     async def slots(self, ctx, bet: int = None) -> None:
         """ Command for playing Slots.
         :param bet: The amount you wanna bet.
