@@ -1,13 +1,17 @@
 import discord
 from discord.ext import commands, menus
-from .player import Player, Skill
 from mysqldb import the_database, the_django_database
+
+from .player import Player, Skill
+from .enums import QuestEnum
 from extra.menu import ConfirmSkill, SwitchTribePages
 from extra import utils
+
 import os
-from datetime import datetime
-from typing import List, Union, Dict, Any, Optional
 import asyncio
+from datetime import datetime
+from typing import List, Union, Dict, Any, Optional, Callable
+from random import choice
 
 bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
 approve_thumbnail_channel_id = int(os.getenv('APPROVE_THUMBNAIL_CHANNEL_ID'))
@@ -1217,4 +1221,107 @@ class Munk(Player):
         • Delay = 2 days
         • Cost = Free  """
 
-        pass
+        perpetrator = ctx.author
+
+        # Do the magic here.
+        if ctx.channel.id != self.bots_txt.id:
+            return await ctx.send(f"**{perpetrator.mention}, you can only use this command in {self.bots_txt.mention}!**")
+
+        perpetrator_fx = await self.get_user_effects(perpetrator)
+
+        if 'knocked_out' in perpetrator_fx:
+            return await ctx.send(f"**{perpetrator.mention}, you can't use this skill, because you are knocked-out!**")
+
+        user_tribe = await self.get_tribe_info_by_user_id(perpetrator.id)
+        if not user_tribe['name']:
+            return await ctx.send(f"**You don't have a tribe, {perpetrator.mention}**!")
+
+        # Checks whether there's already a max number of 1 open quests in that tribe
+        if await self.get_skill_action_by_user_id_and_skill_type(user_id=perpetrator.id, skill_type="quest"):
+            return await ctx.send(f"**You cannot have more than 1 on-going Quest at a time, {perpetrator.mention}!**")
+
+        random_quest = await self.generate_random_quest()
+
+        _, exists = await Player.skill_on_cooldown(skill=Skill.FOUR, seconds=172800).predicate(ctx)
+
+        try:
+            current_timestamp = await utils.get_timestamp()
+            await self.insert_skill_action(
+                user_id=perpetrator.id, skill_type="quest", skill_timestamp=current_timestamp,
+                target_id=perpetrator.id, channel_id=ctx.channel.id, price=random_quest["enum_value"], content=random_quest["message"]
+            )
+            if exists:
+                await self.update_user_skill_ts(perpetrator.id, Skill.FOUR, current_timestamp)
+            else:
+                await self.insert_user_skill_cooldown(perpetrator.id, Skill.FOUR, current_timestamp)
+            # Updates user's skills used counter
+            await self.update_user_skills_used(user_id=perpetrator.id)
+            
+        except Exception as e:
+            print(e)
+            return await ctx.send(f"**Something went wrong with your skill and it failed, {perpetrator.mention}!**")
+
+        else:
+            tribe_quest_embed = await self.get_tribe_quest_embed(channel=ctx.channel, user_id=perpetrator.id, quest=random_quest, tribe=user_tribe)
+            await ctx.send(embed=tribe_quest_embed)
+
+
+    async def generate_random_quest(self) -> Any:
+        """ Generates a random question. """
+
+        quests: List[Dict[str, Union[str, int]]] = [
+            {"message": "Complete 5 `TheLanguageJungle` games.", "enum_value": 1},
+            {"message": "Rep someone and get repped back.", "enum_value": 2},
+            {"message": "Win a coinflip betting 50 leaves.", "enum_value": 3},
+            {"message": "Get a 15+ score in the `Flags` game.", "enum_value": 4},
+            {"message": "Spend 4 hours in a Voice Channel in a single day.", "enum_value": 5},
+            {"message": "Buy any item from the SlothShop, if you have all items you need to get ripped-off first.", "enum_value": 6},
+            
+            {"message": "Ping DNK 3 times in a row and try to evade a BAN!!!!", "enum_value": 7},
+        ]
+
+        return choice(quests)
+
+    async def get_tribe_quest_embed(self, 
+        channel: Union[discord.TextChannel, discord.Thread], user_id: int, quest: Dict[str, Union[str, int]], tribe: Dict[str, Union[str, int]]
+    ) -> discord.Embed:
+        """ Makes an embedded message for a Tribe Role creation.
+        :param channel: The context channel.
+        :param owner_id: The owner of the tribe.
+        :param tribe_info: The tribe info.
+        :param role_name: The role created for that tribe. """
+
+        current_ts = await utils.get_timestamp()
+
+        tribe_quest_embed = discord.Embed(
+            title="__A New Quest has been Started__",
+            description=f"<@{user_id}> has just started a Quest for their Tribe named `{tribe['name']}`!",
+            color=discord.Color.green(),
+            timestamp=datetime.fromtimestamp(current_ts)
+        )
+        tribe_quest_embed.add_field(name="__Quest__:", value=quest["message"])
+
+        if tribe["thumbnail"]:
+            tribe_quest_embed.set_thumbnail(url=tribe["thumbnail"])
+        tribe_quest_embed.set_image(url='https://c.tenor.com/MJ8Dxo58AJAAAAAC/muggers-quest.gif')
+        tribe_quest_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
+        return tribe_quest_embed
+
+    async def complete_quest(self, user_id: int) -> None:
+        """ Completes an on-going quest for a member.
+        :param user_id: The ID of the user who's completing the quest. """
+
+        # Gets Quest
+        quest = await self.get_skill_action_by_user_id_and_skill_type(user_id=user_id, skill_type="quest")
+        if not quest:
+            return
+
+        # Deletes Quest
+        await self.delete_skill_action_by_user_id_and_skill_type(user_id=user_id, skill_type='quest')
+
+        # Gets enum value
+        enum_name = QuestEnum.__dict__['_member_names_'][quest[7]-1]
+        function: Callable = QuestEnum.__getitem__(name=enum_name)
+        # Runs attached method if there's any
+        if function:
+            await function()
