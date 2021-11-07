@@ -13,6 +13,7 @@ from external_cons import the_reddit
 
 from extra.moderation.userinfractions import ModerationUserInfractionsTable
 from extra.moderation.fakeaccounts import ModerationFakeAccountsTable
+from extra.slothclasses.player import Player
 
 mod_role_id = int(os.getenv('MOD_ROLE_ID'))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID'))
@@ -312,6 +313,7 @@ class Social(commands.Cog):
     #     await ctx.send(embed=meme_embed)
 
     @commands.command(aliases=['xkcd', 'comic'])
+    @Player.poisoned()
     async def randomcomic(self, ctx):
         """ Get a comic from xkcd. """
 
@@ -330,6 +332,7 @@ class Social(commands.Cog):
         await ctx.send(embed=em)
 
     @slash_command(name="youtube_together", guild_ids=guild_ids)
+    @Player.poisoned()
     @utils.is_allowed([booster_role_id, *useful_variables.patreon_roles.keys(), mod_role_id, admin_role_id, teacher_role_id], throw_exc=True)
     async def youtube_together(self, ctx,
         voice_channel: Option(discord.abc.GuildChannel, description="The voice channel in which to create the party.")

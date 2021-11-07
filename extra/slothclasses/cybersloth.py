@@ -19,6 +19,7 @@ class Cybersloth(Player):
         self.client = client
 
     @commands.command(aliases=['eb', 'energy', 'boost'])
+    @Player.poisoned()
     @Player.skill_on_cooldown()
     @Player.skills_locked()
     @Player.user_is_class('cybersloth')
@@ -97,6 +98,7 @@ class Cybersloth(Player):
                 await self.reflect_attack(ctx, attacker, target, 'hack')
 
     @commands.command()
+    @Player.poisoned()
     @Player.skills_used(requirement=5)
     @Player.skill_on_cooldown(skill=Skill.TWO)
     @Player.skills_locked()
@@ -246,6 +248,7 @@ class Cybersloth(Player):
 
 
     @commands.command()
+    @Player.poisoned()
     @Player.skills_used(requirement=20)
     @Player.skill_on_cooldown(skill=Skill.THREE)
     @Player.skills_locked()
@@ -398,6 +401,7 @@ class Cybersloth(Player):
 
     
     @commands.command()
+    @Player.poisoned()
     @Player.skills_used(requirement=50)
     @Player.skill_on_cooldown(skill=Skill.FOUR, seconds=172800)
     @Player.skills_locked()

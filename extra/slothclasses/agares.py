@@ -33,6 +33,7 @@ class Agares(Player):
         ]
 
     @commands.command(aliases=['mp'])
+    @Player.poisoned()
     @Player.skill_on_cooldown(seconds=28800)
     @Player.skills_locked()
     @Player.user_is_class('agares')
@@ -115,6 +116,7 @@ class Agares(Player):
             await ctx.send(content=target.mention, embed=magic_pull_embed)
 
     @commands.command()
+    @Player.poisoned()
     @Player.skills_used(requirement=5)
     @Player.skill_on_cooldown(skill=Skill.TWO)
     @Player.skills_locked()
@@ -214,6 +216,7 @@ class Agares(Player):
         return recharge_embed
 
     @commands.command(aliases=['reflection'])
+    @Player.poisoned()
     @Player.skills_used(requirement=20)
     @Player.skill_on_cooldown(skill=Skill.THREE)
     @Player.skills_locked()
@@ -398,6 +401,7 @@ class Agares(Player):
 
 
     @commands.command()
+    @Player.poisoned()
     @Player.skills_used(requirement=50)
     @Player.skill_on_cooldown(skill=Skill.FOUR, seconds=172800)
     @Player.skills_locked()

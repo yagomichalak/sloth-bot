@@ -161,7 +161,19 @@ class Player(commands.Cog):
             ]
 
             random_poisoned_msg = choice(poisoned_messages)
-            answer: discord.PartialMessageable = ctx.reply if random_poisoned_msg['reply'] else ctx.send
+
+            # Gets messageable object to send the message
+            answer: discord.PartialMessageable = None
+            if random_poisoned_msg['reply']:
+                if isinstance(ctx, commands.Context):
+                    answer = ctx.reply
+                else:
+                    answer = ctx.send
+            else:
+                if isinstance(ctx, commands.Context):
+                    answer = ctx.send
+                else:
+                    answer = ctx.respond
 
             await answer(content=random_poisoned_msg["message"])
 

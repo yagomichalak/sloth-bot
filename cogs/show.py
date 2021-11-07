@@ -2,8 +2,11 @@ import discord
 from discord.app.commands import Option, OptionChoice, slash_command
 from discord.ext import commands
 from mysqldb import the_database
+
 from extra.useful_variables import rules
 from extra import utils
+from extra.slothclasses.player import Player
+
 import os
 import subprocess
 import sys
@@ -33,6 +36,7 @@ class Show(commands.Cog):
         await ctx.send(f'{len(all_users)} members!')
 
     @commands.command()
+    @Player.poisoned()
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def about(self, ctx) -> None:
         """ Shows some information about the bot itself. """

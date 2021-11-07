@@ -3,6 +3,7 @@ from discord.ext import commands
 from .blackjack_game import BlackJackGame
 from .create_cards_pack import cards_pack
 
+from extra.slothclasses.player import Player
 from extra.minigames.view import BlackJackActionView
 from extra import utils
 import asyncio
@@ -21,6 +22,7 @@ class BlackJack(commands.Cog):
         self.blackjack_games = {}
 
     @commands.command(name='blackjack', aliases=['bj'])
+    @Player.poisoned()
     @commands.cooldown(1, 25, commands.BucketType.user)
     async def start_blackjack_game(self, ctx, bet = None) -> None:
         """ Starts the BlackJack game.

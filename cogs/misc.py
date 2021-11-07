@@ -1,14 +1,18 @@
 import discord
 from discord.app.commands import slash_command, user_command
 from discord.ext import commands, tasks
+
 from random import randint, choice
-from datetime import datetime
-import aiohttp
 from pytz import timezone
+from datetime import datetime
+
+import os
+import aiohttp
 from mysqldb import the_database
+
 from typing import List, Union
 from extra import utils
-import os
+from extra.slothclasses.player import Player
 
 allowed_roles = [
     int(os.getenv('OWNER_ROLE_ID')), int(os.getenv('ADMIN_ROLE_ID')), int(os.getenv('MOD_ROLE_ID')), int(os.getenv('ASTROSLOTH_ROLE_ID')), 
@@ -46,6 +50,7 @@ class Misc(commands.Cog):
             await self.delete_member_reminder(reminder[0])
 
     @commands.command(aliases=['8ball'])
+    @Player.poisoned()
     async def eightball(self, ctx, *, question: str = None):
         """ Ask the 8 ball a question. """
 
@@ -77,6 +82,7 @@ class Misc(commands.Cog):
         await ctx.send(embed=em)
 
     @commands.command(aliases=['number'])
+    @Player.poisoned()
     async def numberfact(self, ctx, number: int = None):
         """ Get a fact about a number. """
 
@@ -228,6 +234,7 @@ class Misc(commands.Cog):
 
 
     @commands.command(aliases=['reminder', 'remind', 'remindme', 'set_reminder'])
+    @Player.poisoned()
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def setreminder(self, ctx, text: str = None, *, time: str = None):
         """ Sets a reminder for the user.
@@ -270,6 +277,7 @@ class Misc(commands.Cog):
         await ctx.send(f"**Reminding you at <t:{remind_at}>, {member.mention}!**")
 
     @commands.command(aliases=['show_reminders', 'showreminders', 'rmdrs', 'rs'])
+    @Player.poisoned()
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def reminders(self, ctx) -> None:
         """ Shows reminders that you've set. """
@@ -305,6 +313,7 @@ class Misc(commands.Cog):
 
 
     @commands.command(aliases=["remove_reminder", "dr", "rr", "dontremind", "dont_remind"])
+    @Player.poisoned()
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def delete_reminder(self, ctx, reminder_id: int = None) -> None:
         """ Deletes a member reminder.

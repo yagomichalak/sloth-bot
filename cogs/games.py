@@ -1,18 +1,17 @@
 import discord
 from discord.ext import commands
 
-from extra.minigames.view import MoveObjectGameView, TicTacToeView, FlagsGameView
-from extra import utils
-
 from random import randint, sample, shuffle, choice
 import os
 import json
 from typing import List, Dict, Optional, Any
 import asyncio
 
+from extra import utils
 from extra.slothclasses.player import Player
 from extra.minigames.connect_four import ConnectFour
 from extra.minigames.blackjack.blackjack import BlackJack
+from extra.minigames.view import MoveObjectGameView, TicTacToeView, FlagsGameView
 
 minigames_cogs: List[commands.Cog] = [
     ConnectFour, BlackJack
@@ -36,6 +35,7 @@ class Games(*minigames_cogs):
         print("Game cog is online!")
 
     @commands.command()
+    @Player.poisoned()
     @commands.cooldown(1, 600, commands.BucketType.user)
     async def destiny(self, ctx) -> None:
         """ Plays the Destiny game. """
@@ -65,6 +65,7 @@ class Games(*minigames_cogs):
             await msg.edit(embed=embed)
 
     @commands.command(aliases=["ttt", "jogo_da_idosa", "jdi", "jogo_da_velha", "#"])
+    @Player.poisoned()
     @commands.cooldown(1, 60, commands.BucketType.user)
     async def tic_tac_toe(self, ctx, *, member: discord.Member = None) -> None:
         """ Plays Tic Tac Toe.
@@ -108,6 +109,7 @@ class Games(*minigames_cogs):
         
 
     @commands.command(aliases=['flag', 'flag_game', 'flags'])
+    @Player.poisoned()
     @commands.cooldown(1, 60, commands.BucketType.user)
     async def flag_quiz(self, ctx) -> None:
         """ Plays Country Flags Quiz"""
@@ -209,6 +211,7 @@ class Games(*minigames_cogs):
 
     
     @commands.command(aliases=['lotto'])
+    @Player.poisoned()
     async def lottery(self, ctx, g1 = None, g2 = None, g3 = None):
         """ Enter the lottery and see if you win!
         :param g1: Guess 1.
@@ -292,6 +295,7 @@ class Games(*minigames_cogs):
 
     
     @commands.command(aliases=['dice'])
+    @Player.poisoned()
     async def roll(self, ctx, sides = None):
         """ Roll a dice with the number of faces given.
         :param sides: The number of faces to roll. """
@@ -316,6 +320,7 @@ class Games(*minigames_cogs):
 
 
     @commands.command(aliases=['flip_coin', 'flipcoin', 'coinflip', 'cf', 'fc'])
+    @Player.poisoned()
     @commands.cooldown(1, 25, commands.BucketType.user)
     async def coin_flip(self, ctx, bet: int = None, side: str = None) -> None:
         """ Command for flipping a coin.
@@ -380,6 +385,7 @@ class Games(*minigames_cogs):
 
 
     @commands.command()
+    @Player.poisoned()
     @commands.cooldown(1, 20, commands.BucketType.user)
     @Player.not_ready()
     async def slots(self, ctx, bet: int = None) -> None:

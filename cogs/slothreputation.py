@@ -1,14 +1,16 @@
 import discord
 from discord.app.commands import slash_command, Option
 from discord.ext import commands
-from cogs.slothcurrency import SlothCurrency
+
 from mysqldb import *
 from datetime import datetime
 import os
 from typing import List, Optional, Union
-from extra.view import ExchangeActivityView
-from extra import utils
+
 from .slothclass import classes
+from extra import utils
+from extra.view import ExchangeActivityView
+from extra.slothclasses.player import Player
 
 guild_ids = [int(os.getenv('SERVER_ID'))]
 
@@ -86,6 +88,7 @@ class SlothReputation(commands.Cog):
     #     await self._info(ctx, member)
 
     @commands.command(name="info", aliases=['status', 'exchange', 'level', 'lvl', 'exp', 'xp', 'money', 'balance'])
+    @Player.poisoned()
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def _info_command(self, ctx, member: Optional[Union[discord.Member, discord.User]] = None) -> None:
         """ Shows the user's level and experience points.
@@ -94,6 +97,7 @@ class SlothReputation(commands.Cog):
         await self._info(ctx, member)
 
     @slash_command(name="info", guild_ids=guild_ids)
+    @Player.poisoned()
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def _info_slash(self, ctx, 
         member: Option(discord.Member, description="The member to show the info; [Default=Yours]", required=False)) -> None:
@@ -242,6 +246,7 @@ class SlothReputation(commands.Cog):
 
 
     @slash_command(name="leaderboard", guild_ids=guild_ids)
+    @Player.poisoned()
     async def _leaderboard(self, ctx, 
         info_for: Option(str, description="The leaderboard to show the information for.", choices=[
             'Reputation', 'Level', 'Leaves', 'Time'])) -> None:
@@ -258,6 +263,7 @@ class SlothReputation(commands.Cog):
 
 
     @commands.command(aliases=['leaderboard', 'lb', 'scoreboard'])
+    @Player.poisoned()
     async def score(self, ctx):
         """ Shows the top ten members in the reputation leaderboard. """
 
@@ -291,6 +297,7 @@ class SlothReputation(commands.Cog):
         return await answer(embed=leaderboard)
 
     @commands.command(aliases=['level_board', 'levelboard', 'levels'])
+    @Player.poisoned()
     async def level_score(self, ctx):
         """ Shows the top ten members in the level leaderboard. """
 
@@ -321,6 +328,7 @@ class SlothReputation(commands.Cog):
         return await answer(embed=leaderboard)
 
     @commands.command(aliases=['leaf_board', 'leafboard', 'leaves', 'leaves_leaderboard', 'leavesleaderboard', 'll'])
+    @Player.poisoned()
     async def leaf_score(self, ctx):
         """ Shows the top ten members in the leaves leaderboard. """
 
@@ -352,6 +360,7 @@ class SlothReputation(commands.Cog):
         return await answer(embed=leaderboard)
 
     @commands.command(aliases=['time_board', 'timeboard', 'time_leaderboard', 'timeleaderboard', 'tl'])
+    @Player.poisoned()
     async def time_score(self, ctx):
         """ Shows the top ten members in the time leaderboard. """
 
@@ -388,6 +397,7 @@ class SlothReputation(commands.Cog):
         return await answer(embed=leaderboard)
 
     @commands.command()
+    @Player.poisoned()
     async def rep(self, ctx, member: discord.Member = None):
         """ Gives someone reputation points.
         :param member: The member to give the reputation.

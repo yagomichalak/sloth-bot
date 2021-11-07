@@ -23,6 +23,7 @@ class Merchant(Player):
         self.client = client
 
     @commands.command(aliases=['sellpotion', 'potion'])
+    @Player.poisoned()
     @Player.skill_on_cooldown()
     @Player.skills_locked()
     @Player.user_is_class('merchant')
@@ -84,6 +85,7 @@ class Merchant(Player):
             
 
     @commands.command()
+    @Player.poisoned()
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def sloth_shop(self, ctx) -> None:
         """ Shows all class related items in the Sloth shop. """
@@ -97,6 +99,7 @@ class Merchant(Player):
 
 
     @commands.group(aliases=['buy_item', 'buyitem', 'purchase'])
+    @Player.poisoned()
     async def buy(self, ctx) -> None:
         """ Buys a specific item from a Merchant.
         (Use this without an item name to see what items you can possibly buy with this command) """
@@ -205,6 +208,7 @@ class Merchant(Player):
                     ))
 
     @buy.command(aliases=['wedding', 'wedding_ring', 'weddingring'])
+    @Player.poisoned()
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def ring(self, ctx, member: discord.Member = None) -> None:
         """ Buys a Wedding Ring from a Merchant. """
@@ -292,6 +296,7 @@ class Merchant(Player):
 
 
     @commands.command()
+    @Player.poisoned()
     @Player.skills_used(requirement=5)
     @Player.skill_on_cooldown(skill=Skill.TWO)
     @Player.skills_locked()
@@ -449,6 +454,7 @@ class Merchant(Player):
 
         
     @commands.command(aliases=["sellring", "ring"])
+    @Player.poisoned()
     @Player.skills_used(requirement=20)
     @Player.skill_on_cooldown(Skill.THREE, 36000)
     @Player.skills_locked()
@@ -514,6 +520,7 @@ class Merchant(Player):
 
 
     @commands.command()
+    @Player.poisoned()
     @commands.cooldown(1, 180, commands.BucketType.user)
     async def marry(self, ctx, suitor: discord.Member = None) -> None:
         """ Marries someone.
@@ -632,6 +639,7 @@ class Merchant(Player):
             os.remove(filepath)
 
     @commands.command()
+    @Player.poisoned()
     @commands.cooldown(1, 180, commands.BucketType.user)
     async def divorce(self, ctx) -> None:
         """ Divorces your partner.
@@ -798,6 +806,7 @@ class Merchant(Player):
         await mycursor.close()
 
     @commands.command(aliases=['sell_mascot'])
+    @Player.poisoned()
     @Player.skills_used(requirement=50)
     @Player.skill_on_cooldown(skill=Skill.FOUR)
     @Player.skills_locked()
