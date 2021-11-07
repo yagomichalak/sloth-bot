@@ -342,7 +342,7 @@ class Warrior(Player):
         :param channel: The context channel.
         :param perpetrator_id: The ID of the perpetrator of the rip off skill.
         :param target_id: The ID of the target of the rip off skill.
-        :param item: The item """
+        :param item: The item. """
 
         timestamp = await utils.get_timestamp()
 
@@ -368,12 +368,102 @@ class Warrior(Player):
     @Player.user_is_class('warrior')
     @Player.skill_mark()
     @Player.not_ready()
-    async def poison(self, ctx, member: discord.Member = None) -> None:
+    async def poison(self, ctx, target: discord.Member = None) -> None:
         """ Poisons someone so they get dizzy, disoriented to the point
         they can barely use skills, Social, Currency and RolePlay commands.
-        :param member: The member to poison.
+        :param target: The member to poison.
 
         • Delay = 2 days
         • Cost = 100łł  """
 
-        pass
+        attacker = ctx.author
+
+        if ctx.channel.id != bots_and_commands_channel_id:
+            return await ctx.send(f"**{attacker.mention}, you can only use this command in {self.bots_txt.mention}!**")
+
+        attacker_fx = await self.get_user_effects(attacker)
+
+        if 'knocked_out' in attacker_fx:
+            return await ctx.send(f"**{attacker.mention}, you can't use your skill, because you are knocked-out!**")
+
+        if not target:
+            return await ctx.send(f"**Please, inform a target member, {attacker.mention}!**")
+
+        if attacker.id == target.id:
+            return await ctx.send(f"**{attacker.mention}, you cannot lock your own skills!**")
+
+        if target.bot:
+            return await ctx.send(f"**{attacker.mention}, you cannot use this skill on a bot!**")
+
+        target_sloth_profile = await self.get_sloth_profile(target.id)
+        if not target_sloth_profile:
+            return await ctx.send(f"**You cannot lock someone who doesn't have an account, {attacker.mention}!**")
+
+        if target_sloth_profile[1] == 'default':
+            return await ctx.send(f"**You cannot wire someone who has a `default` Sloth class, {attacker.mention}!**")
+
+        target_fx = await self.get_user_effects(target)
+
+        if 'protected' in target_fx:
+            return await ctx.send(f"**{attacker.mention}, {target.mention} is protected, you can't lock their skills!**")
+
+        if 'poison' in target_fx:
+            return await ctx.send(f"**{attacker.mention}, {target.mention} is already poisoned!**")
+
+        user_currency = await self.get_user_currency(attacker.id)
+        if user_currency[1] < 100:
+            return await ctx.send(f"**You don't have 100łł to use this skill, {attacker.mention}!**")
+
+        confirmed = await ConfirmSkill(f"**{attacker.mention}, are you sure you want to poison {target.mention} for `100łł`?**").prompt(ctx)
+        if not confirmed:
+            return await ctx.send("**Not locking their skills, then!**")
+
+        _, exists = await Player.skill_on_cooldown(skill=Skill.FOUR, seconds=172800).predicate(ctx)
+
+        try:
+            current_timestamp = await utils.get_timestamp()
+            await self.insert_skill_action(
+                user_id=attacker.id, skill_type="poison", skill_timestamp=current_timestamp,
+                target_id=target.id, channel_id=ctx.channel.id
+            )
+            if exists:
+                await self.update_user_skill_ts(attacker.id, Skill.FOUR, current_timestamp)
+            else:
+                await self.insert_user_skill_cooldown(ctx.author.id, Skill.FOUR, current_timestamp)
+            # Updates user's skills used counter
+            await self.update_user_skills_used(user_id=attacker.id)
+            await self.update_user_money(attacker.id -100)
+
+        except Exception as e:
+            print(e)
+            return await ctx.send(f"**For some reason I couldn't lock your target's skills, {attacker.mention}!**")
+
+        else:
+            poison_embed = await self.get_poison_embed(
+                channel=ctx.channel, perpetrator_id=attacker.id, target_id=target.id)
+            await ctx.send(embed=poison_embed)
+            if 'reflect' in target_fx:
+                await self.reflect_attack(ctx, attacker, target, 'poison')
+
+
+    async def get_poison_embed(self, channel, perpetrator_id: int, target_id: int, item: List[Union[str, int]]) -> discord.Embed:
+        """ Makes an embedded message for a poison.
+        :param channel: The context channel.
+        :param perpetrator_id: The ID of the perpetrator of the poison skill.
+        :param target_id: The ID of the target of the poison skill.
+        :param item: The item. """
+
+        timestamp = await utils.get_timestamp()
+
+        poison_embed = discord.Embed(
+            title="Someone just got Poisoned!",
+            description=f"**<@{perpetrator_id}> poisoned <@{target_id}> so they are not dizzy and disoriented! 💀**",
+            color=discord.Color.green(),
+            timestamp=datetime.fromtimestamp(timestamp)
+        )
+        
+        poison_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Warrior.png")
+        poison_embed.set_image(url='https://c.tenor.com/Qf37BPPRfIcAAAAC/poison-poisoning.gif')
+        poison_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
+
+        return poison_embed

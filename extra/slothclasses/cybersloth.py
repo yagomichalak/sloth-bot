@@ -467,6 +467,7 @@ class Cybersloth(Player):
                 await self.insert_user_skill_cooldown(ctx.author.id, Skill.FOUR, current_timestamp)
             # Updates user's skills used counter
             await self.update_user_skills_used(user_id=attacker.id)
+            await self.update_user_money(attacker.id -150)
 
         except Exception as e:
             print(e)
@@ -490,10 +491,10 @@ class Cybersloth(Player):
 
         wire_embed = discord.Embed(
             title="Someone's Skills got Locked Up!",
+            description=f"**<@{perpetrator_id}> locked up <@{target_id}>'s set of skills until they finish a Quest!** 🔒",
+            color=discord.Color.green(),
             timestamp=datetime.fromtimestamp(timestamp)
         )
-        wire_embed.description = f"**<@{perpetrator_id}> locked up <@{target_id}>'s set of skills until they finish a Quest!** 🔒"
-        wire_embed.color = discord.Color.green()
         wire_embed.set_image(url='https://c.tenor.com/EDnuqsLISREAAAAS/close-the-door-the-invisible-man.gif')
         wire_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Cybersloth.png")
         wire_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)

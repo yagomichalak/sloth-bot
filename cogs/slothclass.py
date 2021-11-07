@@ -276,7 +276,7 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
         embed.add_field(name="🔴 Munk's 4th Skill:", value="**Skill**: `Get Quest`.", inline=True)
         embed.add_field(name="🔴 Prawler's 4th Skill:", value="**Skill**: `Kidnap`.", inline=False)
         embed.add_field(name="🔴 Seraph's 4th Skill:", value="**Skill**: `Attain Grace`.", inline=True)
-        embed.add_field(name="🔴 Warrior's 4th Skill:", value="**Skill**: `Poison`.", inline=True)
+        embed.add_field(name="🟢 Warrior's 4th Skill:", value="**Skill**: `Poison`.", inline=True)
 
         await ctx.send(embed=embed)
 
