@@ -225,3 +225,19 @@ UPDATE TribeMember as OG
 #     if len(inter := set(you).intersection(set(case))) >= 3:
 #         print('You won with: ', case)
 #         break
+
+
+import enum
+
+
+class QuestEnum(enum.Enum):
+
+    one = 'test1'
+    twice = 'test2'
+    three = 'test3'
+    four = 'test4'
+    five = 'test5'
+    six = 'test6'
+
+
+print(QuestEnum.__dict__['_member_names_'][1-1])
