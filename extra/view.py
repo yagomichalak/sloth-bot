@@ -253,6 +253,7 @@ class ExchangeActivityView(discord.ui.View):
     async def exchange_activity(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
         """ Exchanges the member's activity statuses into leaves (łł). """
 
+        self.stop()
         ctx = await self.client.get_context(interaction.message)
         member = interaction.user
         ctx.author = member
@@ -266,7 +267,6 @@ class ExchangeActivityView(discord.ui.View):
         ctime, time_times = await SlothCurrency.convert_time(self.user_info[2])
 
         if cmsg == ctime == 0:
-            self.stop()
             return await interaction.followup.send(f"**You have nothing to exchange, {member.mention}!**")
 
         expected_money: int = cmsg + ctime
@@ -280,8 +280,6 @@ class ExchangeActivityView(discord.ui.View):
             await SlothCurrency.update_user_money(member.id, expected_money)
         else:
             await interaction.followup.send(f"**{member.mention}, not exchanging, then!**")
-
-        self.stop()
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
 
