@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 from discord.ext.commands.core import cooldown
 
-from extra.customerrors import MissingRequiredSlothClass, ActionSkillOnCooldown, CommandNotReady, SkillsUsedRequirement, ActionSkillsLocked
+from extra.customerrors import MissingRequiredSlothClass, ActionSkillOnCooldown, CommandNotReady, SkillsUsedRequirement, ActionSkillsLocked, PoisonedCommandError
 from extra import utils
 
 from mysqldb import the_database, the_django_database
@@ -157,7 +157,7 @@ class Player(commands.Cog):
             poisoned_messages: List[Dict[str, Any]] = [
                 {"name": "Normal", "message": "I can't... 😵‍💫", "reply": True, "command": None, "kwargs": None},
                 {"name": "Normal", "message": "YOU asked for a fun fact? Aight, did you know that if u eat 70 bananas in less than 10 minutes, you'll die of radiation?", "reply": True, "command": None, "kwargs": None},
-                {"name": "Normal", "message": "I can't... 😵‍💫", "reply": True, "command": None, "kwargs": None},
+                {"name": "Normal", "message": "I guess some **BREAD** is better than what you're trynna do, here, take some 🍞!", "reply": True, "command": None, "kwargs": None},
             ]
 
             random_poisoned_msg = choice(poisoned_messages)
@@ -168,7 +168,7 @@ class Player(commands.Cog):
                 if isinstance(ctx, commands.Context):
                     answer = ctx.reply
                 else:
-                    answer = ctx.send
+                    answer = ctx.respond
             else:
                 if isinstance(ctx, commands.Context):
                     answer = ctx.send
@@ -178,7 +178,7 @@ class Player(commands.Cog):
             await answer(content=random_poisoned_msg["message"])
 
 
-            return False
+            raise PoisonedCommandError()
             
 
         return commands.check(real_check)
