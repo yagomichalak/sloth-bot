@@ -1,14 +1,17 @@
 import discord
 from discord.ext import commands, tasks, menus
 from mysqldb import the_database
-from typing import Union, List, Dict, Optional
-from extra.customerrors import ActionSkillOnCooldown, ActionSkillsLocked, SkillsUsedRequirement, CommandNotReady
-from extra.menu import SlothClassPagination
-from extra.slothclasses.player import Skill
+
 from extra import utils
+from extra.menu import SlothClassPagination
+from extra.customerrors import ActionSkillOnCooldown, ActionSkillsLocked, SkillsUsedRequirement, CommandNotReady
+from extra.slothclasses import agares, cybersloth, merchant, metamorph, munk, prawler, seraph, warrior, db_commands
+from extra.slothclasses.player import Skill
+from extra.slothclasses.player import Player
+
+from typing import Union, List, Dict, Optional
 import os
 
-from extra.slothclasses import agares, cybersloth, merchant, metamorph, munk, prawler, seraph, warrior, db_commands
 classes: Dict[str, object] = {
     'agares': agares.Agares, 'cybersloth': cybersloth.Cybersloth,
     'merchant': merchant.Merchant, 'metamorph': metamorph.Metamorph,
@@ -63,6 +66,7 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
 
     @commands.command(aliases=['sloth_class', 'slothclasses'])
     @commands.cooldown(1, 5, commands.BucketType.user)
+    @Player.poisoned()
     async def sloth_classes(self, ctx, class_name: Optional[str] = None) -> None:
         """ Shows how many people are in each Sloth Class team,
         or showed a full list with all members of the given class ordered by used skills.
@@ -148,6 +152,7 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
 
     @commands.command(aliases=['my_skills'])
     @commands.cooldown(1, 5, commands.BucketType.user)
+    @Player.poisoned()
     async def skills(self, ctx, member: discord.Member = None) -> None:
         """ Shows all skills for the user's Sloth class.
         :param member: The person from whom to see the skills.
@@ -228,6 +233,7 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
 
     @commands.command(aliases=["fx", "efx", "user_effects", "usereffects", "geteffects", "membereffects", "member_effects"])
     @commands.cooldown(1, 5, commands.BucketType.user)
+    @Player.poisoned()
     async def effects(self, ctx, member: discord.Member = None) -> None:
         """ Gets all effects from a member.
         :param member: The member to get it from. """
@@ -251,6 +257,7 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
+    @Player.poisoned()
     async def skills_update(self, ctx) -> None:
         """ Shows the updates/current status of upcoming Sloth Class Skills. """
 
@@ -282,6 +289,7 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
+    @Player.poisoned()
     async def all_skills(self, ctx) -> None:
         """ Shows all skills available for each Sloth Class. """
 

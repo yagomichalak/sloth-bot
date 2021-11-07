@@ -8,6 +8,8 @@ import emojis
 from discord.ext import commands
 from discord.ext.commands import guild_only
 
+from extra.slothclasses.player import Player
+
 from ..constants import Emojis
 
 NUMBERS = list(Emojis.number_emojis.values())
@@ -437,6 +439,7 @@ class ConnectFour(commands.Cog):
             raise
 
     @guild_only()
+    @Player.poisoned()
     @commands.group(
         invoke_without_command=True,
         aliases=("4inarow", "connect4", "connectfour", "c4"),

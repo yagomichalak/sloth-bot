@@ -23,6 +23,7 @@ class Warrior(Player):
         self.client = client
 
     @commands.command(aliases=['ko', 'knock-out', 'knock_out', 'knock'])
+    @Player.poisoned()
     @Player.skill_on_cooldown()
     @Player.skills_locked()
     @Player.user_is_class('warrior')
@@ -102,6 +103,7 @@ class Warrior(Player):
                 await self.reflect_attack(ctx, attacker, target, 'hit')
 
     @commands.command(aliases=['crush', 'break'])
+    @Player.poisoned()
     @Player.skills_used(requirement=5)
     @Player.skill_on_cooldown(skill=Skill.TWO)
     @Player.skills_locked()
@@ -238,6 +240,7 @@ class Warrior(Player):
         return smash_embed
 
     @commands.command(aliases=['ripoff', 'rip', 'shred'])
+    @Player.poisoned()
     @Player.skills_used(requirement=20)
     @Player.skill_on_cooldown(Skill.THREE, seconds=172800)
     @Player.skills_locked()
@@ -362,6 +365,7 @@ class Warrior(Player):
 
 
     @commands.command(aliases=['disorient', 'disorientate'])
+    @Player.poisoned()
     @Player.skills_used(requirement=50)
     @Player.skill_on_cooldown(skill=Skill.FOUR, seconds=172800)
     @Player.skills_locked()

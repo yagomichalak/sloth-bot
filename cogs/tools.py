@@ -20,6 +20,7 @@ import pytz
 from pytz import timezone
 from mysqldb import the_database
 
+from extra.slothclasses.player import Player
 from extra.menu import InroleLooping
 from extra.prompt.menu import ConfirmButton
 from extra.useful_variables import patreon_roles
@@ -187,6 +188,7 @@ class Tools(commands.Cog):
 	@commands.command()
 	@commands.cooldown(1, 5, type=commands.BucketType.guild)
 	@utils.is_allowed([*allowed_roles, analyst_debugger_role_id], throw_exc=True)
+	@Player.poisoned()
 	async def tts(self, ctx, language: str = None, *, message: str = None):
 		'''
 		(BOOSTER) Reproduces a Text-to-Speech message in the voice channel.
@@ -224,6 +226,7 @@ class Tools(commands.Cog):
 			await ctx.send("**The bot is in a different voice channel!**")
 
 	@commands.command(name="translate", aliases=["tr"])
+	@Player.poisoned()
 	async def _tr_command(self, ctx, language: str = None, *, message: str = None) -> None:
 		""" Translates a message into another language.
 		:param language: The language to translate the message to.
@@ -240,6 +243,7 @@ class Tools(commands.Cog):
 
 
 	@message_command(name="Translate", guild_ids=guild_ids)
+	@Player.poisoned()
 	async def _tr_slash(self, ctx, message: discord.Message) -> None:
 		""" Translates a message into another language. """
 
@@ -278,12 +282,14 @@ class Tools(commands.Cog):
 		await answer(embed=embed)
 
 	@commands.command()
+	@Player.poisoned()
 	async def ping(self, ctx):
 		""" Show the latency. """
 
 		await ctx.send(f"**:ping_pong: Pong! {round(self.client.latency * 1000)}ms.**")
 
 	@commands.command()
+	@Player.poisoned()
 	async def math(self, ctx, v1=None, oper: str = None, v2=None):
 		'''
 		Calculates something.
@@ -423,6 +429,7 @@ class Tools(commands.Cog):
 
 	@commands.command(aliases=['mivc'])
 	@commands.cooldown(1, 5, commands.BucketType.user)
+	@Player.poisoned()
 	async def member_in_vc(self, ctx, vc: Optional[discord.VoiceChannel] = None) -> None:
 		""" Tells how many users are in the voice channel.
 		:param vc: The Voice Channel to check. [Optional][Default = all vcs] """
@@ -589,6 +596,7 @@ class Tools(commands.Cog):
 
 	@commands.command()
 	@commands.cooldown(1, 5, commands.BucketType.user)
+	@Player.poisoned()
 	async def time(self, ctx: commands.Context, time: str = None, my_timezone: str = None) -> None:
 		""" Tells the time in a given timezone, and compares to the CET one.
 		:param time: The time you want to check. Ex: 7pm
@@ -877,6 +885,7 @@ class Tools(commands.Cog):
 
 	@commands.command(aliases=['musicbot', 'music_bot', 'musicbots', 'music', 'mb'])
 	@commands.cooldown(1, 10, commands.BucketType.user)
+	@Player.poisoned()
 	async def music_bots(self, ctx) -> None:
 		""" Shows a list with all music bots available in the server. """
 

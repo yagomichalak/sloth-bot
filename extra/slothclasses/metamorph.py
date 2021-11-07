@@ -19,6 +19,7 @@ class Metamorph(Player):
         self.client = client
 
     @commands.command(aliases=['transmutate', 'trans'])
+    @Player.poisoned()
     @Player.skill_on_cooldown()
     @Player.skills_locked()
     @Player.user_is_class('metamorph')
@@ -104,6 +105,7 @@ class Metamorph(Player):
                 pass
 
     @commands.command(aliases=['frogify'])
+    @Player.poisoned()
     @Player.skills_used(requirement=5)
     @Player.skill_on_cooldown(skill=Skill.TWO)
     @Player.skills_locked()
@@ -218,6 +220,7 @@ class Metamorph(Player):
 
 
     @commands.command()
+    @Player.poisoned()
     @Player.skills_used(requirement=20)
     @commands.check_any(Player.mirrored_skill(), Player.skill_on_cooldown(skill=Skill.THREE))
     @Player.skills_locked()
@@ -346,6 +349,7 @@ class Metamorph(Player):
 
     
     @commands.command()
+    @Player.poisoned()
     @Player.skills_used(requirement=50)
     @Player.skill_on_cooldown(skill=Skill.FOUR, seconds=172800)
     @Player.skills_locked()

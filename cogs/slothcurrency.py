@@ -17,6 +17,7 @@ from itertools import cycle
 from extra.menu import InventoryLoop
 from typing import List, Dict, Tuple, Union, Any
 
+from extra.slothclasses.player import Player
 from extra.useful_variables import level_badges, flag_badges
 from extra.gif_manager import GIF
 from extra import utils
@@ -112,6 +113,7 @@ class SlothCurrency(commands.Cog):
         await mid.add_reaction(reaction)
 
     @commands.command(aliases=['inv'])
+    @Player.poisoned()
     async def inventory(self, ctx, member: discord.Member = None) -> None:
         """ Shows the member's item inventory.
         :param member: The member to show. """
@@ -129,6 +131,7 @@ class SlothCurrency(commands.Cog):
         await the_menu.start(ctx)
 
     @commands.command()
+    @Player.poisoned()
     async def equip(self, ctx, *, item_name: str = None) -> None:
         """ Equips an item.
         :param item_name: The item to equip. """
@@ -149,6 +152,7 @@ class SlothCurrency(commands.Cog):
             return await ctx.send(f"**You don't have an item named __{item_name.title()}__!**", delete_after=3)
 
     @commands.command()
+    @Player.poisoned()
     async def unequip(self, ctx, *, item_name: str = None) -> None:
         """ Unequips an item.
         :param item_name: The item to unequip """
@@ -545,6 +549,7 @@ class SlothCurrency(commands.Cog):
 
     @commands.command(name="profile")
     @commands.cooldown(1, 5, commands.BucketType.user)
+    @Player.poisoned()
     async def _profile_command(self, ctx, member: discord.Member = None):
         """ Shows the member's profile with their custom sloth.
         :param member: The member to see the profile. (Optional) """
@@ -553,6 +558,7 @@ class SlothCurrency(commands.Cog):
 
     @slash_command(name="profile", guild_ids=guild_ids)
     @commands.cooldown(1, 5, commands.BucketType.user)
+    @Player.poisoned()
     async def _profile_slash(self, ctx, member: Option(discord.Member, description="The member to show the info; [Default=Yours]", required=False)) -> None:
         """ Shows the member's profile with their custom sloth. """
 
@@ -1194,6 +1200,7 @@ class SlothCurrency(commands.Cog):
 
     @commands.command()
     @commands.cooldown(1, 10, commands.BucketType.user)
+    @Player.poisoned()
     async def transfer(self, ctx, member: discord.Member = None, money: int = None):
         """ Transfers money from one member to another member.
         :param member: The member to transfer the money to.

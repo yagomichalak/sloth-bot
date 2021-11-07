@@ -38,6 +38,7 @@ class RolePlay(commands.Cog):
 
 
     @commands.command()
+    @Player.poisoned()
     @commands.cooldown(1, 120, commands.BucketType.user)
     @send_if_money()
     async def hug(self, ctx, *, member: discord.Member = None) -> None:
@@ -72,6 +73,7 @@ class RolePlay(commands.Cog):
             await self.client.get_cog('SlothCurrency').update_user_money(author.id, -5)
 
     @commands.command()
+    @Player.poisoned()
     @commands.cooldown(1, 120, commands.BucketType.user)
     @send_if_money()
     async def boot(self, ctx, *, member: discord.Member = None) -> None:
@@ -107,6 +109,7 @@ class RolePlay(commands.Cog):
             await self.client.get_cog('SlothCurrency').update_user_money(author.id, -5)
     
     @commands.command()
+    @Player.poisoned()
     @commands.cooldown(1, 120, commands.BucketType.user)
     @send_if_money()
     async def kiss(self, ctx, *, member: discord.Member = None) -> None:
@@ -140,6 +143,7 @@ class RolePlay(commands.Cog):
             await self.client.get_cog('SlothCurrency').update_user_money(author.id, -5)
 
     @commands.command()
+    @Player.poisoned()
     @commands.cooldown(1, 120, commands.BucketType.user)
     @send_if_money()
     async def slap(self, ctx, *, member: discord.Member = None) -> None:
@@ -173,6 +177,7 @@ class RolePlay(commands.Cog):
             await self.client.get_cog('SlothCurrency').update_user_money(author.id, -5)
 
     @commands.command()
+    @Player.poisoned()
     @commands.cooldown(1, 300, commands.BucketType.user)
     async def honeymoon(self, ctx) -> None:
         """ Celebrates a honey moon with your partner.
@@ -306,6 +311,7 @@ class RolePlay(commands.Cog):
         await ctx.send(content=f"{member.mention}, {partner.mention}", embed=final_embed)
 
     @commands.command(aliases=['fist'])
+    @Player.poisoned()
     @commands.cooldown(1, 120, commands.BucketType.user)
     @send_if_money()
     async def punch(self, ctx, *, member: discord.Member = None) -> None:
@@ -339,6 +345,7 @@ class RolePlay(commands.Cog):
             await self.client.get_cog('SlothCurrency').update_user_money(author.id, -5)
 
     @commands.command()
+    @Player.poisoned()
     @commands.cooldown(1, 120, commands.BucketType.user)
     @send_if_money()
     async def give(self, ctx, *, member: discord.Member = None) -> None:
@@ -372,6 +379,7 @@ class RolePlay(commands.Cog):
             await self.client.get_cog('SlothCurrency').update_user_money(author.id, -5)
 
     @commands.command(aliases=['tickling'])
+    @Player.poisoned()
     @commands.cooldown(1, 120, commands.BucketType.user)
     @send_if_money()
     async def tickle(self, ctx, *, member: discord.Member = None) -> None:
@@ -406,6 +414,7 @@ class RolePlay(commands.Cog):
             await self.client.get_cog('SlothCurrency').update_user_money(author.id, -5)
 
     @commands.command(aliases=['throw', 'toss'])
+    @Player.poisoned()
     @commands.cooldown(1, 120, commands.BucketType.user)
     @send_if_money()
     async def yeet(self, ctx, *, member: discord.Member = None) -> None:
@@ -440,6 +449,7 @@ class RolePlay(commands.Cog):
             await self.client.get_cog('SlothCurrency').update_user_money(author.id, -5)
 
     @commands.command()
+    @Player.poisoned()
     @commands.cooldown(1, 120, commands.BucketType.user)
     @send_if_money()
     async def pat(self, ctx, *, member: discord.Member = None) -> None:
@@ -473,6 +483,7 @@ class RolePlay(commands.Cog):
             await self.client.get_cog('SlothCurrency').update_user_money(author.id, -5)
 
     @commands.command(aliases=['imbegging', 'imbeggin', 'beggin'])
+    @Player.poisoned()
     @commands.cooldown(1, 120, commands.BucketType.user)
     @send_if_money()
     async def beg(self, ctx, *, member: discord.Member = None) -> None:
@@ -507,6 +518,7 @@ class RolePlay(commands.Cog):
             await self.client.get_cog('SlothCurrency').update_user_money(author.id, -5)
 
     @commands.command()
+    @Player.poisoned()
     @commands.cooldown(1, 120, commands.BucketType.user)
     @send_if_money()
     async def whisper(self, ctx, member: discord.Member = None, *, text: str = None) -> None:
@@ -547,6 +559,7 @@ class RolePlay(commands.Cog):
             await self.client.get_cog('SlothCurrency').update_user_money(author.id, -5)
 
     @commands.command()
+    @Player.poisoned()
     @commands.cooldown(1, 120, commands.BucketType.user)
     @send_if_money()
     async def handshake(self, ctx, *, member: discord.Member = None) -> None:
@@ -581,6 +594,7 @@ class RolePlay(commands.Cog):
             await self.client.get_cog('SlothCurrency').update_user_money(author.id, -5)
 
     @commands.command(aliases=['hi5', 'h5', 'high_five', 'highestfive', 'highest_five', 'hf'])
+    @Player.poisoned()
     @commands.cooldown(1, 120, commands.BucketType.user)
     @send_if_money()
     async def highfive(self, ctx, *, member: discord.Member = None) -> None:
@@ -615,6 +629,7 @@ class RolePlay(commands.Cog):
             await self.client.get_cog('SlothCurrency').update_user_money(author.id, -5)
 
     @commands.command()
+    @Player.poisoned()
     @commands.cooldown(1, 120, commands.BucketType.user)
     @send_if_money()
     async def peek(self, ctx, *, member: discord.Member = None) -> None:
@@ -648,6 +663,7 @@ class RolePlay(commands.Cog):
             await self.client.get_cog('SlothCurrency').update_user_money(author.id, -5)
 
     @commands.command(aliases=['driveover', 'run_over', 'runover'])
+    @Player.poisoned()
     @commands.cooldown(1, 120, commands.BucketType.user)
     @send_if_money()
     async def drive_over(self, ctx, *, member: discord.Member = None) -> None:

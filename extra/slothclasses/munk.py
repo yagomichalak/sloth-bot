@@ -77,6 +77,7 @@ class Munk(Player):
                     await message.delete()
 
     @commands.command()
+    @Player.poisoned()
     @Player.skill_on_cooldown()
     @Player.skills_locked()
     @Player.user_is_class('munk')
@@ -296,6 +297,7 @@ class Munk(Player):
         return tribe_members
 
     @commands.group(aliases=['tb'])
+    @Player.poisoned()
     async def tribe(self, ctx) -> None:
         """ Command for managing and interacting with a tribe.
         (Use this without a subcommand to see all subcommands available) """
@@ -649,6 +651,7 @@ class Munk(Player):
                 pass
 
     @commands.command()
+    @Player.poisoned()
     @Player.skills_used(requirement=5)
     @Player.skill_on_cooldown(skill=Skill.TWO)
     @Player.skills_locked()
@@ -680,6 +683,7 @@ class Munk(Player):
         await ctx.send(embed=tribe_embed, view=view)
 
     @commands.command(aliases=['add_tribe_role', 'createtriberole', 'addtriberole'])
+    @Player.poisoned()
     @Player.skills_used(requirement=20)
     @Player.skill_on_cooldown(skill=Skill.THREE, seconds=36000)
     @Player.skills_locked()
@@ -1199,6 +1203,7 @@ class Munk(Player):
 
 
     @commands.command(aliases=['get_mission', 'gq', 'gm'])
+    @Player.poisoned()
     @Player.skills_used(requirement=50)
     @Player.skill_on_cooldown(skill=Skill.FOUR, seconds=172800)
     @Player.skills_locked()

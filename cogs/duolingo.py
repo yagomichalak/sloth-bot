@@ -7,6 +7,7 @@ from typing import List, Union, Optional
 import os
 from mysqldb import the_database
 from extra.prompt.menu import Confirm
+from extra.slothclasses.player import Player
 
 class Duolingo(commands.Cog):
     """ Category for Duolingo related commands. """
@@ -28,6 +29,7 @@ class Duolingo(commands.Cog):
 
     
     @commands.command(aliases=['set_duolingo', 'set_owl', 'setduo', 'setduolingo'])
+    @Player.poisoned()
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def set_duo(self, ctx, *, duo_name: str = None) -> None:
         """ Sets a Duolingo account to your Discord account.
@@ -63,6 +65,7 @@ class Duolingo(commands.Cog):
         await ctx.send(f"**Successfully set your Duolingo's account to `{duo_name}`, {member.mention}!**")
 
     @commands.command(aliases=['update_duolingo', 'update_owl', 'updateduo', 'updateduolingo'])
+    @Player.poisoned()
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def update_duo(self, ctx, *, duo_name: str = None) -> None:
         """ Updates a Duolingo account to your Discord account.
@@ -91,6 +94,7 @@ class Duolingo(commands.Cog):
         await ctx.send(f"**Successfully updated your Duolingo's username from `{duo_profile[1]}` to `{duo_name}`, {member.mention}!**")
 
     @commands.command(aliases=['delete_duolingo', 'delete_owl', 'deleteduo', 'deleteduolingo'])
+    @Player.poisoned()
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def delete_duo(self, ctx) -> None:
         """ Deletes a Duolingo account from your Discord account. """
@@ -109,6 +113,7 @@ class Duolingo(commands.Cog):
 
 
     @commands.command(aliases=['duo', 'duo_me'])
+    @Player.poisoned()
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def duome(self, ctx, *, member: Optional[discord.Member] = None) -> None:
         """ Gets the user's Duolingo profile.

@@ -60,6 +60,7 @@ class Prawler(Player):
 						color=discord.Color.green()))
 
 	@commands.command(aliases=['stl', 'rob'])
+	@Player.poisoned()
 	@Player.skill_on_cooldown()
 	@Player.skills_locked()
 	@Player.user_is_class('prawler')
@@ -142,6 +143,7 @@ class Prawler(Player):
 			await steal.edit(content=f"<@{target.id}>")
 
 	@commands.command()
+	@Player.poisoned()
 	@Player.skills_used(requirement=5)
 	@Player.skill_on_cooldown(skill=Skill.TWO, seconds=2592000)
 	@Player.skills_locked()
@@ -367,6 +369,7 @@ class Prawler(Player):
 
 
 	@commands.command()
+	@Player.poisoned()
 	@Player.skills_used(requirement=20)
 	@Player.skill_on_cooldown(Skill.THREE)
 	@Player.skills_locked()
@@ -504,6 +507,7 @@ class Prawler(Player):
 		return sabotages
 
 	@commands.command(aliases=['kn'])
+	@Player.poisoned()
 	@Player.skills_used(requirement=50)
 	@Player.skill_on_cooldown(skill=Skill.FOUR, seconds=172800)
 	@Player.skills_locked()
