@@ -389,6 +389,12 @@ class Seraph(Player):
                 if debuff == 'sabotaged':
                     debuffs_removed += 1
 
+                if debuff == 'locked':
+                    debuffs_removed += 1
+
+                if debuff == 'poisoned':
+                    debuffs_removed += 1
+
             except Exception as e:
                 print(e)
                 continue
