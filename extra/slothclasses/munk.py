@@ -3,13 +3,14 @@ from discord.ext import commands, menus
 from mysqldb import the_database, the_django_database
 
 from .player import Player, Skill
+from .enums import QuestEnum
 from extra.menu import ConfirmSkill, SwitchTribePages
 from extra import utils
 
 import os
 import asyncio
 from datetime import datetime
-from typing import List, Union, Dict, Any, Optional
+from typing import List, Union, Dict, Any, Optional, Callable
 from random import choice
 
 bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
@@ -1305,3 +1306,22 @@ class Munk(Player):
         tribe_quest_embed.set_image(url='https://c.tenor.com/MJ8Dxo58AJAAAAAC/muggers-quest.gif')
         tribe_quest_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
         return tribe_quest_embed
+
+    async def complete_quest(self, user_id: int) -> None:
+        """ Completes an on-going quest for a member.
+        :param user_id: The ID of the user who's completing the quest. """
+
+        # Gets Quest
+        quest = await self.get_skill_action_by_user_id_and_skill_type(user_id=user_id, skill_type="quest")
+        if not quest:
+            return
+
+        # Deletes Quest
+        await self.delete_skill_action_by_user_id_and_skill_type(user_id=user_id, skill_type='quest')
+
+        # Gets enum value
+        enum_name = QuestEnum.__dict__['_member_names_'][quest[7]-1]
+        function: Callable = QuestEnum.__getitem__(name=enum_name)
+        # Runs attached method if there's any
+        if function:
+            await function()
