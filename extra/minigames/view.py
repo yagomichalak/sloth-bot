@@ -447,5 +447,7 @@ class BlackJackActionView(discord.ui.View):
         """ Puts the game status as finished when the game timeouts. """
 
         cog = self.client.get_cog('Games')
-        del cog.blackjack_games[server_id][self.player.id]
+        current_game = cog.blackjack_games[server_id].get(self.player.id)
+        if current_game.status == 'finished':
+            del cog.blackjack_games[server_id][self.player.id]
         return
