@@ -14,7 +14,10 @@ from itertools import cycle
 
 from extra.useful_variables import patreon_roles
 
-from extra.customerrors import MissingRequiredSlothClass, ActionSkillOnCooldown, CommandNotReady, SkillsUsedRequirement, ActionSkillsLocked
+from extra.customerrors import (
+    MissingRequiredSlothClass, ActionSkillOnCooldown, CommandNotReady, 
+    SkillsUsedRequirement, ActionSkillsLocked, PoisonedCommandError
+)
 
 load_dotenv()
 
@@ -137,6 +140,9 @@ async def on_command_error(ctx, error):
     elif isinstance(error, MissingRequiredSlothClass):
         await ctx.send(f"**{error.error_message}: `{error.required_class.title()}`**")
 
+    elif isinstance(error, ActionSkillsLocked):
+        pass
+
     elif isinstance(error, CommandNotReady):
         await ctx.send("**This command is either under construction or on maintenance!**")
 
@@ -182,6 +188,9 @@ async def on_application_command_error(ctx, error) -> None:
 
     elif isinstance(error, commands.CommandOnCooldown):
         await ctx.respond(error)
+
+    elif isinstance(error, ActionSkillsLocked):
+        pass
 
     elif isinstance(error, commands.errors.CheckAnyFailure):
         await ctx.respond("**You can't do that!**")
