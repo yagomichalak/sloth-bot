@@ -332,24 +332,24 @@ class Munk(Player):
         requester = ctx.author
 
         if ctx.channel.id != bots_and_commands_channel_id:
-            self.client.get_command('request_thumbnail').reset_cooldown(ctx)
+            ctx.command.reset_cooldown(ctx)
             return await ctx.send(f"**{ctx.author.mention}, you can only use this command in {self.bots_txt.mention}!**")
 
         if not image_url:
-            self.client.get_command('request_thumbnail').reset_cooldown(ctx)
+            ctx.command.reset_cooldown(ctx)
             return await ctx.send(f"You need to inform an image URL, {requester.mention}!**")
 
         if not image_url.startswith('https://'):
-            self.client.get_command('request_thumbnail').reset_cooldown(ctx)
+            ctx.command.reset_cooldown(ctx)
             return await ctx.send(f"You need to inform an image URL that has HTTPS in it, {requester.mention}!**")
 
         if len(image_url) > 200:
-            self.client.get_command('request_thumbnail').reset_cooldown(ctx)
+            ctx.command.reset_cooldown(ctx)
             return await ctx.send(f"You need to inform an image URL within 200 characters, {requester.mention}!**")
 
         user_tribe = await self.get_tribe_info_by_user_id(user_id=requester.id)
         if not user_tribe['name']:
-            self.client.get_command('request_thumbnail').reset_cooldown(ctx)
+            ctx.command.reset_cooldown(ctx)
             return await ctx.send(f"**You don't even have a tribe, you cannot request it, {requester.mention}!**")
 
         confirm = await ConfirmSkill(content=requester.mention,
@@ -381,7 +381,7 @@ class Munk(Player):
             await ctx.send(f"**Request sent, {ctx.author.mention}!**")
 
         else:
-            self.client.get_command('request_thumbnail').reset_cooldown(ctx)
+            ctx.command.reset_cooldown(ctx)
             await ctx.send(f"**Not doing requesting it, then, {requester.mention}!**")
 
     @tribe.command(aliases=['inv'])
