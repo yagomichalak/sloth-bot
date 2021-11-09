@@ -16,8 +16,6 @@ guild_ids = [int(os.getenv('SERVER_ID'))]
 
 commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
 
-# grupao = SlashCommandGroup.command(name="testeee", description="soh um testeee")
-
 
 class SlothReputation(commands.Cog):
     """ Reputation commands. """

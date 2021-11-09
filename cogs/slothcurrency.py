@@ -324,14 +324,6 @@ class SlothCurrency(*currency_cogs):
             # await asyncio.sleep(0.5)
             return os.remove(file_path)
 
-    async def get_member_public_flags(self, member: discord.Member) -> List[str]:
-        """ Gets the member's public flags.
-        :param member: The member to get the flags from. """
-
-        public_flags = member.public_flags.all()
-        public_flag_names = list(map(lambda pf: pf.name, public_flags))
-        return public_flag_names
-
     @commands.command(name="profile")
     @commands.cooldown(1, 5, commands.BucketType.user)
     @Player.poisoned()
@@ -413,14 +405,14 @@ class SlothCurrency(*currency_cogs):
         else:
             sloth = Image.open(f"./sloth_custom_images/sloth/{sloth_profile[1].title()}.png")
 
-        # print('czxcxzcxzcxzczcxaaaaaaaaadasdsadsadsa')
-        # sloth = Image.open(f"./sloth_custom_images/sloth/{user_info[0][7].title()}.png")
+        # Gets an item image for each equippable slot
         body = Image.open(await self.get_user_specific_type_item(member.id, 'body'))
         hand = Image.open(await self.get_user_specific_type_item(member.id, 'hand'))
         foot = Image.open(await self.get_user_specific_type_item(member.id, 'foot'))
         head = Image.open(await self.get_user_specific_type_item(member.id, 'head'))
         hud = Image.open(await self.get_user_specific_type_item(member.id, 'hud'))
         
+        # Pastes all item images
         pfp = await utils.get_user_pfp(member)
         background.paste(sloth, (0, 0), sloth)
         background.paste(body, (0, 0), body)
@@ -439,7 +431,7 @@ class SlothCurrency(*currency_cogs):
                     background.paste(booster_badge, flag_badge[1], booster_badge)
 
         # Pastes all flag badges that the user has
-        flags = await self.get_member_public_flags(member)
+        flags = await utils.get_member_public_flags(member)
         for flag in flags:
             if flag_badge := flag_badges.get(flag):
                 file_path = f"./sloth_custom_images/badge/{flag_badge[0]}"
@@ -448,7 +440,7 @@ class SlothCurrency(*currency_cogs):
                     background.paste(flag_image, flag_badge[1], flag_image)
 
         # Checks whether user has level badges
-        user_level = await self.get_specific_user(member.id)
+        user_level = await self.client.get_cog('SlothReputation').get_specific_user(member.id)
         for key, value in reversed(list(level_badges.items())):
             if user_level[0][2] >= key:
                 file_path = f"sloth_custom_images/badge/{value[0]}.png"
@@ -474,7 +466,7 @@ class SlothCurrency(*currency_cogs):
 
             if all_effects:
                 try:
-                    gif_file_path = await self.make_gif_image(member_id=member.id, file_path=file_path, all_effects=all_effects)
+                    gif_file_path = await self.make_gif_image(user_id=member.id, all_effects=all_effects)
                     await answer(file=discord.File(gif_file_path))
 
                 except Exception as e:
@@ -491,16 +483,15 @@ class SlothCurrency(*currency_cogs):
                 finally:
                     os.remove(file_path)
 
-    async def make_gif_image(self, member_id: int, file_path: str, all_effects: Dict[str, Dict[str, Union[List[str], Tuple[int]]]]) -> None:
+    async def make_gif_image(self, user_id: int, all_effects: Dict[str, Dict[str, Union[List[str], Tuple[int]]]]) -> str:
         """ Makes a gif image out a profile image.
-        :param file_path:
-        :param effects: """
+        :param user_id: The ID of the user for whom to make the GIF.
+        :param all_effects: All effects that the user currently has. """
 
-        gif_file_path = f'media/temporary/profile_{member_id}.gif'
+        gif_file_path = f'media/temporary/profile_{user_id}.gif'
 
         try:
-
-            profile = Image.open(f'media/temporary/profile_{member_id}.png').convert('RGBA')
+            profile = Image.open(f'media/temporary/profile_{user_id}.png').convert('RGBA')
             gif = GIF(image=profile, frame_duration=40)
             path = 'media/effects'
 
@@ -525,7 +516,6 @@ class SlothCurrency(*currency_cogs):
                 all_effects[efx]['frames'] = cycle(all_effects[efx]['frames'])
 
             for i in range(longest_gif):
-                # print(i+1)
                 # Gets a frame of each effect in each iteration of the loop
                 base = gif.new_frame()
                 await asyncio.sleep(0)
@@ -845,15 +835,6 @@ class SlothCurrency(*currency_cogs):
             await self.update_user_money(ctx.author.id, -money)
             await ctx.send(f"**{ctx.author.mention} transferred {money}łł to {member.mention}!**")
 
-    async def get_specific_user(self, user_id: int) -> List[List[int]]:
-        """ Gets a specific user from the MembersScore table.
-        :param user_id: The ID of the user to get. """
-
-        mycursor, _ = await the_database()
-        await mycursor.execute("SELECT * FROM MembersScore WHERE user_id = %s", (user_id,))
-        member = await mycursor.fetchall()
-        await mycursor.close()
-        return member
 
 
 def setup(client):
