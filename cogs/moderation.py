@@ -14,7 +14,7 @@ from extra.prompt.menu import Confirm
 from extra.view import ReportSupportView
 from extra import utils
 
-from extra.moderation.firewall import ModerationFirewallTable
+from extra.moderation.firewall import ModerationFirewallTable, BypassFirewallTable
 from extra.moderation.mutedmember import ModerationMutedMemberTable
 from extra.moderation.userinfractions import ModerationUserInfractionsTable
 from extra.moderation.watchlist import ModerationWatchlistTable
@@ -36,8 +36,8 @@ server_id = int(os.getenv('SERVER_ID'))
 guild_ids: List[int] = [server_id]
 
 moderation_cogs: List[commands.Cog] = [
-	ModerationFirewallTable, ModerationMutedMemberTable, ModerationUserInfractionsTable,
-	ModerationWatchlistTable, ModerationFakeAccountsTable
+	ModerationFirewallTable, BypassFirewallTable, ModerationMutedMemberTable, 
+	ModerationUserInfractionsTable, ModerationWatchlistTable, ModerationFakeAccountsTable
 ]
 
 class Moderation(*moderation_cogs):
@@ -193,7 +193,10 @@ class Moderation(*moderation_cogs):
 
 		if account_age <= 4:
 			if await self.get_firewall_state():
-				return await member.kick(reason="Possible fake account")
+				if not await self.get_bypass_firewall_user(member.id):
+					return await member.kick(reason="Possible fake account")
+				else:
+					await self.delete_bypass_firewall_user(member.id)
 
 		if account_age <= 2:
 			suspect_channel = discord.utils.get(member.guild.channels, id=suspect_channel_id)
@@ -1368,6 +1371,67 @@ class Moderation(*moderation_cogs):
 				await self.set_firewall_state(1)
 				await ctx.send(f"**Firewall activated, {member.mention}!**")
 				await self.client.get_cog('ReportSupport').audio(member, 'troll_firewall_on')
+
+	@commands.command(aliases=['bfw', 'bypassfirewall', 'bypass_fire', 'bypassfire'])
+	@utils.is_allowed([senior_mod_role_id], throw_exc=True)
+	async def bypass_firewall(self, ctx, user: discord.User = None) -> None:
+		""" Makes a user able to bypass the Firewall.
+		:param user: The user to make able to do so. """
+
+		member: discord.Member = ctx.author
+
+		if not user:
+			return await ctx.send(f"**Please, inform a user, {member.mention}!**")
+
+		if ctx.guild.get_member(user.id):
+			return await ctx.send(f"**This user is already in the server, {member.mention}!**")
+
+		if await self.get_bypass_firewall_user(user.id):
+			return await ctx.send(f"**This user can already bypass the Firewall, {member.mention}!**")
+
+		await self.insert_bypass_firewall_user(user.id)
+		await ctx.send(f"**The `{user}` user can now bypass the Firewall, {member.mention}!**")
+
+	@commands.command(aliases=['ubfw', 'unbypassfirewall', 'unbypass_fire', 'unbypassfire'])
+	@utils.is_allowed([senior_mod_role_id], throw_exc=True)
+	async def unbypass_firewall(self, ctx, user: discord.User = None) -> None:
+		""" Makes a user not able to bypass the Firewall anymore.
+		:param user: The user to make able to do so. """
+
+		member: discord.Member = ctx.author
+
+		if not user:
+			return await ctx.send(f"**Please, inform a user, {member.mention}!**")
+
+		if not await self.get_bypass_firewall_user(user.id):
+			return await ctx.send(f"**This user wasn't able to bypass the Firewall, {member.mention}!**")
+
+		await self.delete_bypass_firewall_user(user.id)
+		await ctx.send(f"**The `{user}` user can no longer bypass the Firewall now, {member.mention}!**")
+
+	@commands.command(aliases=['sbfw', 'showbypassfirewall', 'show_bypass_fire', 'showbypassfire'])
+	@utils.is_allowed([senior_mod_role_id], throw_exc=True)
+	async def show_bypass_firewall(self, ctx) -> None:
+		""" Checks the users who are able to bypass the Firewall. """
+
+		member: discord.Member = ctx.author
+
+		bf_users = await self.get_bypass_firewall_users()
+		if not bf_users:
+			return await ctx.send(f"**No users can bypass the Firewall, {member.mention}!**")
+		
+		formatted_bf_users: str = '\n'.join([f"**{await self.client.fetch_user(bf_user[0])}** (`{bf_user[0]}`)" for bf_user in bf_users])
+
+		embed: discord.Embed = discord.Embed(
+			title="__Bypass Firewall Users__",
+			description=formatted_bf_users,
+			color=member.color,
+			timestamp=ctx.message.created_at
+		)
+		embed.set_thumbnail(url=ctx.guild.icon)
+		embed.set_footer(text=f"Requested by {member}", icon_url=member.display_avatar)
+		await ctx.send(embed=embed)
+
 
 
 	# Infraction methods
