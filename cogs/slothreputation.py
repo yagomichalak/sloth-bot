@@ -40,7 +40,7 @@ class SlothReputation(*currency_cogs):
 
         if message.author.bot:
             return
-        elif not await self.check_table_exist():
+        elif not await self.check_members_score_table_exists():
             return
 
         currnet_ts = await utils.get_timestamp()
@@ -112,7 +112,7 @@ class SlothReputation(*currency_cogs):
             answer = ctx.respond
 
 
-        if not await self.check_table_exist():
+        if not await self.check_members_score_table_exists():
             return await answer("**This command may be on maintenance!**")
 
         author = ctx.author
@@ -268,7 +268,7 @@ class SlothReputation(*currency_cogs):
         else:
             answer = ctx.respond
 
-        if not await self.check_table_exist():
+        if not await self.check_members_score_table_exists():
             return await answer("**This command may be on maintenance!**")
 
         top_ten_users = await self.get_top_ten_users()
