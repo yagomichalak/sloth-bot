@@ -40,7 +40,7 @@ class ReportSupport(*report_support_classes):
 
         # super(ReportSupport, self).__init__(client)
         self.client = client
-        self.cosmos_id: int = int(os.getenv('COSMOS_ID'))
+        self.cosmos_role_id: int = int(os.getenv('COSMOS_ROLE_ID'))
         self.muffin_id: int = int(os.getenv('MUFFIN_ID'))
         self.cache = {}
         self.report_cache = {}
@@ -402,8 +402,8 @@ Please answer using one message only.."""
             We will let you know when we need a new mod. We check apps when we need it!""" 
             await member.send(embed=embed)
             moderator_app_channel = await self.client.fetch_channel(self.moderator_app_channel_id)
-            cosmos = discord.utils.get(moderator_app_channel.guild.members, id=self.cosmos_id)
-            app = await moderator_app_channel.send(content=f"{cosmos.mention}, {member.mention}\n{app}")
+            cosmos_role = discord.utils.get(moderator_app_channel.guild.members, id=self.cosmos_role_id)
+            app = await moderator_app_channel.send(content=f"{cosmos_role.mention}, {member.mention}\n{app}")
             await app.add_reaction('✅')
             await app.add_reaction('❌')
             # Saves in the database
@@ -786,7 +786,7 @@ Entry requirements:
         case_cat = discord.utils.get(guild.categories, id=case_cat_id)
         counter = await self.get_case_number()
         moderator = discord.utils.get(guild.roles, id=moderator_role_id)
-        cosmos = discord.utils.get(guild.members, id=self.cosmos_id)
+        cosmos_role = discord.utils.get(guild.members, id=self.cosmos_role_id)
         overwrites = {guild.default_role: discord.PermissionOverwrite(
             read_messages=False, send_messages=False, connect=False, view_channel=False),
         member: discord.PermissionOverwrite(
@@ -808,7 +808,7 @@ Entry requirements:
             await self.increase_case_number()
             embed = discord.Embed(title="Report Support!", description=f"Please, {member.mention}, try to explain what happened and who you want to report.",
                 color=discord.Color.red())
-            message = await the_channel.send(content=f"{member.mention}, {moderator.mention}, {cosmos.mention}", embed=embed)
+            message = await the_channel.send(content=f"{member.mention}, {moderator.mention}, {cosmos_role.mention}", embed=embed)
             ctx = await self.client.get_context(message)
 
             if member.voice:
