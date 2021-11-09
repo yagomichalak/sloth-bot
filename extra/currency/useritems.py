@@ -32,7 +32,7 @@ class UserItemsTable(commands.Cog):
         await db.commit()
         await mycursor.close()
 
-        return await ctx.send(f"**Table `UserItems` created, {member.mention}!**", delete_after=3)
+        return await ctx.send(f"**Table `UserItems` created, {member.mention}!**")
 
     @commands.has_permissions(administrator=True)
     @commands.command(hidden=True)
@@ -50,7 +50,7 @@ class UserItemsTable(commands.Cog):
         await db.commit()
         await mycursor.close()
 
-        return await ctx.send(f"**Table `UserItems` dropped, {member.mention}!**", delete_after=3)
+        return await ctx.send(f"**Table `UserItems` dropped, {member.mention}!**")
 
     @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
@@ -68,7 +68,7 @@ class UserItemsTable(commands.Cog):
         await db.commit()
         await mycursor.close()
 
-        return await ctx.send(f"**Table `UserItems` reset, {member.mention}!**", delete_after=3)
+        return await ctx.send(f"**Table `UserItems` reset, {member.mention}!**")
 
     # ===== SHOW =====
 
@@ -113,7 +113,7 @@ class UserItemsTable(commands.Cog):
         await mycursor.close()
 
     # ===== UPDATE =====
-    
+
     async def update_user_item_info(self, user_id: int, item_name: str, enable: str) -> None:
         """ Updates the user's item enabled state.
         :param user_id: The ID of the user owner of the item.
