@@ -372,3 +372,11 @@ async def get_user_pfp(member, thumb_width: int = 59) -> Image:
     im_square = crop_max_square(im).resize((thumb_width, thumb_width), Image.LANCZOS)
     im_thumb = mask_circle_transparent(im_square, 4)
     return im_thumb
+
+async def get_member_public_flags(member: discord.Member) -> List[str]:
+    """ Gets the member's public flags.
+    :param member: The member to get the flags from. """
+
+    public_flags = member.public_flags.all()
+    public_flag_names = list(map(lambda pf: pf.name, public_flags))
+    return public_flag_names
