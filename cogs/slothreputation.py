@@ -38,22 +38,20 @@ class SlothReputation(commands.Cog):
         elif not await self.check_table_exist():
             return
 
-        epoch = datetime.utcfromtimestamp(0)
-        time_xp = (datetime.utcnow() - epoch).total_seconds()
-        await self.update_data(message.author, time_xp)
+        currnet_ts = await utils.get_timestamp()
+        await self.update_data(message.author, currnet_ts)
 
-    async def update_data(self, user, time_xp):
+    async def update_data(self, user, current_ts):
         the_member = await self.get_specific_user(user.id)
         if the_member:
-            if time_xp - the_member[0][3] >= 3 or the_member[0][1] == 0:
-                await self.update_user_xp_time(user.id, time_xp)
+            if current_ts - the_member[0][3] >= 3 or the_member[0][1] == 0:
+                await self.update_user_xp_time(user.id, current_ts)
                 await self.update_user_xp(user.id, 5)
                 return await self.level_up(user)
         # else:
-        #     return await self.insert_user(user.id, 5, 1, time_xp, 0, time_xp - 36001)
+        #     return await self.insert_user(user.id, 5, 1, current_ts, 0, time_xp - 36001)
 
     async def level_up(self, user):
-        epoch = datetime.utcfromtimestamp(0)
         the_user = await self.get_specific_user(user.id)
         lvl_end = int(the_user[0][1] ** (1 / 5))
         if the_user[0][2] < lvl_end:
@@ -137,7 +135,9 @@ class SlothReputation(commands.Cog):
                 return await answer(f"**{member} doesn't have an account yet!**")
 
         # Gets user's currency info, such as money balance, class participations, sloth class, etc.
-        ucur = await self.get_user_currency(member.id)
+        SlothCurrency = self.client.get_cog('SlothCurrency')
+
+        ucur = await SlothCurrency.get_user_currency(member.id)
         sloth_profile = await self.client.get_cog('SlothClass').get_sloth_profile(member.id)
         if not ucur or not sloth_profile:
             if author.id == member.id:
@@ -146,8 +146,6 @@ class SlothReputation(commands.Cog):
                     view=view)
             else:
                 return await answer(f"**{member} doesn't have an account yet!**")
-
-        SlothCurrency = self.client.get_cog('SlothCurrency')
 
         SlothClass = self.client.get_cog('SlothClass')
         effects = await SlothClass.get_user_effects(member=member)
@@ -461,120 +459,11 @@ class SlothReputation(commands.Cog):
             f"**{ctx.author.mention} repped {member.mention}! 🍃The repped person got 5łł🍃**")
 
 
-
-    # Database commands
-
-    @commands.has_permissions(administrator=True)
-    @commands.command(hidden=True)
-    async def create_table_member_score(self, ctx):
-        '''
-        (ADM) Creates the MembersScore table.
-        '''
-        await ctx.message.delete()
-        mycursor, db = await the_database()
-        await mycursor.execute(
-            "CREATE TABLE MembersScore (user_id bigint, user_xp bigint, user_lvl int, user_xp_time int, score_points bigint, rep_time bigint)")
-        await db.commit()
-        await mycursor.close()
-
-        await ctx.send("**Table *MembersScore* created!**", delete_after=3)
-
-    @commands.has_permissions(administrator=True)
-    @commands.command(hidden=True)
-    async def drop_table_member_score(self, ctx):
-        '''
-        (ADM) Drops the MembersScore table.
-        '''
-        await ctx.message.delete()
-        mycursor, db = await the_database()
-        await mycursor.execute("DROP TABLE MembersScore")
-        await db.commit()
-        await mycursor.close()
-
-        await ctx.send("**Table *MembersScore* dropped!**", delete_after=3)
-
-    @commands.has_permissions(administrator=True)
-    @commands.command(hidden=True)
-    async def reset_table_member_score(self, ctx):
-        '''
-        (ADM) Resets the MembersScore table.
-        '''
-        await ctx.message.delete()
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM MembersScore")
-        await db.commit()
-        await mycursor.close()
-
-        await ctx.send("**Table *MembersScore* reseted!**", delete_after=3)
-
-    async def insert_user(self, id: int, xp: int, lvl: int, xp_time: int, score_points: int, rep_time: int):
-        mycursor, db = await the_database()
-        await mycursor.execute(
-            f"INSERT INTO MembersScore VALUES({id}, {xp}, {lvl}, {xp_time}, {score_points}, {rep_time})")
-        await db.commit()
-        await mycursor.close()
-
-    async def update_user_xp(self, id: int, xp: int):
-        mycursor, db = await the_database()
-        await mycursor.execute(f"UPDATE MembersScore SET user_xp = user_xp+{xp} WHERE user_id = {id}")
-        await db.commit()
-        await mycursor.close()
-
-    async def update_user_lvl(self, id: int):
-        mycursor, db = await the_database()
-        await mycursor.execute(f"UPDATE MembersScore set user_lvl = user_lvl+1 WHERE user_id = {id}")
-        await db.commit()
-        await mycursor.close()
-
-    async def update_user_xp_time(self, id: int, time: int):
-        mycursor, db = await the_database()
-        await mycursor.execute(f"UPDATE MembersScore SET user_xp_time = {time} WHERE user_id = {id}")
-        await db.commit()
-        await mycursor.close()
-
     async def update_user_money(self, user_id: int, money: int):
         mycursor, db = await the_database()
         await mycursor.execute(f"UPDATE UserCurrency SET user_money = user_money + {money} WHERE user_id = {user_id}")
         await db.commit()
         await mycursor.close()
-
-    async def update_user_score_points(self, user_id: int, score_points: int):
-        mycursor, db = await the_database()
-        await mycursor.execute(
-            f"UPDATE MembersScore SET score_points = score_points + {score_points} WHERE user_id = {user_id}")
-        await db.commit()
-        await mycursor.close()
-
-    async def update_user_rep_time(self, user_id: int, rep_time: int):
-        mycursor, db = await the_database()
-        await mycursor.execute(f"UPDATE MembersScore SET rep_time = {rep_time} WHERE user_id = {user_id}")
-        await db.commit()
-        await mycursor.close()
-
-    async def get_users(self):
-        mycursor, db = await the_database()
-        await mycursor.execute("SELECT * FROM MembersScore")
-        members = await mycursor.fetchall()
-        await mycursor.close()
-        return members
-
-    async def get_top_ten_users(self) -> List[List[int]]:
-        """ Gets the top ten users with the most reputation point. """
-
-        mycursor, db = await the_database()
-        await mycursor.execute("SELECT * FROM MembersScore ORDER BY score_points DESC LIMIT 10")
-        top_ten_members = await mycursor.fetchall()
-        await mycursor.close()
-        return top_ten_members
-
-    async def get_top_ten_xp_users(self) -> List[List[int]]:
-        """ Gets the top ten users with most experience points. """
-
-        mycursor, db = await the_database()
-        await mycursor.execute("SELECT * FROM MembersScore ORDER BY user_xp DESC LIMIT 10")
-        top_ten_members = await mycursor.fetchall()
-        await mycursor.close()
-        return top_ten_members
 
     async def get_top_ten_leaves_users(self) -> List[List[int]]:
         """ Gets the top ten users with the most leaves. """
@@ -613,66 +502,7 @@ class SlothReputation(commands.Cog):
         await mycursor.close()
         return top_ten_members
 
-    async def get_specific_user(self, user_id: int):
-        mycursor, db = await the_database()
-        await mycursor.execute(f"SELECT * FROM MembersScore WHERE user_id = {user_id}")
-        member = await mycursor.fetchall()
-        await mycursor.close()
-        return member
 
-    async def remove_user(self, id: int):
-        mycursor, db = await the_database()
-        await mycursor.execute(f"DELETE FROM MembersScore WHERE user_id = {id}")
-        await db.commit()
-        await mycursor.close()
-
-    async def clear_user_lvl(self, id: int):
-        mycursor, db = await the_database()
-        await mycursor.execute(f"UPDATE MembersScore SET user_xp = 0, user_lvl = 1 WHERE user_id = {id}")
-        await db.commit()
-        await mycursor.close()
-
-    async def check_table_exist(self) -> bool:
-        mycursor, db = await the_database()
-        await mycursor.execute(f"SHOW TABLE STATUS LIKE 'MembersScore'")
-        table_info = await mycursor.fetchall()
-        await mycursor.close()
-        if len(table_info) == 0:
-            return False
-        else:
-            return True
-
-    async def get_user_currency(self, user_id: int):
-        mycursor, db = await the_database()
-        await mycursor.execute(f"SELECT * FROM UserCurrency WHERE user_id = {user_id}")
-        user_currency = await mycursor.fetchall()
-        await mycursor.close()
-        return user_currency
-
-    async def insert_user_currency(self, user_id: int, the_time: int):
-        mycursor, db = await the_database()
-        await mycursor.execute("INSERT INTO UserCurrency (user_id, user_money, last_purchase_ts) VALUES (%s, %s, %s)",
-                               (user_id, 0, the_time))
-        await db.commit()
-        await mycursor.close()
-
-    async def get_all_users_by_score_points(self) -> List[List[int]]:
-        """ Gets all users from the MembersScore table ordered by score points. """
-
-        mycursor, db = await the_database()
-        await mycursor.execute("SELECT * FROM MembersScore ORDER BY score_points DESC")
-        users = await mycursor.fetchall()
-        await mycursor.close()
-        return users
-
-    async def get_all_users_by_xp(self) -> List[List[int]]:
-        """ Gets all users from the MembersScore table ordered by XP. """
-
-        mycursor, db = await the_database()
-        await mycursor.execute("SELECT * FROM MembersScore ORDER BY user_xp DESC")
-        users = await mycursor.fetchall()
-        await mycursor.close()
-        return users
 
 
 def setup(client):

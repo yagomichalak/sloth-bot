@@ -6,7 +6,7 @@ from discord.app.commands import user_command
 import asyncio
 from mysqldb import *
 from datetime import datetime
-from typing import List, Union, Dict, Optional
+from typing import List, Union, Optional
 import os
 
 from extra.useful_variables import banned_links
@@ -22,16 +22,17 @@ from extra.moderation.fakeaccounts import ModerationFakeAccountsTable
 
 # IDs
 mod_log_id = int(os.getenv('MOD_LOG_CHANNEL_ID'))
-muted_role_id = int(os.getenv('MUTED_ROLE_ID'))
 welcome_channel_id = int(os.getenv('WELCOME_CHANNEL_ID'))
-last_deleted_message = []
 suspect_channel_id = int(os.getenv('SUSPECT_CHANNEL_ID'))
 
-mod_role_id = int(os.getenv('MOD_ROLE_ID'))
-preference_role_id = int(os.getenv('PREFERENCE_ROLE_ID'))
+last_deleted_message = []
 
+mod_role_id = int(os.getenv('MOD_ROLE_ID'))
+muted_role_id = int(os.getenv('MUTED_ROLE_ID'))
+preference_role_id = int(os.getenv('PREFERENCE_ROLE_ID'))
 senior_mod_role_id: int = int(os.getenv('SENIOR_MOD_ROLE_ID'))
 allowed_roles = [int(os.getenv('OWNER_ROLE_ID')), int(os.getenv('ADMIN_ROLE_ID')), senior_mod_role_id, mod_role_id]
+
 server_id = int(os.getenv('SERVER_ID'))
 guild_ids: List[int] = [server_id]
 
