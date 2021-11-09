@@ -54,8 +54,6 @@ class SlothCurrency(*currency_cogs):
         """ Tells when the cog is ready to go. """
 
         print("SlothCurrency cog is online!")
-        # await self.download_update()
-        # await self.text_download_update()
 
     @commands.Cog.listener()
     async def on_message(self, message) -> None:
@@ -107,11 +105,10 @@ class SlothCurrency(*currency_cogs):
     @commands.command()
     @commands.has_permissions(administrator=True)
     async def react(self, ctx, mid: discord.Message = None, reaction=None):
-        '''
-        (ADM) Makes the bot react onto a message.
+        """ (ADM) Makes the bot react onto a message.
         :param mid: The message ID.
-        :param reaction: The reaction to add.
-        '''
+        :param reaction: The reaction to add. """
+
         await ctx.message.delete()
         if not reaction:
             return await ctx.send("**Inform a reaction!**", delete_after=3)
