@@ -24,6 +24,7 @@ from extra import utils
 
 from extra.currency.useritems import UserItemsTable
 from extra.currency.userserveractivity import UserServerActivityTable
+from extra.currency.usercurrency import UserCurrencyTable
 
 shop_channels = [
 int(os.getenv('BACKGROUND_ITEMS_CHANNEL_ID')), int(os.getenv('HAND_ITEMS_CHANNEL_ID')),
@@ -36,7 +37,7 @@ booster_role_id = int(os.getenv('BOOSTER_ROLE_ID'))
 guild_ids = [int(os.getenv('SERVER_ID'))]
 
 currency_cogs: List[commands.Cog] = [
-    UserItemsTable, UserServerActivityTable
+    UserItemsTable, UserServerActivityTable, UserCurrencyTable
 ]
 
 
@@ -47,7 +48,6 @@ class SlothCurrency(*currency_cogs):
         """ Class init method. """
 
         self.client = client
-        self.session = aiohttp.ClientSession()
 
     @commands.Cog.listener()
     async def on_ready(self) -> None:
@@ -421,7 +421,7 @@ class SlothCurrency(*currency_cogs):
         head = Image.open(await self.get_user_specific_type_item(member.id, 'head'))
         hud = Image.open(await self.get_user_specific_type_item(member.id, 'hud'))
         
-        pfp = await self.get_user_pfp(member)
+        pfp = await utils.get_user_pfp(member)
         background.paste(sloth, (0, 0), sloth)
         background.paste(body, (0, 0), body)
         background.paste(head, (0, 0), head)
@@ -844,42 +844,6 @@ class SlothCurrency(*currency_cogs):
             await self.update_user_money(member.id, money)
             await self.update_user_money(ctx.author.id, -money)
             await ctx.send(f"**{ctx.author.mention} transferred {money}łł to {member.mention}!**")
-
-    async def get_user_pfp(self, member, thumb_width: int = 59) -> Any:
-        """ Gets the user's profile picture.
-        :param member: The member from whom to get the profile picture.
-        :param thumb_width: The width of the thumbnail. [Default = 59] """
-
-        async with self.session.get(str(member.display_avatar)) as response:
-            image_bytes = await response.content.read()
-            with BytesIO(image_bytes) as pfp:
-                image = Image.open(pfp)
-                im = image.convert('RGBA')
-
-        def crop_center(pil_img, crop_width, crop_height):
-            img_width, img_height = pil_img.size
-            return pil_img.crop(((img_width - crop_width) // 2,
-                                 (img_height - crop_height) // 2,
-                                 (img_width + crop_width) // 2,
-                                 (img_height + crop_height) // 2))
-
-        def crop_max_square(pil_img):
-            return crop_center(pil_img, min(pil_img.size), min(pil_img.size))
-
-        def mask_circle_transparent(pil_img, blur_radius, offset=0):
-            offset = blur_radius * 2 + offset
-            mask = Image.new("L", pil_img.size, 0)
-            draw = ImageDraw.Draw(mask)
-            draw.ellipse((offset, offset, pil_img.size[0] - offset, pil_img.size[1] - offset), fill=255)
-
-            result = pil_img.copy()
-            result.putalpha(mask)
-
-            return result
-
-        im_square = crop_max_square(im).resize((thumb_width, thumb_width), Image.LANCZOS)
-        im_thumb = mask_circle_transparent(im_square, 4)
-        return im_thumb
 
     async def get_specific_user(self, user_id: int) -> List[List[int]]:
         """ Gets a specific user from the MembersScore table.

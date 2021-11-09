@@ -723,14 +723,12 @@ class Merchant(Player):
 
         filename = f"marriage_{p1.id}_{p2.id}.png"
 
-        SlothCurrency = self.client.get_cog('SlothCurrency')
-
         medium = ImageFont.truetype("built titling sb.ttf", 60)
-        background = Image.open(await SlothCurrency.get_user_specific_type_item(p1.id, 'background'))
+        background = Image.open(await utils.get_user_specific_type_item(p1.id, 'background'))
 
         # Get PFPs
-        pfp1 = await SlothCurrency.get_user_pfp(p1, 250)
-        pfp2 = await SlothCurrency.get_user_pfp(p2, 250)
+        pfp1 = await utils.get_user_pfp(p1, 250)
+        pfp2 = await utils.get_user_pfp(p2, 250)
 
 
         background.paste(pfp1, (150, 200), pfp1)

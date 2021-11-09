@@ -1,12 +1,19 @@
-from datetime import datetime
-import re
-from pytz import timezone
 import discord
 from discord.ext import commands
+from datetime import datetime
+import aiohttp
+
+import re
+from pytz import timezone
+from io import BytesIO
+from PIL import Image, ImageDraw
 from typing import List, Dict, Optional, Union
+
 from extra.customerrors import CommandNotReady
 from collections import OrderedDict
 import shlex
+
+session = aiohttp.ClientSession()
 
 async def get_timestamp(tz: str = 'Etc/GMT') -> int:
     """ Gets the current timestamp.
@@ -329,3 +336,39 @@ def not_ready():
         raise CommandNotReady()
 
     return commands.check(real_check)
+
+async def get_user_pfp(member, thumb_width: int = 59) -> Image:
+    """ Gets the user's profile picture.
+    :param member: The member from whom to get the profile picture.
+    :param thumb_width: The width of the thumbnail. [Default = 59] """
+
+    async with session.get(str(member.display_avatar)) as response:
+        image_bytes = await response.content.read()
+        with BytesIO(image_bytes) as pfp:
+            image = Image.open(pfp)
+            im = image.convert('RGBA')
+
+    def crop_center(pil_img, crop_width, crop_height):
+        img_width, img_height = pil_img.size
+        return pil_img.crop(((img_width - crop_width) // 2,
+                                (img_height - crop_height) // 2,
+                                (img_width + crop_width) // 2,
+                                (img_height + crop_height) // 2))
+
+    def crop_max_square(pil_img):
+        return crop_center(pil_img, min(pil_img.size), min(pil_img.size))
+
+    def mask_circle_transparent(pil_img, blur_radius, offset=0):
+        offset = blur_radius * 2 + offset
+        mask = Image.new("L", pil_img.size, 0)
+        draw = ImageDraw.Draw(mask)
+        draw.ellipse((offset, offset, pil_img.size[0] - offset, pil_img.size[1] - offset), fill=255)
+
+        result = pil_img.copy()
+        result.putalpha(mask)
+
+        return result
+
+    im_square = crop_max_square(im).resize((thumb_width, thumb_width), Image.LANCZOS)
+    im_thumb = mask_circle_transparent(im_square, 4)
+    return im_thumb
