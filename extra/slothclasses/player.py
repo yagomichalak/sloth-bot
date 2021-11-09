@@ -621,19 +621,6 @@ class Player(commands.Cog):
         await mycursor.close()
 
     # ========== UPDATE ========== #
-
-    async def update_user_money(self, user_id: int, money: int):
-        """ Updates the user's money.
-        :param user_id: The ID of the user to update the money.
-        :param money: The money to be incremented (it works with negative numbers). """
-
-        mycursor, db = await the_database()
-        await mycursor.execute("""
-            UPDATE UserCurrency SET user_money = user_money + %s
-            WHERE user_id = %s""", (money, user_id))
-        await db.commit()
-        await mycursor.close()
-
     async def update_user_skills_used(self, user_id: int, addition: int = 1) -> None:
         """ Updates the user's skills used counter.
         :param user_id: The ID of the user.

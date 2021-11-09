@@ -129,7 +129,7 @@ class Seraph(Player):
         current_timestamp = await utils.get_timestamp()
 
         # Upate user's money
-        await self.update_user_money(perpetrator.id, -50)
+        await self.client.get_cog('SlothCurrency').update_user_money(perpetrator.id, -50)
         # Update perpetrator's second skill timestamp
         if exists:
             await self.update_user_skill_ts(user_id=perpetrator.id, skill=Skill.TWO, new_skill_ts=current_timestamp)
@@ -348,7 +348,7 @@ class Seraph(Player):
 
         _, exists = await Player.skill_on_cooldown(Skill.THREE).predicate(ctx)
 
-        await self.update_user_money(perpetrator.id, -100)
+        await self.client.get_cog('SlothCurrency').update_user_money(perpetrator.id, -100)
 
         current_ts = await utils.get_timestamp()
         if exists:

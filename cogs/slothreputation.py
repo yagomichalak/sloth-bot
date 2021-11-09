@@ -16,8 +16,13 @@ guild_ids = [int(os.getenv('SERVER_ID'))]
 
 commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
 
+from extra.currency.membersscore import MembersScoreTable
 
-class SlothReputation(commands.Cog):
+currency_cogs: List[commands.Cog] = [
+    MembersScoreTable
+]
+
+class SlothReputation(*currency_cogs):
     """ Reputation commands. """
 
     def __init__(self, client):
@@ -51,11 +56,14 @@ class SlothReputation(commands.Cog):
         # else:
         #     return await self.insert_user(user.id, 5, 1, current_ts, 0, time_xp - 36001)
 
-    async def level_up(self, user):
+    async def level_up(self, user) -> discord.Message:
+        """ Checks whether the user can level up.
+        :param user: The user to check. """
+
         the_user = await self.get_specific_user(user.id)
         lvl_end = int(the_user[0][1] ** (1 / 5))
         if the_user[0][2] < lvl_end:
-            await self.update_user_money(user.id, (the_user[0][2] + 1) * 5)
+            await self.client.get_cog('SlothCurrency').update_user_money(user.id, (the_user[0][2] + 1) * 5)
             await self.update_user_lvl(user.id)
             await self.update_user_score_points(user.id, 100)
             channel = discord.utils.get(user.guild.channels, id=commands_channel_id)
@@ -68,20 +76,10 @@ class SlothReputation(commands.Cog):
         :param goal_xp: The XP they are trying to achieve.
         :param length_progress_bar: The amount of blocks in the bar. Default=20 """
 
-
         percentage = int((xp / goal_xp) * 100)
         boxes = int((percentage * length_progress_bar) / 100)
         progress_bar = f"{xp}xp / {goal_xp}xp\n{':blue_square:' * boxes}{':white_large_square:' * (length_progress_bar - boxes)}"
         return progress_bar
-
-    
-    # @commands.slash_command(name="info", guild_ids=guild_ids)
-    # @commands.cooldown(1, 5, commands.BucketType.user)
-    # async def _info_slash(self, ctx, 
-    #     member: Option(discord.Member, description="The member to show the info; [Default=Yours]", required=False)) -> None:
-    #     """ Shows the user's level and experience points. """
-
-    #     await self._info(ctx, member)
 
     @commands.command(name="info", aliases=['status', 'exchange', 'level', 'lvl', 'exp', 'xp', 'money', 'balance'])
     @Player.poisoned()
@@ -103,8 +101,9 @@ class SlothReputation(commands.Cog):
         await self._info(ctx, member)
 
     async def _info(self, ctx, member: Union[discord.Member, discord.User] = None) -> None:
-        """ Shows the user's level and experience points. """
-
+        """ Shows the user's level and experience points.
+        :param ctx: The context of the command.
+        :param member: The member for whom to show the info. """
 
         answer: discord.PartialMessageable = None
         if isinstance(ctx, commands.Context):
@@ -334,12 +333,14 @@ class SlothReputation(commands.Cog):
         else:
             answer = ctx.respond
 
-        top_ten_users = await self.get_top_ten_leaves_users()
+        SlothCurrency = self.client.get_cog('SlothCurrency')
+
+        top_ten_users = await SlothCurrency.get_top_ten_leaves_users()
         current_time = await utils.get_time_now()
         leaderboard = discord.Embed(title="🍃 __The Language Sloth's Leaf Ranking Leaderboard__ 🍃", colour=discord.Colour.dark_green(),
                                     timestamp=current_time)
 
-        all_users = await self.get_all_leaves_users()
+        all_users = await SlothCurrency.get_all_leaves_users()
         position = [[i+1, u[1]] for i, u in enumerate(all_users) if u[0] == ctx.author.id]
         position = [it for subpos in position for it in subpos] if position else ['??', 0]
 
@@ -366,12 +367,14 @@ class SlothReputation(commands.Cog):
         else:
             answer = ctx.respond
 
-        top_ten_users = await self.get_top_ten_time_users()
+        SlothCurrency = self.client.get_cog('SlothCurrency')
+
+        top_ten_users = await SlothCurrency.get_top_ten_time_users()
         current_time = await utils.get_time_now()
         leaderboard = discord.Embed(title="⏰ __The Language Sloth's Time Ranking Leaderboard__ ⏰", color=discord.Color.dark_green(),
                                     timestamp=current_time)
 
-        all_users = await self.get_all_time_users()
+        all_users = await SlothCurrency.get_all_time_users()
         position = [[i+1, u[2]] for i, u in enumerate(all_users) if u[0] == ctx.author.id]
         position = [it for subpos in position for it in subpos] if position else ['??', 0]
 
@@ -457,50 +460,6 @@ class SlothReputation(commands.Cog):
         await self.client.get_cog('SlothCurrency').update_user_money(member.id, 5)
         return await ctx.send(
             f"**{ctx.author.mention} repped {member.mention}! 🍃The repped person got 5łł🍃**")
-
-
-    async def update_user_money(self, user_id: int, money: int):
-        mycursor, db = await the_database()
-        await mycursor.execute(f"UPDATE UserCurrency SET user_money = user_money + {money} WHERE user_id = {user_id}")
-        await db.commit()
-        await mycursor.close()
-
-    async def get_top_ten_leaves_users(self) -> List[List[int]]:
-        """ Gets the top ten users with the most leaves. """
-
-        mycursor, db = await the_database()
-        await mycursor.execute("SELECT * FROM UserCurrency ORDER BY user_money DESC LIMIT 10")
-        top_ten_members = await mycursor.fetchall()
-        await mycursor.close()
-        return top_ten_members
-
-    async def get_all_leaves_users(self) -> List[List[int]]:
-        """ Gets all users with the most leaves. """
-
-        mycursor, db = await the_database()
-        await mycursor.execute("SELECT * FROM UserCurrency ORDER BY user_money DESC")
-        top_ten_members = await mycursor.fetchall()
-        await mycursor.close()
-        return top_ten_members
-
-
-    async def get_top_ten_time_users(self) -> List[List[int]]:
-        """ Gets the top ten users with the most time. """
-
-        mycursor, db = await the_database()
-        await mycursor.execute("SELECT * FROM UserServerActivity ORDER BY user_time DESC LIMIT 10")
-        top_ten_members = await mycursor.fetchall()
-        await mycursor.close()
-        return top_ten_members
-
-    async def get_all_time_users(self) -> List[List[int]]:
-        """ Gets all users with the most time. """
-
-        mycursor, db = await the_database()
-        await mycursor.execute("SELECT * FROM UserServerActivity ORDER BY user_time DESC")
-        top_ten_members = await mycursor.fetchall()
-        await mycursor.close()
-        return top_ten_members
 
 
 

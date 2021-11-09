@@ -198,7 +198,7 @@ class Prawler(Player):
 			print(e)
 			await ctx.send(f"**For some reason I couldn't sharpen your knife, {perpetrator.mention}!**")
 		else:
-			await self.update_user_money(perpetrator.id, -500)
+			await self.client.get_cog('SlothCurrency').update_user_money(perpetrator.id, -500)
 			sharpen_embed = await self.get_sharpen_embed(
 				channel=ctx.channel, perpetrator_id=perpetrator.id, stack=stack+1)
 			await ctx.send(embed=sharpen_embed)
@@ -222,8 +222,8 @@ class Prawler(Player):
 				# Gives money to the attacker
 				user_currency = await self.get_user_currency(steal[3])
 				if user_currency and user_currency[1] >= 5:
-					await self.update_user_money(steal[0], 5)
-					await self.update_user_money(steal[3], -5)
+					await self.client.get_cog('SlothCurrency').update_user_money(steal[0], 5)
+					await self.client.get_cog('SlothCurrency').update_user_money(steal[3], -5)
 					steal_embed = await self.get_steal_embed(
 						channel=channel, attacker_id=steal[0], target_id=steal[3], attack_succeeded=True)
 					await channel.send(content=f"<@{steal[0]}>", embed=steal_embed)
@@ -255,8 +255,8 @@ class Prawler(Player):
 				target_currency = await self.get_user_currency(target_id)
 				# Checks whether target still has money to be robbed from
 				if target_currency and target_currency[1] >= rob_money:
-					await self.update_user_money(attacker_id, rob_money)
-					await self.update_user_money(target_id, -rob_money)
+					await self.client.get_cog('SlothCurrency').update_user_money(attacker_id, rob_money)
+					await self.client.get_cog('SlothCurrency').update_user_money(target_id, -rob_money)
 				else:
 					return await channel.send(f"**<@{target_id}> doesn't have more `{rob_money}łł`, otherwise you would steal it, <@{attacker_id}>!**")
 			except Exception as e:
@@ -430,7 +430,7 @@ class Prawler(Player):
 			return await ctx.send("**Not sabotaging anyone, then!**")
 
 		_, exists = await Player.skill_on_cooldown(skill=Skill.THREE).predicate(ctx)
-		await self.update_user_money(attacker.id, -50)
+		await self.client.get_cog('SlothCurrency').update_user_money(attacker.id, -50)
 
 		current_timestamp = await utils.get_timestamp()
 

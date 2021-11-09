@@ -79,17 +79,7 @@ class MembersScoreTable(commands.Cog):
             return True
 
     # ===== INSERT =====
-    async def insert_user_currency(self, user_id: int, the_time: int) -> None:
-        """ Inserts a user into the UserCurrency table.
-        :param user_id: The ID of the user to insert.
-        :param the_time: The current timestamp. """
-
-        mycursor, db = await the_database()
-        await mycursor.execute("INSERT INTO UserCurrency (user_id, user_money, last_purchase_ts) VALUES (%s, %s, %s)",
-            (user_id, 0, the_time))
-        await db.commit()
-        await mycursor.close()
-
+    
     async def insert_member_score(self, user_id: int, xp: int, lvl: int, xp_time: int, score_points: int, rep_time: int) -> None:
         """ Inserts a user into the MembersScore table.
         :param user_id: The ID of the user to insert.
