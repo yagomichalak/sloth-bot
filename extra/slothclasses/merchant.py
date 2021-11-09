@@ -67,7 +67,7 @@ class Merchant(Player):
                 user_id=member.id, skill_type="potion", skill_timestamp=current_timestamp,
                 target_id=member.id, channel_id=ctx.channel.id, price=item_price, emoji=item_emoji
             )
-            await self.update_user_money(member.id, -50)
+            await self.client.get_cog('SlothCurrency').update_user_money(member.id, -50)
             if exists:
                 await self.update_user_skill_ts(member.id, Skill.ONE, current_timestamp)
             else:
@@ -162,9 +162,9 @@ class Merchant(Player):
                     siphon_percentage = 35
                     cybersloth_money = round((merchant_item[7]*siphon_percentage)/100)
                     target_money = merchant_item[7] - cybersloth_money
-                    await self.update_user_money(member.id, target_money)
-                    await self.update_user_money(buyer.id, -merchant_item[7])
-                    await self.update_user_money(wired_user[0], cybersloth_money)
+                    await self.client.get_cog('SlothCurrency').update_user_money(member.id, target_money)
+                    await self.client.get_cog('SlothCurrency').update_user_money(buyer.id, -merchant_item[7])
+                    await self.client.get_cog('SlothCurrency').update_user_money(wired_user[0], cybersloth_money)
                     cybersloth = self.client.get_user(wired_user[0])
                     siphon_embed = discord.Embed(
                             title="__Intercepted Purchase__",
@@ -184,8 +184,8 @@ class Merchant(Player):
 
                 else:
                     # Updates both buyer and seller's money
-                    await self.update_user_money(buyer.id, - merchant_item[7])
-                    await self.update_user_money(member.id, merchant_item[7])
+                    await self.client.get_cog('SlothCurrency').update_user_money(buyer.id, - merchant_item[7])
+                    await self.client.get_cog('SlothCurrency').update_user_money(member.id, merchant_item[7])
 
                 # Gives the buyer their potion and removes the potion from the store
                 await self.update_user_has_potion(buyer.id, 1)
@@ -249,9 +249,9 @@ class Merchant(Player):
                 siphon_percentage = 35
                 cybersloth_money = round((merchant_item[7]*siphon_percentage)/100)
                 target_money = merchant_item[7] - cybersloth_money
-                await self.update_user_money(member.id, target_money)
-                await self.update_user_money(buyer.id, -merchant_item[7])
-                await self.update_user_money(wired_user[0], cybersloth_money)
+                await self.client.get_cog('SlothCurrency').update_user_money(member.id, target_money)
+                await self.client.get_cog('SlothCurrency').update_user_money(buyer.id, -merchant_item[7])
+                await self.client.get_cog('SlothCurrency').update_user_money(wired_user[0], cybersloth_money)
                 cybersloth = self.client.get_user(wired_user[0])
                 siphon_embed = discord.Embed(
                         title="__Intercepted Purchase__",
@@ -271,8 +271,8 @@ class Merchant(Player):
 
             else:
                 # Updates both buyer and seller's money
-                await self.update_user_money(buyer.id, - merchant_item[7])
-                await self.update_user_money(member.id, merchant_item[7])
+                await self.client.get_cog('SlothCurrency').update_user_money(buyer.id, - merchant_item[7])
+                await self.client.get_cog('SlothCurrency').update_user_money(member.id, merchant_item[7])
 
             # Gives the buyer their potion and removes the potion from the store
             await self.update_user_rings(buyer.id)
@@ -324,7 +324,7 @@ class Merchant(Player):
         # Checks whether user has money
         user_currency = await self.get_user_currency(merchant.id)
         if user_currency[1] >= 50:
-            await self.update_user_money(merchant.id, -50)
+            await self.client.get_cog('SlothCurrency').update_user_money(merchant.id, -50)
         else:
             return await ctx.send(f"**{merchant.mention}, you don't have `50łł`!**")
 
@@ -345,7 +345,7 @@ class Merchant(Player):
             user_has_item = await SlothCurrency.check_user_has_item(user_id=merchant.id, item_name=random_item[4])
             if user_has_item:
                 # Gives the user the price of the item
-                await self.update_user_money(merchant.id, random_item[6])
+                await self.client.get_cog('SlothCurrency').update_user_money(merchant.id, random_item[6])
                 await ctx.send(f"**{merchant.mention}, you already have the `{random_item[4]}` item, so you got it worth of leaves instead; `{random_item[6]}łł`**")
 
             else:
@@ -493,7 +493,7 @@ class Merchant(Player):
         if user_currency[1] < 100:
             return await ctx.send(f"**{member.mention}, you don't have `100łł`!**")
 
-        await self.update_user_money(member.id, -100)
+        await self.client.get_cog('SlothCurrency').update_user_money(member.id, -100)
 
         item_emoji = '💍'
 
@@ -608,7 +608,7 @@ class Merchant(Player):
             return await ctx.send(f"**Not doing it then, {suitor.mention}!**")
 
 
-        await self.update_user_money(member.id, -1000)
+        await self.client.get_cog('SlothCurrency').update_user_money(member.id, -1000)
             
         # Update ring counters
         if p1_rings == 2 and p2_rings >= 1:
@@ -675,7 +675,7 @@ class Merchant(Player):
         if not confirm_view.value:
             return await ctx.send(f"**Not doing it then, {member.mention}!**")
 
-        await self.update_user_money(member.id, -500)
+        await self.client.get_cog('SlothCurrency').update_user_money(member.id, -500)
 
         # Update marital status
         try:

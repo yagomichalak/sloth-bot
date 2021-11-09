@@ -535,7 +535,7 @@ class CheatingActionView(discord.ui.View):
         try:
             await self.sloth_class.delete_skill_action_by_target_id_and_skill_type(partner.id, skill_type='marriage')
             await self.sloth_class.delete_skill_action_by_user_id_and_skill_type(partner.id, skill_type='marriage')
-            await self.sloth_class.update_user_money(self.cheater.id, -500)
+            await self.client.get_cog('SlothCurrency').update_user_money(self.cheater.id, -500)
         except Exception as e:
             print(e)
             await interaction.response.send_message(f"**Something went wrong with it, {partner.mention}!**")

@@ -99,6 +99,42 @@ class UserCurrencyTable(commands.Cog):
         await mycursor.close()
         return user_currency
 
+    async def get_top_ten_leaves_users(self) -> List[List[int]]:
+        """ Gets the top ten users with the most leaves. """
+
+        mycursor, _ = await the_database()
+        await mycursor.execute("SELECT * FROM UserCurrency ORDER BY user_money DESC LIMIT 10")
+        top_ten_members = await mycursor.fetchall()
+        await mycursor.close()
+        return top_ten_members
+
+    async def get_top_ten_time_users(self) -> List[List[int]]:
+        """ Gets the top ten users with the most time. """
+
+        mycursor, _ = await the_database()
+        await mycursor.execute("SELECT * FROM UserServerActivity ORDER BY user_time DESC LIMIT 10")
+        top_ten_members = await mycursor.fetchall()
+        await mycursor.close()
+        return top_ten_members
+
+    async def get_all_leaves_users(self) -> List[List[int]]:
+        """ Gets all users with the most leaves. """
+
+        mycursor, _ = await the_database()
+        await mycursor.execute("SELECT * FROM UserCurrency ORDER BY user_money DESC")
+        top_ten_members = await mycursor.fetchall()
+        await mycursor.close()
+        return top_ten_members
+
+    async def get_all_time_users(self) -> List[List[int]]:
+        """ Gets all users with the most time. """
+
+        mycursor, _ = await the_database()
+        await mycursor.execute("SELECT * FROM UserServerActivity ORDER BY user_time DESC")
+        top_ten_members = await mycursor.fetchall()
+        await mycursor.close()
+        return top_ten_members
+
     # ===== INSERT =====
 
     async def insert_user_currency(self, user_id: int, the_time: int) -> None:

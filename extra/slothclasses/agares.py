@@ -272,7 +272,7 @@ class Agares(Player):
 
             await self.insert_skill_action(
                 user_id=perpetrator.id, skill_type="reflect", skill_timestamp=current_ts, target_id=target.id)
-            await self.update_user_money(perpetrator.id, -100)
+            await self.client.get_cog('SlothCurrency').update_user_money(perpetrator.id, -100)
 
             if exists:
                 await self.update_user_skill_ts(perpetrator.id, Skill.THREE, current_ts)
@@ -461,7 +461,7 @@ class Agares(Player):
         try:
 
             await self.update_user_skills_ts_increment(target.id, 86400)
-            await self.update_user_money(perpetrator.id, -100)
+            await self.client.get_cog('SlothCurrency').update_user_money(perpetrator.id, -100)
 
             if exists:
                 await self.update_user_skill_ts(perpetrator.id, Skill.FOUR, current_ts)

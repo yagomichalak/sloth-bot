@@ -284,7 +284,7 @@ class Metamorph(Player):
             return await ctx.send(f"**You already have a mirrored skill, {perpetrator.mention}!**")
 
         _, exists = await Player.skill_on_cooldown(skill=Skill.THREE).predicate(ctx)
-        await self.update_user_money(perpetrator.id, -50)
+        await self.client.get_cog('SlothCurrency').update_user_money(perpetrator.id, -50)
 
         timestamp = await utils.get_timestamp()
         try:

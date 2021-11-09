@@ -156,7 +156,7 @@ class Warrior(Player):
 
         current_timestamp = await utils.get_timestamp()
         # Upate user's money
-        await self.update_user_money(attacker.id, -50)
+        await self.client.get_cog('SlothCurrency').update_user_money(attacker.id, -50)
         # # Update attacker's second skill timestamp
         if exists:
             await self.update_user_skill_ts(user_id=attacker.id, skill=Skill.TWO, new_skill_ts=current_timestamp)
@@ -319,7 +319,7 @@ class Warrior(Player):
         if attacker_currency[1] < cost:
             return await ctx.send(f"**You don't have {item[6]}łł to rip off the {item[4]} item, {attacker.mention}!**")
 
-        await self.update_user_money(attacker.id, -cost)
+        await self.client.get_cog('SlothCurrency').update_user_money(attacker.id, -cost)
         try:
             current_timestamp = await utils.get_timestamp()
             # Don't need to store it, since it is forever
@@ -436,7 +436,7 @@ class Warrior(Player):
                 await self.insert_user_skill_cooldown(ctx.author.id, Skill.FOUR, current_timestamp)
             # Updates user's skills used counter
             await self.update_user_skills_used(user_id=attacker.id)
-            await self.update_user_money(attacker.id -100)
+            await self.client.get_cog('SlothCurrency').update_user_money(attacker.id -100)
 
         except Exception as e:
             print(e)

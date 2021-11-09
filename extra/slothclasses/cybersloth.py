@@ -287,7 +287,7 @@ class Cybersloth(Player):
         current_ts = await utils.get_timestamp()
         try:
             await self.update_hacks_content(attacker_id=attacker.id)
-            await self.update_user_money(attacker.id, -150)
+            await self.client.get_cog('SlothCurrency').update_user_money(attacker.id, -150)
             if exists:
                 await self.update_user_skill_ts(attacker.id, Skill.THREE, current_ts)
             else:
@@ -471,7 +471,7 @@ class Cybersloth(Player):
                 await self.insert_user_skill_cooldown(ctx.author.id, Skill.FOUR, current_timestamp)
             # Updates user's skills used counter
             await self.update_user_skills_used(user_id=attacker.id)
-            await self.update_user_money(attacker.id -150)
+            await self.client.get_cog('SlothCurrency').update_user_money(attacker.id -150)
 
         except Exception as e:
             print(e)
