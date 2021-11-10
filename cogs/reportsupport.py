@@ -402,7 +402,7 @@ Please answer using one message only.."""
             We will let you know when we need a new mod. We check apps when we need it!""" 
             await member.send(embed=embed)
             moderator_app_channel = await self.client.fetch_channel(self.moderator_app_channel_id)
-            cosmos_role = discord.utils.get(moderator_app_channel.guild.members, id=self.cosmos_role_id)
+            cosmos_role = discord.utils.get(moderator_app_channel.guild.roles, id=self.cosmos_role_id)
             app = await moderator_app_channel.send(content=f"{cosmos_role.mention}, {member.mention}\n{app}")
             await app.add_reaction('✅')
             await app.add_reaction('❌')
@@ -786,7 +786,7 @@ Entry requirements:
         case_cat = discord.utils.get(guild.categories, id=case_cat_id)
         counter = await self.get_case_number()
         moderator = discord.utils.get(guild.roles, id=moderator_role_id)
-        cosmos_role = discord.utils.get(guild.members, id=self.cosmos_role_id)
+        cosmos_role = discord.utils.get(guild.roles, id=self.cosmos_role_id)
         overwrites = {guild.default_role: discord.PermissionOverwrite(
             read_messages=False, send_messages=False, connect=False, view_channel=False),
         member: discord.PermissionOverwrite(
