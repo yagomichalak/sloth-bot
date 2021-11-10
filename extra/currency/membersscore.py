@@ -74,9 +74,9 @@ class MembersScoreTable(commands.Cog):
         exists = await mycursor.fetchone()
         await mycursor.close()
         if exists:
-            return False
-        else:
             return True
+        else:
+            return False
 
     # ===== INSERT =====
     
