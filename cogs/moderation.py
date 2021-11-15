@@ -1237,7 +1237,7 @@ class Moderation(*moderation_cogs):
 					else:
 						mod_softban_embed.title = f"NitroKick Request ({len(confirmations)}/3) → (5mins)"
 						await msg.edit(embed=mod_softban_embed)
-						if await utils.is_allowed([senior_mod_role_id]).predicate(channel=ctx.channel, member=author):
+						if await utils.is_allowed([senior_mod_role_id]).predicate(channel=ctx.channel, member=u):
 							break
 						elif len(confirmations) < 3:
 							continue
