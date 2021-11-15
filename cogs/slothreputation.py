@@ -177,50 +177,56 @@ class SlothReputation(*currency_cogs):
         progress_bar = await self.get_progress_bar(xp=xp, goal_xp=goal_xp)
         embed.add_field(name="🔮 __**Progress Bar:**__", value=progress_bar, inline=False)
 
-        embed.add_field(name="🧑‍🎓 __**Participated in:**__", value=f"{ucur[0][3]} classes.", inline=True)
-        embed.add_field(name="🌟 __**Rewarded in:**__", value=f"{ucur[0][4]} classes.", inline=True)
-        embed.add_field(name="🧑‍🏫 __**Hosted:**__", value=f"{ucur[0][5]} classes.", inline=True)
+        if member.id != 647452832852869120:
+            embed.add_field(name="🧑‍🎓 __**Participated in:**__", value=f"{ucur[0][3]} classes.", inline=True)
+            embed.add_field(name="🌟 __**Rewarded in:**__", value=f"{ucur[0][4]} classes.", inline=True)
+            embed.add_field(name="🧑‍🏫 __**Hosted:**__", value=f"{ucur[0][5]} classes.", inline=True)
 
-        emoji = user_class.emoji if (user_class := classes.get(sloth_profile[1].lower())) else ''
-        embed.add_field(name="🕵️ __**Sloth Class:**__", value=f"{sloth_profile[1]} {emoji}", inline=True)
-        embed.add_field(name="🍯 __**Has Potion:**__", value=f"{True if sloth_profile[5] else False}", inline=True)
-        marriage = await SlothClass.get_user_marriage(member.id)
-        if not marriage['partner']:
-            embed.add_field(name="💍 __**Rings:**__", value=f"{sloth_profile[7]}/2 rings." if sloth_profile else '0 rings.', inline=True)
+            emoji = user_class.emoji if (user_class := classes.get(sloth_profile[1].lower())) else ''
+            embed.add_field(name="🕵️ __**Sloth Class:**__", value=f"{sloth_profile[1]} {emoji}", inline=True)
+            embed.add_field(name="🍯 __**Has Potion:**__", value=f"{True if sloth_profile[5] else False}", inline=True)
+            marriage = await SlothClass.get_user_marriage(member.id)
+            if not marriage['partner']:
+                embed.add_field(name="💍 __**Rings:**__", value=f"{sloth_profile[7]}/2 rings." if sloth_profile else '0 rings.', inline=True)
 
-        embed.add_field(name="🛡️ __**Protected:**__", value=f"{await SlothClass.has_effect(effects, 'protected')}", inline=True)
-        embed.add_field(name="😵 __**Knocked Out:**__", value=f"{await SlothClass.has_effect(effects, 'knocked_out')}", inline=True)
-        embed.add_field(name="🔌 __**Wired:**__", value=f"{await SlothClass.has_effect(effects, 'wired')}", inline=True)
-        embed.add_field(name="🐸 __**Frogged:**__", value=f"{await SlothClass.has_effect(effects, 'frogged')}", inline=True)
-        embed.add_field(name="🔪 __**Knife Sharpness Stack:**__", value=f"{sloth_profile[6]}/5", inline=True)
-        embed.add_field(name="🧤 __**Sabotaged:**__", value=f"{await SlothClass.has_effect(effects, 'sabotaged')}", inline=True)
+            embed.add_field(name="🛡️ __**Protected:**__", value=f"{await SlothClass.has_effect(effects, 'protected')}", inline=True)
+            embed.add_field(name="😵 __**Knocked Out:**__", value=f"{await SlothClass.has_effect(effects, 'knocked_out')}", inline=True)
+            embed.add_field(name="🔌 __**Wired:**__", value=f"{await SlothClass.has_effect(effects, 'wired')}", inline=True)
+            embed.add_field(name="🐸 __**Frogged:**__", value=f"{await SlothClass.has_effect(effects, 'frogged')}", inline=True)
+            embed.add_field(name="🔪 __**Knife Sharpness Stack:**__", value=f"{sloth_profile[6]}/5", inline=True)
+            embed.add_field(name="🧤 __**Sabotaged:**__", value=f"{await SlothClass.has_effect(effects, 'sabotaged')}", inline=True)
+
         m, s = divmod(user_info[0][2], 60)
         h, m = divmod(m, 60)
 
         embed.add_field(name=f"💰 __**Exchangeable Activity:**__", value=f"{h:d} hours, {m:02d} minutes and {user_info[0][1]} messages.", inline=True)
-        embed.add_field(name=f"🏆 __**Leaderboard Info:**__", value=f"{position[1]}. pts | #{position[0]}", inline=True)
-        embed.add_field(name="🧮 __**Skills Used:**__", value=f"{sloth_profile[2]} skills.")
+        if member.id != 647452832852869120:
+            embed.add_field(name=f"🏆 __**Leaderboard Info:**__", value=f"{position[1]}. pts | #{position[0]}", inline=True)
+            embed.add_field(name="🧮 __**Skills Used:**__", value=f"{sloth_profile[2]} skills.")
 
-        # Gets tribe information for the given user
-        if sloth_profile[3]:
-            tribe_member = await SlothClass.get_tribe_member(user_id=member.id)
-            user_tribe = await SlothClass.get_tribe_info_by_name(name=sloth_profile[3])
-            tribe_owner = tribe_member[0] == tribe_member[2]
-            embed.add_field(
-                name="🏕️ __**Tribe:**__", 
-                value=f"[{user_tribe['name']}]({user_tribe['link']}) ({user_tribe['two_emojis']}){' 👑' if tribe_owner else ''}", 
-                inline=True)
-                
-        else:
-            embed.add_field(name="🏕️ __**Tribe:**__", value="None", inline=True)
+            # Gets tribe information for the given user
+            if sloth_profile[3]:
+                tribe_member = await SlothClass.get_tribe_member(user_id=member.id)
+                user_tribe = await SlothClass.get_tribe_info_by_name(name=sloth_profile[3])
+                tribe_owner = tribe_member[0] == tribe_member[2]
+                embed.add_field(
+                    name="🏕️ __**Tribe:**__", 
+                    value=f"[{user_tribe['name']}]({user_tribe['link']}) ({user_tribe['two_emojis']}){' 👑' if tribe_owner else ''}", 
+                    inline=True)
+                    
+            else:
+                embed.add_field(name="🏕️ __**Tribe:**__", value="None", inline=True)
 
-        
-        if marriage['partner']:
-            embed.add_field(
-                name="💍 __**Marriage:**__", 
-                value=f"Married to <@{marriage['partner']}> (<t:{marriage['timestamp']}:R>).{' 🌛' if marriage['honeymoon'] else ''}" 
-                if sloth_profile else '0 rings.', 
-                inline=False)
+            
+            if marriage['partner']:
+                embed.add_field(
+                    name="💍 __**Marriage:**__", 
+                    value=f"Married to <@{marriage['partner']}> (<t:{marriage['timestamp']}:R>).{' 🌛' if marriage['honeymoon'] else ''}" 
+                    if sloth_profile else '0 rings.', 
+                    inline=False)
+
+        if member.id == 647452832852869120:
+            embed.add_field(name=f"**Pretty much nothing to see here**", value="🤡", inline=False)
 
         embed.set_thumbnail(url=member.display_avatar)
         embed.set_author(name=member, icon_url=member.display_avatar, url=member.display_avatar)
@@ -230,7 +236,7 @@ class SlothReputation(*currency_cogs):
             embed.set_image(url=banner.url)
         embed.set_footer(text=ctx.guild, icon_url=ctx.guild.icon.url)
 
-        if author.id != member.id:
+        if member.id != member.id:
             return await answer(embed=embed)
         else:
             view = ExchangeActivityView(self.client, user_info[0])
