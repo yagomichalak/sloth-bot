@@ -79,57 +79,6 @@ class CreateSmartRoom(*smartroom_cogs):
 			await utils.disable_buttons(view)
 			await create_room_msg.edit(view=view)
 
-
-	@commands.command()
-	async def create_room(self, ctx) -> None:
-		""" Test command for creating rooms. """
-
-		author: discord.Member = ctx.author
-		guild: discord.Guild = ctx.guild
-
-		cat: discord.CategoryChannel = discord.utils.get(guild.categories, id=777886764056051737)
-		vc: discord.VoiceChannel = await guild.create_voice_channel(name=str(ctx.author), category=cat)
-
-		current_ts: int = await utils.get_timestamp()
-
-		try:
-			await self.insert_smartroom(author.id, 'basic', vc.id, current_ts)
-		except Exception as e:
-			print(e)
-			await ctx.reply("**An error occurred!**")
-		else:
-			await ctx.reply(f"Created VC {vc.mention}")
-
-
-	@commands.command()
-	async def get_room(self, ctx, room_id: int = None) -> None:
-		""" Test command for getting rooms. """
-
-		author: discord.Member = ctx.author
-
-		if not room_id: return
-		
-		smart_room: SmartRoom = await self.get_smartroom(vc_id=room_id)
-
-		print('dsauhdsahu', type(smart_room))
-		print(smart_room.creation_ts)
-		print(smart_room.edited_ts)
-
-	@commands.command()
-	async def room(self, ctx, room_id: int = None) -> None:
-		""" Test command for deleting rooms. """
-
-		author: discord.Member = ctx.author
-
-		if not room_id: return
-		
-		smart_room: SmartRoom = await self.get_smartroom(vc_id=room_id)
-
-		print('dsauhdsahu', type(smart_room))
-		print(smart_room.creation_ts)
-		print(smart_room.edited_ts)
-
-
 	
 
 
