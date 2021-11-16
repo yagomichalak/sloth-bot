@@ -196,7 +196,7 @@ class GalaxyRoom(SmartRoom):
         """ Formats the database data into Discord objects. """
 
         guild: discord.Guild = client.get_guild(server_id)
-        owner: Union[discord.Member, discord.User] = guild.get_member(data[0])
+        owner: Union[discord.Member, discord.User] = await guild.fetch_member(data[0])
 
         vc: discord.VoiceChannel = discord.utils.get(guild.voice_channels, id=data[2])
         vc2: discord.VoiceChannel = discord.utils.get(guild.voice_channels, id=data[3])

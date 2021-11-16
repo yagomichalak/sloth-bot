@@ -50,9 +50,9 @@ class SmartRoomDatabase(commands.Cog):
             INSERT INTO SmartRooms (
                 user_id, room_type, vc_id, vc2_id,
                 txt_id, th_id, th2_id, th3_id, th4_id,
-                cat_id, creation_ts
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-            """, (user_id, room_type, vc_id, vc2_id, txt_id, th_id, th2_id, th3_id, th4_id, cat_id, creation_ts))
+                cat_id, creation_ts, edited_ts
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (user_id, room_type, vc_id, vc2_id, txt_id, th_id, th2_id, th3_id, th4_id, cat_id, creation_ts, creation_ts))
         await db.commit()
         await mycursor.close()
 
@@ -85,7 +85,7 @@ class SmartRoomDatabase(commands.Cog):
             results = await mycursor.fetchall()
             await mycursor.close()
             if not results:
-                return
+                return []
 
             smart_rooms: List[SmartRoom] = [
                 await SmartRoomEnum.__getitem__(name=result[1]).value.format_data(self.client, result)
@@ -101,6 +101,41 @@ class SmartRoomDatabase(commands.Cog):
             smart_room: SmartRoom = SmartRoomEnum.__getitem__(name=result[1]).value
             formatted_smart_room: SmartRoom = await smart_room.format_data(client=self.client, data=result)
             return formatted_smart_room
+
+    async def get_galaxies_in_danger_zone(self, current_ts: int) -> List[List[GalaxyRoom]]:
+        """ Gets all Galaxy Rooms in danger zone. """
+
+        mycursor, _ = await the_database()
+        await mycursor.execute("SELECT * FROM SmartRooms WHERE room_type = 'galaxy' AND (edited_ts + 1209600) - %s <= 172800 AND notified = 0", (current_ts,))
+        results = await mycursor.fetchall()
+        await mycursor.close()
+        
+        if not results:
+            return []
+
+        smart_rooms: List[GalaxyRoom] = [
+            await GalaxyRoom.format_data(self.client, result)
+            for result in results
+        ]
+        return smart_rooms
+
+    async def get_galaxies_expired(self, current_ts: int) -> List[List[GalaxyRoom]]:
+        """ Gets all Galaxy Rooms that are expired. """
+
+        mycursor, _ = await the_database()
+        
+        await mycursor.execute("SELECT * FROM SmartRooms WHERE room_type = 'galaxy' AND %s - edited_ts >= 1209600", (current_ts,))
+        results = await mycursor.fetchall()
+        await mycursor.close()
+        
+        if not results:
+            return []
+
+        smart_rooms: List[GalaxyRoom] = [
+            await GalaxyRoom.format_data(self.client, result)
+            for result in results
+        ]
+        return smart_rooms
     
     # ===== UPDATE =====
     async def update_smartroom(self, sql: str) -> None:

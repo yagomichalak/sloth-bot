@@ -1,5 +1,5 @@
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 
 from extra.smartrooms.rooms import BasicRoom, PremiumRoom, GalaxyRoom, SmartRoom
 from extra.smartrooms.discord_commands import GalaxyRoomCommands
@@ -9,6 +9,7 @@ from extra import utils
 
 import os
 from typing import List, Dict
+import asyncio
 
 smartroom_cogs: List[commands.Cog] = [
 	SmartRoomDatabase, GalaxyRoomCommands
@@ -22,6 +23,7 @@ class CreateSmartRoom(*smartroom_cogs):
 		self.cat_id = int(os.getenv('CREATE_SMART_ROOM_CAT_ID'))
 
 		self.user_cooldowns: Dict[int, int] = {}
+		self.check_galaxy_expiration.start()
 
 
 	@commands.Cog.listener()
@@ -78,6 +80,44 @@ class CreateSmartRoom(*smartroom_cogs):
 			await view.wait()
 			await utils.disable_buttons(view)
 			await create_room_msg.edit(view=view)
+
+	@tasks.loop(hours=3)
+	async def check_galaxy_expiration(self):
+		""" Task that checks Galaxy Rooms expirations. """
+		# if not await self.table_galaxy_vc_exists():
+		# 	return
+
+		current_ts = await utils.get_timestamp()
+
+		# Looks for rooms that are soon going to be deleted (Danger zone)
+		danger_rooms = await self.get_galaxies_in_danger_zone(current_ts)
+		print('danger', danger_rooms)
+		for droom in danger_rooms:
+			embed = discord.Embed(
+				title="__Galaxy Rooms in Danger Zone__",
+				description=(
+					"Your Galaxy rooms will be deleted within two days, in case you wanna keep them,"
+					" consider renewing them for `1500łł` (2 channels) or for `2000łł` (3 channels) by using the **z!galaxy pay_rent** command in any of your rooms!"
+				),
+				color=discord.Color.red())
+			try:
+				await droom.update(self, user_id=droom.owner.id, notified=1)
+				await droom.owner.send(embed=embed)
+			except Exception as e:
+				print(e)
+				pass
+
+		# Looks for expired rooms to delete
+		expired_rooms = await self.get_galaxies_expired(current_ts)
+		print('expired', expired_rooms)
+		for eroom in expired_rooms:
+			try:
+				await eroom.delete(self)
+			except Exception as e:
+				print(e)
+				pass
+			else:
+				await eroom.owner.send(f"**Hey! Your rooms expired so they got deleted!**")
 
 	
 

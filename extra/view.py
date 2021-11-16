@@ -502,7 +502,7 @@ class SmartRoomView(discord.ui.View):
         author: discord.User = interaction.user
 
         current_ts: int = await utils.get_timestamp()
-        if not await self.check_if_can_create(interaction, 100, 'galaxy'):
+        if not await self.check_if_can_create(interaction, 1500, 'galaxy'):
             return
 
         try:
