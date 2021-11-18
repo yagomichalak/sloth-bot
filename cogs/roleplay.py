@@ -262,7 +262,7 @@ class RolePlay(commands.Cog):
         if member_marriage['honeymoon']:
             return await ctx.send(f"**You already had your honeymoon, {member.mention}!**")
 
-        await SlothClass.update_user_money(member.id, -1500) # Updates user money
+        await self.client.get_cog('SlothCurrency').update_user_money(member.id, -1500) # Updates user money
         await SlothClass.update_marriage_content(member.id)
 
         place, activity = view.place, view.activity
