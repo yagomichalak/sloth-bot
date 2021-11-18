@@ -22,7 +22,7 @@ from mysqldb import the_database
 
 from extra.slothclasses.player import Player
 from extra.menu import InroleLooping
-from extra.prompt.menu import ConfirmButton
+from extra.prompt.menu import Confirm
 from extra.useful_variables import patreon_roles
 from extra import utils
 
@@ -472,7 +472,7 @@ class Tools(commands.Cog):
 			self.client.get_command('magnet').reset_cooldown(ctx)
 			return await ctx.send("**You are not in a vc!**")
 
-		confirm = await ConfirmButton(f"{ctx.author.mention}, you sure you want to magnet everyone into `{user_state.channel}`?").prompt(ctx)
+		confirm = await Confirm(f"{ctx.author.mention}, you sure you want to magnet everyone into `{user_state.channel}`?").prompt(ctx)
 		if not confirm:
 			self.client.get_command('magnet').reset_cooldown(ctx)
 			return await ctx.send("**Not doing it, then!**")
