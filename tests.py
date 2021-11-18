@@ -227,17 +227,29 @@ UPDATE TribeMember as OG
 #         break
 
 
-import enum
+# import enum
 
 
-class QuestEnum(enum.Enum):
+# class QuestEnum(enum.Enum):
 
-    one = 'test1'
-    twice = 'test2'
-    three = 'test3'
-    four = 'test4'
-    five = 'test5'
-    six = 'test6'
+#     one = 'test1'
+#     twice = 'test2'
+#     three = 'test3'
+#     four = 'test4'
+#     five = 'test5'
+#     six = 'test6'
 
 
-print(QuestEnum.__dict__['_member_names_'][1-1])
+# print(QuestEnum.__dict__['_member_names_'][1-1])
+
+
+roles = ['Native French', 'Studying French', 'Music Club', 'Fluent English', 'Fluent Portuguese']
+t_role = 'Native French'
+
+
+language_roles = [r for r in roles if r.lower().startswith(('native', 'fluent', 'studying'))]
+language = t_role.lower().strip('native').strip('fluent').strip('studying').strip()
+
+print([lr for lr in language_roles if language.lower() in lr.lower()])
+print(language in language_roles)
+# print([])
