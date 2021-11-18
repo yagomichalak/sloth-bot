@@ -283,7 +283,14 @@ class RoleSelect(discord.ui.Select):
 				if role and role.id not in member_roles_ids:
 					native_roles = [r for r in member.roles if r.name.lower().startswith('native')]
 					if role.name.lower().startswith('native') and len(native_roles) >= 2:
-						await interaction.followup.send(f"**You cannot have more than 2 native roles at a time!**", ephemeral=True)
+						return await interaction.followup.send(f"**You cannot have more than 2 native roles at a time!**", ephemeral=True)
+
+					language_roles = [r for r in member.roles if r.name.lower().startswith(('native', 'fluent', 'studying'))]
+					language = role.name.lower().strip('native').strip('fluent').strip('studying').strip()
+
+					language_matches = [lr for lr in language_roles if language.lower() in lr.name.lower()]
+					if language_matches:
+						await interaction.followup.send(f"**You already have a `{language.title()}` role, you cannot take another one!**", ephemeral=True)
 					else:
 						await member.add_roles(role)
 						await interaction.followup.send(f"**The `{role}` role was assigned to you!**", ephemeral=True)
