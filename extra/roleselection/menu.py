@@ -280,8 +280,9 @@ class RoleSelect(discord.ui.Select):
 				pass
 			else:
 				member_roles_ids = [r.id for r in member.roles]
+				native_roles = [r for r in member.roles if r.name.lower().startswith('native')]
+
 				if role and role.id not in member_roles_ids:
-					native_roles = [r for r in member.roles if r.name.lower().startswith('native')]
 					if role.name.lower().startswith('native') and len(native_roles) >= 2:
 						return await interaction.followup.send(f"**You cannot have more than 2 native roles at a time!**", ephemeral=True)
 
@@ -296,7 +297,10 @@ class RoleSelect(discord.ui.Select):
 						await interaction.followup.send(f"**The `{role}` role was assigned to you!**", ephemeral=True)
 					
 				else:
-					await member.remove_roles(role)
-					await interaction.followup.send(f"**The `{role}` role was taken away from you!**", ephemeral=True)
+					if len(native_roles) > 1:
+						await member.remove_roles(role)
+						await interaction.followup.send(f"**The `{role}` role was taken away from you!**", ephemeral=True)
+					else:
+						await interaction.followup.send(f"**You cannot remove your only Native role!**", ephemeral=True)
 
 				await interaction.message.edit(view=self.view)
