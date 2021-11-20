@@ -297,9 +297,12 @@ class RoleSelect(discord.ui.Select):
 						await interaction.followup.send(f"**The `{role}` role was assigned to you!**", ephemeral=True)
 					
 				else:
-					if len(native_roles) > 1 and role.name.lower().startswith('native'):
-						await member.remove_roles(role)
-						await interaction.followup.send(f"**The `{role}` role was taken away from you!**", ephemeral=True)
+					if len(native_roles) > 1:
+						if role.name.lower().startswith('native'):
+							await interaction.followup.send(f"**You cannot remove your only Native role!**", ephemeral=True)
+						else:
+							await member.remove_roles(role)
+							await interaction.followup.send(f"**The `{role}` role was taken away from you!**", ephemeral=True)
 					else:
 						await interaction.followup.send(f"**You cannot remove your only Native role!**", ephemeral=True)
 
