@@ -106,7 +106,7 @@ class Game:
             embed.color = int("ffffff", 16)
             embed.set_field_at(0, name="__Game State__", value=f"{player1.mention} surrendered!")
 
-            await self.message.reply(f"**{self.player1.mention} surrendered. Game over!**")
+            await self.message.reply(f"**{self.player_active.mention} surrendered. Game over!**")
         await self.message.edit(embed=embed)
         try:
             await self.message.clear_reactions()
