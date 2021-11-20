@@ -729,7 +729,7 @@ Entry requirements:
         )
         embed.set_footer(text=f"by {member}", icon_url=member.display_avatar)
 
-        embed.set_image(url="https://cdn.discordapp.com/attachments/562019472257318943/882352621116096542/slothfacepopoo.png")
+        embed.set_image(url="https://cdn.discordapp.com/attachments/675668948473348096/911602316677906492/verify.png")
 
         await member.send(embed=embed)
 
