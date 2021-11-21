@@ -287,7 +287,7 @@ class RoleSelect(discord.ui.Select):
 						return await interaction.followup.send(f"**You cannot have more than 2 native roles at a time!**", ephemeral=True)
 
 					language_roles = [r for r in member.roles if r.name.lower().startswith(('native', 'fluent', 'studying'))]
-					language = role.name.lower().strip('native').strip('fluent').strip('studying').strip()
+					language = role.name.lower().replace('native', '').replace('fluent', '').replace('studying', '').strip()
 
 					language_matches = [lr for lr in language_roles if language.lower() in lr.name.lower()]
 					if len(language_matches) >= 1:
