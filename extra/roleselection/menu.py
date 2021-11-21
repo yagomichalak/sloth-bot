@@ -290,7 +290,7 @@ class RoleSelect(discord.ui.Select):
 					language = role.name.lower().strip('native').strip('fluent').strip('studying').strip()
 
 					language_matches = [lr for lr in language_roles if language.lower() in lr.name.lower()]
-					if language_matches:
+					if len(language_matches) >= 1:
 						await interaction.followup.send(f"**You already have a `{language.title()}` role, you cannot take another one!**", ephemeral=True)
 					else:
 						await member.add_roles(role)
