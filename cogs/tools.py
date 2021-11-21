@@ -1047,8 +1047,8 @@ class Tools(commands.Cog):
 			msg = await ctx.respond(content=role.mention, embed=embed)
 		else:
 			msg = await ctx.respond(embed=embed)
-		await msg.add_reaction('✅')
-		await msg.add_reaction('❌')
+		await msg.add_reaction('<:yessloth:912068622841708594>')
+		await msg.add_reaction('<:nosloth:912066953160556575>')
 
 	@user_command(name="Follow", guild_ids=guild_ids)
 	@utils.is_allowed(allowed_roles, throw_exc=True)
