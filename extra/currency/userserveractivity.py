@@ -2,6 +2,125 @@ import discord
 from discord.ext import commands
 from mysqldb import the_database
 from typing import List, Union
+from extra import utils
+
+class UserVoiceSystem(commands.Cog):
+    """ Cog for the inner systems of UserVoice events. """
+
+    def __init__(self, client: commands.Bot) -> None:
+        """ Class init method. """
+
+        self.client = client
+
+
+    # @commands.Cog.listener()
+    # async def on_voice_state_update(self, member, before, after) -> None:
+    #     """ Updates the user's server time counter. """
+
+
+    #     if not before.channel:
+    #         return await self.update_user_server_timestamp(member.id, the_time)
+
+    #     if not after.channel and not before.channel.id == afk_channel_id:
+    #         old_time = user_info[0][3]
+    #         addition = the_time - old_time
+    #         effects = await self.client.get_cog('SlothClass').get_user_effects(member)
+    #         if 'sabotaged' in effects:
+    #             addition = 0
+    #         await self.update_user_server_time(member.id, addition)
+
+
+    @commands.Cog.listener(name="on_voice_state_update")
+    async def on_voice_state_update_join_leave(self, member, before, after) -> None:
+        """ For when users join or leave the Voice Channel. """
+
+        if member.bot:
+            return
+
+        current_ts: int = await utils.get_timestamp()
+
+        # Get before/after channels and their categories
+        bc = before.channel
+        ac = after.channel
+
+        # Check voice states
+        if before.mute != after.mute:
+            return
+        if before.deaf != before.deaf:
+            return
+        if before.self_stream != after.self_stream:
+            if not before.self_stream and after.self_stream:
+                return
+            if bc == ac:
+                return
+
+        if before.self_video != after.self_video:
+            if not before.self_video and after.self_video:
+                return
+            if bc == ac:
+                return
+
+        # Get before/after channels and their categories
+        bc = before.channel
+        ac = after.channel
+
+        user_info = await self.get_user_activity_info(member.id)
+        if not user_info and not after.self_muted:
+            return await self.insert_user_server_activity(member.id, 0, current_ts)
+
+        # Join
+        if ac and not bc:
+            if not after.self_mute and not after.self_deaf:
+                await self.update_user_server_timestamp(member.id, current_ts)
+
+        # Switch
+        elif (ac and bc) and (bc.id != ac.id) and not after.self_mute:
+            people_in_vc: int = len([m for m in bc.members if not m.bot]) +1
+            if people_in_vc < 2 or before.self_mute:
+                return
+
+            increment: int = current_ts - user_info[0][3]
+            await self.update_user_server_time(member.id, increment, current_ts)
+
+        # Muted/unmuted
+        elif (ac and bc) and (bc.id == ac.id) and before.self_mute != after.self_mute:
+            print('test')
+
+            if not after.self_mute and not after.self_deaf:
+                return await self.update_user_server_timestamp(member.id, current_ts)
+
+            print('test2')
+            people_in_vc: int = len([m for m in bc.members if not m.bot])
+            if people_in_vc < 2 or before.self_mute or before.self_deaf:
+                print('kek')
+                return
+
+            print('test3')
+            increment: int = current_ts - user_info[0][3]
+            await self.update_user_server_time(member.id, increment, current_ts)
+            print('test4')
+
+        # Deafened/undeafened
+        elif (ac and bc) and (bc.id == ac.id) and before.self_deaf != after.self_deaf:
+
+            if not after.self_mute and not after.self_deaf:
+                return await self.update_user_server_timestamp(member.id, current_ts)
+
+            people_in_vc: int = len([m for m in bc.members if not m.bot])
+            if people_in_vc < 2 or after.self_mute or before.self_deaf:
+                return
+
+            increment: int = current_ts - user_info[0][3]
+            await self.update_user_server_time(member.id, increment, current_ts)
+        
+        # Leave
+        elif bc and not ac:
+            people_in_vc: int = len([m for m in bc.members if not m.bot]) +1
+            if people_in_vc < 2 or before.self_mute:
+                return await self.update_user_server_timestamp(member.id, None)
+            
+            increment: int = current_ts - user_info[0][3]
+            await self.update_user_server_time(member.id, increment)
 
 
 class UserServerActivityTable(commands.Cog):
@@ -23,7 +142,7 @@ class UserServerActivityTable(commands.Cog):
             return await ctx.send("The `UserServerActivity` already exists!**")
 
         mycursor, db = await the_database()
-        await mycursor.execute("CREATE TABLE UserServerActivity (user_id bigint, user_messages bigint, user_time bigint, user_timestamp bigint DEFAULT NULL)")
+        await mycursor.execute("CREATE TABLE UserServerActivity (user_id BIGINT, user_messages BIGINT, user_time BIGINT, user_timestamp BIGINT DEFAULT NULL)")
         await db.commit()
         await mycursor.close()
 
@@ -112,13 +231,16 @@ class UserServerActivityTable(commands.Cog):
         await db.commit()
         await mycursor.close()
 
-    async def update_user_server_time(self, user_id: int, add_time: int) -> None:
-        """ Updates the user's time counter.
+    async def update_user_server_time(self, user_id: int, increment: int, current_ts: int = None) -> None:
+        """ Updates the user's voice time information.
         :param user_id: The ID of the user to update.
-        :param add_time: The increment value to apply to the user's current time counter. """
+        :param increment: The increment value in seconds to apply.
+        :param current_ts: The current timestamp. [Optional] """
 
         mycursor, db = await the_database()
-        await mycursor.execute("UPDATE UserServerActivity SET user_time = user_time + %s WHERE user_id = %s", (add_time, user_id))
+        await mycursor.execute("""
+            UPDATE UserServerActivity SET user_time = user_time + %s, user_timestamp = %s WHERE user_id = %s
+            """, (increment, current_ts, user_id))
         await db.commit()
         await mycursor.close()
 
@@ -131,3 +253,4 @@ class UserServerActivityTable(commands.Cog):
         await mycursor.execute("UPDATE UserServerActivity SET user_timestamp = %s WHERE user_id = %s", (new_ts, user_id))
         await db.commit()
         await mycursor.close()
+

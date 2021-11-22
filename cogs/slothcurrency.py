@@ -23,7 +23,7 @@ from extra.gif_manager import GIF
 from extra import utils
 
 from extra.currency.useritems import UserItemsTable
-from extra.currency.userserveractivity import UserServerActivityTable
+from extra.currency.userserveractivity import UserServerActivityTable, UserVoiceSystem
 from extra.currency.usercurrency import UserCurrencyTable
 
 shop_channels = [
@@ -37,7 +37,8 @@ booster_role_id = int(os.getenv('BOOSTER_ROLE_ID'))
 guild_ids = [int(os.getenv('SERVER_ID'))]
 
 currency_cogs: List[commands.Cog] = [
-    UserItemsTable, UserServerActivityTable, UserCurrencyTable
+    UserItemsTable, UserServerActivityTable, UserCurrencyTable,
+    UserVoiceSystem
 ]
 
 
@@ -75,31 +76,6 @@ class SlothCurrency(*currency_cogs):
         if 'sabotaged' not in effects:
             await self.update_user_server_messages(message.author.id, 1)
 
-    @commands.Cog.listener()
-    async def on_voice_state_update(self, member, before, after) -> None:
-        """ Updates the user's server time counter. """
-
-        if member.bot:
-            return
-        if not await self.check_user_server_activity_table_exists():
-            return
-
-        the_time = await utils.get_timestamp()
-
-        user_info = await self.get_user_activity_info(member.id)
-        if not user_info:
-            return await self.insert_user_server_activity(member.id, 0, the_time)
-
-        if not before.channel:
-            return await self.update_user_server_timestamp(member.id, the_time)
-
-        if not after.channel and not before.channel.id == afk_channel_id:
-            old_time = user_info[0][3]
-            addition = the_time - old_time
-            effects = await self.client.get_cog('SlothClass').get_user_effects(member)
-            if 'sabotaged' in effects:
-                addition = 0
-            await self.update_user_server_time(member.id, addition)
 
     # In-game commands
     @commands.command()
