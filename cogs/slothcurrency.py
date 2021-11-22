@@ -32,7 +32,7 @@ int(os.getenv('CLOTHES_ITEMS_CHANNEL_ID')), int(os.getenv('LIMITED_EDITION_ITEMS
 int(os.getenv('HEAD_ITEMS_CHANNEL_ID')), int(os.getenv('LEG_ITEMS_CHANNEL_ID')),
 int(os.getenv('PATREONS_CHANNEL_ID'))
 ]
-afk_channel_id = int(os.getenv('AFK_CHANNEL_ID'))
+
 booster_role_id = int(os.getenv('BOOSTER_ROLE_ID'))
 guild_ids = [int(os.getenv('SERVER_ID'))]
 

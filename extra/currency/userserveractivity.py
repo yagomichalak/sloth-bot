@@ -3,6 +3,9 @@ from discord.ext import commands
 from mysqldb import the_database
 from typing import List, Union
 from extra import utils
+import os
+
+afk_channel_id = int(os.getenv('AFK_CHANNEL_ID'))
 
 class UserVoiceSystem(commands.Cog):
     """ Cog for the inner systems of UserVoice events. """
@@ -11,23 +14,6 @@ class UserVoiceSystem(commands.Cog):
         """ Class init method. """
 
         self.client = client
-
-
-    @commands.Cog.listener()
-    async def on_voice_state_update(self, member, before, after) -> None:
-        """ Updates the user's server time counter. """
-
-
-        if not before.channel:
-            return await self.update_user_server_timestamp(member.id, the_time)
-
-        if not after.channel and not before.channel.id == afk_channel_id:
-            old_time = user_info[0][3]
-            addition = the_time - old_time
-            effects = await self.client.get_cog('SlothClass').get_user_effects(member)
-            if 'sabotaged' in effects:
-                addition = 0
-            await self.update_user_server_time(member.id, addition)
 
 
     @commands.Cog.listener(name="on_voice_state_update")
@@ -72,13 +58,13 @@ class UserVoiceSystem(commands.Cog):
 
         # Join
         if ac and not bc:
-            if not after.self_mute and not after.self_deaf:
+            if not after.self_mute and not after.self_deaf and after.channel.id != afk_channel_id:
                 await self.update_user_server_timestamp(member.id, current_ts)
 
         # Switch
         elif (ac and bc) and (bc.id != ac.id) and not after.self_mute:
             people_in_vc: int = len([m for m in bc.members if not m.bot]) +1
-            if people_in_vc < 2 or before.self_mute:
+            if people_in_vc < 2 or before.self_mute or after.channel.id == afk_channel_id:
                 return
 
             increment: int = current_ts - user_info[0][3]
@@ -91,7 +77,7 @@ class UserVoiceSystem(commands.Cog):
         # Muted/unmuted
         elif (ac and bc) and (bc.id == ac.id) and before.self_mute != after.self_mute:
 
-            if not after.self_mute and not after.self_deaf:
+            if not after.self_mute and not after.self_deaf and after.channel.id != afk_channel_id:
                 return await self.update_user_server_timestamp(member.id, current_ts)
 
             people_in_vc: int = len([m for m in bc.members if not m.bot])
@@ -104,12 +90,11 @@ class UserVoiceSystem(commands.Cog):
                 increment = 0
 
             await self.update_user_server_time(member.id, increment, current_ts)
-            print('test4')
 
         # Deafened/undeafened
         elif (ac and bc) and (bc.id == ac.id) and before.self_deaf != after.self_deaf:
 
-            if not after.self_mute and not after.self_deaf:
+            if not after.self_mute and not after.self_deaf and after.channel.id != afk_channel_id:
                 return await self.update_user_server_timestamp(member.id, current_ts)
 
             people_in_vc: int = len([m for m in bc.members if not m.bot])
@@ -126,14 +111,14 @@ class UserVoiceSystem(commands.Cog):
         # Leave
         elif bc and not ac:
             people_in_vc: int = len([m for m in bc.members if not m.bot]) +1
-            if people_in_vc < 2 or before.self_mute:
+            if people_in_vc < 2 or before.self_mute or before.channel.id == afk_channel_id:
                 return await self.update_user_server_timestamp(member.id, None)
             
             increment: int = current_ts - user_info[0][3]
             effects = await SlothClass.get_user_effects(member)
             if 'sabotaged' in effects:
                 increment = 0
-                
+
             await self.update_user_server_time(member.id, increment)
 
 
