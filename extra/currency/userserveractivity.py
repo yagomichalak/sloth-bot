@@ -13,21 +13,21 @@ class UserVoiceSystem(commands.Cog):
         self.client = client
 
 
-    # @commands.Cog.listener()
-    # async def on_voice_state_update(self, member, before, after) -> None:
-    #     """ Updates the user's server time counter. """
+    @commands.Cog.listener()
+    async def on_voice_state_update(self, member, before, after) -> None:
+        """ Updates the user's server time counter. """
 
 
-    #     if not before.channel:
-    #         return await self.update_user_server_timestamp(member.id, the_time)
+        if not before.channel:
+            return await self.update_user_server_timestamp(member.id, the_time)
 
-    #     if not after.channel and not before.channel.id == afk_channel_id:
-    #         old_time = user_info[0][3]
-    #         addition = the_time - old_time
-    #         effects = await self.client.get_cog('SlothClass').get_user_effects(member)
-    #         if 'sabotaged' in effects:
-    #             addition = 0
-    #         await self.update_user_server_time(member.id, addition)
+        if not after.channel and not before.channel.id == afk_channel_id:
+            old_time = user_info[0][3]
+            addition = the_time - old_time
+            effects = await self.client.get_cog('SlothClass').get_user_effects(member)
+            if 'sabotaged' in effects:
+                addition = 0
+            await self.update_user_server_time(member.id, addition)
 
 
     @commands.Cog.listener(name="on_voice_state_update")
@@ -68,6 +68,8 @@ class UserVoiceSystem(commands.Cog):
         if not user_info and not after.self_muted:
             return await self.insert_user_server_activity(member.id, 0, current_ts)
 
+        SlothClass: commands.Cog = self.client.get_cog('SlothClass')
+
         # Join
         if ac and not bc:
             if not after.self_mute and not after.self_deaf:
@@ -80,23 +82,27 @@ class UserVoiceSystem(commands.Cog):
                 return
 
             increment: int = current_ts - user_info[0][3]
+            effects = await SlothClass.get_user_effects(member)
+            if 'sabotaged' in effects:
+                increment = 0
+
             await self.update_user_server_time(member.id, increment, current_ts)
 
         # Muted/unmuted
         elif (ac and bc) and (bc.id == ac.id) and before.self_mute != after.self_mute:
-            print('test')
 
             if not after.self_mute and not after.self_deaf:
                 return await self.update_user_server_timestamp(member.id, current_ts)
 
-            print('test2')
             people_in_vc: int = len([m for m in bc.members if not m.bot])
             if people_in_vc < 2 or before.self_mute or before.self_deaf:
-                print('kek')
                 return
 
-            print('test3')
             increment: int = current_ts - user_info[0][3]
+            effects = await SlothClass.get_user_effects(member)
+            if 'sabotaged' in effects:
+                increment = 0
+
             await self.update_user_server_time(member.id, increment, current_ts)
             print('test4')
 
@@ -111,6 +117,10 @@ class UserVoiceSystem(commands.Cog):
                 return
 
             increment: int = current_ts - user_info[0][3]
+            effects = await SlothClass.get_user_effects(member)
+            if 'sabotaged' in effects:
+                increment = 0
+
             await self.update_user_server_time(member.id, increment, current_ts)
         
         # Leave
@@ -120,6 +130,10 @@ class UserVoiceSystem(commands.Cog):
                 return await self.update_user_server_timestamp(member.id, None)
             
             increment: int = current_ts - user_info[0][3]
+            effects = await SlothClass.get_user_effects(member)
+            if 'sabotaged' in effects:
+                increment = 0
+                
             await self.update_user_server_time(member.id, increment)
 
 
