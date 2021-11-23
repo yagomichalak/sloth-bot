@@ -231,7 +231,7 @@ class Social(commands.Cog):
         await ctx.send(embed=em)
 
     # Shows all the info about a user
-    @commands.command(aliases=['user', 'whois', 'who_is'])
+    @commands.command(aliases=['user', 'whois', 'who_is', 'ui'])
     async def userinfo(self, ctx, *, message : str = None):
         """ Shows all the information about a member.
         :param member: The member to show the info.
