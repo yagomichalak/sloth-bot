@@ -31,7 +31,7 @@ class Pictures(commands.Cog):
 
         author: discord.Member = ctx.author
         cow_token: str = os.getenv('COW_API_TOKEN')
-        #""
+        
         req: str = f'https://api.unsplash.com/search/photos?client_id={cow_token}&?&query=cow&?format=json'
 
 
