@@ -235,7 +235,7 @@ class SlothCurrency(*currency_cogs):
         else:
             return False
 
-    async def send_hacked_image(self, answer: discord.PartialMessageable, author: discord.Member, member: discord.Member) -> None:
+    async def send_hacked_image(self, answer: discord.PartialMessageable, member: discord.Member) -> None:
         """ Makes and sends a hacked image.
         :param answer: The answerable object.
         :param author: The author of the action.
@@ -263,7 +263,7 @@ class SlothCurrency(*currency_cogs):
             # await asyncio.sleep(0.5)
             return os.remove(file_path)
 
-    async def send_frogged_image(self, answer: discord.PartialMessageable, author: discord.Member, member: discord.Member, knocked_out: bool = False) -> None:
+    async def send_frogged_image(self, answer: discord.PartialMessageable, member: discord.Member, knocked_out: bool = False) -> None:
         """ Makes and sends a frogged image.
         :param answer: The answerable object.
         :param author: The author of the action.
