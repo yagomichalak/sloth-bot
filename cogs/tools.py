@@ -443,19 +443,38 @@ class Tools(commands.Cog):
 
 	@commands.command()
 	@commands.has_any_role(*allowed_roles)
-	async def vc(self, ctx, member: discord.Member = None) -> None:
+	async def vc(self, ctx) -> None:
 		""" Tells where the given member is at (voice channel).
 		:param member: The member you are looking for. """
 
-		if not member:
-			member = ctx.author
+		author: discord.Member = ctx.author
 
-		member_state = member.voice
-		if channel := member_state and member_state.channel:
-			msg = f"**{member.mention} is in the {channel.mention} voice channel.**"
-			await ctx.send(msg)
+		members = await utils.get_mentions(ctx.message)
+
+		if not members:
+			return await ctx.send(f"**Please, inform at least one member to check, {author.mention}!**")
+
+		members_in_vc: List[str] = []
+
+		for member in members:
+			member_state = member.voice
+			if channel := member_state and member_state.channel:
+				members_in_vc.append(f"{member.mention} **-** {channel.mention}")
+			else:
+				members_in_vc.append(f"{member.mention} is not in a VC!")
+
+
+		if len(members_in_vc) > 1:
+			embed = discord.Embed(
+				title="__Members' VCs__",
+				description='\n'.join(members_in_vc),
+				color=author.color,
+				timestamp=ctx.message.created_at
+			)
+			embed.set_footer(text=f"Requested by {author}", icon_url=author.display_avatar)
+			await ctx.send(embed=embed)
 		else:
-			await ctx.send(f"**{member.mention} is not in a VC!**")
+			await ctx.send(members_in_vc[0])
 
 	@commands.command(aliases=['mag'], hidden=True)
 	@commands.cooldown(1, 300, commands.BucketType.guild)
