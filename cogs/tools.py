@@ -29,6 +29,8 @@ from extra import utils
 from extra.view import SoundBoardView, BasicUserCheckView
 from extra.select import SoundBoardSelect
 
+from extra.tool.stealthstatus import StealthStatusTable
+
 guild_ids = [int(os.getenv('SERVER_ID'))]
 
 from typing import List, Optional
@@ -38,13 +40,18 @@ senior_mod_role_id: int = int(os.getenv('SENIOR_MOD_ROLE_ID'))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID'))
 owner_role_id = int(os.getenv('OWNER_ROLE_ID'))
 analyst_debugger_role_id: int = int(os.getenv('ANALYST_DEBUGGER_ROLE_ID'))
+in_a_vc_role_id: int = int(os.getenv('IN_A_VC_ROLE_ID'))
+
 
 allowed_roles = [owner_role_id, admin_role_id, mod_role_id, *patreon_roles.keys(), int(os.getenv('SLOTH_LOVERS_ROLE_ID'))]
 teacher_role_id = int(os.getenv('TEACHER_ROLE_ID'))
 patreon_channel_id = int(os.getenv('PATREONS_CHANNEL_ID'))
 
+tool_cogs: List[commands.Cog] = [
+	StealthStatusTable
+]
 
-class Tools(commands.Cog):
+class Tools(*tool_cogs):
 	""" Some useful tool commands. """
 
 	def __init__(self, client):
@@ -53,6 +60,57 @@ class Tools(commands.Cog):
 	@commands.Cog.listener()
 	async def on_ready(self):
 		print('Tools cog is ready!')
+
+	@commands.Cog.listener()
+	async def on_voice_state_update(self, member, before, after) -> None:
+		""" Removes the 'in a VC' role from people who are in the stealth mode,
+		upon joining VCs. """
+
+		if after.channel:
+			role = member.get_role(in_a_vc_role_id)
+			if not role:
+				return
+
+			stealth_status = await self.get_stealth_status(member.id)
+			if not stealth_status or not stealth_status[1]:
+				return
+
+			await member.remove_roles(role)
+
+	@commands.Cog.listener()
+	async def on_member_update(self, before, after):
+		""" Removes the 'in a VC' role from people who are in the stealth mode,
+		upon getting roles. """
+
+		if not after.guild:
+			return
+
+		roles = before.roles
+		roles2 = after.roles
+		if len(roles2) < len(roles):
+			return
+
+		new_role = None
+
+		for r2 in roles2:
+			if r2 not in roles:
+				new_role = r2
+				break
+
+		if new_role:
+			role = after.get_role(in_a_vc_role_id)
+			if not role:
+				return
+				
+			stealth_status = await self.get_stealth_status(after.id)
+			if not stealth_status or not stealth_status[1]:
+				return
+
+			try:
+				await after.remove_roles(role)
+			except:
+				pass
+
 
 	@commands.Cog.listener()
 	async def on_message(self, message) -> None:
@@ -1110,6 +1168,33 @@ class Tools(commands.Cog):
 			await ctx.respond(f"**For some reason I couldn't bring them here, {author.mention}!**")
 		else:
 			await ctx.respond(f"**They were brought to {user_vc.channel.mention}!**")
+
+	@commands.command()
+	@utils.is_allowed([senior_mod_role_id], throw_exc=True)
+	async def stealth(self, ctx) -> None:
+		""" Makes you stealth, so when you join a VC you don't get the 'in a VC' role. """
+
+		member = ctx.author
+		stealth_status = await self.get_stealth_status(member.id)
+		
+		on = True if stealth_status and stealth_status[1] else False
+
+		confirm = await Confirm(f"**Your Stealth mode is `{'online' if on else 'offline'}` wanna turn it `{'off' if on else 'on'}`?**").prompt(ctx)
+		if not confirm:
+			return await ctx.send(f"**Not doing it, then, {member.mention}!**")
+
+		try:
+			if stealth_status:
+				await self.update_stealth_status(member.id, 0 if on else 1)
+			else:
+				await self.insert_stealth_status(member.id, 1)
+		except Exception as e:
+			print('stealth error: ', e)
+			await ctx.send(f"**Something went wrong, try again or talk with DNK!**")
+		else:
+			await ctx.send(f"**Your stealth mode has been turned `{'off' if on else 'on'}`, {member.mention}!**")
+
+	
 
 def setup(client):
 	client.add_cog(Tools(client))
