@@ -213,11 +213,17 @@ async def prompt_number(client, ctx: commands.Context, the_msg: discord.Message,
 
 
 class InroleLooping(menus.ListPageSource):
-    def __init__(self, members, **kwargs):
+    """ Makes a paginated list of people who have certain roles. """
+
+    def __init__(self, members, **kwargs) -> None:
+        """ Class init method. """
+
         super().__init__(members, per_page=15)
         self.roles = kwargs.get('roles')
 
-    async def format_page(self, menu, entries):
+    async def format_page(self, menu, entries) -> discord.Embed:
+        """ Makes the page's embed. """
+
         start = menu.current_page * self.per_page
 
         formatted_roles = ', '.join([role.mention for role in self.roles])
@@ -225,6 +231,32 @@ class InroleLooping(menus.ListPageSource):
         embed = discord.Embed(
             title=f"__Inroling {len(self.roles)} Roles:__",
             description=f"{formatted_roles}\n\n{description}",
+            color=menu.ctx.author.color,
+            timestamp=menu.ctx.message.created_at
+            )
+        for i, v in enumerate(entries, start=start):
+            embed.set_footer(text=f"({i+1}-{i+6} of {len(self.entries)})")
+
+        return embed
+
+class InchannelLooping(menus.ListPageSource):
+    """ Makes a paginated list of people that can see a particular channel. """
+
+    def __init__(self, members, **kwargs) -> None:
+        """ Class init method. """
+
+        super().__init__(members, per_page=15)
+        self.channel = kwargs.get('channel')
+
+    async def format_page(self, menu, entries) -> discord.Embed:
+        """ Makes the page's embed. """
+
+        start = menu.current_page * self.per_page
+
+        description = f'\n'.join(f"`{i+1}` - **{v}**" for i, v in enumerate(entries, start=start))
+        embed = discord.Embed(
+            title=f"__Inchanneling `{self.channel}`:__",
+            description=f"{self.channel.mention}\n\n{description}",
             color=menu.ctx.author.color,
             timestamp=menu.ctx.message.created_at
             )

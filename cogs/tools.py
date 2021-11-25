@@ -21,7 +21,7 @@ from pytz import timezone
 from mysqldb import the_database
 
 from extra.slothclasses.player import Player
-from extra.menu import InroleLooping
+from extra.menu import InroleLooping, InchannelLooping
 from extra.prompt.menu import Confirm
 from extra.useful_variables import patreon_roles
 from extra import utils
@@ -33,7 +33,7 @@ from extra.tool.stealthstatus import StealthStatusTable
 
 guild_ids = [int(os.getenv('SERVER_ID'))]
 
-from typing import List, Optional
+from typing import List, Optional, Union
 
 mod_role_id = int(os.getenv('MOD_ROLE_ID'))
 senior_mod_role_id: int = int(os.getenv('SENIOR_MOD_ROLE_ID'))
@@ -101,7 +101,7 @@ class Tools(*tool_cogs):
 			role = after.get_role(in_a_vc_role_id)
 			if not role:
 				return
-				
+
 			stealth_status = await self.get_stealth_status(after.id)
 			if not stealth_status or not stealth_status[1]:
 				return
@@ -134,10 +134,10 @@ class Tools(*tool_cogs):
 			except:
 				pass
 
-	@commands.command()
+	@commands.command(aliases=["in_role"])
 	@commands.cooldown(1, 5, commands.BucketType.user)
 	async def inrole(self, ctx, roles: commands.Greedy[discord.Role] = None) -> None:
-		""" Shows everyone who have that role in the server.
+		""" Shows everyone who has that role in the server.
 		:param roles: The set of roles you want to check. """
 
 		member = ctx.author
@@ -157,6 +157,32 @@ class Tools(*tool_cogs):
 				'roles': roles
 			}
 			pages = menus.MenuPages(source=InroleLooping(members, **additional), clear_reactions_after=True)
+			await pages.start(ctx)
+		else:
+			return await ctx.send(f"**No one has this role, {member.mention}!**")
+
+	@commands.command(aliases=["in_channel"])
+	@commands.cooldown(1, 5, commands.BucketType.user)
+	async def inchannel(self, ctx, channel: Union[discord.TextChannel, discord.VoiceChannel] = None) -> None:
+		""" Shows everyone who has permissions in a particular channel.
+		:param roles: The set of roles you want to check. """
+
+		member = ctx.author
+		if not channel:
+			channel = ctx.channel
+		
+		members = [ow.mention for ow in channel.overwrites.keys() if isinstance(ow, discord.Member)]
+		if not members:
+			return await ctx.send(f"**No one has permissions in this channel, {member.mention}!**")
+
+		# embed = discord.Embed(description=', '.join(members))
+		# await ctx.send(embed=embed)
+
+		if members:
+			additional = {
+				'channel': channel
+			}
+			pages = menus.MenuPages(source=InchannelLooping(members, **additional), clear_reactions_after=True)
 			await pages.start(ctx)
 		else:
 			return await ctx.send(f"**No one has this role, {member.mention}!**")
