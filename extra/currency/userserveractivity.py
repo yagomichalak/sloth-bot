@@ -64,7 +64,7 @@ class UserVoiceSystem(commands.Cog):
         # Switch
         elif (ac and bc) and (bc.id != ac.id) and not after.self_mute and not after.mute and not after.deaf:
             people_in_vc: int = len([m for m in bc.members if not m.bot]) +1
-            if people_in_vc < 2 or before.self_mute or before.mute or before.deaf or after.channel.id == afk_channel_id:
+            if people_in_vc < 2 or after.self_mute or after.mute or after.deaf or after.channel.id == afk_channel_id:
                 return await self.update_user_server_timestamp(member.id, None)
 
             increment: int = current_ts - user_info[0][3]
@@ -81,7 +81,7 @@ class UserVoiceSystem(commands.Cog):
                 return await self.update_user_server_timestamp(member.id, current_ts)
 
             people_in_vc: int = len([m for m in bc.members if not m.bot])
-            if people_in_vc < 2 or before.self_mute or before.self_deaf:
+            if people_in_vc < 2 or after.self_mute or after.self_deaf:
                 return await self.update_user_server_timestamp(member.id, None)
 
             increment: int = current_ts - user_info[0][3]
@@ -98,7 +98,7 @@ class UserVoiceSystem(commands.Cog):
                 return await self.update_user_server_timestamp(member.id, current_ts)
 
             people_in_vc: int = len([m for m in bc.members if not m.bot])
-            if people_in_vc < 2 or after.self_mute or before.self_deaf:
+            if people_in_vc < 2 or after.self_mute or after.self_deaf:
                 return await self.update_user_server_timestamp(member.id, None)
 
             increment: int = current_ts - user_info[0][3]
@@ -115,7 +115,7 @@ class UserVoiceSystem(commands.Cog):
                 return await self.update_user_server_timestamp(member.id, current_ts)
 
             people_in_vc: int = len([m for m in bc.members if not m.bot])
-            if people_in_vc < 2 or before.mute or before.deaf:
+            if people_in_vc < 2 or after.mute or after.deaf:
                 return await self.update_user_server_timestamp(member.id, None)
 
             increment: int = current_ts - user_info[0][3]
@@ -132,7 +132,7 @@ class UserVoiceSystem(commands.Cog):
                 return await self.update_user_server_timestamp(member.id, current_ts)
 
             people_in_vc: int = len([m for m in bc.members if not m.bot])
-            if people_in_vc < 2 or after.mute or before.deaf:
+            if people_in_vc < 2 or after.mute or after.deaf:
                 return await self.update_user_server_timestamp(member.id, None)
 
             increment: int = current_ts - user_info[0][3]
