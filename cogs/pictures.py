@@ -53,6 +53,38 @@ class Pictures(commands.Cog):
             await ctx.send(embed=embed)
 
 
+    @commands.command(aliases=['httpcat', 'hc', 'http'])
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def http_cat(self, ctx, code: int = None) -> None:
+        """ Gets an HTTP cat image. 
+        :param code: The HTTP code to search the image. """
+
+        if not code:
+            return await ctx.send("**Please, inform an HTTP code!**")
+
+        code_list = [
+            100, 101, 102, 200, 201, 202, 204, 206, 207, 300, 301, 302, 303, 304, 305, 307,
+            400, 401, 402, 403, 404, 405, 406, 408, 409, 410, 411, 412, 413, 414, 415, 416,
+            417, 418, 420, 421, 422, 423, 424, 425, 426, 429, 431, 444, 450, 451, 499, 500,
+            501, 502, 503, 504, 506, 507, 508, 509, 510, 511, 599]
+
+        if not code in code_list:
+            return await ctx.send(
+                content="**Invalid code, please type one of these!**", 
+                embed=discord.Embed(description=f"```py\n{', '.join(map(lambda e: str(e), code_list))}```"))
+
+        req = f'https://http.cat/{code}'
+
+        try:
+            embed = discord.Embed(
+            title="__HTTP Cat__",
+            url=req)
+            embed.set_image(url=req)
+            await ctx.send(embed=embed)
+        except Exception as e:
+            print(e)
+            return await ctx.send("**Something went wrong with it!**")
+
     
 def setup(client: commands.Bot) -> None:
     """ Cog's setup function. """
