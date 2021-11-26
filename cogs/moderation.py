@@ -1480,6 +1480,7 @@ class Moderation(*moderation_cogs):
 				color=member.color,
 				timestamp=ctx.message.created_at)
 			embed.set_thumbnail(url=member.display_avatar)
+			embed.set_author(name=member.id)
 			embed.set_footer(text=f"Requested by: {ctx.author}", icon_url=ctx.author.display_avatar)
 
 			# Loops through each infraction and adds a field to the embedded message
