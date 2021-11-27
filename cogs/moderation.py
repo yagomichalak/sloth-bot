@@ -1,18 +1,19 @@
 from logging import exception
 import discord
 from discord import user
-from discord.ext import commands, tasks
+from discord.ext import commands, tasks, menus
 from discord.app.commands import user_command
 import asyncio
 from mysqldb import *
 from datetime import datetime
-from typing import List, Union, Optional
+from typing import List, Union, Optional, Dict
 import os
 
 from extra.useful_variables import banned_links
 from extra.prompt.menu import Confirm
 from extra.view import ReportSupportView
 from extra import utils
+from extra.menu import MemberSnipeLooping, SnipeLooping
 
 from extra.moderation.firewall import ModerationFirewallTable, BypassFirewallTable
 from extra.moderation.mutedmember import ModerationMutedMemberTable
@@ -213,22 +214,67 @@ class Moderation(*moderation_cogs):
 	async def on_message_delete(self, message):
 		if message.author.bot:
 			return
-		last_deleted_message.clear()
-		last_deleted_message.append(message)
+
+		if len(last_deleted_message) >= 1000:
+			last_deleted_message[1:]
+		last_deleted_message.append({message.author.id : {"content" : message.content, "time" : (message.created_at).timestamp(), 'channel' : message.channel }})
+
+	async def search_user_deleted_messages(self, member) -> List[Dict]:
+		deleteds_messages = []
+		for message in last_deleted_message:
+			member_id = next(iter(message))
+			if member_id == member.id:
+				message = message[member_id]
+				deleteds_messages.append({"content" : message["content"], "time" : message["time"], "channel" : message["channel"]})
+
+		deleteds_messages = (sorted(deleteds_messages, key = lambda d: d['time']))
+		return deleteds_messages
+
 
 	@commands.command()
 	@utils.is_allowed(allowed_roles, throw_exc=True)
-	async def snipe(self, ctx):
-		""" (MOD) Snipes the last deleted message. """
+	async def snipe(self, ctx, *, message : str = None):
+		"""(MOD) Snipes deleted messages.
+		:param member: The @ or the ID of one or more users to snipe. (Optional) or
+		:param quantity: The quantity of messages to snipe (Optional) """
 
-		message = last_deleted_message
-		if message:
-			message = message[0]
-			embed = discord.Embed(title="Sniped", description=f"**>>** {message.content}", color=message.author.color, timestamp=message.created_at)
-			embed.set_author(name=message.author, url=message.author.display_avatar, icon_url=message.author.display_avatar)
-			await ctx.send(embed=embed)
+		member, message_qtd = await utils.greedy_member_reason(ctx, message)
+
+		if not last_deleted_message:
+			await ctx.message.delete()
+			return await ctx.send("**I couldn't snipe any message**")
+
+		if not member:
+			if not message_qtd:
+				# Gets the last deleted message
+				messages: List[Dict] = [last_deleted_message[-1]]
+
+			else:
+				# Gets the requested amount of deleted messages
+				if int(message_qtd) <= 0:
+					return await ctx.send("**I couldn't snipe any message**")
+
+				if int(message_qtd) > len(last_deleted_message):
+					message_qtd: int = len(last_deleted_message)
+
+				messages: List[Dict] = sorted(last_deleted_message, key = lambda d:  d[next(iter(d))]['time'])
+				messages: List[Dict] = messages[- int(message_qtd) - 1 : ]
+
+			menu = menus.MenuPages(SnipeLooping(messages))
+			await ctx.message.delete()
+			await menu.start(ctx)
+
 		else:
-			await ctx.send("**I couldn't snipe any messages!**")
+			# Gets all deleted messsages from the user
+			messages: List[Dict] = await self.search_user_deleted_messages(member[0])
+
+			if not messages:
+				return await ctx.send("**I couldn't snipe any messages from this member**")
+
+			menu = menus.MenuPages(MemberSnipeLooping(messages, member[0]))
+			await ctx.message.delete()
+			await menu.start(ctx)
+
 
 	# Purge command
 	@commands.command()
