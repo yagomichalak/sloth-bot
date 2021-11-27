@@ -275,6 +275,14 @@ async def audio(client: commands.Bot, voice_channel: discord.VoiceChannel, membe
         print(e)
         return
 
+
+def split_quotes(value):
+    lex = shlex.shlex(value)
+    lex.quotes = '"'
+    lex.whitespace_split = True
+    lex.commenters = ''
+    return list(lex)
+
 async def greedy_member_reason(ctx, message : str = None):
     """A converter that greedily member or users until it can't.
     The member search ends on the first member not found or when the string does not match a member identifier.
@@ -286,7 +294,8 @@ async def greedy_member_reason(ctx, message : str = None):
     if not message:
         return users, reason
 
-    message = shlex.split(message, posix=False)       
+    message = split_quotes(message)
+
     for pos, word in enumerate(message):
         if '"' in word:
             word = word[1:-1]
