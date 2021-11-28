@@ -258,8 +258,7 @@ class Moderation(*moderation_cogs):
 					message_qtd: int = len(last_deleted_message)
 
 				messages: List[Dict] = sorted(last_deleted_message, key = lambda d:  d[next(iter(d))]['time'])
-				messages: List[Dict] = messages[- int(message_qtd) - 1 : ]
-
+				messages: List[Dict] = messages[- int(message_qtd): ]
 			menu = menus.MenuPages(SnipeLooping(messages))
 			await ctx.message.delete()
 			await menu.start(ctx)
