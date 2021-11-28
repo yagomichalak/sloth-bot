@@ -526,7 +526,7 @@ class Tools(*tool_cogs):
 			await ctx.send(f"**`{len(all_members)}` members are in a vc atm!**")
 
 	@commands.command()
-	@commands.has_any_role(*allowed_roles)
+	@utils.is_allowed([*allowed_roles, analyst_debugger_role_id], throw_exc=True)
 	async def vc(self, ctx) -> None:
 		""" Tells where the given member is at (voice channel).
 		:param member: The member you are looking for. """
