@@ -343,7 +343,7 @@ class Misc(commands.Cog):
     async def _gabriel_slash(self, ctx) -> None:
         """ Tells you something about Gabriel. """
         
-        await ctx.respond(f"**<@366628959657394186> ? Il est frais et il est chaud, et quand il rap c'est que du feu !**")
+        await ctx.respond(f"**<@366628959657394186>? Il est frais et il est chaud, et quand il rap c'est que du feu**")
 
     @commands.command(name="gabriel", aliases=["gab", "gabi", "gbrl", "gaburierudesu", "camisa9", "atacante", "rapper"])
     async def _gabriel_command(self, ctx) -> None:
