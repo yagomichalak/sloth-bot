@@ -113,10 +113,10 @@ class Games(*minigames_cogs):
     @commands.cooldown(1, 60, commands.BucketType.user)
     async def flag_quiz(self, ctx) -> None:
         """ Plays Country Flags Quiz"""
-        
+
         json_flags = json.load(open("extra/random/json/flag_game.json"))
-        
-        # Select twenty unique flags
+
+        # Selects twenty unique flags
         flags = [json_flags[number] for number in sample(range(0, len(json_flags)), 20)]
 
         await self.generate_flag_game(ctx=ctx, points=0, round=0, flags=flags)
@@ -144,7 +144,7 @@ class Games(*minigames_cogs):
             description= f"\u200b\n**🪙 Points: {points}**",
             colour=1,
         )
-        embed.set_image(url=flags[round]['link'] + ".png")
+        embed.set_image(url=f"https://flagcdn.com/224x168/{flags[round]['code']}.png")
         embed.set_author(name=ctx.author, icon_url=ctx.author.display_avatar)
         embed.set_footer(text=f"Round {round + 1} of 20")
 
