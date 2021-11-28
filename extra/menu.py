@@ -378,3 +378,61 @@ class SlothClassPagination(menus.ListPageSource):
             embed.set_footer(text=f"({i+1}-{i+6} of {len(self.entries)})")
 
         return embed
+
+class MemberSnipeLooping(menus.ListPageSource):
+    def __init__(self, messages, member : discord.Member):
+        super().__init__(messages, per_page=5)
+
+        self.member = member
+
+    async def format_page(self, menu, entries) -> discord.Embed:
+        """ Formats the inventory for each page. """
+
+        offset = menu.current_page * self.per_page
+
+        embed = discord.Embed(title = "Sniped\n", description = '')
+        embed.set_author(name=self.member, url=self.member.display_avatar, icon_url=self.member.display_avatar)
+
+        for i, message in enumerate(entries, start=offset):
+            if len(message["content"]) > 850:
+                content = message["content"][:850] + '...'
+            else:
+                content = message["content"]
+
+            embed.description = embed.description + f"""
+            **>>** {content}
+            **At <t:{int(message['time'])}:T> in <#{message['channel'].id}>**\n\n"""
+
+            embed.set_footer(text=f"({i+1}-{i+1+6} of {len(self.entries)})")
+
+        return embed
+
+
+class SnipeLooping(menus.ListPageSource):
+    def __init__(self, messages):
+        super().__init__(messages, per_page=5)
+
+    async def format_page(self, menu, entries) -> discord.Embed:
+        """ Formats the inventory for each page. """
+
+        offset = menu.current_page * self.per_page
+
+        embed = discord.Embed(title="Sniped", description = '')
+
+        for i, message in enumerate(entries, start=offset):
+
+            member_id = next(iter(message.keys()))
+            message = message[member_id]
+
+            if len (message["content"]) > 850:
+                content = message["content"][:850] + '...'
+            else:
+                content = message["content"]
+
+            embed.description = embed.description + f"""
+            <@{member_id}>
+            **>>** {content}
+            **At <t:{int(message['time'])}:T> in <#{message['channel'].id}>**\n\n"""
+            embed.set_footer(text=f"({i+1}-{i+1+6} of {len(self.entries)})")
+
+        return embed
