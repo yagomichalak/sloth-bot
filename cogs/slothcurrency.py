@@ -843,10 +843,10 @@ class SlothCurrency(*currency_cogs):
         embed.add_field(
             name="__Checking__:",
             value= f"**Member:** {member.mention}\n" \
-            f"<server_muted:914943052156665919> `{smute}` | <muted:914943036931326054> `{mute}`\n" \
-            f"<server_deafened:914943073119772683> `{sdeaf}` | <deafened:914943091599880203> `{deaf}`\n" \
+            f"<:server_muted:914943052156665919> `{smute}` | <:muted:914943036931326054> `{mute}`\n" \
+            f"<:server_deafened:914943073119772683> `{sdeaf}` | <:deafened:914943091599880203> `{deaf}`\n" \
             f"👤 `{True if not vc or vc and len([m for m in vc.members if not m.bot]) <= 1 else False}\n` ({vc.mention if vc else '`No VC`'})\n" \
-            f"<vc:914947524178116649> `{user_activity}` ({'<t:{user_activity}:R>' if user_activity else '`None`'})" \
+            f"<:vc:914947524178116649> `{user_activity}` ({'<t:{user_activity}:R>' if user_activity else '`None`'})" \
         , inline=False)
 
         embed.set_thumbnail(url=member.display_avatar)
