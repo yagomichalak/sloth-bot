@@ -1,6 +1,7 @@
 import discord
 from discord.app.commands import slash_command, Option
 from discord.ext import commands, menus
+from discord.member import VoiceState
 from discord.utils import escape_mentions
 from mysqldb import *
 from external_cons import the_drive
@@ -807,6 +808,52 @@ class SlothCurrency(*currency_cogs):
             await self.update_user_money(member.id, money)
             await self.update_user_money(ctx.author.id, -money)
             await ctx.send(f"**{ctx.author.mention} transferred {money}łł to {member.mention}!**")
+
+
+    @commands.command(aliases=["farming_status", "farmingstatus", "farm", "farmstatus", "farmstats", "farm_status", "farm_stats"])
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def farming(self, ctx, member: discord.Member = None) -> None:
+        """ Checks the farming status of a specific member.
+        :param member: The member of the checking. """
+
+        author: discord.Member = ctx.author
+        if not member:
+            return await ctx.send(f"**Please, inform a member for the farm checking, {author.mention}!**")
+
+        embed = discord.Embed(
+            title="__Farm Checking__",
+            color=author.color,
+            timestamp=ctx.message.created_at
+        )
+        embed.set_footer(text=f"Requested by: {author}", icon_url=author.display_avatar)
+
+        user_activity = await self.get_user_activity_info(member.id)
+        user_activity = user_activity[0][3] if user_activity else None
+
+        member_voice: VoiceState = member.voice
+        vc: discord.VoiceChannel = member_voice.channel if member_voice else None
+        smute, mute = member_voice.self_mute if member_voice else False, member_voice.mute if member_voice else False
+        sdeaf, deaf = member_voice.self_deaf if member_voice else False, member_voice.deaf if member_voice else False
+
+        embed.description = """
+        👤 - Alone if in VC
+        <vc:914947524178116649> - Joined VC Timestamp
+        """
+
+        embed.add_field(
+            name="__Checking__:",
+            value= f"**Member:** {member.mention}\n" \
+            f"<server_muted:914943052156665919> `{smute}` | <muted:914943036931326054> `{mute}`\n" \
+            f"<server_deafened:914943073119772683> `{sdeaf}` | <deafened:914943091599880203> `{deaf}`\n" \
+            f"👤 `{True if not vc or vc and len([m for m in vc.members if not m.bot]) <= 1 else False}\n` ({vc.mention if vc else '`No VC`'})\n" \
+            f"<vc:914947524178116649> `{user_activity}` ({'<t:{user_activity}:R>' if user_activity else '`None`'})" \
+        , inline=False)
+
+        embed.set_thumbnail(url=member.display_avatar)
+
+        await ctx.send(embed=embed)
+
+
 
 
 
