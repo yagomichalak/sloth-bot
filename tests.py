@@ -90,7 +90,7 @@
 
 # view.add_item(MyButton())
 # embed.set_thumbnail(url="https://pbs.twimg.com/media/EmSIbDzXYAAb4R7.png")
-# await ctx.send(content="\u200b", embed=embed, view=view)
+# await ctx.send(embed=embed, view=view)
 
 """
 UPDATE UserCurrency AS OG,
