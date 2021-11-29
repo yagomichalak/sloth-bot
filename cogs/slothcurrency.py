@@ -832,8 +832,8 @@ class SlothCurrency(*currency_cogs):
 
         member_voice: VoiceState = member.voice
         vc: discord.VoiceChannel = member_voice.channel if member_voice else None
-        smute, mute = member_voice.self_mute if member_voice else False, member_voice.mute if member_voice else False
-        sdeaf, deaf = member_voice.self_deaf if member_voice else False, member_voice.deaf if member_voice else False
+        smute, mute = member_voice.mute if member_voice else False, member_voice.self_mute if member_voice else False
+        sdeaf, deaf = member_voice.deaf if member_voice else False, member_voice.self_deaf if member_voice else False
 
         embed.description = """
         👤 - Alone if in VC
