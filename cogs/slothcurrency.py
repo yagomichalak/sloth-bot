@@ -818,7 +818,7 @@ class SlothCurrency(*currency_cogs):
 
         author: discord.Member = ctx.author
         if not member:
-            return await ctx.send(f"**Please, inform a member for the farm checking, {author.mention}!**")
+            member = author
 
         embed = discord.Embed(
             title="__Farm Checking__",
