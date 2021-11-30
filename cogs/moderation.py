@@ -1757,6 +1757,50 @@ class Moderation(*moderation_cogs):
 			else:
 
 				await ctx.send(f"**The user {member} is not a staff member**", delete_after=3)
+
+	@commands.command(aliases=["md_nickname", "mnick", "m_nick"])
+	@utils.is_allowed(allowed_roles, throw_exc=True)
+	async def moderate_nickname(self, ctx, member: discord.Member = None) -> None:
+		"""(MOD) Warns one or more members.
+		:param member: The @ or the ID of one or more users to warn.
+		:param reason: The reason for warning one or all users. (Optional)"""
+
+		await ctx.message.delete()
+		author: discord.Member = ctx.author
+
+		if not member:
+			return await ctx.send(f"**Please, inform a member, {author.mention}!**")
+
+		if not member.nick:
+			return await ctx.send(f"**The member doesn't even have a nickname, {author.mention}!**")
+
+		name, nick = member.display_name, member.nick
+		reason: str = f"Improper Nickname: {nick}"
+
+
+		try:
+			await member.edit(nick="Moderated Nickname")
+		except Exception as e:
+			print('Error at Moderate Nickname: ', e)
+			return await ctx.send(f"**For some reason I couldn't moderate this person's nickname, {author.mention}!**")
+
+		# General embed
+		general_embed = discord.Embed(description=f'**Reason:** {reason}', color=discord.Color.blue())
+		general_embed.set_author(name=f'{member} got their nickname moderated.', icon_url=member.display_avatar)
+		await ctx.send(embed=general_embed)
+		# Moderation log embed
+		moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
+		embed = discord.Embed(title='__**Moderated Nickname:**__', color=discord.Color.blue(), timestamp=ctx.message.created_at)
+		embed.add_field(name='User info:', value=f'```Name: {name}\nId: {member.id}```', inline=False)
+		embed.add_field(name='Reason:', value=f'```{reason}```')
+		embed.set_author(name=name)
+		embed.set_thumbnail(url=member.display_avatar)
+		embed.set_footer(text=f"Nickname-moderated by {author}", icon_url=author.display_avatar)
+		await moderation_log.send(embed=embed)
+		try:
+			await member.send(embed=general_embed)
+		except:
+			pass
 		
 def setup(client):
 	client.add_cog(Moderation(client))
