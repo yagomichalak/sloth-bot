@@ -20,6 +20,7 @@ from extra.moderation.mutedmember import ModerationMutedMemberTable
 from extra.moderation.userinfractions import ModerationUserInfractionsTable
 from extra.moderation.watchlist import ModerationWatchlistTable
 from extra.moderation.fakeaccounts import ModerationFakeAccountsTable
+from extra.moderation.moderatednicknames import ModeratedNicknamesTable
 
 # IDs
 mod_log_id = int(os.getenv('MOD_LOG_CHANNEL_ID'))
@@ -39,7 +40,8 @@ guild_ids: List[int] = [server_id]
 
 moderation_cogs: List[commands.Cog] = [
 	ModerationFirewallTable, BypassFirewallTable, ModerationMutedMemberTable, 
-	ModerationUserInfractionsTable, ModerationWatchlistTable, ModerationFakeAccountsTable
+	ModerationUserInfractionsTable, ModerationWatchlistTable, ModerationFakeAccountsTable,
+	ModeratedNicknamesTable
 ]
 
 class Moderation(*moderation_cogs):
