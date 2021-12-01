@@ -1805,7 +1805,7 @@ class Moderation(*moderation_cogs):
 		except:
 			pass
 
-	@commands.command(aliases=[])
+	@commands.command(aliases=["umd_nickname", "umnick", "um_nick"])
 	@utils.is_allowed(allowed_roles, throw_exc=True)
 	async def unmoderate_nickname(self, ctx, member: discord.Member = None) -> None:
 		""" Unmoderates someone's nickname.
@@ -1842,6 +1842,30 @@ class Moderation(*moderation_cogs):
 			await member.send(embed=general_embed)
 		except:
 			pass
+
+	@commands.command(aliases=["smn", "smnick", "show_mn", "showmn"])
+	@utils.is_allowed(allowed_roles, throw_exc=True)
+	async def show_moderated_nickname(self, ctx, member: discord.Member = None) -> None:
+		""" Shows the user's previous nickname that got moderated.
+		:param member: The member to show. """
+
+		author: discord.Member = ctx.author
+		if not member:
+			return await ctx.send(f"**Please, inform a member to show, {author.mention}!**")
+
+		if not (mn_user := await self.get_moderated_nickname(member.id)):
+			return await ctx.send(f"**This user's nickname hasn't even been moderated, {author.mention}!**")
+
+		embed: discord.Embed = discord.Embed(
+			title="__Showing Moderated Nickname__",
+			description=f"**User:** {member.mention} ({member.id})\n**Moderated Nickname:** {mn_user[1]}",
+			color=member.color,
+			timestamp=ctx.message.created_at
+		)
+		embed.set_thumbnail(url=member.display_avatar)
+		embed.set_footer(text=f"Requested by {author}", icon_url=author.display_avatar)
+
+		await ctx.send(embed=embed)
 		
 def setup(client):
 	client.add_cog(Moderation(client))

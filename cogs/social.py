@@ -13,6 +13,7 @@ from external_cons import the_reddit
 
 from extra.moderation.userinfractions import ModerationUserInfractionsTable
 from extra.moderation.fakeaccounts import ModerationFakeAccountsTable
+from extra.moderation.moderatednicknames import ModeratedNicknamesTable
 from extra.slothclasses.player import Player
 
 mod_role_id = int(os.getenv('MOD_ROLE_ID'))
@@ -272,6 +273,7 @@ class Social(commands.Cog):
                 view.children.remove(view.children[4])
                 view.children.remove(view.infractions_button)
                 view.children.remove(view.fake_accounts_button)
+                view.children.remove(view.moderated_nickname_button)
             else:
                 view.children.remove(view.info_button)
                 view.children.remove(view.profile_button)
@@ -281,14 +283,17 @@ class Social(commands.Cog):
 
                 if not await ModerationFakeAccountsTable.get_fake_accounts(ctx, member.id):
                     view.children[1].disabled = True
+
+                if not await ModeratedNicknamesTable.get_moderated_nickname(ctx, member.id):
+                    view.children[2].disabled = True
                 
                 watchlist = await self.client.get_cog('Moderation').get_user_watchlist(member.id)
                 
                 if watchlist:
                     message_url = f"https://discord.com/channels/{ctx.guild.id}/{watchlist_channel_id}/{watchlist[1]}"
-                    view.children[2].url = message_url
+                    view.children[3].url = message_url
                 else:
-                    view.children[2].disabled = True
+                    view.children[3].disabled = True
 
             await ctx.send(embed=embed, view=view)
 
