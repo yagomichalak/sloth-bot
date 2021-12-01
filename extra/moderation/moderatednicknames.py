@@ -26,7 +26,7 @@ class ModeratedNicknamesTable(commands.Cog):
             user_id BIGINT NOT NULL,
             nickname VARCHAR(100) NOT NULL,
             PRIMARY KEY (user_id)
-            ) CHARSET utf8mb4 COLLATE utf8mb_unicode_ci
+            ) CHARSET utf8mb4 COLLATE utf8mb4_unicode_ci
         """)
         await db.commit()
         await mycursor.close()
