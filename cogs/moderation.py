@@ -1760,12 +1760,11 @@ class Moderation(*moderation_cogs):
 
 				await ctx.send(f"**The user {member} is not a staff member**", delete_after=3)
 
-	@commands.command(aliases=["md_nickname", "mnick", "m_nick"])
+	@commands.command(aliases=["mn", "md_nickname", "mnick", "m_nick"])
 	@utils.is_allowed(allowed_roles, throw_exc=True)
 	async def moderate_nickname(self, ctx, member: discord.Member = None) -> None:
-		"""(MOD) Warns one or more members.
-		:param member: The @ or the ID of one or more users to warn.
-		:param reason: The reason for warning one or all users. (Optional)"""
+		""" Moderates someone's nickname.
+		:param member: The member for whom to moderate the nickname. """
 
 		await ctx.message.delete()
 		author: discord.Member = ctx.author
@@ -1805,7 +1804,7 @@ class Moderation(*moderation_cogs):
 		except:
 			pass
 
-	@commands.command(aliases=["umd_nickname", "umnick", "um_nick"])
+	@commands.command(aliases=["umn", "umd_nickname", "umnick", "um_nick"])
 	@utils.is_allowed(allowed_roles, throw_exc=True)
 	async def unmoderate_nickname(self, ctx, member: discord.Member = None) -> None:
 		""" Unmoderates someone's nickname.

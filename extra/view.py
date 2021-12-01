@@ -176,7 +176,7 @@ class QuickButtons(discord.ui.View):
         watchlist_button = discord.ui.Button(
             label="Watchlist", style=discord.ButtonStyle.url, emoji="⚠️", url=f"https://discord.com/channels/{ctx.guild.id}/{ctx.channel.id}"
         )
-        self.children.append(watchlist_button)
+        self.children.insert(4, watchlist_button)
         
 
     @discord.ui.button(label="Infractions", style=4, emoji="❗", custom_id=f"user_infractions")

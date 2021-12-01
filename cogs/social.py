@@ -285,15 +285,15 @@ class Social(commands.Cog):
                     view.children[1].disabled = True
 
                 if not await ModeratedNicknamesTable.get_moderated_nickname(ctx, member.id):
-                    view.children[2].disabled = True
+                    view.children.remove(view.moderated_nickname_button)
                 
                 watchlist = await self.client.get_cog('Moderation').get_user_watchlist(member.id)
                 
                 if watchlist:
                     message_url = f"https://discord.com/channels/{ctx.guild.id}/{watchlist_channel_id}/{watchlist[1]}"
-                    view.children[3].url = message_url
+                    view.children[2].url = message_url
                 else:
-                    view.children[3].disabled = True
+                    view.children[2].disabled = True
 
             await ctx.send(embed=embed, view=view)
 
