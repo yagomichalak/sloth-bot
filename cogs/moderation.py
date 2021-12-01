@@ -1773,18 +1773,19 @@ class Moderation(*moderation_cogs):
 		if not member:
 			return await ctx.send(f"**Please, inform a member, {author.mention}!**")
 
-		if not member.nick:
-			return await ctx.send(f"**The member doesn't even have a nickname, {author.mention}!**")
+		if await self.get_moderated_nickname(member.id):
+			return await ctx.send(f"**This user's nickname has already been moderated, {author.mention}!**")
 
-		name, nick = member.display_name, member.nick
+		name = member.name
+		nick = member.display_name
 		reason: str = f"Improper Nickname: {nick}"
 
-
 		try:
+			await self.insert_moderated_nickname(member.id, nick)
 			await member.edit(nick="Moderated Nickname")
 		except Exception as e:
 			print('Error at Moderate Nickname: ', e)
-			return await ctx.send(f"**For some reason I couldn't moderate this person's nickname, {author.mention}!**")
+			return await ctx.send(f"**For some reason I couldn't moderate this user's nickname, {author.mention}!**")
 
 		# General embed
 		general_embed = discord.Embed(description=f'**Reason:** {reason}', color=discord.Color.blue())
@@ -1796,6 +1797,44 @@ class Moderation(*moderation_cogs):
 		embed.add_field(name='User info:', value=f'```Name: {name}\nId: {member.id}```', inline=False)
 		embed.add_field(name='Reason:', value=f'```{reason}```')
 		embed.set_author(name=name)
+		embed.set_thumbnail(url=member.display_avatar)
+		embed.set_footer(text=f"Nickname-moderated by {author}", icon_url=author.display_avatar)
+		await moderation_log.send(embed=embed)
+		try:
+			await member.send(embed=general_embed)
+		except:
+			pass
+
+	@commands.command(aliases=[])
+	@utils.is_allowed(allowed_roles, throw_exc=True)
+	async def unmoderate_nickname(self, ctx, member: discord.Member = None) -> None:
+		""" Unmoderates someone's nickname.
+		:param member: The member for whom to unmoderate the nickname. """
+
+		author: discord.Member = ctx.author
+
+		if not member:
+			return await ctx.send(f"**Please, inform a member, {author.mention}!**")
+
+		if not await self.get_moderated_nickname(member.id):
+			return await ctx.send(f"**This user's nickname hasn't been moderated yet, {author.mention}!**")
+
+		try:
+			await self.delete_moderated_nickname(member.id)
+			await member.edit(nick=None)
+		except Exception as e:
+			print("Error at Unmoderate Nickname: ", e)
+			return await ctx.send(f"**For some reason I couldn't unmoderate this user's nickname, {author.mention}!**")
+		
+		# General embed
+		general_embed = discord.Embed(color=discord.Color.dark_blue())
+		general_embed.set_author(name=f'{member} got their nickname unmoderated.', icon_url=member.display_avatar)
+		await ctx.send(embed=general_embed)
+		# Moderation log embed
+		moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
+		embed = discord.Embed(title='__**Unmoderated Nickname:**__', color=discord.Color.dark_blue(), timestamp=ctx.message.created_at)
+		embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nId: {member.id}```', inline=False)
+		embed.set_author(name=member.display_name)
 		embed.set_thumbnail(url=member.display_avatar)
 		embed.set_footer(text=f"Nickname-moderated by {author}", icon_url=author.display_avatar)
 		await moderation_log.send(embed=embed)
