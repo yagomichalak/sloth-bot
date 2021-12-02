@@ -854,7 +854,7 @@ class SlothCurrency(*currency_cogs):
             pass
 
         vc_members: List[int] = len([m for m in vc.members if not m.bot if m.id not in alts]) if vc else 0
-        is_farming = True if vc and not deaf and not smute and not sdeaf and vc_members <= 1 else False
+        is_farming = True if vc and not deaf and not smute and not sdeaf and vc_members > 1 else False
 
         embed.add_field(
             name="__Checking__:",
