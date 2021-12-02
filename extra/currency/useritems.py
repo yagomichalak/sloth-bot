@@ -223,3 +223,21 @@ class UserItemsTable(commands.Cog):
         user_items = await mycursor.fetchall()
         await mycursor.close()
         return user_items
+
+    async def get_top_ten_item_counter_users(self) -> List[List[int]]:
+        """ Gets the item counter of the top ten users with most items. """
+
+        mycursor, _ = await the_database()
+        await mycursor.execute("SELECT user_id, COUNT(*) FROM UserItems GROUP BY user_id ORDER BY COUNT(*) DESC LIMIT 10")
+        item_counters = await mycursor.fetchall()
+        await mycursor.close()
+        return item_counters
+
+    async def get_item_counter_users(self) -> List[List[int]]:
+        """ Gets the item counter of the all users with most items. """
+
+        mycursor, _ = await the_database()
+        await mycursor.execute("SELECT user_id, COUNT(*) FROM UserItems GROUP BY user_id ORDER BY COUNT(*) DESC")
+        item_counters = await mycursor.fetchall()
+        await mycursor.close()
+        return item_counters
