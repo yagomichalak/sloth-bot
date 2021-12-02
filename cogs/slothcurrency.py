@@ -836,16 +836,32 @@ class SlothCurrency(*currency_cogs):
         sdeaf, deaf = member_voice.deaf if member_voice else False, member_voice.self_deaf if member_voice else False
 
         embed.description = """
-        👤 - Alone if in VC
+        🍃 - Farming
         <:vc:914947524178116649> - Joined VC Timestamp
         """
+
+
+        alts = await self.client.get_cog('Moderation').get_fake_accounts(member.id)
+        alts_list: List[int] = []
+        for alt in alts:
+            alts_list.append(alt[0])
+            alts_list.append(alt[1])
+
+        alts = list(set(alts_list))
+        try:
+            alts.remove(member.id)
+        except ValueError:
+            pass
+
+        vc_members: List[int] = len([m for m in vc.members if not m.bot if m.id not in alts]) if vc else 0
+        is_farming = True if vc and not deaf and not smute and not sdeaf and vc_members <= 1 else False
 
         embed.add_field(
             name="__Checking__:",
             value= f"**Member:** {member.mention}\n" \
             f"<:server_muted:914943052156665919> `{smute}` | <:muted:914943036931326054> `{mute}`\n" \
             f"<:server_deafened:914943091599880203> `{sdeaf}` | <:deafened:914943073119772683> `{deaf}`\n" \
-            f"👤 `{True if not vc or vc and len([m for m in vc.members if not m.bot]) <= 1 else False}` ({vc.mention if vc else '`No VC`'})\n" \
+            f"🍃 `{is_farming}` ({vc.mention if vc else '`No VC`'})\n" \
             f"<:vc:914947524178116649> `{user_activity}` ({f'<t:{user_activity}:R>' if user_activity else '`None`'})" \
         , inline=False)
 
