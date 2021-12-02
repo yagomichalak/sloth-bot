@@ -78,9 +78,10 @@ class UserVoiceSystem(commands.Cog):
             except ValueError:
                 pass
 
-            people_in_vc: int = len([m for m in ac.members if not m.bot and m.id not in alts]) +1
+            people_in_vc: int = len([m for m in bc.members if not m.bot and m.id not in alts]) +1
+
             if people_in_vc < 2 or after.self_mute or after.mute or after.deaf or after.channel.id == afk_channel_id:
-                return await self.update_user_server_timestamp(member.id, None)
+                return await self.update_user_server_time(member.id, 0, current_ts)
 
             increment: int = current_ts - user_info[0][3]
             effects = await SlothClass.get_user_effects(member)
