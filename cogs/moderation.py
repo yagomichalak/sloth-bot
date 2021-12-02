@@ -101,8 +101,7 @@ class Moderation(*moderation_cogs):
 	async def look_for_expired_tempmutes(self) -> None:
 		""" Looks for expired tempmutes and unmutes the users. """
 
-		epoch = datetime.utcfromtimestamp(0)
-		current_ts = (datetime.utcnow() - epoch).total_seconds()
+		current_ts = await utils.get_timestamp()
 		tempmutes = await self.get_expired_tempmutes(current_ts)
 		guild = self.client.get_guild(server_id)
 
