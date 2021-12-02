@@ -135,6 +135,7 @@ class UserCurrencyTable(commands.Cog):
         await mycursor.close()
         return top_ten_members
 
+
     # ===== INSERT =====
 
     async def insert_user_currency(self, user_id: int, the_time: int) -> None:
