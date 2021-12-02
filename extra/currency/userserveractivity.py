@@ -55,6 +55,8 @@ class UserVoiceSystem(commands.Cog):
             return await self.insert_user_server_activity(member.id, 0, current_ts)
 
         SlothClass: commands.Cog = self.client.get_cog('SlothClass')
+        Moderation: commands.Cog = self.client.get_cog('Moderation')
+
 
         # Join
         if ac and not bc:
@@ -63,7 +65,16 @@ class UserVoiceSystem(commands.Cog):
 
         # Switch
         elif (ac and bc) and (bc.id != ac.id) and not after.self_mute and not after.mute and not after.deaf:
-            people_in_vc: int = len([m for m in bc.members if not m.bot]) +1
+            alts = await Moderation.get_fake_accounts(member.id)
+
+            alts_list: List[int] = []
+            for alt in alts:
+                alts_list.append(alt[0])
+                alts_list.append(alt[1])
+
+            alts = list(set(alts_list))
+
+            people_in_vc: int = len([m for m in bc.members if not m.bot and m.id not in alts]) +1
             if people_in_vc < 2 or after.self_mute or after.mute or after.deaf or after.channel.id == afk_channel_id:
                 return await self.update_user_server_timestamp(member.id, None)
 
@@ -80,7 +91,15 @@ class UserVoiceSystem(commands.Cog):
             if not after.self_mute and not after.self_deaf and not after.mute and not after.deaf and after.channel.id != afk_channel_id:
                 return await self.update_user_server_timestamp(member.id, current_ts)
 
-            people_in_vc: int = len([m for m in bc.members if not m.bot])
+            alts = await Moderation.get_fake_accounts(member.id)
+            alts_list: List[int] = []
+            for alt in alts:
+                alts_list.append(alt[0])
+                alts_list.append(alt[1])
+
+            alts = list(set(alts_list))
+
+            people_in_vc: int = len([m for m in bc.members if not m.bot and m.id not in alts])
             if people_in_vc < 2 or after.self_mute or after.self_deaf:
                 return await self.update_user_server_timestamp(member.id, None)
 
@@ -97,7 +116,15 @@ class UserVoiceSystem(commands.Cog):
             if not after.self_mute and not after.self_deaf and not after.mute and not after.deaf and after.channel.id != afk_channel_id:
                 return await self.update_user_server_timestamp(member.id, current_ts)
 
-            people_in_vc: int = len([m for m in bc.members if not m.bot])
+            alts = await Moderation.get_fake_accounts(member.id)
+            alts_list: List[int] = []
+            for alt in alts:
+                alts_list.append(alt[0])
+                alts_list.append(alt[1])
+
+            alts = list(set(alts_list))
+
+            people_in_vc: int = len([m for m in bc.members if not m.bot and m.id not in alts])
             if people_in_vc < 2 or after.self_mute or after.self_deaf:
                 return await self.update_user_server_timestamp(member.id, None)
 
@@ -114,7 +141,15 @@ class UserVoiceSystem(commands.Cog):
             if not after.self_mute and not after.self_deaf and not after.mute and not after.deaf and after.channel.id != afk_channel_id:
                 return await self.update_user_server_timestamp(member.id, current_ts)
 
-            people_in_vc: int = len([m for m in bc.members if not m.bot])
+            alts = await Moderation.get_fake_accounts(member.id)
+            alts_list: List[int] = []
+            for alt in alts:
+                alts_list.append(alt[0])
+                alts_list.append(alt[1])
+
+            alts = list(set(alts_list))
+
+            people_in_vc: int = len([m for m in bc.members if not m.bot and m.id not in alts])
             if people_in_vc < 2 or after.mute or after.deaf:
                 return await self.update_user_server_timestamp(member.id, None)
 
@@ -131,7 +166,15 @@ class UserVoiceSystem(commands.Cog):
             if not after.self_mute and not after.self_deaf and not after.mute and not after.deaf and after.channel.id != afk_channel_id:
                 return await self.update_user_server_timestamp(member.id, current_ts)
 
-            people_in_vc: int = len([m for m in bc.members if not m.bot])
+            alts = await Moderation.get_fake_accounts(member.id)
+            alts_list: List[int] = []
+            for alt in alts:
+                alts_list.append(alt[0])
+                alts_list.append(alt[1])
+
+            alts = list(set(alts_list))
+
+            people_in_vc: int = len([m for m in bc.members if not m.bot and m.id not in alts])
             if people_in_vc < 2 or after.mute or after.deaf:
                 return await self.update_user_server_timestamp(member.id, None)
 
@@ -144,7 +187,15 @@ class UserVoiceSystem(commands.Cog):
         
         # Leave
         elif bc and not ac:
-            people_in_vc: int = len([m for m in bc.members if not m.bot]) +1
+            alts = await Moderation.get_fake_accounts(member.id)
+            alts_list: List[int] = []
+            for alt in alts:
+                alts_list.append(alt[0])
+                alts_list.append(alt[1])
+
+            alts = list(set(alts_list))
+
+            people_in_vc: int = len([m for m in bc.members if not m.bot and m.id not in alts]) +1
             if people_in_vc < 2 or before.self_mute or before.mute or before.deaf or before.channel.id == afk_channel_id:
                 return await self.update_user_server_timestamp(member.id, None)
             
