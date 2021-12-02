@@ -73,8 +73,12 @@ class UserVoiceSystem(commands.Cog):
                 alts_list.append(alt[1])
 
             alts = list(set(alts_list))
+            try:
+                alts.remove(member.id)
+            except ValueError:
+                pass
 
-            people_in_vc: int = len([m for m in bc.members if not m.bot and m.id not in alts]) +1
+            people_in_vc: int = len([m for m in ac.members if not m.bot and m.id not in alts]) +1
             if people_in_vc < 2 or after.self_mute or after.mute or after.deaf or after.channel.id == afk_channel_id:
                 return await self.update_user_server_timestamp(member.id, None)
 
@@ -98,6 +102,10 @@ class UserVoiceSystem(commands.Cog):
                 alts_list.append(alt[1])
 
             alts = list(set(alts_list))
+            try:
+                alts.remove(member.id)
+            except ValueError:
+                pass
 
             people_in_vc: int = len([m for m in bc.members if not m.bot and m.id not in alts])
             if people_in_vc < 2 or after.self_mute or after.self_deaf:
@@ -123,6 +131,10 @@ class UserVoiceSystem(commands.Cog):
                 alts_list.append(alt[1])
 
             alts = list(set(alts_list))
+            try:
+                alts.remove(member.id)
+            except ValueError:
+                pass
 
             people_in_vc: int = len([m for m in bc.members if not m.bot and m.id not in alts])
             if people_in_vc < 2 or after.self_mute or after.self_deaf:
@@ -148,6 +160,10 @@ class UserVoiceSystem(commands.Cog):
                 alts_list.append(alt[1])
 
             alts = list(set(alts_list))
+            try:
+                alts.remove(member.id)
+            except ValueError:
+                pass
 
             people_in_vc: int = len([m for m in bc.members if not m.bot and m.id not in alts])
             if people_in_vc < 2 or after.mute or after.deaf:
@@ -173,6 +189,10 @@ class UserVoiceSystem(commands.Cog):
                 alts_list.append(alt[1])
 
             alts = list(set(alts_list))
+            try:
+                alts.remove(member.id)
+            except ValueError:
+                pass
 
             people_in_vc: int = len([m for m in bc.members if not m.bot and m.id not in alts])
             if people_in_vc < 2 or after.mute or after.deaf:
@@ -194,8 +214,12 @@ class UserVoiceSystem(commands.Cog):
                 alts_list.append(alt[1])
 
             alts = list(set(alts_list))
+            try:
+                alts.remove(member.id)
+            except ValueError:
+                pass
 
-            people_in_vc: int = len([m for m in bc.members if not m.bot and m.id not in alts]) +1
+            people_in_vc: int = len([m for m in bc.members if not m.bot and m.id not in alts])
             if people_in_vc < 2 or before.self_mute or before.mute or before.deaf or before.channel.id == afk_channel_id:
                 return await self.update_user_server_timestamp(member.id, None)
             
