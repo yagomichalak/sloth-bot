@@ -536,7 +536,7 @@ class Tools(*tool_cogs):
 		members = await utils.get_mentions(ctx.message)
 
 		if not members:
-			return await ctx.send(f"**Please, inform at least one member to check, {author.mention}!**")
+			members = [author]
 
 		members_in_vc: List[str] = []
 
