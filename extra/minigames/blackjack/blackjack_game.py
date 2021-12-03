@@ -185,7 +185,10 @@ class BlackJackGame:
 
     # When player have blackjack
     def blackjack_event_dealer(self):
-        self.title = f"Dealer blackjack - **{self.player_name}** lost {self.bet} leaves 🍃"
+        SlothCurrency = self.client.get_cog('SlothCurrency')
+        self.client.loop.create_task(SlothCurrency.update_user_money(self.player_id, int(self.bet * 0.5)))
+
+        self.title = f"Dealer blackjack - **{self.player_name}** lost {int(self.bet * 0.5)} leaves 🍃"
         self.status = 'finished'
         self.color = discord.Color.brand_red()
         self.dealer_final_show()
