@@ -155,6 +155,8 @@ INSERT INTO Sloth.LanguageRoom (category, english_name, room_name, room_quant, r
 
 /* 119 */("south-east asian", "Bahasa Batak", "Bahasa Batak", 2, 10, 60),
 
+/* 120 */("celtic", "Celtic", "Celtic", 2, 10, 60),
+
 /* ??? */("category", "english_name", "room_name", 2, 10, 60)
 
 ;
@@ -743,6 +745,9 @@ INSERT INTO Sloth.LanguageRoomPermissions (room_id, role_id, permission_name, pe
 (119, /*Fluent Indonesian*/ 562043546924744733, "speaker", true),
 (119, /*Studying Indonesian*/ 562043546924744733, "speaker", true),
 
+/* Celtic Channel */
+(120, /*Native Celtic*/ 490155744184762378, "speaker", true),
+(120, /*Studying Celtic*/ 650661949478273044, "speaker", true),
 
 /* Language Channel */
 (00, /*Native Language*/ 0000000000000000000, "speaker", true),
