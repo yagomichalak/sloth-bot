@@ -230,7 +230,7 @@ class BlackJackGame:
         self.client.loop.create_task(SlothCurrency.update_user_money(self.player_id, int(match_bal)))
 
         # Change title and end the game
-        self.title = f"Win - **{self.player_name}** won {match_bal} leaves 🍃"
+        self.title = f"Win - **{self.player_name}** won {int(match_bal - self.bet)} leaves 🍃"
         self.status = 'finished'
         self.color = discord.Color.green()
         self.dealer_final_show()
