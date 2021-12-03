@@ -18,7 +18,6 @@ class BlackJackGame:
         # Player's bet
         self.bet = bet
         self.guild_id = guild_id
-        self.doubled = False
 
         # Player info
         self.player = player
@@ -174,8 +173,7 @@ class BlackJackGame:
         SlothCurrency = self.client.get_cog('SlothCurrency')
         self.client.loop.create_task(SlothCurrency.update_user_money(self.player_id, -self.bet))
 
-        # self.bet *= 2
-        self.doubled = True
+        self.bet *= 2
         card = self.game_pack.pop()
         self.player_cards.append(card)
         self.player_total += card.points
@@ -187,6 +185,9 @@ class BlackJackGame:
 
     # When player have blackjack
     def blackjack_event_dealer(self):
+        SlothCurrency = self.client.get_cog('SlothCurrency')
+        self.client.loop.create_task(SlothCurrency.update_user_money(self.player_id, int(self.bet * 0.5)))
+
         self.title = f"Dealer blackjack - **{self.player_name}** lost {int(self.bet * 0.5)} leaves 🍃"
         self.status = 'finished'
         self.color = discord.Color.brand_red()
@@ -209,23 +210,8 @@ class BlackJackGame:
         # Increase player balance with bet * 2 if he win
 
         SlothCurrency = self.client.get_cog('SlothCurrency')
-
-        match_bal = self.bet
-        # se o player dobrou
-        if self.doubled:
-            # se ele ganhou com 21
-            if self.player_total == 21:
-                match_bal += self.bet * 2.5
-            else:
-                match_bal += self.bet * 2
-        else:
-            # ganhou normal com 21
-            if self.player_total == 21:
-                match_bal += self.bet * 1.5
-            else:
-                match_bal += self.bet
-
-        self.client.loop.create_task(SlothCurrency.update_user_money(self.player_id, int(match_bal)))
+        self.client.loop.create_task(SlothCurrency.update_user_money(self.player_id, int(self.bet * 2)))
+                                                                                                    
 
         # Change title and end the game
         self.title = f"Win - **{self.player_name}** won {self.bet} leaves 🍃"
@@ -237,7 +223,7 @@ class BlackJackGame:
     def surrender_event(self):
         # Change title and end the game
         
-        self.title = f"Surrender - **{self.player_name}** lost {int(self.bet * 0.40)} leaves 🍃"
+        self.title = f"Surrender - **{self.player_name}** lost {int(self.bet/2)} leaves 🍃"
         self.color = int("ffffff", 16)
         self.status = 'finished'
         self.dealer_final_show()
