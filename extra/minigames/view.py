@@ -425,7 +425,7 @@ class BlackJackActionView(discord.ui.View):
                 del cog.blackjack_games[guild_id][interaction.user.id]
                 await self.end_game(interaction)
 
-            await self.client.get_cog('SlothCurrency').update_user_money(self.player.id, int(current_game.bet/2))
+            await self.client.get_cog('SlothCurrency').update_user_money(self.player.id, int(current_game.bet * (1 - 0.40)))
             embed = current_game.embed()
             embed.color = int('ffffff', 16)
             await interaction.followup.edit_message(interaction.message.id, embed=embed)
