@@ -81,7 +81,7 @@ class SlothReputation(*currency_cogs):
         progress_bar = f"{xp}xp / {goal_xp}xp\n{':blue_square:' * boxes}{':white_large_square:' * (length_progress_bar - boxes)}"
         return progress_bar
 
-    @commands.command(name="info", aliases=['status', 'exchange', 'level', 'lvl', 'exp', 'xp', 'money', 'balance'])
+    @commands.command(name="info", aliases=['status', 'exchange', 'level', 'lvl', 'exp', 'xp'])
     @Player.poisoned()
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def _info_command(self, ctx, member: Optional[Union[discord.Member, discord.User]] = None) -> None:
