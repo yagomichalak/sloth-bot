@@ -694,7 +694,7 @@ class SlothCurrency(*currency_cogs):
             if messages_left >= 100:
                 times += 1
                 messages_left -= 100
-                exchanged_money += 3
+                exchanged_money += 4
                 await asyncio.sleep(0)
                 continue
             else:
@@ -712,7 +712,7 @@ class SlothCurrency(*currency_cogs):
             if time_left >= 1800:
                 times += 1
                 time_left -= 1800
-                exchanged_money += 3
+                exchanged_money += 4
                 await asyncio.sleep(0)
                 continue
             else:
