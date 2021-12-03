@@ -198,6 +198,8 @@ class BlackJackGame:
     def blackjack_event_player(self):
         # Increase player balance with bet * 2.5 if he hit blackjack
         SlothCurrency = self.client.get_cog('SlothCurrency')
+        print('p bj', int(self.bet * 2.5))
+        print('msg', int(self.bet * 1.5))
         self.client.loop.create_task(SlothCurrency.update_user_money(self.player_id, int(self.bet * 2.5)))
 
         # Change title and end the game
@@ -227,7 +229,10 @@ class BlackJackGame:
             else:
                 match_bal += self.bet
 
+        print(self.bet)
+        print(match_bal)
         self.client.loop.create_task(SlothCurrency.update_user_money(self.player_id, int(match_bal)))
+        print('aah', int(match_bal))
 
         # Change title and end the game
         self.title = f"Win - **{self.player_name}** won {int(match_bal - self.bet)} leaves 🍃"

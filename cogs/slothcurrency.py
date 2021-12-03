@@ -16,7 +16,7 @@ import glob
 from itertools import cycle
 
 from extra.menu import InventoryLoop
-from typing import List, Dict, Tuple, Union, Any
+from typing import List, Dict, Tuple, Union, Optional
 
 from extra.slothclasses.player import Player
 from extra.useful_variables import level_badges, flag_badges
@@ -867,6 +867,22 @@ class SlothCurrency(*currency_cogs):
         embed.set_thumbnail(url=member.display_avatar)
 
         await ctx.send(embed=embed)
+
+    @commands.command(aliases=['balance', 'bal'])
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def money(self, ctx, member: Optional[Union[discord.Member, discord.User]] = None) -> None:
+        """ Shows the user's money.
+        :param member: The member from whom to show the money. [Optional][Default = You] """
+
+        if not member:
+            member = ctx.author
+
+        user_currency = await self.get_user_currency(member.id)
+        if not user_currency:
+            return await ctx.send(f"**User doesn't have a Sloth Account, {ctx.author.mention}!**")
+
+        text: str = f"**`{member}'s` money: `{user_currency[0][1]}łł`**"
+        await ctx.send(text)
 
 
 
