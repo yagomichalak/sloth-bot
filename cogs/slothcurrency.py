@@ -840,7 +840,6 @@ class SlothCurrency(*currency_cogs):
         <:vc:914947524178116649> - Joined VC Timestamp
         """
 
-
         alts = await self.client.get_cog('Moderation').get_fake_accounts(member.id)
         alts_list: List[int] = []
         for alt in alts:

@@ -7,6 +7,7 @@ from extra.prompt.menu import Confirm
 from extra.view import ReportSupportView
 from typing import List, Dict, Optional
 import os
+from extra import utils
 
 case_cat_id = int(os.getenv('CASE_CAT_ID'))
 reportsupport_channel_id = int(os.getenv('REPORT_CHANNEL_ID'))
@@ -918,59 +919,67 @@ Entry requirements:
 
     @commands.command(aliases=['permit_case', 'allow_case', 'add_witness', 'witness', 'aw'])
     @commands.has_any_role(*allowed_roles)
-    async def allow_witness(self, ctx, member: discord.Member = None):
-        """ Allows a witness to join a case channel.
-        :param member: The member to allow. """
+    async def allow_witness(self, ctx):
+        """ Allows one or more witnesses to join a case channel.
+        :param members: The member(s) to allow. """
 
-        if not member:
-            return await ctx.send("**Inform a witness to allow!**")
+        members = await utils.get_mentions(ctx.message)
+
+        if not members:
+            return await ctx.send("**Inform at least one witness to allow!**")
 
         user_channel = await self.get_case_channel(ctx.channel.id)
-        if user_channel:
+        if not user_channel:
+            return await ctx.send(f"**This is not a case channel, {ctx.author.mention}!**")
 
-            confirm = await Confirm(f"**Are you sure you want to allow {member.mention} as a witness in this case channel, {ctx.author.mention}?**").prompt(ctx)
-            if not confirm:
-                return await ctx.send(f"**Not allowing them, then!**")
+        confirm = await Confirm(f"**Are you sure you want to allow all `{len(members)}` informed {'witnesses' if len(members) > 1 else 'witness'} in this case channel, {ctx.author.mention}?**").prompt(ctx)
+        if not confirm:
+            return await ctx.send(f"**Not allowing them, then!**")
 
-            channel = discord.utils.get(ctx.guild.channels, id=user_channel[0][1])
+        channel = discord.utils.get(ctx.guild.channels, id=user_channel[0][1])
+        allowed: int = 0
+        for member in members:
             try:
                 await channel.set_permissions(
                     member, read_messages=True, send_messages=True, connect=True, speak=True, view_channel=True)
             except Exception:
                 pass
+            else:
+                allowed += 1
 
-            return await ctx.send(f"**{member.mention} has been allowed here!**")
-
-        else:
-            await ctx.send(f"**This is not a case channel, {ctx.author.mention}!**")
+        return await ctx.send(f"**`{allowed}` {'witnesses have' if allowed > 1 else 'witness has'} been allowed here!**")
 
     @commands.command(aliases=['forbid_case', 'delete_witness', 'remve_witness', 'fw'])
     @commands.has_any_role(*allowed_roles)
-    async def forbid_witness(self, ctx, member: discord.Member = None):
-        """ Forbids a witness from a case channel.
-        :param member: The member to forbid. """
+    async def forbid_witness(self, ctx):
+        """ Forbids one or more witnesses from a case channel.
+        :param members: The member(s) to forbid. """
 
-        if not member:
+        members = await utils.get_mentions(ctx.message)
+        if not members:
             return await ctx.send("**Inform a witness to forbid!**")
 
         user_channel = await self.get_case_channel(ctx.channel.id)
-        if user_channel:
+        if not user_channel:
+            return await ctx.send(f"**This is not a case channel, {ctx.author.mention}!**")
 
-            confirm = await Confirm(f"**Are you sure you want to forbid {member.mention} from being a witness in this case channel, {ctx.author.mention}?**").prompt(ctx)
-            if not confirm:
-                return await ctx.send(f"**Not forbidding them, then!**")
+        confirm = await Confirm(f"**Are you sure you want to forbid all `{len(members)}` informed {'witnesses' if len(members) > 1 else 'witness'} from this case channel, {ctx.author.mention}?**").prompt(ctx)
+        if not confirm:
+            return await ctx.send(f"**Not forbidding them, then!**")
 
-            channel = discord.utils.get(ctx.guild.channels, id=user_channel[0][1])
+        channel = discord.utils.get(ctx.guild.channels, id=user_channel[0][1])
+        forbid: int = 0
+        for member in members:
             try:
                 await channel.set_permissions(
                     member, read_messages=False, send_messages=False, connect=False, speak=False, view_channel=False)
             except Exception:
                 pass
+            else:
+                forbid += 1
 
-            return await ctx.send(f"**{member.mention} has been forbidden here!**")
-
-        else:
-            await ctx.send(f"**This is not a case channel, {ctx.author.mention}!**")
+        return await ctx.send(f"**`{forbid}` {'witnesses have' if forbid > 1 else 'witness has'} been forbidden from here!**")
+            
 
     @commands.command(aliases=['delete_channel', 'archive'])
     @commands.has_any_role(*allowed_roles)
