@@ -868,7 +868,7 @@ class SlothCurrency(*currency_cogs):
 
         await ctx.send(embed=embed)
 
-    @commands.command(aliases=['balance', 'bal'])
+    @commands.command(aliases=['balance', 'bal', 'fric'])
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def money(self, ctx, member: Optional[Union[discord.Member, discord.User]] = None) -> None:
         """ Shows the user's money.
