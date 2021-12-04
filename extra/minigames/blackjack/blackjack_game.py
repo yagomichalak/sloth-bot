@@ -156,7 +156,6 @@ class BlackJackGame:
 
     # Action of stand in blackjack
     def stand(self):
-        print('dsadsad', self.current_money)
         while self.dealer_total < 17:
             card = self.game_pack.pop()
             self.dealer_cards.append(card)
@@ -202,8 +201,6 @@ class BlackJackGame:
     def blackjack_event_player(self):
         # Increase player balance with bet * 2.5 if he hit blackjack
         SlothCurrency = self.client.get_cog('SlothCurrency')
-        print('p bj', int(self.bet * 2.5))
-        print('msg', int(self.bet * 1.5))
         self.client.loop.create_task(SlothCurrency.update_user_money(self.player_id, int(self.bet * 2.5)))
 
         # Change title and end the game
@@ -218,41 +215,31 @@ class BlackJackGame:
 
         SlothCurrency = self.client.get_cog('SlothCurrency')
         match_bal = self.bet
-        print('current money', self.current_money)
         # se o player dobrou
 
         won_text: str = ''
         if self.doubled:
-            print('no')
 
             # se ele ganhou com 21
             if self.player_total == 21:
-                print('bah')
                 match_bal += self.bet * 2.5
                 won_text = int(match_bal - self.bet)
                 match_bal += self.bet
             else:
-                print('buh')
                 match_bal += self.bet * 2
                 won_text = int(match_bal - self.bet)
                 match_bal += self.bet
 
         else:
-            print('yes')
             # ganhou normal com 21
             if self.player_total == 21:
-                print('boh')
                 match_bal += self.bet * 1.5
                 won_text = int(match_bal - self.bet)
             else:
-                print('beh')
                 match_bal += self.bet
                 won_text = int(match_bal - self.bet)
 
-        print('bet', self.bet)
-        print('matchbal', match_bal)
         self.client.loop.create_task(SlothCurrency.update_user_money(self.player_id, int(match_bal)))
-        print('aah', int(match_bal))
 
         # Change title and end the game
         self.title = f"Win - **{self.player_name}** won {won_text} leaves 🍃"
@@ -272,7 +259,10 @@ class BlackJackGame:
     def lose_event(self):
         # Change title and end the game
 
-        self.title = f"Lose - **{self.player_name}** lost {self.bet} leaves 🍃"
+        
+        bet_var: str = int(self.bet) if not self.doubled else int(self.bet * 2)
+
+        self.title = f"Lose - **{self.player_name}** lost {bet_var} leaves 🍃"
         self.color = discord.Color.brand_red()
         self.status = 'finished'
         self.dealer_final_show()
@@ -282,7 +272,10 @@ class BlackJackGame:
         # Refund player's leaves 🍃 if he draw
 
         SlothCurrency = self.client.get_cog('SlothCurrency')
-        self.client.loop.create_task(SlothCurrency.update_user_money(self.player_id, int(self.bet)))
+
+        bet_var: str = int(self.bet) if not self.doubled else int(self.bet * 2)
+
+        self.client.loop.create_task(SlothCurrency.update_user_money(self.player_id, bet_var))
 
         # Change title and end the game
         self.title = f"Draw - **{self.player_name}** won 0 leaves 🍃"
