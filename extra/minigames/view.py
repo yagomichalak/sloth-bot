@@ -381,6 +381,7 @@ class BlackJackActionView(discord.ui.View):
         SlothCurrency = self.client.get_cog('SlothCurrency')
         user_currency = await SlothCurrency.get_user_currency(player_id)
         player_bal = user_currency[0][1]
+        print(player_bal)
 
         if cog.blackjack_games.get(guild_id) is None:
             cog.blackjack_games[guild_id] = {}
@@ -399,7 +400,11 @@ class BlackJackActionView(discord.ui.View):
                 current_game.double()
                 if current_game.status == 'finished':
                     del cog.blackjack_games[guild_id][interaction.user.id]
+                    user_currency = await SlothCurrency.get_user_currency(player_id)
+                    print(user_currency[0][1])
                     await self.end_game(interaction)
+                    user_currency = await SlothCurrency.get_user_currency(player_id)
+                    print(user_currency[0][1])
 
             await interaction.followup.edit_message(interaction.message.id, embed=current_game.embed())
         else:
@@ -448,6 +453,6 @@ class BlackJackActionView(discord.ui.View):
 
         cog = self.client.get_cog('Games')
         current_game = cog.blackjack_games[server_id].get(self.player.id)
-        if current_game.status == 'finished':
+        if hasattr(current_game, 'status') and current_game.status == 'finished':
             del cog.blackjack_games[server_id][self.player.id]
         return

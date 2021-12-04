@@ -1,3 +1,4 @@
+import asyncio
 import discord
 from discord.ext import commands
 
@@ -9,7 +10,7 @@ class BlackJackGame:
     """ Class for the BlackJack game. """
 
     def __init__(self, client: commands.Bot, bet: int, player: discord.Member, player_cards: list, dealer_cards: list,
-                 game_pack: list, guild_id: int) -> None:
+                 game_pack: list, guild_id: int, current_money: int) -> None:
         """ Class init method. """
 
         self.client = client
@@ -27,6 +28,7 @@ class BlackJackGame:
         self.player_cards = player_cards
         self.player_total = 0
         self.player_a_number = 0
+        self.current_money = current_money
 
         # Dealer info
         self.dealer_cards = dealer_cards
@@ -154,6 +156,7 @@ class BlackJackGame:
 
     # Action of stand in blackjack
     def stand(self):
+        print('dsadsad', self.current_money)
         while self.dealer_total < 17:
             card = self.game_pack.pop()
             self.dealer_cards.append(card)
@@ -162,6 +165,7 @@ class BlackJackGame:
                 self.change_a_value_dealer()
 
         if self.dealer_total > 21 or self.dealer_total < self.player_total:
+            print('sadsa', self.current_money)
             self.win_event()
         elif self.dealer_total > self.player_total:
             self.lose_event()
@@ -213,29 +217,45 @@ class BlackJackGame:
         # Increase player balance with bet * 2 if he win
 
         SlothCurrency = self.client.get_cog('SlothCurrency')
-
         match_bal = self.bet
+        print('current money', self.current_money)
         # se o player dobrou
+
+        won_text: str = ''
         if self.doubled:
+            print('no')
+
             # se ele ganhou com 21
             if self.player_total == 21:
+                print('bah')
                 match_bal += self.bet * 2.5
+                won_text = int(match_bal - self.bet)
+                match_bal += self.bet
             else:
+                print('buh')
                 match_bal += self.bet * 2
-        else:
-            # ganhou normal com 21
-            if self.player_total == 21:
-                match_bal += self.bet * 1.5
-            else:
+                won_text = int(match_bal - self.bet)
                 match_bal += self.bet
 
-        print(self.bet)
-        print(match_bal)
+        else:
+            print('yes')
+            # ganhou normal com 21
+            if self.player_total == 21:
+                print('boh')
+                match_bal += self.bet * 1.5
+                won_text = int(match_bal - self.bet)
+            else:
+                print('beh')
+                match_bal += self.bet
+                won_text = int(match_bal - self.bet)
+
+        print('bet', self.bet)
+        print('matchbal', match_bal)
         self.client.loop.create_task(SlothCurrency.update_user_money(self.player_id, int(match_bal)))
         print('aah', int(match_bal))
 
         # Change title and end the game
-        self.title = f"Win - **{self.player_name}** won {int(match_bal - self.bet)} leaves 🍃"
+        self.title = f"Win - **{self.player_name}** won {won_text} leaves 🍃"
         self.status = 'finished'
         self.color = discord.Color.green()
         self.dealer_final_show()
