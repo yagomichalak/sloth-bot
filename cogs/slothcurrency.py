@@ -881,7 +881,7 @@ class SlothCurrency(*currency_cogs):
         if not user_currency:
             return await ctx.send(f"**User doesn't have a Sloth Account, {ctx.author.mention}!**")
 
-        text: str = f"**`{member}'s` money: `{user_currency[0][1]}łł`**"
+        text: str = f"**`{member}`'s money: `{user_currency[0][1]}łł`**"
         await ctx.send(text)
 
 

@@ -63,6 +63,7 @@ class BlackJack(commands.Cog):
 
         player_bal = user_currency[0][1]
         minimum_bet = 50
+        print('começo', player_bal)
 
         # Check if player's blackjack game is active
         if player.id in self.blackjack_games[guild_id]:
@@ -77,7 +78,7 @@ class BlackJack(commands.Cog):
         else:
             await SlothCurrency.update_user_money(player.id, -bet)
 
-            current_game = BlackJackGame(self.client, bet, player, [], [], self.cards_pack, guild_id)
+            current_game = BlackJackGame(self.client, bet, player, [], [], self.cards_pack, guild_id, player_bal-bet)
             self.blackjack_games[guild_id][player.id] = current_game
             if current_game.status == 'finished':
                 del self.blackjack_games[guild_id][player.id]
