@@ -14,7 +14,7 @@ mod_role_id = int(os.getenv('MOD_ROLE_ID'))
 senior_mod_role_id = int(os.getenv('SENIOR_MOD_ROLE_ID'))
 allowed_roles = [int(os.getenv('OWNER_ROLE_ID')), int(os.getenv('ADMIN_ROLE_ID')), mod_role_id]
 general_channel_id = int(os.getenv('GENERAL_CHANNEL_ID'))
-
+lesson_manager_role_id = int(os.getenv('LESSON_MANAGEMENT_ROLE_ID'))
 
 class Communication(commands.Cog):
     """ A cog related to communication commands. """
@@ -189,7 +189,7 @@ If you have any questions feel free to ask! And if you experience any type of pr
         await announce_channel.send(msg[1])
 
     @commands.command()
-    @utils.is_allowed([senior_mod_role_id], throw_exc=True)
+    @utils.is_allowed([senior_mod_role_id, lesson_manager_role_id], throw_exc=True)
     async def dm(self, ctx, member: discord.Member = None, *, message=None):
         """ (SeniorMod) Sends a Direct Message to someone.
         :param member: The member to send the message to.
