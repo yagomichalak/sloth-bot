@@ -881,8 +881,11 @@ class SlothCurrency(*currency_cogs):
         if not user_currency:
             return await ctx.send(f"**User doesn't have a Sloth Account, {ctx.author.mention}!**")
 
-        text: str = f"**`{member}`'s money: `{user_currency[0][1]}łł`**"
-        await ctx.send(text)
+        embed = discord.Embed(
+            description=f"**{member.mention}'s money: {user_currency[0][1]} 🍃**",
+            color=member.color
+        )
+        await ctx.send(embed=embed)
 
 
 
