@@ -1118,7 +1118,7 @@ class Tools(*tool_cogs):
 		view: discord.ui.View = BasicUserCheckView(author)
 		select: discord.ui.Select = SoundBoardSelect(ctx, self.client, sb_view=SoundBoardView, settings=[
 			['General', 'sounds'], ['General 2', 'sounds2'], ['General 3', 'sounds3'], ['Cosmos', 'cosmos'],
-			['Other', 'other']
+			['DNK', 'dnk'], ['Other', 'other']
 		])
 		view.add_item(select)
 		await ctx.send(embed=embed, view=view)
