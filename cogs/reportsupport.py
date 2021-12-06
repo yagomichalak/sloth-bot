@@ -981,7 +981,7 @@ Entry requirements:
         return await ctx.send(f"**`{forbid}` {'witnesses have' if forbid > 1 else 'witness has'} been forbidden from here!**")
             
 
-    @commands.command(aliases=['delete_channel', 'archive'])
+    @commands.command(aliases=['delete_channel', 'archive', 'cc'])
     @commands.has_any_role(*allowed_roles)
     async def close_channel(self, ctx):
         """ (MOD) Closes a Case-Channel. """

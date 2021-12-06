@@ -24,7 +24,7 @@ class Pictures(commands.Cog):
         print("Pictures cog is online!")
 
 
-    @commands.command()
+    @commands.command(aliases=['tak'])
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def cow(self, ctx) -> None:
         """ Gets a random Cow image. """

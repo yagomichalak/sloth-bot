@@ -187,7 +187,7 @@ class Tools(*tool_cogs):
 		else:
 			return await ctx.send(f"**No one has this role, {member.mention}!**")
 
-	@commands.command(aliases=["ping_inrole"])
+	@commands.command(aliases=["ping_inrole", "pir"])
 	@commands.cooldown(1, 5, commands.BucketType.user)
 	@utils.is_allowed(allowed_roles)
 	async def ping_intersection_role(self, ctx, roles: commands.Greedy[discord.Role] = None) -> None:
@@ -269,7 +269,7 @@ class Tools(*tool_cogs):
 		else:
 			await ctx.send("**I'm not even in a channel, lol!**")
 
-	@commands.command()
+	@commands.command(aliases=['talk'])
 	@commands.cooldown(1, 5, type=commands.BucketType.guild)
 	@utils.is_allowed([*allowed_roles, analyst_debugger_role_id], throw_exc=True)
 	@Player.poisoned()
@@ -525,7 +525,7 @@ class Tools(*tool_cogs):
 			all_members = [m.name for vc in vcs for m in vc.members]
 			await ctx.send(f"**`{len(all_members)}` members are in a vc atm!**")
 
-	@commands.command()
+	@commands.command(aliases=['stalk', 'voice_channel'])
 	@utils.is_allowed([*allowed_roles, analyst_debugger_role_id], throw_exc=True)
 	async def vc(self, ctx) -> None:
 		""" Tells where the given member is at (voice channel).
@@ -1174,7 +1174,7 @@ class Tools(*tool_cogs):
 		else:
 			await ctx.respond(f"**You got moved to {user_vc.channel.mention}!**")
 
-	@commands.command()
+	@commands.command(aliases=['simp'])
 	@utils.is_allowed(allowed_roles, throw_exc=True)
 	async def follow(self, ctx, user: discord.Member) -> None:
 		""" Follows a user by moving yourself to the Voice Channel they are in.
