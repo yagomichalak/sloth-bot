@@ -1174,6 +1174,29 @@ class Tools(*tool_cogs):
 		else:
 			await ctx.respond(f"**You got moved to {user_vc.channel.mention}!**")
 
+	@commands.command()
+	@utils.is_allowed(allowed_roles, throw_exc=True)
+	async def follow(self, ctx, user: discord.Member) -> None:
+		""" Follows a user by moving yourself to the Voice Channel they are in.
+		:param member:  The member you intend to follow"""
+
+		author = ctx.author
+		user_vc = user.voice
+		if not user_vc or not user_vc.channel:
+			return await ctx.send(f"**{user} is not in a VC, {author.mention}!**")
+
+		author_vc = author.voice
+		if not author_vc or not author_vc.channel:
+			return await ctx.send(f"**You're not in a VC, I cannot move you to there, {author.mention}!**")
+
+		try:
+			await author.move_to(user_vc.channel)
+		except:
+			await ctx.send(f"**For some reason I couldn't move you to there, {author.mention}!**")
+		else:
+			embed = discord.Embed(description=f' :knife: **You followed <@{user.id}> to the <#{author_vc.channel.id}> voice channel**')
+			await ctx.send(embed=embed)
+
 	@user_command(name="Pull", guild_ids=guild_ids)
 	@utils.is_allowed(allowed_roles, throw_exc=True)
 	async def _pull(self, ctx, user: discord.Member) -> None:
