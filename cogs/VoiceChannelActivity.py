@@ -314,7 +314,7 @@ class VoiceChannelActivity(commands.Cog):
 
         return formated_time
 
-    @commands.command(aliases=['wj', 'whojoined', 'whoj'])
+    @commands.command(aliases=['wj', 'whojoined', 'whoj', 'wj1', 'who', 'quem'])
     @commands.has_any_role(*allowed_roles)
     async def who_joined(self, ctx, channel: discord.VoiceChannel = None, time: str = None, time2: str = None) -> None:
         """ Shows which members were in the given voice channel at the given time:
@@ -343,7 +343,7 @@ class VoiceChannelActivity(commands.Cog):
 
         await ctx.send(embed=embed)
 
-    @commands.command(aliases=['wherejoined', 'joined_where'])
+    @commands.command(aliases=['wherejoined', 'joined_where', 'wj2', 'where', 'onde'])
     @commands.has_any_role(*allowed_roles)
     async def where_joined(self, ctx, member: discord.Member = None, time: str = None, time2: str = None) -> None:
         """ Shows in which voice channel a specific user was at a given time:

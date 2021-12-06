@@ -14,7 +14,7 @@ class ModerationFakeAccountsTable(commands.Cog):
     def __init__(self, client) -> None:
         self.client = client
 
-    @commands.command(aliases=['link_fake', 'linkfake', 'add_fake', 'addfake'])
+    @commands.command(aliases=['link_fake', 'linkfake', 'add_fake', 'addfake', 'lfa'])
     @utils.is_allowed(allowed_roles)
     async def link_fake_account(self, ctx, member: Union[discord.User, discord.Member] = None, fake_member: Union[discord.User, discord.Member] = None) -> None:
         """ Links a member to their fake account.
@@ -41,7 +41,7 @@ class ModerationFakeAccountsTable(commands.Cog):
         await self.insert_fake_account(member.id, fake_member.id)
         await ctx.send(f"**Successfully associated `{member}` with `{fake_member}`, {author.mention}!**")
 
-    @commands.command(aliases=['unlink_fakes', 'unlinkfakes', 'dissociate_fakes', 'remove_fakes', 'removefakes'])
+    @commands.command(aliases=['unlink_fakes', 'unlinkfakes', 'dissociate_fakes', 'remove_fakes', 'removefakes', 'ufa'])
     @utils.is_allowed(allowed_roles)
     async def unlink_fake_accounts(self, ctx, member: Union[discord.Member, discord.User] = None) -> None:
         """ Unlinks all associations with a specific member.
