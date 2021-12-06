@@ -389,9 +389,9 @@ class BlackJackActionView(discord.ui.View):
         # Check if player's blackjack game is active
         if interaction.user.id in cog.blackjack_games[guild_id]:
             current_game = cog.blackjack_games[guild_id].get(interaction.user.id)
-            # Checks whether the player has more than 2 cards
-            if len(current_game.player_cards) > 2:
-                await interaction.followup.send("**You can double only in the first round!**")
+            # Checks whether the player has more than 4 cards  
+            if len(current_game.player_cards) > 4:
+                await interaction.followup.send("**You can double only in the first three rounds!**")
 
             # Checks whether the player has sufficient funds for double
             elif player_bal < current_game.bet:
