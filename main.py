@@ -379,7 +379,7 @@ async def help(ctx, *, cmd: str =  None):
         else:
             await ctx.send(f"**Invalid parameter! It is neither a command nor a cog!**")
 
-@client.command()
+@client.command(aliases=['al', 'alias'])
 async def aliases(ctx, *, cmd: str =  None):
     """ Shows some information about commands and categories. 
     :param cmd: The command. """

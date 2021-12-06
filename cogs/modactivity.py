@@ -119,9 +119,9 @@ class ModActivity(commands.Cog):
         await mycursor.close()
 
     @utils.is_allowed([senior_mod_role_id], throw_exc=True)
-    @commands.command()
+    @commands.command(aliases=['mods_reputation', 'mod_rep'])
     async def modrep(self, ctx):
-        """ (ADM) Shows all the moderators and their statuses in an embedded message. """
+        """ (STAFF) Shows all the moderators and their statuses in an embedded message. """
 
         mycursor, db = await the_database()
         await mycursor.execute('SELECT * FROM ModActivity')

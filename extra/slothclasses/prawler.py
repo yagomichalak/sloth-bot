@@ -59,7 +59,7 @@ class Prawler(Player):
 						description=f"**{payload.member.mention} defended themselves against <@{skill_action[0]}>'s stealing, good luck next time!**",
 						color=discord.Color.green()))
 
-	@commands.command(aliases=['stl', 'rob'])
+	@commands.command(aliases=['stl', 'rob', 'cariocar'])
 	@Player.poisoned()
 	@Player.skill_on_cooldown()
 	@Player.skills_locked()
