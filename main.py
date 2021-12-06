@@ -379,6 +379,26 @@ async def help(ctx, *, cmd: str =  None):
         else:
             await ctx.send(f"**Invalid parameter! It is neither a command nor a cog!**")
 
+@client.command()
+async def aliases(ctx, *, cmd: str =  None):
+    """ Shows some information about commands and categories. 
+    :param cmd: The command. """
+
+    if not cmd:
+        return await ctx.send("**Please, informe one command!**")
+
+    cmd = escape_mentions(cmd)
+    if command := client.get_command(cmd.lower()):
+        embed = discord.Embed(title=f"Command: {command}", color=ctx.author.color, timestamp=ctx.message.created_at)
+        aliases = [alias for alias in command.aliases]
+
+        if not aliases:
+            return await ctx.send("**This command doesn't have any aliases!**")
+        embed.description = '**Aliases: **' + ', '.join(aliases)
+        return await ctx.send(embed=embed)
+    else:
+        await ctx.send(f"**Invalid parameter! It is neither a command nor a cog!**")
+
 @client.command(hidden=True)
 @commands.has_permissions(administrator=True)
 async def load(ctx, extension: str = None):
