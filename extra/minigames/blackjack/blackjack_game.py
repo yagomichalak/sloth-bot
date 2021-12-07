@@ -45,19 +45,6 @@ class BlackJackGame:
         self.game_pack = copy.deepcopy(game_pack)
         random.shuffle(self.game_pack)
 
-        # Draw first 2 cards for player
-        for i in range(2):
-            card = self.game_pack.pop()
-            # Change one of 'A' points to 1 if both first cards are 'A'
-            if card.number == 'A' and self.player_total == 11:
-                self.player_total += 1
-                card.number = '1'
-            else:
-                self.player_total += card.points
-            self.player_cards.append(card)
-            if card.number == 'A':
-                self.player_a_number += 1
-
         # Draw first 2 cards for dealer
         # Draw the hidden card for dealer
         secret_card = self.game_pack.pop()
@@ -78,6 +65,19 @@ class BlackJackGame:
         dealer_cards.append(card)
         if card.number == 'A':
             self.dealer_a_number += 1
+
+        # Draw first 2 cards for player
+        for i in range(2):
+            card = self.game_pack.pop()
+            # Change one of 'A' points to 1 if both first cards are 'A'
+            if card.number == 'A' and self.player_total == 11:
+                self.player_total += 1
+                card.number = '1'
+            else:
+                self.player_total += card.points
+            self.player_cards.append(card)
+            if card.number == 'A':
+                self.player_a_number += 1
 
         if self.player_total == self.dealer_total == 21:
             self.draw_event()
