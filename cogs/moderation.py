@@ -606,6 +606,24 @@ class Moderation(*moderation_cogs):
 			except:
 				pass
 
+			# Sends the muted channel rules to the user
+			rules_embed = discord.Embed(color=discord.Color.dark_grey(), timestamp=current_time,
+				description=
+				"""**You have been muted. You can see the reason of your mute above.**
+				You can get unmuted only by talking to the Staff member that muted you.
+
+				Behaviours in the <#656730447857975296> that might result in a ban:
+				**1**. Trolling
+				**2**. Insulting Staff Members
+				**3**. Pinging Admins/Moderators
+
+				**P.S.** Being muted does not mean you are banned or being punished. It means that a Staff member wants to talk to you to solve an ongoing case, colaborate with them to be unmuted asap.
+			""")
+			try:
+				await member.send(embed=rules_embed)
+			except:
+				pass
+
 		else:
 			await answer(f'**{member} is already muted!**')
 
