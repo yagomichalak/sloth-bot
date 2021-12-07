@@ -380,7 +380,7 @@ class Moderation(*moderation_cogs):
 			await ctx.send(smessage)
 
 	# Warns a member
-	@commands.command()
+	@commands.command(aliases=['warnado'])
 	@utils.is_allowed(allowed_roles, throw_exc=True)
 	async def warn(self, ctx, *, message : str = None) -> None:
 		"""(MOD) Warns one or more members.
@@ -492,7 +492,7 @@ class Moderation(*moderation_cogs):
 		else:
 			await ctx.send(f"**Successfully rar'd `{member}`, {author.mention}!**")
 
-	@commands.command(aliases=['show_muted_roles', 'check_muted', 'muted_roles', 'removed_roles', 'srr'])
+	@commands.command(aliases=['show_muted_roles', 'check_muted', 'muted_roles', 'removed_roles', 'srr', 'see_removed_roles'])
 	@utils.is_allowed(allowed_roles, throw_exc=True)
 	async def show_removed_roles(self, ctx, member: Union[discord.Member, discord.User] = None) -> None:
 		""" Shows the roles that were remove from the user when they got muted.
@@ -522,7 +522,7 @@ class Moderation(*moderation_cogs):
 
 
 
-	@commands.command(name="mute", aliases=["shutup", "shut_up", "stfu", "zitto", "zitta", "shh", "tg", "ta_gueule", "tagueule"])
+	@commands.command(name="mute", aliases=["shutup", "shut_up", "stfu", "zitto", "zitta", "shh", "tg", "ta_gueule", "tagueule", "mutado", "xiu", "calaboca"])
 	@utils.is_allowed(allowed_roles, throw_exc=True)
 	async def _mute_command(self, ctx, *, message : str = None) -> None:
 		"""(MOD) Mutes one or more members.
@@ -603,6 +603,24 @@ class Moderation(*moderation_cogs):
 				timestamp=current_ts, perpetrator=ctx.author.id)
 			try:
 				await member.send(embed=general_embed)
+			except:
+				pass
+
+			# Sends the muted channel rules to the user
+			rules_embed = discord.Embed(color=discord.Color.dark_grey(), timestamp=current_time,
+				description=
+				"""**You have been muted. You can see the reason of your mute above.**
+				You can get unmuted only by talking to the Staff member that muted you.
+
+				Behaviours in the <#656730447857975296> that might result in a ban:
+				**1**. Trolling
+				**2**. Insulting Staff Members
+				**3**. Pinging Admins/Moderators
+
+				**P.S.** Being muted does not mean you are banned or being punished. It means that a Staff member wants to talk to you to solve an ongoing case, colaborate with them to be unmuted asap.
+			""")
+			try:
+				await member.send(embed=rules_embed)
 			except:
 				pass
 
@@ -858,7 +876,7 @@ class Moderation(*moderation_cogs):
 			await ctx.send(f"**Not kicking them, then, {perpetrator.mention}!**")
 
 
-	@commands.command()
+	@commands.command(aliases=['kickado'])
 	@utils.is_allowed(allowed_roles, throw_exc=True)
 	async def kick(self, ctx, *, message : str = None):
 		""" (MOD) Kicks one or more members from the server.
@@ -915,7 +933,7 @@ class Moderation(*moderation_cogs):
 				await ctx.send(f"** The user `{member}` is not on the server**")
 
 	# Bans a member
-	@commands.command()
+	@commands.command(aliases=['banido'])
 	@utils.is_allowed(allowed_roles, throw_exc=True)
 	async def ban(self, ctx, member: Optional[discord.Member] = None, *, reason: Optional[str] = None):
 		""" (ModTeam/ADM) Bans a member from the server.
