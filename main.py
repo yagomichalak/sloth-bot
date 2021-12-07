@@ -446,7 +446,7 @@ _cnp = client.command_group(name="cnp", description="For copy and pasting stuff.
 @utils.is_allowed([moderator_role_id, admin_role_id], throw_exc=True)
 async def _specific(ctx, 
     text: Option(str, name="text", description="Pastes a text for specific purposes", required=True,
-        choices=['Muted/Purge', 'Nickname', 'Classes', 'Interview', 'Resources', 'Global', 'Searching Teachers'])):
+        choices=['Muted/Purge', 'Nickname', 'Classes', 'Interview', 'Resources', 'Global', 'Searching Teachers', 'Not An Emotional Support Server'])):
     """ Posts a specific test of your choice """
     
     
