@@ -1154,7 +1154,7 @@ class Tools(*tool_cogs):
 		await msg.add_reaction('<:nosloth:912066953160556575>')
 
 	@user_command(name="Follow", guild_ids=guild_ids)
-	@utils.is_allowed(allowed_roles, throw_exc=True)
+	@utils.is_allowed([owner_role_id, admin_role_id, mod_role_id])
 	async def _follow(self, ctx, user: discord.Member) -> None:
 		""" Follows a user by moving yourself to the Voice Channel they are in. """
 
@@ -1175,7 +1175,7 @@ class Tools(*tool_cogs):
 			await ctx.respond(f"**You got moved to {user_vc.channel.mention}!**")
 
 	@commands.command(aliases=['simp'])
-	@utils.is_allowed(allowed_roles, throw_exc=True)
+	@utils.is_allowed([owner_role_id, admin_role_id, mod_role_id], throw_exc=True)
 	async def follow(self, ctx, user: discord.Member) -> None:
 		""" Follows a user by moving yourself to the Voice Channel they are in.
 		:param member:  The member you intend to follow"""
@@ -1198,7 +1198,7 @@ class Tools(*tool_cogs):
 			await ctx.send(embed=embed)
 
 	@user_command(name="Pull", guild_ids=guild_ids)
-	@utils.is_allowed(allowed_roles, throw_exc=True)
+	@utils.is_allowed([owner_role_id, admin_role_id, mod_role_id], throw_exc=True)
 	async def _pull(self, ctx, user: discord.Member) -> None:
 		""" Pulls a user by moving them to the Voice Channel you are in. """
 
