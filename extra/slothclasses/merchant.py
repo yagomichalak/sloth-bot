@@ -124,7 +124,8 @@ class Merchant(Player):
     @buy.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def potion(self, ctx, member: discord.Member = None) -> None:
-        """ Buys a changing-Sloth-class potion from a Merchant. """
+        """ Buys a changing-Sloth-class potion from a Merchant.
+        :param member: The member from whom to buy it. """
 
         buyer = ctx.author
         if not member:
@@ -211,7 +212,8 @@ class Merchant(Player):
     @Player.poisoned()
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def ring(self, ctx, member: discord.Member = None) -> None:
-        """ Buys a Wedding Ring from a Merchant. """
+        """ Buys a Wedding Ring from a Merchant.
+        :param member: The member from whom to buy it. """
 
         buyer = ctx.author
         if not member:
@@ -294,11 +296,12 @@ class Merchant(Player):
                 timestamp=ctx.message.created_at
                 ))
 
-    # @buy.command(aliases=['pet', 'egg'])
-    # @Player.poisoned()
-    # @commands.cooldown(1, 5, commands.BucketType.user)
+    @buy.command(aliases=['pet', 'egg'])
+    @Player.poisoned()
+    @commands.cooldown(1, 5, commands.BucketType.user)
     async def pet_egg(self, ctx, member: discord.Member = None) -> None:
-        """ Buys a Pet Egg from a Merchant. """
+        """ Buys a Pet Egg from a Merchant.
+        :param member: The member from whom to buy it. """
 
         buyer = ctx.author
         if not member:
