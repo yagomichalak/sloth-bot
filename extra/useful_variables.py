@@ -160,7 +160,7 @@ different_class_roles = {
         "tagalog"
     ], 
     "cebuano-bisaya": [
-        "cebuano", "bisaya"
+        "cebuano", "bisaya", "cebuano/bisaya"
     ]
 }
 
