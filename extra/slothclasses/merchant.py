@@ -822,4 +822,55 @@ class Merchant(Player):
         • Pets stay up to 5 days in the Sloth Shop
         • You cannot sell more than 3 pets at the time.  """
 
-        pass
+        
+        if ctx.channel.id != bots_and_commands_channel_id:
+            return await ctx.send(f"**{ctx.author.mention}, you can only use this command in {self.bots_txt.mention}!**")
+
+        member = ctx.author
+
+        member_fx = await self.get_user_effects(member)
+
+        if 'knocked_out' in member_fx:
+            return await ctx.send(f"**{member.mention}, you can't use your skill, because you are knocked-out!**")
+
+        if await self.get_skill_action_by_user_id_and_skill_type(member.id, 'ring'):
+            return await ctx.send(f"**{member.mention}, you already have a ring in your shop!**")
+
+        item_price = await prompt_number(self.client, ctx, f"**{member.mention}, for how much do you want to sell your ring?**", member)
+        if item_price is None:
+            return
+
+        confirm = await ConfirmSkill(f"**{member.mention}, are you sure you want to spend `500` to put a pet in your shop with the price of `{item_price}`łł ?**").prompt(ctx)
+        if not confirm:
+            return await ctx.send(f"**Not doing it, then, {member.mention}!**")
+
+        _, exists = await Player.skill_on_cooldown(skill=Skill.FOUR).predicate(ctx)
+
+        user_currency = await self.get_user_currency(member.id)
+        if user_currency[1] < 500:
+            return await ctx.send(f"**{member.mention}, you don't have `500łł`!**")
+
+        await self.client.get_cog('SlothCurrency').update_user_money(member.id, -500)
+
+        item_emoji = '💍'
+
+        try:
+            current_timestamp = await utils.get_timestamp()
+            await self.insert_skill_action(
+                user_id=member.id, skill_type="pet_egg", skill_timestamp=current_timestamp,
+                target_id=member.id, channel_id=ctx.channel.id, price=item_price, emoji=item_emoji
+            )
+            if exists:
+                await self.update_user_skill_ts(member.id, Skill.FOUR, current_timestamp)
+            else:
+                await self.insert_user_skill_cooldown(ctx.author.id, Skill.FOUR, current_timestamp)
+            # Updates user's skills used counter
+            await self.update_user_skills_used(user_id=member.id)
+            open_shop_embed = await self.get_open_shop_embed(
+                channel=ctx.channel, perpetrator_id=member.id, price=item_price, item_name='Pet Egg', emoji=item_emoji)
+            await ctx.send(embed=open_shop_embed)
+        except Exception as e:
+            print(e)
+            return await ctx.send(f"**{member.mention}, something went wrong with it, try again later!**")
+        else:
+            await ctx.send(f"**{member}, your item is now in the shop, check `z!sloth_shop` to see it there!**")
