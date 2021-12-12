@@ -1361,8 +1361,9 @@ class Moderation(*moderation_cogs):
 				await ctx.send(f"**You cannot nitrokick a staff member, {author.mention}!**")
 
 
+	# @utils.is_allowed([senior_mod_role_id], throw_exc=True)
 	@commands.command()
-	@utils.is_allowed([senior_mod_role_id], throw_exc=True)
+	@commands.has_permissions(administrator=True)
 	async def hackban(self, ctx, user_id: int = None, *, reason: Optional[str] = None):
 		""" (ADM) Bans a user that is currently not in the server.
 		Only accepts user IDs.
