@@ -294,6 +294,93 @@ class Merchant(Player):
                 timestamp=ctx.message.created_at
                 ))
 
+    # @buy.command(aliases=['pet', 'egg'])
+    # @Player.poisoned()
+    # @commands.cooldown(1, 5, commands.BucketType.user)
+    async def pet_egg(self, ctx, member: discord.Member = None) -> None:
+        """ Buys a Pet Egg from a Merchant. """
+
+        buyer = ctx.author
+        if not member:
+            return await ctx.send(f"**Please, inform a `Merchant`, {buyer.mention}!**")
+
+        if not(merchant_item := await self.get_skill_action_by_user_id_and_skill_type(member.id, 'pet_egg')):
+            return await ctx.send(
+                f"**{member} is either not a `Merchant` or they don't have a pet egg available for purchase, {buyer.mention}!**")
+
+        user_info = await self.get_user_currency(buyer.id)
+        slothprofile = await self.get_sloth_profile(buyer.id)
+        
+        if not user_info:
+            return await ctx.send(embed=discord.Embed(description=f"**{buyer.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one!**"))
+
+        if slothprofile[1].lower() == 'default':
+            return await ctx.send(embed=discord.Embed(description=f"**{buyer.mention}, you don't have a Sloth class yet. Click [here](https://thelanguagesloth.com/profile/slothclass) to choose one!**"))
+
+        # if slothprofile:
+        #     return await ctx.send(embed=discord.Embed(description=f"**{buyer.mention}, you already have a `Pet`, you can't buy another one!**"))
+
+        if user_info[1] < merchant_item[7]:
+            return await ctx.send(embed=discord.Embed(description=f"**{buyer.mention}, the pet egg costs {merchant_item[7]}, but you only have {user_info[1]}łł!**"))
+
+        confirm = await ConfirmSkill(f"**{buyer.mention}, are you sure you want to buy a `Pet Egg` for `{merchant_item[7]}łł`?**").prompt(ctx)
+        if not confirm:
+            return await ctx.send(f"**Not buying it, then, {buyer.mention}!**")
+
+        if not await self.get_skill_action_by_user_id_and_skill_type(member.id, 'pet_egg'):
+            return await ctx.send(f"**{member.mention} doesn't have a `Pet Egg` available for purchase, {buyer.mention}!**")
+
+        try:
+            if wired_user := await self.get_skill_action_by_target_id_and_skill_type(target_id=member.id, skill_type='wire'):
+
+                siphon_percentage = 35
+                cybersloth_money = round((merchant_item[7]*siphon_percentage)/100)
+                target_money = merchant_item[7] - cybersloth_money
+                await self.client.get_cog('SlothCurrency').update_user_money(member.id, target_money)
+                await self.client.get_cog('SlothCurrency').update_user_money(buyer.id, -merchant_item[7])
+                await self.client.get_cog('SlothCurrency').update_user_money(wired_user[0], cybersloth_money)
+                cybersloth = self.client.get_user(wired_user[0])
+                siphon_embed = discord.Embed(
+                        title="__Intercepted Purchase__",
+                        description=(
+                            f"{buyer.mention} bought a `Pet Egg` from {member.mention} for `{merchant_item[7]}łł`, "
+                            f"but {cybersloth.mention if cybersloth else str(cybersloth)} siphoned off `{siphon_percentage}%` of the price; `{cybersloth_money}łł`! "
+                            f"So the Merhcant {member.mention} actually got `{target_money}łł`!"
+                        ),
+                        color=buyer.color,
+                        timestamp=ctx.message.created_at)
+                if cybersloth:
+                    siphon_embed.set_thumbnail(url=cybersloth.display_avatar)
+
+                await ctx.send(
+                    content=f"{buyer.mention}, {member.mention}, <@{wired_user[0]}>",
+                    embed=siphon_embed)
+
+            else:
+                # Updates both buyer and seller's money
+                await self.client.get_cog('SlothCurrency').update_user_money(buyer.id, - merchant_item[7])
+                await self.client.get_cog('SlothCurrency').update_user_money(member.id, merchant_item[7])
+
+            # Gives the buyer their potion and removes the potion from the store
+            await self.update_user_pet_egg(buyer.id) ##### Make this method.
+            await self.delete_skill_action_by_target_id_and_skill_type(member.id, 'pet_egg')
+        except Exception as e:
+            print(e)
+            await ctx.send(embed=discord.Embed(
+                title="Error!",
+                description=f"**Something went wrong with that purchase, {buyer.mention}!**",
+                color=discord.Color.red(),
+                timestamp=ctx.message.created_at
+                ))
+
+        else:
+            await ctx.send(embed=discord.Embed(
+                title="__Successful Acquisition__",
+                description=f"{buyer.mention} bought a `Pet Egg` from {member.mention}!",
+                color=discord.Color.green(),
+                timestamp=ctx.message.created_at
+                ))
+
 
     @commands.command()
     @Player.poisoned()
@@ -852,7 +939,7 @@ class Merchant(Player):
 
         await self.client.get_cog('SlothCurrency').update_user_money(member.id, -500)
 
-        item_emoji = '💍'
+        item_emoji = '🥚'
 
         try:
             current_timestamp = await utils.get_timestamp()
