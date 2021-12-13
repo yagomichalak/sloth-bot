@@ -91,10 +91,10 @@ class ReportSupport(*report_support_classes):
 
         def msg_check(message):
             if message.author == member and not message.guild:
-                if len(message.content) <= 100:
+                if len(message.content) <= 250:
                     return True
                 else:
-                    self.client.loop.create_task(member.send("**Your answer must be within 100 characters**"))
+                    self.client.loop.create_task(member.send("**Your answer must be within 250 characters**"))
             else:
                 return False
 
@@ -257,10 +257,10 @@ class ReportSupport(*report_support_classes):
 
         def msg_check(message):
             if message.author == member and not message.guild:
-                if len(message.content) <= 100:
+                if len(message.content) <= 250:
                     return True
                 else:
-                    self.client.loop.create_task(member.send("**Your answer must be within 100 characters**"))
+                    self.client.loop.create_task(member.send("**Your answer must be within 250 characters**"))
             else:
                 return False
 
