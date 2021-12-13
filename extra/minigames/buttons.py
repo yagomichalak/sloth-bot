@@ -11,7 +11,7 @@ class TicTacToeButton(discord.ui.Button):
 
 
     def __init__(self, custom_id: str, row: int):
-        super().__init__(label='\u200b', style=discord.ButtonStyle.blurple, custom_id=custom_id, row=row)
+        super().__init__(label='\u200b', style=discord.ButtonStyle.secondary, custom_id=custom_id, row=row)
 
     
     async def callback(self, interaction: discord.Interaction) -> None:

@@ -130,7 +130,7 @@ INSERT INTO Sloth.LanguageRoom (category, english_name, room_name, room_quant, r
 /* 099 */("unafiliated", "Ancient Greek", "αρχαία ελληνικά (Ancient Greek)", 2, 10, 60),
 /* 100 */("iranian", "Pashto", "پښتو (Pashto)", 2, 10, 60),
 /* 101 */("germanic", "Faroese", "Føroyskt (Faroese)", 2, 10, 60),
-/* 102 */("slavic", "Belarusian", "беларуская (Belarusian)", 2, 10, 60),
+/* 102 */("slavic", "Belarusian", "беларуская ", 2, 10, 60),
 /* 103 */("turkic", "Turkmen", "Türkmençe (Turkmen)", 2, 10, 60),
 /* 104 */("turkic", "Kyrgyz", "кыргыз тили (Kyrgyz)", 2, 10, 60),
 /* 105 */("turkic", "Uzbek", "Oʻzbek tili (Uzbek)", 2, 10, 60),

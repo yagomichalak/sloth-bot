@@ -683,8 +683,8 @@ class TeacherFeedback(commands.Cog):
 
         if confirm_view.value:
             # Prompts for a feedback
-            await member.send("Please, send a feedback message containing a maximum of `200` characeters.")
-            feedback_message = await prompt_message(self.client, member, member, limit=200, timeout=6000)
+            await member.send("Please, send a feedback message containing a maximum of `500` characeters.")
+            feedback_message = await prompt_message(self.client, member, member, limit=500, timeout=6000)
             # Feedback embed
             user_response_embed = discord.Embed(
                 title="__Feedback__:",
