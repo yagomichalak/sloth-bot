@@ -161,6 +161,9 @@ different_class_roles = {
     ], 
     "cebuano-bisaya": [
         "cebuano", "bisaya", "cebuano/bisaya"
+    ],
+    "malay": [
+        "马来文"
     ]
 }
 
