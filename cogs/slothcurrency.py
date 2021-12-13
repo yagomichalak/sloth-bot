@@ -676,10 +676,11 @@ class SlothCurrency(*currency_cogs):
         embed.set_author(name=ctx.author, url=ctx.author.display_avatar)
         if cmsg > 0:
             embed.add_field(name="__**Messages:**__",
-                            value=f"Exchanged `{message_times * 100}` messages for `{cmsg}`łł;", inline=False)
+                            value=f"Exchanged `{message_times * 50}` messages for `{cmsg}`łł;", inline=False)
         if ctime > 0:
             embed.add_field(name="__**Time:**__",
-                            value=f"Exchanged `{(time_times * 3600) / 60}` minutes for `{ctime}`łł;", inline=False)
+                            value=f"Exchanged `{(time_times * 1800) / 60}` minutes for `{ctime}`łł;", inline=False)
+
         return await ctx.send(embed=embed)
 
 
@@ -691,10 +692,10 @@ class SlothCurrency(*currency_cogs):
         exchanged_money = times = 0
 
         while True:
-            if messages_left >= 100:
+            if messages_left >= 50:
                 times += 1
-                messages_left -= 100
-                exchanged_money += 4
+                messages_left -= 50
+                exchanged_money += 2
                 await asyncio.sleep(0)
                 continue
             else:
@@ -712,7 +713,7 @@ class SlothCurrency(*currency_cogs):
             if time_left >= 1800:
                 times += 1
                 time_left -= 1800
-                exchanged_money += 4
+                exchanged_money += 2
                 await asyncio.sleep(0)
                 continue
             else:

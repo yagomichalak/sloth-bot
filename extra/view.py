@@ -285,7 +285,7 @@ class ExchangeActivityView(discord.ui.View):
         if confirmed:
             await SlothCurrency.exchange(ctx, cmsg, message_times, ctime, time_times)
             # Updates user Activity Status and Money
-            await SlothCurrency.update_user_server_messages(member.id, -message_times * 100)
+            await SlothCurrency.update_user_server_messages(member.id, -message_times * 50)
             await SlothCurrency.update_user_server_time(member.id, -time_times * 1800)
             await SlothCurrency.update_user_money(member.id, expected_money)
         else:
