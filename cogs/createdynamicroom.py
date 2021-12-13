@@ -914,7 +914,7 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
             if chosen_option.current_quantity < chosen_option.room_quant:
                 return chosen_option
             else:
-                await member.send(f"**Max number of this room was reached ({chosen_room.room_quant})**")
+                await member.send(f"**Max number of this room was reached ({chosen_option.room_quant})**")
         else:
             await member.send(f"**Timed out!**")
 
