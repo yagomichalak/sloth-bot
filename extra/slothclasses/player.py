@@ -13,8 +13,13 @@ import os
 from pytz import timezone
 
 from enum import Enum
+from .userpets import UserPetsTable
 
 bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
+additional_cogs: List[commands.Cog] = [
+    UserPetsTable
+]
+
 
 class Skill(Enum):
 
@@ -25,7 +30,7 @@ class Skill(Enum):
     FIVE = 'skill_five_ts'
 
 
-class Player(commands.Cog):
+class Player(UserPetsTable):
 
     def __init__(self, client) -> None:
         self.client = client
