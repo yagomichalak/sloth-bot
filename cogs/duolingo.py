@@ -163,9 +163,8 @@ class Duolingo(commands.Cog):
                     **Streak**: `{data['languages'][0]['streak']} days` 🔥
                     **Indexed language:** `{data['learning_language_string']}`
                     **Finished skills for indexed language:** `{len(finished_skills)}`
-                    **Timezone:** `{data.get('timezone')}`
-                    **Following:** `{len(lang_data['points_ranking_data']) -1} people`
-                    """,
+                    **Timezone:** `{data.get('timezone')}`""",
+                    #**Following:** `{len(lang_data['points_ranking_data']) -1} people`""",
                     # **Skills Learned:**: `{data['num_skills_learned']}k`
                     color=member.color,
                     timestamp=ctx.message.created_at,
@@ -190,7 +189,8 @@ class Duolingo(commands.Cog):
 
                 if properties := data.get('tracking_properties'):
                     creation_ts = int(properties['creation_date_millis']/1000)
-                    embed.description += f"**Followers:** `{properties['num_followers']} people`"
+                    embed.description += f"\n**Following:** `{properties['num_following']} people`"
+                    embed.description += f" **Followers:** `{properties['num_followers']} people`"
                     embed.add_field(
                         name="__Properties__:",
                         value=f"""
