@@ -7,7 +7,7 @@ from mysqldb import the_database
 from extra.menu import ConfirmSkill, prompt_number, OpenShopLoop
 from extra import utils
 import os
-from typing import List, Dict, Union
+from typing import List, Dict, Union, Optional
 from datetime import datetime
 import random
 from PIL import Image, ImageDraw, ImageFont
@@ -963,3 +963,36 @@ class Merchant(Player):
             return await ctx.send(f"**{member.mention}, something went wrong with it, try again later!**")
         else:
             await ctx.send(f"**{member}, your item is now in the shop, check `z!sloth_shop` to see it there!**")
+
+    @commands.command()
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def pet(self, ctx, member: Optional[Union[discord.Member, discord.User]] = None) -> None:
+        """ Sees someone's pet.
+        :param member: The member from whom to show the pet. [Optional][Default = You] """
+
+        author: discord.Member = ctx.author
+
+        if not member:
+            member = author
+
+        user_pet = await self.get_user_pet(member.id)
+        if not user_pet:
+            if author == member:
+                return await ctx.send(f"**You don't have a pet, {member.mention}!**")
+            else:
+                return await ctx.send(f"**{member} doesn't have a pet, {author.mention}!**")
+
+        # Makes the Pet's Image
+
+        small = ImageFont.truetype("built titling sb.ttf", 45)
+        background = Image.open(f"./background/base_pet_background.png")
+        breed = Image.open(f"./sloth_custom_images/pet/{user_pet[2]}.png")
+
+        background.paste(breed, (0, 0), breed)
+        draw = ImageDraw.Draw(background)
+        draw.text((400, 0), user_pet[1], fill="white", font=small)
+        file_name = f"user_pet-{member.id}.png"
+        background.save(f'media/temporary/{member.id}.png')
+
+        # Sends the Pet's Image
+        await ctx.send(file=discord.File(file_name))
