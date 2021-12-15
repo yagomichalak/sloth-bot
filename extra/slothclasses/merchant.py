@@ -1002,3 +1002,4 @@ class Merchant(Player):
 
         # Sends the Pet's Image
         await ctx.send(file=discord.File(file_path))
+        return os.remove(file_path)
