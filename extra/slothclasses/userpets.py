@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 from mysqldb import the_database
-from typing import List, Union
+from typing import List, Union, Optional
 
 
 class UserPetsTable(commands.Cog):
@@ -24,8 +24,8 @@ class UserPetsTable(commands.Cog):
         mycursor, db = await the_database()
         await mycursor.execute("""CREATE TABLE UserPets (
             user_id BIGINT NOT NULL,
-            pet_name VARCHAR(25) NOT NULL,
-            pet_breed VARCHAR(25) NOT NULL,
+            pet_name VARCHAR(25) DEFAULT NULL,
+            pet_breed VARCHAR(25) DEFAULT 'Egg',
             PRIMARY KEY (user_id)
             ) CHARSET utf8mb4 COLLATE utf8mb4_unicode_ci
         """)
@@ -78,14 +78,17 @@ class UserPetsTable(commands.Cog):
         else:
             return False
 
-    async def insert_user_pet(self, user_id: int, pet_name: str, pet_breed: str) -> None:
+    async def insert_user_pet(self, user_id: int, pet_name: Optional[str] = None, pet_breed: Optional[str] = None) -> None:
         """ Inserts a User Pet.
         :param user_id: The ID of the user owner of the pet.
-        :param pet_name: The name of the pet.
-        :param pet_breed: The breed of the pet. """
+        :param pet_name: The name of the pet. [Optional]
+        :param pet_breed: The breed of the pet. [Optional]"""
 
         mycursor, db = await the_database()
-        await mycursor.execute("INSERT INTO UserPets (user_id, pet_name, pet_breed) VALUES (%s, %s, %s)", (user_id, pet_name, pet_breed))
+        if pet_name and pet_breed:
+            await mycursor.execute("INSERT INTO UserPets (user_id, pet_name, pet_breed) VALUES (%s, %s, %s)", (user_id, pet_name, pet_breed))
+        else:
+            await mycursor.execute("INSERT INTO UserPets (user_id) VALUES (%s)", (user_id,))
         await db.commit()
         await mycursor.close()
 

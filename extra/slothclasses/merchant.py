@@ -275,7 +275,7 @@ class Merchant(Player):
                 await self.client.get_cog('SlothCurrency').update_user_money(buyer.id, - merchant_item[7])
                 await self.client.get_cog('SlothCurrency').update_user_money(member.id, merchant_item[7])
 
-            # Gives the buyer their potion and removes the potion from the store
+            # Gives the buyer their ring and removes the potion from the store
             await self.update_user_rings(buyer.id)
             await self.delete_skill_action_by_target_id_and_skill_type(member.id, 'ring')
         except Exception as e:
@@ -319,8 +319,8 @@ class Merchant(Player):
         if slothprofile[1].lower() == 'default':
             return await ctx.send(embed=discord.Embed(description=f"**{buyer.mention}, you don't have a Sloth class yet. Click [here](https://thelanguagesloth.com/profile/slothclass) to choose one!**"))
 
-        # if slothprofile:
-        #     return await ctx.send(embed=discord.Embed(description=f"**{buyer.mention}, you already have a `Pet`, you can't buy another one!**"))
+        if await self.get_user_pet(buyer.id):
+            return await ctx.send(embed=discord.Embed(description=f"**{buyer.mention}, you already have a `Pet`, you can't buy another one!**"))
 
         if user_info[1] < merchant_item[7]:
             return await ctx.send(embed=discord.Embed(description=f"**{buyer.mention}, the pet egg costs {merchant_item[7]}, but you only have {user_info[1]}łł!**"))
@@ -363,8 +363,8 @@ class Merchant(Player):
                 await self.client.get_cog('SlothCurrency').update_user_money(buyer.id, - merchant_item[7])
                 await self.client.get_cog('SlothCurrency').update_user_money(member.id, merchant_item[7])
 
-            # Gives the buyer their potion and removes the potion from the store
-            await self.update_user_pet_egg(buyer.id) ##### Make this method.
+            # Gives the buyer their pet egg and removes the potion from the store
+            await self.insert_user_pet(buyer.id)
             await self.delete_skill_action_by_target_id_and_skill_type(member.id, 'pet_egg')
         except Exception as e:
             print(e)
@@ -515,7 +515,7 @@ class Merchant(Player):
         """ Gets all open shop items. """
 
         mycursor, _ = await the_database()
-        await mycursor.execute("SELECT * FROM SlothSkills WHERE skill_type = 'potion' OR skill_type = 'ring'")
+        await mycursor.execute("SELECT * FROM SlothSkills WHERE skill_type in ('potion', 'ring', 'pet_egg')")
         potions = await mycursor.fetchall()
         await mycursor.close()
         return potions
@@ -899,17 +899,16 @@ class Merchant(Player):
     @Player.skills_locked()
     @Player.user_is_class('merchant')
     @Player.skill_mark()
-    @Player.not_ready()
+    # @Player.not_ready()
     async def sell_pet(self, ctx) -> None:
-        """ Sells one pet of your choice from a set of options.
+        """ Sells a pet egg.
         
         PS: You must be a responsible parent, otherwise your pet will 'vanish'.
         
         • Delay = 1 day
         • Cost = 500łł
         • You can only sell pets costing more than 500łł as well
-        • Pets stay up to 5 days in the Sloth Shop
-        • You cannot sell more than 3 pets at the time.  """
+        • Pets stay up to 5 days in the Sloth Shop. """
 
         
         if ctx.channel.id != bots_and_commands_channel_id:
@@ -922,10 +921,10 @@ class Merchant(Player):
         if 'knocked_out' in member_fx:
             return await ctx.send(f"**{member.mention}, you can't use your skill, because you are knocked-out!**")
 
-        if await self.get_skill_action_by_user_id_and_skill_type(member.id, 'ring'):
-            return await ctx.send(f"**{member.mention}, you already have a ring in your shop!**")
+        if await self.get_skill_action_by_user_id_and_skill_type(member.id, 'pet_egg'):
+            return await ctx.send(f"**{member.mention}, you already have a pet egg in your shop!**")
 
-        item_price = await prompt_number(self.client, ctx, f"**{member.mention}, for how much do you want to sell your ring?**", member)
+        item_price = await prompt_number(self.client, ctx, f"**{member.mention}, for how much do you want to sell your pet egg?**", member)
         if item_price is None:
             return
 
@@ -966,6 +965,13 @@ class Merchant(Player):
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
+    async def hatch(self, ctx) -> None:
+        """ Hatches your pet egg. """
+
+        pass
+
+    @commands.command()
+    @commands.cooldown(1, 5, commands.BucketType.user)
     async def pet(self, ctx, member: Optional[Union[discord.Member, discord.User]] = None) -> None:
         """ Sees someone's pet.
         :param member: The member from whom to show the pet. [Optional][Default = You] """
@@ -985,8 +991,8 @@ class Merchant(Player):
         # Makes the Pet's Image
 
         small = ImageFont.truetype("built titling sb.ttf", 45)
-        background = Image.open(f"./background/base_pet_background.png")
-        breed = Image.open(f"./sloth_custom_images/pet/{user_pet[2]}.png")
+        background = Image.open(f"./sloth_custom_images/background/base_pet_background.png")
+        breed = Image.open(f"./sloth_custom_images/pet/{user_pet[2].lower()}.png")
 
         background.paste(breed, (0, 0), breed)
         draw = ImageDraw.Draw(background)
