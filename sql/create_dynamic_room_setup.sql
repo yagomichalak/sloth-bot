@@ -26,7 +26,7 @@ INSERT INTO Sloth.LanguageRoom (category, english_name, room_name, room_quant, r
 /* 017 */("turkic", "Kazakh", "Қазақ 🐎🇰🇿", 2, 10, 60),
 /* 018 */("turkic", "Azerbaijani", "Azərbaycan 🔥🇦🇿", 2, 10, 60),
 /* 019 */("iranian", "Kurdish", "كوردی🥪 (kurdish)", 2, 10, 60),
-/* 020 */("iranian", "Iran", "فارسی🐈🇮🇷", 2, 10, 60),
+/* 020 */("iranian", "Farsi", "فارسی🐈🇮🇷", 2, 10, 60),
 /* 021 */("south-east asian", "Vietnamese", "Tiếng Việt🛵🇻🇳", 2, 10, 60 * 60 * 1),
 /* 022 */("south-east asian", "Khmer", "ខ្មែរ🇰🇭", 2, 10, 60),
 /* 023 */("south-east asian", "Thai", "ภาษาไทย 🥘🇹🇭", 2, 10, 60),
@@ -157,6 +157,8 @@ INSERT INTO Sloth.LanguageRoom (category, english_name, room_name, room_quant, r
 
 /* 120 */("celtic", "Celtic", "Celtic", 2, 10, 60),
 
+/* 121 */("iranian", "Gilaki", "گیلکی (Gilaki)", 2, 10, 60),
+
 /* ??? */("category", "english_name", "room_name", 2, 10, 60)
 
 ;
@@ -276,10 +278,10 @@ INSERT INTO Sloth.LanguageRoomPermissions (room_id, role_id, permission_name, pe
 /* Kurdish channel */
 (19, /*Native Kurdish*/ 478181311971065867, "speaker", true),
 
-/* Iran channel */
-(20, /*Native Iran*/ 478178098437685248, "speaker", true),
-(20, /*Fluent Iran*/ 478178529368866826, "speaker", true),
-(20, /*Studying Iran*/ 563369533440655360, "speaker", true),
+/* Farsi channel */
+(20, /*Native Farsi*/ 478178098437685248, "speaker", true),
+(20, /*Fluent Farsi*/ 478178529368866826, "speaker", true),
+(20, /*Studying Farsi*/ 563369533440655360, "speaker", true),
 
 /* Vietnamese channel */
 (21, /*Native Vietnamese*/ 475240442779140116, "speaker", true),
@@ -748,6 +750,11 @@ INSERT INTO Sloth.LanguageRoomPermissions (room_id, role_id, permission_name, pe
 /* Celtic Channel */
 (120, /*Native Celtic*/ 490155744184762378, "speaker", true),
 (120, /*Studying Celtic*/ 650661949478273044, "speaker", true),
+
+/* Gilaki Channel */
+(121, /*Native Farsi*/ 478178098437685248, "speaker", true),
+(121, /*Fluent Farsi*/ 478178529368866826, "speaker", true),
+(121, /*Studying Farsi*/ 563369533440655360, "speaker", true),
 
 /* Language Channel */
 (00, /*Native Language*/ 0000000000000000000, "speaker", true),
