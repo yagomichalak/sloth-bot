@@ -5,6 +5,7 @@ from discord.ext import commands, menus
 from .player import Player, Skill
 from mysqldb import the_database
 from extra.menu import ConfirmSkill, prompt_number, OpenShopLoop
+from extra.view import UserPetView
 from extra import utils
 import os
 from typing import List, Dict, Union, Optional
@@ -968,7 +969,39 @@ class Merchant(Player):
     async def hatch(self, ctx) -> None:
         """ Hatches your pet egg. """
 
-        pass
+        member: discord.Member = ctx.author
+
+        user_pet = await self.get_user_pet(member.id)
+        if not user_pet:
+            return await ctx.send(f"**You don't have an egg to hatch, {member.mention}!**")
+        if user_pet[2].lower() != 'egg':
+            return await ctx.send(f"**You already hatched your pet egg, {member.mention}!**")
+
+        
+        embed: discord.Embed = discord.Embed(
+            title="__Pet Breed Selection__",
+            color=member.color,
+            timestamp=ctx.message.created_at
+        )
+        embed.set_author(name=member, icon_url=member.display_avatar)
+        embed.set_thumbnail(url=member.display_avatar)
+        embed.set_footer(text="3 minutes to select", icon_url=ctx.guild.icon.url)
+
+        view: discord.ui.View = UserPetView(member)
+        msg = await ctx.send(embed=embed, view=view)
+        await view.wait()
+        await utils.disable_buttons(view)
+        await msg.edit(view=view)
+
+        if view.selected_pet is None:
+            return
+
+        if not view.selected_pet:
+            return
+
+        await self.update_user_pet_breed(member.id, view.selected_pet.lower())
+        await ctx.send(f"**Your `Pet Egg` has been successfully hatched into a `{view.selected_pet}`, {member.mention}!**")
+
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)

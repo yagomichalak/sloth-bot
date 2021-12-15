@@ -1,0 +1,8 @@
+{
+    "Frog": {"name": "Frog", "description": "Rigbt rgibt", "emoji": "🐸", "url": "https://i.natgeofe.com/k/8fa25ea4-6409-47fb-b3cc-4af8e0dc9616/red-eyed-tree-frog-on-leaves-3-2_2x3.jpg"},
+    "Parrot": {"name": "Parrot", "description": "Prrrr", "emoji": "🦜", "url": "https://imgs.mongabay.com/wp-content/uploads/sites/20/2020/09/01173258/127404317_f44bdea9ba_h.jpg"},
+    "Monkey": {"name": "Monkey", "description": "MACAAAAACO", "emoji": "🐒", "url": "https://m.media-amazon.com/images/I/51YLsREcAaL.jpg"},
+    "Cow": {"name": "Cow", "description": "Moooh", "emoji": "🐮", "url": "https://cdn.britannica.com/55/174255-050-526314B6/brown-Guernsey-cow.jpg"},
+    "Raccoon": {"name": "Raccoon", "description": "T pose", "emoji": "🦝", "url": "https://i.dailymail.co.uk/1s/2020/01/08/09/23138888-0-image-a-14_1578474161826.jpg"},
+    "Human": {"name": "Human", "description": "I'm only a human", "emoji": "👤", "url": "https://ak.picdn.net/shutterstock/videos/10362980/thumb/1.jpg"}
+}
