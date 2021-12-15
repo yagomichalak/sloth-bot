@@ -6,6 +6,7 @@ from .player import Player, Skill
 from mysqldb import the_database
 from extra.menu import ConfirmSkill, prompt_number, OpenShopLoop
 from extra.view import UserPetView
+from extra.prompt.menu import Confirm
 from extra import utils
 import os
 from typing import List, Dict, Union, Optional
@@ -999,11 +1000,51 @@ class Merchant(Player):
         if not view.selected_pet:
             return
 
+        await self.update_user_pet_name(member.id, view.selected_pet)
         await self.update_user_pet_breed(member.id, view.selected_pet.lower())
         await ctx.send(f"**Your `Pet Egg` has been successfully hatched into a `{view.selected_pet}`, {member.mention}!**")
 
+    @commands.command(aliases=['pet_name', 'cpet_name', 'update_pet_name'])
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def change_pet_name(self, ctx, *, pet_name: str = None) -> None:
+        """ Changes the pet's name.
+        :param pet_name: The new pet name to change to.
+        
+        * You don't pay to change the name the first time.
+        * Price: 250.
+        * Character limit: 25. """
 
-    @commands.command()
+        member: discord.Member = ctx.author
+        if not (user_pet := await self.get_user_pet(member.id)):
+            return await ctx.send(f"**You don't even have a pet, you cannot change it's name, {member.mention}!**")
+
+        if user_pet[2].lower() == 'Egg':
+            return await ctx.send(f"**You cannot change the name of an unhatched egg, {member.mention}!**")
+
+        if not pet_name:
+            return await ctx.send(f"**Please, inform a name for your pet, {member.mention}!**")
+
+        if pet_name.lower() == 'egg':
+            return await ctx.send(f"**You cannot put that name, {member.mention}!**")
+
+        if len(pet_name) > 25:
+            return await ctx.send(f"**The limit of characters for the name is 25, {member.mention}!**")
+
+        SlothCurrency = self.client.get_cog('SlothCurrency')
+        user_money = await SlothCurrency.get_user_currency(member.id)
+        if user_money[0][1] < 250:
+            return await ctx.send(f"**You don't have 250łł to change your pet's nickname, {member.mention}!**")
+
+        confirm = await Confirm(f"**Are you sure you want to spend `250łł` to change your pet's name to `{pet_name}`?**").prompt(ctx)
+        if not confirm:
+            return await ctx.send(f"**Not doing it then, {member.mention}!**")
+
+        await SlothCurrency.update_user_money(member.id, -250)
+        await self.update_user_pet_name(member.id, pet_name)
+        await ctx.send(f"**Successfully updated your pet {user_pet[2]}'s nickname from `{user_pet[2]}` to `{pet_name}`, {member.mention}!**")
+
+
+    @commands.command(aliases=['mascot'])
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def pet(self, ctx, member: Optional[Union[discord.Member, discord.User]] = None) -> None:
         """ Sees someone's pet.
@@ -1029,7 +1070,7 @@ class Merchant(Player):
 
         background.paste(breed, (0, 0), breed)
         draw = ImageDraw.Draw(background)
-        draw.text((360, 0), str(user_pet[1]), fill="black", font=small)
+        draw.text((320, 0), str(user_pet[1]), fill="black", font=small)
         file_path = f"media/temporary/user_pet-{member.id}.png"
         background.save(file_path)
 

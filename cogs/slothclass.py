@@ -278,7 +278,7 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
 
         embed.add_field(name="🟢 Agares' 4th Skill:", value="**Skill**: `Delay`.", inline=True)
         embed.add_field(name="🟢 Cybersloth's 4th Skill:", value="**Skill**: `Lock`.", inline=True)
-        embed.add_field(name="🔴 Merchant's 4th Skill:", value="**Skill**: `Sell Pet`.", inline=False)
+        embed.add_field(name="🟢 Merchant's 4th Skill:", value="**Skill**: `Sell Pet`.", inline=False)
         embed.add_field(name="🔴 Metamorph's 4th Skill:", value="**Skill**: `Reborn`.", inline=True)
         embed.add_field(name="🟠 Munk's 4th Skill:", value="**Skill**: `Get Quest`.", inline=True)
         embed.add_field(name="🔴 Prawler's 4th Skill:", value="**Skill**: `Kidnap`.", inline=False)
