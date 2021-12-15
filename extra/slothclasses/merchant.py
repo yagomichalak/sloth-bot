@@ -813,7 +813,8 @@ class Merchant(Player):
         filename = f"marriage_{p1.id}_{p2.id}.png"
 
         medium = ImageFont.truetype("built titling sb.ttf", 60)
-        background = Image.open(await utils.get_user_specific_type_item(p1.id, 'background'))
+        SlothCurrency = self.client.get_cog('SlothCurrency')
+        background = Image.open(await SlothCurrency.get_user_specific_type_item(p1.id, 'background'))
 
         # Get PFPs
         pfp1 = await utils.get_user_pfp(p1, 250)
@@ -907,7 +908,6 @@ class Merchant(Player):
         
         • Delay = 1 day
         • Cost = 500łł
-        • You can only sell pets costing more than 500łł as well
         • Pets stay up to 5 days in the Sloth Shop. """
 
         
@@ -996,9 +996,9 @@ class Merchant(Player):
 
         background.paste(breed, (0, 0), breed)
         draw = ImageDraw.Draw(background)
-        draw.text((400, 0), user_pet[1], fill="white", font=small)
-        file_name = f"user_pet-{member.id}.png"
-        background.save(f'media/temporary/{member.id}.png')
+        draw.text((360, 0), str(user_pet[1]), fill="black", font=small)
+        file_path = f"media/temporary/user_pet-{member.id}.png"
+        background.save(file_path)
 
         # Sends the Pet's Image
-        await ctx.send(file=discord.File(file_name))
+        await ctx.send(file=discord.File(file_path))

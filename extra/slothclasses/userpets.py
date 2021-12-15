@@ -24,7 +24,7 @@ class UserPetsTable(commands.Cog):
         mycursor, db = await the_database()
         await mycursor.execute("""CREATE TABLE UserPets (
             user_id BIGINT NOT NULL,
-            pet_name VARCHAR(25) DEFAULT NULL,
+            pet_name VARCHAR(25) DEFAULT 'Egg',
             pet_breed VARCHAR(25) DEFAULT 'Egg',
             PRIMARY KEY (user_id)
             ) CHARSET utf8mb4 COLLATE utf8mb4_unicode_ci
