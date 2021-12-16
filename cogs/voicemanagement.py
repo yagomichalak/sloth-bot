@@ -35,24 +35,24 @@ class VoiceManagement(commands.Cog):
 
         for user_id in list(self.people.keys()):
             secs = current_ts - self.people[user_id]['timestamp']
-            if secs >= 60 and secs < 180:
-                if not self.people[user_id]['camera_on'] and not self.people[user_id]['notified']:
-                    # Notifies user to turn on camera
-                    msg = f"**Hey, I saw you are in the `Video Calls` channel and didn't turn on your camera. Please, do it or you will soon get disconnected!**"
-                    try:
-                        member = guild.get_member(user_id)
-                        if not member.voice or not (vc := member.voice.channel):
-                            continue
+            # if secs >= 60 and secs < 180:
+            #     if not self.people[user_id]['camera_on'] and not self.people[user_id]['notified']:
+            #         # Notifies user to turn on camera
+            #         msg = f"**Hey, I saw you are in the `Video Calls` channel and didn't turn on your camera. Please, do it or you will soon get disconnected!**"
+            #         try:
+            #             member = guild.get_member(user_id)
+            #             if not member.voice or not (vc := member.voice.channel):
+            #                 continue
 
-                        if self.vcc_id != vc.id:
-                            continue
+            #             if self.vcc_id != vc.id:
+            #                 continue
 
-                        await member.send(msg)
-                        self.people[user_id]['notified'] = True
-                    except:
-                        await bots_and_commands_channel.send(f"{msg}. {member.mention}")
+            #             await member.send(msg)
+            #             self.people[user_id]['notified'] = True
+            #         except:
+            #             await bots_and_commands_channel.send(f"{msg}. {member.mention}")
 
-            elif secs >= 180:
+            if secs >= 60:
                 if not self.people[user_id]['camera_on']:
                     del self.people[user_id]
                     # Disconnects users with cameras off
