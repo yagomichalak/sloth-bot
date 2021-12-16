@@ -14,10 +14,11 @@ from pytz import timezone
 
 from enum import Enum
 from .userpets import UserPetsTable
+from .userbabies import UserBabiesTable
 
 bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
 additional_cogs: List[commands.Cog] = [
-    UserPetsTable
+    UserPetsTable, UserBabiesTable
 ]
 
 
@@ -30,7 +31,7 @@ class Skill(Enum):
     FIVE = 'skill_five_ts'
 
 
-class Player(UserPetsTable):
+class Player(*additional_cogs):
 
     def __init__(self, client) -> None:
         self.client = client
