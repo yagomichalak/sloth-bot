@@ -552,10 +552,11 @@ class SlothCurrency(*currency_cogs):
                        "hud": "1-U6oOphdMNMPhPAjRJxJ2E6KIzIbewEh",
                        "badge": "1k8NRfwwLzIY5ALK5bUObAcrKr_eUlfjd",
                        "foot": "1Frfra1tQ49dKM6Dg4DIbrfYbtXadv9zj",
-                       "head": "1Y9kSOayw4NDehbqfmvPXKZLrXnIjeblP"
+                       "head": "1Y9kSOayw4NDehbqfmvPXKZLrXnIjeblP",
+                       "pet": "1BthM5C9Gs2OkCJLzYQNwg1gMQky5v-pn"
                        }
 
-        categories = ['background', 'sloth', 'body', 'hand', 'hud', 'badge', 'foot', 'head']
+        categories = ['background', 'sloth', 'body', 'hand', 'hud', 'badge', 'foot', 'head', 'pet']
         for category in categories:
             try:
                 os.makedirs(f'./sloth_custom_images/{category}')
