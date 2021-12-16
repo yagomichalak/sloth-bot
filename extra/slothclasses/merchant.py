@@ -1066,11 +1066,13 @@ class Merchant(Player):
 
         small = ImageFont.truetype("built titling sb.ttf", 45)
         background = Image.open(f"./sloth_custom_images/background/base_pet_background.png")
+        hud = Image.open(f"./sloth_custom_images/hud/base_pet_hud.png")
         breed = Image.open(f"./sloth_custom_images/pet/{user_pet[2].lower()}.png")
 
+        background.paste(hud, (0, 0), hud)
         background.paste(breed, (0, 0), breed)
         draw = ImageDraw.Draw(background)
-        draw.text((320, 0), str(user_pet[1]), fill="black", font=small)
+        draw.text((320, 5), str(user_pet[1]), fill="white", font=small)
         file_path = f"media/temporary/user_pet-{member.id}.png"
         background.save(file_path)
 
