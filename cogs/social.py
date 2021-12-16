@@ -340,7 +340,7 @@ class Social(commands.Cog):
     @Player.poisoned()
     @utils.is_allowed([booster_role_id, *useful_variables.patreon_roles.keys(), mod_role_id, admin_role_id, teacher_role_id], throw_exc=True)
     async def youtube_together(self, ctx,
-        voice_channel: Option(discord.abc.GuildChannel, description="The voice channel in which to create the party.")
+        voice_channel: Option(discord.VoiceChannel, description="The voice channel in which to create the party.")
     ) -> None:
         """ Creates a YouTube Together session in a VC. """
 
