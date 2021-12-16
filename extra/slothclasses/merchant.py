@@ -902,7 +902,7 @@ class Merchant(Player):
     @Player.skills_locked()
     @Player.user_is_class('merchant')
     @Player.skill_mark()
-    # @Player.not_ready()
+    @Player.not_ready()
     async def sell_pet(self, ctx) -> None:
         """ Sells a pet egg.
         
