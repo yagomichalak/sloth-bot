@@ -611,7 +611,7 @@ class TeacherFeedback(commands.Cog):
         if users_to_reward:
             the_reward_embed = discord.Embed(
                 title="__**Class Activity Reward**__",
-                description=f"The following people got rewarded for participating and being active in {teacher.mention}'s __{language}__ {class_type} class!\n__Teacher__ **+50łł**; __students__ **+10łł**",
+                description=f"The following people got rewarded for participating and being active in {teacher.mention}'s __{language}__ {class_type} class!\n__Teacher__ **+100łł**; __students__ **+10łł**",
                 color=discord.Color.green())
             the_reward_embed.set_footer(text=teacher.guild.name, icon_url=teacher.guild.icon.url)
             the_reward_embed.set_thumbnail(url=teacher.display_avatar)
@@ -641,7 +641,7 @@ class TeacherFeedback(commands.Cog):
 
             if await SlothCurrency.get_user_currency(teacher.id):
                 try:
-                    await SlothCurrency.update_user_money(teacher.id, 50)
+                    await SlothCurrency.update_user_money(teacher.id, 100)
                     await SlothCurrency.update_user_hosted(teacher.id)
                 except Exception as e:
                     print('e', e)
