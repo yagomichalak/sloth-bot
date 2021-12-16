@@ -5,8 +5,8 @@ from extra.slothclasses.player import Player
 from extra.slothclasses.view import (
     HugView, BootView, KissView, SlapView, 
     HoneymoonView, PunchView, GiveView, TickleView,
-     YeetView, BegView, PatView, WhisperView,
-     HandshakeView, PeekView, DriveOverView, HighFiveView
+    YeetView, BegView, PatView, WhisperView,
+    HandshakeView, PeekView, DriveOverView, HighFiveView
 )
 from extra import utils
 from extra.prompt.menu import ConfirmButton
