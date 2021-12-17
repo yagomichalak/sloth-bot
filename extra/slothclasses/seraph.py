@@ -575,7 +575,7 @@ class Seraph(Player):
         await self.update_user_baby_breed(member.id, view.selected_class.lower())
         await ctx.send(f"**Your `Embryo` is born as a `{view.selected_class}`, {member.mention}!**")
 
-    @commands.command(aliases=['pet_name', 'cpet_name', 'update_pet_name'])
+    @commands.command(aliases=['baby_name', 'cbaby_name', 'update_baby_name'])
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def change_baby_name(self, ctx, *, baby_name: str = None) -> None:
         """ Changes the baby's name.
