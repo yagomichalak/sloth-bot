@@ -2,12 +2,13 @@ import discord
 from discord.ext import commands
 from .player import Player, Skill
 from mysqldb import the_database
-from extra.menu import ConfirmSkill
+from extra.prompt.menu import Confirm
 from extra import utils
 import os
 from datetime import datetime
 import random
-from typing import List, Optional
+from typing import List, Optional, Union
+from PIL import Image, ImageDraw, ImageFont
 
 bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
 
@@ -57,7 +58,7 @@ class Seraph(Player):
         if 'protected' in target_fx:
             return await ctx.send(f"**{target.mention} is already protected, {perpetrator.mention}!**")
 
-        confirmed = await ConfirmSkill(f"**{perpetrator.mention}, are you sure you want to use your skill, to protect {target.mention}?**").prompt(ctx)
+        confirmed = await Confirm(f"**{perpetrator.mention}, are you sure you want to use your skill, to protect {target.mention}?**").prompt(ctx)
         if not confirmed:
             return await ctx.send("**Not protecting anyone, then!**")
 
@@ -118,7 +119,7 @@ class Seraph(Player):
             return await ctx.send(f"**You don't have `50łł` to use this skill, {perpetrator.mention}!**")
 
         # Confirms the use of the skill
-        confirm = await ConfirmSkill(
+        confirm = await Confirm(
             f"**Are you sure you want to reinforce `{len(shields)}` active Divine Protection shields for `50łł`, {perpetrator.mention}?**").prompt(ctx)
         # User confirmed the use the skill
         if not confirm:
@@ -342,7 +343,7 @@ class Seraph(Player):
         if user[1] < 100:
             return await ctx.send(f"**You don't have `100łł` to use this skill, {perpetrator.mention}!**")
 
-        confirm = await ConfirmSkill(f"**Do you really want to heal {target.mention} from all debuffs, {perpetrator.mention}?**").prompt(ctx)
+        confirm = await Confirm(f"**Do you really want to heal {target.mention} from all debuffs, {perpetrator.mention}?**").prompt(ctx)
         if not confirm:
             return await ctx.send(f"**Not doing it then, {perpetrator.mention}!**")
 
@@ -444,3 +445,118 @@ class Seraph(Player):
         • Cost = 500łł  """
 
         pass
+
+
+    @commands.command(aliases=['update_baby_class', 'change_baby_class'])
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def choose_baby_class(self, ctx) -> None:
+        """ Chooses a class for your baby. """
+
+        member: discord.Member = ctx.author
+
+        user_pet = await self.get_user_pet(member.id)
+        if not user_pet:
+            return await ctx.send(f"**You don't even have a baby, {member.mention}!**")
+        if user_pet[2].lower() != 'embryo':
+            return await ctx.send(f"**You already chose a class for your baby, {member.mention}!**")
+
+        
+        embed: discord.Embed = discord.Embed(
+            title="__Baby Class Selection__",
+            color=member.color,
+            timestamp=ctx.message.created_at
+        )
+        embed.set_author(name=member, icon_url=member.display_avatar)
+        embed.set_thumbnail(url=member.display_avatar)
+        embed.set_footer(text="3 minutes to select", icon_url=ctx.guild.icon.url)
+
+        view: discord.ui.View = UserBabyView(member)
+        msg = await ctx.send(embed=embed, view=view)
+        await view.wait()
+        await utils.disable_buttons(view)
+        await msg.edit(view=view)
+
+        if view.selected_class is None:
+            return
+
+        if not view.selected_class:
+            return
+
+        await self.update_user_baby_name(member.id, f"Baby {view.selected_class}")
+        await self.update_user_baby_breed(member.id, view.selected_class.lower())
+        await ctx.send(f"**Your `Embryo` is born as a `{view.selected_class}`, {member.mention}!**")
+
+    @commands.command(aliases=['pet_name', 'cpet_name', 'update_pet_name'])
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def change_baby_name(self, ctx, *, baby_name: str = None) -> None:
+        """ Changes the baby's name.
+        :param baby_name: The new baby name to change to.
+        
+        * Price: 250.
+        * Character limit: 25. """
+
+        member: discord.Member = ctx.author
+        if not (user_baby := await self.get_user_baby(member.id)):
+            return await ctx.send(f"**You don't even have a baby, you cannot change it's name, {member.mention}!**")
+
+        if user_baby[2].lower() == 'Embryo':
+            return await ctx.send(f"**You cannot change the name of an unhatched embryo, {member.mention}!**")
+
+        if not baby_name:
+            return await ctx.send(f"**Please, inform a name for your baby, {member.mention}!**")
+
+        if baby_name.lower() == 'embryo':
+            return await ctx.send(f"**You cannot put that name, {member.mention}!**")
+
+        if len(baby_name) > 25:
+            return await ctx.send(f"**The limit of characters for the name is 25, {member.mention}!**")
+
+        SlothCurrency = self.client.get_cog('SlothCurrency')
+        user_money = await SlothCurrency.get_user_currency(member.id)
+        if user_money[0][1] < 250:
+            return await ctx.send(f"**You don't have 250łł to change your baby's nickname, {member.mention}!**")
+
+        confirm = await Confirm(f"**Are you sure you want to spend `250łł` to change your baby's name to `{baby_name}`?**").prompt(ctx)
+        if not confirm:
+            return await ctx.send(f"**Not doing it then, {member.mention}!**")
+
+        await SlothCurrency.update_user_money(member.id, -250)
+        await self.update_user_baby_name(member.id, baby_name)
+        await ctx.send(f"**Successfully updated your baby {user_baby[2]}'s nickname from `{user_baby[2]}` to `{baby_name}`, {member.mention}!**")
+
+
+    @commands.command()
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def baby(self, ctx, member: Optional[Union[discord.Member, discord.User]] = None) -> None:
+        """ Sees someone's baby.
+        :param member: The member from whom to show the baby. [Optional][Default = You] """
+
+        author: discord.Member = ctx.author
+
+        if not member:
+            member = author
+
+        user_baby = await self.get_user_baby(member.id)
+        if not user_baby:
+            if author == member:
+                return await ctx.send(f"**You don't have a baby, {member.mention}!**")
+            else:
+                return await ctx.send(f"**{member} doesn't have a baby, {author.mention}!**")
+
+        # Makes the Baby's Image
+
+        small = ImageFont.truetype("built titling sb.ttf", 45)
+        background = Image.open(f"./sloth_custom_images/background/base_baby_sloth_background.png")
+        hud = Image.open(f"./sloth_custom_images/hud/base_baby_sloth_hud.png")
+        breed = Image.open(f"./sloth_custom_images/sloth/{user_baby[2].lower()}.png")
+
+        background.paste(hud, (0, 0), hud)
+        background.paste(breed, (0, 0), breed)
+        draw = ImageDraw.Draw(background)
+        draw.text((320, 5), str(user_baby[1]), fill="white", font=small)
+        file_path = f"media/temporary/user_baby-{member.id}.png"
+        background.save(file_path)
+
+        # Sends the Baby's Image
+        await ctx.send(file=discord.File(file_path))
+        return os.remove(file_path)

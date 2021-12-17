@@ -78,11 +78,11 @@ class UserBabiesTable(commands.Cog):
         else:
             return False
 
-    async def insert_user_pet(self, user_id: int, baby_name: Optional[str] = None, baby_class: Optional[str] = None) -> None:
-        """ Inserts a User Pet.
-        :param user_id: The ID of the user owner of the pet.
-        :param baby_name: The name of the pet. [Optional]
-        :param baby_class: The breed of the pet. [Optional]"""
+    async def insert_user_baby(self, user_id: int, baby_name: Optional[str] = None, baby_class: Optional[str] = None) -> None:
+        """ Inserts a User Baby.
+        :param user_id: The ID of the user owner of the baby.
+        :param baby_name: The name of the baby. [Optional]
+        :param baby_class: The class of the baby. [Optional]"""
 
         mycursor, db = await the_database()
         if baby_name and baby_class:
@@ -92,20 +92,20 @@ class UserBabiesTable(commands.Cog):
         await db.commit()
         await mycursor.close()
 
-    async def get_user_pet(self, user_id: int) -> List[Union[str, int]]:
-        """ Get the user's pet.
+    async def get_user_baby(self, user_id: int) -> List[Union[str, int]]:
+        """ Get the user's baby.
         :param user_id: The ID of the baby's owner. """
 
         mycursor, _ = await the_database()
         await mycursor.execute("SELECT * FROM UserBabies WHERE user_id = %s", (user_id,))
-        user_pet = await mycursor.fetchone()
+        user_baby = await mycursor.fetchone()
         await mycursor.close()
-        return user_pet
+        return user_baby
 
     async def update_user_baby_name(self, user_id: int, baby_name: str) -> None:
         """ Updates the User Baby's name.
         :param user_id: The ID of the baby's owner.
-        :param baby_name: The new pet name to update to. """
+        :param baby_name: The new baby name to update to. """
 
         mycursor, db = await the_database()
         await mycursor.execute("UPDATE UserBabies SET baby_name = %s WHERE user_id = %s", (baby_name, user_id))
@@ -113,17 +113,17 @@ class UserBabiesTable(commands.Cog):
         await mycursor.close()
 
     async def update_user_baby_class(self, user_id: int, baby_class: str) -> None:
-        """ Updates the User Baby's breed.
+        """ Updates the User Baby's class.
         :param user_id: The ID of the baby's owner.
-        :param baby_class: The new pet breed to update to. """
+        :param baby_class: The new baby class to update to. """
 
         mycursor, db = await the_database()
         await mycursor.execute("UPDATE UserBabies SET baby_class = %s WHERE user_id = %s", (baby_class, user_id))
         await db.commit()
         await mycursor.close()
 
-    async def delete_user_pet(self, user_id: int) -> None:
-        """ Deletes the user's pet.
+    async def delete_user_baby(self, user_id: int) -> None:
+        """ Deletes the user's baby.
         :param user_id: The ID of the baby's owner. """
 
         mycursor, db = await the_database()
