@@ -27,7 +27,7 @@ class UserBabiesTable(commands.Cog):
             parent_two BIGINT NOT NULL,
             baby_name VARCHAR(25) DEFAULT 'Embryo',
             baby_class VARCHAR(25) DEFAULT 'Embryo',
-            PRIMARY KEY (user_id)
+            PRIMARY KEY (parent_one, parent_two)
             ) CHARSET utf8mb4 COLLATE utf8mb4_unicode_ci
         """)
         await db.commit()
