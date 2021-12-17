@@ -1010,7 +1010,6 @@ class Merchant(Player):
         """ Changes the pet's name.
         :param pet_name: The new pet name to change to.
         
-        * You don't pay to change the name the first time.
         * Price: 250.
         * Character limit: 25. """
 

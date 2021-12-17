@@ -21,7 +21,6 @@ additional_cogs: List[commands.Cog] = [
     UserPetsTable, UserBabiesTable
 ]
 
-
 class Skill(Enum):
 
     ONE = 'skill_one_ts'
