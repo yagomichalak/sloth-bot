@@ -433,18 +433,107 @@ class Seraph(Player):
     @Player.user_is_class('seraph')
     @Player.skill_mark()
     @Player.not_ready()
-    async def attain_grace(self, ctx, member: Optional[discord.Member] = None) -> None:
+    async def attain_grace(self, ctx, target: Optional[discord.Member] = None) -> None:
         """ Tries with a 10% chance of success to attain the grace from the deity
          so the person, who must be honeymoon'd receives a baby to take care of, 
          together with their spouse.
-        :param member: The member to attain the grace to. [Optional][Default=You]
+        :param target: The target member to attain the grace to. [Optional][Default=You]
         
         PS: Don't forget to feed your baby, that's crucial and vital.
 
         • Delay = 1 day
         • Cost = 500łł  """
 
-        pass
+        if ctx.channel.id != bots_and_commands_channel_id:
+            return await ctx.send(f"**{ctx.author.mention}, you can only use this command in {self.bots_txt.mention}!**")
+
+        perpetrator = ctx.author
+        perpetrator_fx = await self.get_user_effects(perpetrator)
+
+        if 'knocked_out' in perpetrator_fx:
+            return await ctx.send(f"**{perpetrator.mention}, you can't use your skill, because you are knocked-out!**")
+
+        if not target:
+            target = perpetrator
+
+        if target.bot:
+            return await ctx.send(f"**You cannot use it on a bot, {perpetrator.mention}!**")
+
+        target_sloth_profile = await self.get_sloth_profile(target.id)
+        if not target_sloth_profile:
+            return await ctx.send(f"**You cannot attain the grace for someone who doesn't have an account, {perpetrator.mention}!**")
+
+        if target_sloth_profile[1] == 'default':
+            return await ctx.send(f"**You cannot attain the grace for someone who has a `default` Sloth class, {perpetrator.mention}!**")
+
+        marriage = await self.client.get_cog('SlothClass').get_user_marriage(perpetrator.id)
+        if not marriage['partner']:
+            return await ctx.send(f"**You cannot attain the grace for someone who is not married, {perpetrator.mention}!**")
+
+        if not marriage['honeymoon']:
+            return await ctx.send(f"**You cannot attain the grace for someone who is not honeymoon'd, {perpetrator.mention}!**")
+
+        confirm = await Confirm(f"**Are you sure you want to spend `500` to try to attain the grace for {target.mention}, {perpetrator.mention}?**").prompt(ctx)
+        if not confirm:
+            return await ctx.send(f"**Not doing it, then, {target.mention}!**")
+
+        _, exists = await Player.skill_on_cooldown(skill=Skill.FOUR).predicate(ctx)
+
+        user_currency = await self.get_user_currency(perpetrator.id)
+        if user_currency[1] < 500:
+            return await ctx.send(f"**{perpetrator.mention}, you don't have `500łł`!**")
+
+        await self.client.get_cog('SlothCurrency').update_user_money(perpetrator.id, -500)
+
+        emoji = '👶'
+
+        # Calculates the chance (10%) of attaining the grace for the a member
+        rn = random.random()
+        attained_grace: bool = rn <= 0.10
+
+        try:
+            current_timestamp = await utils.get_timestamp()
+            if attained_grace:
+                target_partner_sloth_profile = await self.get_sloth_profile(marriage['partner'])
+                baby_class = random.choice([target_sloth_profile[1]], target_partner_sloth_profile[1])
+                await self.insert_user_baby(target.id, marriage['partner'], f"Baby {baby_class}", baby_class)
+            if exists:
+                await self.update_user_skill_ts(perpetrator.id, Skill.FOUR, current_timestamp)
+            else:
+                await self.insert_user_skill_cooldown(perpetrator.id, Skill.FOUR, current_timestamp)
+                # Updates user's skills used counter
+                await self.update_user_skills_used(user_id=perpetrator.id)
+        except Exception as e:
+            print(e)
+            return await ctx.send(f"**{perpetrator.mention}, something went wrong with it, try again later!**")
+        else:
+            if attained_grace:
+                attained_grace_embed = await self.attained_grace_embed(perpetrator=perpetrator, target=target, emoji=emoji)
+                await ctx.send(embed=attained_grace_embed)
+            else:
+                await ctx.send(f"**You had a `10%` chance of attaining the grace for {target.mention}, but you missed it, {perpetrator.mention}!**")
+
+
+    async def attained_grace_embed(self, perpetrator: int, target: int, emoji: str) -> discord.Embed:
+        """ Makes an embedded message for an attain grace action.
+        :param perpetrator: The member who conceived the grace.
+        :param target: The member who has been received the grace.
+        :param emoji: The emoji representing the skill action. """
+
+        parsed_time = await utils.parse_time()
+        attained_grace_embed = discord.Embed(
+            title="__A Grace has been Attained__!",
+            description=f"{target.mention} attained the grace thanks to {perpetrator.mention} and has been given a beautiful baby!",
+            color=discord.Color.green(),
+            timestamp=parsed_time
+        )
+
+        attained_grace_embed.set_thumbnail(url=target.display_avatar)
+        attained_grace_embed.set_image(url="https://c.tenor.com/ISO7aKhQvX4AAAAC/lion-king-simba.gif")
+        attained_grace_embed.set_author(name=perpetrator, url=perpetrator.display_avatar, icon_url=perpetrator.display_avatar)
+        attained_grace_embed.set_footer(text=perpetrator.guild.name, icon_url=perpetrator.guild.icon.url)
+
+        return attained_grace_embed
 
 
     @commands.command(aliases=['update_baby_class', 'change_baby_class'])
@@ -546,12 +635,12 @@ class Seraph(Player):
         # Makes the Baby's Image
 
         small = ImageFont.truetype("built titling sb.ttf", 45)
-        background = Image.open(f"./sloth_custom_images/background/base_baby_sloth_background.png")
-        hud = Image.open(f"./sloth_custom_images/hud/base_baby_sloth_hud.png")
-        breed = Image.open(f"./sloth_custom_images/sloth/{user_baby[2].lower()}.png")
+        background = Image.open(f"./sloth_custom_images/background/base_baby_background.png")
+        hud = Image.open(f"./sloth_custom_images/hud/base_baby_hud.png")
+        baby_class = Image.open(f"./sloth_custom_images/sloth/{user_baby[2].lower()}.png")
 
         background.paste(hud, (0, 0), hud)
-        background.paste(breed, (0, 0), breed)
+        background.paste(baby_class, (0, 0), baby_class)
         draw = ImageDraw.Draw(background)
         draw.text((320, 5), str(user_baby[1]), fill="white", font=small)
         file_path = f"media/temporary/user_baby-{member.id}.png"
