@@ -432,7 +432,7 @@ class Seraph(Player):
     @Player.skills_locked()
     @Player.user_is_class('seraph')
     @Player.skill_mark()
-    @Player.not_ready()
+    # @Player.not_ready()
     async def attain_grace(self, ctx, target: Optional[discord.Member] = None) -> None:
         """ Tries with a 10% chance of success to attain the grace from the deity
          so the person, who must be honeymoon'd receives a baby to take care of, 
@@ -495,7 +495,7 @@ class Seraph(Player):
             current_timestamp = await utils.get_timestamp()
             if attained_grace:
                 target_partner_sloth_profile = await self.get_sloth_profile(marriage['partner'])
-                baby_class = random.choice([target_sloth_profile[1]], target_partner_sloth_profile[1])
+                baby_class = random.choice([target_sloth_profile[1], target_partner_sloth_profile[1]])
                 await self.insert_user_baby(target.id, marriage['partner'], f"Baby {baby_class}", baby_class)
             if exists:
                 await self.update_user_skill_ts(perpetrator.id, Skill.FOUR, current_timestamp)
@@ -637,12 +637,12 @@ class Seraph(Player):
         small = ImageFont.truetype("built titling sb.ttf", 45)
         background = Image.open(f"./sloth_custom_images/background/base_baby_background.png")
         hud = Image.open(f"./sloth_custom_images/hud/base_baby_hud.png")
-        baby_class = Image.open(f"./sloth_custom_images/sloth/{user_baby[2].lower()}.png")
+        baby_class = Image.open(f"./sloth_custom_images/sloth/{user_baby[3].lower()}.png").resize((470, 350))
 
         background.paste(hud, (0, 0), hud)
-        background.paste(baby_class, (0, 0), baby_class)
+        background.paste(baby_class, (160, 280), baby_class)
         draw = ImageDraw.Draw(background)
-        draw.text((320, 5), str(user_baby[1]), fill="white", font=small)
+        draw.text((320, 5), str(user_baby[2]), fill="white", font=small)
         file_path = f"media/temporary/user_baby-{member.id}.png"
         background.save(file_path)
 
