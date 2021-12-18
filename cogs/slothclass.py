@@ -49,6 +49,7 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
         await self.try_to_run(self.check_transmutations)
         await self.try_to_run(self.check_shop_potion_items)
         await self.try_to_run(self.check_shop_ring_items)
+        await self.try_to_run(self.check_shop_egg_items)
         await self.try_to_run(self.check_hacks)
         await self.try_to_run(self.check_knock_outs)
         await self.try_to_run(self.check_wires)

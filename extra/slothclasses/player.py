@@ -472,30 +472,43 @@ class Player(*additional_cogs):
         return frogs
 
     async def get_expired_potion_items(self) -> List[List[Union[str, int]]]:
-        """ Gets expired transmutation skill actions. """
+        """ Gets expired Potion items from the shop. """
 
         the_time = await utils.get_timestamp()
-        mycursor, db = await the_database()
+        mycursor, _ = await the_database()
         await mycursor.execute("""
             SELECT * FROM SlothSkills
             WHERE skill_type = 'potion' AND (%s - skill_timestamp) >= 86400
             """, (the_time,))
-        transmutations = await mycursor.fetchall()
+        potions = await mycursor.fetchall()
         await mycursor.close()
-        return transmutations
+        return potions
 
     async def get_expired_ring_items(self) -> List[List[Union[str, int]]]:
-        """ Gets expired transmutation skill actions. """
+        """ Gets expired Wedding Ring items from the shop. """
 
         the_time = await utils.get_timestamp()
-        mycursor, db = await the_database()
+        mycursor, _ = await the_database()
         await mycursor.execute("""
             SELECT * FROM SlothSkills
             WHERE skill_type = 'ring' AND (%s - skill_timestamp) >= 36000
             """, (the_time,))
-        transmutations = await mycursor.fetchall()
+        rings = await mycursor.fetchall()
         await mycursor.close()
-        return transmutations
+        return rings
+
+    async def get_expired_pet_egg_items(self) -> List[List[Union[str, int]]]:
+        """ Gets expired Pet Egg items from the shop. """
+
+        the_time = await utils.get_timestamp()
+        mycursor, _ = await the_database()
+        await mycursor.execute("""
+            SELECT * FROM SlothSkills
+            WHERE skill_type = 'pet_egg' AND (%s - skill_timestamp) >= 432000
+            """, (the_time,))
+        pet_eggs = await mycursor.fetchall()
+        await mycursor.close()
+        return pet_eggs
 
     async def get_hacks(self) -> List[List[Union[str, int]]]:
         """ Gets all hack skill actions. """
