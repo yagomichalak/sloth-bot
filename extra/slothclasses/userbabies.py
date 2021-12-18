@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 from mysqldb import the_database
 from typing import List, Union, Optional
-
+from extra import utils
 
 class UserBabiesTable(commands.Cog):
     """ Class for the UserBabies table and its commands and methods. """
@@ -29,6 +29,8 @@ class UserBabiesTable(commands.Cog):
             baby_class VARCHAR(25) DEFAULT 'Embryo',
             life_points TINYINT(3) DEFAULT 100,
             food TINYINT(3) DEFAULT 100,
+            life_points_ts BIGINT NOT NULL,
+            food_ts BIGINT NOT NULL,
             PRIMARY KEY (parent_one, parent_two)
             ) CHARSET utf8mb4 COLLATE utf8mb4_unicode_ci
         """)
@@ -86,15 +88,19 @@ class UserBabiesTable(commands.Cog):
         :param parent_one: The parent one of the baby.
         :param parent_two: The parent two of the baby.
         :param baby_name: The name of the baby. [Optional]
-        :param baby_class: The class of the baby. [Optional]"""
+        :param baby_class: The class of the baby. [Optional] """
+
+        current_ts = await utils.get_timestamp()
+        current_ts = current_ts + 3600
 
         mycursor, db = await the_database()
         if baby_name and baby_class:
             await mycursor.execute("""
-                INSERT INTO UserBabies (parent_one, parent_two, baby_name, baby_class) VALUES (%s, %s, %s, %s)
-                """, (parent_one, parent_two, baby_name, baby_class))
+                INSERT INTO UserBabies (parent_one, parent_two, baby_name, baby_class, life_points_ts, food_ts) VALUES (%s, %s, %s, %s, %s, %s)
+                """, (parent_one, parent_two, baby_name, baby_class, current_ts, current_ts))
         else:
-            await mycursor.execute("INSERT INTO UserBabies (user_id, parent_one, parent_two) VALUES (%s, %s)", (parent_one, parent_two))
+            await mycursor.execute("INSERT INTO UserBabies (user_id, parent_one, parent_two, life_points_ts, food_ts) VALUES (%s, %s, %s, %s)", (
+                parent_one, parent_two, current_ts, current_ts))
         await db.commit()
         await mycursor.close()
 
@@ -128,23 +134,33 @@ class UserBabiesTable(commands.Cog):
         await db.commit()
         await mycursor.close()
 
-    async def update_user_baby_lp(self, parent_id: int, increment: int = 5) -> None:
+    async def update_user_baby_lp(self, parent_id: int, increment: int = 5, current_ts: Optional[int] = None) -> None:
         """ Updates the User Baby's life points.
         :param parent_id: The ID of one of the baby's parents.
-        :param increment: The incremention value to apply. [Default = 5] (Can be negative) """
+        :param increment: The incremention value to apply. [Default = 5] (Can be negative)
+        :param current_ts: The current timestamp. [Optional] """
 
         mycursor, db = await the_database()
-        await mycursor.execute("UPDATE UserBabies SET life_points = life_points + %s WHERE parent_one = %s OR parent_two = %s", (increment, parent_id, parent_id))
+        if current_ts:
+            await mycursor.execute("""UPDATE UserBabies SET life_points = life_points + %s, life_points_ts = %s WHERE parent_one = %s OR parent_two = %s
+            """, (increment, current_ts, parent_id, parent_id))
+        else:
+            await mycursor.execute("UPDATE UserBabies SET life_points = life_points + %s WHERE parent_one = %s OR parent_two = %s", (increment, parent_id, parent_id))
         await db.commit()
         await mycursor.close()
 
-    async def update_user_baby_food(self, parent_id: int, increment: int = 5) -> None:
+    async def update_user_baby_food(self, parent_id: int, increment: int = 5, current_ts: Optional[int] = None) -> None:
         """ Updates the User Baby's food status.
         :param parent_id: The ID of one of the baby's parents.
-        :param increment: The incremention value to apply. [Default = 5] (Can be negative) """
+        :param increment: The incremention value to apply. [Default = 5] (Can be negative)
+        :param current_ts: The current timestamp. [Optional] """
 
         mycursor, db = await the_database()
-        await mycursor.execute("UPDATE UserBabies SET food = food + %s WHERE parent_one = %s OR parent_two = %s", (increment, parent_id, parent_id))
+        if current_ts:
+            await mycursor.execute("""UPDATE UserBabies SET food = food + %s, food_ts = %s WHERE parent_one = %s OR parent_two = %s
+            """, (increment, current_ts, parent_id, parent_id))
+        else:
+            await mycursor.execute("UPDATE UserBabies SET food = food + %s WHERE parent_one = %s OR parent_two = %s", (increment, parent_id, parent_id))
         await db.commit()
         await mycursor.close()
 
