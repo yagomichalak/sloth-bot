@@ -5,6 +5,7 @@ from typing import List, Union, Optional, Dict, Any
 from .menu import ConfirmSkill
 from .select import ReportSupportSelect
 import os
+from functools import partial
 import json
 
 
@@ -397,3 +398,71 @@ class SoundBoardView(discord.ui.View):
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
         return interaction.user.id == self.ctx.author.id
+
+
+class UserPetView(discord.ui.View):
+    """ View for the UserPet selection. """
+
+    def __init__(self, member: discord.Member, timeout: Optional[float] = 180):
+        super().__init__(timeout=timeout)
+        self.member = member
+        self.pets = self.get_pets()
+        self.selected_pet: str = None
+
+        options = [
+            discord.SelectOption(label=pet, description=values['description'], emoji=values['emoji'])
+            for pet, values in self.pets.items()]
+
+        pets_select = discord.ui.Select(
+            placeholder="Select the kind of Pet you want to hatch your egg to.", custom_id="user_pet_view_select_id", 
+            options=options)
+
+        pets_select.callback = partial(self.select_pet_select, pets_select)
+
+        self.children.insert(0, pets_select)
+
+    def get_pets(self) -> List[Dict[str, str]]:
+        """ Gets a list of sounds to play on the soundboard. """
+
+        data = {}
+        with open(f'extra/random/json/pets.json', 'r', encoding='utf-8') as file:
+            data = json.loads(file.read())
+
+        return data
+
+    
+    async def select_pet_select(self, select: discord.ui.select, interaction: discord.Interaction) -> None:
+        """ Callback for a select menu option. """
+
+        embed = interaction.message.embeds[0]
+        selected_option = interaction.data['values'][0]
+        embed.clear_fields()
+        embed.add_field(name="Selected Pet Breed:", value=f"{selected_option} {self.pets[selected_option]['emoji']}")
+        embed.set_image(url=self.pets[selected_option]['url'])
+        self.selected_pet = selected_option
+
+        await interaction.response.edit_message(embed=embed)
+
+
+
+    @discord.ui.button(label="Confirm", custom_id="confirm_pet_selection_id", style=discord.ButtonStyle.success, emoji="✅", row=1)
+    async def confirm_pet_selection_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Confirms the pet selection. """
+
+        if not self.selected_pet:
+            return await interaction.response.send_message("**You must choose an option to confirm!**", ephemeral=True)
+
+        await interaction.response.defer()
+        self.stop()
+
+    @discord.ui.button(label="Cancel", custom_id="cancel_pet_selection_id", style=discord.ButtonStyle.danger, emoji="❌", row=1)
+    async def cancel_pet_selection_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Cancels the pet selection. """
+
+        await interaction.response.defer()
+        self.selected_pet = None
+        self.stop()
+
+
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        return await super().interaction_check(interaction)

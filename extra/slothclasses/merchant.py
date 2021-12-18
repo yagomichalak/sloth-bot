@@ -5,15 +5,16 @@ from discord.ext import commands, menus
 from .player import Player, Skill
 from mysqldb import the_database
 from extra.menu import ConfirmSkill, prompt_number, OpenShopLoop
+from extra.view import UserPetView
+from extra.prompt.menu import Confirm
 from extra import utils
 import os
-from typing import List, Dict, Union
+from typing import List, Dict, Union, Optional
 from datetime import datetime
 import random
 from PIL import Image, ImageDraw, ImageFont
 
 bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
-
 
 class Merchant(Player):
 
@@ -124,7 +125,8 @@ class Merchant(Player):
     @buy.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def potion(self, ctx, member: discord.Member = None) -> None:
-        """ Buys a changing-Sloth-class potion from a Merchant. """
+        """ Buys a changing-Sloth-class potion from a Merchant.
+        :param member: The member from whom to buy it. """
 
         buyer = ctx.author
         if not member:
@@ -211,7 +213,8 @@ class Merchant(Player):
     @Player.poisoned()
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def ring(self, ctx, member: discord.Member = None) -> None:
-        """ Buys a Wedding Ring from a Merchant. """
+        """ Buys a Wedding Ring from a Merchant.
+        :param member: The member from whom to buy it. """
 
         buyer = ctx.author
         if not member:
@@ -274,7 +277,7 @@ class Merchant(Player):
                 await self.client.get_cog('SlothCurrency').update_user_money(buyer.id, - merchant_item[7])
                 await self.client.get_cog('SlothCurrency').update_user_money(member.id, merchant_item[7])
 
-            # Gives the buyer their potion and removes the potion from the store
+            # Gives the buyer their ring and removes the potion from the store
             await self.update_user_rings(buyer.id)
             await self.delete_skill_action_by_target_id_and_skill_type(member.id, 'ring')
         except Exception as e:
@@ -290,6 +293,94 @@ class Merchant(Player):
             await ctx.send(embed=discord.Embed(
                 title="__Successful Acquisition__",
                 description=f"{buyer.mention} bought a `Wedding Ring` from {member.mention}!",
+                color=discord.Color.green(),
+                timestamp=ctx.message.created_at
+                ))
+
+    @buy.command(aliases=['pet', 'egg'])
+    @Player.poisoned()
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def pet_egg(self, ctx, member: discord.Member = None) -> None:
+        """ Buys a Pet Egg from a Merchant.
+        :param member: The member from whom to buy it. """
+
+        buyer = ctx.author
+        if not member:
+            return await ctx.send(f"**Please, inform a `Merchant`, {buyer.mention}!**")
+
+        if not(merchant_item := await self.get_skill_action_by_user_id_and_skill_type(member.id, 'pet_egg')):
+            return await ctx.send(
+                f"**{member} is either not a `Merchant` or they don't have a pet egg available for purchase, {buyer.mention}!**")
+
+        user_info = await self.get_user_currency(buyer.id)
+        slothprofile = await self.get_sloth_profile(buyer.id)
+        
+        if not user_info:
+            return await ctx.send(embed=discord.Embed(description=f"**{buyer.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one!**"))
+
+        if slothprofile[1].lower() == 'default':
+            return await ctx.send(embed=discord.Embed(description=f"**{buyer.mention}, you don't have a Sloth class yet. Click [here](https://thelanguagesloth.com/profile/slothclass) to choose one!**"))
+
+        if await self.get_user_pet(buyer.id):
+            return await ctx.send(embed=discord.Embed(description=f"**{buyer.mention}, you already have a `Pet`, you can't buy another one!**"))
+
+        if user_info[1] < merchant_item[7]:
+            return await ctx.send(embed=discord.Embed(description=f"**{buyer.mention}, the pet egg costs {merchant_item[7]}, but you only have {user_info[1]}łł!**"))
+
+        confirm = await ConfirmSkill(f"**{buyer.mention}, are you sure you want to buy a `Pet Egg` for `{merchant_item[7]}łł`?**").prompt(ctx)
+        if not confirm:
+            return await ctx.send(f"**Not buying it, then, {buyer.mention}!**")
+
+        if not await self.get_skill_action_by_user_id_and_skill_type(member.id, 'pet_egg'):
+            return await ctx.send(f"**{member.mention} doesn't have a `Pet Egg` available for purchase, {buyer.mention}!**")
+
+        try:
+            if wired_user := await self.get_skill_action_by_target_id_and_skill_type(target_id=member.id, skill_type='wire'):
+
+                siphon_percentage = 35
+                cybersloth_money = round((merchant_item[7]*siphon_percentage)/100)
+                target_money = merchant_item[7] - cybersloth_money
+                await self.client.get_cog('SlothCurrency').update_user_money(member.id, target_money)
+                await self.client.get_cog('SlothCurrency').update_user_money(buyer.id, -merchant_item[7])
+                await self.client.get_cog('SlothCurrency').update_user_money(wired_user[0], cybersloth_money)
+                cybersloth = self.client.get_user(wired_user[0])
+                siphon_embed = discord.Embed(
+                        title="__Intercepted Purchase__",
+                        description=(
+                            f"{buyer.mention} bought a `Pet Egg` from {member.mention} for `{merchant_item[7]}łł`, "
+                            f"but {cybersloth.mention if cybersloth else str(cybersloth)} siphoned off `{siphon_percentage}%` of the price; `{cybersloth_money}łł`! "
+                            f"So the Merhcant {member.mention} actually got `{target_money}łł`!"
+                        ),
+                        color=buyer.color,
+                        timestamp=ctx.message.created_at)
+                if cybersloth:
+                    siphon_embed.set_thumbnail(url=cybersloth.display_avatar)
+
+                await ctx.send(
+                    content=f"{buyer.mention}, {member.mention}, <@{wired_user[0]}>",
+                    embed=siphon_embed)
+
+            else:
+                # Updates both buyer and seller's money
+                await self.client.get_cog('SlothCurrency').update_user_money(buyer.id, - merchant_item[7])
+                await self.client.get_cog('SlothCurrency').update_user_money(member.id, merchant_item[7])
+
+            # Gives the buyer their pet egg and removes the potion from the store
+            await self.insert_user_pet(buyer.id)
+            await self.delete_skill_action_by_target_id_and_skill_type(member.id, 'pet_egg')
+        except Exception as e:
+            print(e)
+            await ctx.send(embed=discord.Embed(
+                title="Error!",
+                description=f"**Something went wrong with that purchase, {buyer.mention}!**",
+                color=discord.Color.red(),
+                timestamp=ctx.message.created_at
+                ))
+
+        else:
+            await ctx.send(embed=discord.Embed(
+                title="__Successful Acquisition__",
+                description=f"{buyer.mention} bought a `Pet Egg` from {member.mention}!",
                 color=discord.Color.green(),
                 timestamp=ctx.message.created_at
                 ))
@@ -426,7 +517,7 @@ class Merchant(Player):
         """ Gets all open shop items. """
 
         mycursor, _ = await the_database()
-        await mycursor.execute("SELECT * FROM SlothSkills WHERE skill_type = 'potion' OR skill_type = 'ring'")
+        await mycursor.execute("SELECT * FROM SlothSkills WHERE skill_type in ('potion', 'ring', 'pet_egg')")
         potions = await mycursor.fetchall()
         await mycursor.close()
         return potions
@@ -724,7 +815,8 @@ class Merchant(Player):
         filename = f"marriage_{p1.id}_{p2.id}.png"
 
         medium = ImageFont.truetype("built titling sb.ttf", 60)
-        background = Image.open(await utils.get_user_specific_type_item(p1.id, 'background'))
+        SlothCurrency = self.client.get_cog('SlothCurrency')
+        background = Image.open(await SlothCurrency.get_user_specific_type_item(p1.id, 'background'))
 
         # Get PFPs
         pfp1 = await utils.get_user_pfp(p1, 250)
@@ -812,14 +904,177 @@ class Merchant(Player):
     @Player.skill_mark()
     @Player.not_ready()
     async def sell_pet(self, ctx) -> None:
-        """ Sells one pet of your choice from a set of options.
+        """ Sells a pet egg.
         
         PS: You must be a responsible parent, otherwise your pet will 'vanish'.
         
         • Delay = 1 day
         • Cost = 500łł
-        • You can only sell pets costing more than 500łł as well
-        • Pets stay up to 5 days in the Sloth Shop
-        • You cannot sell more than 3 pets at the time.  """
+        • Pets stay up to 5 days in the Sloth Shop. """
 
-        pass
+        
+        if ctx.channel.id != bots_and_commands_channel_id:
+            return await ctx.send(f"**{ctx.author.mention}, you can only use this command in {self.bots_txt.mention}!**")
+
+        member = ctx.author
+
+        member_fx = await self.get_user_effects(member)
+
+        if 'knocked_out' in member_fx:
+            return await ctx.send(f"**{member.mention}, you can't use your skill, because you are knocked-out!**")
+
+        if await self.get_skill_action_by_user_id_and_skill_type(member.id, 'pet_egg'):
+            return await ctx.send(f"**{member.mention}, you already have a pet egg in your shop!**")
+
+        item_price = await prompt_number(self.client, ctx, f"**{member.mention}, for how much do you want to sell your pet egg?**", member)
+        if item_price is None:
+            return
+
+        confirm = await ConfirmSkill(f"**{member.mention}, are you sure you want to spend `500` to put a pet in your shop with the price of `{item_price}`łł ?**").prompt(ctx)
+        if not confirm:
+            return await ctx.send(f"**Not doing it, then, {member.mention}!**")
+
+        _, exists = await Player.skill_on_cooldown(skill=Skill.FOUR).predicate(ctx)
+
+        user_currency = await self.get_user_currency(member.id)
+        if user_currency[1] < 500:
+            return await ctx.send(f"**{member.mention}, you don't have `500łł`!**")
+
+        await self.client.get_cog('SlothCurrency').update_user_money(member.id, -500)
+
+        item_emoji = '🥚'
+
+        try:
+            current_timestamp = await utils.get_timestamp()
+            await self.insert_skill_action(
+                user_id=member.id, skill_type="pet_egg", skill_timestamp=current_timestamp,
+                target_id=member.id, channel_id=ctx.channel.id, price=item_price, emoji=item_emoji
+            )
+            if exists:
+                await self.update_user_skill_ts(member.id, Skill.FOUR, current_timestamp)
+            else:
+                await self.insert_user_skill_cooldown(ctx.author.id, Skill.FOUR, current_timestamp)
+            # Updates user's skills used counter
+            await self.update_user_skills_used(user_id=member.id)
+            open_shop_embed = await self.get_open_shop_embed(
+                channel=ctx.channel, perpetrator_id=member.id, price=item_price, item_name='Pet Egg', emoji=item_emoji)
+            await ctx.send(embed=open_shop_embed)
+        except Exception as e:
+            print(e)
+            return await ctx.send(f"**{member.mention}, something went wrong with it, try again later!**")
+        else:
+            await ctx.send(f"**{member}, your item is now in the shop, check `z!sloth_shop` to see it there!**")
+
+    @commands.command()
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def hatch(self, ctx) -> None:
+        """ Hatches your pet egg. """
+
+        member: discord.Member = ctx.author
+
+        user_pet = await self.get_user_pet(member.id)
+        if not user_pet:
+            return await ctx.send(f"**You don't have an egg to hatch, {member.mention}!**")
+        if user_pet[2].lower() != 'egg':
+            return await ctx.send(f"**You already hatched your pet egg, {member.mention}!**")
+
+        
+        embed: discord.Embed = discord.Embed(
+            title="__Pet Breed Selection__",
+            color=member.color,
+            timestamp=ctx.message.created_at
+        )
+        embed.set_author(name=member, icon_url=member.display_avatar)
+        embed.set_thumbnail(url=member.display_avatar)
+        embed.set_footer(text="3 minutes to select", icon_url=ctx.guild.icon.url)
+
+        view: discord.ui.View = UserPetView(member)
+        msg = await ctx.send(embed=embed, view=view)
+        await view.wait()
+        await utils.disable_buttons(view)
+        await msg.edit(view=view)
+
+        if view.selected_pet is None:
+            return
+
+        if not view.selected_pet:
+            return
+
+        await self.update_user_pet_name(member.id, view.selected_pet)
+        await self.update_user_pet_breed(member.id, view.selected_pet.lower())
+        await ctx.send(f"**Your `Pet Egg` has been successfully hatched into a `{view.selected_pet}`, {member.mention}!**")
+
+    @commands.command(aliases=['pet_name', 'cpet_name', 'update_pet_name'])
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def change_pet_name(self, ctx, *, pet_name: str = None) -> None:
+        """ Changes the pet's name.
+        :param pet_name: The new pet name to change to.
+        
+        * Price: 250.
+        * Character limit: 25. """
+
+        member: discord.Member = ctx.author
+        if not (user_pet := await self.get_user_pet(member.id)):
+            return await ctx.send(f"**You don't even have a pet, you cannot change it's name, {member.mention}!**")
+
+        if user_pet[2].lower() == 'Egg':
+            return await ctx.send(f"**You cannot change the name of an unhatched egg, {member.mention}!**")
+
+        if not pet_name:
+            return await ctx.send(f"**Please, inform a name for your pet, {member.mention}!**")
+
+        if pet_name.lower() == 'egg':
+            return await ctx.send(f"**You cannot put that name, {member.mention}!**")
+
+        if len(pet_name) > 25:
+            return await ctx.send(f"**The limit of characters for the name is 25, {member.mention}!**")
+
+        SlothCurrency = self.client.get_cog('SlothCurrency')
+        user_money = await SlothCurrency.get_user_currency(member.id)
+        if user_money[0][1] < 250:
+            return await ctx.send(f"**You don't have 250łł to change your pet's nickname, {member.mention}!**")
+
+        confirm = await Confirm(f"**Are you sure you want to spend `250łł` to change your pet's name to `{pet_name}`?**").prompt(ctx)
+        if not confirm:
+            return await ctx.send(f"**Not doing it then, {member.mention}!**")
+
+        await SlothCurrency.update_user_money(member.id, -250)
+        await self.update_user_pet_name(member.id, pet_name)
+        await ctx.send(f"**Successfully updated your pet {user_pet[2]}'s nickname from `{user_pet[2]}` to `{pet_name}`, {member.mention}!**")
+
+
+    @commands.command(aliases=['mascot'])
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def pet(self, ctx, member: Optional[Union[discord.Member, discord.User]] = None) -> None:
+        """ Sees someone's pet.
+        :param member: The member from whom to show the pet. [Optional][Default = You] """
+
+        author: discord.Member = ctx.author
+
+        if not member:
+            member = author
+
+        user_pet = await self.get_user_pet(member.id)
+        if not user_pet:
+            if author == member:
+                return await ctx.send(f"**You don't have a pet, {member.mention}!**")
+            else:
+                return await ctx.send(f"**{member} doesn't have a pet, {author.mention}!**")
+
+        # Makes the Pet's Image
+
+        small = ImageFont.truetype("built titling sb.ttf", 45)
+        background = Image.open(f"./sloth_custom_images/background/base_pet_background.png")
+        hud = Image.open(f"./sloth_custom_images/hud/base_pet_hud.png")
+        breed = Image.open(f"./sloth_custom_images/pet/{user_pet[2].lower()}.png")
+
+        background.paste(hud, (0, 0), hud)
+        background.paste(breed, (0, 0), breed)
+        draw = ImageDraw.Draw(background)
+        draw.text((320, 5), str(user_pet[1]), fill="white", font=small)
+        file_path = f"media/temporary/user_pet-{member.id}.png"
+        background.save(file_path)
+
+        # Sends the Pet's Image
+        await ctx.send(file=discord.File(file_path))
+        return os.remove(file_path)

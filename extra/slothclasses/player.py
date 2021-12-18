@@ -13,8 +13,13 @@ import os
 from pytz import timezone
 
 from enum import Enum
+from .userpets import UserPetsTable
+from .userbabies import UserBabiesTable
 
 bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
+additional_cogs: List[commands.Cog] = [
+    UserPetsTable, UserBabiesTable
+]
 
 class Skill(Enum):
 
@@ -25,7 +30,7 @@ class Skill(Enum):
     FIVE = 'skill_five_ts'
 
 
-class Player(commands.Cog):
+class Player(*additional_cogs):
 
     def __init__(self, client) -> None:
         self.client = client
@@ -75,7 +80,9 @@ class Player(commands.Cog):
             current_time = await utils.get_timestamp()
             cooldown_in_seconds = current_time - skill_ts
             if cooldown_in_seconds >= seconds:
+                print('truee')
                 return True, exists
+            print('no')
 
             raise ActionSkillOnCooldown(
                 try_after=cooldown_in_seconds, error_message="Action skill on cooldown!", skill_ts=skill_ts, cooldown=seconds)
