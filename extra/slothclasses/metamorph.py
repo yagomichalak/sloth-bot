@@ -217,8 +217,6 @@ class Metamorph(Player):
         return transmutation_embed
 
 
-
-
     @commands.command()
     @Player.poisoned()
     @Player.skills_used(requirement=20)
@@ -356,12 +354,112 @@ class Metamorph(Player):
     @Player.user_is_class('metamorph')
     @Player.skill_mark()
     @Player.not_ready()
-    async def reborn(self, ctx, member: Optional[discord.Member] = None) -> None:
+    async def reborn(self, ctx, pet_baby: str = None, target: Optional[discord.Member] = None) -> None:
         """ Reborns someone's pet or baby, but this time you can select a different 
         breed for pets and a different Sloth Class for babies.
-        :param member: The member from whom to get the pet/baby to reborn. [Optional][Default=You]
+        :param pet_baby: Whether you want to reborn a pet or a baby.
+        :param target: The target member from whom to get the pet/baby to reborn. [Optional][Default=You]
         
         • Delay = 2 days
         • Cost = 400łł """
 
-        pass
+        perpetrator = ctx.author
+
+        if ctx.channel.id != self.bots_txt.id:
+            return await ctx.send(f"**{ctx.author.mention}, you can only use this command in {self.bots_txt.mention}!**")
+
+        perpetrator_effects = await self.get_user_effects(member=perpetrator)
+
+        if 'knocked_out' in perpetrator_effects:
+            return await ctx.send(f"**{perpetrator.mention}, you can't use your skill, because you are knocked-out!**")
+
+        if not pet_baby:
+            return await ctx.send(f"**Please, inform whether you want to reborn a pet or a baby, {perpetrator.mention}!**")
+
+        if pet_baby.lower() not in ['pet', 'baby']:
+            return await ctx.send(f"**You can either reborn a pet or a baby, {perpetrator.mention}!**")
+
+        if not target:
+            target = perpetrator
+
+        if target.bot:
+            return await ctx.send(f"**{perpetrator.mention}, you use it on a bot!**")
+
+        target_sloth_profile = await self.get_sloth_profile(target.id)
+        if not target_sloth_profile:
+            return await ctx.send(f"**You cannot use reborn on someone who doesn't have an account, {perpetrator.mention}!**")
+
+        if target_sloth_profile[1] == 'default':
+            return await ctx.send(f"**You cannot use reborn on someone who has a `default` Sloth class, {perpetrator.mention}!**")
+
+        if pet_baby.lower() == 'pet':
+            target_pet = await self.get_user_pet(target.id)
+            if not target_pet:
+                return await ctx.send(f"**`{target}` doesn't have a pet to reborn**")
+        else:
+            #target_baby = await self.get_user_baby(target.id)
+            target_baby = await self.get_user_pet(target.id)
+            if not target_baby:
+                return await ctx.send(f"**`{target}` doesn't have a baby to reborn**")
+
+        user_currency = await self.get_user_currency(perpetrator.id)
+        if user_currency[1] < 400:
+            return await ctx.send(f"**You don't have `400łł` to use this skill, {perpetrator.mention}!**")
+
+        confirm = await ConfirmSkill(f"**Are you sure you want to spend `400łł` to use reborn, {perpetrator.mention}?**").prompt(ctx)
+        if not confirm:
+            return await ctx.send(f"**Not doing it then, {perpetrator.mention}!**")
+
+
+        if perpetrator != target:
+            new_ctx = ctx
+            new_ctx.author = target
+            target_confirm = await ConfirmSkill(f"**{perpetrator.mention} wants to reborn your {pet_baby.title()}, do you accept it, {target.mention}?**").prompt(new_ctx)
+            if not target_confirm:
+                return await ctx.send(f"**Not doing it then, {perpetrator.mention}!**")
+            new_ctx.author = perpetrator
+
+        _, exists = await Player.skill_on_cooldown(skill=Skill.FOUR, seconds=172800).predicate(ctx)
+        await self.client.get_cog('SlothCurrency').update_user_money(perpetrator.id, -400)
+
+        timestamp = await utils.get_timestamp()
+        try:
+            if pet_baby.lower() == 'pet':
+                await self.update_user_pet_breed(target.id, 'Egg')
+            else:
+                await self.update_user_pet_breed(target.id, 'Embryo')
+
+            if exists:
+                await self.update_user_skill_ts(perpetrator.id, Skill.FOUR, timestamp)
+            else:
+                await self.insert_user_skill_cooldown(perpetrator.id, Skill.FOUR, timestamp)
+            # Updates user's skills used counter
+            await self.update_user_skills_used(user_id=perpetrator.id)
+        except Exception as e:
+            print(e)
+            await ctx.send(f"**Something went wrong with it, {perpetrator.mention}!**")
+        else:
+            reborn_skill_embed = await self.get_reborn_skill_embed(
+                channel=ctx.channel, perpetrator_id=perpetrator.id, target_id=target.id, reborn_type=pet_baby.lower())
+            await ctx.send(embed=reborn_skill_embed)
+
+    async def get_reborn_skill_embed(self, channel: discord.TextChannel, 
+        perpetrator_id: int, target_id: int, reborn_type: str) -> discord.Embed:
+        """ Makes an embedded message for a frog action.
+        :param channel: The context channel.
+        :param attacker_id: The ID of the attacker.
+        :param target_id: The ID of the target. """
+
+        timestamp = await utils.get_timestamp()
+
+        transmutation_embed = discord.Embed(
+            title=f"A {reborn_type.title()} is Reborn!",
+            timestamp=datetime.fromtimestamp(timestamp)
+        )
+        transmutation_embed.description = f"**<@{perpetrator_id}> reborned <@{target_id}>'s {reborn_type.title()}!  😶‍🌫️**"
+        transmutation_embed.color = discord.Color.green()
+
+        transmutation_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Metamorph.png")
+        transmutation_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
+
+        return transmutation_embed
