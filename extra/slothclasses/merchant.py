@@ -1093,6 +1093,9 @@ class Merchant(Player):
         pets = await self.get_hungry_pets(current_ts)
 
         for pet in pets:
+            if pet[2].lower() == 'egg':
+                continue
+
             try:
                 # Checks whether pet has food
                 if pet[4] >= 5:
