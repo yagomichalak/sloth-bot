@@ -10,6 +10,8 @@ import random
 from typing import List, Optional, Union
 from PIL import Image, ImageDraw, ImageFont
 
+from extra.view import UserBabyView
+
 bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
 
 
@@ -543,10 +545,10 @@ class Seraph(Player):
 
         member: discord.Member = ctx.author
 
-        user_pet = await self.get_user_pet(member.id)
-        if not user_pet:
+        user_baby = await self.get_user_baby(member.id)
+        if not user_baby:
             return await ctx.send(f"**You don't even have a baby, {member.mention}!**")
-        if user_pet[2].lower() != 'embryo':
+        if user_baby[3].lower() != 'embryo':
             return await ctx.send(f"**You already chose a class for your baby, {member.mention}!**")
 
         
@@ -565,15 +567,14 @@ class Seraph(Player):
         await utils.disable_buttons(view)
         await msg.edit(view=view)
 
-        if view.selected_class is None:
+        if view.selected_baby is None:
             return
 
-        if not view.selected_class:
+        if not view.selected_baby:
             return
-
-        await self.update_user_baby_name(member.id, f"Baby {view.selected_class}")
-        await self.update_user_baby_breed(member.id, view.selected_class.lower())
-        await ctx.send(f"**Your `Embryo` is born as a `{view.selected_class}`, {member.mention}!**")
+            
+        await self.update_user_baby_class(member.id, view.selected_baby.lower())
+        await ctx.send(f"**Your `Embryo` is born as a `{view.selected_baby}`, {member.mention}!**")
 
     @commands.command(aliases=['baby_name', 'cbaby_name', 'update_baby_name'])
     @commands.cooldown(1, 5, commands.BucketType.user)

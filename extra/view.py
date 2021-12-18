@@ -422,7 +422,7 @@ class UserPetView(discord.ui.View):
         self.children.insert(0, pets_select)
 
     def get_pets(self) -> List[Dict[str, str]]:
-        """ Gets a list of sounds to play on the soundboard. """
+        """ Gets a list of pets to select. """
 
         data = {}
         with open(f'extra/random/json/pets.json', 'r', encoding='utf-8') as file:
@@ -461,6 +461,73 @@ class UserPetView(discord.ui.View):
 
         await interaction.response.defer()
         self.selected_pet = None
+        self.stop()
+
+
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        return await super().interaction_check(interaction)
+
+class UserBabyView(discord.ui.View):
+    """ View for the UserBaby selection. """
+
+    def __init__(self, member: discord.Member, timeout: Optional[float] = 180):
+        super().__init__(timeout=timeout)
+        self.member = member
+        self.babies = self.get_baby_classes()
+        self.selected_baby: str = None
+
+        options = [
+            discord.SelectOption(label=baby, description=values['description'], emoji=values['emoji'])
+            for baby, values in self.babies.items()]
+
+        babies_select = discord.ui.Select(
+            placeholder="Select the Sloth Class you want your Baby baby to be born in.", custom_id="user_baby_view_select_id", 
+            options=options)
+
+        babies_select.callback = partial(self.select_baby_select, babies_select)
+
+        self.children.insert(0, babies_select)
+
+    def get_baby_classes(self) -> List[Dict[str, str]]:
+        """ Gets a list of sloth classes to select. """
+
+        data = {}
+        with open(f'extra/random/json/baby_classes.json', 'r', encoding='utf-8') as file:
+            data = json.loads(file.read())
+
+        return data
+
+    
+    async def select_baby_select(self, select: discord.ui.select, interaction: discord.Interaction) -> None:
+        """ Callback for a select menu option. """
+
+        embed = interaction.message.embeds[0]
+        selected_option = interaction.data['values'][0]
+        embed.clear_fields()
+        embed.add_field(name="Selected Sloth Class:", value=f"{selected_option} {self.babies[selected_option]['emoji']}")
+        embed.set_image(url=self.babies[selected_option]['url'])
+        self.selected_baby = selected_option
+
+        await interaction.response.edit_message(embed=embed)
+
+
+
+    @discord.ui.button(label="Confirm", custom_id="confirm_baby_selection_id", style=discord.ButtonStyle.success, emoji="✅", row=1)
+    async def confirm_baby_selection_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Confirms the baby selection. """
+
+        if not self.selected_baby:
+            return await interaction.response.send_message("**You must choose an option to confirm!**", ephemeral=True)
+
+        await interaction.response.defer()
+        self.stop()
+
+    @discord.ui.button(label="Cancel", custom_id="cancel_baby_selection_id", style=discord.ButtonStyle.danger, emoji="❌", row=1)
+    async def cancel_baby_selection_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Cancels the baby selection. """
+
+        await interaction.response.defer()
+        self.selected_baby = None
         self.stop()
 
 
