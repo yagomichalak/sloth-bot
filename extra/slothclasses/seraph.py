@@ -572,7 +572,7 @@ class Seraph(Player):
 
         if not view.selected_baby:
             return
-            
+
         await self.update_user_baby_class(member.id, view.selected_baby.lower())
         await ctx.send(f"**Your `Embryo` is born as a `{view.selected_baby}`, {member.mention}!**")
 
@@ -633,6 +633,13 @@ class Seraph(Player):
             else:
                 return await ctx.send(f"**{member} doesn't have a baby, {author.mention}!**")
 
+        # Gets the baby's parents
+        parent_one: discord.Member = ctx.guild.get_member(user_baby[0])
+        parent_two: discord.Member = ctx.guild.get_member(user_baby[1])
+        # Gets parents' profile pictures
+        p1pfp = await utils.get_user_pfp(parent_one)
+        p2pfp = await utils.get_user_pfp(parent_two)
+
         # Makes the Baby's Image
 
         small = ImageFont.truetype("built titling sb.ttf", 45)
@@ -641,9 +648,14 @@ class Seraph(Player):
         baby_class = Image.open(f"./sloth_custom_images/sloth/{user_baby[3].lower()}.png").resize((470, 350))
 
         background.paste(hud, (0, 0), hud)
+        background.paste(p1pfp, (5, 5), p1pfp)
+        background.paste(p2pfp, (730, 5), p2pfp)
         background.paste(baby_class, (160, 280), baby_class)
+        
         draw = ImageDraw.Draw(background)
         draw.text((320, 5), str(user_baby[2]), fill="white", font=small)
+        draw.text((5, 70), f"LP: {user_baby[4]}", fill="red", font=small)
+        draw.text((5, 120), f"Food: {user_baby[5]}", fill="brown", font=small)
         file_path = f"media/temporary/user_baby-{member.id}.png"
         background.save(file_path)
 
