@@ -27,6 +27,8 @@ class UserBabiesTable(commands.Cog):
             parent_two BIGINT NOT NULL,
             baby_name VARCHAR(25) DEFAULT 'Embryo',
             baby_class VARCHAR(25) DEFAULT 'Embryo',
+            life_points TINYINT(3) DEFAULT 100,
+            food TINYINT(3) DEFAULT 100,
             PRIMARY KEY (parent_one, parent_two)
             ) CHARSET utf8mb4 COLLATE utf8mb4_unicode_ci
         """)
@@ -98,7 +100,7 @@ class UserBabiesTable(commands.Cog):
 
     async def get_user_baby(self, parent_id: int) -> List[Union[str, int]]:
         """ Get the user's baby.
-        :param parent_id: The ID of one of the baby's parent. """
+        :param parent_id: The ID of one of the baby's parents. """
 
         mycursor, _ = await the_database()
         await mycursor.execute("SELECT * FROM UserBabies WHERE parent_one = %s OR parent_two = %s", (parent_id, parent_id))
@@ -108,7 +110,7 @@ class UserBabiesTable(commands.Cog):
 
     async def update_user_baby_name(self, parent_id: int, baby_name: str) -> None:
         """ Updates the User Baby's name.
-        :param parent_id: The ID of one of the baby's parent.
+        :param parent_id: The ID of one of the baby's parents.
         :param baby_name: The new baby name to update to. """
 
         mycursor, db = await the_database()
@@ -118,7 +120,7 @@ class UserBabiesTable(commands.Cog):
 
     async def update_user_baby_class(self, parent_id: int, baby_class: str) -> None:
         """ Updates the User Baby's class.
-        :param parent_id: The ID of one of the the baby's parent.
+        :param parent_id: The ID of one of the the baby's parents.
         :param baby_class: The new baby class to update to. """
 
         mycursor, db = await the_database()
@@ -126,9 +128,29 @@ class UserBabiesTable(commands.Cog):
         await db.commit()
         await mycursor.close()
 
+    async def update_user_baby_lp(self, parent_id: int, increment: int = 5) -> None:
+        """ Updates the User Baby's life points.
+        :param parent_id: The ID of one of the baby's parents.
+        :param increment: The incremention value to apply. [Default = 5] (Can be negative) """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("UPDATE UserBabies SET life_points = life_points + %s WHERE parent_one = %s OR parent_two = %s", (increment, parent_id, parent_id))
+        await db.commit()
+        await mycursor.close()
+
+    async def update_user_baby_food(self, parent_id: int, increment: int = 5) -> None:
+        """ Updates the User Baby's food status.
+        :param parent_id: The ID of one of the baby's parents.
+        :param increment: The incremention value to apply. [Default = 5] (Can be negative) """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("UPDATE UserBabies SET food = food + %s WHERE parent_one = %s OR parent_two = %s", (increment, parent_id, parent_id))
+        await db.commit()
+        await mycursor.close()
+
     async def delete_user_baby(self, parent_id: int) -> None:
         """ Deletes the user's baby.
-        :param parent_id: The ID of one of the baby's parent. """
+        :param parent_id: The ID of one of the baby's parents. """
 
         mycursor, db = await the_database()
         await mycursor.execute("DELETE FROM UserBabies WHERE parent_one = %s or parent_two = %s", (parent_id, parent_id))
