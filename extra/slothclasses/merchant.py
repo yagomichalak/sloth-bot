@@ -480,6 +480,22 @@ class Merchant(Player):
                     description=f"**<@{tm[3]}>'s `Wedding Ring` has just expired! Then it's been removed from the `Sloth class shop`! 🍯**",
                     color=discord.Color.red()))
 
+    async def check_shop_egg_items(self) -> None:
+
+        """ Check on-going Pet Egg items and their expiration time. """
+
+        transmutations = await self.get_expired_pet_egg_items()
+        for tm in transmutations:
+            await self.delete_skill_action_by_target_id_and_skill_type(tm[3], 'pet_egg')
+
+            channel = self.bots_txt
+
+            await channel.send(
+                content=f"<@{tm[0]}>",
+                embed=discord.Embed(
+                    description=f"**<@{tm[3]}>'s `Pet Egg` has just expired! Then it's been removed from the `Sloth class shop`! 🥚**",
+                    color=discord.Color.red()))
+
     # ========== Update ===========
 
     async def update_user_has_potion(self, user_id: int, has_it: int) -> None:
