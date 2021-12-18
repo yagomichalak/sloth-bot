@@ -114,6 +114,25 @@ class UserBabiesTable(commands.Cog):
         await mycursor.close()
         return user_baby
 
+    async def get_babies(self) -> List[List[Union[str, int]]]:
+        """ Get all user babies. """
+
+        mycursor, _ = await the_database()
+        await mycursor.execute("SELECT * FROM UserBabies")
+        user_babies = await mycursor.fetchall()
+        await mycursor.close()
+        return user_babies
+
+    async def get_hungry_babies(self, current_ts: int) -> List[List[Union[str, int]]]:
+        """ Get all user hungry babies.
+        :param current_ts: The current timestamp. """
+
+        mycursor, _ = await the_database()
+        await mycursor.execute("SELECT * FROM UserBabies WHERE %s - food_ts >= 3600", (current_ts,))
+        user_babies = await mycursor.fetchall()
+        await mycursor.close()
+        return user_babies
+
     async def update_user_baby_name(self, parent_id: int, baby_name: str) -> None:
         """ Updates the User Baby's name.
         :param parent_id: The ID of one of the baby's parents.

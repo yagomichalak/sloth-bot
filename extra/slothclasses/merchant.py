@@ -1123,7 +1123,7 @@ class Merchant(Player):
                         await channel.send(content=f"<@{pet[0]}>", embed=embed, file=discord.File(file_path, filename="user_pet_death.png"))
                         os.remove(file_path)
             except Exception as e:
-                print('Pet death error')
+                print('Pet death error', e)
                 pass
 
     async def make_pet_death_image(self, pet: List[Union[int, str]]) -> str:
