@@ -55,6 +55,8 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
         await self.try_to_run(self.check_tribe_creations)
         await self.try_to_run(self.check_frogs)
         await self.try_to_run(self.check_sabotages)
+        # await self.try_to_run(self.check_pet_food)
+        # await self.try_to_run(self.check_baby_food)
 
     async def try_to_run(self, func):
         """ Tries to run a function/method and ignore failures. """

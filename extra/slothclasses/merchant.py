@@ -1084,3 +1084,20 @@ class Merchant(Player):
         # Sends the Pet's Image
         await ctx.send(file=discord.File(file_path))
         return os.remove(file_path)
+
+    async def check_pet_food(self) -> None:
+        """ Checks pet food statuses. """
+
+        current_ts = await utils.get_timestamp()
+        pets = await self.get_hungry_pets(current_ts)
+
+        for pet in pets:
+
+
+            channel = self.bots_txt
+
+            await channel.send(
+                content=f"a",
+                embed=discord.Embed(
+                    description=f"**a**",
+                    color=discord.Color.red()))
