@@ -1061,6 +1061,9 @@ class Merchant(Player):
             else:
                 return await ctx.send(f"**{member} doesn't have a pet, {author.mention}!**")
 
+        # Gets parents' profile pictures
+        pet_owner_pfp = await utils.get_user_pfp(member)
+
         # Makes the Pet's Image
 
         small = ImageFont.truetype("built titling sb.ttf", 45)
@@ -1069,9 +1072,12 @@ class Merchant(Player):
         breed = Image.open(f"./sloth_custom_images/pet/{user_pet[2].lower()}.png")
 
         background.paste(hud, (0, 0), hud)
+        background.paste(pet_owner_pfp, (5, 5), pet_owner_pfp)
         background.paste(breed, (0, 0), breed)
         draw = ImageDraw.Draw(background)
         draw.text((320, 5), str(user_pet[1]), fill="white", font=small)
+        draw.text((5, 70), f"LP: {user_pet[3]}", fill="red", font=small)
+        draw.text((5, 120), f"Food: {user_pet[4]}", fill="brown", font=small)
         file_path = f"media/temporary/user_pet-{member.id}.png"
         background.save(file_path)
 

@@ -26,6 +26,8 @@ class UserPetsTable(commands.Cog):
             user_id BIGINT NOT NULL,
             pet_name VARCHAR(25) DEFAULT 'Egg',
             pet_breed VARCHAR(25) DEFAULT 'Egg',
+            life_points TINYINT(3) DEFAULT 100,
+            food TINYINT(3) DEFAULT 100,
             PRIMARY KEY (user_id)
             ) CHARSET utf8mb4 COLLATE utf8mb4_unicode_ci
         """)
