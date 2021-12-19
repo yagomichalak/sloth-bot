@@ -1232,9 +1232,11 @@ class Munk(Player):
         if 'knocked_out' in perpetrator_fx:
             return await ctx.send(f"**{perpetrator.mention}, you can't use this skill, because you are knocked-out!**")
 
-        user_tribe = await self.get_tribe_info_by_user_id(perpetrator.id)
-        if not user_tribe['name']:
-            return await ctx.send(f"**You don't have a tribe, {perpetrator.mention}**!")
+        tribe_member = await self.get_tribe_member(perpetrator.id)
+        if not tribe_member:
+            return await ctx.send(f"**You are not in a tribe, {perpetrator.mention}**!")
+
+        user_tribe = await self.get_tribe_info_by_user_id(tribe_member[0])
 
         # Checks whether there's already a max number of 1 open quests in that tribe
         if await self.get_skill_action_by_user_id_and_skill_type(user_id=perpetrator.id, skill_type="quest"):
@@ -1325,3 +1327,42 @@ class Munk(Player):
         # Runs attached method if there's any
         if function:
             await function()
+
+    @tribe.command(aliases=["mission", "task", "chore", "quests"])
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.has_permissions(administrator=True)
+    async def quest(self, ctx) -> None:
+        """ Shows all Quests that the tribe you are in has. """
+
+        member = ctx.author
+
+        tribe_member = await self.get_tribe_member(member.id)
+        if not tribe_member:
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.send(f"**You're not even in a tribe, {member.mention}!**")
+        
+        user_tribe = await self.get_tribe_info_by_user_id(tribe_member[0])
+
+        tribe_members = await self.get_tribe_members(tribe_member[0], tribe_member[1])
+        quests: List[List[Union[str, int]]] = []
+        for tribe_member in tribe_members:
+            quest = await self.get_skill_action_by_user_id_and_skill_type(user_id=tribe_member[0], skill_type="quest")
+            if quest:
+                quests.append(quest)
+
+        if not quests:
+            return await ctx.send(f"**No quests found in your tribe, {member.mention}!**")
+
+        quests_text: str = ''.join(list(map(lambda q: f"```• {q[8]} ({q[7]});```", quests)))
+        embed: discord.Embed = discord.Embed(
+            title="__Tribe Quests__",
+            description=f"Showing all `{len(quests)}` quests from this tribe:\n{quests_text}",
+            color=member.color,
+            timestamp=ctx.message.created_at
+
+        )
+        embed.set_footer(text=f"Requested by: {member}", icon_url=member.display_avatar)
+        if user_tribe["thumbnail"]:
+            embed.set_thumbnail(url=user_tribe["thumbnail"])
+
+        await ctx.send(embed=embed)
