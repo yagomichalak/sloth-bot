@@ -136,7 +136,7 @@ different_class_roles = {
         "espanhol"
     ],
     "dutch": [
-        "felemenkçe", "holländisch", "néerlandais"
+        "felemenkçe", "holländisch", "néerlandais", "flemish"
     ],
     "russian": [
         "rusça" ,"russo" ,"russe" ,"russisch" 
