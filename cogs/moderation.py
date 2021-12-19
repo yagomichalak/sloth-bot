@@ -1883,6 +1883,26 @@ class Moderation(*moderation_cogs):
 		embed.set_footer(text=f"Requested by {author}", icon_url=author.display_avatar)
 
 		await ctx.send(embed=embed)
-		
+	
+	@commands.command(aliases=['minfr', 'muted_infr'])
+	@utils.is_allowed([senior_mod_role_id], throw_exc=True)
+	async def muted_infractions(self, ctx) -> None:
+		"""Shows the infractions for all muted members"""
+
+		muted_role = discord.utils.get(ctx.guild.roles, id=muted_role_id)
+
+		muted_members = []
+
+		# Gets all muted members
+		for member in ctx.guild.members:
+			if muted_role in member.roles:
+				muted_members.append(str(member.id))
+
+		if not muted_members:
+			return await ctx.send("**There is no muted members**")
+
+		await self.infractions(context=ctx, message=' '.join(muted_members))
+
+
 def setup(client):
 	client.add_cog(Moderation(client))
