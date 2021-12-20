@@ -218,7 +218,6 @@ class Prawler(Player):
 					await message.edit(embed=message_embed)
 					await message.remove_reaction('🛡️', self.client.user)
 				# Removes skill action from the database
-				await self.delete_skill_action_by_message_id(steal[4])
 				# Gives money to the attacker
 				user_currency = await self.get_user_currency(steal[3])
 				if user_currency and user_currency[1] >= 5:
@@ -233,7 +232,7 @@ class Prawler(Player):
 					await channel.send(content=f"<@{steal[0]}>", embed=steal_embed)
 
 			except Exception as e:
-				pass
+				await self.delete_skill_action_by_message_id(steal[4])
 			finally:
 				sloth_profile = await self.get_sloth_profile(steal[0])
 				stack = sloth_profile[6]
