@@ -2,7 +2,11 @@ import discord
 from discord.ext import commands
 from discord.ext.commands.core import cooldown
 
-from extra.customerrors import MissingRequiredSlothClass, ActionSkillOnCooldown, CommandNotReady, SkillsUsedRequirement, ActionSkillsLocked, PoisonedCommandError
+from extra.customerrors import (
+    MissingRequiredSlothClass, ActionSkillOnCooldown, CommandNotReady, 
+    SkillsUsedRequirement, ActionSkillsLocked, PoisonedCommandError,
+    KidnappedCommandError
+    )
 from extra import utils
 
 from mysqldb import the_database, the_django_database
@@ -187,6 +191,23 @@ class Player(*additional_cogs):
 
             raise PoisonedCommandError()
             
+
+        return commands.check(real_check)
+
+    def kidnapped() -> bool:
+        """ Checks whether the user is poisoned and disorients the command. """
+
+        async def real_check(ctx):
+            """ Perfoms the real check. """
+
+            kidnapped = await Player.get_skill_action_by_target_id_and_skill_type(Player, target_id=ctx.author.id, skill_type='kidnap')
+            if not kidnapped:
+                print('oi')
+                return True
+
+            print('tchau')
+
+            raise KidnappedCommandError()
 
         return commands.check(real_check)
 

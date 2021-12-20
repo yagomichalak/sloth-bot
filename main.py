@@ -16,7 +16,8 @@ from extra.useful_variables import patreon_roles
 
 from extra.customerrors import (
     MissingRequiredSlothClass, ActionSkillOnCooldown, CommandNotReady, 
-    SkillsUsedRequirement, ActionSkillsLocked, PoisonedCommandError
+    SkillsUsedRequirement, ActionSkillsLocked, PoisonedCommandError,
+    KidnappedCommandError
 )
 
 load_dotenv()
@@ -142,6 +143,9 @@ async def on_command_error(ctx, error):
 
     elif isinstance(error, ActionSkillsLocked):
         pass
+
+    elif isinstance(error, KidnappedCommandError):
+        await ctx.send(f"**You cannot interact with tribes until any member of your tribe pays your kidnap rescue value**")
 
     elif isinstance(error, CommandNotReady):
         await ctx.send("**This command is either under construction or on maintenance!**")
