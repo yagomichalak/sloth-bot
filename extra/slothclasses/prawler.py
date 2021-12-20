@@ -513,10 +513,10 @@ class Prawler(Player):
 	@Player.skills_locked()
 	@Player.user_is_class('prawler')
 	@Player.skill_mark()
-	@Player.not_ready()
-	async def kidnap(self, ctx, member: discord.Member = None) -> None:
+	# @Player.not_ready()
+	async def kidnap(self, ctx, target: discord.Member = None) -> None:
 		""" Kidnaps someone from a Tribe to yours and takes them hostage for 2 days.
-		:param member: The member to kidnap.
+		:param target: The target member to kidnap.
 		
 		PS: Members who were held hostages cannot interact with their tribe
 		during that time.
@@ -524,4 +524,105 @@ class Prawler(Player):
 		• Delay = 2 days
 		• Cost = 200łł  """
 
-		pass
+		
+		attacker = ctx.author
+		
+		if ctx.channel.id != self.bots_txt.id:
+			return await ctx.send(f"**{attacker.mention}, you can only use this command in {self.bots_txt.mention}!**")
+
+		attacker_fx = await self.get_user_effects(attacker)
+
+		if 'knocked_out' in attacker_fx:
+			return await ctx.send(f"**{attacker.mention}, you can't use your skill, because you are knocked-out!**")
+
+		if not target:
+			return await ctx.send(f"**Inform a member to kidnap, {attacker.mention}!**")
+
+		if target.bot:
+			return await ctx.send(f"**You cannot kidnap a bot, {attacker.mention}!**")
+
+		if attacker.id == target.id:
+			return await ctx.send("**You cannot kidnap yourself!**")
+
+		target_sloth_profile = await self.get_sloth_profile(target.id)
+		if not target_sloth_profile:
+			return await ctx.send(f"**You cannot kidnap someone who doesn't have an account, {attacker.mention}!**")
+
+		if target_sloth_profile[1] == 'default':
+			return await ctx.send(f"**You cannot kidnap someone who has a `default` Sloth class, {attacker.mention}!**")
+
+		target_fx = await self.get_user_effects(target)
+
+		if 'protected' in target_fx:
+			return await ctx.send(f"**{attacker.mention}, you cannot kidnap {target.mention}, because they are protected against attacks!**")
+
+		if 'kidnapped' in target_fx:
+			return await ctx.send(f"**{attacker.mention}, {target.mention} has been kidnapped already!**")
+
+		# Checks whether attacker is in a tribe
+		user_tribe = await self.get_tribe_member(attacker.id)
+		if not user_tribe:
+			return await ctx.send(f"**You cannot kidnap someone if you're not in a tribe to keep the target as a hostage there, {attacker.mention}!**")
+
+		# Checks whether target is in a tribe
+		target_tribe = await self.get_tribe_member(target.id)
+		if not target_tribe:
+			return await ctx.send(f"**`{target}` is not even in a tribe, you cannot kidnap them, {attacker.mention}!**")
+
+		# Checks whether both members are not in the same tribe.
+
+		if user_tribe[1] == target_tribe[1]:
+			return await ctx.send(f"**You cannot kidnap someone from your own tribe, {attacker.mention}!**")
+
+		attacker_currency = await self.get_user_currency(attacker.id)
+		if attacker_currency[1] < 200:
+			return await ctx.send(f"**You don't have `200łł` to use this skill, {attacker.mention}!**")
+
+		confirmed = await ConfirmSkill(f"**{attacker.mention}, are you sure you want to kidnap {target.mention}?**").prompt(ctx)
+		if not confirmed:
+			return await ctx.send("**Not sabotaging anyone, then!**")
+
+		_, exists = await Player.skill_on_cooldown(skill=Skill.FOUR, seconds=172800).predicate(ctx)
+		await self.client.get_cog('SlothCurrency').update_user_money(attacker.id, -200)
+
+		current_timestamp = await utils.get_timestamp()
+
+		try:
+			await self.insert_skill_action(
+				user_id=attacker.id, skill_type="kidnap", skill_timestamp=current_timestamp,
+				target_id=target.id,
+			)
+			if exists:
+				await self.update_user_skill_ts(attacker.id, Skill.FOUR, current_timestamp)
+			else:
+				await self.insert_user_skill_cooldown(attacker.id, Skill.FOUR, current_timestamp)
+
+			# Updates user's skills used counter
+			await self.update_user_skills_used(user_id=attacker.id)
+		except Exception as e:
+			print(e)
+			await ctx.send(f"**Something went wrong with it, {attacker.mention}!**")
+
+		else:
+			kidnap_embed = await self.get_kidnap_embed(ctx.channel, attacker.id, target.id)
+			await ctx.send(embed=kidnap_embed)
+
+
+	async def get_kidnap_embed(self, channel, attacker_id: int, target_id: int) -> discord.Embed:
+		""" Makes an embedded message for a kidnap.
+		:param channel: The context channel.
+		:param attacker_id: The ID of the attacker.
+		:param target_id: The target of the kidnapping. """
+
+		timestamp = await utils.get_timestamp()
+		kidnap_embed = discord.Embed(
+			title="Someone just got Kidnapped!",
+			description=f"<@{attacker_id}> has kidnapped <@{target_id}> 🥷",
+			color=discord.Color.green(),
+			timestamp=datetime.fromtimestamp(timestamp)
+		)
+		kidnap_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Prawler.png")
+		kidnap_embed.set_image(url='https://c.tenor.com/6JdZPCpRz1UAAAAS/dongwook-lee-dongwook.gif')
+		kidnap_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
+
+		return kidnap_embed

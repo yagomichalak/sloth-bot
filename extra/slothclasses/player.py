@@ -305,6 +305,14 @@ class Player(*additional_cogs):
             effects['poisoned']['resize'] = None
             effects['poisoned']['debuff'] = True
 
+        if then := await self.get_skill_action_by_target_id_and_skill_type(target_id=member.id, skill_type='kidnap'):
+            effects['kidnapped'] = {}
+            effects['kidnapped']['cooldown'] = f"Ends when rescue is paid"
+            effects['kidnapped']['frames'] = []
+            effects['kidnapped']['cords'] = (0, 0)
+            effects['kidnapped']['resize'] = None
+            effects['kidnapped']['debuff'] = True
+
         return effects
 
     async def get_sloth_class_skills(self, sloth_class: str) -> List[commands.Command]:
