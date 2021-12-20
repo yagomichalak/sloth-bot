@@ -39,3 +39,6 @@ class ActionSkillsLocked(commands.CheckFailure):
 
 class PoisonedCommandError(commands.CheckFailure):
     pass
+
+class KidnappedCommandError(commands.CheckFailure):
+    pass

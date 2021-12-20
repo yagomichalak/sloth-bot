@@ -302,6 +302,7 @@ class Munk(Player):
 
     @commands.group(aliases=['tb'])
     @Player.poisoned()
+    @Player.kidnapped()
     async def tribe(self, ctx) -> None:
         """ Command for managing and interacting with a tribe.
         (Use this without a subcommand to see all subcommands available) """

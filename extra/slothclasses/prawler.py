@@ -571,14 +571,14 @@ class Prawler(Player):
 
 		# Checks whether both members are not in the same tribe.
 
-		if user_tribe[1] == target_tribe[1]:
-			return await ctx.send(f"**You cannot kidnap someone from your own tribe, {attacker.mention}!**")
+		# if user_tribe[1] == target_tribe[1]:
+		# 	return await ctx.send(f"**You cannot kidnap someone from your own tribe, {attacker.mention}!**")
 
 		attacker_currency = await self.get_user_currency(attacker.id)
 		if attacker_currency[1] < 200:
 			return await ctx.send(f"**You don't have `200łł` to use this skill, {attacker.mention}!**")
 
-		confirmed = await ConfirmSkill(f"**{attacker.mention}, are you sure you want to kidnap {target.mention}?**").prompt(ctx)
+		confirmed = await ConfirmSkill(f"**{attacker.mention}, are you sure you want spend `200łł` to kidnap {target.mention}?**").prompt(ctx)
 		if not confirmed:
 			return await ctx.send("**Not sabotaging anyone, then!**")
 
