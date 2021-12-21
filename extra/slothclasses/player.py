@@ -618,11 +618,29 @@ class Player(*additional_cogs):
         """ Gets the SlothProfile for the user.
         :param user_id: The ID of the user to get. """
 
-        mycursor, db = await the_database()
+        mycursor, _ = await the_database()
         await mycursor.execute("SELECT * FROM SlothProfile WHERE user_id = %s", (user_id,))
         user = await mycursor.fetchone()
         await mycursor.close()
         return user
+
+    async def get_specific_unprotected_users(self, user_ids: int) -> List[Union[str, int]]:
+        """ Gets specific SlothProfiles from a list of user IDs.
+        :param user_ids: The list of user IDs. """
+
+        mycursor, _ = await the_database()
+        await mycursor.execute("""
+            SELECT UC.user_id, UC.user_money FROM UserCurrency AS UC
+            WHERE UC.user_id IN {}
+            AND UC.user_id IN (
+                SELECT SP.user_id FROM SlothProfile AS SP) 
+            AND UC.user_id NOT IN (
+                SELECT SS.target_id FROM SlothSkills AS SS WHERE skill_type = 'divine_protection')
+            """.format(tuple(user_ids)))
+
+        unprotected_users = await mycursor.fetchall()
+        await mycursor.close()
+        return unprotected_users
 
     # ========== DELETE ========== #
     async def delete_skill_action_by_message_id(self, message_id: int) -> None:
