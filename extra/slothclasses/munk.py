@@ -524,6 +524,10 @@ class Munk(Player):
         if expeller.id == member.id:
             return await ctx.send(f"**You cannot kick yourself out of your own tribe, {expeller.mention}!**")
 
+        member_fx = await self.get_user_effects(member)
+        if 'kidnapped' in member_fx:
+            return await ctx.send(f"**You cannot kick someone from your tribe who is kidnapped, {expeller.mention}!**")
+
         confirm = await ConfirmSkill(f"Are you sure you want to kick, {member.mention} from `{user_tribe['name']}`?").prompt(ctx)
         if not confirm:
             return await ctx.send("**Not kicking them, then!**")
@@ -539,7 +543,6 @@ class Munk(Player):
             # await self.update_someones_tribe(user_id=member.id, tribe_name=None)
             await self.delete_tribe_member(user_id=member.id)
             try:
-                print(member, member.display_name, user_tribe['two_emojis'])
                 await self.update_tribe_name(member=member, two_emojis=user_tribe['two_emojis'], joining=False)
             except:
                 pass

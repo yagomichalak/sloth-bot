@@ -513,7 +513,7 @@ class Prawler(Player):
 	@Player.skills_locked()
 	@Player.user_is_class('prawler')
 	@Player.skill_mark()
-	# @Player.not_ready()
+	@Player.not_ready()
 	async def kidnap(self, ctx, target: discord.Member = None) -> None:
 		""" Kidnaps someone from a Tribe to yours and takes them hostage for 2 days.
 		:param target: The target member to kidnap.
@@ -636,12 +636,10 @@ class Prawler(Player):
 		
 		* Rescue value = 3% of the the sum of the tribe members' balance. """
 
-
 		member: discord.Member = ctx.author
 
 		if not hostage:
 			return await ctx.send(f"**Please, inform a hostage to pay the rescue for, {member.mention}!**")
-
 
 		hostage_fx = await self.get_user_effects(hostage)
 
