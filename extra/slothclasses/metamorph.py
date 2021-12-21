@@ -397,8 +397,7 @@ class Metamorph(Player):
             if not target_pet:
                 return await ctx.send(f"**`{target}` doesn't have a pet to reborn**")
         else:
-            #target_baby = await self.get_user_baby(target.id)
-            target_baby = await self.get_user_pet(target.id)
+            target_baby = await self.get_user_baby(target.id)
             if not target_baby:
                 return await ctx.send(f"**`{target}` doesn't have a baby to reborn**")
 
@@ -427,7 +426,7 @@ class Metamorph(Player):
             if pet_baby.lower() == 'pet':
                 await self.update_user_pet_breed(target.id, 'Egg')
             else:
-                await self.update_user_pet_breed(target.id, 'Embryo')
+                await self.update_user_baby_class(target.id, 'Embryo')
 
             if exists:
                 await self.update_user_skill_ts(perpetrator.id, Skill.FOUR, timestamp)

@@ -194,6 +194,7 @@ class SlothReputation(*currency_cogs):
         embed.add_field(name="🐸 __**Frogged:**__", value=f"{await SlothClass.has_effect(effects, 'frogged')}", inline=True)
         embed.add_field(name="🔪 __**Knife Sharpness Stack:**__", value=f"{sloth_profile[6]}/5", inline=True)
         embed.add_field(name="🧤 __**Sabotaged:**__", value=f"{await SlothClass.has_effect(effects, 'sabotaged')}", inline=True)
+        embed.add_field(name="🤐 __**Kidnapped:**__", value=f"{True if await SlothClass.has_effect(effects, 'kidnapped') else False}", inline=True)
 
         m, s = divmod(user_info[0][2], 60)
         h, m = divmod(m, 60)
