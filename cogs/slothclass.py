@@ -11,6 +11,7 @@ from extra.slothclasses.player import Player
 
 from typing import Union, List, Dict, Optional
 import os
+from random import sample, random
 
 classes: Dict[str, object] = {
     'agares': agares.Agares, 'cybersloth': cybersloth.Cybersloth,
@@ -328,6 +329,35 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
             embed.set_footer(text=f"Requested by {member}", icon_url=member.display_avatar)
 
         await ctx.send(embed=embed)
+
+    @commands.command(aliases=["get_target"])
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def find_target(self, ctx) -> None:
+        """ Finds a random unprotected target, who is offline. """
+
+
+        author: discord.Member = ctx.author
+        offline: List[int] = list({m.id for m in ctx.guild.members if m.status == discord.Status.offline})
+        try: 
+            offline.remove(author.id) 
+        except:
+            pass
+
+        users = await self.client.get_cog('SlothCurrency').get_all_specific_leaves_users(offline)
+        unprotected_users = await self.get_specific_unprotected_users([user[0] for user in users])
+
+        embed: discord.Embed = discord.Embed(title="__Random Target__")
+        scrambled_users = sorted(unprotected_users, key = lambda _: random())
+
+        for user in scrambled_users:
+            if member := ctx.guild.get_member(user[0]):
+                embed.color = member.color
+                embed.description = f"Your random target is: {member.mention}! (`{user[1]}` 🍃)"
+                embed.set_footer(text=f"Requested by {author}", icon_url=author.display_avatar)
+                embed.set_author(name=f"From {len(unprotected_users)} offline users.")
+                return await ctx.reply(embed=embed)
+        else:
+            await ctx.send(f"**No targets found, {author.mention}!**")
 
 def setup(client) -> None:
     """ Cog's setup function. """

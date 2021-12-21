@@ -122,9 +122,19 @@ class UserCurrencyTable(commands.Cog):
 
         mycursor, _ = await the_database()
         await mycursor.execute("SELECT * FROM UserCurrency ORDER BY user_money DESC")
-        top_ten_members = await mycursor.fetchall()
+        top_members = await mycursor.fetchall()
         await mycursor.close()
-        return top_ten_members
+        return top_members
+
+    async def get_all_specific_leaves_users(self, user_ids: List[int]) -> List[List[int]]:
+        """ Gets specific users with the most leaves.
+        :param user_ids: The list of the user IDs. """
+
+        mycursor, _ = await the_database()
+        await mycursor.execute("SELECT * FROM UserCurrency WHERE user_id IN {} ORDER BY user_money DESC".format(tuple(user_ids)))
+        top_spec_members = await mycursor.fetchall()
+        await mycursor.close()
+        return top_spec_members
 
     async def get_all_time_users(self) -> List[List[int]]:
         """ Gets all users with the most time. """
