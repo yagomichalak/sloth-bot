@@ -202,10 +202,7 @@ class Player(*additional_cogs):
 
             kidnapped = await Player.get_skill_action_by_target_id_and_skill_type(Player, target_id=ctx.author.id, skill_type='kidnap')
             if not kidnapped:
-                print('oi')
                 return True
-
-            print('tchau')
 
             raise KidnappedCommandError()
 
@@ -606,6 +603,16 @@ class Player(*additional_cogs):
         user = await mycursor.fetchone()
         await mycursor.close()
         return user
+
+    async def get_users_currency(self, user_ids: List[int]) -> List[List[Union[str, int]]]:
+        """ Gets currency of a list of users.
+        :param user_ids: The list of IDs of the users to get the currency from. """
+
+        mycursor, _ = await the_database()
+        await mycursor.execute("SELECT user_money FROM UserCurrency WHERE user_id in {}".format(tuple(user_ids)))
+        users = await mycursor.fetchall()
+        await mycursor.close()
+        return users
 
     async def get_sloth_profile(self, user_id: int) -> List[Union[str, int]]:
         """ Gets the SlothProfile for the user.
