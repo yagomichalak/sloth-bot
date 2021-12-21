@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 from .player import Player, Skill
 from mysqldb import the_database
-from extra.menu import ConfirmSkill
+from extra.prompt.menu import Confirm
 from extra import utils
 import os
 from datetime import datetime
@@ -101,7 +101,7 @@ class Prawler(Player):
 		if 'protected' in target_fx:
 			return await ctx.send(f"**{attacker.mention}, you cannot steal from {target.mention}, because they are protected against attacks!**")
 
-		confirmed = await ConfirmSkill(f"**{attacker.mention}, are you sure you want to steal from {target.mention}?**").prompt(ctx)
+		confirmed = await Confirm(f"**{attacker.mention}, are you sure you want to steal from {target.mention}?**").prompt(ctx)
 		if not confirmed:
 			return await ctx.send("**Not stealing from anyone, then!**")
 
@@ -174,7 +174,7 @@ class Prawler(Player):
 		if not user[1] >= 500:
 			return await ctx.send(f"**You don't have `500łł` to use this skill, {perpetrator.mention}!**")
 
-		confirmed = await ConfirmSkill(
+		confirmed = await Confirm(
 			f"**{perpetrator.mention}, are you sure you want to sharpen your knife sharpness stack `{stack}` to `{stack+1}` for `500łł`?**"
 			).prompt(ctx)
 		if not confirmed:
@@ -425,7 +425,7 @@ class Prawler(Player):
 		if attacker_currency[1] < 50:
 			return await ctx.send(f"**You don't have `50łł` to use this skill, {attacker.mention}!**")
 
-		confirmed = await ConfirmSkill(f"**{attacker.mention}, are you sure you want to sabotage {target.mention}?**").prompt(ctx)
+		confirmed = await Confirm(f"**{attacker.mention}, are you sure you want to sabotage {target.mention}?**").prompt(ctx)
 		if not confirmed:
 			return await ctx.send("**Not sabotaging anyone, then!**")
 
@@ -571,14 +571,14 @@ class Prawler(Player):
 
 		# Checks whether both members are not in the same tribe.
 
-		# if user_tribe[1] == target_tribe[1]:
-		# 	return await ctx.send(f"**You cannot kidnap someone from your own tribe, {attacker.mention}!**")
+		if user_tribe[1] == target_tribe[1]:
+			return await ctx.send(f"**You cannot kidnap someone from your own tribe, {attacker.mention}!**")
 
 		attacker_currency = await self.get_user_currency(attacker.id)
 		if attacker_currency[1] < 200:
 			return await ctx.send(f"**You don't have `200łł` to use this skill, {attacker.mention}!**")
 
-		confirmed = await ConfirmSkill(f"**{attacker.mention}, are you sure you want spend `200łł` to kidnap {target.mention}?**").prompt(ctx)
+		confirmed = await Confirm(f"**{attacker.mention}, are you sure you want spend `200łł` to kidnap {target.mention}?**").prompt(ctx)
 		if not confirmed:
 			return await ctx.send("**Not sabotaging anyone, then!**")
 
@@ -626,3 +626,63 @@ class Prawler(Player):
 		kidnap_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
 
 		return kidnap_embed
+
+
+	@commands.command(aliases=["rescue"])
+	@commands.cooldown(1, 5, commands.BucketType.user)
+	async def pay_rescue(self, ctx, hostage: discord.Member = None) -> None:
+		""" Pays off someone's rescue.
+		:param hostage: The hostage for whom to pay the rescue.
+		
+		* Rescue value = 3% of the the sum of the tribe members' balance. """
+
+
+		member: discord.Member = ctx.author
+
+		if not hostage:
+			return await ctx.send(f"**Please, inform a hostage to pay the rescue for, {member.mention}!**")
+
+
+		hostage_fx = await self.get_user_effects(hostage)
+
+		if 'kidnapped' not in hostage_fx:
+			return await ctx.send(f"**{hostage} is not even kidnapped, {member.mention}!**")
+
+		if not (hostage_tribe := await self.get_tribe_member(hostage.id)):
+			await self.delete_skill_action_by_target_id_and_skill_type(hostage.id, 'kidnap')
+			return await ctx.send(f"**{hostage} is not even in a tribe anymore, no need to pay to rescue them, {member.mention}!** ✅")
+
+		if not (user_tribe := await self.get_tribe_member(member.id)):
+			return await ctx.send(f"**You're not in `{hostage}`'s tribe because you're not even in a tribe, you can't rescue them, {member.mention}!**")
+
+		if hostage_tribe[1] != user_tribe[1]:
+			return await ctx.send(f"**Only members from `{hostage}`'s tribe can rescue them, {member.mention}!**")
+
+		user_currency = await self.get_user_currency(member.id)
+		if not user_currency:
+			return await ctx.send(f"**You don't even have an account, therefore you cannot pay for someone's rescue, {member.mention}!**")
+
+
+		tribe_members = await self.get_tribe_members(hostage_tribe[0])
+		tribe_member_ids: List[int] = list(map(lambda m: m[0], tribe_members))
+		currencies = await self.get_users_currency(tribe_member_ids)
+
+		rescue_money: int = sum(list(map(lambda cr: cr[0], currencies)))
+		rescue_money = int((rescue_money * 3) / 100)
+
+		if user_currency[1] < rescue_money:
+			return await ctx.send(f"**You don't have `{rescue_money}łł` to pay for `{hostage}`'s rescue, {member.mention}!**")
+
+		
+		confirm = await Confirm(f"**Are you sure you want to pay `{rescue_money}łł` to rescue `{hostage}`, {member.mention}?**").prompt(ctx)
+		if not confirm:
+			return await ctx.send(f"**Not doing it then, {member.mention}!**")
+
+		try:
+			await self.delete_skill_action_by_target_id_and_skill_type(hostage.id, 'kidnap')
+			await self.client.get_cog('SlothCurrency').update_user_money(member.id, -rescue_money)
+		except Exception as e:
+			print('Error at rescuing user from kidnap: ', e)
+			await ctx.send("**Something went wrong, try again later or contact an admin if the error persists!**")
+		else:
+			await ctx.send(f"**{hostage.mention} has been successfully rescued from a kidnap, thanks to {member.mention} and their tribe!**")
