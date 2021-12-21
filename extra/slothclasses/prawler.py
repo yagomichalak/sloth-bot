@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 from .player import Player, Skill
 from mysqldb import the_database
-from extra.menu import ConfirmSkill
+from extra.prompt.menu import Confirm
 from extra import utils
 import os
 from datetime import datetime
@@ -101,7 +101,7 @@ class Prawler(Player):
 		if 'protected' in target_fx:
 			return await ctx.send(f"**{attacker.mention}, you cannot steal from {target.mention}, because they are protected against attacks!**")
 
-		confirmed = await ConfirmSkill(f"**{attacker.mention}, are you sure you want to steal from {target.mention}?**").prompt(ctx)
+		confirmed = await Confirm(f"**{attacker.mention}, are you sure you want to steal from {target.mention}?**").prompt(ctx)
 		if not confirmed:
 			return await ctx.send("**Not stealing from anyone, then!**")
 
@@ -174,7 +174,7 @@ class Prawler(Player):
 		if not user[1] >= 500:
 			return await ctx.send(f"**You don't have `500łł` to use this skill, {perpetrator.mention}!**")
 
-		confirmed = await ConfirmSkill(
+		confirmed = await Confirm(
 			f"**{perpetrator.mention}, are you sure you want to sharpen your knife sharpness stack `{stack}` to `{stack+1}` for `500łł`?**"
 			).prompt(ctx)
 		if not confirmed:
@@ -424,7 +424,7 @@ class Prawler(Player):
 		if attacker_currency[1] < 50:
 			return await ctx.send(f"**You don't have `50łł` to use this skill, {attacker.mention}!**")
 
-		confirmed = await ConfirmSkill(f"**{attacker.mention}, are you sure you want to sabotage {target.mention}?**").prompt(ctx)
+		confirmed = await Confirm(f"**{attacker.mention}, are you sure you want to sabotage {target.mention}?**").prompt(ctx)
 		if not confirmed:
 			return await ctx.send("**Not sabotaging anyone, then!**")
 
@@ -513,9 +513,9 @@ class Prawler(Player):
 	@Player.user_is_class('prawler')
 	@Player.skill_mark()
 	@Player.not_ready()
-	async def kidnap(self, ctx, member: discord.Member = None) -> None:
+	async def kidnap(self, ctx, target: discord.Member = None) -> None:
 		""" Kidnaps someone from a Tribe to yours and takes them hostage for 2 days.
-		:param member: The member to kidnap.
+		:param target: The target member to kidnap.
 		
 		PS: Members who were held hostages cannot interact with their tribe
 		during that time.
@@ -523,4 +523,163 @@ class Prawler(Player):
 		• Delay = 2 days
 		• Cost = 200łł  """
 
-		pass
+		
+		attacker = ctx.author
+		
+		if ctx.channel.id != self.bots_txt.id:
+			return await ctx.send(f"**{attacker.mention}, you can only use this command in {self.bots_txt.mention}!**")
+
+		attacker_fx = await self.get_user_effects(attacker)
+
+		if 'knocked_out' in attacker_fx:
+			return await ctx.send(f"**{attacker.mention}, you can't use your skill, because you are knocked-out!**")
+
+		if not target:
+			return await ctx.send(f"**Inform a member to kidnap, {attacker.mention}!**")
+
+		if target.bot:
+			return await ctx.send(f"**You cannot kidnap a bot, {attacker.mention}!**")
+
+		if attacker.id == target.id:
+			return await ctx.send("**You cannot kidnap yourself!**")
+
+		target_sloth_profile = await self.get_sloth_profile(target.id)
+		if not target_sloth_profile:
+			return await ctx.send(f"**You cannot kidnap someone who doesn't have an account, {attacker.mention}!**")
+
+		if target_sloth_profile[1] == 'default':
+			return await ctx.send(f"**You cannot kidnap someone who has a `default` Sloth class, {attacker.mention}!**")
+
+		target_fx = await self.get_user_effects(target)
+
+		if 'protected' in target_fx:
+			return await ctx.send(f"**{attacker.mention}, you cannot kidnap {target.mention}, because they are protected against attacks!**")
+
+		if 'kidnapped' in target_fx:
+			return await ctx.send(f"**{attacker.mention}, {target.mention} has been kidnapped already!**")
+
+		# Checks whether attacker is in a tribe
+		user_tribe = await self.get_tribe_member(attacker.id)
+		if not user_tribe:
+			return await ctx.send(f"**You cannot kidnap someone if you're not in a tribe to keep the target as a hostage there, {attacker.mention}!**")
+
+		# Checks whether target is in a tribe
+		target_tribe = await self.get_tribe_member(target.id)
+		if not target_tribe:
+			return await ctx.send(f"**`{target}` is not even in a tribe, you cannot kidnap them, {attacker.mention}!**")
+
+		# Checks whether both members are not in the same tribe.
+
+		if user_tribe[1] == target_tribe[1]:
+			return await ctx.send(f"**You cannot kidnap someone from your own tribe, {attacker.mention}!**")
+
+		attacker_currency = await self.get_user_currency(attacker.id)
+		if attacker_currency[1] < 200:
+			return await ctx.send(f"**You don't have `200łł` to use this skill, {attacker.mention}!**")
+
+		confirmed = await Confirm(f"**{attacker.mention}, are you sure you want spend `200łł` to kidnap {target.mention}?**").prompt(ctx)
+		if not confirmed:
+			return await ctx.send("**Not sabotaging anyone, then!**")
+
+		_, exists = await Player.skill_on_cooldown(skill=Skill.FOUR, seconds=172800).predicate(ctx)
+		await self.client.get_cog('SlothCurrency').update_user_money(attacker.id, -200)
+
+		current_timestamp = await utils.get_timestamp()
+
+		try:
+			await self.insert_skill_action(
+				user_id=attacker.id, skill_type="kidnap", skill_timestamp=current_timestamp,
+				target_id=target.id,
+			)
+			if exists:
+				await self.update_user_skill_ts(attacker.id, Skill.FOUR, current_timestamp)
+			else:
+				await self.insert_user_skill_cooldown(attacker.id, Skill.FOUR, current_timestamp)
+
+			# Updates user's skills used counter
+			await self.update_user_skills_used(user_id=attacker.id)
+		except Exception as e:
+			print(e)
+			await ctx.send(f"**Something went wrong with it, {attacker.mention}!**")
+
+		else:
+			kidnap_embed = await self.get_kidnap_embed(ctx.channel, attacker.id, target.id)
+			await ctx.send(embed=kidnap_embed)
+
+
+	async def get_kidnap_embed(self, channel, attacker_id: int, target_id: int) -> discord.Embed:
+		""" Makes an embedded message for a kidnap.
+		:param channel: The context channel.
+		:param attacker_id: The ID of the attacker.
+		:param target_id: The target of the kidnapping. """
+
+		timestamp = await utils.get_timestamp()
+		kidnap_embed = discord.Embed(
+			title="Someone just got Kidnapped!",
+			description=f"<@{attacker_id}> has kidnapped <@{target_id}> 🥷",
+			color=discord.Color.green(),
+			timestamp=datetime.fromtimestamp(timestamp)
+		)
+		kidnap_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Prawler.png")
+		kidnap_embed.set_image(url='https://c.tenor.com/6JdZPCpRz1UAAAAS/dongwook-lee-dongwook.gif')
+		kidnap_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
+
+		return kidnap_embed
+
+
+	@commands.command(aliases=["rescue"])
+	@commands.cooldown(1, 5, commands.BucketType.user)
+	async def pay_rescue(self, ctx, hostage: discord.Member = None) -> None:
+		""" Pays off someone's rescue.
+		:param hostage: The hostage for whom to pay the rescue.
+		
+		* Rescue value = 3% of the the sum of the tribe members' balance. """
+
+		member: discord.Member = ctx.author
+
+		if not hostage:
+			return await ctx.send(f"**Please, inform a hostage to pay the rescue for, {member.mention}!**")
+
+		hostage_fx = await self.get_user_effects(hostage)
+
+		if 'kidnapped' not in hostage_fx:
+			return await ctx.send(f"**{hostage} is not even kidnapped, {member.mention}!**")
+
+		if not (hostage_tribe := await self.get_tribe_member(hostage.id)):
+			await self.delete_skill_action_by_target_id_and_skill_type(hostage.id, 'kidnap')
+			return await ctx.send(f"**{hostage} is not even in a tribe anymore, no need to pay to rescue them, {member.mention}!** ✅")
+
+		if not (user_tribe := await self.get_tribe_member(member.id)):
+			return await ctx.send(f"**You're not in `{hostage}`'s tribe because you're not even in a tribe, you can't rescue them, {member.mention}!**")
+
+		if hostage_tribe[1] != user_tribe[1]:
+			return await ctx.send(f"**Only members from `{hostage}`'s tribe can rescue them, {member.mention}!**")
+
+		user_currency = await self.get_user_currency(member.id)
+		if not user_currency:
+			return await ctx.send(f"**You don't even have an account, therefore you cannot pay for someone's rescue, {member.mention}!**")
+
+
+		tribe_members = await self.get_tribe_members(hostage_tribe[0])
+		tribe_member_ids: List[int] = list(map(lambda m: m[0], tribe_members))
+		currencies = await self.get_users_currency(tribe_member_ids)
+
+		rescue_money: int = sum(list(map(lambda cr: cr[0], currencies)))
+		rescue_money = int((rescue_money * 3) / 100)
+
+		if user_currency[1] < rescue_money:
+			return await ctx.send(f"**You don't have `{rescue_money}łł` to pay for `{hostage}`'s rescue, {member.mention}!**")
+
+		
+		confirm = await Confirm(f"**Are you sure you want to pay `{rescue_money}łł` to rescue `{hostage}`, {member.mention}?**").prompt(ctx)
+		if not confirm:
+			return await ctx.send(f"**Not doing it then, {member.mention}!**")
+
+		try:
+			await self.delete_skill_action_by_target_id_and_skill_type(hostage.id, 'kidnap')
+			await self.client.get_cog('SlothCurrency').update_user_money(member.id, -rescue_money)
+		except Exception as e:
+			print('Error at rescuing user from kidnap: ', e)
+			await ctx.send("**Something went wrong, try again later or contact an admin if the error persists!**")
+		else:
+			await ctx.send(f"**{hostage.mention} has been successfully rescued from a kidnap, thanks to {member.mention} and their tribe!**")

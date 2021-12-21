@@ -8,7 +8,9 @@ import os
 from datetime import datetime
 import random
 from typing import List, Optional, Union
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageOps
+
+from extra.view import UserBabyView
 
 bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
 
@@ -543,10 +545,10 @@ class Seraph(Player):
 
         member: discord.Member = ctx.author
 
-        user_pet = await self.get_user_pet(member.id)
-        if not user_pet:
+        user_baby = await self.get_user_baby(member.id)
+        if not user_baby:
             return await ctx.send(f"**You don't even have a baby, {member.mention}!**")
-        if user_pet[2].lower() != 'embryo':
+        if user_baby[3].lower() != 'embryo':
             return await ctx.send(f"**You already chose a class for your baby, {member.mention}!**")
 
         
@@ -565,15 +567,14 @@ class Seraph(Player):
         await utils.disable_buttons(view)
         await msg.edit(view=view)
 
-        if view.selected_class is None:
+        if view.selected_baby is None:
             return
 
-        if not view.selected_class:
+        if not view.selected_baby:
             return
 
-        await self.update_user_baby_name(member.id, f"Baby {view.selected_class}")
-        await self.update_user_baby_breed(member.id, view.selected_class.lower())
-        await ctx.send(f"**Your `Embryo` is born as a `{view.selected_class}`, {member.mention}!**")
+        await self.update_user_baby_class(member.id, view.selected_baby.lower())
+        await ctx.send(f"**Your `Embryo` is born as a `{view.selected_baby}`, {member.mention}!**")
 
     @commands.command(aliases=['baby_name', 'cbaby_name', 'update_baby_name'])
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -632,6 +633,13 @@ class Seraph(Player):
             else:
                 return await ctx.send(f"**{member} doesn't have a baby, {author.mention}!**")
 
+        # Gets the baby's parents
+        parent_one: discord.Member = ctx.guild.get_member(user_baby[0])
+        parent_two: discord.Member = ctx.guild.get_member(user_baby[1])
+        # Gets parents' profile pictures
+        p1pfp = await utils.get_user_pfp(parent_one)
+        p2pfp = await utils.get_user_pfp(parent_two)
+
         # Makes the Baby's Image
 
         small = ImageFont.truetype("built titling sb.ttf", 45)
@@ -640,12 +648,79 @@ class Seraph(Player):
         baby_class = Image.open(f"./sloth_custom_images/sloth/{user_baby[3].lower()}.png").resize((470, 350))
 
         background.paste(hud, (0, 0), hud)
+        background.paste(p1pfp, (5, 5), p1pfp)
+        background.paste(p2pfp, (730, 5), p2pfp)
         background.paste(baby_class, (160, 280), baby_class)
+        
         draw = ImageDraw.Draw(background)
         draw.text((320, 5), str(user_baby[2]), fill="white", font=small)
+        draw.text((5, 70), f"LP: {user_baby[4]}", fill="red", font=small)
+        draw.text((5, 120), f"Food: {user_baby[5]}", fill="brown", font=small)
         file_path = f"media/temporary/user_baby-{member.id}.png"
         background.save(file_path)
 
         # Sends the Baby's Image
         await ctx.send(file=discord.File(file_path))
         return os.remove(file_path)
+
+    async def check_baby_food(self) -> None:
+        """ Checks baby food statuses. """
+
+        current_ts = await utils.get_timestamp()
+        babies = await self.get_hungry_babies(current_ts)
+        for baby in babies:
+            if baby[4].lower() == 'embryo':
+                continue
+            
+            try:
+                # Checks whether baby has food
+                if baby[5] >= 5:
+                    # Increments LP if it needs
+                    if baby[4] < 100:
+                        await self.update_user_baby_lp(baby[0], 5, current_ts)
+                    # Subtracts food
+                    await self.update_user_baby_food(baby[0], -5, current_ts)
+
+                else:
+                    # Checks whether baby has lp
+                    if baby[4] - 5 > 0: 
+                        await self.update_user_baby_lp(baby[0], -5, current_ts)
+                        await self.update_user_baby_food(baby[0], 0, current_ts)
+                    else:
+                        # Baby died
+                        channel = self.bots_txt
+
+                        await self.delete_user_baby(baby[0])
+
+                        embed: discord.Embed = discord.Embed(
+                            description=f"**Sadly, your baby `{baby[3]}` named `{baby[2]}` starved to death because you didn't feed it for a while. My deepest feelings...**",
+                            color=discord.Color.red())
+
+                        file_path = await self.make_baby_death_image(baby)
+                        embed.set_image(url="attachment://user_baby_death.png")
+                        # Sends the Baby's Image
+                        await channel.send(content=f"<@{baby[0]}>, <@{baby[1]}>", embed=embed, file=discord.File(file_path, filename="user_baby_death.png"))
+                        os.remove(file_path)
+            except Exception as e:
+                print('Baby death error', e)
+                pass
+
+    async def make_baby_death_image(self, baby: List[Union[int, str]]) -> str:
+        """ Makes an embed for the baby's death.
+        :param baby: The data from the dead baby. """
+    
+        medium = ImageFont.truetype("built titling sb.ttf", 60)
+        background = Image.open(f"./sloth_custom_images/background/base_baby_background.png")
+        baby_class = Image.open(f"./sloth_custom_images/sloth/{baby[3].lower()}.png").resize((470, 350))
+
+        background.paste(baby_class, (160, 280), baby_class)
+        draw = ImageDraw.Draw(background)
+        draw.text((320, 180), "R.I.P.", fill="black", font=medium)
+        draw.text((320, 230), str(baby[2]), fill="black", font=medium)
+        file_path = f"media/temporary/user_baby_death-{baby[0]}.png"
+        # Makes the image gray
+        background = ImageOps.grayscale(background)
+        # Saves image
+        background.save(file_path)
+
+        return file_path

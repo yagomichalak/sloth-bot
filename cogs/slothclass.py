@@ -49,12 +49,15 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
         await self.try_to_run(self.check_transmutations)
         await self.try_to_run(self.check_shop_potion_items)
         await self.try_to_run(self.check_shop_ring_items)
+        await self.try_to_run(self.check_shop_egg_items)
         await self.try_to_run(self.check_hacks)
         await self.try_to_run(self.check_knock_outs)
         await self.try_to_run(self.check_wires)
         await self.try_to_run(self.check_tribe_creations)
         await self.try_to_run(self.check_frogs)
         await self.try_to_run(self.check_sabotages)
+        await self.try_to_run(self.check_pet_food)
+        await self.try_to_run(self.check_baby_food)
 
     async def try_to_run(self, func):
         """ Tries to run a function/method and ignore failures. """
@@ -281,7 +284,7 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
         embed.add_field(name="🟢 Merchant's 4th Skill:", value="**Skill**: `Sell Pet`.", inline=False)
         embed.add_field(name="🟢 Metamorph's 4th Skill:", value="**Skill**: `Reborn`.", inline=True)
         embed.add_field(name="🟠 Munk's 4th Skill:", value="**Skill**: `Get Quest`.", inline=True)
-        embed.add_field(name="🔴 Prawler's 4th Skill:", value="**Skill**: `Kidnap`.", inline=False)
+        embed.add_field(name="🟢 Prawler's 4th Skill:", value="**Skill**: `Kidnap`.", inline=False)
         embed.add_field(name="🟢 Seraph's 4th Skill:", value="**Skill**: `Attain Grace`.", inline=True)
         embed.add_field(name="🟢 Warrior's 4th Skill:", value="**Skill**: `Poison`.", inline=True)
 

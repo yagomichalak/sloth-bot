@@ -12,7 +12,8 @@ import os
 from typing import List, Dict, Union, Optional
 from datetime import datetime
 import random
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageOps
+from io import BytesIO
 
 bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
 
@@ -477,6 +478,22 @@ class Merchant(Player):
                 content=f"<@{tm[0]}>",
                 embed=discord.Embed(
                     description=f"**<@{tm[3]}>'s `Wedding Ring` has just expired! Then it's been removed from the `Sloth class shop`! 🍯**",
+                    color=discord.Color.red()))
+
+    async def check_shop_egg_items(self) -> None:
+
+        """ Check on-going Pet Egg items and their expiration time. """
+
+        transmutations = await self.get_expired_pet_egg_items()
+        for tm in transmutations:
+            await self.delete_skill_action_by_target_id_and_skill_type(tm[3], 'pet_egg')
+
+            channel = self.bots_txt
+
+            await channel.send(
+                content=f"<@{tm[0]}>",
+                embed=discord.Embed(
+                    description=f"**<@{tm[3]}>'s `Pet Egg` has just expired! Then it's been removed from the `Sloth class shop`! 🥚**",
                     color=discord.Color.red()))
 
     # ========== Update ===========
@@ -1061,6 +1078,9 @@ class Merchant(Player):
             else:
                 return await ctx.send(f"**{member} doesn't have a pet, {author.mention}!**")
 
+        # Gets parents' profile pictures
+        pet_owner_pfp = await utils.get_user_pfp(member)
+
         # Makes the Pet's Image
 
         small = ImageFont.truetype("built titling sb.ttf", 45)
@@ -1069,12 +1089,78 @@ class Merchant(Player):
         breed = Image.open(f"./sloth_custom_images/pet/{user_pet[2].lower()}.png")
 
         background.paste(hud, (0, 0), hud)
+        background.paste(pet_owner_pfp, (5, 5), pet_owner_pfp)
         background.paste(breed, (0, 0), breed)
         draw = ImageDraw.Draw(background)
         draw.text((320, 5), str(user_pet[1]), fill="white", font=small)
+        draw.text((5, 70), f"LP: {user_pet[3]}", fill="red", font=small)
+        draw.text((5, 120), f"Food: {user_pet[4]}", fill="brown", font=small)
         file_path = f"media/temporary/user_pet-{member.id}.png"
         background.save(file_path)
 
         # Sends the Pet's Image
         await ctx.send(file=discord.File(file_path))
         return os.remove(file_path)
+
+    async def check_pet_food(self) -> None:
+        """ Checks pet food statuses. """
+
+        current_ts = await utils.get_timestamp()
+        pets = await self.get_hungry_pets(current_ts)
+
+        for pet in pets:
+            if pet[2].lower() == 'egg':
+                continue
+
+            try:
+                # Checks whether pet has food
+                if pet[4] >= 5:
+                    # Increments LP if it needs
+                    if pet[3] < 100:
+                        await self.update_user_pet_lp(pet[0], 5, current_ts)
+                    # Subtracts food
+                    await self.update_user_pet_food(pet[0], -5, current_ts)
+
+                else:
+                    # Checks whether pet has lp
+                    if pet[3] - 5 > 0: 
+                        await self.update_user_pet_lp(pet[0], -5, current_ts)
+                        await self.update_user_pet_food(pet[0], 0, current_ts)
+                    else:
+                        # Pet died
+                        channel = self.bots_txt
+
+                        await self.delete_user_pet(pet[0])
+
+                        embed: discord.Embed = discord.Embed(
+                            description=f"**Sadly, your pet `{pet[2]}` named `{pet[1]}` starved to death because you didn't feed it for a while. My deepest feelings...**",
+                            color=discord.Color.red())
+
+                        file_path = await self.make_pet_death_image(pet)
+                        embed.set_image(url="attachment://user_pet_death.png")
+                        # Sends the Pet's Image
+                        await channel.send(content=f"<@{pet[0]}>", embed=embed, file=discord.File(file_path, filename="user_pet_death.png"))
+                        os.remove(file_path)
+            except Exception as e:
+                print('Pet death error', e)
+                pass
+
+    async def make_pet_death_image(self, pet: List[Union[int, str]]) -> str:
+        """ Makes an embed for the pet's death.
+        :param pet: The data from the dead pet. """
+    
+        medium = ImageFont.truetype("built titling sb.ttf", 60)
+        background = Image.open(f"./sloth_custom_images/background/base_pet_background.png")
+        breed = Image.open(f"./sloth_custom_images/pet/{pet[2].lower()}.png")
+
+        background.paste(breed, (0, 0), breed)
+        draw = ImageDraw.Draw(background)
+        draw.text((320, 260), "R.I.P.", font=medium)
+        draw.text((320, 310), str(pet[1]), font=medium)
+        file_path = f"media/temporary/user_pet_death-{pet[0]}.png"
+        # Makes the image gray
+        background = ImageOps.grayscale(background)
+        # Saves image
+        background.save(file_path)
+
+        return file_path

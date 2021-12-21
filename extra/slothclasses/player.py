@@ -2,7 +2,11 @@ import discord
 from discord.ext import commands
 from discord.ext.commands.core import cooldown
 
-from extra.customerrors import MissingRequiredSlothClass, ActionSkillOnCooldown, CommandNotReady, SkillsUsedRequirement, ActionSkillsLocked, PoisonedCommandError
+from extra.customerrors import (
+    MissingRequiredSlothClass, ActionSkillOnCooldown, CommandNotReady, 
+    SkillsUsedRequirement, ActionSkillsLocked, PoisonedCommandError,
+    KidnappedCommandError
+    )
 from extra import utils
 
 from mysqldb import the_database, the_django_database
@@ -190,6 +194,20 @@ class Player(*additional_cogs):
 
         return commands.check(real_check)
 
+    def kidnapped() -> bool:
+        """ Checks whether the user is poisoned and disorients the command. """
+
+        async def real_check(ctx):
+            """ Perfoms the real check. """
+
+            kidnapped = await Player.get_skill_action_by_target_id_and_skill_type(Player, target_id=ctx.author.id, skill_type='kidnap')
+            if not kidnapped:
+                return True
+
+            raise KidnappedCommandError()
+
+        return commands.check(real_check)
+
 
     async def has_effect(self, effects: Dict[str, Dict[str, Any]], effect: str) -> Union[str, bool]:
         if effect in effects:
@@ -304,6 +322,14 @@ class Player(*additional_cogs):
             effects['poisoned']['cords'] = (0, 0)
             effects['poisoned']['resize'] = None
             effects['poisoned']['debuff'] = True
+
+        if then := await self.get_skill_action_by_target_id_and_skill_type(target_id=member.id, skill_type='kidnap'):
+            effects['kidnapped'] = {}
+            effects['kidnapped']['cooldown'] = f"Ends when rescue is paid"
+            effects['kidnapped']['frames'] = []
+            effects['kidnapped']['cords'] = (0, 0)
+            effects['kidnapped']['resize'] = None
+            effects['kidnapped']['debuff'] = True
 
         return effects
 
@@ -472,30 +498,43 @@ class Player(*additional_cogs):
         return frogs
 
     async def get_expired_potion_items(self) -> List[List[Union[str, int]]]:
-        """ Gets expired transmutation skill actions. """
+        """ Gets expired Potion items from the shop. """
 
         the_time = await utils.get_timestamp()
-        mycursor, db = await the_database()
+        mycursor, _ = await the_database()
         await mycursor.execute("""
             SELECT * FROM SlothSkills
             WHERE skill_type = 'potion' AND (%s - skill_timestamp) >= 86400
             """, (the_time,))
-        transmutations = await mycursor.fetchall()
+        potions = await mycursor.fetchall()
         await mycursor.close()
-        return transmutations
+        return potions
 
     async def get_expired_ring_items(self) -> List[List[Union[str, int]]]:
-        """ Gets expired transmutation skill actions. """
+        """ Gets expired Wedding Ring items from the shop. """
 
         the_time = await utils.get_timestamp()
-        mycursor, db = await the_database()
+        mycursor, _ = await the_database()
         await mycursor.execute("""
             SELECT * FROM SlothSkills
             WHERE skill_type = 'ring' AND (%s - skill_timestamp) >= 36000
             """, (the_time,))
-        transmutations = await mycursor.fetchall()
+        rings = await mycursor.fetchall()
         await mycursor.close()
-        return transmutations
+        return rings
+
+    async def get_expired_pet_egg_items(self) -> List[List[Union[str, int]]]:
+        """ Gets expired Pet Egg items from the shop. """
+
+        the_time = await utils.get_timestamp()
+        mycursor, _ = await the_database()
+        await mycursor.execute("""
+            SELECT * FROM SlothSkills
+            WHERE skill_type = 'pet_egg' AND (%s - skill_timestamp) >= 432000
+            """, (the_time,))
+        pet_eggs = await mycursor.fetchall()
+        await mycursor.close()
+        return pet_eggs
 
     async def get_hacks(self) -> List[List[Union[str, int]]]:
         """ Gets all hack skill actions. """
@@ -564,6 +603,16 @@ class Player(*additional_cogs):
         user = await mycursor.fetchone()
         await mycursor.close()
         return user
+
+    async def get_users_currency(self, user_ids: List[int]) -> List[List[Union[str, int]]]:
+        """ Gets currency of a list of users.
+        :param user_ids: The list of IDs of the users to get the currency from. """
+
+        mycursor, _ = await the_database()
+        await mycursor.execute("SELECT user_money FROM UserCurrency WHERE user_id in {}".format(tuple(user_ids)))
+        users = await mycursor.fetchall()
+        await mycursor.close()
+        return users
 
     async def get_sloth_profile(self, user_id: int) -> List[Union[str, int]]:
         """ Gets the SlothProfile for the user.
