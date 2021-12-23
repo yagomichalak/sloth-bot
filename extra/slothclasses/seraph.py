@@ -669,7 +669,7 @@ class Seraph(Player):
         current_ts = await utils.get_timestamp()
         babies = await self.get_hungry_babies(current_ts)
         for baby in babies:
-            if baby[4].lower() == 'embryo':
+            if baby[3].lower() == 'embryo':
                 continue
             
             try:
