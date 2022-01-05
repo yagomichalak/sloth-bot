@@ -92,7 +92,7 @@ class Show(commands.Cog):
     @utils.is_allowed(allowed_roles)
     async def _rules_slash(self, ctx, 
         rule_number: Option(int, name="rule_number", description="The number of the rule you wanna show.", choices=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], required=False), 
-        reply_message: Option(bool, name="reply_message", description="Weather the slash command should reply to your original message.", required=False, default=True)) -> None:
+        reply_message: Option(bool, name="reply_message", description="Whether the slash command should reply to your original message.", required=False, default=True)) -> None:
         """ (MOD) Sends an embedded message containing all rules in it, or a specific rule. """
 
         if rule_number:
