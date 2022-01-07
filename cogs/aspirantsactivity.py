@@ -5,6 +5,7 @@ from mysqldb import *
 import asyncio
 import os
 from extra import utils
+from typing import List
 
 senior_mod_role_id: int = int(os.getenv('SENIOR_MOD_ROLE_ID'))
 mod_role_id = int(os.getenv('MOD_ROLE_ID'))
@@ -12,9 +13,7 @@ guild_id = int(os.getenv('SERVER_ID'))
 
 
 class AspirantActivity(commands.Cog):
-    '''
-    A cog related to the Aspirant's activity.
-    '''
+    """ A cog related to the Aspirant's activity. """
 
     def __init__(self, client):
         self.client = client
@@ -54,10 +53,9 @@ class AspirantActivity(commands.Cog):
         else:
             return
 
-        epoch = datetime.utcfromtimestamp(0)
-        the_time = (datetime.utcnow() - epoch).total_seconds()
-        old_time = await self.get_aspirant_current_timestamp(member.id, int(the_time))
-        addition = the_time - old_time
+        current_ts = await utils.get_timestamp()
+        old_time = await self.get_aspirant_current_timestamp(member.id, int(current_ts))
+        addition = current_ts - old_time
 
         if not before.channel:
             return await self.update_aspirant_time(member.id)
@@ -158,9 +156,9 @@ class AspirantActivity(commands.Cog):
 
 
     ### Functions
-    async def get_all_aspirants(self):
+    async def get_all_aspirants(self) -> List[List[int]]:
         mycursor, db = await the_database()
-        await mycursor.execute(f'SELECT user_id FROM AspirantActivity')
+        await mycursor.execute('SELECT user_id FROM AspirantActivity')
         users = await mycursor.fetchall()
         await mycursor.close()
         members = []
@@ -170,7 +168,7 @@ class AspirantActivity(commands.Cog):
 
     async def get_aspirant_current_timestamp(self, user_id: int, old_ts: int):
         mycursor, db = await the_database()
-        await mycursor.execute(f'SELECT * FROM AspirantActivity WHERE user_id = {user_id}')
+        await mycursor.execute("SELECT * FROM AspirantActivity WHERE user_id = %s", (user_id,))
         user = await mycursor.fetchall()
         await mycursor.close()
 
@@ -185,7 +183,7 @@ class AspirantActivity(commands.Cog):
 
     async def get_aspirant_current_messages(self, user_id: int):
         mycursor, db = await the_database()
-        await mycursor.execute(f'SELECT * FROM AspirantActivity WHERE user_id = {user_id}')
+        await mycursor.execute("SELECT * FROM AspirantActivity WHERE user_id = %s", (user_id,))
         user = await mycursor.fetchall()
         await mycursor.close()
 
@@ -197,7 +195,7 @@ class AspirantActivity(commands.Cog):
 
     async def add_aspirant_time(self, user_id: int, addition: int):
         mycursor, db = await the_database()
-        await mycursor.execute(f'UPDATE AspirantActivity SET time = time + {addition} WHERE user_id = {user_id}')
+        await mycursor.execute("UPDATE AspirantActivity SET time = time + %s WHERE user_id = %s", (addition, user_id))
         await db.commit()
         await mycursor.close()
         await self.update_aspirant_time(user_id)
@@ -205,31 +203,31 @@ class AspirantActivity(commands.Cog):
 
     async def update_aspirant_message(self, user_id: int):
         mycursor, db = await the_database()
-        await mycursor.execute(f'UPDATE AspirantActivity SET messages = messages+1 WHERE user_id = {user_id}')
+        await mycursor.execute("UPDATE AspirantActivity SET messages = messages + 1 WHERE user_id = %s", (user_id,))
         await db.commit()
         await mycursor.close()
 
 
     async def update_aspirant_time(self, user_id: int):
         mycursor, db = await the_database()
-        epoch = datetime.utcfromtimestamp(0)
-        new_ts = (datetime.utcnow() - epoch).total_seconds()
-        await mycursor.execute(f'UPDATE AspirantActivity SET timestamp = {int(new_ts)} WHERE user_id = {user_id}')
+        current_ts = await utils.get_timestamp()
+        await mycursor.execute("UPDATE AspirantActivity SET timestamp = %s WHERE user_id = %s", (int(current_ts), user_id))
         await db.commit()
         await mycursor.close()
 
 
     async def insert_aspirant(self, user_id: int, old_ts: int):
         mycursor, db = await the_database()
-        await mycursor.execute("INSERT INTO AspirantActivity (user_id, time, timestamp, messages) VALUES (%s, %s, %s, %s)",
-                               (user_id, 0, old_ts, 0))
+        await mycursor.execute(
+            "INSERT INTO AspirantActivity (user_id, time, timestamp, messages) VALUES (%s, %s, %s, %s)", 
+            (user_id, 0, old_ts, 0))
         await db.commit()
         await mycursor.close()
 
 
     async def reset_users_activity(self, user_id: int):
         mycursor, db = await the_database()
-        await mycursor.execute(f'UPDATE AspirantActivity SET messages = 0, time=0 WHERE user_id = {user_id}')
+        await mycursor.execute("UPDATE AspirantActivity SET messages = 0, time = 0 WHERE user_id = %s", (user_id,))
         await db.commit()
         await mycursor.close()
 
@@ -259,6 +257,7 @@ class AspirantActivity(commands.Cog):
     @commands.has_permissions(administrator=True)
     async def reset_table_aspirants(self, ctx):
         """ (ADM) Resets the AspirantActivity table. """
+
         mycursor, db = await the_database()
         await mycursor.execute("DELETE FROM AspirantActivity")
         await db.commit()
