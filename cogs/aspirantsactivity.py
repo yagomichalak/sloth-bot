@@ -19,12 +19,16 @@ class AspirantActivity(commands.Cog):
         self.client = client
 
     @commands.Cog.listener()
-    async def on_ready(self):
+    async def on_ready(self) -> None:
+        """ Tells when the cog is ready to run. """
+
         print('AspirantActivity cog is ready!')
 
     ### Listeners
     @commands.Cog.listener()
-    async def on_message(self, message):
+    async def on_message(self, message) -> None:
+        """ Listens to aspirants' messages. """
+        
         if not message.guild:
             return
         if message.author.bot:
@@ -42,7 +46,9 @@ class AspirantActivity(commands.Cog):
         await self.update_aspirant_message(message.author.id)
 
     @commands.Cog.listener()
-    async def on_voice_state_update(self, member, before, after):
+    async def on_voice_state_update(self, member, before, after) -> None:
+        """ Listenins to aspirants' voice activity. """
+
         if member.bot:
             return
 
@@ -66,7 +72,7 @@ class AspirantActivity(commands.Cog):
     ### Commands
     @utils.is_allowed([senior_mod_role_id], throw_exc=True)
     @commands.command(aliases=['asprep', 'asp_rep'])
-    async def aspirant_rep(self, ctx):
+    async def aspirant_rep(self, ctx) -> None:
         """ (STAFF) Shows all the aspirants and their statuses in an embedded message. """
 
         if not (users_id := await self.get_all_aspirants()):
@@ -121,7 +127,7 @@ class AspirantActivity(commands.Cog):
 
     @utils.is_allowed([senior_mod_role_id], throw_exc=True)
     @commands.command(aliases=['addasp', 'add_asp'])
-    async def add_aspirant(self, ctx, member: discord.Member=None):
+    async def add_aspirant(self, ctx, member: discord.Member = None) -> None:
         """Adds an aspirant from the activity monitor
         :param member: The user_id, mention or name#0000 of the user"""
 
@@ -140,16 +146,17 @@ class AspirantActivity(commands.Cog):
 
     @utils.is_allowed([senior_mod_role_id], throw_exc=True)
     @commands.command(aliases=['del_asp', 'delasp'])
-    async def remove_aspirant(self, ctx, member: discord.Member=None):
+    async def remove_aspirant(self, ctx, member: discord.Member = None) -> None:
         """Removes an aspirant from the activity monitor
         :param member: The user_id, mention or name#0000 of the user"""
+
         await ctx.message.delete()
 
         if not member:
             return await ctx.send("**Please, inform a member**")
 
         mycursor, db = await the_database()
-        await mycursor.execute(f"DELETE FROM AspirantActivity WHERE user_id = {member.id}")
+        await mycursor.execute("DELETE FROM AspirantActivity WHERE user_id = %s", (member.id))
         await db.commit()
         await mycursor.close()
         await ctx.send(f"**The member {member} was successfully removed**")
@@ -157,7 +164,9 @@ class AspirantActivity(commands.Cog):
 
     ### Functions
     async def get_all_aspirants(self) -> List[List[int]]:
-        mycursor, db = await the_database()
+        """ Gets all aspirants. """
+
+        mycursor, _ = await the_database()
         await mycursor.execute('SELECT user_id FROM AspirantActivity')
         users = await mycursor.fetchall()
         await mycursor.close()
@@ -166,8 +175,12 @@ class AspirantActivity(commands.Cog):
             members.append(user[0])
         return members
 
-    async def get_aspirant_current_timestamp(self, user_id: int, old_ts: int):
-        mycursor, db = await the_database()
+    async def get_aspirant_current_timestamp(self, user_id: int, old_ts: int) -> int:
+        """ Gets a specific aspirant's timestamp.
+        :param user_id: The ID of the user from whom to get it.
+        :param old_ts: The current timestamp. """
+
+        mycursor, _ = await the_database()
         await mycursor.execute("SELECT * FROM AspirantActivity WHERE user_id = %s", (user_id,))
         user = await mycursor.fetchall()
         await mycursor.close()
@@ -181,8 +194,11 @@ class AspirantActivity(commands.Cog):
         else:
             return old_ts
 
-    async def get_aspirant_current_messages(self, user_id: int):
-        mycursor, db = await the_database()
+    async def get_aspirant_current_messages(self, user_id: int) -> int:
+        """ Gets a specific aspirant's messages counter.
+        :param user_id: The ID of the user from whom to get it. """
+
+        mycursor, _ = await the_database()
         await mycursor.execute("SELECT * FROM AspirantActivity WHERE user_id = %s", (user_id,))
         user = await mycursor.fetchall()
         await mycursor.close()
@@ -193,7 +209,11 @@ class AspirantActivity(commands.Cog):
 
         return user[0][3]
 
-    async def add_aspirant_time(self, user_id: int, addition: int):
+    async def add_aspirant_time(self, user_id: int, addition: int) -> None:
+        """ Updates an aspirant's time counter.
+        :param user_id: The ID of the aspirant to add.
+        :param addition: The addition to increment to their current time counter. """
+
         mycursor, db = await the_database()
         await mycursor.execute("UPDATE AspirantActivity SET time = time + %s WHERE user_id = %s", (addition, user_id))
         await db.commit()
@@ -201,14 +221,20 @@ class AspirantActivity(commands.Cog):
         await self.update_aspirant_time(user_id)
 
 
-    async def update_aspirant_message(self, user_id: int):
+    async def update_aspirant_message(self, user_id: int) -> None:
+        """ Updates an aspirant's message counter.
+        :param user_id: The user for whom to update it. """
+
         mycursor, db = await the_database()
         await mycursor.execute("UPDATE AspirantActivity SET messages = messages + 1 WHERE user_id = %s", (user_id,))
         await db.commit()
         await mycursor.close()
 
 
-    async def update_aspirant_time(self, user_id: int):
+    async def update_aspirant_time(self, user_id: int) -> None:
+        """ Updates an aspirant's timestamp.
+        :param user_id: The ID of the aspirant from whom to update it. """
+
         mycursor, db = await the_database()
         current_ts = await utils.get_timestamp()
         await mycursor.execute("UPDATE AspirantActivity SET timestamp = %s WHERE user_id = %s", (int(current_ts), user_id))
