@@ -78,12 +78,12 @@ class AspirantActivity(commands.Cog):
         if not (users_id := await self.get_all_aspirants()):
             return await ctx.send("**There is no aspirants being moderated**")
 
-        mycursor, db = await the_database()
+        mycursor, _ = await the_database()
         await mycursor.execute(f'SELECT * FROM AspirantActivity')
         users = await mycursor.fetchall()
         await mycursor.close()
 
-        description=["Aspirants' activity statuses.\n\n"]
+        description = ["Aspirants' activity statuses.\n\n"]
 
         embed = discord.Embed(title="**Free work labor candidates**",
                               url="https://www.cbp.gov/trade/forced-labor",
@@ -242,7 +242,11 @@ class AspirantActivity(commands.Cog):
         await mycursor.close()
 
 
-    async def insert_aspirant(self, user_id: int, old_ts: int):
+    async def insert_aspirant(self, user_id: int, old_ts: int) -> None:
+        """ Inserts an aspirant to the database.
+        :param user_id: The ID of the aspirant to add.
+        :param old_ts: The current timestamp. """
+
         mycursor, db = await the_database()
         await mycursor.execute(
             "INSERT INTO AspirantActivity (user_id, time, timestamp, messages) VALUES (%s, %s, %s, %s)", 
@@ -251,7 +255,10 @@ class AspirantActivity(commands.Cog):
         await mycursor.close()
 
 
-    async def reset_users_activity(self, user_id: int):
+    async def reset_users_activity(self, user_id: int) -> None:
+        """ Resets an aspirant's statuses.
+        :param user_id: The ID of the user to reset. """
+
         mycursor, db = await the_database()
         await mycursor.execute("UPDATE AspirantActivity SET messages = 0, time = 0 WHERE user_id = %s", (user_id,))
         await db.commit()
@@ -264,32 +271,62 @@ class AspirantActivity(commands.Cog):
     async def create_aspirants_table(self, ctx):
         """(ADM) Creates the AspirantActivity table."""
         
+        member: discord.Member = ctx.author
+        if await self.check_aspirant_activity_exists():
+            return await ctx.send(f"**The AspirantActivity table already exists, {member.mention}!**")
+
         mycursor, db = await the_database()
         await mycursor.execute(
             'CREATE TABLE AspirantActivity (user_id bigint , time bigint, timestamp bigint default null, messages int)')
         await db.commit()
         await mycursor.close()
+        await ctx.send(f"**Table `AspirantActivity` created, {member.mention}!**")
 
     @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
     async def drop_table_aspirants(self, ctx):
         """(ADM) Drops the AspirantActivity table."""
+
+        member: discord.Member = ctx.author
+        if not await self.check_aspirant_activity_exists():
+            return await ctx.send(f"**The AspirantActivity table doesn't exist, {member.mention}!**")
+
         mycursor, db = await the_database()
         await mycursor.execute('DROP TABLE AspirantActivity')
         await db.commit()
         await mycursor.close()
+        await ctx.send(f"**Table `AspirantActivity` dropped, {member.mention}!**")
 
     @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
     async def reset_table_aspirants(self, ctx):
         """ (ADM) Resets the AspirantActivity table. """
 
+        member: discord.Member = ctx.author
+        if not await self.check_aspirant_activity_exists():
+            return await ctx.send(f"**The AspirantActivity table doesn't exist yet, {member.mention}!**")
+
         mycursor, db = await the_database()
         await mycursor.execute("DELETE FROM AspirantActivity")
         await db.commit()
         await mycursor.close()
+        await ctx.send(f"**Table `AspirantActivity` reset, {member.mention}!**")
+
+    async def check_aspirant_activity_exists(self) -> bool:
+        """ Checks whether the AspirantActivity table exists. """
+
+        mycursor, _ = await the_database()
+        await mycursor.execute("SHOW TABLE STATUS LIKE 'AspirantActivity'")
+        exists = await mycursor.fetchone()
+        await mycursor.close()
+        if exists:
+            return True
+        else:
+            return False
 
 
 
 def setup(client) -> None:
+    """ Cog's setup function. """
+
     client.add_cog(AspirantActivity(client))
