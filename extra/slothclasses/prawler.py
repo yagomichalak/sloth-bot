@@ -233,7 +233,8 @@ class Prawler(Player):
 
 			except Exception as e:
 				await self.delete_skill_action_by_message_id(steal[4])
-			finally:
+			else:
+				await self.delete_skill_action_by_message_id(steal[4])
 				sloth_profile = await self.get_sloth_profile(steal[0])
 				stack = sloth_profile[6]
 				if stack:
