@@ -394,6 +394,9 @@ class Moderation(*moderation_cogs):
 		if not members:
 			await ctx.send("**Please, inform a member!**", delete_after=3)
 		else:
+			if len(reason) > 960:
+				return await ctx.send(f"**Please, inform a reason that is lower than or equal to 960 characters, {ctx.author.mention}!**", delete_after=3)
+
 			for member in members:
 				if ctx.guild.get_member(member.id):
 					# General embed
