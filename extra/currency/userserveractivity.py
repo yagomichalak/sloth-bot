@@ -137,7 +137,7 @@ class UserVoiceSystem(commands.Cog):
             except ValueError:
                 pass
 
-            increment: int = current_ts - user_info[0][3]
+            increment: int = current_ts - user_info[0][3] # Fix this, index out of range sometimes
             people_in_vc: int = len([m for m in bc.members if not m.bot and m.id not in alts])
             if people_in_vc < 2 or after.self_mute or after.self_deaf:
                 return await self.update_user_server_time(member.id, increment, None)

@@ -1,5 +1,5 @@
 import discord
-from discord.ext import commands, tasks, flags
+from discord.ext import commands, tasks
 from typing import List, Union, Dict, Optional
 from random import choice
 import os
