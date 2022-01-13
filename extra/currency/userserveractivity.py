@@ -51,7 +51,7 @@ class UserVoiceSystem(commands.Cog):
         ac = after.channel
 
         user_info = await self.get_user_activity_info(member.id)
-        if not user_info and not after.self_muted:
+        if not user_info and not after.self_mute:
             return await self.insert_user_server_activity(member.id, 0, current_ts)
 
         SlothClass: commands.Cog = self.client.get_cog('SlothClass')
