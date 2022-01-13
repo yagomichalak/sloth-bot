@@ -21,7 +21,7 @@ class SlothClassDatabaseCommands(commands.Cog):
                 skill_timestamp BIGINT NOT NULL, target_id BIGINT DEFAULT NULL,
                 message_id BIGINT DEFAULT NULL, channel_id BIGINT DEFAULT NULL,
                 emoji VARCHAR(50) DEFAULT NULL, PRICE INT DEFAULT 0,
-                PRIMARY KEY (target_is, skill_type)
+                PRIMARY KEY (target_id, skill_type)
             ) DEFAULT CHARSET=utf8mb4""")
         await db.commit()
         await mycursor.close()
