@@ -53,7 +53,7 @@ shades_of_pink = cycle([(252, 15, 192), (255, 0, 255), (248, 24, 148),
               ])
 
 # Making the client variable
-client = commands.Bot(command_prefix='z!', intents=discord.Intents.all(), help_command=None)
+client = commands.Bot(command_prefix='z!', intents=discord.Intents.all(), help_command=None, case_insensitive=True)
 
 # Tells when the bot is online
 @client.event
