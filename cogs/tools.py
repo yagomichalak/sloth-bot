@@ -46,7 +46,8 @@ in_a_vc_role_id: int = int(os.getenv('IN_A_VC_ROLE_ID'))
 allowed_roles = [owner_role_id, admin_role_id, mod_role_id, *patreon_roles.keys(), int(os.getenv('SLOTH_LOVERS_ROLE_ID'))]
 teacher_role_id = int(os.getenv('TEACHER_ROLE_ID'))
 patreon_channel_id = int(os.getenv('PATREONS_CHANNEL_ID'))
-
+popular_lang_cat_id = int(os.getenv('LANGUAGES_CHANNEL_ID'))
+dynamic_channels_cat_id = int(os.getenv('CREATE_DYNAMIC_ROOM_CAT_ID'))
 tool_cogs: List[commands.Cog] = [
 	StealthStatusTable
 ]
@@ -1243,7 +1244,56 @@ class Tools(*tool_cogs):
 		else:
 			await ctx.send(f"**Your stealth mode has been turned `{'off' if on else 'on'}`, {member.mention}!**")
 
-	
+	@slash_command(name="join", guild_ids=guild_ids)
+	@utils.is_allowed(allowed_roles, throw_exc=True)
+	@commands.cooldown(1, 5, commands.BucketType.user)
+	async def _join_slash(self, ctx,
+		channel: Option(discord.VoiceChannel, description="The language voice channel you want to join", required=True)) -> None:
+		""" (Patreon) Joins a language channel"""
+
+		await ctx.defer()
+
+		allowed_channels = [popular_lang_cat_id, dynamic_channels_cat_id]
+		if channel.category.id not in allowed_channels:
+			return await ctx.respond("**You are not allowed to join this channel**")
+
+		author_vc = ctx.author.voice
+		if not author_vc or not author_vc.channel:
+			return await ctx.respond(f"**You're not in a VC, I cannot move you to there, {ctx.author.mention}!**")
+
+		try:
+			await ctx.author.move_to(channel)
+		except:
+			await ctx.respond(f"**For some reason I couldn't move you to there, {ctx.author.mention}!**")
+		else:
+			await ctx.respond(f"**You got moved to {channel.mention}!**")
+
+
+	@commands.command()
+	@utils.is_allowed(allowed_roles, throw_exc=True)
+	async def join(self, ctx, channel: Optional[discord.VoiceChannel]) -> None:
+		""" (Patreon) Joins a language channel
+		:param voice_channel: ID of the language voice channel
+		"""
+
+		if not channel:
+			return await ctx.send(f"**Inform the channel you want to join, {ctx.author.mention}**")
+
+		# Checks if the channel is not a smartroom
+		allowed_channels = [popular_lang_cat_id, dynamic_channels_cat_id]
+		if channel.category.id not in allowed_channels:
+			return await ctx.send("**You do not have permission to access this channel**", delete_after=3)
+
+		author_vc = ctx.author.voice
+		if not author_vc or not author_vc.channel:
+			return await ctx.respond(f"**You're not in a VC, I cannot move you to there, {ctx.author.mention}!**")
+
+		try:
+			await ctx.author.move_to(channel)
+		except:
+			await ctx.respond(f"**For some reason I couldn't move you to there, {ctx.author.mention}!**")
+		else:
+			await ctx.respond(f"**You got moved to {channel.mention}!**")
 
 def setup(client):
 	client.add_cog(Tools(client))
