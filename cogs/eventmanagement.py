@@ -100,14 +100,6 @@ class EventManagement(commands.Cog):
 
         overwrites = await self.get_event_permissions(guild)
 
-        tv_club_role = discord.utils.get(
-            guild.roles, id=int(os.getenv('TV_CLUB_ROLE_ID'))
-        )
-        # Adds some perms to the Movie Club role
-        overwrites[tv_club_role] = discord.PermissionOverwrite(
-            read_messages=True, send_messages=True,
-            connect=True, speak=True, view_channel=True)
-
         events_category = discord.utils.get(
             guild.categories, id=int(os.getenv('EVENTS_CAT_ID')))
 
