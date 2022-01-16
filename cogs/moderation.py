@@ -333,8 +333,7 @@ class Moderation(*moderation_cogs):
 	`A short idea name/description`
 
 	**Explanation:**
-	`Explain the feature in detail and including reasons why you would like this feature to be implemented.`''',
-			int(os.getenv('NATIVE_LANGUAGE_HELP_CHANNEL_ID')): "Hey, we've noticed you haven't assigned yourself a native language role. Perhaps we can help you with that. Would you mind telling me what is your native language and what languages are you studying? So we can complete your profile?",
+	`Explain the feature in detail and including reasons why you would like this feature to be implemented.`'''
 		}
 
 		if ctx.channel.id not in special_channels.keys():
