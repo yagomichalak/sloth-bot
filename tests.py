@@ -306,16 +306,3 @@ z!create_table_stealth_status
 z!create_table_selection_menu
 
 
-
-
-
-z!eval
-from mysqldb import the_database
-
-mycursor, db = await the_database()
-await mycursor.execute("""
-  ALTER TABLE SlothProfile
-  ADD CONSTRAINT fk_sloth_pfl_tribe_name
-  FOREIGN KEY (tribe_user_id, tribe) REFERENCES TribeMember (member_id, tribe_name) ON DELETE SET NULL ON UPDATE CASCADE
-""")
-await mycursor.close()
