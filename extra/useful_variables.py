@@ -230,8 +230,11 @@ You can check it with the command "z!status" or "z!profile", check our website t
 
 
 
-        int(os.getenv('ASTROSLOTH_ROLE_ID')): ["**Hype! {member.mention} is now the highest rank, `Astrosloth`!  <:zslothvcool:695411944332460053> **", "**Hey! Thank you for helping our community, you will now receive :leaves: 10000 ŁŁ monthly, you'll have access to exclusive content from our events.**", """Hip-Hip a Payment is order for our **AstroSloths**, you've just received your monthly **10.000** :leaves: in your account!
-You can check it with the command "z!status" or "z!profile", check our website to learn what to spend it with!""", 10000]
+        int(os.getenv('ASTROSLOTH_ROLE_ID')): ["**Hype! {member.mention} joined the `Astrosloth`!  <:zslothvcool:695411944332460053> **", "**Hey! Thank you for helping our community, you will now receive :leaves: 10000 ŁŁ monthly, you'll have access to exclusive content from our events.**", """Hip-Hip a Payment is order for our **AstroSloths**, you've just received your monthly **10.000** :leaves: in your account!
+You can check it with the command "z!status" or "z!profile", check our website to learn what to spend it with!""", 10000],
+
+        int(os.getenv('MASTERSLOTH_ROLE_ID')): ["**Hype! {member.mention} is now the highest rank, `Mastersloth`!  <:zslothvcool:695411944332460053> **", "**Hey! Thank you for helping our community, you will now receive :leaves: 10000 ŁŁ monthly, you'll have access to exclusive content from our events.**", """Hehe boi, here is the monthly payment for our **MasterSloths**, you've just received your monthly **10.000** :leaves: in your account!
+You can check it with the command "z!status" or "z!profile", check our website to learn what to spend it with!""", 22000]
 
 
 
