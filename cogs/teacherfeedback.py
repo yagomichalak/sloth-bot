@@ -839,7 +839,7 @@ class TeacherFeedback(commands.Cog):
 
         overwrites[lesson_management_role] = discord.PermissionOverwrite(
             read_messages=True, send_messages=True, manage_messages=True, mute_members=True, embed_links=True, connect=True,
-            speak=True, move_members=True, view_channel=True, manage_channels=True)
+            speak=True, move_members=True, view_channel=True, manage_channels=True, manage_permissions=True)
 
         overwrites[sloth_explorer_role] = discord.PermissionOverwrite(
             read_messages=True, send_messages=True, connect=True, speak=True, view_channel=True, embed_links=True)
