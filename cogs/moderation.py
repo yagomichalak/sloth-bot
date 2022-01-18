@@ -295,7 +295,7 @@ class Moderation(*moderation_cogs):
 			return await ctx.send("**Please, insert a valid amount of messages to delete**", delete_after=5)
 
 		perms = ctx.channel.permissions_for(ctx.author)
-		if not perms.administrator:
+		if not perms.administrator and not ctx.author.get_role(senior_mod_role_id):
 			if int(amount) > 30:
 				return await ctx.send(f"**You cannot delete more than `30` messages at a time, {ctx.author.mention}!**")
 
