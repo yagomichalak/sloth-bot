@@ -251,7 +251,7 @@ class BlackJackGame:
     def surrender_event(self):
         # Change title and end the game
         
-        self.title = f"Surrender - **{self.player_name}** lost {int(self.bet * 0.35)} leaves 🍃"
+        self.title = f"Surrender - **{self.player_name}** lost {int(self.bet * 0.30)} leaves 🍃"
         self.color = int("ffffff", 16)
         self.status = 'finished'
         self.dealer_final_show()
