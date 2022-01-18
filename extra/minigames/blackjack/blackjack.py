@@ -26,7 +26,7 @@ class BlackJack(commands.Cog):
 
     @commands.command(name='blackjack', aliases=['bj'])
     @Player.poisoned()
-    @commands.cooldown(1, 10, commands.BucketType.user)
+    @commands.cooldown(1, 3, commands.BucketType.user)
     async def start_blackjack_game(self, ctx, bet = None) -> None:
         """ Starts the BlackJack game.
         :param bet: The amount of money you wanna bet.
