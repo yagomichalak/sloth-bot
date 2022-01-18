@@ -47,6 +47,8 @@ allowed_roles = [owner_role_id, admin_role_id, mod_role_id, *patreon_roles.keys(
 teacher_role_id = int(os.getenv('TEACHER_ROLE_ID'))
 patreon_channel_id = int(os.getenv('PATREONS_CHANNEL_ID'))
 popular_lang_cat_id = int(os.getenv('LANGUAGES_CHANNEL_ID'))
+more_popular_lang_cat_id = int(os.getenv('MORE_LANGUAGES_CHANNEL_ID'))
+
 dynamic_channels_cat_id = int(os.getenv('CREATE_DYNAMIC_ROOM_CAT_ID'))
 tool_cogs: List[commands.Cog] = [
 	StealthStatusTable
@@ -1280,7 +1282,7 @@ class Tools(*tool_cogs):
 			return await ctx.send(f"**Inform the channel you want to join, {ctx.author.mention}**")
 
 		# Checks if the channel is not a smartroom
-		allowed_channels = [popular_lang_cat_id, dynamic_channels_cat_id]
+		allowed_channels = [popular_lang_cat_id, more_popular_lang_cat_id, dynamic_channels_cat_id]
 		if channel.category.id not in allowed_channels:
 			return await ctx.send("**You do not have permission to access this channel**", delete_after=3)
 
