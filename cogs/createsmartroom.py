@@ -1810,6 +1810,92 @@ You can only add either **threads** **OR** one **voice channel**"""))
 
 
 
+	# Creates a smartroom manually
+	@commands.command(aliases=['csr'])
+	async def create_smartroom(self, ctx, type: int, limit: int, *, name: str) -> None:
+		""":param type: The type of smart room (1-Basic / 2-Premium)
+		:param size: The size of the smart room (0-25)
+		:param name: The name of the smart room"""
+
+		if not type:
+			return await ctx.send("**Please, inform the type of the room (1-Basic 5🍃/ 2-Premium 100🍃)**")
+
+		if not limit:
+			return await ctx.send("**Please, inform the limit of the voice channel**")
+
+		if not name:
+			return await ctx.send("**Please, inform the name of the room**")
+
+		else:
+			if len(name) < 1 or len(name) > 30:
+				return await ctx.send("**The name of the room must have between 1 and 30 characters**")
+
+		member = ctx.message.author
+		if type == 1:
+			price = 5
+		elif type == 2:
+			price = 100
+
+		# Checks if the user has money for it
+		user_currency = await SlothCurrency.get_user_currency(member, member.id)
+		if not user_currency:
+			view = discord.ui.View()
+			view.add_item(discord.ui.Button(style=5, label="Create Account", emoji="🦥", url="https://thelanguagesloth.com/profile/update"))
+			return await ctx.send( 
+				embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one, or in the button below!**"),
+				view=view)
+
+		if user_currency[0][1] < price:
+			return await ctx.send("**You don't have enough money to buy this service!**")
+
+		confirm = await ConfirmSkill(f"Would you like to create this smart room for {price} 🍃?`, {member.mention}?").prompt(ctx)
+		if not confirm:
+			return await ctx.send(f"**Not doing it then, {member.mention}!**")
+
+		# Gets the CreateSmartRoom category, creates the VC and text channel and tries to move the user to there
+
+		creations = []
+		failed = False
+
+		the_category_test = discord.utils.get(member.guild.categories, id=self.cat_id)
+
+		if vc_channel := await self.try_to_create(kind='voice', category=the_category_test, name=name, user_limit=limit):
+			creations.append(vc_channel)
+			await vc_channel.edit(sync_permissions=True)
+		else:
+			failed = True
+
+		if type == 2:
+			if txt_channel := await self.try_to_create(kind='text', category=the_category_test, name=name):
+				creations.append(txt_channel)
+				await txt_channel.edit(sync_permissions=True)
+			else:
+				failed = True
+
+		# Checks whether there are failed creations, if so, delete the channels
+		if failed:
+			await self.delete_things(creations)
+			return await member.send(f"**Channels limit reached, creation cannot be completed, try again later!**")
+
+
+		# Puts the channels ids in the database
+		if type == 2:
+			await self.insert_premium_vc(member.id, vc_channel.id, txt_channel.id)
+
+		await SlothCurrency.update_user_money(member, member.id, -price)
+		await ctx.send(f"**Your smartroom {vc_channel.mention} has been created**", delete_after=60)
+
+		try:
+			await member.move_to(vc_channel)
+		except:
+			await ctx.send("**You cannot be moved because you are not in a Voice-Channel! You have one minute to join the room before it gets deleted together with the text channel.**", delete_after=60)
+			await asyncio.sleep(60)
+			if len(vc_channel.members) == 0:
+				await vc_channel.delete()
+				if type == 2:
+					await txt_channel.delete()
+
+
 
 def setup(client):
 	""" Cog's setup function. """
