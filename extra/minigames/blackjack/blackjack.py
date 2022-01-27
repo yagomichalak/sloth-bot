@@ -101,7 +101,7 @@ class BlackJack(commands.Cog):
         author: discord.Member = ctx.author
 
         if member:
-            perms = ctx.channel.permission_for(ctx.author)
+            perms = ctx.channel.permissions_for(ctx.author)
             if not perms.administrator:
                 return await ctx.send("**You can't do that**")
 
