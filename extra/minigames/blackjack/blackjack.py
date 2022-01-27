@@ -46,9 +46,9 @@ class BlackJack(commands.Cog):
             ctx.command.reset_cooldown(ctx)
             return await ctx.reply("**Please, inform an integer value!**")
 
-        if bet > 3000:
+        if bet > 5000:
             ctx.command.reset_cooldown(ctx)
-            return await ctx.reply("**The betting limit is `3000łł`!**")
+            return await ctx.reply("**The betting limit is `5000łł`!**")
 
         SlothCurrency = self.client.get_cog('SlothCurrency')
         user_currency = await SlothCurrency.get_user_currency(player.id)
