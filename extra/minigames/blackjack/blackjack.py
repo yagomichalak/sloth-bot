@@ -93,18 +93,24 @@ class BlackJack(commands.Cog):
             await msg.edit(embed=current_game.embed(), view=view)
 
     @commands.command(aliases=["fix_bj", "fbj", "fixbj", "reset_bj", "rbj", "resetbj"], hidden=True)
-    @commands.has_permissions(administrator=True)
+    @commands.has_permissions()
     async def fix_blackjack(self, ctx, member: discord.Member = None) -> None:
         """ Fixes the Blackjack game for a specific user.
         :param member: The member for whom fix the game. """
 
         author: discord.Member = ctx.author
+
+        if member:
+            perms = ctx.channel.permissions_for(ctx.author)
+            if not perms.administrator:
+                return await ctx.send("**You can't do that**")
+
         if not member:
-            return await ctx.send(f"**Please, inform a member to fix the game for, {author.mention}!**")
+            member: discord.Member = ctx.message.author
 
         try:
             del self.blackjack_games[ctx.guild.id][member.id]
         except:
             await ctx.send(f"**This user is not even broken, {author.mention}!**")
         else:
-            await ctx.send(f"**Fixed the game for `{member}`, {author.mention}!**")
+            await ctx.send(f"**Fixed the game for `{member}`!**")
