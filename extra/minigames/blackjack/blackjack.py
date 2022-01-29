@@ -2,6 +2,9 @@ import discord
 from discord.ext import commands
 from .blackjack_game import BlackJackGame
 from .create_cards_pack import cards_pack
+from mysqldb import *
+from .blackjack_db import BlackJackDB
+from typing import List, Union, Optional, Dict
 
 from extra.slothclasses.player import Player
 from extra.minigames.view import BlackJackActionView
@@ -11,7 +14,10 @@ import os
 
 server_id: int = int(os.getenv('SERVER_ID'))
 
-class BlackJack(commands.Cog):
+blackjack_db: List[commands.Cog] = [
+	BlackJackDB
+]
+class BlackJack(*blackjack_db):
     """ To start a blackjack game in your channel use the 'blackjack <bet>' command,
     and instead of <bet> put the amount you want to gamble (the value must be an integer).
     After you start a blackjack game use 'hit' command to draw a new card, 'stand' command
@@ -49,6 +55,11 @@ class BlackJack(commands.Cog):
         if bet > 5000:
             ctx.command.reset_cooldown(ctx)
             return await ctx.reply("**The betting limit is `5000łł`!**")
+
+        if not await self.check_user_database(ctx.author.id):
+            await self.insert_user_database(ctx.author.id)
+
+        await self.insert_user_data(type="games", user_id=ctx.author.id)
 
         SlothCurrency = self.client.get_cog('SlothCurrency')
         user_currency = await SlothCurrency.get_user_currency(player.id)
@@ -92,7 +103,7 @@ class BlackJack(commands.Cog):
             await utils.disable_buttons(view)
             await msg.edit(embed=current_game.embed(), view=view)
 
-    @commands.command(aliases=["fix_bj", "fbj", "fixbj", "reset_bj", "rbj", "resetbj"], hidden=True)
+    @commands.command(aliases=["fix_bj", "fbj", "fixbj", "reset_bj", "rbj", "resetbj"])
     @commands.has_permissions()
     async def fix_blackjack(self, ctx, member: discord.Member = None) -> None:
         """ Fixes the Blackjack game for a specific user.
@@ -114,3 +125,16 @@ class BlackJack(commands.Cog):
             await ctx.send(f"**This user is not even broken, {author.mention}!**")
         else:
             await ctx.send(f"**Fixed the game for `{member}`!**")
+
+    @commands.command(aliases=["bjs"])
+    @commands.has_permissions()
+    async def blackjack_status(self, ctx, member: discord.Member = None) -> None:
+    
+        if not member:
+            member: discord.Member = ctx.message.author
+        
+        user_id, wins, losses, draws, surrenders, games = await self.get_user_data(member.id)
+
+        embed = discord.Embed(title=f"BlackJack Status {member}", timestamp=ctx.message.created_at, color=ctx.author.color)
+        embed.description=(f"```{wins} wins🍃| {losses} losses ❌| {draws} draws 🔶| {surrenders} srr 🏳️| {games} games 🏅```")
+        await ctx.send(embed=embed)

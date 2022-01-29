@@ -1,12 +1,16 @@
 import asyncio
 import discord
 from discord.ext import commands
-
+from mysqldb import *
 import copy
 import random
+from .blackjack_db import BlackJackDB
+from typing import List, Union, Optional, Dict
 
-
-class BlackJackGame:
+moderation_cogs: List[commands.Cog] = [
+	BlackJackDB
+]
+class BlackJackGame(*moderation_cogs):
     """ Class for the BlackJack game. """
 
     def __init__(self, client: commands.Bot, bet: int, player: discord.Member, player_cards: list, dealer_cards: list,
@@ -204,27 +208,31 @@ class BlackJackGame:
                 return
         self.stand()
 
-    # When player have blackjack
+    # When dealer have blackjack
     def blackjack_event_dealer(self):
         SlothCurrency = self.client.get_cog('SlothCurrency')
         self.client.loop.create_task(SlothCurrency.update_user_money(self.player_id, int(self.bet * 1)))
+        self.client.loop.create_task(self.insert_user_data(type="losses", user_id=self.player_id))
 
         self.title = f"Dealer blackjack - **{self.player_name}** lost {int(self.bet * 1)} leaves 🍃"
         self.status = 'finished'
         self.color = discord.Color.brand_red()
         self.dealer_final_show()
 
+
     # When player have blackjack
     def blackjack_event_player(self):
         # Increase player balance with bet * 2 if he hit blackjack
         SlothCurrency = self.client.get_cog('SlothCurrency')
         self.client.loop.create_task(SlothCurrency.update_user_money(self.player_id, int(self.bet * 2)))
+        self.client.loop.create_task(self.insert_user_data(type="wins", user_id=self.player_id))
 
         # Change title and end the game
         self.title = f"Player Blackjack - **{self.player_name}** won {int(self.bet * 1)} leaves 🍃"
         self.status = 'finished'
         self.color = discord.Color.green()
         self.dealer_final_show()
+
 
     # Classic win in blackjack
     def win_event(self):
@@ -247,6 +255,7 @@ class BlackJackGame:
             match_bal += self.bet
             won_text = int(match_bal - self.bet)
         self.client.loop.create_task(SlothCurrency.update_user_money(self.player_id, int(match_bal)))
+        self.client.loop.create_task(self.insert_user_data(type="wins", user_id=self.player_id))
 
         # Change title and end the game
         self.title = f"Win - **{self.player_name}** won {won_text} leaves 🍃"
@@ -262,10 +271,12 @@ class BlackJackGame:
         self.color = int("ffffff", 16)
         self.status = 'finished'
         self.dealer_final_show()
+        self.client.loop.create_task(self.insert_user_data("surrenders", self.player_id))
 
     def lose_event(self):
-        # Change title and end the game
+        self.client.loop.create_task(self.insert_user_data(type="losses", user_id=self.player_id))
 
+        # Change title and end the game
         if self.doubled:
             bet_var: str = int(self.bet * 2)
         elif self.tripled:
@@ -292,6 +303,7 @@ class BlackJackGame:
             bet_var: str = int(self.bet)
 
         self.client.loop.create_task(SlothCurrency.update_user_money(self.player_id, bet_var))
+        self.client.loop.create_task(self.insert_user_data('draws', self.player_id))
 
         # Change title and end the game
         self.title = f"Draw - **{self.player_name}** won 0 leaves 🍃"
