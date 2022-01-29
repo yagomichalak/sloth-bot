@@ -207,21 +207,21 @@ class BlackJackGame:
     # When player have blackjack
     def blackjack_event_dealer(self):
         SlothCurrency = self.client.get_cog('SlothCurrency')
-        self.client.loop.create_task(SlothCurrency.update_user_money(self.player_id, int(self.bet * 0.5)))
+        self.client.loop.create_task(SlothCurrency.update_user_money(self.player_id, int(self.bet * 1)))
 
-        self.title = f"Dealer blackjack - **{self.player_name}** lost {int(self.bet * 0.5)} leaves 🍃"
+        self.title = f"Dealer blackjack - **{self.player_name}** lost {int(self.bet * 1)} leaves 🍃"
         self.status = 'finished'
         self.color = discord.Color.brand_red()
         self.dealer_final_show()
 
     # When player have blackjack
     def blackjack_event_player(self):
-        # Increase player balance with bet * 2.5 if he hit blackjack
+        # Increase player balance with bet * 2 if he hit blackjack
         SlothCurrency = self.client.get_cog('SlothCurrency')
-        self.client.loop.create_task(SlothCurrency.update_user_money(self.player_id, int(self.bet * 2.5)))
+        self.client.loop.create_task(SlothCurrency.update_user_money(self.player_id, int(self.bet * 2)))
 
         # Change title and end the game
-        self.title = f"Player Blackjack - **{self.player_name}** won {int(self.bet * 1.5)} leaves 🍃"
+        self.title = f"Player Blackjack - **{self.player_name}** won {int(self.bet * 1)} leaves 🍃"
         self.status = 'finished'
         self.color = discord.Color.green()
         self.dealer_final_show()
@@ -232,39 +232,20 @@ class BlackJackGame:
 
         SlothCurrency = self.client.get_cog('SlothCurrency')
         match_bal = self.bet
-        # se o player dobrou
-
         won_text: str = ''
         if self.doubled:
-            # victory with 21 when double
-            if self.player_total == 21:
-                match_bal += self.bet * 2.5
-                won_text = int(match_bal - self.bet)
-                match_bal += self.bet
-            else:
-                match_bal += self.bet * 2
-                won_text = int(match_bal - self.bet)
-                match_bal += self.bet
+            match_bal += self.bet * 2
+            won_text = int(match_bal - self.bet)
+            match_bal += self.bet
 
         elif self.tripled:
-            # victory with 21 when triple
-            if self.player_total == 21:
-                match_bal += self.bet * 4.5
-                won_text = int(match_bal - self.bet * 2)
-                match_bal += self.bet
-            else:
-                match_bal += self.bet * 4
-                won_text = int(match_bal - self.bet * 2)
-                match_bal += self.bet
+            match_bal += self.bet * 4
+            won_text = int(match_bal - self.bet * 2)
+            match_bal += self.bet
 
         else:
-            # ganhou normal com 21
-            if self.player_total == 21:
-                match_bal += self.bet * 1.5
-                won_text = int(match_bal - self.bet)
-            else:
-                match_bal += self.bet
-                won_text = int(match_bal - self.bet)
+            match_bal += self.bet
+            won_text = int(match_bal - self.bet)
         self.client.loop.create_task(SlothCurrency.update_user_money(self.player_id, int(match_bal)))
 
         # Change title and end the game
@@ -277,7 +258,7 @@ class BlackJackGame:
     def surrender_event(self):
         # Change title and end the game
         
-        self.title = f"Surrender - **{self.player_name}** lost {int(self.bet * 0.33)} leaves 🍃"
+        self.title = f"Surrender - **{self.player_name}** lost {int(self.bet * 0.5)} leaves 🍃"
         self.color = int("ffffff", 16)
         self.status = 'finished'
         self.dealer_final_show()
