@@ -72,7 +72,7 @@ class BlackJackDB(commands.Cog):
 
     async def insert_user_database(self, user_id) -> None:
         mycursor, db = await the_database()
-        await mycursor.execute("INSERT INTO Blackjack (user_id, wins, losses, draws, surrenders, games) VALUES (%s, %s, %s, %s, %s, %s) )", (user_id, 0, 0, 0, 0, 0))
+        await mycursor.execute("INSERT INTO Blackjack (user_id, wins, losses, draws, surrenders, games) VALUES (%s, %s, %s, %s, %s, %s)", (user_id, 0, 0, 0, 0, 0))
         await db.commit()
         await mycursor.close()
 
