@@ -24,7 +24,6 @@ class BlackJackGame(*moderation_cogs):
         self.bet = bet
         self.guild_id = guild_id
         self.doubled = False
-        self.tripled = False
 
         # Player info
         self.player = player
@@ -192,29 +191,14 @@ class BlackJackGame(*moderation_cogs):
                 return
         self.stand()
 
-    # Action of triple in blackjack
-    def triple(self):
-
-        SlothCurrency = self.client.get_cog('SlothCurrency')
-        self.client.loop.create_task(SlothCurrency.update_user_money(self.player_id, -self.bet * 2))
-
-        self.tripled = True
-        card = self.game_pack.pop()
-        self.player_cards.append(card)
-        self.player_total += card.points
-        if self.player_total > 21:
-            if not self.change_a_value_player():
-                self.lose_event()
-                return
-        self.stand()
 
     # When dealer have blackjack
     def blackjack_event_dealer(self):
         SlothCurrency = self.client.get_cog('SlothCurrency')
-        self.client.loop.create_task(SlothCurrency.update_user_money(self.player_id, int(self.bet * 1)))
+        self.client.loop.create_task(SlothCurrency.update_user_money(self.player_id, int(self.bet * 0.25)))
         self.client.loop.create_task(self.insert_user_data(type="losses", user_id=self.player_id))
 
-        self.title = f"Dealer blackjack - **{self.player_name}** lost {int(self.bet * 1)} leaves 🍃"
+        self.title = f"Dealer blackjack - **{self.player_name}** lost {int(self.bet * 0.75)} leaves 🍃"
         self.status = 'finished'
         self.color = discord.Color.brand_red()
         self.dealer_final_show()
@@ -222,13 +206,13 @@ class BlackJackGame(*moderation_cogs):
 
     # When player have blackjack
     def blackjack_event_player(self):
-        # Increase player balance with bet * 2 if he hit blackjack
+        # Increase player balance with bet * 2.5 if he hit blackjack
         SlothCurrency = self.client.get_cog('SlothCurrency')
-        self.client.loop.create_task(SlothCurrency.update_user_money(self.player_id, int(self.bet * 2)))
+        self.client.loop.create_task(SlothCurrency.update_user_money(self.player_id, int(self.bet * 2.5)))
         self.client.loop.create_task(self.insert_user_data(type="wins", user_id=self.player_id))
 
         # Change title and end the game
-        self.title = f"Player Blackjack - **{self.player_name}** won {int(self.bet * 1)} leaves 🍃"
+        self.title = f"Player Blackjack - **{self.player_name}** won {int(self.bet * 1.5)} leaves 🍃"
         self.status = 'finished'
         self.color = discord.Color.green()
         self.dealer_final_show()
@@ -241,19 +225,16 @@ class BlackJackGame(*moderation_cogs):
         SlothCurrency = self.client.get_cog('SlothCurrency')
         match_bal = self.bet
         won_text: str = ''
+
         if self.doubled:
             match_bal += self.bet * 2
             won_text = int(match_bal - self.bet)
             match_bal += self.bet
 
-        elif self.tripled:
-            match_bal += self.bet * 4
-            won_text = int(match_bal - self.bet * 2)
-            match_bal += self.bet
-
         else:
             match_bal += self.bet
             won_text = int(match_bal - self.bet)
+
         self.client.loop.create_task(SlothCurrency.update_user_money(self.player_id, int(match_bal)))
         self.client.loop.create_task(self.insert_user_data(type="wins", user_id=self.player_id))
 
@@ -267,7 +248,7 @@ class BlackJackGame(*moderation_cogs):
     def surrender_event(self):
         # Change title and end the game
         
-        self.title = f"Surrender - **{self.player_name}** lost {int(self.bet * 0.5)} leaves 🍃"
+        self.title = f"Surrender - **{self.player_name}** lost {int(self.bet * 0.35)} leaves 🍃"
         self.color = int("ffffff", 16)
         self.status = 'finished'
         self.dealer_final_show()
@@ -279,8 +260,6 @@ class BlackJackGame(*moderation_cogs):
         # Change title and end the game
         if self.doubled:
             bet_var: str = int(self.bet * 2)
-        elif self.tripled:
-            bet_var: str = int(self.bet * 3)
         else:
             bet_var: str = int(self.bet)
 
@@ -297,8 +276,6 @@ class BlackJackGame(*moderation_cogs):
 
         if self.doubled:
             bet_var: str = int(self.bet * 2)
-        elif self.tripled:
-            bet_var: str = int(self.bet * 3)
         else:
             bet_var: str = int(self.bet)
 
