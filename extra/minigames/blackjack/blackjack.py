@@ -37,7 +37,8 @@ class BlackJack(*blackjack_db):
         """ Starts the BlackJack game.
         :param bet: The amount of money you wanna bet.
         
-        PS: Minimum bet = 50 leaves. """
+        * Minimum bet = 50 leaves.
+        * Maximum bet = 2000 leaves. """
 
         player: discord.Member = ctx.author
         guild_id = ctx.guild.id
@@ -52,9 +53,9 @@ class BlackJack(*blackjack_db):
             ctx.command.reset_cooldown(ctx)
             return await ctx.reply("**Please, inform an integer value!**")
 
-        if bet > 5000:
+        if bet > 2000:
             ctx.command.reset_cooldown(ctx)
-            return await ctx.reply("**The betting limit is `5000łł`!**")
+            return await ctx.reply("**The betting limit is `2000łł`!**")
 
         if not await self.check_user_database(ctx.author.id):
             await self.insert_user_database(ctx.author.id)
