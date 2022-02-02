@@ -410,46 +410,6 @@ class BlackJackActionView(discord.ui.View):
         else:
             await interaction.followup.send("**You must be in a blackjack game!**")
 
-    @discord.ui.button(label="triple", style=discord.ButtonStyle.blurple, custom_id="bj_triple_id")
-    async def black_jack_triple_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
-        """ Button for doubling in the BlackJack game. """
-
-        await interaction.response.defer()
-
-
-        player_id = interaction.user.id
-        guild_id = interaction.guild.id
-        cog = self.client.get_cog('Games')
-
-        SlothCurrency = self.client.get_cog('SlothCurrency')
-        user_currency = await SlothCurrency.get_user_currency(player_id)
-        player_bal = user_currency[0][1]
-
-        if cog.blackjack_games.get(guild_id) is None:
-            cog.blackjack_games[guild_id] = {}
-
-        # Check if player's blackjack game is active
-        if interaction.user.id in cog.blackjack_games[guild_id]:
-            current_game = cog.blackjack_games[guild_id].get(interaction.user.id)
-            # Checks whether the player has more than 4 cards  
-            if len(current_game.player_cards) > 4:
-                await interaction.followup.send("**You can triple only in the first three rounds!**")
-
-            # Checks whether the player has sufficient funds for triple
-            elif player_bal < current_game.bet:
-                await interaction.followup.send("**You have insufficient funds!**")
-            else:
-                current_game.triple()
-                if current_game.status == 'finished':
-                    del cog.blackjack_games[guild_id][interaction.user.id]
-                    user_currency = await SlothCurrency.get_user_currency(player_id)
-                    await self.end_game(interaction)
-                    user_currency = await SlothCurrency.get_user_currency(player_id)
-
-            await interaction.followup.edit_message(interaction.message.id, embed=current_game.embed())
-        else:
-            await interaction.followup.send("**You must be in a blackjack game!**")
-
     @discord.ui.button(label="surrender", style=discord.ButtonStyle.gray, custom_id="bj_surrender_id")
     async def black_jack_surrender_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
         """ Button for surrendering in the BlackJack game. """
@@ -470,7 +430,7 @@ class BlackJackActionView(discord.ui.View):
                 del cog.blackjack_games[guild_id][interaction.user.id]
                 await self.end_game(interaction)
 
-            await self.client.get_cog('SlothCurrency').update_user_money(self.player.id, int(current_game.bet * (1 - 0.5)))
+            await self.client.get_cog('SlothCurrency').update_user_money(self.player.id, int(current_game.bet * (1 - 0.35)))
             embed = current_game.embed()
             embed.color = int('ffffff', 16)
             await interaction.followup.edit_message(interaction.message.id, embed=embed)
