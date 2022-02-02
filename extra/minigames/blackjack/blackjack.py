@@ -57,11 +57,6 @@ class BlackJack(*blackjack_db):
             ctx.command.reset_cooldown(ctx)
             return await ctx.reply("**The betting limit is `2000łł`!**")
 
-        if not await self.check_user_database(ctx.author.id):
-            await self.insert_user_database(ctx.author.id)
-
-        await self.insert_user_data(type="games", user_id=ctx.author.id)
-
         SlothCurrency = self.client.get_cog('SlothCurrency')
         user_currency = await SlothCurrency.get_user_currency(player.id)
         if not user_currency:
@@ -87,8 +82,6 @@ class BlackJack(*blackjack_db):
             ctx.command.reset_cooldown(ctx)
             return await ctx.reply(f"**You don't have `{bet}`!**")
         else:
-            await SlothCurrency.update_user_money(player.id, -bet)
-
             current_game = BlackJackGame(self.client, bet, player, [], [], self.cards_pack, guild_id, player_bal-bet)
             self.blackjack_games[guild_id][player.id] = current_game
             if current_game.status == 'finished':
@@ -98,6 +91,15 @@ class BlackJack(*blackjack_db):
             if current_game.status == 'finished':
                 await utils.disable_buttons(view)
             msg = await ctx.send(embed=current_game.embed(), view=view)
+
+            await SlothCurrency.update_user_money(player.id, -bet)
+
+            # Checks if the user is in the blackjack table
+            if not await self.check_user_database(ctx.author.id):
+                await self.insert_user_database(ctx.author.id)
+
+            # Inserts game in user blackjack status
+            await self.insert_user_data(type="games", user_id=ctx.author.id)
 
             await view.wait()
             await asyncio.sleep(0.3)
@@ -119,6 +121,10 @@ class BlackJack(*blackjack_db):
 
         if not member:
             member: discord.Member = ctx.message.author
+
+        # Checks if the user is in the blackjack table
+        if not await self.check_user_database(ctx.author.id):
+            return await ctx.send(f"**No games of blackjack was found for {member}**")
 
         try:
             del self.blackjack_games[ctx.guild.id][member.id]
