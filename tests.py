@@ -8,7 +8,7 @@
 #     embed = discord.Embed(
 #         title="__Role Counting__",
 #         color=discord.Color.gold(),
-z!#         timestamp=ctx.message.created_at
+#         timestamp=ctx.message.created_at
 #     )
 #     for kw in keywords:
 #         the_roles = [(role, role.color) for role in guild.roles if role.name.lower().startswith(kw)]
@@ -243,66 +243,87 @@ UPDATE TribeMember as OG
 # print(QuestEnum.__dict__['_member_names_'][1-1])
 
 
-roles = ['Native French', 'Studying French', 'Music Club', 'Fluent English', 'Fluent Portuguese']
-t_role = 'Native French'
+# roles = ['Native French', 'Studying French', 'Music Club', 'Fluent English', 'Fluent Portuguese']
+# t_role = 'Native French'
 
 
-language_roles = [r for r in roles if r.lower().startswith(('native', 'fluent', 'studying'))]
-language = t_role.lower().strip('native').strip('fluent').strip('studying').strip()
+# language_roles = [r for r in roles if r.lower().startswith(('native', 'fluent', 'studying'))]
+# language = t_role.lower().strip('native').strip('fluent').strip('studying').strip()
 
-print([lr for lr in language_roles if language.lower() in lr.lower()])
-print(language in language_roles)
-# print([])
-
-
-
+# print([lr for lr in language_roles if language.lower() in lr.lower()])
+# print(language in language_roles)
+# # print([])
 
 
 
 
-z!create_table_sloth_analytics
-z!create_table_data_bumps
-z!create_table_scheduled_events
-z!create_table_user_dr_vc_ts
-z!create_table_dynamic_rooms
-z!create_table_language_room
-z!create_table_premium_vc
-z!create_table_galaxy_vc
-z!create_table_user_vc_ts
-z!create_table_cursed_member
-z!create_table_duolingo_profile
-z!create_table_event_rooms
-z!create_table_giveaways
-z!create_table_giveaway_entries
-z!create_table_member_reminder
-z!create_table_queues
-z!create_table_slothboard
-z!create_table_user_timezones
-z!create_table_voice_channel_activity
-z!create_table_member_score
-z!create_table_user_currency
-z!create_table_user_items
-z!create_table_server_activity
-z!create_table_fake_accounts
-z!create_table_bypass_firewall
-z!create_table_firewall
-z!create_table_moderated_nicknames
-z!create_table_mutedmember
-z!create_table_user_infractions
-z!create_table_watchlist
-z!create_table_applications
-z!create_table_case_counter
-z!create_table_open_channels
-z!create_table_selection_menu
-z!create_table_sloth_skills
-z!create_table_skills_cooldown
-z!create_table_user_tribe
-z!create_table_tribe_member
-z!create_table_tribe_role
-z!create_table_sloth_profile
-z!create_table_user_babies
-z!create_table_user_pets
-z!create_table_stealth_status
-z!create_table_selection_menu
 
 
+
+# z!create_table_sloth_analytics
+# z!create_table_data_bumps
+# z!create_table_scheduled_events
+# z!create_table_user_dr_vc_ts
+# z!create_table_dynamic_rooms
+# z!create_table_language_room
+# z!create_table_premium_vc
+# z!create_table_galaxy_vc
+# z!create_table_user_vc_ts
+# z!create_table_cursed_member
+# z!create_table_duolingo_profile
+# z!create_table_event_rooms
+# z!create_table_giveaways
+# z!create_table_giveaway_entries
+# z!create_table_member_reminder
+# z!create_table_queues
+# z!create_table_slothboard
+# z!create_table_user_timezones
+# z!create_table_voice_channel_activity
+# z!create_table_member_score
+# z!create_table_user_currency
+# z!create_table_user_items
+# z!create_table_server_activity
+# z!create_table_fake_accounts
+# z!create_table_bypass_firewall
+# z!create_table_firewall
+# z!create_table_moderated_nicknames
+# z!create_table_mutedmember
+# z!create_table_user_infractions
+# z!create_table_watchlist
+# z!create_table_applications
+# z!create_table_case_counter
+# z!create_table_open_channels
+# z!create_table_selection_menu
+# z!create_table_sloth_skills
+# z!create_table_skills_cooldown
+# z!create_table_user_tribe
+# z!create_table_tribe_member
+# z!create_table_tribe_role
+# z!create_table_sloth_profile
+# z!create_table_user_babies
+# z!create_table_user_pets
+# z!create_table_stealth_status
+# z!create_table_selection_menu
+
+
+
+def multiplication_table(number: int) -> None:
+    # Initialize the starting point of the multiplication table
+    multiplier = 1
+    # Only want to loop through 5
+    for multiplier in range(1, 6):
+        result = number*multiplier 
+        # What is the additional condition to exit out of the loop?
+        if result >= 25:
+            break
+
+        print(f"{number}x{multiplier} = {result}")
+
+def sum1(num):
+    soma = 0
+    for i in range(1, num + 1):
+        if num % i == 0:
+            soma += i
+    return soma
+
+print(sum1(25))

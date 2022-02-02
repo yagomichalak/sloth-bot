@@ -263,6 +263,15 @@ class SmartRoomDatabase(commands.Cog):
 		await mycursor.close()
 		return rooms
 
+	async def get_galaxy_rooms(self) -> List[List[Union[str, int]]]:
+		""" Get all Galaxy Rooms. """
+
+		mycursor, _ = await the_database()
+		await mycursor.execute("SELECT * FROM GalaxyVc")
+		rooms = await mycursor.fetchall()
+		await mycursor.close()
+		return rooms
+
 	# ===== Delete =====
 
 
@@ -972,6 +981,10 @@ class CreateSmartRoom(SmartRoomDatabase):
 			has_galaxy = await self.has_galaxy_rooms(member.id)
 			if has_galaxy:
 				return await member.send("**You already have a Galaxy category, you can't create more than one!**")
+
+			# Checks whether the server reached the limit of 15 galaxy rooms created at a time 
+			if len(await self.get_galaxy_rooms()) > 15:
+				return await member.send(f"**You cannot created a Galaxy Room, because the server reached the limit of Galaxy rooms that can be created at a time; 15!**")
 
 			# Checks if the user has money (1500łł)
 			user_currency = await SlothCurrency.get_user_currency(member, member.id)
