@@ -39,7 +39,7 @@ class Social(commands.Cog):
         """ Sends messages to the Slothboard channel. """
         
         emoji = str(payload.emoji)
-        star = '<:zzSloth:686237376510689327>'
+        star = '<:Sloth:686237376510689327>'
 
         # Checkes whether it's the right emoji
         if emoji != star:
@@ -64,7 +64,7 @@ class Social(commands.Cog):
                 continue
 
             # Check whether message is already in the Slothboard
-            if not await self.get_slothboard_message(message.id, channel.id):
+            if not (something := await self.get_slothboard_message(message.id, channel.id)):
 
                 # Checks whether message content contains an embedded image
                 current_date = await utils.get_time_now()
@@ -101,11 +101,11 @@ class Social(commands.Cog):
                         return
 
                 embed.set_author(name=message.author, url=message.author.display_avatar, icon_url=message.author.display_avatar)
-                # Post in #slothboard
+                # Posts in #slothboard
                 await self.insert_slothboard_message(message.id, channel.id)
                 slothboard_channel = guild.get_channel(slothboard_channel_id)
                 return await slothboard_channel.send(content=f"**From:** {channel.mention}", embed=embed)
-
+            print(something)
     @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
     async def create_table_slothboard(self, ctx) -> None:
@@ -172,9 +172,9 @@ class Social(commands.Cog):
 
         mycursor, _ = await the_database()
         await mycursor.execute("SELECT * FROM Slothboard WHERE message_id = %s AND channel_id = %s", (message_id, channel_id))
-        Slothboard_message = await mycursor.fetchone()
+        slothboard_message = await mycursor.fetchone()
         await mycursor.close()
-        return Slothboard_message
+        return slothboard_message
 
     async def insert_slothboard_message(self, message_id: int, channel_id: int) -> None:
         """ Inserts a Slothboard message.
