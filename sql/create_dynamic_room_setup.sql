@@ -110,7 +110,7 @@ INSERT INTO Sloth.LanguageRoom (category, english_name, room_name, room_quant, r
 /* 085 */("south-east asian", "Cebuano", "Cebuano 🥥🇵🇭", 2, 10, 60),
 /* 086 */("south-east asian", "Ilocano", "Ilocano", 2, 10, 60),
 
-/* 087 */("south-east asian", "Javanese", "Bahasa Jawa 🦜", 2, 10, 60),
+/* 087 */("south-east asian", "Javanese", "Bahasa Jawa 🇮🇩🦜", 2, 10, 60),
 /* 088 */("south-east asian", "Lao", "ພາສາລາວ", 2, 10, 60),
 
 /* 089 */("romance", "Portunhol", "Portuñol 🧉🌎", 2, 10, 60),
@@ -153,7 +153,7 @@ INSERT INTO Sloth.LanguageRoom (category, english_name, room_name, room_quant, r
 
 /* 118 */("uralic", "Estonian", "Estonian", 2, 10, 60 * 60 * 1),
 
-/* 119 */("south-east asian", "Bahasa Batak", "Bahasa Batak 🦏", 2, 10, 60),
+/* 119 */("south-east asian", "Bahasa Batak", "Bahasa Batak 🇮🇩🦏", 2, 10, 60),
 
 /* 120 */("celtic", "Celtic", "Celtic", 2, 10, 60),
 
