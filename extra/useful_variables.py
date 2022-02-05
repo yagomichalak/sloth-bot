@@ -94,7 +94,7 @@ different_class_roles = {
         "esperanto", "toki pona"
     ],
     "hindi-urdu": [
-        "hindi", "urdu", "hindustani", "hindi-urdu"
+        "hindi", "urdu", "hindustani", "hindi-urdu", "angrejee"
     ],
     "south asian languages": [
         "bengali", "tamil", "punjabi" 
