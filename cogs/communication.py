@@ -15,6 +15,7 @@ senior_mod_role_id = int(os.getenv('SENIOR_MOD_ROLE_ID'))
 allowed_roles = [int(os.getenv('OWNER_ROLE_ID')), int(os.getenv('ADMIN_ROLE_ID')), mod_role_id]
 general_channel_id = int(os.getenv('GENERAL_CHANNEL_ID'))
 lesson_manager_role_id = int(os.getenv('LESSON_MANAGEMENT_ROLE_ID'))
+real_event_manager_role_id = int(os.getenv('REAL_EVENT_MANAGER_ROLE_ID'))
 
 class Communication(commands.Cog):
     """ A cog related to communication commands. """
@@ -189,13 +190,14 @@ If you have any questions feel free to ask! And if you experience any type of pr
         await announce_channel.send(msg[1])
 
     @commands.command()
-    @utils.is_allowed([senior_mod_role_id, lesson_manager_role_id], throw_exc=True)
+    @utils.is_allowed([senior_mod_role_id, lesson_manager_role_id, real_event_manager_role_id], throw_exc=True)
     async def dm(self, ctx, member: discord.Member = None, *, message=None):
         """ (SeniorMod) Sends a Direct Message to someone.
         :param member: The member to send the message to.
         :param message: The message to send. """
 
         await ctx.message.delete()
+        author: discord.Member = ctx.author
 
         if not message:
             return await ctx.send("**Inform a message to send!**", delete_after=3)
@@ -204,9 +206,26 @@ If you have any questions feel free to ask! And if you experience any type of pr
             return await ctx.send("**Inform a member!**", delete_after=3)
 
         check_member = ctx.guild.get_member(member.id)
-        if check_member:
-            return await member.send(message)
-        await ctx.send(f"**Member: {member} not found!", delete_after=3)
+        if not check_member:
+            return await ctx.send(f"**Member: {member} not found!", delete_after=3)
+
+        try:
+            await member.send(message)
+        except:
+            pass
+
+        # Moderation log
+        if demote_log := discord.utils.get(ctx.guild.text_channels, id=int(os.getenv('DM_LOG_CHANNEL_ID'))):
+            dm_embed = discord.Embed(
+                title="__DM Message__",
+                description=f"{author.mention} DM'd {member.mention}.\n**Message:** {message}",
+                color=author.color,
+                timestamp=ctx.message.created_at
+            )
+            dm_embed.set_author(name=member, icon_url=member.display_avatar)
+            dm_embed.set_footer(text=f"Sent by: {author}", icon_url=author.display_avatar)
+            await demote_log.send(embed=dm_embed)
+
 
 
     # Database
