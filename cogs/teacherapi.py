@@ -1,3 +1,4 @@
+from dis import disco
 import discord
 from discord.ext import commands, menus
 import os
@@ -315,7 +316,7 @@ class TeacherAPI(commands.Cog):
             await ctx.send(embed=embed)
 
     @commands.command(aliases=['pt'])
-    @commands.has_any_role(*[owner_role_id, admin_role_id, lesson_manager_role_id])
+    @utils.is_allowed([owner_role_id, admin_role_id, lesson_manager_role_id], throw_exc=True)
     async def promote_teacher(self, ctx, member: discord.Member = None) -> None:
         """ Promotes a member to a teacher.
         :param member: The member that is gonna be promoted. """
@@ -352,13 +353,15 @@ class TeacherAPI(commands.Cog):
         await ctx.send(embed=teacher_embed, view=view)
 
     @commands.command(aliases=['dt'])
-    @commands.has_any_role(*[owner_role_id, admin_role_id, lesson_manager_role_id])
+    @utils.is_allowed([owner_role_id, admin_role_id, lesson_manager_role_id], throw_exc=True)
     async def demote_teacher(self, ctx, member: discord.Member = None) -> None:
         """ Demotes a teacher to a regular user.
         :param member: The teacher that is gonna be demoted. """
 
         if not member:
             return await ctx.send("**Please, inform a member to demote to a regular user!**")
+
+        author: discord.Member = ctx.author
 
         teacher_role = discord.utils.get(ctx.guild.roles, id=self.teacher_role_id)
         if teacher_role in member.roles:
@@ -381,15 +384,27 @@ class TeacherAPI(commands.Cog):
             return await ctx.send(f"**{member.mention} is not even a teacher on the website!**")
 
         await self._change_teacher_state(member.id, 0)
-        teacher_embed = discord.Embed(
-            title=f"__Demoted!__",
-            description=f"{member.mention} has been `demoted` to a regular user!",
-            color=member.color,
-            timestamp=ctx.message.created_at,
-            url=self.website_link
-            )
+        # General log
+        demote_embed = discord.Embed(
+            title="__Demotion__",
+            description=f"{member.mention} has been demoted from a `Teacher` to `regular user` by {author.mention}",
+            color=discord.Color.dark_red(),
+            timestamp=ctx.message.created_at
+        )
 
-        await ctx.send(embed=teacher_embed)
+        await ctx.send(embed=demote_embed)
+
+        # Moderation log
+        if demote_log := discord.utils.get(ctx.guild.text_channels, id=int(os.getenv('PROMOTE_DEMOTE_LOG_ID'))):
+            demote_embed.set_author(name=member, icon_url=member.display_avatar)
+            demote_embed.set_footer(text=f"Demoted by {author}", icon_url=author.display_avatar)
+            await demote_log.send(embed=demote_embed)
+
+        # User message
+        try:
+            await member.send(f"**You have been demoted from a `Teacher` to a regular user!**")
+        except:
+            pass
 
     async def _change_teacher_state(self, member_id: int, state: int) -> None:
         """ Changes the current state of a given member in the website.
