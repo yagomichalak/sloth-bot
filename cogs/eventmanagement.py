@@ -1,14 +1,17 @@
 import discord
 from discord.ext import commands
 from extra.menu import ConfirmSkill
+from extra import utils
 import os
 from typing import Dict, Any, List
 from mysqldb import the_database
 
 mod_role_id = int(os.getenv('MOD_ROLE_ID'))
+senior_mod_role_id = int(os.getenv('SENIOR_MOD_ROLE_ID'))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID'))
 owner_role_id = int(os.getenv('OWNER_ROLE_ID'))
 event_manager_role_id = int(os.getenv('EVENT_MANAGER_ROLE_ID'))
+real_event_manager_role_id = int(os.getenv('REAL_EVENT_MANAGER_ROLE_ID'))
 preference_role_id = int(os.getenv('PREFERENCE_ROLE_ID'))
 
 
@@ -728,6 +731,45 @@ class EventManagement(commands.Cog):
         else:
             return True
 
+    @commands.command(aliases=['dh'])
+    @utils.is_allowed([owner_role_id, admin_role_id, real_event_manager_role_id], throw_exc=True)
+    async def demote_host(self, ctx, member: discord.Member = None) -> None:
+        """ Demotes a teacher to a regular user.
+        :param member: The teacher that is gonna be demoted. """
+
+        if not member:
+            return await ctx.send("**Please, inform a member to demote to a regular user!**")
+
+        author: discord.Member = ctx.author
+
+        event_host = discord.utils.get(ctx.guild.roles, id=event_manager_role_id)
+        if event_host not in member.roles:
+            return await ctx.send(f"**{member.mention} is not even an Event Host!**")
+
+        try:
+            await member.remove_roles(event_host)
+        except:
+            pass
+
+        # General log
+        demote_embed = discord.Embed(
+            title="__Event Host Demotion__",
+            description=f"{member.mention} has been demoted from an `Event Host` to `regular user` by {author.mention}",
+            color=discord.Color.dark_red(),
+            timestamp=ctx.message.created_at
+        )
+        await ctx.send(embed=demote_embed)
+
+        # Moderation log
+        if demote_log := discord.utils.get(ctx.guild.text_channels, id=int(os.getenv('PROMOTE_DEMOTE_LOG_ID'))):
+            demote_embed.set_author(name=member, icon_url=member.display_avatar)
+            demote_embed.set_footer(text=f"Demoted by {author}", icon_url=author.display_avatar)
+            await demote_log.send(embed=demote_embed)
+
+        try:
+            await member.send(f"**You have been demoted from an `Event Host` to a regular user!**")
+        except:
+            pass
 
 def setup(client) -> None:
     """ Cog's setup function. """
