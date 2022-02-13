@@ -27,12 +27,6 @@ from extra.currency.useritems import UserItemsTable
 from extra.currency.userserveractivity import UserServerActivityTable, UserVoiceSystem
 from extra.currency.usercurrency import UserCurrencyTable
 
-shop_channels = [
-int(os.getenv('BACKGROUND_ITEMS_CHANNEL_ID')), int(os.getenv('HAND_ITEMS_CHANNEL_ID')),
-int(os.getenv('CLOTHES_ITEMS_CHANNEL_ID')), int(os.getenv('LIMITED_EDITION_ITEMS_CHANNEL_ID')),
-int(os.getenv('HEAD_ITEMS_CHANNEL_ID')), int(os.getenv('LEG_ITEMS_CHANNEL_ID')),
-int(os.getenv('PATREONS_CHANNEL_ID'))
-]
 
 booster_role_id = int(os.getenv('BOOSTER_ROLE_ID'))
 guild_ids = [int(os.getenv('SERVER_ID'))]
