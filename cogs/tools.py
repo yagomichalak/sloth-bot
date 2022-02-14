@@ -1061,6 +1061,7 @@ class Tools(*tool_cogs):
 			year: Option(int, name="year", description="Year of date.", required=False)) -> None:
 		""" Gets a timestamp for a specific date and time. - Output will format according to your timezone. """
 
+		await ctx.defer()
 		current_date = await utils.get_time_now()
 
 		if hour: current_date = current_date.replace(hour=hour)
