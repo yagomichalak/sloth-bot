@@ -13,7 +13,7 @@ from extra import utils
 
 # IDs from .env
 create_room_vc_id = int(os.getenv('CREATE_SMART_CLASSROOM_VC_ID'))
-create_room_txt_id = int(os.getenv('LESSON_CAT_ID'))
+create_room_txt_id = int(os.getenv('CREATE_CLASSROOM_CHANNEL_ID'))
 create_room_cat_id = int(os.getenv('CREATE_ROOM_CAT_ID'))
 create_private_room_vc_id: int = int(os.getenv('CREATE_PRIVATE_ROOM_VC_ID'))
 
