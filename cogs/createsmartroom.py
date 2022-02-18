@@ -8,503 +8,15 @@ import os
 from cogs.slothcurrency import SlothCurrency
 from mysqldb import *
 from typing import List, Union, Any, Optional
+
 from extra.menu import ConfirmSkill
+from extra.smartroom.smartroom import PremiumVcTable, GalaxyVcTable, UserVcStampTable
 
-class SmartRoomDatabase(commands.Cog):
-	""" Class for database commands and methods related to the SmartRooms. """
+smart_room_cogs: List[commands.Cog] = [
+	PremiumVcTable, GalaxyVcTable, UserVcStampTable
+]
 
-	def __init__(self, client) -> None:
-		self.client = client
-
-
-	# ===== READ ======
-	async def get_all_galaxy_rooms_in_danger_zone(self, the_time) -> None:
-		""" Gets all Galaxy Rooms in the danger zone; at least 2 days from being deleted.
-		:param the_time: The current time. """
-
-		mycursor, db = await the_database()
-		await mycursor.execute("SELECT * FROM GalaxyVc WHERE (user_ts + 1209600) - %s <= 172800 and user_notified = 'no'", (the_time,))
-		danger_rooms = await mycursor.fetchall()
-		await mycursor.close()
-		return danger_rooms
-
-	async def get_user_all_galaxy_rooms(self, user_id: int) -> List[int]:
-		""" Checks whether a user has a Galaxy Room.
-		:param user_id: The ID of the user to check it. """
-
-		mycursor, db = await the_database()
-		await mycursor.execute("SELECT user_ts, user_cat, user_txt1, user_txt2, user_txt3, user_txt4, user_txt5, user_vc, user_vc2 FROM GalaxyVc WHERE user_id = %s", (user_id,))
-		user_rooms = await mycursor.fetchone()
-		await mycursor.close()
-		return user_rooms
-
-
-	async def has_galaxy_rooms(self, user_id: int) -> bool:
-		""" Checks whether a user has a Galaxy Room.
-		:param user_id: The ID of the user to check it. """
-
-		mycursor, db = await the_database()
-		await mycursor.execute("SELECT * FROM GalaxyVc WHERE user_id = %s", (user_id,))
-		user_rooms = await mycursor.fetchall()
-		await mycursor.close()
-
-		if user_rooms:
-			return True
-		else:
-			return False
-
-	# ===== UPDATE =====
-
-
-	async def update_txt_2(self, user_id: int, txt2: int = None) -> None:
-		""" Updates the user's second text channel value in the database.
-		:param user_id: The user ID.
-		:param txt2: The value for the second txt. """
-
-		mycursor, db = await the_database()
-		await mycursor.execute("UPDATE GalaxyVc SET user_txt2 = %s WHERE user_id = %s", (txt2, user_id))
-		await db.commit()
-		await mycursor.close()
-
-	async def update_vc_2(self, user_id: int, vc2: int = None) -> None:
-		""" Updates the user's second voice channel value in the database.
-		:param user_id: The user ID.
-		:param vc2: The value for the second vc. """
-
-		mycursor, db = await the_database()
-		await mycursor.execute("UPDATE GalaxyVc SET user_vc2 = %s WHERE user_id = %s", (vc2, user_id))
-		await db.commit()
-		await mycursor.close()
-
-
-	async def user_notified_yes(self, user_id: int) -> None:
-		""" Updates the the user notified status to 'yes'.
-		:param user_id: The ID of the user. """
-
-		mycursor, db = await the_database()
-		await mycursor.execute("UPDATE GalaxyVc SET user_notified = 'yes' WHERE user_id = %s", (user_id,))
-		await db.commit()
-		await mycursor.close()
-
-	async def user_notified_no(self, user_id: int) -> None:
-		""" Updates the the user notified status to 'no'.
-		:param user_id: The ID of the user. """
-
-		mycursor, db = await the_database()
-		await mycursor.execute("UPDATE GalaxyVc SET user_notified = 'no' WHERE user_id = %s", (user_id,))
-		await db.commit()
-		await mycursor.close()
-
-	async def increment_galaxy_ts(self, user_id: int, addition: int) -> None:
-		""" Increments a Galaxy Room's timestamp so it lasts longer.
-		:param user_id: The ID of the owner of the Galaxy Room.
-		:param addition: The amount of time to increment, in seconds. """
-
-		mycursor, db = await the_database()
-		await mycursor.execute("UPDATE GalaxyVc SET user_ts = user_ts + %s WHERE user_id = %s", (addition, user_id))
-		await db.commit()
-		await mycursor.close()
-
-
-	async def update_user_vc_ts(self, user_id: int, new_ts: int) -> None:
-		""" Updates the user's voice channel timestamp.
-		:param user_id: The ID of the user.
-		:param new_ts: The new/current timestamp. """
-
-		mycursor, db = await the_database()
-		await mycursor.execute("UPDATE UserVCstamp SET user_vc_ts = %s WHERE user_id = %s", (new_ts, user_id))
-		await db.commit()
-		await mycursor.close()
-
-	async def update_txt(self, user_id: int, position: int, channel_id: Optional[int] = None) -> None:
-		""" Updates a channel value in the database.
-		:param user_id: The ID of the owner of the Galaxy Room.
-		:param position: The position of the channel to update.
-		:param channel_id: The ID of the channel. [Optional] """
-
-		mycursor, db = await the_database()
-
-		column_name = f"user_txt{position}"
-		sql = "UPDATE GalaxyVc SET " + column_name + " = %s WHERE user_id = %s "
-
-		await mycursor.execute(sql, (channel_id, user_id))
-		await db.commit()
-		await mycursor.close()
-
-	async def update_galaxy_user(self, old_owner_id: int, new_owner_id: int) -> None:
-		""" Updates the Galaxy Room's owner ID.
-		:param old_owner_id: The old owner's ID.
-		:param new_owner_id: The new owner's ID. """
-
-		mycursor, db = await the_database()
-		await mycursor.execute("UPDATE GalaxyVc SET user_id = %s WHERE user_id = %s", (new_owner_id, old_owner_id))
-		await db.commit()
-		await mycursor.close()
-
-	# ===== INSERT =====
-
-	async def insert_user_vc(self, user_id: int, the_time: int) -> None:
-		""" Inserts a user into the UserVCstamp table.
-		:param user_id: The ID of the user.
-		:param the_time: The current time. """
-
-		mycursor, db = await the_database()
-		await mycursor.execute("INSERT INTO UserVCstamp (user_id, user_vc_ts) VALUES (%s, %s)", (user_id, the_time - 61))
-		await db.commit()
-		await mycursor.close()
-
-
-	async def insert_premium_vc(self, user_id: int, user_vc: int, user_txt: int) -> None:
-		""" Inserts a Premium Room.
-		:param user_id: The owner ID.
-		:param user_vc: The voice channel ID.
-		:param user_txt: The text channel ID. """
-
-		mycursor, db = await the_database()
-		await mycursor.execute("INSERT INTO PremiumVc (user_id, user_vc, user_txt) VALUES (%s, %s, %s)", (user_id, user_vc, user_txt))
-		await db.commit()
-		await mycursor.close()
-
-	async def insert_galaxy_vc(self, user_id: int, user_cat: int, user_vc: int, user_txt1: int, user_ts: int) -> None:
-		""" Inserts a Galaxy Room.
-		:param user_id: The owner ID.
-		:param user_cat: The category ID.
-		:param user_vc: The Galaxy Room's main voice channel ID.
-		:param user_txt1: The ID of the first text channel.
-		:param user_txt2: The ID of the second text channel.
-		:param user_ts: The current timestamp. """
-
-		mycursor, db = await the_database()
-		await mycursor.execute(
-			"""
-			INSERT INTO GalaxyVc (user_id, user_cat, user_vc, user_txt1, user_ts)
-			VALUES (%s, %s, %s, %s, %s)""", (user_id, user_cat, user_vc, user_txt1, user_ts)
-			)
-		await db.commit()
-		await mycursor.close()
-
-	# ===== Get =====
-
-	async def get_user_vc_timestamp(self, user_id: int, the_time: int) -> int:
-		""" Gets the user voice channel timestamp, and insert them into the database
-		in case they are not there yet.
-		:param user_id: The ID of the user.
-		:param the_time: The current time. """
-
-		mycursor, db = await the_database()
-		await mycursor.execute("SELECT * FROM UserVCstamp WHERE user_id = %s", (user_id,))
-		user = await mycursor.fetchall()
-		await mycursor.close()
-
-		if not user:
-			await self.insert_user_vc(user_id, the_time)
-			return await self.get_user_vc_timestamp(user_id, the_time)
-
-		return user[0][1]
-
-	async def get_premium_vc(self, user_vc: int) -> List[List[int]]:
-		""" Gets a Premium Room by voice channel ID.
-		:param user_vc: The voice channel ID. """
-
-		mycursor, db = await the_database()
-		await mycursor.execute("SELECT * FROM PremiumVc WHERE user_vc = %s", (user_vc,))
-		premium_vc = await mycursor.fetchall()
-		await mycursor.close()
-		return premium_vc
-
-	async def get_premium_txt(self, user_txt: int) -> List[List[int]]:
-		""" Gets a Premium Room by text channel ID.
-		:param user_txt: The text channel ID. """
-
-		mycursor, db = await the_database()
-		await mycursor.execute("SELECT * FROM PremiumVc WHERE user_txt = %s", (user_txt,))
-		premium_txt = await mycursor.fetchall()
-		await mycursor.close()
-		return premium_txt
-
-	async def get_galaxy_txt(self, user_id: int, user_cat: int) -> List[int]:
-		""" Gets the Galaxy Room's channels by category ID.
-		:param user_id: The ID of the owner of the channels.
-		:param user_cat: The ID of the category. """
-
-		mycursor, db = await the_database()
-		await mycursor.execute("SELECT * FROM GalaxyVc WHERE user_id = %s and user_cat = %s", (user_id, user_cat))
-		galaxy_vc = await mycursor.fetchone()
-		await mycursor.close()
-		return galaxy_vc
-
-	async def get_galaxy_by_cat_id(self, cat_id: int) -> List[int]:
-		""" Gets a Galaxy Room by category ID.
-		:param cat_id: The category ID. """
-
-		mycursor, db = await the_database()
-		await mycursor.execute("SELECT * FROM GalaxyVc WHERE user_cat = %s", (cat_id,))
-		galaxy_vc = await mycursor.fetchone()
-		await mycursor.close()
-		return galaxy_vc
-
-	async def get_galaxy_by_user_id(self, user_id: int) -> List[Union[int, str]]:
-		""" Gets a Galaxy Room by user ID.
-		:param user_id: The user ID. """
-
-		mycursor, _ = await the_database()
-		await mycursor.execute("SELECT * FROM GalaxyVc WHERE user_id = %s", (user_id,))
-		galaxy_vc = await mycursor.fetchone()
-		await mycursor.close()
-		return galaxy_vc
-
-	async def get_all_galaxy_rooms(self, the_time: int):
-		""" Get all expired Galaxy Rooms.
-		:param the_time The current time. """
-
-		mycursor, db = await the_database()
-		await mycursor.execute("SELECT * FROM GalaxyVc WHERE %s - user_ts >= 1209600", (the_time,))
-		rooms = await mycursor.fetchall()
-		await mycursor.close()
-		return rooms
-
-	async def get_galaxy_rooms(self) -> List[List[Union[str, int]]]:
-		""" Get all Galaxy Rooms. """
-
-		mycursor, _ = await the_database()
-		await mycursor.execute("SELECT * FROM GalaxyVc")
-		rooms = await mycursor.fetchall()
-		await mycursor.close()
-		return rooms
-
-	# ===== Delete =====
-
-
-	async def delete_galaxy_vc(self, user_id: int, user_vc: int) -> None:
-		""" Deletes a a Galaxy Room by voice channel ID.
-		:param user_id: The user ID.
-		:param user_vc: The voice channel ID. """
-
-		mycursor, db = await the_database()
-		await mycursor.execute("DELETE FROM GalaxyVc WHERE user_id = %s and user_vc = %s", (user_id, user_vc))
-		await db.commit()
-		await mycursor.close()
-
-	async def delete_galaxy_by_cat_id(self, cat_id: int) -> None:
-		""" Deletes a a Galaxy Room by category ID.
-		:param cat_id: The category ID. """
-
-		mycursor, db = await the_database()
-		await mycursor.execute("DELETE FROM GalaxyVc WHERE user_cat = %s", (cat_id,))
-		await db.commit()
-		await mycursor.close()
-
-	async def delete_premium_vc(self, user_id: int, user_vc: int) -> None:
-		""" Deletes a Premium Room by voice channel ID.
-		:param user_id: The owner ID.
-		:param user_vc: The voice channel ID. """
-
-		mycursor, db = await the_database()
-		await mycursor.execute("DELETE FROM PremiumVc WHERE user_id = %s and user_vc = %s", (user_id, user_vc))
-		await db.commit()
-		await mycursor.close()
-
-	async def delete_premium_txt(self, user_id: int, user_txt: int) -> None:
-		""" Deletes a Premium Room by text channel ID.
-		:param user_id: The owner ID.
-		:param user_txt: The text channel ID. """
-
-		mycursor, db = await the_database()
-		await mycursor.execute("DELETE FROM PremiumVc WHERE user_id = %s and user_txt = %s", (user_id, user_txt))
-		await db.commit()
-		await mycursor.close()
-
-
-	# Premium related functions
-	@commands.command(hidden=True)
-	@commands.has_permissions(administrator=True)
-	async def create_table_premium_vc(self, ctx) -> None:
-		""" (ADM) Creates the PremiumVc table. """
-
-		if await self.table_premium_vc_exists():
-			return await ctx.send("**Table __PremiumVc__ already exists!**")
-
-		mycursor, db = await the_database()
-		await mycursor.execute("CREATE TABLE PremiumVc (user_id BIGINT, user_vc BIGINT, user_txt BIGINT)")
-		await db.commit()
-		await mycursor.close()
-
-		return await ctx.send("**Table __PremiumVc__ created!**")
-
-	@commands.command(hidden=True)
-	@commands.has_permissions(administrator=True)
-	async def drop_table_premium_vc(self, ctx) -> None:
-		""" (ADM) Drops the PremiumVc table. """
-
-		if not await self.table_premium_vc_exists():
-			return await ctx.send("**Table __PremiumVc__ doesn't exist!**")
-
-		mycursor, db = await the_database()
-		await mycursor.execute("DROP TABLE PremiumVc")
-		await db.commit()
-		await mycursor.close()
-
-		return await ctx.send("**Table __PremiumVc__ dropped!**")
-
-	@commands.command(hidden=True)
-	@commands.has_permissions(administrator=True)
-	async def reset_table_premium_vc(self, ctx) -> None:
-		""" (ADM) Resets the PremiumVc table. """
-
-		if not await self.table_premium_vc_exists():
-			return await ctx.send("**Table __PremiumVc__ doesn't exist yet!**")
-
-		mycursor, db = await the_database()
-		await mycursor.execute("DELETE FROM PremiumVc")
-		await db.commit()
-		await mycursor.close()
-
-		return await ctx.send("**Table __PremiumVc__ reset!**")
-
-	async def table_premium_vc_exists(self) -> bool:
-		""" Checks whether the PremiumVc table exists. """
-
-		mycursor, db = await the_database()
-		await mycursor.execute("SHOW TABLE STATUS LIKE 'PremiumVc'")
-		table_info = await mycursor.fetchall()
-		await mycursor.close()
-
-		if len(table_info) == 0:
-			return False
-
-		else:
-			return True
-
-
-
-	# Galaxy related functions
-	@commands.command(hidden=True)
-	@commands.has_permissions(administrator=True)
-	async def create_table_galaxy_vc(self, ctx) -> None:
-		""" (ADM) Creates the GalaxyVc table. """
-
-		if await self.table_galaxy_vc_exists():
-			return await ctx.send("**Table __GalaxyVc__ already exists!**")
-
-		mycursor, db = await the_database()
-		await mycursor.execute("""
-			CREATE TABLE GalaxyVc (
-			user_id BIGINT, user_cat BIGINT, user_vc BIGINT, 
-			user_txt1 BIGINT, user_txt2 BIGINT, user_vc2 BIGINT,
-			user_ts BIGINT, user_notified VARCHAR(3) default 'no',
-			user_txt3 BIGINT, user_txt4 BIGINT, user_txt5 BIGINT)""")
-		await db.commit()
-		await mycursor.close()
-
-		return await ctx.send("**Table __GalaxyVc__ created!**")
-
-	@commands.command(hidden=True)
-	@commands.has_permissions(administrator=True)
-	async def drop_table_galaxy_vc(self, ctx) -> None:
-		""" (ADM) Drops the GalaxyVc table. """
-
-		if not await self.table_galaxy_vc_exists():
-			return await ctx.send("**Table __GalaxyVc__ doesn't exist!**")
-
-		mycursor, db = await the_database()
-		await mycursor.execute("DROP TABLE GalaxyVc")
-		await db.commit()
-		await mycursor.close()
-
-		return await ctx.send("**Table __GalaxyVc__ dropped!**")
-
-	@commands.command(hidden=True)
-	@commands.has_permissions(administrator=True)
-	async def reset_table_galaxy_vc(self, ctx) -> None:
-		""" (ADM) Resets the GalaxyVc table. """
-
-		if not await self.table_galaxy_vc_exists():
-			return await ctx.send("**Table __GalaxyVc__ doesn't exist yet!**")
-
-		mycursor, db = await the_database()
-		await mycursor.execute("DELETE FROM GalaxyVc")
-		await db.commit()
-		await mycursor.close()
-
-		return await ctx.send("**Table __GalaxyVc__ reset!**")
-
-	async def table_galaxy_vc_exists(self) -> bool:
-		""" Checks whether the GalaxyVc table exists. """
-
-		mycursor, db = await the_database()
-		await mycursor.execute("SHOW TABLE STATUS LIKE 'GalaxyVc'")
-		table_info = await mycursor.fetchall()
-		await mycursor.close()
-
-		if len(table_info) == 0:
-			return False
-
-		else:
-			return True
-
-
-	@commands.has_permissions(administrator=True)
-	@commands.command(hidden=True)
-	async def create_table_user_vc_ts(self, ctx) -> None:
-		""" (ADM) Creates the UserVcstamp table. """
-
-		await ctx.message.delete()
-		if await self.table_user_vc_ts_exists():
-			return await ctx.send("**Table __UserVCstamp__ already exists!**")
-		mycursor, db = await the_database()
-		await mycursor.execute("CREATE TABLE UserVCstamp (user_id bigint, user_vc_ts bigint)")
-		await db.commit()
-		await mycursor.close()
-
-		return await ctx.send("**Table __UserVCstamp__ created!**", delete_after=5)
-
-	@commands.has_permissions(administrator=True)
-	@commands.command(hidden=True)
-	async def drop_table_user_vc_ts(self, ctx) -> None:
-		""" (ADM) Drops the UserVcstamp table. """
-
-		await ctx.message.delete()
-		if not await self.table_user_vc_ts_exists():
-			return await ctx.send("**Table __UserVCstamp__ doesn't exist!**")
-		mycursor, db = await the_database()
-		await mycursor.execute("DROP TABLE UserVCstamp")
-		await db.commit()
-		await mycursor.close()
-
-		return await ctx.send("**Table __UserVCstamp__ dropped!**", delete_after=5)
-
-	@commands.has_permissions(administrator=True)
-	@commands.command(hidden=True)
-	async def reset_table_user_vc_ts(self, ctx) -> None:
-		""" (ADM) Resets the UserVcstamp table. """
-
-		await ctx.message.delete()
-		if not await self.table_user_vc_ts_exists():
-			return await ctx.send("**Table __UserVCstamp__ doesn't exist yet!**")
-		mycursor, db = await the_database()
-		await mycursor.execute("DELETE FROM UserVCstamp")
-		await db.commit()
-		await mycursor.close()
-
-		return await ctx.send("**Table __UserVCstamp__ reset!**", delete_after=5)
-
-	async def table_user_vc_ts_exists(self) -> bool:
-		""" Checks whether the UserVCstamp table exists. """
-
-		mycursor, db = await the_database()
-		await mycursor.execute("SHOW TABLE STATUS LIKE 'UserVCstamp'")
-		table_info = await mycursor.fetchall()
-		await mycursor.close()
-
-		if len(table_info) == 0:
-			return False
-
-		else:
-			return True
-
-
-
-class CreateSmartRoom(SmartRoomDatabase):
+class CreateSmartRoom(*smart_room_cogs):
 	""" A cog related to the creation of a custom voice channel. """
 
 	def __init__(self, client):
@@ -1163,16 +675,12 @@ You can only add either **threads** **OR** one **voice channel**"""))
 		if int(size) != 0:
 			await self.overwrite_image_with_image(member_id, (375, 965), f'./images/smart_vc/sizes/voice channel ({size}).png')
 
-
-
-
 	async def handle_permissions(self, members: List[discord.Member], galaxy_room: List[Union[int, str]], guild: discord.Guild, allow: bool = True) -> List[str]:
 		""" Handles permissions for a member in one's Galaxy Room.
 		:param members: The list of members to handle permissions for.
 		:param galaxy_room: The Galaxy Room info.
 		:param guild: The guild of the Galaxy Room.
 		:param allow: Whether to allow or disallow the member and their permissions from the Galaxy Room. [Default=True]"""
-
 
 		channels: List[Union[discord.abc.GuildChannel, discord.Thread]] = [
 			discord.utils.get(guild.categories, id=galaxy_room[1]),
@@ -1284,8 +792,6 @@ You can only add either **threads** **OR** one **voice channel**"""))
 		forbidden_members = ', '.join(forbid)
 
 		await ctx.send(f"**{forbidden_members} {'have' if len(forbid) > 1 else 'has'} been forbidden, {member.mention}!**")
-
-
 
 	# Other useful commands
 	@galaxy.command(name="info", aliases=['creation', 'expiration'])
@@ -1441,7 +947,6 @@ You can only add either **threads** **OR** one **voice channel**"""))
 		else:
 			await ctx.send(f"**Successfully transferred the ownership of this Galaxy Room from <@{galaxy_room[0]}> to {member.mention}!**")
 
-
 	@galaxy.command(name="close", aliases=['close_room', 'closeroom', 'kill', 'terminate', 'delete', 'del'])
 	async def _galaxy_close(self, ctx) -> None:
 		""" Deletes a Galaxy Room. """
@@ -1481,7 +986,6 @@ You can only add either **threads** **OR** one **voice channel**"""))
 		finally:
 			await self.delete_galaxy_by_cat_id(galaxy_room[1])
 
-
 	async def order_rooms(self, user_rooms: List[int]) -> List[List[int]]:
 		""" Orders the user's Galaxy Room channels by txt and vc.
 		:param user_rooms: The user rooms. """
@@ -1490,7 +994,6 @@ You can only add either **threads** **OR** one **voice channel**"""))
 		txts = [txt for txt in [user_rooms[2], user_rooms[3], user_rooms[4], user_rooms[5], user_rooms[6]] if txt is not None]
 
 		return vcs, txts
-
 
 	@galaxy.group(name="add_channel", aliases=['ac'])
 	async def _galaxy_add_channel(self, ctx) -> None:
@@ -1637,8 +1140,6 @@ You can only add either **threads** **OR** one **voice channel**"""))
 		await SlothCurrency.update_user_money(member.id, -500)
 		await ctx.send(f"**Voice Channel created, {member.mention}!** ({vc.mention})")
 
-
-
 	@galaxy.group(name="delete_channel", aliases=['dc', 'deletechannel', 'remove_channel', 'removechannel', 'rc'])
 	async def _galaxy_delete_channel(self, ctx) -> None:
 		""" Deletes either a Text or a Voice Channel from
@@ -1699,8 +1200,6 @@ You can only add either **threads** **OR** one **voice channel**"""))
 
 			await ctx.send(f"**Text Channel deleted, {member.mention}!**")
 		
-
-
 	@_galaxy_delete_channel.command(name='voice', aliases=['vc', 'voice_channel'])
 	@commands.cooldown(1, 60, commands.BucketType.user)
 	async def _galaxy_delete_channel_voice(self, ctx) -> None:
@@ -1736,8 +1235,6 @@ You can only add either **threads** **OR** one **voice channel**"""))
 				await self.delete_things([vc])
 
 			await ctx.send(f"**Voice Channel deleted, {member.mention}!**")
-
-
 
 	@galaxy.command(name="allow_tribe", aliases=['at', 'permit_tribe', 'add_tribe', 'allowtribe', 'permittribe', 'addtribe'])
 	@commands.cooldown(1, 60, commands.BucketType.user)
@@ -1820,8 +1317,6 @@ You can only add either **threads** **OR** one **voice channel**"""))
 				mention=member.mention)
 
 			await ctx.send(text)
-
-
 
 	# Creates a smartroom manually
 	@commands.command(aliases=['csr'])
@@ -1907,8 +1402,6 @@ You can only add either **threads** **OR** one **voice channel**"""))
 				await vc_channel.delete()
 				if type == 2:
 					await txt_channel.delete()
-
-
 
 def setup(client):
 	""" Cog's setup function. """
