@@ -39,7 +39,7 @@ class RolePlay(commands.Cog):
 
     @commands.command()
     @Player.poisoned()
-    @commands.cooldown(1, 120, commands.BucketType.user)
+    @commands.cooldown(1, 30, commands.BucketType.user)
     @send_if_money()
     async def hug(self, ctx, *, member: discord.Member = None) -> None:
         """ Hugs someone.
@@ -74,7 +74,7 @@ class RolePlay(commands.Cog):
 
     @commands.command()
     @Player.poisoned()
-    @commands.cooldown(1, 120, commands.BucketType.user)
+    @commands.cooldown(1, 30, commands.BucketType.user)
     @send_if_money()
     async def boot(self, ctx, *, member: discord.Member = None) -> None:
         """ Boots/kicks someone.
@@ -110,7 +110,7 @@ class RolePlay(commands.Cog):
     
     @commands.command()
     @Player.poisoned()
-    @commands.cooldown(1, 120, commands.BucketType.user)
+    @commands.cooldown(1, 30, commands.BucketType.user)
     @send_if_money()
     async def kiss(self, ctx, *, member: discord.Member = None) -> None:
         """ Kisses someone.
@@ -144,7 +144,7 @@ class RolePlay(commands.Cog):
 
     @commands.command()
     @Player.poisoned()
-    @commands.cooldown(1, 120, commands.BucketType.user)
+    @commands.cooldown(1, 30, commands.BucketType.user)
     @send_if_money()
     async def slap(self, ctx, *, member: discord.Member = None) -> None:
         """ Slaps someone.
@@ -312,7 +312,7 @@ class RolePlay(commands.Cog):
 
     @commands.command(aliases=['fist'])
     @Player.poisoned()
-    @commands.cooldown(1, 120, commands.BucketType.user)
+    @commands.cooldown(1, 30, commands.BucketType.user)
     @send_if_money()
     async def punch(self, ctx, *, member: discord.Member = None) -> None:
         """ Punches someone.
@@ -346,7 +346,7 @@ class RolePlay(commands.Cog):
 
     @commands.command()
     @Player.poisoned()
-    @commands.cooldown(1, 120, commands.BucketType.user)
+    @commands.cooldown(1, 30, commands.BucketType.user)
     @send_if_money()
     async def give(self, ctx, *, member: discord.Member = None) -> None:
         """ Gives someone something.
@@ -380,7 +380,7 @@ class RolePlay(commands.Cog):
 
     @commands.command(aliases=['tickling'])
     @Player.poisoned()
-    @commands.cooldown(1, 120, commands.BucketType.user)
+    @commands.cooldown(1, 30, commands.BucketType.user)
     @send_if_money()
     async def tickle(self, ctx, *, member: discord.Member = None) -> None:
         """ Tickles someone.
@@ -415,7 +415,7 @@ class RolePlay(commands.Cog):
 
     @commands.command(aliases=['throw', 'toss'])
     @Player.poisoned()
-    @commands.cooldown(1, 120, commands.BucketType.user)
+    @commands.cooldown(1, 30, commands.BucketType.user)
     @send_if_money()
     async def yeet(self, ctx, *, member: discord.Member = None) -> None:
         """ Yeets something at someone.
@@ -450,7 +450,7 @@ class RolePlay(commands.Cog):
 
     @commands.command()
     @Player.poisoned()
-    @commands.cooldown(1, 120, commands.BucketType.user)
+    @commands.cooldown(1, 30, commands.BucketType.user)
     @send_if_money()
     async def pat(self, ctx, *, member: discord.Member = None) -> None:
         """ Pats someone.
@@ -484,7 +484,7 @@ class RolePlay(commands.Cog):
 
     @commands.command(aliases=['imbegging', 'imbeggin', 'beggin'])
     @Player.poisoned()
-    @commands.cooldown(1, 120, commands.BucketType.user)
+    @commands.cooldown(1, 30, commands.BucketType.user)
     @send_if_money()
     async def beg(self, ctx, *, member: discord.Member = None) -> None:
         """ Begs someone.
@@ -519,7 +519,7 @@ class RolePlay(commands.Cog):
 
     @commands.command()
     @Player.poisoned()
-    @commands.cooldown(1, 120, commands.BucketType.user)
+    @commands.cooldown(1, 30, commands.BucketType.user)
     @send_if_money()
     async def whisper(self, ctx, member: discord.Member = None, *, text: str = None) -> None:
         """ Whispers to someone.
@@ -560,7 +560,7 @@ class RolePlay(commands.Cog):
 
     @commands.command()
     @Player.poisoned()
-    @commands.cooldown(1, 120, commands.BucketType.user)
+    @commands.cooldown(1, 30, commands.BucketType.user)
     @send_if_money()
     async def handshake(self, ctx, *, member: discord.Member = None) -> None:
         """ Handshakes someone.
@@ -595,7 +595,7 @@ class RolePlay(commands.Cog):
 
     @commands.command(aliases=['hi5', 'h5', 'high_five', 'highestfive', 'highest_five', 'hf'])
     @Player.poisoned()
-    @commands.cooldown(1, 120, commands.BucketType.user)
+    @commands.cooldown(1, 30, commands.BucketType.user)
     @send_if_money()
     async def highfive(self, ctx, *, member: discord.Member = None) -> None:
         """ High fives someone.
@@ -630,7 +630,7 @@ class RolePlay(commands.Cog):
 
     @commands.command()
     @Player.poisoned()
-    @commands.cooldown(1, 120, commands.BucketType.user)
+    @commands.cooldown(1, 30, commands.BucketType.user)
     @send_if_money()
     async def peek(self, ctx, *, member: discord.Member = None) -> None:
         """ Peeks at someone.
@@ -664,7 +664,7 @@ class RolePlay(commands.Cog):
 
     @commands.command(aliases=['driveover', 'run_over', 'runover'])
     @Player.poisoned()
-    @commands.cooldown(1, 120, commands.BucketType.user)
+    @commands.cooldown(1, 30, commands.BucketType.user)
     @send_if_money()
     async def drive_over(self, ctx, *, member: discord.Member = None) -> None:
         """ Drivers over someone.
