@@ -177,7 +177,6 @@ class VoiceChannelActivity(commands.Cog):
 
             # Checks whether user provided two values
             if time2:
-                print('Provided 2 values!')
                 time2 = datetime.strptime(time2, '%H')
                 await mycursor.execute("""
                     SELECT DISTINCT HOUR(the_time), member_name, member_id
@@ -186,7 +185,6 @@ class VoiceChannelActivity(commands.Cog):
 
                 text = f"Users who joined `{channel}` between `{time.hour}:00` and `{time2.hour}:59`:"
             else:
-                print('Provided 1 value!')
                 await mycursor.execute("""
                     SELECT DISTINCT HOUR(the_time), member_name, member_id
                     FROM VoiceChannelActivity WHERE channel_id = %s AND HOUR(the_time) = %s""",
@@ -234,7 +232,7 @@ class VoiceChannelActivity(commands.Cog):
         :param member: The member from whom you want to fetch information.
         :param time: The time at around the user that you are looking for has to have information. """
 
-        mycursor, db = await the_database()
+        mycursor, _ = await the_database()
 
         text = ''
         # If in format (HOUR)
@@ -242,7 +240,6 @@ class VoiceChannelActivity(commands.Cog):
             time = datetime.strptime(time, '%H')
             # Checks whether user provided two values
             if time2:
-                print('Provided 2 values!')
                 time2 = datetime.strptime(time2, '%H')
                 await mycursor.execute("""
                     SELECT DISTINCT HOUR(the_time), channel_id, channel_name,  member_id
@@ -253,7 +250,6 @@ class VoiceChannelActivity(commands.Cog):
 
             # If not, gets all values from that hour.
             else:
-                print('Provided 1 value!')
                 await mycursor.execute("""
                     SELECT DISTINCT HOUR(the_time), channel_id, channel_name,  member_id
                     FROM VoiceChannelActivity WHERE HOUR(the_time) = %s AND member_id = %s""",
@@ -301,7 +297,6 @@ class VoiceChannelActivity(commands.Cog):
 
         records = await mycursor.fetchall()
         await mycursor.close()
-        print('Nice!!!')
         return records, time, text
 
     async def format_time(self, time: str) -> str:
