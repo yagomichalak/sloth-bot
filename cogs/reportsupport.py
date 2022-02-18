@@ -5,7 +5,7 @@ import asyncio
 from extra.useful_variables import list_of_commands
 from extra.prompt.menu import Confirm
 from extra.view import ReportSupportView
-from typing import List, Dict, Optional
+from typing import List, Optional
 import os
 from extra import utils
 
