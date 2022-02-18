@@ -10,8 +10,6 @@ import os
 
 import shutil
 import asyncio
-import aiohttp
-from io import BytesIO
 import glob
 from itertools import cycle
 

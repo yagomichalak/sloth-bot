@@ -3,7 +3,6 @@ from discord.app.commands import slash_command, Option
 from discord.ext import commands
 
 from mysqldb import *
-from datetime import datetime
 import os
 from typing import List, Optional, Union
 
@@ -497,9 +496,6 @@ class SlothReputation(*currency_cogs):
         await self.client.get_cog('SlothCurrency').update_user_money(member.id, 5)
         return await ctx.send(
             f"**{ctx.author.mention} repped {member.mention}! 🍃The repped person got 5łł🍃**")
-
-
-
 
 def setup(client):
     client.add_cog(SlothReputation(client))

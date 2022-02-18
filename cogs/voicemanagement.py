@@ -17,8 +17,6 @@ class VoiceManagement(commands.Cog):
 
         self.people: Dict[int, Dict[str, Union[int, bool]]] = {}
 
-
-
     @commands.Cog.listener()
     async def on_ready(self) -> None:
         self.check_camera_on.start()
@@ -106,8 +104,6 @@ class VoiceManagement(commands.Cog):
         # Leaving the Video Calls channel
         elif not ac or ac.id != self.vcc_id:
             self.people.pop(member.id, None)
-
-
 
 
 def setup(client) -> None:
