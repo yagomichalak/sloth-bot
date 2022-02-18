@@ -1,11 +1,10 @@
 import discord
 from discord import utils
 from discord.ext import commands, tasks
-from mysqldb import the_database
 
-from datetime import datetime, timedelta
+from datetime import timedelta
 from extra import utils
-from extra_cogs.analytics import SlothAnalyticsTable, DataBumpsTable
+from extra.analytics import SlothAnalyticsTable, DataBumpsTable
 
 from PIL import Image, ImageFont, ImageDraw
 from typing import List

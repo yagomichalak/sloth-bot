@@ -5,7 +5,7 @@ from discord.ext import commands
 from extra.useful_variables import rules
 from extra import utils
 from extra.slothclasses.player import Player
-from extra_cogs.analytics import DataBumpsTable
+from extra.analytics import DataBumpsTable
 
 from typing import List
 import os
