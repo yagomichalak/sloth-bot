@@ -3,8 +3,8 @@ from discord.ext import commands
 from extra.menu import ConfirmSkill
 from extra import utils
 import os
-from typing import Dict, Any, List
-from mysqldb import the_database
+from typing import Dict, Any
+from extra.smartroom.event_rooms import EventRoomsTable
 
 mod_role_id = int(os.getenv('MOD_ROLE_ID'))
 senior_mod_role_id = int(os.getenv('SENIOR_MOD_ROLE_ID'))
@@ -15,7 +15,7 @@ real_event_manager_role_id = int(os.getenv('REAL_EVENT_MANAGER_ROLE_ID'))
 preference_role_id = int(os.getenv('PREFERENCE_ROLE_ID'))
 
 
-class EventManagement(commands.Cog):
+class EventManagement(EventRoomsTable):
     """ A category for event related commands. """
 
     def __init__(self, client) -> None:
@@ -559,9 +559,6 @@ class EventManagement(commands.Cog):
         else:
             await ctx.send(f"**{member.mention}, {text_channel.mention} is up and running!**")
 
-
-    # DELETE EVENT
-
     @commands.command(aliases=['close_event'])
     @commands.has_any_role(*[event_manager_role_id, mod_role_id, admin_role_id, owner_role_id])
     async def delete_event(self, ctx) -> None:
@@ -594,142 +591,6 @@ class EventManagement(commands.Cog):
                     await ctx.send(f"**Something went wrong with it, try again later, {member.mention}!**")
             else:
                 await ctx.send(f"**Not deleting them, then, {member.mention}!**")
-
-    # ======
-
-    # INSERT
-
-    async def insert_event_room(self, user_id: int, vc_id: int = None, txt_id: int = None) -> None:
-        """ Inserts an Event Room by VC ID.
-        :param user_id: The ID of the user who's gonna be attached to the rooms.
-        :param vc_id: The ID of the VC.
-        :param txt_id: The ID of the txt. """
-
-        mycursor, db = await the_database()
-        await mycursor.execute("""
-            INSERT INTO EventRooms (user_id, vc_id, txt_id)
-            VALUES (%s, %s, %s)""", (user_id, vc_id, txt_id))
-        await db.commit()
-        await mycursor.close()
-
-    # GET
-
-    async def get_event_room_by_user_id(self, user_id: int) -> List[int]:
-        """ Gets an Event Room by VC ID.
-        :param user_id: The ID of the user that you are looking for. """
-
-        mycursor, db = await the_database()
-        await mycursor.execute("SELECT * FROM EventRooms WHERE user_id = %s", (user_id,))
-        event_room = await mycursor.fetchone()
-        await mycursor.close()
-        return event_room
-
-    async def get_event_room_by_vc_id(self, vc_id: int) -> List[int]:
-        """ Gets an Event Room by VC ID.
-        :param vc_id: The ID of the VC that you are looking for. """
-
-        mycursor, db = await the_database()
-        await mycursor.execute("SELECT * FROM EventRooms WHERE vc_id = %s", (vc_id,))
-        event_room = await mycursor.fetchone()
-        await mycursor.close()
-        return event_room
-
-    async def get_event_room_by_txt_id(self, txt_id: int) -> List[int]:
-        """ Gets an Event Room by VC ID.
-        :param txt_id: The ID of the txt that you are looking for. """
-
-        mycursor, db = await the_database()
-        await mycursor.execute("SELECT * FROM EventRooms WHERE txt_id = %s", (txt_id,))
-        event_room = await mycursor.fetchone()
-        await mycursor.close()
-        return event_room
-
-    # DELETE
-
-    async def delete_event_room_by_user_id(self, user_id: int) -> None:
-        """ Deletes an Event Room by VC ID.
-        :param user_id: The ID of the user that you want to delete event rooms from. """
-
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM EventRooms WHERE user_id = %s", (user_id,))
-        await db.commit()
-        await mycursor.close()
-
-    async def delete_event_room_by_vc_id(self, vc_id: int) -> None:
-        """ Deletes an Event Room by VC ID.
-        :param vc_id: The ID of the txt that you want to delete. """
-
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM EventRooms WHERE vc_id = %s", (vc_id,))
-        await db.commit()
-        await mycursor.close()
-
-    async def delete_event_room_by_txt_id(self, txt_id: int) -> None:
-        """ Deletes an Event Room by VC ID.
-        :param txt_id: The ID of the txt that you want to delete. """
-
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM EventRooms WHERE txt_id = %s", (txt_id,))
-        await db.commit()
-        await mycursor.close()
-
-    @commands.command(hidden=True)
-    @commands.has_permissions(administrator=True)
-    async def create_table_event_rooms(self, ctx) -> None:
-        """ (ADM) Creates the EventRooms table. """
-
-        if await self.table_event_rooms_exists():
-            return await ctx.send("**The `EventRooms` table already exists!**")
-
-        mycursor, db = await the_database()
-        await mycursor.execute("""
-            CREATE TABLE EventRooms (
-                user_id BIGINT NOT NULL, vc_id BIGINT DEFAULT NULL,
-                txt_id BIGINT DEFAULT NULL
-            )""")
-        await db.commit()
-        await mycursor.close()
-        await ctx.send("**Created `EventRooms` table!**")
-
-    @commands.command(hidden=True)
-    @commands.has_permissions(administrator=True)
-    async def drop_table_event_rooms(self, ctx) -> None:
-        """ (ADM) Drops the EventRooms table. """
-
-        if not await self.table_event_rooms_exists():
-            return await ctx.send("**The `EventRooms` table doesn't exist!**")
-
-        mycursor, db = await the_database()
-        await mycursor.execute("DROP TABLE EventRooms")
-        await db.commit()
-        await mycursor.close()
-        await ctx.send("**Dropped `EventRooms` table!**")
-
-    @commands.command(hidden=True)
-    @commands.has_permissions(administrator=True)
-    async def reset_table_event_rooms(self, ctx) -> None:
-        """ (ADM) Resets the EventRooms table. """
-
-        if not await self.table_event_rooms_exists():
-            return await ctx.send("**The `EventRooms` table doesn't exist yet!**")
-
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM EventRooms")
-        await db.commit()
-        await mycursor.close()
-        await ctx.send("**Reset `EventRooms` table!**")
-
-    async def table_event_rooms_exists(self) -> bool:
-        """ Checks whether the EventRooms table exists. """
-
-        mycursor, db = await the_database()
-        await mycursor.execute("SHOW TABLE STATUS LIKE 'EventRooms'")
-        table_info = await mycursor.fetchall()
-        await mycursor.close()
-        if len(table_info) == 0:
-            return False
-        else:
-            return True
 
     @commands.command(aliases=['dh'])
     @utils.is_allowed([owner_role_id, admin_role_id, real_event_manager_role_id], throw_exc=True)
