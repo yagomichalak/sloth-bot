@@ -5,18 +5,19 @@ from mysqldb import *
 import asyncio
 import os
 from extra import utils
+from extra.moderation.modactivity import ModActivityTable
 
 senior_mod_role_id: int = int(os.getenv('SENIOR_MOD_ROLE_ID'))
 mod_role_id = int(os.getenv('MOD_ROLE_ID'))
 guild_id = int(os.getenv('SERVER_ID'))
 
 
-class ModActivity(commands.Cog):
-    '''
-    A cog related to the Moderators' activity.
-    '''
+class ModActivity(ModActivityTable):
+    """ A cog related to the Moderators' activity. """
 
-    def __init__(self, client):
+    def __init__(self, client: commands.Bot) -> None:
+        """ Class init method. """
+
         self.client = client
 
     @commands.Cog.listener()
@@ -56,67 +57,6 @@ class ModActivity(commands.Cog):
         if not after.channel:
             await self.add_time_moderator(member.id, addition)
 
-    async def update_moderator(self, mod_id: int):
-        mycursor, db = await the_database()
-        epoch = datetime.utcfromtimestamp(0)
-        new_ts = (datetime.utcnow() - epoch).total_seconds()
-        await mycursor.execute(f'UPDATE ModActivity SET timestamp = {int(new_ts)} WHERE mod_id = {mod_id}')
-        await db.commit()
-        await mycursor.close()
-
-    async def add_time_moderator(self, mod_id: int, addition: int):
-        mycursor, db = await the_database()
-        await mycursor.execute(f'UPDATE ModActivity SET time = time + {addition} WHERE mod_id = {mod_id}')
-        await db.commit()
-        await mycursor.close()
-        await self.update_moderator(mod_id)
-
-    async def get_moderator_current_timestamp(self, mod_id: int, old_ts: int):
-        mycursor, db = await the_database()
-        await mycursor.execute(f'SELECT * FROM ModActivity WHERE mod_id = {mod_id}')
-        mod = await mycursor.fetchall()
-        await mycursor.close()
-
-        if not mod:
-            await self.insert_moderator(mod_id, old_ts)
-            return await self.get_moderator_current_timestamp(mod_id, old_ts)
-
-        if mod[0][2]:
-            return mod[0][2]
-        else:
-            return old_ts
-
-    async def insert_moderator(self, mod_id: int, old_ts: int):
-        mycursor, db = await the_database()
-        await mycursor.execute("INSERT INTO ModActivity (mod_id, time, timestamp, messages) VALUES (%s, %s, %s, %s)",
-                               (mod_id, 0, old_ts, 0))
-        await db.commit()
-        await mycursor.close()
-
-    async def get_moderator_current_messages(self, mod_id: int):
-        mycursor, db = await the_database()
-        await mycursor.execute(f'SELECT * FROM ModActivity WHERE mod_id = {mod_id}')
-        mod = await mycursor.fetchall()
-        await mycursor.close()
-
-        if not mod:
-            await self.insert_moderator_message(mod_id)
-            return await self.get_moderator_current_messages(mod_id)
-
-        return mod[0][3]
-
-    async def insert_moderator_message(self, mod_id: int):
-        mycursor, db = await the_database()
-        await mycursor.execute("INSERT INTO ModActivity (mod_id, time, timestamp, messages) VALUES (%s, %s, %s, %s)",
-                               (mod_id, 0, None, 1))
-        await db.commit()
-        await mycursor.close()
-
-    async def update_moderator_message(self, mod_id: int):
-        mycursor, db = await the_database()
-        await mycursor.execute(f'UPDATE ModActivity SET messages = messages+1 WHERE mod_id = {mod_id}')
-        await db.commit()
-        await mycursor.close()
 
     @utils.is_allowed([senior_mod_role_id], throw_exc=True)
     @commands.command(aliases=['mods_reputation', 'mod_rep'])
@@ -169,40 +109,6 @@ class ModActivity(commands.Cog):
             await the_msg.delete()
             await asyncio.sleep(2)
             return await resp.delete()
-
-    # Database commands
-    @commands.command(hidden=True)
-    @commands.has_permissions(administrator=True)
-    async def create_mod_table(self, ctx):
-        '''
-        (ADM) Creates the ModActivity table.
-        '''
-        mycursor, db = await the_database()
-        await mycursor.execute(
-            'CREATE TABLE ModActivity (mod_id bigint, time bigint, timestamp bigint default null, messages int)')
-        await db.commit()
-        await mycursor.close()
-
-    @commands.command(hidden=True)
-    @commands.has_permissions(administrator=True)
-    async def drop_table_mods(self, ctx):
-        '''
-        (ADM) Drops the ModActivity table.
-        '''
-        mycursor, db = await the_database()
-        await mycursor.execute('DROP TABLE ModActivity')
-        await db.commit()
-        await mycursor.close()
-
-    @commands.command(hidden=True)
-    @commands.has_permissions(administrator=True)
-    async def reset_table_mods(self, ctx):
-        """ (ADM) Resets the ModActivity table. """
-
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM ModActivity")
-        await db.commit()
-        await mycursor.close()
 
 
 def setup(client):
