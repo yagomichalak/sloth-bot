@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands, tasks
 from mysqldb import the_database
-from typing import List, Tuple, Union, Any
+from typing import List, Tuple, Union
 from datetime import datetime
 from pytz import timezone
 import os

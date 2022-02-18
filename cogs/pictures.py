@@ -1,11 +1,8 @@
 import discord
 from discord.ext import commands
-from mysqldb import the_database
 import os
 import aiohttp
-from extra import utils
 import json
-import asyncio
 from random import choice
 
 class Pictures(commands.Cog):
