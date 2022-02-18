@@ -1,12 +1,13 @@
 import discord
-from discord.app.commands import Option, OptionChoice, slash_command
+from discord.app.commands import Option, slash_command
 from discord.ext import commands
-from mysqldb import the_database
 
 from extra.useful_variables import rules
 from extra import utils
 from extra.slothclasses.player import Player
+from extra_cogs.analytics import DataBumpsTable
 
+from typing import List
 import os
 import subprocess
 import sys
@@ -14,21 +15,25 @@ import sys
 allowed_roles = [int(os.getenv('OWNER_ROLE_ID')), int(os.getenv('ADMIN_ROLE_ID')), int(os.getenv('MOD_ROLE_ID'))]
 guild_ids = [int(os.getenv('SERVER_ID'))]
 
-class Show(commands.Cog):
-    '''
-    Commands involving showing some information related to the server.
-    '''
+extra_cogs: List[commands.Cog] = [
+    DataBumpsTable
+]
 
-    def __init__(self, client):
+class Show(*extra_cogs):
+    """ Commands involving showing some information related to the server. """
+
+    def __init__(self, client) -> None:
+        """ Class init method. """
+
         self.client = client
 
     @commands.Cog.listener()
-    async def on_ready(self):
+    async def on_ready(self) -> None:
         print('Show cog is ready!')
 
     # Shows how many members there are in the server
     @commands.command()
-    async def members(self, ctx):
+    async def members(self, ctx) -> None:
         """ Shows how many members there are in the server (including bots). """
 
         await ctx.message.delete()
@@ -109,7 +114,7 @@ class Show(commands.Cog):
         await self._rule(ctx, numb)
 
 
-    async def _rule(self, ctx, numb: int = None, reply: bool = True):
+    async def _rule(self, ctx, numb: int = None, reply: bool = True) -> None:
         """ Shows a specific server rule.
         :param numb: The number of the rule to show. """
 
@@ -182,19 +187,7 @@ class Show(commands.Cog):
 
         member = ctx.author
 
-        mycursor, db = await the_database()
-        await mycursor.execute("""
-            SELECT
-            STR_TO_DATE(complete_date, '%d/%m/%Y') AS Months,
-            SUM(m_joined) - SUM(m_left) AS 'Total Joins',
-            members AS 'First Member Record of the Month',
-            MAX(members) AS 'Last Member Record of the Month'
-            FROM DataBumps
-            GROUP BY YEAR(Months), MONTH(Months)
-            """)
-
-        months = await mycursor.fetchall()
-        await mycursor.close()
+        months = await self.get_month_statuses()
 
         embed = discord.Embed(
             title="__Server's Monthly Statuses__",

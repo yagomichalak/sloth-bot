@@ -1,8 +1,8 @@
-import discord
 from discord.ext import commands
 from mysqldb import the_database
-from typing import List, Union, Any
+from typing import List, Union
 from extra import utils
+from datetime import datetime
 
 class SlothAnalyticsTable(commands.Cog):
     """ Class for managing the SlothAnalytics table in the database. """
@@ -255,3 +255,22 @@ class DataBumpsTable(commands.Cog):
         last_record = await mycursor.fetchone()
         await mycursor.close()
         return 0 if not last_record else last_record[0]
+
+
+    async def get_month_statuses(self) -> List[Union[datetime, str, int]]:
+        """ Gets months statuses. """
+
+        mycursor, _ = await the_database()
+        await mycursor.execute("""
+            SELECT
+                STR_TO_DATE(complete_date, '%d/%m/%Y') AS Months,
+                SUM(m_joined) - SUM(m_left) AS 'Total Joins',
+                members AS 'First Member Record of the Month',
+                MAX(members) AS 'Last Member Record of the Month'
+            FROM DataBumps
+            GROUP BY YEAR(Months), MONTH(Months)
+        """)
+
+        months = await mycursor.fetchall()
+        await mycursor.close()
+        return months
