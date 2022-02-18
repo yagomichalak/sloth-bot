@@ -120,8 +120,8 @@ class SlothAnalyticsTable(commands.Cog):
         return info
 
 
-class SlothAnalyticsTable(commands.Cog):
-    """ Class for managing the SlothAnalytics table in the database. """
+class DataBumpsTable(commands.Cog):
+    """ Class for managing the DataBumps table in the database. """
 
     def __init__(self, client: commands.Bot) -> None:
         """ Class init method. """
