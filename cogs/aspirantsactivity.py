@@ -127,39 +127,45 @@ class AspirantActivity(commands.Cog):
 
     @utils.is_allowed([senior_mod_role_id], throw_exc=True)
     @commands.command(aliases=['addasp', 'add_asp'])
-    async def add_aspirant(self, ctx, member: discord.Member = None) -> None:
+    async def add_aspirant(self, ctx, members: commands.Greedy[discord.Member] = None) -> None:
         """Adds an aspirant from the activity monitor
         :param member: The user_id, mention or name#0000 of the user"""
 
         await ctx.message.delete()
 
-        if not member:
+        if not members:
             return await ctx.send("**Please, inform a member**")
 
-        mycursor, db = await the_database()
-        await mycursor.execute("INSERT INTO AspirantActivity (user_id, time, timestamp, messages) VALUES (%s, %s, %s, %s)",
-                               (member.id, 0, None, 1))
-        await db.commit()
-        await mycursor.close()
-        await ctx.send(f"**The member {member} was successfully added**")
+        for member in members:
+            # Checks if the user is already in the table
+            if  not await self.get_user(member.id):
+                mycursor, db = await the_database()
+                await mycursor.execute("INSERT INTO AspirantActivity (user_id, time, timestamp, messages) VALUES (%s, %s, %s, %s)",
+                                    (member.id, 0, None, 1))
+                await db.commit()
+                await mycursor.close()
+                await ctx.send(f"**The member {member} was successfully added**")
+            else:
+                return await ctx.send(f"**The user {member} is already been monitored**")
 
 
     @utils.is_allowed([senior_mod_role_id], throw_exc=True)
     @commands.command(aliases=['del_asp', 'delasp'])
-    async def remove_aspirant(self, ctx, member: discord.Member = None) -> None:
+    async def remove_aspirant(self, ctx, members: commands.Greedy[discord.Member] = None) -> None:
         """Removes an aspirant from the activity monitor
         :param member: The user_id, mention or name#0000 of the user"""
 
         await ctx.message.delete()
 
-        if not member:
+        if not members:
             return await ctx.send("**Please, inform a member**")
 
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM AspirantActivity WHERE user_id = %s", (member.id))
-        await db.commit()
-        await mycursor.close()
-        await ctx.send(f"**The member {member} was successfully removed**")
+        for member in members:
+            mycursor, db = await the_database()
+            await mycursor.execute("DELETE FROM AspirantActivity WHERE user_id = %s", (member.id))
+            await db.commit()
+            await mycursor.close()
+            await ctx.send(f"**The member {member} was successfully removed**")
 
 
     ### Functions
@@ -264,6 +270,19 @@ class AspirantActivity(commands.Cog):
         await db.commit()
         await mycursor.close()
 
+    async def get_user(self, user_id: int) -> None:
+        """ Resets an aspirant's statuses.
+        :param user_id: The ID of the user to reset. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("SELECT * FROM AspirantActivity WHERE user_id = %s", (user_id,))
+        user = await mycursor.fetchall()
+        await mycursor.close()
+
+        if user:
+            return True
+        else:
+            return False
 
     ### Database commands for aspirants activity
     @commands.command(hidden=True)
