@@ -1858,10 +1858,12 @@ You can only add either **threads** **OR** one **voice channel**"""))
 		failed = False
 
 		the_category_test = discord.utils.get(member.guild.categories, id=self.cat_id)
+		music_bot_role = discord.utils.get(ctx.guild.roles, id=int(os.getenv('MUSIC_BOT_ROLE_ID')))
 
 		if vc_channel := await self.try_to_create(kind='voice', category=the_category_test, name=name, user_limit=limit):
 			creations.append(vc_channel)
 			await vc_channel.edit(sync_permissions=True)
+			await vc_channel.set_permissions(music_bot_role, view_channel=True, speak=True, connect=True, move_members=True)
 		else:
 			failed = True
 
@@ -1869,6 +1871,7 @@ You can only add either **threads** **OR** one **voice channel**"""))
 			if txt_channel := await self.try_to_create(kind='text', category=the_category_test, name=name):
 				creations.append(txt_channel)
 				await txt_channel.edit(sync_permissions=True)
+				await txt_channel.set_permissions(music_bot_role, view_channel=True, send_messages=True)
 			else:
 				failed = True
 
