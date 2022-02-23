@@ -1,5 +1,5 @@
 import discord
-from discord.app.commands import Option, option
+from discord import Option, option
 from discord.utils import escape_mentions
 from pytz import timezone
 from dotenv import load_dotenv
@@ -208,9 +208,6 @@ async def on_application_command_error(ctx, error) -> None:
 
     elif isinstance(error, commands.ChannelNotFound):
         await ctx.respond("**Channel not found!**")
-
-    elif isinstance(error, discord.app.commands.errors.CheckFailure):
-        await ctx.respond("**It looks like you can't run this command!**")
 
 
     print('='*10)
@@ -444,7 +441,7 @@ async def reload(ctx, extension: str = None):
 # Slash commands
 
 
-_cnp = client.command_group(name="cnp", description="For copy and pasting stuff.", guild_ids=guild_ids)
+_cnp = client.create_group(name="cnp", description="For copy and pasting stuff.", guild_ids=guild_ids)
 
 @_cnp.command(name="specific")
 @utils.is_allowed([moderator_role_id, admin_role_id], throw_exc=True)
@@ -509,7 +506,7 @@ async def _club_speak(ctx) -> None:
     )
     await ctx.respond(embed=embed)
 
-_giveaway = client.command_group(name="giveaway", description="For copy and pasting stuff.", guild_ids=guild_ids)
+_giveaway = client.create_group(name="giveaway", description="For copy and pasting stuff.", guild_ids=guild_ids)
 
 @utils.is_allowed([giveaway_manager_role_id, moderator_role_id, admin_role_id], throw_exc=True)
 @_giveaway.command(name="start", guild_ids=guild_ids)

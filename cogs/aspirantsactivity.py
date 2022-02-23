@@ -1,12 +1,10 @@
 import discord
 from discord.ext import commands
-from datetime import datetime
 from mysqldb import *
 import asyncio
 import os
 from extra import utils
 from extra.moderation.aspirants import AspirantsTable
-from typing import List
 
 senior_mod_role_id: int = int(os.getenv('SENIOR_MOD_ROLE_ID'))
 mod_role_id = int(os.getenv('MOD_ROLE_ID'))

@@ -1,18 +1,11 @@
 import discord
-from discord import channel
-from discord.ext.menus import Position
 from extra import utils
 from discord.ext import commands, tasks
-from datetime import datetime
 import asyncio
-from PIL import Image, ImageFont, ImageDraw
 import os
-from cogs.slothcurrency import SlothCurrency
 from mysqldb import *
-from typing import List, Union, Any, Optional, Dict
-from extra.menu import ConfirmSkill
+from typing import List, Union, Any, Dict
 from extra.select import LanguageRoomSelect
-import json
 
 analyst_debugger_role_id = int(os.getenv('ANALYST_DEBUGGER_ROLE_ID'))
 

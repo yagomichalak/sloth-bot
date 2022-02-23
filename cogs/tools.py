@@ -1,5 +1,5 @@
 import discord
-from discord.app.commands import slash_command, message_command, user_command, Option, OptionChoice
+from discord import slash_command, message_command, user_command, Option, OptionChoice
 from discord.ext import commands, menus
 import asyncio
 from gtts import gTTS
