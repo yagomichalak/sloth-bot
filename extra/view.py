@@ -4,6 +4,7 @@ from discord.ext import commands
 from typing import List, Union, Optional, Dict, Any
 from .menu import ConfirmSkill
 from .select import ReportSupportSelect
+from .modals import ModeratorApplicationModal
 import os
 from functools import partial
 import json
@@ -45,7 +46,6 @@ class ReportSupportView(discord.ui.View):
     async def apply_to_moderate_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
         """ Button for starting the Moderator application. """
 
-        await interaction.response.defer()
         member = interaction.user
 
         # Apply to be a Moderator
@@ -54,11 +54,11 @@ class ReportSupportView(discord.ui.View):
         if member_ts:
             sub = time_now - member_ts
             if sub <= 1800:
-                return await interaction.followup.send(
+                return await interaction.response.send_message(
                     f"**You are on cooldown to apply, try again in {(1800-sub)/60:.1f} minutes**", ephemeral=True)
 
         self.cog.cache[member.id] = time_now
-        await self.cog.send_moderator_application(member)
+        await interaction.response.send_modal(ModeratorApplicationModal(self.client))
 
     @discord.ui.button(label="Apply for Event Host!", style=3, custom_id=f"apply_to_host_events", emoji="🎉")
     async def apply_to_event_host_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
