@@ -24,7 +24,7 @@ class Show(commands.Cog):
 
         self.client = client
 
-    _cnp = SlashCommandGroup(name="cnp", description="For copy and pasting stuff.", guild_ids=guild_ids)
+    _cnp = SlashCommandGroup("cnp", "For copy and pasting stuff.", guild_ids=guild_ids)
     
 
     @commands.Cog.listener()

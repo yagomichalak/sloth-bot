@@ -33,13 +33,11 @@ report_support_classes: List[commands.Cog] = [
     ApplicationsTable, Verify, OpenChannels
 ]
 
-
 class ReportSupport(*report_support_classes):
     """ A cog related to the system of reports and some other things. """
 
     def __init__(self, client) -> None:
 
-        # super(ReportSupport, self).__init__(client)
         self.client = client
         self.cosmos_role_id: int = int(os.getenv('COSMOS_ROLE_ID'))
         self.muffin_id: int = int(os.getenv('MUFFIN_ID'))
@@ -413,7 +411,6 @@ Please answer using one message only.."""
         else:
             self.cache[member.id] = 0
             return await member.send("**Thank you anyways!**")
-
 
     async def send_event_host_application(self, member):
         """ Sends a event host application form to the user.
