@@ -11,6 +11,7 @@ class ConfirmButton(discord.ui.View):
 		super().__init__(timeout=timeout)
 		self.member = member
 		self.value = None
+		self.interaction = None
 
 	# When the confirm button is pressed, set the inner value to `True` and
 	# stop the View from listening to more input.
@@ -18,12 +19,14 @@ class ConfirmButton(discord.ui.View):
 	@discord.ui.button(label='Confirm', style=discord.ButtonStyle.green)
 	async def confirm(self, button: discord.ui.Button, interaction: discord.Interaction):
 		self.value = True
+		self.interaction = interaction
 		self.stop()
 
 	# This one is similar to the confirmation button except sets the inner value to `False`
 	@discord.ui.button(label='Cancel', style=discord.ButtonStyle.grey)
 	async def cancel(self, button: discord.ui.Button, interaction: discord.Interaction):
 		self.value = False
+		self.interaction = interaction
 		self.stop()
 
 	async def interaction_check(self, interaction: discord.Interaction) -> bool:
