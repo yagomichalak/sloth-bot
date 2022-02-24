@@ -1,6 +1,8 @@
 import discord
 from discord.ui import InputText, Modal
 from discord.ext import commands
+from .prompt.menu import ConfirmButton
+import asyncio
 
 class ModeratorApplicationModal(Modal):
     def __init__(self, client: commands.Bot) -> None:
@@ -37,59 +39,52 @@ class ModeratorApplicationModal(Modal):
 
     async def callback(self, interaction: discord.Interaction):
 
-
-        user: discord.Member = interaction.user
-
-        def check_reaction(r, u):
-            return u.id == user.id and not r.message.guild and str(r.emoji) in ['✅', '❌']
+        await interaction.response.defer(ephemeral=True)
+        member: discord.Member = interaction.user
 
         embed = discord.Embed(
             title=f"__Moderator Application__",
-            color=user.color
+            color=member.color
         )
 
-        user_native_roles = [
-            role.name.title() for role in user.roles
+        member_native_roles = [
+            role.name.title() for role in member.roles
             if str(role.name).lower().startswith('native')
         ]
 
-        embed.set_thumbnail(url=user.display_avatar)
-        embed.add_field(name="Joined the server", value=user.joined_at.strftime("%a, %d %B %y, %I %M %p UTC"), inline=False)
-        embed.add_field(name="Native roles", value=', '.join(user_native_roles), inline=False)
+        embed.set_thumbnail(url=member.display_avatar)
+        embed.add_field(name="Joined the server", value=member.joined_at.strftime("%a, %d %B %y, %I %M %p UTC"), inline=False)
+        embed.add_field(name="Native roles", value=', '.join(member_native_roles), inline=False)
         embed.add_field(name="Age, gender, timezone", value=self.children[0].value, inline=False)
         embed.add_field(name="Discord Activity", value=self.children[1].value, inline=False)
         embed.add_field(name="English level", value=self.children[2].value, inline=False)
         embed.add_field(name="Approach to make Sloth a better community", value=self.children[3].value, inline=False)
         embed.add_field(name="Motivation for application", value=self.children[4].value, inline=False)
-        await interaction.response.send_message(embeds=[embed])
 
-        await user.send(embed=embed)
-        embed.description = """
-        Are you sure you want to apply this? :white_check_mark: to send and :x: to Cancel
-        """
-        app_conf = await user.send(embed=embed)
-        await app_conf.add_reaction('✅')
-        await app_conf.add_reaction('❌')
+        confirm_view = ConfirmButton(member, timeout=60)
 
-        # Waits for reaction confirmation
-        r = await self.get_reaction(user, check_reaction)
-        if r is None:
-            return
+        await interaction.followup.send(
+            content="Are you sure you want to apply this?",
+            embed=embed, view=confirm_view, ephemeral=True)
 
-        if r == '✅':
-            # ""
-            embed.description = """**Application successfully made, please, be patient now.**
-            
-            We will let you know when we need a new mod. We check apps when we need it!""" 
-            await user.send(embed=embed)
-            moderator_app_channel = await self.client.fetch_channel(self.moderator_app_channel_id)
-            cosmos_role = discord.utils.get(moderator_app_channel.guild.roles, id=self.cosmos_role_id)
-            app = await moderator_app_channel.send(content=f"{cosmos_role.mention}, {user.mention}\n{app}")
-            await app.add_reaction('✅')
-            await app.add_reaction('❌')
-            # Saves in the database
-            await self.cog.insert_application(app.id, user.id, 'moderator')
+        await confirm_view.wait()
+        if confirm_view.value is None:
+            return await confirm_view.interaction.followup.send(f"**{member.mention}, you took too long to answer...**", ephemeral=True)
 
-        else:
-            self.cache[user.id] = 0
-            return await user.send("**Thank you anyways!**")
+        if not confirm_view.value:
+            self.cog.cache[member.id] = 0
+            return await confirm_view.interaction.followup.send(f"**Not doing it then, {member.mention}!**", ephemeral=True)
+
+ 
+        await confirm_view.interaction.followup.send(content="""
+        **Application successfully made, please, be patient now.**
+    • We will let you know when we need a new mod. We check apps when we need it!""", ephemeral=True)
+
+
+        moderator_app_channel = await self.client.fetch_channel(self.cog.moderator_app_channel_id)
+        cosmos_role = discord.utils.get(moderator_app_channel.guild.roles, id=self.cog.cosmos_role_id)
+        app = await moderator_app_channel.send(content=f"{cosmos_role.mention}, {member.mention}", embed=embed)
+        await app.add_reaction('✅')
+        await app.add_reaction('❌')
+        # Saves in the database
+        await self.cog.insert_application(app.id, member.id, 'moderator')

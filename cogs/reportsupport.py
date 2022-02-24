@@ -913,7 +913,6 @@ Entry requirements:
         else:
             return str(reaction.emoji)
 
-
     @commands.command(aliases=['permit_case', 'allow_case', 'add_witness', 'witness', 'aw'])
     @commands.has_any_role(*allowed_roles)
     async def allow_witness(self, ctx):
