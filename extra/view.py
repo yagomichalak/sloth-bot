@@ -4,7 +4,7 @@ from discord.ext import commands
 from typing import List, Union, Optional, Dict, Any
 from .menu import ConfirmSkill
 from .select import ReportSupportSelect
-from .modals import ModeratorApplicationModal
+from .modals import ModeratorApplicationModal, TeacherApplicationModal
 import os
 from functools import partial
 import json
@@ -14,8 +14,11 @@ mod_role_id = int(os.getenv('MOD_ROLE_ID'))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID'))
 
 class ReportSupportView(discord.ui.View):
+    """ View for the ReportSupport menu. """
 
     def __init__(self, client: commands.Bot) -> None:
+        """ Class init method. """
+
         super().__init__(timeout=None)
         self.client = client
         self.cog = client.get_cog('ReportSupport')
@@ -27,7 +30,7 @@ class ReportSupportView(discord.ui.View):
     async def apply_to_teach_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
         """ Button for starting the Teacher application. """
 
-        await interaction.response.defer()
+        # await interaction.response.defer()
         member = interaction.user
 
         # Apply to be a Teacher
@@ -36,11 +39,12 @@ class ReportSupportView(discord.ui.View):
         if member_ts:
             sub = time_now - member_ts
             if sub <= 1800:
-                return await interaction.followup.send(
+                return await interaction.response.send_message(
                     f"**You are on cooldown to apply, try again in {(1800-sub)/60:.1f} minutes**", ephemeral=True)
 
         self.cog.cache[member.id] = time_now
-        await self.cog.send_teacher_application(member)
+        await interaction.response.send_modal(TeacherApplicationModal(self.client))
+        # await self.cog.send_teacher_application(member)
 
     @discord.ui.button(label="Apply for Moderator!", style=3, custom_id=f"apply_to_moderate", emoji="👮")
     async def apply_to_moderate_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
