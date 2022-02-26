@@ -32,7 +32,6 @@ class ConfirmButton(discord.ui.View):
 	async def interaction_check(self, interaction: discord.Interaction) -> bool:
 		return self.member.id == interaction.user.id
 
-
 # ===== Message-based =====
 
 async def get_role_response(client, ctx, msg: discord.Message, member: discord.Member, embed: discord.Embed, channel: discord.TextChannel) -> Union[discord.Role, None]:
