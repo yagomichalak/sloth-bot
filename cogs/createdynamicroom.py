@@ -619,7 +619,7 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
         if before.channel and before.channel.category:
             if before.channel.category.id == self.dr_cat_id:
                 # check_empty_dynamic_rooms task fix?
-                self.check_empty_dynamic_rooms()
+                await self.check_empty_dynamic_rooms()
 
                 user_voice_channel = discord.utils.get(
                     member.guild.channels, id=before.channel.id)
