@@ -35,20 +35,20 @@ guild_ids = [int(os.getenv('SERVER_ID'))]
 
 from typing import List, Optional, Union
 
+# Role IDs
 mod_role_id = int(os.getenv('MOD_ROLE_ID'))
 senior_mod_role_id: int = int(os.getenv('SENIOR_MOD_ROLE_ID'))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID'))
 owner_role_id = int(os.getenv('OWNER_ROLE_ID'))
 analyst_debugger_role_id: int = int(os.getenv('ANALYST_DEBUGGER_ROLE_ID'))
 in_a_vc_role_id: int = int(os.getenv('IN_A_VC_ROLE_ID'))
-
-
-allowed_roles = [owner_role_id, admin_role_id, mod_role_id, *patreon_roles.keys(), int(os.getenv('SLOTH_LOVERS_ROLE_ID'))]
 teacher_role_id = int(os.getenv('TEACHER_ROLE_ID'))
+allowed_roles = [owner_role_id, admin_role_id, mod_role_id, *patreon_roles.keys(), int(os.getenv('SLOTH_LOVERS_ROLE_ID'))]
+
+# Channel IDs
 patreon_channel_id = int(os.getenv('PATREONS_CHANNEL_ID'))
 popular_lang_cat_id = int(os.getenv('LANGUAGES_CHANNEL_ID'))
 more_popular_lang_cat_id = int(os.getenv('MORE_LANGUAGES_CHANNEL_ID'))
-
 dynamic_channels_cat_id = int(os.getenv('CREATE_DYNAMIC_ROOM_CAT_ID'))
 tool_cogs: List[commands.Cog] = [
 	StealthStatusTable
@@ -1297,6 +1297,53 @@ class Tools(*tool_cogs):
 			await ctx.respond(f"**For some reason I couldn't move you to there, {ctx.author.mention}!**")
 		else:
 			await ctx.respond(f"**You got moved to {channel.mention}!**")
+
+	@commands.command()
+	@utils.is_allowed([senior_mod_role_id, admin_role_id, owner_role_id], throw_exc=True)
+	async def surf(self, ctx, member: Optional[discord.Member] = None) -> None:
+		""" Makes a member surf in the empty Dynamic Rooms, to delete them.
+		:param member: The member who's gonna surf. [Optional][Default = You] """
+
+		author: discord.Member = ctx.author
+
+		if not member:
+			member = ctx.author
+
+		dynamic_channels: List[discord.TextChannel] = [
+			dynamic_vc for dynamic_vc in ctx.guild.voice_channels
+			if dynamic_vc.category and dynamic_vc.category.id == dynamic_channels_cat_id
+			and len(dynamic_vc.members) == 0
+		]
+
+		if not len(dynamic_channels):
+			return await ctx.send(f"**It seems like there are no VCs to surf on today, {author.mention}!**")
+
+		original_vc: discord.VoiceChannel
+
+		if not member.voice or not (original_vc := member.voice.channel):
+			if member.id == author.id:
+				return await ctx.send(f"**You are not in a VC, you cannot surf, {member.mention}!**")
+			else:
+				return await ctx.send(f"**{member.mention} is not in a VC, they cannot surf, {author.mention}!**")
+
+		await ctx.send(f"**{member.mention} is gonna surf on `{len(dynamic_channels)}` VCs!**")
+
+		# Moves the user to all of the channels
+		for dynamic_vc in dynamic_channels:
+			try: 
+				await member.move_to(dynamic_vc)
+			except:
+				pass
+			else:
+				await asyncio.sleep(1.5)
+		
+		# Moves the user back to the channel they were in before
+		try:  
+			await member.move_to(original_vc)
+		except: 
+			pass
+		else:
+			await ctx.send(f"**{member.mention}, is back home, after a long day of surfing,!**")
 
 def setup(client):
 	client.add_cog(Tools(client))
