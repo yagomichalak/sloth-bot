@@ -223,7 +223,7 @@ class Tools(*tool_cogs):
 				await member.add_roles(temp_role)
 
 			# delete disclaimer message
-			tmp_message.delete()
+			await tmp_message.delete()
 
 			# send ping
 			tmp_message = await ctx.send(f"{temp_role.mention}")
