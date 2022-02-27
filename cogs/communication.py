@@ -3,10 +3,11 @@ from discord.errors import NotFound
 from discord.ext import commands, tasks
 import os
 from extra import utils
-from mysqldb import the_database
-from typing import List, Union
+from typing import List
 import json
 from random import choice
+
+from extra.tool.scheduled_events import ScheduledEventsTable
 
 bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
 announcement_channel_id = int(os.getenv('ANNOUNCEMENT_CHANNEL_ID'))
@@ -17,7 +18,9 @@ general_channel_id = int(os.getenv('GENERAL_CHANNEL_ID'))
 lesson_manager_role_id = int(os.getenv('LESSON_MANAGEMENT_ROLE_ID'))
 real_event_manager_role_id = int(os.getenv('REAL_EVENT_MANAGER_ROLE_ID'))
 
-class Communication(commands.Cog):
+tool_cogs: List[commands.Cog] = [ScheduledEventsTable]
+
+class Communication(*tool_cogs):
     """ A cog related to communication commands. """
 
     def __init__(self, client):
@@ -118,7 +121,6 @@ class Communication(commands.Cog):
 
         except NotFound:
             return await ctx.send("**Message not found. Send the command in the same channel as the original message.**", delete_after=5)
-
 
     # Spies a channel
     @commands.command()
@@ -225,132 +227,6 @@ If you have any questions feel free to ask! And if you experience any type of pr
             dm_embed.set_author(name=member, icon_url=member.display_avatar)
             dm_embed.set_footer(text=f"Sent by: {author}", icon_url=author.display_avatar)
             await demote_log.send(embed=dm_embed)
-
-
-
-    # Database
-
-
-    @commands.command(hidden=True)
-    @commands.has_permissions(administrator=True)
-    async def create_table_scheduled_events(self, ctx: commands.Context) -> None:
-        """ Creates the ScheduledEvents table. """
-
-        member = ctx.author
-        await ctx.message.delete()
-
-        if await self.check_scheduled_events_exists():
-            return await ctx.send(f"**Table `ScheduledEvents` already exists, {member.mention}!**")
-        
-        mycursor, db = await the_database()
-        await mycursor.execute("""
-            CREATE TABLE ScheduledEvents (
-                event_label VARCHAR(100) NOT NULL,
-                event_ts BIGINT NOT NULL,
-                PRIMARY KEY (event_label)
-            )""")
-        await db.commit()
-        await mycursor.close()
-
-        await ctx.send(f"**Table `ScheduledEvents` created, {member.mention}!**")
-
-    @commands.command(hidden=True)
-    @commands.has_permissions(administrator=True)
-    async def drop_table_scheduled_events(self, ctx: commands.Context) -> None:
-        """ Creates the ScheduledEvents table. """
-
-        member = ctx.author
-        await ctx.message.delete()
-
-        if not await self.check_scheduled_events_exists():
-            return await ctx.send(f"**Table `ScheduledEvents` doesn't exist, {member.mention}!**")
-
-        mycursor, db = await the_database()
-        await mycursor.execute("DROP TABLE ScheduledEvents")
-        await db.commit()
-        await mycursor.close()
-
-        await ctx.send(f"**Table `ScheduledEvents` dropped, {member.mention}!**")
-
-
-    @commands.command(hidden=True)
-    @commands.has_permissions(administrator=True)
-    async def reset_table_scheduled_events(self, ctx: commands.Context) -> None:
-        """ Creates the ScheduledEvents table. """
-
-        member = ctx.author
-        await ctx.message.delete()
-
-        if not await self.check_scheduled_events_exists():
-            return await ctx.send(f"**Table `ScheduledEvents` doesn't exist yet, {member.mention}!**")
-
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM ScheduledEvents")
-        await db.commit()
-        await mycursor.close()
-
-        await ctx.send(f"**Table `ScheduledEvents` reset, {member.mention}!**")
-
-    async def check_scheduled_events_exists(self) -> bool:
-        """ Checks whether the ScheduledEvents table exists. """
-
-        mycursor, _ = await the_database()
-        await mycursor.execute("SHOW TABLE STATUS LIKE 'ScheduledEvents'")
-        exists = await mycursor.fetchone()
-        await mycursor.close()
-        if exists:
-            return True
-        else:
-            return False
-
-    async def check_advertising_time(self, current_ts: int, event_label: str, ad_time: int) -> bool:
-        """ Checks whether the advertising time is due.
-        :param current_ts: The current timestamp.
-        :param event_label: The label of the event
-        :param ad_time: Advertising time cooldown. """
-
-        mycursor, _ = await the_database()
-        await mycursor.execute("""
-            SELECT * from ScheduledEvents
-            WHERE event_label = %s AND %s - event_ts >= %s
-        """, (event_label, current_ts, ad_time))
-        
-        due_event = await mycursor.fetchone()
-        await mycursor.close()
-        if due_event:
-            return True
-        else:
-            return False
-
-    async def get_advertising_event(self, event_label: str) -> List[Union[str, int]]:
-        """ Gets an advertising event.
-        :param event_label: The label of the advertising event. """
-
-        mycursor, _ = await the_database()
-        await mycursor.execute("SELECT * FROM ScheduledEvents WHERE event_label = %s", (event_label,))
-        event = await mycursor.fetchone()
-        await mycursor.close()
-        return event
-
-    async def insert_advertising_event(self, event_label: str, current_ts: int) -> None:
-        """ Inserts an advertising event.
-        :param event_label: The label of the advertising event.
-        :param current_ts: The timestamp in which it was inserted. """
-
-        mycursor, db = await the_database()
-        await mycursor.execute("INSERT INTO ScheduledEvents (event_label, event_ts) VALUES (%s, %s)", (event_label, current_ts))
-        await db.commit()
-        await mycursor.close()
-
-    async def update_advertising_time(self, event_label: str, current_ts: int) -> None:
-        """ Updates the timestamp of the advertising event.
-        :param event_label: The label of the advertising event.
-        :param current_ts: The timestamp to update the event to. """
-
-        mycursor, db = await the_database()
-        await mycursor.execute("UPDATE ScheduledEvents SET event_ts = %s WHERE event_label = %s", (current_ts, event_label))
-        await db.commit()
-        await mycursor.close()
 
 def setup(client):
     """ Cog's setup function. """

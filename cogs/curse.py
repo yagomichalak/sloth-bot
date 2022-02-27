@@ -2,15 +2,13 @@ import discord
 from discord.ext import commands
 from mysqldb import *
 import os
-from typing import List, Union
+from extra.misc.curse import CurseTable
 
 server_id = int(os.getenv('SERVER_ID'))
 
 
-class CurseMember(commands.Cog):
-    '''
-    A cog related to the 'curse a member' feature.
-    '''
+class CurseMember(CurseTable):
+    """ A cog related to the 'curse a member' feature. """
 
     def __init__(self, client) -> None:
         """ Class initializing method. """
@@ -108,80 +106,6 @@ class CurseMember(commands.Cog):
         voice_client = discord.utils.get(ctx.bot.voice_clients, guild=ctx.guild)
         if voice_client and voice_client.is_connected():
             await voice_client.disconnect()
-
-    async def insert_cursed_member(self, user_id: int) -> None:
-        """ Insert the cursed member into the database.
-        :param user_id: The ID of the user that's being cursed. """
-
-        mycursor, db = await the_database()
-        await mycursor.execute("INSERT INTO CursedMember (user_id) VALUES (%s)", (user_id))
-        await db.commit()
-        await mycursor.close()
-
-    @commands.command(hidden=True)
-    @commands.has_permissions(administrator=True)
-    async def create_table_cursed_member(self, ctx) -> None:
-        """ (ADM) Creates the CursedMember table. """
-
-        await ctx.message.delete()
-        mycursor, db = await the_database()
-        await mycursor.execute("CREATE TABLE CursedMember (user_id bigint)")
-        await db.commit()
-        await mycursor.close()
-
-        return await ctx.send("**Table CursedMember was created!**", delete_after=3)
-
-    @commands.command(hidden=True)
-    @commands.has_permissions(administrator=True)
-    async def drop_table_cursed_member(self, ctx) -> None:
-        """ (ADM) Drops the CursedMember table. """
-
-        await ctx.message.delete()
-        mycursor, db = await the_database()
-        await mycursor.execute("DROP TABLE CursedMember")
-        await db.commit()
-        await mycursor.close()
-
-        return await ctx.send("**Table CursedMember was dropped!**", delete_after=3)
-
-    @commands.command(hidden=True)
-    @commands.has_permissions(administrator=True)
-    async def reset_table_cursed_member(self, ctx) -> None:
-        """ (ADM) Resets the CursedMember table. """
-
-        await ctx.message.delete()
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM CursedMember")
-        await db.commit()
-        await mycursor.close()
-
-        return await ctx.send("**Table CursedMember was reseted!**", delete_after=3)
-
-    async def get_cursed_member(self, user_id: int) -> List[List[int]]:
-        """ Gets the cursed member from the database. """
-
-        mycursor, db = await the_database()
-        await mycursor.execute("SELECT * FROM CursedMember WHERE user_id = %s", (user_id,))
-        cm = await mycursor.fetchall()
-        await mycursor.close()
-        return cm
-
-    async def delete_cursed_member(self) -> bool:
-        """ Deletes the cursed member from the database. """
-
-        mycursor, db = await the_database()
-        await mycursor.execute("SELECT * FROM CursedMember")
-        cm = await mycursor.fetchall()
-        if cm:
-            cm = cm[0]
-            await mycursor.execute("DELETE FROM CursedMember WHERE user_id = %s", (cm[0],))
-            await db.commit()
-            await mycursor.close()
-            return True
-        else:
-            await mycursor.close()
-            return False
-
 
 def setup(client):
     """ Cog's setup function. """
