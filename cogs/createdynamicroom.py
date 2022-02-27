@@ -595,6 +595,12 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
         """ Set's up dynamic room database entries from sql file """
 
         await ctx.message.delete()
+        await self.setup_dynamic_rooms_callback()
+        await ctx.send(f"**SQL file ran with no hitches 👌**")
+
+    async def setup_dynamic_rooms_callback(self) -> None:
+        """ Callback for the setup dynamic rooms commands. """
+
         mycursor, db = await the_database()
         sql_file = open("./sql/create_dynamic_room_setup.sql", encoding='utf-8')
         sql_as_string = sql_file.read()
@@ -602,8 +608,6 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
         await mycursor.execute(sql_as_string)
         await db.commit()
         await mycursor.close()
-
-        await ctx.send(f"**SQL file ran with no hitches 👌**")
 
     async def prefetch_language_room(self):
         """ Prefetches language rooms from database """

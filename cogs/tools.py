@@ -1326,6 +1326,9 @@ class Tools(*tool_cogs):
 			else:
 				return await ctx.send(f"**{member.mention} is not in a VC, they cannot surf, {author.mention}!**")
 
+		# Resets the Dynamic Rooms' states.
+		await self.client.get_cog('CreateDynamicRoom').setup_dynamic_rooms_callback()
+
 		await ctx.send(f"**{member.mention} is gonna surf on `{len(dynamic_channels)}` VCs!**")
 
 		# Moves the user to all of the channels
