@@ -337,7 +337,7 @@ async def help(ctx, *, cmd: str =  None) -> None:
         for cog in client.cogs:
             cog = client.get_cog(cog)
             cog_commands = [c for c in cog.__cog_commands__ if hasattr(c, 'parent') and c.parent is None]
-            commands = [f"{client.command_prefix}{c.name}" for c in cog_commands if not c.hidden]
+            commands = [f"{client.command_prefix}{c.name}" for c in cog_commands if hasattr(c, 'hidden') and not c.hidden]
             if commands:
                 embed.add_field(
                     name=f"__{cog.qualified_name}__",
@@ -367,7 +367,7 @@ async def help(ctx, *, cmd: str =  None) -> None:
             if str(cog).lower() == str(cmd).lower():
                 cog = client.get_cog(cog)
                 cog_embed = discord.Embed(title=f"__Cog:__ {cog.qualified_name}", description=f"__**Description:**__\n```{cog.description}```", color=ctx.author.color, timestamp=ctx.message.created_at)
-                cog_commands = [c for c in cog.__cog_commands__ if hasattr(c, 'parent') and c.parent is None]
+                cog_commands = [c for c in cog.__cog_commands__ if hasattr(c, 'hidden') and hasattr(c, 'parent') and c.parent is None]
                 for c in cog_commands:
                     if not c.hidden:
                         cog_embed.add_field(name=c.qualified_name, value=c.help, inline=False)
