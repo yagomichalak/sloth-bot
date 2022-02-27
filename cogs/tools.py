@@ -1298,5 +1298,55 @@ class Tools(*tool_cogs):
 		else:
 			await ctx.respond(f"**You got moved to {channel.mention}!**")
 
+	@commands.command()
+	@utils.is_allowed([senior_mod_role_id, admin_role_id, owner_role_id], throw_exc=True)
+	async def surf(self, ctx, member: Optional[discord.Member] = None) -> None:
+		""" Makes a member surf in the empty Dynamic Rooms, to delete them.
+		:param member: The member who's gonna surf. [Optional][Default = You] """
+
+		author: discord.Member = ctx.author
+
+		if not member:
+			member = ctx.author
+
+		dynamic_channels: List[discord.TextChannel] = [
+			dynamic_vc for dynamic_vc in ctx.guild.voice_channels
+			if dynamic_vc.category and dynamic_vc.category.id == dynamic_channels_cat_id
+			and len(dynamic_vc.members) == 0
+		]
+
+		if not len(dynamic_channels):
+			return await ctx.send(f"**It seems like there are no VCs to surf on today, {author.mention}!**")
+
+		original_vc: discord.VoiceChannel
+
+		if not member.voice or not (original_vc := member.voice.channel):
+			if member.id == author.id:
+				return await ctx.send(f"**You are not in a VC, you cannot surf, {member.mention}!**")
+			else:
+				return await ctx.send(f"**{member.mention} is not in a VC, they cannot surf, {author.mention}!**")
+
+		# Resets the Dynamic Rooms' states.
+		await self.client.get_cog('CreateDynamicRoom').setup_dynamic_rooms_callback()
+
+		await ctx.send(f"**{member.mention} is gonna surf on `{len(dynamic_channels)}` VCs!**")
+
+		# Moves the user to all of the channels
+		for dynamic_vc in dynamic_channels:
+			try: 
+				await member.move_to(dynamic_vc)
+			except:
+				pass
+			else:
+				await asyncio.sleep(1.5)
+		
+		# Moves the user back to the channel they were in before
+		try:  
+			await member.move_to(original_vc)
+		except: 
+			pass
+		else:
+			await ctx.send(f"**{member.mention}, is back home, after a long day of surfing,!**")
+
 def setup(client):
 	client.add_cog(Tools(client))
