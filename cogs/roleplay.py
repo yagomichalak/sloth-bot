@@ -34,8 +34,6 @@ class RolePlay(commands.Cog):
             return True
         
         return commands.check(real_check)
-            
-
 
     @commands.command()
     @Player.poisoned()

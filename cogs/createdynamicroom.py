@@ -1,18 +1,11 @@
 import discord
-from discord import channel
-from discord.ext.menus import Position
 from extra import utils
 from discord.ext import commands, tasks
-from datetime import datetime
 import asyncio
-from PIL import Image, ImageFont, ImageDraw
 import os
-from cogs.slothcurrency import SlothCurrency
 from mysqldb import *
-from typing import List, Union, Any, Optional, Dict
-from extra.menu import ConfirmSkill
+from typing import List, Union, Any, Dict
 from extra.select import LanguageRoomSelect
-import json
 
 analyst_debugger_role_id = int(os.getenv('ANALYST_DEBUGGER_ROLE_ID'))
 
@@ -626,7 +619,7 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
         if before.channel and before.channel.category:
             if before.channel.category.id == self.dr_cat_id:
                 # check_empty_dynamic_rooms task fix?
-                self.check_empty_dynamic_rooms()
+                await self.check_empty_dynamic_rooms()
 
                 user_voice_channel = discord.utils.get(
                     member.guild.channels, id=before.channel.id)

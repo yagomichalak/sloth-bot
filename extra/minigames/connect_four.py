@@ -1,6 +1,5 @@
 import asyncio
 import random
-from functools import partial
 from typing import Optional, Union, Tuple, List
 
 import discord
