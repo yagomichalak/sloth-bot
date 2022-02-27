@@ -49,6 +49,7 @@ patreon_channel_id = int(os.getenv('PATREONS_CHANNEL_ID'))
 popular_lang_cat_id = int(os.getenv('LANGUAGES_CHANNEL_ID'))
 more_popular_lang_cat_id = int(os.getenv('MORE_LANGUAGES_CHANNEL_ID'))
 
+dynamic_vc_id: int = int(os.getenv('CREATE_DYNAMIC_ROOM_VC_ID'))
 dynamic_channels_cat_id = int(os.getenv('CREATE_DYNAMIC_ROOM_CAT_ID'))
 tool_cogs: List[commands.Cog] = [
 	StealthStatusTable
@@ -1312,7 +1313,7 @@ class Tools(*tool_cogs):
 		dynamic_channels: List[discord.TextChannel] = [
 			dynamic_vc for dynamic_vc in ctx.guild.voice_channels
 			if dynamic_vc.category and dynamic_vc.category.id == dynamic_channels_cat_id
-			and len(dynamic_vc.members) == 0
+			and dynamic_vc.id != dynamic_vc_id and len(dynamic_vc.members) == 0
 		]
 
 		if not len(dynamic_channels):
