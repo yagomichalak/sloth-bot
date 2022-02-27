@@ -87,12 +87,9 @@ class AspirantsTable(commands.Cog):
 
         mycursor, _ = await the_database()
         await mycursor.execute('SELECT user_id FROM AspirantActivity')
-        users = await mycursor.fetchone()
+        users = await mycursor.fetchall()
         await mycursor.close()
-        members = []
-        for user in users:
-            members.append(user)
-        return members
+        return list(map(lambda user: user[0], users))
 
     async def get_aspirant_current_timestamp(self, user_id: int, old_ts: int) -> int:
         """ Gets a specific aspirant's timestamp.
