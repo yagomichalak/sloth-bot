@@ -15,11 +15,7 @@ import sys
 allowed_roles = [int(os.getenv('OWNER_ROLE_ID')), int(os.getenv('ADMIN_ROLE_ID')), int(os.getenv('MOD_ROLE_ID'))]
 guild_ids = [int(os.getenv('SERVER_ID'))]
 
-extra_cogs: List[commands.Cog] = [
-    DataBumpsTable
-]
-
-class Show(*extra_cogs):
+class Show(commands.Cog):
     """ Commands involving showing some information related to the server. """
 
     def __init__(self, client) -> None:
@@ -187,7 +183,7 @@ class Show(*extra_cogs):
 
         member = ctx.author
 
-        months = await self.get_month_statuses()
+        months = await DataBumpsTable.get_month_statuses()
 
         embed = discord.Embed(
             title="__Server's Monthly Statuses__",
