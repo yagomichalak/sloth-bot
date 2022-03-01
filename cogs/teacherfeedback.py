@@ -131,7 +131,6 @@ class TeacherFeedback(commands.Cog):
             if await self.db.get_student_by_vc_id(member.id, the_class[2]):
                 await self.db.update_student_messages(member.id, the_class[2])
 
-
     @commands.Cog.listener(name="on_voice_state_update")
     async def on_voice_state_update_private(self, member, before, after) -> None:
         """ For teachers to create private classes. """
