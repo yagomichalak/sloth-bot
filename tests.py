@@ -307,6 +307,9 @@ UPDATE TribeMember as OG
 
 
 
+
+
+
 def multiplication_table(number: int) -> None:
     # Initialize the starting point of the multiplication table
     multiplier = 1
@@ -327,3 +330,4 @@ def sum1(num):
     return soma
 
 print(sum1(25))
+
