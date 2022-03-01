@@ -1,10 +1,22 @@
+import os
+import sys
+
 import pytest
 from unittest.mock import Mock
-import os
-from typing import List, Dict, Union, Optional
-from tests.data import users
 
-from cogs.teacherfeedback import TeacherFeedback
+from typing import List, Dict, Union, Optional
+
+# Appends the path of folders 2 folders back, so you can import them
+sys.path.append(
+    os.path.join(
+        os.path.dirname(
+            os.path.realpath(__file__)
+        ), os.pardir, os.pardir
+    )
+)
+
+import cogs
+# from cogs.teacherfeedback import TeacherFeedback
 
 # SLC: Sloth Language Class
 
