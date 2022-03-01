@@ -1,1 +1,41 @@
-{"roles": ["474721016183259137", "471922090908581890", "490120999338246145", "574265899801116673", "476630931252314153", "475236110315028490", "562035467055529995", "651792674453585930", "884451814928429097", "878415631354044436", "507298235766013981", "876107010419073054"], "nick": null, "avatar": null, "premium_since": null, "joined_at": "2019-11-23T20:19:05.787000+00:00", "is_pending": false, "pending": false, "communication_disabled_until": null, "user": {"id": "647452832852869120", "username": "DNK", "avatar": "18e50d71c54f4dbe403d2d999fef2f01", "discriminator": "6725", "public_flags": 393344}, "mute": false, "deaf": false}
+[
+    {
+        "roles": [
+            "474721016183259137",
+            "471922090908581890",
+            "490120999338246145",
+            "574265899801116673",
+            "476630931252314153",
+            "475236110315028490",
+            "562035467055529995",
+            "651792674453585930",
+            "884451814928429097",
+            "878415631354044436",
+            "507298235766013981",
+            "876107010419073054"
+        ],
+        "nick": null,
+        "premium_since": null,
+        "joined_at": "2019-11-23T20:19:05.787000+00:00",
+        "is_pending": false,
+        "pending": false,
+        "communication_disabled_until": null,
+        "id": 647452832852869120,
+        "username": "DNK",
+        "discriminator": "6725",
+        "avatar": "18e50d71c54f4dbe403d2d999fef2f01",
+        "display_avatar": "https://cdn.discordapp.com/avatars/647452832852869120/18e50d71c54f4dbe403d2d999fef2f01.png?size=1024",
+        "public_flags": 393344,
+        "mute": false,
+        "deaf": false,
+        "guild": {
+            "categories": {
+                "562019326295670806": {
+                    "id": 562019326295670806,
+                    "name": "📚 Lessons",
+                    "nsfw": false
+                }
+            }
+        }
+    }
+]
