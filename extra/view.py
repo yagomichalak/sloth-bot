@@ -98,7 +98,6 @@ class ReportSupportView(discord.ui.View):
         self.cog.cache[member.id] = time_now
         await self.cog.send_debate_manager_application(member)
 
-
     @discord.ui.button(label="Get your own Custom Bot (not for free)", style=1, custom_id=f"get_custom_bot", emoji="🤖", disabled=True, row=2)
     async def bot_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
         """ Button for buying a custom bot. """
