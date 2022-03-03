@@ -1442,7 +1442,7 @@ class Moderation(*moderation_cogs):
 				await self.client.get_cog('ReportSupport').audio(member, 'troll_firewall_on')
 
 	@commands.command(aliases=['bfw', 'bypassfirewall', 'bypass_fire', 'bypassfire'])
-	@utils.is_allowed([senior_mod_role_id], throw_exc=True)
+	@utils.is_allowed([senior_mod_role_id, mod_role_id], throw_exc=True)
 	async def bypass_firewall(self, ctx, user: discord.User = None) -> None:
 		""" Makes a user able to bypass the Firewall.
 		:param user: The user to make able to do so. """
