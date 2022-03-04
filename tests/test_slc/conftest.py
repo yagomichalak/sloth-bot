@@ -19,16 +19,17 @@ from typing import (
     TypedDict,
 )
 
+import mysql.connector
 import pytest
 import dotenv
 from cached_method import cached_method
-from utils.utils import build_cursor_results_as_dict
+from ..utils.utils import build_cursor_results_as_dict
 
 dotenv.load_dotenv(override=True)  # type: ignore
 
 BASE_DIR = os.path.dirname(__file__)
 
-USERS_JSON_PATH = BASE_DIR + "/data/users.json"
+USERS_JSON_PATH = BASE_DIR + "/../data/users.json"
 
 _NULL = None
 _EMPTY_STRING: Literal[''] = ''
@@ -329,4 +330,15 @@ def get_users() -> Dict[str, Any]:
     with open(USERS_JSON_PATH, 'r', encoding="utf-8") as f:
         data = f.read()
 
-    return json.loads(data)        
+    return json.loads(data)
+
+
+def createConnection() -> List[Any]:
+    connection = mysql.connector.connect(
+        host=os.getenv("SLOTH_DB_HOST"),
+        user=os.getenv("SLOTH_DB_USER"),
+        passwd=os.getenv("SLOTH_DB_PASSWORD"),
+        database=os.getenv("SLOTH_DB_NAME"))
+    cursor = connection.cursor()
+    connection.autocommit = False
+    return cursor, connection
