@@ -324,13 +324,38 @@ class DatabaseDriver:
         return result.asdict()
 
 
+class DiscordMember(TypedDict):
+    id: int
+    name: str
+    nick: str
+    premium_since: str
+    joined_at: str
+    username: str
+    discriminator: str
+    display_avatar: str
+    avatar: str
+    public_flags: int
+    mute: str
+    deaf: str
+    roles: list
+    guild: dict
+
+
 def get_users() -> Dict[str, Any]:
     """ Returns a dictionary with all users. """
 
     with open(USERS_JSON_PATH, 'r', encoding="utf-8") as f:
-        data = f.read()
+        users = json.loads(f.read())
 
-    return json.loads(data)
+    parse = DiscordMember
+
+    try:
+        data = map(lambda i: parse(**i), users)
+        print(data)
+        return list(data)
+    except TypeError:
+        traceback.print_exc()
+        pytest.fail("data must be a list of DiscordMember")
 
 
 def createConnection() -> List[Any]:
