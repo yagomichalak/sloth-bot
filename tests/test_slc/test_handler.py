@@ -11,8 +11,12 @@ from .conftest import (
     Result,
     get_users,
     _INSERT,
-    createConnection
+    createConnection,
+    DiscordMember
 )
+from contextlib import suppress
+
+DNK_ID: int = 647452832852869120
 
 # SLC: Sloth Language Class
 # RUN: pytest --asyncio-mode=auto --capture=no
@@ -48,6 +52,18 @@ class TestSlothLanguageClass:
 
         self.users: List[Dict[str, Any]] = get_users()
 
+    def get_user(
+        self,
+        user_id: int,
+    ) -> Optional[DiscordMember]:
+        """ Gets a vendor for the product creation.
+        :param vendor: The vendor to get. """
+
+        with suppress(Exception):
+            return next(x
+                for x in self.users
+                if x["id"] == user_id)
+        return
 
     # @pytest.mark.skip(reason="Not implemented.")
     @pytest.mark.asyncio
@@ -56,7 +72,8 @@ class TestSlothLanguageClass:
 
 
         from cogs import teacherfeedback
-
+        print(self.get_user(user_id=DNK_ID))
+        # dnk = self.users
         # teacherfeedback.TeacherFeedback.create_class(member)
         
         #  = Mock()
