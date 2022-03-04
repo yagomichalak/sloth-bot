@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 import io
 import os
 import json
@@ -324,12 +325,15 @@ class DatabaseDriver:
         return result.asdict()
 
 
-class DiscordMember(TypedDict):
+@dataclass
+class DiscordMember:
     id: int
-    name: str
     nick: str
     premium_since: str
     joined_at: str
+    is_pending: bool
+    pending: bool
+    communication_disabled_until: str
     username: str
     discriminator: str
     display_avatar: str
@@ -351,7 +355,6 @@ def get_users() -> Dict[str, Any]:
 
     try:
         data = map(lambda i: parse(**i), users)
-        print(data)
         return list(data)
     except TypeError:
         traceback.print_exc()

@@ -62,7 +62,7 @@ class TestSlothLanguageClass:
         with suppress(Exception):
             return next(x
                 for x in self.users
-                if x["id"] == user_id)
+                if x.id == user_id)
         return
 
     # @pytest.mark.skip(reason="Not implemented.")
@@ -72,9 +72,10 @@ class TestSlothLanguageClass:
 
 
         from cogs import teacherfeedback
-        print(self.get_user(user_id=DNK_ID))
+        member: DiscordMember = self.get_user(user_id=DNK_ID)
         # dnk = self.users
-        # teacherfeedback.TeacherFeedback.create_class(member)
+        print(member.guild)
+        # await teacherfeedback.TeacherFeedback.create_class(member, member)
         
         #  = Mock()
 
