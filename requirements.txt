@@ -5,12 +5,13 @@ cached_method==0.1.0
 chatbot==1.5.2b0
 dacite==1.6.0
 flake8==4.0.1
+git+https://github.com/Pycord-Development/pycord@14607fe5a2c48c5ab2a89a0b2c54dc64df63be8a
+
 praw==7.3.0
 pytest==7.0.1
 pytest-asyncio==0.18.1
 pytz==2021.1
 gTTS==2.2.3
-git+https://github.com/Rapptz/discord-ext-menus
 googletrans==3.1.0a0
 mysqlclient==2.1.0
 mysql-connector-python==8.0.28
@@ -21,4 +22,3 @@ python-dotenv==0.15.0
 treelib==1.6.1
 emoji==1.4.1
 emojis==0.6.0
-git+https://github.com/Pycord-Development/pycord@14607fe5a2c48c5ab2a89a0b2c54dc64df63be8a
