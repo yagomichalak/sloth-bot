@@ -309,7 +309,7 @@ class TeacherFeedback(commands.Cog):
             return
 
         # Adds a new timestamp to the teacher
-        self.teacher_cache[member.id] = await TeacherFeedback.get_timestamp()
+        self.teacher_cache[member.id] = await utils.get_timestamp()
 
         # Checks whether the teacher has saved classes
         if saved_classes := await self.db.get_teacher_saved_classes(member.id):
@@ -370,7 +370,7 @@ class TeacherFeedback(commands.Cog):
         """ Starts a language class.
         :param class_info: The information about the class. """
 
-        current_ts = await TeacherFeedback.get_timestamp()
+        current_ts = await utils.get_timestamp()
         cc_channel = discord.utils.get(member.guild.channels, id=create_room_txt_id)
         txt, vc = await self.create_channels(member, cc_channel, class_info)
         await self.db.insert_active_teacher_class(
@@ -390,7 +390,7 @@ class TeacherFeedback(commands.Cog):
         if not (teacher_class := await self.db.get_active_teacher_class_by_vc_id(class_vc.id)):
             return
 
-        current_ts = await TeacherFeedback.get_timestamp()
+        current_ts = await utils.get_timestamp()
 
         # Checks whether it's a teacher
         if teacher_class[0] == member.id:
@@ -421,7 +421,7 @@ class TeacherFeedback(commands.Cog):
         :param member: The member who's leaving the class.
         :param class_vc: The class to leave. """
 
-        current_ts = await TeacherFeedback.get_timestamp()
+        current_ts = await utils.get_timestamp()
 
         # Checks whether member is teacher and has an existing class
         if teacher_class := await self.db.get_active_teacher_class_by_teacher_and_vc_id(member.id, class_vc.id):
@@ -952,7 +952,7 @@ class TeacherFeedback(commands.Cog):
         :param cooldown: The cooldown for the class creation. (Default = 60s) """
 
         member_ts = teacher_cache.get(teacher_id)
-        current_ts = await TeacherFeedback.get_timestamp()
+        current_ts = await utils.get_timestamp()
         if member_ts := teacher_cache.get(teacher_id):
             sub = current_ts - member_ts
             return sub <= cooldown
@@ -1169,7 +1169,7 @@ class TeacherFeedbackDatabaseInsert:
         :param the_time: The current timestamp.
         :param class_desc: The class description.
         :param taught_in: The language that the class is taught in. """
-
+        
         mycursor, db = await the_database()
         await mycursor.execute("""
             INSERT INTO ActiveClasses (teacher_id, txt_id, vc_id, language, class_type, vc_timestamp, class_desc, taught_in)
