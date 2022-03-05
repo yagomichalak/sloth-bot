@@ -362,10 +362,10 @@ def get_users() -> Dict[str, Any]:
 
 def createConnection() -> List[Any]:
     connection = mysql.connector.connect(
-        host=os.getenv("SLOTH_DB_HOST"),
-        user=os.getenv("SLOTH_DB_USER"),
-        passwd=os.getenv("SLOTH_DB_PASSWORD"),
-        database=os.getenv("SLOTH_DB_NAME"))
+        host=DB_HOST,
+        user=DB_USER,
+        passwd=DB_PASSWORD,
+        database=DB_NAME)
     cursor = connection.cursor()
     connection.autocommit = False
     return cursor, connection

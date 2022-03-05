@@ -1,5 +1,7 @@
 import os
 import sys
+from dotenv import load_dotenv
+load_dotenv()
 
 import pytest
 from unittest.mock import AsyncMock, MagicMock, Mock, PropertyMock, patch
