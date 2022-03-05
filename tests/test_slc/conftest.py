@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 import io
 import os
 import json
@@ -25,6 +24,11 @@ import pytest
 import dotenv
 from cached_method import cached_method
 from ..utils.utils import build_cursor_results_as_dict
+from dacite import from_dict
+
+from ..models.discord_models import (
+    DiscordMember
+)
 
 dotenv.load_dotenv(override=True)  # type: ignore
 
@@ -128,7 +132,7 @@ class Result:
         """ Returns a dictionary with the result of the cursor (`fetchone`). """
 
         result = build_cursor_results_as_dict(self.cursor)
-        return result[0]
+        return [] if not result else result[0]
 
     @cached_method
     def all_asdict(self) -> List[Dict[str, Any]]:
@@ -202,16 +206,14 @@ class DatabaseDriver:
 
         return self._query(
             _INSERT, table,
-            f"INSERT INTO {table} ({columns}) VALUES ({values}) RETURNING *;"
+            f"INSERT INTO {table} ({columns}) VALUES ({values});"
         )
 
     def _delete_query(
         self,
         table: str,
         conditions: Optional[str] = None,
-        # The type of `returning` is explicitly; it is not a union.
-        # It is Optional[Iterable[str]] because it can be empty.
-        returning: Optional[Union[str, Iterable[str]]] = None,
+        # It is Optional[Iterable[str]] because it can be empty.,
     ) -> Query:
         """ Creates a delete query. """
 
@@ -219,16 +221,6 @@ class DatabaseDriver:
 
         if conditions:
             query += f" WHERE {conditions}"
-
-        if returning:
-            if not isinstance(returning, str):
-                # Don't check if `returning` is an `Iterable`, because
-                # a `isintance(str, Iterable)` is always true.
-                returning = ", ".join(returning)
-
-            assert returning, "returning must not be empty"
-
-            query += f" RETURNING {returning}"
 
         query += ';'
 
@@ -287,7 +279,6 @@ class DatabaseDriver:
                 kind = query.split(' ', 1)[0]
 
         options: Dict[str, Any] = dict()
-
         self.cursor.execute(query)
 
         if commit and kind in (_INSERT, _DELETE, None):
@@ -321,29 +312,39 @@ class DatabaseDriver:
         id_ = self._parse(id_)
         query = self._select_query(table, None, f"{column} = {id_}")
         result = self.execute(query)
-
         return result.asdict()
 
+    async def get_active_teacher_class_by_teacher_id(self, *args):
+        print("yoo")
 
-@dataclass
-class DiscordMember:
-    id: int
-    nick: str
-    premium_since: str
-    joined_at: str
-    is_pending: bool
-    pending: bool
-    communication_disabled_until: str
-    username: str
-    discriminator: str
-    display_avatar: str
-    avatar: str
-    public_flags: int
-    mute: str
-    deaf: str
-    roles: list
-    guild: dict
 
+    def insert_active_teacher_class(self, **data: Any):
+        """ Inserts an active teacher class.
+        :param teacher_id: The teacher's ID.
+        :param txt_id: The text channel ID.
+        :param vc_id: The voice channel ID.
+        :param language: The language being taught in the class.
+        :param class_type: The class type (pronunciation, grammar, programming)
+        :param the_time: The current timestamp.
+        :param class_desc: The class description.
+        :param taught_in: The language that the class is taught in. """
+
+        self._required_keys((
+            "teacher_id",
+            "language",
+            "class_type",
+            "vc_timestamp",
+            "class_desc",
+        ), data, "ActiveClasses")
+
+        data.setdefault("txt_id", 123)
+        data.setdefault("vc_id", 456)
+        data.setdefault("taught_in", 'English')
+        
+        query = self._insert_query("ActiveClasses", data)
+        self.execute(query)
+        result = self.get('ActiveClasses', data.get("txt_id"), "txt_id")
+        return result
 
 def get_users() -> Dict[str, Any]:
     """ Returns a dictionary with all users. """
@@ -351,10 +352,8 @@ def get_users() -> Dict[str, Any]:
     with open(USERS_JSON_PATH, 'r', encoding="utf-8") as f:
         users = json.loads(f.read())
 
-    parse = DiscordMember
-
     try:
-        data = map(lambda i: parse(**i), users)
+        data = map(lambda user: from_dict(data_class=DiscordMember, data=user), users)
         return list(data)
     except TypeError:
         traceback.print_exc()
