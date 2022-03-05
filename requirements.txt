@@ -6,7 +6,6 @@ chatbot==1.5.2b0
 dacite==1.6.0
 flake8==4.0.1
 praw==7.3.0
-psycopg==2.9.3
 pytest==7.0.1
 pytest-asyncio==0.18.1
 pytz==2021.1
