@@ -7,7 +7,7 @@ client_secrets.json
 sloth_custom_images/
 texts/
 .vs/
-.vscode
+.vscode/
 sloth.sql
 tests.py
 
