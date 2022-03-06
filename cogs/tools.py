@@ -955,6 +955,11 @@ class Tools(*tool_cogs):
 		# await ctx.send(embed=embed)
 		await Tools.send_big_message('File Tree', ctx.channel, str(tree), discord.Color.green())
 
+	@commands.command(aliases=["eli", "elj", "elijaaah"])
+	async def elijah(self, ctx) -> None:
+		""" A command for telling something about Elijah. """
+
+		await ctx.send("**\"You have a really nice voice\"**")
 
 	@commands.command()
 	@utils.is_allowed([owner_role_id, admin_role_id, mod_role_id])
