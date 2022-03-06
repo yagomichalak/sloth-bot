@@ -9,20 +9,20 @@ from typing import List, Optional
 import os
 from extra import utils
 
-case_cat_id = int(os.getenv('CASE_CAT_ID'))
-reportsupport_channel_id = int(os.getenv('REPORT_CHANNEL_ID'))
-mod_log_id = int(os.getenv('MOD_LOG_CHANNEL_ID'))
-dnk_id = int(os.getenv('DNK_ID'))
-cent_id = int(os.getenv('CENT_ID'))
-moderator_role_id = int(os.getenv('MOD_ROLE_ID'))
-admin_role_id = int(os.getenv('ADMIN_ROLE_ID'))
-lesson_management_role_id = int(os.getenv('LESSON_MANAGEMENT_ROLE_ID'))
-server_id = int(os.getenv('SERVER_ID'))
+case_cat_id = int(os.getenv('CASE_CAT_ID', 123))
+reportsupport_channel_id = int(os.getenv('REPORT_CHANNEL_ID', 123))
+mod_log_id = int(os.getenv('MOD_LOG_CHANNEL_ID', 123))
+dnk_id = int(os.getenv('DNK_ID', 123))
+cent_id = int(os.getenv('CENT_ID', 123))
+moderator_role_id = int(os.getenv('MOD_ROLE_ID', 123))
+admin_role_id = int(os.getenv('ADMIN_ROLE_ID', 123))
+lesson_management_role_id = int(os.getenv('LESSON_MANAGEMENT_ROLE_ID', 123))
+server_id = int(os.getenv('SERVER_ID', 123))
 
-staff_vc_id = int(os.getenv('STAFF_VC_ID'))
+staff_vc_id = int(os.getenv('STAFF_VC_ID', 123))
 
 allowed_roles = [
-int(os.getenv('OWNER_ROLE_ID')), admin_role_id,
+int(os.getenv('OWNER_ROLE_ID', 123)), admin_role_id,
 moderator_role_id]
 
 from extra.reportsupport.applications import ApplicationsTable
@@ -42,8 +42,8 @@ class ReportSupport(*report_support_classes):
 
         # super(ReportSupport, self).__init__(client)
         self.client = client
-        self.cosmos_role_id: int = int(os.getenv('COSMOS_ROLE_ID'))
-        self.muffin_id: int = int(os.getenv('MUFFIN_ID'))
+        self.cosmos_role_id: int = int(os.getenv('COSMOS_ROLE_ID', 123))
+        self.muffin_id: int = int(os.getenv('MUFFIN_ID', 123))
         self.cache = {}
         self.report_cache = {}
         

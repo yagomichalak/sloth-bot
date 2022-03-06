@@ -12,8 +12,8 @@ import os
 import subprocess
 import sys
 
-allowed_roles = [int(os.getenv('OWNER_ROLE_ID')), int(os.getenv('ADMIN_ROLE_ID')), int(os.getenv('MOD_ROLE_ID'))]
-guild_ids = [int(os.getenv('SERVER_ID'))]
+allowed_roles = [int(os.getenv('OWNER_ROLE_ID', 123)), int(os.getenv('ADMIN_ROLE_ID', 123)), int(os.getenv('MOD_ROLE_ID', 123))]
+guild_ids = [int(os.getenv('SERVER_ID', 123))]
 
 class Show(commands.Cog):
     """ Commands involving showing some information related to the server. """

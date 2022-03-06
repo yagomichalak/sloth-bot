@@ -6,13 +6,13 @@ import os
 from typing import Dict, Any
 from extra.smartroom.event_rooms import EventRoomsTable
 
-mod_role_id = int(os.getenv('MOD_ROLE_ID'))
-senior_mod_role_id = int(os.getenv('SENIOR_MOD_ROLE_ID'))
-admin_role_id = int(os.getenv('ADMIN_ROLE_ID'))
-owner_role_id = int(os.getenv('OWNER_ROLE_ID'))
-event_manager_role_id = int(os.getenv('EVENT_MANAGER_ROLE_ID'))
-real_event_manager_role_id = int(os.getenv('REAL_EVENT_MANAGER_ROLE_ID'))
-preference_role_id = int(os.getenv('PREFERENCE_ROLE_ID'))
+mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
+senior_mod_role_id = int(os.getenv('SENIOR_MOD_ROLE_ID', 123))
+admin_role_id = int(os.getenv('ADMIN_ROLE_ID', 123))
+owner_role_id = int(os.getenv('OWNER_ROLE_ID', 123))
+event_manager_role_id = int(os.getenv('EVENT_MANAGER_ROLE_ID', 123))
+real_event_manager_role_id = int(os.getenv('REAL_EVENT_MANAGER_ROLE_ID', 123))
+preference_role_id = int(os.getenv('PREFERENCE_ROLE_ID', 123))
 
 
 class EventManagement(EventRoomsTable):
@@ -104,7 +104,7 @@ class EventManagement(EventRoomsTable):
         overwrites = await self.get_event_permissions(guild)
 
         cinema_club_role = discord.utils.get(
-            guild.roles, id=int(os.getenv('CINEMA_CLUB_ROLE_ID'))
+            guild.roles, id=int(os.getenv('CINEMA_CLUB_ROLE_ID', 123))
         )
         # Adds some perms to the Cinema Club role
         overwrites[cinema_club_role] = discord.PermissionOverwrite(
@@ -112,7 +112,7 @@ class EventManagement(EventRoomsTable):
             connect=True, speak=True, view_channel=True)
 
         events_category = discord.utils.get(
-            guild.categories, id=int(os.getenv('EVENTS_CAT_ID')))
+            guild.categories, id=int(os.getenv('EVENTS_CAT_ID', 123)))
 
         try:
             # Creating text channel
@@ -157,7 +157,7 @@ class EventManagement(EventRoomsTable):
         overwrites = await self.get_event_permissions(guild)
 
         karaoke_club_role = discord.utils.get(
-            guild.roles, id=int(os.getenv('KARAOKE_CLUB_ROLE_ID'))
+            guild.roles, id=int(os.getenv('KARAOKE_CLUB_ROLE_ID', 123))
         )
         # Adds some perms to the Karaoke Club role
         overwrites[karaoke_club_role] = discord.PermissionOverwrite(
@@ -165,7 +165,7 @@ class EventManagement(EventRoomsTable):
             connect=True, speak=True, view_channel=True)
 
         events_category = discord.utils.get(
-            guild.categories, id=int(os.getenv('EVENTS_CAT_ID')))
+            guild.categories, id=int(os.getenv('EVENTS_CAT_ID', 123)))
 
         try:
             # Creating text channel
@@ -210,7 +210,7 @@ class EventManagement(EventRoomsTable):
         overwrites = await self.get_event_permissions(guild)
 
         culture_club_role = discord.utils.get(
-            guild.roles, id=int(os.getenv('CULTURE_CLUB_ROLE_ID'))
+            guild.roles, id=int(os.getenv('CULTURE_CLUB_ROLE_ID', 123))
         )
         # Adds some perms to the Culture Club role
         overwrites[culture_club_role] = discord.PermissionOverwrite(
@@ -218,7 +218,7 @@ class EventManagement(EventRoomsTable):
             connect=True, speak=True, view_channel=True)
 
         events_category = discord.utils.get(
-            guild.categories, id=int(os.getenv('EVENTS_CAT_ID')))
+            guild.categories, id=int(os.getenv('EVENTS_CAT_ID', 123)))
 
         try:
             # Creating text channel
@@ -263,7 +263,7 @@ class EventManagement(EventRoomsTable):
         overwrites = await self.get_event_permissions(guild)
 
         art_club_role = discord.utils.get(
-            guild.roles, id=int(os.getenv('ART_CLUB_ROLE_ID'))
+            guild.roles, id=int(os.getenv('ART_CLUB_ROLE_ID', 123))
         )
         # Adds some perms to the Culture Club role
         overwrites[art_club_role] = discord.PermissionOverwrite(
@@ -271,7 +271,7 @@ class EventManagement(EventRoomsTable):
             connect=True, speak=True, view_channel=True)
 
         events_category = discord.utils.get(
-            guild.categories, id=int(os.getenv('EVENTS_CAT_ID')))
+            guild.categories, id=int(os.getenv('EVENTS_CAT_ID', 123)))
 
         try:
             # Creating text channel
@@ -316,7 +316,7 @@ class EventManagement(EventRoomsTable):
         overwrites = await self.get_event_permissions(guild)
 
         wellness_role = discord.utils.get(
-            guild.roles, id=int(os.getenv('WELLNESS_ROLE_ID'))
+            guild.roles, id=int(os.getenv('WELLNESS_ROLE_ID', 123))
         )
         # Adds some perms to the Culture Club role
         overwrites[wellness_role] = discord.PermissionOverwrite(
@@ -324,7 +324,7 @@ class EventManagement(EventRoomsTable):
             connect=True, speak=True, view_channel=True)
 
         events_category = discord.utils.get(
-            guild.categories, id=int(os.getenv('EVENTS_CAT_ID')))
+            guild.categories, id=int(os.getenv('EVENTS_CAT_ID', 123)))
 
         try:
             # Creating text channel
@@ -369,7 +369,7 @@ class EventManagement(EventRoomsTable):
         overwrites = await self.get_event_permissions(guild)
 
         science_club_role = discord.utils.get(
-            guild.roles, id=int(os.getenv('SCIENCE_CLUB_ROLE_ID'))
+            guild.roles, id=int(os.getenv('SCIENCE_CLUB_ROLE_ID', 123))
         )
         # Adds some perms to the Culture Club role
         overwrites[science_club_role] = discord.PermissionOverwrite(
@@ -377,7 +377,7 @@ class EventManagement(EventRoomsTable):
             connect=True, speak=True, view_channel=True)
 
         events_category = discord.utils.get(
-            guild.categories, id=int(os.getenv('EVENTS_CAT_ID')))
+            guild.categories, id=int(os.getenv('EVENTS_CAT_ID', 123)))
 
         try:
             # Creating text channel
@@ -423,7 +423,7 @@ class EventManagement(EventRoomsTable):
         overwrites = await self.get_event_permissions(guild)
 
         culture_club_role = discord.utils.get(
-            guild.roles, id=int(os.getenv('READING_CLUB_ROLE_ID'))
+            guild.roles, id=int(os.getenv('READING_CLUB_ROLE_ID', 123))
         )
         # Adds some perms to the Culture Club role
         overwrites[culture_club_role] = discord.PermissionOverwrite(
@@ -431,7 +431,7 @@ class EventManagement(EventRoomsTable):
             connect=True, speak=True, view_channel=True)
 
         events_category = discord.utils.get(
-            guild.categories, id=int(os.getenv('EVENTS_CAT_ID')))
+            guild.categories, id=int(os.getenv('EVENTS_CAT_ID', 123)))
 
         try:
             # Creating text channel
@@ -476,7 +476,7 @@ class EventManagement(EventRoomsTable):
         overwrites = await self.get_event_permissions(guild)
 
         gamer_role = discord.utils.get(
-            guild.roles, id=int(os.getenv('GAMER_ROLE_ID'))
+            guild.roles, id=int(os.getenv('GAMER_ROLE_ID', 123))
         )
         # Adds some perms to the Karaoke Club role
         overwrites[gamer_role] = discord.PermissionOverwrite(
@@ -484,7 +484,7 @@ class EventManagement(EventRoomsTable):
             connect=True, speak=True, view_channel=True)
 
         events_category = discord.utils.get(
-            guild.categories, id=int(os.getenv('EVENTS_CAT_ID')))
+            guild.categories, id=int(os.getenv('EVENTS_CAT_ID', 123)))
 
         try:
             # Creating text channel
@@ -529,7 +529,7 @@ class EventManagement(EventRoomsTable):
         overwrites = await self.get_event_permissions(guild)
 
         gamer_role = discord.utils.get(
-            guild.roles, id=int(os.getenv('SPORT_CLUB_ROLE_ID'))
+            guild.roles, id=int(os.getenv('SPORT_CLUB_ROLE_ID', 123))
         )
         # Adds some perms to the Karaoke Club role
         overwrites[gamer_role] = discord.PermissionOverwrite(
@@ -537,7 +537,7 @@ class EventManagement(EventRoomsTable):
             connect=True, speak=True, view_channel=True)
 
         events_category = discord.utils.get(
-            guild.categories, id=int(os.getenv('EVENTS_CAT_ID')))
+            guild.categories, id=int(os.getenv('EVENTS_CAT_ID', 123)))
 
         try:
             # Creating text channel
@@ -622,7 +622,7 @@ class EventManagement(EventRoomsTable):
         await ctx.send(embed=demote_embed)
 
         # Moderation log
-        if demote_log := discord.utils.get(ctx.guild.text_channels, id=int(os.getenv('PROMOTE_DEMOTE_LOG_ID'))):
+        if demote_log := discord.utils.get(ctx.guild.text_channels, id=int(os.getenv('PROMOTE_DEMOTE_LOG_ID', 123))):
             demote_embed.set_author(name=member, icon_url=member.display_avatar)
             demote_embed.set_footer(text=f"Demoted by {author}", icon_url=author.display_avatar)
             await demote_log.send(embed=demote_embed)

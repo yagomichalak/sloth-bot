@@ -12,7 +12,7 @@ from datetime import datetime
 import random
 from typing import List, Union
 
-bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
+bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID', 123))
 
 
 class Warrior(Player):
