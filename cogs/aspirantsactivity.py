@@ -8,9 +8,9 @@ from extra import utils
 from extra.moderation.aspirants import AspirantsTable
 from typing import List
 
-senior_mod_role_id: int = int(os.getenv('SENIOR_MOD_ROLE_ID'))
-mod_role_id = int(os.getenv('MOD_ROLE_ID'))
-guild_id = int(os.getenv('SERVER_ID'))
+senior_mod_role_id: int = int(os.getenv('SENIOR_MOD_ROLE_ID', 123))
+mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
+guild_id = int(os.getenv('SERVER_ID', 123))
 
 
 class AspirantActivity(AspirantsTable):

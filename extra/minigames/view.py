@@ -7,7 +7,7 @@ from random import randint
 from extra import utils
 import os
 
-server_id: int = int(os.getenv('SERVER_ID'))
+server_id: int = int(os.getenv('SERVER_ID', 123))
 
 class TicTacToeView(discord.ui.View):
     """ View for the TicTacToe minigame. """

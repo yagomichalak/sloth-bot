@@ -13,11 +13,11 @@ from extra.slothclasses.player import Player
 from extra.misc.reminder import MemberReminderTable
 
 allowed_roles = [
-    int(os.getenv('OWNER_ROLE_ID')), int(os.getenv('ADMIN_ROLE_ID')), int(os.getenv('MOD_ROLE_ID')), int(os.getenv('ASTROSLOTH_ROLE_ID')), 
-    int(os.getenv('SLOTH_EXPLORER_ROLE_ID')),int(os.getenv('SLOTH_NAPPER_ROLE_ID')), int(os.getenv('SLOTH_NATION_ROLE_ID')),
-    int(os.getenv('SLOTH_SUPPORTER_ROLE_ID')), int(os.getenv('SLOTH_LOVERS_ROLE_ID')),
+    int(os.getenv('OWNER_ROLE_ID', 123)), int(os.getenv('ADMIN_ROLE_ID', 123)), int(os.getenv('MOD_ROLE_ID', 123)), int(os.getenv('ASTROSLOTH_ROLE_ID', 123)), 
+    int(os.getenv('SLOTH_EXPLORER_ROLE_ID', 123)),int(os.getenv('SLOTH_NAPPER_ROLE_ID', 123)), int(os.getenv('SLOTH_NATION_ROLE_ID', 123)),
+    int(os.getenv('SLOTH_SUPPORTER_ROLE_ID', 123)), int(os.getenv('SLOTH_LOVERS_ROLE_ID', 123)),
     ]
-guild_ids = [int(os.getenv('SERVER_ID'))]
+guild_ids = [int(os.getenv('SERVER_ID', 123))]
 
 misc_cogs: List[commands.Cog] = [MemberReminderTable]
 
@@ -38,7 +38,7 @@ class Misc(*misc_cogs):
 
         current_ts = await utils.get_timestamp()
         reminders = await self.get_due_reminders(current_ts)
-        guild = self.client.get_guild(int(os.getenv('SERVER_ID')))
+        guild = self.client.get_guild(int(os.getenv('SERVER_ID', 123)))
         for reminder in reminders:
             member = discord.utils.get(guild.members, id=reminder[1])
             if member:

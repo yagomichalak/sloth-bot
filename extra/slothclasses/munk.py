@@ -13,8 +13,8 @@ from datetime import datetime
 from typing import List, Union, Dict, Any, Optional, Callable
 from random import choice
 
-bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
-approve_thumbnail_channel_id = int(os.getenv('APPROVE_THUMBNAIL_CHANNEL_ID'))
+bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID', 123))
+approve_thumbnail_channel_id = int(os.getenv('APPROVE_THUMBNAIL_CHANNEL_ID', 123))
 
 
 class Munk(Player):
@@ -645,7 +645,7 @@ class Munk(Player):
         """ Check on-going steals and their expiration time. """
 
         creations = await self.get_skill_actions_by_skill_type('tribe_creation')
-        guild = self.client.get_guild(int(os.getenv('SERVER_ID')))
+        guild = self.client.get_guild(int(os.getenv('SERVER_ID', 123)))
         for creation in creations:
             try:
                 # Removes skill action from the database

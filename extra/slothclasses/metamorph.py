@@ -8,7 +8,7 @@ import os
 from datetime import datetime
 from typing import List, Union, Tuple, Any, Optional
 
-bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
+bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID', 123))
 
 
 class Metamorph(Player):

@@ -5,7 +5,7 @@ from typing import List, Union
 from extra import utils
 import os
 
-afk_channel_id = int(os.getenv('AFK_CHANNEL_ID'))
+afk_channel_id = int(os.getenv('AFK_CHANNEL_ID', 123))
 
 class UserVoiceSystem(commands.Cog):
     """ Cog for the inner systems of UserVoice events. """

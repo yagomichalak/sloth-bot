@@ -9,8 +9,8 @@ from functools import partial
 import json
 
 
-mod_role_id = int(os.getenv('MOD_ROLE_ID'))
-admin_role_id = int(os.getenv('ADMIN_ROLE_ID'))
+mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
+admin_role_id = int(os.getenv('ADMIN_ROLE_ID', 123))
 
 class ReportSupportView(discord.ui.View):
 
@@ -116,7 +116,7 @@ class ReportSupportView(discord.ui.View):
 
         self.cog.cache[member.id] = time_now
         # Order a bot
-        dnk = self.client.get_user(int(os.getenv('DNK_ID')))
+        dnk = self.client.get_user(int(os.getenv('DNK_ID', 123)))
         embed = discord.Embed(title="New possible order!",
             description=f"{member.mention} ({member.id}) might be interested in buying something from you!",
             color=member.color)

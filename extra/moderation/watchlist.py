@@ -7,8 +7,8 @@ from extra import utils
 from extra.prompt.menu import Confirm
 from typing import List, Union
 
-allowed_roles = [int(os.getenv('OWNER_ROLE_ID')), int(os.getenv('ADMIN_ROLE_ID')), int(os.getenv('MOD_ROLE_ID'))]
-watchlist_channel_id: int = int(os.getenv('WATCHLIST_CHANNEL_ID'))
+allowed_roles = [int(os.getenv('OWNER_ROLE_ID', 123)), int(os.getenv('ADMIN_ROLE_ID', 123)), int(os.getenv('MOD_ROLE_ID', 123))]
+watchlist_channel_id: int = int(os.getenv('WATCHLIST_CHANNEL_ID', 123))
 
 
 class ModerationWatchlistTable(commands.Cog):
