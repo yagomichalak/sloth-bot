@@ -29,5 +29,12 @@ jobs:
         pip install -r dev-requirements.txt
         pip install -U git+https://github.com/Pycord-Development/pycord@14607fe5a2c48c5ab2a89a0b2c54dc64df63be8a
     - name: Test with pytest
+      working-directory: ./tests
+      env:
+        SLOTH_DB_HOST: ${{ secrets.SLOTH_DB_HOST }}
+        SLOTH_DB_USER: ${{ secrets.SLOTH_DB_USER }}
+        SLOTH_DB_PASSWORD: ${{ secrets.SLOTH_DB_PASSWORD }}
+        SLOTH_DB_NAME: ${{ secrets.SLOTH_DB_NAME }}
+        TEACHER_ROLE_ID: ${{ secrets.TEACHER_ROLE_ID }}
       run: |
         pytest
