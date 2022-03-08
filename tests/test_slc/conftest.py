@@ -318,7 +318,7 @@ class DatabaseDriver:
         print("yoo")
 
 
-    def insert_active_teacher_class(self, **data: Any):
+    def insert_active_teacher_class(self, **data: Any) -> Dict[str, Union[str, int]]:
         """ Inserts an active teacher class.
         :param teacher_id: The teacher's ID.
         :param txt_id: The text channel ID.
@@ -344,6 +344,22 @@ class DatabaseDriver:
         query = self._insert_query("ActiveClasses", data)
         self.execute(query)
         result = self.get('ActiveClasses', data.get("txt_id"), "txt_id")
+        return result
+
+    def delete_active_teacher_class(self, **data: Any) -> Dict[str, Union[str, int]]:
+        """ Deletes an active teacher class.
+        :param teacher_id: The teacher's ID.
+        :param vc_id: The voice channel ID. """
+
+        self._required_keys((
+            "teacher_id",
+            "vc_id",
+        ), data, "ActiveClasses")
+
+        query = self._delete_query("ActiveClasses",
+            f"teacher_id = {data['teacher_id']} AND vc_id = {data['vc_id']}")
+        self.execute(query)
+        result = self.get('ActiveClasses', data["vc_id"], "vc_id")
         return result
 
 def get_users() -> Dict[str, Any]:
