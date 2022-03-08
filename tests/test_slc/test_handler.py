@@ -120,10 +120,11 @@ class TestSlothLanguageClass:
         # Mocks Channel creation
         await teacherfb.create_class(teacherfb, member)
         # Deletes Active Class from the database
-        await teacherfbdb.delete_active_teacher_class_by_teacher_and_vc_id(
-            object,
-            teacher_id=member.id, vc_id=result["vc_id"],
+
+        inserted_class = self.driver.delete_active_teacher_class(
+            vc_id=result["vc_id"], teacher_id=result["teacher_id"]
         )
+        assert not inserted_class, "Class not deleted"
 
     # @pytest.mark.skip(reason="Not implemented.")
     @pytest.mark.asyncio
