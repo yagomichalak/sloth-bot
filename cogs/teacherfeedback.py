@@ -460,7 +460,6 @@ class TeacherFeedback(commands.Cog):
         # Gets all students and deletes the class from the system
         users_feedback = await self.db.get_all_students(member.id)
         await self.db.delete_active_teacher_class_by_teacher_and_vc_id(member.id, teacher_class[2])
-
         await self.db.delete_active_students(member.id)
 
         # teacher, txt_id, vc_id, language, class_type, vc_timestamp, vc_time, members, class_desc)
@@ -632,7 +631,7 @@ class TeacherFeedback(commands.Cog):
                     await self.client.loop.create_task(self.ask_for_user_feedback(
                         teacher, language, class_type, member, teacher_feedback_thread))
                 except Exception as e:
-                    print('e', e)
+                    print(e)
                     pass
 
             rewarded_members_text = ', '.join(rewarded_members_text) if rewarded_members_text else "No one got rewarded!"
@@ -643,7 +642,7 @@ class TeacherFeedback(commands.Cog):
                     await SlothCurrency.update_user_money(teacher.id, 100)
                     await SlothCurrency.update_user_hosted(teacher.id)
                 except Exception as e:
-                    print('e', e)
+                    print(e)
                     pass
 
             commands_channel = discord.utils.get(teacher.guild.channels, id=bot_commands_channel_id)

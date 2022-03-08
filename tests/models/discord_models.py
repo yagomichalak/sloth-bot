@@ -41,3 +41,9 @@ class DiscordCategory:
 @dataclass
 class DiscordChannel:
     id: int
+
+    async def send(self, *args, **kwargs):
+        pass
+
+    async def delete(self, *args, **kwargs):
+        pass
