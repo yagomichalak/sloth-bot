@@ -50,13 +50,16 @@
         "id": 647452832852869120,
         "username": "DNK",
         "discriminator": "6725",
-        "avatar": "18e50d71c54f4dbe403d2d999fef2f01",
+        "avatar": {
+            "url": "https://cdn.discordapp.com/avatars/647452832852869120/18e50d71c54f4dbe403d2d999fef2f01.png?size=1024"
+        },
         "display_avatar": "https://cdn.discordapp.com/avatars/647452832852869120/18e50d71c54f4dbe403d2d999fef2f01.png?size=1024",
         "public_flags": 393344,
         "mute": false,
         "deaf": false,
         "guild": {
             "id": 777886754761605140,
+            "name": "Test Server",
             "categories": [
                 {
                     "id": 562019326295670806,
@@ -107,8 +110,19 @@
             ],
             "channels": [
                 {
-                    "id": 123
+                    "id": 777886760994471986
                 }
+            ],
+            "threads": [
+                {
+                    "id": 950938171791773696
+                }
+            ],
+            "icon": {
+                "url": "https://google.com"
+            },
+            "members": [
+
             ]
         }
     }

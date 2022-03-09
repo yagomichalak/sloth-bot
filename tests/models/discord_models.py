@@ -19,19 +19,25 @@ class DiscordMember:
     username: str
     discriminator: str
     display_avatar: str
-    avatar: str
+    avatar: DiscordIcon
     public_flags: int
     mute: bool
     deaf: bool
     roles: List[DiscordRole]
     guild: DiscordGuild
 
+    def mention(self) -> None: ...
+
 @dataclass
 class DiscordGuild:
     id: int
+    name: str
     roles: List[DiscordRole] 
     categories: List[DiscordCategory]
     channels: List[DiscordChannel]
+    threads: List[DiscordChannel]
+    icon: DiscordIcon
+    members: List[DiscordMember]
 
 @dataclass
 class DiscordCategory:
@@ -42,8 +48,14 @@ class DiscordCategory:
 class DiscordChannel:
     id: int
 
-    async def send(self, *args, **kwargs):
-        pass
+    async def send(self, *args, **kwargs) -> None: ...
 
-    async def delete(self, *args, **kwargs):
-        pass
+    async def delete(self, *args, **kwargs) -> None: ...
+
+@dataclass
+class DiscordIcon:
+    url: str
+
+@dataclass
+class DiscordMessage:
+    id: 678

@@ -36,5 +36,7 @@ jobs:
         SLOTH_DB_PASSWORD: ${{ secrets.SLOTH_DB_PASSWORD }}
         SLOTH_DB_NAME: ${{ secrets.SLOTH_DB_NAME }}
         TEACHER_ROLE_ID: ${{ secrets.TEACHER_ROLE_ID }}
+        BOTS_AND_COMMANDS_CHANNEL_ID: ${{ secrets.BOTS_AND_COMMANDS_CHANNEL_ID }}
+        TEACHER_FEEDBACK_THREAD_ID: ${{ secrets.TEACHER_FEEDBACK_THREAD_ID }}
       run: |
         pytest
