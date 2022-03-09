@@ -120,7 +120,8 @@ class BlackJackGame(*moderation_cogs):
         embed.add_field(name='**You**', value=self.player_info(), inline=True)
         embed.add_field(name='**Dealer**', value=self.dealer_info(), inline=True)
         embed.set_author(name=self.player, icon_url=self.player.display_avatar)
-        embed.set_footer(text='Game mode: Blackjack')
+        embed.set_footer(text=f'Blackjack: {self.current_money}łł')
+    
         return embed
 
     # Return a string with player's cards and total of points
@@ -168,7 +169,6 @@ class BlackJackGame(*moderation_cogs):
                 self.change_a_value_dealer()
 
         if self.dealer_total > 21 or self.dealer_total < self.player_total:
-            print('sadsa', self.current_money)
             self.win_event()
         elif self.dealer_total > self.player_total:
             self.lose_event()
