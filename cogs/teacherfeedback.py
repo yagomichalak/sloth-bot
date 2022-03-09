@@ -1207,6 +1207,8 @@ class TeacherFeedbackDatabaseInsert:
         """ Saves a user to be rewarded later on.
         :param user: The user to be saved. """
 
+        print("Here: ", (user[4], user[1], user[6], user[5], user[0]))
+
         mycursor, db = await the_database()
         await mycursor.execute("""
             INSERT INTO RewardAcceptedStudents (teacher_id, student_id, language, class_type, msg_id)

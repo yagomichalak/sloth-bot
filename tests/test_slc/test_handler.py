@@ -1,3 +1,4 @@
+from datetime import datetime
 import os
 import sys
 from dotenv import load_dotenv
@@ -8,7 +9,7 @@ from unittest.mock import AsyncMock, MagicMock, Mock, PropertyMock, patch
 from typing import List, Dict, Union, Optional, Any
 from cogs.teacherfeedback import TeacherFeedback
 
-from tests.models.discord_models import DiscordChannel
+from tests.models.discord_models import DiscordMember, DiscordChannel, DiscordMessage
 from extra.utils import get_timestamp
 from pprint import pprint
 
@@ -18,8 +19,7 @@ from .conftest import (
     Result,
     get_users,
     _INSERT,
-    createConnection,
-    DiscordMember
+    createConnection
 )
 from contextlib import suppress
 import asyncio
@@ -59,6 +59,26 @@ class TestSlothLanguageClass:
         self.driver = DatabaseDriver(cursor, connection)
 
         self.users: List[Dict[str, Any]] = get_users()
+        self.setup_models()
+
+    def setup_models(self) -> None:
+
+        
+        # Gets basic required data
+        current_ts = int(datetime.now().timestamp())
+        # Setup user
+        self.member: DiscordMember = self.get_user(user_id=DNK_ID)
+        # Setup channels
+        self.txt, self.vc = DiscordChannel(123), DiscordChannel(456)
+        self.msg = DiscordMessage(678)
+
+        # Setup class info
+        self.class_info: Dict[str, str] = {
+            "teacher_id": self.member.id, "txt_id": self.txt.id, "vc_id": self.vc.id,
+            'language': 'Test Class', 'class_type': 'Test',
+            'class_desc': "This is a test class.", "vc_timestamp": current_ts,
+            'taught_in': 'English'
+        }
 
     def teardown(self) -> None:
         """ Closes the database connection after tests. """
@@ -77,8 +97,8 @@ class TestSlothLanguageClass:
                 if x.id == user_id)
         return
 
+    @pytest.mark.skip(reason="Not implemented.")
     @pytest.mark.asyncio
-    # @pytest.mark.skip(reason="Not implemented.")
     async def test_start_classroom(self) -> None:
         """ Tests the creation of a classroom. """
 
@@ -126,35 +146,32 @@ class TestSlothLanguageClass:
         )
         assert not inserted_class, "Class not deleted"
 
-    # @pytest.mark.skip(reason="Not implemented.")
+    @pytest.mark.skip(reason="Not implemented.")
     @pytest.mark.asyncio
     async def test_end_classroom(self) -> None:
+        """ Tests the deletion of a classroom. """
 
         # Imports the teacherfeedback's cog
         from cogs import teacherfeedback
 
-        # Gets basic required data
-        current_ts = int(await get_timestamp())
-        member: DiscordMember = self.get_user(user_id=DNK_ID)
+        class_info = self.class_info
 
-        txt, vc = DiscordChannel(123), DiscordChannel(456)
+        member, txt_id, vc_id = (
+            self.member,
+            class_info["txt_id"],
+            class_info["vc_id"]
+        )
 
         # Mocks DB connector
-        teacherfbdb = teacherfeedback.TeacherFeedbackDatabase
         teacherfb = teacherfeedback.TeacherFeedback
 
         teacherfb.db = AsyncMock(return_value=self.driver)
         teacherfb.db.get_active_teacher_class_by_teacher_id = AsyncMock(return_value=[])
         teacherfb.db.get_teacher_saved_classes = AsyncMock(return_value=[])
-        all_students = [[member.id, 0, vc.id]]
+        all_students = [[class_info["teacher_id"], 0, vc_id]]
         teacherfb.db.get_all_students = AsyncMock(return_value=all_students)
 
-        class_info: Dict[str, str] = {
-            "teacher_id": member.id, "txt_id": txt.id, "vc_id": vc.id,
-            'language': 'Portuguese', 'class_type': 'Pronunciation',
-            'class_desc': "Beginner's class", "vc_timestamp": current_ts,
-            'taught_in': 'English'
-        }
+
         inserted_class = self.driver.insert_active_teacher_class(
             teacher_id=class_info['teacher_id'], language=class_info['language'],
             class_type=class_info['class_type'], vc_timestamp=class_info['vc_timestamp'],
@@ -166,7 +183,7 @@ class TestSlothLanguageClass:
         teacherfb.show_class_history = AsyncMock()
         teacherfb.ask_class_reward = AsyncMock()
 
-        await teacherfb.end_class(teacherfb, member, txt, vc, list(class_info.values()))
+        await teacherfb.end_class(teacherfb, member, txt_id, vc_id, list(class_info.values()))
 
         inserted_class = self.driver.delete_active_teacher_class(
             vc_id=class_info["vc_id"], teacher_id=class_info["teacher_id"]
@@ -174,6 +191,60 @@ class TestSlothLanguageClass:
         assert not inserted_class, "Class not deleted"
 
 
-    @pytest.mark.skip(reason="Not implemented.")
-    def test_reward_people(self) -> None: pass
+    # @pytest.mark.skip(reason="Not implemented.")
+    @pytest.mark.asyncio
+    async def test_reward_people(self) -> None:
+        """ Tests the rewarding students feature. """
 
+        # Imports the teacherfeedback's cog
+        from cogs import teacherfeedback, slothcurrency
+
+        self.member.guild.members.append(self.member)
+
+        # Class info
+        class_info = self.class_info
+
+        teacherfbdb = teacherfeedback.TeacherFeedbackDatabase()
+
+        # Mocks methods
+
+        # Teacher Feedback
+        client = teacherfeedback.TeacherFeedback
+        teacherfb = teacherfeedback.TeacherFeedback
+        teacherfb.db = teacherfbdb
+        teacherfb.client = client
+        teacherfb.client.loop = AsyncMock()
+        teacherfb.ask_for_user_feedback = Mock()
+        
+        # Sloth Currency
+        client = slothcurrency.SlothCurrency
+        slothcrr = slothcurrency.SlothCurrency
+        slothcrr.client = client
+
+        slothcrr.client.get_user_currency = AsyncMock()
+        slothcrr.client.update_user_money = AsyncMock()
+        slothcrr.client.update_user_class_reward = AsyncMock()
+        slothcrr.client.update_user_hosted = AsyncMock()
+
+        teacherfb.client.get_cog = Mock(return_value=slothcrr)
+
+        users_to_reward = [
+            [self.member.id, class_info["language"], class_info["class_type"], self.msg.id]
+        ]
+
+        # RewardAcceptedStudents
+        rw_accepted_student = [
+            self.msg.id, self.member.id, None, None, self.member.id,
+            class_info["class_type"], class_info["language"], 
+        ]
+        pprint(rw_accepted_student)
+
+        await teacherfb.db.insert_student_rewarded(rw_accepted_student)
+        inserted_rw_accepted_student = await teacherfb.db.get_reward_accepted_students(self.msg.id)
+        print(inserted_rw_accepted_student)
+        assert inserted_rw_accepted_student, "Reward Accepted Student was not inserted!"
+
+        await teacherfb.client.reward_accepted_students(teacherfb, self.member, users_to_reward)
+        inserted_rw_accepted_student = await teacherfb.db.get_reward_accepted_students(self.msg.id)
+        print(inserted_rw_accepted_student)
+        assert not inserted_rw_accepted_student, "Reward Accepted Student was not deleted!"
