@@ -97,7 +97,7 @@ class TestSlothLanguageClass:
                 if x.id == user_id)
         return
 
-    @pytest.mark.skip(reason="Not implemented.")
+    # @pytest.mark.skip(reason="Not implemented.")
     @pytest.mark.asyncio
     async def test_start_classroom(self) -> None:
         """ Tests the creation of a classroom. """
@@ -121,16 +121,15 @@ class TestSlothLanguageClass:
         teacherfb.db.get_teacher_saved_classes = AsyncMock(return_value=[])
 
         # Mocks class creation questions
-        class_info: Dict[str, str] = {
-            'language': 'Portuguese', 'type': 'Pronunciation', 'desc': "Beginner's class", 'taught_in': 'English'}
+        class_info = self.class_info
         teacherfb.ask_class_creation_questions = AsyncMock(return_value=class_info)
 
         # Inserts Active Class
         inserted_class = teacherfb.start_class = AsyncMock(
             return_value=self.driver.insert_active_teacher_class(
                 teacher_id=member.id, language=class_info['language'],
-                class_type=class_info['type'], vc_timestamp=current_time,
-                class_desc=class_info['desc'], taught_in=class_info['taught_in']
+                class_type=class_info['class_type'], vc_timestamp=current_time,
+                class_desc=class_info['class_desc'], taught_in=class_info['taught_in']
             )
         )
         result = await inserted_class()
@@ -146,7 +145,7 @@ class TestSlothLanguageClass:
         )
         assert not inserted_class, "Class not deleted"
 
-    @pytest.mark.skip(reason="Not implemented.")
+    # @pytest.mark.skip(reason="Not implemented.")
     @pytest.mark.asyncio
     async def test_end_classroom(self) -> None:
         """ Tests the deletion of a classroom. """
@@ -183,7 +182,7 @@ class TestSlothLanguageClass:
         teacherfb.show_class_history = AsyncMock()
         teacherfb.ask_class_reward = AsyncMock()
 
-        await teacherfb.end_class(teacherfb, member, txt_id, vc_id, list(class_info.values()))
+        await teacherfb.end_class(teacherfb, member, self.txt, self.vc, list(class_info.values()))
 
         inserted_class = self.driver.delete_active_teacher_class(
             vc_id=class_info["vc_id"], teacher_id=class_info["teacher_id"]
