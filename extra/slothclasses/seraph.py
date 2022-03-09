@@ -12,7 +12,7 @@ from PIL import Image, ImageDraw, ImageFont, ImageOps
 
 from extra.view import UserBabyView
 
-bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
+bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID', 123))
 
 
 class Seraph(Player):

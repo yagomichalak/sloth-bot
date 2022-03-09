@@ -10,7 +10,7 @@ from typing import Union, Any
 import os
 from datetime import datetime
 
-bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
+bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID', 123))
 
 
 class Agares(Player):
@@ -21,15 +21,15 @@ class Agares(Player):
         self.client = client
 
         self.safe_categories = [
-            int(os.getenv('LESSON_CAT_ID')),
-            int(os.getenv('CASE_CAT_ID')),
-            int(os.getenv('EVENTS_CAT_ID')),
-            int(os.getenv('DEBATE_CAT_ID')),
-            int(os.getenv('CULTURE_CAT_ID')),
-            int(os.getenv('TEACHER_APPLICATION_CAT_ID')),
-            int(os.getenv('MODERATOR_APPLICATION_CAT_ID')),
-            int(os.getenv('EVENT_MANAGER_APPLICATION_CAT_ID')),
-            int(os.getenv('POMODORO_CAT_ID'))
+            int(os.getenv('LESSON_CAT_ID', 123)),
+            int(os.getenv('CASE_CAT_ID', 123)),
+            int(os.getenv('EVENTS_CAT_ID', 123)),
+            int(os.getenv('DEBATE_CAT_ID', 123)),
+            int(os.getenv('CULTURE_CAT_ID', 123)),
+            int(os.getenv('TEACHER_APPLICATION_CAT_ID', 123)),
+            int(os.getenv('MODERATOR_APPLICATION_CAT_ID', 123)),
+            int(os.getenv('EVENT_MANAGER_APPLICATION_CAT_ID', 123)),
+            int(os.getenv('POMODORO_CAT_ID', 123))
         ]
 
     @commands.command(aliases=['mp'])

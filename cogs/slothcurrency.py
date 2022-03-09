@@ -26,8 +26,8 @@ from extra.currency.userserveractivity import UserServerActivityTable, UserVoice
 from extra.currency.usercurrency import UserCurrencyTable
 
 
-booster_role_id = int(os.getenv('BOOSTER_ROLE_ID'))
-guild_ids = [int(os.getenv('SERVER_ID'))]
+booster_role_id = int(os.getenv('BOOSTER_ROLE_ID', 123))
+guild_ids = [int(os.getenv('SERVER_ID', 123))]
 
 currency_cogs: List[commands.Cog] = [
     UserItemsTable, UserServerActivityTable, UserCurrencyTable,

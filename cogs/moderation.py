@@ -23,19 +23,19 @@ from extra.moderation.fakeaccounts import ModerationFakeAccountsTable
 from extra.moderation.moderatednicknames import ModeratedNicknamesTable
 
 # IDs
-mod_log_id = int(os.getenv('MOD_LOG_CHANNEL_ID'))
-welcome_channel_id = int(os.getenv('WELCOME_CHANNEL_ID'))
-suspect_channel_id = int(os.getenv('SUSPECT_CHANNEL_ID'))
+mod_log_id = int(os.getenv('MOD_LOG_CHANNEL_ID', 123))
+welcome_channel_id = int(os.getenv('WELCOME_CHANNEL_ID', 123))
+suspect_channel_id = int(os.getenv('SUSPECT_CHANNEL_ID', 123))
 
 last_deleted_message = []
 
-mod_role_id = int(os.getenv('MOD_ROLE_ID'))
-muted_role_id = int(os.getenv('MUTED_ROLE_ID'))
-preference_role_id = int(os.getenv('PREFERENCE_ROLE_ID'))
-senior_mod_role_id: int = int(os.getenv('SENIOR_MOD_ROLE_ID'))
-allowed_roles = [int(os.getenv('OWNER_ROLE_ID')), int(os.getenv('ADMIN_ROLE_ID')), senior_mod_role_id, mod_role_id]
+mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
+muted_role_id = int(os.getenv('MUTED_ROLE_ID', 123))
+preference_role_id = int(os.getenv('PREFERENCE_ROLE_ID', 123))
+senior_mod_role_id: int = int(os.getenv('SENIOR_MOD_ROLE_ID', 123))
+allowed_roles = [int(os.getenv('OWNER_ROLE_ID', 123)), int(os.getenv('ADMIN_ROLE_ID', 123)), senior_mod_role_id, mod_role_id]
 
-server_id = int(os.getenv('SERVER_ID'))
+server_id = int(os.getenv('SERVER_ID', 123))
 guild_ids: List[int] = [server_id]
 
 moderation_cogs: List[commands.Cog] = [
@@ -324,10 +324,10 @@ class Moderation(*moderation_cogs):
 		""" (MOD) Clears the whole channel. """
 
 		special_channels = {
-		  int(os.getenv('MUTED_CHANNEL_ID')): 'https://cdn.discordapp.com/attachments/746478846466981938/748605295122448534/Muted.png',
-		  int(os.getenv('QUESTION_CHANNEL_ID')): '''**Would you like to ask us a question about the server? Ask them there!**
+		  int(os.getenv('MUTED_CHANNEL_ID', 123)): 'https://cdn.discordapp.com/attachments/746478846466981938/748605295122448534/Muted.png',
+		  int(os.getenv('QUESTION_CHANNEL_ID', 123)): '''**Would you like to ask us a question about the server? Ask them there!**
 	`Questions will be answered and deleted immediately.`''',
-		  int(os.getenv('SUGGESTION_CHANNEL_ID')): '''**Would you like to suggest a feature for the server? Please follow this template to submit your feature request**
+		  int(os.getenv('SUGGESTION_CHANNEL_ID', 123)): '''**Would you like to suggest a feature for the server? Please follow this template to submit your feature request**
 
 	**Suggestion:**
 	`A short idea name/description`
@@ -1686,7 +1686,7 @@ class Moderation(*moderation_cogs):
 		if title.lower() not in mod_app + teacher_app + event_host_app:
 			return await ctx.send(f"**Invalid title, {member.mention}!**")
 
-		channel = discord.utils.get(ctx.guild.text_channels, id=int(os.getenv('REPORT_CHANNEL_ID')))
+		channel = discord.utils.get(ctx.guild.text_channels, id=int(os.getenv('REPORT_CHANNEL_ID', 123)))
 		message = await channel.fetch_message(message_id) # Message containing the application buttons
 		if not message:
 			return await ctx.send(f"**Message not found, {member.mentio}!**")

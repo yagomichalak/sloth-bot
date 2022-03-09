@@ -11,8 +11,8 @@ from typing import List
 import os
 import io
 
-bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
-select_your_language_channel_id = int(os.getenv('SELECT_YOUR_LANGUAGE_CHANNEL_ID'))
+bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID', 123))
+select_your_language_channel_id = int(os.getenv('SELECT_YOUR_LANGUAGE_CHANNEL_ID', 123))
 
 analytics_cogs: List[commands.Cog] = [SlothAnalyticsTable, DataBumpsTable]
 
@@ -23,7 +23,7 @@ class Analytics(*analytics_cogs):
         """ Class initializing method. """
 
         self.client = client
-        self.dnk_id: int = int(os.getenv('DNK_ID'))
+        self.dnk_id: int = int(os.getenv('DNK_ID', 123))
 
     @commands.Cog.listener()
     async def on_ready(self) -> None:
