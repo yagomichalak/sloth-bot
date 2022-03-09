@@ -31,28 +31,28 @@ from extra.select import SoundBoardSelect
 
 from extra.tool.stealthstatus import StealthStatusTable
 
-guild_ids = [int(os.getenv('SERVER_ID'))]
+guild_ids = [int(os.getenv('SERVER_ID', 123))]
 
 from typing import List, Optional, Union
 
-mod_role_id = int(os.getenv('MOD_ROLE_ID'))
-senior_mod_role_id: int = int(os.getenv('SENIOR_MOD_ROLE_ID'))
-admin_role_id = int(os.getenv('ADMIN_ROLE_ID'))
-owner_role_id = int(os.getenv('OWNER_ROLE_ID'))
-analyst_debugger_role_id: int = int(os.getenv('ANALYST_DEBUGGER_ROLE_ID'))
-in_a_vc_role_id: int = int(os.getenv('IN_A_VC_ROLE_ID'))
+mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
+senior_mod_role_id: int = int(os.getenv('SENIOR_MOD_ROLE_ID', 123))
+admin_role_id = int(os.getenv('ADMIN_ROLE_ID', 123))
+owner_role_id = int(os.getenv('OWNER_ROLE_ID', 123))
+analyst_debugger_role_id: int = int(os.getenv('ANALYST_DEBUGGER_ROLE_ID', 123))
+in_a_vc_role_id: int = int(os.getenv('IN_A_VC_ROLE_ID', 123))
 
 
-allowed_roles = [owner_role_id, admin_role_id, mod_role_id, *patreon_roles.keys(), int(os.getenv('SLOTH_LOVERS_ROLE_ID'))]
-teacher_role_id = int(os.getenv('TEACHER_ROLE_ID'))
-patreon_channel_id = int(os.getenv('PATREONS_CHANNEL_ID'))
+allowed_roles = [owner_role_id, admin_role_id, mod_role_id, *patreon_roles.keys(), int(os.getenv('SLOTH_LOVERS_ROLE_ID', 123))]
+teacher_role_id = int(os.getenv('TEACHER_ROLE_ID', 123))
+patreon_channel_id = int(os.getenv('PATREONS_CHANNEL_ID', 123))
 
-popular_lang_cat_id = int(os.getenv('LANGUAGES_CHANNEL_ID'))
-more_popular_lang_cat_id = int(os.getenv('MORE_LANGUAGES_CHANNEL_ID'))
-smart_room_cat_id = int(os.getenv('CREATE_SMART_ROOM_CAT_ID'))
+popular_lang_cat_id = int(os.getenv('LANGUAGES_CHANNEL_ID', 123))
+more_popular_lang_cat_id = int(os.getenv('MORE_LANGUAGES_CHANNEL_ID', 123))
+smart_room_cat_id = int(os.getenv('CREATE_SMART_ROOM_CAT_ID', 123))
 
-dynamic_vc_id: int = int(os.getenv('CREATE_DYNAMIC_ROOM_VC_ID'))
-dynamic_channels_cat_id = int(os.getenv('CREATE_DYNAMIC_ROOM_CAT_ID'))
+dynamic_vc_id: int = int(os.getenv('CREATE_DYNAMIC_ROOM_VC_ID', 123))
+dynamic_channels_cat_id = int(os.getenv('CREATE_DYNAMIC_ROOM_CAT_ID', 123))
 tool_cogs: List[commands.Cog] = [
 	StealthStatusTable
 ]
@@ -966,7 +966,7 @@ class Tools(*tool_cogs):
 	async def cosmos(self, ctx) -> None:
 		""" A command for pinging Cosmos, the stealthy little guy. """
 
-		cosmos_id = int(os.getenv('COSMOS_ID'))
+		cosmos_id = int(os.getenv('COSMOS_ID', 123))
 		cosmos = discord.utils.get(ctx.guild.members, id=cosmos_id)
 		await ctx.send(cosmos.mention)
 
@@ -975,7 +975,7 @@ class Tools(*tool_cogs):
 	async def muffin(self, ctx) -> None:
 		""" A command for pinging Muffin, the rich Lux lass. """
 
-		muffin_id = int(os.getenv('MUFFIN_ID'))
+		muffin_id = int(os.getenv('MUFFIN_ID', 123))
 		muffin = discord.utils.get(ctx.guild.members, id=muffin_id)
 		await ctx.send(muffin.mention)
 
@@ -984,7 +984,7 @@ class Tools(*tool_cogs):
 	async def prisca(self, ctx) -> None:
 		""" A command for pinging Prisca, the photoshop Turk. """
 
-		prisca_id = int(os.getenv('PRISCA_ID'))
+		prisca_id = int(os.getenv('PRISCA_ID', 123))
 		prisca = discord.utils.get(ctx.guild.members, id=prisca_id)
 		await ctx.send(prisca.mention)
 
@@ -993,7 +993,7 @@ class Tools(*tool_cogs):
 	async def guibot(self, ctx) -> None:
 		""" A command for pinging GuiBot, the lawyer and demoter guy. """
 
-		guibot_id = int(os.getenv('GUIBOT_ID'))
+		guibot_id = int(os.getenv('GUIBOT_ID', 123))
 		guibot = discord.utils.get(ctx.guild.members, id=guibot_id)
 		await ctx.send(guibot.mention)
 
@@ -1003,7 +1003,7 @@ class Tools(*tool_cogs):
 	async def music_bots(self, ctx) -> None:
 		""" Shows a list with all music bots available in the server. """
 
-		music_bot_role = discord.utils.get(ctx.guild.roles, id=int(os.getenv('MUSIC_BOT_ROLE_ID')))
+		music_bot_role = discord.utils.get(ctx.guild.roles, id=int(os.getenv('MUSIC_BOT_ROLE_ID', 123)))
 		music_bots = [mb for mb in ctx.guild.members if music_bot_role in mb.roles]
 		music_bots = [f"{mb.mention} ❌" if mb.voice and mb.voice.channel else f"{mb.mention} ✅" for mb in music_bots]
 

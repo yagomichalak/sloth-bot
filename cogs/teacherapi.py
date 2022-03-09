@@ -16,10 +16,10 @@ from mysqldb import the_django_database
 from extra.menu import ConfirmSkill
 from extra import utils
 
-owner_role_id = int(os.getenv('OWNER_ROLE_ID'))
-admin_role_id = int(os.getenv('ADMIN_ROLE_ID'))
-mod_role_id = int(os.getenv('MOD_ROLE_ID'))
-lesson_manager_role_id = int(os.getenv('LESSON_MANAGEMENT_ROLE_ID'))
+owner_role_id = int(os.getenv('OWNER_ROLE_ID', 123))
+admin_role_id = int(os.getenv('ADMIN_ROLE_ID', 123))
+mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
+lesson_manager_role_id = int(os.getenv('LESSON_MANAGEMENT_ROLE_ID', 123))
 allowed_roles = [owner_role_id, admin_role_id, mod_role_id]
 
 
@@ -30,10 +30,10 @@ class TeacherAPI(commands.Cog):
         """ Cog initializer """
 
         self.client = client
-        self.teacher_role_id: int = int(os.getenv('TEACHER_ROLE_ID'))
-        self.teacher_fun_role_id: int = int(os.getenv('TEACHER_FUN_ROLE_ID'))
+        self.teacher_role_id: int = int(os.getenv('TEACHER_ROLE_ID', 123))
+        self.teacher_fun_role_id: int = int(os.getenv('TEACHER_FUN_ROLE_ID', 123))
         self.session = aiohttp.ClientSession(loop=client.loop)
-        self.classes_channel_id: int = int(os.getenv('CLASSES_CHANNEL_ID'))
+        self.classes_channel_id: int = int(os.getenv('CLASSES_CHANNEL_ID', 123))
         self.website_link: str = 'https://thelanguagesloth.com'
         # self.website_link: str = 'http://127.0.0.1:8000'
         self.django_website_root = os.getenv('DJANGO_WEBSITE_ROOT')
@@ -395,7 +395,7 @@ class TeacherAPI(commands.Cog):
         await ctx.send(embed=demote_embed)
 
         # Moderation log
-        if demote_log := discord.utils.get(ctx.guild.text_channels, id=int(os.getenv('PROMOTE_DEMOTE_LOG_ID'))):
+        if demote_log := discord.utils.get(ctx.guild.text_channels, id=int(os.getenv('PROMOTE_DEMOTE_LOG_ID', 123))):
             demote_embed.set_author(name=member, icon_url=member.display_avatar)
             demote_embed.set_footer(text=f"Demoted by {author}", icon_url=author.display_avatar)
             await demote_log.send(embed=demote_embed)

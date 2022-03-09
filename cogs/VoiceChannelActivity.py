@@ -6,7 +6,7 @@ from datetime import datetime
 from pytz import timezone
 import os
 
-allowed_roles = [int(os.getenv('OWNER_ROLE_ID')), int(os.getenv('ADMIN_ROLE_ID')), int(os.getenv('MOD_ROLE_ID'))]
+allowed_roles = [int(os.getenv('OWNER_ROLE_ID', 123)), int(os.getenv('ADMIN_ROLE_ID', 123)), int(os.getenv('MOD_ROLE_ID', 123))]
 
 
 class VoiceChannelActivity(commands.Cog):
@@ -16,7 +16,7 @@ class VoiceChannelActivity(commands.Cog):
         """ Cog's initializing method. """
 
         self.client = client
-        self.server_id = int(os.getenv('SERVER_ID'))
+        self.server_id = int(os.getenv('SERVER_ID', 123))
 
     @commands.Cog.listener()
     async def on_ready(self) -> None:

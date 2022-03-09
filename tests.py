@@ -310,24 +310,25 @@ UPDATE TribeMember as OG
 
 
 
-def multiplication_table(number: int) -> None:
-    # Initialize the starting point of the multiplication table
-    multiplier = 1
-    # Only want to loop through 5
-    for multiplier in range(1, 6):
-        result = number*multiplier 
-        # What is the additional condition to exit out of the loop?
-        if result >= 25:
-            break
 
-        print(f"{number}x{multiplier} = {result}")
 
-def sum1(num):
-    soma = 0
-    for i in range(1, num + 1):
-        if num % i == 0:
-            soma += i
-    return soma
+# import requests
+# import json
+# import os
 
-print(sum1(25))
+# the_member = {}
+# headers = {
+#     'Authorization': f"Bot {os.getenv('TOKEN')}",
+#     'Content-Type': 'application/json',
+# }
+# params = {
+#     'limit': 40
+# }
+# endpoint = f'https://discord.com/api/v10/guilds/{guild.id}/members/{author.id}'
+# response = requests.get(endpoint, headers=headers, params=params)
+# if response.status_code == 200:
+#     the_member = json.loads(response.text)
+        
+
+# print(the_member)
 

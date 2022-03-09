@@ -20,7 +20,7 @@ class ReportSupportSelect(discord.ui.Select):
     async def callback(self, interaction: discord.Interaction):
         await interaction.response.defer()
         
-        # guild = self.client.get_guild(int(os.getenv('SERVER_ID')))
+        # guild = self.client.get_guild(int(os.getenv('SERVER_ID', 123)))
         # member = discord.utils.get(guild.members, id=interaction.user.id)
         member = interaction.user
 

@@ -16,13 +16,13 @@ from extra.moderation.moderatednicknames import ModeratedNicknamesTable
 from extra.slothclasses.player import Player
 from extra.misc.slothboard import SlothboardTable
 
-mod_role_id = int(os.getenv('MOD_ROLE_ID'))
-admin_role_id = int(os.getenv('ADMIN_ROLE_ID'))
-teacher_role_id = int(os.getenv('TEACHER_ROLE_ID'))
-watchlist_channel_id = int(os.getenv('WATCHLIST_CHANNEL_ID'))
-slothboard_channel_id = int(os.getenv('SLOTHBOARD_CHANNEL_ID'))
-booster_role_id = int(os.getenv('BOOSTER_ROLE_ID'))
-guild_ids = [int(os.getenv('SERVER_ID'))]
+mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
+admin_role_id = int(os.getenv('ADMIN_ROLE_ID', 123))
+teacher_role_id = int(os.getenv('TEACHER_ROLE_ID', 123))
+watchlist_channel_id = int(os.getenv('WATCHLIST_CHANNEL_ID', 123))
+slothboard_channel_id = int(os.getenv('SLOTHBOARD_CHANNEL_ID', 123))
+booster_role_id = int(os.getenv('BOOSTER_ROLE_ID', 123))
+guild_ids = [int(os.getenv('SERVER_ID', 123))]
 
 social_cogs: List[commands.Bot] = [SlothboardTable]
 

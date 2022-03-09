@@ -10,14 +10,14 @@ from random import choice
 
 from extra.tool.scheduled_events import ScheduledEventsTable
 
-bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
-announcement_channel_id = int(os.getenv('ANNOUNCEMENT_CHANNEL_ID'))
-mod_role_id = int(os.getenv('MOD_ROLE_ID'))
-senior_mod_role_id = int(os.getenv('SENIOR_MOD_ROLE_ID'))
-allowed_roles = [int(os.getenv('OWNER_ROLE_ID')), int(os.getenv('ADMIN_ROLE_ID')), mod_role_id]
-general_channel_id = int(os.getenv('GENERAL_CHANNEL_ID'))
-lesson_manager_role_id = int(os.getenv('LESSON_MANAGEMENT_ROLE_ID'))
-real_event_manager_role_id = int(os.getenv('REAL_EVENT_MANAGER_ROLE_ID'))
+bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID', 123))
+announcement_channel_id = int(os.getenv('ANNOUNCEMENT_CHANNEL_ID', 123))
+mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
+senior_mod_role_id = int(os.getenv('SENIOR_MOD_ROLE_ID', 123))
+allowed_roles = [int(os.getenv('OWNER_ROLE_ID', 123)), int(os.getenv('ADMIN_ROLE_ID', 123)), mod_role_id]
+general_channel_id = int(os.getenv('GENERAL_CHANNEL_ID', 123))
+lesson_manager_role_id = int(os.getenv('LESSON_MANAGEMENT_ROLE_ID', 123))
+real_event_manager_role_id = int(os.getenv('REAL_EVENT_MANAGER_ROLE_ID', 123))
 
 tool_cogs: List[commands.Cog] = [ScheduledEventsTable]
 
@@ -218,7 +218,7 @@ If you have any questions feel free to ask! And if you experience any type of pr
             pass
 
         # Moderation log
-        if demote_log := discord.utils.get(ctx.guild.text_channels, id=int(os.getenv('DM_LOG_CHANNEL_ID'))):
+        if demote_log := discord.utils.get(ctx.guild.text_channels, id=int(os.getenv('DM_LOG_CHANNEL_ID', 123))):
             dm_embed = discord.Embed(
                 title="__DM Message__",
                 description=f"{author.mention} DM'd {member.mention}.\n**Message:** {message}",

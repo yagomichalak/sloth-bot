@@ -23,8 +23,8 @@ class CreateSmartRoom(*smart_room_cogs):
 		""" Class initializing method. """
 
 		self.client = client
-		self.vc_id = int(os.getenv('CREATE_SMART_ROOM_VC_ID'))
-		self.cat_id = int(os.getenv('CREATE_SMART_ROOM_CAT_ID'))
+		self.vc_id = int(os.getenv('CREATE_SMART_ROOM_VC_ID', 123))
+		self.cat_id = int(os.getenv('CREATE_SMART_ROOM_CAT_ID', 123))
 
 	@commands.Cog.listener()
 	async def on_ready(self):

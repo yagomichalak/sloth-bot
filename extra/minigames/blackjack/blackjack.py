@@ -12,7 +12,7 @@ from extra import utils
 import asyncio
 import os
 
-server_id: int = int(os.getenv('SERVER_ID'))
+server_id: int = int(os.getenv('SERVER_ID', 123))
 
 blackjack_db: List[commands.Cog] = [
 	BlackJackDB

@@ -15,7 +15,7 @@ import random
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 from io import BytesIO
 
-bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
+bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID', 123))
 
 class Merchant(Player):
 

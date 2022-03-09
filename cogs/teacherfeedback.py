@@ -12,25 +12,25 @@ from extra.prompt.menu import ConfirmButton
 from extra import utils
 
 # IDs from .env
-create_room_vc_id = int(os.getenv('CREATE_SMART_CLASSROOM_VC_ID'))
-create_room_txt_id = int(os.getenv('CREATE_CLASSROOM_CHANNEL_ID'))
-create_room_cat_id = int(os.getenv('CREATE_ROOM_CAT_ID'))
-create_private_room_vc_id: int = int(os.getenv('CREATE_PRIVATE_ROOM_VC_ID'))
+create_room_vc_id = int(os.getenv('CREATE_SMART_CLASSROOM_VC_ID', 123))
+create_room_txt_id = int(os.getenv('CREATE_CLASSROOM_CHANNEL_ID', 123))
+create_room_cat_id = int(os.getenv('CREATE_ROOM_CAT_ID', 123))
+create_private_room_vc_id: int = int(os.getenv('CREATE_PRIVATE_ROOM_VC_ID', 123))
 
-mod_role_id = int(os.getenv('MOD_ROLE_ID'))
-admin_role_id = int(os.getenv('ADMIN_ROLE_ID'))
-teacher_role_id = int(os.getenv('TEACHER_ROLE_ID'))
-preference_role_id = int(os.getenv('PREFERENCE_ROLE_ID'))
-lesson_management_role_id = int(os.getenv('LESSON_MANAGEMENT_ROLE_ID'))
-sloth_explorer_role_id = int(os.getenv('SLOTH_EXPLORER_ROLE_ID'))
-show_me_everything_role_id = int(os.getenv('SHOW_ME_EVERYTHING_ROLE_ID'))
-sloth_pass_role_id = int(os.getenv('SLOTH_PASS_ROLE_ID'))
+mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
+admin_role_id = int(os.getenv('ADMIN_ROLE_ID', 123))
+teacher_role_id = int(os.getenv('TEACHER_ROLE_ID', 123))
+preference_role_id = int(os.getenv('PREFERENCE_ROLE_ID', 123))
+lesson_management_role_id = int(os.getenv('LESSON_MANAGEMENT_ROLE_ID', 123))
+sloth_explorer_role_id = int(os.getenv('SLOTH_EXPLORER_ROLE_ID', 123))
+show_me_everything_role_id = int(os.getenv('SHOW_ME_EVERYTHING_ROLE_ID', 123))
+sloth_pass_role_id = int(os.getenv('SLOTH_PASS_ROLE_ID', 123))
 
-teacher_feedback_thread_id = int(os.getenv('TEACHER_FEEDBACK_THREAD_ID'))
-class_history_channel_id = int(os.getenv('CLASS_HISTORY_CHANNEL_ID'))
-reward_channel_id = int(os.getenv('REWARD_CHANNEL_ID'))
-bot_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
-queuebot_id = int(os.getenv('QUEUE_BOT_ID'))
+teacher_feedback_thread_id = int(os.getenv('TEACHER_FEEDBACK_THREAD_ID', 123))
+class_history_channel_id = int(os.getenv('CLASS_HISTORY_CHANNEL_ID', 123))
+reward_channel_id = int(os.getenv('REWARD_CHANNEL_ID', 123))
+bot_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID', 123))
+queuebot_id = int(os.getenv('QUEUE_BOT_ID', 123))
 
 
 class TeacherFeedback(commands.Cog):
@@ -130,7 +130,6 @@ class TeacherFeedback(commands.Cog):
             # Checks if user is an active student
             if await self.db.get_student_by_vc_id(member.id, the_class[2]):
                 await self.db.update_student_messages(member.id, the_class[2])
-
 
     @commands.Cog.listener(name="on_voice_state_update")
     async def on_voice_state_update_private(self, member, before, after) -> None:
@@ -310,7 +309,7 @@ class TeacherFeedback(commands.Cog):
             return
 
         # Adds a new timestamp to the teacher
-        self.teacher_cache[member.id] = await TeacherFeedback.get_timestamp()
+        self.teacher_cache[member.id] = await utils.get_timestamp()
 
         # Checks whether the teacher has saved classes
         if saved_classes := await self.db.get_teacher_saved_classes(member.id):
@@ -371,7 +370,7 @@ class TeacherFeedback(commands.Cog):
         """ Starts a language class.
         :param class_info: The information about the class. """
 
-        current_ts = await TeacherFeedback.get_timestamp()
+        current_ts = await utils.get_timestamp()
         cc_channel = discord.utils.get(member.guild.channels, id=create_room_txt_id)
         txt, vc = await self.create_channels(member, cc_channel, class_info)
         await self.db.insert_active_teacher_class(
@@ -391,7 +390,7 @@ class TeacherFeedback(commands.Cog):
         if not (teacher_class := await self.db.get_active_teacher_class_by_vc_id(class_vc.id)):
             return
 
-        current_ts = await TeacherFeedback.get_timestamp()
+        current_ts = await utils.get_timestamp()
 
         # Checks whether it's a teacher
         if teacher_class[0] == member.id:
@@ -422,7 +421,7 @@ class TeacherFeedback(commands.Cog):
         :param member: The member who's leaving the class.
         :param class_vc: The class to leave. """
 
-        current_ts = await TeacherFeedback.get_timestamp()
+        current_ts = await utils.get_timestamp()
 
         # Checks whether member is teacher and has an existing class
         if teacher_class := await self.db.get_active_teacher_class_by_teacher_and_vc_id(member.id, class_vc.id):
@@ -461,7 +460,6 @@ class TeacherFeedback(commands.Cog):
         # Gets all students and deletes the class from the system
         users_feedback = await self.db.get_all_students(member.id)
         await self.db.delete_active_teacher_class_by_teacher_and_vc_id(member.id, teacher_class[2])
-
         await self.db.delete_active_students(member.id)
 
         # teacher, txt_id, vc_id, language, class_type, vc_timestamp, vc_time, members, class_desc)
@@ -633,7 +631,7 @@ class TeacherFeedback(commands.Cog):
                     await self.client.loop.create_task(self.ask_for_user_feedback(
                         teacher, language, class_type, member, teacher_feedback_thread))
                 except Exception as e:
-                    print('e', e)
+                    print(e)
                     pass
 
             rewarded_members_text = ', '.join(rewarded_members_text) if rewarded_members_text else "No one got rewarded!"
@@ -644,7 +642,7 @@ class TeacherFeedback(commands.Cog):
                     await SlothCurrency.update_user_money(teacher.id, 100)
                     await SlothCurrency.update_user_hosted(teacher.id)
                 except Exception as e:
-                    print('e', e)
+                    print(e)
                     pass
 
             commands_channel = discord.utils.get(teacher.guild.channels, id=bot_commands_channel_id)
@@ -953,7 +951,7 @@ class TeacherFeedback(commands.Cog):
         :param cooldown: The cooldown for the class creation. (Default = 60s) """
 
         member_ts = teacher_cache.get(teacher_id)
-        current_ts = await TeacherFeedback.get_timestamp()
+        current_ts = await utils.get_timestamp()
         if member_ts := teacher_cache.get(teacher_id):
             sub = current_ts - member_ts
             return sub <= cooldown
@@ -1170,7 +1168,7 @@ class TeacherFeedbackDatabaseInsert:
         :param the_time: The current timestamp.
         :param class_desc: The class description.
         :param taught_in: The language that the class is taught in. """
-
+        
         mycursor, db = await the_database()
         await mycursor.execute("""
             INSERT INTO ActiveClasses (teacher_id, txt_id, vc_id, language, class_type, vc_timestamp, class_desc, taught_in)
@@ -1208,6 +1206,8 @@ class TeacherFeedbackDatabaseInsert:
     async def insert_student_rewarded(self, user: List[Union[int, str]]):
         """ Saves a user to be rewarded later on.
         :param user: The user to be saved. """
+
+        print("Here: ", (user[4], user[1], user[6], user[5], user[0]))
 
         mycursor, db = await the_database()
         await mycursor.execute("""
