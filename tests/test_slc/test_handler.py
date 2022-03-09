@@ -70,8 +70,8 @@ class TestSlothLanguageClass:
         # Setup user
         self.member: DiscordMember = self.get_user(user_id=DNK_ID)
         # Setup channels
-        self.txt, self.vc = DiscordChannel(randomint(1, 999)), DiscordChannel(randomint(1, 999))
-        self.msg = DiscordMessage(randomint(1, 999))
+        self.txt, self.vc = DiscordChannel(randint(1, 999)), DiscordChannel(randint(1, 999))
+        self.msg = DiscordMessage(randint(1, 999))
 
         # Setup class info
         self.class_info: Dict[str, str] = {
