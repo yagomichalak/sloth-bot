@@ -12,6 +12,7 @@ from cogs.teacherfeedback import TeacherFeedback
 from tests.models.discord_models import DiscordMember, DiscordChannel, DiscordMessage
 from extra.utils import get_timestamp
 from pprint import pprint
+from random import randint
 
 from .conftest import (
     DatabaseDriver,
@@ -69,8 +70,8 @@ class TestSlothLanguageClass:
         # Setup user
         self.member: DiscordMember = self.get_user(user_id=DNK_ID)
         # Setup channels
-        self.txt, self.vc = DiscordChannel(123), DiscordChannel(456)
-        self.msg = DiscordMessage(678)
+        self.txt, self.vc = DiscordChannel(randint(1, 999)), DiscordChannel(randint(1, 999))
+        self.msg = DiscordMessage(randint(1, 999))
 
         # Setup class info
         self.class_info: Dict[str, str] = {
