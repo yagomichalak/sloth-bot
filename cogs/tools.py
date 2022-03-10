@@ -959,7 +959,7 @@ class Tools(*tool_cogs):
 	async def elijah(self, ctx) -> None:
 		""" A command for telling something about Elijah. """
 
-		await ctx.send("**\"You have a really nice voice\"**")
+		await ctx.send("**Sure, go for it.**")
 
 	@commands.command()
 	@utils.is_allowed([owner_role_id, admin_role_id, mod_role_id])
