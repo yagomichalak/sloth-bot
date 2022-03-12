@@ -184,7 +184,7 @@ class Show(commands.Cog):
 
         member = ctx.author
 
-        months = await DataBumpsTable.get_month_statuses()
+        months = await DataBumpsTable.get_month_statuses(self)
 
         embed = discord.Embed(
             title="__Server's Monthly Statuses__",
