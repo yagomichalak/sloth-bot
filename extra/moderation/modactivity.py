@@ -1,7 +1,8 @@
 import discord
 from discord.ext import commands
 from mysqldb import the_database
-from typing import Optional
+
+from typing import Optional, List
 from extra import utils
 
 class ModActivityTable(commands.Cog):
@@ -19,6 +20,7 @@ class ModActivityTable(commands.Cog):
         """ (ADM) Creates the ModActivity table. """
 
         member: discord.Member = ctx.author
+
         if await self.check_mod_activity_table_exists():
             return await ctx.send(f"**The `ModActivity` table already exists, {member.mention}!**")
 
@@ -90,6 +92,15 @@ class ModActivityTable(commands.Cog):
         await db.commit()
         await mycursor.close()
 
+    async def get_mod_activities(self) -> List[List[int]]:
+        """ Gets all Mod activities data from the database. """
+
+        mycursor, _ = await the_database()
+        await mycursor.execute("SELECT * FROM ModActivity")
+        mod_activities = await mycursor.fetchall()
+        await mycursor.close()
+        return mod_activities
+
     async def get_moderator_current_timestamp(self, mod_id: int, old_ts: Optional[int] = None) -> int:
         """ Gets the moderator's current timestamp.
         :param mod_id: The moderator ID.
@@ -130,7 +141,7 @@ class ModActivityTable(commands.Cog):
         await db.commit()
         await mycursor.close()
 
-    async def update_moderator(self, mod_id: int) -> None:
+    async def update_moderator_timestamp(self, mod_id: int) -> None:
         """ Updates the moderator's timestamp.
         :param mod_id: The moderator ID. """
 
@@ -140,7 +151,7 @@ class ModActivityTable(commands.Cog):
         await db.commit()
         await mycursor.close()
 
-    async def add_time_moderator(self, mod_id: int, addition: int) -> None:
+    async def update_moderator_time(self, mod_id: int, addition: int) -> None:
         """ Increments the moderator's time counter.
         :param mod_id: The moderator ID.
         :param addition: The addition value. """
@@ -151,3 +162,10 @@ class ModActivityTable(commands.Cog):
         await mycursor.close()
         await self.update_moderator(mod_id)
 
+    async def delete_mod_activity(self) -> None:
+        """ Deletes all the data from the ModActivity table. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("DELETE FROM ModActivity")
+        await db.commit()
+        await mycursor.close()
