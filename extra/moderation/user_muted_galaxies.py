@@ -86,7 +86,7 @@ class UserMutedGalaxiesTable(commands.Cog):
         :param muted_galaxies: The galaxies in which the user got muted. """
 
         mycursor, db = await the_database()
-        await mycursor.executemany("INSERT INTO UserMutedGalaxies (user_id, role_id) VALUES (%s, %s)", muted_galaxies)
+        await mycursor.executemany("INSERT INTO UserMutedGalaxies (user_id, cat_id) VALUES (%s, %s)", muted_galaxies)
         await db.commit()
         await mycursor.close()
 

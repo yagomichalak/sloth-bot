@@ -532,12 +532,12 @@ class Moderation(*moderation_cogs):
 		all_galaxies = await SmartRoom.get_galaxy_rooms()
 		
 		# Gets all Galaxy categories to give perms back
-		galaxy_categories: Dict[discord.CategoryChannel, List[int]] = [
-			gcat for galaxy in all_galaxies
+		galaxy_categories: Dict[discord.CategoryChannel, List[int]] = {
+			gcat: galaxy for galaxy in all_galaxies
 			for mgalaxy in muted_galaxies
-			if gcat.id == mgalaxy[1]
+			if galaxy[1] == mgalaxy[1]
 			and (gcat := discord.utils.get(member.guild.categories, id=galaxy[1]))
-		]
+		}
 		# Gives perms to all Galaxy categories
 		for gcat, ginfo in galaxy_categories.items():
 			await SmartRoom.handle_permissions([member], ginfo, member.guild, allow=True)
@@ -552,10 +552,10 @@ class Moderation(*moderation_cogs):
 		all_galaxies = await SmartRoom.get_galaxy_rooms()
 
 		# Gets all selected Galaxy categories to remove perms
-		galaxy_categories: Dict[discord.CategoryChannel, List[int]] = [
-			gcat for galaxy in all_galaxies
+		galaxy_categories: Dict[discord.CategoryChannel, List[int]] = {
+			gcat: galaxy for galaxy in all_galaxies
 			if (gcat := discord.utils.get(member.guild.categories, id=galaxy[1]))
-		]
+		}
 
 		# Removes perms from the selected Galaxy categories
 		for gcat, ginfo in galaxy_categories.items():
@@ -807,7 +807,6 @@ class Moderation(*moderation_cogs):
 		except:
 			pass
 			
-
 	# Mutes a member temporarily
 	@commands.command()
 	@utils.is_allowed(allowed_roles, throw_exc=True)
