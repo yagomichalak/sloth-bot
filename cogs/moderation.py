@@ -6,7 +6,7 @@ from discord.app.commands import user_command
 import asyncio
 from mysqldb import *
 from datetime import datetime
-from typing import List, Union, Optional, Dict
+from typing import List, Union, Optional, Dict, Tuple
 import os
 
 from extra.useful_variables import banned_links
@@ -21,6 +21,7 @@ from extra.moderation.userinfractions import ModerationUserInfractionsTable
 from extra.moderation.watchlist import ModerationWatchlistTable
 from extra.moderation.fakeaccounts import ModerationFakeAccountsTable
 from extra.moderation.moderatednicknames import ModeratedNicknamesTable
+from extra.moderation.user_muted_galaxies import UserMutedGalaxiesTable
 
 # IDs
 mod_log_id = int(os.getenv('MOD_LOG_CHANNEL_ID', 123))
@@ -41,7 +42,7 @@ guild_ids: List[int] = [server_id]
 moderation_cogs: List[commands.Cog] = [
 	ModerationFirewallTable, BypassFirewallTable, ModerationMutedMemberTable, 
 	ModerationUserInfractionsTable, ModerationWatchlistTable, ModerationFakeAccountsTable,
-	ModeratedNicknamesTable
+	ModeratedNicknamesTable, UserMutedGalaxiesTable
 ]
 
 class Moderation(*moderation_cogs):
@@ -522,7 +523,50 @@ class Moderation(*moderation_cogs):
 
 		await ctx.send(embed=embed)
 
+	async def add_galaxy_room_perms(self, member: discord.Member, muted_galaxies: List[Tuple[int, int]]) -> List[Tuple[int, int]]:
+		""" Removes teh user's permissions in all Galaxy Rooms.
+		:param member: The member from whom to remove the permissions. """
 
+		# Gets all Galaxy rooms that are created
+		SmartRoom = self.client.get_cog('CreateSmartRoom')
+		all_galaxies = await SmartRoom.get_galaxy_rooms()
+		
+		# Gets all Galaxy categories to give perms back
+		galaxy_categories: Dict[discord.CategoryChannel, List[int]] = [
+			gcat for galaxy in all_galaxies
+			for mgalaxy in muted_galaxies
+			if gcat.id == mgalaxy[1]
+			and (gcat := discord.utils.get(member.guild.categories, id=galaxy[1]))
+		]
+		# Gives perms to all Galaxy categories
+		for gcat, ginfo in galaxy_categories.items():
+			await SmartRoom.handle_permissions([member], ginfo, member.guild, allow=True)
+
+	async def remove_galaxy_room_perms(self, member: discord.Member) -> List[Tuple[int, int]]:
+		""" Removes teh user's permissions in all Galaxy Rooms.
+		:param member: The member from whom to remove the permissions. """
+
+		removed_grooms = []
+		# Gets all Galaxy rooms that are created
+		SmartRoom = self.client.get_cog('CreateSmartRoom')
+		all_galaxies = await SmartRoom.get_galaxy_rooms()
+
+		# Gets all selected Galaxy categories to remove perms
+		galaxy_categories: Dict[discord.CategoryChannel, List[int]] = [
+			gcat for galaxy in all_galaxies
+			if (gcat := discord.utils.get(member.guild.categories, id=galaxy[1]))
+		]
+
+		# Removes perms from the selected Galaxy categories
+		for gcat, ginfo in galaxy_categories.items():
+			overwrites = gcat.overwrites
+			if not overwrites.get(member):
+				continue
+
+			await SmartRoom.handle_permissions([member], ginfo, member.guild, allow=False)
+			removed_grooms.append((member.id, gcat.id))
+
+		return removed_grooms
 
 	@commands.command(name="mute", aliases=["shutup", "shut_up", "stfu", "zitto", "zitta", "shh", "tg", "ta_gueule", "tagueule", "mutado", "xiu", "calaboca"])
 	@utils.is_allowed(allowed_roles, throw_exc=True)
@@ -581,6 +625,10 @@ class Moderation(*moderation_cogs):
 			await member.edit(roles=keep_roles)
 			user_role_ids = [(member.id, rr.id, current_ts, None) for rr in remove_roles]
 			await self.insert_in_muted(user_role_ids)
+
+			removed_grooms = await self.remove_galaxy_room_perms(member.id)
+			await self.insert_user_muted_galaxies(removed_grooms)
+
 			# General embed
 			current_time = await utils.get_time_now()
 			general_embed = discord.Embed(description=f'**Reason:** {reason}', colour=discord.Colour.dark_grey(), timestamp=current_time)
@@ -726,6 +774,10 @@ class Moderation(*moderation_cogs):
 				except Exception as e:
 					print(e)
 					pass
+
+			if muted_galaxies := await self.get_user_muted_galaxies(member.id):
+				await self.add_galaxy_room_perms(member.id, muted_galaxies)
+				await self.delete_user_muted_galaxies(member.id)
 
 			current_time = await utils.get_time_now()
 			general_embed = discord.Embed(colour=discord.Colour.light_grey(),
