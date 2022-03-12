@@ -626,7 +626,7 @@ class Moderation(*moderation_cogs):
 			user_role_ids = [(member.id, rr.id, current_ts, None) for rr in remove_roles]
 			await self.insert_in_muted(user_role_ids)
 
-			removed_grooms = await self.remove_galaxy_room_perms(member.id)
+			removed_grooms = await self.remove_galaxy_room_perms(member)
 			await self.insert_user_muted_galaxies(removed_grooms)
 
 			# General embed
@@ -751,56 +751,62 @@ class Moderation(*moderation_cogs):
 
 		role = discord.utils.get(ctx.guild.roles, id=muted_role_id)
 		if not member:
-			return await answer("**Please, specify a member!**", delete_after=3)
-		if role in member.roles:
-			if user_roles := await self.get_muted_roles(member.id):
+			return await answer("**Please, specify a member!**")
 
-				bot = discord.utils.get(ctx.guild.members, id=self.client.user.id)
+		if not member.get_role(role.id):
+			return await answer(f'**{member} is not even muted!**')
 
-				member_roles = list([
-					a_role for the_role in user_roles if (a_role := discord.utils.get(member.guild.roles, id=the_role[1]))
-					and a_role < bot.top_role
-				])
-				member_roles.extend(member.roles)
+		if user_roles := await self.get_muted_roles(member.id):
 
-				member_roles = list(set(member_roles))
-				if role in member_roles:
-					member_roles.remove(role)
+			bot = discord.utils.get(ctx.guild.members, id=self.client.user.id)
 
-				await member.edit(roles=member_roles)
+			member_roles = list([
+				a_role for the_role in user_roles if (a_role := discord.utils.get(member.guild.roles, id=the_role[1]))
+				and a_role < bot.top_role
+			])
+			member_roles.extend(member.roles)
 
-				try:
-					await self.remove_all_roles_from_system(member.id)
-				except Exception as e:
-					print(e)
-					pass
+			member_roles = list(set(member_roles))
+			if role in member_roles:
+				member_roles.remove(role)
 
-			if muted_galaxies := await self.get_user_muted_galaxies(member.id):
-				await self.add_galaxy_room_perms(member.id, muted_galaxies)
-				await self.delete_user_muted_galaxies(member.id)
+			await member.edit(roles=member_roles)
 
-			current_time = await utils.get_time_now()
-			general_embed = discord.Embed(colour=discord.Colour.light_grey(),
-										  timestamp=current_time)
-			general_embed.set_author(name=f'{member} has been unmuted', icon_url=member.display_avatar)
-			await answer(embed=general_embed)
-			# Moderation log embed
-			moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
-			embed = discord.Embed(title='__**Unmute**__', colour=discord.Colour.light_grey(),
-								  timestamp=current_time)
-			embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nId: {member.id}```',
-							inline=False)
-			embed.set_author(name=member)
-			embed.set_thumbnail(url=member.display_avatar)
-			embed.set_footer(text=f"Unmuted by {ctx.author}", icon_url=ctx.author.display_avatar)
-			await moderation_log.send(embed=embed)
 			try:
-				await member.send(embed=general_embed)
-			except:
+				await self.remove_all_roles_from_system(member.id)
+			except Exception as e:
+				print(e)
 				pass
 
-		else:
-			await answer(f'**{member} is not even muted!**', delete_after=5)
+		if muted_galaxies := await self.get_user_muted_galaxies(member.id):
+			await self.add_galaxy_room_perms(member, muted_galaxies)
+			await self.delete_user_muted_galaxies(member.id)
+
+		try:
+			await member.remove_roles(role)
+		except:
+			pass
+
+		current_time = await utils.get_time_now()
+		general_embed = discord.Embed(colour=discord.Colour.light_grey(),
+										timestamp=current_time)
+		general_embed.set_author(name=f'{member} has been unmuted', icon_url=member.display_avatar)
+		await answer(embed=general_embed)
+		# Moderation log embed
+		moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
+		embed = discord.Embed(title='__**Unmute**__', colour=discord.Colour.light_grey(),
+								timestamp=current_time)
+		embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nId: {member.id}```',
+						inline=False)
+		embed.set_author(name=member)
+		embed.set_thumbnail(url=member.display_avatar)
+		embed.set_footer(text=f"Unmuted by {ctx.author}", icon_url=ctx.author.display_avatar)
+		await moderation_log.send(embed=embed)
+		try:
+			await member.send(embed=general_embed)
+		except:
+			pass
+			
 
 	# Mutes a member temporarily
 	@commands.command()

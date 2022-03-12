@@ -740,6 +740,14 @@ You can only add either **threads** **OR** one **voice channel**"""))
 		)
 		await ctx.send(embed=embed)
 
+	@galaxy.command(name="count", aliases=["number", "current", "cnt", "co"])
+	@commands.cooldown(1, 5, commands.BucketType.user)
+	async def _galaxy_count(self, ctx) -> None:
+		""" Counts how many Galaxy Rooms there are currently. """
+
+		galaxy_rooms = await self.get_galaxy_rooms()
+		await ctx.reply(f"**We currently have `{len(galaxy_rooms)}` Galaxy Rooms!**")
+
 	@galaxy.command(name="allow", aliases=['permit'])
 	async def _galaxy_allow(self, ctx) -> None:
 		""" Allows one or more members to join your channels.
