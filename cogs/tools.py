@@ -1,3 +1,4 @@
+from random import choice
 import discord
 from discord.app.commands import slash_command, message_command, user_command, Option, OptionChoice
 from discord.ext import commands, menus
@@ -960,6 +961,18 @@ class Tools(*tool_cogs):
 		""" A command for telling something about Elijah. """
 
 		await ctx.send("**Sure, go for it.**")
+
+	@commands.command(aliases=["winni", "winnie", "wynni", "wynnie"])
+	async def wyncham(self, ctx) -> None:
+		""" A command for telling something about Wyncham. """
+
+		sentences = [
+			"You have a really nice voice",
+			"Elijah is my brother",
+			"Elijah and DNK are my brothers"
+		]
+		
+		await ctx.send(choice(sentences))
 
 	@commands.command()
 	@utils.is_allowed([owner_role_id, admin_role_id, mod_role_id])
