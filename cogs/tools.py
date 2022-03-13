@@ -967,11 +967,11 @@ class Tools(*tool_cogs):
 		""" A command for telling something about Wyncham. """
 
 		sentences = [
-			"You have a really nice voice",
-			"Elijah is my brother",
-			"Elijah and DNK are my brothers"
+			"**You have a really nice voice**",
+			"**Elijah is my brother**",
+			"**Elijah and DNK are my brothers**"
 		]
-		
+
 		await ctx.send(choice(sentences))
 
 	@commands.command()
