@@ -1245,15 +1245,20 @@ class Tools(*tool_cogs):
 
 	@commands.command()
 	@utils.is_allowed([senior_mod_role_id], throw_exc=True)
-	async def stealth(self, ctx) -> None:
-		""" Makes you stealth, so when you join a VC you don't get the 'in a VC' role. """
+	async def stealth(self, ctx, member: Optional[discord.Member] = None) -> None:
+		""" Makes you stealth, so when you join a VC you don't get the 'in a VC' role.
+		:param member: The member to make stealth. [Optional][Default = You] """
 
-		member = ctx.author
+		if not member:
+			member = ctx.author
+
 		stealth_status = await self.get_stealth_status(member.id)
 		
 		on = True if stealth_status and stealth_status[1] else False
 
-		confirm = await Confirm(f"**Your Stealth mode is `{'online' if on else 'offline'}` wanna turn it `{'off' if on else 'on'}`?**").prompt(ctx)
+		text: str = "Your Stealth" if ctx.author == member else f"{member}'s Stealth"
+		
+		confirm = await Confirm(f"**{text} mode is `{'online' if on else 'offline'}` wanna turn it `{'off' if on else 'on'}`?**").prompt(ctx)
 		if not confirm:
 			return await ctx.send(f"**Not doing it, then, {member.mention}!**")
 
