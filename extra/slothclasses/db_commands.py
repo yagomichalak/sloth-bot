@@ -407,3 +407,13 @@ class SlothClassDatabaseCommands(commands.Cog):
             return True
         else:
             return False
+
+    async def update_sloth_profile_class(self, user_id: int, sloth_class: str) -> None:
+        """ Updates the user's Sloth Profile's class.
+        :param user_id: The ID of the user to update.
+        :param sloth_class: The sloth class to update to. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("UPDATE SlothProfile SET sloth_class = %s WHERE user_id = %s", (sloth_class, user_id))
+        await db.commit()
+        await mycursor.close()
