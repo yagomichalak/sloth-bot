@@ -807,7 +807,8 @@ You can only add either **threads** **OR** one **voice channel**"""))
 		""" Shows the creation and expiration time of the user's Galaxy Rooms. """
 
 		user_galaxy = await self.get_galaxy_txt(ctx.author.id, ctx.channel.category.id)
-		if not user_galaxy:
+		is_admin = ctx.channel.permissions_for(ctx.author)
+		if not user_galaxy and not is_admin:
 			return await ctx.send("**You cannot run this command outside your rooms, in case you have them!**")
 
 		user_ts = user_galaxy[6]
