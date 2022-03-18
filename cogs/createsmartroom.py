@@ -806,26 +806,32 @@ You can only add either **threads** **OR** one **voice channel**"""))
 	async def _galaxy_info(self, ctx) -> None:
 		""" Shows the creation and expiration time of the user's Galaxy Rooms. """
 
+		author: discord.Member = ctx.author
+		is_admin = ctx.channel.permissions_for(author).administrator
+
 		user_galaxy = await self.get_galaxy_by_cat_id(ctx.channel.category.id)
-		is_admin = ctx.channel.permissions_for(ctx.author).administrator
 		if not user_galaxy:
 			return await ctx.send("**This is not a Galaxy Room!**")
 
-		if user_galaxy[0] != ctx.author.id and not is_admin:
-			return await ctx.send("**You cannot run this command outside your rooms, in case you have them!**")
+		if user_galaxy[0] != author.id and not is_admin:
+			return await ctx.send(f"**You cannot run this command outside your Galaxy Room, in case you have one, {author.mention}!**")
+
+		member: discord.Member = discord.utils.get(ctx.guild.members, id=user_galaxy[0])
+		if not member:
+			return await ctx.send(f"**It looks like the owner of this Galaxy Room is not in the server anymore, {author.mention}!")
 
 		user_ts = user_galaxy[6]
 		the_time = await utils.get_timestamp()
 		deadline = user_ts + 1209600
 
 		embed = discord.Embed(
-			title=f"__{ctx.author.name}'s Rooms' Info__",
+			title=f"__{member.name}'s Rooms' Info__",
 			description=f'''**Created at:** {datetime.fromtimestamp(user_ts)}
 			**Expected expiration:** {datetime.fromtimestamp(deadline)}\n''',
-			color=ctx.author.color,
+			color=member.color,
 			timestamp=ctx.message.created_at)
 
-		embed.set_thumbnail(url=ctx.author.display_avatar)
+		embed.set_thumbnail(url=member.display_avatar)
 		embed.set_footer(text="Requested")
 
 		seconds_left = deadline - the_time
