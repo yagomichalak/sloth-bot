@@ -360,27 +360,34 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
             await ctx.send(f"**No targets found, {author.mention}!**")
 
 
-    @commands.command()
+    @commands.command(aliases=["update_sc", "usc"])
     @commands.has_permissions(administrator=True)
     async def update_sloth_class(self, ctx, member: discord.Member = None, sloth_class: str = None) -> None:
         """ Updates the user's Sloth Class.
         :param member: The user to update.
         :sloth_class: The sloth class to update to. """
 
+        author: discord.Member = ctx.author
+        available_classes: List[str] = ['default', *classes.keys()]
+
         if not sloth_class:
             return await ctx.send(f"**Please, type a `Sloth Class`, {member.mention}!**")
-
-        available_classes: List[str] = ['default', *classes.keys()]
 
         if sloth_class.lower() not in available_classes:
             return await ctx.send(f"**Please, type a valid `Sloth Class`, {member.mention}!**\n`{', '.join(available_classes)}`")
 
+        # Checks whether the given user has a Sloth Profile
+        if not await self.get_sloth_profile(member.id):
+            return await ctx.send(f"**{member.mention} doesn't have a Sloth Profile, {author.mention}!**")
+
+        # Handles capitalization of Sloth Class names
         if sloth_class.lower() == 'default':
             sloth_class = sloth_class.lower()
         else:
             sloth_class = sloth_class.title()
 
         await self.update_sloth_profile_class(member.id, sloth_class)
+        await ctx.send(f"**Successfully updated {member.mention}'s class to `{sloth_class}`!**")
 
 def setup(client) -> None:
     """ Cog's setup function. """
