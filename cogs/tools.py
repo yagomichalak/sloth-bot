@@ -1,7 +1,7 @@
 from random import choice
 import discord
 from discord.app.commands import slash_command, message_command, user_command, Option, OptionChoice
-from discord.ext import commands, menus
+from discord.ext import commands, menus, tasks
 import asyncio
 from gtts import gTTS
 
@@ -66,7 +66,36 @@ class Tools(*tool_cogs):
 
 	@commands.Cog.listener()
 	async def on_ready(self):
+
+		self.make_dumps_event.start()
 		print('Tools cog is ready!')
+
+
+	@tasks.loop(seconds=60)
+	async def make_dumps_event(self) -> None:
+		""" Checks the time for advertising Patreon. """
+
+		current_ts = await utils.get_timestamp()
+
+		Communication = self.client.get_cog('Communication')
+
+		# Checks whether the MakeDumps event exists
+		if not await Communication.get_advertising_event(event_label='make_dumps'):
+			# If not, creates it
+			return await Communication.insert_advertising_event(event_label='make_dumps', current_ts=current_ts-43200)
+
+		# Checks whether event time is due
+		if await Communication.check_advertising_time(
+			current_ts=int(current_ts), event_label="make_dumps", ad_time=43200): # Every 12 hours
+
+			# Updates time and makes the dumps.
+			await Communication.update_advertising_time(event_label="make_dumps", current_ts=current_ts)
+
+			guild = self.client.get_guild(int(os.getenv("SERVER_ID")))
+			dumps_channel = discord.utils.get(guild.channels, id=int(os.getenv("DUMPS_CHANNEL_ID")))
+
+			await self.make_dump_callback(channel=dumps_channel)
+
 
 	@commands.Cog.listener()
 	async def on_voice_state_update(self, member, before, after) -> None:
@@ -1375,16 +1404,18 @@ class Tools(*tool_cogs):
 			await ctx.send(f"**{member.mention}, is back home, after a long day of surfing,!**")
 
 	@commands.command(aliases=["make_dump", "mkdps", "mkdp"])
-	@commands.cooldown(1, 15, commands.BucketType.guild)
+	# @commands.cooldown(1, 15, commands.BucketType.guild)
 	@commands.has_permissions(administrator=True)
 	async def make_dumps(self, ctx) -> None:
 		""" Makes dumps of the databases and posts them in a specific channel. """
 
 		member: discord.Member = ctx.author
-
+		current_ts = await utils.get_timestamp()
 		dumps_channel = discord.utils.get(ctx.guild.channels, id=int(os.getenv("DUMPS_CHANNEL_ID")))
 
+		Communication = self.client.get_cog('Communication')
 		await self.make_dump_callback(dumps_channel)
+		await Communication.update_advertising_time(event_label="make_dumps", current_ts=current_ts)
 		await ctx.send(f"**Posted dumps in {dumps_channel.mention}, {member.mention}!**")
 
 	async def make_dump_callback(self, channel: Union[discord.TextChannel, discord.Thread]) -> None:
@@ -1419,7 +1450,7 @@ class Tools(*tool_cogs):
 
 		with open(file_path3, 'w', encoding="utf-8") as f3:
 			f3.writelines('\n'.join(map(lambda key: f"{key} = 123", os.environ.__dict__['_data'].keys())))
-			
+
 		# Posts it
 		await channel.send(files=[discord.File(file_path), discord.File(file_path2), discord.File(file_path3)])
 		os.remove(file_path); os.remove(file_path2); os.remove(file_path3)
