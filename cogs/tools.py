@@ -14,7 +14,7 @@ import collections
 from contextlib import redirect_stdout
 import os
 from treelib import Tree
-import json
+import subprocess
 
 from datetime import datetime
 import pytz
@@ -1373,6 +1373,53 @@ class Tools(*tool_cogs):
 			pass
 		else:
 			await ctx.send(f"**{member.mention}, is back home, after a long day of surfing,!**")
+
+	@commands.command(aliases=["make_dump", "mkdps", "mkdp"])
+	@commands.cooldown(1, 15, commands.BucketType.guild)
+	@commands.has_permissions(administrator=True)
+	async def make_dumps(self, ctx) -> None:
+		""" Makes dumps of the databases and posts them in a specific channel. """
+
+		member: discord.Member = ctx.author
+
+		dumps_channel = discord.utils.get(ctx.guild.channels, id=int(os.getenv("DUMPS_CHANNEL_ID")))
+
+		await self.make_dump_callback(dumps_channel)
+		await ctx.send(f"**Posted dumps in {dumps_channel.mention}, {member.mention}!**")
+
+	async def make_dump_callback(self, channel: Union[discord.TextChannel, discord.Thread]) -> None:
+		""" Callback for the make dumps command.
+		:param channel: The channel to which to send the dumps. """
+
+		# Gets current date
+		current_time = await utils.get_time_now()
+		# Separates current date into vars, to name the dump files
+		(
+			d, m, y, h, m
+		) = (
+			current_time.day,
+			current_time.month,
+			current_time.year,
+			current_time.hour,
+			current_time.minute
+		)
+
+		# Makes the dump
+		file_path: str = f'media/temporary/sloth_db_dump_{d}_{m}_{y}_{h}_{m}.sql'
+		file_path2: str = f'media/temporary/slothdjango_db_dump_{d}_{m}_{y}_{h}_{m}.sql'
+
+		command = f"mysqldump -u {os.getenv('SLOTH_DB_USER')} -p{os.getenv('SLOTH_DB_PASSWORD')} {os.getenv('SLOTH_DB_NAME')}" \
+			f" > {file_path}"
+		subprocess.getstatusoutput(command)
+
+		command2 = f"mysqldump -u {os.getenv('DJANGO_DB_USER')} -p{os.getenv('DJANGO_DB_PASSWORD')} {os.getenv('DJANGO_DB_NAME')}" \
+			f" > {file_path2}"
+		subprocess.getstatusoutput(command2)
+
+		# Posts it
+		await channel.send(files=[discord.File(file_path), discord.File(file_path2)])
+		os.remove(file_path); os.remove(file_path2)
+
 
 def setup(client):
 	client.add_cog(Tools(client))
