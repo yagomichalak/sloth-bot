@@ -1407,6 +1407,7 @@ class Tools(*tool_cogs):
 		# Makes the dump
 		file_path: str = f'media/temporary/sloth_db_dump_{d}_{m}_{y}_{h}_{m}.sql'
 		file_path2: str = f'media/temporary/slothdjango_db_dump_{d}_{m}_{y}_{h}_{m}.sql'
+		file_path3: str = f'media/temporary/.env_schema_{d}_{m}_{y}_{h}_{m}.txt'
 
 		command = f"mysqldump -u {os.getenv('SLOTH_DB_USER')} -p{os.getenv('SLOTH_DB_PASSWORD')} {os.getenv('SLOTH_DB_NAME')}" \
 			f" > {file_path}"
@@ -1416,9 +1417,12 @@ class Tools(*tool_cogs):
 			f" > {file_path2}"
 		subprocess.getstatusoutput(command2)
 
+		with open(file_path3, 'w', encoding="utf-8") as f3:
+			f3.writelines('\n'.join(map(lambda key: f"{key} = 123", os.environ.__dict__['_data'].keys())))
+			
 		# Posts it
-		await channel.send(files=[discord.File(file_path), discord.File(file_path2)])
-		os.remove(file_path); os.remove(file_path2)
+		await channel.send(files=[discord.File(file_path), discord.File(file_path2), discord.File(file_path3)])
+		os.remove(file_path); os.remove(file_path2); os.remove(file_path3)
 
 
 def setup(client):
