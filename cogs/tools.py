@@ -1448,7 +1448,7 @@ class Tools(*tool_cogs):
 			else:
 				command = f"mysqldump -u {os.getenv('SLOTH_DB_USER')} {os.getenv('SLOTH_DB_NAME')}" \
 					f" > {file_path}"
-			subprocess.call(command.split(), shell=True)
+			subprocess.getstatusoutput(command)
 
 			if pw2 := os.getenv('DJANGO_DB_PASSWORD'):
 				command2 = f"mysqldump -u {os.getenv('DJANGO_DB_USER')} -p{pw2} {os.getenv('DJANGO_DB_NAME')}" \
@@ -1456,7 +1456,7 @@ class Tools(*tool_cogs):
 			else:
 				command2 = f"mysqldump -u {os.getenv('DJANGO_DB_USER')} {os.getenv('DJANGO_DB_NAME')}" \
 					f" > {file_path2}"
-			subprocess.call(command2.split(), shell=True)
+			subprocess.getstatusoutput(command2)
 
 			with open(file_path3, 'w', encoding="utf-8") as f3:
 				f3.writelines('\n'.join(map(lambda key: f"{key} = 123", os.environ.__dict__['_data'].keys())))
