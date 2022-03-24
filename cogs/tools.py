@@ -1442,11 +1442,13 @@ class Tools(*tool_cogs):
 		file_path2: str = f'media/temporary/slothdjango_db_dump_{d}_{m}_{y}_{h}_{m}.sql'
 		file_path3: str = f'media/temporary/.env_schema_{d}_{m}_{y}_{h}_{m}.txt'
 		try:
-			command = f"mysqldump -u {os.getenv('SLOTH_DB_USER')} -p{os.getenv('SLOTH_DB_PASSWORD')} {os.getenv('SLOTH_DB_NAME')}" \
+			pw = os.getenv('SLOTH_DB_PASSWORD')
+			command = f"mysqldump -u {os.getenv('SLOTH_DB_USER')} {f'-p{pw}' if pw else ''} {os.getenv('SLOTH_DB_NAME')}" \
 				f" > {file_path}"
 			subprocess.call(command.split(), shell=True)
 
-			command2 = f"mysqldump -u {os.getenv('DJANGO_DB_USER')} -p{os.getenv('DJANGO_DB_PASSWORD')} {os.getenv('DJANGO_DB_NAME')}" \
+			pw2 = os.getenv('SLOTH_DB_PASSWORD')
+			command2 = f"mysqldump -u {os.getenv('DJANGO_DB_USER')} {f'-p{pw2}' if pw2 else ''} {os.getenv('DJANGO_DB_NAME')}" \
 				f" > {file_path2}"
 			subprocess.call(command2.split(), shell=True)
 
