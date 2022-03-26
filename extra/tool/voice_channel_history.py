@@ -3,6 +3,7 @@ from discord.ext import commands
 
 from mysqldb import the_database
 from typing import List, Union, Optional
+from extra import utils
 
 class VoiceChannelHistoryTable(commands.Cog):
     """ Class for managing the VoiceChannelHistory table in the database. """
@@ -118,3 +119,43 @@ class VoiceChannelHistoryTable(commands.Cog):
         await mycursor.execute("DELETE FROM VoiceChannelHistory WHERE user_id = %s LIMIT %s", (user_id, limit))
         await db.commit()
         await mycursor.close()
+
+
+class VoiceChannelHistorySystem(commands.Cog):
+    """ Class for the VoiceChannelHistory system. """
+
+    def __init__(self, client: commands.Bot) -> None:
+        """ Class init method. """
+
+        self.client = client
+
+
+    @commands.Cog.listener(name="on_voice_state_update")
+    async def on_voice_state_update_voice_channel_history(self, member, before, after):
+        """ Registers a member whenever they join a channel. """
+
+        # === Checks whether the user just changed their state being in the same VC. ===
+        if before.self_mute != after.self_mute:
+            return
+        if before.self_deaf != after.self_deaf:
+            return
+        if before.self_stream != after.self_stream:
+            return
+        if before.self_video != after.self_video:
+            return
+
+        if before.mute != after.mute:
+            return
+        if before.deaf != after.deaf:
+            return
+
+        bc, ac = before.channel, after.channel
+
+        current_ts = await utils.get_timestamp()
+
+        if not bc and ac: # Join
+            await self.insert_voice_channel_history(member.id, "join", current_ts, ac.id)
+        elif bc and ac: # Switch
+            await self.insert_voice_channel_history(member.id, "switch", current_ts, bc.id, ac.id)
+        else: # Leave
+            await self.insert_voice_channel_history(member.id, "leave", current_ts, bc.id)

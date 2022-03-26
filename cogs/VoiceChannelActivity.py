@@ -9,14 +9,15 @@ import os
 from typing import List, Tuple, Union, Optional, Dict, Any
 from extra import utils
 from extra.menu import PaginatorView
+from extra.tool.voice_channel_history import VoiceChannelHistoryTable, VoiceChannelHistorySystem
 
 allowed_roles = [int(os.getenv('OWNER_ROLE_ID', 123)), int(os.getenv('ADMIN_ROLE_ID', 123)), int(os.getenv('MOD_ROLE_ID', 123))]
 
 tool_cogs: List[commands.Cog] = [
-    
+    VoiceChannelHistoryTable, VoiceChannelHistorySystem
 ]
 
-class VoiceChannelActivity(commands.Cog):
+class VoiceChannelActivity(*tool_cogs):
     """ Category for the users' voice channel activities. """
 
     def __init__(self, client) -> None:
@@ -375,42 +376,23 @@ class VoiceChannelActivity(commands.Cog):
 
         await ctx.send(embed=embed)
 
-    @commands.command()
-    @utils.is_allowed(allowed_roles, throw_exc=True)
+    @commands.command(aliases=['vh', ])
+    # @utils.is_allowed(allowed_roles, throw_exc=True)
     async def voice_history(self, ctx, member: Optional[discord.Member] = None) -> None:
         """ Shows the Voice Channel history of a member.
         :param member: The member from whom to see the history. [Optional][Default = You] """
 
         author: discord.Member = ctx.author
-        current_ts = int(await utils.get_timestamp())
 
         if not member:
             member = ctx.author
 
-        channels_in_history = [
-            (member.id, 123, '1left', current_ts),
-            (member.id, 123, '1join', current_ts),
-            (member.id, 123, '1left', current_ts),
-            (member.id, 123, '1switch', current_ts),
-            (member.id, 123, '1switch', current_ts),
-            (member.id, 123, '1join', current_ts),
-
-            (member.id, 123, '2left', current_ts),
-            (member.id, 123, '2join', current_ts),
-            (member.id, 123, '2left', current_ts),
-            (member.id, 123, '2switch', current_ts),
-            (member.id, 123, '2switch', current_ts),
-            (member.id, 123, '2join', current_ts),
-
-            (member.id, 123, '3left', current_ts),
-            (member.id, 123, '3join', current_ts),
-            (member.id, 123, '3left', current_ts),
-            (member.id, 123, '3switch', current_ts),
-            (member.id, 123, '3switch', current_ts),
-            (member.id, 123, '3join', current_ts),
-
-            (member.id, 123, '4left', current_ts),
-        ]
+        channels_in_history = await self.get_voice_channel_history(member.id)
+        if not channels_in_history:
+            if author == member:
+                return await ctx.send(f"**You don't have any Voice Channels in the history, {member.mention}!**")
+            else:
+                return await ctx.send(f"**This user doesn't have any Voice Channels in the history, {member.mention}!**")
 
         # channels_in_history = await self.get_channels_in_history(member.id)
         if not channels_in_history:
@@ -453,7 +435,10 @@ class VoiceChannelActivity(commands.Cog):
         for i in range(0, 6, 1):
             if offset - 1 + i < lentries:
                 entry = entries[offset-1 + i]
-                description_list.append(f"<#{entry[1]}> **{entry[2]}** <t:{entry[3]}:R>")
+                if entry[1] == 'switch':
+                    description_list.append(f"(**{entry[1]}**) <#{entry[3]}> **->** <#{entry[4]}>  <t:{entry[2]}>")
+                else:
+                    description_list.append(f"(**{entry[1]}**) <#{entry[3]}> <t:{entry[2]}>")
             else:
                 break
 
