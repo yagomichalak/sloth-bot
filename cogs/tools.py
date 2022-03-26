@@ -1401,7 +1401,7 @@ class Tools(*tool_cogs):
 		except: 
 			pass
 		else:
-			await ctx.send(f"**{member.mention}, is back home, after a long day of surfing,!**")
+			await ctx.send(f"**{member.mention}, is back home, after a long day of surfing!**")
 
 	@commands.command(aliases=["make_dump", "mkdps", "mkdp"])
 	@commands.cooldown(1, 15, commands.BucketType.guild)
