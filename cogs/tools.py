@@ -1458,11 +1458,13 @@ class Tools(*tool_cogs):
 					f" > {file_path2}"
 			subprocess.getstatusoutput(command2)
 
-			with open(file_path3, 'w', encoding="utf-8") as f3:
+			with open(file_path3, 'w') as f3:
 				f3.writelines('\n'.join(map(lambda key: f"{key} = 123", os.environ.__dict__['_data'].keys())))
 
 			# Posts it
 			await channel.send(files=[discord.File(file_path), discord.File(file_path2), discord.File(file_path3)])
+		except Exception as e:
+			print("Error at making dump: ", e)
 		finally:
 			os.remove(file_path); os.remove(file_path2); os.remove(file_path3)
 
