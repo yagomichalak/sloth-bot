@@ -445,7 +445,6 @@ class VoiceChannelActivity(commands.Cog):
             timestamp=current_time
         )
 
-
         description_list = []
 
         for i in range(0, 6, 1):
