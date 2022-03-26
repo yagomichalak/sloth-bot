@@ -12,6 +12,9 @@ from extra.menu import PaginatorView
 
 allowed_roles = [int(os.getenv('OWNER_ROLE_ID', 123)), int(os.getenv('ADMIN_ROLE_ID', 123)), int(os.getenv('MOD_ROLE_ID', 123))]
 
+tool_cogs: List[commands.Cog] = [
+    
+]
 
 class VoiceChannelActivity(commands.Cog):
     """ Category for the users' voice channel activities. """
