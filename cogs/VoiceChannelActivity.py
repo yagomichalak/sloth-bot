@@ -32,6 +32,7 @@ class VoiceChannelActivity(*tool_cogs):
 
         self.calculate.start()
         self.check_old_record_deletion_time.start()
+        self.check_exceeding_voice_channels_from_history.start()
 
         print('VoiceChannelActivity cog is online!')
 
@@ -376,8 +377,8 @@ class VoiceChannelActivity(*tool_cogs):
 
         await ctx.send(embed=embed)
 
-    @commands.command(aliases=['vh', ])
-    # @utils.is_allowed(allowed_roles, throw_exc=True)
+    @commands.command(aliases=['vh'])
+    @utils.is_allowed(allowed_roles, throw_exc=True)
     async def voice_history(self, ctx, member: Optional[discord.Member] = None) -> None:
         """ Shows the Voice Channel history of a member.
         :param member: The member from whom to see the history. [Optional][Default = You] """

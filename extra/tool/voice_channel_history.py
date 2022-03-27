@@ -1,5 +1,5 @@
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 
 from mysqldb import the_database
 from typing import List, Union, Optional
@@ -110,13 +110,28 @@ class VoiceChannelHistoryTable(commands.Cog):
         await mycursor.close()
         return history_vcs
 
-    async def delete_voice_channel_history(self, user_id: int, limit: int = 10) -> None:
-        """ Deletes Voice Channels from the user's history.
-        :param user_id: The user ID.
-        :param limit: The limit of channels to delete from the user's history. [Default = 10] """
+    async def get_users_exceeding_records(self, limit: int = 10) -> List[List[int]]:
+        """ Gets all IDs of the users that have an amount of Voice Channel records
+        that exceeds the limit.
+        :param limit: The limit of records one can have. """
+
+        mycursor, _ = await the_database()
+        await mycursor.execute("""
+            SELECT * FROM (
+                SELECT COUNT(*) AS records_count, user_id 
+                FROM VoiceChannelHistory GROUP BY user_id
+            ) AS result WHERE records_count >= %s;
+        """, (limit,))
+        raw_results = await mycursor.fetchall()
+        await mycursor.close()
+        return raw_results
+
+    async def delete_voice_channel_history(self, users: List[int]) -> None:
+        """ Deletes Voice Channels from the users' Voice Channel histories.
+        :param users: A list of users from whom to delete records from their history. """
 
         mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM VoiceChannelHistory WHERE user_id = %s LIMIT %s", (user_id, limit))
+        await mycursor.executemany("DELETE FROM VoiceChannelHistory WHERE user_id = %s LIMIT %s", users)
         await db.commit()
         await mycursor.close()
 
@@ -128,6 +143,17 @@ class VoiceChannelHistorySystem(commands.Cog):
         """ Class init method. """
 
         self.client = client
+
+    @tasks.loop(minutes=1)
+    async def check_exceeding_voice_channels_from_history(self) -> None:
+        """ Checks for channels that are exceeding the amount of Voice Channel records
+        in people's histories. """
+
+        records_limit: int = 55
+        delete_records_limit: int = 5
+        if raw_users := await self.get_users_exceeding_records(limit=records_limit):
+            users = list(map(lambda result: [result[1], delete_records_limit], raw_users))
+            await self.delete_voice_channel_history(users)
 
 
     @commands.Cog.listener(name="on_voice_state_update")
