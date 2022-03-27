@@ -105,7 +105,7 @@ class VoiceChannelHistoryTable(commands.Cog):
         :param user_id: The user's ID. """
 
         mycursor, _ = await the_database()
-        await mycursor.execute("SELECT * FROM VoiceChannelHistory WHERE user_id = %s", (user_id,))
+        await mycursor.execute("SELECT * FROM VoiceChannelHistory WHERE user_id = %s ORDER BY action_ts DESC", (user_id,))
         history_vcs = await mycursor.fetchall()
         await mycursor.close()
         return history_vcs
