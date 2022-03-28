@@ -46,7 +46,7 @@ INSERT INTO Sloth.LanguageRoom (category, english_name, room_name, room_quant, r
 /* 036 */("south asian", "Telugu", "తెలుగు (Telugu)", 2, 10, 60),
 /* 037 */("south asian", "Kannada", "ಕನ್ನಡ (Kannada)", 2, 10, 60),
 /* 038 */("south asian", "Bengali", "বাংলা (Bengali)", 2, 10, 60),
-/* 039 */("south asian", "Nepali", "ལྷོ་མཚམས་མའི་ཁ (Nepali)", 2, 10, 60),
+/* 039 */("south asian", "Nepali", "नेपाली (Nepali)", 2, 10, 60),
 
 /* 040 */("south asian", "Urdu", "اردو Urdu 🇵🇰", 2, 10, 60),
 
