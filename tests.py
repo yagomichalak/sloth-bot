@@ -333,22 +333,3 @@ UPDATE TribeMember as OG
 # print(the_member)
 
 
-
-DELETE 
-    VCH 
-FROM 
-    VoiceChannelHistory VCH INNER JOIN 
-         (SELECT 
-           distinct user_id 
-         FROM 
-             VoiceChannelHistory 
-         GROUP BY user_id  
-      HAVING COUNT(user_id) >= 5 ) as result on result.id = VCH.id;
-
-
-      delete from VoiceChannelHistory as history left join ((select count(*) as records_count, user_id from VoiceChannelHistory group by user_id) as VCH where records_count >= 10) as results on results.user_id = history.user_id;
-
-select distinct VCH.user_id from VoiceChannelHistory VCH left join (select count(*) as records_count, user_id from VoiceChannelHistory group by user_id) as result on VCH.user_id = result.user_id AND records_count >= 10;
-
-
-select * from (select count(*) as records_count, user_id from VoiceChannelHistory group by user_id) as result where records_count >= 10;
