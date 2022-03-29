@@ -1685,10 +1685,10 @@ class Moderation(*moderation_cogs):
 			if user_infraction := await self.get_user_infraction_by_infraction_id(infr_id):
 
 				# Get user by id
-				member = self.client.get_user(user_infraction[0][0])
+				member = await self.client.fetch_user(user_infraction[0][0])
 
 				# General embed
-				general_embed = discord.Embed(description=f'**New Reason:** {reason}', colour=discord.Colour.lighter_grey())
+				general_embed = discord.Embed(description=f'**New Reason:** {reason}', color=discord.Color.lighter_grey())
 				general_embed.set_author(name=f"{member}'s {user_infraction[0][1].capitalize()} reason has been edited", icon_url=member.display_avatar)
 				general_embed.set_footer(text=f"Edited by {ctx.author}", icon_url=ctx.author.display_avatar)
 
