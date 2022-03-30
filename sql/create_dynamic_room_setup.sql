@@ -640,6 +640,7 @@ INSERT INTO Sloth.LanguageRoomPermissions (room_id, role_id, permission_name, pe
 
 /* Amazigh Channel */
 (90, /*Native Amazigh*/ 658059163041267722, "speaker", true),
+(90, /*Studying Amazigh*/ 948986544138616862, "speaker", true),
 
 /* Esperanto Channel */
 (91, /*Studying Conlang*/ 591576844042502193, "speaker", true),
