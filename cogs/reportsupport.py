@@ -1,3 +1,4 @@
+import aiohttp
 import discord
 from discord.ext import commands
 from mysqldb import *
@@ -20,6 +21,7 @@ lesson_management_role_id = int(os.getenv('LESSON_MANAGEMENT_ROLE_ID', 123))
 server_id = int(os.getenv('SERVER_ID', 123))
 
 staff_vc_id = int(os.getenv('STAFF_VC_ID', 123))
+webhook_url: str = os.getenv('WEBHOOK_URL')
 
 allowed_roles = [
 int(os.getenv('OWNER_ROLE_ID', 123)), admin_role_id,
@@ -54,8 +56,25 @@ class ReportSupport(*report_support_classes):
         self.client.add_view(view=ReportSupportView(self.client))
         print('ReportSupport cog is online!')
 
+    @commands.Cog.listener()
+    async def on_message(self, message: discord.Message) -> None:
+        """ Detects when a webhook is sent from the Sloth Appeals server. """
 
-    async def handle_application(self, guild, payload) -> None:
+        # Initiates the session
+        async with aiohttp.ClientSession() as session:
+            # Gets the webhook
+            webhook = discord.Webhook.from_url(webhook_url, session=session)
+            try:
+                # Tries to fetch the message
+                await webhook.fetch_message(message.id)
+            except discord.NotFound:
+                pass
+            else:
+                # Adds the reactions to the message, if fetched
+                await message.add_reaction('✅')
+                await message.add_reaction('❌')
+
+    async def handle_ban_appeal(self, message: discord.Message, payload) -> None:
         """ Handles teacher applications.
         :param guild: The server in which the application is running.
         :param payload: Data about the Staff member who is opening the application. """
@@ -66,13 +85,44 @@ class ReportSupport(*report_support_classes):
             if not (app := await self.get_application_by_message(payload.message_id)):
                 return
 
-            # Checks if the person has not an open interview channel already
-            if not app[3]:
-                # Creates an interview room with the teacher and sends their application there (you can z!close there)
-                return await self.create_interview_room(guild, app)
+            try:
+                user = discord.Object(app[1])
+                await message.guild.unban(user)
+            except Exception as e:
+                print(e)
+            else:
+                await message.add_reaction('❤️‍🩹')
+
 
         elif emoji == '❌':
             # Tries to delete the teacher app from the db, in case it is registered
+            app = await self.get_application_by_message(payload.message_id)
+            if app and not app[3]:
+                await self.delete_application(payload.message_id)
+
+
+                app_channel = self.client.get_channel(self.ban_appeals_channel_id)
+                app_msg = await app_channel.fetch_message(payload.message_id)
+                await app_msg.add_reaction('🚫')
+
+    async def handle_application(self, guild, payload) -> None:
+        """ Handles applications.
+        :param guild: The server in which the application is running.
+        :param payload: Data about the Staff member who is opening the application. """
+
+        emoji = str(payload.emoji)
+        if emoji == '✅':
+            # Gets the app and does the magic
+            if not (app := await self.get_application_by_message(payload.message_id)):
+                return
+
+            # Checks if the person has not an open interview channel already
+            if not app[3]:
+                # Creates an interview room with the applicant and sends their application there (you can z!close there)
+                return await self.create_interview_room(guild, app)
+
+        elif emoji == '❌':
+            # Tries to delete the app from the db, in case it is registered
             app = await self.get_application_by_message(payload.message_id)
             if app and not app[3]:
                 await self.delete_application(payload.message_id)
@@ -982,7 +1032,6 @@ Entry requirements:
 
         return await ctx.send(f"**`{forbid}` {'witnesses have' if forbid > 1 else 'witness has'} been forbidden from here!**")
             
-
     @commands.command(aliases=['delete_channel', 'archive', 'cc'])
     @commands.has_any_role(*allowed_roles)
     async def close_channel(self, ctx):
@@ -1030,8 +1079,6 @@ Entry requirements:
                 embed.description = "Not deleting it!"
                 await confirmation.edit(content='', embed=embed)
             
-            
-
     async def dnk_embed(self, member):
         def check(r, u):
             return u == member and str(r.message.id) == str(the_msg.id) and str(r.emoji) in ['⬅️', '➡️']
@@ -1120,7 +1167,6 @@ Entry requirements:
         formatted_pings = await self.format_application_pings(guild, interview_info['pings'])
         await txt_channel.send(content=f"{formatted_pings}, {applicant.mention}", embed=app_embed)
 
-
     # In-game commands
     @commands.command()
     @commands.has_permissions(administrator=True)
@@ -1157,7 +1203,6 @@ Entry requirements:
         except:
             pass
             
-
     async def audio(self, member: discord.Member, audio_name: str) -> None:
         """ Plays an audio.
         :param member: A member to get guild context from.
