@@ -88,9 +88,10 @@ class ReportSupport(*report_support_classes):
             try:
                 user = discord.Object(app[1])
                 await message.guild.unban(user)
-            except Exception as e:
-                print(e)
-            else:
+            except discord.NotFound:
+                pass
+            finally:
+                await self.delete_application(message.id)
                 await message.add_reaction('❤️‍🩹')
 
 

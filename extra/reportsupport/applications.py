@@ -93,11 +93,11 @@ class ApplicationsTable(commands.Cog):
                     await self.handle_application(guild, payload)
             elif payload.channel_id == self.teacher_app_channel_id: # User is an mod+ or lesson manager
                 if await utils.is_allowed([moderator_role_id, lesson_management_role_id]).predicate(channel=channel, member=payload.member):
-                    await self.handle_application(message, payload)
+                    await self.handle_application(guild, payload)
 
             elif payload.channel_id == self.ban_appeals_channel_id:
                 if adm:
-                    await self.handle_ban_appeal(guild, payload)
+                    await self.handle_ban_appeal(message, payload)
             elif adm: # User is an adm
                 await self.handle_application(guild, payload)
             else:
