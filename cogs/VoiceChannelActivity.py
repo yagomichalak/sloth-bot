@@ -57,7 +57,7 @@ class VoiceChannelActivity(*tool_cogs):
 
         if channel := after.channel:
 
-            tzone = timezone('Etc/GMT-1')
+            tzone = timezone('Europe/Berlin')
             date_and_time = datetime.now().astimezone(tzone)
             the_time = date_and_time.strftime('%H:%M')
 
@@ -66,7 +66,7 @@ class VoiceChannelActivity(*tool_cogs):
     @tasks.loop(seconds=60)
     async def calculate(self) -> None:
         """ Calculates all members that are in a voice channel. """
-        tzone = timezone('Etc/GMT-1')
+        tzone = timezone('Europe/Berlin')
         date_and_time = datetime.now().astimezone(tzone)
         the_time = date_and_time.strftime('%H:%M')
 

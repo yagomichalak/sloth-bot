@@ -331,5 +331,3 @@ UPDATE TribeMember as OG
         
 
 # print(the_member)
-
-
