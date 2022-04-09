@@ -67,7 +67,7 @@ class Tools(*tool_cogs):
 	@commands.Cog.listener()
 	async def on_ready(self):
 
-		self.make_dumps_event.start()
+		# self.make_dumps_event.start()
 		print('Tools cog is ready!')
 
 
