@@ -4,7 +4,7 @@ from discord.ext import commands, tasks, menus
 import asyncio
 from mysqldb import *
 from datetime import datetime
-from typing import List, Union, Optional, Dict
+from typing import List, Union, Optional, Dict, Tuple
 import os
 
 from extra.useful_variables import banned_links
@@ -19,27 +19,28 @@ from extra.moderation.userinfractions import ModerationUserInfractionsTable
 from extra.moderation.watchlist import ModerationWatchlistTable
 from extra.moderation.fakeaccounts import ModerationFakeAccountsTable
 from extra.moderation.moderatednicknames import ModeratedNicknamesTable
+from extra.moderation.user_muted_galaxies import UserMutedGalaxiesTable
 
 # IDs
-mod_log_id = int(os.getenv('MOD_LOG_CHANNEL_ID'))
-welcome_channel_id = int(os.getenv('WELCOME_CHANNEL_ID'))
-suspect_channel_id = int(os.getenv('SUSPECT_CHANNEL_ID'))
+mod_log_id = int(os.getenv('MOD_LOG_CHANNEL_ID', 123))
+welcome_channel_id = int(os.getenv('WELCOME_CHANNEL_ID', 123))
+suspect_channel_id = int(os.getenv('SUSPECT_CHANNEL_ID', 123))
 
 last_deleted_message = []
 
-mod_role_id = int(os.getenv('MOD_ROLE_ID'))
-muted_role_id = int(os.getenv('MUTED_ROLE_ID'))
-preference_role_id = int(os.getenv('PREFERENCE_ROLE_ID'))
-senior_mod_role_id: int = int(os.getenv('SENIOR_MOD_ROLE_ID'))
-allowed_roles = [int(os.getenv('OWNER_ROLE_ID')), int(os.getenv('ADMIN_ROLE_ID')), senior_mod_role_id, mod_role_id]
+mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
+muted_role_id = int(os.getenv('MUTED_ROLE_ID', 123))
+preference_role_id = int(os.getenv('PREFERENCE_ROLE_ID', 123))
+senior_mod_role_id: int = int(os.getenv('SENIOR_MOD_ROLE_ID', 123))
+allowed_roles = [int(os.getenv('OWNER_ROLE_ID', 123)), int(os.getenv('ADMIN_ROLE_ID', 123)), senior_mod_role_id, mod_role_id]
 
-server_id = int(os.getenv('SERVER_ID'))
+server_id = int(os.getenv('SERVER_ID', 123))
 guild_ids: List[int] = [server_id]
 
 moderation_cogs: List[commands.Cog] = [
 	ModerationFirewallTable, BypassFirewallTable, ModerationMutedMemberTable, 
 	ModerationUserInfractionsTable, ModerationWatchlistTable, ModerationFakeAccountsTable,
-	ModeratedNicknamesTable
+	ModeratedNicknamesTable, UserMutedGalaxiesTable
 ]
 
 class Moderation(*moderation_cogs):
@@ -322,10 +323,10 @@ class Moderation(*moderation_cogs):
 		""" (MOD) Clears the whole channel. """
 
 		special_channels = {
-		  int(os.getenv('MUTED_CHANNEL_ID')): 'https://cdn.discordapp.com/attachments/746478846466981938/748605295122448534/Muted.png',
-		  int(os.getenv('QUESTION_CHANNEL_ID')): '''**Would you like to ask us a question about the server? Ask them there!**
+		  int(os.getenv('MUTED_CHANNEL_ID', 123)): 'https://cdn.discordapp.com/attachments/746478846466981938/748605295122448534/Muted.png',
+		  int(os.getenv('QUESTION_CHANNEL_ID', 123)): '''**Would you like to ask us a question about the server? Ask them there!**
 	`Questions will be answered and deleted immediately.`''',
-		  int(os.getenv('SUGGESTION_CHANNEL_ID')): '''**Would you like to suggest a feature for the server? Please follow this template to submit your feature request**
+		  int(os.getenv('SUGGESTION_CHANNEL_ID', 123)): '''**Would you like to suggest a feature for the server? Please follow this template to submit your feature request**
 
 	**Suggestion:**
 	`A short idea name/description`
@@ -520,7 +521,50 @@ class Moderation(*moderation_cogs):
 
 		await ctx.send(embed=embed)
 
+	async def add_galaxy_room_perms(self, member: discord.Member, muted_galaxies: List[Tuple[int, int]]) -> List[Tuple[int, int]]:
+		""" Removes teh user's permissions in all Galaxy Rooms.
+		:param member: The member from whom to remove the permissions. """
 
+		# Gets all Galaxy rooms that are created
+		SmartRoom = self.client.get_cog('CreateSmartRoom')
+		all_galaxies = await SmartRoom.get_galaxy_rooms()
+		
+		# Gets all Galaxy categories to give perms back
+		galaxy_categories: Dict[discord.CategoryChannel, List[int]] = {
+			gcat: galaxy for galaxy in all_galaxies
+			for mgalaxy in muted_galaxies
+			if galaxy[1] == mgalaxy[1]
+			and (gcat := discord.utils.get(member.guild.categories, id=galaxy[1]))
+		}
+		# Gives perms to all Galaxy categories
+		for gcat, ginfo in galaxy_categories.items():
+			await SmartRoom.handle_permissions([member], ginfo, member.guild, allow=True)
+
+	async def remove_galaxy_room_perms(self, member: discord.Member) -> List[Tuple[int, int]]:
+		""" Removes teh user's permissions in all Galaxy Rooms.
+		:param member: The member from whom to remove the permissions. """
+
+		removed_grooms = []
+		# Gets all Galaxy rooms that are created
+		SmartRoom = self.client.get_cog('CreateSmartRoom')
+		all_galaxies = await SmartRoom.get_galaxy_rooms()
+
+		# Gets all selected Galaxy categories to remove perms
+		galaxy_categories: Dict[discord.CategoryChannel, List[int]] = {
+			gcat: galaxy for galaxy in all_galaxies
+			if (gcat := discord.utils.get(member.guild.categories, id=galaxy[1]))
+		}
+
+		# Removes perms from the selected Galaxy categories
+		for gcat, ginfo in galaxy_categories.items():
+			overwrites = gcat.overwrites
+			if not overwrites.get(member):
+				continue
+
+			await SmartRoom.handle_permissions([member], ginfo, member.guild, allow=False)
+			removed_grooms.append((member.id, gcat.id))
+
+		return removed_grooms
 
 	@commands.command(name="mute", aliases=["shutup", "shut_up", "stfu", "zitto", "zitta", "shh", "tg", "ta_gueule", "tagueule", "mutado", "xiu", "calaboca"])
 	@utils.is_allowed(allowed_roles, throw_exc=True)
@@ -579,6 +623,10 @@ class Moderation(*moderation_cogs):
 			await member.edit(roles=keep_roles)
 			user_role_ids = [(member.id, rr.id, current_ts, None) for rr in remove_roles]
 			await self.insert_in_muted(user_role_ids)
+
+			removed_grooms = await self.remove_galaxy_room_perms(member)
+			await self.insert_user_muted_galaxies(removed_grooms)
+
 			# General embed
 			current_time = await utils.get_time_now()
 			general_embed = discord.Embed(description=f'**Reason:** {reason}', colour=discord.Colour.dark_grey(), timestamp=current_time)
@@ -701,53 +749,62 @@ class Moderation(*moderation_cogs):
 
 		role = discord.utils.get(ctx.guild.roles, id=muted_role_id)
 		if not member:
-			return await answer("**Please, specify a member!**", delete_after=3)
-		if role in member.roles:
-			if user_roles := await self.get_muted_roles(member.id):
+			return await answer("**Please, specify a member!**")
 
-				bot = discord.utils.get(ctx.guild.members, id=self.client.user.id)
+		if not member.get_role(role.id):
+			return await answer(f'**{member} is not even muted!**')
 
-				member_roles = list([
-					a_role for the_role in user_roles if (a_role := discord.utils.get(member.guild.roles, id=the_role[1]))
-					and a_role < bot.top_role
-				])
-				member_roles.extend(member.roles)
+		if user_roles := await self.get_muted_roles(member.id):
 
-				member_roles = list(set(member_roles))
-				if role in member_roles:
-					member_roles.remove(role)
+			bot = discord.utils.get(ctx.guild.members, id=self.client.user.id)
 
-				await member.edit(roles=member_roles)
+			member_roles = list([
+				a_role for the_role in user_roles if (a_role := discord.utils.get(member.guild.roles, id=the_role[1]))
+				and a_role < bot.top_role
+			])
+			member_roles.extend(member.roles)
 
-				try:
-					await self.remove_all_roles_from_system(member.id)
-				except Exception as e:
-					print(e)
-					pass
+			member_roles = list(set(member_roles))
+			if role in member_roles:
+				member_roles.remove(role)
 
-			current_time = await utils.get_time_now()
-			general_embed = discord.Embed(colour=discord.Colour.light_grey(),
-										  timestamp=current_time)
-			general_embed.set_author(name=f'{member} has been unmuted', icon_url=member.display_avatar)
-			await answer(embed=general_embed)
-			# Moderation log embed
-			moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
-			embed = discord.Embed(title='__**Unmute**__', colour=discord.Colour.light_grey(),
-								  timestamp=current_time)
-			embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nId: {member.id}```',
-							inline=False)
-			embed.set_author(name=member)
-			embed.set_thumbnail(url=member.display_avatar)
-			embed.set_footer(text=f"Unmuted by {ctx.author}", icon_url=ctx.author.display_avatar)
-			await moderation_log.send(embed=embed)
+			await member.edit(roles=member_roles)
+
 			try:
-				await member.send(embed=general_embed)
-			except:
+				await self.remove_all_roles_from_system(member.id)
+			except Exception as e:
+				print(e)
 				pass
 
-		else:
-			await answer(f'**{member} is not even muted!**', delete_after=5)
+		if muted_galaxies := await self.get_user_muted_galaxies(member.id):
+			await self.add_galaxy_room_perms(member, muted_galaxies)
+			await self.delete_user_muted_galaxies(member.id)
 
+		try:
+			await member.remove_roles(role)
+		except:
+			pass
+
+		current_time = await utils.get_time_now()
+		general_embed = discord.Embed(colour=discord.Colour.light_grey(),
+										timestamp=current_time)
+		general_embed.set_author(name=f'{member} has been unmuted', icon_url=member.display_avatar)
+		await answer(embed=general_embed)
+		# Moderation log embed
+		moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
+		embed = discord.Embed(title='__**Unmute**__', colour=discord.Colour.light_grey(),
+								timestamp=current_time)
+		embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nId: {member.id}```',
+						inline=False)
+		embed.set_author(name=member)
+		embed.set_thumbnail(url=member.display_avatar)
+		embed.set_footer(text=f"Unmuted by {ctx.author}", icon_url=ctx.author.display_avatar)
+		await moderation_log.send(embed=embed)
+		try:
+			await member.send(embed=general_embed)
+		except:
+			pass
+			
 	# Mutes a member temporarily
 	@commands.command()
 	@utils.is_allowed(allowed_roles, throw_exc=True)
@@ -1440,7 +1497,7 @@ class Moderation(*moderation_cogs):
 				await self.client.get_cog('ReportSupport').audio(member, 'troll_firewall_on')
 
 	@commands.command(aliases=['bfw', 'bypassfirewall', 'bypass_fire', 'bypassfire'])
-	@utils.is_allowed([senior_mod_role_id], throw_exc=True)
+	@utils.is_allowed([senior_mod_role_id, mod_role_id], throw_exc=True)
 	async def bypass_firewall(self, ctx, user: discord.User = None) -> None:
 		""" Makes a user able to bypass the Firewall.
 		:param user: The user to make able to do so. """
@@ -1626,10 +1683,10 @@ class Moderation(*moderation_cogs):
 			if user_infraction := await self.get_user_infraction_by_infraction_id(infr_id):
 
 				# Get user by id
-				member = self.client.get_user(user_infraction[0][0])
+				member = await self.client.fetch_user(user_infraction[0][0])
 
 				# General embed
-				general_embed = discord.Embed(description=f'**New Reason:** {reason}', colour=discord.Colour.lighter_grey())
+				general_embed = discord.Embed(description=f'**New Reason:** {reason}', color=discord.Color.lighter_grey())
 				general_embed.set_author(name=f"{member}'s {user_infraction[0][1].capitalize()} reason has been edited", icon_url=member.display_avatar)
 				general_embed.set_footer(text=f"Edited by {ctx.author}", icon_url=ctx.author.display_avatar)
 
@@ -1684,7 +1741,7 @@ class Moderation(*moderation_cogs):
 		if title.lower() not in mod_app + teacher_app + event_host_app:
 			return await ctx.send(f"**Invalid title, {member.mention}!**")
 
-		channel = discord.utils.get(ctx.guild.text_channels, id=int(os.getenv('REPORT_CHANNEL_ID')))
+		channel = discord.utils.get(ctx.guild.text_channels, id=int(os.getenv('REPORT_CHANNEL_ID', 123)))
 		message = await channel.fetch_message(message_id) # Message containing the application buttons
 		if not message:
 			return await ctx.send(f"**Message not found, {member.mentio}!**")

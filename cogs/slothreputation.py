@@ -11,9 +11,9 @@ from extra import utils
 from extra.view import ExchangeActivityView
 from extra.slothclasses.player import Player
 
-guild_ids = [int(os.getenv('SERVER_ID'))]
+guild_ids = [int(os.getenv('SERVER_ID', 123))]
 
-commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
+commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID', 123))
 
 from extra.currency.membersscore import MembersScoreTable
 

@@ -5,7 +5,7 @@ from typing import List, Union
 from extra import utils
 import os
 
-afk_channel_id = int(os.getenv('AFK_CHANNEL_ID'))
+afk_channel_id = int(os.getenv('AFK_CHANNEL_ID', 123))
 
 class UserVoiceSystem(commands.Cog):
     """ Cog for the inner systems of UserVoice events. """
@@ -83,7 +83,7 @@ class UserVoiceSystem(commands.Cog):
             except ValueError:
                 pass
 
-            people_in_vc: int = len([m for m in bc.members if not m.bot and m.id not in alts]) +1
+            people_in_vc: int = len([m for m in bc.members if not m.bot and m.id not in alts]) + 1
 
             if people_in_vc < 2 or after.self_mute or after.mute or after.deaf or after.channel.id == afk_channel_id:
                 return await self.update_user_server_time(member.id, 0, current_ts)
@@ -235,7 +235,7 @@ class UserVoiceSystem(commands.Cog):
             except ValueError:
                 pass
 
-            people_in_vc: int = len([m for m in bc.members if not m.bot and m.id not in alts])
+            people_in_vc: int = len([m for m in bc.members if not m.bot and m.id not in alts]) + 1
             if people_in_vc < 2 or before.self_mute or before.mute or before.deaf or before.channel.id == afk_channel_id:
                 return await self.update_user_server_timestamp(member.id, None)
             
