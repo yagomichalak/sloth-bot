@@ -119,7 +119,7 @@ different_class_roles = {
         "ingilizce", "inggris", "영어", "الإنكليزية" ,"الإنكليزِيَّة" ,"الإنجليزية",
         "AL-إنجليزية", "الإنكليزية-Al", "الإنكليزِيَّة-AL", "AL-إنجليزية",
         "AL-الإنكليزية", "A-الإنكليزيَّة", "AL-إنكليزيَّة", "английский",
-        "انگلیسی", "英語"
+        "انگلیسی", "英語", "英语"
     ],
     "german": [
         "almanca", "allemand", "aléman", "jerman", "deutsch", "آلمانی",
@@ -151,7 +151,7 @@ different_class_roles = {
         "japonês", "japonais" ,"japanisch", "japonés", "日本語", "giapponese"
     ],
     "korean": [
-        "한국어"
+        "한국어", "bahasa korea"
     ], 
     "celtic": [
         "irish"
