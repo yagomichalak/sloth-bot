@@ -21,4 +21,4 @@ python-dotenv==0.15.0
 treelib==1.6.1
 emoji==1.4.1
 emojis==0.6.0
-git+https://github.com/Pycord-Development/pycord@14607fe5a2c48c5ab2a89a0b2c54dc64df63be8a
+py-cord==2.0.0b4
