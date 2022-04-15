@@ -358,3 +358,66 @@ class DebateManagerApplicationModal(Modal):
         await app.add_reaction('❌')
         # Saves in the database
         await self.cog.insert_application(app.id, member.id, 'debate_manager')
+
+class UserReportDetailModal(Modal):
+    """ Class for specifying details for a User Report application. """
+
+    def __init__(self, client: commands.Bot, option: str) -> None:
+        """ Class init method. """
+
+        super().__init__("Report a User")
+        self.client = client
+        self.cog: commands.Cog = client.get_cog('ReportSupport')
+        self.add_item(
+            InputText(
+                label="What Happened?",
+                placeholder="Describe the situation as much as you can, so we can help you better and faster.",
+                style=discord.InputTextStyle.paragraph
+            )
+        )
+        self.option = option
+
+    async def callback(self, interaction: discord.Interaction) -> None:
+        """ Callback for the form modal. """        
+
+        text = self.children[0].value
+        
+        # guild = self.client.get_guild(int(os.getenv('SERVER_ID', 123)))
+        # member = discord.utils.get(guild.members, id=interaction.user.id)
+        member = interaction.user
+
+        if self.option == 'Report':
+            try:
+                exists = await self.cog.report_someone(interaction, text)
+                if exists is False:
+                    return
+            except Exception as e:
+                print(e)
+
+            else:
+                return await self.cog.audio(member, 'case_alert')
+
+        elif self.option == 'Support':
+            message = f"Please, {member.mention}, try to explain what kind of help you want related to the server."
+            try:
+                exists = await self.cog.generic_help(interaction, 'general help', message)
+                if exists is False:
+                    return
+            except Exception as e:
+                print(e)
+            else:
+                return await self.cog.audio(member, 'general_help_alert')
+                
+        elif self.option == 'Help':
+            message = f"Please, {member.mention}, inform us what roles you want, and if you spotted a specific problem with the reaction-role selection."
+            try:
+                exists = await self.cog.generic_help(interaction, 'role help', message)
+                if exists is False:
+                    return
+            except Exception as e:
+                print(e)
+            else:
+                return await self.cog.audio(member, 'role_help_alert')
+
+        elif self.option == 'Oopsie':
+            return await interaction.followup.send("**All right, cya!**", ephemeral=True)

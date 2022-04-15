@@ -945,7 +945,7 @@ class Munk(Player):
 
         roles = await self.get_tribe_roles(member.id)
         if not roles:
-            return await ctx.send(f"**This tribe doesn't have any intern roles, {member.mention}!**")
+            return await ctx.send(f"**This tribe doesn't have any internal roles, {member.mention}!**")
 
         embed = discord.Embed(
             title=f"__{tribe['name']}'s Roles__:",
