@@ -13,8 +13,8 @@ from functools import partial
 import json
 
 
-mod_role_id = int(os.getenv('MOD_ROLE_ID'))
-admin_role_id = int(os.getenv('ADMIN_ROLE_ID'))
+mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
+admin_role_id = int(os.getenv('ADMIN_ROLE_ID', 123))
 
 class ReportSupportView(discord.ui.View):
     """ View for the ReportSupport menu. """
@@ -106,27 +106,39 @@ class ReportSupportView(discord.ui.View):
         """ Button for buying a custom bot. """
 
         member = interaction.user
+        guild = interaction.guild
+        await interaction.response.defer(ephemeral=True)
 
-        member_ts = self.cog.cache.get(member.id)
+        member_ts = self.cog.bot_cache.get(member.id)
         time_now = await utils.get_timestamp()
         if member_ts:
             sub = time_now - member_ts
             if sub <= 240:
-                return await member.send(
+                return await interaction.followup.send(
                     f"**You are on cooldown to use this, try again in {round(240-sub)} seconds**", ephemeral=True)
-            
-        await interaction.response.defer()
 
-        self.cog.cache[member.id] = time_now
+        self.cog.bot_cache[member.id] = time_now
+
+        with open('extra/random/texts/dnk.txt', 'r') as file:
+            dnk_text = file.read()
+
+        website_link = "https://thelanguagesloth.com"
+
         # Order a bot
-        dnk = self.client.get_user(int(os.getenv('DNK_ID')))
-        embed = discord.Embed(title="New possible order!",
-            description=f"{member.mention} ({member.id}) might be interested in buying something from you!",
-            color=member.color)
+        embed = discord.Embed(
+            title="__Commission a Bot!__",
+            description=dnk_text,
+            color=member.color,
+            timestamp=interaction.message.created_at,
+            url=website_link
+        )
         embed.set_thumbnail(url=member.display_avatar)
-        await dnk.send(embed=embed)
-        await member.send(f"**If you are really interested in **buying** a custom bot, send a private message to {dnk.mention}!**")
-        await self.cog.dnk_embed(member)
+        embed.set_footer(text=guild.name, icon_url=guild.icon.url)
+        view = discord.ui.View()
+        view.add_item(
+            discord.ui.Button(label="Go to website!", url=website_link)
+        )
+        await interaction.followup.send(embed=embed, view=view, ephemeral=True)
 
     @discord.ui.button(label="Verify", style=1, custom_id=f"verify_id", emoji="☑️", row=2)
     async def verify_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:

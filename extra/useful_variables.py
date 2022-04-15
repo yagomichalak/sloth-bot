@@ -212,28 +212,28 @@ banned_links = [
 ]
 
 patreon_roles = {
-        int(os.getenv('SLOTH_SUPPORTER_ROLE_ID')): ["**Thanks! {member.mention} just became a `Sloth Supporter`**", "**Hey! Thank you for helping our community, you will now receive :leaves: 300 ŁŁ monthly, you'll have access to exclusive content from our events.**", """Hello there Supporter! it's finally PayDay! you just received your monthly **300** :leaves: in your account!
+        int(os.getenv('SLOTH_SUPPORTER_ROLE_ID', 123)): ["**Thanks! {member.mention} just became a `Sloth Supporter`**", "**Hey! Thank you for helping our community, you will now receive :leaves: 300 ŁŁ monthly, you'll have access to exclusive content from our events.**", """Hello there Supporter! it's finally PayDay! you just received your monthly **300** :leaves: in your account!
 You can check it with the command "z!status" or "z!profile", check our website to learn what to spend it with!""", 300],
 
-        int(os.getenv('SLOTH_NATION_ROLE_ID')): ["**Thank you, {member.mention}, for joining the `Sloth Nation`!**", "**Hey! Thank you for helping our community, you will now receive :leaves: 2000 ŁŁ monthly, you'll have access to exclusive content from our events.**", """Yay! Hello nation, it's that time of the month! you just received your monthly **2.000** :leaves: in your account!
+        int(os.getenv('SLOTH_NATION_ROLE_ID', 123)): ["**Thank you, {member.mention}, for joining the `Sloth Nation`!**", "**Hey! Thank you for helping our community, you will now receive :leaves: 2000 ŁŁ monthly, you'll have access to exclusive content from our events.**", """Yay! Hello nation, it's that time of the month! you just received your monthly **2.000** :leaves: in your account!
 You can check it with the command "z!status" or "z!profile", check our website to learn what to spend it on! """, 2000],
 
 
 
-        int(os.getenv('SLOTH_NAPPER_ROLE_ID')): ["**Wowie! {member.mention} joined the `Sloth Napper`!  <:zslothsleepyuwu:695420722419466371>**", "**Hey! Thank you for helping our community, you will now receive :leaves: 3500 ŁŁ monthly, you'll have access to exclusive content from our events.**", """Cheers! not to wake you up or anything, but you've just received your monthly **3.500** :leaves: in your account!
+        int(os.getenv('SLOTH_NAPPER_ROLE_ID', 123)): ["**Wowie! {member.mention} joined the `Sloth Napper`!  <:zslothsleepyuwu:695420722419466371>**", "**Hey! Thank you for helping our community, you will now receive :leaves: 3500 ŁŁ monthly, you'll have access to exclusive content from our events.**", """Cheers! not to wake you up or anything, but you've just received your monthly **3.500** :leaves: in your account!
 You can check it with the command "z!status" or "z!profile", check our website to learn what to spend it with!""", 3500],
 
 
 
-        int(os.getenv('SLOTH_EXPLORER_ROLE_ID')): ["**Hype! {member.mention} joined the `Sloth Explorer`!  <:zslothvcool:695411944332460053> **", "**Hey! Thank you for helping our community, you will now receive :leaves: 5000 ŁŁ monthly, you'll have access to exclusive content from our events.**", """Hurray! It's that time of the month for you Sloth Explorers! We have added ***5.000*** :leaves: to your Bank Account!
+        int(os.getenv('SLOTH_EXPLORER_ROLE_ID', 123)): ["**Hype! {member.mention} joined the `Sloth Explorer`!  <:zslothvcool:695411944332460053> **", "**Hey! Thank you for helping our community, you will now receive :leaves: 5000 ŁŁ monthly, you'll have access to exclusive content from our events.**", """Hurray! It's that time of the month for you Sloth Explorers! We have added ***5.000*** :leaves: to your Bank Account!
 You can check it with the command "z!status" or "z!profile", check our website to learn what to spend it with!""", 5000],
 
 
 
-        int(os.getenv('ASTROSLOTH_ROLE_ID')): ["**Hype! {member.mention} joined the `Astrosloth`!  <:zslothvcool:695411944332460053> **", "**Hey! Thank you for helping our community, you will now receive :leaves: 10000 ŁŁ monthly, you'll have access to exclusive content from our events.**", """Hip-Hip a Payment is order for our **AstroSloths**, you've just received your monthly **10.000** :leaves: in your account!
+        int(os.getenv('ASTROSLOTH_ROLE_ID', 123)): ["**Hype! {member.mention} joined the `Astrosloth`!  <:zslothvcool:695411944332460053> **", "**Hey! Thank you for helping our community, you will now receive :leaves: 10000 ŁŁ monthly, you'll have access to exclusive content from our events.**", """Hip-Hip a Payment is order for our **AstroSloths**, you've just received your monthly **10.000** :leaves: in your account!
 You can check it with the command "z!status" or "z!profile", check our website to learn what to spend it with!""", 10000],
 
-        int(os.getenv('MASTERSLOTH_ROLE_ID')): ["**Hype! {member.mention} is now the highest rank, `Mastersloth`!  <:zslothvcool:695411944332460053> **", "**Hey! Thank you for helping our community, you will now receive :leaves: 10000 ŁŁ monthly, you'll have access to exclusive content from our events.**", """Hehe boi, here is the monthly payment for our **MasterSloths**, you've just received your monthly **10.000** :leaves: in your account!
+        int(os.getenv('MASTERSLOTH_ROLE_ID', 123)): ["**Hype! {member.mention} is now the highest rank, `Mastersloth`!  <:zslothvcool:695411944332460053> **", "**Hey! Thank you for helping our community, you will now receive :leaves: 10000 ŁŁ monthly, you'll have access to exclusive content from our events.**", """Hehe boi, here is the monthly payment for our **MasterSloths**, you've just received your monthly **10.000** :leaves: in your account!
 You can check it with the command "z!status" or "z!profile", check our website to learn what to spend it with!""", 22000]
 
 

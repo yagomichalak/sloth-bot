@@ -9,9 +9,9 @@ from extra.view import GiveawayView
 from extra.prompt.menu import ConfirmButton
 from extra.misc.giveaways import GiveawaysTable, GiveawayEntriesTable
 
-server_id = int(os.getenv('SERVER_ID'))
-giveaway_manager_role_id: int = int(os.getenv('GIVEAWAY_MANAGER_ROLE_ID'))
-mod_role_id = int(os.getenv('MOD_ROLE_ID'))
+server_id = int(os.getenv('SERVER_ID', 123))
+giveaway_manager_role_id: int = int(os.getenv('GIVEAWAY_MANAGER_ROLE_ID', 123))
+mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 
 allowed_roles: List[int] = [giveaway_manager_role_id, mod_role_id, int(os.getenv('ADMIN_ROLE_ID'))]
 guild_ids: List[int] = [server_id]

@@ -17,7 +17,7 @@ from extra.menu import InventoryLoop
 from typing import List, Dict, Tuple, Union, Optional
 
 from extra.slothclasses.player import Player
-from extra.useful_variables import level_badges, flag_badges
+from extra.useful_variables import level_badges, flag_badges, patreon_roles
 from extra.gif_manager import GIF
 from extra import utils
 
@@ -26,8 +26,8 @@ from extra.currency.userserveractivity import UserServerActivityTable, UserVoice
 from extra.currency.usercurrency import UserCurrencyTable
 
 
-booster_role_id = int(os.getenv('BOOSTER_ROLE_ID'))
-guild_ids = [int(os.getenv('SERVER_ID'))]
+booster_role_id = int(os.getenv('BOOSTER_ROLE_ID', 123))
+guild_ids = [int(os.getenv('SERVER_ID', 123))]
 
 currency_cogs: List[commands.Cog] = [
     UserItemsTable, UserServerActivityTable, UserCurrencyTable,
@@ -810,7 +810,15 @@ class SlothCurrency(*currency_cogs):
         """ Checks the farming status of a specific member.
         :param member: The member of the checking. """
 
+        allowed_roles = [int(os.getenv('OWNER_ROLE_ID', 123)), int(os.getenv('ADMIN_ROLE_ID', 123)), int(os.getenv('MOD_ROLE_ID', 123)), *patreon_roles.keys(), int(os.getenv('SLOTH_LOVERS_ROLE_ID', 123))]
+        
+        allowed: bool = await utils.is_allowed(allowed_roles).predicate(ctx)
+
+        if member and not allowed:
+            return await ctx.send("**You can't do that!**")
+        
         author: discord.Member = ctx.author
+        
         if not member:
             member = author
 
@@ -846,7 +854,7 @@ class SlothCurrency(*currency_cogs):
         except ValueError:
             pass
 
-        vc_members: List[int] = len([m for m in vc.members if not m.bot if m.id not in alts]) if vc else 0
+        vc_members: List[int] = len([m for m in vc.members  if m.id not in alts]) if vc else 0
         is_farming = True if vc and not mute and not deaf and not smute and not sdeaf and vc_members > 1 else False
 
         embed.add_field(

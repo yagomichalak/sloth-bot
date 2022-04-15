@@ -46,7 +46,7 @@ INSERT INTO Sloth.LanguageRoom (category, english_name, room_name, room_quant, r
 /* 036 */("south asian", "Telugu", "తెలుగు (Telugu)", 2, 10, 60),
 /* 037 */("south asian", "Kannada", "ಕನ್ನಡ (Kannada)", 2, 10, 60),
 /* 038 */("south asian", "Bengali", "বাংলা (Bengali)", 2, 10, 60),
-/* 039 */("south asian", "Nepali", "ལྷོ་མཚམས་མའི་ཁ (Nepali)", 2, 10, 60),
+/* 039 */("south asian", "Nepali", "नेपाली (Nepali)", 2, 10, 60),
 
 /* 040 */("south asian", "Urdu", "اردو Urdu 🇵🇰", 2, 10, 60),
 
@@ -640,6 +640,7 @@ INSERT INTO Sloth.LanguageRoomPermissions (room_id, role_id, permission_name, pe
 
 /* Amazigh Channel */
 (90, /*Native Amazigh*/ 658059163041267722, "speaker", true),
+(90, /*Studying Amazigh*/ 948986544138616862, "speaker", true),
 
 /* Esperanto Channel */
 (91, /*Studying Conlang*/ 591576844042502193, "speaker", true),

@@ -4,7 +4,7 @@ from mysqldb import *
 import os
 from extra.misc.curse import CurseTable
 
-server_id = int(os.getenv('SERVER_ID'))
+server_id = int(os.getenv('SERVER_ID', 123))
 
 
 class CurseMember(CurseTable):

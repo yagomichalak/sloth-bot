@@ -176,7 +176,7 @@ class RolePlay(commands.Cog):
 
     @commands.command()
     @Player.poisoned()
-    @commands.cooldown(1, 300, commands.BucketType.user)
+    @commands.cooldown(1, 240, commands.BucketType.user)
     async def honeymoon(self, ctx) -> None:
         """ Celebrates a honey moon with your partner.
         

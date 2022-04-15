@@ -7,7 +7,7 @@ from mysqldb import *
 from typing import List, Union, Any, Dict
 from extra.select import LanguageRoomSelect
 
-analyst_debugger_role_id = int(os.getenv('ANALYST_DEBUGGER_ROLE_ID'))
+analyst_debugger_role_id = int(os.getenv('ANALYST_DEBUGGER_ROLE_ID', 123))
 
 class DynRoomUserVCstamp:
     def __init__(self, user_id: int, user_vc_ts: int):
@@ -528,11 +528,11 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
         """ Class initializing method. """
 
         self.client = client
-        self.dr_vc_id = int(os.getenv('CREATE_DYNAMIC_ROOM_VC_ID'))
-        self.dr_cat_id = int(os.getenv('CREATE_DYNAMIC_ROOM_CAT_ID'))
+        self.dr_vc_id = int(os.getenv('CREATE_DYNAMIC_ROOM_VC_ID', 123))
+        self.dr_cat_id = int(os.getenv('CREATE_DYNAMIC_ROOM_CAT_ID', 123))
         self.language_rooms = None
         self.error_log = None
-        self.error_log_id = int(os.getenv('ERROR_LOG_CHANNEL_ID'))
+        self.error_log_id = int(os.getenv('ERROR_LOG_CHANNEL_ID', 123))
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -771,8 +771,8 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
 
     async def get_language_rooms_from_member(self, member: discord.Member) -> List[LanguageRoom]:
         roles_tuple = tuple([role.id for role in member.roles])
-        show_me_everything = any([int(os.getenv('SHOW_ME_EVERYTHING_ROLE_ID')) in roles_tuple])
-        is_admin = any([int(os.getenv('ADMIN_ROLE_ID')) in roles_tuple])
+        show_me_everything = any([int(os.getenv('SHOW_ME_EVERYTHING_ROLE_ID', 123)) in roles_tuple])
+        is_admin = any([int(os.getenv('ADMIN_ROLE_ID', 123)) in roles_tuple])
         can_see_everything = any([show_me_everything, is_admin])
 
         permissions_rooms = await self.get_available_rooms(roles_tuple, see_everything=can_see_everything, object_form=True)

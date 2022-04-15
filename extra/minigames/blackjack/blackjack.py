@@ -12,7 +12,7 @@ from extra import utils
 import asyncio
 import os
 
-server_id: int = int(os.getenv('SERVER_ID'))
+server_id: int = int(os.getenv('SERVER_ID', 123))
 
 blackjack_db: List[commands.Cog] = [
 	BlackJackDB
@@ -90,9 +90,9 @@ class BlackJack(*blackjack_db):
             view: discord.ui.View = BlackJackActionView(self.client, player)
             if current_game.status == 'finished':
                 await utils.disable_buttons(view)
-            msg = await ctx.send(embed=current_game.embed(), view=view)
 
             await SlothCurrency.update_user_money(player.id, -bet)
+            msg = await ctx.send(embed=current_game.embed(), view=view)
 
             # Checks if the user is in the blackjack table
             if not await self.check_user_database(ctx.author.id):
@@ -102,6 +102,8 @@ class BlackJack(*blackjack_db):
             await self.insert_user_data(type="games", user_id=ctx.author.id)
 
             await view.wait()
+            user_currency = await SlothCurrency.get_user_currency(player.id)
+            current_game.current_money = user_currency[0][1]
             await asyncio.sleep(0.3)
             await utils.disable_buttons(view)
             await msg.edit(embed=current_game.embed(), view=view)

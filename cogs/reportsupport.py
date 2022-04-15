@@ -1,3 +1,4 @@
+import aiohttp
 import discord
 from discord.ext import commands
 from mysqldb import *
@@ -9,19 +10,21 @@ from typing import List, Optional
 import os
 from extra import utils
 
-case_cat_id = int(os.getenv('CASE_CAT_ID'))
-reportsupport_channel_id = int(os.getenv('REPORT_CHANNEL_ID'))
-dnk_id = int(os.getenv('DNK_ID'))
-cent_id = int(os.getenv('CENT_ID'))
-moderator_role_id = int(os.getenv('MOD_ROLE_ID'))
-admin_role_id = int(os.getenv('ADMIN_ROLE_ID'))
-lesson_management_role_id = int(os.getenv('LESSON_MANAGEMENT_ROLE_ID'))
-server_id = int(os.getenv('SERVER_ID'))
+case_cat_id = int(os.getenv('CASE_CAT_ID', 123))
+reportsupport_channel_id = int(os.getenv('REPORT_CHANNEL_ID', 123))
+mod_log_id = int(os.getenv('MOD_LOG_CHANNEL_ID', 123))
+dnk_id = int(os.getenv('DNK_ID', 123))
+cent_id = int(os.getenv('CENT_ID', 123))
+moderator_role_id = int(os.getenv('MOD_ROLE_ID', 123))
+admin_role_id = int(os.getenv('ADMIN_ROLE_ID', 123))
+lesson_management_role_id = int(os.getenv('LESSON_MANAGEMENT_ROLE_ID', 123))
+server_id = int(os.getenv('SERVER_ID', 123))
 
-staff_vc_id = int(os.getenv('STAFF_VC_ID'))
+staff_vc_id = int(os.getenv('STAFF_VC_ID', 123))
+webhook_url: str = os.getenv('WEBHOOK_URL')
 
 allowed_roles = [
-int(os.getenv('OWNER_ROLE_ID')), admin_role_id,
+int(os.getenv('OWNER_ROLE_ID', 123)), admin_role_id,
 moderator_role_id]
 
 from extra.reportsupport.applications import ApplicationsTable
@@ -39,10 +42,11 @@ class ReportSupport(*report_support_classes):
     def __init__(self, client) -> None:
 
         self.client = client
-        self.cosmos_role_id: int = int(os.getenv('COSMOS_ROLE_ID'))
-        self.muffin_id: int = int(os.getenv('MUFFIN_ID'))
+        self.cosmos_role_id: int = int(os.getenv('COSMOS_ROLE_ID', 123))
+        self.muffin_id: int = int(os.getenv('MUFFIN_ID', 123))
         self.cache = {}
         self.report_cache = {}
+        self.bot_cache = {}
         
 
     @commands.Cog.listener()
@@ -51,8 +55,25 @@ class ReportSupport(*report_support_classes):
         self.client.add_view(view=ReportSupportView(self.client))
         print('ReportSupport cog is online!')
 
+    @commands.Cog.listener()
+    async def on_message(self, message: discord.Message) -> None:
+        """ Detects when a webhook is sent from the Sloth Appeals server. """
 
-    async def handle_application(self, guild, payload) -> None:
+        # Initiates the session
+        async with aiohttp.ClientSession() as session:
+            # Gets the webhook
+            webhook = discord.Webhook.from_url(webhook_url, session=session)
+            try:
+                # Tries to fetch the message
+                await webhook.fetch_message(message.id)
+            except discord.NotFound:
+                pass
+            else:
+                # Adds the reactions to the message, if fetched
+                await message.add_reaction('✅')
+                await message.add_reaction('❌')
+
+    async def handle_ban_appeal(self, message: discord.Message, payload) -> None:
         """ Handles teacher applications.
         :param guild: The server in which the application is running.
         :param payload: Data about the Staff member who is opening the application. """
@@ -63,13 +84,45 @@ class ReportSupport(*report_support_classes):
             if not (app := await self.get_application_by_message(payload.message_id)):
                 return
 
-            # Checks if the person has not an open interview channel already
-            if not app[3]:
-                # Creates an interview room with the teacher and sends their application there (you can z!close there)
-                return await self.create_interview_room(guild, app)
+            try:
+                user = discord.Object(app[1])
+                await message.guild.unban(user)
+            except discord.NotFound:
+                pass
+            finally:
+                await self.delete_application(message.id)
+                await message.add_reaction('❤️‍🩹')
+
 
         elif emoji == '❌':
             # Tries to delete the teacher app from the db, in case it is registered
+            app = await self.get_application_by_message(payload.message_id)
+            if app and not app[3]:
+                await self.delete_application(payload.message_id)
+
+
+                app_channel = self.client.get_channel(self.ban_appeals_channel_id)
+                app_msg = await app_channel.fetch_message(payload.message_id)
+                await app_msg.add_reaction('🚫')
+
+    async def handle_application(self, guild, payload) -> None:
+        """ Handles applications.
+        :param guild: The server in which the application is running.
+        :param payload: Data about the Staff member who is opening the application. """
+
+        emoji = str(payload.emoji)
+        if emoji == '✅':
+            # Gets the app and does the magic
+            if not (app := await self.get_application_by_message(payload.message_id)):
+                return
+
+            # Checks if the person has not an open interview channel already
+            if not app[3]:
+                # Creates an interview room with the applicant and sends their application there (you can z!close there)
+                return await self.create_interview_room(guild, app)
+
+        elif emoji == '❌':
+            # Tries to delete the app from the db, in case it is registered
             app = await self.get_application_by_message(payload.message_id)
             if app and not app[3]:
                 await self.delete_application(payload.message_id)
@@ -172,7 +225,8 @@ class ReportSupport(*report_support_classes):
             read_messages=True, send_messages=True, connect=False, view_channel=True, manage_messages=True)}
         try:
             the_channel = await guild.create_text_channel(name=f"case-{counter[0][0]}", category=case_cat, overwrites=overwrites)
-        except Exception:
+        except Exception as e:
+            print(e)
             await interaction.followup.send("**Something went wrong with it, please contact an admin!**", ephemeral=True)
             raise Exception
         else:
@@ -355,93 +409,52 @@ class ReportSupport(*report_support_classes):
 
         return await ctx.send(f"**`{forbid}` {'witnesses have' if forbid > 1 else 'witness has'} been forbidden from here!**")
             
-
     @commands.command(aliases=['delete_channel', 'archive', 'cc'])
     @commands.has_any_role(*allowed_roles)
     async def close_channel(self, ctx):
         """ (MOD) Closes a Case-Channel. """
 
+        member: discord.Member = ctx.author
+
         user_channel = await self.get_case_channel(ctx.channel.id)
         if not user_channel:
-            return await ctx.send(f"**What do you think that you are doing? You cannot delete this channel, {ctx.author.mention}!**")
+            return await ctx.send(f"**What do you think that you are doing? You cannot delete this channel, {member.mention}!**")
             
         channel = discord.utils.get(ctx.guild.text_channels, id=user_channel[0][1])
         embed = discord.Embed(title="Confirmation",
             description="Are you sure that you want to delete this channel?",
-            color=ctx.author.color,
+            color=member.color,
             timestamp=ctx.message.created_at)
-        confirmation = await ctx.send(content=ctx.author.mention, embed=embed)
+        confirmation = await ctx.send(content=member.mention, embed=embed)
         await confirmation.add_reaction('✅')
         await confirmation.add_reaction('❌')
         try:
             reaction, user = await self.client.wait_for('reaction_add', timeout=20,
-                check=lambda r, u: u == ctx.author and r.message.channel == ctx.channel and str(r.emoji) in ['✅', '❌'])
+                check=lambda r, u: u == member and r.message.channel == ctx.channel and str(r.emoji) in ['✅', '❌'])
         except asyncio.TimeoutError:
             embed = discord.Embed(title="Confirmation",
             description="You took too long to answer the question; not deleting it!",
             color=discord.Color.red(),
             timestamp=ctx.message.created_at)
-            return await confirmation.edit(content=ctx.author.mention, embed=embed)
+            return await confirmation.edit(content=member.mention, embed=embed)
         else:
             if str(reaction.emoji) == '✅':
                 embed.description = f"**Channel {ctx.channel.mention} is being deleted...**"
-                await confirmation.edit(content=ctx.author.mention, embed=embed)
+                await confirmation.edit(content=member.mention, embed=embed)
                 await asyncio.sleep(3)
                 await channel.delete()
                 await self.remove_user_open_channel(user_channel[0][0])
+                # Moderation log embed
+                moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
+                embed = discord.Embed(
+                    title='__**Case Closed**__',
+                    color=discord.Color.red(),
+                    timestamp=ctx.message.created_at)
+                embed.set_footer(text=f"Closed by {member}", icon_url=member.display_avatar)
+                await moderation_log.send(embed=embed)
             else:
                 embed.description = "Not deleting it!"
                 await confirmation.edit(content='', embed=embed)
-            
-            
-
-    async def dnk_embed(self, member):
-        def check(r, u):
-            return u == member and str(r.message.id) == str(the_msg.id) and str(r.emoji) in ['⬅️', '➡️']
-
-        command_index = 0
-        initial_embed = discord.Embed(title="__Table of Commands and their Prices__",
-                description="These are a few of commands and features that DNK can do.",
-                color=discord.Color.blue())
-        the_msg = await member.send(embed=initial_embed)
-        await the_msg.add_reaction('⬅️')
-        await the_msg.add_reaction('➡️')
-        while True:
-            embed = discord.Embed(title=f"__Table of Commands and their Prices__ ({command_index+1}/{len(list_of_commands)})",
-                description="These are a few of commands and features that DNK can do.",
-                color=discord.Color.blue())
-            embed.add_field(name=list_of_commands[command_index][0],
-                value=list_of_commands[command_index][1])
-            await the_msg.edit(embed=embed)
-
-            try:
-                pending_tasks = [self.client.wait_for('reaction_add', check=check),
-                self.client.wait_for('reaction_remove', check=check)]
-                done_tasks, pending_tasks = await asyncio.wait(pending_tasks, timeout=60, return_when=asyncio.FIRST_COMPLETED)
-                if not done_tasks:
-                    raise asyncio.TimeoutError
-
-                for task in pending_tasks:
-                    task.cancel()
-
-            except asyncio.TimeoutError:
-                await the_msg.remove_reaction('⬅️', self.client.user)
-                await the_msg.remove_reaction('➡️', self.client.user)
-                break
-
-            else:
-                for task in done_tasks:
-                    reaction, user = await task
-                if str(reaction.emoji) == "➡️":
-                    # await the_msg.remove_reaction(reaction.emoji, member)
-                    if command_index < (len(list_of_commands) - 1):
-                        command_index += 1
-                    continue
-                elif str(reaction.emoji) == "⬅️":
-                    # await the_msg.remove_reaction(reaction.emoji, member)
-                    if command_index > 0:
-                        command_index -= 1
-                    continue
 
     # Discord methods
     async def create_interview_room(self, guild: discord.Guild, app: List[str]) -> None:
@@ -483,7 +496,6 @@ class ReportSupport(*report_support_classes):
         formatted_pings = await self.format_application_pings(guild, interview_info['pings'])
         await txt_channel.send(content=f"{formatted_pings}, {applicant.mention}", embed=app_embed)
 
-
     # In-game commands
     @commands.command()
     @commands.has_permissions(administrator=True)
@@ -520,7 +532,6 @@ class ReportSupport(*report_support_classes):
         except:
             pass
             
-
     async def audio(self, member: discord.Member, audio_name: str) -> None:
         """ Plays an audio.
         :param member: A member to get guild context from.

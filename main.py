@@ -20,23 +20,23 @@ from extra.customerrors import (
 load_dotenv()
 
 # IDs
-user_cosmos_id = int(os.getenv('COSMOS_ID'))
-admin_role_id = int(os.getenv('ADMIN_ROLE_ID'))
-moderator_role_id = int(os.getenv('MOD_ROLE_ID'))
-booster_role_id = int(os.getenv('BOOSTER_ROLE_ID'))
-teacher_role_id = int(os.getenv('TEACHER_ROLE_ID'))
-giveaway_manager_role_id: int = int(os.getenv('GIVEAWAY_MANAGER_ROLE_ID'))
+user_cosmos_id = int(os.getenv('COSMOS_ID', 123))
+admin_role_id = int(os.getenv('ADMIN_ROLE_ID', 123))
+moderator_role_id = int(os.getenv('MOD_ROLE_ID', 123))
+booster_role_id = int(os.getenv('BOOSTER_ROLE_ID', 123))
+teacher_role_id = int(os.getenv('TEACHER_ROLE_ID', 123))
+giveaway_manager_role_id: int = int(os.getenv('GIVEAWAY_MANAGER_ROLE_ID', 123))
 
-server_id = int(os.getenv('SERVER_ID'))
+server_id = int(os.getenv('SERVER_ID', 123))
 
-moderation_log_channel_id: int = int(os.getenv('MOD_LOG_CHANNEL_ID'))
-lesson_category_id: int = int(os.getenv('LESSON_CAT_ID'))
-clock_voice_channel_id: int = int(os.getenv('CLOCK_VC_ID'))
-admin_commands_channel_id: int = int(os.getenv('ADMIN_COMMANDS_CHANNEL_ID'))
-patreon_role_id: int = int(os.getenv('SLOTH_EXPLORER_ROLE_ID'))
-support_us_channel_id: int = int(os.getenv('SUPPORT_US_CHANNEL_ID'))
-error_log_channel_id: int = int(os.getenv('ERROR_LOG_CHANNEL_ID'))
-guild_ids: List[int] = [server_id]
+moderation_log_channel_id = int(os.getenv('MOD_LOG_CHANNEL_ID', 123))
+lesson_category_id = int(os.getenv('LESSON_CAT_ID', 123))
+clock_voice_channel_id = int(os.getenv('CLOCK_VC_ID', 123))
+admin_commands_channel_id = int(os.getenv('ADMIN_COMMANDS_CHANNEL_ID', 123))
+patreon_role_id = int(os.getenv('SLOTH_EXPLORER_ROLE_ID', 123))
+support_us_channel_id = int(os.getenv('SUPPORT_US_CHANNEL_ID', 123))
+error_log_channel_id = int(os.getenv('ERROR_LOG_CHANNEL_ID', 123))
+guild_ids = [server_id]
 
 # colors = cycle([(255, 0, 0), (255, 127, 0), (255, 255, 0), (0, 255, 0), (0, 0, 255), (75, 0, 130), (143, 0, 255)])
 shades_of_pink = cycle([(252, 15, 192), (255, 0, 255), (248, 24, 148),

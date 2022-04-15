@@ -4,14 +4,14 @@ import os
 from typing import Dict, Union
 from extra import utils
 
-server_id = int(os.getenv('SERVER_ID'))
-bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID'))
+server_id = int(os.getenv('SERVER_ID', 123))
+bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID', 123))
 
 class VoiceManagement(commands.Cog):
 
     def __init__(self, client) -> None:
         self.client = client
-        self.vcc_id: int = int(os.getenv('VOICE_CALLS_CHANNEL_ID'))
+        self.vcc_id: int = int(os.getenv('VOICE_CALLS_CHANNEL_ID', 123))
 
         # user_id: {'timestamp': 123, 'camera_on': False, 'notified': False}
 

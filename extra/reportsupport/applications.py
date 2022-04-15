@@ -5,39 +5,41 @@ from typing import Any, List, Dict, Union
 from extra import utils
 import os
 
-cosmos_role_id: int = int(os.getenv('COSMOS_ROLE_ID'))
-muffin_id: int = int(os.getenv('MUFFIN_ID'))
-cent_id: int = int(os.getenv('CENT_ID'))
-guibot_id: int = int(os.getenv('GUIBOT_ID'))
+cosmos_role_id: int = int(os.getenv('COSMOS_ROLE_ID', 123))
+muffin_id: int = int(os.getenv('MUFFIN_ID', 123))
+cent_id: int = int(os.getenv('CENT_ID', 123))
+guibot_id: int = int(os.getenv('GUIBOT_ID', 123))
 
-moderator_role_id: int = int(os.getenv('MOD_ROLE_ID'))
-admin_role_id: int = int(os.getenv('ADMIN_ROLE_ID'))
-lesson_management_role_id: int = int(os.getenv('LESSON_MANAGEMENT_ROLE_ID'))
-real_event_manager_role_id: int = int(os.getenv('REAL_EVENT_MANAGER_ROLE_ID'))
+moderator_role_id: int = int(os.getenv('MOD_ROLE_ID', 123))
+admin_role_id: int = int(os.getenv('ADMIN_ROLE_ID', 123))
+lesson_management_role_id: int = int(os.getenv('LESSON_MANAGEMENT_ROLE_ID', 123))
+real_event_manager_role_id: int = int(os.getenv('REAL_EVENT_MANAGER_ROLE_ID', 123))
 
 class ApplicationsTable(commands.Cog):
     """ Cog for managing applications. """
 
     # Teacher application attributes
-    teacher_app_channel_id: int = int(os.getenv('TEACHER_APPLICATION_CHANNEL_ID'))
-    teacher_app_cat_id: int = int(os.getenv('TEACHER_APPLICATION_CAT_ID'))
-    teacher_parent_channel_id: int = int(os.getenv('TEACHER_CHANNEL_ID'))
-    teacher_interview_vc_id: int = int(os.getenv('TEACHER_INTERVIEW_VC_ID'))
+    teacher_app_channel_id: int = int(os.getenv('TEACHER_APPLICATION_CHANNEL_ID', 123))
+    teacher_app_cat_id: int = int(os.getenv('TEACHER_APPLICATION_CAT_ID', 123))
+    teacher_parent_channel_id: int = int(os.getenv('TEACHER_CHANNEL_ID', 123))
+    teacher_interview_vc_id: int = int(os.getenv('TEACHER_INTERVIEW_VC_ID', 123))
 
-    moderator_app_channel_id: int = int(os.getenv('MODERATOR_APPLICATION_CHANNEL_ID'))
-    moderator_app_cat_id: int = int(os.getenv('MODERATOR_APPLICATION_CAT_ID'))
-    moderator_parent_channel_id: int = int(os.getenv('MODERATOR_CHANNEL_ID'))
-    moderator_interview_vc_id: int = int(os.getenv('MODERATOR_INTERVIEW_VC_ID'))
+    moderator_app_channel_id: int = int(os.getenv('MODERATOR_APPLICATION_CHANNEL_ID', 123))
+    moderator_app_cat_id: int = int(os.getenv('MODERATOR_APPLICATION_CAT_ID', 123))
+    moderator_parent_channel_id: int = int(os.getenv('MODERATOR_CHANNEL_ID', 123))
+    moderator_interview_vc_id: int = int(os.getenv('MODERATOR_INTERVIEW_VC_ID', 123))
 
-    event_host_app_channel_id: int = int(os.getenv('EVENT_MANAGER_APPLICATION_CHANNEL_ID'))
-    event_host_app_cat_id: int = int(os.getenv('EVENT_MANAGER_APPLICATION_CAT_ID'))
-    event_host_parent_channel_id: int = int(os.getenv('EVENT_MANAGER_CHANNEL_ID'))
-    event_host_interview_vc_id: int = int(os.getenv('EVENT_MANAGER_INTERVIEW_VC_ID'))
+    event_host_app_channel_id: int = int(os.getenv('EVENT_MANAGER_APPLICATION_CHANNEL_ID', 123))
+    event_host_app_cat_id: int = int(os.getenv('EVENT_MANAGER_APPLICATION_CAT_ID', 123))
+    event_host_parent_channel_id: int = int(os.getenv('EVENT_MANAGER_CHANNEL_ID', 123))
+    event_host_interview_vc_id: int = int(os.getenv('EVENT_MANAGER_INTERVIEW_VC_ID', 123))
 
-    debate_manager_app_channel_id: int = int(os.getenv('DEBATE_MANAGER_APPLICATION_CHANNEL_ID'))
-    debate_manager_app_cat_id: int = int(os.getenv('DEBATE_MANAGER_APPLICATION_CAT_ID'))
-    debate_manager_parent_channel_id: int = int(os.getenv('DEBATE_MANAGER_CHANNEL_ID'))
-    debate_manager_interview_vc_id: int = int(os.getenv('DEBATE_MANAGER_INTERVIEW_VC_ID'))
+    debate_manager_app_channel_id: int = int(os.getenv('DEBATE_MANAGER_APPLICATION_CHANNEL_ID', 123))
+    debate_manager_app_cat_id: int = int(os.getenv('DEBATE_MANAGER_APPLICATION_CAT_ID', 123))
+    debate_manager_parent_channel_id: int = int(os.getenv('DEBATE_MANAGER_CHANNEL_ID', 123))
+    debate_manager_interview_vc_id: int = int(os.getenv('DEBATE_MANAGER_INTERVIEW_VC_ID', 123))
+
+    ban_appeals_channel_id: int = int(os.getenv('BAN_APPEALS_CHANNEL_ID', 123))
 
 
     interview_info: Dict[str, Any] = {
@@ -81,16 +83,21 @@ class ApplicationsTable(commands.Cog):
             return
 
         adm = channel.permissions_for(payload.member).administrator
-
         # Checks if it's in an applications channel
-        if payload.channel_id in [self.moderator_app_channel_id, self.event_host_app_channel_id, self.teacher_app_channel_id, self.debate_manager_app_channel_id]:
+        if payload.channel_id in [
+            self.moderator_app_channel_id, self.event_host_app_channel_id, self.teacher_app_channel_id, 
+            self.debate_manager_app_channel_id, self.ban_appeals_channel_id]:
 
             if payload.channel_id == self.debate_manager_app_channel_id: # User is an mod+ or lesson manager
                 if await utils.is_allowed_members([cent_id]).predicate(channel=channel, member=payload.member):
                     await self.handle_application(guild, payload)
-            if payload.channel_id == self.teacher_app_channel_id: # User is an mod+ or lesson manager
+            elif payload.channel_id == self.teacher_app_channel_id: # User is an mod+ or lesson manager
                 if await utils.is_allowed([moderator_role_id, lesson_management_role_id]).predicate(channel=channel, member=payload.member):
                     await self.handle_application(guild, payload)
+
+            elif payload.channel_id == self.ban_appeals_channel_id:
+                if adm:
+                    await self.handle_ban_appeal(message, payload)
             elif adm: # User is an adm
                 await self.handle_application(guild, payload)
             else:

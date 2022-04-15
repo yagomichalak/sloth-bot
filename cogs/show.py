@@ -12,9 +12,10 @@ import os
 import subprocess
 import sys
 import json
+import wikipedia
 
-allowed_roles = [int(os.getenv('OWNER_ROLE_ID')), int(os.getenv('ADMIN_ROLE_ID')), int(os.getenv('MOD_ROLE_ID'))]
-guild_ids = [int(os.getenv('SERVER_ID'))]
+allowed_roles = [int(os.getenv('OWNER_ROLE_ID', 123)), int(os.getenv('ADMIN_ROLE_ID', 123)), int(os.getenv('MOD_ROLE_ID', 123))]
+guild_ids = [int(os.getenv('SERVER_ID', 123))]
 
 class Show(commands.Cog):
     """ Commands involving showing some information related to the server. """
@@ -186,8 +187,7 @@ class Show(commands.Cog):
         """ Shows some server statuses. """
 
         member = ctx.author
-
-        months = await DataBumpsTable.get_month_statuses()
+        months = await DataBumpsTable.get_month_statuses(self)
 
         embed = discord.Embed(
             title="__Server's Monthly Statuses__",
@@ -289,7 +289,37 @@ class Show(commands.Cog):
             color=ctx.author.color
         )
         await ctx.respond(embed=embed)
-
+        
+    @commands.command(aliases=['wk','w', 'wiki'])
+    @commands.cooldown(1, 10, type=commands.BucketType.user)
+    async def wikipedia(self, ctx, *, topic: str = None):
+        '''
+        Searches something on Wikipedia.
+        :param topic: The topic to search.
+        '''
+        if not topic:
+            return await ctx.send(f"**{ctx.author.mention}, please, inform a topic to search!**")
+        try:
+            result = wikipedia.summary(topic)
+        except Exception as error:
+            await ctx.send("**I couldn't find anything for this topic!**")
+        else:
+            if (len(result) <= 2048):
+                embed = discord.Embed(title=f"(Wikipedia) - __{topic.title()}__:", description=result, color=discord.Color.green())
+                await ctx.send(embed=embed)
+            else:
+                embedList = []
+                n = 2048
+                embedList = [result[i:i + n] for i in range(0, len(result), n)]
+                for num, item in enumerate(embedList, start=1):
+                    if (num == 1):
+                        embed = discord.Embed(title=f"(Wikipedia) - __{topic.title()}__:", description=item, color=discord.Color.green())
+                        embed.set_footer(text="Page {}".format(num))
+                        await ctx.send(embed=embed)
+                    else:
+                        embed = discord.Embed(description=item, color=discord.Color.green())
+                        embed.set_footer(text="Page {}".format(num))
+                        await ctx.send(embed=embed)
 
 def setup(client):
     client.add_cog(Show(client))
