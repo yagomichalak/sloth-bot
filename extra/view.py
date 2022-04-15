@@ -44,7 +44,6 @@ class ReportSupportView(discord.ui.View):
                 return await interaction.response.send_message(
                     f"**You are on cooldown to apply, try again in {(1800-sub)/60:.1f} minutes**", ephemeral=True)
 
-        self.cog.cache[member.id] = time_now
         await interaction.response.send_modal(TeacherApplicationModal(self.client))
 
     @discord.ui.button(label="Apply for Moderator!", style=3, custom_id=f"apply_to_moderate", emoji="👮")
@@ -62,7 +61,6 @@ class ReportSupportView(discord.ui.View):
                 return await interaction.response.send_message(
                     f"**You are on cooldown to apply, try again in {(1800-sub)/60:.1f} minutes**", ephemeral=True)
 
-        self.cog.cache[member.id] = time_now
         await interaction.response.send_modal(ModeratorApplicationModal(self.client))
 
     @discord.ui.button(label="Apply for Event Host!", style=3, custom_id=f"apply_to_host_events", emoji="🎉")
@@ -80,7 +78,6 @@ class ReportSupportView(discord.ui.View):
                 return await interaction.response.send_message(
                     f"**You are on cooldown to apply, try again in {(1800-sub)/60:.1f} minutes**", ephemeral=True)
 
-        self.cog.cache[member.id] = time_now
         await interaction.response.send_modal(EventHostApplicationModal(self.client))
 
     @discord.ui.button(label="Apply for Debate Manager!", style=3, custom_id=f"apply_to_manage_debates", emoji="🌐")
@@ -98,7 +95,6 @@ class ReportSupportView(discord.ui.View):
                 return await interaction.response.send_message(
                     f"**You are on cooldown to apply, try again in {(1800-sub)/60:.1f} minutes**", ephemeral=True)
 
-        self.cog.cache[member.id] = time_now
         await interaction.response.send_modal(DebateManagerApplicationModal(self.client))
 
     @discord.ui.button(label="Get your own Custom Bot (not for free)", style=1, custom_id=f"get_custom_bot", emoji="🤖", row=2)
@@ -119,7 +115,7 @@ class ReportSupportView(discord.ui.View):
 
         self.cog.bot_cache[member.id] = time_now
 
-        with open('extra/random/texts/dnk.txt', 'r') as file:
+        with open('extra/random/texts/dnk.txt', 'r', encoding="utf-8") as file:
             dnk_text = file.read()
 
         website_link = "https://thelanguagesloth.com"

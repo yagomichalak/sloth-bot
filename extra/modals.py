@@ -2,7 +2,7 @@ import discord
 from discord.ui import InputText, Modal
 from discord.ext import commands
 from .prompt.menu import ConfirmButton
-import asyncio
+from . import utils
 
 class ModeratorApplicationModal(Modal):
     """ Class for the moderator application. """
@@ -44,7 +44,6 @@ class ModeratorApplicationModal(Modal):
     async def callback(self, interaction: discord.Interaction) -> None:
         """ Callback for the moderation application. """
 
-        await interaction.response.defer(ephemeral=True)
         member: discord.Member = interaction.user
 
         embed = discord.Embed(
@@ -56,6 +55,7 @@ class ModeratorApplicationModal(Modal):
             role.name.title() for role in member.roles
             if str(role.name).lower().startswith('native')
         ]
+        member_native_roles = ['None.'] if not member_native_roles else member_native_roles
 
         embed.set_thumbnail(url=member.display_avatar)
         embed.add_field(name="Joined the server", value=member.joined_at.strftime("%a, %d %B %y, %I %M %p UTC"), inline=False)
@@ -68,7 +68,7 @@ class ModeratorApplicationModal(Modal):
 
         confirm_view = ConfirmButton(member, timeout=60)
 
-        await interaction.followup.send(
+        await interaction.response.send_message(
             content="Are you sure you want to apply this?",
             embed=embed, view=confirm_view, ephemeral=True)
 
@@ -77,10 +77,9 @@ class ModeratorApplicationModal(Modal):
             return await confirm_view.interaction.followup.send(f"**{member.mention}, you took too long to answer...**", ephemeral=True)
 
         if not confirm_view.value:
-            self.cog.cache[member.id] = 0
             return await confirm_view.interaction.followup.send(f"**Not doing it then, {member.mention}!**", ephemeral=True)
 
- 
+        self.cog.cache[member.id] = await utils.get_timestamp()
         await confirm_view.interaction.followup.send(content="""
         **Application successfully made, please, be patient now.**
     • We will let you know when we need a new mod. We check apps when we need it!""", ephemeral=True)
@@ -135,7 +134,6 @@ class TeacherApplicationModal(Modal):
     async def callback(self, interaction: discord.Interaction) -> None:
         """ Callback for the moderation application. """
 
-        await interaction.response.defer(ephemeral=True)
         member: discord.Member = interaction.user
 
         embed = discord.Embed(
@@ -147,6 +145,7 @@ class TeacherApplicationModal(Modal):
             role.name.title() for role in member.roles
             if str(role.name).lower().startswith('native')
         ]
+        member_native_roles = ['None.'] if not member_native_roles else member_native_roles
 
         embed.set_thumbnail(url=member.display_avatar)
         embed.add_field(name="Joined the server", value=member.joined_at.strftime("%a, %d %B %y, %I %M %p UTC"), inline=False)
@@ -159,8 +158,8 @@ class TeacherApplicationModal(Modal):
 
         confirm_view = ConfirmButton(member, timeout=60)
 
-        await interaction.followup.send(
-            content="Are you sure you want to apply this?",
+        await interaction.response.send_message(
+            "Are you sure you want to apply this?",
             embed=embed, view=confirm_view, ephemeral=True)
 
         await confirm_view.wait()
@@ -168,9 +167,9 @@ class TeacherApplicationModal(Modal):
             return await confirm_view.interaction.followup.send(f"**{member.mention}, you took too long to answer...**", ephemeral=True)
 
         if not confirm_view.value:
-            self.cog.cache[member.id] = 0
             return await confirm_view.interaction.followup.send(f"**Not doing it then, {member.mention}!**", ephemeral=True)
- 
+
+        self.cog.cache[member.id] = await utils.get_timestamp()
         await confirm_view.interaction.followup.send(content="""
         **Application successfully made, please, be patient now.**
     • We will let you know when we need a new mod. We check apps when we need it!""", ephemeral=True)
@@ -224,7 +223,6 @@ class EventHostApplicationModal(Modal):
     async def callback(self, interaction: discord.Interaction) -> None:
         """ Callback for the moderation application. """
 
-        await interaction.response.defer(ephemeral=True)
         member: discord.Member = interaction.user
 
         embed = discord.Embed(
@@ -237,6 +235,7 @@ class EventHostApplicationModal(Modal):
             role.name.title() for role in member.roles
             if str(role.name).lower().startswith('native')
         ]
+        member_native_roles = ['None.'] if not member_native_roles else member_native_roles
 
         embed.set_thumbnail(url=member.display_avatar)
         embed.add_field(name="Joined the server", value=member.joined_at.strftime("%a, %d %B %y, %I %M %p UTC"), inline=False)
@@ -249,7 +248,7 @@ class EventHostApplicationModal(Modal):
 
         confirm_view = ConfirmButton(member, timeout=60)
 
-        await interaction.followup.send(
+        await interaction.response.send_message(
             content="Are you sure you want to apply this?",
             embed=embed, view=confirm_view, ephemeral=True)
 
@@ -258,9 +257,9 @@ class EventHostApplicationModal(Modal):
             return await confirm_view.interaction.followup.send(f"**{member.mention}, you took too long to answer...**", ephemeral=True)
 
         if not confirm_view.value:
-            self.cog.cache[member.id] = 0
             return await interaction.followup.send(f"**Not doing it then, {member.mention}!**", ephemeral=True)
  
+        self.cog.cache[member.id] = await utils.get_timestamp()
         await confirm_view.interaction.followup.send(content="""
         **Application successfully made, please, be patient now.**
     • We will let you know when we need a new mod. We check apps when we need it!""", ephemeral=True)
@@ -313,7 +312,6 @@ class DebateManagerApplicationModal(Modal):
     async def callback(self, interaction: discord.Interaction) -> None:
         """ Callback for the moderation application. """
 
-        await interaction.response.defer(ephemeral=True)
         member: discord.Member = interaction.user
 
         embed = discord.Embed(
@@ -326,6 +324,7 @@ class DebateManagerApplicationModal(Modal):
             role.name.title() for role in member.roles
             if str(role.name).lower().startswith('native')
         ]
+        member_native_roles = ['None.'] if not member_native_roles else member_native_roles
 
         embed.set_thumbnail(url=member.display_avatar)
         embed.add_field(name="Joined the server", value=member.joined_at.strftime("%a, %d %B %y, %I %M %p UTC"), inline=False)
@@ -335,10 +334,8 @@ class DebateManagerApplicationModal(Modal):
         embed.add_field(name="Experience with moderating, organizing events", value=self.children[2].value.title(), inline=False)
         embed.add_field(name="Motivation", value=self.children[3].value.capitalize(), inline=False)
         embed.add_field(name="What would you change?", value=self.children[4].value.capitalize(), inline=False)
-
         confirm_view = ConfirmButton(member, timeout=60)
-
-        await interaction.followup.send(
+        await interaction.response.send_message(
             content="Are you sure you want to apply this?",
             embed=embed, view=confirm_view, ephemeral=True)
 
@@ -347,9 +344,9 @@ class DebateManagerApplicationModal(Modal):
             return await confirm_view.interaction.followup.send(f"**{member.mention}, you took too long to answer...**", ephemeral=True)
 
         if not confirm_view.value:
-            self.cog.cache[member.id] = 0
             return await interaction.followup.send(f"**Not doing it then, {member.mention}!**", ephemeral=True)
- 
+
+        self.cog.cache[member.id] = await utils.get_timestamp()
         await confirm_view.interaction.followup.send(content="""
         **Application successfully made, please, be patient now.**
     • We will let you know when we need a new mod. We check apps when we need it!""", ephemeral=True)
