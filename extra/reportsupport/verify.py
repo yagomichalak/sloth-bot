@@ -62,7 +62,7 @@ class Verify(commands.Cog):
             except:
                 pass
         else:
-            msg = "**Verification Request**\nOur staff has evaluated your verification request and has declined it for intern reasons."
+            msg = "**Verification Request**\nOur staff has evaluated your verification request and has declined it for internal reasons."
 
         # Deletes the verify request/application
         await self.delete_application(payload.message_id)
