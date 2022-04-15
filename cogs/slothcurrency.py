@@ -1,5 +1,5 @@
 import discord
-from discord.app.commands import slash_command, Option
+from discord import slash_command, Option
 from discord.ext import commands, menus
 from discord.member import VoiceState
 from discord.utils import escape_mentions

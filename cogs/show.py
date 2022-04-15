@@ -1,5 +1,5 @@
 import discord
-from discord.app.commands import Option, slash_command
+from discord import Option, SlashCommandGroup, slash_command
 from discord.ext import commands
 
 from extra.useful_variables import rules
@@ -7,10 +7,11 @@ from extra import utils
 from extra.slothclasses.player import Player
 from extra.analytics import DataBumpsTable
 
-from typing import List
+from typing import Dict
 import os
 import subprocess
 import sys
+import json
 import wikipedia
 
 allowed_roles = [int(os.getenv('OWNER_ROLE_ID', 123)), int(os.getenv('ADMIN_ROLE_ID', 123)), int(os.getenv('MOD_ROLE_ID', 123))]
@@ -23,6 +24,9 @@ class Show(commands.Cog):
         """ Class init method. """
 
         self.client = client
+
+    _cnp = SlashCommandGroup("cnp", "For copy and pasting stuff.", guild_ids=guild_ids)
+    
 
     @commands.Cog.listener()
     async def on_ready(self) -> None:
@@ -183,7 +187,6 @@ class Show(commands.Cog):
         """ Shows some server statuses. """
 
         member = ctx.author
-
         months = await DataBumpsTable.get_month_statuses(self)
 
         embed = discord.Embed(
@@ -224,6 +227,69 @@ class Show(commands.Cog):
         await ctx.send(embed=embed)
 
 
+    @_cnp.command(name="specific")
+    @utils.is_allowed(allowed_roles, throw_exc=True)
+    async def _specific(self, ctx, 
+        text: Option(str, name="text", description="Pastes a text for specific purposes", required=True,
+            choices=['Muted/Purge', 'Nickname', 'Classes', 'Interview', 'Resources', 'Global', 'Searching Teachers', 'Not An Emotional Support Server'])):
+        """ Posts a specific test of your choice """
+        
+        
+        member = ctx.author
+
+        available_texts: Dict[str, str] = {}
+        with open(f"./extra/random/json/special_texts.json", 'r', encoding="utf-8") as file:
+            available_texts = json.loads(file.read())
+
+        if not (selected_text := available_texts.get(text.lower())):
+            return await ctx.respond(f"**Please, inform a supported language, {member.mention}!**\n{', '.join(available_texts)}")
+
+        if selected_text['embed']:
+            embed = discord.Embed(
+                title=f"__{text.title()}__",
+                description=selected_text['text'],
+                color=member.color
+            )
+            if selected_text["image"]:
+                embed.set_image(url=selected_text["image"])
+            await ctx.respond(embed=embed)
+        else:
+            await ctx.respond(selected_text['text'])
+
+
+    @_cnp.command(name="speak")
+    @utils.is_allowed(allowed_roles, throw_exc=True)
+    async def _speak(self, ctx, language: Option(str, name="language", description="The language they should speak.", required=True)) -> None:
+        """ Pastes a 'speak in X language' text in different languages. """
+
+        member = ctx.author
+
+        available_languages: Dict[str, str] = {}
+        with open(f"./extra/random/json/speak_in.json", 'r', encoding="utf-8") as file:
+            available_languages = json.loads(file.read())
+
+        if not (language_text := available_languages.get(language.lower())):
+            return await ctx.respond(f"**Please, inform a supported language, {member.mention}!**\n{', '.join(available_languages)}")
+
+        embed = discord.Embed(
+            title=f"__{language.title()}__",
+            description=language_text,
+            color=member.color
+        )
+        await ctx.respond(embed=embed)
+
+    @_cnp.command(name="club_speak")
+    @utils.is_allowed(allowed_roles, throw_exc=True)
+    async def _club_speak(self, ctx) -> None:
+        """ Tells people that they must speak in English in club channels. """
+
+        embed = discord.Embed(
+            title="__Speak English__",
+            description="**This is an English-only channel. Please do not use other languages in the club channels.**",
+            color=ctx.author.color
+        )
+        await ctx.respond(embed=embed)
+        
     @commands.command(aliases=['wk','w', 'wiki'])
     @commands.cooldown(1, 10, type=commands.BucketType.user)
     async def wikipedia(self, ctx, *, topic: str = None):

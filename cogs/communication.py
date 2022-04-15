@@ -3,8 +3,7 @@ from discord.errors import NotFound
 from discord.ext import commands, tasks
 import os
 from extra import utils
-from mysqldb import the_database
-from typing import List, Union
+from typing import List
 import json
 from random import choice
 

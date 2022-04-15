@@ -1,6 +1,6 @@
 from random import choice
 import discord
-from discord.app.commands import slash_command, message_command, user_command, Option, OptionChoice
+from discord import slash_command, message_command, user_command, Option, OptionChoice
 from discord.ext import commands, menus, tasks
 import asyncio
 from gtts import gTTS
@@ -43,7 +43,6 @@ owner_role_id = int(os.getenv('OWNER_ROLE_ID', 123))
 analyst_debugger_role_id: int = int(os.getenv('ANALYST_DEBUGGER_ROLE_ID', 123))
 in_a_vc_role_id: int = int(os.getenv('IN_A_VC_ROLE_ID', 123))
 
-
 allowed_roles = [owner_role_id, admin_role_id, mod_role_id, *patreon_roles.keys(), int(os.getenv('SLOTH_LOVERS_ROLE_ID', 123))]
 teacher_role_id = int(os.getenv('TEACHER_ROLE_ID', 123))
 patreon_channel_id = int(os.getenv('PATREONS_CHANNEL_ID', 123))
@@ -54,6 +53,7 @@ smart_room_cat_id = int(os.getenv('CREATE_SMART_ROOM_CAT_ID', 123))
 
 dynamic_vc_id: int = int(os.getenv('CREATE_DYNAMIC_ROOM_VC_ID', 123))
 dynamic_channels_cat_id = int(os.getenv('CREATE_DYNAMIC_ROOM_CAT_ID', 123))
+
 tool_cogs: List[commands.Cog] = [
 	StealthStatusTable
 ]
@@ -256,7 +256,7 @@ class Tools(*tool_cogs):
 				await member.add_roles(temp_role)
 
 			# delete disclaimer message
-			tmp_message.delete()
+			await tmp_message.delete()
 
 			# send ping
 			tmp_message = await ctx.send(f"{temp_role.mention}")
@@ -1467,7 +1467,6 @@ class Tools(*tool_cogs):
 			print("Error at making dump: ", e)
 		finally:
 			os.remove(file_path); os.remove(file_path2); os.remove(file_path3)
-
 
 def setup(client):
 	client.add_cog(Tools(client))
