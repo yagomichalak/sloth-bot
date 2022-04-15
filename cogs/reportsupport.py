@@ -48,6 +48,7 @@ class ReportSupport(*report_support_classes):
         self.muffin_id: int = int(os.getenv('MUFFIN_ID', 123))
         self.cache = {}
         self.report_cache = {}
+        self.bot_cache = {}
         
 
     @commands.Cog.listener()
@@ -1079,54 +1080,6 @@ Entry requirements:
             else:
                 embed.description = "Not deleting it!"
                 await confirmation.edit(content='', embed=embed)
-            
-    async def dnk_embed(self, member):
-        def check(r, u):
-            return u == member and str(r.message.id) == str(the_msg.id) and str(r.emoji) in ['⬅️', '➡️']
-
-        command_index = 0
-        initial_embed = discord.Embed(title="__Table of Commands and their Prices__",
-                description="These are a few of commands and features that DNK can do.",
-                color=discord.Color.blue())
-        the_msg = await member.send(embed=initial_embed)
-        await the_msg.add_reaction('⬅️')
-        await the_msg.add_reaction('➡️')
-        while True:
-            embed = discord.Embed(title=f"__Table of Commands and their Prices__ ({command_index+1}/{len(list_of_commands)})",
-                description="These are a few of commands and features that DNK can do.",
-                color=discord.Color.blue())
-            embed.add_field(name=list_of_commands[command_index][0],
-                value=list_of_commands[command_index][1])
-            await the_msg.edit(embed=embed)
-
-            try:
-                pending_tasks = [self.client.wait_for('reaction_add', check=check),
-                self.client.wait_for('reaction_remove', check=check)]
-                done_tasks, pending_tasks = await asyncio.wait(pending_tasks, timeout=60, return_when=asyncio.FIRST_COMPLETED)
-                if not done_tasks:
-                    raise asyncio.TimeoutError
-
-                for task in pending_tasks:
-                    task.cancel()
-
-            except asyncio.TimeoutError:
-                await the_msg.remove_reaction('⬅️', self.client.user)
-                await the_msg.remove_reaction('➡️', self.client.user)
-                break
-
-            else:
-                for task in done_tasks:
-                    reaction, user = await task
-                if str(reaction.emoji) == "➡️":
-                    # await the_msg.remove_reaction(reaction.emoji, member)
-                    if command_index < (len(list_of_commands) - 1):
-                        command_index += 1
-                    continue
-                elif str(reaction.emoji) == "⬅️":
-                    # await the_msg.remove_reaction(reaction.emoji, member)
-                    if command_index > 0:
-                        command_index -= 1
-                    continue
 
     # Discord methods
     async def create_interview_room(self, guild: discord.Guild, app: List[str]) -> None:
