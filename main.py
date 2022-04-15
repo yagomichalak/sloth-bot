@@ -1,13 +1,11 @@
 import discord
-from discord.app.commands import Option, option
 from discord.utils import escape_mentions
 from pytz import timezone
 from dotenv import load_dotenv
 from discord.ext import commands, tasks
 
 from extra import utils
-from typing import Dict, List
-import json
+from typing import List
 import os
 from datetime import datetime
 from itertools import cycle
@@ -16,8 +14,7 @@ from extra.useful_variables import patreon_roles
 
 from extra.customerrors import (
     MissingRequiredSlothClass, ActionSkillOnCooldown, CommandNotReady, 
-    SkillsUsedRequirement, ActionSkillsLocked, PoisonedCommandError,
-    KidnappedCommandError
+    SkillsUsedRequirement, ActionSkillsLocked, KidnappedCommandError
 )
 
 load_dotenv()
@@ -57,21 +54,21 @@ client = commands.Bot(command_prefix='z!', intents=discord.Intents.all(), help_c
 
 # Tells when the bot is online
 @client.event
-async def on_ready():
+async def on_ready() -> None:
     change_status.start()
     change_color.start()
     print('Bot is ready!')
 
 
 @tasks.loop(seconds=65)
-async def change_color():
+async def change_color() -> None:
     guild = client.get_guild(server_id)
     patreon = discord.utils.get(guild.roles, id=patreon_role_id)
     r, g, b = next(shades_of_pink)
     await patreon.edit(colour=discord.Colour.from_rgb(r, g, b))
 
 @client.event
-async def on_member_update(before, after):
+async def on_member_update(before, after) -> None:
     """ Sends a messages to new patreons, as soon as they get their patreon roles. """
 
     if not after.guild:
@@ -98,7 +95,7 @@ async def on_member_update(before, after):
 
 
 @client.event
-async def on_member_remove(member):
+async def on_member_remove(member) -> None:
     roles = [role for role in member.roles]
     channel = discord.utils.get(member.guild.channels, id=admin_commands_channel_id)
     embed = discord.Embed(title=member.name, description=f"User has left the server.", colour=discord.Colour.dark_red())
@@ -115,7 +112,7 @@ async def on_member_remove(member):
     await channel.send(embed=embed)
 
 @client.event
-async def on_command_error(ctx, error):
+async def on_command_error(ctx, error) -> None:
     if isinstance(error, commands.MissingPermissions):
         await ctx.send("**You can't do that!**")
 
@@ -209,9 +206,6 @@ async def on_application_command_error(ctx, error) -> None:
     elif isinstance(error, commands.ChannelNotFound):
         await ctx.respond("**Channel not found!**")
 
-    elif isinstance(error, discord.app.commands.errors.CheckFailure):
-        await ctx.respond("**It looks like you can't run this command!**")
-
 
     print('='*10)
     print(f"ERROR: {error} | Class: {error.__class__} | Cause: {error.__cause__}")
@@ -229,13 +223,13 @@ async def on_application_command_error(ctx, error) -> None:
 
 # Members status update
 @tasks.loop(seconds=10)
-async def change_status():
+async def change_status() -> None:
     guild = client.get_guild(server_id)
     await client.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=f'{len(guild.members)} members.'))
 
 
 @tasks.loop(seconds=60)
-async def update_timezones():
+async def update_timezones() -> None:
     time_now = datetime.now()
     timezones = {'Etc/GMT-1': [clock_voice_channel_id, 'CET']}
 
@@ -250,7 +244,7 @@ async def update_timezones():
 
 # Joins VC log #########
 @client.event
-async def on_voice_state_update(member, before, after):
+async def on_voice_state_update(member, before, after) -> None:
     # No longer being used
 
     return
@@ -306,7 +300,7 @@ start_time = datetime.now(timezone('Etc/GMT'))
 
 
 @client.command()
-async def uptime(ctx: commands.Context):
+async def uptime(ctx: commands.Context) -> None:
     """ Shows for how much time the bot is online. """
 
     now = await utils.get_time_now()  # Timestamp of when uptime function is run
@@ -327,7 +321,7 @@ async def uptime(ctx: commands.Context):
 
 
 @client.command()
-async def help(ctx, *, cmd: str =  None):
+async def help(ctx, *, cmd: str =  None) -> None:
     """ Shows some information about commands and categories. 
     :param cmd: The command/category. """
 
@@ -343,7 +337,7 @@ async def help(ctx, *, cmd: str =  None):
         for cog in client.cogs:
             cog = client.get_cog(cog)
             cog_commands = [c for c in cog.__cog_commands__ if hasattr(c, 'parent') and c.parent is None]
-            commands = [f"{client.command_prefix}{c.name}" for c in cog_commands if not c.hidden]
+            commands = [f"{client.command_prefix}{c.name}" for c in cog_commands if hasattr(c, 'hidden') and not c.hidden]
             if commands:
                 embed.add_field(
                     name=f"__{cog.qualified_name}__",
@@ -373,7 +367,7 @@ async def help(ctx, *, cmd: str =  None):
             if str(cog).lower() == str(cmd).lower():
                 cog = client.get_cog(cog)
                 cog_embed = discord.Embed(title=f"__Cog:__ {cog.qualified_name}", description=f"__**Description:**__\n```{cog.description}```", color=ctx.author.color, timestamp=ctx.message.created_at)
-                cog_commands = [c for c in cog.__cog_commands__ if hasattr(c, 'parent') and c.parent is None]
+                cog_commands = [c for c in cog.__cog_commands__ if hasattr(c, 'hidden') and hasattr(c, 'parent') and c.parent is None]
                 for c in cog_commands:
                     if not c.hidden:
                         cog_embed.add_field(name=c.qualified_name, value=c.help, inline=False)
@@ -384,7 +378,7 @@ async def help(ctx, *, cmd: str =  None):
             await ctx.send(f"**Invalid parameter! It is neither a command nor a cog!**")
 
 @client.command(aliases=['al', 'alias'])
-async def aliases(ctx, *, cmd: str =  None):
+async def aliases(ctx, *, cmd: str =  None) -> None:
     """ Shows some information about commands and categories. 
     :param cmd: The command. """
 
@@ -405,7 +399,7 @@ async def aliases(ctx, *, cmd: str =  None):
 
 @client.command(hidden=True)
 @commands.has_permissions(administrator=True)
-async def load(ctx, extension: str = None):
+async def load(ctx, extension: str = None) -> None:
     """ Loads a cog.
     :param extension: The cog. """
 
@@ -417,7 +411,7 @@ async def load(ctx, extension: str = None):
 
 @client.command(hidden=True)
 @commands.has_permissions(administrator=True)
-async def unload(ctx, extension: str = None):
+async def unload(ctx, extension: str = None) -> None:
     """ Unloads a cog.
     :param extension: The cog. """
 
@@ -429,7 +423,7 @@ async def unload(ctx, extension: str = None):
 
 @client.command(hidden=True)
 @commands.has_permissions(administrator=True)
-async def reload(ctx, extension: str = None):
+async def reload(ctx, extension: str = None) -> None:
     """ Reloads a cog.
     :param extension: The cog. """
 
@@ -438,153 +432,6 @@ async def reload(ctx, extension: str = None):
     client.unload_extension(f'cogs.{extension}')
     client.load_extension(f'cogs.{extension}')
     return await ctx.send(f"**{extension} reloaded!**", delete_after=3)
-
-
-
-# Slash commands
-
-
-_cnp = client.command_group(name="cnp", description="For copy and pasting stuff.", guild_ids=guild_ids)
-
-@_cnp.command(name="specific")
-@utils.is_allowed([moderator_role_id, admin_role_id], throw_exc=True)
-async def _specific(ctx, 
-    text: Option(str, name="text", description="Pastes a text for specific purposes", required=True,
-        choices=['Muted/Purge', 'Nickname', 'Classes', 'Interview', 'Resources', 'Global', 'Searching Teachers', 'Not An Emotional Support Server'])):
-    """ Posts a specific test of your choice """
-    
-    
-    member = ctx.author
-
-    available_texts: Dict[str, str] = {}
-    with open(f"./extra/random/json/special_texts.json", 'r', encoding="utf-8") as file:
-        available_texts = json.loads(file.read())
-
-    if not (selected_text := available_texts.get(text.lower())):
-        return await ctx.respond(f"**Please, inform a supported language, {member.mention}!**\n{', '.join(available_texts)}")
-
-    if selected_text['embed']:
-        embed = discord.Embed(
-            title=f"__{text.title()}__",
-            description=selected_text['text'],
-            color=member.color
-        )
-        if selected_text["image"]:
-            embed.set_image(url=selected_text["image"])
-        await ctx.respond(embed=embed)
-    else:
-        await ctx.respond(selected_text['text'])
-
-
-@_cnp.command(name="speak")
-@utils.is_allowed([moderator_role_id, admin_role_id], throw_exc=True)
-async def _speak(ctx, language: Option(str, name="language", description="The language they should speak.", required=True)) -> None:
-    """ Pastes a 'speak in X language' text in different languages. """
-
-    member = ctx.author
-
-    available_languages: Dict[str, str] = {}
-    with open(f"./extra/random/json/speak_in.json", 'r', encoding="utf-8") as file:
-        available_languages = json.loads(file.read())
-
-    if not (language_text := available_languages.get(language.lower())):
-        return await ctx.respond(f"**Please, inform a supported language, {member.mention}!**\n{', '.join(available_languages)}")
-
-    embed = discord.Embed(
-        title=f"__{language.title()}__",
-        description=language_text,
-        color=member.color
-    )
-    await ctx.respond(embed=embed)
-
-@_cnp.command(name="club_speak")
-@utils.is_allowed([moderator_role_id, admin_role_id], throw_exc=True)
-async def _club_speak(ctx) -> None:
-    """ Tells people that they must speak in English in club channels. """
-
-    embed = discord.Embed(
-        title="__Speak English__",
-        description="**This is an English-only channel. Please do not use other languages in the club channels.**",
-        color=ctx.author.color
-    )
-    await ctx.respond(embed=embed)
-
-_giveaway = client.command_group(name="giveaway", description="For copy and pasting stuff.", guild_ids=guild_ids)
-
-@utils.is_allowed([giveaway_manager_role_id, moderator_role_id, admin_role_id], throw_exc=True)
-@_giveaway.command(name="start", guild_ids=guild_ids)
-@option(type=str, name="prize", description="The prize of the giveaway.", required=True)
-@option(type=str, name="title", description="The title for the giveaway.", required=False, default="Giveaway")
-@option(type=str, name="description", description="The description of the giveaway.", required=False)
-@option(type=int, name="winners", description="The amount of winners.", required=False, default=1)
-@option(type=int, name="days", description="The days for the giveaway.", required=False)
-@option(type=int, name="hours", description="The hours for the giveaway.", required=False)
-@option(type=int, name="minutes", description="The minutes for the giveaway.", required=False)
-@option(type=discord.Role, name="role", description="The role for role-only giveaways.", required=False)
-@option(type=discord.Member, name="host", description="The person hosting the giveaway.", required=False)
-async def _giveaway_start_slash(
-    ctx, prize: str, title: str, description: str, winners: int,
-     days: int, hours: int, minutes: int, role: discord.Role, host: discord.Member) -> None:
-    """ Starts a giveaway. """
-
-    winners = 1 if not winners else winners
-    minutes = 0 if minutes is None else minutes
-    hours = 0 if hours is None else hours
-    days = 0 if days is None else days
-    host = host if host else ctx.author
-
-    await client.get_cog('Giveaways')._giveaway_start_callback(ctx=ctx,
-        host=host, prize=prize, title=title, description=description, 
-        winners=winners, days=days, hours=hours, minutes=minutes, role=role
-    )
-
-@utils.is_allowed([giveaway_manager_role_id, moderator_role_id, admin_role_id], throw_exc=True)
-@_giveaway.command(name="reroll", guild_ids=guild_ids)
-@option("message_id", str, description="The message ID of the giveaway to reroll.")
-async def _giveaway_reroll_slash(ctx, message_id: str) -> None:
-    """ Rerolls a giveaway. """
-
-    try:
-        message_id: int = int(message_id)
-    except ValueError:
-        await ctx.respond(f"**This is not a valid message ID, {ctx.author.mention}!**", ephemeral=True)
-    else:
-        await client.get_cog('Giveaways')._giveaway_reroll_callback(ctx=ctx, message_id=message_id)
-
-@utils.is_allowed([giveaway_manager_role_id, moderator_role_id, admin_role_id], throw_exc=True)
-@_giveaway.command(name="delete", guild_ids=guild_ids)
-@option("message_id", str, description="The message ID of the giveaway to delete.")
-async def _giveaway_delete_slash(ctx, message_id: str) -> None:
-    """ Deletes a giveaway. """
-
-    try:
-        message_id: int = int(message_id)
-    except ValueError:
-        await ctx.respond(f"**This is not a valid message ID, {ctx.author.mention}!**", ephemeral=True)
-    else:
-        await client.get_cog('Giveaways')._giveaway_delete_callback(ctx=ctx, message_id=message_id)
-
-@utils.is_allowed([giveaway_manager_role_id, moderator_role_id, admin_role_id], throw_exc=True)
-@_giveaway.command(name="end", guild_ids=guild_ids)
-@option("message_id", str, description="The message ID of the giveaway to end.")
-async def _giveaway_end_slash(ctx, message_id: str) -> None:
-    """ Ends a giveaway. """
-
-    try:
-        message_id: int = int(message_id)
-    except ValueError:
-        await ctx.respond(f"**This is not a valid message ID, {ctx.author.mention}!**", ephemeral=True)
-    else:
-        await client.get_cog('Giveaways')._giveaway_end_callback(ctx=ctx, message_id=message_id)
-
-@utils.is_allowed([giveaway_manager_role_id, moderator_role_id, admin_role_id], throw_exc=True)
-@_giveaway.command(name="list", guild_ids=guild_ids)
-async def _giveaway_list_slash(ctx) -> None:
-    """ Lists all giveaways. """
-
-    await client.get_cog('Giveaways')._giveaway_list_callback(ctx=ctx)
-
-# End of slash commands
 
 forbidden_files: List[str] = [
     # 'createdynamicroom.py'

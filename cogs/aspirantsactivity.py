@@ -1,12 +1,10 @@
 import discord
 from discord.ext import commands
-from datetime import datetime
 from mysqldb import *
 import asyncio
 import os
 from extra import utils
 from extra.moderation.aspirants import AspirantsTable
-from typing import List
 
 senior_mod_role_id: int = int(os.getenv('SENIOR_MOD_ROLE_ID', 123))
 mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
@@ -128,39 +126,46 @@ class AspirantActivity(AspirantsTable):
 
     @utils.is_allowed([senior_mod_role_id], throw_exc=True)
     @commands.command(aliases=['addasp', 'add_asp'])
-    async def add_aspirant(self, ctx, member: discord.Member = None) -> None:
+    async def add_aspirant(self, ctx, members: commands.Greedy[discord.Member] = None) -> None:
         """Adds an aspirant from the activity monitor
         :param member: The user_id, mention or name#0000 of the user"""
 
         await ctx.message.delete()
 
-        if not member:
+        if not members:
             return await ctx.send("**Please, inform a member**")
 
-        mycursor, db = await the_database()
-        await mycursor.execute("INSERT INTO AspirantActivity (user_id, time, timestamp, messages) VALUES (%s, %s, %s, %s)",
-                               (member.id, 0, None, 1))
-        await db.commit()
-        await mycursor.close()
-        await ctx.send(f"**The member {member} was successfully added**")
+        for member in members:
+            # Checks if the user is already in the table
+            if  not await self.get_user(member.id):
+                mycursor, db = await the_database()
+                await mycursor.execute("INSERT INTO AspirantActivity (user_id, time, timestamp, messages) VALUES (%s, %s, %s, %s)",
+                                    (member.id, 0, None, 1))
+                await db.commit()
+                await mycursor.close()
+                await ctx.send(f"**The member {member} was successfully added**")
+            else:
+                return await ctx.send(f"**The user {member} is already been monitored**")
 
 
     @utils.is_allowed([senior_mod_role_id], throw_exc=True)
     @commands.command(aliases=['del_asp', 'delasp'])
-    async def remove_aspirant(self, ctx, member: discord.Member = None) -> None:
+    async def remove_aspirant(self, ctx, members: commands.Greedy[discord.Member] = None) -> None:
         """Removes an aspirant from the activity monitor
         :param member: The user_id, mention or name#0000 of the user"""
 
         await ctx.message.delete()
 
-        if not member:
+        if not members:
             return await ctx.send("**Please, inform a member**")
 
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM AspirantActivity WHERE user_id = %s", (member.id))
-        await db.commit()
-        await mycursor.close()
-        await ctx.send(f"**The member {member} was successfully removed**")
+        for member in members:
+            mycursor, db = await the_database()
+            await mycursor.execute("DELETE FROM AspirantActivity WHERE user_id = %s", (member.id))
+            await db.commit()
+            await mycursor.close()
+            await ctx.send(f"**The member {member} was successfully removed**")
+
 
 def setup(client) -> None:
     """ Cog's setup function. """

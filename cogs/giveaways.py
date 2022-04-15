@@ -1,4 +1,5 @@
 import discord
+from discord import SlashCommandGroup, option
 from discord.ext import commands, tasks
 from typing import List, Union
 import os
@@ -12,6 +13,9 @@ server_id = int(os.getenv('SERVER_ID', 123))
 giveaway_manager_role_id: int = int(os.getenv('GIVEAWAY_MANAGER_ROLE_ID', 123))
 mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 
+allowed_roles: List[int] = [giveaway_manager_role_id, mod_role_id, int(os.getenv('ADMIN_ROLE_ID'))]
+guild_ids: List[int] = [server_id]
+
 giveaway_cogs: List[commands.Cog] = [GiveawaysTable, GiveawayEntriesTable]
 
 class Giveaways(*giveaway_cogs):
@@ -19,6 +23,8 @@ class Giveaways(*giveaway_cogs):
 
     def __init__(self, client) -> None:
         self.client = client
+
+    _giveaway = SlashCommandGroup("giveaway", "Various greeting from cogs!", guild_ids=guild_ids)
 
     @commands.Cog.listener()
     async def on_ready(self) -> None:
@@ -332,6 +338,79 @@ class Giveaways(*giveaway_cogs):
 
         return minutes + hours + days
 
+    
+    @utils.is_allowed(allowed_roles, throw_exc=True)
+    @_giveaway.command(name="start", guild_ids=guild_ids)
+    @option(type=str, name="prize", description="The prize of the giveaway.", required=True)
+    @option(type=str, name="title", description="The title for the giveaway.", required=False, default="Giveaway")
+    @option(type=str, name="description", description="The description of the giveaway.", required=False)
+    @option(type=int, name="winners", description="The amount of winners.", required=False, default=1)
+    @option(type=int, name="days", description="The days for the giveaway.", required=False)
+    @option(type=int, name="hours", description="The hours for the giveaway.", required=False)
+    @option(type=int, name="minutes", description="The minutes for the giveaway.", required=False)
+    @option(type=discord.Role, name="role", description="The role for role-only giveaways.", required=False)
+    @option(type=discord.Member, name="host", description="The person hosting the giveaway.", required=False)
+    async def _giveaway_start_slash(self,
+        ctx, prize: str, title: str, description: str, winners: int,
+        days: int, hours: int, minutes: int, role: discord.Role, host: discord.Member) -> None:
+        """ Starts a giveaway. """
+
+        winners = 1 if not winners else winners
+        minutes = 0 if minutes is None else minutes
+        hours = 0 if hours is None else hours
+        days = 0 if days is None else days
+        host = host if host else ctx.author
+
+        await self._giveaway_start_callback(ctx=ctx,
+            host=host, prize=prize, title=title, description=description, 
+            winners=winners, days=days, hours=hours, minutes=minutes, role=role
+        )
+
+    @utils.is_allowed(allowed_roles, throw_exc=True)
+    @_giveaway.command(name="reroll")
+    @option("message_id", str, description="The message ID of the giveaway to reroll.")
+    async def _giveaway_reroll_slash(self, ctx, message_id: str) -> None:
+        """ Rerolls a giveaway. """
+
+        try:
+            message_id: int = int(message_id)
+        except ValueError:
+            await ctx.respond(f"**This is not a valid message ID, {ctx.author.mention}!**", ephemeral=True)
+        else:
+            await self._giveaway_reroll_callback(ctx=ctx, message_id=message_id)
+
+    @utils.is_allowed(allowed_roles, throw_exc=True)
+    @_giveaway.command(name="delete")
+    @option("message_id", str, description="The message ID of the giveaway to delete.")
+    async def _giveaway_delete_slash(self, ctx, message_id: str) -> None:
+        """ Deletes a giveaway. """
+
+        try:
+            message_id: int = int(message_id)
+        except ValueError:
+            await ctx.respond(f"**This is not a valid message ID, {ctx.author.mention}!**", ephemeral=True)
+        else:
+            await self._giveaway_delete_callback(ctx=ctx, message_id=message_id)
+
+    @utils.is_allowed(allowed_roles, throw_exc=True)
+    @_giveaway.command(name="end")
+    @option("message_id", str, description="The message ID of the giveaway to end.")
+    async def _giveaway_end_slash(self, ctx, message_id: str) -> None:
+        """ Ends a giveaway. """
+
+        try:
+            message_id: int = int(message_id)
+        except ValueError:
+            await ctx.respond(f"**This is not a valid message ID, {ctx.author.mention}!**", ephemeral=True)
+        else:
+            await self._giveaway_end_callback(ctx=ctx, message_id=message_id)
+
+    @utils.is_allowed(allowed_roles, throw_exc=True)
+    @_giveaway.command(name="list")
+    async def _giveaway_list_slash(self, ctx) -> None:
+        """ Lists all giveaways. """
+
+        await self._giveaway_list_callback(ctx=ctx)
 """
 Setup:
 
