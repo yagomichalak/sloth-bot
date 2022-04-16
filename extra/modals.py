@@ -377,13 +377,11 @@ class UserReportDetailModal(Modal):
         )
         self.option = option
 
-    async def callback(self, interaction: discord.Interaction) -> None:
+    async def callback(self, interaction) -> None:
         """ Callback for the form modal. """        
 
+        await interaction.response.defer()
         text = self.children[0].value
-        
-        # guild = self.client.get_guild(int(os.getenv('SERVER_ID', 123)))
-        # member = discord.utils.get(guild.members, id=interaction.user.id)
         member = interaction.user
 
         if self.option == 'Report':
