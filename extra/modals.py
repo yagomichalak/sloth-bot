@@ -175,8 +175,8 @@ class TeacherApplicationModal(Modal):
     • We will let you know when we need a new mod. We check apps when we need it!""", ephemeral=True)
 
         teacher_app_channel = await self.client.fetch_channel(self.cog.teacher_app_channel_id)
-        cosmos_role = discord.utils.get(teacher_app_channel.guild.roles, id=self.cog.cosmos_role_id)
-        app = await teacher_app_channel.send(content=f"{cosmos_role.mention}, {member.mention}", embed=embed)
+        muffin = discord.utils.get(teacher_app_channel.guild.members, id=self.cog.muffin_id)
+        app = await teacher_app_channel.send(content=f"{muffin.mention}, {member.mention}", embed=embed)
         await app.add_reaction('✅')
         await app.add_reaction('❌')
         # Saves in the database
@@ -265,8 +265,7 @@ class EventHostApplicationModal(Modal):
     • We will let you know when we need a new mod. We check apps when we need it!""", ephemeral=True)
 
         teacher_app_channel = await self.client.fetch_channel(self.cog.event_host_app_channel_id)
-        cosmos_role = discord.utils.get(teacher_app_channel.guild.roles, id=self.cog.cosmos_role_id)
-        app = await teacher_app_channel.send(content=f"{cosmos_role.mention}, {member.mention}", embed=embed)
+        app = await teacher_app_channel.send(content=member.mention, embed=embed)
         await app.add_reaction('✅')
         await app.add_reaction('❌')
         # Saves in the database
@@ -352,8 +351,8 @@ class DebateManagerApplicationModal(Modal):
     • We will let you know when we need a new mod. We check apps when we need it!""", ephemeral=True)
 
         teacher_app_channel = await self.client.fetch_channel(self.cog.debate_manager_app_channel_id)
-        cosmos_role = discord.utils.get(teacher_app_channel.guild.roles, id=self.cog.cosmos_role_id)
-        app = await teacher_app_channel.send(content=f"{cosmos_role.mention}, {member.mention}", embed=embed)
+        cent = discord.utils.get(teacher_app_channel.guild.members, id=self.cog.cent_id)
+        app = await teacher_app_channel.send(content=f"{cent.mention}, {member.mention}", embed=embed)
         await app.add_reaction('✅')
         await app.add_reaction('❌')
         # Saves in the database
