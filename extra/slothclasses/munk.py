@@ -1277,7 +1277,7 @@ class Munk(Player):
             {"message": "Complete 5 `TheLanguageJungle` games.", "enum_value": 1},
             {"message": "Rep someone and get repped back in less than an hour.", "enum_value": 2},
             {"message": "Win a coinflip betting 50 leaves.", "enum_value": 3},
-            {"message": "Get a 15+ score in the `Flags` game.", "enum_value": 4},
+            {"message": "Get a score 20 in the `Flags` game.", "enum_value": 4},
             {"message": "Spend 4 hours in a Voice Channel in a single day.", "enum_value": 5},
             {"message": "Buy any item from the SlothShop, if you have all items you need to get ripped-off first.", "enum_value": 6},
             
