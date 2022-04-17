@@ -358,18 +358,18 @@ class DebateManagerApplicationModal(Modal):
         # Saves in the database
         await self.cog.insert_application(app.id, member.id, 'debate_manager')
 
-class UserReportDetailModal(Modal):
-    """ Class for specifying details for a User Report application. """
+class UserReportSupportDetailModal(Modal):
+    """ Class for specifying details for a Report Support request. """
 
     def __init__(self, client: commands.Bot, option: str) -> None:
         """ Class init method. """
 
-        super().__init__("Report a User")
+        super().__init__("Report-Support")
         self.client = client
         self.cog: commands.Cog = client.get_cog('ReportSupport')
         self.add_item(
             InputText(
-                label="What Happened?",
+                label="What happened/How can we help you?",
                 placeholder="Describe the situation as much as you can, so we can help you better and faster.",
                 style=discord.InputTextStyle.paragraph
             )
