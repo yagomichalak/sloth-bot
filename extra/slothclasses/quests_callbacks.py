@@ -8,6 +8,41 @@ import os
 bots_and_commands_channel_id: int = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID', 123))
 server_id: int = int(os.getenv('SERVER_ID', 123))
 
+async def quest_one_callback(client: commands.Bot, user_id: int) -> None:
+    """ Callback for the quest one.
+    :param client: The bot client.
+    :param user_id: The user ID. """
+
+    pass
+
+async def quest_two_callback(client: commands.Bot, user_id: int) -> None:
+    """ Callback for the quest two.
+    :param client: The bot client.
+    :param user_id: The user ID. """
+
+    pass
+
+async def quest_three_callback(client: commands.Bot, user_id: int) -> None:
+    """ Callback for the quest_three.
+    :param client: The bot client.
+    :param user_id: The user ID. """
+
+    pass
+
+async def quest_four_callback(client: commands.Bot, user_id: int) -> None:
+    """ Callback for the quest four.
+    :param client: The bot client.
+    :param user_id: The user ID. """
+
+    pass
+
+async def quest_five_callback(client: commands.Bot, user_id: int) -> None:
+    """ Callback for the quest five.
+    :param client: The bot client.
+    :param user_id: The user ID. """
+
+    pass
+
 async def quest_six_callback(client: commands.Bot, user_id: int) -> None:
     """ Callback for the quest six.
     :param client: The bot client.
