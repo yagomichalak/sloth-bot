@@ -1208,8 +1208,6 @@ class Munk(Player):
         else:
             await ctx.send(f"**Successfully transferred ownership of `{user_tribe['name']}` from <@{user_tribe['owner_id']}> to {member.mention}!**")
 
-
-
     @commands.command(aliases=['get_mission', 'gq', 'gm'])
     @Player.poisoned()
     @Player.skills_used(requirement=50)
@@ -1277,7 +1275,7 @@ class Munk(Player):
 
         quests: List[Dict[str, Union[str, int]]] = [
             {"message": "Complete 5 `TheLanguageJungle` games.", "enum_value": 1},
-            {"message": "Rep someone and get repped back.", "enum_value": 2},
+            {"message": "Rep someone and get repped back in less than an hour.", "enum_value": 2},
             {"message": "Win a coinflip betting 50 leaves.", "enum_value": 3},
             {"message": "Get a 15+ score in the `Flags` game.", "enum_value": 4},
             {"message": "Spend 4 hours in a Voice Channel in a single day.", "enum_value": 5},
