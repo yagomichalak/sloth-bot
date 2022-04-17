@@ -206,7 +206,7 @@ class Munk(Player):
         """ Gets information about a specific tribe.
         :param name: The name of the tribe. """
 
-        mycursor, db = await the_database()
+        mycursor, _ = await the_database()
         await mycursor.execute("SELECT * FROM UserTribe WHERE tribe_name = %s", (name,))
         tribe = await mycursor.fetchone()
         await mycursor.close()
@@ -1313,24 +1313,28 @@ class Munk(Player):
         tribe_quest_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
         return tribe_quest_embed
 
-    async def complete_quest(self, user_id: int) -> None:
+    async def complete_quest(self, user_id: int, quest_number: int) -> None:
         """ Completes an on-going quest for a member.
-        :param user_id: The ID of the user who's completing the quest. """
+        :param user_id: The ID of the user who's completing the quest.
+        :param quest_number: The quest number. """
 
         # Gets Quest
         quest = await self.get_skill_action_by_user_id_and_skill_type(user_id=user_id, skill_type="quest")
         if not quest:
             return
 
+        if quest[7] != quest_number:
+            return
+
         # Deletes Quest
         await self.delete_skill_action_by_user_id_and_skill_type(user_id=user_id, skill_type='quest')
 
         # Gets enum value
-        enum_name = QuestEnum.__dict__['_member_names_'][quest[7]-1]
-        function: Callable = QuestEnum.__getitem__(name=enum_name)
+        enum_name = list(QuestEnum.__annotations__)[quest[7]-1]
+        function: Callable = getattr(QuestEnum, enum_name)
         # Runs attached method if there's any
         if function:
-            await function()
+            await function(client=self.client, user_id=user_id)
 
     @tribe.command(aliases=["mission", "task", "chore", "quests"])
     @commands.cooldown(1, 5, commands.BucketType.user)

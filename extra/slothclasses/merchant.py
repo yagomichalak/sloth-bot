@@ -1,19 +1,20 @@
-from discord import file
-from extra.prompt.menu import ConfirmButton
+
 import discord
 from discord.ext import commands, menus
-from .player import Player, Skill
 from mysqldb import the_database
+
+from extra import utils
 from extra.menu import ConfirmSkill, prompt_number, OpenShopLoop
 from extra.view import UserPetView
-from extra.prompt.menu import Confirm
-from extra import utils
+from extra.prompt.menu import Confirm, ConfirmButton
+
+from .player import Player, Skill
+
 import os
 from typing import List, Dict, Union, Optional
 from datetime import datetime
 import random
 from PIL import Image, ImageDraw, ImageFont, ImageOps
-from io import BytesIO
 
 bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID', 123))
 
@@ -186,6 +187,7 @@ class Merchant(Player):
                         embed=siphon_embed)
 
                 else:
+                    pass
                     # Updates both buyer and seller's money
                     await self.client.get_cog('SlothCurrency').update_user_money(buyer.id, - merchant_item[7])
                     await self.client.get_cog('SlothCurrency').update_user_money(member.id, merchant_item[7])
@@ -208,7 +210,10 @@ class Merchant(Player):
                     description=f"{buyer.mention} bought a `changing-Sloth-class potion` from {member.mention}!",
                     color=discord.Color.green(),
                     timestamp=ctx.message.created_at
-                    ))
+                ))
+
+                # Tries to complete a quest, if possible.
+                await self.complete_quest(buyer.id, 6)
 
     @buy.command(aliases=['wedding', 'wedding_ring', 'weddingring'])
     @Player.poisoned()
