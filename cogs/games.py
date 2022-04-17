@@ -195,8 +195,9 @@ class Games(*minigames_cogs):
         embed.set_author(name=member, icon_url=member.display_avatar)
         await message.edit('\u200b', embed=embed, view=None)
 
-        # Tries to complete a quest, if possible.
-        await self.client.get_cog('SlothClass').complete_quest(member.id, 4)
+        if points == 20:
+            # Tries to complete a quest, if possible.
+            await self.client.get_cog('SlothClass').complete_quest(member.id, 4)
 
 
     #=== Flag games settings ===#
