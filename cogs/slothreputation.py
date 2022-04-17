@@ -438,16 +438,18 @@ class SlothReputation(*currency_cogs):
         :param member: The member to give the reputation.
 
         Ps: The repped person gets 5łł and 100 reputation points. """
+
+        author: discord.Member = ctx.author
         
         if not member:
             await ctx.message.delete()
             return await ctx.send(f"**Inform a member to rep to!**", delete_after=3)
 
-        if member.id == ctx.author.id:
+        if member.id == author.id:
             await ctx.message.delete()
             return await ctx.send(f"**You cannot rep yourself!**", delete_after=3)
 
-        user = await self.get_specific_user(ctx.author.id)
+        user = await self.get_specific_user(author.id)
         if not user:
             return await self.rep(ctx)
 
@@ -455,7 +457,7 @@ class SlothReputation(*currency_cogs):
 
         target_user = await self.get_specific_user(member.id)
         if not target_user:
-            if ctx.author.id == member.id:
+            if author.id == member.id:
 
                 view = discord.ui.View()
                 view.add_item(discord.ui.Button(style=5, label="Create Account", emoji="🦥", url="https://thelanguagesloth.com/profile/update"))
@@ -467,17 +469,17 @@ class SlothReputation(*currency_cogs):
 
         SlothClass = self.client.get_cog('SlothClass')
 
-        perpetrator_fx = await SlothClass.get_user_effects(ctx.author)
+        perpetrator_fx = await SlothClass.get_user_effects(author)
         if 'sabotaged' in perpetrator_fx:
-            return await ctx.send(f"**You can't rep anyone because you have been sabotaged, {ctx.author.mention}!**")
+            return await ctx.send(f"**You can't rep anyone because you have been sabotaged, {author.mention}!**")
 
         target_fx = await SlothClass.get_user_effects(member)
         if 'sabotaged' in target_fx:
-            return await ctx.send(f"**You can't rep {member.mention} because they have been sabotaged, {ctx.author.mention}!**")
+            return await ctx.send(f"**You can't rep {member.mention} because they have been sabotaged, {author.mention}!**")
 
 
-        time_xp = await utils.get_timestamp()
-        sub_time = time_xp - user[0][5]
+        current_ts = await utils.get_timestamp()
+        sub_time = current_ts - user[0][5]
         cooldown = 36000
         if int(sub_time) < int(cooldown):
             m, s = divmod(int(cooldown) - int(sub_time), 60)
@@ -490,12 +492,22 @@ class SlothReputation(*currency_cogs):
             elif s > 0:
                 return await ctx.send(f"**Rep again in {s:02d} seconds!**", delete_after=10)
 
-        await self.update_user_score_points(ctx.author.id, 100)
+        await self.update_user_score_points(author.id, 100)
         await self.update_user_score_points(member.id, 100)
-        await self.update_user_rep_time(ctx.author.id, time_xp)
+        await self.update_user_rep_time(author.id, current_ts)
         await self.client.get_cog('SlothCurrency').update_user_money(member.id, 5)
-        return await ctx.send(
-            f"**{ctx.author.mention} repped {member.mention}! 🍃The repped person got 5łł🍃**")
+        await ctx.send(
+            f"**{author.mention} repped {member.mention}! 🍃The repped person got 5łł🍃**")
+
+        user_quest = await SlothClass.get_skill_action_by_user_id_and_skill_type(user_id=author.id, skill_type="quest")
+        if user_quest and user_quest[9] == 0:
+            await SlothClass.update_sloth_skill_target_id(author.id, member.id, current_ts)
+            return await SlothClass.complete_quest(author.id, 2)
+
+        target_quest = await SlothClass.get_skill_action_by_user_id_and_skill_type(user_id=member.id, skill_type="quest")
+        if target_quest and target_quest[3] == author.id:
+            # Tries to complete a Quest, if possible
+            await SlothClass.complete_quest(member.id, 2)
 
 def setup(client):
     client.add_cog(SlothReputation(client))

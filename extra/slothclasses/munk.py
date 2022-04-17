@@ -1215,7 +1215,7 @@ class Munk(Player):
     @Player.skills_locked()
     @Player.user_is_class('munk')
     @Player.skill_mark()
-    @Player.not_ready()
+    # @Player.not_ready()
     async def get_quest(self, ctx) -> None:
         """ Gets a Quest for you and your Tribe to complete, and if so,
         the involved people will get rewarded.
@@ -1324,15 +1324,12 @@ class Munk(Player):
         if quest[7] != quest_number:
             return
 
-        # Deletes Quest
-        await self.delete_skill_action_by_user_id_and_skill_type(user_id=user_id, skill_type='quest')
-
         # Gets enum value
         enum_name = list(QuestEnum.__annotations__)[quest[7]-1]
         function: Callable = getattr(QuestEnum, enum_name)
         # Runs attached method if there's any
         if function:
-            await function(client=self.client, user_id=user_id)
+            await function(client=self.client, user_id=user_id, quest=quest)
 
     @tribe.command(aliases=["mission", "task", "chore", "quests"])
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -1372,3 +1369,29 @@ class Munk(Player):
             embed.set_thumbnail(url=user_tribe["thumbnail"])
 
         await ctx.send(embed=embed)
+
+    async def update_sloth_skill_int_content(self, user_id: int, int_content: int, current_ts: int) -> None:
+        """ Updates the integer content of a SlothSkill.
+        :param user_id: The user ID.
+        :param int_content: The integer content.
+        :param current_ts: The current timestamp. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("""
+            UPDATE SlothSkills SET edited_timestamp = %s, int_content = %s 
+            WHERE user_id = %s""", (current_ts, int_content, user_id))
+        await db.commit()
+        await mycursor.close()
+
+    async def update_sloth_skill_target_id(self, user_id: int, target_id: int, current_ts: int) -> None:
+        """ Updates the integer content of a SlothSkill.
+        :param user_id: The user ID.
+        :param target_id: The target ID.
+        :param current_ts: The current timestamp. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("""
+            UPDATE SlothSkills SET target_id = %s, edited_timestamp = %s 
+            WHERE user_id = %s""", (target_id, current_ts, user_id))
+        await db.commit()
+        await mycursor.close()
