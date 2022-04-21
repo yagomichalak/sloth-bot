@@ -91,7 +91,7 @@ INSERT INTO Sloth.LanguageRoom (category, english_name, room_name, room_quant, r
 /* 070 */("balkan", "Croatian", "Hrvatski 🇭🇷", 2, 10, 60),
 /* 071 */("balkan", "Montenegrin", "Crnogorski 🇲🇪", 2, 10, 60),
 /* 072 */("balkan", "Serbian", "Srpski 🇷🇸", 2, 10, 60),
-/* 122 */("balkan", "Bosnian", "Srpski 🇷🇸", 2, 10, 60),
+/* 122 */("balkan", "Bosnian", "Bosanci 🇧🇦", 2, 10, 60),
 
 /* 073 */("baltic", "Lithuanian", "Lietuvių 🇱🇹🥔", 2, 10, 60),
 
@@ -526,7 +526,7 @@ INSERT INTO Sloth.LanguageRoomPermissions (room_id, role_id, permission_name, pe
 (72, /*Studying Balkan Languages*/ 476630854706397186, "speaker", true),
 (72, /*Studying Macedonian*/ 476631603872006144, "speaker", true),
 
-/* Bosnian Channel */
+-- /* Bosnian Channel */
 (122, /*Native Balkan Languages*/ 476020149846278154, "speaker", true),
 (122, /*Native Macedonian*/ 476505421457391626, "speaker", true),
 (122, /*Fluent Balkan Languages*/ 476645488574070785, "speaker", true),
