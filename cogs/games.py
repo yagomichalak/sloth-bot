@@ -193,8 +193,11 @@ class Games(*minigames_cogs):
             description= f"✅ Correct Answers: {points}/20.",
         )
         embed.set_author(name=member, icon_url=member.display_avatar)
-
         await message.edit('\u200b', embed=embed, view=None)
+
+        if points == 20:
+            # Tries to complete a quest, if possible.
+            await self.client.get_cog('SlothClass').complete_quest(member.id, 4)
 
 
     #=== Flag games settings ===#
@@ -384,11 +387,15 @@ class Games(*minigames_cogs):
             embed.add_field(name="New balance", value=f"{user_currency[0][1]-bet} leaves")
             await SlothCurrency.update_user_money(member.id, -bet)
 
-
         embed.set_author(name=f"You've {win_var}!", icon_url=member.display_avatar)
         embed.set_thumbnail(url=side_options[coin_var]['image'])
         embed.set_footer(text=f"Command by {member}")
         await ctx.reply(embed=embed)
+
+        if win_var == 'won' and bet == 50:
+            # Tries to complete a quest, if possible.
+            await self.client.get_cog('SlothClass').complete_quest(member.id, 3)
+
 
 
     @commands.command()
