@@ -206,7 +206,7 @@ class Munk(Player):
         """ Gets information about a specific tribe.
         :param name: The name of the tribe. """
 
-        mycursor, db = await the_database()
+        mycursor, _ = await the_database()
         await mycursor.execute("SELECT * FROM UserTribe WHERE tribe_name = %s", (name,))
         tribe = await mycursor.fetchone()
         await mycursor.close()
@@ -1208,8 +1208,6 @@ class Munk(Player):
         else:
             await ctx.send(f"**Successfully transferred ownership of `{user_tribe['name']}` from <@{user_tribe['owner_id']}> to {member.mention}!**")
 
-
-
     @commands.command(aliases=['get_mission', 'gq', 'gm'])
     @Player.poisoned()
     @Player.skills_used(requirement=50)
@@ -1217,7 +1215,7 @@ class Munk(Player):
     @Player.skills_locked()
     @Player.user_is_class('munk')
     @Player.skill_mark()
-    @Player.not_ready()
+    # @Player.not_ready()
     async def get_quest(self, ctx) -> None:
         """ Gets a Quest for you and your Tribe to complete, and if so,
         the involved people will get rewarded.
@@ -1277,9 +1275,9 @@ class Munk(Player):
 
         quests: List[Dict[str, Union[str, int]]] = [
             {"message": "Complete 5 `TheLanguageJungle` games.", "enum_value": 1},
-            {"message": "Rep someone and get repped back.", "enum_value": 2},
+            {"message": "Rep someone and get repped back in less than an hour.", "enum_value": 2},
             {"message": "Win a coinflip betting 50 leaves.", "enum_value": 3},
-            {"message": "Get a 15+ score in the `Flags` game.", "enum_value": 4},
+            {"message": "Get a score 20 in the `Flags` game.", "enum_value": 4},
             {"message": "Spend 4 hours in a Voice Channel in a single day.", "enum_value": 5},
             {"message": "Buy any item from the SlothShop, if you have all items you need to get ripped-off first.", "enum_value": 6},
             
@@ -1313,24 +1311,25 @@ class Munk(Player):
         tribe_quest_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
         return tribe_quest_embed
 
-    async def complete_quest(self, user_id: int) -> None:
+    async def complete_quest(self, user_id: int, quest_number: int) -> None:
         """ Completes an on-going quest for a member.
-        :param user_id: The ID of the user who's completing the quest. """
+        :param user_id: The ID of the user who's completing the quest.
+        :param quest_number: The quest number. """
 
         # Gets Quest
         quest = await self.get_skill_action_by_user_id_and_skill_type(user_id=user_id, skill_type="quest")
         if not quest:
             return
 
-        # Deletes Quest
-        await self.delete_skill_action_by_user_id_and_skill_type(user_id=user_id, skill_type='quest')
+        if quest[7] != quest_number:
+            return
 
         # Gets enum value
-        enum_name = QuestEnum.__dict__['_member_names_'][quest[7]-1]
-        function: Callable = QuestEnum.__getitem__(name=enum_name)
+        enum_name = list(QuestEnum.__annotations__)[quest[7]-1]
+        function: Callable = getattr(QuestEnum, enum_name)
         # Runs attached method if there's any
         if function:
-            await function()
+            await function(client=self.client, user_id=user_id, quest=quest)
 
     @tribe.command(aliases=["mission", "task", "chore", "quests"])
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -1370,3 +1369,29 @@ class Munk(Player):
             embed.set_thumbnail(url=user_tribe["thumbnail"])
 
         await ctx.send(embed=embed)
+
+    async def update_sloth_skill_int_content(self, user_id: int, int_content: int, current_ts: int) -> None:
+        """ Updates the integer content of a SlothSkill.
+        :param user_id: The user ID.
+        :param int_content: The integer content.
+        :param current_ts: The current timestamp. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("""
+            UPDATE SlothSkills SET edited_timestamp = %s, int_content = %s 
+            WHERE user_id = %s""", (current_ts, int_content, user_id))
+        await db.commit()
+        await mycursor.close()
+
+    async def update_sloth_skill_target_id(self, user_id: int, target_id: int, current_ts: int) -> None:
+        """ Updates the integer content of a SlothSkill.
+        :param user_id: The user ID.
+        :param target_id: The target ID.
+        :param current_ts: The current timestamp. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("""
+            UPDATE SlothSkills SET target_id = %s, edited_timestamp = %s 
+            WHERE user_id = %s""", (target_id, current_ts, user_id))
+        await db.commit()
+        await mycursor.close()
