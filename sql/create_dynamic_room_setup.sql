@@ -526,14 +526,6 @@ INSERT INTO Sloth.LanguageRoomPermissions (room_id, role_id, permission_name, pe
 (72, /*Studying Balkan Languages*/ 476630854706397186, "speaker", true),
 (72, /*Studying Macedonian*/ 476631603872006144, "speaker", true),
 
--- /* Bosnian Channel */
-(122, /*Native Balkan Languages*/ 476020149846278154, "speaker", true),
-(122, /*Native Macedonian*/ 476505421457391626, "speaker", true),
-(122, /*Fluent Balkan Languages*/ 476645488574070785, "speaker", true),
-(122, /*Fluent Macedonian*/ 476506585867223040, "speaker", true),
-(122, /*Studying Balkan Languages*/ 476630854706397186, "speaker", true),
-(122, /*Studying Macedonian*/ 476631603872006144, "speaker", true),
-
 /* Lithuanian channel */
 (73, /*Native Latvian*/ 476062242690039837, "speaker", true),
 (73, /*Studying Latvian*/ 476765630519836693, "speaker", true),
@@ -765,6 +757,14 @@ INSERT INTO Sloth.LanguageRoomPermissions (room_id, role_id, permission_name, pe
 (121, /*Native Farsi*/ 478178098437685248, "speaker", true),
 (121, /*Fluent Farsi*/ 478178529368866826, "speaker", true),
 (121, /*Studying Farsi*/ 563369533440655360, "speaker", true),
+
+/* Bosnian Channel */
+(122, /*Native Balkan Languages*/ 476020149846278154, "speaker", true),
+(122, /*Native Macedonian*/ 476505421457391626, "speaker", true),
+(122, /*Fluent Balkan Languages*/ 476645488574070785, "speaker", true),
+(122, /*Fluent Macedonian*/ 476506585867223040, "speaker", true),
+(122, /*Studying Balkan Languages*/ 476630854706397186, "speaker", true),
+(122, /*Studying Macedonian*/ 476631603872006144, "speaker", true),
 
 /* Language Channel */
 (00, /*Native Language*/ 0000000000000000000, "speaker", true),
