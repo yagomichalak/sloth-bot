@@ -1215,7 +1215,7 @@ class Munk(Player):
     @Player.skills_locked()
     @Player.user_is_class('munk')
     @Player.skill_mark()
-    # @Player.not_ready()
+    @Player.not_ready()
     async def get_quest(self, ctx) -> None:
         """ Gets a Quest for you and your Tribe to complete, and if so,
         the involved people will get rewarded.
