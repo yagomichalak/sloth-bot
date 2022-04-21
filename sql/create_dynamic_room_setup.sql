@@ -91,7 +91,6 @@ INSERT INTO Sloth.LanguageRoom (category, english_name, room_name, room_quant, r
 /* 070 */("balkan", "Croatian", "Hrvatski 🇭🇷", 2, 10, 60),
 /* 071 */("balkan", "Montenegrin", "Crnogorski 🇲🇪", 2, 10, 60),
 /* 072 */("balkan", "Serbian", "Srpski 🇷🇸", 2, 10, 60),
-/* 122 */("balkan", "Bosnian", "Bosanci 🇧🇦", 2, 10, 60),
 
 /* 073 */("baltic", "Lithuanian", "Lietuvių 🇱🇹🥔", 2, 10, 60),
 
@@ -159,6 +158,8 @@ INSERT INTO Sloth.LanguageRoom (category, english_name, room_name, room_quant, r
 /* 120 */("celtic", "Celtic", "Celtic", 2, 10, 60),
 
 /* 121 */("iranian", "Gilaki", "گیلکی (Gilaki)", 2, 10, 60),
+
+/* 122 */("balkan", "Bosnian", "Bosanci 🇧🇦", 2, 10, 60),
 
 /* ??? */("category", "english_name", "room_name", 2, 10, 60)
 
