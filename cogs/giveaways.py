@@ -100,7 +100,8 @@ class Giveaways(*giveaway_cogs):
 
     async def _giveaway_start_callback(
         self, ctx, host: discord.Member, title: str, description: str, prize: str, winners: int = 1, days: int = 0, 
-        hours: int = 0, minutes: int = 0, role: discord.Role = None) -> None:
+        hours: int = 0, minutes: int = 0, role: discord.Role = None, thumbnail: discord.Attachment = None, image: discord.Attachment = None
+    ) -> None:
         """ Callback for the giveaway command.
         :param host: The host of the giveaway..
         :param title: Title for the giveaway.
@@ -111,6 +112,8 @@ class Giveaways(*giveaway_cogs):
         :param hours: Amount of hours until the giveaway ends. [Optional]
         :param minutes: Amount of minutes until the giveaway ends. [Optional]
         :param role: The role for role-only giveaways. [Optional]
+        :param thumbnail: The thumbnail for the giveaway message. [Optional]
+        :param image: The image for the giveaway message. [Optional]
         
         PS: The total time summing up days, minutes and minutes MUST be greater than 0. """
 
@@ -134,10 +137,16 @@ class Giveaways(*giveaway_cogs):
             timestamp=current_time
         )
 
+        if thumbnail:
+            embed.set_thumbnail(url=thumbnail.url)
+        else:
+            embed.set_thumbnail(url=guild.icon.url)
 
-        embed.set_thumbnail(url=guild.icon.url)
-        if guild.banner:
-            embed.set_image(url=guild.banner.url)
+        if image:
+            embed.set_image(url=image)
+        else:
+            if guild.banner:
+                embed.set_image(url=guild.banner.url)
         embed.set_footer(text=guild.name, icon_url=guild.icon.url)
 
         deadline_ts = int(current_ts+giveaway_time)
@@ -350,9 +359,14 @@ class Giveaways(*giveaway_cogs):
     @option(type=int, name="minutes", description="The minutes for the giveaway.", required=False)
     @option(type=discord.Role, name="role", description="The role for role-only giveaways.", required=False)
     @option(type=discord.Member, name="host", description="The person hosting the giveaway.", required=False)
+    @option(type=discord.Attachment, name="thumbnail", description="The thumbnail for the giveaway.", required=False)
+    @option(type=discord.Attachment, name="image", description="The image for the giveaway.", required=False)
     async def _giveaway_start_slash(self,
         ctx, prize: str, title: str, description: str, winners: int,
-        days: int, hours: int, minutes: int, role: discord.Role, host: discord.Member) -> None:
+        days: int, hours: int, minutes: int, role: discord.Role, 
+        host: discord.Member, thumbnail: discord.Attachment, image: discord.Attachment
+
+    ) -> None:
         """ Starts a giveaway. """
 
         winners = 1 if not winners else winners
@@ -363,7 +377,8 @@ class Giveaways(*giveaway_cogs):
 
         await self._giveaway_start_callback(ctx=ctx,
             host=host, prize=prize, title=title, description=description, 
-            winners=winners, days=days, hours=hours, minutes=minutes, role=role
+            winners=winners, days=days, hours=hours, minutes=minutes, role=role,
+            thumbnail=thumbnail, image=image
         )
 
     @utils.is_allowed(allowed_roles, throw_exc=True)
