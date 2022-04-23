@@ -485,7 +485,7 @@ class TravelBuddyModal(Modal):
         confirm_view = ConfirmButton(member, timeout=60)
 
         await interaction.response.send_message(
-            content="Are you sure you want to post this, and ping the `{self.country_role.name}`?",
+            content=f"Are you sure you want to post this, and ping the `{self.country_role.name}`?",
             embed=embed, view=confirm_view, ephemeral=True)
 
         await confirm_view.wait()
@@ -497,6 +497,6 @@ class TravelBuddyModal(Modal):
 
         self.cog.cache[member.id] = await utils.get_timestamp()
 
-        await confirm_view.interaction.response.send_message(
+        await confirm_view.interaction.followup.send(
             content=f"Hello, {self.country_role.mention}!", embed=embed
         )
