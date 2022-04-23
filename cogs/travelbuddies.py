@@ -19,6 +19,7 @@ class TravelBuddies(commands.Cog):
         """ Class init method. """
 
         self.client = client
+        self.cache = {}
 
     @commands.Cog.listener()
     async def on_ready(self) -> None:
@@ -27,14 +28,14 @@ class TravelBuddies(commands.Cog):
         print("The TravelBuddies cog is ready!")
 
     @slash_command(guild_ids=guild_ids)
+    @commands.cooldown(1, 60, commands.BucketType.user)
     async def find_travel_buddy(self, ctx: discord.ApplicationContext,
         role: Option(discord.Role, name="country_role", description="Select the target country's language role.", required=True)
     ) -> None:
         """ Stars the process of finding a travel buddy. """
 
-        print('oi')
         modal = discord.ui.Modal = TravelBuddyModal(self.client, role)
-        await ctx.send_modal(modal)
+        await ctx.response.send_modal(modal=modal)
 
 
 
