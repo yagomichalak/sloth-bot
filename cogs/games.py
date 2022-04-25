@@ -377,19 +377,19 @@ class Games(*minigames_cogs):
         embed: discord.Embed = discord.Embed(
             description = f"It's **{coin_var}**",
         )
-        embed.add_field(name=f"Amount {win_var}", value=f"{bet} leaves", inline=False)
+        embed.add_field(name=f"Amount {win_var}", value=f"{bet} leaves 🍃")
         if win_var == 'won':
             embed.color=discord.Color.green()
-            embed.add_field(name="New balance", value=f"{user_currency[0][1]+bet} leaves")
+            embed.add_field(name="New balance", value=f"{user_currency[0][1]+bet} leaves 🍃")
             await SlothCurrency.update_user_money(member.id, bet)
         else:
             embed.color=discord.Color.dark_red()
-            embed.add_field(name="New balance", value=f"{user_currency[0][1]-bet} leaves")
+            embed.add_field(name="New balance", value=f"{user_currency[0][1]-bet} leaves 🍃")
             await SlothCurrency.update_user_money(member.id, -bet)
 
         embed.set_author(name=f"You've {win_var}!", icon_url=member.display_avatar)
         embed.set_thumbnail(url=side_options[coin_var]['image'])
-        embed.set_footer(text=f"Command by {member}")
+        embed.set_footer(text=f"Gambled by {member}")
         await ctx.reply(embed=embed)
 
         if win_var == 'won' and bet == 50:
