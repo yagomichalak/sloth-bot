@@ -334,7 +334,7 @@ class Games(*minigames_cogs):
 
         member: discord.Member = ctx.author
 
-        if not bet:
+        if bet is None or bet < 0:
             ctx.command.reset_cooldown(ctx)
             return await ctx.reply("**Please, inform how much you wanna bet!**")
 
@@ -356,7 +356,7 @@ class Games(*minigames_cogs):
         if user_currency[0][1] < bet:
             return await ctx.reply(f"**You don't have `{bet} leaves` to bet!**")
 
-        if bet < minimum_bet:
+        if bet != 0 and bet < minimum_bet:
             ctx.command.reset_cooldown(ctx)
             return await ctx.send(f"**The minimum bet is `{minimum_bet} leaves`!**")
 
@@ -377,15 +377,18 @@ class Games(*minigames_cogs):
         embed: discord.Embed = discord.Embed(
             description = f"It's **{coin_var}**",
         )
-        embed.add_field(name=f"Amount {win_var}", value=f"{bet} leaves 🍃")
+        if bet != 0: embed.add_field(name=f"Amount {win_var}", value=f"{bet} leaves 🍃")
+        
         if win_var == 'won':
             embed.color=discord.Color.green()
-            embed.add_field(name="New balance", value=f"{user_currency[0][1]+bet} leaves 🍃")
-            await SlothCurrency.update_user_money(member.id, bet)
+            if bet != 0:
+                embed.add_field(name="New balance", value=f"{user_currency[0][1]+bet} leaves 🍃")
+                await SlothCurrency.update_user_money(member.id, bet)
         else:
             embed.color=discord.Color.dark_red()
-            embed.add_field(name="New balance", value=f"{user_currency[0][1]-bet} leaves 🍃")
-            await SlothCurrency.update_user_money(member.id, -bet)
+            if bet != 0:
+                embed.add_field(name="New balance", value=f"{user_currency[0][1]-bet} leaves 🍃")
+                await SlothCurrency.update_user_money(member.id, -bet)
 
         embed.set_author(name=f"You've {win_var}!", icon_url=member.display_avatar)
         embed.set_thumbnail(url=side_options[coin_var]['image'])
