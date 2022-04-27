@@ -9,6 +9,7 @@ from extra import utils
 from extra.prompt.menu import ConfirmButton
 from extra.modals import TravelBuddyModal
 
+travel_buddies_channel_id: int = int(os.getenv("TRAVEL_BUDDIES_CHANNEL_ID", 123))
 guild_ids: List[int] = [int(os.getenv("SERVER_ID", 123))]
 
 
@@ -20,6 +21,7 @@ class TravelBuddies(commands.Cog):
 
         self.client = client
         self.cache = {}
+        self.channel_id: int = travel_buddies_channel_id
 
     @commands.Cog.listener()
     async def on_ready(self) -> None:
@@ -43,6 +45,9 @@ class TravelBuddies(commands.Cog):
         role: Option(discord.Role, name="country_role", description="Select the target country's language role.", required=True)
     ) -> None:
         """ Stars the process of finding a travel buddy. """
+
+        if ctx.channel.id != self.channel_id:
+            return await ctx.respond(f"**You cannot use this command here, only in <#{self.channel_id}>!**", ephemeral=True)
 
         member_ts = self.cog.cache.get(ctx.author.id)
         time_now = await utils.get_timestamp()
