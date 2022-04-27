@@ -49,7 +49,7 @@ class TravelBuddies(commands.Cog):
         if ctx.channel.id != self.channel_id:
             return await ctx.respond(f"**You cannot use this command here, only in <#{self.channel_id}>!**", ephemeral=True)
 
-        member_ts = self.cog.cache.get(ctx.author.id)
+        member_ts = self.cache.get(ctx.author.id)
         time_now = await utils.get_timestamp()
         if member_ts:
             sub = time_now - member_ts
