@@ -497,6 +497,9 @@ class TravelBuddyModal(Modal):
 
         self.cog.cache[member.id] = await utils.get_timestamp()
 
-        await confirm_view.interaction.followup.send(
+        message = await confirm_view.interaction.followup.send(
             content=f"Hello, {self.country_role.mention}!", embed=embed
         )
+        message.guild = interaction.guild
+
+        await message.create_thread(name="Discussion Thread", auto_archive_duration=10080)
