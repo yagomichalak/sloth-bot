@@ -34,6 +34,9 @@ class TravelBuddies(commands.Cog):
         """ Deletes any normal message sent by normal users
         in the travel-buddies channel. """
 
+        if message.channel.id != self.channel_id:
+            return
+
         perms = message.channel.permissions_for(message.author)
         if perms.administrator:
             return
