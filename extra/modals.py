@@ -439,7 +439,6 @@ class TravelBuddyModal(Modal):
                 style=discord.InputTextStyle.short
             )
         )
-
         self.add_item(
             InputText(
                 label="When",
