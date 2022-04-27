@@ -23,25 +23,37 @@ class TravelBuddies(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self) -> None:
-        """ Tell when the cog is ready to go. """
+        """ Tells when the cog is ready to go. """
 
         print("The TravelBuddies cog is ready!")
 
+    @commands.Cog.listener()
+    async def on_message(self, message) -> None:
+        """ Deletes any normal message sent by normal users
+        in the travel-buddies channel. """
+
+        perms = message.channel.permissions_for(message.author)
+        if perms.administrator:
+            return
+
+        await message.delete()
+
     @slash_command(guild_ids=guild_ids)
-    @commands.cooldown(1, 60, commands.BucketType.user)
     async def find_travel_buddy(self, ctx: discord.ApplicationContext,
         role: Option(discord.Role, name="country_role", description="Select the target country's language role.", required=True)
     ) -> None:
         """ Stars the process of finding a travel buddy. """
 
+        member_ts = self.cog.cache.get(ctx.author.id)
+        time_now = await utils.get_timestamp()
+        if member_ts:
+            sub = time_now - member_ts
+            if sub <= 1800:
+                return await ctx.respond(
+                    f"**You are on cooldown to apply, try again in {(1800-sub)/60:.1f} minutes**", ephemeral=True)
+
         modal = discord.ui.Modal = TravelBuddyModal(self.client, role)
         await ctx.response.send_modal(modal=modal)
-
-
-
-        
-
-
 
 
 def setup(client: commands.Bot) -> None:
