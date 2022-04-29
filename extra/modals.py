@@ -501,4 +501,4 @@ class TravelBuddyModal(Modal):
         )
         message.guild = interaction.guild
 
-        await message.create_thread(name="Discussion Thread", auto_archive_duration=10080)
+        await message.create_thread(name=f"{member}'s Trip", auto_archive_duration=10080)
