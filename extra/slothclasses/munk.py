@@ -1,5 +1,5 @@
 import discord
-from discord.ext import commands, menus
+from discord.ext import commands, menus, tasks
 from mysqldb import the_database, the_django_database
 
 from .player import Player, Skill
@@ -23,6 +23,15 @@ class Munk(Player):
 
     def __init__(self, client) -> None:
         self.client = client
+
+    @tasks.loop(minutes=1)
+    async def check_mission_one_completion(self) -> None:
+        """ Checks whether members completed their mission of index 1. """
+
+        skill_actions = await self.get_skill_actions_by_skill_type_and_int_content(skill_type="quest", int_content=1)
+
+        for skill_action in skill_actions:
+            await self.complete_quest(skill_action[0], 1)
 
     @commands.Cog.listener(name='on_raw_reaction_add')
     async def on_raw_reaction_add_munk(self, payload) -> None:

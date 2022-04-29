@@ -400,6 +400,16 @@ class Player(*additional_cogs):
         await mycursor.close()
         return skill_action
 
+    async def get_skill_actions_by_skill_type_and_int_content(self, skill_type: str, int_content) -> Union[List[Union[int, str]], bool]:
+        """ Gets skill actions by skill type.
+        :param skill_type: The skill type of the skill action. """
+
+        mycursor, _ = await the_database()
+        await mycursor.execute("SELECT * FROM SlothSkills WHERE skill_type = %s AND int_content = %s", (skill_type, int_content))
+        skill_action = await mycursor.fetchall()
+        await mycursor.close()
+        return skill_action
+
     async def get_skill_action_by_message_id_and_skill_type(self, message_id: int, skill_type: str) -> Union[List[Union[int, str]], bool]:
         """ Gets a skill action by message ID and skill type.
         :param message_id: The ID with which to get the skill action.
