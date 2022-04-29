@@ -130,7 +130,7 @@ async def update_tribe_members_money(
         embed.set_thumbnail(url=tribe_tn)
     embed.set_footer(text=f"Completed by: {member}", icon_url=member.display_avatar)
 
-    await bots_and_commands_channel.send(embed=embed)
+    await bots_and_commands_channel.send(content=member.mention, embed=embed)
 
     # Deletes Quest
     await cog.delete_skill_action_by_user_id_and_skill_type(user_id=member.id, skill_type='quest')
