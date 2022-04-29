@@ -16,7 +16,7 @@ async def quest_one_callback(client: commands.Bot, user_id: int, quest: Dict[str
     :param user_id: The user ID.
     :param quest: The quest information and data. """
 
-    pass
+    await money_callback(client, user_id, 'One', 230, quest)
 
 async def quest_two_callback(client: commands.Bot, user_id: int, quest: Dict[str, Union[str, int]]) -> None:
     """ Callback for the quest two.

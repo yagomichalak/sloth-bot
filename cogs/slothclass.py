@@ -38,6 +38,7 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
 
         self.bots_txt = await self.client.fetch_channel(bots_and_commands_channel_id)
         self.check_skill_actions.start()
+        self.skill_actions.start()
         print("SlothClass cog is online")
 
     @tasks.loop(minutes=1)
