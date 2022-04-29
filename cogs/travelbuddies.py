@@ -56,9 +56,9 @@ class TravelBuddies(commands.Cog):
         time_now = await utils.get_timestamp()
         if member_ts:
             sub = time_now - member_ts
-            if sub <= 1800:
+            if sub <= 300:
                 return await ctx.respond(
-                    f"**You are on cooldown to apply, try again in {(1800-sub)/60:.1f} minutes**", ephemeral=True)
+                    f"**You are on cooldown to apply, try again in {(300-sub)/60:.1f} minutes**", ephemeral=True)
 
         modal = discord.ui.Modal = TravelBuddyModal(self.client, role)
         await ctx.response.send_modal(modal=modal)
