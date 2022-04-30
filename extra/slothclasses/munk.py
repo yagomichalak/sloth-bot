@@ -1299,10 +1299,10 @@ class Munk(Player):
 
         quests: List[Dict[str, Union[str, int]]] = [
             {"message": "Complete 5 `TheLanguageJungle` games.", "enum_value": 1},
-            {"message": "Rep someone and get repped back in less than an hour.", "enum_value": 2},
+            {"message": "Rep someone and get repped back.", "enum_value": 2},
             {"message": "Win a coinflip betting 50 leaves.", "enum_value": 3},
             {"message": "Get a score 20 in the `Flags` game.", "enum_value": 4},
-            {"message": "Spend 4 hours in a Voice Channel in a single day.", "enum_value": 5},
+            {"message": "Spend 4 hours in a Voice Channel.", "enum_value": 5},
             {"message": "Buy any item from the SlothShop, if you have all items you need to get ripped-off first.", "enum_value": 6},
         ]
 
@@ -1378,7 +1378,7 @@ class Munk(Player):
         if not quests:
             return await ctx.send(f"**No quests found in your tribe, {member.mention}!**")
 
-        quests_text: str = ''.join(list(map(lambda q: f"```• {q[8]} ({q[7]});```", quests)))
+        quests_text: str = await self.make_tribe_quests_text(quests)
         embed: discord.Embed = discord.Embed(
             title="__Tribe Quests__",
             description=f"Showing all `{len(quests)}` quests from this tribe:\n{quests_text}",
@@ -1391,6 +1391,30 @@ class Munk(Player):
             embed.set_thumbnail(url=user_tribe["thumbnail"])
 
         await ctx.send(embed=embed)
+    
+    async def make_tribe_quests_text(self, quests: List[Dict[str, Union[str, int]]]) -> str:
+        """ Makes a text for the tribe quests.
+        :param quests: The quests to make a text for. """
+
+        texts_list: List[str] = []
+        for quest in quests:
+            quest_number: int = quest[7]
+            if quest_number == 1:
+                texts_list.append(f"```ini\n• {quest[8]} (Q{quest[7]});\n[Progress]: {quest[9]} games.```")
+            elif quest_number == 2:
+                texts_list.append(f"```ini\n• {quest[8]} (Q{quest[7]});\n[Progress]: {quest[9]}/2 reps.```")
+            elif quest_number == 3:
+                texts_list.append(f"```ini\n• {quest[8]} (Q{quest[7]});```")
+            elif quest_number == 4:
+                texts_list.append(f"```ini\n• {quest[8]} (Q{quest[7]});```")
+            elif quest_number == 5:
+                m, s = divmod(quest[7], 60)
+                h, m = divmod(m, 60)
+                texts_list.append(f"```ini\n• {quest[8]} (Q{quest[7]});\n[Progress]: {h:d}h, {m:02d}m.```")
+            elif quest_number == 6:
+                texts_list.append(f"```ini\n• {quest[8]} (Q{quest[7]});```")
+        
+        return ''.join(texts_list)
 
     async def update_sloth_skill_int_content(self, user_id: int, int_content: int, current_ts: int) -> None:
         """ Updates the integer content of a SlothSkill.
