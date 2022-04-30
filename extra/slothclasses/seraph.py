@@ -572,7 +572,6 @@ class Seraph(Player):
             return await ctx.send(f"**You don't even have a baby, {member.mention}!**")
         if user_baby[3].lower() != 'embryo':
             return await ctx.send(f"**You already chose a class for your baby, {member.mention}!**")
-
         
         embed: discord.Embed = discord.Embed(
             title="__Baby Class Selection__",

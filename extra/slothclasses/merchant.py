@@ -1020,8 +1020,6 @@ class Merchant(Player):
             return await ctx.send(f"**You don't have an egg to hatch, {member.mention}!**")
         if user_pet[2].lower() != 'egg':
             return await ctx.send(f"**You already hatched your pet egg, {member.mention}!**")
-
-        current_ts: int = await utils.get_timestamp()
         
         embed: discord.Embed = discord.Embed(
             title="__Pet Breed Selection__",
@@ -1044,7 +1042,8 @@ class Merchant(Player):
         if not view.selected_pet:
             return
 
-        await self.update_user_pet_name_breed_and_birth_ts(member.id, view.selected_pet, view.selected_pet.lower(), current_ts)
+        await self.update_user_pet_name(member.id, view.selected_pet)
+        await self.update_user_pet_breed(member.id, view.selected_pet.lower())
         await ctx.send(f"**Your `Pet Egg` has been successfully hatched into a `{view.selected_pet}`, {member.mention}!**")
 
     @pet.command(name="change_name", aliases=['name', 'c_name', 'update_name'])

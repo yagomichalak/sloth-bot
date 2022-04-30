@@ -95,9 +95,15 @@ class UserPetsTable(commands.Cog):
 
         mycursor, db = await the_database()
         if pet_name and pet_breed:
-            await mycursor.execute("INSERT INTO UserPets (user_id, pet_name, pet_breed, life_points_ts, food_ts) VALUES (%s, %s, %s, %s, %s)", (user_id, pet_name, pet_breed, current_ts, current_ts))
+            await mycursor.execute("""
+            INSERT INTO UserPets (
+                user_id, pet_name, pet_breed, life_points_ts, food_ts, birth_ts
+            ) VALUES (%s, %s, %s, %s, %s, %s)""", (user_id, pet_name, pet_breed, current_ts, current_ts, current_ts))
         else:
-            await mycursor.execute("INSERT INTO UserPets (user_id, life_points_ts, food_ts) VALUES (%s, %s, %s)", (user_id, current_ts, current_ts))
+            await mycursor.execute("""
+            INSERT INTO UserPets (
+                user_id, life_points_ts, food_ts, birth_ts
+            ) VALUES (%s, %s, %s, %s)""", (user_id, current_ts, current_ts, current_ts))
         await db.commit()
         await mycursor.close()
 
