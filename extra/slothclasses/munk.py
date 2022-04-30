@@ -26,7 +26,7 @@ class Munk(Player):
 
     @tasks.loop(minutes=1)
     async def check_mission_one_completion(self) -> None:
-        """ Checks whether members completed their mission of index 1. """
+        """ Checks whether members completed their mission of number 1. """
 
         skill_actions = await self.get_skill_actions_by_skill_type_and_int_content(skill_type="quest", int_content=5)
         filtered_skill_actions = [
@@ -35,6 +35,18 @@ class Munk(Player):
         ]
         for skill_action in filtered_skill_actions:
             await self.complete_quest(skill_action[0], 1)
+
+    @tasks.loop(minutes=1)
+    async def check_mission_six_completion(self) -> None:
+        """ Checks whether members completed their mission of number 6. """
+
+        skill_actions = await self.get_skill_actions_by_skill_type_and_int_content(skill_type="quest", int_content=1)
+        filtered_skill_actions = [
+            skill_action for skill_action in skill_actions
+            if skill_action[7] == 6
+        ]
+        for skill_action in filtered_skill_actions:
+            await self.complete_quest(skill_action[0], 6)
 
     @commands.Cog.listener(name='on_raw_reaction_add')
     async def on_raw_reaction_add_munk(self, payload) -> None:
