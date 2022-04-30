@@ -96,6 +96,7 @@ class UserVoiceSystem(commands.Cog):
                 increment = 0
 
             await self.update_user_server_time(member.id, increment, current_ts)
+            await self.client.get_cog("SlothClass").complete_quest(member.id, 5, increment=increment)
 
         # Muted/unmuted
         elif (ac and bc) and (bc.id == ac.id) and before.self_mute != after.self_mute:
@@ -127,6 +128,7 @@ class UserVoiceSystem(commands.Cog):
                 increment = 0
 
             await self.update_user_server_time(member.id, increment, current_ts)
+            await self.client.get_cog("SlothClass").complete_quest(member.id, 5, increment=increment)
 
         # Deafened/undeafened
         elif (ac and bc) and (bc.id == ac.id) and before.self_deaf != after.self_deaf:
@@ -158,6 +160,7 @@ class UserVoiceSystem(commands.Cog):
                 increment = 0
 
             await self.update_user_server_time(member.id, increment, current_ts)
+            await self.client.get_cog("SlothClass").complete_quest(member.id, 5, increment=increment)
 
         # Server Muted/unmuted
         elif (ac and bc) and (bc.id == ac.id) and before.mute != after.mute:
@@ -189,6 +192,7 @@ class UserVoiceSystem(commands.Cog):
                 increment = 0
 
             await self.update_user_server_time(member.id, increment, current_ts)
+            await self.client.get_cog("SlothClass").complete_quest(member.id, 5, increment=increment)
 
         # Server Deafened/undeafened
         elif (ac and bc) and (bc.id == ac.id) and before.deaf != after.deaf:
@@ -220,6 +224,7 @@ class UserVoiceSystem(commands.Cog):
                 increment = 0
 
             await self.update_user_server_time(member.id, increment, current_ts)
+            await self.client.get_cog("SlothClass").complete_quest(member.id, 5, increment=increment)
         
         # Leave
         elif bc and not ac:
@@ -247,6 +252,7 @@ class UserVoiceSystem(commands.Cog):
                 increment = 0
 
             await self.update_user_server_time(member.id, increment)
+            await self.client.get_cog("SlothClass").complete_quest(member.id, 5, increment=increment)
 
 
 class UserServerActivityTable(commands.Cog):
