@@ -776,6 +776,8 @@ class Seraph(Player):
         if leaves <= 0:
             return await ctx.send(f"**Please, inform an amount of leaves that is greater than 0, {member.mention}!**")
 
+        current_ts = await utils.get_timestamp()
+
         food_points: int = user_baby[5]
 
         temp_points = temp_leaves = 0
@@ -796,23 +798,22 @@ class Seraph(Player):
             view=confirm_view)
         await confirm_view.wait()
 
-        SlothClass = self.client.get_cog("SlothClass")
         SlothCurrency = self.client.get_cog("SlothCurrency")
 
-        user_currency = await SlothClass.get_user_currency(member.id)
+        user_currency = await self.get_user_currency(member.id)
         if user_currency[1] < temp_leaves:
             return await ctx.send(f"**You don't have `{temp_leaves}` leaves to feed your baby, {member.mention}!**")
         
         if confirm_view.value:
             await SlothCurrency.update_user_money(member.id, -temp_leaves)
+            await self.update_user_baby_food(member.id, temp_points, current_ts)
             embed = discord.Embed(
                 title="__Pet has been Fed__",
                 description=f"**You just fed `{user_baby[2]}` with `{temp_leaves}łł`, now it has `{food_points}` food points, {member.mention}!**",
                 color=discord.Color.green(),
                 timestamp=ctx.message.created_at
             )
-            print(user_baby[3])
-            print(f"https://thelanguagesloth.com/static/assets/images/sloth_classes/{user_baby[3]}.png")
+
             embed.set_thumbnail(url=f"https://thelanguagesloth.com/static/assets/images/sloth_classes/{user_baby[3]}.png")
 
             await ctx.send(embed=embed)

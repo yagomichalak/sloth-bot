@@ -1166,3 +1166,72 @@ class Merchant(Player):
         background.save(file_path)
 
         return file_path
+
+    @pet.command(name="feed", aliases=["give_food", "f"])
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def _pet_feed(self, ctx, leaves: str = None) -> None:
+        """ Feeds your pet.
+        :param leaves: The amount of leaves you want to give to your pet.
+
+        PS: You feed your pet with leaves.
+        Each leave gives 5 life points to your pet. """
+
+        member: discord.Member = ctx.author
+
+        if not leaves:
+            return await ctx.send(f"**Please, inform an amount of leaves to feed your pet, {member.mention}!**")
+
+        user_pet = await self.get_user_pet(member.id)
+        if not user_pet:
+            return await ctx.send(f"**You don't have a pet, {member.mention}!**")
+
+        try:
+            leaves = int(leaves)
+        except ValueError:
+            return await ctx.send(f"**Please, inform a valid amount of leaves, {member.mention}!**")
+
+        if leaves <= 0:
+            return await ctx.send(f"**Please, inform an amount of leaves that is greater than 0, {member.mention}!**")
+
+        current_ts = await utils.get_timestamp()
+
+        food_points: int = user_pet[4]
+
+        temp_points = temp_leaves = 0
+        food_rate: int = 5 # The life points each leaf gives to the pet
+
+        for _ in range(leaves):
+            
+            if food_points + food_rate <= 100:
+                temp_points += food_rate
+                temp_leaves += 1
+                food_points += food_rate
+            else:
+                break
+
+        confirm_view = ConfirmButton(member, timeout=60)
+        msg = await ctx.send(
+            content=f"**Are you sure you want to spend `{temp_leaves}` out of `{leaves}łł` to recover `{temp_points}lp` to your pet, {member.mention}!**",
+            view=confirm_view)
+        await confirm_view.wait()
+
+        SlothCurrency = self.client.get_cog("SlothCurrency")
+
+        user_currency = await self.get_user_currency(member.id)
+        if user_currency[1] < temp_leaves:
+            return await ctx.send(f"**You don't have `{temp_leaves}` leaves to feed your pet, {member.mention}!**")
+        
+        if confirm_view.value:
+            await SlothCurrency.update_user_money(member.id, -temp_leaves)
+            await self.update_user_pet_food(member.id, temp_points, current_ts)
+            embed = discord.Embed(
+                title="__Pet has been Fed__",
+                description=f"**You just fed `{user_pet[1]}` with `{temp_leaves}łł`, now it has `{food_points}` food points, {member.mention}!**",
+                color=discord.Color.green(),
+                timestamp=ctx.message.created_at
+            )
+
+            await ctx.send(embed=embed)
+
+        await utils.disable_buttons(confirm_view)
+        await msg.edit(view=confirm_view)
