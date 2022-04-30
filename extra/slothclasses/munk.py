@@ -1227,7 +1227,7 @@ class Munk(Player):
     @Player.skills_locked()
     @Player.user_is_class('munk')
     @Player.skill_mark()
-    # @Player.not_ready()
+    @Player.not_ready()
     async def get_quest(self, ctx) -> None:
         """ Gets a Quest for you and your Tribe to complete, and if so,
         the involved people will get rewarded.
@@ -1292,8 +1292,6 @@ class Munk(Player):
             {"message": "Get a score 20 in the `Flags` game.", "enum_value": 4},
             {"message": "Spend 4 hours in a Voice Channel in a single day.", "enum_value": 5},
             {"message": "Buy any item from the SlothShop, if you have all items you need to get ripped-off first.", "enum_value": 6},
-            
-            {"message": "Ping DNK 3 times in a row and try to evade a BAN!!!!", "enum_value": 7},
         ]
 
         return choice(quests)
@@ -1323,7 +1321,7 @@ class Munk(Player):
         tribe_quest_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
         return tribe_quest_embed
 
-    async def complete_quest(self, user_id: int, quest_number: int) -> None:
+    async def complete_quest(self, user_id: int, quest_number: int, **kwargs) -> None:
         """ Completes an on-going quest for a member.
         :param user_id: The ID of the user who's completing the quest.
         :param quest_number: The quest number. """
@@ -1341,7 +1339,7 @@ class Munk(Player):
         function: Callable = getattr(QuestEnum, enum_name)
         # Runs attached method if there's any
         if function:
-            await function(client=self.client, user_id=user_id, quest=quest)
+            await function(client=self.client, user_id=user_id, quest=quest, **kwargs)
 
     @tribe.command(aliases=["mission", "task", "chore", "quests"])
     @commands.cooldown(1, 5, commands.BucketType.user)

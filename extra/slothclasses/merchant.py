@@ -212,9 +212,6 @@ class Merchant(Player):
                     timestamp=ctx.message.created_at
                 ))
 
-                # Tries to complete a quest, if possible.
-                await self.complete_quest(buyer.id, 6)
-
     @buy.command(aliases=['wedding', 'wedding_ring', 'weddingring'])
     @Player.poisoned()
     @commands.cooldown(1, 5, commands.BucketType.user)
