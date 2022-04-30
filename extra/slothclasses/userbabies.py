@@ -31,6 +31,7 @@ class UserBabiesTable(commands.Cog):
             food TINYINT(3) DEFAULT 100,
             life_points_ts BIGINT NOT NULL,
             food_ts BIGINT NOT NULL,
+            birth_ts BIGINT DEFAULT NULL,
             PRIMARY KEY (parent_one, parent_two)
             ) CHARSET utf8mb4 COLLATE utf8mb4_unicode_ci
         """)
@@ -83,7 +84,9 @@ class UserBabiesTable(commands.Cog):
         else:
             return False
 
-    async def insert_user_baby(self, parent_one: int, parent_two: int, baby_name: Optional[str] = None, baby_class: Optional[str] = None) -> None:
+    async def insert_user_baby(self, 
+        parent_one: int, parent_two: int, 
+        baby_name: Optional[str] = None, baby_class: Optional[str] = None) -> None:
         """ Inserts a User Baby.
         :param parent_one: The parent one of the baby.
         :param parent_two: The parent two of the baby.
@@ -96,11 +99,14 @@ class UserBabiesTable(commands.Cog):
         mycursor, db = await the_database()
         if baby_name and baby_class:
             await mycursor.execute("""
-                INSERT INTO UserBabies (parent_one, parent_two, baby_name, baby_class, life_points_ts, food_ts) VALUES (%s, %s, %s, %s, %s, %s)
-                """, (parent_one, parent_two, baby_name, baby_class, current_ts, current_ts))
+                INSERT INTO UserBabies (
+                    parent_one, parent_two, baby_name, baby_class, life_points_ts, food_ts, birth_ts
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s)""", (parent_one, parent_two, baby_name, baby_class, current_ts, current_ts, current_ts))
         else:
-            await mycursor.execute("INSERT INTO UserBabies (user_id, parent_one, parent_two, life_points_ts, food_ts) VALUES (%s, %s, %s, %s)", (
-                parent_one, parent_two, current_ts, current_ts))
+            await mycursor.execute("""
+                INSERT INTO UserBabies (
+                    parent_one, parent_two, life_points_ts, food_ts, birth_ts
+                ) VALUES (%s, %s, %s, %s, %s)""", (parent_one, parent_two, current_ts, current_ts, current_ts))
         await db.commit()
         await mycursor.close()
 
