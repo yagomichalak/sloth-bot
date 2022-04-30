@@ -984,9 +984,33 @@ class Merchant(Player):
         else:
             await ctx.send(f"**{member}, your item is now in the shop, check `z!sloth_shop` to see it there!**")
 
-    @commands.command()
+
+    @commands.group(aliases=["mascot"])
+    @Player.poisoned()
+    @Player.kidnapped()
+    async def pet(self, ctx) -> None:
+        """ Command for managing and interacting with a pet.
+        (Use this without a subcommand to see all subcommands available) """
+        if ctx.invoked_subcommand:
+            return
+
+        prefix = self.client.command_prefix
+        subcommands = [f"{prefix}{c.qualified_name}" for c in ctx.command.commands
+            ]
+
+        subcommands = '\n'.join(subcommands)
+        items_embed = discord.Embed(
+            title="__Subcommads__:",
+            description=f"```apache\n{subcommands}```",
+            color=ctx.author.color,
+            timestamp=ctx.message.created_at
+        )
+
+        await ctx.send(embed=items_embed)
+
+    @pet.command(name="hatch")
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def hatch(self, ctx) -> None:
+    async def _pet_hatch(self, ctx) -> None:
         """ Hatches your pet egg. """
 
         member: discord.Member = ctx.author
@@ -1023,9 +1047,9 @@ class Merchant(Player):
         await self.update_user_pet_breed(member.id, view.selected_pet.lower())
         await ctx.send(f"**Your `Pet Egg` has been successfully hatched into a `{view.selected_pet}`, {member.mention}!**")
 
-    @commands.command(aliases=['pet_name', 'cpet_name', 'update_pet_name'])
+    @pet.command(name="change_name", aliases=['name', 'c_name', 'update_name'])
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def change_pet_name(self, ctx, *, pet_name: str = None) -> None:
+    async def _pet_change_name(self, ctx, *, pet_name: str = None) -> None:
         """ Changes the pet's name.
         :param pet_name: The new pet name to change to.
         
@@ -1062,9 +1086,9 @@ class Merchant(Player):
         await ctx.send(f"**Successfully updated your pet {user_pet[2]}'s nickname from `{user_pet[2]}` to `{pet_name}`, {member.mention}!**")
 
 
-    @commands.command(aliases=['mascot'])
+    @pet.command(name="see", aliases=["show", "display", "render"])
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def pet(self, ctx, member: Optional[Union[discord.Member, discord.User]] = None) -> None:
+    async def _pet_see(self, ctx, member: Optional[Union[discord.Member, discord.User]] = None) -> None:
         """ Sees someone's pet.
         :param member: The member from whom to show the pet. [Optional][Default = You] """
 
