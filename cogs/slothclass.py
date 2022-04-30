@@ -233,7 +233,7 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
         )
         skills_embed.add_field(name=f"__Skills__:", value=f"```apache\n{cmds_text}```")
         skills_embed.set_author(name=member, icon_url=member.display_avatar)
-        skills_embed.set_thumbnail(url=f"https://thelanguagesloth.com/media/sloth_classes/{sloth_profile[1]}.png")
+        skills_embed.set_thumbnail(url=f"https://thelanguagesloth.com/static/assets/images/sloth_classes/{sloth_profile[1]}.png")
         skills_embed.set_footer(text=ctx.guild, icon_url=ctx.guild.icon.url)
         await ctx.send(embed=skills_embed)
 
@@ -286,7 +286,7 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
         embed.add_field(name="🟢 Cybersloth's 4th Skill:", value="**Skill**: `Lock`.", inline=True)
         embed.add_field(name="🟢 Merchant's 4th Skill:", value="**Skill**: `Sell Pet`.", inline=False)
         embed.add_field(name="🟢 Metamorph's 4th Skill:", value="**Skill**: `Reborn`.", inline=True)
-        embed.add_field(name="🟠 Munk's 4th Skill:", value="**Skill**: `Get Quest`.", inline=True)
+        embed.add_field(name="🟢 Munk's 4th Skill:", value="**Skill**: `Get Quest`.", inline=True)
         embed.add_field(name="🟢 Prawler's 4th Skill:", value="**Skill**: `Kidnap`.", inline=False)
         embed.add_field(name="🟢 Seraph's 4th Skill:", value="**Skill**: `Attain Grace`.", inline=True)
         embed.add_field(name="🟢 Warrior's 4th Skill:", value="**Skill**: `Poison`.", inline=True)
