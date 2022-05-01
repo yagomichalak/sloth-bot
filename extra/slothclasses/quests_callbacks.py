@@ -82,8 +82,6 @@ async def quest_five_callback(client: commands.Bot, user_id: int, quest: Dict[st
     increment: int = kwargs["increment"]
     seconds = quest[9]
 
-
-
     current_seconds: int = int(seconds + increment)
     if current_seconds + increment < required_time:
         return await cog.update_sloth_skill_int_content(member.id, current_seconds, current_time.timestamp())
