@@ -210,12 +210,29 @@ class SlothReputation(*currency_cogs):
             embed.add_field(
                 name="🏕️ __**Tribe:**__", 
                 value=f"[{user_tribe['name']}]({user_tribe['link']}) ({user_tribe['two_emojis']}){' 👑' if tribe_owner else ''}", 
-                inline=True)
+                inline=False)
                 
         else:
             embed.add_field(name="🏕️ __**Tribe:**__", value="None", inline=True)
 
-        
+        if user_baby := await SlothClass.get_user_baby(member.id):
+            baby_emoji: str = ''
+            if user_baby[3].lower() != 'embryo':
+                baby_emoji = classes.get(user_baby[3].lower()).emoji
+            else:
+                baby_emoji = '🥚'
+
+            embed.add_field(
+                name=f"{baby_emoji} __**Pet:**__", 
+                value=f"`{user_baby[2]}` (<t:{user_baby[8]}:R>).", 
+                inline=True)
+
+        if user_pet := await SlothClass.get_user_pet(member.id):
+            embed.add_field(
+                name="🐸 __**Pet:**__", 
+                value=f"`{user_pet[1]}` (<t:{user_pet[7]}:R>). `{user_pet[2]}`", 
+                inline=True)
+
         if marriage['partner']:
             embed.add_field(
                 name="💍 __**Marriage:**__", 
