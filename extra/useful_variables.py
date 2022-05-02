@@ -148,7 +148,7 @@ different_class_roles = {
         "粤语"
     ],
     "japanese": [
-        "japonês", "japonais" ,"japanisch", "japonés", "日本語", "giapponese"
+        "japonês", "japonais" ,"japanisch", "japonés", "日本語", "giapponese", "bahasa jepang"
     ],
     "korean": [
         "한국어", "bahasa korea"

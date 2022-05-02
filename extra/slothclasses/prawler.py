@@ -515,7 +515,8 @@ class Prawler(Player):
 	@Player.skill_mark()
 	@Player.not_ready()
 	async def kidnap(self, ctx, target: discord.Member = None) -> None:
-		""" Kidnaps someone from a Tribe to yours and takes them hostage for 2 days.
+		""" Kidnaps someone from a Tribe to yours and takes them hostage until
+		the rescue tax is paid.
 		:param target: The target member to kidnap.
 		
 		PS: Members who were held hostages cannot interact with their tribe
