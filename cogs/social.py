@@ -4,7 +4,7 @@ from discord.ext import commands
 from random import randint
 import aiohttp
 import os
-from typing import List
+from typing import List, Optional
 
 from extra import utils, useful_variables
 from extra.view import QuickButtons
@@ -291,48 +291,82 @@ class Social(*social_cogs):
         await ctx.respond(embed=embed, view=view)
 
 
+    @commands.command(name="change_nickname")
+    @commands.cooldown(1, 60, commands.BucketType.user)
+    async def _change_nickname_command(self, ctx, *, nickname: Optional[str] = None) -> None:
+        """ Changes your nickname.
+        :param nickname: The nickname to change to. [Optional]
+        
+        * Cost: 150łł """
+
+        await self._change_nickname_callack(ctx, nickname)
+
     @slash_command(name="change_nickname", guild_ids=guild_ids)
     @commands.cooldown(1, 60, commands.BucketType.user)
-    async def _change_nickname(self, ctx,
+    async def _change_nickname_slash_command(self, ctx,
         nickname: Option(str, name="nickname", description="The nickname to change to.", required=False)
     ) -> None:
         """ Changes your nickname. (150łł)"""
 
         await ctx.defer()
+        await self._change_nickname_callack(ctx, nickname)
+
+
+    async def _change_nickname_callack(self, ctx, nickname: Optional[str] = None) -> None:
+        """ Callback for the change_nickname command.
+        :param ctx: The context of the command.
+        :param nickname. The nickname to change to. [Optional] """
+
+        answer: discord.PartialMessageable = ctx.reply if isinstance(ctx, commands.Context) else ctx.respond
         member: discord.Member = ctx.author
         cost: int = 150
 
         if nickname and len(nickname) > 32:
-            return await ctx.respond(f"**Inform a nickname containing less than 33 characters!**", ephemeral=True)
+            ctx.command.reset_cooldown(ctx)
+            return await answer(f"**Inform a nickname containing less than 33 characters!**")
 
-        UserCurrency = self.client.get_cog('UserCurrency')
-        profile = await UserCurrency.get_sloth_profile(member.id)
+        if not nickname and not member.nick:
+            ctx.command.reset_cooldown(ctx)
+            return await answer(f"**Your nickname is already set to default!**")
+
+        if nickname and nickname == member.nick:
+            ctx.command.reset_cooldown(ctx)
+            return await answer(f"**Your nickname is already like this!**")
+
+        SlothCurrency = self.client.get_cog('SlothCurrency')
+        profile = await SlothCurrency.get_user_currency(member.id)
         if not profile:
-            return await ctx.respond(f"**You don't even have a Sloth Profile, you can't pay for this!**", ephemeral=True)
+            ctx.command.reset_cooldown(ctx)
+            return await answer(f"**You don't even have a Sloth Profile, you can't pay for this!**")
 
         if profile[0][1] < cost:
-            return await ctx.respond(f"**You don't have {cost} to pay for this nickname change!**", ephemeral=True)
+            ctx.command.reset_cooldown(ctx)
+            return await answer(f"**You don't have {cost} to pay for this nickname change!**")
 
         confirm_view = ConfirmButton(member, timeout=60)
-        msg =  await ctx.respond(f"**Are you sure you wanna change your nickname to `{nickname}`, {member.mention}?**", view=confirm_view)
+        nickname_to_change: str = "'default'" if not nickname else nickname
+        msg =  await answer(f"**Are you sure you wanna change your nickname to `{nickname_to_change}`, {member.mention}?**", view=confirm_view)
         await confirm_view.wait()
 
         await utils.disable_buttons(confirm_view)
         await msg.edit(view=confirm_view)
 
         if confirm_view.value is None:
-            return ctx.respond("**Timeout!**")
+            ctx.command.reset_cooldown(ctx)
+            return await answer("**Timeout!**")
 
         if not confirm_view.value:
-            return ctx.respond("**Canceled!**")
+            ctx.command.reset_cooldown(ctx)
+            return await answer("**Canceled!**")
 
         try:
             await member.edit(nick=nickname)
-            await UserCurrency.update_user_money(member.id, -cost)
+            await SlothCurrency.update_user_money(member.id, -cost)
         except:
-            return await ctx.respond(f"**For some reason I couldn't update it! Try again later**")
+            ctx.command.reset_cooldown(ctx)
+            return await answer(f"**For some reason I couldn't update it! Try again later**")
         else:
-            await ctx.respond(f"**Successfully updated your nickname, {member.mention}!**")
+            await answer(f"**Successfully updated your nickname, {member.mention}!**")
         
 
             
