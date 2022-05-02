@@ -8,6 +8,7 @@ from typing import List
 
 from extra import utils, useful_variables
 from extra.view import QuickButtons
+from extra.prompt.menu import ConfirmButton
 from external_cons import the_reddit
 
 from extra.moderation.userinfractions import ModerationUserInfractionsTable
@@ -289,6 +290,52 @@ class Social(*social_cogs):
         embed.set_footer(text=f"(Expires in 5 minutes)", icon_url=ctx.guild.icon.url)
         await ctx.respond(embed=embed, view=view)
 
+
+    @slash_command(name="change_nickname", guild_ids=guild_ids)
+    @commands.cooldown(1, 60, commands.BucketType.user)
+    async def _change_nickname(self, ctx,
+        nickname: Option(str, name="nickname", description="The nickname to change to.", required=False)
+    ) -> None:
+        """ Changes your nickname. (150łł)"""
+
+        await ctx.defer()
+        member: discord.Member = ctx.author
+        cost: int = 150
+
+        if nickname and len(nickname) > 32:
+            return await ctx.respond(f"**Inform a nickname containing less than 33 characters!**", ephemeral=True)
+
+        UserCurrency = self.client.get_cog('UserCurrency')
+        profile = await UserCurrency.get_sloth_profile(member.id)
+        if not profile:
+            return await ctx.respond(f"**You don't even have a Sloth Profile, you can't pay for this!**", ephemeral=True)
+
+        if profile[0][1] < cost:
+            return await ctx.respond(f"**You don't have {cost} to pay for this nickname change!**", ephemeral=True)
+
+        confirm_view = ConfirmButton(member, timeout=60)
+        msg =  await ctx.respond(f"**Are you sure you wanna change your nickname to `{nickname}`, {member.mention}?**", view=confirm_view)
+        await confirm_view.wait()
+
+        await utils.disable_buttons(confirm_view)
+        await msg.edit(view=confirm_view)
+
+        if confirm_view.value is None:
+            return ctx.respond("**Timeout!**")
+
+        if not confirm_view.value:
+            return ctx.respond("**Canceled!**")
+
+        try:
+            await member.edit(nick=nickname)
+            await UserCurrency.update_user_money(member.id, -cost)
+        except:
+            return await ctx.respond(f"**For some reason I couldn't update it! Try again later**")
+        else:
+            await ctx.respond(f"**Successfully updated your nickname, {member.mention}!**")
+        
+
+            
 
 def setup(client):
     client.add_cog(Social(client))

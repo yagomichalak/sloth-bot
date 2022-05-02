@@ -1057,7 +1057,6 @@ class Tools(*tool_cogs):
 		)
 		await ctx.send(embed=embed)
 
-
 	@commands.command(aliases=["pd"])
 	@commands.has_permissions(administrator=True)
 	async def payday(self, ctx) -> None:
