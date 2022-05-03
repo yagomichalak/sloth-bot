@@ -291,7 +291,7 @@ class Social(*social_cogs):
         await ctx.respond(embed=embed, view=view)
 
 
-    @commands.command(name="change_nickname", aliases=["cn", "update_nick", "un"])
+    @commands.command(name="change_nickname", aliases=["cn", "update_nick", "un", "changenick", "updatenick"])
     @commands.cooldown(1, 60, commands.BucketType.user)
     async def _change_nickname_command(self, ctx, *, nickname: Optional[str] = None) -> None:
         """ Changes your nickname.
