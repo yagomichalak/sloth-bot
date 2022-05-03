@@ -291,7 +291,7 @@ class Social(*social_cogs):
         await ctx.respond(embed=embed, view=view)
 
 
-    @commands.command(name="change_nickname")
+    @commands.command(name="change_nickname", aliases=["cn", "update_nick", "un"])
     @commands.cooldown(1, 60, commands.BucketType.user)
     async def _change_nickname_command(self, ctx, *, nickname: Optional[str] = None) -> None:
         """ Changes your nickname.
@@ -321,9 +321,9 @@ class Social(*social_cogs):
         member: discord.Member = ctx.author
         cost: int = 150
 
-        if nickname and len(nickname) > 32:
+        if nickname and len(nickname) > 30:
             ctx.command.reset_cooldown(ctx)
-            return await answer(f"**Inform a nickname containing less than 33 characters!**")
+            return await answer(f"**Inform a nickname containing less than 31 characters!**")
 
         if not nickname and not member.nick:
             ctx.command.reset_cooldown(ctx)
@@ -359,8 +359,17 @@ class Social(*social_cogs):
             ctx.command.reset_cooldown(ctx)
             return await answer("**Canceled!**")
 
+        user_tribe = await self.client.get_cog("SlothClass").get_tribe_info_by_name(name=profile[0][3])
+        tribe_emojis = None if not user_tribe else user_tribe["two_emojis"]
+
         try:
-            await member.edit(nick=nickname)
+            if tribe_emojis:
+                if not nickname:
+                    await member.edit(nick=f"{member.name} {tribe_emojis}")
+                else:
+                    await member.edit(nick=f"{nickname} {tribe_emojis}")
+            else:
+                await member.edit(nick=nickname)
             await SlothCurrency.update_user_money(member.id, -cost)
         except:
             ctx.command.reset_cooldown(ctx)
