@@ -341,7 +341,7 @@ class Social(*social_cogs):
 
         if profile[0][1] < cost:
             ctx.command.reset_cooldown(ctx)
-            return await answer(f"**You don't have {cost} to pay for this nickname change!**")
+            return await answer(f"**You don't have `{cost}łł` to pay for this nickname change!**")
 
         confirm_view = ConfirmButton(member, timeout=60)
         nickname_to_change: str = "'default'" if not nickname else nickname
