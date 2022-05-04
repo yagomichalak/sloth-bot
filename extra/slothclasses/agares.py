@@ -407,7 +407,6 @@ class Agares(Player):
     @Player.skills_locked()
     @Player.user_is_class('agares')
     @Player.skill_mark()
-    @Player.not_ready()
     async def delay(self, ctx, target: discord.Member = None) -> None:
         """ Delays someone else's set of skills for 1 day.
         :param target: The member of whom to delay the skills.

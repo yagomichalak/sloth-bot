@@ -513,7 +513,6 @@ class Prawler(Player):
 	@Player.skills_locked()
 	@Player.user_is_class('prawler')
 	@Player.skill_mark()
-	@Player.not_ready()
 	async def kidnap(self, ctx, target: discord.Member = None) -> None:
 		""" Kidnaps someone from a Tribe to yours and takes them hostage for 2 days.
 		:param target: The target member to kidnap.
