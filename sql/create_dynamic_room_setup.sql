@@ -159,7 +159,7 @@ INSERT INTO Sloth.LanguageRoom (category, english_name, room_name, room_quant, r
 
 /* 121 */("iranian", "Gilaki", "گیلکی (Gilaki)", 2, 10, 60),
 
-/* 122 */("balkan", "Bosnian", "Bosanci 🇧🇦", 2, 10, 60),
+/* 122 */("balkan", "Bosnian", "Bosanski 🇧🇦", 2, 10, 60),
 
 /* ??? */("category", "english_name", "room_name", 2, 10, 60)
 

@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 import os
 from typing import List, Union, Dict
-from .modals import UserReportDetailModal
+from .modals import UserReportSupportDetailModal
 
 class ReportSupportSelect(discord.ui.Select):
     """ Select for the Report-Support options. """
@@ -24,7 +24,7 @@ class ReportSupportSelect(discord.ui.Select):
     async def callback(self, interaction: discord.Interaction):
         """ Callback for the ReportSupport's selected option. """
 
-        modal = UserReportDetailModal(self.client, interaction.data['values'][0])
+        modal = UserReportSupportDetailModal(self.client, interaction.data['values'][0])
         await interaction.response.send_modal(modal)
         self.view.stop()
 

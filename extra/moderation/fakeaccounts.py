@@ -32,7 +32,7 @@ class ModerationFakeAccountsTable(commands.Cog):
             return await ctx.send(f"**Please, inform the member's fake account to link to the other one, {author.mention}!**")
 
         if member.id == fake_member.id:
-            return await ctx.send(f"**Accoutns can't be the same, {author.mention}!*")
+            return await ctx.send(f"**Accounts can't be the same, {author.mention}!**")
 
         
         if await self.get_fake_account(member.id, fake_member.id):
