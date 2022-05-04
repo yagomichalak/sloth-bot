@@ -12,7 +12,6 @@ import os
 from functools import partial
 import json
 
-
 mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID', 123))
 
@@ -175,7 +174,6 @@ class ReportSupportView(discord.ui.View):
         view.add_item(ReportSupportSelect(self.client))
         await interaction.followup.send(content="How can we help you?", view=view, ephemeral=True)
 
-
 class QuickButtons(discord.ui.View):
 
     def __init__(self, client: commands.Bot, ctx: commands.Context, target_member: Union[discord.Member, discord.User]) -> None:
@@ -188,7 +186,6 @@ class QuickButtons(discord.ui.View):
             label="Watchlist", style=discord.ButtonStyle.url, emoji="⚠️", url=f"https://discord.com/channels/{ctx.guild.id}/{ctx.channel.id}"
         )
         self.children.insert(4, watchlist_button)
-        
 
     @discord.ui.button(label="Infractions", style=4, emoji="❗", custom_id=f"user_infractions")
     async def infractions_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
@@ -235,8 +232,6 @@ class QuickButtons(discord.ui.View):
             await interaction.response.defer()
             await self.client.get_cog("Moderation").show_moderated_nickname(self.ctx, member=self.target_member)
 
-
-
 class Test(discord.ui.View):
 
     def __init__(self) -> None:
@@ -261,14 +256,12 @@ class BasicUserCheckView(discord.ui.View):
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
         return self.member.id == interaction.user.id
         
-
 class ExchangeActivityView(discord.ui.View):
 
     def __init__(self, client: commands.Bot, user_info: List[Union[int, str]]) -> None:
         super().__init__(timeout=60)
         self.client = client
         self.user_info = user_info
-
 
     @discord.ui.button(style=discord.ButtonStyle.success, label="Exchange Activity!", custom_id="exchange_money", emoji="💰")
     async def exchange_activity(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
@@ -305,7 +298,6 @@ class ExchangeActivityView(discord.ui.View):
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
 
         return self.user_info[0] == interaction.user.id
-
 
 class GiveawayView(discord.ui.View):
     """ View for giveaway entries """
@@ -349,7 +341,6 @@ class GiveawayView(discord.ui.View):
                 return False
         else:
             return True
-
 
 class SoundBoardButton(discord.ui.Button):
     """ Button of the soundboard. """
@@ -409,7 +400,6 @@ class SoundBoardView(discord.ui.View):
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
         return interaction.user.id == self.ctx.author.id
 
-
 class UserPetView(discord.ui.View):
     """ View for the UserPet selection. """
 
@@ -439,7 +429,6 @@ class UserPetView(discord.ui.View):
             data = json.loads(file.read())
 
         return data
-
     
     async def select_pet_select(self, select: discord.ui.select, interaction: discord.Interaction) -> None:
         """ Callback for a select menu option. """
@@ -452,8 +441,6 @@ class UserPetView(discord.ui.View):
         self.selected_pet = selected_option
 
         await interaction.response.edit_message(embed=embed)
-
-
 
     @discord.ui.button(label="Confirm", custom_id="confirm_pet_selection_id", style=discord.ButtonStyle.success, emoji="✅", row=1)
     async def confirm_pet_selection_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
