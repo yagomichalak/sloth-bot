@@ -371,7 +371,6 @@ class Warrior(Player):
     @Player.skills_locked()
     @Player.user_is_class('warrior')
     @Player.skill_mark()
-    @Player.not_ready()
     async def poison(self, ctx, target: discord.Member = None) -> None:
         """ Poisons someone so they get dizzy, disoriented to the point
         they can barely use skills, Social, Currency and RolePlay commands.

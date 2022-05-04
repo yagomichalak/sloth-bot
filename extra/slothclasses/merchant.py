@@ -212,9 +212,6 @@ class Merchant(Player):
                     timestamp=ctx.message.created_at
                 ))
 
-                # Tries to complete a quest, if possible.
-                await self.complete_quest(buyer.id, 6)
-
     @buy.command(aliases=['wedding', 'wedding_ring', 'weddingring'])
     @Player.poisoned()
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -924,7 +921,6 @@ class Merchant(Player):
     @Player.skills_locked()
     @Player.user_is_class('merchant')
     @Player.skill_mark()
-    @Player.not_ready()
     async def sell_pet(self, ctx) -> None:
         """ Sells a pet egg.
         
@@ -987,9 +983,32 @@ class Merchant(Player):
         else:
             await ctx.send(f"**{member}, your item is now in the shop, check `z!sloth_shop` to see it there!**")
 
-    @commands.command()
+    @commands.group(aliases=["mascot"])
+    @Player.poisoned()
+    @Player.kidnapped()
+    async def pet(self, ctx) -> None:
+        """ Command for managing and interacting with a pet.
+        (Use this without a subcommand to see all subcommands available) """
+        if ctx.invoked_subcommand:
+            return
+
+        prefix = self.client.command_prefix
+        subcommands = [f"{prefix}{c.qualified_name}" for c in ctx.command.commands
+            ]
+
+        subcommands = '\n'.join(subcommands)
+        items_embed = discord.Embed(
+            title="__Subcommads__:",
+            description=f"```apache\n{subcommands}```",
+            color=ctx.author.color,
+            timestamp=ctx.message.created_at
+        )
+
+        await ctx.send(embed=items_embed)
+
+    @pet.command(name="hatch")
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def hatch(self, ctx) -> None:
+    async def _pet_hatch(self, ctx) -> None:
         """ Hatches your pet egg. """
 
         member: discord.Member = ctx.author
@@ -999,7 +1018,6 @@ class Merchant(Player):
             return await ctx.send(f"**You don't have an egg to hatch, {member.mention}!**")
         if user_pet[2].lower() != 'egg':
             return await ctx.send(f"**You already hatched your pet egg, {member.mention}!**")
-
         
         embed: discord.Embed = discord.Embed(
             title="__Pet Breed Selection__",
@@ -1026,9 +1044,9 @@ class Merchant(Player):
         await self.update_user_pet_breed(member.id, view.selected_pet.lower())
         await ctx.send(f"**Your `Pet Egg` has been successfully hatched into a `{view.selected_pet}`, {member.mention}!**")
 
-    @commands.command(aliases=['pet_name', 'cpet_name', 'update_pet_name'])
+    @pet.command(name="change_name", aliases=['name', 'c_name', 'update_name'])
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def change_pet_name(self, ctx, *, pet_name: str = None) -> None:
+    async def _pet_change_name(self, ctx, *, pet_name: str = None) -> None:
         """ Changes the pet's name.
         :param pet_name: The new pet name to change to.
         
@@ -1064,10 +1082,9 @@ class Merchant(Player):
         await self.update_user_pet_name(member.id, pet_name)
         await ctx.send(f"**Successfully updated your pet {user_pet[2]}'s nickname from `{user_pet[2]}` to `{pet_name}`, {member.mention}!**")
 
-
-    @commands.command(aliases=['mascot'])
+    @pet.command(name="see", aliases=["show", "display", "render"])
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def pet(self, ctx, member: Optional[Union[discord.Member, discord.User]] = None) -> None:
+    async def _pet_see(self, ctx, member: Optional[Union[discord.Member, discord.User]] = None) -> None:
         """ Sees someone's pet.
         :param member: The member from whom to show the pet. [Optional][Default = You] """
 
@@ -1169,3 +1186,72 @@ class Merchant(Player):
         background.save(file_path)
 
         return file_path
+
+    @pet.command(name="feed", aliases=["give_food", "f"])
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def _pet_feed(self, ctx, leaves: str = None) -> None:
+        """ Feeds your pet.
+        :param leaves: The amount of leaves you want to give to your pet.
+
+        PS: You feed your pet with leaves.
+        Each leave gives 5 life points to your pet. """
+
+        member: discord.Member = ctx.author
+
+        if not leaves:
+            return await ctx.send(f"**Please, inform an amount of leaves to feed your pet, {member.mention}!**")
+
+        user_pet = await self.get_user_pet(member.id)
+        if not user_pet:
+            return await ctx.send(f"**You don't have a pet, {member.mention}!**")
+
+        try:
+            leaves = int(leaves)
+        except ValueError:
+            return await ctx.send(f"**Please, inform a valid amount of leaves, {member.mention}!**")
+
+        if leaves <= 0:
+            return await ctx.send(f"**Please, inform an amount of leaves that is greater than 0, {member.mention}!**")
+
+        current_ts = await utils.get_timestamp()
+
+        food_points: int = user_pet[4]
+
+        temp_points = temp_leaves = 0
+        food_rate: int = 5 # The life points each leaf gives to the pet
+
+        for _ in range(leaves):
+            
+            if food_points + food_rate <= 100:
+                temp_points += food_rate
+                temp_leaves += 1
+                food_points += food_rate
+            else:
+                break
+
+        confirm_view = ConfirmButton(member, timeout=60)
+        msg = await ctx.send(
+            content=f"**Are you sure you want to spend `{temp_leaves}` out of `{leaves}łł` to recover `{temp_points}lp` to your pet, {member.mention}!**",
+            view=confirm_view)
+        await confirm_view.wait()
+
+        SlothCurrency = self.client.get_cog("SlothCurrency")
+
+        user_currency = await self.get_user_currency(member.id)
+        if user_currency[1] < temp_leaves:
+            return await ctx.send(f"**You don't have `{temp_leaves}` leaves to feed your pet, {member.mention}!**")
+        
+        if confirm_view.value:
+            await SlothCurrency.update_user_money(member.id, -temp_leaves)
+            await self.update_user_pet_food(member.id, temp_points, current_ts)
+            embed = discord.Embed(
+                title="__Pet has been Fed__",
+                description=f"**You just fed `{user_pet[1]}` with `{temp_leaves}łł`, now it has `{food_points}` food points, {member.mention}!**",
+                color=discord.Color.green(),
+                timestamp=ctx.message.created_at
+            )
+
+            await ctx.send(embed=embed)
+
+        await utils.disable_buttons(confirm_view)
+        await msg.edit(view=confirm_view)

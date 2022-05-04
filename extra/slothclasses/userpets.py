@@ -31,6 +31,7 @@ class UserPetsTable(commands.Cog):
             food TINYINT(3) DEFAULT 100,
             life_points_ts BIGINT NOT NULL,
             food_ts BIGINT NOT NULL,
+            birth_ts BIGINT DEFAULT NULL,
             PRIMARY KEY (user_id)
             ) CHARSET utf8mb4 COLLATE utf8mb4_unicode_ci
         """)
@@ -94,9 +95,15 @@ class UserPetsTable(commands.Cog):
 
         mycursor, db = await the_database()
         if pet_name and pet_breed:
-            await mycursor.execute("INSERT INTO UserPets (user_id, pet_name, pet_breed, life_points_ts, food_ts) VALUES (%s, %s, %s, %s, %s)", (user_id, pet_name, pet_breed, current_ts, current_ts))
+            await mycursor.execute("""
+            INSERT INTO UserPets (
+                user_id, pet_name, pet_breed, life_points_ts, food_ts, birth_ts
+            ) VALUES (%s, %s, %s, %s, %s, %s)""", (user_id, pet_name, pet_breed, current_ts, current_ts, current_ts))
         else:
-            await mycursor.execute("INSERT INTO UserPets (user_id, life_points_ts, food_ts) VALUES (%s, %s, %s)", (user_id, current_ts, current_ts))
+            await mycursor.execute("""
+            INSERT INTO UserPets (
+                user_id, life_points_ts, food_ts, birth_ts
+            ) VALUES (%s, %s, %s, %s)""", (user_id, current_ts, current_ts, current_ts))
         await db.commit()
         await mycursor.close()
 
@@ -146,6 +153,20 @@ class UserPetsTable(commands.Cog):
 
         mycursor, db = await the_database()
         await mycursor.execute("UPDATE UserPets SET pet_breed = %s WHERE user_id = %s", (pet_breed, user_id))
+        await db.commit()
+        await mycursor.close()
+
+    async def update_user_pet_name_breed_and_birth_ts(self, user_id: int, pet_name: str, pet_breed: str, birth_ts: int) -> None:
+        """ Updates the User Pet's breed.
+        :param user_id: The ID of the pet's owner.
+        :param pet_name: The new pet name to update to.
+        :param pet_breed: The new pet breed to update to.
+        :param birth_ts: The birth timestamp """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("""
+            UPDATE UserPets SET pet_name = %s, pet_breed = %s, birth_ts = %s WHERE user_id = %s
+        """, (pet_name, pet_breed, birth_ts, user_id))
         await db.commit()
         await mycursor.close()
 
