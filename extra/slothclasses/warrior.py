@@ -440,7 +440,7 @@ class Warrior(Player):
 
         except Exception as e:
             print(e)
-            return await ctx.send(f"**For some reason I couldn't lock your target's skills, {attacker.mention}!**")
+            return await ctx.send(f"**For some reason I couldn't poison your target, {attacker.mention}!**")
 
         else:
             poison_embed = await self.get_poison_embed(
