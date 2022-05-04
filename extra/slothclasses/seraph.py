@@ -434,7 +434,6 @@ class Seraph(Player):
     @Player.skills_locked()
     @Player.user_is_class('seraph')
     @Player.skill_mark()
-    @Player.not_ready()
     async def attain_grace(self, ctx, target: Optional[discord.Member] = None) -> None:
         """ Tries with a 10% chance of success to attain the grace from the deity
          so the person, who must be honeymoon'd receives a baby to take care of, 

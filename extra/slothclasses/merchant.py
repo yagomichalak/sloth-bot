@@ -921,7 +921,6 @@ class Merchant(Player):
     @Player.skills_locked()
     @Player.user_is_class('merchant')
     @Player.skill_mark()
-    @Player.not_ready()
     async def sell_pet(self, ctx) -> None:
         """ Sells a pet egg.
         
@@ -983,7 +982,6 @@ class Merchant(Player):
             return await ctx.send(f"**{member.mention}, something went wrong with it, try again later!**")
         else:
             await ctx.send(f"**{member}, your item is now in the shop, check `z!sloth_shop` to see it there!**")
-
 
     @commands.group(aliases=["mascot"])
     @Player.poisoned()
@@ -1083,7 +1081,6 @@ class Merchant(Player):
         await SlothCurrency.update_user_money(member.id, -250)
         await self.update_user_pet_name(member.id, pet_name)
         await ctx.send(f"**Successfully updated your pet {user_pet[2]}'s nickname from `{user_pet[2]}` to `{pet_name}`, {member.mention}!**")
-
 
     @pet.command(name="see", aliases=["show", "display", "render"])
     @commands.cooldown(1, 5, commands.BucketType.user)
