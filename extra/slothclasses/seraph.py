@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 from .player import Player, Skill
 from mysqldb import the_database
-from extra.prompt.menu import Confirm
+from extra.prompt.menu import Confirm, ConfirmButton
 from extra import utils
 import os
 from datetime import datetime
@@ -434,7 +434,6 @@ class Seraph(Player):
     @Player.skills_locked()
     @Player.user_is_class('seraph')
     @Player.skill_mark()
-    @Player.not_ready()
     async def attain_grace(self, ctx, target: Optional[discord.Member] = None) -> None:
         """ Tries with a 10% chance of success to attain the grace from the deity
          so the person, who must be honeymoon'd receives a baby to take care of, 
@@ -537,10 +536,32 @@ class Seraph(Player):
 
         return attained_grace_embed
 
+    @commands.group(aliases=['bb'])
+    @Player.poisoned()
+    @Player.kidnapped()
+    async def baby(self, ctx) -> None:
+        """ Command for managing and interacting with a baby.
+        (Use this without a subcommand to see all subcommands available) """
+        if ctx.invoked_subcommand:
+            return
 
-    @commands.command(aliases=['update_baby_class', 'change_baby_class'])
+        prefix = self.client.command_prefix
+        subcommands = [f"{prefix}{c.qualified_name}" for c in ctx.command.commands
+            ]
+
+        subcommands = '\n'.join(subcommands)
+        items_embed = discord.Embed(
+            title="__Subcommads__:",
+            description=f"```apache\n{subcommands}```",
+            color=ctx.author.color,
+            timestamp=ctx.message.created_at
+        )
+
+        await ctx.send(embed=items_embed)
+
+    @baby.command(name="choose_class", aliases=["update_class", "change_class", "cc"])
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def choose_baby_class(self, ctx) -> None:
+    async def _baby_choose_class(self, ctx) -> None:
         """ Chooses a class for your baby. """
 
         member: discord.Member = ctx.author
@@ -550,7 +571,6 @@ class Seraph(Player):
             return await ctx.send(f"**You don't even have a baby, {member.mention}!**")
         if user_baby[3].lower() != 'embryo':
             return await ctx.send(f"**You already chose a class for your baby, {member.mention}!**")
-
         
         embed: discord.Embed = discord.Embed(
             title="__Baby Class Selection__",
@@ -576,9 +596,9 @@ class Seraph(Player):
         await self.update_user_baby_class(member.id, view.selected_baby.lower())
         await ctx.send(f"**Your `Embryo` is born as a `{view.selected_baby}`, {member.mention}!**")
 
-    @commands.command(aliases=['baby_name', 'cbaby_name', 'update_baby_name'])
+    @baby.command(name="change_name", aliases=["name", "c_name", "update_name", "cn"])
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def change_baby_name(self, ctx, *, baby_name: str = None) -> None:
+    async def _baby_change_name(self, ctx, *, baby_name: str = None) -> None:
         """ Changes the baby's name.
         :param baby_name: The new baby name to change to.
         
@@ -615,9 +635,9 @@ class Seraph(Player):
         await ctx.send(f"**Successfully updated your baby {user_baby[2]}'s nickname from `{user_baby[2]}` to `{baby_name}`, {member.mention}!**")
 
 
-    @commands.command()
+    @baby.command(name="see", aliases=["show", "display", "render"])
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def baby(self, ctx, member: Optional[Union[discord.Member, discord.User]] = None) -> None:
+    async def _baby_see(self, ctx, member: Optional[Union[discord.Member, discord.User]] = None) -> None:
         """ Sees someone's baby.
         :param member: The member from whom to show the baby. [Optional][Default = You] """
 
@@ -724,3 +744,77 @@ class Seraph(Player):
         background.save(file_path)
 
         return file_path
+
+    @baby.command(name="feed", aliases=["give_food", "f"])
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def _baby_feed(self, ctx, leaves: str = None) -> None:
+        """ Feeds your baby.
+        :param leaves: The amount of leaves you want to give to your baby.
+
+        PS: You feed your baby with leaves.
+        Each leave gives 5 life points to your baby. """
+
+        member: discord.Member = ctx.author
+
+        if not leaves:
+            return await ctx.send(f"**Please, inform an amount of leaves to feed your baby, {member.mention}!**")
+
+        user_baby = await self.get_user_baby(member.id)
+        if not user_baby:
+            return await ctx.send(f"**You don't have a baby, {member.mention}!**")
+
+        if user_baby[3] == 'Embryo':
+            return await ctx.send(f"**You cannot feed an embryo, {member.mention}!**")
+
+        try:
+            leaves = int(leaves)
+        except ValueError:
+            return await ctx.send(f"**Please, inform a valid amount of leaves, {member.mention}!**")
+
+        if leaves <= 0:
+            return await ctx.send(f"**Please, inform an amount of leaves that is greater than 0, {member.mention}!**")
+
+        current_ts = await utils.get_timestamp()
+
+        food_points: int = user_baby[5]
+
+        temp_points = temp_leaves = 0
+        food_rate: int = 5 # The life points each leaf gives to the baby
+
+        for _ in range(leaves):
+            
+            if food_points + food_rate <= 100:
+                temp_points += food_rate
+                temp_leaves += 1
+                food_points += food_rate
+            else:
+                break
+
+        confirm_view = ConfirmButton(member, timeout=60)
+        msg = await ctx.send(
+            content=f"**Are you sure you want to spend `{temp_leaves}` out of `{leaves}łł` to recover `{temp_points}lp` to your baby, {member.mention}!**",
+            view=confirm_view)
+        await confirm_view.wait()
+
+        SlothCurrency = self.client.get_cog("SlothCurrency")
+
+        user_currency = await self.get_user_currency(member.id)
+        if user_currency[1] < temp_leaves:
+            return await ctx.send(f"**You don't have `{temp_leaves}` leaves to feed your baby, {member.mention}!**")
+        
+        if confirm_view.value:
+            await SlothCurrency.update_user_money(member.id, -temp_leaves)
+            await self.update_user_baby_food(member.id, temp_points, current_ts)
+            embed = discord.Embed(
+                title="__Pet has been Fed__",
+                description=f"**You just fed `{user_baby[2]}` with `{temp_leaves}łł`, now it has `{food_points}` food points, {member.mention}!**",
+                color=discord.Color.green(),
+                timestamp=ctx.message.created_at
+            )
+
+            embed.set_thumbnail(url=f"https://thelanguagesloth.com/static/assets/images/sloth_classes/{user_baby[3]}.png")
+
+            await ctx.send(embed=embed)
+
+        await utils.disable_buttons(confirm_view)
+        await msg.edit(view=confirm_view)
