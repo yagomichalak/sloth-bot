@@ -665,7 +665,7 @@ class Seraph(Player):
         small = ImageFont.truetype("built titling sb.ttf", 45)
         background = Image.open(f"./sloth_custom_images/background/base_baby_background.png")
         hud = Image.open(f"./sloth_custom_images/hud/base_baby_hud.png")
-        baby_class = Image.open(f"./sloth_custom_images/sloth/{user_baby[3].lower()}.png").resize((470, 350))
+        baby_class = Image.open(f"./sloth_custom_images/sloth/{user_baby[3].title()}.png").resize((470, 350))
 
         background.paste(hud, (0, 0), hud)
         background.paste(p1pfp, (5, 5), p1pfp)
