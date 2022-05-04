@@ -449,7 +449,6 @@ class Warrior(Player):
             if 'reflect' in target_fx:
                 await self.reflect_attack(ctx, attacker, target, 'poison')
 
-
     async def get_poison_embed(self, channel, perpetrator_id: int, target_id: int, item: List[Union[str, int]]) -> discord.Embed:
         """ Makes an embedded message for a poison.
         :param channel: The context channel.
