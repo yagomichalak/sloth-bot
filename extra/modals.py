@@ -358,18 +358,18 @@ class DebateManagerApplicationModal(Modal):
         # Saves in the database
         await self.cog.insert_application(app.id, member.id, 'debate_manager')
 
-class UserReportDetailModal(Modal):
-    """ Class for specifying details for a User Report application. """
+class UserReportSupportDetailModal(Modal):
+    """ Class for specifying details for a Report Support request. """
 
     def __init__(self, client: commands.Bot, option: str) -> None:
         """ Class init method. """
 
-        super().__init__("Report a User")
+        super().__init__("Report-Support")
         self.client = client
         self.cog: commands.Cog = client.get_cog('ReportSupport')
         self.add_item(
             InputText(
-                label="What Happened?",
+                label="What happened/How can we help you?",
                 placeholder="Describe the situation as much as you can, so we can help you better and faster.",
                 style=discord.InputTextStyle.paragraph
             )
@@ -418,3 +418,87 @@ class UserReportDetailModal(Modal):
 
         elif self.option == 'Oopsie':
             return await interaction.followup.send("**All right, cya!**", ephemeral=True)
+
+
+
+class TravelBuddyModal(Modal):
+    """ Class for the TravelBuddies feature. """
+
+    def __init__(self, client: commands.Bot, country_role: discord.Role) -> None:
+        """ Class init method. """
+
+        super().__init__("Travel Buddy Form")
+        self.client = client
+        self.country_role = country_role
+        self.cog: commands.Cog = client.get_cog('TravelBuddies')
+
+        self.add_item(
+            InputText(
+                label="Where",
+                placeholder="Where are you traveling to?",
+                style=discord.InputTextStyle.short
+            )
+        )
+        self.add_item(
+            InputText(
+                label="When",
+                placeholder="When are you traveling to that place and for how long?",
+                style=discord.InputTextStyle.short,
+            )
+        )
+        self.add_item(
+            InputText(
+                label="Lookin for a host",
+                placeholder="Are you looking for a host there?",
+                style=discord.InputTextStyle.short
+            )
+        )
+        self.add_item(
+            InputText(
+                label="Activities",
+                placeholder="What kind of activities are you planning or want to do there?",
+                style=discord.InputTextStyle.paragraph
+            )
+        )
+
+    async def callback(self, interaction: discord.Interaction) -> None:
+        """ Callback for the moderation application. """
+
+        member: discord.Member = interaction.user
+        current_time = await utils.get_time_now()
+
+        embed = discord.Embed(
+            title=f"__Travel Buddy__",
+            color=member.color,
+            timestamp=current_time
+        )
+
+        embed.set_thumbnail(url=member.display_avatar)
+    
+        embed.add_field(name="Who's traveling:", value=member.mention, inline=False)
+        embed.add_field(name="Where", value=self.children[0].value, inline=False)
+        embed.add_field(name="When", value=self.children[1].value, inline=False)
+        embed.add_field(name="Looking for a host", value=self.children[2].value, inline=False)
+        embed.add_field(name="Activities", value=self.children[3].value, inline=False)
+
+        confirm_view = ConfirmButton(member, timeout=60)
+
+        await interaction.response.send_message(
+            content=f"Are you sure you want to post this, and ping the `{self.country_role.name}`?",
+            embed=embed, view=confirm_view, ephemeral=True)
+
+        await confirm_view.wait()
+        if confirm_view.value is None:
+            return await confirm_view.interaction.response.send_message(f"**{member.mention}, you took too long to answer...**", ephemeral=True)
+
+        if not confirm_view.value:
+            return await confirm_view.interaction.response.send_message(f"**Not doing it then, {member.mention}!**", ephemeral=True)
+
+        self.cog.cache[member.id] = await utils.get_timestamp()
+
+        message = await confirm_view.interaction.followup.send(
+            content=f"Hello, {self.country_role.mention}!", embed=embed
+        )
+        message.guild = interaction.guild
+
+        await message.create_thread(name=f"{member}'s Trip", auto_archive_duration=10080)

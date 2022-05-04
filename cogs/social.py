@@ -4,10 +4,11 @@ from discord.ext import commands
 from random import randint
 import aiohttp
 import os
-from typing import List
+from typing import List, Optional
 
 from extra import utils, useful_variables
 from extra.view import QuickButtons
+from extra.prompt.menu import ConfirmButton
 from external_cons import the_reddit
 
 from extra.moderation.userinfractions import ModerationUserInfractionsTable
@@ -289,6 +290,95 @@ class Social(*social_cogs):
         embed.set_footer(text=f"(Expires in 5 minutes)", icon_url=ctx.guild.icon.url)
         await ctx.respond(embed=embed, view=view)
 
+
+    @commands.command(name="change_nickname", aliases=["cn", "update_nick", "un", "changenick", "updatenick"])
+    @commands.cooldown(1, 60, commands.BucketType.user)
+    async def _change_nickname_command(self, ctx, *, nickname: Optional[str] = None) -> None:
+        """ Changes your nickname.
+        :param nickname: The nickname to change to. [Optional]
+        
+        * Cost: 150łł """
+
+        await self._change_nickname_callack(ctx, nickname)
+
+    @slash_command(name="change_nickname", guild_ids=guild_ids)
+    @commands.cooldown(1, 60, commands.BucketType.user)
+    async def _change_nickname_slash_command(self, ctx,
+        nickname: Option(str, name="nickname", description="The nickname to change to.", required=False)
+    ) -> None:
+        """ Changes your nickname. (150łł)"""
+
+        await ctx.defer()
+        await self._change_nickname_callack(ctx, nickname)
+
+
+    async def _change_nickname_callack(self, ctx, nickname: Optional[str] = None) -> None:
+        """ Callback for the change_nickname command.
+        :param ctx: The context of the command.
+        :param nickname. The nickname to change to. [Optional] """
+
+        answer: discord.PartialMessageable = ctx.reply if isinstance(ctx, commands.Context) else ctx.respond
+        member: discord.Member = ctx.author
+        cost: int = 150
+
+        if nickname and len(nickname) > 30:
+            ctx.command.reset_cooldown(ctx)
+            return await answer(f"**Inform a nickname containing less than 31 characters!**")
+
+        if not nickname and not member.nick:
+            ctx.command.reset_cooldown(ctx)
+            return await answer(f"**Your nickname is already set to default!**")
+
+        if nickname and nickname == member.nick:
+            ctx.command.reset_cooldown(ctx)
+            return await answer(f"**Your nickname is already like this!**")
+
+        SlothCurrency = self.client.get_cog('SlothCurrency')
+        profile = await SlothCurrency.get_user_currency(member.id)
+        if not profile:
+            ctx.command.reset_cooldown(ctx)
+            return await answer(f"**You don't even have a Sloth Profile, you can't pay for this!**")
+
+        if profile[0][1] < cost:
+            ctx.command.reset_cooldown(ctx)
+            return await answer(f"**You don't have `{cost}łł` to pay for this nickname change!**")
+
+        confirm_view = ConfirmButton(member, timeout=60)
+        nickname_to_change: str = "'default'" if not nickname else nickname
+        msg =  await answer(f"**Are you sure you wanna change your nickname to `{nickname_to_change}`, {member.mention}?**", view=confirm_view)
+        await confirm_view.wait()
+
+        await utils.disable_buttons(confirm_view)
+        await msg.edit(view=confirm_view)
+
+        if confirm_view.value is None:
+            ctx.command.reset_cooldown(ctx)
+            return await answer("**Timeout!**")
+
+        if not confirm_view.value:
+            ctx.command.reset_cooldown(ctx)
+            return await answer("**Canceled!**")
+
+        user_tribe = await self.client.get_cog("SlothClass").get_tribe_info_by_name(name=profile[0][3])
+        tribe_emojis = None if not user_tribe else user_tribe["two_emojis"]
+
+        try:
+            if tribe_emojis:
+                if not nickname:
+                    await member.edit(nick=f"{member.name} {tribe_emojis}")
+                else:
+                    await member.edit(nick=f"{nickname} {tribe_emojis}")
+            else:
+                await member.edit(nick=nickname)
+            await SlothCurrency.update_user_money(member.id, -cost)
+        except:
+            ctx.command.reset_cooldown(ctx)
+            return await answer(f"**For some reason I couldn't update it! Try again later**")
+        else:
+            await answer(f"**Successfully updated your nickname, {member.mention}!**")
+        
+
+            
 
 def setup(client):
     client.add_cog(Social(client))
