@@ -161,8 +161,8 @@ class Player(*additional_cogs):
             if not poisoned:
                 return True
 
-            # 35% chance of messing with the user when they're poisoned
-            if random() > 0.35:
+            # 65% chance of messing with the user when they're poisoned
+            if random() > 0.65:
                 return True
 
             poisoned_messages: List[Dict[str, Any]] = [
