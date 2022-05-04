@@ -473,9 +473,10 @@ class UserPetView(discord.ui.View):
         self.selected_pet = None
         self.stop()
 
-
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
-        return await super().interaction_check(interaction)
+        """ Checks whether the click was done by the author of the command. """
+
+        return self.member.id == interaction.user.id
 
 class UserBabyView(discord.ui.View):
     """ View for the UserBaby selection. """
@@ -507,7 +508,6 @@ class UserBabyView(discord.ui.View):
 
         return data
 
-    
     async def select_baby_select(self, select: discord.ui.select, interaction: discord.Interaction) -> None:
         """ Callback for a select menu option. """
 
@@ -519,8 +519,6 @@ class UserBabyView(discord.ui.View):
         self.selected_baby = selected_option
 
         await interaction.response.edit_message(embed=embed)
-
-
 
     @discord.ui.button(label="Confirm", custom_id="confirm_baby_selection_id", style=discord.ButtonStyle.success, emoji="✅", row=1)
     async def confirm_baby_selection_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
@@ -540,6 +538,7 @@ class UserBabyView(discord.ui.View):
         self.selected_baby = None
         self.stop()
 
-
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
-        return await super().interaction_check(interaction)
+        """ Checks whether the click was done by the author of the command. """
+
+        return self.member.id == interaction.user.id
