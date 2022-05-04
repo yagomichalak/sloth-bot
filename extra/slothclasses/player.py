@@ -169,6 +169,14 @@ class Player(*additional_cogs):
                 {"name": "Normal", "message": "I can't... 😵‍💫", "reply": True, "command": None, "kwargs": None},
                 {"name": "Normal", "message": "YOU asked for a fun fact? Aight, did you know that if u eat 70 bananas in less than 10 minutes, you'll die of radiation?", "reply": True, "command": None, "kwargs": None},
                 {"name": "Normal", "message": "I guess some **BREAD** is better than what you're trynna do, here, take some 🍞!", "reply": True, "command": None, "kwargs": None},
+                {"name": "Normal", "message": "There is evidence that frogs have roamed the Earth for more than 200 million years, at least as long as the dinosaurs.", "reply": True, "command": None, "kwargs": None},
+                {"name": "Normal", "message": "I'm busy now, I might do it later! 🤨", "reply": True, "command": None, "kwargs": None},
+                {"name": "Normal", "message": "Toads are frogs. The word 'toad' is usually used for frogs that have warty and dry skin, as well as shorter hind legs. 🐸", "reply": True, "command": None, "kwargs": None},
+                {"name": "Normal", "message": "https://www.youtube.com/watch?v=dQw4w9WgXcQ", "reply": True, "command": None, "kwargs": None},
+                {"name": "Normal", "message": "yhbt yhl hand", "reply": True, "command": None, "kwargs": None},
+                {"name": "Normal", "message": "Did you like my new haircut? <a:dance_sloth:737775776228966470>", "reply": True, "command": None, "kwargs": None},
+                {"name": "Normal", "message": "Can you give me some leaves? I'm hungry 😢", "reply": True, "command": None, "kwargs": None},
+                {"name": "Normal", "message": "Titanic: * Starts to Sink *\nMe & the crew: <a:sad_pepe_violin:970130876086222848><a:sad_pepe_violin:970130876086222848><a:sad_pepe_violin:970130876086222848><a:sad_pepe_violin:970130876086222848>", "reply": True, "command": None, "kwargs": None},
             ]
 
             random_poisoned_msg = choice(poisoned_messages)
