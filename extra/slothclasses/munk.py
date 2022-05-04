@@ -1,5 +1,5 @@
 import discord
-from discord.ext import commands, menus
+from discord.ext import commands, menus, tasks
 from mysqldb import the_database, the_django_database
 
 from .player import Player, Skill
@@ -23,6 +23,30 @@ class Munk(Player):
 
     def __init__(self, client) -> None:
         self.client = client
+
+    @tasks.loop(minutes=1)
+    async def check_mission_one_completion(self) -> None:
+        """ Checks whether members completed their mission of number 1. """
+
+        skill_actions = await self.get_skill_actions_by_skill_type_and_int_content(skill_type="quest", int_content=5)
+        filtered_skill_actions = [
+            skill_action for skill_action in skill_actions
+            if skill_action[7] == 1
+        ]
+        for skill_action in filtered_skill_actions:
+            await self.complete_quest(skill_action[0], 1)
+
+    @tasks.loop(minutes=1)
+    async def check_mission_six_completion(self) -> None:
+        """ Checks whether members completed their mission of number 6. """
+
+        skill_actions = await self.get_skill_actions_by_skill_type_and_int_content(skill_type="quest", int_content=1)
+        filtered_skill_actions = [
+            skill_action for skill_action in skill_actions
+            if skill_action[7] == 6
+        ]
+        for skill_action in filtered_skill_actions:
+            await self.complete_quest(skill_action[0], 6)
 
     @commands.Cog.listener(name='on_raw_reaction_add')
     async def on_raw_reaction_add_munk(self, payload) -> None:
@@ -1215,7 +1239,6 @@ class Munk(Player):
     @Player.skills_locked()
     @Player.user_is_class('munk')
     @Player.skill_mark()
-    @Player.not_ready()
     async def get_quest(self, ctx) -> None:
         """ Gets a Quest for you and your Tribe to complete, and if so,
         the involved people will get rewarded.
@@ -1275,13 +1298,11 @@ class Munk(Player):
 
         quests: List[Dict[str, Union[str, int]]] = [
             {"message": "Complete 5 `TheLanguageJungle` games.", "enum_value": 1},
-            {"message": "Rep someone and get repped back in less than an hour.", "enum_value": 2},
+            {"message": "Rep someone and get repped back.", "enum_value": 2},
             {"message": "Win a coinflip betting 50 leaves.", "enum_value": 3},
             {"message": "Get a score 20 in the `Flags` game.", "enum_value": 4},
-            {"message": "Spend 4 hours in a Voice Channel in a single day.", "enum_value": 5},
+            {"message": "Spend 4 hours in a Voice Channel.", "enum_value": 5},
             {"message": "Buy any item from the SlothShop, if you have all items you need to get ripped-off first.", "enum_value": 6},
-            
-            {"message": "Ping DNK 3 times in a row and try to evade a BAN!!!!", "enum_value": 7},
         ]
 
         return choice(quests)
@@ -1311,7 +1332,7 @@ class Munk(Player):
         tribe_quest_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
         return tribe_quest_embed
 
-    async def complete_quest(self, user_id: int, quest_number: int) -> None:
+    async def complete_quest(self, user_id: int, quest_number: int, **kwargs) -> None:
         """ Completes an on-going quest for a member.
         :param user_id: The ID of the user who's completing the quest.
         :param quest_number: The quest number. """
@@ -1329,7 +1350,7 @@ class Munk(Player):
         function: Callable = getattr(QuestEnum, enum_name)
         # Runs attached method if there's any
         if function:
-            await function(client=self.client, user_id=user_id, quest=quest)
+            await function(client=self.client, user_id=user_id, quest=quest, **kwargs)
 
     @tribe.command(aliases=["mission", "task", "chore", "quests"])
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -1356,7 +1377,7 @@ class Munk(Player):
         if not quests:
             return await ctx.send(f"**No quests found in your tribe, {member.mention}!**")
 
-        quests_text: str = ''.join(list(map(lambda q: f"```• {q[8]} ({q[7]});```", quests)))
+        quests_text: str = await self.make_tribe_quests_text(quests)
         embed: discord.Embed = discord.Embed(
             title="__Tribe Quests__",
             description=f"Showing all `{len(quests)}` quests from this tribe:\n{quests_text}",
@@ -1369,6 +1390,30 @@ class Munk(Player):
             embed.set_thumbnail(url=user_tribe["thumbnail"])
 
         await ctx.send(embed=embed)
+    
+    async def make_tribe_quests_text(self, quests: List[Dict[str, Union[str, int]]]) -> str:
+        """ Makes a text for the tribe quests.
+        :param quests: The quests to make a text for. """
+
+        texts_list: List[str] = []
+        for quest in quests:
+            quest_number: int = quest[7]
+            if quest_number == 1:
+                texts_list.append(f"```ini\n• {quest[8]} (Q{quest[7]});\n[Progress]: {quest[9]} games.```")
+            elif quest_number == 2:
+                texts_list.append(f"```ini\n• {quest[8]} (Q{quest[7]});\n[Progress]: {quest[9]}/2 reps.```")
+            elif quest_number == 3:
+                texts_list.append(f"```ini\n• {quest[8]} (Q{quest[7]});```")
+            elif quest_number == 4:
+                texts_list.append(f"```ini\n• {quest[8]} (Q{quest[7]});```")
+            elif quest_number == 5:
+                m, s = divmod(quest[7], 60)
+                h, m = divmod(m, 60)
+                texts_list.append(f"```ini\n• {quest[8]} (Q{quest[7]});\n[Progress]: {h:d}h, {m:02d}m.```")
+            elif quest_number == 6:
+                texts_list.append(f"```ini\n• {quest[8]} (Q{quest[7]});```")
+        
+        return ''.join(texts_list)
 
     async def update_sloth_skill_int_content(self, user_id: int, int_content: int, current_ts: int) -> None:
         """ Updates the integer content of a SlothSkill.

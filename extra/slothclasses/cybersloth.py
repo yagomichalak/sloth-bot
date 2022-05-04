@@ -406,7 +406,6 @@ class Cybersloth(Player):
     @Player.skills_locked()
     @Player.user_is_class('cybersloth')
     @Player.skill_mark()
-    @Player.not_ready()
     async def lock(self, ctx, target: discord.Member = None) -> None:
         """ Locks someone else's set of skills until they complete a Quest.
         :param target: The member for whom to lock the skills.

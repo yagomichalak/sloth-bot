@@ -353,7 +353,6 @@ class Metamorph(Player):
     @Player.skills_locked()
     @Player.user_is_class('metamorph')
     @Player.skill_mark()
-    @Player.not_ready()
     async def reborn(self, ctx, pet_baby: str = None, target: Optional[discord.Member] = None) -> None:
         """ Reborns someone's pet or baby, but this time you can select a different 
         breed for pets and a different Sloth Class for babies.

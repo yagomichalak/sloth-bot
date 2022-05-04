@@ -10,19 +10,21 @@ from datetime import datetime
 bots_and_commands_channel_id: int = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID', 123))
 server_id: int = int(os.getenv('SERVER_ID', 123))
 
-async def quest_one_callback(client: commands.Bot, user_id: int, quest: Dict[str, Union[str, int]]) -> None:
+async def quest_one_callback(client: commands.Bot, user_id: int, quest: Dict[str, Union[str, int]], **kwargs) -> None:
     """ Callback for the quest one.
     :param client: The bot client.
     :param user_id: The user ID.
-    :param quest: The quest information and data. """
+    :param quest: The quest information and data.
+    :param kwargs: Additional data. """
 
-    pass
+    await money_callback(client, user_id, 'One', 230, quest)
 
-async def quest_two_callback(client: commands.Bot, user_id: int, quest: Dict[str, Union[str, int]]) -> None:
+async def quest_two_callback(client: commands.Bot, user_id: int, quest: Dict[str, Union[str, int]], **kwargs) -> None:
     """ Callback for the quest two.
     :param client: The bot client.
     :param user_id: The user ID.
-    :param quest: The quest information and data. """
+    :param quest: The quest information and data.
+    :param kwargs: Additional data. """
 
     # Gets general info
     current_time = await utils.get_time_now()
@@ -39,40 +41,64 @@ async def quest_two_callback(client: commands.Bot, user_id: int, quest: Dict[str
 
     await update_tribe_members_money(client, member, 'Two', money, current_time, quest)
 
-async def quest_three_callback(client: commands.Bot, user_id: int, quest: Dict[str, Union[str, int]]) -> None:
+async def quest_three_callback(client: commands.Bot, user_id: int, quest: Dict[str, Union[str, int]], **kwargs) -> None:
     """ Callback for the quest_three.
     :param client: The bot client.
     :param user_id: The user ID.
-    :param quest: The quest information and data. """
+    :param quest: The quest information and data.
+    :param kwargs: Additional data. """
 
     await money_callback(client, user_id, 'Three', 250, quest)
 
-async def quest_four_callback(client: commands.Bot, user_id: int, quest: Dict[str, Union[str, int]]) -> None:
+async def quest_four_callback(client: commands.Bot, user_id: int, quest: Dict[str, Union[str, int]], **kwargs) -> None:
     """ Callback for the quest four.
     :param client: The bot client.
     :param user_id: The user ID.
-    :param quest: The quest information and data. """
+    :param quest: The quest information and data.
+    :param kwargs: Additional data. """
 
     await money_callback(client, user_id, 'Four', 100, quest)
 
-async def quest_five_callback(client: commands.Bot, user_id: int, quest: Dict[str, Union[str, int]]) -> None:
+async def quest_five_callback(client: commands.Bot, user_id: int, quest: Dict[str, Union[str, int]], **kwargs) -> None:
     """ Callback for the quest five.
     :param client: The bot client.
     :param user_id: The user ID.
-    :param quest: The quest information and data. """
+    :param quest: The quest information and data.
+    :param kwargs: Additional data. """
 
-    pass
+    # Gets general info
+    current_time = await utils.get_time_now()
+    guild = client.get_guild(server_id)
+    member = guild.get_member(user_id)
+    cog = client.get_cog('SlothClass')
+    money = 100
 
-async def quest_six_callback(client: commands.Bot, user_id: int, quest: Dict[str, Union[str, int]]) -> None:
+    # Checks whether the int content reached its expected mark, else increments it
+    quest = await cog.get_skill_action_by_user_id_and_skill_type(user_id=user_id, skill_type="quest")
+    if not quest:
+        return
+
+    required_time: int = 3600 * 4
+    increment: int = kwargs["increment"]
+    seconds = quest[9]
+
+    current_seconds: int = int(seconds + increment)
+    if current_seconds + increment < required_time:
+        return await cog.update_sloth_skill_int_content(member.id, current_seconds, current_time.timestamp())
+
+    await update_tribe_members_money(client, member, 'Five', money, current_time, quest)
+
+async def quest_six_callback(client: commands.Bot, user_id: int, quest: Dict[str, Union[str, int]], **kwargs) -> None:
     """ Callback for the quest six.
     :param client: The bot client.
     :param user_id: The user ID.
-    :param quest: The quest information and data. """
+    :param quest: The quest information and data.
+    :param kwargs: Additional data. """
 
     await money_callback(client, user_id, 'Six', 100, quest)
 
 # Default callbacks
-async def money_callback(client: commands.Cog, user_id: int, quest_name: str, money: int, quest: Dict[str, Union[str, int]]) -> None:
+async def money_callback(client: commands.Cog, user_id: int, quest_name: str, money: int, quest: Dict[str, Union[str, int]], **kwargs) -> None:
     """ Default callback for Quests which the reward is just money for the entire tribe.
     :param client: The bot client.
     :param user_id: The user ID.
@@ -130,7 +156,7 @@ async def update_tribe_members_money(
         embed.set_thumbnail(url=tribe_tn)
     embed.set_footer(text=f"Completed by: {member}", icon_url=member.display_avatar)
 
-    await bots_and_commands_channel.send(embed=embed)
+    await bots_and_commands_channel.send(content=member.mention, embed=embed)
 
     # Deletes Quest
     await cog.delete_skill_action_by_user_id_and_skill_type(user_id=member.id, skill_type='quest')
