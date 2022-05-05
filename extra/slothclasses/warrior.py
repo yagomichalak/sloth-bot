@@ -435,7 +435,7 @@ class Warrior(Player):
                 await self.insert_user_skill_cooldown(ctx.author.id, Skill.FOUR, current_timestamp)
             # Updates user's skills used counter
             await self.update_user_skills_used(user_id=attacker.id)
-            await self.client.get_cog('SlothCurrency').update_user_money(attacker.id -100)
+            await self.client.get_cog('SlothCurrency').update_user_money(attacker.id, -100)
 
         except Exception as e:
             print(e)
