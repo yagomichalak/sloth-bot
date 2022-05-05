@@ -1354,7 +1354,6 @@ class Munk(Player):
 
     @tribe.command(aliases=["mission", "task", "chore", "quests"])
     @commands.cooldown(1, 5, commands.BucketType.user)
-    @commands.has_permissions(administrator=True)
     async def quest(self, ctx) -> None:
         """ Shows all Quests that the tribe you are in has. """
 
