@@ -10,7 +10,7 @@ from extra.customerrors import (
 from extra import utils
 
 from mysqldb import the_database, the_django_database
-from typing import Union, List, Dict, Any
+from typing import Union, List, Tuple, Dict, Any
 from datetime import datetime
 from random import random, choice
 import os
@@ -685,7 +685,7 @@ class Player(*additional_cogs):
 
         mycursor, db = await the_database()
         await mycursor.execute("""
-        DELETE FROM SlothSkills WHERE target_id = %s AND skill_type IN ('hack', 'wire', 'frog', 'hit', 'sabotage', 'poison')
+        DELETE FROM SlothSkills WHERE target_id = %s AND skill_type IN ('hack', 'wire', 'frog', 'hit', 'sabotage')
         """, (target_id,))
         await db.commit()
         await mycursor.close()
@@ -709,6 +709,17 @@ class Player(*additional_cogs):
         mycursor, db = await the_database()
         sql = "DELETE FROM SlothSkills WHERE user_id = %s AND skill_type = %s" + 'LIMIT 1' if not multiple else ''
         await mycursor.execute(sql, (user_id, skill_type))
+        await db.commit()
+        await mycursor.close()
+
+    async def delete_skill_actions_by_target_id_and_skill_type(self, users: List[Tuple[int, str]]) -> None:
+        """ Deletes a skill action by user ID.
+        :param user_id: The ID of the user member.
+        :param skill_type: The type of the action skill. """
+
+        mycursor, db = await the_database()
+        sql = "DELETE FROM SlothSkills WHERE target_id = %s AND skill_type = %s"
+        await mycursor.executemany(sql, users)
         await db.commit()
         await mycursor.close()
 

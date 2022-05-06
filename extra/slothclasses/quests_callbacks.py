@@ -160,3 +160,6 @@ async def update_tribe_members_money(
 
     # Deletes Quest
     await cog.delete_skill_action_by_user_id_and_skill_type(user_id=member.id, skill_type='quest')
+
+    locked_users = [(tm[0], 'lock') for tm in tribe_members]
+    await cog.delete_skill_actions_by_target_id_and_skill_type(locked_users)

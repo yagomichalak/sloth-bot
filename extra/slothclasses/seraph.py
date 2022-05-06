@@ -336,7 +336,7 @@ class Seraph(Player):
 
 
         effects = await self.get_user_effects(target)
-        debuffs = [fx for fx, values in effects.items() if values['debuff']]
+        debuffs = [fx for fx, values in effects.items() if values['debuff'] and fx not in ['locked', 'poisoned', 'kidnapped']]
 
         if not debuffs:
             return await ctx.send(f"**{target.mention} doesn't have any active debuff, {perpetrator.mention}!**")
@@ -390,12 +390,6 @@ class Seraph(Player):
                     debuffs_removed += 1
 
                 if debuff == 'sabotaged':
-                    debuffs_removed += 1
-
-                if debuff == 'locked':
-                    debuffs_removed += 1
-
-                if debuff == 'poisoned':
                     debuffs_removed += 1
 
             except Exception as e:
