@@ -506,6 +506,34 @@ class Prawler(Player):
 		await mycursor.close()
 		return sabotages
 
+	async def check_poisons(self) -> None:
+		""" Check on-going poisons and their expiration time. """
+
+		poisons = await self.get_expired_poisons()
+		for ps in poisons:
+			await self.delete_skill_action_by_target_id_and_skill_type(ps[3], 'poison')
+
+			channel = self.bots_txt
+
+			await channel.send(
+				content=f"<@{ps[0]}>, <@{ps[3]}>",
+				embed=discord.Embed(
+					description=f"**<@{ps[3]}>'s `Poison` from <@{ps[0]}> just expired!**",
+					color=discord.Color.red()))
+
+	async def get_expired_poisons(self) -> List[Union[str, int]]:
+		""" Gets expired sabotage skill actions. """
+
+		the_time = await utils.get_timestamp()
+		mycursor, _ = await the_database()
+		await mycursor.execute("""
+			SELECT * FROM SlothSkills
+			WHERE skill_type = 'poison' AND (%s - skill_timestamp) >= 86400
+			""", (the_time,))
+		poisons = await mycursor.fetchall()
+		await mycursor.close()
+		return poisons
+
 	@commands.command(aliases=['kn'])
 	@Player.poisoned()
 	@Player.skills_used(requirement=50)
