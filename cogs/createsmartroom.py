@@ -495,7 +495,7 @@ class CreateSmartRoom(*smart_room_cogs):
 				return await member.send("**You already have a Galaxy category, you can't create more than one!**")
 
 			# Checks whether the server reached the limit of 15 galaxy rooms created at a time 
-			if len(await self.get_galaxy_rooms()) > 15:
+			if len(await self.get_galaxy_rooms()) >= 15:
 				return await member.send(f"**You cannot created a Galaxy Room, because the server reached the limit of Galaxy rooms that can be created at a time; 15!**")
 
 			# Checks if the user has money (1500łł)
@@ -1089,7 +1089,6 @@ You can only add either **threads** **OR** one **voice channel**"""))
 		if not (thread := await self.try_to_create(kind='thread', channel=channel, owner=member, name=name, auto_archive_duration=10080)):
 			return await ctx.send(f"**Channels limit reached, creation cannot be completed, try again later!**")
 
-		print('texts', len(txts))
 		await self.update_txt(user_id=member.id, position=len(txts)+1, channel_id=thread.id)
 		# await self.update_txt_2(member.id, thread.id)
 		await SlothCurrency.update_user_money(member.id, -250)
