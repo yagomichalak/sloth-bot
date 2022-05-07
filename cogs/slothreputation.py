@@ -223,7 +223,7 @@ class SlothReputation(*currency_cogs):
                 baby_emoji = '🥚'
 
             embed.add_field(
-                name=f"{baby_emoji} __**Pet:**__", 
+                name=f"{baby_emoji} __**Baby:**__", 
                 value=f"`{user_baby[2]}` (<t:{user_baby[8]}:R>).", 
                 inline=True)
 
