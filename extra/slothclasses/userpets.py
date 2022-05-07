@@ -91,19 +91,19 @@ class UserPetsTable(commands.Cog):
         :param pet_breed: The breed of the pet. [Optional]"""
 
         current_ts = await utils.get_timestamp()
-        current_ts = current_ts + 3600
+        other_ts = current_ts + 3600
 
         mycursor, db = await the_database()
         if pet_name and pet_breed:
             await mycursor.execute("""
             INSERT INTO UserPets (
                 user_id, pet_name, pet_breed, life_points_ts, food_ts, birth_ts
-            ) VALUES (%s, %s, %s, %s, %s, %s)""", (user_id, pet_name, pet_breed, current_ts, current_ts, current_ts))
+            ) VALUES (%s, %s, %s, %s, %s, %s)""", (user_id, pet_name, pet_breed, other_ts, other_ts, current_ts))
         else:
             await mycursor.execute("""
             INSERT INTO UserPets (
                 user_id, life_points_ts, food_ts, birth_ts
-            ) VALUES (%s, %s, %s, %s)""", (user_id, current_ts, current_ts, current_ts))
+            ) VALUES (%s, %s, %s, %s)""", (user_id, other_ts, other_ts, current_ts))
         await db.commit()
         await mycursor.close()
 

@@ -94,19 +94,19 @@ class UserBabiesTable(commands.Cog):
         :param baby_class: The class of the baby. [Optional] """
 
         current_ts = await utils.get_timestamp()
-        current_ts = current_ts + 3600
+        other_ts = current_ts + 3600
 
         mycursor, db = await the_database()
         if baby_name and baby_class:
             await mycursor.execute("""
                 INSERT INTO UserBabies (
                     parent_one, parent_two, baby_name, baby_class, life_points_ts, food_ts, birth_ts
-                ) VALUES (%s, %s, %s, %s, %s, %s, %s)""", (parent_one, parent_two, baby_name, baby_class, current_ts, current_ts, current_ts))
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s)""", (parent_one, parent_two, baby_name, baby_class, other_ts, other_ts, current_ts))
         else:
             await mycursor.execute("""
                 INSERT INTO UserBabies (
                     parent_one, parent_two, life_points_ts, food_ts, birth_ts
-                ) VALUES (%s, %s, %s, %s, %s)""", (parent_one, parent_two, current_ts, current_ts, current_ts))
+                ) VALUES (%s, %s, %s, %s, %s)""", (parent_one, parent_two, other_ts, other_ts, current_ts))
         await db.commit()
         await mycursor.close()
 
