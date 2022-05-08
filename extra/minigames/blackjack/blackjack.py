@@ -38,10 +38,11 @@ class BlackJack(*blackjack_db):
         :param bet: The amount of money you wanna bet.
         
         * Minimum bet = 50 leaves.
-        * Maximum bet = 1000 leaves. """
+        * Maximum bet = 2500 leaves. """
 
         player: discord.Member = ctx.author
         guild_id = ctx.guild.id
+        max_bet: int = 2500
 
         if not bet:
             ctx.command.reset_cooldown(ctx)
@@ -53,9 +54,9 @@ class BlackJack(*blackjack_db):
             ctx.command.reset_cooldown(ctx)
             return await ctx.reply("**Please, inform an integer value!**")
 
-        if bet > 1000:
+        if bet > max_bet:
             ctx.command.reset_cooldown(ctx)
-            return await ctx.reply("**The betting limit is `1000łł`!**")
+            return await ctx.reply(f"**The betting limit is `{max_bet}łł`!**")
 
         SlothCurrency = self.client.get_cog('SlothCurrency')
         user_currency = await SlothCurrency.get_user_currency(player.id)
