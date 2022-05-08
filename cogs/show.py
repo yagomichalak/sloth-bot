@@ -200,7 +200,7 @@ class Show(commands.Cog):
                 ),
             color=member.color,
             timestamp=ctx.message.created_at,
-            url="http://thelanguagesloth.com"
+            url="https://thelanguagesloth.com"
         )
 
         temp_text1 = f"{'N':>2} | {'Date':<4} | {'Joins':^5} | {'First':>5} | {'Last':>5}"
