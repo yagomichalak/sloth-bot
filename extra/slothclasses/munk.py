@@ -1406,7 +1406,7 @@ class Munk(Player):
             elif quest_number == 4:
                 texts_list.append(f"```ini\n• {quest[8]} (Q{quest[7]});```")
             elif quest_number == 5:
-                m, s = divmod(quest[7], 60)
+                m, s = divmod(quest[9], 60)
                 h, m = divmod(m, 60)
                 texts_list.append(f"```ini\n• {quest[8]} (Q{quest[7]});\n[Progress]: {h:d}h, {m:02d}m.```")
             elif quest_number == 6:
