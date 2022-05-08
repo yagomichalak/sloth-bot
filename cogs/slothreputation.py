@@ -509,8 +509,12 @@ class SlothReputation(*currency_cogs):
             elif s > 0:
                 return await ctx.send(f"**Rep again in {s:02d} seconds!**", delete_after=10)
 
-        await self.update_user_score_points(author.id, 100)
-        await self.update_user_score_points(member.id, 100)
+        rep_points: int = 100
+        if await SlothClass.get_user_pet(author.id): rep_points += 100
+        if await SlothClass.get_user_baby(author.id): rep_points += 100
+
+        await self.update_user_score_points(author.id, rep_points)
+        await self.update_user_score_points(member.id, rep_points)
         await self.update_user_rep_time(author.id, current_ts)
         await self.client.get_cog('SlothCurrency').update_user_money(member.id, 5)
         await ctx.send(
