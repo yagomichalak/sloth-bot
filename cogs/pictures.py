@@ -1,9 +1,13 @@
 import discord
 from discord.ext import commands
+from discord import slash_command, Option
 import os
 import aiohttp
 import json
 from random import choice
+from typing import List
+
+guild_ids: List[int] = [int(os.getenv("SERVER_ID", 123))]
 
 class Pictures(commands.Cog):
     """ Category for getting random pictures from the internet. """
@@ -82,6 +86,34 @@ class Pictures(commands.Cog):
             print(e)
             return await ctx.send("**Something went wrong with it!**")
 
+
+    @slash_command(name="change_server")
+    @commands.has_permissions(administrator=True)
+    async def _change_server(self, ctx,
+        icon: Option(discord.Attachment, name="icon", description="The new server icon.", required=False),
+        banner: Option(discord.Attachment, name="banner", description="The new server banner.", required=False)
+    ) -> None:
+        """ Changes the server's icon and/or banner. """
+
+        await ctx.defer()
+        member: discord.Member = ctx.author
+        if not icon and not banner:
+            return await ctx.respond(f"**Please, inform at least a banner or an icon, {member.mention}!**")
+
+        try:
+            if icon and banner:
+                await ctx.guild.edit(icon=await icon.read(), banner=await banner.read())
+            elif icon:
+                await ctx.guild.edit(icon=await icon.read())
+            elif banner:
+                await ctx.guild.edit(banner=await banner.read())
+
+        except Exception as e:
+            print("Error at changing server pics: ", e)
+            await ctx.respond(f"**Something went wrong with it, {member.mention}!**")
+
+        else:
+            await ctx.respond(f"**Successfully changed the server's pictures, {member.mention}!**")
     
 def setup(client: commands.Bot) -> None:
     """ Cog's setup function. """
