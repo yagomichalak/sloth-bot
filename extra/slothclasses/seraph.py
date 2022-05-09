@@ -800,7 +800,7 @@ class Seraph(Player):
             await SlothCurrency.update_user_money(member.id, -temp_leaves)
             await self.update_user_baby_food(member.id, temp_points, current_ts)
             embed = discord.Embed(
-                title="__Pet has been Fed__",
+                title="__Baby has been Fed__",
                 description=f"**You just fed `{user_baby[2]}` with `{temp_leaves}łł`, now it has `{food_points}` food points, {member.mention}!**",
                 color=discord.Color.green(),
                 timestamp=ctx.message.created_at
