@@ -30,6 +30,7 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
         """ Class initializing method. """
 
         self.client = client
+        self.classes = classes
         super(SlothClass, self).__init__(client)
 
     @commands.Cog.listener()
