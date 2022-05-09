@@ -552,7 +552,7 @@ class Munk(Player):
         tribe_embed.add_field(name="__Members:__", value=', '.join(entries), inline=False)
 
         formatted_sloth_class_members = await self.format_sloth_class_members(sloth_class_members)
-        tribe_embed.add_field(name="__Sloth Class Counter:__", value=', '.join(formatted_sloth_class_members), inline=False)
+        tribe_embed.add_field(name="__Sloth Class Counter:__", value=' **|** '.join(formatted_sloth_class_members), inline=False)
 
         for i, v in enumerate(entries, start=offset):
             tribe_embed.set_footer(text=f"({i} of {lentries})")
@@ -565,7 +565,7 @@ class Munk(Player):
 
         return list(
             map(
-                lambda scm: f"(:{scm[0]}:): {scm[1]}", sloth_class_members
+                lambda scm: f"{self.classes.get(scm[0].lower()).emoji}: `{scm[1]}`", sloth_class_members
             )
         )
     @tribe.command(aliases=['kick', 'expel', 'kick_out', 'can_i_show_you_the_door?'])
