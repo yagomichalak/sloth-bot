@@ -10,7 +10,7 @@ from extra import utils
 import os
 import asyncio
 from datetime import datetime
-from typing import List, Union, Dict, Any, Optional, Callable
+from typing import List, Tuple, Union, Dict, Any, Optional, Callable
 from random import choice
 
 bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID', 123))
@@ -324,6 +324,30 @@ class Munk(Player):
 
         return tribe_members
 
+    async def get_sloth_class_tribe_members(self, tribe_name: str) -> List[List[Union[int, str]]]:
+        """ Gets a list of Sloth Classes with counters from a specific tribe.
+        :param tribe_name: The name of the tribe.. """
+
+        mycursor, _ = await the_database()
+
+        sloth_class_counters: List[int] = []
+
+        await mycursor.execute("""
+            SELECT sp.sloth_class, COUNT(*)
+            FROM TribeMember AS tm
+            RIGHT JOIN
+                SlothProfile AS sp
+            ON
+                sp.user_id = tm.member_id
+            WHERE tm.tribe_name = %s
+            GROUP BY sp.sloth_class
+        """, (tribe_name,))
+        sloth_class_counters = await mycursor.fetchall()
+
+        await mycursor.close()
+
+        return sloth_class_counters
+
     @commands.group(aliases=['tb'])
     @Player.poisoned()
     @Player.kidnapped()
@@ -491,20 +515,25 @@ class Munk(Player):
 
         # Gets all tribe members
         tribe_members = await self.get_tribe_members(tribe_name=tribe['name'])
+        all_sloth_class_members = await self.get_sloth_class_tribe_members(tribe_name=tribe['name'])
 
         all_members = list(map(lambda mid: f"<@{mid[0]}> ({mid[1]})", tribe_members))
 
         # Additional data:
         additional = {
             'tribe': tribe,
-            'change_embed': self._make_tribe_embed
+            'change_embed': self._make_tribe_embed,
+            "sloth_class_members": all_sloth_class_members
         }
 
         pages = menus.MenuPages(source=SwitchTribePages(all_members, **additional), clear_reactions_after=True)
         await pages.start(ctx)
 
-    async def _make_tribe_embed(self, ctx: commands.Context, tribe: Dict[str, Union[str, int]], entries: int, offset: int, lentries: int) -> discord.Embed:
-
+    async def _make_tribe_embed(self, 
+        ctx: commands.Context, tribe: Dict[str, Union[str, int]], 
+        entries: int, offset: int, lentries: int, sloth_class_members: List[Tuple[int, str]]
+    ) -> discord.Embed:
+        """ Makes an embed for the Tribe display command. """
 
         tribe_owner = self.client.get_user(tribe['owner_id'])
         tribe_embed = discord.Embed(
@@ -522,11 +551,23 @@ class Munk(Player):
 
         tribe_embed.add_field(name="__Members:__", value=', '.join(entries), inline=False)
 
+        formatted_sloth_class_members = await self.format_sloth_class_members(sloth_class_members)
+        tribe_embed.add_field(name="__Sloth Class Counter:__", value=', '.join(formatted_sloth_class_members), inline=False)
+
         for i, v in enumerate(entries, start=offset):
             tribe_embed.set_footer(text=f"({i} of {lentries})")
 
         return tribe_embed
 
+    async def format_sloth_class_members(self, sloth_class_members: List[Tuple[int, str]]) -> List[str]:
+        """ Formats the Sloth Class members by Sloth Class.
+        :param sloth_class_members: The list of members to format. """
+
+        return list(
+            map(
+                lambda scm: f"(:{scm[0]}:): {scm[1]}", sloth_class_members
+            )
+        )
     @tribe.command(aliases=['kick', 'expel', 'kick_out', 'can_i_show_you_the_door?'])
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def kickout(self, ctx, member: Union[discord.Member, discord.User] = None) -> None:
