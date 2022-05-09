@@ -566,7 +566,7 @@ class Moderation(*moderation_cogs):
 
 		return removed_grooms
 
-	@commands.command(name="mute", aliases=["shutup", "shut_up", "stfu", "zitto", "zitta", "shh", "tg", "ta_gueule", "tagueule", "mutado", "xiu", "calaboca"])
+	@commands.command(name="mute", aliases=["shutup", "shut_up", "stfu", "zitto", "zitta", "shh", "tg", "ta_gueule", "tagueule", "mutado", "xiu", "calaboca", "callate"])
 	@utils.is_allowed(allowed_roles, throw_exc=True)
 	async def _mute_command(self, ctx, *, message : str = None) -> None:
 		"""(MOD) Mutes one or more members.
