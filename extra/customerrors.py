@@ -21,6 +21,14 @@ class ActionSkillOnCooldown(commands.CheckFailure):
         self.skill_ts = skill_ts
         self.cooldown = cooldown
 
+class StillInRehabError(commands.CheckFailure):
+
+    def __init__(self, try_after: int, error_message: str, rehab_ts: int, cooldown: int = 86400) -> None:
+        self.try_after = try_after
+        self.error_message = error_message
+        self.rehab_ts = rehab_ts
+        self.cooldown = cooldown
+
 
 class CommandNotReady(commands.CheckFailure):
     pass

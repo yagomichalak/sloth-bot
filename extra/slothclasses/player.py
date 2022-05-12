@@ -84,9 +84,7 @@ class Player(*additional_cogs):
             current_time = await utils.get_timestamp()
             cooldown_in_seconds = current_time - skill_ts
             if cooldown_in_seconds >= seconds:
-                print('truee')
                 return True, exists
-            print('no')
 
             raise ActionSkillOnCooldown(
                 try_after=cooldown_in_seconds, error_message="Action skill on cooldown!", skill_ts=skill_ts, cooldown=seconds)

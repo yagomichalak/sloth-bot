@@ -2,6 +2,8 @@ import discord
 from discord.ext import commands
 from mysqldb import the_database
 from typing import List, Union, Tuple
+from extra.customerrors import StillInRehabError
+from extra import utils
 
 class RehabMembersTable(commands.Cog):
     """ Class for managing the RehabMembers table in the database. """
@@ -10,6 +12,29 @@ class RehabMembersTable(commands.Cog):
         """ Class init method. """
 
         self.client = client
+
+    def in_rehab(seconds: int = 86400):
+        """ Checks whether the user's action skill is on cooldown. """
+
+        async def real_check(ctx):
+            """ Perfoms the real check. """
+
+            rehab_member = await RehabMembersTable.get_rehab_member(RehabMembersTable, user_id=ctx.author.id)
+
+            if not rehab_member:
+                return True
+
+            rehab_ts = rehab_member[1]
+
+            current_time = await utils.get_timestamp()
+            cooldown_in_seconds = current_time - rehab_ts
+            if cooldown_in_seconds >= seconds:
+                return True
+
+            raise StillInRehabError(
+                try_after=cooldown_in_seconds, error_message="Action skill on cooldown!", rehab_ts=rehab_ts, cooldown=seconds)
+
+        return commands.check(real_check)
 
     @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
