@@ -32,7 +32,7 @@ class RehabMembersTable(commands.Cog):
                 return True
 
             raise StillInRehabError(
-                try_after=cooldown_in_seconds, error_message="Action skill on cooldown!", rehab_ts=rehab_ts, cooldown=seconds)
+                try_after=cooldown_in_seconds, error_message="You're still in rehab!", rehab_ts=rehab_ts, cooldown=seconds)
 
         return commands.check(real_check)
 
