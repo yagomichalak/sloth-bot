@@ -500,9 +500,9 @@ class Games(*minigames_cogs):
             await SlothCurrency.update_user_money(ctx.author.id, -bet)
             return await msg.edit(embed=lost)
 
-
     @commands.command(aliases=["rh"])
     @commands.cooldown(1, 5, commands.BucketType.user)
+    @RehabMembersTable.in_rehab()
     async def rehab(self, ctx) -> None:
         """ Goes to rehab for 24 hours. """
 
@@ -512,7 +512,7 @@ class Games(*minigames_cogs):
         rehab = await self.get_rehab_member(member.id)
         if rehab:
             if current_ts - rehab[1] > 86400:
-                await self.updaet_rehab_member(member.id, current_ts)
+                await self.update_rehab_member(member.id, current_ts)
                 return await ctx.send(f"**You're now into rehab for the next `24 hours`, have a good recovery, {member.mention}!**")
             else:
                 return await ctx.send(f"**You're already into rehab, {member.mention}!**")

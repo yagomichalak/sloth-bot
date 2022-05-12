@@ -14,7 +14,8 @@ from extra.useful_variables import patreon_roles
 
 from extra.customerrors import (
     MissingRequiredSlothClass, ActionSkillOnCooldown, CommandNotReady, 
-    SkillsUsedRequirement, ActionSkillsLocked, KidnappedCommandError
+    SkillsUsedRequirement, ActionSkillsLocked, KidnappedCommandError,
+    StillInRehabError
 )
 
 load_dotenv()
@@ -159,9 +160,18 @@ async def on_command_error(ctx, error) -> None:
             cooldown = the_error.skill_ts + the_error.cooldown
             await ctx.send(f"**You can use your skill again <t:{int(cooldown)}:R>!**")
 
+        if isinstance(error.errors[0], StillInRehabError):
+            the_error = error.errors[0]
+            cooldown = the_error.rehab_ts + the_error.cooldown
+            await ctx.send(f"**You will leave rehab <t:{int(cooldown)}:R>!**")
+
     elif isinstance(error, ActionSkillOnCooldown):
         cooldown = error.skill_ts + error.cooldown
         await ctx.send(f"**You can use your skill again <t:{int(cooldown)}:R>!**")
+
+    elif isinstance(error, StillInRehabError):
+        cooldown = error.rehab_ts + error.cooldown
+        await ctx.send(f"**You will leave rehab <t:{int(cooldown)}:R>!**")
 
     elif isinstance(error, ActionSkillsLocked):
         await ctx.send(f"**{error.error_message}**")
