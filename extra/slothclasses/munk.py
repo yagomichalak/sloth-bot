@@ -1463,6 +1463,8 @@ class Munk(Player):
                 texts_list.append(f"```ini\n• {quest[8]} (Q{quest[7]});\n[Progress]: {h:d}h, {m:02d}m.```")
             elif quest_number == 6:
                 texts_list.append(f"```ini\n• {quest[8]} (Q{quest[7]});```")
+            elif quest_number == 7:
+                texts_list.append(f"```ini\n• {quest[8]} (Q{quest[7]});\n[Progress]: {1 if quest[9] else 0}/2 transfers.```")
         
         return ''.join(texts_list)
 
