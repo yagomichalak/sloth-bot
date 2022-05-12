@@ -395,7 +395,6 @@ class VoiceChannelActivity(*tool_cogs):
             else:
                 return await ctx.send(f"**This user doesn't have any Voice Channels in the history, {member.mention}!**")
 
-        # channels_in_history = await self.get_channels_in_history(member.id)
         if not channels_in_history:
             if author == member:
                 return await ctx.send(f"**You don't have any Voice Channels in your history, {author.mention}!**")
@@ -405,7 +404,8 @@ class VoiceChannelActivity(*tool_cogs):
         # Additional data:
         additional = {
             'client': self.client,
-            'change_embed': self.make_voice_history_embed
+            'change_embed': self.make_voice_history_embed,
+            'target': member
         }
         view = PaginatorView(channels_in_history, increment=6, **additional)
         embed = await view.make_embed(member)
@@ -413,7 +413,7 @@ class VoiceChannelActivity(*tool_cogs):
         return embed
 
     async def make_voice_history_embed(self, req: str, member: Union[discord.Member, discord.User], search: str, example: Any, 
-        offset: int, lentries: int, entries: Dict[str, Any], title: str = None, result: str = None) -> discord.Embed:
+        offset: int, lentries: int, entries: Dict[str, Any], title: str = None, result: str = None, **kwargs: Dict[str, Any]) -> discord.Embed:
         """ Makes an embed for .
         :param req: The request URL link.
         :param member: The member who triggered the command.
@@ -423,11 +423,14 @@ class VoiceChannelActivity(*tool_cogs):
         :param lentries: The length of entries for the given search. """
 
         current_time = await utils.get_time_now()
+        target = kwargs.get("target")
+        if not target:
+            target = member
 
         # Makes the embed's header
         embed = discord.Embed(
             title=f"__Voice Channel History__ ({offset}/{lentries})",
-            color=member.color,
+            color=target.color,
             timestamp=current_time
         )
 
@@ -446,9 +449,9 @@ class VoiceChannelActivity(*tool_cogs):
         embed.description = '\n'.join(description_list)
 
         # Sets the author of the search
-        embed.set_author(name=member, icon_url=member.display_avatar)
+        embed.set_author(name=target, icon_url=target.display_avatar)
         # Makes a footer with the a current page and total page counter
-        embed.set_footer(text=f"Requested by {member}", icon_url=member.display_avatar)
+        embed.set_footer(text=f"Requested by {target}", icon_url=target.display_avatar)
 
         return embed        
 

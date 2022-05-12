@@ -2,8 +2,6 @@ import discord
 from discord.ext import commands, menus
 from typing import Union, List, Dict, Optional, Any
 import asyncio
-# from . import TeacherFeedbackDatabaseDelete
-
 
 class ConfirmSkill(menus.Menu):
     """ Class related to confirmation skill actions. """
@@ -455,6 +453,7 @@ class PaginatorView(discord.ui.View):
         self.change_embed = kwargs.get('change_embed')
         self.index: int = 0
         self.increment = increment
+        self.kwargs = kwargs
 
     @discord.ui.button(label="Left", emoji="⬅", style=discord.ButtonStyle.blurple, custom_id="left_button_id")
     async def button_left(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
@@ -488,6 +487,6 @@ class PaginatorView(discord.ui.View):
             req=self.req, member=member, search=self.search, 
             example=self.data[self.index], offset=self.index+1, 
             lentries=len(self.data), entries=self.data, title=self.title, 
-            result=self.result
+            result=self.result, **self.kwargs
         )
         return embed
