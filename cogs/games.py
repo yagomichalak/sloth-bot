@@ -12,9 +12,10 @@ from extra.slothclasses.player import Player
 from extra.minigames.connect_four import ConnectFour
 from extra.minigames.blackjack.blackjack import BlackJack
 from extra.minigames.view import MoveObjectGameView, TicTacToeView, FlagsGameView
+from extra.minigames.rehab_members import RehabMembersTable
 
 minigames_cogs: List[commands.Cog] = [
-    ConnectFour, BlackJack
+    ConnectFour, BlackJack, RehabMembersTable
 ]
 
 class Games(*minigames_cogs):
@@ -41,8 +42,6 @@ class Games(*minigames_cogs):
         """ Plays the Destiny game. """
 
         member = ctx.author
-
-
         embed = discord.Embed(
             title="__Destiny__",
             color=discord.Color.blue(),
@@ -105,8 +104,7 @@ class Games(*minigames_cogs):
         if view.state is False:
             embed.color = discord.Color.brand_red()
             embed.set_field_at(1, name="__Timeout__", value="The game has timeouted!")
-            await msg.edit(embed=embed)
-        
+            await msg.edit(embed=embed)   
 
     @commands.command(aliases=['flag', 'flag_game', 'flags'])
     @Player.poisoned()
@@ -120,7 +118,6 @@ class Games(*minigames_cogs):
         flags = [json_flags[number] for number in sample(range(0, len(json_flags)), 20)]
 
         await self.generate_flag_game(ctx=ctx, points=0, round=0, flags=flags)
-
 
     async def generate_flag_game(self, ctx: commands.Context, message: Optional[discord.Message] = None, points: int = 0, round: int = 0, flags: List[Any] = None, timeout_count: int = 0):
         # Open JSON file
@@ -199,7 +196,6 @@ class Games(*minigames_cogs):
             # Tries to complete a quest, if possible.
             await self.client.get_cog('SlothClass').complete_quest(member.id, 4)
 
-
     #=== Flag games settings ===#
     @commands.command(hidden=True)
     @commands.is_owner()
@@ -211,7 +207,6 @@ class Games(*minigames_cogs):
             embed = discord.Embed()
             embed.set_image(url=flag['link'] + '.png')
             await ctx.send(flag['name'], embed=embed)
-
     
     @commands.command(aliases=['lotto'])
     @Player.poisoned()
@@ -296,7 +291,6 @@ class Games(*minigames_cogs):
             await ctx.send(
                 f"**{author.mention}, better luck next time... You guessed {g1}, {g2}, {g3}...\nThe numbers were:** `{', '.join(string_numbers)}`")
 
-    
     @commands.command(aliases=['dice'])
     @Player.poisoned()
     async def roll(self, ctx, sides = None):
@@ -320,7 +314,6 @@ class Games(*minigames_cogs):
             timestamp=ctx.message.created_at)
         embed.set_footer(text=f"Rolled by {ctx.author}", icon_url=ctx.author.display_avatar)
         await ctx.send(embed=embed)
-
 
     @commands.command(aliases=['flip_coin', 'flipcoin', 'coinflip', 'cf', 'fc'])
     @Player.poisoned()
@@ -398,8 +391,6 @@ class Games(*minigames_cogs):
         if win_var == 'won' and bet == 50:
             # Tries to complete a quest, if possible.
             await self.client.get_cog('SlothClass').complete_quest(member.id, 3)
-
-
 
     @commands.command()
     @Player.poisoned()
@@ -509,6 +500,26 @@ class Games(*minigames_cogs):
             await SlothCurrency.update_user_money(ctx.author.id, -bet)
             return await msg.edit(embed=lost)
 
+
+    @commands.command(aliases=["rh"])
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def rehab(self, ctx) -> None:
+        """ Goes to rehab for 24 hours. """
+
+        member: discord.Member = ctx.author
+        current_ts = await utils.get_timestamp()
+
+        rehab = await self.get_rehab_member(member.id)
+        if rehab:
+            if current_ts - rehab[1] > 86400:
+                await self.updaet_rehab_member(member.id, current_ts)
+                return await ctx.send(f"**You're now into rehab for the next `24 hours`, have a good recovery, {member.mention}!**")
+            else:
+                return await ctx.send(f"**You're already into rehab, {member.mention}!**")
+
+        await self.insert_rehab_member(member.id, current_ts)
+        await ctx.send(f"**You're now into rehab for the next `24 hours`, have a good recovery, {member.mention}!**")
+        
 
 def setup(client) -> None:
     """ Cog's setup function. """
