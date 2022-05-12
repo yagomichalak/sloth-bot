@@ -8,6 +8,7 @@ from typing import List, Union, Optional, Dict
 
 from extra.slothclasses.player import Player
 from extra.minigames.view import BlackJackActionView
+from extra.minigames.rehab_members import RehabMembersTable
 from extra import utils
 import asyncio
 import os
@@ -33,6 +34,7 @@ class BlackJack(*blackjack_db):
     @commands.command(name='blackjack', aliases=['bj'])
     @Player.poisoned()
     @commands.cooldown(1, 3, commands.BucketType.user)
+    @RehabMembersTable.in_rehab()
     async def start_blackjack_game(self, ctx, bet = None) -> None:
         """ Starts the BlackJack game.
         :param bet: The amount of money you wanna bet.
