@@ -230,6 +230,9 @@ class CreateSmartRoom(*smart_room_cogs):
 			except discord.errors.HTTPException:
 				await member.send("**You cannot be moved because you are not in a Voice-Channel!**")
 				await creation.delete()
+			else:
+				...
+				# await self.log_room_creation()
 			finally:
 				try:
 					os.remove(f'./images/smart_vc/user_previews/{member.id}.png')

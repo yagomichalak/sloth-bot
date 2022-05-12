@@ -519,11 +519,16 @@ class Munk(Player):
 
         all_members = list(map(lambda mid: f"<@{mid[0]}> ({mid[1]})", tribe_members))
 
+        tribe_member_ids: List[int] = list(map(lambda m: m[0], tribe_members))
+        currencies = await self.get_users_currency(tribe_member_ids)
+        tribe_money: int = sum(list(map(lambda cr: cr[0], currencies)))
+
         # Additional data:
         additional = {
             'tribe': tribe,
             'change_embed': self._make_tribe_embed,
-            "sloth_class_members": all_sloth_class_members
+            "sloth_class_members": all_sloth_class_members,
+            "tribe_money": tribe_money
         }
 
         pages = menus.MenuPages(source=SwitchTribePages(all_members, **additional), clear_reactions_after=True)
@@ -531,9 +536,12 @@ class Munk(Player):
 
     async def _make_tribe_embed(self, 
         ctx: commands.Context, tribe: Dict[str, Union[str, int]], 
-        entries: int, offset: int, lentries: int, sloth_class_members: List[Tuple[int, str]]
+        entries: int, offset: int, lentries: int, kwargs: Dict[str, Any]
     ) -> discord.Embed:
         """ Makes an embed for the Tribe display command. """
+
+        sloth_class_members: List[Tuple[int, str]] = kwargs.get('sloth_class_members')
+        tribe_money: str = kwargs.get('tribe_money')
 
         tribe_owner = self.client.get_user(tribe['owner_id'])
         tribe_embed = discord.Embed(
@@ -549,10 +557,12 @@ class Munk(Player):
         if tribe_owner:
             tribe_embed.set_author(name=f"Owner: {tribe_owner}", icon_url=tribe_owner.display_avatar, url=tribe_owner.display_avatar)
 
-        tribe_embed.add_field(name="__Members:__", value=', '.join(entries), inline=False)
+        tribe_embed.add_field(name="__Total Money:__", value=f"{tribe_money}łł 🍃 ", inline=False)
 
         formatted_sloth_class_members = await self.format_sloth_class_members(sloth_class_members)
         tribe_embed.add_field(name="__Sloth Class Counter:__", value=' **|** '.join(formatted_sloth_class_members), inline=False)
+
+        tribe_embed.add_field(name="__Members:__", value=', '.join(entries), inline=False)
 
         for i, v in enumerate(entries, start=offset):
             tribe_embed.set_footer(text=f"({i} of {lentries})")
