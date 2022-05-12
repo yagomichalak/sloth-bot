@@ -6,5 +6,6 @@
     "Raccoon": {"name": "Raccoon", "description": "T pose", "emoji": "🦝", "url": "https://i.dailymail.co.uk/1s/2020/01/08/09/23138888-0-image-a-14_1578474161826.jpg"},
     "Dog": {"name": "Dog", "description": "Au au au ", "emoji": "🐶", "url": "https://cdn.discordapp.com/attachments/855909757982343189/921146506210324500/20200209_144935.jpg"},
     "Cat": {"name": "Cat", "description": "Meow meow", "emoji": "🐱", "url": "https://d3wo5wojvuv7l.cloudfront.net/t_square_limited_720/images.spreaker.com/original/f8a17c13268a914ae4bcff8219d027e2.jpg"},
-    "Fish": {"name": "Fish", "description": "Blub blub", "emoji": "🐟", "url": "https://upload.wikimedia.org/wikipedia/commons/a/ae/Katri.jpg"}
+    "Fish": {"name": "Fish", "description": "Blub blub", "emoji": "🐟", "url": "https://upload.wikimedia.org/wikipedia/commons/a/ae/Katri.jpg"},
+    "Sloth": {"name": "Sloth", "description": "zZZzz", "emoji": "🦥", "url": "https://www.portaldosanimais.com.br/wp-content/uploads/2019/12/Bicho-pregui%C3%A7a-.jpg"}
 }
