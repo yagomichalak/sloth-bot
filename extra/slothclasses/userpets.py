@@ -131,7 +131,7 @@ class UserPetsTable(commands.Cog):
         :param current_ts: The current timestamp. """
 
         mycursor, _ = await the_database()
-        await mycursor.execute("SELECT * FROM UserPets WHERE %s - food_ts >= 3600", (current_ts,))
+        await mycursor.execute("SELECT * FROM UserPets WHERE %s - food_ts >= 7200", (current_ts,))
         user_pets = await mycursor.fetchall()
         await mycursor.close()
         return user_pets
