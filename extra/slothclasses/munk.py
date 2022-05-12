@@ -1354,6 +1354,7 @@ class Munk(Player):
             {"message": "Get a score 20 in the `Flags` game.", "enum_value": 4},
             {"message": "Spend 4 hours in a Voice Channel.", "enum_value": 5},
             {"message": "Buy any item from the SlothShop, if you have all items you need to get ripped-off first.", "enum_value": 6},
+            {"message": "Transfer 25 leaves to two different staff members.", "enum_value": 7},
         ]
 
         return choice(quests)

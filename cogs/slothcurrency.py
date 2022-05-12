@@ -27,6 +27,8 @@ from extra.currency.usercurrency import UserCurrencyTable
 
 
 booster_role_id = int(os.getenv('BOOSTER_ROLE_ID', 123))
+mod_role_id = int(os.getenv("MOD_ROLE_ID", 123))
+senior_mod_role_id = int(os.getenv("SENIOR_MOD_ROLE_ID", 123))
 guild_ids = [int(os.getenv('SERVER_ID', 123))]
 
 currency_cogs: List[commands.Cog] = [
@@ -750,16 +752,18 @@ class SlothCurrency(*currency_cogs):
         
         * Cooldown: 10 secs. """
 
+        author: discord.Member = ctx.author
+
         if not member:
             return await ctx.send('**Inform the member!**', delete_after=3)
-        elif member.id == ctx.author.id:
+        elif member.id == author.id:
             return await ctx.send("**You can't transfer money to yourself!**", delete_after=3)
         elif not money:
             return await ctx.send('**Inform the amount of money to transfer!**', delete_after=3)
         elif not int(money) > 0:
             return await ctx.send('**Inform value bigger than 0!**', delete_after=3)
 
-        the_user = await self.get_user_currency(ctx.author.id)
+        the_user = await self.get_user_currency(author.id)
         target_user = await self.get_user_currency(member.id)
         if not the_user:
             view = discord.ui.View()
@@ -773,28 +777,27 @@ class SlothCurrency(*currency_cogs):
         if the_user[0][1] < int(money):
             return await ctx.send(f"You don't have {money}łł!")
 
-
         SlothClass = self.client.get_cog('SlothClass')
 
         wired_user = await SlothClass.get_skill_action_by_target_id_and_skill_type(
-            target_id=ctx.author.id, skill_type='wire')
+            target_id=author.id, skill_type='wire')
 
         if wired_user:
             siphon_percentage = 35
             cybersloth_money = round((money*siphon_percentage)/100)
             await self.update_user_money(member.id, money-cybersloth_money)
-            await self.update_user_money(ctx.author.id, -money)
+            await self.update_user_money(author.id, -money)
             await self.update_user_money(wired_user[0], cybersloth_money)
-            description: str = f"{ctx.author.mention} tried to transfer `{money}łł` to {member.mention}, "\
+            description: str = f"{author.mention} tried to transfer `{money}łł` to {member.mention}, "\
                 f"and <@{wired_user[0]}> siphoned off `{siphon_percentage}%` of it; `{cybersloth_money}łł`! "\
                 f"So {member.mention} actually got `{money-cybersloth_money}łł`!"
 
             await ctx.send(
-                content=f"{ctx.author.mention}, {member.mention}, <@{wired_user[0]}>",
+                content=f"{author.mention}, {member.mention}, <@{wired_user[0]}>",
                 embed=discord.Embed(
                     title="__Intercepted Transfer__",
                     description=description,
-                    color=ctx.author.color,
+                    color=author.color,
                     timestamp=ctx.message.created_at)
             )
 
@@ -803,6 +806,8 @@ class SlothCurrency(*currency_cogs):
             await self.update_user_money(ctx.author.id, -money)
             await ctx.send(f"**{ctx.author.mention} transferred {money}łł to {member.mention}!**")
 
+        if money == 25 and await utils.is_allowed([mod_role_id, senior_mod_role_id], channel=ctx.channel, member=member):
+            await SlothClass.complete_quest(author.id, 7, staff_id=member.id)
 
     @commands.command(aliases=["farming_status", "farmingstatus", "farm", "farmstatus", "farmstats", "farm_status", "farm_stats"])
     @commands.cooldown(1, 5, commands.BucketType.user)
