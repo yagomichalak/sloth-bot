@@ -502,7 +502,7 @@ class Games(*minigames_cogs):
             await SlothCurrency.update_user_money(ctx.author.id, -bet)
             return await msg.edit(embed=lost)
 
-    @commands.command(aliases=["rh"])
+    @commands.command(aliases=["rh", "recovery"])
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def rehab(self, ctx) -> None:
         """ Goes to rehab for 24 hours. """
