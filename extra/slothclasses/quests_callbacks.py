@@ -119,7 +119,6 @@ async def quest_seven_callback(client: commands.Bot, user_id: int, quest: Dict[s
     else:
         return await cog.update_sloth_skill_int_content(member.id, staff_id, current_time.timestamp())
 
-    print('kekek')
     await money_callback(client, user_id, 'Seven', money, quest)
 
 # Default callbacks
