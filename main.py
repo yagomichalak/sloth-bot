@@ -167,11 +167,11 @@ async def on_command_error(ctx, error) -> None:
 
     elif isinstance(error, ActionSkillOnCooldown):
         cooldown = error.skill_ts + error.cooldown
-        await ctx.send(f"**You can use your skill again <t:{int(cooldown)}:R>!** <:nervous_sloth:974087109176598579>")
+        await ctx.send(f"**You can use your skill again <t:{int(cooldown)}:R>!**")
 
     elif isinstance(error, StillInRehabError):
         cooldown = error.rehab_ts + error.cooldown
-        await ctx.send(f"**You will leave rehab <t:{int(cooldown)}:R>!**")
+        await ctx.send(f"**You will leave rehab <t:{int(cooldown)}:R>!** <:nervous_sloth:974087109176598579>")
 
     elif isinstance(error, ActionSkillsLocked):
         await ctx.send(f"**{error.error_message}**")

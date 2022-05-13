@@ -1493,3 +1493,12 @@ class Munk(Player):
             WHERE user_id = %s AND skill_type = %s""", (target_id, current_ts, user_id, skill_type))
         await db.commit()
         await mycursor.close()
+
+    @tribe.command(aliases=["transferquest"])
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    @utils.not_ready()
+    async def transfer_quest(self, ctx, member: discord.Member = None) -> None:
+        """ Transfer a quest to someone else.
+        :param member: The member to transfer the quest to. """
+
+        pass
