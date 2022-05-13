@@ -575,7 +575,8 @@ class Munk(Player):
 
         return list(
             map(
-                lambda scm: f"{self.classes.get(scm[0].lower()).emoji}: `{scm[1]}`", sloth_class_members
+                lambda scm: f"{'default' if not (sloth_class := self.classes.get(scm[0].lower())) else sloth_class.emoji}: `{scm[1]}`", 
+                sloth_class_members
             )
         )
     @tribe.command(aliases=['kick', 'expel', 'kick_out', 'can_i_show_you_the_door?'])
