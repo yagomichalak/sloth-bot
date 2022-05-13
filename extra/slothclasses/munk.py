@@ -1470,10 +1470,11 @@ class Munk(Player):
         return ''.join(texts_list)
 
     async def update_sloth_skill_int_content(self, user_id: int, int_content: int, current_ts: int, skill_type: str) -> None:
-        """ Updates the integer content of a SlothSkill.
+        """ Updates the skill's integer content.
         :param user_id: The user ID.
         :param int_content: The integer content.
-        :param current_ts: The current timestamp. """
+        :param current_ts: The current timestamp.
+        :param skill_type: The skill type. """
 
         mycursor, db = await the_database()
         await mycursor.execute("""
@@ -1483,10 +1484,11 @@ class Munk(Player):
         await mycursor.close()
 
     async def update_sloth_skill_target_id(self, user_id: int, target_id: int, current_ts: int, skill_type: str) -> None:
-        """ Updates the integer content of a SlothSkill.
+        """ Updates the skill's target id.
         :param user_id: The user ID.
         :param target_id: The target ID.
-        :param current_ts: The current timestamp. """
+        :param current_ts: The current timestamp.
+        :param skill_type: The skill type. """
 
         mycursor, db = await the_database()
         await mycursor.execute("""
@@ -1495,11 +1497,66 @@ class Munk(Player):
         await db.commit()
         await mycursor.close()
 
-    @tribe.command(aliases=["transferquest"])
+    async def update_sloth_skill_user_and_target_id(self, user_id: int, target_id: int, current_ts: int, skill_type: str) -> None:
+        """ Updates the skill's user and target id.
+        :param user_id: The user ID.
+        :param target_id: The target ID.
+        :param current_ts: The current timestamp.
+        :param skill_type: The skill type. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("""
+            UPDATE SlothSkills SET user_id = %s, target_id = %s, edited_timestamp = %s 
+            WHERE user_id = %s AND skill_type = %s""", (target_id, target_id, current_ts, user_id, skill_type))
+        await db.commit()
+        await mycursor.close()
+
+    async def update_sloth_skill_user_and_target_id_and_int_content(self, user_id: int, target_id: int, int_content: int, current_ts: int, skill_type: str) -> None:
+        """ Updates the skill's user and target id.
+        :param user_id: The user ID.
+        :param target_id: The target ID.
+        :param int_content: The integer content.
+        :param current_ts: The current timestamp.
+        :param skill_type: The skill type. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("""
+            UPDATE SlothSkills SET user_id = %s, target_id = %s, int_content = %s, edited_timestamp = %s 
+            WHERE user_id = %s AND skill_type = %s""", (target_id, target_id, int_content, current_ts, user_id, skill_type))
+        await db.commit()
+        await mycursor.close()
+
+    @tribe.command(aliases=["transferquest", "tq"])
     @commands.cooldown(1, 5, commands.BucketType.user)
-    @utils.not_ready()
     async def transfer_quest(self, ctx, member: discord.Member = None) -> None:
         """ Transfer a quest to someone else.
         :param member: The member to transfer the quest to. """
 
-        pass
+        author: discord.Member = ctx.author
+
+        if not member:
+            return await ctx.send(f"**Please inform a member to transfer your quest to, {author.mention}!**")
+
+        target_profile = await self.get_sloth_profile(member.id)
+        if not target_profile:
+            return await ctx.send(f"**This person doesn't have a Sloth Profile, {author.mention}!**")
+
+        if target_profile[1] == 'default':
+            return await ctx.send(f"**This person has a `default` Sloth Class, you cannot transfer your quest to them, {author.mention}!**")
+
+        quest = await self.get_skill_action_by_user_id_and_skill_type(user_id=author.id, skill_type="quest")
+        if not quest:
+            return await ctx.send(f"**You don't any Quest to transfer, {author.mention}!**")
+
+        current_ts = await utils.get_timestamp()
+
+        try:
+            if quest[9] == member.id:
+                await self.update_sloth_skill_user_and_target_id_and_int_content(author.id, member.id, author.id, current_ts, 'quest')
+            else:
+                await self.update_sloth_skill_user_and_target_id(author.id, member.id, current_ts, 'quest')
+        except Exception as e:
+            print("Error at transferring quest: ", e)
+            await ctx.send(f"**Something went wrong with it, try again later, {author.mention}!**")
+        else:
+            await ctx.send(f"**Successfully transferred your Quest to {member.mention}, {author.mention}!**")
