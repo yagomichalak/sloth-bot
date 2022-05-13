@@ -395,7 +395,7 @@ class Games(*minigames_cogs):
 
     @commands.command()
     @Player.poisoned()
-    @commands.cooldown(1, 25, commands.BucketType.user)
+    @commands.cooldown(1, 5, commands.BucketType.user)
     @RehabMembersTable.in_rehab()
     async def slots(self, ctx, bet: int = None) -> None:
         """ Command for playing Slots.
