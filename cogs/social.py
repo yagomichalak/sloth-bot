@@ -359,17 +359,16 @@ class Social(*social_cogs):
             ctx.command.reset_cooldown(ctx)
             return await answer("**Canceled!**")
 
-        user_tribe = await self.client.get_cog("SlothClass").get_tribe_info_by_name(name=profile[0][3])
-        tribe_emojis = None if not user_tribe else user_tribe["two_emojis"]
+        SlothClass = self.client.get_cog("SlothClass")
+        user_tribe = await SlothClass.get_tribe_info_by_name(name=profile[0][3])
+        tribe_emojis = '' if not user_tribe else user_tribe["two_emojis"]
+        munk_label = 'Munk' if 'Munk' in member.display_name else ''
 
         try:
-            if tribe_emojis:
-                if not nickname:
-                    await member.edit(nick=f"{member.name} {tribe_emojis}")
-                else:
-                    await member.edit(nick=f"{nickname} {tribe_emojis}")
+            if nickname:
+                await member.edit(nick=f"{nickname}{munk_label}{tribe_emojis}")
             else:
-                await member.edit(nick=nickname)
+                await member.edit(nick=f"{member.name}{munk_label}{tribe_emojis}")
             await SlothCurrency.update_user_money(member.id, -cost)
         except:
             ctx.command.reset_cooldown(ctx)
