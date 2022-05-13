@@ -35,7 +35,7 @@ async def quest_two_callback(client: commands.Bot, user_id: int, quest: Dict[str
 
     # Checks whether the int content reached its expected mark, else increments it
     if quest[9] < 2:
-         await cog.update_sloth_skill_int_content(member.id, quest[9]+1, current_time.timestamp())
+         await cog.update_sloth_skill_int_content(member.id, quest[9]+1, current_time.timestamp(), 'quest')
          if quest[9] + 1 < 2:
              return
 
@@ -84,7 +84,7 @@ async def quest_five_callback(client: commands.Bot, user_id: int, quest: Dict[st
 
     current_seconds: int = int(seconds + increment)
     if current_seconds + increment < required_time:
-        return await cog.update_sloth_skill_int_content(member.id, current_seconds, current_time.timestamp())
+        return await cog.update_sloth_skill_int_content(member.id, current_seconds, current_time.timestamp(), 'quest')
 
     await update_tribe_members_money(client, member, 'Five', money, current_time, quest)
 
@@ -117,7 +117,7 @@ async def quest_seven_callback(client: commands.Bot, user_id: int, quest: Dict[s
         if old_staff_id == staff_id:
             return
     else:
-        return await cog.update_sloth_skill_int_content(member.id, staff_id, current_time.timestamp())
+        return await cog.update_sloth_skill_int_content(member.id, staff_id, current_time.timestamp(), 'quest')
 
     await money_callback(client, user_id, 'Seven', money, quest)
 
