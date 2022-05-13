@@ -13,6 +13,7 @@ import asyncio
 import glob
 from itertools import cycle
 
+from extra.view import ExchangeActivityView
 from extra.menu import InventoryLoop
 from typing import List, Dict, Tuple, Union, Optional
 
@@ -893,6 +894,39 @@ class SlothCurrency(*currency_cogs):
             color=member.color
         )
         await ctx.send(embed=embed)
+
+    @commands.command(aliases=['hours', 'hour', 'minutes', 'minute', 'seconds', 'second'])
+    @commands.cooldown(1, 3, commands.BucketType.user)
+    async def activity(self, ctx, member: Optional[Union[discord.Member, discord.User]] = None) -> None:
+        """ Shows the user's activity status.
+        :param member: The member from whom to show the activity status. [Optional][Default = You] """
+
+        author: discord.Member = ctx.author
+
+        if not member:
+            member = ctx.author
+
+        user_info = await self.get_user_activity_info(member.id)
+        if not user_info:
+            if author.id == member.id:
+                return await ctx.send(f"**You don't have an account yet, {author.mention}!**")
+            else:
+                return await ctx.send(f"**This user doesn't have an account yet, {author.mention}!**")
+
+        embed = discord.Embed(
+            color=member.color
+        )
+
+        m, s = divmod(user_info[0][2], 60)
+        h, m = divmod(m, 60)
+
+        embed.add_field(
+            name=f"💰 __**Exchangeable Activity:**__",
+            value=f"{h:d} hours, {m:02d} minutes and {user_info[0][1]} messages.",
+        )
+
+        view = ExchangeActivityView(self.client, user_info[0])
+        await ctx.send(embed=embed, view=view)
 
 
 
