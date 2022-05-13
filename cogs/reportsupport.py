@@ -487,15 +487,21 @@ class ReportSupport(*report_support_classes):
         await parent_channel.set_permissions(applicant, read_messages=True, send_messages=False, view_channel=True)
         await interview_vc.set_permissions(applicant, speak=True, connect=True, view_channel=True)
 
+        application_type = app[2].title().replace('_', ' ')
+
         app_embed = discord.Embed(
             title=f"{applicant.name}'s Interview",
             description=f"""
-            Hello, {applicant.mention}, we have received and reviewed your `{app[2].title().replace('_', ' ')}` application. In order to explain how our system works we have to schedule a voice conversation with you.
+            Hello, {applicant.mention}, we have received and reviewed your `{application_type}` application. In order to explain how our system works we have to schedule a voice conversation with you.
             When would be the best time to talk to one of our staff?""",
             color=applicant.color)
 
         formatted_pings = await self.format_application_pings(guild, interview_info['pings'])
         await txt_channel.send(content=f"{formatted_pings}, {applicant.mention}", embed=app_embed)
+        try:
+            await applicant.send(f"We just opened the {txt_channel.mention} channel for reviewing your `{application_type}` application!")
+        except:
+            pass
 
     # In-game commands
     @commands.command()
