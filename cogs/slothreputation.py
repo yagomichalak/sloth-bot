@@ -522,7 +522,7 @@ class SlothReputation(*currency_cogs):
 
         user_quest = await SlothClass.get_skill_action_by_user_id_and_skill_type(user_id=author.id, skill_type="quest")
         if user_quest and user_quest[9] == 0:
-            await SlothClass.update_sloth_skill_target_id(author.id, member.id, current_ts)
+            await SlothClass.update_sloth_skill_target_id(author.id, member.id, current_ts, 'quest')
             return await SlothClass.complete_quest(author.id, 2)
 
         target_quest = await SlothClass.get_skill_action_by_user_id_and_skill_type(user_id=member.id, skill_type="quest")

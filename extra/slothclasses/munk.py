@@ -1468,7 +1468,7 @@ class Munk(Player):
         
         return ''.join(texts_list)
 
-    async def update_sloth_skill_int_content(self, user_id: int, int_content: int, current_ts: int) -> None:
+    async def update_sloth_skill_int_content(self, user_id: int, int_content: int, current_ts: int, skill_type: str) -> None:
         """ Updates the integer content of a SlothSkill.
         :param user_id: The user ID.
         :param int_content: The integer content.
@@ -1477,11 +1477,11 @@ class Munk(Player):
         mycursor, db = await the_database()
         await mycursor.execute("""
             UPDATE SlothSkills SET edited_timestamp = %s, int_content = %s 
-            WHERE user_id = %s""", (current_ts, int_content, user_id))
+            WHERE user_id = %s AND skill_type = %s""", (current_ts, int_content, user_id, skill_type))
         await db.commit()
         await mycursor.close()
 
-    async def update_sloth_skill_target_id(self, user_id: int, target_id: int, current_ts: int) -> None:
+    async def update_sloth_skill_target_id(self, user_id: int, target_id: int, current_ts: int, skill_type: str) -> None:
         """ Updates the integer content of a SlothSkill.
         :param user_id: The user ID.
         :param target_id: The target ID.
@@ -1490,6 +1490,6 @@ class Munk(Player):
         mycursor, db = await the_database()
         await mycursor.execute("""
             UPDATE SlothSkills SET target_id = %s, edited_timestamp = %s 
-            WHERE user_id = %s""", (target_id, current_ts, user_id))
+            WHERE user_id = %s AND skill_type = %s""", (target_id, current_ts, user_id, skill_type))
         await db.commit()
         await mycursor.close()
