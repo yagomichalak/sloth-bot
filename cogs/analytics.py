@@ -39,7 +39,6 @@ class Analytics(*analytics_cogs):
         time_now = await utils.get_time_now()
         day = time_now.day
         if await self.check_relatory_time(day):
-            await self.update_day(day)
             channel = self.client.get_channel(bots_and_commands_channel_id)
             members = channel.guild.members
             info = await self.get_info()

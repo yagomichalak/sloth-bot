@@ -59,7 +59,7 @@ class SlothAnalyticsTable(commands.Cog):
 
         mycursor, db = await the_database()
         time_now = await utils.get_time_now()
-        await mycursor.execute("UPDATE SlothAnalytics SET day_now = %s", (time_now.day,))
+        await mycursor.execute("UPDATE SlothAnalytics SET day_now = %s, m_joined = 0, m_left = 0, messages_sent = 0", (time_now.day,))
         await db.commit()
         await mycursor.close()
 
