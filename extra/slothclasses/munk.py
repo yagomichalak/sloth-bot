@@ -1537,9 +1537,20 @@ class Munk(Player):
         if not member:
             return await ctx.send(f"**Please inform a member to transfer your quest to, {author.mention}!**")
 
+        user_profile = await self.get_sloth_profile(author.id)
+        if not user_profile:
+            return await ctx.send(f"**You don't even have a Sloth Profile, you can't do this, {author.mention}!**")
+
+        quest = await self.get_skill_action_by_user_id_and_skill_type(user_id=author.id, skill_type="quest")
+        if not quest:
+            return await ctx.send(f"**You don't any Quest to transfer, {author.mention}!**")
+
         target_profile = await self.get_sloth_profile(member.id)
         if not target_profile:
             return await ctx.send(f"**This person doesn't have a Sloth Profile, {author.mention}!**")
+
+        if user_profile[3] != target_profile[3]:
+            return await ctx.send(f"**You can only transfer quest to people from the same tribe as you, {author.mention}!**")
 
         if target_profile[1] == 'default':
             return await ctx.send(f"**This person has a `default` Sloth Class, you cannot transfer your quest to them, {author.mention}!**")
