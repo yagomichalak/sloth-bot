@@ -1437,9 +1437,9 @@ You can only add either **threads** **OR** one **voice channel**"""))
 
 		embed = discord.Embed(
 			title="__SmartRoom Created__",
+			description=f"**Type:** `{room_type}`",
 			color=member.color,
-			timestamp=current_time,
-			url="https://thelanguagesloth.com"
+			timestamp=current_time
 		)
 		vc_emoji = '<:vc:914947524178116649>'
 		txt_emoji = '<:txt:975033834166972496>'
