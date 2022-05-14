@@ -1456,7 +1456,7 @@ You can only add either **threads** **OR** one **voice channel**"""))
 
 		embed = discord.Embed(
 			title=f"__SmartRoom {'Created' if created else 'Edited'}__",
-			description=f"**Type:** `{room_type}`",
+			description=f"**Type:** `{room_type}`\n**User ID:** {member.id}",
 			color=member.color,
 			timestamp=current_time
 		)
@@ -1487,7 +1487,6 @@ You can only add either **threads** **OR** one **voice channel**"""))
 		embed.set_thumbnail(url=member.display_avatar)
 		embed.set_footer(text=f"Created by: {member}", icon_url=member.display_avatar)
 
-		# SMART_ROOM_CHANNEL_LOG_ID = 123
 		log_channel: discord.TextChannel = discord.utils.get(member.guild.text_channels, id=int(os.getenv("SMART_ROOM_CHANNEL_LOG_ID", 123)))
 		await log_channel.send(embed=embed)
 
