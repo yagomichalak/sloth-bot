@@ -1049,26 +1049,33 @@ You can only add either **threads** **OR** one **voice channel**"""))
 		member = ctx.author
 
 		if not name:
+			ctx.command.reset_cooldown(ctx)
 			return await ctx.send(f"**Please, inform a channel name, {member.mention}!**")
 
 		if len(name) > 20:
+			ctx.command.reset_cooldown(ctx)
 			return await ctx.send("**Please inform a name having 1-20 characters!**")
 
 		if not (user_rooms := await self.get_user_all_galaxy_rooms(member.id)):
+			ctx.command.reset_cooldown(ctx)
 			return await ctx.send(f"**You don't have any Galaxy Rooms!**")
 
 		if ctx.channel.id not in user_rooms:
+			ctx.command.reset_cooldown(ctx)
 			return await ctx.send(f"**You can only use this command in your Galaxy Rooms, {member.mention}!**")
 
 		vcs, txts = await self.order_rooms(user_rooms)
 
 		if len(vcs) == 2:
+			ctx.command.reset_cooldown(ctx)
 			return await ctx.send(f"**You cannot add threads because you chose to have a second Voice Channel instead, {member.mention}!**")
 
 		if len(txts) >= 5:
+			ctx.command.reset_cooldown(ctx)
 			return await ctx.send(f"**You cannot add more thread channels, {member.mention}!**")
 
 		if len(vcs) + len(txts) >= 6:
+			ctx.command.reset_cooldown(ctx)
 			return await ctx.send(f"**You reached your maximum amount of channels in your Galaxy Rooms, {member.mention}!**")
 
 		money: int = await self.get_rent_price(len(txts)+1, len(vcs))
@@ -1076,6 +1083,7 @@ You can only add either **threads** **OR** one **voice channel**"""))
 			f"**Do you want to add an extra `Thread` channel for `250łł`, {member.mention}?**\n\n||From now on, you're gonna be charged `{money}łł` in your next fortnight rents||"
 			).prompt(ctx)
 		if not confirm:
+			ctx.command.reset_cooldown(ctx)
 			return await ctx.send(f"**Not doing it then, {member.mention}!**")
 
 
@@ -1088,6 +1096,7 @@ You can only add either **threads** **OR** one **voice channel**"""))
 				view=view)
 
 		if user_currency[0][1] < 250:
+			ctx.command.reset_cooldown(ctx)
 			return await ctx.send("**You don't have enough money to buy this service!**")
 
 		channel = discord.utils.get(ctx.guild.text_channels, id=user_rooms[2])
@@ -1099,7 +1108,7 @@ You can only add either **threads** **OR** one **voice channel**"""))
 		# await self.update_txt_2(member.id, thread.id)
 		await SlothCurrency.update_user_money(member.id, -250)
 		await ctx.send(f"**Thread Channel created, {member.mention}!** ({thread.mention})")
-
+		await self.log_smartroom_creation(member, 'galaxy', created=False, thread=thread)
 
 	@_galaxy_add_channel.command(name='voice', aliases=['vc', 'voice_channel'])
 	@commands.cooldown(1, 60, commands.BucketType.user)
@@ -1111,27 +1120,34 @@ You can only add either **threads** **OR** one **voice channel**"""))
 		member = ctx.author
 
 		if limit is None:
+			ctx.command.reset_cooldown(ctx)
 			return await ctx.send(f"**Please, inform a user limit for your vc, {member.mention}!** `(0 for limitless)`")
 
 		if not name:
+			ctx.command.reset_cooldown(ctx)
 			return await ctx.send(f"**Please, inform a channel name, {member.mention}!**")
 
 		if len(name) > 20:
+			ctx.command.reset_cooldown(ctx)
 			return await ctx.send("**Please inform a name having 1-20 characters!**")
 
 		if not (user_rooms := await self.get_user_all_galaxy_rooms(member.id)):
+			ctx.command.reset_cooldown(ctx)
 			return await ctx.send(f"**You don't have any Galaxy Rooms!**")
 
 		if ctx.channel.id not in user_rooms:
+			ctx.command.reset_cooldown(ctx)
 			return await ctx.send(f"**You can only use this command in your Galaxy Rooms, {member.mention}!**")
 
 		vcs, txts = await self.order_rooms(user_rooms)
 		money: int = await self.get_rent_price(len(txts), len(vcs)+1)
 
 		if len(vcs) == 2:
+			ctx.command.reset_cooldown(ctx)
 			return await ctx.send(f"**You cannot add more voice channels, {member.mention}!**")
 			
 		if len(vcs) + len(txts) >= 3:
+			ctx.command.reset_cooldown(ctx)
 			return await ctx.send(f"**You reached your maximum amount of channels in your Galaxy Room, {member.mention}!**")
 
 
@@ -1139,6 +1155,7 @@ You can only add either **threads** **OR** one **voice channel**"""))
 			f"**Do you want to add an extra `Voice Channel` for `500łł`, {member.mention}?**\n\n||From now on, you're gonna be charged `{money}łł` in your next fortnight rents||"
 			).prompt(ctx)
 		if not confirm:
+			ctx.command.reset_cooldown(ctx)
 			return await ctx.send(f"**Not doing it then, {member.mention}!**")
 
 
@@ -1151,6 +1168,7 @@ You can only add either **threads** **OR** one **voice channel**"""))
 				view=view)
 
 		if user_currency[0][1] < 500:
+			ctx.command.reset_cooldown(ctx)
 			return await ctx.send("**You don't have enough money to buy this service!**")
 
 
@@ -1162,6 +1180,7 @@ You can only add either **threads** **OR** one **voice channel**"""))
 		await self.update_vc_2(member.id, vc.id)
 		await SlothCurrency.update_user_money(member.id, -500)
 		await ctx.send(f"**Voice Channel created, {member.mention}!** ({vc.mention})")
+		await self.log_smartroom_creation(member, 'galaxy', created=False, vc=vc)
 
 	@galaxy.group(name="delete_channel", aliases=['dc', 'deletechannel', 'remove_channel', 'removechannel', 'rc'])
 	async def _galaxy_delete_channel(self, ctx) -> None:
@@ -1184,7 +1203,7 @@ You can only add either **threads** **OR** one **voice channel**"""))
 		)
 		await ctx.send(embed=embed)
 
-	@_galaxy_delete_channel.command(name='thread', aliases=['thread_channel', 'th', 'text', 'txt', 'text_channel'])
+	@_galaxy_delete_channel.command(name='thread', aliases=['thread_channel', 'th', 'thr', 'text', 'txt', 'text_channel'])
 	@commands.cooldown(1, 60, commands.BucketType.user)
 	async def _galaxy_delete_channel_thread(self, ctx) -> None:
 		""" Deletes the user's second Text Channel from their Galaxy Room. """
@@ -1427,7 +1446,7 @@ You can only add either **threads** **OR** one **voice channel**"""))
 					await txt_channel.delete()
 
 
-	async def log_smartroom_creation(self, member: discord.Member, room_type: str, **data) -> None:
+	async def log_smartroom_creation(self, member: discord.Member, room_type: str, created: bool = True, **data) -> None:
 		""" Logs the creation of a SmartRoom.
 		:param ctx: The context of the command.
 		:param room_type: The type of room to log.
@@ -1436,7 +1455,7 @@ You can only add either **threads** **OR** one **voice channel**"""))
 		current_time = await utils.get_time_now()
 
 		embed = discord.Embed(
-			title="__SmartRoom Created__",
+			title=f"__SmartRoom {'Created' if created else 'Edited'}__",
 			description=f"**Type:** `{room_type}`",
 			color=member.color,
 			timestamp=current_time
@@ -1444,6 +1463,7 @@ You can only add either **threads** **OR** one **voice channel**"""))
 		vc_emoji = '<:vc:914947524178116649>'
 		txt_emoji = '<:txt:975033834166972496>'
 		cat_emoji = '📁'
+		thr_emoji = '<:thr:975056831271551047>'
 
 		if room_type == 'basic':
 			embed.add_field(name=f"{vc_emoji} Voice Channel:", value=f"Name: {data['vc'].name} ({data['vc'].id})")
@@ -1453,9 +1473,16 @@ You can only add either **threads** **OR** one **voice channel**"""))
 			embed.add_field(name=f"{txt_emoji} Text Channel:", value=f"Name: {data['txt'].name} ({data['txt'].id})")
 
 		elif room_type == 'galaxy':
-			embed.add_field(name=f"{cat_emoji} Category:", value=f"Name: {data['cat'].name} ({data['cat'].id})")
-			embed.add_field(name=f"{vc_emoji} Voice Channel:", value=f"Name: {data['vc'].name} ({data['vc'].id})")
-			embed.add_field(name=f"{txt_emoji} Text Channel:", value=f"Name: {data['txt'].name} ({data['txt'].id})")
+			if created:
+				embed.add_field(name=f"{cat_emoji} Category:", value=f"Name: {data['cat'].name} ({data['cat'].id})")
+				embed.add_field(name=f"{vc_emoji} Voice Channel:", value=f"Name: {data['vc'].name} ({data['vc'].id})")
+				embed.add_field(name=f"{txt_emoji} Text Channel:", value=f"Name: {data['txt'].name} ({data['txt'].id})")
+			else:
+				if thr := data.get("thread"):
+					embed.add_field(name=f"{thr_emoji} Thread Channel:", value=f"Name: {thr.name} ({thr.id})")
+				elif vc := data.get("vc"):
+					embed.add_field(name=f"{vc_emoji} Voice Channel:", value=f"Name: {vc.name} ({vc.id})")
+
 
 		embed.set_thumbnail(url=member.display_avatar)
 		embed.set_footer(text=f"Created by: {member}", icon_url=member.display_avatar)
