@@ -1438,23 +1438,30 @@ You can only add either **threads** **OR** one **voice channel**"""))
 		embed = discord.Embed(
 			title="__SmartRoom Created__",
 			color=member.color,
-			timestamp=current_time.timestamp()
+			timestamp=current_time,
+			url="https://thelanguagesloth.com"
 		)
+		vc_emoji = '<:vc:914947524178116649>'
+		txt_emoji = '<:txt:975033834166972496>'
+		cat_emoji = '📁'
 
 		if room_type == 'basic':
-			embed.add_field(name="__Voice Channel__:", value=f"Name: {data['vc'].name} ({data['vc'].id})")
+			embed.add_field(name=f"{vc_emoji} Voice Channel:", value=f"Name: {data['vc'].name} ({data['vc'].id})")
 
 		elif room_type == 'premium':
-			embed.add_field(name="__Voice Channel__:", value=f"Name: {data['vc'].name} ({data['vc'].id})")
-			embed.add_field(name="__Text Channel__:", value=f"Name: {data['txt'].name} ({data['txt'].id})")
+			embed.add_field(name=f"{vc_emoji} Voice Channel:", value=f"Name: {data['vc'].name} ({data['vc'].id})")
+			embed.add_field(name=f"{txt_emoji} Text Channel:", value=f"Name: {data['txt'].name} ({data['txt'].id})")
 
 		elif room_type == 'galaxy':
-			embed.add_field(name="__Category__:", value=f"Name: {data['cat'].name} ({data['cat'].id})")
-			embed.add_field(name="__Voice Channel__:", value=f"Name: {data['vc'].name} ({data['vc'].id})")
-			embed.add_field(name="__Text Channel__:", value=f"Name: {data['txt'].name} ({data['txt'].id})")
+			embed.add_field(name=f"{cat_emoji} Category:", value=f"Name: {data['cat'].name} ({data['cat'].id})")
+			embed.add_field(name=f"{vc_emoji} Voice Channel:", value=f"Name: {data['vc'].name} ({data['vc'].id})")
+			embed.add_field(name=f"{txt_emoji} Text Channel:", value=f"Name: {data['txt'].name} ({data['txt'].id})")
+
+		embed.set_thumbnail(url=member.display_avatar)
+		embed.set_footer(text=f"Created by: {member}", icon_url=member.display_avatar)
 
 		# SMART_ROOM_CHANNEL_LOG_ID = 123
-		log_channel: discord.TextChannel = discord.utils.get(member.guild.text_channels, id=int("SMART_ROOM_CHANNEL_LOG_ID", 123))
+		log_channel: discord.TextChannel = discord.utils.get(member.guild.text_channels, id=int(os.getenv("SMART_ROOM_CHANNEL_LOG_ID", 123)))
 		await log_channel.send(embed=embed)
 
 
