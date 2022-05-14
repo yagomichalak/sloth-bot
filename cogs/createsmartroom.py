@@ -231,8 +231,7 @@ class CreateSmartRoom(*smart_room_cogs):
 				await member.send("**You cannot be moved because you are not in a Voice-Channel!**")
 				await creation.delete()
 			else:
-				...
-				# await self.log_room_creation()
+				await self.log_smartroom_creation(member, 'basic', vc=creation)
 			finally:
 				try:
 					os.remove(f'./images/smart_vc/user_previews/{member.id}.png')
@@ -352,6 +351,8 @@ class CreateSmartRoom(*smart_room_cogs):
 				if len(vc_channel.members) == 0:
 					await vc_channel.delete()
 					await txt_channel.delete()
+			else:
+				await self.log_smartroom_creation(member, 'premium', vc=vc_channel, txt=txt_channel)
 			finally:
 				try:
 					os.remove(f'./images/smart_vc/user_previews/{member.id}.png')
@@ -554,6 +555,8 @@ class CreateSmartRoom(*smart_room_cogs):
 				await member.move_to(vc_channel)
 			except discord.errors.HTTPException:
 				await member.send("**You cannot be moved because you are not in a Voice-Channel, but your channels and category will remain alive nonetheless! 👍**")
+			else:
+				await self.log_smartroom_creation(member, 'galaxy', vc=vc_channel, txt=txt_channel1, cat=the_cat)
 			finally:
 				try:
 					os.remove(f'./images/smart_vc/user_previews/{member.id}.png')
@@ -1422,6 +1425,38 @@ You can only add either **threads** **OR** one **voice channel**"""))
 				await vc_channel.delete()
 				if type == 2:
 					await txt_channel.delete()
+
+
+	async def log_smartroom_creation(self, member: discord.Member, room_type: str, **data) -> None:
+		""" Logs the creation of a SmartRoom.
+		:param ctx: The context of the command.
+		:param room_type: The type of room to log.
+		:param data: The key-word arguments. """
+
+		current_time = await utils.get_time_now()
+
+		embed = discord.Embed(
+			title="__SmartRoom Created__",
+			color=member.color,
+			timestamp=current_time.timestamp()
+		)
+
+		if room_type == 'basic':
+			embed.add_field(name="__Voice Channel__:", value=f"Name: {data['vc'].name} ({data['vc'].id})")
+
+		elif room_type == 'premium':
+			embed.add_field(name="__Voice Channel__:", value=f"Name: {data['vc'].name} ({data['vc'].id})")
+			embed.add_field(name="__Text Channel__:", value=f"Name: {data['txt'].name} ({data['txt'].id})")
+
+		elif room_type == 'galaxy':
+			embed.add_field(name="__Category__:", value=f"Name: {data['cat'].name} ({data['cat'].id})")
+			embed.add_field(name="__Voice Channel__:", value=f"Name: {data['vc'].name} ({data['vc'].id})")
+			embed.add_field(name="__Text Channel__:", value=f"Name: {data['txt'].name} ({data['txt'].id})")
+
+		# SMART_ROOM_CHANNEL_LOG_ID = 123
+		log_channel: discord.TextChannel = discord.utils.get(member.guild.text_channels, id=int("SMART_ROOM_CHANNEL_LOG_ID", 123))
+		await log_channel.send(embed=embed)
+
 
 def setup(client):
 	""" Cog's setup function. """
