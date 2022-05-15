@@ -143,7 +143,13 @@ class Seraph(Player):
 
         # Calculates chance (50%) of reinforcing the shields of the targets
         n1 = random.random()
-        if n1 <= 0.5:
+        success_rate: float = 0.5
+        success_rate2: float = 0.45
+        if await self.get_user_baby(perpetrator.id):
+            success_rate = 1.0
+            success_rate2 = 1.0
+        
+        if n1 <= success_rate:
             # Tries to execute it and update the database
             try:
                 # Update active Divine Protection shields' time (+1 day)
@@ -153,7 +159,7 @@ class Seraph(Player):
                 await ctx.send(f"**For some reason I couldn't reinforce the shield(s), {perpetrator.mention}!**")
             else:
                 reinforce_shields_embed = await self.get_reinforce_shields_embed(
-                    channel=ctx.channel, perpetrator_id=perpetrator.id, shields_len=len(shields))
+                    channel=ctx.channel, perpetrator_id=perpetrator.id, shields_len=len(shields), success_rate=success_rate)
                 await ctx.send(embed=reinforce_shields_embed)
         else:
             await ctx.send(f"**You had a `50%` chance of reinforcing all active Divine Protection shields, but you missed it, {perpetrator.mention}!**")
@@ -162,7 +168,7 @@ class Seraph(Player):
         if 'protected' not in perpetrator_fx:
             n2 = random.random()
             # Calculates the chance (45%) of getting a shield for the perpetrator
-            if n2 <= 0.45:
+            if n2 <= success_rate2:
                 # Tries to execute it and update the database
                 try:
                     # Give user a shield
@@ -176,7 +182,7 @@ class Seraph(Player):
                     await ctx.send(f"**For some reason I couldn't give you a shield, {perpetrator.mention}!**")
                 else:
                     self_shield_embed = await self.get_self_shield_embed(
-                        channel=ctx.channel, perpetrator_id=perpetrator.id)
+                        channel=ctx.channel, perpetrator_id=perpetrator.id, success_rate=success_rate2)
                     await ctx.send(embed=self_shield_embed)
 
             else:
@@ -254,11 +260,12 @@ class Seraph(Player):
 
         return divine_embed
 
-    async def get_reinforce_shields_embed(self, channel, perpetrator_id: int, shields_len: int) -> discord.Embed:
+    async def get_reinforce_shields_embed(self, channel, perpetrator_id: int, shields_len: int, success_rate: float) -> discord.Embed:
         """ Makes an embedded message for a shield reinforcement action.
         :param channel: The context channel.
         :param perpetrator_id: The ID of the perpetrator of the shield reinforcement.
-        :param shields_len: The amount of active shields that the perpetrator have. """
+        :param shields_len: The amount of active shields that the perpetrator have.
+        :param success_rate: The success rate. """
 
         timestamp = await utils.get_timestamp()
 
@@ -269,17 +276,18 @@ class Seraph(Player):
         reinforce_shields_embed.description = f"🛡️ <@{perpetrator_id}> reinforced `{shields_len}` active shields; now they have more 24 hours of duration! 🛡️💪"
         reinforce_shields_embed.color = discord.Color.green()
 
-        reinforce_shields_embed.set_author(name='50% of chance', url=self.client.user.display_avatar)
+        reinforce_shields_embed.set_author(name=f"{int(success_rate*100)}% of chance", url=self.client.user.display_avatar)
         reinforce_shields_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Seraph.png")
         reinforce_shields_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
 
         return reinforce_shields_embed
 
-    async def get_self_shield_embed(self, channel, perpetrator_id: int) -> discord.Embed:
+    async def get_self_shield_embed(self, channel, perpetrator_id: int, success_rate: float) -> discord.Embed:
         """ Makes an embedded message for a shield reinforcement action.
         :param channel: The context channel.
         :param perpetrator_id: The ID of the perpetrator of the shield reinforcement.
-        :param shields_len: The amount of active shields that the perpetrator have. """
+        :param shields_len: The amount of active shields that the perpetrator have.
+        :param success_rate: The success rate. """
 
         timestamp = await utils.get_timestamp()
 
@@ -290,7 +298,7 @@ class Seraph(Player):
         self_shield_embed.description = f"🛡️ <@{perpetrator_id}> got a shield for themselves for reinforcing other shields! 🛡️💪"
         self_shield_embed.color = discord.Color.green()
 
-        self_shield_embed.set_author(name='45% of chance', url=self.client.user.display_avatar)
+        self_shield_embed.set_author(name=f"{int(success_rate*100)}% of chance", url=self.client.user.display_avatar)
         self_shield_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Seraph.png")
         self_shield_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
 
