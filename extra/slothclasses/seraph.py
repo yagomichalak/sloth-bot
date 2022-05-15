@@ -486,7 +486,8 @@ class Seraph(Player):
         if user_currency[1] < 500:
             return await ctx.send(f"**{perpetrator.mention}, you don't have `500łł`!**")
 
-        await self.client.get_cog('SlothCurrency').update_user_money(perpetrator.id, -500)
+        SlothCurrency = self.client.get_cog("SlothCurrency")
+        await SlothCurrency.update_user_money(perpetrator.id, -500)
 
         emoji = '👶'
 
@@ -515,6 +516,13 @@ class Seraph(Player):
                 await ctx.send(embed=attained_grace_embed)
             else:
                 await ctx.send(f"**You had a `10%` chance of attaining the grace for {target.mention}, but you missed it, {perpetrator.mention}!**")
+
+                if random.random() <= 0.5:
+                    await ctx.send(f"**You had a `50%` chance of getting your money back after failing your `attain grace`, and you got it, {perpetrator.mention}!** 😄")
+                    await SlothCurrency.update_user_money(perpetrator.id, 500)
+                else:
+                    await ctx.send(f"**You had a `50%` chance of getting your money back after failing your `attain grace`, but you missed it, {perpetrator.mention}!** 😢")
+
 
 
     async def attained_grace_embed(self, perpetrator: int, target: int, emoji: str) -> discord.Embed:
