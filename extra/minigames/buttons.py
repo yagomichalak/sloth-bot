@@ -10,7 +10,9 @@ class TicTacToeButton(discord.ui.Button):
     """ Button for the TicTacToe game. """
 
 
-    def __init__(self, custom_id: str, row: int):
+    def __init__(self, custom_id: str, row: int) -> None:
+        """ Class init method. """
+
         super().__init__(label='\u200b', style=discord.ButtonStyle.secondary, custom_id=custom_id, row=row)
 
     
@@ -48,8 +50,8 @@ class TicTacToeButton(discord.ui.Button):
         embed.remove_field(1)
         embed.add_field(name="__Turn__:", value=f"Now it's {self.view.turn_member.mention}'s turn!")
 
-        if await self.check_win_state(user):
-            
+        if win_case := await self.check_win_state(user):
+            await self.update_win_case_colors(interaction, win_case)
             embed.remove_field(1)
             embed.add_field(name="__We have a Winner!__:", value=f"{user.mention} just won the game!")
             await interaction.followup.send(f"**You won the game, {interaction.user.mention}!**")
@@ -64,7 +66,8 @@ class TicTacToeButton(discord.ui.Button):
         await interaction.message.edit(embed=embed, view=self.view)
 
     async def check_win_state(self, user: discord.Member) -> None:
-        """ Checks whether someone won the game. """
+        """ Checks whether someone won the game.
+        :param user: The user. """
 
         #  ___    ___    ___
         # |   |  |   |  |   |
@@ -103,14 +106,32 @@ class TicTacToeButton(discord.ui.Button):
 
         for case in cases:
             if len(set(you).intersection(set(case))) >= 3:
-                return True
+                return case
 
         return False
+
+    async def update_win_case_colors(self, interaction: discord.Interaction, win_case: List[Tuple[int, int, int]]) -> None:
+        """ Updates the colors of the buttons that made the user win the game.
+        :param interaction: The interaction.
+        :param win_case: The list of tuples containing the coordinates of the win case. """
+
+        rows: List[Tuple[discord.Button]] = [
+            tuple(btn for btn in self.view.children if btn.row == 0),
+            tuple(btn for btn in self.view.children if btn.row == 1),
+            tuple(btn for btn in self.view.children if btn.row == 2),
+        ]
+
+        for cord in win_case:
+            rows[cord[0]][cord[1]].style = discord.ButtonStyle.green
+
+        await interaction.message.edit(view=self.view)
 
 class FlagsGameButton(discord.ui.Button):
     """ Button of the FlagGame. """
 
     def __init__(self, style: discord.ButtonStyle = discord.ButtonStyle.secondary, custom_id: Optional[str] = None, label: Optional[str]=None, row: Optional[int] = None) -> None:
+        """ Class init method. """
+
         super().__init__(style=style, label=label, custom_id=custom_id, row=row)
     
 
