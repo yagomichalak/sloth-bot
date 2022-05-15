@@ -37,6 +37,8 @@ class TicTacToeView(discord.ui.View):
                 self.add_item(button)
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        """ Checks whether the person who clicked the button is on their turn. """
+
         return interaction.user.id == self.turn_member.id
 
     async def on_timeout(self) -> None:
@@ -292,6 +294,8 @@ class FlagsGameView(discord.ui.View):
     """ View for the FlagGame. """
 
     def __init__(self, ctx: commands.Context, client: commands.Bot, countries_names: List[str], flags: list, points: int, round: int, timeout_count: int = 0) -> None:
+        """ Class init method. """
+
         super().__init__(timeout=30)
         self.ctx = ctx
         self.client = client
@@ -381,7 +385,6 @@ class BlackJackActionView(discord.ui.View):
         SlothCurrency = self.client.get_cog('SlothCurrency')
         user_currency = await SlothCurrency.get_user_currency(player_id)
         player_bal = user_currency[0][1]
-        print(player_bal)
 
         if cog.blackjack_games.get(guild_id) is None:
             cog.blackjack_games[guild_id] = {}
@@ -401,10 +404,8 @@ class BlackJackActionView(discord.ui.View):
                 if current_game.status == 'finished':
                     del cog.blackjack_games[guild_id][interaction.user.id]
                     user_currency = await SlothCurrency.get_user_currency(player_id)
-                    print(user_currency[0][1])
                     await self.end_game(interaction)
                     user_currency = await SlothCurrency.get_user_currency(player_id)
-                    print(user_currency[0][1])
 
             await interaction.followup.edit_message(interaction.message.id, embed=current_game.embed())
         else:
@@ -438,6 +439,8 @@ class BlackJackActionView(discord.ui.View):
             await interaction.followup.send("**You must be in a blackjack game!**")
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        """ Checks whether the person who clicked on the button is the one who started the blackjack. """
+
         return self.player.id == interaction.user.id
 
     async def end_game(self, interaction: discord.Interaction) -> None:
