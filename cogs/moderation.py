@@ -1418,34 +1418,101 @@ class Moderation(*moderation_cogs):
 				await ctx.send(f"**You cannot nitrokick a staff member, {author.mention}!**")
 
 
-	# @utils.is_allowed([senior_mod_role_id], throw_exc=True)
-	@commands.command()
-	@commands.has_permissions(administrator=True)
-	async def hackban(self, ctx, user_id: int = None, *, reason: Optional[str] = None):
-		""" (ADM) Bans a user that is currently not in the server.
-		Only accepts user IDs.
-		:param user_id: Member ID
-		:param reason: The reason for hackbanning the user. (Optional) """
+	    # Hackban a member
+	@commands.command(aliases=['hban'])
+	@utils.is_allowed(allowed_roles, throw_exc=True)
+	async def hackban(self, ctx, member: Optional[discord.Member] = None, *, reason: Optional[str] = None):
+		""" (ModTeam/ADM) Hackbans a member from the server.
+		:param member: The @ or ID of the user to hackban.
+		:param reason: The reason for hackbanning the user. (Optional)
+		
+		PS: Needs 4 mods to hackban, in a ModTeam hackban. """
 
 		await ctx.message.delete()
-		if not user_id:
-			return await ctx.send("**Inform the user id!**", delete_after=3)
 
-		member = discord.Object(id=user_id)
+		channel = ctx.channel
+		author = ctx.author
+
 		if not member:
-			return await ctx.send("**Invalid user id!**", delete_after=3)
+			return await ctx.send('**Member not found!**', delete_after=3)
 
-		guild_member = discord.utils.get(ctx.guild.members, id=member.id)
-		if guild_member:
-			if await utils.is_allowed(allowed_roles).predicate(channel=ctx.channel, member=guild_member):
-				return await ctx.send(f"**You cannot hackban a staff member, {ctx.author}!**", delete_after=3)
+		if await utils.is_allowed(allowed_roles).predicate(channel=ctx.channel, member=member):
+			return await ctx.send(f"**You cannot hackban a staff member, {author.mention}!**")
+			
+		perpetrators = []
+		confirmations = {}
+
+		perms = channel.permissions_for(author)
+
+		if not perms.administrator:
+			confirmations[author.id] = author.name
+			mod_ban_embed = discord.Embed(
+				title=f"Hackban Request ({len(confirmations)}/4) → (5mins)",
+				description=f'''
+				{author.mention} wants to hackban {member.mention}, it requires 3 more moderator ✅ reactions for it!
+				```Reason: {reason}```''',
+				colour=discord.Colour.dark_red(), timestamp=ctx.message.created_at)
+			mod_ban_embed.set_author(name=f'{member} is going to Brazil 🦜...', icon_url=member.display_avatar)
+			msg = await ctx.send(embed=mod_ban_embed)
+			await msg.add_reaction('✅')
+
+			# Prompts for 3 moderator reactions
+			def check_mod(r, u):
+				if u.bot:
+					return False
+
+				if r.message.id != msg.id:
+					return
+
+				if str(r.emoji) == '✅':
+					perms = channel.permissions_for(u)
+					if mod_role_id in [r.id for r in u.roles] or perms.administrator:
+						confirmations[u.id] = u.name
+						return True
+					else:
+						self.client.loop.create_task(msg.remove_reaction('✅', u))
+						return False
+
+				else:
+					self.client.loop.create_task(msg.remove_reaction(r.emoji, u))
+					return False
+
+			while True:
+				try:
+					r, u = await self.client.wait_for('reaction_add', timeout=300, check=check_mod)
+				except asyncio.TimeoutError:
+					mod_ban_embed.description = f'Timeout, {member} is not getting hackbanned!'
+					await msg.remove_reaction('✅', self.client.user)
+					
+					return await msg.edit(embed=mod_ban_embed)
+				else:
+					mod_ban_embed.title = f"Hackban Request ({len(confirmations)}/4) → (5mins)"
+					await msg.edit(embed=mod_ban_embed)
+
+					if channel.permissions_for(u).administrator:
+						break
+					elif len(confirmations) < 4:
+						continue
+					else:
+						break
+
+		# Checks if it was a moderator hackban request or just a normal hackban
+		if len(confirmations) == 0:
+			perpetrators = ctx.author
+			icon = ctx.author.display_avatar
+		else:
+			perpetrators = ', '.join(confirmations.values())
+			icon = ctx.guild.icon.url
+
 		try:
 			await ctx.guild.ban(member, reason=reason)
 			# General embed
 			general_embed = discord.Embed(description=f'**Reason:** {reason}', colour=discord.Colour.dark_teal(),
 										  timestamp=ctx.message.created_at)
-			general_embed.set_author(name=f'{self.client.get_user(user_id)} has been hackbanned')
+			general_embed.set_author(name=f'{self.client.get_user(member.id)} has been hackbanned')
+			
 			await ctx.send(embed=general_embed)
+			
 			try:
 				await member.send(embed=general_embed)
 			except Exception as e:
@@ -1455,12 +1522,12 @@ class Moderation(*moderation_cogs):
 			moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
 			embed = discord.Embed(title='__**HackBanishment**__', colour=discord.Colour.dark_teal(),
 								  timestamp=ctx.message.created_at)
-			embed.add_field(name='User info:', value=f'```Name: {self.client.get_user(user_id)}\nId: {member.id}```',
+			embed.add_field(name='User info:', value=f'```Name: {self.client.get_user(member.id)}\nId: {member.id}```',
 							inline=False)
 			embed.add_field(name='Reason:', value=f'```{reason}```')
 
-			embed.set_author(name=self.client.get_user(user_id))
-			embed.set_footer(text=f"HackBanned by {ctx.author}", icon_url=ctx.author.display_avatar)
+			embed.set_author(name=self.client.get_user(ctx.author.id))
+			embed.set_footer(text=f"HackBanned by {perpetrators}", icon_url=ctx.author.display_avatar)
 			await moderation_log.send(embed=embed)
 
 			# Inserts a infraction into the database
