@@ -520,6 +520,37 @@ class Games(*minigames_cogs):
 
         await self.insert_rehab_member(member.id, current_ts)
         await ctx.send(f"**You're now into rehab for the next `24 hours`, have a good recovery, {member.mention}!**")
+
+    @commands.command(aliases=["urh"])
+    @commands.has_permissions(administrator=True)
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def unrehab(self, ctx, addict: discord.Member = None) -> None:
+        """ Takes someone out of rehab.
+        :param addict: The addict to take out of rehab.  """
+
+        author: discord.Member = ctx.author
+        current_ts = await utils.get_timestamp()
+        if not addict:
+            addict = author
+
+        rehab = await self.get_rehab_member(addict.id)
+        if not rehab:
+            if author == addict:
+                return await ctx.send(f"**You're not even in rehab, {author.mention}!**")
+
+            return await ctx.send(f"**{addict} is not even in rehab, {author.mention}!**")
+        else:
+            if current_ts - rehab[1] < 86400:
+                if author == addict:
+                    return await ctx.send(f"**You're not even in rehab, {author.mention}!**")
+
+                return await ctx.send(f"**{addict} is not even in rehab, {author.mention}!**")
+
+        await self.delete_rehab_member(addict.id, current_ts)
+        if author == addict:
+            return await ctx.send(f"**You just came out of rehab, {author.mention}!**")
+            
+        await ctx.send(f"**{author.mention} just took {addict.mention} out of rehab!**")
         
 
 def setup(client) -> None:

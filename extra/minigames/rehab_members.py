@@ -133,3 +133,12 @@ class RehabMembersTable(commands.Cog):
         await mycursor.execute("UPDATE RehabMembers SET rehab_ts = %s WHERE user_id = %s", (current_ts, user_id))
         await db.commit()
         await mycursor.close()
+
+    async def delete_rehab_member(self, user_id: int) -> None:
+        """ Deletes a rehab member from rehab.
+        :param user_id: The ID of the member to delete. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("DELETE FROM RehabMembers WHERE user_id = %s", (user_id,))
+        await db.commit()
+        await mycursor.close()
