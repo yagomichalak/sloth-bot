@@ -1436,8 +1436,9 @@ class Moderation(*moderation_cogs):
 		if not member:
 			return await ctx.send('**Member not found!**', delete_after=3)
 
-		if await utils.is_allowed(allowed_roles).predicate(channel=ctx.channel, member=member):
-			return await ctx.send(f"**You cannot hackban a staff member, {author.mention}!**")
+		if isinstance(member, discord.Member):
+			if await utils.is_allowed(allowed_roles).predicate(channel=ctx.channel, member=member):
+				return await ctx.send(f"**You cannot hackban a staff member, {author.mention}!**")
 			
 		perpetrators = []
 		confirmations = {}
