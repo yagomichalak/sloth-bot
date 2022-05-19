@@ -1421,7 +1421,7 @@ class Moderation(*moderation_cogs):
 	    # Hackban a member
 	@commands.command(aliases=['hban'])
 	@utils.is_allowed(allowed_roles, throw_exc=True)
-	async def hackban(self, ctx, member: Optional[discord.Member] = None, *, reason: Optional[str] = None):
+	async def hackban(self, ctx, member: Optional[Union[discord.Member, discord.User]] = None, *, reason: Optional[str] = None):
 		""" (ModTeam/ADM) Hackbans a member from the server.
 		:param member: The @ or ID of the user to hackban.
 		:param reason: The reason for hackbanning the user. (Optional)
