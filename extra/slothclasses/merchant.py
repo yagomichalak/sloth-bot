@@ -640,6 +640,7 @@ class Merchant(Player):
         * Cost: 1000łł
 
         Ps: Both you and your suitor must have a sum of at least 2 rings in order to marry.
+        Ps²: In case of divorce, your partner is entitled to half of your leaves.
         """
 
         member = ctx.author
@@ -797,6 +798,16 @@ class Merchant(Player):
         else:
             divorce_embed = await self.get_divorce_embed(ctx.channel, member, partner)
             await ctx.send(content=f"<@{partner.id}>", embed=divorce_embed)
+
+            partner1_money = await SlothCurrency.get_user_currency(member.id)
+            partner2_money = await SlothCurrency.get_user_currency(partner.id)
+
+            await SlothCurrency.update_user_money(member.id, -partner1_money)
+            await SlothCurrency.update_user_money(partner.id, -partner2_money)
+
+            await SlothCurrency.update_user_money(member.id, (partner1_money + partner2_money)//2)
+            await SlothCurrency.update_user_money(partner.id, (partner1_money + partner2_money)//2)
+
 
     async def get_user_marriage(self, user_id: int) -> Dict[str, Union[str, int]]:
         """ Gets the user's partner.
