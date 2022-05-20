@@ -1452,7 +1452,7 @@ class Moderation(*moderation_cogs):
 				description=f'''
 				{author.mention} wants to hackban {member.mention}, it requires 3 more moderator ✅ reactions for it!
 				```Reason: {reason}```''',
-				colour=discord.Colour.dark_red(), timestamp=ctx.message.created_at)
+				colour=discord.Colour.dark_teal(), timestamp=ctx.message.created_at)
 			mod_ban_embed.set_author(name=f'{member} is going to Brazil 🦜...', icon_url=member.display_avatar)
 			msg = await ctx.send(embed=mod_ban_embed)
 			await msg.add_reaction('✅')
