@@ -412,7 +412,7 @@ class Agares(Player):
         :param target: The member of whom to delay the skills.
         
         • Delay = 2 days
-        • Cost = 150łł
+        • Cost = 100łł
         
         PS: It only works on skills that the member used at least once. """
 
