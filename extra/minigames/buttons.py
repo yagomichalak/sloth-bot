@@ -15,14 +15,14 @@ class TicTacToeButton(discord.ui.Button):
 
         super().__init__(label='\u200b', style=discord.ButtonStyle.secondary, custom_id=custom_id, row=row)
 
-    
     async def callback(self, interaction: discord.Interaction) -> None:
         """ Callback for the button click. """
 
         user: discord.Member = interaction.user
         await interaction.response.defer()
         i, ii = tuple(self.custom_id.replace('ttt_button:', '').split('_'))
-        coords_played: Tuple[int, int, int] = (int(i), int(ii))
+
+        coords_played: Tuple[int, int] = (int(i), int(ii))
 
         all_coords_played = [
             coord for key in self.view.coords.keys() for coord in self.view.coords[key]
@@ -133,7 +133,6 @@ class FlagsGameButton(discord.ui.Button):
         """ Class init method. """
 
         super().__init__(style=style, label=label, custom_id=custom_id, row=row)
-    
 
     async def callback(self, interaction: discord.Interaction) -> None:
         """ FlagGame's button callback. """
@@ -168,13 +167,13 @@ class FlagsGameButton(discord.ui.Button):
     async def view_correct_answer(self, interaction: discord.Interaction, embed: discord.Embed):
         # Changes the clicked button to green
         self.style = discord.ButtonStyle.success
-        await interaction.message.edit('\u200b', embed=embed, view=self.view)    
+        await interaction.message.edit('\u200b', embed=embed, view=self.view)
 
         await asyncio.sleep(0.8)
 
         # Generates a new guess
         await self.view.cog.generate_flag_game(self.view.ctx, message=interaction.message, points=self.view.points, round=self.view.round + 1, flags=self.view.flags)
-    
+
 
     async def view_wrong_answer(self, interaction: discord.interactions, embed: discord.Embed):
         # Changes the wrong button to red
@@ -184,9 +183,8 @@ class FlagsGameButton(discord.ui.Button):
         correct_button = [button for button in self.view.children if button.label == self.view.flags[self.view.round]['name']]
         correct_button[0].style = discord.ButtonStyle.success
         await interaction.message.edit(embed=embed, view=self.view)
-        
+
         await asyncio.sleep(0.8)
 
         # Generates a new guess
         await self.view.cog.generate_flag_game(self.view.ctx, message=interaction.message, points=self.view.points, round=self.view.round + 1, flags=self.view.flags)
-

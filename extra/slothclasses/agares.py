@@ -410,10 +410,10 @@ class Agares(Player):
     async def delay(self, ctx, target: discord.Member = None) -> None:
         """ Delays someone else's set of skills for 1 day.
         :param target: The member of whom to delay the skills.
-        
+
         • Delay = 2 days
-        • Cost = 150łł
-        
+        • Cost = 100łł
+
         PS: It only works on skills that the member used at least once. """
 
         perpetrator = ctx.author
