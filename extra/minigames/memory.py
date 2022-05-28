@@ -112,3 +112,21 @@ class MemoryTable(commands.Cog):
         await mycursor.execute("UPDATE MemoryMember SET level = %s, record_ts = %s WHERE user_id = %s", (level, current_ts, user_id))
         await db.commit()
         await mycursor.close()
+
+    async def get_top_ten_memory_users(self) -> List[List[int]]:
+        """ Gets the top ten users with the highest level in the Memory game. """
+
+        mycursor, _ = await the_database()
+        await mycursor.execute("SELECT * FROM MemoryMember ORDER BY level DESC LIMIT 10")
+        top_ten_members = await mycursor.fetchall()
+        await mycursor.close()
+        return top_ten_members
+
+    async def get_all_memory_users_by_level(self) -> List[List[int]]:
+        """ Gets all users from the MemoryMember table ordered by level. """
+
+        mycursor, _ = await the_database()
+        await mycursor.execute("SELECT * FROM MemoryMember ORDER BY level DESC")
+        users = await mycursor.fetchall()
+        await mycursor.close()
+        return users

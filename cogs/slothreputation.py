@@ -262,7 +262,7 @@ class SlothReputation(*currency_cogs):
     @Player.poisoned()
     async def _leaderboard(self, ctx, 
         info_for: Option(str, description="The leaderboard to show the information for.", choices=[
-            'Reputation', 'Level', 'Leaves', 'Time', 'Items'])) -> None:
+            'Reputation', 'Level', 'Leaves', 'Time', 'Items', 'Memory'])) -> None:
         """ Shows the leaderboard. """
 
         if info_for == 'Reputation':
@@ -275,6 +275,8 @@ class SlothReputation(*currency_cogs):
             await self.time_score(ctx)
         elif info_for == 'Items':
             await self.items_score(ctx)
+        elif info_for == 'Memory':
+            await self.memory_score(ctx)
 
 
     @commands.command(aliases=['leaderboard', 'lb', 'scoreboard'])
@@ -444,6 +446,40 @@ class SlothReputation(*currency_cogs):
         for i, sm in enumerate(top_ten_users):
             member = discord.utils.get(ctx.guild.members, id=sm[0])
             leaderboard.add_field(name=f"[{i + 1}]# - __**{member}**__", value=f"__**Items:**__ `{sm[1]}` items 🐮", inline=False)
+            if i + 1 == 10:
+                break
+        return await answer(embed=leaderboard)
+
+    @commands.command(aliases=['memory_board', 'memoryboard', 'memories'])
+    @Player.poisoned()
+    async def memory_score(self, ctx):
+        """ Shows the top ten members in the memory leaderboard. """
+
+        answer: discord.PartialMessageable = None
+        if isinstance(ctx, commands.Context):
+            answer = ctx.send
+        else:
+            answer = ctx.respond
+
+        Games = self.client.get_cog("Games")
+
+        top_ten_users = await Games.get_top_ten_memory_users()
+        current_time = await utils.get_time_now()
+        leaderboard = discord.Embed(title="__The Language Sloth's Memory Ranking Leaderboard__", colour=discord.Colour.dark_green(),
+                                    timestamp=current_time)
+        all_users = await Games.get_all_memory_users_by_level()
+        position = [[i+1, u[1]] for i, u in enumerate(all_users) if u[0] == ctx.author.id]
+        position = [it for subpos in position for it in subpos] if position else ['??', 0]
+
+        leaderboard.set_footer(text=f"Your level: {position[1]} | #{position[0]}", icon_url=ctx.author.display_avatar)
+        leaderboard.set_thumbnail(url=ctx.guild.icon.url)
+
+        # Embeds each one of the top ten users.
+        for i, sm in enumerate(top_ten_users):
+            member = discord.utils.get(ctx.guild.members, id=sm[0])
+            leaderboard.add_field(name=f"[{i + 1}]# - __**{member}**__", 
+                value=f"__**Level:**__ `{sm[1]}` (<t:{sm[2]}:R>)",
+                                  inline=False)
             if i + 1 == 10:
                 break
         return await answer(embed=leaderboard)
