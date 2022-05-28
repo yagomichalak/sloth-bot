@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 from .buttons import TicTacToeButton, FlagsGameButton
 
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Any
 from random import randint
 from extra import utils
 import os
@@ -459,3 +459,49 @@ class BlackJackActionView(discord.ui.View):
         if hasattr(current_game, 'status') and current_game.status == 'finished':
             del cog.blackjack_games[server_id][self.player.id]
         return
+
+class WhiteJackActionView(discord.ui.View):
+    """ View for the BlackJack game actions. """
+
+    def __init__(self, client: commands.Bot, player: discord.Member, game: Any) -> None:
+        """ Class init method. """
+
+        super().__init__(timeout=120)
+        self.client = client
+        self.player = player
+        self.game: Any = game
+        self.cog = client.get_cog("Games")
+
+    @discord.ui.button(label="hit", style=discord.ButtonStyle.blurple, custom_id="wj_hit_id")
+    async def white_jack_hit_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Button for hitting in the BlackJack game. """
+
+        await interaction.response.defer()
+        await interaction.followup.send("**Hit**")
+
+    @discord.ui.button(label="stand", style=discord.ButtonStyle.blurple, custom_id="wj_stand_id")
+    async def white_jack_stand_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Button for standing in the BlackJack game. """
+
+        await interaction.response.defer()
+        await interaction.followup.send("**Stand**")
+
+    @discord.ui.button(label="double", style=discord.ButtonStyle.blurple, custom_id="wj_double_id")
+    async def white_jack_double_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Button for doubling in the BlackJack game. """
+
+        await interaction.response.defer()
+        await interaction.followup.send("**Double**")
+
+    @discord.ui.button(label="surrender", style=discord.ButtonStyle.gray, custom_id="wj_surrender_id")
+    async def white_jack_surrender_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Button for surrendering in the BlackJack game. """
+
+        await interaction.response.defer()
+        await interaction.followup.send("**Surrender**")
+
+
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        """ Checks whether the person who clicked on the button is the one who started the blackjack. """
+
+        return self.player.id == interaction.user.id

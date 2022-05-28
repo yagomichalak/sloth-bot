@@ -11,11 +11,12 @@ from extra import utils
 from extra.slothclasses.player import Player
 from extra.minigames.connect_four import ConnectFour
 from extra.minigames.blackjack.blackjack import BlackJack
+from extra.minigames.whitejack.whitejack import WhiteJack
 from extra.minigames.view import MoveObjectGameView, TicTacToeView, FlagsGameView
 from extra.minigames.rehab_members import RehabMembersTable
 
 minigames_cogs: List[commands.Cog] = [
-    ConnectFour, BlackJack, RehabMembersTable
+    ConnectFour, BlackJack, WhiteJack, RehabMembersTable
 ]
 
 class Games(*minigames_cogs):
