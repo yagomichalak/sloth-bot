@@ -525,6 +525,7 @@ class MemoryGameView(discord.ui.View):
 
         self.client = client
         self.member = member
+        self.cog = client.get_cog("Games")
         self.button_map: Dict[int, List[discord.Button]] = {}
         self.value: bool = False
 
@@ -569,6 +570,7 @@ class MemoryGameView(discord.ui.View):
             if self.lives == 0:
                 content = f"**Level `{self.level}` lost!** ❌"
                 await utils.disable_buttons(self)
+                await self.update_game_data()
                 self.stop()
             
         if not content:
@@ -657,6 +659,16 @@ class MemoryGameView(discord.ui.View):
         await utils.remove_emoji_buttons(self)
         # Edits message
         await message.edit(view=self)
+
+    async def update_game_data(self) -> None:
+        """ Updates the player's data in the database. """
+
+        current_ts = await utils.get_timestamp()
+        memory_member = await self.cog.get_memory_member(self.member.id)
+        if not memory_member:
+            return await self.cog.insert_memory_member(self.member.id, self.level-1, current_ts)
+        
+        await self.cog.update_memory_member(self.member.id, self.level-1, current_ts)
 
     def reset_game_status(self) -> None:
         """ Resets the game status. """

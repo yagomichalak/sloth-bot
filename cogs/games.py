@@ -14,9 +14,11 @@ from extra.minigames.blackjack.blackjack import BlackJack
 from extra.minigames.whitejack.whitejack import WhiteJack
 from extra.minigames.view import MoveObjectGameView, TicTacToeView, FlagsGameView, MemoryGameView
 from extra.minigames.rehab_members import RehabMembersTable
+from extra.minigames.memory import MemoryTable
 
 minigames_cogs: List[commands.Cog] = [
-    ConnectFour, BlackJack, WhiteJack, RehabMembersTable
+    ConnectFour, BlackJack, WhiteJack, RehabMembersTable,
+    MemoryTable
 ]
 
 class Games(*minigames_cogs):
@@ -553,7 +555,7 @@ class Games(*minigames_cogs):
             
         await ctx.send(f"**{author.mention} just took {addict.mention} out of rehab!**")
         
-    @commands.command()
+    @commands.command(aliases=["mm", "memo"])
     async def memory(self, ctx) -> None:
         """ Plays the Memory game. """
 
