@@ -133,7 +133,7 @@ class WhiteJackGame(*cogs):
 
     def draw_event(self) -> None:
         pass
-    
+
     def blackjack_event_player(self) -> None:
         pass
 

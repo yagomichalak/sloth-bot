@@ -12,7 +12,7 @@ from extra.slothclasses.player import Player
 from extra.minigames.connect_four import ConnectFour
 from extra.minigames.blackjack.blackjack import BlackJack
 from extra.minigames.whitejack.whitejack import WhiteJack
-from extra.minigames.view import MoveObjectGameView, TicTacToeView, FlagsGameView
+from extra.minigames.view import MoveObjectGameView, TicTacToeView, FlagsGameView, MemoryGameView
 from extra.minigames.rehab_members import RehabMembersTable
 
 minigames_cogs: List[commands.Cog] = [
@@ -553,6 +553,24 @@ class Games(*minigames_cogs):
             
         await ctx.send(f"**{author.mention} just took {addict.mention} out of rehab!**")
         
+    @commands.command()
+    async def memory(self, ctx) -> None:
+        """ Plays the Memory game. """
+
+        member: discord.Member = ctx.author
+
+        view: discord.ui.View = MemoryGameView(self.client, member)
+        content = view.get_content()
+        msg = await ctx.send(content=content, view=view)
+
+        await asyncio.sleep(2)
+        await utils.enable_buttons(view)
+        await utils.remove_emoji_buttons(view)
+        await msg.edit(view=view)
+        await view.wait()
+        
+        if view.value is None:
+            await msg.edit(content="**Timeout!**")
 
 def setup(client) -> None:
     """ Cog's setup function. """

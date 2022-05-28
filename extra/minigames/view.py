@@ -2,10 +2,13 @@ import discord
 from discord.ext import commands
 from .buttons import TicTacToeButton, FlagsGameButton
 
-from typing import Dict, List, Tuple, Any
+from typing import Dict, List, Tuple, Any, Optional
+from functools import partial
 from random import randint
-from extra import utils
+import asyncio
 import os
+
+from extra import utils
 
 server_id: int = int(os.getenv('SERVER_ID', 123))
 
@@ -505,3 +508,135 @@ class WhiteJackActionView(discord.ui.View):
         """ Checks whether the person who clicked on the button is the one who started the blackjack. """
 
         return self.player.id == interaction.user.id
+
+class MemoryGameView(discord.ui.View):
+    """ View for the Memory game. """
+
+    def __init__(self, client: commands.Bot, member: discord.Member, timeout: Optional[float] = 180) -> None:
+        """ Class init method. """
+
+        super().__init__(timeout=timeout)
+
+        self.client = client
+        self.member = member
+        self.button_map: Dict[int, List[discord.Button]] = {}
+        self.value: bool = False
+        self.emoji: str = '🤪'
+
+        self.generated_cards = []
+        self.selected_cards = []
+        self.generate_cards()
+
+        # Game status
+        self.lives: int = 3
+        self.right_answers: int = 0
+        self.level: int = 1
+
+    async def callback(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Callback for the button. """
+
+        content = None
+        custom_id = button.custom_id
+        y, x = custom_id.replace('memory:', '').split('x')
+        selected_card = (x, y)
+        next_level: bool = False
+
+        if selected_card in self.generated_cards:
+            self.selected_cards.append(selected_card)
+            button.style = discord.ButtonStyle.green
+            button.emoji = self.emoji
+            self.right_answers += 1
+        else:
+            self.lives -= 1
+            button.style = discord.ButtonStyle.red
+        button.disabled = True
+
+        if len(self.selected_cards) == len(self.generated_cards):
+            await utils.disable_buttons(self)
+            content = f"**Level `{self.level}` passed!** 🎊"
+            next_level = True
+        else:
+            if self.lives == 0:
+                content = f"**Level `{self.level}` lost!** ❌"
+                await utils.disable_buttons(self)
+                self.stop()
+            
+        if not content:
+            content = self.get_content()
+
+        await interaction.response.edit_message(content=content, view=self)
+        if next_level:
+            await asyncio.sleep(1.5)
+            await self.next_level(interaction.message)
+
+    def get_content(self) -> str:
+        """ Returns the game's message content. """
+
+        return f"{self.lives}❤ | {self.right_answers}/{len(self.generated_cards)}✅ (`Lvl {self.level}`)"
+
+    def generate_cards(self) -> None:
+        """ Generates random cards """
+
+        # Generates the 5x5
+        for i in range(5):
+            for ii in range(5):
+                button = discord.ui.Button(
+                    label="\u200b", style=discord.ButtonStyle.blurple, row=i,
+                    custom_id=f"memory:{i}x{ii}", disabled=True
+                )
+                button.callback = partial(self.callback, button)
+                if self.button_map.get(i):
+                    self.button_map[i].append(button)
+                else:
+                    self.button_map[i] = [button]
+        
+        # Generates X flagged cards
+        self.generated_cards.clear()
+        for _ in range (4):
+            while True:
+                x, y = randint(0, 4), randint(0, 4)
+                button = self.button_map[y][x]
+                if button.emoji is None:
+                    button.emoji = self.emoji
+                    self.generated_cards.append((str(x), str(y)))
+                    break
+                continue
+
+        # Adds all buttons into the view
+        self.clear_items()
+        for buttons in self.button_map.values():
+            for button in buttons:
+                self.add_item(button)
+    
+    async def next_level(self, message: discord.Message) -> None:
+        """ Updates the view's state for the next game level.
+        :param message: The original game message. """
+
+        self.level += 1
+        # Gives 1 life point for each level multiple of 5
+        if self.level % 5 == 0 and self.lives != 3:
+            self.lives += 1
+        
+        # Reset game state
+        self.right_answers = 0
+        self.button_map.clear()
+        self.selected_cards.clear()
+        self.generate_cards()
+        content = self.get_content()
+        await message.edit(content=content, view=self)
+        await asyncio.sleep(2)
+        # Enables buttons and removes emojis
+        await utils.enable_buttons(self)
+        await utils.remove_emoji_buttons(self)
+        # Edits message
+        await message.edit(view=self)
+
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        """ Checks whether the user can interact with the buttons. """
+
+        return interaction.user.id == self.member.id
+    
+    async def on_timeout(self) -> None:
+        """ Runs when the game timeouts. """
+        
+        self.value = None
