@@ -1,10 +1,11 @@
 import discord
 from discord.ext import commands
+from emoji import emoji_count
 from .buttons import TicTacToeButton, FlagsGameButton
 
 from typing import Dict, List, Tuple, Any, Optional
 from functools import partial
-from random import randint
+from random import randint, choice
 import asyncio
 import os
 
@@ -512,6 +513,11 @@ class WhiteJackActionView(discord.ui.View):
 class MemoryGameView(discord.ui.View):
     """ View for the Memory game. """
 
+    emojis: List[str] = [
+        '🤪', '<:Classypepe:532302844657795072>', '<:leoblabla:978481579590570034>',
+        '<:peepoGiveloveKing:755691944247689236>', '<:peepoQueen:757105478714130512>'
+    ]
+
     def __init__(self, client: commands.Bot, member: discord.Member, timeout: Optional[float] = 180) -> None:
         """ Class init method. """
 
@@ -521,13 +527,17 @@ class MemoryGameView(discord.ui.View):
         self.member = member
         self.button_map: Dict[int, List[discord.Button]] = {}
         self.value: bool = False
-        self.emoji: str = '🤪'
 
+        # Emoji info
+        self.emoji: str = self.get_random_emoji()
+        self.emojis_count: int = 4
+
+        # Card info
         self.generated_cards = []
         self.selected_cards = []
         self.generate_cards()
 
-        # Game status
+        # Game info
         self.lives: int = 3
         self.right_answers: int = 0
         self.level: int = 1
@@ -573,6 +583,17 @@ class MemoryGameView(discord.ui.View):
         """ Returns the game's message content. """
 
         return f"{self.lives}❤ | {self.right_answers}/{len(self.generated_cards)}✅ (`Lvl {self.level}`)"
+    
+    def get_random_emoji(self, new: bool = False) -> str:
+        """ Gets a random emoji from the emojis list.
+        :param new: Whether to get a non-repeated emoji. """
+
+        while True:
+            emoji = choice(self.emojis)
+            if new and len(self.emojis) > 1:
+                if new == self.emoji:
+                    continue
+            return emoji
 
     def generate_cards(self) -> None:
         """ Generates random cards """
@@ -592,7 +613,7 @@ class MemoryGameView(discord.ui.View):
         
         # Generates X flagged cards
         self.generated_cards.clear()
-        for _ in range (4):
+        for _ in range(self.emojis_count):
             while True:
                 x, y = randint(0, 4), randint(0, 4)
                 button = self.button_map[y][x]
@@ -608,19 +629,25 @@ class MemoryGameView(discord.ui.View):
             for button in buttons:
                 self.add_item(button)
     
+    
     async def next_level(self, message: discord.Message) -> None:
         """ Updates the view's state for the next game level.
         :param message: The original game message. """
 
         self.level += 1
-        # Gives 1 life point for each level multiple of 5
-        if self.level % 5 == 0 and self.lives != 3:
-            self.lives += 1
+        # Changes game state every 5 turns
+        if self.level % 5 == 0:            
+            self.emoji = self.get_random_emoji(new=True)
+            # Gives 1 life point for each level multiple of 5
+            if self.lives != 3:
+                self.lives += 1
+        
+        if self.level % 10 == 0:
+            if self.emojis_count < 10:
+                self.emojis_count += 1
         
         # Reset game state
-        self.right_answers = 0
-        self.button_map.clear()
-        self.selected_cards.clear()
+        self.reset_game_status()
         self.generate_cards()
         content = self.get_content()
         await message.edit(content=content, view=self)
@@ -630,6 +657,13 @@ class MemoryGameView(discord.ui.View):
         await utils.remove_emoji_buttons(self)
         # Edits message
         await message.edit(view=self)
+
+    def reset_game_status(self) -> None:
+        """ Resets the game status. """
+
+        self.right_answers = 0
+        self.button_map.clear()
+        self.selected_cards.clear()
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
         """ Checks whether the user can interact with the buttons. """
