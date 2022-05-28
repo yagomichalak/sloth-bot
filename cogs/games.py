@@ -542,12 +542,6 @@ class Games(*minigames_cogs):
                 return await ctx.send(f"**You're not even in rehab, {author.mention}!**")
 
             return await ctx.send(f"**{addict} is not even in rehab, {author.mention}!**")
-        else:
-            if current_ts - rehab[1] < 86400:
-                if author == addict:
-                    return await ctx.send(f"**You're not even in rehab, {author.mention}!**")
-
-                return await ctx.send(f"**{addict} is not even in rehab, {author.mention}!**")
 
         await self.delete_rehab_member(addict.id, current_ts)
         if author == addict:
