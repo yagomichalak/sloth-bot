@@ -22,7 +22,7 @@ class TicTacToeButton(discord.ui.Button):
         user: discord.Member = interaction.user
         await interaction.response.defer()
         i, ii = tuple(self.custom_id.replace('ttt_button:', '').split('_'))
-        coords_played: Tuple[int, int, int] = (int(i), int(ii))
+        coords_played: Tuple[int, int] = (int(i), int(ii))
 
         all_coords_played = [
             coord for key in self.view.coords.keys() for coord in self.view.coords[key]
@@ -189,4 +189,3 @@ class FlagsGameButton(discord.ui.Button):
 
         # Generates a new guess
         await self.view.cog.generate_flag_game(self.view.ctx, message=interaction.message, points=self.view.points, round=self.view.round + 1, flags=self.view.flags)
-

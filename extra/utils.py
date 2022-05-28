@@ -238,7 +238,19 @@ async def disable_buttons(view: discord.ui.View) -> None:
     for child in view.children:
         child.disabled = True
 
+async def enable_buttons(view: discord.ui.View) -> None:
+    """ Enables all buttons from a view.
+    :param view: The view from which to enable the buttons. """
 
+    for child in view.children:
+        child.disabled = False
+
+async def remove_emoji_buttons(view: discord.ui.View) -> None:
+    """ Removes all button emojis from a view.
+    :param view: The view from which to remove the buttons emojis. """
+
+    for child in view.children:
+        child.emoji = None
 
 async def audio(client: commands.Bot, voice_channel: discord.VoiceChannel, member: discord.Member, audio_path: str) -> None:
     """ Plays an audio.

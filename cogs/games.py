@@ -11,11 +11,14 @@ from extra import utils
 from extra.slothclasses.player import Player
 from extra.minigames.connect_four import ConnectFour
 from extra.minigames.blackjack.blackjack import BlackJack
-from extra.minigames.view import MoveObjectGameView, TicTacToeView, FlagsGameView
+from extra.minigames.whitejack.whitejack import WhiteJack
+from extra.minigames.view import MoveObjectGameView, TicTacToeView, FlagsGameView, MemoryGameView
 from extra.minigames.rehab_members import RehabMembersTable
+from extra.minigames.memory import MemoryTable
 
 minigames_cogs: List[commands.Cog] = [
-    ConnectFour, BlackJack, RehabMembersTable
+    ConnectFour, BlackJack, WhiteJack, RehabMembersTable,
+    MemoryTable
 ]
 
 class Games(*minigames_cogs):
@@ -539,12 +542,6 @@ class Games(*minigames_cogs):
                 return await ctx.send(f"**You're not even in rehab, {author.mention}!**")
 
             return await ctx.send(f"**{addict} is not even in rehab, {author.mention}!**")
-        else:
-            if current_ts - rehab[1] < 86400:
-                if author == addict:
-                    return await ctx.send(f"**You're not even in rehab, {author.mention}!**")
-
-                return await ctx.send(f"**{addict} is not even in rehab, {author.mention}!**")
 
         await self.delete_rehab_member(addict.id, current_ts)
         if author == addict:
@@ -552,6 +549,24 @@ class Games(*minigames_cogs):
             
         await ctx.send(f"**{author.mention} just took {addict.mention} out of rehab!**")
         
+    @commands.command(aliases=["mm", "memo"])
+    async def memory(self, ctx) -> None:
+        """ Plays the Memory game. """
+
+        member: discord.Member = ctx.author
+
+        view: discord.ui.View = MemoryGameView(self.client, member)
+        content = view.get_content()
+        msg = await ctx.send(content=content, view=view)
+
+        await asyncio.sleep(2)
+        await utils.enable_buttons(view)
+        await utils.remove_emoji_buttons(view)
+        await msg.edit(view=view)
+        await view.wait()
+        
+        if view.value is None:
+            await msg.edit(content="**Timeout!**")
 
 def setup(client) -> None:
     """ Cog's setup function. """
