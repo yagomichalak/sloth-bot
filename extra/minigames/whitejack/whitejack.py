@@ -35,7 +35,7 @@ class WhiteJack(*whitejack_db):
     @Player.poisoned()
     @commands.cooldown(1, 3, commands.BucketType.user)
     @RehabMembersTable.in_rehab()
-    @utils.not_ready()
+    # @utils.not_ready()
     async def start_whitejack_game(self, ctx, bet = None) -> None:
         """ Starts the Whitejack game.
         :param bet: The amount of money you wanna bet.
@@ -45,6 +45,7 @@ class WhiteJack(*whitejack_db):
 
         player: discord.Member = ctx.author
         max_bet: int = 2500
+        guild = ctx.guild
 
         if not bet:
             ctx.command.reset_cooldown(ctx)
@@ -70,17 +71,76 @@ class WhiteJack(*whitejack_db):
                 embed=discord.Embed(description=f"**{player.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one, or in the button below!**"),
                 view=view)
 
-
         player_bal = user_currency[0][1]
         minimum_bet = 50
 
+        # Check if player's blackjack game is active
+        if player.id in self.blackjack_games[guild.id]:
+            ctx.command.reset_cooldown(ctx)
+            await ctx.send("**You are already in a game!**")
+        if bet < minimum_bet:
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.send(f"**The minimum bet is `{minimum_bet} leaves`!**")
+        if player_bal < bet:
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.reply(f"**You don't have `{bet}`!**")
         if bet < minimum_bet:
             return await ctx.reply(f"**The minimum bet is `{minimum_bet}łł`!**")
 
-        
-        game = WhiteJackGame(self.client, bet, player, ctx.guild, player_bal-bet)
-        embed = await game.create_whitejack_embed()
+        game = WhiteJackGame(self.client, bet, player, guild, player_bal)
+        self.blackjack_games[guild.id][player.id] = game
+        if game.status == 'finished':
+            del self.blackjack_games[guild.id][player.id]
 
+        embed = await game.create_whitejack_embed()
         whitejack_view: discord.ui.View = WhiteJackActionView(self.client, player, game)
 
-        await ctx.send(embed=embed, view=whitejack_view)
+        if game.status == 'finished':
+            await utils.disable_buttons(whitejack_view)
+
+        msg = await ctx.send(embed=embed, view=whitejack_view)
+        await whitejack_view.wait()
+
+        if game.state == 'win':
+            await self.insert_user_data(type="wins", user_id=player.id)
+
+            addition = bet
+            if game.doubled:
+                addition *= 2
+            if game.blackjack:
+                addition = int(bet * 1.5)
+
+            player_bal += addition
+            await SlothCurrency.update_user_money(player.id, addition)
+
+        elif game.state == 'lose':
+            await self.insert_user_data(type="losses", user_id=player.id)
+
+            subtraction = bet
+            if game.doubled:
+                subtraction *= 2
+            if game.blackjack:
+                subtraction = int (bet * 0.75)
+
+            player_bal -= subtraction
+            await SlothCurrency.update_user_money(player.id, -subtraction)
+
+        elif game.state == 'surrender':
+            await self.insert_user_data('surrenders', player.id)
+            
+            subtraction = int(bet * 0.35)
+
+            player_bal -= subtraction
+            await SlothCurrency.update_user_money(player.id, -subtraction)
+        
+        elif game.state == 'draw':
+            await self.insert_user_data('draws', player.id)
+
+        print(f"Your current balance: {player_bal}")
+        new_footer = f"Whitejack: {player_bal}łł"
+        embed = msg.embeds[0]
+        if embed.footer.text != new_footer:
+            embed.set_footer(text=new_footer)
+            await msg.edit(embed=embed)
+
+        
