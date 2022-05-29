@@ -1231,7 +1231,7 @@ class Merchant(Player):
 
         confirm_view = ConfirmButton(member, timeout=60)
         msg = await ctx.send(
-            content=f"**Are you sure you want to spend `{temp_leaves}` out of `{leaves}łł` to recover `{temp_points}lp` to your pet, {member.mention}!**",
+            content=f"**Are you sure you want to spend `{temp_leaves}` out of `{leaves}łł` to recover `{temp_points}fp` to your pet, {member.mention}!**",
             view=confirm_view)
         await confirm_view.wait()
 
