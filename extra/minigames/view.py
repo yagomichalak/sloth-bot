@@ -598,6 +598,7 @@ class WhiteJackActionView(discord.ui.View):
         """ Ends the game.
         :param interaction: The interaction. """
 
+        print('le jeu est fini')
         await utils.disable_buttons(self)
         await interaction.followup.edit_message(interaction.message.id, view=self)
         self.stop()

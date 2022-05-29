@@ -77,7 +77,7 @@ class WhiteJack(*whitejack_db):
         # Check if player's blackjack game is active
         if player.id in self.blackjack_games[guild.id]:
             ctx.command.reset_cooldown(ctx)
-            await ctx.send("**You are already in a game!**")
+            return await ctx.send("**You are already in a game!**")
         if bet < minimum_bet:
             ctx.command.reset_cooldown(ctx)
             return await ctx.send(f"**The minimum bet is `{minimum_bet} leaves`!**")
@@ -89,14 +89,16 @@ class WhiteJack(*whitejack_db):
 
         game = WhiteJackGame(self.client, bet, player, guild, player_bal)
         self.blackjack_games[guild.id][player.id] = game
+
         if game.status == 'finished':
             del self.blackjack_games[guild.id][player.id]
-
+            
         embed = await game.create_whitejack_embed()
         whitejack_view: discord.ui.View = WhiteJackActionView(self.client, player, game)
 
         if game.status == 'finished':
             await utils.disable_buttons(whitejack_view)
+            whitejack_view.stop()
 
         msg = await ctx.send(embed=embed, view=whitejack_view)
         await whitejack_view.wait()
@@ -136,9 +138,8 @@ class WhiteJack(*whitejack_db):
         elif game.state == 'draw':
             await self.insert_user_data('draws', player.id)
 
-        print(f"Your current balance: {player_bal}")
         new_footer = f"Whitejack: {player_bal}łł"
-        embed = msg.embeds[0]
+        embed = await game.create_whitejack_embed()
         if embed.footer.text != new_footer:
             embed.set_footer(text=new_footer)
             await msg.edit(embed=embed)

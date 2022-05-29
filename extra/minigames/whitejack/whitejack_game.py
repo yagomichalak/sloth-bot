@@ -196,7 +196,7 @@ class WhiteJackGame(*cogs):
         elif self.dealer_total > self.player_total:
             await self.lose_event()
         else:
-            await self.draw_event()
+            self.draw_event()
 
     # Action of double in blackjack
     async def double(self):
