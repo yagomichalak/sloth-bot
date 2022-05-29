@@ -275,7 +275,7 @@ class SlothReputation(*currency_cogs):
             await self.time_score(ctx)
         elif info_for == 'Items':
             await self.items_score(ctx)
-	elif info_for == 'Memory':
+        elif info_for == 'Memory':
             await self.memory_score(ctx)
 
     @commands.command(aliases=['leaderboard', 'lb', 'scoreboard'])
