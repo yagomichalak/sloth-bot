@@ -1577,3 +1577,38 @@ class Munk(Player):
             await ctx.send(f"**Something went wrong with it, try again later, {author.mention}!**")
         else:
             await ctx.send(f"**Successfully transferred your Quest to {member.mention}, {author.mention}!**")
+
+    async def get_top_ten_tribe_leaves(self) -> List[List[Union[str, int]]]:
+        """ Gets the top ten tribes with most leaves. """
+        
+        mycursor, _ = await the_database()
+        await mycursor.execute("""
+            SELECT SP.tribe, SUM(UC.user_money) AS tm
+            FROM UserCurrency AS UC
+            INNER JOIN
+                SlothProfile AS SP
+            ON UC.user_id
+            GROUP BY tribe
+            ORDER BY tm DESC
+            LIMIT 10
+        """)
+        tribe_leaves = await mycursor.fetchall()
+        await mycursor.close()
+        return tribe_leaves
+
+    async def get_all_tribe_leaves(self) -> List[List[Union[str, int]]]:
+        """ Gets all tribe leaves. """
+        
+        mycursor, _ = await the_database()
+        await mycursor.execute("""
+            SELECT SP.tribe, SUM(UC.user_money) AS tm
+            FROM UserCurrency AS UC
+            INNER JOIN
+                SlothProfile AS SP
+            ON UC.user_id
+            GROUP BY tribe
+            ORDER BY tm DESC
+        """)
+        tribe_leaves = await mycursor.fetchall()
+        await mycursor.close()
+        return tribe_leaves

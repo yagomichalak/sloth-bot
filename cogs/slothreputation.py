@@ -262,7 +262,7 @@ class SlothReputation(*currency_cogs):
     @Player.poisoned()
     async def _leaderboard(self, ctx, 
         info_for: Option(str, description="The leaderboard to show the information for.", choices=[
-            'Reputation', 'Level', 'Leaves', 'Time', 'Items', 'Memory'])) -> None:
+            'Reputation', 'Level', 'Leaves', 'Time', 'Items', 'Memory', 'Tribe Leaves'])) -> None:
         """ Shows the leaderboard. """
 
         if info_for == 'Reputation':
@@ -277,6 +277,8 @@ class SlothReputation(*currency_cogs):
             await self.items_score(ctx)
         elif info_for == 'Memory':
             await self.memory_score(ctx)
+        elif info_for == 'Tribe Leaves':
+            await self.tribe_leaf_score(ctx)
 
     @commands.command(aliases=['leaderboard', 'lb', 'scoreboard'])
     @Player.poisoned()
@@ -372,6 +374,33 @@ class SlothReputation(*currency_cogs):
         for i, sm in enumerate(top_ten_users):
             member = discord.utils.get(ctx.guild.members, id=sm[0])
             leaderboard.add_field(name=f"[{i + 1}]# - __**{member}**__", value=f"__**Leaves:**__ `{sm[1]}` 🍃",
+                                  inline=False)
+            if i + 1 == 10:
+                break
+        return await answer(embed=leaderboard)
+
+    @commands.command(aliases=['tribe_leaf_board', 'tribeleafboard', 'tribeleaves', 'tribe_leaves_leaderboard', 'tribeleavesleaderboard', 'tll'])
+    @Player.poisoned()
+    async def tribe_leaf_score(self, ctx):
+        """ Shows the top ten tribes with most leaves in the leaderboard. """
+
+        answer: discord.PartialMessageable = None
+        if isinstance(ctx, commands.Context):
+            answer = ctx.send
+        else:
+            answer = ctx.respond
+
+        SlothClass = self.client.get_cog('SlothClass')
+
+        top_ten_tribes = await SlothClass.get_top_ten_tribe_leaves()
+        current_time = await utils.get_time_now()
+        leaderboard = discord.Embed(title="🍃 __The Language Sloth's Tribe Leaf Ranking Leaderboard__ 🍃", colour=discord.Colour.dark_green(),
+                                    timestamp=current_time)
+        leaderboard.set_thumbnail(url=ctx.guild.icon.url)
+
+        # Embeds each one of the top ten users.
+        for i, tribe in enumerate(top_ten_tribes):
+            leaderboard.add_field(name=f"[{i + 1}]# - __**{tribe[0]}**__", value=f"__**Leaves:**__ `{tribe[1]}` 🍃",
                                   inline=False)
             if i + 1 == 10:
                 break
