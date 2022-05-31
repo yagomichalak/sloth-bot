@@ -1587,7 +1587,7 @@ class Munk(Player):
             FROM UserCurrency AS UC
             INNER JOIN
                 SlothProfile AS SP
-            ON UC.user_id
+            ON UC.user_id = SP.user_id
             GROUP BY tribe
             ORDER BY tm DESC
             LIMIT 10
@@ -1605,7 +1605,7 @@ class Munk(Player):
             FROM UserCurrency AS UC
             INNER JOIN
                 SlothProfile AS SP
-            ON UC.user_id
+            ON UC.user_id = SP.user_id
             GROUP BY tribe
             ORDER BY tm DESC
         """)

@@ -249,6 +249,15 @@ class GalaxyVcTable(commands.Cog):
 		await mycursor.close()
 		return rooms
 
+	async def get_galaxy_rooms_by_expiration_time(self) -> List[List[Union[str, int]]]:
+		""" Get all Galaxy Rooms. """
+
+		mycursor, _ = await the_database()
+		await mycursor.execute("SELECT user_id, user_ts FROM GalaxyVc ORDER BY user_ts ASC")
+		rooms = await mycursor.fetchall()
+		await mycursor.close()
+		return rooms
+
 	async def get_galaxy_rooms(self) -> List[List[Union[str, int]]]:
 		""" Get all Galaxy Rooms. """
 

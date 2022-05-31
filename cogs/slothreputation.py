@@ -262,7 +262,7 @@ class SlothReputation(*currency_cogs):
     @Player.poisoned()
     async def _leaderboard(self, ctx, 
         info_for: Option(str, description="The leaderboard to show the information for.", choices=[
-            'Reputation', 'Level', 'Leaves', 'Time', 'Items', 'Memory', 'Tribe Leaves'])) -> None:
+            'Reputation', 'Level', 'Leaves', 'Time', 'Items', 'Memory', 'Tribe Leaves', 'Galaxy Expiration'])) -> None:
         """ Shows the leaderboard. """
 
         if info_for == 'Reputation':
@@ -279,6 +279,8 @@ class SlothReputation(*currency_cogs):
             await self.memory_score(ctx)
         elif info_for == 'Tribe Leaves':
             await self.tribe_leaf_score(ctx)
+        elif info_for == 'Galaxy Expiration':
+            await self.galaxy_expiration_score(ctx)
 
     @commands.command(aliases=['leaderboard', 'lb', 'scoreboard'])
     @Player.poisoned()
@@ -508,6 +510,36 @@ class SlothReputation(*currency_cogs):
             leaderboard.add_field(name=f"[{i + 1}]# - __**{member}**__", 
                 value=f"__**Level:**__ `{sm[1]}` (<t:{sm[2]}:R>)",
                                   inline=False)
+            if i + 1 == 10:
+                break
+        return await answer(embed=leaderboard)
+
+    @commands.command(aliases=['galaxy_board', 'galaxy_score', 'galaxyboard', 'galboard', 'galexps', 'galex'])
+    @Player.poisoned()
+    async def galaxy_expiration(self, ctx):
+        """ Shows all galaxy rooms with their expiration time in the leaderboard. """
+
+        answer: discord.PartialMessageable = None
+        if isinstance(ctx, commands.Context):
+            answer = ctx.send
+        else:
+            answer = ctx.respond
+
+        CreateSmartRoom = self.client.get_cog("CreateSmartRoom")
+
+        get_all_galaxies = await CreateSmartRoom.get_galaxy_rooms_by_expiration_time()
+        current_time = await utils.get_time_now()
+        leaderboard = discord.Embed(
+            title="__The Language Sloth's Galaxy Expiration Ranking Leaderboard__", 
+            color=discord.Color.dark_green(), timestamp=current_time)
+        leaderboard.set_thumbnail(url=ctx.guild.icon.url)
+
+        # Embeds each one of the top ten users.
+        for i, sm in enumerate(get_all_galaxies):
+            member = discord.utils.get(ctx.guild.members, id=sm[0])
+            leaderboard.add_field(
+                name=f"[{i + 1}]# - __**{member}**__", value=f"__**Galaxy Room Expires in:**__ <t:{sm[1]}:R>", inline=False
+            )
             if i + 1 == 10:
                 break
         return await answer(embed=leaderboard)
