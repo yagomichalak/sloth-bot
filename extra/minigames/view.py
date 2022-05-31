@@ -480,7 +480,7 @@ class WhiteJackActionView(discord.ui.View):
         self.game: Any = game
         self.cog = client.get_cog("Games")
 
-    @discord.ui.button(label="hit", style=discord.ButtonStyle.blurple, custom_id="bj_hit_id")
+    @discord.ui.button(style=discord.ButtonStyle.blurple, custom_id="bj_hit_id", emoji='👊🏻')
     async def black_jack_hit_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
         """ Button for hitting in the BlackJack game. """
 
@@ -503,7 +503,7 @@ class WhiteJackActionView(discord.ui.View):
         else:
             await interaction.followup.send("**You must be in a blackjack game!**")
 
-    @discord.ui.button(label="stand", style=discord.ButtonStyle.blurple, custom_id="bj_stand_id")
+    @discord.ui.button(style=discord.ButtonStyle.blurple, custom_id="bj_stand_id", emoji='✊🏻')
     async def black_jack_stand_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
         """ Button for standing in the BlackJack game. """
 
@@ -527,7 +527,7 @@ class WhiteJackActionView(discord.ui.View):
         else:
             await interaction.followup.send("**You must be in a blackjack game!**")
 
-    @discord.ui.button(label="double", style=discord.ButtonStyle.blurple, custom_id="bj_double_id")
+    @discord.ui.button(style=discord.ButtonStyle.blurple, custom_id="bj_double_id", emoji='✌🏻')
     async def black_jack_double_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
         """ Button for doubling in the BlackJack game. """
 
@@ -566,7 +566,7 @@ class WhiteJackActionView(discord.ui.View):
         else:
             await interaction.followup.send("**You must be in a blackjack game!**")
 
-    @discord.ui.button(label="surrender", style=discord.ButtonStyle.gray, custom_id="bj_surrender_id")
+    @discord.ui.button(style=discord.ButtonStyle.gray, custom_id="bj_surrender_id", emoji='🏳️')
     async def black_jack_surrender_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
         """ Button for surrendering in the BlackJack game. """
 
