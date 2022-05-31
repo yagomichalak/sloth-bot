@@ -6,7 +6,7 @@ from mysqldb import *
 import copy
 import random
 from ..blackjack.blackjack_db import BlackJackDB
-from .create_cards_pack import cards_pack
+from .create_cards_pack import wj_pack
 from typing import List, Union, Optional, Dict
 from .enums import EmbedColorEnum, EmbedStateEnum
 from extra import utils
@@ -48,7 +48,7 @@ class WhiteJackGame(*cogs):
         self.state = None
         self.title = f"**{player.display_name}**'s game ({self.bet} leaves 🍃)"
         self.status = 'in game'
-        self.game_pack: List = copy.deepcopy(cards_pack)
+        self.game_pack: List = copy.deepcopy(wj_pack)
         random.shuffle(self.game_pack)
 
         # Draw first 2 cards for dealer
@@ -85,6 +85,7 @@ class WhiteJackGame(*cogs):
             if card.number == 'A':
                 self.player_a_number += 1
 
+        print("haha")
         if self.player_total == self.dealer_total == 21:
             self.draw_event()
         elif self.player_total == 21:
@@ -166,7 +167,7 @@ class WhiteJackGame(*cogs):
         secret_card = self.dealer_cards[0]
         if secret_card.number == '1':
             secret_card.number = 'A'
-        secret_card.symbol = '`' + secret_card.number + secret_card.card_type + '`'
+        secret_card.symbol = secret_card.card_type
         
         self.dealer_cards[0] = secret_card
         self.dealer_total_showed = self.dealer_total
