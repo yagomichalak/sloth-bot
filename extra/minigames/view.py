@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 from emoji import emoji_count
 from .buttons import TicTacToeButton, FlagsGameButton
+from .whitejack.enums import ButtonStyleEnum
 
 from typing import Dict, List, Tuple, Any, Optional
 from functools import partial
@@ -455,6 +456,7 @@ class BlackJackActionView(discord.ui.View):
 
         await utils.disable_buttons(self)
         await interaction.followup.edit_message(interaction.message.id, view=self)
+
         self.stop()
 
     async def on_timeout(self) -> None:
@@ -599,6 +601,8 @@ class WhiteJackActionView(discord.ui.View):
         :param interaction: The interaction. """
 
         await utils.disable_buttons(self)
+        style: discord.ButtonStyle = getattr(ButtonStyleEnum, self.game.state.lower()).value
+        await utils.change_style_buttons(self, style)
         await interaction.followup.edit_message(interaction.message.id, view=self)
         self.stop()
 

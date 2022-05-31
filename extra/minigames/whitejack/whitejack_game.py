@@ -85,7 +85,6 @@ class WhiteJackGame(*cogs):
             if card.number == 'A':
                 self.player_a_number += 1
 
-        print("haha")
         if self.player_total == self.dealer_total == 21:
             self.draw_event()
         elif self.player_total == 21:
