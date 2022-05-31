@@ -46,7 +46,7 @@ class WhiteJackGame(*cogs):
         self.dealer_cards: List = []
 
         self.state = None
-        self.title = f"**{player.display_name}**'s game ({self.bet} leaves 🍃)"
+        self.title = f"**Bet: {self.bet} leaves 🍃"
         self.status = 'in game'
         self.game_pack: List = copy.deepcopy(wj_pack)
         random.shuffle(self.game_pack)
@@ -132,7 +132,7 @@ class WhiteJackGame(*cogs):
         if state:
             title = self.title
         else:
-            title: str = f"{player_name}'s game ({self.bet} leaves 🍃)"
+            title: str = f"Bet: {self.bet} leaves 🍃"
 
         embed: discord.Embed = discord.Embed(
             title=title,
@@ -140,10 +140,10 @@ class WhiteJackGame(*cogs):
             timestamp=current_time
         )
 
-        embed.add_field(name="Player", value=self.player_info())
-        embed.add_field(name="Dealer", value=self.dealer_info())
+        embed.add_field(name="__Player__", value=self.player_info())
+        embed.add_field(name="__Dealer__", value=self.dealer_info())
 
-        embed.set_author(name=f"{player_name}", icon_url=self.player.display_avatar)
+        embed.set_author(name=player_name, icon_url=self.player.display_avatar)
         embed.set_footer(text=f"Whitejack: {self.current_money}łł")
 
         return embed
@@ -215,7 +215,7 @@ class WhiteJackGame(*cogs):
     # When dealer have blackjack
     def blackjack_event_dealer(self):
 
-        self.title = f"Dealer blackjack - **{self.player.display_name}** lost {int(self.bet * 0.75)} leaves 🍃"
+        self.title = f"Dealer Whitejack - You lost {int(self.bet * 0.75)} leaves 🍃"
         self.state = 'lose'
         self.blackjack = True
         self.status = 'finished'
@@ -226,7 +226,7 @@ class WhiteJackGame(*cogs):
     def blackjack_event_player(self):
 
         # Change title and end the game
-        self.title = f"Player Blackjack - **{self.player.display_name}** won {int(self.bet * 1.5)} leaves 🍃"
+        self.title = f"Player Whitejack - You won {int(self.bet * 1.5)} leaves 🍃"
         self.state = 'win'
         self.blackjack = True
         self.status = 'finished'
@@ -243,7 +243,7 @@ class WhiteJackGame(*cogs):
             bet_var: str = int(self.bet)
 
         # Change title and end the game
-        self.title = f"Win - **{self.player.display_name}** won {bet_var} leaves 🍃"
+        self.title = f"Win - You won {bet_var} leaves 🍃"
         self.state = 'win'
         self.status = 'finished'
         self.dealer_final_show()
@@ -252,7 +252,7 @@ class WhiteJackGame(*cogs):
     async def surrender_event(self):
         # Change title and end the game
         
-        self.title = f"Surrender - **{self.player.display_name}** lost {int(self.bet * 0.35)} leaves 🍃"
+        self.title = f"Surrender - You lost {int(self.bet * 0.35)} leaves 🍃"
         self.state = 'surrender'
         self.status = 'finished'
         self.dealer_final_show()
@@ -267,7 +267,7 @@ class WhiteJackGame(*cogs):
         else:
             bet_var: str = int(self.bet)
 
-        self.title = f"Lose - **{self.player.display_name}** lost {bet_var} leaves 🍃"
+        self.title = f"Lose - You lost {bet_var} leaves 🍃"
         self.state = 'lose'
         self.status = 'finished'
         self.dealer_final_show()
@@ -277,7 +277,7 @@ class WhiteJackGame(*cogs):
         # Refund player's leaves 🍃 if he draw
 
         # Change title and end the game
-        self.title = f"Draw - **{self.player.display_name}** won 0 leaves 🍃"
+        self.title = f"Draw - You won 0 leaves 🍃"
         self.state = 'draw'
         self.status = 'finished'
         self.dealer_final_show()
