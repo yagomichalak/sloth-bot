@@ -24,3 +24,11 @@ class ButtonStyleEnum(enum.Enum):
     lose: discord.ButtonStyle = discord.ButtonStyle.danger
     draw: discord.ButtonStyle = discord.ButtonStyle.blurple
     surrender: discord.ButtonStyle = discord.ButtonStyle.gray
+
+class ButtonOppositeStyleEnum(enum.Enum):
+    """ Class for the WhiteJack's button opposite style enum. """
+
+    win: discord.ButtonStyle = discord.ButtonStyle.danger
+    lose: discord.ButtonStyle = discord.ButtonStyle.success
+    draw: discord.ButtonStyle = discord.ButtonStyle.gray
+    surrender: discord.ButtonStyle = discord.ButtonStyle.blurple

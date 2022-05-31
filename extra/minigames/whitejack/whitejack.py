@@ -75,7 +75,7 @@ class WhiteJack(*whitejack_db):
         minimum_bet = 50
 
         # Check if player's blackjack game is active
-        if player.id in self.blackjack_games[guild.id]:
+        if player.id in self.whitejack_games[guild.id]:
             ctx.command.reset_cooldown(ctx)
             return await ctx.send("**You are already in a game!**")
         if bet < minimum_bet:
@@ -87,11 +87,20 @@ class WhiteJack(*whitejack_db):
         if bet < minimum_bet:
             return await ctx.reply(f"**The minimum bet is `{minimum_bet}łł`!**")
 
+        await self.white_jack_callback(bet, player, guild, player_bal, ctx=ctx)
+    
+    async def white_jack_callback(self, 
+        bet: int, player: discord.Member, guild: discord.Guild, player_bal: int,
+        ctx: commands.Context = None, interaction: discord.Interaction = None
+    ) -> None:
+
+        SlothCurrency = self.client.get_cog('SlothCurrency')
+
         game = WhiteJackGame(self.client, bet, player, guild, player_bal)
-        self.blackjack_games[guild.id][player.id] = game
+        self.whitejack_games[guild.id][player.id] = game
 
         if game.status == 'finished':
-            del self.blackjack_games[guild.id][player.id]
+            del self.whitejack_games[guild.id][player.id]
             
         embed = await game.create_whitejack_embed()
         whitejack_view: discord.ui.View = WhiteJackActionView(self.client, player, game)
@@ -100,7 +109,12 @@ class WhiteJack(*whitejack_db):
             await utils.disable_buttons(whitejack_view)
             whitejack_view.stop()
 
-        msg = await ctx.send(embed=embed, view=whitejack_view)
+        msg: discord.Message
+        if ctx:
+            msg = await ctx.send(embed=embed, view=whitejack_view)
+        else:
+            msg = await interaction.followup.edit(embed=embed, view=whitejack_view)
+
         await whitejack_view.wait()
 
         if game.state == 'win':
