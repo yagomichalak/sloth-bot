@@ -688,7 +688,6 @@ class Prawler(Player):
 		if not user_currency:
 			return await ctx.send(f"**You don't even have an account, therefore you cannot pay for someone's rescue, {member.mention}!**")
 
-
 		tribe_members = await self.get_tribe_members(hostage_tribe[0])
 		tribe_member_ids: List[int] = list(map(lambda m: m[0], tribe_members))
 		currencies = await self.get_users_currency(tribe_member_ids)
@@ -704,9 +703,12 @@ class Prawler(Player):
 		if not confirm:
 			return await ctx.send(f"**Not doing it then, {member.mention}!**")
 
+		kidnap_skill = await self.get_skill_action_by_target_id_and_skill_type(user_id=ctx.author.id, skill_type='kidnap')
+
 		try:
 			await self.delete_skill_action_by_target_id_and_skill_type(hostage.id, 'kidnap')
 			await self.client.get_cog('SlothCurrency').update_user_money(member.id, -rescue_money)
+			await self.client.get_cog('SlothCurrency').update_user_money(member.id, kidnap_skill[0])
 		except Exception as e:
 			print('Error at rescuing user from kidnap: ', e)
 			await ctx.send("**Something went wrong, try again later or contact an admin if the error persists!**")
