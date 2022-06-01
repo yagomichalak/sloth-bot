@@ -514,9 +514,9 @@ class SlothReputation(*currency_cogs):
                 break
         return await answer(embed=leaderboard)
 
-    @commands.command(aliases=['galaxy_board', 'galaxy_score', 'galaxyboard', 'galboard', 'galexps', 'galex'])
+    @commands.command(aliases=['galaxy_board', 'galaxy_score', 'galaxyboard', 'galboard', 'galexps', 'galex', 'galaxy_expiration'])
     @Player.poisoned()
-    async def galaxy_expiration(self, ctx):
+    async def galaxy_expiration_score(self, ctx):
         """ Shows all galaxy rooms with their expiration time in the leaderboard. """
 
         answer: discord.PartialMessageable = None
@@ -536,9 +536,10 @@ class SlothReputation(*currency_cogs):
 
         # Embeds each one of the top ten users.
         for i, sm in enumerate(get_all_galaxies):
+            deadline = sm[1] + 1209600
             member = discord.utils.get(ctx.guild.members, id=sm[0])
             leaderboard.add_field(
-                name=f"[{i + 1}]# - __**{member}**__", value=f"__**Galaxy Room Expires in:**__ <t:{sm[1]}:R>", inline=False
+                name=f"[{i + 1}]# - __**{member}**__", value=f"Galaxy Room Expires in: <t:{deadline}:R>", inline=False
             )
             if i + 1 == 10:
                 break
