@@ -245,6 +245,14 @@ async def enable_buttons(view: discord.ui.View) -> None:
     for child in view.children:
         child.disabled = False
 
+async def change_style_buttons(view: discord.ui.View, style: discord.ButtonStyle) -> None:
+    """ Changes all button styles from a view.
+    :param view: The view from which to change the button styles.
+    :param style: The new button style. """
+
+    for child in view.children:
+        child.style = style
+
 async def remove_emoji_buttons(view: discord.ui.View) -> None:
     """ Removes all button emojis from a view.
     :param view: The view from which to remove the buttons emojis. """

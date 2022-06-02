@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 from .buttons import TicTacToeButton, FlagsGameButton
+from .whitejack.enums import ButtonStyleEnum, ButtonOppositeStyleEnum
 
 from typing import Dict, List, Tuple, Any, Optional
 from random import randint, choice
@@ -307,7 +308,7 @@ class FlagsGameView(discord.ui.View):
         self.countries_names = countries_names
         self.points = points
         self.round = round
-        self.cog = self.client.get_cog('Games')
+        self.cog = self.cog
         self.used = False
         self.timeout_count = timeout_count
 
@@ -470,45 +471,187 @@ class WhiteJackActionView(discord.ui.View):
     def __init__(self, client: commands.Bot, player: discord.Member, game: Any) -> None:
         """ Class init method. """
 
-        super().__init__(timeout=120)
+        super().__init__(timeout=60)
         self.client = client
         self.player = player
         self.game: Any = game
         self.cog = client.get_cog("Games")
+        self.msg: discord.Message = None
 
-    @discord.ui.button(label="hit", style=discord.ButtonStyle.blurple, custom_id="wj_hit_id")
+    @discord.ui.button(style=discord.ButtonStyle.blurple, custom_id="wj_hit_id", emoji='👊🏻')
     async def white_jack_hit_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
-        """ Button for hitting in the BlackJack game. """
+        """ Button for hitting in the Whitejack game. """
 
         await interaction.response.defer()
-        await interaction.followup.send("**Hit**")
 
-    @discord.ui.button(label="stand", style=discord.ButtonStyle.blurple, custom_id="wj_stand_id")
+        guild_id = interaction.guild.id
+        cog = self.cog
+
+        if cog.whitejack_games.get(guild_id) is None:
+            cog.whitejack_games[guild_id] = {}
+
+        if interaction.user.id in cog.whitejack_games[guild_id]:
+            current_game = cog.whitejack_games[guild_id][interaction.user.id][self.game.session_id]
+            await current_game.hit_a_card()
+            if current_game.status == 'finished':
+                del cog.whitejack_games[guild_id][interaction.user.id][current_game.session_id]
+                return await self.end_game(interaction)
+            embed = await self.game.create_whitejack_embed()
+            await interaction.followup.edit_message(interaction.message.id, embed=embed)
+        else:
+            await interaction.followup.send("**You must be in a blackjack game!**")
+
+    @discord.ui.button(style=discord.ButtonStyle.blurple, custom_id="wj_stand_id", emoji='✊🏻')
     async def white_jack_stand_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
-        """ Button for standing in the BlackJack game. """
+        """ Button for standing in the Whitejack game. """
 
         await interaction.response.defer()
-        await interaction.followup.send("**Stand**")
 
-    @discord.ui.button(label="double", style=discord.ButtonStyle.blurple, custom_id="wj_double_id")
+        guild_id = interaction.guild.id
+        cog = self.cog
+
+
+        if cog.whitejack_games.get(guild_id) is None:
+            cog.whitejack_games[guild_id] = {}
+
+        if interaction.user.id in cog.whitejack_games[guild_id]:
+            current_game = cog.whitejack_games[guild_id][interaction.user.id][self.game.session_id]
+            await current_game.stand()
+            if current_game.status == 'finished':
+                del cog.whitejack_games[guild_id][interaction.user.id][current_game.session_id]
+                return await self.end_game(interaction)
+            embed = await self.game.create_whitejack_embed()
+            await interaction.followup.edit_message(interaction.message.id, embed=embed)
+        else:
+            await interaction.followup.send("**You must be in a blackjack game!**")
+
+    @discord.ui.button(style=discord.ButtonStyle.blurple, custom_id="wj_double_id", emoji='✌🏻')
     async def white_jack_double_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
-        """ Button for doubling in the BlackJack game. """
+        """ Button for doubling in the Whitejack game. """
 
         await interaction.response.defer()
-        await interaction.followup.send("**Double**")
 
-    @discord.ui.button(label="surrender", style=discord.ButtonStyle.gray, custom_id="wj_surrender_id")
+        player_id = interaction.user.id
+        guild_id = interaction.guild.id
+        cog = self.cog
+
+        SlothCurrency = self.client.get_cog('SlothCurrency')
+        user_currency = await SlothCurrency.get_user_currency(player_id)
+        player_bal = user_currency[0][1]
+
+        if cog.whitejack_games.get(guild_id) is None:
+            cog.whitejack_games[guild_id] = {}
+
+        # Check if player's blackjack game is active
+        if interaction.user.id in cog.whitejack_games[guild_id]:
+            current_game = cog.whitejack_games[guild_id][interaction.user.id][self.game.session_id]
+            # Checks whether the player has more than 4 cards  
+            if len(current_game.player_cards) > 4:
+                await interaction.followup.send("**You can double only in the first three rounds!**")
+
+            # Checks whether the player has sufficient funds for double
+            elif player_bal < current_game.bet:
+                await interaction.followup.send("**You have insufficient funds!**")
+            else:
+                await current_game.double()
+                if current_game.status == 'finished':
+                    del cog.whitejack_games[guild_id][interaction.user.id][current_game.session_id]
+                    return await self.end_game(interaction)
+
+            embed = await self.game.create_whitejack_embed()
+            await interaction.followup.edit_message(interaction.message.id, embed=embed)
+        else:
+            await interaction.followup.send("**You must be in a blackjack game!**")
+
+    @discord.ui.button(style=discord.ButtonStyle.gray, custom_id="wj_surrender_id", emoji='🏳️')
     async def white_jack_surrender_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
-        """ Button for surrendering in the BlackJack game. """
+        """ Button for surrendering in the Whitejack game. """
 
         await interaction.response.defer()
-        await interaction.followup.send("**Surrender**")
 
+        cog = self.cog
+
+        guild_id = interaction.guild.id
+        if cog.whitejack_games.get(guild_id) is None:
+            cog.whitejack_games[guild_id] = {}
+
+        # Check whether the player's blackjack game is active
+        if interaction.user.id in cog.whitejack_games[guild_id]:
+            current_game = cog.whitejack_games[guild_id][interaction.user.id][self.game.session_id]
+            await current_game.surrender_event()
+            if current_game.status == 'finished':
+                del cog.whitejack_games[guild_id][interaction.user.id][current_game.session_id]
+                return await self.end_game(interaction)
+
+            embed = current_game.create_whitejack_embed()
+            await interaction.followup.edit_message(interaction.message.id, embed=embed)
+        else:
+            await interaction.followup.send("**You must be in a blackjack game!**")
+
+    async def white_jack_refresh_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Button for refreshing the game state. """
+
+        # await utils.enable_buttons(self)
+        await interaction.response.defer()
+        await self.cog.white_jack_callback_before(self.game.bet, self.player, interaction.guild, self.game.current_money, interaction=interaction)
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
         """ Checks whether the person who clicked on the button is the one who started the blackjack. """
 
         return self.player.id == interaction.user.id
+
+    async def end_game(self, ctx: discord.PartialMessageable) -> None:
+        """ Ends the game.
+        :param interaction: The interaction. """
+
+        # Disable buttons
+        await utils.disable_buttons(self)
+        # Changes button styles
+        style: discord.ButtonStyle = getattr(ButtonStyleEnum, self.game.state.lower()).value
+        await utils.change_style_buttons(self, style)
+        # Adds a refresh button
+        await self.add_refresh_button()
+
+        msg: discord.Message
+        if isinstance(ctx, commands.Context):
+            msg = await ctx.send(view=self)
+        else:
+            msg = await ctx.followup.edit_message(ctx.message.id, view=self)
+        await self.cog.white_jack_callback_after(self, self.game, ctx.guild, msg=msg)
+
+    async def add_refresh_button(self) -> None:
+        """ Adds a button to refresh the game. """
+
+        # Gets the button's style
+        opposite_style: discord.ButtonStyle = getattr(ButtonOppositeStyleEnum, self.game.state.lower()).value
+
+        # Makes the refresh button
+        refresh_button: discord.ui.Button = discord.ui.Button(
+            style=opposite_style,
+            custom_id="wj_refresh_id",
+            emoji="🔃"
+        )
+        # Attaches the callback to the button
+        refresh_button.callback = partial(self.white_jack_refresh_button, refresh_button)
+
+        # Adds the button into the view
+        self.add_item(refresh_button)
+
+    async def on_timeout(self) -> None:
+        """ Puts the game status as finished when the game timeouts. """
+
+        cog = self.cog
+        if player_games := cog.whitejack_games[server_id].get(self.player.id):
+            if current_game := player_games.get(self.game.session_id):
+                if hasattr(current_game, 'status') and current_game.status == 'finished':
+                    print(current_game)
+                    del cog.whitejack_games[server_id][self.player.id][current_game.session_id]
+        
+        if self.msg:
+            await utils.disable_buttons(self)
+            await self.msg.edit(view=self)
+
+        return
 
 class MemoryGameView(discord.ui.View):
     """ View for the Memory game. """
