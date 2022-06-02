@@ -21,7 +21,7 @@ class WhiteJackGame(*cogs):
 
     def __init__(self, 
         client: commands.Bot, bet: int, player: discord.Member, 
-        guild: discord.Guild, current_money: int
+        guild: discord.Guild, current_money: int, session_id: int
     ) -> None:
         """ Class init method. """
         
@@ -32,6 +32,7 @@ class WhiteJackGame(*cogs):
         self.cog = self.client.get_cog('SlothCurrency')
         self.doubled = False
         self.blackjack = False
+        self.session_id = session_id
 
         # Player info
         self.player = player

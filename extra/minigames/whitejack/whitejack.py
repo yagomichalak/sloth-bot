@@ -11,6 +11,8 @@ from extra.minigames.rehab_members import RehabMembersTable
 from extra import utils
 import asyncio
 import os
+import string
+import random
 
 server_id: int = int(os.getenv('SERVER_ID', 123))
 
@@ -36,7 +38,7 @@ class WhiteJack(*whitejack_db):
     @commands.cooldown(1, 3, commands.BucketType.user)
     @RehabMembersTable.in_rehab()
     # @utils.not_ready()
-    async def start_whitejack_game(self, ctx, bet = None) -> None:
+    async def start_whitejack_game(self, ctx, bet = None, games: int = 1) -> None:
         """ Starts the Whitejack game.
         :param bet: The amount of money you wanna bet.
         
@@ -60,6 +62,18 @@ class WhiteJack(*whitejack_db):
         if bet > max_bet:
             ctx.command.reset_cooldown(ctx)
             return await ctx.reply(f"**The betting limit is `{max_bet}łł`!**")
+        
+        try:
+            games = int(games)
+        except ValueError:
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.reply("**Please, inform an integer value!**")
+
+        if games <= 0:
+            return await ctx.send(f"**You must have at least 1 game!**")
+
+        if games > 5:
+            return await ctx.send(f"**You can only have a maximum of 5 games at a time!**")
 
         SlothCurrency = self.client.get_cog('SlothCurrency')
         user_currency = await SlothCurrency.get_user_currency(player.id)
@@ -87,18 +101,24 @@ class WhiteJack(*whitejack_db):
         if bet < minimum_bet:
             return await ctx.reply(f"**The minimum bet is `{minimum_bet}łł`!**")
 
-        await self.white_jack_callback_before(bet, player, guild, player_bal, ctx=ctx)
+        for _ in range(games):
+            await self.white_jack_callback_before(bet, player, guild, player_bal, ctx=ctx)
     
     async def white_jack_callback_before(self, 
         bet: int, player: discord.Member, guild: discord.Guild, player_bal: int,
         ctx: commands.Context = None, interaction: discord.Interaction = None
     ) -> None:
 
-        game = WhiteJackGame(self.client, bet, player, guild, player_bal)
-        self.whitejack_games[guild.id][player.id] = game
+        session_id: int = self.generate_session_id()
+        game = WhiteJackGame(self.client, bet, player, guild, player_bal, session_id)
+        game_sessions = self.whitejack_games[guild.id]
+        if game_sessions.get(player.id):
+            game_sessions[player.id][session_id] = game
+        else:
+            game_sessions[player.id] = {session_id: game}
 
         if game.status == 'finished':
-            del self.whitejack_games[guild.id][player.id]
+            del self.whitejack_games[guild.id][player.id][game.session_id]
             
         embed = await game.create_whitejack_embed()
         whitejack_view: discord.ui.View = WhiteJackActionView(self.client, player, game)
@@ -163,3 +183,22 @@ class WhiteJack(*whitejack_db):
         await msg.edit(embed=embed)
 
         
+    def generate_session_id(self, length: Optional[int] = 18) -> str:
+        """ Generates a session ID.
+        :param length: The length of the session ID. [Default = 18] """
+
+        # Defines data
+        lower = string.ascii_lowercase
+        upper = string.ascii_uppercase
+        num = string.digits
+        symbols = string.punctuation
+
+        # Combines the data
+        all_chars = lower + upper + num + symbols
+
+        # Uses random 
+        temp = random.sample(all_chars, length)
+
+        # Create the session ID 
+        session_id = "".join(temp)
+        return session_id

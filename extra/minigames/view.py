@@ -493,10 +493,10 @@ class WhiteJackActionView(discord.ui.View):
             cog.whitejack_games[guild_id] = {}
 
         if interaction.user.id in cog.whitejack_games[guild_id]:
-            current_game = cog.whitejack_games[guild_id].get(interaction.user.id)
+            current_game = cog.whitejack_games[guild_id][interaction.user.id][self.game.session_id]
             await current_game.hit_a_card()
             if current_game.status == 'finished':
-                del cog.whitejack_games[guild_id][interaction.user.id]
+                del cog.whitejack_games[guild_id][interaction.user.id][current_game.session_id]
                 return await self.end_game(interaction)
             embed = await self.game.create_whitejack_embed()
             await interaction.followup.edit_message(interaction.message.id, embed=embed)
@@ -517,10 +517,10 @@ class WhiteJackActionView(discord.ui.View):
             cog.whitejack_games[guild_id] = {}
 
         if interaction.user.id in cog.whitejack_games[guild_id]:
-            current_game = cog.whitejack_games[guild_id].get(interaction.user.id)
+            current_game = cog.whitejack_games[guild_id][interaction.user.id][self.game.session_id]
             await current_game.stand()
             if current_game.status == 'finished':
-                del cog.whitejack_games[guild_id][interaction.user.id]
+                del cog.whitejack_games[guild_id][interaction.user.id][current_game.session_id]
                 return await self.end_game(interaction)
             embed = await self.game.create_whitejack_embed()
             await interaction.followup.edit_message(interaction.message.id, embed=embed)
@@ -532,7 +532,6 @@ class WhiteJackActionView(discord.ui.View):
         """ Button for doubling in the Whitejack game. """
 
         await interaction.response.defer()
-
 
         player_id = interaction.user.id
         guild_id = interaction.guild.id
@@ -547,7 +546,7 @@ class WhiteJackActionView(discord.ui.View):
 
         # Check if player's blackjack game is active
         if interaction.user.id in cog.whitejack_games[guild_id]:
-            current_game = cog.whitejack_games[guild_id].get(interaction.user.id)
+            current_game = cog.whitejack_games[guild_id][interaction.user.id][self.game.session_id]
             # Checks whether the player has more than 4 cards  
             if len(current_game.player_cards) > 4:
                 await interaction.followup.send("**You can double only in the first three rounds!**")
@@ -558,7 +557,7 @@ class WhiteJackActionView(discord.ui.View):
             else:
                 await current_game.double()
                 if current_game.status == 'finished':
-                    del cog.whitejack_games[guild_id][interaction.user.id]
+                    del cog.whitejack_games[guild_id][interaction.user.id][current_game.session_id]
                     return await self.end_game(interaction)
 
             embed = await self.game.create_whitejack_embed()
@@ -580,10 +579,10 @@ class WhiteJackActionView(discord.ui.View):
 
         # Check whether the player's blackjack game is active
         if interaction.user.id in cog.whitejack_games[guild_id]:
-            current_game = cog.whitejack_games[guild_id].get(interaction.user.id)
+            current_game = cog.whitejack_games[guild_id][interaction.user.id][self.game.session_id]
             await current_game.surrender_event()
             if current_game.status == 'finished':
-                del cog.whitejack_games[guild_id][interaction.user.id]
+                del cog.whitejack_games[guild_id][interaction.user.id][current_game.session_id]
                 return await self.end_game(interaction)
 
             embed = current_game.create_whitejack_embed()
@@ -617,7 +616,7 @@ class WhiteJackActionView(discord.ui.View):
 
         msg: discord.Message
         if isinstance(ctx, commands.Context):
-            msg = await ctx.edit(view=self)
+            msg = await ctx.message.edit(view=self)
         else:
             msg = await ctx.followup.edit_message(ctx.message.id, view=self)
         await self.cog.white_jack_callback_after(self, self.game, ctx.guild, msg=msg)
@@ -640,14 +639,19 @@ class WhiteJackActionView(discord.ui.View):
         # Adds the button into the view
         self.add_item(refresh_button)
 
+    def get_current_game(self) -> Any:
+        """ Gets the current game. """
+
 
     async def on_timeout(self) -> None:
         """ Puts the game status as finished when the game timeouts. """
 
         cog = self.cog
-        current_game = cog.whitejack_games[server_id].get(self.player.id)
-        if hasattr(current_game, 'status') and current_game.status == 'finished':
-            del cog.whitejack_games[server_id][self.player.id]
+        if player_games := cog.whitejack_games[server_id].get(self.player.id):
+            if current_game := player_games.get(self.game.session_id):
+                if hasattr(current_game, 'status') and current_game.status == 'finished':
+                    print(current_game)
+                    del cog.whitejack_games[server_id][self.player.id][current_game.session_id]
         return
 
 class MemoryGameView(discord.ui.View):
