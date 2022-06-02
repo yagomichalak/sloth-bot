@@ -474,11 +474,12 @@ class WhiteJackActionView(discord.ui.View):
     def __init__(self, client: commands.Bot, player: discord.Member, game: Any) -> None:
         """ Class init method. """
 
-        super().__init__(timeout=120)
+        super().__init__(timeout=60)
         self.client = client
         self.player = player
         self.game: Any = game
         self.cog = client.get_cog("Games")
+        self.msg: discord.Message = None
 
     @discord.ui.button(style=discord.ButtonStyle.blurple, custom_id="wj_hit_id", emoji='👊🏻')
     async def white_jack_hit_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
@@ -616,7 +617,7 @@ class WhiteJackActionView(discord.ui.View):
 
         msg: discord.Message
         if isinstance(ctx, commands.Context):
-            msg = await ctx.message.edit(view=self)
+            msg = await ctx.send(view=self)
         else:
             msg = await ctx.followup.edit_message(ctx.message.id, view=self)
         await self.cog.white_jack_callback_after(self, self.game, ctx.guild, msg=msg)
@@ -639,10 +640,6 @@ class WhiteJackActionView(discord.ui.View):
         # Adds the button into the view
         self.add_item(refresh_button)
 
-    def get_current_game(self) -> Any:
-        """ Gets the current game. """
-
-
     async def on_timeout(self) -> None:
         """ Puts the game status as finished when the game timeouts. """
 
@@ -652,6 +649,11 @@ class WhiteJackActionView(discord.ui.View):
                 if hasattr(current_game, 'status') and current_game.status == 'finished':
                     print(current_game)
                     del cog.whitejack_games[server_id][self.player.id][current_game.session_id]
+        
+        if self.msg:
+            await utils.disable_buttons(self)
+            await self.msg.edit(view=self)
+
         return
 
 class MemoryGameView(discord.ui.View):

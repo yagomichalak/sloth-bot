@@ -37,7 +37,6 @@ class WhiteJack(*whitejack_db):
     @Player.poisoned()
     @commands.cooldown(1, 3, commands.BucketType.user)
     @RehabMembersTable.in_rehab()
-    # @utils.not_ready()
     async def start_whitejack_game(self, ctx, bet = None, games: int = 1) -> None:
         """ Starts the Whitejack game.
         :param bet: The amount of money you wanna bet.
@@ -89,9 +88,12 @@ class WhiteJack(*whitejack_db):
         minimum_bet = 50
 
         # Check if player's blackjack game is active
-        if player.id in self.whitejack_games[guild.id]:
-            ctx.command.reset_cooldown(ctx)
-            return await ctx.send("**You are already in a game!**")
+        if game_sessions := self.whitejack_games[guild.id].get(player.id):
+            print(len(game_sessions))
+            print(game_sessions)
+            if len(game_sessions) >= 5:
+                ctx.command.reset_cooldown(ctx)
+                return await ctx.send("**You reached the limit of 5 games at a time!**")
         if bet < minimum_bet:
             ctx.command.reset_cooldown(ctx)
             return await ctx.send(f"**The minimum bet is `{minimum_bet} leaves`!**")
@@ -129,8 +131,10 @@ class WhiteJack(*whitejack_db):
 
         if ctx:
             msg = await ctx.send(embed=embed, view=whitejack_view)
+            whitejack_view.msg = msg
         else:
             msg = await interaction.followup.edit_message(interaction.message.id, embed=embed, view=whitejack_view)
+            whitejack_view.msg = msg
 
     async def white_jack_callback_after(self, view: discord.ui.View, game: Any, guild: discord.Guild, msg: discord.Message) -> None:
 
@@ -180,7 +184,8 @@ class WhiteJack(*whitejack_db):
         new_footer = f"Whitejack: {player_bal}łł"
         embed = await game.create_whitejack_embed()
         embed.set_footer(text=new_footer)
-        await msg.edit(embed=embed)
+        msg = await msg.edit(embed=embed)
+        view.msg = msg
 
         
     def generate_session_id(self, length: Optional[int] = 18) -> str:
