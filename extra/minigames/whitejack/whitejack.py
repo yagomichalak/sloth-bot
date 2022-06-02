@@ -87,14 +87,12 @@ class WhiteJack(*whitejack_db):
         if bet < minimum_bet:
             return await ctx.reply(f"**The minimum bet is `{minimum_bet}łł`!**")
 
-        await self.white_jack_callback(bet, player, guild, player_bal, ctx=ctx)
+        await self.white_jack_callback_before(bet, player, guild, player_bal, ctx=ctx)
     
-    async def white_jack_callback(self, 
+    async def white_jack_callback_before(self, 
         bet: int, player: discord.Member, guild: discord.Guild, player_bal: int,
         ctx: commands.Context = None, interaction: discord.Interaction = None
     ) -> None:
-
-        SlothCurrency = self.client.get_cog('SlothCurrency')
 
         game = WhiteJackGame(self.client, bet, player, guild, player_bal)
         self.whitejack_games[guild.id][player.id] = game
@@ -107,15 +105,21 @@ class WhiteJack(*whitejack_db):
 
         if game.status == 'finished':
             await utils.disable_buttons(whitejack_view)
-            whitejack_view.stop()
+            return await whitejack_view.end_game(ctx)
 
-        msg: discord.Message
         if ctx:
             msg = await ctx.send(embed=embed, view=whitejack_view)
         else:
-            msg = await interaction.followup.edit(embed=embed, view=whitejack_view)
+            msg = await interaction.followup.edit_message(interaction.message.id, embed=embed, view=whitejack_view)
 
-        await whitejack_view.wait()
+    async def white_jack_callback_after(self, view: discord.ui.View, game: Any, guild: discord.Guild, msg: discord.Message) -> None:
+
+        SlothCurrency = self.client.get_cog('SlothCurrency')
+        bet = game.bet
+        player = game.player
+        player_bal = game.current_money
+
+        # msg = await interaction.followup.edit_message(interaction.message.id, view=view)
 
         if game.state == 'win':
             await self.insert_user_data(type="wins", user_id=player.id)
@@ -152,10 +156,10 @@ class WhiteJack(*whitejack_db):
         elif game.state == 'draw':
             await self.insert_user_data('draws', player.id)
 
+        game.current_money = player_bal
         new_footer = f"Whitejack: {player_bal}łł"
         embed = await game.create_whitejack_embed()
-        if embed.footer.text != new_footer:
-            embed.set_footer(text=new_footer)
-            await msg.edit(embed=embed)
+        embed.set_footer(text=new_footer)
+        await msg.edit(embed=embed)
 
         

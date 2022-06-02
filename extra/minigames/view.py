@@ -497,7 +497,7 @@ class WhiteJackActionView(discord.ui.View):
             await current_game.hit_a_card()
             if current_game.status == 'finished':
                 del cog.whitejack_games[guild_id][interaction.user.id]
-                await self.end_game(interaction)
+                return await self.end_game(interaction)
             embed = await self.game.create_whitejack_embed()
             await interaction.followup.edit_message(interaction.message.id, embed=embed)
         else:
@@ -521,7 +521,7 @@ class WhiteJackActionView(discord.ui.View):
             await current_game.stand()
             if current_game.status == 'finished':
                 del cog.whitejack_games[guild_id][interaction.user.id]
-                await self.end_game(interaction)
+                return await self.end_game(interaction)
             embed = await self.game.create_whitejack_embed()
             await interaction.followup.edit_message(interaction.message.id, embed=embed)
         else:
@@ -559,7 +559,7 @@ class WhiteJackActionView(discord.ui.View):
                 await current_game.double()
                 if current_game.status == 'finished':
                     del cog.whitejack_games[guild_id][interaction.user.id]
-                    await self.end_game(interaction)
+                    return await self.end_game(interaction)
 
             embed = await self.game.create_whitejack_embed()
             await interaction.followup.edit_message(interaction.message.id, embed=embed)
@@ -584,7 +584,7 @@ class WhiteJackActionView(discord.ui.View):
             await current_game.surrender_event()
             if current_game.status == 'finished':
                 del cog.whitejack_games[guild_id][interaction.user.id]
-                await self.end_game(interaction)
+                return await self.end_game(interaction)
 
             embed = current_game.create_whitejack_embed()
             await interaction.followup.edit_message(interaction.message.id, embed=embed)
@@ -596,14 +596,14 @@ class WhiteJackActionView(discord.ui.View):
 
         # await utils.enable_buttons(self)
         await interaction.response.defer()
-        await self.white_jack_callback(self.game.bet, self.player.id, interaction.guild, self.game.player_bal, interaction=interaction)
+        await self.cog.white_jack_callback_before(self.game.bet, self.player, interaction.guild, self.game.current_money, interaction=interaction)
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
         """ Checks whether the person who clicked on the button is the one who started the blackjack. """
 
         return self.player.id == interaction.user.id
 
-    async def end_game(self, interaction: discord.Interaction) -> None:
+    async def end_game(self, ctx: discord.PartialMessageable) -> None:
         """ Ends the game.
         :param interaction: The interaction. """
 
@@ -615,8 +615,12 @@ class WhiteJackActionView(discord.ui.View):
         # Adds a refresh button
         await self.add_refresh_button()
 
-        await interaction.followup.edit_message(interaction.message.id, view=self)
-        self.stop()
+        msg: discord.Message
+        if isinstance(ctx, commands.Context):
+            msg = await ctx.edit(view=self)
+        else:
+            msg = await ctx.followup.edit_message(ctx.message.id, view=self)
+        await self.cog.white_jack_callback_after(self, self.game, ctx.guild, msg=msg)
 
     async def add_refresh_button(self) -> None:
         """ Adds a button to refresh the game. """
