@@ -338,7 +338,7 @@ class BlackJackActionView(discord.ui.View):
         await interaction.response.defer()
 
         guild_id = interaction.guild.id
-        cog = self.cog
+        cog = self.client.get_cog('Games')
 
         if cog.blackjack_games.get(guild_id) is None:
             cog.blackjack_games[guild_id] = {}
@@ -349,8 +349,7 @@ class BlackJackActionView(discord.ui.View):
             if current_game.status == 'finished':
                 del cog.blackjack_games[guild_id][interaction.user.id]
                 await self.end_game(interaction)
-            embed = await self.game.create_whitejack_embed()
-            await interaction.followup.edit_message(interaction.message.id, embed=embed)
+            await interaction.followup.edit_message(interaction.message.id, embed=current_game.embed())
         else:
             await interaction.followup.send("**You must be in a blackjack game!**")
 
@@ -361,7 +360,7 @@ class BlackJackActionView(discord.ui.View):
         await interaction.response.defer()
 
         guild_id = interaction.guild.id
-        cog = self.cog
+        cog = self.client.get_cog('Games')
 
 
         if cog.blackjack_games.get(guild_id) is None:
@@ -373,8 +372,7 @@ class BlackJackActionView(discord.ui.View):
             if current_game.status == 'finished':
                 del cog.blackjack_games[guild_id][interaction.user.id]
                 await self.end_game(interaction)
-            embed = await self.game.create_whitejack_embed()
-            await interaction.followup.edit_message(interaction.message.id, embed=embed)
+            await interaction.followup.edit_message(interaction.message.id, embed=current_game.embed())
         else:
             await interaction.followup.send("**You must be in a blackjack game!**")
 
@@ -387,7 +385,7 @@ class BlackJackActionView(discord.ui.View):
 
         player_id = interaction.user.id
         guild_id = interaction.guild.id
-        cog = self.cog
+        cog = self.client.get_cog('Games')
 
         SlothCurrency = self.client.get_cog('SlothCurrency')
         user_currency = await SlothCurrency.get_user_currency(player_id)
@@ -413,8 +411,8 @@ class BlackJackActionView(discord.ui.View):
                     user_currency = await SlothCurrency.get_user_currency(player_id)
                     await self.end_game(interaction)
                     user_currency = await SlothCurrency.get_user_currency(player_id)
-            embed = await self.game.create_whitejack_embed()
-            await interaction.followup.edit_message(interaction.message.id, embed=embed)
+
+            await interaction.followup.edit_message(interaction.message.id, embed=current_game.embed())
         else:
             await interaction.followup.send("**You must be in a blackjack game!**")
 
@@ -424,7 +422,7 @@ class BlackJackActionView(discord.ui.View):
 
         await interaction.response.defer()
 
-        cog = self.cog
+        cog = self.client.get_cog('Games')
 
         guild_id = interaction.guild.id
         if cog.blackjack_games.get(guild_id) is None:
@@ -456,13 +454,12 @@ class BlackJackActionView(discord.ui.View):
 
         await utils.disable_buttons(self)
         await interaction.followup.edit_message(interaction.message.id, view=self)
-
         self.stop()
 
     async def on_timeout(self) -> None:
         """ Puts the game status as finished when the game timeouts. """
 
-        cog = self.cog
+        cog = self.client.get_cog('Games')
         current_game = cog.blackjack_games[server_id].get(self.player.id)
         if hasattr(current_game, 'status') and current_game.status == 'finished':
             del cog.blackjack_games[server_id][self.player.id]

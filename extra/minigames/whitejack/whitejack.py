@@ -89,8 +89,6 @@ class WhiteJack(*whitejack_db):
 
         # Check if player's blackjack game is active
         if game_sessions := self.whitejack_games[guild.id].get(player.id):
-            print(len(game_sessions))
-            print(game_sessions)
             if len(game_sessions) >= 5:
                 ctx.command.reset_cooldown(ctx)
                 return await ctx.send("**You reached the limit of 5 games at a time!**")
