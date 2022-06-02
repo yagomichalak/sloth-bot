@@ -8,6 +8,7 @@ from typing import List, Union, Optional, Dict, Any
 from extra.slothclasses.player import Player
 from extra.minigames.view import WhiteJackActionView
 from extra.minigames.rehab_members import RehabMembersTable
+from extra.useful_variables import patreon_roles
 from extra import utils
 import asyncio
 import os
@@ -15,6 +16,10 @@ import string
 import random
 
 server_id: int = int(os.getenv('SERVER_ID', 123))
+allowed_roles = [
+    int(os.getenv('OWNER_ROLE_ID', 123)), int(os.getenv('ADMIN_ROLE_ID', 123)), int(os.getenv('SENIOR_MOD_ROLE_ID', 123)),
+    int(os.getenv('MOD_ROLE_ID', 123)), int(os.getenv('ANALYST_DEBUGGER_ROLE_ID', 123)), *patreon_roles.keys()
+]
 
 whitejack_db: List[commands.Cog] = [
 	WhiteJackDB
@@ -37,6 +42,7 @@ class WhiteJack(*whitejack_db):
     @Player.poisoned()
     @commands.cooldown(1, 3, commands.BucketType.user)
     @RehabMembersTable.in_rehab()
+    @utils.is_allowed(allowed_roles, throw_exc=True)
     async def start_whitejack_game(self, ctx, bet = None, games: int = 1) -> None:
         """ Starts the Whitejack game.
         :param bet: The amount of money you wanna bet.
