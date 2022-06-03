@@ -985,6 +985,18 @@ class Tools(*tool_cogs):
 		# await ctx.send(embed=embed)
 		await Tools.send_big_message('File Tree', ctx.channel, str(tree), discord.Color.green())
 
+	@commands.command(aliases=["lexi", "lèqçi", "lexis"])
+	async def alexis(self, ctx) -> None:
+		""" A command for telling something about Alexis. """
+
+		sentences = [
+			"**I have a really nice voice**",
+			"**Best sister-in-law ever**",
+			"**z!bj 50**"
+		]
+
+		await ctx.send(choice(sentences))
+
 	@commands.command(aliases=["eli", "elj", "elijaaah"])
 	async def elijah(self, ctx) -> None:
 		""" A command for telling something about Elijah. """
