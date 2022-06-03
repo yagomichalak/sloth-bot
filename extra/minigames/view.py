@@ -308,7 +308,7 @@ class FlagsGameView(discord.ui.View):
         self.countries_names = countries_names
         self.points = points
         self.round = round
-        self.cog = self.cog
+        self.cog = self.client.get_cog('Games')
         self.used = False
         self.timeout_count = timeout_count
 
