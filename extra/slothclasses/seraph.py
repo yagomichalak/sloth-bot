@@ -469,7 +469,12 @@ class Seraph(Player):
         if target_sloth_profile[1] == 'default':
             return await ctx.send(f"**You cannot attain the grace for someone who has a `default` Sloth class, {perpetrator.mention}!**")
 
-        marriage = await self.client.get_cog('SlothClass').get_user_marriage(target.id)
+        SlothClass = await self.client.get_cog('SlothClass')
+        user_baby = await SlothClass.get_user_baby(target.id)
+        if user_baby:
+            return await ctx.send(f"**This user already has a baby, {perpetrator.mention}!**")
+
+        marriage = SlothClass.get_user_marriage(target.id)
         if not marriage['partner']:
             return await ctx.send(f"**You cannot attain the grace for someone who is not married, {perpetrator.mention}!**")
 
