@@ -259,7 +259,7 @@ class WhiteJackGame(*cogs):
         await self.insert_user_data("surrenders", self.player.id)
 
     async def lose_event(self):
-        await self.insert_user_data(type="losses", user_id=self.player.id)
+        await self.insert_user_data(data_type="losses", user_id=self.player.id)
 
         # Change title and end the game
         if self.doubled:

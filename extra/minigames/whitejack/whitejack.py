@@ -150,7 +150,7 @@ class WhiteJack(*whitejack_db):
         # msg = await interaction.followup.edit_message(interaction.message.id, view=view)
 
         if game.state == 'win':
-            await self.insert_user_data(type="wins", user_id=player.id)
+            await self.insert_user_data(data_type="wins", user_id=player.id)
 
             addition = bet
             if game.doubled:
@@ -162,7 +162,7 @@ class WhiteJack(*whitejack_db):
             await SlothCurrency.update_user_money(player.id, addition)
 
         elif game.state == 'lose':
-            await self.insert_user_data(type="losses", user_id=player.id)
+            await self.insert_user_data(data_type="losses", user_id=player.id)
 
             subtraction = bet
             if game.doubled:

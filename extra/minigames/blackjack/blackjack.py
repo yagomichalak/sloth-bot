@@ -102,7 +102,7 @@ class BlackJack(*blackjack_db):
                 await self.insert_user_database(ctx.author.id)
 
             # Inserts game in user blackjack status
-            await self.insert_user_data(type="games", user_id=ctx.author.id)
+            await self.insert_user_data(data_type="games", user_id=ctx.author.id)
 
             await view.wait()
             user_currency = await SlothCurrency.get_user_currency(player.id)
@@ -138,15 +138,16 @@ class BlackJack(*blackjack_db):
         else:
             await ctx.send(f"**Fixed the game for `{member}`!**")
 
-    @commands.command(aliases=["bjs"])
+    @commands.command(aliases=["bjs", "wjs", "whjs", "blackjack_status", "whitejack_status"])
     @commands.has_permissions()
-    async def blackjack_status(self, ctx, member: discord.Member = None) -> None:
+    async def jack_status(self, ctx, member: discord.Member = None) -> None:
     
         if not member:
             member: discord.Member = ctx.message.author
         
-        user_id, wins, losses, draws, surrenders, games = await self.get_user_data(member.id)
+        user_id, wins, losses, draws, surrenders, _ = await self.get_user_data(member.id)
 
+        games = sum([wins, losses, draws, surrenders])
         embed = discord.Embed(title=f"BlackJack Status {member}", timestamp=ctx.message.created_at, color=ctx.author.color)
         embed.description=(f"```{wins} wins🍃| {losses} losses ❌| {draws} draws 🔶| {surrenders} srr 🏳️| {games} games 🏅```")
         await ctx.send(embed=embed)

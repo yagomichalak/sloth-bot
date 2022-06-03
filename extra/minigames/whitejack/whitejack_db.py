@@ -87,11 +87,11 @@ class WhiteJackDB(commands.Cog):
         else:
             return False
 
-    async def insert_user_data(self, type: str, user_id: int) -> None:
+    async def insert_user_data(self, data_type: str, user_id: int) -> None:
         """ Checks whether the Whitejack table exists. """
 
         mycursor, db = await the_database()
-        await mycursor.execute(f"UPDATE Whitejack SET {type} = {type} + 1 WHERE user_id = {user_id}")
+        await mycursor.execute("UPDATE Whitejack SET %s = %s + 1 WHERE user_id = %s", (data_type, data_type, user_id))
         await db.commit()
         await mycursor.close()
 

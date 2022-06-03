@@ -196,7 +196,7 @@ class BlackJackGame(*moderation_cogs):
     def blackjack_event_dealer(self):
         SlothCurrency = self.client.get_cog('SlothCurrency')
         self.client.loop.create_task(SlothCurrency.update_user_money(self.player_id, int(self.bet * 0.25)))
-        self.client.loop.create_task(self.insert_user_data(type="losses", user_id=self.player_id))
+        self.client.loop.create_task(self.insert_user_data(data_type="losses", user_id=self.player_id))
 
         self.title = f"Dealer blackjack - **{self.player_name}** lost {int(self.bet * 0.75)} leaves 🍃"
         self.status = 'finished'
@@ -209,7 +209,7 @@ class BlackJackGame(*moderation_cogs):
         # Increase player balance with bet * 2.5 if he hit blackjack
         SlothCurrency = self.client.get_cog('SlothCurrency')
         self.client.loop.create_task(SlothCurrency.update_user_money(self.player_id, int(self.bet * 2.5)))
-        self.client.loop.create_task(self.insert_user_data(type="wins", user_id=self.player_id))
+        self.client.loop.create_task(self.insert_user_data(data_type="wins", user_id=self.player_id))
 
         # Change title and end the game
         self.title = f"Player Blackjack - **{self.player_name}** won {int(self.bet * 1.5)} leaves 🍃"
@@ -236,7 +236,7 @@ class BlackJackGame(*moderation_cogs):
             won_text = int(match_bal - self.bet)
 
         self.client.loop.create_task(SlothCurrency.update_user_money(self.player_id, int(match_bal)))
-        self.client.loop.create_task(self.insert_user_data(type="wins", user_id=self.player_id))
+        self.client.loop.create_task(self.insert_user_data(data_type="wins", user_id=self.player_id))
 
         # Change title and end the game
         self.title = f"Win - **{self.player_name}** won {won_text} leaves 🍃"
@@ -255,7 +255,7 @@ class BlackJackGame(*moderation_cogs):
         self.client.loop.create_task(self.insert_user_data("surrenders", self.player_id))
 
     def lose_event(self):
-        self.client.loop.create_task(self.insert_user_data(type="losses", user_id=self.player_id))
+        self.client.loop.create_task(self.insert_user_data(data_type="losses", user_id=self.player_id))
 
         # Change title and end the game
         if self.doubled:
