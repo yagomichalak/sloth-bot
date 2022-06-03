@@ -703,7 +703,7 @@ class Prawler(Player):
 		if not confirm:
 			return await ctx.send(f"**Not doing it then, {member.mention}!**")
 
-		kidnap_skill = await self.get_skill_action_by_target_id_and_skill_type(user_id=ctx.author.id, skill_type='kidnap')
+		kidnap_skill = await self.get_skill_action_by_target_id_and_skill_type(target_id=ctx.author.id, skill_type='kidnap')
 
 		try:
 			await self.delete_skill_action_by_target_id_and_skill_type(hostage.id, 'kidnap')
