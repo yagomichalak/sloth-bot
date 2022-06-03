@@ -594,6 +594,7 @@ class WhiteJackActionView(discord.ui.View):
         # await utils.enable_buttons(self)
         await interaction.response.defer()
         await self.cog.white_jack_callback_before(self.game.bet, self.player, interaction.guild, self.game.current_money, interaction=interaction)
+        self.stop()
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
         """ Checks whether the person who clicked on the button is the one who started the blackjack. """
