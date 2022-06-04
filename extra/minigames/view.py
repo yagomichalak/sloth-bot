@@ -651,8 +651,10 @@ class WhiteJackActionView(discord.ui.View):
         if player_games := cog.whitejack_games[server_id].get(self.player.id):
             if current_game := player_games.get(self.game.session_id):
                 if hasattr(current_game, 'status') and current_game.status == 'finished':
-                    print(current_game)
                     del cog.whitejack_games[server_id][self.player.id][current_game.session_id]
+                else:
+                    SlothCurrency = self.client.get_cog('SlothCurrency')
+                    await SlothCurrency.update_user_money(self.player.id, -self.game.bet)
         
         if self.msg:
             await utils.disable_buttons(self)
