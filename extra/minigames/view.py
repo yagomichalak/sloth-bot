@@ -595,7 +595,7 @@ class WhiteJackActionView(discord.ui.View):
         user_currency = await SlothCurrency.get_user_currency(self.player.id)
         player_bal = user_currency[0][1]
 
-        if player_bal < self.current_game.bet:
+        if player_bal < self.game.bet:
             return await interaction.followup.send("**You have insufficient funds!**")
 
         await interaction.response.defer()

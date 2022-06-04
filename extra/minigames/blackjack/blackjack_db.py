@@ -88,11 +88,13 @@ class BlackJackDB(commands.Cog):
         else:
             return False
 
-    async def insert_user_data(self, type: str, user_id: int) -> None:
+    async def insert_user_data(self, data_type: str, user_id: int) -> None:
         """ Checks whether the Blackjack table exists. """
 
         mycursor, db = await the_database()
-        await mycursor.execute(f"UPDATE Blackjack SET {type} = {type} + 1 WHERE user_id = {user_id}")
+        await mycursor.execute(
+            "UPDATE Blackjack SET {0} = {0} + 1 WHERE user_id = {1}".format(data_type, user_id)
+        )
         await db.commit()
         await mycursor.close()
 

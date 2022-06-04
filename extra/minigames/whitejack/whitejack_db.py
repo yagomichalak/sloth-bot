@@ -91,7 +91,9 @@ class WhiteJackDB(commands.Cog):
         """ Checks whether the Whitejack table exists. """
 
         mycursor, db = await the_database()
-        await mycursor.execute("UPDATE Whitejack SET %s = %s + 1 WHERE user_id = %s", (data_type, data_type, user_id))
+        await mycursor.execute(
+            "UPDATE Whitejack SET {0} = {0} + 1 WHERE user_id = {1}".format(data_type, user_id)
+        )
         await db.commit()
         await mycursor.close()
 
