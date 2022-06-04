@@ -1020,7 +1020,8 @@ class Tools(*tool_cogs):
 
 		sentences = [
 			"**You have a really nice voice**",
-			"**Elijah is my brother**",
+			"**Leonarda is my best friend**",
+			"**Cleopatra ♥**",
 			"**Elijah and DNK are my brothers**"
 		]
 
