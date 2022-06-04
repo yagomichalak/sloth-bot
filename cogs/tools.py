@@ -1003,6 +1003,12 @@ class Tools(*tool_cogs):
 
 		await ctx.send("**Sure, go for it.**")
 
+	@commands.command(aliases=["caro"])
+	async def carola(self, ctx) -> None:
+		""" A command for telling something about Carola. """
+
+		await ctx.send("**Elijah stop!.**")
+
 	@commands.command(aliases=["winni", "winnie", "wynni", "wynnie"])
 	async def wyncham(self, ctx) -> None:
 		""" A command for telling something about Wyncham. """
