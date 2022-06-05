@@ -42,7 +42,6 @@ class WhiteJack(*whitejack_db):
     @Player.poisoned()
     @commands.cooldown(1, 3, commands.BucketType.user)
     @RehabMembersTable.in_rehab()
-    @utils.is_allowed(allowed_roles, throw_exc=True)
     async def start_whitejack_game(self, ctx, bet = None, games: int = 1) -> None:
         """ Starts the Whitejack game.
         :param bet: The amount of money you wanna bet.
