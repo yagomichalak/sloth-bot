@@ -360,10 +360,10 @@ class Social(*social_cogs):
             return await answer("**Canceled!**")
 
         SlothClass = self.client.get_cog("SlothClass")
-        user_tribe = await SlothClass.get_tribe_info_by_name(name=profile[0][3])
-        tribe_emojis = '' if not user_tribe else user_tribe["two_emojis"]
-        munk_label = 'Munk' if 'Munk' in member.display_name else ''
-
+        sloth_profile = await SlothClass.get_sloth_profile(member.id)
+        user_tribe = await SlothClass.get_tribe_info_by_name(name=sloth_profile[3])
+        tribe_emojis = '' if not user_tribe['two_emojis'] else f" {user_tribe['two_emojis']}"
+        munk_label = ' Munk' if 'Munk' in member.display_name else ''
         try:
             if nickname:
                 await member.edit(nick=f"{nickname}{munk_label}{tribe_emojis}")
