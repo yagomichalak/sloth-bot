@@ -820,7 +820,8 @@ class MemoryGameView(discord.ui.View):
         if not memory_member:
             return await self.cog.insert_memory_member(self.member.id, self.level-1, current_ts)
 
-        await self.cog.update_memory_member(self.member.id, self.level-1, current_ts)
+        if self.level - 1 > memory_member[1]:
+            await self.cog.update_memory_member(self.member.id, self.level-1, current_ts)
 
     def reset_game_status(self) -> None:
         """ Resets the game status. """
