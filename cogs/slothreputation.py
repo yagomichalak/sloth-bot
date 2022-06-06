@@ -541,7 +541,7 @@ class SlothReputation(*currency_cogs):
             leaderboard.add_field(
                 name=f"[{i + 1}]# - __**{member}**__", value=f"Galaxy Room Expires in: <t:{deadline}:R>", inline=False
             )
-            if i + 1 == 10:
+            if i + 1 == 20:
                 break
         return await answer(embed=leaderboard)
 
