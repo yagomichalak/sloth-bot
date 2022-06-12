@@ -25,6 +25,7 @@ lesson_management_role_id = int(os.getenv('LESSON_MANAGEMENT_ROLE_ID', 123))
 sloth_explorer_role_id = int(os.getenv('SLOTH_EXPLORER_ROLE_ID', 123))
 show_me_everything_role_id = int(os.getenv('SHOW_ME_EVERYTHING_ROLE_ID', 123))
 sloth_pass_role_id = int(os.getenv('SLOTH_PASS_ROLE_ID', 123))
+all_vcs_role_id = int(os.getenv('ALL_VCS_ROLE_ID', 123))
 
 teacher_feedback_thread_id = int(os.getenv('TEACHER_FEEDBACK_THREAD_ID', 123))
 class_history_channel_id = int(os.getenv('CLASS_HISTORY_CHANNEL_ID', 123))
@@ -698,7 +699,6 @@ class TeacherFeedback(commands.Cog):
                 await member.send(f"✅ **Successfully sent your feedback, thank you!**")
         else:
             await member.send(f"**Thank you anyways, bye!**")
-            
 
     # ===== Channel management =====
 
@@ -748,8 +748,6 @@ class TeacherFeedback(commands.Cog):
         if studying_role := discord.utils.get(member.guild.roles, name=f"Studying {language.title()}"):
             overwrites[studying_role] = discord.PermissionOverwrite(
                 read_messages=True, send_messages=False, connect=False, speak=False, view_channel=True, embed_links=False)
-
-        
 
         return overwrites
 
@@ -808,8 +806,7 @@ class TeacherFeedback(commands.Cog):
         mod_role = discord.utils.get(member.guild.roles, id=mod_role_id)
         lesson_management_role = discord.utils.get(member.guild.roles, id=lesson_management_role_id)
         sloth_explorer_role = discord.utils.get(member.guild.roles, id=sloth_explorer_role_id)
-        show_me_everything_role = discord.utils.get(member.guild.roles, id=show_me_everything_role_id)
-        sloth_pass_role = discord.utils.get(member.guild.roles, id=sloth_pass_role_id)
+        all_vcs_role = discord.utils.get(member.guild.roles, id=all_vcs_role_id)
 
         overwrites = {}
         # Gets permissions for general roles
@@ -821,7 +818,6 @@ class TeacherFeedback(commands.Cog):
         # Class taught in
         overwrites = await self.get_perms_for_taught_in(member, language, taught_in, overwrites)
   
-
         if queuebot := discord.utils.get(member.guild.members, id=queuebot_id):
             overwrites[queuebot] = discord.PermissionOverwrite(
                 read_messages=True, send_messages=True, view_channel=True
@@ -841,6 +837,9 @@ class TeacherFeedback(commands.Cog):
 
         overwrites[sloth_explorer_role] = discord.PermissionOverwrite(
             read_messages=True, send_messages=True, connect=True, speak=True, view_channel=True, embed_links=True)
+
+        overwrites[all_vcs_role] = discord.PermissionOverwrite(
+            read_messages=True, send_messages=True)
 
         return overwrites
 
@@ -1010,7 +1009,6 @@ class TeacherFeedback(commands.Cog):
         if not member:
             return await ctx.send(f"**Please, inform a member to allow into your private class, {teacher.mention}!**")
 
-
         cog = self.client.get_cog('CreateSmartRoom')
         private_room: List[List[int]] = await cog.get_premium_txt(channel.id)
         if not private_room:
@@ -1045,7 +1043,6 @@ class TeacherFeedback(commands.Cog):
         if not member:
             return await ctx.send(f"**Please, inform a member to disallow into your private class, {teacher.mention}!**")
 
-
         cog = self.client.get_cog('CreateSmartRoom')
         private_room: List[List[int]] = await cog.get_premium_txt(channel.id)
         if not private_room:
@@ -1069,8 +1066,6 @@ class TeacherFeedback(commands.Cog):
             await ctx.send(f"**For some reason I couldn't give this user permissions, {teacher.mention}!**")
         else:
             await ctx.send(f"**Successfully given permissions to {member.mention}, {teacher.mention}!**")
-
-
 
     @commands.command(aliases=['showclass', 'view_class', 'viewclass', 'class_info', 'classinfo', 'class_status', 'classstatus'])
     @utils.is_allowed([teacher_role_id, mod_role_id, admin_role_id], throw_exc=True)
@@ -1133,12 +1128,10 @@ class TeacherFeedback(commands.Cog):
         else:
             await ctx.send(f"**This isn't a class channel, {member.mention}!**")
 
-
 class TeacherFeedbackDatabaseCreate:
     """ [CREATE] A class for creating things in the database. """
 
     pass
-
 
 class TeacherFeedbackDatabaseInsert:
     """ [INSERT] A class for inserting things into the database. """
@@ -1216,7 +1209,6 @@ class TeacherFeedbackDatabaseInsert:
         await db.commit()
         await mycursor.close()
 
-
 class TeacherFeedbackDatabaseSelect:
     """ [SELECT] A class for selecting things from the database. """
 
@@ -1225,7 +1217,7 @@ class TeacherFeedbackDatabaseSelect:
         """ Gets an active teacher class by teacher ID.
         :param teacher_id: The teacher's ID. """
 
-        mycursor, db = await the_database()
+        mycursor, _ = await the_database()
         await mycursor.execute("SELECT * FROM ActiveClasses WHERE teacher_id = %s", (teacher_id, ))
         the_class = await mycursor.fetchone()
         await mycursor.close()
@@ -1235,7 +1227,7 @@ class TeacherFeedbackDatabaseSelect:
         """ Gets an active teacher class by voice channel ID.
         :param vc_id: The voice channel ID. """
 
-        mycursor, db = await the_database()
+        mycursor, _ = await the_database()
         await mycursor.execute("SELECT * FROM ActiveClasses WHERE vc_id = %s", (vc_id,))
         the_class = await mycursor.fetchone()
         await mycursor.close()
@@ -1245,7 +1237,7 @@ class TeacherFeedbackDatabaseSelect:
         """ Gets an active teacher class by text channel ID.
         :param txt_id: The text channel ID. """
 
-        mycursor, db = await the_database()
+        mycursor, _ = await the_database()
         await mycursor.execute("SELECT * FROM ActiveClasses WHERE txt_id = %s", (txt_id,))
         the_class = await mycursor.fetchone()
         await mycursor.close()
@@ -1256,7 +1248,7 @@ class TeacherFeedbackDatabaseSelect:
         :param teacher_id: The teacher's ID.
         :param vc_id: The voice channel ID. """
 
-        mycursor, db = await the_database()
+        mycursor, _ = await the_database()
         await mycursor.execute("SELECT * FROM ActiveClasses WHERE teacher_id = %s AND vc_id = %s", (teacher_id, vc_id))
         the_class = await mycursor.fetchone()
         await mycursor.close()
@@ -1267,7 +1259,7 @@ class TeacherFeedbackDatabaseSelect:
         """ Gets the teacher's saved classes.
         :param teacher_id: The teacher's ID. """
 
-        mycursor, db = await the_database()
+        mycursor, _ = await the_database()
         await mycursor.execute("SELECT * FROM SavedClasses WHERE teacher_id = %s", (teacher_id,))
         saved_classes = await mycursor.fetchall()
         await mycursor.close()
@@ -1280,7 +1272,7 @@ class TeacherFeedbackDatabaseSelect:
         :param teacher_id: The teacher's ID.
         :param vc_id: The ID of the voice channel attached to that class. """
 
-        mycursor, db = await the_database()
+        mycursor, _ = await the_database()
         await mycursor.execute("""
             SELECT SUM(student_messages) FROM Students WHERE teacher_id = %s AND vc_id = %s""", (teacher_id, vc_id))
         total_messages = number[0] if (number := await mycursor.fetchone())[0] else 0
@@ -1292,7 +1284,7 @@ class TeacherFeedbackDatabaseSelect:
         :param teacher_id: The teacher's ID.
         :param vc_id: The ID of the voice channel attached to that class. """
 
-        mycursor, db = await the_database()
+        mycursor, _ = await the_database()
         await mycursor.execute("""
             SELECT SUM(student_time) FROM Students WHERE teacher_id = %s AND vc_id = %s""", (teacher_id, vc_id))
         total_time = number[0] if (number := await mycursor.fetchone())[0] else 0
@@ -1305,7 +1297,7 @@ class TeacherFeedbackDatabaseSelect:
         :param student_id: The student's ID.
         :param vc_id: The voice channel ID. """
 
-        mycursor, db = await the_database()
+        mycursor, _ = await the_database()
         await mycursor.execute("SELECT * FROM Students WHERE student_id = %s AND vc_id = %s", (student_id, vc_id))
         the_student = await mycursor.fetchone()
         await mycursor.close()
@@ -1315,7 +1307,7 @@ class TeacherFeedbackDatabaseSelect:
         """ Get all students by teacher ID.
         :param teacher_id: The teacher's ID. """
 
-        mycursor, db = await the_database()
+        mycursor, _ = await the_database()
         await mycursor.execute("SELECT * FROM Students WHERE teacher_id = %s", (teacher_id,))
         the_students = await mycursor.fetchall()
         await mycursor.close()
@@ -1328,7 +1320,7 @@ class TeacherFeedbackDatabaseSelect:
         :param teacher_id: The teacher's ID.
         :param msg_id: The ID of the message attached to the data. """
 
-        mycursor, db = await the_database()
+        mycursor, _ = await the_database()
 
         await mycursor.execute("SELECT *, COUNT(*) FROM RewardStudents WHERE reward_message = %s and teacher_id = %s", (msg_id, teacher_id))
         users = await mycursor.fetchone()
@@ -1341,7 +1333,7 @@ class TeacherFeedbackDatabaseSelect:
         :param teacher_id: The teacher's ID.
         :param msg_id: The ID of the message attached to the data. """
 
-        mycursor, db = await the_database()
+        mycursor, _ = await the_database()
 
         await mycursor.execute("SELECT * FROM RewardStudents WHERE reward_message = %s and teacher_id = %s", (msg_id, teacher_id))
         users = await mycursor.fetchall()
@@ -1353,12 +1345,11 @@ class TeacherFeedbackDatabaseSelect:
         """ Gets reward info for the accepted students by reward message ID.
         :param msg_id: The ID of the message to look for. """
 
-        mycursor, db = await the_database()
+        mycursor, _ = await the_database()
         await mycursor.execute("SELECT student_id, language, class_type, msg_id FROM RewardAcceptedStudents WHERE msg_id = %s", (msg_id,))
         users = await mycursor.fetchall()
         await mycursor.close()
         return users
-
 
 class TeacherFeedbackDatabaseUpdate:
     """ [UPDATE] A class for updating things in the database. """
@@ -1549,22 +1540,18 @@ class TeacherFeedbackDatabaseDelete:
         await db.commit()
         await mycursor.close()
 
-
 class TeacherFeedbackDatabaseShow:
     """ [SHOW] A class for checking things in the database. """
 
     pass
-
 
 db_classes: List[object] = [
     TeacherFeedbackDatabaseCreate, TeacherFeedbackDatabaseInsert, TeacherFeedbackDatabaseSelect,
     TeacherFeedbackDatabaseUpdate, TeacherFeedbackDatabaseDelete, TeacherFeedbackDatabaseShow
     ]
 
-
 class TeacherFeedbackDatabase(*db_classes):
     pass
-
 
 def setup(client) -> None:
     """ Cog's setup function. """
