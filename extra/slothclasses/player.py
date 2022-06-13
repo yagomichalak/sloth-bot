@@ -625,7 +625,7 @@ class Player(*additional_cogs):
         :param user_ids: The list of IDs of the users to get the currency from. """
 
         mycursor, _ = await the_database()
-        await mycursor.execute("SELECT user_money FROM UserCurrency WHERE user_id in {}".format(tuple(user_ids)))
+        await mycursor.execute("SELECT user_money FROM UserCurrency WHERE user_id in %s", (user_ids,))
         users = await mycursor.fetchall()
         await mycursor.close()
         return users

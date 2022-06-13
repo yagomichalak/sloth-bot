@@ -527,8 +527,8 @@ class Munk(Player):
 
         tribe_member_ids: List[int] = list(map(lambda m: m[0], tribe_members))
         currencies = await self.get_users_currency(tribe_member_ids)
-        tribe_money: int = sum(list(map(lambda cr: cr[0], currencies)))
 
+        tribe_money: int = sum(list(map(lambda cr: cr[0], filter(lambda cr: cr[0] >= 0, currencies))))
         # Additional data:
         additional = {
             'tribe': tribe,
