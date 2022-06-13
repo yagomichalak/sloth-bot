@@ -232,7 +232,6 @@ class WhiteJackGame(*cogs):
         self.status = 'finished'
         self.dealer_final_show()
 
-
     # Classic win in blackjack
     async def win_event(self):
         # Increase player balance with bet * 2 if he win
@@ -256,7 +255,6 @@ class WhiteJackGame(*cogs):
         self.state = 'surrender'
         self.status = 'finished'
         self.dealer_final_show()
-        await self.insert_user_data("surrenders", self.player.id)
 
     async def lose_event(self):
         await self.insert_user_data(data_type="losses", user_id=self.player.id)
