@@ -708,7 +708,7 @@ class Prawler(Player):
 		try:
 			await self.delete_skill_action_by_target_id_and_skill_type(hostage.id, 'kidnap')
 			await self.client.get_cog('SlothCurrency').update_user_money(member.id, -rescue_money)
-			await self.client.get_cog('SlothCurrency').update_user_money(member.id, kidnap_skill[0])
+			await self.client.get_cog('SlothCurrency').update_user_money(kidnap_skill[0], 700)
 		except Exception as e:
 			print('Error at rescuing user from kidnap: ', e)
 			await ctx.send("**Something went wrong, try again later or contact an admin if the error persists!**")
