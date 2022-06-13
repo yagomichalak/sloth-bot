@@ -466,7 +466,7 @@ class BlackJackActionView(discord.ui.View):
         return
 
 class WhiteJackActionView(discord.ui.View):
-    """ View for the BlackJack game actions. """
+    """ View for the WhiteJack game actions. """
 
     def __init__(self, client: commands.Bot, player: discord.Member, game: Any) -> None:
         """ Class init method. """
@@ -499,7 +499,7 @@ class WhiteJackActionView(discord.ui.View):
             embed = await self.game.create_whitejack_embed()
             await interaction.followup.edit_message(interaction.message.id, embed=embed)
         else:
-            await interaction.followup.send("**You must be in a blackjack game!**")
+            await interaction.followup.send("**You must be in a whitejack game!**")
 
     @discord.ui.button(style=discord.ButtonStyle.blurple, custom_id="wj_stand_id", emoji='✊🏻')
     async def white_jack_stand_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
@@ -523,7 +523,7 @@ class WhiteJackActionView(discord.ui.View):
             embed = await self.game.create_whitejack_embed()
             await interaction.followup.edit_message(interaction.message.id, embed=embed)
         else:
-            await interaction.followup.send("**You must be in a blackjack game!**")
+            await interaction.followup.send("**You must be in a whitejack game!**")
 
     @discord.ui.button(style=discord.ButtonStyle.blurple, custom_id="wj_double_id", emoji='✌🏻')
     async def white_jack_double_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
@@ -542,7 +542,7 @@ class WhiteJackActionView(discord.ui.View):
         if cog.whitejack_games.get(guild_id) is None:
             cog.whitejack_games[guild_id] = {}
 
-        # Check if player's blackjack game is active
+        # Check if player's whitejack game is active
         if interaction.user.id in cog.whitejack_games[guild_id]:
             current_game = cog.whitejack_games[guild_id][interaction.user.id][self.game.session_id]
             # Checks whether the player has more than 4 cards  
@@ -562,7 +562,7 @@ class WhiteJackActionView(discord.ui.View):
             embed = await self.game.create_whitejack_embed()
             await interaction.followup.edit_message(interaction.message.id, embed=embed)
         else:
-            await interaction.followup.send("**You must be in a blackjack game!**")
+            await interaction.followup.send("**You must be in a whitejack game!**")
 
     @discord.ui.button(style=discord.ButtonStyle.gray, custom_id="wj_surrender_id", emoji='🏳️')
     async def white_jack_surrender_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
@@ -576,7 +576,7 @@ class WhiteJackActionView(discord.ui.View):
         if cog.whitejack_games.get(guild_id) is None:
             cog.whitejack_games[guild_id] = {}
 
-        # Check whether the player's blackjack game is active
+        # Check whether the player's whitejack game is active
         if interaction.user.id in cog.whitejack_games[guild_id]:
             current_game = cog.whitejack_games[guild_id][interaction.user.id][self.game.session_id]
             await current_game.surrender_event()
@@ -587,7 +587,7 @@ class WhiteJackActionView(discord.ui.View):
             embed = current_game.create_whitejack_embed()
             await interaction.followup.edit_message(interaction.message.id, embed=embed)
         else:
-            await interaction.followup.send("**You must be in a blackjack game!**")
+            await interaction.followup.send("**You must be in a whitejack game!**")
 
     async def white_jack_refresh_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
         """ Button for refreshing the game state. """
@@ -604,7 +604,7 @@ class WhiteJackActionView(discord.ui.View):
         self.stop()
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
-        """ Checks whether the person who clicked on the button is the one who started the blackjack. """
+        """ Checks whether the person who clicked on the button is the one who started the whitejack. """
 
         return self.player.id == interaction.user.id
 

@@ -189,7 +189,6 @@ class WhiteJack(*whitejack_db):
 
 
         game.current_money = player_bal
-        print('currrnertetuh: ', game.current_money)
         new_footer = f"Whitejack: {player_bal}łł"
         embed = await game.create_whitejack_embed()
         embed.set_footer(text=new_footer)
