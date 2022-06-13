@@ -173,7 +173,7 @@ class WhiteJack(*whitejack_db):
             if game.blackjack:
                 subtraction = int (bet * 0.75)
 
-            player_bal -= subtraction
+            player_bal += bet - subtraction
             await SlothCurrency.update_user_money(player.id, -subtraction)
 
         elif game.state == 'surrender':
@@ -187,7 +187,6 @@ class WhiteJack(*whitejack_db):
         elif game.state == 'draw':
             await self.insert_user_data('draws', player.id)
 
-        print('sububububu> ', subtraction)
 
         game.current_money = player_bal
         print('currrnertetuh: ', game.current_money)
