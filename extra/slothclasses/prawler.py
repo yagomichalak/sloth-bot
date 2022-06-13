@@ -656,9 +656,9 @@ class Prawler(Player):
 		return kidnap_embed
 
 
-	@commands.command(aliases=["rescue"])
+	@commands.command(aliases=["ransom", "pay_rescue", "rescue"])
 	@commands.cooldown(1, 5, commands.BucketType.user)
-	async def pay_rescue(self, ctx, hostage: discord.Member = None) -> None:
+	async def pay_ransom(self, ctx, hostage: discord.Member = None) -> None:
 		""" Pays off someone's rescue.
 		:param hostage: The hostage for whom to pay the rescue.
 		
