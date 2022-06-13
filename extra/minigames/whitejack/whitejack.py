@@ -107,6 +107,10 @@ class WhiteJack(*whitejack_db):
             return await ctx.reply(f"**The minimum bet is `{minimum_bet}łł`!**")
 
         for _ in range(games):
+            player_bal -= bet
+            if player_bal < 0:
+                return
+                
             await self.white_jack_callback_before(bet, player, guild, player_bal, ctx=ctx)
     
     async def white_jack_callback_before(self, 

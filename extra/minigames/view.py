@@ -550,7 +550,9 @@ class WhiteJackActionView(discord.ui.View):
                 await interaction.followup.send("**You can double only in the first three rounds!**")
 
             # Checks whether the player has sufficient funds for double
-            elif player_bal < current_game.bet:
+
+            elif player_bal - current_game.bet < current_game.bet:
+                print(player_bal, current_game.bet)
                 await interaction.followup.send("**You have insufficient funds!**")
             else:
                 await current_game.double()
