@@ -221,7 +221,6 @@ class WhiteJackGame(*cogs):
         self.status = 'finished'
         self.dealer_final_show()
 
-
     # When player have blackjack
     def blackjack_event_player(self):
 
@@ -257,7 +256,6 @@ class WhiteJackGame(*cogs):
         self.dealer_final_show()
 
     async def lose_event(self):
-        await self.insert_user_data(data_type="losses", user_id=self.player.id)
 
         # Change title and end the game
         if self.doubled:
