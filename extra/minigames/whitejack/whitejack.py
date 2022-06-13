@@ -110,7 +110,7 @@ class WhiteJack(*whitejack_db):
             player_bal -= bet
             if player_bal < 0:
                 return
-                
+
             await self.white_jack_callback_before(bet, player, guild, player_bal, ctx=ctx)
     
     async def white_jack_callback_before(self, 
@@ -180,14 +180,17 @@ class WhiteJack(*whitejack_db):
             await self.insert_user_data('surrenders', player.id)
             
             subtraction = int(bet * 0.35)
-
-            player_bal -= subtraction
+            print(subtraction)
+            player_bal += bet - subtraction
             await SlothCurrency.update_user_money(player.id, -subtraction)
         
         elif game.state == 'draw':
             await self.insert_user_data('draws', player.id)
 
+        print('sububububu> ', subtraction)
+
         game.current_money = player_bal
+        print('currrnertetuh: ', game.current_money)
         new_footer = f"Whitejack: {player_bal}łł"
         embed = await game.create_whitejack_embed()
         embed.set_footer(text=new_footer)
