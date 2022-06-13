@@ -592,6 +592,7 @@ class WhiteJackActionView(discord.ui.View):
     async def white_jack_refresh_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
         """ Button for refreshing the game state. """
 
+        await interaction.response.defer()
         SlothCurrency = self.client.get_cog('SlothCurrency')
         user_currency = await SlothCurrency.get_user_currency(self.player.id)
         player_bal = user_currency[0][1]
@@ -599,7 +600,6 @@ class WhiteJackActionView(discord.ui.View):
         if player_bal < self.game.bet:
             return await interaction.followup.send("**You have insufficient funds!**")
 
-        await interaction.response.defer()
         await self.cog.white_jack_callback_before(self.game.bet, self.player, interaction.guild, self.game.current_money, interaction=interaction)
         self.stop()
 
