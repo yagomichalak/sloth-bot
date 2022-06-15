@@ -90,18 +90,18 @@ class ApplicationsTable(commands.Cog):
 
             if payload.channel_id == self.debate_manager_app_channel_id: # User is an mod+ or lesson manager
                 if await utils.is_allowed_members([cent_id]).predicate(channel=channel, member=payload.member):
-                    await self.handle_application(guild, payload)
+                    return await self.handle_application(guild, payload)
             elif payload.channel_id == self.teacher_app_channel_id: # User is an mod+ or lesson manager
-                if await utils.is_allowed([moderator_role_id, lesson_management_role_id]).predicate(channel=channel, member=payload.member):
-                    await self.handle_application(guild, payload)
+                if await utils.is_allowed([moderator_role_id]).predicate(channel=channel, member=payload.member):
+                    return await self.handle_application(guild, payload)
 
             elif payload.channel_id == self.ban_appeals_channel_id:
                 if adm:
-                    await self.handle_ban_appeal(message, payload)
+                    return await self.handle_ban_appeal(message, payload)
             elif adm: # User is an adm
-                await self.handle_application(guild, payload)
-            else:
-                await message.remove_reaction(payload.emoji, payload.member)
+                return await self.handle_application(guild, payload)
+
+            await message.remove_reaction(payload.emoji, payload.member)
 
 
     async def format_application_pings(self, guild: discord.Guild, pings: List[Dict[str, Union[int, bool]]]) -> str:
