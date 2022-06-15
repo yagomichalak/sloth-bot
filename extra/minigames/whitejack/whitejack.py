@@ -38,7 +38,7 @@ class WhiteJack(*whitejack_db):
             server_id: {}
         }
 
-    @commands.command(name='whitejack', aliases=['whj'])
+    @commands.command(name='whitejack', aliases=['wj', 'white_jack'])
     @Player.poisoned()
     @commands.cooldown(1, 3, commands.BucketType.user)
     @RehabMembersTable.in_rehab()

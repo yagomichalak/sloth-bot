@@ -318,7 +318,7 @@ class VoiceChannelActivity(*tool_cogs):
 
         return formated_time
 
-    @commands.command(aliases=['wj', 'whojoined', 'whoj', 'wj1', 'who', 'quem'])
+    @commands.command(aliases=['whj', 'whojoined', 'whoj', 'who', 'quem'])
     @commands.has_any_role(*allowed_roles)
     async def who_joined(self, ctx, channel: discord.VoiceChannel = None, time: str = None, time2: str = None) -> None:
         """ Shows which members were in the given voice channel at the given time:

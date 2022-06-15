@@ -135,12 +135,15 @@ class BlackJack(*blackjack_db):
         if not await self.check_user_database(author.id):
             return await ctx.send(f"**No games of blackjack were found for {member}**")
 
+        fixed_games: bool = False
+
         if self.blackjack_games[ctx.guild.id].get(member.id):
             try:
                 del self.blackjack_games[ctx.guild.id][member.id]
             except:
                 pass
             else:
+                fixed_games = True
                 await ctx.send(f"**Fixed BJ game for `{member}`!**")
                 
         if self.whitejack_games[ctx.guild.id].get(member.id):
@@ -149,7 +152,13 @@ class BlackJack(*blackjack_db):
             except:
                 pass
             else:
-                await ctx.send(f"**Fixed WHJ game for `{member}`!**")
+                fixed_games = True
+                await ctx.send(f"**Fixed WJ game for `{member}`!**")
+        if not fixed_games:
+            if author.id == member.id:
+                return await ctx.send(f"**You're not even broken, you can't be fixed, {member.mention}!**")
+            else:
+                return await ctx.send(f"**You're not even broken, you can't be fixed, {member.mention}!**")
 
     @commands.command(aliases=["bjs", "wjs", "whjs", "blackjack_status", "whitejack_status"])
     @commands.has_permissions()
