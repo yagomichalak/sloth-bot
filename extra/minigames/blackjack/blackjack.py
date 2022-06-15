@@ -4,7 +4,7 @@ from .blackjack_game import BlackJackGame
 from .create_cards_pack import cards_pack
 from mysqldb import *
 from .blackjack_db import BlackJackDB
-from typing import List, Union, Optional, Dict
+from typing import List, Optional
 
 from extra.slothclasses.player import Player
 from extra.minigames.view import BlackJackActionView
@@ -111,16 +111,20 @@ class BlackJack(*blackjack_db):
             await utils.disable_buttons(view)
             await msg.edit(embed=current_game.embed(), view=view)
 
-    @commands.command(aliases=["fix_bj", "fbj", "fixbj", "reset_bj", "rbj", "resetbj"])
+    @commands.command(aliases=[
+        "fix_bj", "fbj", "fixbj", "reset_bj", "rbj", "resetbj",
+        "fix_wj", "fwj", "fixwj", "reset_wj", "rwj", "resetwj",
+        "fix_j", "fj", "fixj", "reset_j", "rj", "resetj"
+    ])
     @commands.has_permissions()
-    async def fix_blackjack(self, ctx, member: discord.Member = None) -> None:
-        """ Fixes the Blackjack game for a specific user.
+    async def fix_jack(self, ctx, member: discord.Member = None) -> None:
+        """ Fixes the Jack games for a specific user.
         :param member: The member for whom fix the game. """
 
         author: discord.Member = ctx.author
 
         if member:
-            perms = ctx.channel.permissions_for(ctx.author)
+            perms = ctx.channel.permissions_for(author)
             if not perms.administrator:
                 return await ctx.send("**You can't do that**")
 
@@ -128,26 +132,35 @@ class BlackJack(*blackjack_db):
             member: discord.Member = ctx.message.author
 
         # Checks if the user is in the blackjack table
-        if not await self.check_user_database(ctx.author.id):
-            return await ctx.send(f"**No games of blackjack was found for {member}**")
+        if not await self.check_user_database(author.id):
+            return await ctx.send(f"**No games of blackjack were found for {member}**")
 
-        try:
-            del self.blackjack_games[ctx.guild.id][member.id]
-        except:
-            await ctx.send(f"**This user is not even broken, {author.mention}!**")
-        else:
-            await ctx.send(f"**Fixed the game for `{member}`!**")
+        if self.blackjack_games[ctx.guild.id].get(member.id):
+            try:
+                del self.blackjack_games[ctx.guild.id][member.id]
+            except:
+                pass
+            else:
+                await ctx.send(f"**Fixed BJ game for `{member}`!**")
+                
+        if self.whitejack_games[ctx.guild.id].get(member.id):
+            try:
+                del self.whitejack_games[ctx.guild.id][member.id]
+            except:
+                pass
+            else:
+                await ctx.send(f"**Fixed WHJ game for `{member}`!**")
 
     @commands.command(aliases=["bjs", "wjs", "whjs", "blackjack_status", "whitejack_status"])
     @commands.has_permissions()
-    async def jack_status(self, ctx, member: discord.Member = None) -> None:
+    async def jack_status(self, ctx, member: Optional[discord.Member] = None) -> None:
     
         if not member:
             member: discord.Member = ctx.message.author
         
-        user_id, wins, losses, draws, surrenders, _ = await self.get_user_data(member.id)
+        _, wins, losses, draws, surrenders, _ = await self.get_user_data(member.id)
 
         games = sum([wins, losses, draws, surrenders])
-        embed = discord.Embed(title=f"BlackJack Status {member}", timestamp=ctx.message.created_at, color=ctx.author.color)
+        embed = discord.Embed(title=f"Jack Status {member}", timestamp=ctx.message.created_at, color=ctx.author.color)
         embed.description=(f"```{wins} wins🍃| {losses} losses ❌| {draws} draws 🔶| {surrenders} srr 🏳️| {games} games 🏅```")
         await ctx.send(embed=embed)
