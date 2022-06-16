@@ -2,7 +2,6 @@ import discord
 from discord.ext import commands
 from .whitejack_game import WhiteJackGame
 from mysqldb import *
-from .whitejack_db import WhiteJackDB
 from typing import List, Union, Optional, Dict, Any
 
 from extra.slothclasses.player import Player
@@ -21,10 +20,8 @@ allowed_roles = [
     int(os.getenv('MOD_ROLE_ID', 123)), int(os.getenv('ANALYST_DEBUGGER_ROLE_ID', 123)), *patreon_roles.keys()
 ]
 
-whitejack_db: List[commands.Cog] = [
-	WhiteJackDB
-]
-class WhiteJack(*whitejack_db):
+
+class WhiteJack(commands.Cog):
     """ To start a Whitejack game in your channel use the 'whitejack <bet>' command,
     and instead of <bet> put the amount you want to gamble (the value must be an integer).
     After you start a Whitejack game use 'hit' command to draw a new card, 'stand' command

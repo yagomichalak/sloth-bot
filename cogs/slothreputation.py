@@ -263,7 +263,7 @@ class SlothReputation(*currency_cogs):
     async def _leaderboard(self, ctx, 
         info_for: Option(str, description="The leaderboard to show the information for.", choices=[
             'Reputation', 'Level', 'Leaves', 'Time', 'Items', 'Memory', 'Tribe Leaves', 'Galaxy Expiration',
-            'Coinflips'
+            'Blackjacks', 'Coinflips'
         ]
     )) -> None:
         """ Shows the leaderboard. """
@@ -284,6 +284,8 @@ class SlothReputation(*currency_cogs):
             await self.tribe_leaf_score(ctx)
         elif info_for == 'Galaxy Expiration':
             await self.galaxy_expiration_score(ctx)
+        elif info_for == 'Blackjacks':
+            await self.blackjack_score(ctx)
         elif info_for == 'Coinflips':
             await self.coinflips_score(ctx)
 
@@ -547,6 +549,41 @@ class SlothReputation(*currency_cogs):
                 name=f"[{i + 1}]# - __**{member}**__", value=f"Galaxy Room Expires in: <t:{deadline}:R>", inline=False
             )
             if i + 1 == 20:
+                break
+        return await answer(embed=leaderboard)
+
+    @commands.command(aliases=[
+        'blackjack_board', 'blackjackboard', 'bjscore', 'bjboard', 
+        'whitejack_board', 'whitejackboard', 'whitejack_score', 'wjscore', 'wjboard'
+    ]
+    )
+    @Player.poisoned()
+    async def blackjack_score(self, ctx):
+        """ Shows the top ten members in the blackjack leaderboard. """
+
+        answer: discord.PartialMessageable = None
+        if isinstance(ctx, commands.Context):
+            answer = ctx.send
+        else:
+            answer = ctx.respond
+
+        Games = self.client.get_cog("Games")
+        top_ten_users = await Games.get_top_ten_blackjack_members_by_wins()
+        current_time = await utils.get_time_now()
+        leaderboard = discord.Embed(title="__The Language Sloth's Blackjack Ranking Leaderboard__", colour=discord.Colour.dark_green(),
+                                    timestamp=current_time)
+        all_users = await Games.get_all_blackjack_members_by_wins()
+        position = [[i+1, u[1]] for i, u in enumerate(all_users) if u[0] == ctx.author.id]
+        position = [it for subpos in position for it in subpos] if position else ['??', 0]
+
+        leaderboard.set_footer(text=f"Your wins: {position[1]} | #{position[0]}", icon_url=ctx.author.display_avatar)
+        leaderboard.set_thumbnail(url=ctx.guild.icon.url)
+
+        # Embeds each one of the top ten users.
+        for i, sm in enumerate(top_ten_users):
+            member = discord.utils.get(ctx.guild.members, id=sm[0])
+            leaderboard.add_field(name=f"[{i + 1}]#", value=f"**__{member}__ • Wins:** `{sm[1]}`", inline=False)
+            if i + 1 == 10:
                 break
         return await answer(embed=leaderboard)
 

@@ -1,15 +1,11 @@
-import asyncio
 import discord
 from discord.ext import commands
-from mysqldb import *
-
-import copy
-import random
+from mysqldb import the_database
+from typing import List
 
 
 class BlackJackDB(commands.Cog):
     """ Class for the BlackJack game. """
-
 
     ### Database commands for aspirants activity
     @commands.command(hidden=True)
@@ -22,8 +18,16 @@ class BlackJackDB(commands.Cog):
             return await ctx.send(f"**The Blackjack table already exists, {member.mention}!**")
 
         mycursor, db = await the_database()
-        await mycursor.execute(
-            'CREATE TABLE Blackjack (user_id bigint, wins int, losses int, draws int, surrenders int, games int)')
+        await mycursor.execute("""
+            CREATE TABLE Blackjack (
+                user_id BIGINT NOT NULL, 
+                wins INT NOT DEFAULT 0,
+                losses INT DEFAULT 0,
+                draws INT DEFAULT 0,
+                surrenders INT DEFAULT 0,
+                games INT DEFAULT 0,
+                PRIMARY KEY (user_id)
+        )""")
         await db.commit()
         await mycursor.close()
         await ctx.send(f"**Table `Blackjack` created, {member.mention}!**")
@@ -72,7 +76,9 @@ class BlackJackDB(commands.Cog):
 
     async def insert_user_database(self, user_id) -> None:
         mycursor, db = await the_database()
-        await mycursor.execute("INSERT INTO Blackjack (user_id, wins, losses, draws, surrenders, games) VALUES (%s, %s, %s, %s, %s, %s)", (user_id, 0, 0, 0, 0, 0))
+        await mycursor.execute("""
+            INSERT INTO Blackjack (user_id, wins, losses, draws, surrenders, games) 
+            VALUES (%s, %s, %s, %s, %s, %s)""", (user_id, 0, 0, 0, 0, 0))
         await db.commit()
         await mycursor.close()
 
@@ -106,3 +112,21 @@ class BlackJackDB(commands.Cog):
         user_data = await mycursor.fetchone()
         await mycursor.close()
         return user_data
+
+    async def get_top_ten_blackjack_members_by_wins(self) -> List[List[int]]:
+        """ Gets the top ten users with the most wins in the coinflip game. """
+
+        mycursor, _ = await the_database()
+        await mycursor.execute("SELECT * FROM Blackjack ORDER BY wins DESC LIMIT 10")
+        top_ten_members = await mycursor.fetchall()
+        await mycursor.close()
+        return top_ten_members
+
+    async def get_all_blackjack_members_by_wins(self) -> List[List[int]]:
+        """ Gets the top ten users with the most wins in the coinflips game. """
+
+        mycursor, _ = await the_database()
+        await mycursor.execute("SELECT * FROM Blackjack ORDER BY wins DESC")
+        users = await mycursor.fetchall()
+        await mycursor.close()
+        return users
