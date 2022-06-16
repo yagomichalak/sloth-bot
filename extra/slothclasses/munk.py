@@ -1362,6 +1362,13 @@ class Munk(Player):
             {"message": "Spend 4 hours in a Voice Channel.", "enum_value": 5},
             {"message": "Buy any item from the SlothShop, if you have all items you need to get ripped-off first.", "enum_value": 6},
             {"message": "Transfer 25 leaves to two different staff members.", "enum_value": 7},
+            # {"message": "Complete a Teacher Class Feedback Prompt", "enum_value": 8},
+            # {"message": "Attend a class", "enum_value": 9},
+            {"message": "Transfer 25 leaves to two different teachers.", "enum_value": 10},
+            # {"message": "Complete 1 `TheLanguageJungle` singleplayer games. (zg!play)", "enum_value": 11},
+            # {"message": "Feed a pet or a baby", "enum_value": 12},
+            # {"message": "Play 3 lottery games", "enum_value": 13},
+            # {"message": "Perform 2 different RolePlay commands (z!hug, z!kiss, z!boot, etc.).", "enum_value": 14},
         ]
 
         return choice(quests)

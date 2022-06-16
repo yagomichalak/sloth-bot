@@ -121,6 +121,30 @@ async def quest_seven_callback(client: commands.Bot, user_id: int, quest: Dict[s
 
     await money_callback(client, user_id, 'Seven', money, quest)
 
+async def quest_ten_callback(client: commands.Bot, user_id: int, quest: Dict[str, Union[str, int]], **kwargs) -> None:
+    """ Callback for the quest ten.
+    :param client: The bot client.
+    :param user_id: The user ID.
+    :param quest: The quest information and data.
+    :param kwargs: Additional data. """
+
+    # Gets general info
+    current_time = await utils.get_time_now()
+    guild = client.get_guild(server_id)
+    member = guild.get_member(user_id)
+    cog = client.get_cog('SlothClass')
+    teacher_id: int = kwargs.get("teacher_id")
+    money = 150
+
+    # Checks whether the int content reached its expected mark, else increments it
+    if old_teacher_id := quest[9]:
+        if old_teacher_id == teacher_id:
+            return
+    else:
+        return await cog.update_sloth_skill_int_content(member.id, teacher_id, current_time.timestamp(), 'quest')
+
+    await money_callback(client, user_id, 'Ten', money, quest)
+
 # Default callbacks
 async def money_callback(client: commands.Cog, user_id: int, quest_name: str, money: int, quest: Dict[str, Union[str, int]], **kwargs) -> None:
     """ Default callback for Quests which the reward is just money for the entire tribe.

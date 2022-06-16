@@ -28,6 +28,7 @@ from extra.currency.usercurrency import UserCurrencyTable
 
 
 booster_role_id = int(os.getenv('BOOSTER_ROLE_ID', 123))
+teacher_role_id = int(os.getenv("TEACHER_ROLE_ID", 123))
 mod_role_id = int(os.getenv("MOD_ROLE_ID", 123))
 senior_mod_role_id = int(os.getenv("SENIOR_MOD_ROLE_ID", 123))
 guild_ids = [int(os.getenv('SERVER_ID', 123))]
@@ -807,8 +808,11 @@ class SlothCurrency(*currency_cogs):
             await self.update_user_money(ctx.author.id, -money)
             await ctx.send(f"**{ctx.author.mention} transferred {money}łł to {member.mention}!**")
 
-        if money == 25 and await utils.is_allowed([mod_role_id, senior_mod_role_id]).predicate(channel=ctx.channel, member=member):
-            await SlothClass.complete_quest(author.id, 7, staff_id=member.id)
+        if money == 25:
+            if await utils.is_allowed([mod_role_id, senior_mod_role_id]).predicate(channel=ctx.channel, member=member):
+                await SlothClass.complete_quest(author.id, 7, staff_id=member.id)
+            elif await utils.is_allowed([teacher_role_id]).predicate(channel=ctx.channel, member=member):
+                await SlothClass.complete_quest(author.id, 10, teacher_id=member.id)
 
     @commands.command(aliases=["farming_status", "farmingstatus", "farm", "farmstatus", "farmstats", "farm_status", "farm_stats"])
     @commands.cooldown(1, 5, commands.BucketType.user)
