@@ -43,9 +43,31 @@ class CreateSmartRoom(*smart_room_cogs):
 		the_time = await utils.get_timestamp()
 
 		# Looks for rooms that are soon going to be deleted (Danger zone)
+		SlothCurrency = self.client.get_cog("SlothCurrency")
 		danger_rooms = await self.get_all_galaxy_rooms_in_danger_zone(the_time)
 		for droom in danger_rooms:
 			member = self.client.get_user(droom[0])
+			if not member:
+				continue
+
+			# Checks for auto_pay mode
+			if droom[11]:
+				# Checks to see if the user has enough money to autopay the GR
+				user_currency = await SlothCurrency.get_user_currency(member.id)
+				vcs, txts = await self.order_rooms_default(droom)
+				required_money: int = await self.get_rent_price(len(txts), len(vcs))
+				if user_currency and user_currency[0][1] >= required_money:
+					await SlothCurrency.update_user_money(member.id, -required_money)
+					await self.increment_galaxy_ts(member.id, 1209600)
+					await self.user_notified_no(member.id)
+					# Tries notifying the user of the renewal through DM's
+					try:
+						await member.send(f"**Your Galaxy Room was auto renewed! `(-{required_money}łł)`**")
+					except Exception:
+						pass
+					continue
+
+			# Embed for the Galaxy Room in Danger Zone notification
 			embed = discord.Embed(
 				title="__Galaxy Rooms in Danger Zone__",
 				description=(
@@ -1020,6 +1042,15 @@ You can only add either **threads** **OR** one **voice channel**"""))
 
 		return vcs, txts
 
+	async def order_rooms_default(self, user_rooms: List[int]) -> List[List[int]]:
+		""" Orders the user's Galaxy Room channels by txt and vc.
+		:param user_rooms: The user rooms. """
+
+		vcs = [vc for vc in [user_rooms[2], user_rooms[5]] if vc is not None]
+		txts = [txt for txt in [user_rooms[3], user_rooms[4], user_rooms[8], user_rooms[9], user_rooms[10]] if txt is not None]
+
+		return vcs, txts
+
 	@galaxy.group(name="add_channel", aliases=['ac'])
 	async def _galaxy_add_channel(self, ctx) -> None:
 		""" Adds either a Text or a Voice Channel to
@@ -1516,10 +1547,7 @@ You can only add either **threads** **OR** one **voice channel**"""))
 			return await ctx.send(f"**Not doing it then, {member.mention}!**")
 
 		await self.update_galaxy_auto_pay(member.id, not auto_pay_int)
-		if not auto_pay_int:
-			await self.user_notified_yes(member.id)
-		else:
-			await self.user_notified_no(member.id)
+		await self.user_notified_no(member.id)
 			
 		await ctx.send(f"**Your Galaxy Room's auto pay mode has been turned `{reverse_auto_pay}`, {member.mention}!**")
 
