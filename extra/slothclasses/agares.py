@@ -398,8 +398,6 @@ class Agares(Player):
         await mycursor.close()
         return reflects
 
-
-
     @commands.command()
     @Player.poisoned()
     @Player.skills_used(requirement=50)
