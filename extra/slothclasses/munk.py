@@ -1435,7 +1435,7 @@ class Munk(Player):
         if not quests:
             return await ctx.send(f"**No quests found in your tribe, {member.mention}!**")
 
-        quests_text: str = await self.make_tribe_quests_text(quests)
+        quests_text: str = await self.make_tribe_quests_text(ctx.guild, quests)
         embed: discord.Embed = discord.Embed(
             title="__Tribe Quests__",
             description=f"Showing all `{len(quests)}` quests from this tribe:\n{quests_text}",
@@ -1449,29 +1449,31 @@ class Munk(Player):
 
         await ctx.send(embed=embed)
     
-    async def make_tribe_quests_text(self, quests: List[Dict[str, Union[str, int]]]) -> str:
+    async def make_tribe_quests_text(self, guild: discord.Guild, quests: List[Dict[str, Union[str, int]]]) -> str:
         """ Makes a text for the tribe quests.
+        :param guild: The server.
         :param quests: The quests to make a text for. """
 
         texts_list: List[str] = []
         for quest in quests:
             quest_number: int = quest[7]
+            quest_owner: discord.Member = guild.get_member(quest[0])
             if quest_number == 1:
-                texts_list.append(f"```ini\n• {quest[8]} (Q{quest[7]});\n[Progress]: {quest[9]} games.```")
+                texts_list.append(f"```ini\n• {quest[8]} (Q{quest[7]})\n[Progress]: {quest[9]} games.\n[Owner]: {quest_owner}```")
             elif quest_number == 2:
-                texts_list.append(f"```ini\n• {quest[8]} (Q{quest[7]});\n[Progress]: {quest[9]}/2 reps.```")
+                texts_list.append(f"```ini\n• {quest[8]} (Q{quest[7]})\n[Progress]: {quest[9]}/2 reps.\n[Owner]: {quest_owner}```")
             elif quest_number == 3:
-                texts_list.append(f"```ini\n• {quest[8]} (Q{quest[7]});```")
+                texts_list.append(f"```ini\n• {quest[8]} (Q{quest[7]})\n[Owner]: {quest_owner}```")
             elif quest_number == 4:
-                texts_list.append(f"```ini\n• {quest[8]} (Q{quest[7]});```")
+                texts_list.append(f"```ini\n• {quest[8]} (Q{quest[7]})\n[Owner]: {quest_owner}```")
             elif quest_number == 5:
                 m, s = divmod(quest[9], 60)
                 h, m = divmod(m, 60)
-                texts_list.append(f"```ini\n• {quest[8]} (Q{quest[7]});\n[Progress]: {h:d}h, {m:02d}m.```")
+                texts_list.append(f"```ini\n• {quest[8]} (Q{quest[7]})\n[Progress]: {h:d}h, {m:02d}m.\n[Owner]: {quest_owner}```")
             elif quest_number == 6:
-                texts_list.append(f"```ini\n• {quest[8]} (Q{quest[7]});```")
+                texts_list.append(f"```ini\n• {quest[8]} (Q{quest[7]})\n[Owner]: {quest_owner}```")
             elif quest_number == 7:
-                texts_list.append(f"```ini\n• {quest[8]} (Q{quest[7]});\n[Progress]: {1 if quest[9] else 0}/2 transfers.```")
+                texts_list.append(f"```ini\n• {quest[8]} (Q{quest[7]})\n[Progress]: {1 if quest[9] else 0}/2 transfers.\n[Owner]: {quest_owner}```")
         
         return ''.join(texts_list)
 

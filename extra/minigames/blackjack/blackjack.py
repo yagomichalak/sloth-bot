@@ -70,7 +70,6 @@ class BlackJack(*blackjack_db):
                 embed=discord.Embed(description=f"**{player.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one, or in the button below!**"),
                 view=view)
 
-
         player_bal = user_currency[0][1]
         minimum_bet = 50
 

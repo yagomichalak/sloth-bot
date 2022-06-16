@@ -500,7 +500,6 @@ class Games(*minigames_cogs):
         ok = discord.Embed(title="__Slots Machine__", color=discord.Color(0xFFEC))
         ok.set_footer(text=f"Bet from {author}", icon_url=author.display_avatar)
 
-
         rolling_emoji: str = '<a:slots_emoji:903335419725373490>'
         ok.add_field(name='Rolling...', value='| {} | {} | {} |\n'.format(rolling_emoji, rolling_emoji, rolling_emoji))
         msg = await ctx.send(embed=ok)
