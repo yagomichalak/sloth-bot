@@ -649,7 +649,8 @@ class Player(*additional_cogs):
             SELECT UC.user_id, UC.user_money FROM UserCurrency AS UC
             WHERE UC.user_id IN {}
             AND UC.user_id IN (
-                SELECT SP.user_id FROM SlothProfile AS SP) 
+                SELECT SP.user_id FROM SlothProfile AS SP
+                WHERE SP.sloth_class <> 'default') 
             AND UC.user_id NOT IN (
                 SELECT SS.target_id FROM SlothSkills AS SS WHERE skill_type = 'divine_protection')
             """.format(tuple(user_ids)))
