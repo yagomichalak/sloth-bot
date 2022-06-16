@@ -137,10 +137,20 @@ class GalaxyVcTable(commands.Cog):
 		mycursor, db = await the_database()
 		await mycursor.execute("""
 			CREATE TABLE GalaxyVc (
-			user_id BIGINT, user_cat BIGINT, user_vc BIGINT, 
-			user_txt1 BIGINT, user_txt2 BIGINT, user_vc2 BIGINT,
-			user_ts BIGINT, user_notified VARCHAR(3) default 'no',
-			user_txt3 BIGINT, user_txt4 BIGINT, user_txt5 BIGINT)""")
+			user_id BIGINT NOT NULL,
+			user_cat BIGINT NOT NULL,
+			user_vc BIGINT NOT NULL,
+			user_txt1 BIGINT NOT NULL,
+			user_txt2 BIGINT DEFAULT NULL,
+			user_vc2 BIGINT DEFAULT NULL,
+			user_ts BIGINT NOT NULL,
+			user_notified VARCHAR(3) DEFAULT 'no',
+			user_txt3 BIGINT DEFAULT NULL,
+			user_txt4 BIGINT DEFAULT NULL,
+			user_txt5 BIGINT DEFAULT NULL,
+			auto_pay TINYINT(1) DEFAULT 0,
+			PRIMARY KEY (user_id)
+		)""")
 		await db.commit()
 		await mycursor.close()
 
@@ -282,7 +292,7 @@ class GalaxyVcTable(commands.Cog):
 		:param user_id: The ID of the user to check it. """
 
 		mycursor, _ = await the_database()
-		await mycursor.execute("SELECT user_ts, user_cat, user_txt1, user_txt2, user_txt3, user_txt4, user_txt5, user_vc, user_vc2 FROM GalaxyVc WHERE user_id = %s", (user_id,))
+		await mycursor.execute("SELECT user_ts, user_cat, user_txt1, user_txt2, user_txt3, user_txt4, user_txt5, user_vc, user_vc2, auto_pay FROM GalaxyVc WHERE user_id = %s", (user_id,))
 		user_rooms = await mycursor.fetchone()
 		await mycursor.close()
 		return user_rooms
@@ -346,7 +356,6 @@ class GalaxyVcTable(commands.Cog):
 		await db.commit()
 		await mycursor.close()
 
-
 	async def user_notified_yes(self, user_id: int) -> None:
 		""" Updates the the user notified status to 'yes'.
 		:param user_id: The ID of the user. """
@@ -372,6 +381,17 @@ class GalaxyVcTable(commands.Cog):
 
 		mycursor, db = await the_database()
 		await mycursor.execute("UPDATE GalaxyVc SET user_ts = user_ts + %s WHERE user_id = %s", (addition, user_id))
+		await db.commit()
+		await mycursor.close()
+
+	async def update_galaxy_auto_pay(self, user_id: int, auto_pay: bool = True) -> None:
+		""" Updates the the Galaxy Room's auto pay mode.
+		:param user_id: The ID of the user who's the owner of the Galaxy Room.
+		:param auto_pay: Whether to put it into auto pay mode or not. [Default = True] """
+
+		auto_pay = 1 if auto_pay else 0
+		mycursor, db = await the_database()
+		await mycursor.execute("UPDATE GalaxyVc SET auto_pay = %s WHERE user_id = %s", (auto_pay, user_id))
 		await db.commit()
 		await mycursor.close()
 

@@ -827,13 +827,14 @@ You can only add either **threads** **OR** one **voice channel**"""))
 			return await ctx.send(f"**It looks like the owner of this Galaxy Room is not in the server anymore, {author.mention}!")
 
 		user_ts = user_galaxy[6]
+		auto_pay = True if user_galaxy[11] else False
 		the_time = await utils.get_timestamp()
 		deadline = user_ts + 1209600
 
 		embed = discord.Embed(
 			title=f"__{member.name}'s Rooms' Info__",
-			description=f'''**Created at:** {datetime.fromtimestamp(user_ts)}
-			**Expected expiration:** {datetime.fromtimestamp(deadline)}\n''',
+			description=f"""**Created at:** `{datetime.fromtimestamp(user_ts)}`
+			**Expected expiration:** `{datetime.fromtimestamp(deadline)}`\n**Auto Pay:** `{auto_pay}`\n""",
 			color=member.color,
 			timestamp=ctx.message.created_at)
 
@@ -842,13 +843,13 @@ You can only add either **threads** **OR** one **voice channel**"""))
 
 		seconds_left = deadline - the_time
 		if seconds_left >= 86400:
-			embed.description += f"**Time left:** {round(seconds_left/3600/24)} days left"
+			embed.description += f"**Time left:** `{round(seconds_left/3600/24)} days left`"
 		elif seconds_left >= 3600:
-			embed.description += f"**Time left:** {round(seconds_left/3600)} hours left"
+			embed.description += f"**Time left:** `{round(seconds_left/3600)} hours left`"
 		elif seconds_left >= 60:
-			embed.description += f"**Time left:** {round(seconds_left/60)} minutes left"
+			embed.description += f"**Time left:** `{round(seconds_left/60)} minutes left`"
 		else:
-			embed.description += f"**Time left:** {round(seconds_left)} seconds left"
+			embed.description += f"**Time left:** `{round(seconds_left)} seconds left`"
 
 		await ctx.send(embed=embed)
 
@@ -1490,6 +1491,37 @@ You can only add either **threads** **OR** one **voice channel**"""))
 		log_channel: discord.TextChannel = discord.utils.get(member.guild.text_channels, id=int(os.getenv("SMART_ROOM_CHANNEL_LOG_ID", 123)))
 		await log_channel.send(embed=embed)
 
+	@galaxy.command(name="auto_pay", aliases=['ap', 'autopay', 'pay_auto', 'payauto', 'ar', 'auto_renew', 'autorenew'])
+	async def _galaxy_auto_pay(self, ctx) -> None:
+		""" Puts the Galaxy Room into the auto pay mode. """
+
+		if not ctx.guild:
+			return await ctx.send("**Don't use it here!**")
+
+		member = ctx.author
+
+		user_galaxy = await self.get_galaxy_by_cat_id(ctx.channel.category.id)
+		if not user_galaxy:
+			return await ctx.send("**This is not a Galaxy Room!**")
+
+		if user_galaxy[0] != member.id:
+			return await ctx.send(f"**You cannot run this command outside your Galaxy Room, in case you have one, {member.mention}!**")
+
+		auto_pay_int = user_galaxy[11]
+		auto_pay = 'on' if auto_pay_int else 'off'
+		reverse_auto_pay = 'off' if auto_pay_int else 'on'
+
+		confirm = await ConfirmSkill(f"Your Galaxy Room is currently turned `{auto_pay}`, do you wanna turn it `{reverse_auto_pay}`, {member.mention}?").prompt(ctx)
+		if not confirm:
+			return await ctx.send(f"**Not doing it then, {member.mention}!**")
+
+		await self.update_galaxy_auto_pay(member.id, not auto_pay_int)
+		if not auto_pay_int:
+			await self.user_notified_yes(member.id)
+		else:
+			await self.user_notified_no(member.id)
+			
+		await ctx.send(f"**Your Galaxy Room's auto pay mode has been turned `{reverse_auto_pay}`, {member.mention}!**")
 
 def setup(client):
 	""" Cog's setup function. """
