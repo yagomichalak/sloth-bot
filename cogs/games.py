@@ -294,6 +294,9 @@ class Games(*minigames_cogs):
             await ctx.send(
                 f"**{author.mention}, better luck next time... You guessed {g1}, {g2}, {g3}...\nThe numbers were:** `{', '.join(string_numbers)}`")
 
+        # Tries to complete a quest, if possible.
+        await self.client.get_cog('SlothClass').complete_quest(author.id, 13)
+
     @commands.command(aliases=['dice'])
     @Player.poisoned()
     async def roll(self, ctx, sides = None):
