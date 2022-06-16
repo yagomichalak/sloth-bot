@@ -1368,7 +1368,7 @@ class Munk(Player):
             # {"message": "Complete 1 `TheLanguageJungle` singleplayer games. (zg!play)", "enum_value": 11},
             {"message": "Feed a pet or a baby", "enum_value": 12},
             {"message": "Play 3 lottery games", "enum_value": 13},
-            # {"message": "Perform 2 different RolePlay commands (z!hug, z!kiss, z!boot, etc.).", "enum_value": 14},
+            {"message": "Perform 2 different RolePlay commands (z!hug, z!kiss, z!boot, etc.).", "enum_value": 14},
         ]
 
         return choice(quests)
@@ -1483,6 +1483,20 @@ class Munk(Player):
                 texts_list.append(f"```ini\n• {quest[8]} (Q{quest[7]})\n[Progress]: {1 if quest[9] else 0}/2 transfers.\n[Member]: {quest_owner}```")
         
         return ''.join(texts_list)
+
+    async def update_sloth_skill_content(self, user_id: int, content: int, current_ts: int, skill_type: str) -> None:
+        """ Updates the skill's integer content.
+        :param user_id: The user ID.
+        :param content: The integer content.
+        :param current_ts: The current timestamp.
+        :param skill_type: The skill type. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("""
+            UPDATE SlothSkills SET edited_timestamp = %s, content = %s 
+            WHERE user_id = %s AND skill_type = %s""", (current_ts, content, user_id, skill_type))
+        await db.commit()
+        await mycursor.close()
 
     async def update_sloth_skill_int_content(self, user_id: int, int_content: int, current_ts: int, skill_type: str) -> None:
         """ Updates the skill's integer content.
