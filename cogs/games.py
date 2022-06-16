@@ -15,10 +15,11 @@ from extra.minigames.whitejack.whitejack import WhiteJack
 from extra.minigames.view import MoveObjectGameView, TicTacToeView, FlagsGameView, MemoryGameView
 from extra.minigames.rehab_members import RehabMembersTable
 from extra.minigames.memory import MemoryTable
+from extra.minigames.coinflip import CoinflipMemberTable
 
 minigames_cogs: List[commands.Cog] = [
     ConnectFour, BlackJack, WhiteJack, RehabMembersTable,
-    MemoryTable
+    MemoryTable, CoinflipMemberTable
 ]
 
 class Games(*minigames_cogs):
@@ -336,6 +337,8 @@ class Games(*minigames_cogs):
 
         minimum_bet: int = 50
         bet_limit: int = 5000
+        win_increment, loss_increment = 0, 0
+
         if bet > bet_limit:
             ctx.command.reset_cooldown(ctx)
             return await ctx.reply(f"**You cannot bet more than {bet_limit}łł at a time, {member.mention}!**")
@@ -365,6 +368,7 @@ class Games(*minigames_cogs):
             ctx.command.reset_cooldown(ctx)
             return await ctx.reply("**Please, inform a valid side!**")
 
+        current_ts = await utils.get_timestamp()
         side = 'Tail' if side.lower() in side_options['Tail']['aliases'] else 'Heads'
 
         coin_var: str = choice(['Tail', 'Heads'])
@@ -377,10 +381,12 @@ class Games(*minigames_cogs):
         
         if win_var == 'won':
             embed.color=discord.Color.green()
+            win_increment = 1
             if bet != 0:
                 embed.add_field(name="New balance", value=f"{user_currency[0][1]+bet} leaves 🍃")
                 await SlothCurrency.update_user_money(member.id, bet)
         else:
+            loss_increment = 1
             embed.color=discord.Color.dark_red()
             if bet != 0:
                 embed.add_field(name="New balance", value=f"{user_currency[0][1]-bet} leaves 🍃")
@@ -390,10 +396,41 @@ class Games(*minigames_cogs):
         embed.set_thumbnail(url=side_options[coin_var]['image'])
         embed.set_footer(text=f"Gambled by {member}")
         await ctx.reply(embed=embed)
+        if await self.get_coinflip_member(member.id):
+            # Updates the status
+            await self.update_coinflip_member(member.id, current_ts, wins=win_increment, losses=loss_increment)
+        else:
+            # Inserts the member
+            await self.insert_coinflip_member(member.id, current_ts, wins=win_increment, losses=loss_increment)
+
 
         if win_var == 'won' and bet == 50:
             # Tries to complete a quest, if possible.
             await self.client.get_cog('SlothClass').complete_quest(member.id, 3)
+
+    @commands.command(aliases=["cs", "coinflips", "c_s", "coinflip_statuses", "flips", "cflps", "cfs"])
+    @commands.has_permissions()
+    async def coinflip_status(self, ctx, member: Optional[discord.Member] = None) -> None:
+        """ Shows your coinflip game status; wins, losses and total of games.
+        :param member: The member to show it for. [Optional][Default = You] """
+    
+        if not member:
+            member: discord.Member = ctx.message.author
+        
+        coinflip_member = await self.get_coinflip_member(member.id)
+        if not coinflip_member:
+            return await ctx.send(f"**You have never coinflipped before, {member.mention}!**")
+
+        wins, losses = coinflip_member[1], coinflip_member[2]
+        games = sum([wins, losses])
+        embed = discord.Embed(
+            title=f"Coinflip Status:",
+            description=f"```{wins} wins ✅| {losses} losses ❌| {games} games 🏅```\n**Last time played:** <t:{coinflip_member[3]}>",
+            color=member.color
+        )
+        embed.set_author(name=member, icon_url=member.display_avatar)
+
+        await ctx.send(embed=embed)
 
     @commands.command()
     @Player.poisoned()

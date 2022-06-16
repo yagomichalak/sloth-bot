@@ -163,6 +163,8 @@ class BlackJack(*blackjack_db):
     @commands.command(aliases=["bjs", "wjs", "whjs", "blackjack_status", "whitejack_status"])
     @commands.has_permissions()
     async def jack_status(self, ctx, member: Optional[discord.Member] = None) -> None:
+        """ Shows your blackjack/whitejack game status; wins, losses, draws, surrenders and total of games.
+        :param member: The member to show it for. [Optional][Default = You] """
     
         if not member:
             member: discord.Member = ctx.message.author
@@ -171,5 +173,5 @@ class BlackJack(*blackjack_db):
 
         games = sum([wins, losses, draws, surrenders])
         embed = discord.Embed(title=f"Jack Status {member}", timestamp=ctx.message.created_at, color=ctx.author.color)
-        embed.description=(f"```{wins} wins🍃| {losses} losses ❌| {draws} draws 🔶| {surrenders} srr 🏳️| {games} games 🏅```")
+        embed.description=(f"```{wins} wins ✅| {losses} losses ❌| {draws} draws 🔶| {surrenders} srr 🏳️| {games} games 🏅```")
         await ctx.send(embed=embed)
