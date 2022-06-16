@@ -13,4 +13,8 @@ class QuestEnum(enum.Enum):
     five: Callable = quest_five_callback
     six: Callable = quest_six_callback
     seven: Callable = quest_seven_callback
+
+
     ten: Callable = quest_ten_callback
+    
+    twelve: Callable = quest_twelve_callback

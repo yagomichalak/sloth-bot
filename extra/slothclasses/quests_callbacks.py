@@ -145,6 +145,15 @@ async def quest_ten_callback(client: commands.Bot, user_id: int, quest: Dict[str
 
     await money_callback(client, user_id, 'Ten', money, quest)
 
+async def quest_twelve_callback(client: commands.Bot, user_id: int, quest: Dict[str, Union[str, int]], **kwargs) -> None:
+    """ Callback for the quest four.
+    :param client: The bot client.
+    :param user_id: The user ID.
+    :param quest: The quest information and data.
+    :param kwargs: Additional data. """
+
+    await money_callback(client, user_id, 'Twelve', 50, quest)
+
 # Default callbacks
 async def money_callback(client: commands.Cog, user_id: int, quest_name: str, money: int, quest: Dict[str, Union[str, int]], **kwargs) -> None:
     """ Default callback for Quests which the reward is just money for the entire tribe.

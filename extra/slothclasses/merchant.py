@@ -1252,6 +1252,9 @@ class Merchant(Player):
             )
 
             await ctx.send(embed=embed)
+            # Tries to complete a quest, if possible.
+            await self.client.get_cog('SlothClass').complete_quest(member.id, 12)
 
         await utils.disable_buttons(confirm_view)
         await msg.edit(view=confirm_view)
+

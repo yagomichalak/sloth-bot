@@ -830,6 +830,8 @@ class Seraph(Player):
             embed.set_thumbnail(url=f"https://thelanguagesloth.com/static/assets/images/sloth_classes/{user_baby[3]}.png")
 
             await ctx.send(embed=embed)
+            # Tries to complete a quest, if possible.
+            await self.client.get_cog('SlothClass').complete_quest(member.id, 12)
 
         await utils.disable_buttons(confirm_view)
         await msg.edit(view=confirm_view)

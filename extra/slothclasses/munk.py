@@ -1366,7 +1366,7 @@ class Munk(Player):
             # {"message": "Attend a class", "enum_value": 9},
             {"message": "Transfer 25 leaves to two different teachers.", "enum_value": 10},
             # {"message": "Complete 1 `TheLanguageJungle` singleplayer games. (zg!play)", "enum_value": 11},
-            # {"message": "Feed a pet or a baby", "enum_value": 12},
+            {"message": "Feed a pet or a baby", "enum_value": 12},
             # {"message": "Play 3 lottery games", "enum_value": 13},
             # {"message": "Perform 2 different RolePlay commands (z!hug, z!kiss, z!boot, etc.).", "enum_value": 14},
         ]
