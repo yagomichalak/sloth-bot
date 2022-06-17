@@ -190,13 +190,14 @@ async def quest_fourteen_callback(client: commands.Bot, user_id: int, quest: Dic
     member = guild.get_member(user_id)
     cog = client.get_cog('SlothClass')
     command_name = kwargs.get("command_name")
+    command_int = int.from_bytes(command_name.encode('utf-8'), byteorder='big')
     money = 75
 
     # Checks whether the int content reached its expected mark, else increments it
-    if not quest[8]:
-         await cog.update_sloth_skill_content(member.id, command_name, current_time.timestamp(), 'quest')
+    if quest[9] == 0:
+         return await cog.update_sloth_skill_int_content(member.id, command_int, current_time.timestamp(), 'quest')
 
-    if quest[8] == command_name:
+    if quest[9] == command_int:
         return
 
     await update_tribe_members_money(client, member, 'Fourteen', money, current_time, quest)

@@ -70,7 +70,7 @@ class RolePlay(commands.Cog):
         if view.used:
             await self.client.get_cog('SlothCurrency').update_user_money(author.id, -5)
             # Tries to complete a quest, if possible.
-            await self.client.get_cog('SlothClass').complete_quest(member.id, 14, command_name=ctx.command.name)
+            await self.client.get_cog('SlothClass').complete_quest(author.id, 14, command_name=ctx.command.name)
 
     @commands.command()
     @Player.poisoned()
@@ -108,7 +108,7 @@ class RolePlay(commands.Cog):
         if view.used:
             await self.client.get_cog('SlothCurrency').update_user_money(author.id, -5)
             # Tries to complete a quest, if possible.
-            await self.client.get_cog('SlothClass').complete_quest(member.id, 14, command_name=ctx.command.name)
+            await self.client.get_cog('SlothClass').complete_quest(author.id, 14, command_name=ctx.command.name)
     
     @commands.command()
     @Player.poisoned()
@@ -144,7 +144,7 @@ class RolePlay(commands.Cog):
         if view.used:
             await self.client.get_cog('SlothCurrency').update_user_money(author.id, -5)
             # Tries to complete a quest, if possible.
-            await self.client.get_cog('SlothClass').complete_quest(member.id, 14, command_name=ctx.command.name)
+            await self.client.get_cog('SlothClass').complete_quest(author.id, 14, command_name=ctx.command.name)
 
     @commands.command()
     @Player.poisoned()
@@ -180,7 +180,7 @@ class RolePlay(commands.Cog):
         if view.used:
             await self.client.get_cog('SlothCurrency').update_user_money(author.id, -5)
             # Tries to complete a quest, if possible.
-            await self.client.get_cog('SlothClass').complete_quest(member.id, 14, command_name=ctx.command.name)
+            await self.client.get_cog('SlothClass').complete_quest(author.id, 14, command_name=ctx.command.name)
 
     @commands.command()
     @Player.poisoned()
@@ -350,7 +350,7 @@ class RolePlay(commands.Cog):
         if view.used:
             await self.client.get_cog('SlothCurrency').update_user_money(author.id, -5)
             # Tries to complete a quest, if possible.
-            await self.client.get_cog('SlothClass').complete_quest(member.id, 14, command_name=ctx.command.name)
+            await self.client.get_cog('SlothClass').complete_quest(author.id, 14, command_name=ctx.command.name)
 
     @commands.command()
     @Player.poisoned()
@@ -386,7 +386,7 @@ class RolePlay(commands.Cog):
         if view.used:
             await self.client.get_cog('SlothCurrency').update_user_money(author.id, -5)
             # Tries to complete a quest, if possible.
-            await self.client.get_cog('SlothClass').complete_quest(member.id, 14, command_name=ctx.command.name)
+            await self.client.get_cog('SlothClass').complete_quest(author.id, 14, command_name=ctx.command.name)
 
     @commands.command(aliases=['tickling'])
     @Player.poisoned()
@@ -423,7 +423,7 @@ class RolePlay(commands.Cog):
         if view.used:
             await self.client.get_cog('SlothCurrency').update_user_money(author.id, -5)
             # Tries to complete a quest, if possible.
-            await self.client.get_cog('SlothClass').complete_quest(member.id, 14, command_name=ctx.command.name)
+            await self.client.get_cog('SlothClass').complete_quest(author.id, 14, command_name=ctx.command.name)
 
     @commands.command(aliases=['throw', 'toss'])
     @Player.poisoned()
@@ -460,7 +460,7 @@ class RolePlay(commands.Cog):
         if view.used:
             await self.client.get_cog('SlothCurrency').update_user_money(author.id, -5)
             # Tries to complete a quest, if possible.
-            await self.client.get_cog('SlothClass').complete_quest(member.id, 14, command_name=ctx.command.name)
+            await self.client.get_cog('SlothClass').complete_quest(author.id, 14, command_name=ctx.command.name)
 
     @commands.command()
     @Player.poisoned()
@@ -496,7 +496,7 @@ class RolePlay(commands.Cog):
         if view.used:
             await self.client.get_cog('SlothCurrency').update_user_money(author.id, -5)
             # Tries to complete a quest, if possible.
-            await self.client.get_cog('SlothClass').complete_quest(member.id, 14, command_name=ctx.command.name)
+            await self.client.get_cog('SlothClass').complete_quest(author.id, 14, command_name=ctx.command.name)
 
     @commands.command(aliases=['imbegging', 'imbeggin', 'beggin'])
     @Player.poisoned()
@@ -533,7 +533,7 @@ class RolePlay(commands.Cog):
         if view.used:
             await self.client.get_cog('SlothCurrency').update_user_money(author.id, -5)
             # Tries to complete a quest, if possible.
-            await self.client.get_cog('SlothClass').complete_quest(member.id, 14, command_name=ctx.command.name)
+            await self.client.get_cog('SlothClass').complete_quest(author.id, 14, command_name=ctx.command.name)
 
     @commands.command()
     @Player.poisoned()
@@ -576,7 +576,7 @@ class RolePlay(commands.Cog):
         if view.used:
             await self.client.get_cog('SlothCurrency').update_user_money(author.id, -5)
             # Tries to complete a quest, if possible.
-            await self.client.get_cog('SlothClass').complete_quest(member.id, 14, command_name=ctx.command.name)
+            await self.client.get_cog('SlothClass').complete_quest(author.id, 14, command_name=ctx.command.name)
 
     @commands.command()
     @Player.poisoned()
@@ -613,7 +613,7 @@ class RolePlay(commands.Cog):
         if view.used:
             await self.client.get_cog('SlothCurrency').update_user_money(author.id, -5)
             # Tries to complete a quest, if possible.
-            await self.client.get_cog('SlothClass').complete_quest(member.id, 14, command_name=ctx.command.name)
+            await self.client.get_cog('SlothClass').complete_quest(author.id, 14, command_name=ctx.command.name)
 
     @commands.command(aliases=['hi5', 'h5', 'high_five', 'highestfive', 'highest_five', 'hf'])
     @Player.poisoned()
@@ -650,7 +650,7 @@ class RolePlay(commands.Cog):
         if view.used:
             await self.client.get_cog('SlothCurrency').update_user_money(author.id, -5)
             # Tries to complete a quest, if possible.
-            await self.client.get_cog('SlothClass').complete_quest(member.id, 14, command_name=ctx.command.name)
+            await self.client.get_cog('SlothClass').complete_quest(author.id, 14, command_name=ctx.command.name)
 
     @commands.command()
     @Player.poisoned()
@@ -686,7 +686,7 @@ class RolePlay(commands.Cog):
         if view.used:
             await self.client.get_cog('SlothCurrency').update_user_money(author.id, -5)
             # Tries to complete a quest, if possible.
-            await self.client.get_cog('SlothClass').complete_quest(member.id, 14, command_name=ctx.command.name)
+            await self.client.get_cog('SlothClass').complete_quest(author.id, 14, command_name=ctx.command.name)
 
     @commands.command(aliases=['driveover', 'run_over', 'runover'])
     @Player.poisoned()
@@ -723,7 +723,7 @@ class RolePlay(commands.Cog):
         if view.used:
             await self.client.get_cog('SlothCurrency').update_user_money(author.id, -5)
             # Tries to complete a quest, if possible.
-            await self.client.get_cog('SlothClass').complete_quest(member.id, 14, command_name=ctx.command.name)
+            await self.client.get_cog('SlothClass').complete_quest(author.id, 14, command_name=ctx.command.name)
 
 def setup(client):
     client.add_cog(RolePlay(client))
