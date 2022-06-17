@@ -504,7 +504,10 @@ class Seraph(Player):
             current_timestamp = await utils.get_timestamp()
             if attained_grace:
                 target_partner_sloth_profile = await self.get_sloth_profile(marriage['partner'])
-                baby_class = random.choice([target_sloth_profile[1], target_partner_sloth_profile[1]])
+                sclass_one, sclass_two = target_sloth_profile[1], target_partner_sloth_profile[1]
+                if sclass_two == 'default':
+                    sclass_two = sclass_one
+                baby_class = random.choice([sclass_one, sclass_two])
                 await self.insert_user_baby(target.id, marriage['partner'], f"Baby {baby_class}", baby_class)
             if exists:
                 await self.update_user_skill_ts(perpetrator.id, Skill.FOUR, current_timestamp)
