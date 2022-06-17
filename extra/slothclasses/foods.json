@@ -32,7 +32,7 @@
         "gifs": ["https://c.tenor.com/YS6St_xCRN4AAAAC/popcorn-eating-popcorn.gif", "https://c.tenor.com/L8nQOHAF3VYAAAAC/thriller-michael-jackson.gif", "https://c.tenor.com/_0cv0UNf6TYAAAAC/bill-hader-watching.gif", "https://c.tenor.com/F1KG-Mpw__IAAAAC/popcorn-popcorn-day.gif", "https://c.tenor.com/JqS9iD9qHSoAAAAC/eating-popcorn-movie-time.gif", "https://c.tenor.com/Cg0dZkgo3SYAAAAC/popcorn-julia-popcorn.gif", "https://c.tenor.com/RPUIeyIVUkkAAAAC/popcorn-panda.gif", "https://c.tenor.com/myoYGpI-g8cAAAAC/popcorns-crackhead-eating.gif", "https://c.tenor.com/ASlchYiD1VUAAAAC/popcorn-entertainment.gif", "https://c.tenor.com/qbK_nSIXGFIAAAAC/curry-eat.gif"]
     },
     "Coffee": {
-        "name": "Coffee", "emoji": "<a:coffe_sloth:737788866043314297>", "sentence": "{member.mention} gave a cup of coffee {target.mention}",
+        "name": "Coffee", "emoji": "<a:coffe_sloth:737788866043314297>", "sentence": "{member.mention} gave a cup of coffee to {target.mention}",
         "gifs": ["https://c.tenor.com/pvbn5bGWSQcAAAAC/coffee-snow-white.gif", "https://c.tenor.com/tqImnFvqFhwAAAAd/coffee-smiley.gif", "https://c.tenor.com/NiXFXBvOTpUAAAAd/need-coffee-i-have-one-cup-a-day.gif", "https://c.tenor.com/y9dY2Ka7_WMAAAAd/yoda-coffee.gif", "https://c.tenor.com/XIseUZRe3C4AAAAC/morning-coffee.gif", "https://c.tenor.com/M2UcJkMe27kAAAAC/coffee-latte.gif", "https://c.tenor.com/I_9SAgYkp-kAAAAC/coffee.gif", "https://c.tenor.com/Z0MMOXH1VbQAAAAC/caf%C3%A9-coffee.gif", "https://c.tenor.com/IzXnvyY0oTMAAAAd/sip-drink.gif", "https://c.tenor.com/ay8O934_NVYAAAAC/coffee-hearts.gif"]
     },
     "Tea": {
@@ -44,7 +44,7 @@
         "gifs": ["https://c.tenor.com/Uy0mqNhKNK8AAAAC/muffin-time-its-muffin-time.gif", "https://c.tenor.com/K-zKgFdlpp4AAAAC/muffin-cute.gif", "https://c.tenor.com/J5l6mslYTj8AAAAC/chocolate-muffin-muffin.gif", "https://c.tenor.com/m7dJej6jQBwAAAAd/muffin-hogg.gif", "https://c.tenor.com/GRAcVs3T6_IAAAAC/muffin-cute.gif", "https://c.tenor.com/Od5Eb0JmCm0AAAAd/muffin-cupcake.gif", "https://c.tenor.com/eNMpNwjjYR4AAAAC/the-muffin-man-muffin-man.gif", "https://c.tenor.com/-Yhu1kazv70AAAAd/victoria-sponge-cupcakes-cupcake.gif", "https://c.tenor.com/DrxIS7RcRH0AAAAC/cupcake-jumping.gif", "https://c.tenor.com/I4nNLc_YLoEAAAAC/baking-oven.gif"]
     },
     "Cookie": {
-        "name": "Cookie", "emoji": "<:zslothcookie:695423388042133514>", "sentence": "{member.mention} gave {target.mention} a cookıe",
+        "name": "Cookie", "emoji": "<:zslothcookie:695423388042133514>", "sentence": "{member.mention} gave {target.mention} a cookie",
         "gifs": ["https://c.tenor.com/mNjpKjB8Xz8AAAAC/cookies.gif", "https://c.tenor.com/YBclaql8X7YAAAAC/cookies-enjoy.gif", "https://c.tenor.com/TJREb7mszbwAAAAd/cat-cookies-cookies.gif", "https://c.tenor.com/rTnBjHSdVRQAAAAC/cookies-chocolate-chip-cookies.gif", "https://c.tenor.com/9txVHvCQ7p8AAAAC/cookie-wink.gif", "https://c.tenor.com/Gyir-IHh1SsAAAAC/spongebob-cookies.gif", "https://c.tenor.com/5rKEwpAA5zoAAAAC/choclate-chip-cookie-to-the-rescue.gif", "https://c.tenor.com/naj-rk6rhd8AAAAC/milk-bath-cookie-mascot.gif", "https://c.tenor.com/HeJjdBn99xQAAAAC/chocolate-chip-cookies-cookies.gif", "https://c.tenor.com/GTGO4S0_8_YAAAAd/tim-hortons-cookies.gif"]
     },
     "Honey": {
