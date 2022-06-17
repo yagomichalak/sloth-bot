@@ -1542,7 +1542,7 @@ You can only add either **threads** **OR** one **voice channel**"""))
 		auto_pay = 'on' if auto_pay_int else 'off'
 		reverse_auto_pay = 'off' if auto_pay_int else 'on'
 
-		confirm = await ConfirmSkill(f"Your Galaxy Room is currently turned `{auto_pay}`, do you wanna turn it `{reverse_auto_pay}`, {member.mention}?").prompt(ctx)
+		confirm = await ConfirmSkill(f"Your Galaxy Room's auto pay mode is currently turned `{auto_pay}`, do you wanna turn it `{reverse_auto_pay}`, {member.mention}?").prompt(ctx)
 		if not confirm:
 			return await ctx.send(f"**Not doing it then, {member.mention}!**")
 
