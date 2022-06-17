@@ -811,7 +811,7 @@ class SlothCurrency(*currency_cogs):
         if money == 25:
             if await utils.is_allowed([mod_role_id, senior_mod_role_id]).predicate(channel=ctx.channel, member=member):
                 await SlothClass.complete_quest(author.id, 7, staff_id=member.id)
-            elif await utils.is_allowed([teacher_role_id]).predicate(channel=ctx.channel, member=member):
+            if await utils.is_allowed([teacher_role_id]).predicate(channel=ctx.channel, member=member):
                 await SlothClass.complete_quest(author.id, 10, teacher_id=member.id)
 
     @commands.command(aliases=["farming_status", "farmingstatus", "farm", "farmstatus", "farmstats", "farm_status", "farm_stats"])

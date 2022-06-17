@@ -1481,6 +1481,20 @@ class Munk(Player):
                 texts_list.append(f"```ini\n• {quest[8]} (Q{quest[7]})\n[Member]: {quest_owner}```")
             elif quest_number == 7:
                 texts_list.append(f"```ini\n• {quest[8]} (Q{quest[7]})\n[Progress]: {1 if quest[9] else 0}/2 transfers.\n[Member]: {quest_owner}```")
+            elif quest_number == 8:
+                texts_list.append(f"```ini\n• {quest[8]} (Q{quest[7]})\n[Member]: {quest_owner}```")
+            elif quest_number == 9:
+                texts_list.append(f"```ini\n• {quest[8]} (Q{quest[7]})\n[Member]: {quest_owner}```")
+            elif quest_number == 10:
+                texts_list.append(f"```ini\n• {quest[8]} (Q{quest[7]})\n[Progress]: {1 if quest[9] else 0}/2 transfers.\n[Member]: {quest_owner}```")
+            elif quest_number == 11:
+                texts_list.append(f"```ini\n• {quest[8]} (Q{quest[7]})\n[Member]: {quest_owner}```")
+            elif quest_number == 12:
+                texts_list.append(f"```ini\n• {quest[8]} (Q{quest[7]})\n[Member]: {quest_owner}```")
+            elif quest_number == 13:
+                texts_list.append(f"```ini\n• {quest[8]} (Q{quest[7]})\n[Progress]: {quest[9]}/3 lottos.\n[Member]: {quest_owner}```")
+            elif quest_number == 14:
+                texts_list.append(f"```ini\n• {quest[8]} (Q{quest[7]})\n[Progress]: {1 if quest[9] else 0}/2 RolePlay commands.\n[Member]: {quest_owner}```")
         
         return ''.join(texts_list)
 
