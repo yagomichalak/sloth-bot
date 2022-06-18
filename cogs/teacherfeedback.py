@@ -25,7 +25,7 @@ lesson_management_role_id = int(os.getenv('LESSON_MANAGEMENT_ROLE_ID', 123))
 sloth_explorer_role_id = int(os.getenv('SLOTH_EXPLORER_ROLE_ID', 123))
 show_me_everything_role_id = int(os.getenv('SHOW_ME_EVERYTHING_ROLE_ID', 123))
 sloth_pass_role_id = int(os.getenv('SLOTH_PASS_ROLE_ID', 123))
-all_vcs_role_id = int(os.getenv('ALL_VCS_ROLE_ID', 123))
+# all_vcs_role_id = int(os.getenv('ALL_VCS_ROLE_ID', 123))
 
 teacher_feedback_thread_id = int(os.getenv('TEACHER_FEEDBACK_THREAD_ID', 123))
 class_history_channel_id = int(os.getenv('CLASS_HISTORY_CHANNEL_ID', 123))
@@ -806,7 +806,7 @@ class TeacherFeedback(commands.Cog):
         mod_role = discord.utils.get(member.guild.roles, id=mod_role_id)
         lesson_management_role = discord.utils.get(member.guild.roles, id=lesson_management_role_id)
         sloth_explorer_role = discord.utils.get(member.guild.roles, id=sloth_explorer_role_id)
-        all_vcs_role = discord.utils.get(member.guild.roles, id=all_vcs_role_id)
+        # all_vcs_role = discord.utils.get(member.guild.roles, id=all_vcs_role_id)
 
         overwrites = {}
         # Gets permissions for general roles
@@ -838,8 +838,8 @@ class TeacherFeedback(commands.Cog):
         overwrites[sloth_explorer_role] = discord.PermissionOverwrite(
             read_messages=True, send_messages=True, connect=True, speak=True, view_channel=True, embed_links=True)
 
-        overwrites[all_vcs_role] = discord.PermissionOverwrite(
-            read_messages=True, send_messages=True)
+        # overwrites[all_vcs_role] = discord.PermissionOverwrite(
+        #     read_messages=True, send_messages=True)
 
         return overwrites
 
