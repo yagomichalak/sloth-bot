@@ -21,6 +21,7 @@ bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID', 123
 class Merchant(Player):
 
     emoji = '<:Merchant:839498018532753468>'
+    food_rate: int = 5
 
     def __init__(self, client) -> None:
         self.client = client
@@ -1129,8 +1130,10 @@ class Merchant(Player):
     async def check_pet_food(self) -> None:
         """ Checks pet food statuses. """
 
-        current_ts = await utils.get_timestamp()
+        current_time = await utils.get_time_now()
+        current_ts =  current_time.timestamp()
         pets = await self.get_hungry_pets(current_ts)
+        SlothCurrency = self.client.get_cog("SlothCurrency")
 
         for pet in pets:
             if pet[2].lower() == 'egg':
@@ -1146,6 +1149,26 @@ class Merchant(Player):
                     await self.update_user_pet_food(pet[0], -5, current_ts)
 
                 else:
+                    # Autofeeds if it's enabled
+                    if pet[8] and not pet[4]:
+                        user_currency = await SlothCurrency.get_user_currency(pet[0])
+                        money = user_currency[0][1]
+                        food_points, req_money = await self.get_required_feed_pet_money(pet[4], money)
+                        if user_currency and money >= req_money:
+                            await SlothCurrency.update_user_money(pet[0], -req_money)
+                            await self.update_user_pet_food(pet[0], food_points, current_ts)
+
+                            embed = discord.Embed(
+                                title="__Pet has been Fed__",
+                                description=f"**You just auto-fed `{pet[1]}` with `{req_money}łł`, now it has `{food_points}` food points, <@{pet[0]}>!**",
+                                color=discord.Color.green(),
+                                timestamp=current_time
+                            )
+
+                            member = self.client.get_user(pet[0])
+                            await member.send(embed=embed)
+                            continue
+
                     # Checks whether pet has lp
                     if pet[3] - 5 > 0: 
                         await self.update_user_pet_lp(pet[0], -5, current_ts)
@@ -1218,18 +1241,7 @@ class Merchant(Player):
         current_ts = await utils.get_timestamp()
 
         food_points: int = user_pet[4]
-
-        temp_points = temp_leaves = 0
-        food_rate: int = 5 # The life points each leaf gives to the pet
-
-        for _ in range(leaves):
-            
-            if food_points + food_rate <= 100:
-                temp_points += food_rate
-                temp_leaves += 1
-                food_points += food_rate
-            else:
-                break
+        temp_points,temp_leaves, = await self.get_required_feed_pet_money(food_points, leaves)
 
         confirm_view = ConfirmButton(member, timeout=60)
         msg = await ctx.send(
@@ -1284,3 +1296,23 @@ class Merchant(Player):
         await self.update_pet_auto_feed(member.id, not auto_feed_int)
             
         await ctx.send(f"**Your pet's auto pay mode has been turned `{reverse_auto_feed}`, {member.mention}!**")
+
+    async def get_required_feed_pet_money(self, food_points: int, leaves: int) -> int:
+        """ Gets the required amount of leaves to feed the pet,
+        and the amount of food points the user can pay for.
+        :param food_points: The pet's current food points.
+        :param leaves: The user's current amount of leaves. """
+
+        temp_points = temp_leaves = 0
+        food_rate: int = self.food_rate # The life points each leaf gives to the pet
+
+        for _ in range(leaves):
+            
+            if food_points + food_rate <= 100:
+                temp_points += food_rate
+                temp_leaves += 1
+                food_points += food_rate
+            else:
+                break
+
+        return temp_points, temp_leaves
