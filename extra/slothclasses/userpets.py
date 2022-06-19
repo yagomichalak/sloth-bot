@@ -32,6 +32,7 @@ class UserPetsTable(commands.Cog):
             life_points_ts BIGINT NOT NULL,
             food_ts BIGINT NOT NULL,
             birth_ts BIGINT DEFAULT NULL,
+            auto_feed TINYINT(1) DEFAULT 0,
             PRIMARY KEY (user_id)
             ) CHARSET utf8mb4 COLLATE utf8mb4_unicode_ci
         """)
@@ -200,6 +201,16 @@ class UserPetsTable(commands.Cog):
         await db.commit()
         await mycursor.close()
 
+    async def update_pet_auto_feed(self, user_id: int, auto_feed: bool = True) -> None:
+        """ Updates the the pet's auto pay mode.
+        :param user_id: The ID of the user who's the owner of the pet.
+        :param auto_feed: Whether to put it into auto pay mode or not. [Default = True] """
+
+        auto_feed = 1 if auto_feed else 0
+        mycursor, db = await the_database()
+        await mycursor.execute("UPDATE UserPets SET auto_feed = %s WHERE user_id = %s", (auto_feed, user_id))
+        await db.commit()
+        await mycursor.close()
 
     async def delete_user_pet(self, user_id: int) -> None:
         """ Deletes the user's pet.

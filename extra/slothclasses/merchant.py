@@ -1102,6 +1102,7 @@ class Merchant(Player):
 
         # Gets parents' profile pictures
         pet_owner_pfp = await utils.get_user_pfp(member)
+        auto_feed = True if user_pet[8] else False
 
         # Makes the Pet's Image
 
@@ -1117,6 +1118,7 @@ class Merchant(Player):
         draw.text((320, 5), str(user_pet[1]), fill="white", font=small)
         draw.text((5, 70), f"LP: {user_pet[3]}", fill="red", font=small)
         draw.text((5, 120), f"Food: {user_pet[4]}", fill="brown", font=small)
+        draw.text((5, 550), f"Auto Feed: {auto_feed}", fill="black", font=small)
         file_path = f"media/temporary/user_pet-{member.id}.png"
         background.save(file_path)
 
@@ -1258,3 +1260,27 @@ class Merchant(Player):
         await utils.disable_buttons(confirm_view)
         await msg.edit(view=confirm_view)
 
+    @pet.command(name="auto_feed", aliases=['af', 'autofeed', 'feed_auto', 'feedauto'])
+    async def _pet_auto_feed(self, ctx) -> None:
+        """ Puts the pet into the auto feed mode. """
+
+        if not ctx.guild:
+            return await ctx.send("**Don't use it here!**")
+
+        member = ctx.author
+
+        user_pet = await self.get_user_pet(member.id)
+        if not user_pet:
+            return await ctx.send(f"**You don't have a pet, {member.mention}!**")
+
+        auto_feed_int = user_pet[8]
+        auto_feed = 'on' if auto_feed_int else 'off'
+        reverse_auto_feed = 'off' if auto_feed_int else 'on'
+
+        confirm = await ConfirmSkill(f"Your pet's auto pay mode is currently turned `{auto_feed}`, do you wanna turn it `{reverse_auto_feed}`, {member.mention}?").prompt(ctx)
+        if not confirm:
+            return await ctx.send(f"**Not doing it then, {member.mention}!**")
+
+        await self.update_pet_auto_feed(member.id, not auto_feed_int)
+            
+        await ctx.send(f"**Your pet's auto pay mode has been turned `{reverse_auto_feed}`, {member.mention}!**")
