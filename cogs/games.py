@@ -270,12 +270,12 @@ class Games(*minigames_cogs):
                     return await ctx.send(
                         f"**You're on cooldown, try again in {s:02d} seconds.**",
                         delete_after=5)
+
+        await SlothCurrency.update_user_lotto_ts(author.id, current_ts)
+        if user_secs[0][1] >= 1:
+            await SlothCurrency.update_user_money(author.id, -1)
         else:
-            await SlothCurrency.update_user_lotto_ts(author.id, current_ts)
-            if user_secs[0][1] >= 1:
-                await SlothCurrency.update_user_money(author.id, -1)
-            else:
-                return await ctx.send(f"**You need 1łł to play the lottery, {author.mention}!**")
+            return await ctx.send(f"**You need 1łł to play the lottery, {author.mention}!**")
 
         author = author
         numbers = []
