@@ -126,7 +126,8 @@ different_class_roles = {
         "ألماني", "德语", 'niemiecki', 'немецкий'
     ],
     "french": [
-        "fransızca","francés", "francês", "français", "فرانسه", "Французский"
+        "fransızca","francés", "francês", "français", "فرانسه", "Французский",
+        "Французскии"
     ],
     "italian": [
         "ايطالى", "اللغة الايطالية", "italiano"
