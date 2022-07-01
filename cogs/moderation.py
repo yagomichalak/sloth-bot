@@ -378,9 +378,29 @@ class Moderation(*moderation_cogs):
 			await ctx.send(smessage)
 
 	# Warns a member
-	@commands.command(aliases=['warnado'])
+	@commands.command()
+	@commands.has_permissions(administrator=True)
+	async def fwarn(self, ctx, *, message: Optional[str] = None):
+		""" (ADM) Warns't a member in the server.
+		:param member: The @ or ID of the user to fwarn.
+		:param reason: The reason for fwarning the user. (Optional) """
+
+		await ctx.message.delete()
+
+		members, reason = await utils.greedy_member_reason(ctx, message)
+
+		if not members:
+			await ctx.send('**Member not found!**', delete_after=3)
+		else:
+			for member in members:
+				# General embed
+				general_embed = discord.Embed(description=f'**Reason:** {reason}', colour=discord.Colour.dark_gold())
+				general_embed.set_author(name=f'{member} has been warned', icon_url=member.display_avatar)
+				await ctx.send(embed=general_embed)
+
+	@commands.command(aliases=['warnado', 'wrn'])
 	@utils.is_allowed(allowed_roles, throw_exc=True)
-	async def warn(self, ctx, *, message : str = None) -> None:
+	async def warn(self, ctx, *, message: Optional[str] = None) -> None:
 		"""(MOD) Warns one or more members.
 		:param member: The @ or the ID of one or more users to warn.
 		:param reason: The reason for warning one or all users. (Optional)"""
