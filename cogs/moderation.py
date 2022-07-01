@@ -193,7 +193,7 @@ class Moderation(*moderation_cogs):
 		time_now = await utils.get_timestamp()
 		account_age = round((time_now - timestamp)/86400)
 
-		if account_age <= 4:
+		if account_age <= 120:
 			if await self.get_firewall_state():
 				if not await self.get_bypass_firewall_user(member.id):
 					return await member.kick(reason="Possible fake account")
