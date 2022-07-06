@@ -993,7 +993,8 @@ class Tools(*tool_cogs):
 		sentences = [
 			"**I have a really nice voice**",
 			"**Best sister-in-law ever**",
-			"**z!bj 50**"
+			"**z!bj 50**",
+			"**z!bj 2500**",
 		]
 
 		await ctx.send(choice(sentences))
@@ -1022,7 +1023,6 @@ class Tools(*tool_cogs):
 		sentences = [
 			"**You have a really nice voice**",
 			"**Leonarda is my best friend**",
-			"**Cleopatra ♥**",
 			"**Elijah and DNK are my brothers**"
 		]
 
