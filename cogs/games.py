@@ -581,7 +581,7 @@ class Games(*minigames_cogs):
 
             return await ctx.send(f"**{addict} is not even in rehab, {author.mention}!**")
 
-        await self.delete_rehab_member(addict.id, current_ts)
+        await self.delete_rehab_member(addict.id)
         if author == addict:
             return await ctx.send(f"**You just came out of rehab, {author.mention}!**")
 
