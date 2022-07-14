@@ -1540,7 +1540,7 @@ class Moderation(*moderation_cogs):
 				icon = ctx.guild.icon.url
 
 			try:
-				# await ctx.guild.ban(member, reason=reason)
+				await ctx.guild.ban(member, reason=reason)
 				# General embed
 				general_embed = discord.Embed(description=f'**Reason:** {reason}', colour=discord.Colour.dark_teal(),
 											timestamp=ctx.message.created_at)
