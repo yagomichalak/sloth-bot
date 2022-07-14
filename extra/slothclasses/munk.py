@@ -1351,8 +1351,9 @@ class Munk(Player):
             await ctx.send(embed=tribe_quest_embed)
 
 
-    async def generate_random_quest(self) -> Any:
-        """ Generates a random question. """
+    async def generate_random_quest(self, return_quests: bool = False) -> Union[Any, List[Any]]:
+        """ Generates a random question.
+        :param return_quests: Whether to return the quests as well. """
 
         quests: List[Dict[str, Union[str, int]]] = [
             {"message": "Complete 5 `TheLanguageJungle` multiplayer games. (zg!mp)", "enum_value": 1},
@@ -1371,7 +1372,10 @@ class Munk(Player):
             {"message": "Perform 2 different RolePlay commands (z!hug, z!kiss, z!boot, etc.).", "enum_value": 14},
         ]
 
-        return choice(quests)
+        if return_quests:
+            return choice(quests), quests
+        else:
+            return choice(quests)
 
     async def get_tribe_quest_embed(self, 
         channel: Union[discord.TextChannel, discord.Thread], user_id: int, quest: Dict[str, Union[str, int]], tribe: Dict[str, Union[str, int]]

@@ -393,6 +393,36 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
         await self.update_sloth_profile_class(member.id, sloth_class)
         await ctx.send(f"**Successfully updated {member.mention}'s class to `{sloth_class}`!**")
 
+    @commands.command(aliases=["complete_quest", "fix_qst", "fixqst"])
+    @commands.has_permissions(administrator=True)
+    async def fix_quest(self, ctx, member: discord.Member = None, quest_id: str = None) -> None:
+        """ Tries to fix a quest.
+        :param member: The member to fix the quest for.
+        :param quest_id: The quest ID. """
+
+        author: discord.Member = ctx.author
+
+        if not member:
+            return await ctx.send(f"**Please, inform a member to fix the quest for, {author.mention}!**")
+
+        if not quest_id:
+            return await ctx.send(f"**Please, inform a quest ID, {author.mention}!**")
+
+        try:
+            quest_id = int(quest_id)
+        except ValueError:
+            return await ctx.send(f"**Please, inform a valid number, {author.mention}!**")
+
+        _, quests = await self.generate_random_quest(return_quests=True)
+
+        quest_ids = [quest['enum_value'] for quest in quests]
+        if quest_id not in quest_ids:
+            return await ctx.send(f"**Please, inform a valid quest number, {author.mention}!**")
+
+        await self.complete_quest(member.id, quest_id)
+        await ctx.send(f"**Successfully tried to fix quest `{quest_id}` for `{member}`, {author.mention}!**")
+
+
 def setup(client) -> None:
     """ Cog's setup function. """
 
