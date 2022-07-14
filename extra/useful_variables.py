@@ -126,7 +126,7 @@ different_class_roles = {
         "ألماني", "德语", 'niemiecki', 'немецкий'
     ],
     "french": [
-        "fransızca","francés", "francês", "français", "فرانسه", "Французский",
+        "fransızca", "francés", "francês", "français", "فرانسه", "Французский",
         "Французскии"
     ],
     "italian": [
@@ -165,6 +165,9 @@ different_class_roles = {
     ],
     "malay": [
         "马来文"
+    ],
+    "arabic": [
+        "arabe", "árabe", "arabo"
     ]
 }
 
