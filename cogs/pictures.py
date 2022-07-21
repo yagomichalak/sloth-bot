@@ -6,6 +6,7 @@ import aiohttp
 import json
 from random import choice
 from typing import List
+from extra import utils
 
 guild_ids: List[int] = [int(os.getenv("SERVER_ID", 123))]
 
@@ -89,6 +90,7 @@ class Pictures(commands.Cog):
 
     @slash_command(name="change_server")
     @commands.has_permissions(administrator=True)
+    @utils.is_allowed_members([228296480643874826], throw_exc=True) # Wynnie's ID
     async def _change_server(self, ctx,
         icon: Option(discord.Attachment, name="icon", description="The new server icon.", required=False),
         banner: Option(discord.Attachment, name="banner", description="The new server banner.", required=False)
