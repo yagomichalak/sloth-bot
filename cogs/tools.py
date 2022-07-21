@@ -36,6 +36,7 @@ guild_ids = [int(os.getenv('SERVER_ID', 123))]
 
 from typing import List, Optional, Union
 
+community_manager_role_id = int(os.getenv('COMMUNITY_MANAGER_ROLE_ID', 123))
 mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 senior_mod_role_id: int = int(os.getenv('SENIOR_MOD_ROLE_ID', 123))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID', 123))
@@ -226,7 +227,7 @@ class Tools(*tool_cogs):
 
 	@commands.command(aliases=["ping_inrole", "pir"])
 	@commands.cooldown(1, 5, commands.BucketType.user)
-	@utils.is_allowed(allowed_roles)
+	@utils.is_allowed(allowed_roles, throw_exc=True)
 	async def ping_intersection_role(self, ctx, roles: commands.Greedy[discord.Role] = None) -> None:
 		""" Shows everyone who have that role in the server.
 		:param roles: The set of roles you want to check. """
@@ -656,7 +657,7 @@ class Tools(*tool_cogs):
 				await ctx.send(f"**They stopped comming, but we've gathered `{magneted_members}/{len(all_members)}` members!**")
 
 	@commands.command(aliases=['mv', 'drag'])
-	@utils.is_allowed([mod_role_id, admin_role_id, owner_role_id, analyst_debugger_role_id])
+	@utils.is_allowed([mod_role_id, admin_role_id, owner_role_id, analyst_debugger_role_id], throw_exc=True)
 	async def move(self, ctx) -> None:
 		""" Moves 1 or more people to a voice channel.
 		Ps¹: If no channel is provided, the channel you are in will be used.
@@ -1029,7 +1030,7 @@ class Tools(*tool_cogs):
 		await ctx.send(choice(sentences))
 
 	@commands.command()
-	@utils.is_allowed([owner_role_id, admin_role_id, mod_role_id])
+	@utils.is_allowed([owner_role_id, admin_role_id, mod_role_id], throw_exc=True)
 	async def cosmos(self, ctx) -> None:
 		""" A command for pinging Cosmos, the stealthy little guy. """
 
@@ -1038,7 +1039,7 @@ class Tools(*tool_cogs):
 		await ctx.send(cosmos.mention)
 
 	@commands.command()
-	@utils.is_allowed([owner_role_id, admin_role_id, mod_role_id])
+	@utils.is_allowed([owner_role_id, admin_role_id, mod_role_id], throw_exc=True)
 	async def muffin(self, ctx) -> None:
 		""" A command for pinging Muffin, the rich Lux lass. """
 
@@ -1047,7 +1048,7 @@ class Tools(*tool_cogs):
 		await ctx.send(muffin.mention)
 
 	@commands.command()
-	@utils.is_allowed([owner_role_id, admin_role_id, mod_role_id])
+	@utils.is_allowed([owner_role_id, admin_role_id, mod_role_id], throw_exc=True)
 	async def prisca(self, ctx) -> None:
 		""" A command for pinging Prisca, the photoshop Turk. """
 
@@ -1056,7 +1057,7 @@ class Tools(*tool_cogs):
 		await ctx.send(prisca.mention)
 
 	@commands.command(aliases=['gui'])
-	@utils.is_allowed([owner_role_id, admin_role_id, mod_role_id])
+	@utils.is_allowed([owner_role_id, admin_role_id, mod_role_id], throw_exc=True)
 	async def guibot(self, ctx) -> None:
 		""" A command for pinging GuiBot, the lawyer and demoter guy. """
 
@@ -1156,7 +1157,7 @@ class Tools(*tool_cogs):
 		await ctx.respond(embed=embed, ephemeral=True)
 
 	@commands.slash_command(name="mention", guild_ids=guild_ids)
-	@utils.is_allowed([mod_role_id, admin_role_id, owner_role_id])
+	@utils.is_allowed([mod_role_id, admin_role_id, owner_role_id], throw_exc=True)
 	async def _mention(self, ctx, 
 		member: Option(str, name="member", description="The Staff member to mention/ping.", required=True,
 			choices=[
@@ -1232,7 +1233,7 @@ class Tools(*tool_cogs):
 		await msg.add_reaction('<:nosloth:912066953160556575>')
 
 	@user_command(name="Follow", guild_ids=guild_ids)
-	@utils.is_allowed([owner_role_id, admin_role_id, mod_role_id])
+	@utils.is_allowed([owner_role_id, admin_role_id, mod_role_id], throw_exc=True)
 	async def _follow(self, ctx, user: discord.Member) -> None:
 		""" Follows a user by moving yourself to the Voice Channel they are in. """
 
@@ -1491,6 +1492,56 @@ class Tools(*tool_cogs):
 			print("Error at making dump: ", e)
 		finally:
 			os.remove(file_path); os.remove(file_path2); os.remove(file_path3)
+
+	@commands.command(aliases=["invs"])
+	@utils.is_allowed([community_manager_role_id, admin_role_id], throw_exc=True)
+	async def invites(self, ctx, inviter: Optional[discord.Member] = None) -> None:
+		""" Shows the invites for recruiters if not members are informed.
+		:param inviter: The inviter to show invites from. """
+
+		member: discord.Member = ctx.author
+
+		inviters = []
+
+		invites = await ctx.guild.invites()
+		def get_user_invites_count(member: discord.Member) -> discord.Invite:
+			
+			user_invites = [invite.uses for invite in invites if invite.inviter.id == member.id]
+			return sum(user_invites)
+
+		if not inviter:
+			inviters = [
+				f"**• {member}**: `{get_user_invites_count(member)}`"
+				for member in ctx.guild.members
+				if member.get_role(community_manager_role_id)
+			]
+			inviters_text = '\n'.join(inviters)
+
+			embed = discord.Embed(
+				title="Recruiter Invites",
+				description=f"Showing invites for `{len(inviters)}` recruiters:\n{inviters_text}",
+				color=member.color,
+				timestamp = ctx.message.created_at
+			)
+			embed.set_thumbnail(url=ctx.guild.icon.url)
+		else:
+			embed = discord.Embed(
+				title=f"{inviter}'s Invites",
+				description=f"• {member.mention} has `{get_user_invites_count(inviter)}` invites",
+				color=inviter.color,
+				timestamp = ctx.message.created_at
+			)
+			embed.set_thumbnail(url=inviter.display_avatar)
+
+
+		
+		embed.set_footer(text=f"Requested by: {member}", icon_url=member.display_avatar)
+		await ctx.send(embed=embed)
+
+
+
+
+
 
 def setup(client):
 	client.add_cog(Tools(client))
