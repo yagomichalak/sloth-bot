@@ -37,6 +37,7 @@ guild_ids = [int(os.getenv('SERVER_ID', 123))]
 from typing import List, Optional, Union
 
 community_manager_role_id = int(os.getenv('COMMUNITY_MANAGER_ROLE_ID', 123))
+recruiter_role_id = int(os.getenv('RECRUITER_ROLE_ID', 123))
 mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 senior_mod_role_id: int = int(os.getenv('SENIOR_MOD_ROLE_ID', 123))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID', 123))
@@ -1513,7 +1514,7 @@ class Tools(*tool_cogs):
 			inviters = [
 				f"**• {member}**: `{get_user_invites_count(member)}`"
 				for member in ctx.guild.members
-				if member.get_role(community_manager_role_id)
+				if member.get_role(recruiter_role_id)
 			]
 			inviters_text = '\n'.join(inviters)
 
