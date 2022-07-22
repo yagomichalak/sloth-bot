@@ -89,7 +89,6 @@ class Pictures(commands.Cog):
 
 
     @slash_command(name="change_server")
-    @commands.has_permissions(administrator=True)
     @utils.is_allowed_members([228296480643874826], throw_exc=True) # Wynnie's ID
     async def _change_server(self, ctx,
         icon: Option(discord.Attachment, name="icon", description="The new server icon.", required=False),
