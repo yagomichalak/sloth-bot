@@ -103,25 +103,30 @@ class Show(commands.Cog):
     @utils.is_allowed(allowed_roles)
     async def _rules_slash(self, ctx,
                            rule_number: Option(int, name="rule_number", description="The number of the rule you wanna show.", choices=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], required=False),
+                           rule_lang: Option(str, name="rule_language", description="The language of the rule you wanna show.", choices=["Arabic", "English", "Italian", "Portuguese", "Russian", "Turkish"], required=False, default='english'),
                            reply_message: Option(bool, name="reply_message", description="Whether the slash command should reply to your original message.", required=False, default=True)) -> None:
         """ (MOD) Sends an embedded message containing all rules in it, or a specific rule. """
 
         if rule_number:
-            await self._rule(ctx, rule_number, reply_message)
+            await self._rule(ctx, rule_number, rule_lang, reply_message)
         else:
-            await self._rules(ctx, reply_message)
+            await self._rules(ctx, rule_lang, reply_message)
 
     @commands.command(name="rule")
     @utils.is_allowed(allowed_roles)
-    async def _rule_command(self, ctx, numb: int = None) -> None:
+    async def _rule_command(self, ctx, numb: int = None, lang: str = 'english') -> None:
         """ Shows a specific server rule.
-        :param numb: The number of the rule to show. """
+        :param numb: The number of the rule to show. 
+        :param lang: The language of the rule to show. """
 
-        await self._rule(ctx, numb)
+        await self._rule(ctx, numb, lang)
 
-    async def _rule(self, ctx, numb: int = None, reply: bool = True) -> None:
+    async def _rule(self, ctx, numb: int = None, lang: str = 'english', reply: bool = True) -> None:
         """ Shows a specific server rule.
-        :param numb: The number of the rule to show. """
+        :param numb: The number of the rule to show. 
+        :param numb: The language of the rule to show. """
+        
+        member = ctx.author
 
         answer: discord.PartialMessageable = None
         if isinstance(ctx, commands.Context):
@@ -135,10 +140,15 @@ class Show(commands.Cog):
 
         if numb > len(rules) or numb <= 0:
             return await answer(f'**Inform a rule from `1-{len(rules)}` rules!**')
+        
+        #if invalid language
+        languages = [r_lang for r_lang, _ in rules.items()]
+        if not(rules_in_lang := rules.get(lang.lower())):
+            return await ctx.respond(f"**Please, inform a supported language, {member.mention}!**\n{', '.join(languages)}")
 
-        rule_index = list(rules)[numb - 1]
+        rule_index = list(rules_in_lang)[numb - 1]
         embed = discord.Embed(title=f'Rule - {numb}# {rule_index}',
-                              description=rules[rule_index], color=discord.Color.green())
+                              description=rules_in_lang[rule_index], color=discord.Color.green())
         embed.set_footer(text=ctx.author.guild.name)
 
         if reply:
@@ -149,12 +159,12 @@ class Show(commands.Cog):
 
     @commands.command(name="rules")
     @utils.is_allowed(allowed_roles)
-    async def _rules_command(self, ctx) -> None:
+    async def _rules_command(self, ctx, lang: str = 'english') -> None:
         """ (MOD) Sends an embedded message containing all rules in it. """
 
-        await self._rules(ctx)
+        await self._rules(ctx, lang)
 
-    async def _rules(self, ctx, reply: bool = True):
+    async def _rules(self, ctx, lang: str = 'english', reply: bool = True):
         """ (MOD) Sends an embedded message containing all rules in it. """
 
         answer: discord.PartialMessageable = None
@@ -165,16 +175,23 @@ class Show(commands.Cog):
             answer = ctx.respond
 
         current_time = await utils.get_time_now()
-
+        
+        member = ctx.author
         guild = ctx.guild
+        
+        #if invalid language
+        languages = [r_lang for r_lang, _ in rules.items()]
+        if not(rules_in_lang := rules.get(lang.lower())):
+            return await ctx.respond(f"**Please, inform a supported language, {member.mention}!**\n{', '.join(languages)}")
+
         embed = discord.Embed(
             title="__Rules of the Server__",
             description="You must always abide by the rules and follow [Discord's Terms of Service](https://discord.com/terms) and [Community Guidelines](https://discordapp.com/guidelines)\n```Hello, The Language Sloth public discord server is meant for people all across the globe to meet, learn and share their love for languages. Here are our rules of conduct:```",
             url='https://thelanguagesloth.com', color=discord.Color.green(), timestamp=current_time)
         i = 1
-        for rule, rule_value in rules.items():
-            embed.add_field(name=f"{i} - __{rule}__:",
-                            value=rule_value, inline=False)
+        for r_rule, r_value in rules_in_lang.items():
+            embed.add_field(name=f"{i} - __{r_rule}__:",
+                            value=r_value, inline=False)
             i += 1
 
         embed.set_footer(text=guild.owner, icon_url=guild.owner.avatar.url)
