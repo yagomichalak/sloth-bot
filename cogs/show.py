@@ -103,7 +103,7 @@ class Show(commands.Cog):
     @utils.is_allowed(allowed_roles)
     async def _rules_slash(self, ctx,
                            rule_number: Option(int, name="rule_number", description="The number of the rule you wanna show.", choices=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], required=False),
-                           rule_lang: Option(str, name="rule_language", description="The language of the rule you wanna show.", choices=["Arabic", "English", "Italian", "Portuguese", "Russian", "Turkish"], required=False, default='english'),
+                           rule_lang: Option(str, name="rule_language", description="The language of the rule you wanna show.", choices=["English", "Italian", "Portuguese", "Russian", "Turkish"], required=False, default='english'),
                            reply_message: Option(bool, name="reply_message", description="Whether the slash command should reply to your original message.", required=False, default=True)) -> None:
         """ (MOD) Sends an embedded message containing all rules in it, or a specific rule. """
 
