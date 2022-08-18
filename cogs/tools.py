@@ -37,7 +37,7 @@ guild_ids = [int(os.getenv('SERVER_ID', 123))]
 from typing import List, Optional, Union
 
 community_manager_role_id = int(os.getenv('COMMUNITY_MANAGER_ROLE_ID', 123))
-recruiter_role_id = int(os.getenv('RECRUITER_ROLE_ID', 123))
+recruiter_role_id = int(os.getenv('RECRUITER_ROLE_ID', 123)) = int(os.getenv('RECRUITER_ROLE_ID', 123))
 mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 senior_mod_role_id: int = int(os.getenv('SENIOR_MOD_ROLE_ID', 123))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID', 123))
@@ -1495,7 +1495,7 @@ class Tools(*tool_cogs):
 			os.remove(file_path); os.remove(file_path2); os.remove(file_path3)
 
 	@commands.command(aliases=["invs"])
-	@utils.is_allowed([community_manager_role_id, admin_role_id], throw_exc=True)
+	@utils.is_allowed([recruiter_role_id, community_manager_role_id, admin_role_id], throw_exc=True)
 	async def invites(self, ctx, inviter: Optional[discord.Member] = None) -> None:
 		""" Shows the invites for recruiters if not members are informed.
 		:param inviter: The inviter to show invites from. """
