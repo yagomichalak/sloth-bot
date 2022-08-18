@@ -139,12 +139,12 @@ class Show(commands.Cog):
             return await answer('**Invalid parameter!**')
 
         if numb > len(rules) or numb <= 0:
-            return await answer(f'**Inform a rule from `1-{len(rules)}` rules!**')
+            return await answer(f'**Inform a rule from `1-{len(rules["english"])}` rules!**')
         
         #if invalid language
         languages = [r_lang for r_lang, _ in rules.items()]
         if not(rules_in_lang := rules.get(lang.lower())):
-            return await ctx.respond(f"**Please, inform a supported language, {member.mention}!**\n{', '.join(languages)}")
+            return await answer(f"**Please, inform a supported language, {member.mention}!**\n{', '.join(languages)}")
 
         rule_index = list(rules_in_lang)[numb - 1]
         embed = discord.Embed(title=f'Rule - {numb}# {rule_index}',
@@ -182,7 +182,7 @@ class Show(commands.Cog):
         #if invalid language
         languages = [r_lang for r_lang, _ in rules.items()]
         if not(rules_in_lang := rules.get(lang.lower())):
-            return await ctx.respond(f"**Please, inform a supported language, {member.mention}!**\n{', '.join(languages)}")
+            return await answer(f"**Please, inform a supported language, {member.mention}!**\n{', '.join(languages)}")
 
         embed = discord.Embed(
             title="__Rules of the Server__",
