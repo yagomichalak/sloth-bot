@@ -1495,7 +1495,7 @@ class Tools(*tool_cogs):
 			os.remove(file_path); os.remove(file_path2); os.remove(file_path3)
 
 	@commands.command(aliases=["invs"])
-	@utils.is_allowed([community_manager_role_id, admin_role_id], throw_exc=True)
+	@utils.is_allowed([recruiter_role_id, community_manager_role_id, admin_role_id], throw_exc=True)
 	async def invites(self, ctx, inviter: Optional[discord.Member] = None) -> None:
 		""" Shows the invites for recruiters if not members are informed.
 		:param inviter: The inviter to show invites from. """
