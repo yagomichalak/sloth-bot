@@ -47,35 +47,160 @@ I'm open to new ideas, in other words, if you want a custom command designed spe
 ]
 
 rules = {
-    "NSFW is forbidden": """This applies to, among others, pornographic, gore, violent, foul, offensive content/conversations. They will not be tolerated in either VCs, text channels and DMs.
-This rule also applies to user profiles (avatar, banner, status, about me etc).""",
+    "english": {
+        "NSFW is forbidden": """This applies to, among others, pornographic, gore, violent, foul, offensive content/conversations. They will not be tolerated in either VCs, text channels and DMs.
+            This rule also applies to user profiles (avatar, banner, status, about me etc).""",
 
-    "Be respectful": """Discrimination on the grounds of race, nationality, religion, gender, or sexual orientation is forbidden.
-Do not insult other users.
-Do not troll.
-Do not harass other users.
-Do not swear mindlessly.
-Do not make people feel uncomfortable, or otherwise bother them in any unwanted way.
-This rule applies to both activity on the server and dms.""",
+        "Be respectful": """Discrimination on the grounds of race, nationality, religion, gender, or sexual orientation is forbidden.
+            Do not insult other users.
+            Do not troll.
+            Do not harass other users.
+            Do not swear mindlessly.
+            Do not make people feel uncomfortable, or otherwise bother them in any unwanted way.
+            This rule applies to both activity on the server and dms.""",
 
-    "Avoid Controversy": """As the Language Sloth is an international server of educational nature, we have people from all over the world here. To avoid unnecessary conflicts, topics considered controversial are only allowed in the Debate Club.
-This applies to, among others, politics, religion, self-harm, suicide, gender identity, sexual orientation.
-This rule also applies to user profiles.""",
+        "Avoid Controversy": """As the Language Sloth is an international server of educational nature, we have people from all over the world here. To avoid unnecessary conflicts, topics considered controversial are only allowed in the Debate Club.
+            This applies to, among others, politics, religion, self-harm, suicide, gender identity, sexual orientation.
+            This rule also applies to user profiles.""",
 
-    "Advertising is forbidden": """Advertising Discord servers or self-promoting via text/voice channels or dms is not allowed. If you would like to get permission, get in touch with our Staff.""",
+        "Advertising is forbidden": """Advertising Discord servers or self-promoting via text/voice channels or dms is not allowed. If you would like to get permission, get in touch with our Staff.""",
 
-    "Do not dox": "Do not share other users' personal information without their consent.",
+        "Do not dox": "Do not share other users' personal information without their consent.",
 
-    "Do not spam": """Do not flood or spam text channels.
-Do not spam react in messages.
-Do not ping staff members repeatedly without a reason.
-Do not mic spam/earrape/use soundboards in voice channels.""",
+        "Do not spam": """Do not flood or spam text channels.
+            Do not spam react in messages.
+            Do not ping staff members repeatedly without a reason.
+            Do not mic spam/earrape/use soundboards in voice channels.""",
 
-    "Do not impersonate others": "Do not impersonate other users or Staff members.",
+        "Do not impersonate others": """ Do not impersonate other users or Staff members. """,
 
-    "Do not beg": """Do not ask to be granted roles such as moderator, teacher or event manager. You may apply for those roles in <#729454413290143774> 
-Repeatedly begging the Staff for things may result in warnings or a ban."""
+        "Do not beg": """Do not ask to be granted roles such as moderator, teacher or event manager. You may apply for those roles in <#729454413290143774> 
+            Repeatedly begging the Staff for things may result in warnings or a ban.""",
 
+        "Drama": """Do your best to keep drama out of this server. Any active attempt to start drama, or refusal to end a dispute within the server, may result in consequences."""
+    },
+    "portuguese": {
+        "NSFW (Not Safe For Work) é proibido": """Isto aplica-se, entre outros, a conteúdos/conversações pornográficas, violentas, viés (gore) e ofensivas. Tais não serão toleradas nem em VCs (Voice Chats) nem em Canais de Texto.
+            Esta regra também se aplica aos avatares (PFP), nomes de usuário, e seu status do Discord.""",
+
+        "Seja respeitoso(a)":"""A discriminação com base na etnicidade, nacionalidade, religião, sexo e/ou orientação sexual é proibida.
+            Não insulte os outros membros.
+            Não assedie os outros membros.
+            Não xingue despropositadamente.
+            Não faça com que as pessoas se sintam desconfortáveis, ou de outra forma incomodá-las de qualquer maneira indesejada.
+            Esta regra aplica-se tanto à atividade no servidor como ao DMs (Direct Message).""",
+        
+        "Evite controvérsia":"""Como o Language Sloth é um servidor internacional de natureza educacional, aqui temos pessoas de todo o mundo. Para evitar conflitos desnecessários, os tópicos considerados controversos só serão permitidos no Clube de Debate.
+            Isto aplica-se, entre outros, à política, religião, automutilação, suicídio, identidade de gênero, orientação sexual.
+            Esta regra também se aplica aos avatares (PFP).""",
+            
+        "Publicidade é proibida":"""Não é permitida a publicidade de outros servidores Discord ou auto-publicidade via canais de texto/voz ou DMs. Se desejar obter tal autorização, entre em contacto com a nossa Staff.""",
+            
+        "Não faça dox":""" Não partilhe a informação pessoal de outros utilizadores sem o seu retrospectivo consentimento. """,
+        
+        "Não faça spam":""" Não floode ou envie spam pelos canais de texto.
+            Não faça spam de reações nas mensagens.
+            Não mencione os membros do pessoal repetidamente sem um motivo.
+            Não faça mic spam/earrape nos canais de voz. """,
+            
+        "Não imite os outros":""" Não se faça passar por outros usuários ou membros do Sloth. """,
+        
+        "Não implore":""" Não mendigue a atribuição de cargos/cargos de moderação. Mas pode candidatar-se a estes cargos acessando aos links no <#729454413290143774>  (Nem sempre estarão disponíveis) mas implorar repetidamente a Staff pode resultar em warnings ou ban. """,
+        
+        "Drama" : """ Evite dramas no servidor. Qualquer tentativa de iniciar ou a recusa em encerrar um conflito, pode resultar em consequências. """
+    },
+    "italian":{
+        "Il NSFW è vietato":""" Ciò vale anche, tra le altre cose, per conversazioni e contenuti pornografici, gore, violenti e linguaggio volgare ed offensivo. Questi argomenti non saranno tollerati né in canali vocali né in canali testuali. 
+            Questa regola vale anche per foto profilo, usernames e per lo stato di discord. """,
+        
+        "Essere rispettosi":""" La discriminazione per motivi di razza, nazionalità, religione, genere o orientamento sessuale è vietata.
+            Non insulare altri utenti.
+            Non molestare altri utenti.
+            Non imprecare senza considerazione.
+            Non far sentire le persone a disagio e non disturbale in qualsiasi modo indesiderato.
+            Questa regola è applicata sia all'attività relativa al server che a quella relativa ai messaggi privati. """,
+
+        "Evitare polemiche e argomenti controversi":""" Poiché "Language Sloth" è un server internazionale di natura educativa, ci sono persone provenienti da tutto il mondo. Per evitare conflitti inutili,  argomenti considerati controversi sono solo permessi nel Club del Dibattiti. 
+            Questo vale, tra le altre cose, per la politica, religione, autolesionismo, suicidio, identità di genere e orientamento sessuale.
+            Questa è applicata anche alle foto profilo. """,
+
+        "Pubblicizzare è vietato":""" Pubblicizzare server discord o auto-promuoversi via canali testuali e messaggi privati non è permesso. Se desideri ottenere il permesso per farlo, per favore mettiti in contatto con il nostro Staff. """,
+        
+        "Non rilasciare dati sensibili di altri utenti":""" Non condividere le informazioni personali degli altri utenti senza il loro consenso. """,
+        
+        "Non spammare":""" Non spammare o intasare dimessagi i canali testuali.
+            Non spammare le emoji di reazioni nei messaggi.
+            Non menzionare i membri dello staff ripetutamente senza alcun motivo.
+            Non abusare tramite il proprio microfono e non commettere earrape nei canali vocali. """,
+            
+        "Non impersonare gli altri":""" Non impersonare gli altri utenti del server o i memebri dello Staff. """,
+
+        "Non mendicare":""" Non chiedere di ottenere ruoli o il ruolo di moderatore. Puoi candidarti per questa posizione accedendo al link in <#729454413290143774>  Tuttavia pregare e chiedere ripetutamente il ruolo allo Staff può comportare warns o essere bannati dal server. """,
+        
+        "Dramma":""" Fai del tuo meglio per lasciare il dramma fuori da questo server. Qualsiasi tentativo di iniziare un dramma, o il rifiuto di porre fine a una disputa all’interno del server, potrebbe avere conseguenze. """
+    },
+    "turkish":{
+        "NSFW yasaktır":""" Bu kural pornografik, vahşet, şiddet içeren, açık saçık, saldırgan içerik/konuşmalar için geçerlidir. Sesli kanallarda veya metin kanallarında bunlara tolerans gösterilmeyecektir.
+            Bu kural aynı zamanda profil resimleri, kullanıcı adları ve discord durumu için de geçerlidir. """,
+
+        "Saygılı olun":""" Irk, milliyet, din, cinsiyet veya cinsel yönelim temelinde ayrımcılık yapmak yasaktır.
+            Diğer kullanıcılara hakaret etmeyin.
+            Diğer kullanıcıları taciz etmeyin.
+            Boş yere, düşüncesizce küfretmeyin.
+            İnsanları rahatsız etmeyin ya da onları istenmeyen herhangi bir şekilde rahatsız etmeyin.
+            Bu kural hem sunucudaki aktivitede hem de özel mesajlar(dm) için geçerlidir. """,
+            
+        "Tartışmadan Kaçının":""" Language Sloth, eğitim amaçlı uluslararası bir sunucu olduğundan, burada dünyanın her yerinden insanlarımız var. Gereksiz çatışmalardan kaçınmak için tartışmalı olarak kabul edilen konulara yalnızca Münazara Kulübü'nde izin verilir.
+            Bu kural politika, din, kendine zarar verme, intihar, cinsiyet kimliği, cinsel yönelim için geçerlidir.
+            Bu kural profil resimleri için de geçerlidir. """,
+            
+        "Reklam yasaktır":""" Discord sunucularının reklamını yapmak veya metin/ses kanalları veya özel mesaj yoluyla kendi tanıtımını yapmak yasaktır. İzin almak istiyorsanız, yetkililer ile iletişime geçin. """,
+        
+        "Dox yapmayın":""" Diğer kullanıcıların kişisel bilgilerini izinleri olmadan paylaşmayın. """,
+        
+        "Spamlamayın":""" Metin kanallarına flood veya spam göndermeyin.
+            Mesajlara spam tepki vermeyin.
+            Yetkili kullanıcıları sebepsiz yere tekrar tekrar ping atmayın.
+            Ses kanallarında spam/earrape yapmayın. """,
+            
+        "Başkalarını taklit etmeyin":""" Diğer kullanıcıların veya Yetkililerin hesaplarını taklit etmeyin. """,
+        
+        "Dilenmeyin":""" Yetkili Roller/Moderatör rolü verilmesi için dilenmeyin. Bu pozisyonlara <#729454413290143774> 'daki linke girerek başvurabilirsiniz ancak personele tekrar tekrar yalvarmanız uyarı veya banlanmanız ile sonuçlanabilir. """,
+        
+        "Drama": """ Dramayı bu sunucudan uzak tutmak için elinizden geleni yapın. Drama başlatmaya herhangi bir eylemli kalkışma veya sunucu içindeki bir anlaşmazlığı sona erdirmeyi reddetme, sonuçlara neden olabilir. """
+    },
+    "russian":{
+        "NSFW запрещен":""" Это относится, в частности, к порнографическому, кровавому, жестокому, непристойному, оскорбительному контенту/разговорам. Вышеперечисленное не допускаются ни в голосовых чатах, ни в текстовых каналах. 
+            Это правило так же относится к изображениям профиля, никнейму пользователей и дискорд статусу.""",
+            
+        "Будьте вежливыми":""" Запрещена дискриминация на почве расовой, национальной, религиозной принадлежности или же сексуальной ориентации. 
+            ЗАПРЕЩЕНЫ: 
+            Грубые провокации и оскорбления других пользователей. 
+            Злоупотребление матами/нецензурной бранью. 
+            Беспокоить участников или же причинять им неудобства. 
+            Правила должны быть соблюдены как на сервере, так и в личных сообщениях. """,
+            
+        "Избегайте споров":""" Поскольку Language Sloth является международным сервером образовательного характера, у нас есть люди со всего мира. Чтобы избежать ненужных конфликтов, спорные темы разрешены только в клубе дебатов. 
+            Запрещено обсуждать политические, религиозные темы, а так же темы, касающиеся селфхарма/самоповреждения, самоубийства, гендерной идентичности, сексуальной ориентации. 
+            Это правило относится и к фотографиям профиля.  """,
+            
+        "Реклама запрещена":""" Не допускается реклама дискорд серверов или самореклама в текстовых/голосовых каналах или в личных сообщениях. Если вы хотите получить разрешение, свяжитесь с нашим персоналом.""",
+        
+        "Доксинг запрещен":""" Не разглашайте личную информацию других пользователей без их согласия. """,
+        
+        "Не спамить":""" Запрещен спам, флуд в любых его проявлениях. 
+            ЗАПРЕЩЕНО: 
+            Флудить или спамить текстовые каналы. 
+            Спам реакциями в сообщениях. 
+            Отмечать/упоминать роли персонала без причины и неоднократно. 
+            Транслировать спам звуки, музыку, громкие шумы через микрофон в голосовых каналах. """,
+            
+        "Не выдавайте себя за других":""" Запрещено копировать профили других пользователей или персонала. """,
+        
+        "Не попрошайничать":""" Не запрашивать предоставление ролей/ролей модератора. Вы можете подать заявку на эти должности, перейдя по ссылке в <#729454413290143774>. Если будете не переставая просить у персонала, это может привести к бану или к выдаче предупреждения. """,
+        
+        "Drama": """Do your best to keep drama out of this server. Any active attempt to start drama, or refusal to end a dispute within the server, may result in consequences."""
+    }
 }
 
 different_class_roles = {
