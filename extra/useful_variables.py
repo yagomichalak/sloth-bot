@@ -292,7 +292,7 @@ different_class_roles = {
         "马来文"
     ],
     "arabic": [
-        "arabe", "árabe", "arabo"
+        "arabe", "árabe", "arabo", "darija"
     ]
 }
 
