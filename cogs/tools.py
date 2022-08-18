@@ -37,7 +37,7 @@ guild_ids = [int(os.getenv('SERVER_ID', 123))]
 from typing import List, Optional, Union
 
 community_manager_role_id = int(os.getenv('COMMUNITY_MANAGER_ROLE_ID', 123))
-recruiter_role_id = int(os.getenv('RECRUITER_ROLE_ID', 123)) = int(os.getenv('RECRUITER_ROLE_ID', 123))
+recruiter_role_id = int(os.getenv('RECRUITER_ROLE_ID', 123))
 mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 senior_mod_role_id: int = int(os.getenv('SENIOR_MOD_ROLE_ID', 123))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID', 123))
