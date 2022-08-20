@@ -138,7 +138,7 @@ class Show(commands.Cog):
         if numb is None:
             return await answer('**Invalid parameter!**')
 
-        if numb > len(rules) or numb <= 0:
+        if numb > len(rules[lang]) or numb <= 0:
             return await answer(f'**Inform a rule from `1-{len(rules["english"])}` rules!**')
         
         #if invalid language
