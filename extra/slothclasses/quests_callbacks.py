@@ -79,7 +79,7 @@ async def quest_five_callback(client: commands.Bot, user_id: int, quest: Dict[st
         return
 
     required_time: int = 3600 * 4
-    increment: int = kwargs["increment"]
+    increment: int = kwargs.get("increment", 0)
     seconds = quest[9]
 
     current_seconds: int = int(seconds + increment)
