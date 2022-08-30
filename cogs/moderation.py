@@ -198,7 +198,7 @@ class Moderation(*moderation_cogs):
 				if not await self.get_bypass_firewall_user(member.id):
 					try:
 						unverified_role = discord.utils.get(member.guild.roles, id=unverified_role_id)
-						await member.add_role(unverified_role)
+						await member.add_roles(unverified_role)
 					except:
 						pass
 					return
