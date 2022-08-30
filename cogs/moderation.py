@@ -33,6 +33,7 @@ muted_role_id = int(os.getenv('MUTED_ROLE_ID', 123))
 preference_role_id = int(os.getenv('PREFERENCE_ROLE_ID', 123))
 senior_mod_role_id: int = int(os.getenv('SENIOR_MOD_ROLE_ID', 123))
 allowed_roles = [int(os.getenv('OWNER_ROLE_ID', 123)), int(os.getenv('ADMIN_ROLE_ID', 123)), senior_mod_role_id, mod_role_id]
+unverified_role_id = int(os.getenv('UNVERIFIED_ROLE_ID', 123))
 
 server_id = int(os.getenv('SERVER_ID', 123))
 guild_ids: List[int] = [server_id]
@@ -151,7 +152,6 @@ class Moderation(*moderation_cogs):
 				print(e)
 				continue
 
-
 	async def check_invite_guild(self, msg, guild, invite_root: str):
 		""" Checks whether it's a guild invite or not. """
 
@@ -196,7 +196,12 @@ class Moderation(*moderation_cogs):
 		if account_age <= 120:
 			if await self.get_firewall_state():
 				if not await self.get_bypass_firewall_user(member.id):
-					return await member.kick(reason="Possible fake account")
+					try:
+						unverified_role = discord.utils.get(member.guild.roles, id=unverified_role_id)
+						await member.add_role(unverified_role)
+					except:
+						pass
+					return
 				else:
 					await self.delete_bypass_firewall_user(member.id)
 
