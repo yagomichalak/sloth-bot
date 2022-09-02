@@ -34,6 +34,7 @@ preference_role_id = int(os.getenv('PREFERENCE_ROLE_ID', 123))
 senior_mod_role_id: int = int(os.getenv('SENIOR_MOD_ROLE_ID', 123))
 allowed_roles = [int(os.getenv('OWNER_ROLE_ID', 123)), int(os.getenv('ADMIN_ROLE_ID', 123)), senior_mod_role_id, mod_role_id]
 unverified_role_id = int(os.getenv('UNVERIFIED_ROLE_ID', 123))
+join_the_server_channel_id = int(os.getenv('JOIN_THE_SERVER_CHANNEL_ID', 123))
 
 server_id = int(os.getenv('SERVER_ID', 123))
 guild_ids: List[int] = [server_id]
@@ -201,6 +202,22 @@ class Moderation(*moderation_cogs):
 						await member.add_roles(unverified_role)
 					except:
 						pass
+					else:
+						join_the_server_channel = discord.utils.get(member.guild.text_channels, id=join_the_server_channel_id)
+						await join_the_server_channel.send(f"""
+						Welcome to The Language Sloth, {member.mention}
+Because your account on Discord was created recently, before you can join the server we have to verify you're not a bot.
+
+You can do that in two ways.
+:one: **answering these questions here in this text chat**
+Please answer these questions:
+1- What is your native language (the first language or dialect that a person has been exposed to from birth or within the critical period.)
+2- What languages are you interested in learning?
+3- Would you like to see every voice channel even for languages you don't speak? Yes or No?
+4- What is your purpose in this Discord server?
+
+:two: **joinning this voice chat: <#1013620324820074547> and talking to a staff member**
+						""")
 					return
 				else:
 					await self.delete_bypass_firewall_user(member.id)
