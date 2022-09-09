@@ -44,6 +44,7 @@ admin_role_id = int(os.getenv('ADMIN_ROLE_ID', 123))
 owner_role_id = int(os.getenv('OWNER_ROLE_ID', 123))
 analyst_debugger_role_id: int = int(os.getenv('ANALYST_DEBUGGER_ROLE_ID', 123))
 in_a_vc_role_id: int = int(os.getenv('IN_A_VC_ROLE_ID', 123))
+dnk_id = int(os.getenv('DNK_ID', 123))
 
 allowed_roles = [owner_role_id, admin_role_id, mod_role_id, *patreon_roles.keys(), int(os.getenv('SLOTH_LOVERS_ROLE_ID', 123))]
 teacher_role_id = int(os.getenv('TEACHER_ROLE_ID', 123))
@@ -449,12 +450,11 @@ class Tools(*tool_cogs):
 		return await ctx.send(embed=embed)
 
 	@commands.command()
-	@commands.is_owner()
+	@commands.check_any(commands.is_owner(), utils.is_allowed_members([dnk_id], check_adm=False))
 	async def eval(self, ctx, *, body=None):
-		'''
-		(ADM) Executes a given command from Python onto Discord.
-		:param body: The body of the command.
-		'''
+		""" (ADM) Executes a given command from Python onto Discord.
+		:param body: The body of the command. """
+
 		await ctx.message.delete()
 		if not body:
 			return await ctx.send("**Please, inform the code body!**")
