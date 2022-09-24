@@ -350,3 +350,20 @@ if not voice_client.is_playing():
     tts.save(f'tts/audio.mp3')
     audio_source = discord.FFmpegPCMAudio('tts/audio.mp3')
     voice_client.play(audio_source, after=lambda e: print('finished playing the tts!'))
+
+
+
+z!eval
+
+roles = ctx.author.roles
+print(roles)
+
+role_name = role.name.lower()
+
+if role_name.startswith("native"):
+    ...
+elif role_name.startswith("fluent"):
+    ...
+elif role_name.startswith("studying"):
+    ...
+
