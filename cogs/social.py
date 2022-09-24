@@ -1,5 +1,6 @@
 import discord
 from discord import Option, slash_command
+from discord.utils import escape_mentions
 from discord.ext import commands
 from random import randint
 import aiohttp
@@ -316,6 +317,8 @@ class Social(*social_cogs):
         """ Callback for the change_nickname command.
         :param ctx: The context of the command.
         :param nickname. The nickname to change to. [Optional] """
+
+        nickname = escape_mentions(nickname)
 
         answer: discord.PartialMessageable = ctx.reply if isinstance(ctx, commands.Context) else ctx.respond
         member: discord.Member = ctx.author
