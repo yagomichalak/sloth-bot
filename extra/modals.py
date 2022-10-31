@@ -10,7 +10,7 @@ class ModeratorApplicationModal(Modal):
     def __init__(self, client: commands.Bot) -> None:
         """ Class init method. """
 
-        super().__init__("Moderator Application")
+        super().__init__(title="Moderator Application")
         self.client = client
         self.cog: commands.Cog = client.get_cog('ReportSupport')
 
@@ -99,7 +99,7 @@ class TeacherApplicationModal(Modal):
     def __init__(self, client: commands.Bot) -> None:
         """ Class init method. """
 
-        super().__init__("Teacher Application")
+        super().__init__(title="Teacher Application")
         self.client = client
         self.cog: commands.Cog = client.get_cog('ReportSupport')
 
@@ -188,7 +188,7 @@ class EventHostApplicationModal(Modal):
     def __init__(self, client: commands.Bot) -> None:
         """ Class init method. """
 
-        super().__init__("Event Host Application")
+        super().__init__(title="Event Host Application")
         self.client = client
         self.cog: commands.Cog = client.get_cog('ReportSupport')
 
@@ -277,7 +277,7 @@ class DebateManagerApplicationModal(Modal):
     def __init__(self, client: commands.Bot) -> None:
         """ Class init method. """
 
-        super().__init__("Debate Manager Application")
+        super().__init__(title="Debate Manager Application")
         self.client = client
         self.cog: commands.Cog = client.get_cog('ReportSupport')
 
@@ -364,7 +364,7 @@ class UserReportSupportDetailModal(Modal):
     def __init__(self, client: commands.Bot, option: str) -> None:
         """ Class init method. """
 
-        super().__init__("Report-Support")
+        super().__init__(title="Report-Support")
         self.client = client
         self.cog: commands.Cog = client.get_cog('ReportSupport')
         self.add_item(
@@ -427,7 +427,7 @@ class TravelBuddyModal(Modal):
     def __init__(self, client: commands.Bot, country_role: discord.Role) -> None:
         """ Class init method. """
 
-        super().__init__("Travel Buddy Form")
+        super().__init__(title="Travel Buddy Form")
         self.client = client
         self.country_role = country_role
         self.cog: commands.Cog = client.get_cog('TravelBuddies')
