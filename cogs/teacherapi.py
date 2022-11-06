@@ -176,7 +176,7 @@ class TeacherAPI(commands.Cog):
 
     @commands.command(aliases=['epfp'])
     @commands.has_permissions(administrator=True)
-    async def export_profile_picutres(self, ctx) -> None:
+    async def export_profile_pictures(self, ctx) -> None:
         """ Exports a zip file with all of the teachers' profile picture. """
 
         path = 'media/icons/'
