@@ -10,8 +10,8 @@ mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 senior_mod_role_id = int(os.getenv('SENIOR_MOD_ROLE_ID', 123))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID', 123))
 owner_role_id = int(os.getenv('OWNER_ROLE_ID', 123))
-event_manager_role_id = int(os.getenv('EVENT_MANAGER_ROLE_ID', 123))
-real_event_manager_role_id = int(os.getenv('REAL_EVENT_MANAGER_ROLE_ID', 123))
+event_host_role_id = int(os.getenv('EVENT_MANAGER_ROLE_ID', 123))
+event_manager_role_id = int(os.getenv('REAL_EVENT_MANAGER_ROLE_ID', 123))
 preference_role_id = int(os.getenv('PREFERENCE_ROLE_ID', 123))
 
 
@@ -33,6 +33,7 @@ class EventManagement(EventRoomsTable):
         """ Gets permissions for event rooms. """
 
         # Get some roles
+        event_host_role = discord.utils.get(guild.roles, id=event_host_role_id)
         event_manager_role = discord.utils.get(guild.roles, id=event_manager_role_id)
         preference_role = discord.utils.get(guild.roles, id=preference_role_id)
         mod_role = discord.utils.get(guild.roles, id=mod_role_id)
@@ -47,6 +48,12 @@ class EventManagement(EventRoomsTable):
         read_messages=True, send_messages=False, connect=False, view_channel=True)
 
         overwrites[event_manager_role] = discord.PermissionOverwrite(
+        read_messages=True, send_messages=True, manage_messages=True,
+        mute_members=True, embed_links=True, connect=True,
+        speak=True, move_members=True, view_channel=True, manage_channel=True,
+        manage_permissions=True)
+        
+        overwrites[event_host_role] = discord.PermissionOverwrite(
         read_messages=True, send_messages=True, manage_messages=True,
         mute_members=True, embed_links=True, connect=True,
         speak=True, move_members=True, view_channel=True,
@@ -82,7 +89,7 @@ class EventManagement(EventRoomsTable):
         await ctx.send(embed=embed)
 
     @create_event.command()
-    @commands.has_any_role(*[event_manager_role_id, mod_role_id, admin_role_id, owner_role_id])
+    @commands.has_any_role(*[event_host_role_id, event_manager_role_id, mod_role_id, admin_role_id, owner_role_id])
     @commands.cooldown(1, 60, commands.BucketType.user)
     async def movie(self, ctx) -> None:
         """ Creates a Movie Night voice and text channel. """
@@ -135,7 +142,7 @@ class EventManagement(EventRoomsTable):
             await ctx.send(f"**{member.mention}, {text_channel.mention} is up and running!**")
 
     @create_event.command()
-    @commands.has_any_role(*[event_manager_role_id, mod_role_id, admin_role_id, owner_role_id])
+    @commands.has_any_role(*[event_host_role_id, event_manager_role_id, mod_role_id, admin_role_id, owner_role_id])
     @commands.cooldown(1, 60, commands.BucketType.user)
     async def karaoke(self, ctx) -> None:
         """ Creates a Karaoke Night voice and text channel. """
@@ -188,7 +195,7 @@ class EventManagement(EventRoomsTable):
             await ctx.send(f"**{member.mention}, {text_channel.mention} is up and running!**")
 
     @create_event.command()
-    @commands.has_any_role(*[event_manager_role_id, mod_role_id, admin_role_id, owner_role_id])
+    @commands.has_any_role([*event_host_role_id, event_manager_role_id, mod_role_id, admin_role_id, owner_role_id])
     @commands.cooldown(1, 60, commands.BucketType.user)
     async def culture(self, ctx) -> None:
         """ Creates a Culture Event voice and text channel. """
@@ -241,7 +248,7 @@ class EventManagement(EventRoomsTable):
             await ctx.send(f"**{member.mention}, {text_channel.mention} is up and running!**")
 
     @create_event.command()
-    @commands.has_any_role(*[event_manager_role_id, mod_role_id, admin_role_id, owner_role_id])
+    @commands.has_any_role(*[event_host_role_id, event_manager_role_id, mod_role_id, admin_role_id, owner_role_id])
     @commands.cooldown(1, 60, commands.BucketType.user)
     async def art(self, ctx) -> None:
         """ Creates a Art Event voice and text channel. """
@@ -265,7 +272,7 @@ class EventManagement(EventRoomsTable):
         art_club_role = discord.utils.get(
             guild.roles, id=int(os.getenv('ART_CLUB_ROLE_ID', 123))
         )
-        # Adds some perms to the Culture Club role
+        # Adds some perms to the Art Club role
         overwrites[art_club_role] = discord.PermissionOverwrite(
             read_messages=True, send_messages=True,
             connect=True, speak=True, view_channel=True)
@@ -293,8 +300,9 @@ class EventManagement(EventRoomsTable):
         else:
             await ctx.send(f"**{member.mention}, {text_channel.mention} is up and running!**")
 
-    @create_event.command()
-    @commands.has_any_role(*[event_manager_role_id, mod_role_id, admin_role_id, owner_role_id])
+    # WELLNESS GOT REMOVED
+    # @create_event.command()
+    @commands.has_any_role(*[admin_role_id, owner_role_id])
     @commands.cooldown(1, 60, commands.BucketType.user)
     async def wellness(self, ctx) -> None:
         """ Creates a Wellness Event voice and text channel. """
@@ -347,7 +355,7 @@ class EventManagement(EventRoomsTable):
             await ctx.send(f"**{member.mention}, {text_channel.mention} is up and running!**")
 
     @create_event.command()
-    @commands.has_any_role(*[event_manager_role_id, mod_role_id, admin_role_id, owner_role_id])
+    @commands.has_any_role(*[event_host_role_id, event_manager_role_id, mod_role_id, admin_role_id, owner_role_id])
     @commands.cooldown(1, 60, commands.BucketType.user)
     async def science(self, ctx) -> None:
         """ Creates a Science Event voice and text channel. """
@@ -371,7 +379,7 @@ class EventManagement(EventRoomsTable):
         science_club_role = discord.utils.get(
             guild.roles, id=int(os.getenv('SCIENCE_CLUB_ROLE_ID', 123))
         )
-        # Adds some perms to the Culture Club role
+        # Adds some perms to the Science Club role
         overwrites[science_club_role] = discord.PermissionOverwrite(
             read_messages=True, send_messages=True,
             connect=True, speak=True, view_channel=True)
@@ -401,7 +409,7 @@ class EventManagement(EventRoomsTable):
 
 
     @create_event.command()
-    @commands.has_any_role(*[event_manager_role_id, mod_role_id, admin_role_id, owner_role_id])
+    @commands.has_any_role(*[event_host_role_id, event_manager_role_id, mod_role_id, admin_role_id, owner_role_id])
     @commands.cooldown(1, 60, commands.BucketType.user)
     async def reading(self, ctx) -> None:
         """ Creates a Reading Session voice and text channel. """
@@ -425,7 +433,7 @@ class EventManagement(EventRoomsTable):
         culture_club_role = discord.utils.get(
             guild.roles, id=int(os.getenv('READING_CLUB_ROLE_ID', 123))
         )
-        # Adds some perms to the Culture Club role
+        # Adds some perms to the Reading Club role
         overwrites[culture_club_role] = discord.PermissionOverwrite(
             read_messages=True, send_messages=True,
             connect=True, speak=True, view_channel=True)
@@ -454,7 +462,7 @@ class EventManagement(EventRoomsTable):
             await ctx.send(f"**{member.mention}, {text_channel.mention} is up and running!**")
 
     @create_event.command()
-    @commands.has_any_role(*[event_manager_role_id, mod_role_id, admin_role_id, owner_role_id])
+    @commands.has_any_role(*[event_host_role_id, event_manager_role_id, mod_role_id, admin_role_id, owner_role_id])
     @commands.cooldown(1, 60, commands.BucketType.user)
     async def gaming(self, ctx) -> None:
         """ Creates a Gaming Event voice and text channel. """
@@ -478,7 +486,7 @@ class EventManagement(EventRoomsTable):
         gamer_role = discord.utils.get(
             guild.roles, id=int(os.getenv('GAMER_ROLE_ID', 123))
         )
-        # Adds some perms to the Karaoke Club role
+        # Adds some perms to the Gamer role
         overwrites[gamer_role] = discord.PermissionOverwrite(
             read_messages=True, send_messages=True,
             connect=True, speak=True, view_channel=True)
@@ -507,7 +515,7 @@ class EventManagement(EventRoomsTable):
             await ctx.send(f"**{member.mention}, {text_channel.mention} is up and running!**")
 
     @create_event.command()
-    @commands.has_any_role(*[event_manager_role_id, mod_role_id, admin_role_id, owner_role_id])
+    @commands.has_any_role(*[event_host_role_id, event_manager_role_id, mod_role_id, admin_role_id, owner_role_id])
     @commands.cooldown(1, 60, commands.BucketType.user)
     async def sport(self, ctx) -> None:
         """ Creates a Sport Event voice and text channel. """
@@ -531,7 +539,7 @@ class EventManagement(EventRoomsTable):
         gamer_role = discord.utils.get(
             guild.roles, id=int(os.getenv('SPORT_CLUB_ROLE_ID', 123))
         )
-        # Adds some perms to the Karaoke Club role
+        # Adds some perms to the Sport Club role
         overwrites[gamer_role] = discord.PermissionOverwrite(
             read_messages=True, send_messages=True,
             connect=True, speak=True, view_channel=True)
@@ -560,7 +568,7 @@ class EventManagement(EventRoomsTable):
             await ctx.send(f"**{member.mention}, {text_channel.mention} is up and running!**")
 
     @commands.command(aliases=['close_event'])
-    @commands.has_any_role(*[event_manager_role_id, mod_role_id, admin_role_id, owner_role_id])
+    @commands.has_any_role(*[event_host_role_id, event_manager_role_id, mod_role_id, admin_role_id, owner_role_id])
     async def delete_event(self, ctx) -> None:
         """ Deletes an event room. """
         member = ctx.author
@@ -593,17 +601,17 @@ class EventManagement(EventRoomsTable):
                 await ctx.send(f"**Not deleting them, then, {member.mention}!**")
 
     @commands.command(aliases=['dh'])
-    @utils.is_allowed([owner_role_id, admin_role_id, real_event_manager_role_id], throw_exc=True)
+    @utils.is_allowed([owner_role_id, admin_role_id, event_manager_role_id], throw_exc=True)
     async def demote_host(self, ctx, member: discord.Member = None) -> None:
-        """ Demotes a teacher to a regular user.
-        :param member: The teacher that is gonna be demoted. """
+        """ Demotes a host to a regular user.
+        :param member: The host that is going to be demoted. """
 
         if not member:
             return await ctx.send("**Please, inform a member to demote to a regular user!**")
 
         author: discord.Member = ctx.author
 
-        event_host = discord.utils.get(ctx.guild.roles, id=event_manager_role_id)
+        event_host = discord.utils.get(ctx.guild.roles, id=event_host_role_id)
         if event_host not in member.roles:
             return await ctx.send(f"**{member.mention} is not even an Event Host!**")
 
@@ -629,6 +637,46 @@ class EventManagement(EventRoomsTable):
 
         try:
             await member.send(f"**You have been demoted from an `Event Host` to a regular user!**")
+        except:
+            pass
+    
+    @commands.command(aliases=['ph'])
+    @utils.is_allowed([owner_role_id, admin_role_id, event_manager_role_id], throw_exc=True)
+    async def promote_host(self, ctx, member: discord.Member = None) -> None:
+        """ Promotes a host to a regular user.
+        :param member: The user that is going to be promoted. """
+
+        if not member:
+            return await ctx.send("**Please, inform a member to promote to event host!**")
+
+        author: discord.Member = ctx.author
+
+        event_host = discord.utils.get(ctx.guild.roles, id=event_host_role_id)
+        if event_host in member.roles:
+            return await ctx.send(f"**{member.mention} already is an Event Host!**")
+
+        try:
+            await member.add_roles(event_host)
+        except:
+            pass
+
+        # General log
+        promote_embed = discord.Embed(
+            title="__Event Host Promotion__",
+            description=f"{member.mention} has been promoted to `Event Host` by {author.mention}",
+            color=discord.Color.dark_red(),
+            timestamp=ctx.message.created_at
+        )
+        await ctx.send(embed=promote_embed)
+
+        # Moderation log
+        if promote_log := discord.utils.get(ctx.guild.text_channels, id=int(os.getenv('PROMOTE_DEMOTE_LOG_ID', 123))):
+            promote_embed.set_author(name=member, icon_url=member.display_avatar)
+            promote_embed.set_footer(text=f"Promoted by {author}", icon_url=author.display_avatar)
+            await promote_log.send(embed=promote_embed)
+
+        try:
+            await member.send(f"**You have been promoted to `Event Host`**")
         except:
             pass
 
