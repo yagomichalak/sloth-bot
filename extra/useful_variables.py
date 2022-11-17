@@ -293,6 +293,9 @@ different_class_roles = {
     ],
     "arabic": [
         "arabe", "árabe", "arabo", "darija"
+    ],
+    "sub-saharan languages": [
+        "zulu"
     ]
 }
 
