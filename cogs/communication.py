@@ -190,33 +190,38 @@ If you have any questions feel free to ask! And if you experience any type of pr
         announce_channel = discord.utils.get(ctx.guild.channels, id=announcement_channel_id)
         msg = ctx.message.content.split('!announce', 1)
         await announce_channel.send(msg[1])
-
+            
+    #greedy_dm
     @commands.command()
     @utils.is_allowed([senior_mod_role_id, lesson_manager_role_id, real_event_manager_role_id], throw_exc=True)
     async def dm(self, ctx, member: discord.Member = None, *, message=None):
-        """ (SeniorMod) Sends a Direct Message to someone.
-        :param member: The member to send the message to.
+        """ (SeniorMod | Manager) Sends a Direct Message to one or more users.
+        :param member: The @ or the ID of one or more users to mute.
         :param message: The message to send. """
 
+        members, reason = await utils.greedy_member_reason(ctx, message)
+        
         await ctx.message.delete()
         author: discord.Member = ctx.author
 
-        if not message:
+        #no message to be sent
+        if not reason:
             return await ctx.send("**Inform a message to send!**", delete_after=3)
 
-        if not member:
+        #no users to be messaged
+        if not members:
             return await ctx.send("**Inform a member!**", delete_after=3)
-
-        check_member = ctx.guild.get_member(member.id)
-        if not check_member:
-            return await ctx.send(f"**Member: {member} not found!", delete_after=3)
-
-        try:
-            await member.send(message)
-        except:
-            pass
-
-        # Moderation log
+        
+        #if theres a user, DM them
+        for member in members:
+            if ctx.guild.get_member(member.id):
+                await member.send(reason)#sends DM message
+                DM_log(ctx, author, member, reason)#triggers DM log
+            else:
+                await ctx.send(f"**Member: {member} not found!", delete_after=3)
+        
+async def DM_log(ctx, author, member, message):
+    # Moderation log
         if demote_log := discord.utils.get(ctx.guild.text_channels, id=int(os.getenv('DM_LOG_CHANNEL_ID', 123))):
             dm_embed = discord.Embed(
                 title="__DM Message__",
