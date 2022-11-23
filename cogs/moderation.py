@@ -204,20 +204,8 @@ class Moderation(*moderation_cogs):
 						pass
 					else:
 						join_the_server_channel = discord.utils.get(member.guild.text_channels, id=join_the_server_channel_id)
-						await join_the_server_channel.send(f"""
-						Welcome to The Language Sloth, {member.mention}
-Because your account on Discord was created recently, before you can join the server we have to verify you're not a bot.
-
-You can do that in two ways.
-:one: **answering these questions here in this text chat**
-Please answer these questions:
-1- What is your native language (the first language or dialect that a person has been exposed to from birth or within the critical period.)
-2- What languages are you interested in learning?
-3- Would you like to see every voice channel even for languages you don't speak? Yes or No?
-4- What is your purpose in this Discord server?
-
-:two: **joinning this voice chat: <#1013620324820074547> and talking to a staff member**
-						""")
+						msg = await join_the_server_channel.send(member.mention)
+						await msg.delete()
 					return
 				else:
 					await self.delete_bypass_firewall_user(member.id)
