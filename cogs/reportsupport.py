@@ -200,7 +200,7 @@ class ReportSupport(*report_support_classes):
 
 
     # - Report someone
-    async def report_someone(self, interaction: discord.Interaction, text: str):
+    async def report_someone(self, interaction: discord.Interaction, reportee: str, text: str):
 
         member = interaction.user
         guild = interaction.guild
@@ -208,7 +208,7 @@ class ReportSupport(*report_support_classes):
         if open_channel := await self.member_has_open_channel(member.id):
             if open_channel := discord.utils.get(guild.text_channels, id=open_channel[1]):
                 embed = discord.Embed(title="Error!", description=f"**You already have an open channel! ({open_channel.mention})**", color=discord.Color.red())
-                await interaction.response.send_message(embed=embed, ephemeral=True)
+                await interaction.followup.send(embed=embed, ephemeral=True)
                 return False
             else:
                 await self.remove_user_open_channel(member.id)
@@ -228,17 +228,17 @@ class ReportSupport(*report_support_classes):
             the_channel = await guild.create_text_channel(name=f"case-{counter[0][0]}", category=case_cat, overwrites=overwrites)
         except Exception as e:
             print(e)
-            await interaction.response.send_message("**Something went wrong with it, please contact an admin!**", ephemeral=True)
+            await interaction.followup.send("**Something went wrong with it, please contact an admin!**", ephemeral=True)
             raise Exception
         else:
             created_embed = discord.Embed(
                 title="Report room created!",
                 description=f"**Go to {the_channel.mention}!**",
                 color=discord.Color.green())
-            await interaction.response.send_message(embed=created_embed, ephemeral=True)
+            await interaction.followup.send(embed=created_embed, ephemeral=True)
             await self.insert_user_open_channel(member.id, the_channel.id)
             await self.increase_case_number()
-            embed = discord.Embed(title="Report Support!", description=f"{member.mention}:```{text}```",
+            embed = discord.Embed(title="Report Support!", description=f"{member.mention} is reporting `{reportee}`:```{text}```",
                 color=discord.Color.red())
             message = await the_channel.send(content=f"{member.mention}, {moderator.mention}, {cosmos_role.mention}", embed=embed)
             ctx = await self.client.get_context(message)

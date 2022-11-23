@@ -369,7 +369,14 @@ class UserReportSupportDetailModal(Modal):
         self.cog: commands.Cog = client.get_cog('ReportSupport')
         self.add_item(
             InputText(
-                label="What happened/How can we help you?",
+                label="Who are you reporting?",
+                placeholder="Type the username of the user you are reporting.",
+                style=discord.InputTextStyle.singleline
+            )
+        )
+        self.add_item(
+            InputText(
+                label="Reason of the report/What did this user do?",
                 placeholder="Describe the situation as much as you can, so we can help you better and faster.",
                 style=discord.InputTextStyle.paragraph
             )
@@ -380,12 +387,13 @@ class UserReportSupportDetailModal(Modal):
         """ Callback for the form modal. """        
 
         await interaction.response.defer()
-        text = self.children[0].value
+        reportee = self.children[0].value
+        text = self.children[1].value
         member = interaction.user
 
         if self.option == 'Report':
             try:
-                exists = await self.cog.report_someone(interaction, text)
+                exists = await self.cog.report_someone(interaction, reportee, text)
                 if exists is False:
                     return
             except Exception as e:
