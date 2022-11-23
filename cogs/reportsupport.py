@@ -238,7 +238,7 @@ class ReportSupport(*report_support_classes):
             await interaction.followup.send(embed=created_embed, ephemeral=True)
             await self.insert_user_open_channel(member.id, the_channel.id)
             await self.increase_case_number()
-            embed = discord.Embed(title="Report Support!", description=f"{member.mention} is reporting `{reportee}`:```{text}```",
+            embed = discord.Embed(title="Report Support!", description=f"{member.mention}\nReporting `{reportee}`\nFor:```{text}```",
                 color=discord.Color.red())
             message = await the_channel.send(content=f"{member.mention}, {moderator.mention}, {cosmos_role.mention}", embed=embed)
             ctx = await self.client.get_context(message)
