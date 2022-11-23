@@ -3,7 +3,7 @@ from discord.errors import NotFound
 from discord.ext import commands, tasks
 import os
 from extra import utils
-from typing import List
+from typing import List, Optional
 import json
 from random import choice
 
@@ -194,44 +194,52 @@ If you have any questions feel free to ask! And if you experience any type of pr
     #greedy_dm
     @commands.command()
     @utils.is_allowed([senior_mod_role_id, lesson_manager_role_id, real_event_manager_role_id], throw_exc=True)
-    async def dm(self, ctx, member: discord.Member = None, *, message=None):
+    async def dm(self, ctx, *, message: Optional[str] = None):
         """ (SeniorMod | Manager) Sends a Direct Message to one or more users.
-        :param member: The @ or the ID of one or more users to mute.
+        :param members: The @ or the ID of one or more users to mute.
         :param message: The message to send. """
 
         members, reason = await utils.greedy_member_reason(ctx, message)
-        
+
         await ctx.message.delete()
         author: discord.Member = ctx.author
 
-        #no message to be sent
+        # No message to be sent
         if not reason:
             return await ctx.send("**Inform a message to send!**", delete_after=3)
 
-        #no users to be messaged
+        # No users to be messaged
         if not members:
             return await ctx.send("**Inform a member!**", delete_after=3)
         
-        #if theres a user, DM them
+        # If there's a user, DM them
         for member in members:
             if ctx.guild.get_member(member.id):
-                await member.send(reason)#sends DM message
-                DM_log(ctx, author, member, reason)#triggers DM log
+                await member.send(reason) # Sends DM message
+                await self.log_dm(ctx, author, member, reason) # Triggers DM log
             else:
                 await ctx.send(f"**Member: {member} not found!", delete_after=3)
         
-async def DM_log(ctx, author, member, message):
-    # Moderation log
-        if demote_log := discord.utils.get(ctx.guild.text_channels, id=int(os.getenv('DM_LOG_CHANNEL_ID', 123))):
-            dm_embed = discord.Embed(
-                title="__DM Message__",
-                description=f"{author.mention} DM'd {member.mention}.\n**Message:** {message}",
-                color=author.color,
-                timestamp=ctx.message.created_at
-            )
-            dm_embed.set_author(name=member, icon_url=member.display_avatar)
-            dm_embed.set_footer(text=f"Sent by: {author}", icon_url=author.display_avatar)
-            await demote_log.send(embed=dm_embed)
+    async def log_dm(self, ctx, author: discord.Member, member: discord.Member, message: str) -> None:
+        """ Log's a DM message.
+        :param ctx: The context.
+        :param author: The author of the message.
+        :param member: The member who's the receiver of the message.
+        :param message: The message. """
+
+        # Moderation log
+        if not (demote_log := discord.utils.get(ctx.guild.text_channels, id=int(os.getenv('DM_LOG_CHANNEL_ID', 123)))):
+            return
+
+        dm_embed = discord.Embed(
+            title="__DM Message__",
+            description=f"{author.mention} DM'd {member.mention}.\n**Message:** {message}",
+            color=author.color,
+            timestamp=ctx.message.created_at
+        )
+        dm_embed.set_author(name=member, icon_url=member.display_avatar)
+        dm_embed.set_footer(text=f"Sent by: {author}", icon_url=author.display_avatar)
+        await demote_log.send(embed=dm_embed)
 
 def setup(client):
     """ Cog's setup function. """

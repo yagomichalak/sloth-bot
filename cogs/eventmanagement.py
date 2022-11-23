@@ -195,7 +195,7 @@ class EventManagement(EventRoomsTable):
             await ctx.send(f"**{member.mention}, {text_channel.mention} is up and running!**")
 
     @create_event.command()
-    @commands.has_any_role([*event_host_role_id, event_manager_role_id, mod_role_id, admin_role_id, owner_role_id])
+    @commands.has_any_role(*[event_host_role_id, event_manager_role_id, mod_role_id, admin_role_id, owner_role_id])
     @commands.cooldown(1, 60, commands.BucketType.user)
     async def culture(self, ctx) -> None:
         """ Creates a Culture Event voice and text channel. """
