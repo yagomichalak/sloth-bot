@@ -75,13 +75,13 @@ class ReportSupport(*report_support_classes):
                 await message.add_reaction('❌')
 
     async def handle_ban_appeal(self, message: discord.Message, payload) -> None:
-        """ Handles teacher applications.
+        """ Handles ban appeal applications.
         :param guild: The server in which the application is running.
         :param payload: Data about the Staff member who is opening the application. """
 
         emoji = str(payload.emoji)
         if emoji == '✅':
-            # Gets the teacher app and does the magic
+            # Gets the ban appeal app and does the magic
             if not (app := await self.get_application_by_message(payload.message_id)):
                 return
 
@@ -96,7 +96,7 @@ class ReportSupport(*report_support_classes):
 
 
         elif emoji == '❌':
-            # Tries to delete the teacher app from the db, in case it is registered
+            # Tries to delete the ban appeal app from the db, in case it is registered
             app = await self.get_application_by_message(payload.message_id)
             if app and not app[3]:
                 await self.delete_application(payload.message_id)
