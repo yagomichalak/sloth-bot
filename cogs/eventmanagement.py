@@ -50,7 +50,7 @@ class EventManagement(EventRoomsTable):
         overwrites[event_manager_role] = discord.PermissionOverwrite(
         read_messages=True, send_messages=True, manage_messages=True,
         mute_members=True, embed_links=True, connect=True,
-        speak=True, move_members=True, view_channel=True, manage_channel=True,
+        speak=True, move_members=True, view_channel=True,
         manage_permissions=True)
         
         overwrites[event_host_role] = discord.PermissionOverwrite(
