@@ -344,6 +344,26 @@ class Show(commands.Cog):
                         embed.set_footer(text="Page {}".format(num))
                         await ctx.send(embed=embed)
 
+    @commands.command()
+    @commands.cooldown(1, 10, commands.BucketType.user)
+    async def website(self, ctx) -> None:
+        """ Shows the website link. """
+
+        member: discord.Member = ctx.author
+
+        website_url = "https://thelanguagesloth.com"
+
+        embed = discord.Embed(
+            title="Visit our website!",
+            color=member.color,
+            timestamp=ctx.message.created_at,
+            url=website_url
+        )
+        embed.set_footer(text=f"Requested by: {member}", icon_url=member.display_avatar)
+        view: discord.ui.View = discord.ui.View()
+        view.add_item(discord.ui.Button(style=discord.ButtonStyle.url, url=website_url, label="The Language Sloth"))
+        await ctx.send(embed=embed, view=view)
+
 
 def setup(client):
     client.add_cog(Show(client))
