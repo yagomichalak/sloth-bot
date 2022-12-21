@@ -292,10 +292,13 @@ different_class_roles = {
         "马来文"
     ],
     "arabic": [
-        "arabe", "árabe", "arabo", "darija"
+        "arabe", "árabe", "arabo", "darija", "arapça"
     ],
     "sub-saharan languages": [
         "zulu"
+    ],
+    "turkic languages": [
+        "uzbek"
     ]
 }
 
