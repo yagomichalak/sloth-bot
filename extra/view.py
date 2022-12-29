@@ -117,7 +117,7 @@ class ReportSupportView(discord.ui.View):
         with open('extra/random/texts/dnk.txt', 'r', encoding="utf-8") as file:
             dnk_text = file.read()
 
-        website_link = "https://thelanguagesloth.com/bots/commission"
+        website_link = "https://languagesloth.com/bots/commission"
 
         # Order a bot
         embed = discord.Embed(

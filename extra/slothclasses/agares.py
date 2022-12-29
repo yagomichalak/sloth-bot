@@ -189,7 +189,7 @@ class Agares(Player):
         magic_pull_embed.description = f"**<@{perpetrator_id}> magic pulled <@{target_id}> from `{t_before_vc}` to `{t_after_vc}`!** 🧲"
         magic_pull_embed.color = discord.Color.green()
 
-        magic_pull_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Agares.png")
+        magic_pull_embed.set_thumbnail(url="https://languagesloth.com/media/sloth_classes/Agares.png")
         magic_pull_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
 
         return magic_pull_embed
@@ -209,7 +209,7 @@ class Agares(Player):
         recharge_embed.description = f"**<@{perpetrator_id}> reset <@{target_id}>'s first skill cooldown!** 🔁"
         recharge_embed.color = discord.Color.green()
 
-        recharge_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Agares.png")
+        recharge_embed.set_thumbnail(url="https://languagesloth.com/media/sloth_classes/Agares.png")
         recharge_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
         recharge_embed.set_image(url='https://media1.tenor.com/images/623500b09831e08eb963bdc7d75797c4/tenor.gif?itemid=20299439')
 
@@ -340,7 +340,7 @@ class Agares(Player):
         reflect_embed.description = f"**<@{perpetrator_id}> put a Reflection Aura onto <@{target_id}>!** ↕️"
         reflect_embed.color = discord.Color.green()
 
-        reflect_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Agares.png")
+        reflect_embed.set_thumbnail(url="https://languagesloth.com/media/sloth_classes/Agares.png")
         reflect_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
         reflect_embed.set_image(url='https://media1.tenor.com/images/3fc942141e181ef927813f0a5a679193/tenor.gif?itemid=15706915')
 
@@ -495,7 +495,7 @@ class Agares(Player):
             timestamp=datetime.fromtimestamp(timestamp)
         )
 
-        delay_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Agares.png")
+        delay_embed.set_thumbnail(url="https://languagesloth.com/media/sloth_classes/Agares.png")
         delay_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
         delay_embed.set_image(url='https://c.tenor.com/PSGLSYMPNJEAAAAd/sorry-for-the-delay-tom-felton.gif')
 

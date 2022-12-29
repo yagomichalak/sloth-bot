@@ -142,10 +142,10 @@ class Merchant(Player):
         user_info = await self.get_user_currency(buyer.id)
         sloth_profile = await self.get_sloth_profile(buyer.id)
         if not user_info or not sloth_profile:
-            await ctx.send(embed=discord.Embed(description=f"**{buyer.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one!**"))
+            await ctx.send(embed=discord.Embed(description=f"**{buyer.mention}, you don't have an account yet. Click [here](https://languagesloth.com/profile/update) to create one!**"))
 
         elif sloth_profile[1].lower() == 'default':
-            await ctx.send(embed=discord.Embed(description=f"**{buyer.mention}, you don't have a Sloth class yet. Click [here](https://thelanguagesloth.com/profile/slothclass) to choose one!**"))
+            await ctx.send(embed=discord.Embed(description=f"**{buyer.mention}, you don't have a Sloth class yet. Click [here](https://languagesloth.com/profile/slothclass) to choose one!**"))
 
         elif sloth_profile[5]:
             await ctx.send(embed=discord.Embed(description=f"**{buyer.mention}, you already have a potion, you can't buy another one!**"))
@@ -232,10 +232,10 @@ class Merchant(Player):
         slothprofile = await self.get_sloth_profile(buyer.id)
         
         if not user_info:
-            return await ctx.send(embed=discord.Embed(description=f"**{buyer.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one!**"))
+            return await ctx.send(embed=discord.Embed(description=f"**{buyer.mention}, you don't have an account yet. Click [here](https://languagesloth.com/profile/update) to create one!**"))
 
         if slothprofile[1].lower() == 'default':
-            return await ctx.send(embed=discord.Embed(description=f"**{buyer.mention}, you don't have a Sloth class yet. Click [here](https://thelanguagesloth.com/profile/slothclass) to choose one!**"))
+            return await ctx.send(embed=discord.Embed(description=f"**{buyer.mention}, you don't have a Sloth class yet. Click [here](https://languagesloth.com/profile/slothclass) to choose one!**"))
 
         if slothprofile and slothprofile[7] == 2:
             return await ctx.send(embed=discord.Embed(description=f"**{buyer.mention}, you already have two `Wedding Rings`, you can't buy another one!**"))
@@ -320,10 +320,10 @@ class Merchant(Player):
         slothprofile = await self.get_sloth_profile(buyer.id)
         
         if not user_info:
-            return await ctx.send(embed=discord.Embed(description=f"**{buyer.mention}, you don't have an account yet. Click [here](https://thelanguagesloth.com/profile/update) to create one!**"))
+            return await ctx.send(embed=discord.Embed(description=f"**{buyer.mention}, you don't have an account yet. Click [here](https://languagesloth.com/profile/update) to create one!**"))
 
         if slothprofile[1].lower() == 'default':
-            return await ctx.send(embed=discord.Embed(description=f"**{buyer.mention}, you don't have a Sloth class yet. Click [here](https://thelanguagesloth.com/profile/slothclass) to choose one!**"))
+            return await ctx.send(embed=discord.Embed(description=f"**{buyer.mention}, you don't have a Sloth class yet. Click [here](https://languagesloth.com/profile/slothclass) to choose one!**"))
 
         if await self.get_user_pet(buyer.id):
             return await ctx.send(embed=discord.Embed(description=f"**{buyer.mention}, you already have a `Pet`, you can't buy another one!**"))
@@ -558,7 +558,7 @@ class Merchant(Player):
         open_shop_embed.description = f"**<@{perpetrator_id}> put a `{item_name}` into the Sloth class shop, for the price of `{price}łł`!** {emoji}"
         open_shop_embed.color = discord.Color.green()
 
-        open_shop_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Merchant.png")
+        open_shop_embed.set_thumbnail(url="https://languagesloth.com/media/sloth_classes/Merchant.png")
         open_shop_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
 
         return open_shop_embed
@@ -659,7 +659,7 @@ class Merchant(Player):
             return await ctx.send(f"**You cannot marry yourself, {member.mention}!**")
 
         no_pf_view = discord.ui.View()
-        no_pf_view.add_item(discord.ui.Button(style=5, label="Create Account", emoji="🦥", url="https://thelanguagesloth.com/profile/update"))
+        no_pf_view.add_item(discord.ui.Button(style=5, label="Create Account", emoji="🦥", url="https://languagesloth.com/profile/update"))
 
         if not (sloth_profile := await self.get_sloth_profile(member.id)):
             self.client.get_command('marry').reset_cooldown(ctx)

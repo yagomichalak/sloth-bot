@@ -255,7 +255,7 @@ class Seraph(Player):
         divine_embed.description = f"🛡️ <@{perpetrator_id}> protected <@{target_id}> from attacks for 24 hours! 🛡️"
         divine_embed.color = discord.Color.green()
 
-        divine_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Seraph.png")
+        divine_embed.set_thumbnail(url="https://languagesloth.com/media/sloth_classes/Seraph.png")
         divine_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
 
         return divine_embed
@@ -277,7 +277,7 @@ class Seraph(Player):
         reinforce_shields_embed.color = discord.Color.green()
 
         reinforce_shields_embed.set_author(name=f"{int(success_rate*100)}% of chance", url=self.client.user.display_avatar)
-        reinforce_shields_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Seraph.png")
+        reinforce_shields_embed.set_thumbnail(url="https://languagesloth.com/media/sloth_classes/Seraph.png")
         reinforce_shields_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
 
         return reinforce_shields_embed
@@ -299,7 +299,7 @@ class Seraph(Player):
         self_shield_embed.color = discord.Color.green()
 
         self_shield_embed.set_author(name=f"{int(success_rate*100)}% of chance", url=self.client.user.display_avatar)
-        self_shield_embed.set_thumbnail(url="https://thelanguagesloth.com/media/sloth_classes/Seraph.png")
+        self_shield_embed.set_thumbnail(url="https://languagesloth.com/media/sloth_classes/Seraph.png")
         self_shield_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
 
         return self_shield_embed
@@ -830,7 +830,7 @@ class Seraph(Player):
                 timestamp=ctx.message.created_at
             )
 
-            embed.set_thumbnail(url=f"https://thelanguagesloth.com/static/assets/images/sloth_classes/{user_baby[3]}.png")
+            embed.set_thumbnail(url=f"https://languagesloth.com/static/assets/images/sloth_classes/{user_baby[3]}.png")
 
             await ctx.send(embed=embed)
             # Tries to complete a quest, if possible.
