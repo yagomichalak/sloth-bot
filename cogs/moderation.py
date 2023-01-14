@@ -1177,7 +1177,7 @@ class Moderation(*moderation_cogs):
 		if not member:
 			return await ctx.send('**Please, inform a member!**', delete_after=3)
 
-		banned_users = await ctx.guild.bans()
+		banned_users = ctx.guild.bans()
 		try:
 			member_name, member_discriminator = str(member).split('#')
 		except ValueError:
