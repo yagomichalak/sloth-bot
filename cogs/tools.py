@@ -1507,7 +1507,7 @@ class Tools(*tool_cogs):
 		invites = await ctx.guild.invites()
 		def get_user_invites_count(member: discord.Member) -> discord.Invite:
 			
-			user_invites = [invite.uses for invite in invites if invite.inviter.id == member.id]
+			user_invites = [invite.uses for invite in invites if invite.inviter and invite.inviter.id == member.id]
 			return sum(user_invites)
 
 		if not inviter:

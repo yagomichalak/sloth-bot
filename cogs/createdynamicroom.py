@@ -565,12 +565,15 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
                 return
 
             len_users = len(channel.members)
-            empty_since_ts = room.empty_since_ts
             language_room_data = await self.get_language_room_by_id(room.room_id, object_form=True)
             # if empty room
             if len_users == 0 and not is_perma_room:
                 # check if room expired
-                is_expired = the_time >= room.empty_since_ts + language_room_data.max_empty_time
+                if room.empty_since_ts:
+                    is_expired = the_time >= room.empty_since_ts + language_room_data.max_empty_time
+                else:
+                    is_expired = False
+
                 # check if duplicated
                 is_duplicated = len(await self.get_dynamic_room_by_room_id(room.room_id)) > 1
 
