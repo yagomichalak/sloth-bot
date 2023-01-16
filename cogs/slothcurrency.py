@@ -593,20 +593,21 @@ class SlothCurrency(*currency_cogs):
 
         drive = await the_drive()
 
-        all_text_folders = {"languages": "1_gBiliWPrCj5cLpChQfg9QRnj8skQVHM"}
+        all_text_folders = {
+            "languages": "1_gBiliWPrCj5cLpChQfg9QRnj8skQVHM",
+            "other": "1aGASrmZRgId57lrm2AHQoCp4GlV9-yYS"
+        }
 
-        text_categories = ["languages"]
-
-        for t_category in text_categories:
+        for t_category in all_text_folders.keys():
             try:
-                os.makedirs(f'./texts/{t_category}')
+                os.makedirs(f'./extra/random/texts/{t_category}')
                 print(f"{t_category} folder made!")
             except FileExistsError:
                 pass
 
         for folder, folder_id in all_text_folders.items():
             files = drive.ListFile({'q': "'%s' in parents and trashed=false" % folder_id}).GetList()
-            download_path = f'./texts/{folder}'
+            download_path = f'./extra/random/texts/{folder}'
             for file in files:
                 isFile = os.path.isfile(f"{download_path}/{file['title']}")
                 if not isFile:

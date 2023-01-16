@@ -42,7 +42,7 @@ class RoleTexts(commands.Cog):
         else:
             return
 
-        path = f"./texts/languages/{new_role.replace(' ', '_').lower()}.txt"
+        path = f"./extra/random/texts/languages/{new_role.replace(' ', '_').lower()}.txt"
         if os.path.exists(path):
             # Reads text
             role_text = await self.read_text(path)

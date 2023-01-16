@@ -114,7 +114,7 @@ class ReportSupportView(discord.ui.View):
 
         self.cog.bot_cache[member.id] = time_now
 
-        with open('extra/random/texts/dnk.txt', 'r', encoding="utf-8") as file:
+        with open('extra/random/texts/other/dnk.txt', 'r', encoding="utf-8") as file:
             dnk_text = file.read()
 
         website_link = "https://languagesloth.com/bots/commission"

@@ -51,7 +51,7 @@ class Communication(*tool_cogs):
 
             random_message = ""
             i = randint(1, 5)
-            with open(f'./extra/random/texts/patreon_ad_{i}.txt', 'r', encoding="utf-8") as f:
+            with open(f'./extra/random/texts/other/patreon_ad_{i}.txt', 'r', encoding="utf-8") as f:
                 random_message = f.read()
             
             await general_channel.send(random_message)
