@@ -5,7 +5,7 @@ import os
 from extra import utils
 from typing import List, Optional
 import json
-from random import choice
+from random import choice, randint
 
 from extra.tool.scheduled_events import ScheduledEventsTable
 
@@ -49,11 +49,11 @@ class Communication(*tool_cogs):
             await self.update_advertising_time(event_label="patreon_ad", current_ts=current_ts)
             general_channel = self.client.get_channel(general_channel_id)
 
-            data = {}
-            with open('./extra/random/json/patreon_ads.json', 'r', encoding="utf-8") as f:
-                data = json.loads(f.read())
+            random_message = ""
+            i = randint(1, 5)
+            with open(f'./extra/random/texts/patreon_ad_{i}.txt', 'r', encoding="utf-8") as f:
+                random_message = f.read()
             
-            random_message = choice(list(data.values()))
             await general_channel.send(random_message)
 
 
