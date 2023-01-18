@@ -587,7 +587,7 @@ class SlothCurrency(*currency_cogs):
 
         if rall.lower() == 'yes':
             try:
-                shutil.rmtree('./texts')
+                shutil.rmtree('./extra/random/texts')
             except Exception as e:
                 pass
 
