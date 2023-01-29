@@ -1018,6 +1018,12 @@ class Tools(*tool_cogs):
 
 		await ctx.send(choice(sentences))
 
+	@commands.command()
+	async def freak(self, ctx) -> None:
+		""" A command for telling something about Marceline. """
+
+		await ctx.send("You mean missy aka Marceline")
+
 	@commands.command(aliases=["winni", "winnie", "wynni", "wynnie"])
 	async def wyncham(self, ctx) -> None:
 		""" A command for telling something about Wyncham. """
