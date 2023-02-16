@@ -1360,7 +1360,7 @@ class Tools(*tool_cogs):
 
 
 	@commands.command()
-	@utils.is_allowed(allowed_roles, throw_exc=True)
+	@utils.is_allowed([*allowed_roles, teacher_role_id], throw_exc=True)
 	async def join(self, ctx, channel: Optional[discord.VoiceChannel]) -> None:
 		""" (Patreon) Joins a language channel
 		:param voice_channel: ID of the language voice channel
