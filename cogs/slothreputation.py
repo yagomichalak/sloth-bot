@@ -120,14 +120,14 @@ class SlothReputation(*currency_cogs):
             member = author
 
         view = discord.ui.View()
-        view.add_item(discord.ui.Button(style=5, label="Create Account", emoji="🦥", url="https://languagesloth.com/profile/update"))
+        view.add_item(discord.ui.Button(style=5, label="Create Account", emoji="🦥", url="https://discord.languagesloth.com/profile/update"))
 
         # Gets users ranking info, such as level and experience points
         user = await self.get_specific_user(member.id)
         if not user:
             if author.id == member.id:
                 return await answer( 
-                    embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://languagesloth.com/profile/update) to create one, or in the button below!**"),
+                    embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://discord.languagesloth.com/profile/update) to create one, or in the button below!**"),
                     view=view)
             else:
                 return await answer(f"**{member} doesn't have an account yet!**")
@@ -140,7 +140,7 @@ class SlothReputation(*currency_cogs):
         if not ucur or not sloth_profile:
             if author.id == member.id:
                 return await answer( 
-                    embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://languagesloth.com/profile/update) to create one, or in the button below!**"),
+                    embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://discord.languagesloth.com/profile/update) to create one, or in the button below!**"),
                     view=view)
             else:
                 return await answer(f"**{member} doesn't have an account yet!**")
@@ -647,9 +647,9 @@ class SlothReputation(*currency_cogs):
             if author.id == member.id:
 
                 view = discord.ui.View()
-                view.add_item(discord.ui.Button(style=5, label="Create Account", emoji="🦥", url="https://languagesloth.com/profile/update"))
+                view.add_item(discord.ui.Button(style=5, label="Create Account", emoji="🦥", url="https://discord.languagesloth.com/profile/update"))
                 return await ctx.send( 
-                    embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://languagesloth.com/profile/update) to create one, or in the button below!**"),
+                    embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://discord.languagesloth.com/profile/update) to create one, or in the button below!**"),
                     view=view)
             else:
                 return await ctx.send("**This member is not on the leaderboard yet!**", delete_after=3)

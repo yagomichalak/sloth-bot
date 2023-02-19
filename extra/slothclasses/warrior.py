@@ -214,7 +214,7 @@ class Warrior(Player):
         hit_embed.description = f"**<@{perpetrator_id}> knocked <@{target_id}> out!** 😵"
         hit_embed.color = discord.Color.green()
 
-        hit_embed.set_thumbnail(url="https://languagesloth.com/media/sloth_classes/Warrior.png")
+        hit_embed.set_thumbnail(url="https://discord.languagesloth.com/media/sloth_classes/Warrior.png")
         hit_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
 
         return hit_embed
@@ -234,7 +234,7 @@ class Warrior(Player):
         smash_embed.description = f"**<@{perpetrator_id}> smashed <@{target_id}>'s' Divine Protection shield; it's gone!** 🚫"
         smash_embed.color = discord.Color.green()
 
-        smash_embed.set_thumbnail(url="https://languagesloth.com/media/sloth_classes/Warrior.png")
+        smash_embed.set_thumbnail(url="https://discord.languagesloth.com/media/sloth_classes/Warrior.png")
         smash_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
 
         return smash_embed
@@ -354,11 +354,11 @@ class Warrior(Player):
             description=f"**<@{perpetrator_id}> ripped of <@{target_id}>'s {item[4]} item that was worth `{item[6]}łł`!** <:warrior_scratch:869221184925995079>",
             color=discord.Color.green(),
             timestamp=datetime.fromtimestamp(timestamp),
-            url=f"https://languagesloth.com/shop/{item[7]}"
+            url=f"https://discord.languagesloth.com/shop/{item[7]}"
         )
         
-        rip_off_embed.set_thumbnail(url="https://languagesloth.com/media/sloth_classes/Warrior.png")
-        rip_off_embed.set_image(url=f"https://languagesloth.com/media/{item[3]}")
+        rip_off_embed.set_thumbnail(url="https://discord.languagesloth.com/media/sloth_classes/Warrior.png")
+        rip_off_embed.set_image(url=f"https://discord.languagesloth.com/media/{item[3]}")
         rip_off_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
 
         return rip_off_embed
@@ -464,7 +464,7 @@ class Warrior(Player):
             timestamp=datetime.fromtimestamp(timestamp)
         )
         
-        poison_embed.set_thumbnail(url="https://languagesloth.com/media/sloth_classes/Warrior.png")
+        poison_embed.set_thumbnail(url="https://discord.languagesloth.com/media/sloth_classes/Warrior.png")
         poison_embed.set_image(url='https://c.tenor.com/Qf37BPPRfIcAAAAC/poison-poisoning.gif')
         poison_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
 

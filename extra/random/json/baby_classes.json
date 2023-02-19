@@ -1,10 +1,10 @@
 {
-    "Agares": {"name": "Agares", "description": "", "emoji": "<:Agares:839497855621660693>", "url": "https://languagesloth.com/media/sloth_classes/Agares.png"},
-    "Cybersloth": {"name": "Cybersloth", "description": "", "emoji": "<:Cybersloth:839498017823916082>", "url": "https://languagesloth.com/media/sloth_classes/Cybersloth.png"},
-    "Merchant": {"name": "Merchant", "description": "", "emoji": "<:Merchant:839498018532753468>", "url": "https://languagesloth.com/media/sloth_classes/Merchant.png"},
-    "Metamorph": {"name": "Metamorph", "description": "", "emoji": "<:Metamorph:839498019204497458>", "url": "https://languagesloth.com/media/sloth_classes/Metamorph.png"},
-    "Munk": {"name": "Munk", "description": "", "emoji": "<:Munk:839498018712715284>", "url": "https://languagesloth.com/media/sloth_classes/Munk.png"},
-    "Prawler": {"name": "Prawler", "description": " ", "emoji": "<:Prawler:839498018361049139>", "url": "https://languagesloth.com/media/sloth_classes/Prawler.png"},
-    "Seraph": {"name": "Seraph", "description": "", "emoji": "<:Seraph:839498018998976563>", "url": "https://languagesloth.com/media/sloth_classes/Seraph.png"},
-    "Warrior": {"name": "Warrior", "description": "", "emoji": "<:Warrior:839498018792800286>", "url": "https://languagesloth.com/media/sloth_classes/Warrior.png"}
+    "Agares": {"name": "Agares", "description": "", "emoji": "<:Agares:839497855621660693>", "url": "https://discord.languagesloth.com/media/sloth_classes/Agares.png"},
+    "Cybersloth": {"name": "Cybersloth", "description": "", "emoji": "<:Cybersloth:839498017823916082>", "url": "https://discord.languagesloth.com/media/sloth_classes/Cybersloth.png"},
+    "Merchant": {"name": "Merchant", "description": "", "emoji": "<:Merchant:839498018532753468>", "url": "https://discord.languagesloth.com/media/sloth_classes/Merchant.png"},
+    "Metamorph": {"name": "Metamorph", "description": "", "emoji": "<:Metamorph:839498019204497458>", "url": "https://discord.languagesloth.com/media/sloth_classes/Metamorph.png"},
+    "Munk": {"name": "Munk", "description": "", "emoji": "<:Munk:839498018712715284>", "url": "https://discord.languagesloth.com/media/sloth_classes/Munk.png"},
+    "Prawler": {"name": "Prawler", "description": " ", "emoji": "<:Prawler:839498018361049139>", "url": "https://discord.languagesloth.com/media/sloth_classes/Prawler.png"},
+    "Seraph": {"name": "Seraph", "description": "", "emoji": "<:Seraph:839498018998976563>", "url": "https://discord.languagesloth.com/media/sloth_classes/Seraph.png"},
+    "Warrior": {"name": "Warrior", "description": "", "emoji": "<:Warrior:839498018792800286>", "url": "https://discord.languagesloth.com/media/sloth_classes/Warrior.png"}
 }

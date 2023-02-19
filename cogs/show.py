@@ -57,7 +57,7 @@ class Show(commands.Cog):
             ),
             color=ctx.author.color,
             timestamp=ctx.message.created_at,
-            url='https://languagesloth.com/bots/sloth/'
+            url='https://discord.languagesloth.com/bots/sloth/'
         )
 
         lines = subprocess.getstatusoutput(
@@ -187,7 +187,7 @@ class Show(commands.Cog):
         embed = discord.Embed(
             title="__Rules of the Server__",
             description="You must always abide by the rules and follow [Discord's Terms of Service](https://discord.com/terms) and [Community Guidelines](https://discordapp.com/guidelines)\n```Hello, The Language Sloth public discord server is meant for people all across the globe to meet, learn and share their love for languages. Here are our rules of conduct:```",
-            url='https://languagesloth.com', color=discord.Color.green(), timestamp=current_time)
+            url='https://discord.languagesloth.com', color=discord.Color.green(), timestamp=current_time)
         i = 1
         for r_rule, r_value in rules_in_lang.items():
             embed.add_field(name=f"{i} - __{r_rule}__:",
@@ -223,7 +223,7 @@ class Show(commands.Cog):
             ),
             color=member.color,
             timestamp=ctx.message.created_at,
-            url="https://languagesloth.com"
+            url="https://discord.languagesloth.com"
         )
 
         temp_text1 = f"{'N':>2} | {'Date':<4} | {'Joins':^5} | {'First':>5} | {'Last':>5}"
@@ -351,7 +351,7 @@ class Show(commands.Cog):
 
         member: discord.Member = ctx.author
 
-        website_url = "https://languagesloth.com"
+        website_url = "https://discord.languagesloth.com"
 
         embed = discord.Embed(
             title="Visit our website!",

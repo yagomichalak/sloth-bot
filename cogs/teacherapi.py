@@ -34,7 +34,7 @@ class TeacherAPI(commands.Cog):
         self.teacher_fun_role_id: int = int(os.getenv('TEACHER_FUN_ROLE_ID', 123))
         self.session = aiohttp.ClientSession(loop=client.loop)
         self.classes_channel_id: int = int(os.getenv('CLASSES_CHANNEL_ID', 123))
-        self.website_link: str = 'https://languagesloth.com'
+        self.website_link: str = 'https://discord.languagesloth.com'
         # self.website_link: str = 'http://127.0.0.1:8000'
         self.django_website_root = os.getenv('DJANGO_WEBSITE_ROOT')
 

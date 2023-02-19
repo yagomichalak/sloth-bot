@@ -191,7 +191,7 @@ class Metamorph(Player):
         transmutation_embed.description = f"**<@{perpetrator_id}> transmutated themselves into something else! 🦥→💥→🐩**"
         transmutation_embed.color = discord.Color.green()
 
-        transmutation_embed.set_thumbnail(url="https://languagesloth.com/media/sloth_classes/Metamorph.png")
+        transmutation_embed.set_thumbnail(url="https://discord.languagesloth.com/media/sloth_classes/Metamorph.png")
         transmutation_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
 
         return transmutation_embed
@@ -211,7 +211,7 @@ class Metamorph(Player):
         transmutation_embed.description = f"**<@{attacker_id}> frogged <@{target_id}>!  🦥→💥→🐸**"
         transmutation_embed.color = discord.Color.green()
 
-        transmutation_embed.set_thumbnail(url="https://languagesloth.com/media/sloth_classes/Metamorph.png")
+        transmutation_embed.set_thumbnail(url="https://discord.languagesloth.com/media/sloth_classes/Metamorph.png")
         transmutation_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
 
         return transmutation_embed
@@ -319,10 +319,10 @@ class Metamorph(Player):
             title="__Someone's Skill just got Mirrored!__",
             description=f"<@{perpetrator_id}> has just mirrored <@{target_id}> 1st skill; `{m_skill}`!",
             color=discord.Color.green(),
-            url="https://languagesloth.com",
+            url="https://discord.languagesloth.com",
             timestamp=current_date)
 
-        mirrored_skill_embed.set_thumbnail(url="https://languagesloth.com/media/sloth_classes/Metamorph.png")
+        mirrored_skill_embed.set_thumbnail(url="https://discord.languagesloth.com/media/sloth_classes/Metamorph.png")
         mirrored_skill_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
 
         return mirrored_skill_embed
@@ -457,7 +457,7 @@ class Metamorph(Player):
         transmutation_embed.description = f"**<@{perpetrator_id}> reborned <@{target_id}>'s {reborn_type.title()}!  😶‍🌫️**"
         transmutation_embed.color = discord.Color.green()
 
-        transmutation_embed.set_thumbnail(url="https://languagesloth.com/media/sloth_classes/Metamorph.png")
+        transmutation_embed.set_thumbnail(url="https://discord.languagesloth.com/media/sloth_classes/Metamorph.png")
         transmutation_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
 
         return transmutation_embed

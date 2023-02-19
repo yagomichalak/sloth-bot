@@ -220,7 +220,7 @@ class Cybersloth(Player):
         # hack_embed.description=f"**<@{perpetrator_id}> hacked <@{attacker_id}>!** <a:hackerman:802354539184259082>"
         hack_embed.color = discord.Color.green()
 
-        hack_embed.set_thumbnail(url="https://languagesloth.com/media/sloth_classes/Cybersloth.png")
+        hack_embed.set_thumbnail(url="https://discord.languagesloth.com/media/sloth_classes/Cybersloth.png")
         hack_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
 
         return hack_embed
@@ -240,7 +240,7 @@ class Cybersloth(Player):
         wire_embed.description = f"**<@{perpetrator_id}> wired <@{target_id}>!** 🔌"
         wire_embed.color = discord.Color.green()
         wire_embed.set_image(url='https://i.pinimg.com/originals/8f/e1/d1/8fe1d171c2cfc5b7cc5f6b022d2a51b1.gif')
-        wire_embed.set_thumbnail(url="https://languagesloth.com/media/sloth_classes/Cybersloth.png")
+        wire_embed.set_thumbnail(url="https://discord.languagesloth.com/media/sloth_classes/Cybersloth.png")
         wire_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
 
         return wire_embed
@@ -369,7 +369,7 @@ class Cybersloth(Player):
         contagious_embed.color = discord.Color.green()
 
 
-        contagious_embed.set_thumbnail(url="https://languagesloth.com/media/sloth_classes/Cybersloth.png")
+        contagious_embed.set_thumbnail(url="https://discord.languagesloth.com/media/sloth_classes/Cybersloth.png")
         contagious_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
 
         return contagious_embed
@@ -393,7 +393,7 @@ class Cybersloth(Player):
         wire_embed.color = discord.Color.green()
         
         wire_embed.set_image(url='https://media1.tenor.com/images/df4840a6e3ddd163fd5cef6d678a57aa/tenor.gif?itemid=9991524')
-        wire_embed.set_thumbnail(url="https://languagesloth.com/media/sloth_classes/Cybersloth.png")
+        wire_embed.set_thumbnail(url="https://discord.languagesloth.com/media/sloth_classes/Cybersloth.png")
         wire_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
 
         return wire_embed
@@ -498,7 +498,7 @@ class Cybersloth(Player):
             timestamp=datetime.fromtimestamp(timestamp)
         )
         wire_embed.set_image(url='https://c.tenor.com/EDnuqsLISREAAAAS/close-the-door-the-invisible-man.gif')
-        wire_embed.set_thumbnail(url="https://languagesloth.com/media/sloth_classes/Cybersloth.png")
+        wire_embed.set_thumbnail(url="https://discord.languagesloth.com/media/sloth_classes/Cybersloth.png")
         wire_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
 
         return wire_embed

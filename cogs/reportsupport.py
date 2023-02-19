@@ -580,7 +580,7 @@ class ReportSupport(*report_support_classes):
             description="""Welcome to the Report-Support section, here you can easily find your way into things and/or get help with whatever problem you may be experiencing.""",
             color=ctx.author.color,
             timestamp=ctx.message.created_at,
-            url="https://languagesloth.com"
+            url="https://discord.languagesloth.com"
         )
         embed.set_author(name=self.client.user.display_name, url=self.client.user.display_avatar, icon_url=self.client.user.display_avatar)
         embed.set_thumbnail(url=guild.icon.url)

@@ -461,9 +461,9 @@ class Games(*minigames_cogs):
         user_currency = await SlothCurrency.get_user_currency(author.id)
         if not user_currency:
             view = discord.ui.View()
-            view.add_item(discord.ui.Button(style=5, label="Create Account", emoji="🦥", url="https://languagesloth.com/profile/update"))
+            view.add_item(discord.ui.Button(style=5, label="Create Account", emoji="🦥", url="https://discord.languagesloth.com/profile/update"))
             return await ctx.reply( 
-                embed=discord.Embed(description=f"**{author.mention}, you don't have an account yet. Click [here](https://languagesloth.com/profile/update) to create one, or in the button below!**"),
+                embed=discord.Embed(description=f"**{author.mention}, you don't have an account yet. Click [here](https://discord.languagesloth.com/profile/update) to create one, or in the button below!**"),
                 view=view)
 
         try:
