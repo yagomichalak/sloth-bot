@@ -1119,7 +1119,19 @@ class Moderation(*moderation_cogs):
 			general_embed.set_author(name=f'{member} has been banned', icon_url=member.display_avatar)
 			await ctx.send(embed=general_embed)
 			try:
-				await member.send(content="If you think you should be unbanned, you can make a ban appeal here: https://discord.gg/f9B7FzYv8D", embed=general_embed)
+				await member.send(content="""Hello,
+
+We regret to inform you that you have been banned from our Discord server. Our moderation team has reviewed your behavior and has determined that it violates our server rules.
+
+Please note that our community strives to provide a safe and friendly environment for all our members. We do not tolerate any form of harassment, hate speech, or any other type of inappropriate behavior.
+
+We understand that sometimes mistakes happen and we believe in second chances. We would like to hear your side of the story and see if we can find a way to move forward together.
+
+The appeal process is simple, just join the server below and fill out the form as instructed there. We will review your appeal as soon as possible and get back to you with a decision through our bot.
+
+https://discord.gg/V5XPMyTyrj
+
+We appreciate your understanding and look forward to hearing from you. """, embed=general_embed)
 			except Exception as e:
 				pass
 			try:
