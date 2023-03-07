@@ -384,7 +384,7 @@ class UserReportSupportDetailModal(Modal):
         self.option = option
 
     async def callback(self, interaction) -> None:
-        """ Callback for the form modal. """        
+        """ Callback for the form modal. """
 
         await interaction.response.defer()
         reportee = self.children[0].value

@@ -24,8 +24,13 @@ class ReportSupportSelect(discord.ui.Select):
     async def callback(self, interaction: discord.Interaction):
         """ Callback for the ReportSupport's selected option. """
 
-        modal = UserReportSupportDetailModal(self.client, interaction.data['values'][0])
-        await interaction.response.send_modal(modal)
+        if interaction.data["values"][0] == "Report":
+            modal = UserReportSupportDetailModal(self.client, interaction.data['values'][0])
+            await interaction.response.send_modal(modal)
+        else:
+            modal = UserReportSupportDetailModal(self.client, interaction.data['values'][0])
+            await modal.callback(interaction)
+
         self.view.stop()
 
 

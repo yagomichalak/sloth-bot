@@ -273,7 +273,7 @@ class ReportSupport(*report_support_classes):
         if open_channel := await self.member_has_open_channel(member.id):
             if open_channel := discord.utils.get(guild.text_channels, id=open_channel[1]):
                 embed = discord.Embed(title="Error!", description=f"**You already have an open channel! ({open_channel.mention})**", color=discord.Color.red())
-                await interaction.response.send_message(embed=embed, ephemeral=True)
+                await interaction.followup.send(embed=embed, ephemeral=True)
                 return False
             else:
                 await self.remove_user_open_channel(member.id)
@@ -290,14 +290,14 @@ class ReportSupport(*report_support_classes):
         try:
             the_channel = await guild.create_text_channel(name=f"{'-'.join(type_help.split())}", category=case_cat, overwrites=overwrites)
         except:
-            await interaction.response.send_message("**Something went wrong with it, please contact an admin!**", ephemeral=True)
+            await interaction.followup.send("**Something went wrong with it, please contact an admin!**", ephemeral=True)
             raise Exception
         else:
             created_embed = discord.Embed(
                 title=f"Room for `{type_help}` created!",
                 description=f"**Go to {the_channel.mention}!**",
                 color=discord.Color.green())
-            await interaction.response.send_message(embed=created_embed, ephemeral=True)
+            await interaction.followup.send(embed=created_embed, ephemeral=True)
             await self.insert_user_open_channel(member.id, the_channel.id)
             embed = discord.Embed(title=f"{type_help.title()}!", description=message, color=discord.Color.red())
 
