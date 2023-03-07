@@ -1195,7 +1195,7 @@ We appreciate your understanding and look forward to hearing from you. """, embe
 		except ValueError:
 			return await ctx.send('**Wrong parameter!**', delete_after=3)
 
-		for ban_entry in banned_users:
+		async for ban_entry in banned_users:
 			user = ban_entry.user
 
 			if (user.name, user.discriminator) == (member_name, member_discriminator):
