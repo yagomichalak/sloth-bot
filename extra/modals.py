@@ -122,13 +122,14 @@ class TeacherApplicationModal(Modal):
 
         self.add_item(
             InputText(
-                label="Are you able to teach lessons in English?",
+                label="English Level",
+                placeholder="Please explain why you would be a great teacher.",
                 style=discord.InputTextStyle.short))
 
         self.add_item(
             InputText(
-                label="Why are you applying to be Staff?",
-                placeholder="Explain why you want to be a moderator and why we should add you.",
+                label="Motivation for applying",
+                placeholder="Please explain why you would be a great teacher.",
                 style=discord.InputTextStyle.paragraph))
 
     async def callback(self, interaction: discord.Interaction) -> None:
