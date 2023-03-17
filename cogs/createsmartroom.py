@@ -243,6 +243,7 @@ class CreateSmartRoom(*smart_room_cogs):
 				return await member.send(f"**Channels limit reached, creation cannot be completed, try again later!**")
 
 			await creation.edit(sync_permissions=True)
+			await creation.set_permissions(member, move_members=True)
 			await SlothCurrency.update_user_money(member, member.id, -5)
 			await member.send(f"**You've been charged `5łł`!**")
 
