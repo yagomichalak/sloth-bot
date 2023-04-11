@@ -45,6 +45,7 @@ owner_role_id = int(os.getenv('OWNER_ROLE_ID', 123))
 analyst_debugger_role_id: int = int(os.getenv('ANALYST_DEBUGGER_ROLE_ID', 123))
 in_a_vc_role_id: int = int(os.getenv('IN_A_VC_ROLE_ID', 123))
 dnk_id = int(os.getenv('DNK_ID', 123))
+steffen_id = int(os.getenv('STEFFEN_ID', 123))
 
 allowed_roles = [owner_role_id, admin_role_id, mod_role_id, *patreon_roles.keys(), int(os.getenv('SLOTH_LOVERS_ROLE_ID', 123))]
 teacher_role_id = int(os.getenv('TEACHER_ROLE_ID', 123))
@@ -56,6 +57,7 @@ smart_room_cat_id = int(os.getenv('CREATE_SMART_ROOM_CAT_ID', 123))
 
 dynamic_vc_id: int = int(os.getenv('CREATE_DYNAMIC_ROOM_VC_ID', 123))
 dynamic_channels_cat_id = int(os.getenv('CREATE_DYNAMIC_ROOM_CAT_ID', 123))
+
 
 tool_cogs: List[commands.Cog] = [
 	StealthStatusTable
@@ -697,7 +699,7 @@ class Tools(*tool_cogs):
 		await ctx.send(' '.join(text))
 
 	@commands.command(aliases=['tp', 'beam'])
-	@utils.is_allowed([senior_mod_role_id], throw_exc=True)
+	@commands.check_any(utils.is_allowed([senior_mod_role_id]), utils.is_allowed_members([steffen_id], check_adm=False))
 	async def teleport(self, ctx, vc_1: discord.VoiceChannel = None, vc_2: discord.VoiceChannel = None) -> None:
 		""" Teleports all members in a given voice channel to another one.
 		:param vc_1: The origin vc.
