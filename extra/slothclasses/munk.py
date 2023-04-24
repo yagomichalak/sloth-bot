@@ -1707,8 +1707,7 @@ class Munk(Player):
         if not quest_number:
             return await ctx.send(f"**Please, inform a quest number, {member.mention}!**")
         
-        _, quests = await self.generate_random_quest(return_quests=True)
-        quest_numbers = [str(q["enum_value"]) for q in quests]
+        quest_numbers = await self.generate_random_quest(return_quests_numbers=True)
         if quest_number not in quest_numbers:
             return await ctx.send(f"**Please, inform a valid quest number, {member.mention}!**")
 
