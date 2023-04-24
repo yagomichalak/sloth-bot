@@ -1461,7 +1461,7 @@ class Munk(Player):
 
         await ctx.send(embed=embed)
     
-    async def make_tribe_quests_text(self, guild: discord.Guild, quests: List[Dict[str, Union[str, int]]]) -> str:
+    async def make_tribe_quests_text(self, guild: discord.Guild, quests: List[Dict[str, Union[str, int]]], show_target: bool = False) -> str:
         """ Makes a text for the tribe quests.
         :param guild: The server.
         :param quests: The quests to make a text for. """
@@ -1470,36 +1470,43 @@ class Munk(Player):
         for quest in quests:
             quest_number: int = quest[7]
             quest_owner: discord.Member = guild.get_member(quest[0])
+
+            quest_target_text: str = ""
+            quest_target: discord.Member = None
+            if show_target:
+                quest_target: discord.Member = guild.get_member(quest[3])
+                quest_target_text = f"\n[Target]: {quest_target}"
+
             if quest_number == 1:
-                texts_list.append(f"```ini\n• {quest[8]} (Q{quest[7]})\n[Progress]: {quest[9]} games.\n[Member]: {quest_owner}```")
+                texts_list.append(f"```ini\n[{quest_number}]• {quest[8]}\n[Progress]: {quest[9]} games.\n[Owner]: {quest_owner}{quest_target_text}```")
             elif quest_number == 2:
-                texts_list.append(f"```ini\n• {quest[8]} (Q{quest[7]})\n[Progress]: {quest[9]}/2 reps.\n[Member]: {quest_owner}```")
+                texts_list.append(f"```ini\n[{quest_number}] • {quest[8]}\n[Progress]: {quest[9]}/2 reps.\n[Owner]: {quest_owner}{quest_target_text}```")
             elif quest_number == 3:
-                texts_list.append(f"```ini\n• {quest[8]} (Q{quest[7]})\n[Member]: {quest_owner}```")
+                texts_list.append(f"```ini\n[{quest_number}] • {quest[8]}\n[Owner]: {quest_owner}{quest_target_text}```")
             elif quest_number == 4:
-                texts_list.append(f"```ini\n• {quest[8]} (Q{quest[7]})\n[Member]: {quest_owner}```")
+                texts_list.append(f"```ini\n[{quest_number}] • {quest[8]}\n[Owner]: {quest_owner}{quest_target_text}```")
             elif quest_number == 5:
                 m, s = divmod(quest[9], 60)
                 h, m = divmod(m, 60)
-                texts_list.append(f"```ini\n• {quest[8]} (Q{quest[7]})\n[Progress]: {h:d}h, {m:02d}m.\n[Member]: {quest_owner}```")
+                texts_list.append(f"```ini\n[{quest_number}] • {quest[8]}\n[Progress]: {h:d}h, {m:02d}m.\n[Owner]: {quest_owner}{quest_target_text}```")
             elif quest_number == 6:
-                texts_list.append(f"```ini\n• {quest[8]} (Q{quest[7]})\n[Member]: {quest_owner}```")
+                texts_list.append(f"```ini\n[{quest_number}] • {quest[8]}\n[Owner]: {quest_owner}{quest_target_text}```")
             elif quest_number == 7:
-                texts_list.append(f"```ini\n• {quest[8]} (Q{quest[7]})\n[Progress]: {1 if quest[9] else 0}/2 transfers.\n[Member]: {quest_owner}```")
+                texts_list.append(f"```ini\n[{quest_number}] • {quest[8]}\n[Progress]: {1 if quest[9] else 0}/2 transfers.\n[Owner]: {quest_owner}{quest_target_text}```")
             elif quest_number == 8:
-                texts_list.append(f"```ini\n• {quest[8]} (Q{quest[7]})\n[Member]: {quest_owner}```")
+                texts_list.append(f"```ini\n[{quest_number}] • {quest[8]}\n[Owner]: {quest_owner}{quest_target_text}```")
             elif quest_number == 9:
-                texts_list.append(f"```ini\n• {quest[8]} (Q{quest[7]})\n[Member]: {quest_owner}```")
+                texts_list.append(f"```ini\n[{quest_number}] • {quest[8]}\n[Owner]: {quest_owner}{quest_target_text}```")
             elif quest_number == 10:
-                texts_list.append(f"```ini\n• {quest[8]} (Q{quest[7]})\n[Progress]: {1 if quest[9] else 0}/2 transfers.\n[Member]: {quest_owner}```")
+                texts_list.append(f"```ini\n[{quest_number}] • {quest[8]}\n[Progress]: {1 if quest[9] else 0}/2 transfers.\n[Owner]: {quest_owner}{quest_target_text}```")
             elif quest_number == 11:
-                texts_list.append(f"```ini\n• {quest[8]} (Q{quest[7]})\n[Member]: {quest_owner}```")
+                texts_list.append(f"```ini\n[{quest_number}] • {quest[8]}\n[Owner]: {quest_owner}{quest_target_text}```")
             elif quest_number == 12:
-                texts_list.append(f"```ini\n• {quest[8]} (Q{quest[7]})\n[Member]: {quest_owner}```")
+                texts_list.append(f"```ini\n[{quest_number}] • {quest[8]}\n[Owner]: {quest_owner}{quest_target_text}```")
             elif quest_number == 13:
-                texts_list.append(f"```ini\n• {quest[8]} (Q{quest[7]})\n[Progress]: {quest[9]}/3 lottos.\n[Member]: {quest_owner}```")
+                texts_list.append(f"```ini\n[{quest_number}] • {quest[8]}\n[Progress]: {quest[9]}/3 lottos.\n[Owner]: {quest_owner}{quest_target_text}```")
             elif quest_number == 14:
-                texts_list.append(f"```ini\n• {quest[8]} (Q{quest[7]})\n[Progress]: {1 if quest[9] else 0}/2 RolePlay commands.\n[Member]: {quest_owner}```")
+                texts_list.append(f"```ini\n[{quest_number}] • {quest[8]}\n[Progress]: {1 if quest[9] else 0}/2 RolePlay commands.\n[Owner]: {quest_owner}{quest_target_text}```")
         
         return ''.join(texts_list)
 
@@ -1654,3 +1661,39 @@ class Munk(Player):
         tribe_leaves = await mycursor.fetchall()
         await mycursor.close()
         return tribe_leaves
+    
+    @commands.command(aliases=["my_quest", "see_quest", "see_quests", "quest", "quests", "qs"])
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def my_quests(self, ctx, target: Optional[discord.Member] = None) -> None:
+        """ Shows all Quests attached to the you or a user.
+        :param target: The member from which to show the quests. [Optional][Default = You] """
+
+        perpetrator = ctx.author
+
+        if not target:
+            target = perpetrator
+
+        tribe_member = await self.get_tribe_member(target.id)
+        if not tribe_member:
+            ctx.command.reset_cooldown(ctx)
+            if perpetrator == target:
+                return await ctx.send(f"**You're not even in a tribe, {perpetrator.mention}!**")
+            return await ctx.send(f"**{target.mention} is not even in a tribe, {target.mention}!**")
+        
+        quests = await self.get_skill_action_by_user_id_or_target_id_and_skill_type(user_id=target.id, skill_type="quest", multiple=True)
+        if not quests:
+            if perpetrator == target:
+                return await ctx.send(f"**No quests found in your tribe, {perpetrator.mention}!**")
+            return await ctx.send(f"**No quests found in {target.mention}'s tribe, {perpetrator.mention}!**")
+
+        quests_text: str = await self.make_tribe_quests_text(ctx.guild, quests, show_target=True)
+        embed: discord.Embed = discord.Embed(
+            title=f"__{target} Quests__",
+            description=f"Showing quests attached to: {target.mention}\n{quests_text}",
+            color=target.color,
+            timestamp=ctx.message.created_at
+        )
+        embed.set_footer(text=f"Requested by: {perpetrator}", icon_url=perpetrator.display_avatar)
+        embed.set_thumbnail(url=ctx.guild.icon.url)
+
+        await ctx.send(embed=embed)

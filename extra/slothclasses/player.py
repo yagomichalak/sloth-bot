@@ -453,6 +453,21 @@ class Player(*additional_cogs):
         await mycursor.close()
         return skill_actions
 
+    async def get_skill_action_by_user_id_or_target_id_and_skill_type(self, user_id: int, skill_type: str, multiple: bool = False
+    ) -> Union[List[List[Union[int, str]]], List[Union[int, str]], bool]:
+        """ Gets a skill action by user ID and skill type.
+        :param user_id: The user ID with which to get the skill action.
+        :param skill_type: The skill type of the skill action. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("SELECT * FROM SlothSkills WHERE (user_id = %s OR target_id = %s) and skill_type = %s", (user_id, user_id, skill_type))
+        if multiple:
+            skill_actions = await mycursor.fetchall()
+        else:
+            skill_actions = await mycursor.fetchone()
+        await mycursor.close()
+        return skill_actions
+
     async def get_skill_action_by_reaction_context(self, message_id: int, target_id: int) -> Union[List[Union[int, str]], bool]:
         """ Gets a skill action by reaction context.
         :param message_id: The ID of the message of the skill action.
