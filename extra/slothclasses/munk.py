@@ -1353,12 +1353,12 @@ class Munk(Player):
             await ctx.send(embed=tribe_quest_embed)
 
 
-    async def generate_random_quest(self, return_quests: bool = False) -> Union[Any, List[Any]]:
+    async def generate_random_quest(self, return_quests: bool = False, return_quests_numbers: bool = False) -> Union[Any, List[Any]]:
         """ Generates a random question.
         :param return_quests: Whether to return the quests as well. """
 
         quests: List[Dict[str, Union[str, int]]] = [
-            # {"message": "Complete 5 `TheLanguageJungle` multiplayer games. (zg!mp)", "enum_value": 1},
+            {"message": "Complete 5 `TheLanguageJungle` multiplayer games. (zg!mp)", "enum_value": 1, "disabled": True},
             {"message": "Rep someone and get repped back.", "enum_value": 2},
             {"message": "Win a coinflip betting 50 leaves.", "enum_value": 3},
             {"message": "Get a score 20 in the `Flags` game.", "enum_value": 4},
@@ -1374,10 +1374,14 @@ class Munk(Player):
             {"message": "Perform 2 different RolePlay commands (z!hug, z!kiss, z!boot, etc.).", "enum_value": 14},
         ]
 
+        enabled_quests = [q for q in quests if not q.get("disabled")]
+
         if return_quests:
-            return choice(quests), quests
+            return choice(enabled_quests), enabled_quests
+        elif return_quests_numbers:
+            return [str(q["enum_value"]) for q in quests]
         else:
-            return choice(quests)
+            return choice(enabled_quests)
 
     async def get_tribe_quest_embed(self, 
         channel: Union[discord.TextChannel, discord.Thread], user_id: int, quest: Dict[str, Union[str, int]], tribe: Dict[str, Union[str, int]]
@@ -1706,7 +1710,7 @@ class Munk(Player):
         _, quests = await self.generate_random_quest(return_quests=True)
         quest_numbers = [str(q["enum_value"]) for q in quests]
         if quest_number not in quest_numbers:
-            return await ctx.send(f"**Please, inform a valid quest numnber, {member.mention}!**")
+            return await ctx.send(f"**Please, inform a valid quest number, {member.mention}!**")
 
         quests = await self.get_skill_action_by_user_id_or_target_id_and_skill_type(user_id=member.id, skill_type="quest", multiple=True)
         if not quests:
