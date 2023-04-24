@@ -487,7 +487,8 @@ class Munk(Player):
                     pass
 
             except Exception as e:
-                print(e)
+                print(f"Error at inviting {member.id} to tribe: ", e)
+                print("Tribe: ", tribe_member[1])
                 await ctx.send(f"**Something went wrong with it, {member.mention}, {inviter.mention}!**")
             else:
                 join_tribe_embed = await self.get_join_tribe_embed(
@@ -1356,7 +1357,7 @@ class Munk(Player):
         :param return_quests: Whether to return the quests as well. """
 
         quests: List[Dict[str, Union[str, int]]] = [
-            {"message": "Complete 5 `TheLanguageJungle` multiplayer games. (zg!mp)", "enum_value": 1},
+            # {"message": "Complete 5 `TheLanguageJungle` multiplayer games. (zg!mp)", "enum_value": 1},
             {"message": "Rep someone and get repped back.", "enum_value": 2},
             {"message": "Win a coinflip betting 50 leaves.", "enum_value": 3},
             {"message": "Get a score 20 in the `Flags` game.", "enum_value": 4},
