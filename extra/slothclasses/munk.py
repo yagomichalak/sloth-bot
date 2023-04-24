@@ -1678,13 +1678,13 @@ class Munk(Player):
             ctx.command.reset_cooldown(ctx)
             if perpetrator == target:
                 return await ctx.send(f"**You're not even in a tribe, {perpetrator.mention}!**")
-            return await ctx.send(f"**{target.mention} is not even in a tribe, {target.mention}!**")
+            return await ctx.send(f"**{target.mention} is not even in a tribe, {perpetrator.mention}!**")
         
         quests = await self.get_skill_action_by_user_id_or_target_id_and_skill_type(user_id=target.id, skill_type="quest", multiple=True)
         if not quests:
             if perpetrator == target:
-                return await ctx.send(f"**No quests found in your tribe, {perpetrator.mention}!**")
-            return await ctx.send(f"**No quests found in {target.mention}'s tribe, {perpetrator.mention}!**")
+                return await ctx.send(f"**No quests are attached to you, {perpetrator.mention}!**")
+            return await ctx.send(f"**No quests are attached to {target.mention}, {perpetrator.mention}!**")
 
         quests_text: str = await self.make_tribe_quests_text(ctx.guild, quests, show_target=True)
         embed: discord.Embed = discord.Embed(
@@ -1697,3 +1697,4 @@ class Munk(Player):
         embed.set_thumbnail(url=ctx.guild.icon.url)
 
         await ctx.send(embed=embed)
+    
