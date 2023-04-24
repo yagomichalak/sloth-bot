@@ -710,7 +710,7 @@ class Player(*additional_cogs):
         :param skill_type: The type of the action skill. """
 
         mycursor, db = await the_database()
-        sql = "DELETE FROM SlothSkills WHERE target_id = %s AND skill_type = %s" + 'LIMIT 1' if not multiple else ''
+        sql = "DELETE FROM SlothSkills WHERE target_id = %s AND skill_type = %s" + "LIMIT 1" if not multiple else ""
         await mycursor.execute(sql, (target_id, skill_type))
         await db.commit()
         await mycursor.close()
@@ -721,7 +721,7 @@ class Player(*additional_cogs):
         :param skill_type: The type of the action skill. """
 
         mycursor, db = await the_database()
-        sql = "DELETE FROM SlothSkills WHERE user_id = %s AND skill_type = %s" + 'LIMIT 1' if not multiple else ''
+        sql = "DELETE FROM SlothSkills WHERE user_id = %s AND skill_type = %s" + "LIMIT 1" if not multiple else ""
         await mycursor.execute(sql, (user_id, skill_type))
         await db.commit()
         await mycursor.close()
@@ -734,6 +734,19 @@ class Player(*additional_cogs):
         mycursor, db = await the_database()
         sql = "DELETE FROM SlothSkills WHERE target_id = %s AND skill_type = %s"
         await mycursor.executemany(sql, users)
+        await db.commit()
+        await mycursor.close()
+
+    async def delete_skill_action_by_user_id_or_target_id_and_skill_type_and_price(self, user_id: int, skill_type: str, price: str, multiple: bool = False) -> None:
+        """ Deletes a skill action by user_id or target ID and skill type and price.
+        :param user_id: The ID of the user or target member.
+        :param skill_type: The type of the action skill.
+        :param price: The value for the price field.
+        :param multiple: If multiple rows should deleted. """
+
+        mycursor, db = await the_database()
+        sql = "DELETE FROM SlothSkills WHERE (user_id = %s OR target_id = %s) AND skill_type = %s AND price = %s" + "LIMIT 1" if not multiple else ""
+        await mycursor.execute(sql, (user_id, user_id, skill_type, price))
         await db.commit()
         await mycursor.close()
 

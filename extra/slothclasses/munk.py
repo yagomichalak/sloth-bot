@@ -5,6 +5,7 @@ from mysqldb import the_database, the_django_database
 from .player import Player, Skill
 from .enums import QuestEnum
 from extra.menu import ConfirmSkill, SwitchTribePages
+from extra.prompt.menu import Confirm
 from extra import utils
 
 import os
@@ -1672,13 +1673,6 @@ class Munk(Player):
 
         if not target:
             target = perpetrator
-
-        tribe_member = await self.get_tribe_member(target.id)
-        if not tribe_member:
-            ctx.command.reset_cooldown(ctx)
-            if perpetrator == target:
-                return await ctx.send(f"**You're not even in a tribe, {perpetrator.mention}!**")
-            return await ctx.send(f"**{target.mention} is not even in a tribe, {perpetrator.mention}!**")
         
         quests = await self.get_skill_action_by_user_id_or_target_id_and_skill_type(user_id=target.id, skill_type="quest", multiple=True)
         if not quests:
@@ -1698,3 +1692,32 @@ class Munk(Player):
 
         await ctx.send(embed=embed)
     
+    @commands.command(aliases=["removequest", "detach_quest", "detachquest", "delete_quest", "deletequest", "rmq", "dq"])
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def remove_quest(self, ctx, quest_number: str = None) -> None:
+        """ Removes q eust by quest number.
+        :param quest_number: The quest number. """
+
+        member = ctx.author
+
+        if not quest_number:
+            return await ctx.send(f"**Please, inform a quest number, {member.mention}!**")
+        
+        _, quests = await self.generate_random_quest(return_quests=True)
+        quest_numbers = [str(q["enum_value"]) for q in quests]
+        if quest_number not in quest_numbers:
+            return await ctx.send(f"**Please, inform a valid quest numnber, {member.mention}!**")
+
+        quests = await self.get_skill_action_by_user_id_or_target_id_and_skill_type(user_id=member.id, skill_type="quest", multiple=True)
+        if not quests:
+            return await ctx.send(f"**You don't even have any quest attached to you, {member.mention}**")
+
+        if not any(map(lambda q: str(q[7]) == quest_number, quests)):
+            return await ctx.send(f"**You don't have any quest with this number!**")
+
+        confirm = await Confirm(f"**Are you sure you wanna remove this quest, {member.mention}?**").prompt(ctx)
+        if not confirm:
+            return
+
+        await self.delete_skill_action_by_user_id_or_target_id_and_skill_type_and_price(member.id, "quest", quest_number)
+        await ctx.send(f"**You successfully removed the quest number `{quest_number}` that was attached to you, {member.mention}!**")
