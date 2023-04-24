@@ -110,7 +110,7 @@ class Social(*social_cogs):
                 slothboard_channel = guild.get_channel(slothboard_channel_id)
                 return await slothboard_channel.send(content=f"**From:** {channel.mention}", embed=embed)
 
-    @commands.command(aliases=['si', 'server'])
+    @commands.command(aliases=['si', 'server', 'server_info'])
     async def serverinfo(self, ctx) -> None:
         """ Shows information about the server. """
 
@@ -139,7 +139,6 @@ class Social(*social_cogs):
             inline=False)
         em.add_field(name="Roles", value=len(guild.roles), inline=True)
         em.add_field(name="Emojis", value=len(guild.emojis), inline=True)
-        em.add_field(name="🌐 Region", value=str(guild.region).title() if guild.region else None, inline=True)
         em.add_field(name="<:ban:593407893248802817> Bans", value=len(await guild.bans()), inline=True)
         em.add_field(name="🌟 Boosts", value=f"{guild.premium_subscription_count} (Level {guild.premium_tier})", inline=True)
         features = ', '.join(list(map(lambda f: f.replace('_', ' ').capitalize(), guild.features)))
