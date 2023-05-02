@@ -28,12 +28,11 @@ int(os.getenv('OWNER_ROLE_ID', 123)), admin_role_id,
 moderator_role_id]
 
 from extra.reportsupport.applications import ApplicationsTable
-from extra.reportsupport.verify import Verify
 from extra.reportsupport.openchannels import OpenChannels
 
 
 report_support_classes: List[commands.Cog] = [
-    ApplicationsTable, Verify, OpenChannels
+    ApplicationsTable, OpenChannels
 ]
 
 class ReportSupport(*report_support_classes):
