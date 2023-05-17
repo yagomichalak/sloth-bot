@@ -247,7 +247,7 @@ different_class_roles = {
         "انگلیسی", "英語", "英语", "أنكليزية", "bahasa inggris"
     ],
     "german": [
-        "almanca", "allemand", "aléman", "jerman", "deutsch", "آلمانی",
+        "almanca", "allemand", "alemán", "jerman", "deutsch", "آلمانی",
         "ألماني", "德语", 'niemiecki', 'немецкий'
     ],
     "french": [
