@@ -1040,6 +1040,7 @@ class Moderation(*moderation_cogs):
 			return await ctx.send('**Member not found!**', delete_after=3)
 			
 		for member in members:
+			should_ban = False
 			if await utils.is_allowed(allowed_roles).predicate(channel=ctx.channel, member=member):
 				if len(members) == 1:
 					return await ctx.send(f"**You cannot ban a staff member, {author.mention}!**")
@@ -1051,7 +1052,9 @@ class Moderation(*moderation_cogs):
 
 			perms = channel.permissions_for(author)
 
-			if not perms.administrator:
+			if perms.administrator:
+				should_ban = True
+			else:
 				confirmations[author.id] = author.name
 				mod_ban_embed = discord.Embed(
 					title=f"Ban Request ({len(confirmations)}/4) → (5mins)",
@@ -1099,11 +1102,16 @@ class Moderation(*moderation_cogs):
 						mod_ban_embed.title = f"Ban Request ({len(confirmations)}/4) → (5mins)"
 						await msg.edit(embed=mod_ban_embed)
 						if channel.permissions_for(u).administrator:
+							should_ban = True
 							break
 						elif len(confirmations) < 4:
 							continue
 						else:
+							should_ban = True
 							break
+
+			if not should_ban:
+				continue
 
 			# Checks if it was a moderator ban request or just a normal ban
 			if len(confirmations) == 0:
@@ -1132,7 +1140,7 @@ The appeal process is simple, just join the server below and fill out the form a
 https://discord.gg/V5XPMyTyrj
 
 We appreciate your understanding and look forward to hearing from you. """, embed=general_embed)
-			except Exception as e:
+			except Exception:
 				pass
 			try:
 				await member.ban(delete_message_days=7, reason=reason)
