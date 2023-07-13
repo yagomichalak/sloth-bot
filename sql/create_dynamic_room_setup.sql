@@ -52,7 +52,7 @@ INSERT INTO Sloth.LanguageRoom (category, english_name, room_name, room_quant, r
 
 /* 041 */("germanic", "Swiss German", "Schwyzerdütsch (Swiss German)", 2, 10, 60),
 
-/* 042 */("romance", "Basque", "Euskara", 2, 10, 60),
+/* 042 */("unafiliated", "Basque", "Euskara", 2, 10, 60),
 /* 043 */("romance", "Galician", "Galego", 2, 10, 60),
 
 /* 044 */("sub-saharan", "Yoruba", "عِدعِ يوْرُبا (Yorúbà)", 2, 10, 60),
