@@ -299,6 +299,9 @@ different_class_roles = {
     ],
     "turkic languages": [
         "uzbek"
+    ],
+    "indigenous languages": [
+        "georgian"
     ]
 }
 
