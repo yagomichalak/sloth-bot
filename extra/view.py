@@ -135,6 +135,25 @@ class ReportSupportView(discord.ui.View):
         )
         await interaction.followup.send(embed=embed, view=view, ephemeral=True)
 
+    @discord.ui.button(label="Verify", style=1, custom_id=f"verify_id", emoji="☑️", row=2)
+    async def verify_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Button for starting the verification process. """
+
+        await interaction.response.defer()
+
+        member = interaction.user
+        member_ts = self.cog.cache.get(member.id)
+        time_now = await utils.get_timestamp()
+
+        if member_ts:
+            sub = time_now - member_ts
+            if sub <= 240:
+                return await interaction.followup.send(
+                    f"**You are on cooldown to use this, try again in {round(240-sub)} seconds, {member.mention}!**", ephemeral=True)
+
+        self.cog.cache[member.id] = time_now
+        await self.cog.send_verified_selfies_verification(interaction)
+
     @discord.ui.button(label="Report a User or Get Server/Role Support!", style=4, custom_id=f"report_support", emoji="<:politehammer:608941633454735360>", row=3)
     async def report_support_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
         """ Button for reporting someone. """

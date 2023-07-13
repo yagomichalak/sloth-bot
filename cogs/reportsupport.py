@@ -28,11 +28,12 @@ int(os.getenv('OWNER_ROLE_ID', 123)), admin_role_id,
 moderator_role_id]
 
 from extra.reportsupport.applications import ApplicationsTable
+from extra.reportsupport.verify import Verify
 from extra.reportsupport.openchannels import OpenChannels
 
 
 report_support_classes: List[commands.Cog] = [
-    ApplicationsTable, OpenChannels
+    ApplicationsTable, Verify, OpenChannels
 ]
 
 class ReportSupport(*report_support_classes):
@@ -134,6 +135,68 @@ class ReportSupport(*report_support_classes):
                 
                 if applicant := discord.utils.get(guild.members, id=app[1]):
                     return await applicant.send(embed=discord.Embed(description=interview_info['message']))
+
+    async def send_verified_selfies_verification(self, interaction: discord.Interaction) -> None:
+        """ Sends a message to the user asking for them to send a selfie in order for them
+        to get the verified selfies role.
+        :param interaction: The interaction object. """
+
+        guild = interaction.guild
+        member = interaction.user
+
+        def msg_check(message):
+            if message.author == member and not message.guild:
+                if len(message.content) <= 100:
+                    return True
+                else:
+                    self.client.loop.create_task(member.send("**Your answer must be within 100 characters**"))
+            else:
+                return False
+
+        embed = discord.Embed(
+            title=f"__Verify__",
+            description=f"""You have opened a verification request, if you would like to verify:\n
+**1.** Take a clear picture of yourself holding a piece of paper with today's date and time of verification, and your Discord server name written on it. Image links won't work, only image uploads!\n(You have 5 minutes to do so)"""
+        )
+        embed.set_footer(text=f"by {member}", icon_url=member.display_avatar)
+
+        embed.set_image(url="https://cdn.discordapp.com/attachments/675668948473348096/911602316677906492/verify.png")
+
+        await member.send(embed=embed)
+
+        while True:
+            msg = await self.get_message(member, msg_check, 300)
+            if msg is None:
+                return await member.send(f"**Timeout, you didn't answer in time, try again later!**")
+
+
+            attachments = [att for att in msg.attachments if att.content_type.startswith('image')]
+            if msg.content.lower() == 'quit':
+                return await member.send(f"**Bye!**")
+
+            if not attachments:
+                await member.send(f"**No uploaded pic detected, send it again or type `quit` to stop this!**")
+                continue
+
+            break
+
+        # Sends verified request to admins
+        verify_embed = discord.Embed(
+            title=f"__Verification Request__",
+            description=f"{member} ({member.id})",
+            color=member.color,
+            timestamp=interaction.message.created_at
+        )
+
+        verify_embed.set_thumbnail(url=member.display_avatar)
+        verify_embed.set_image(url=attachments[0])
+        verify_req_channel_id = discord.utils.get(guild.text_channels, id=self.verify_reqs_channel_id)
+        verify_msg = await verify_req_channel_id.send(content=member.mention, embed=verify_embed)
+        await verify_msg.add_reaction('✅')
+        await verify_msg.add_reaction('❌')
+        # Saves
+        await self.insert_application(verify_msg.id, member.id, 'verify')
+        return await member.send(f"**Request sent, you will get notified here if you get accepted or declined! ✅**")
 
     # - Report someone
     async def report_someone(self, interaction: discord.Interaction, reportee: str, text: str):
