@@ -60,6 +60,10 @@ class TravelBuddies(commands.Cog):
                 return await ctx.respond(
                     f"**You are on cooldown to apply, try again in {(300-sub)/60:.1f} minutes**", ephemeral=True)
 
+        if role.name.strip() == "@everyone":
+            self.cache[ctx.author.id] = await utils.get_timestamp()
+            return await ctx.respond("**You cannot select this role!**", ephemeral=True)
+
         modal = discord.ui.Modal = TravelBuddyModal(self.client, role)
         await ctx.response.send_modal(modal=modal)
 

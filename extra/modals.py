@@ -506,7 +506,7 @@ class TravelBuddyModal(Modal):
         self.cog.cache[member.id] = await utils.get_timestamp()
 
         message = await confirm_view.interaction.followup.send(
-            content=f"Hello, {self.country_role.mention}!", embed=embed
+            content=f"Hello, {self.country_role.mention}!", embed=embed, allowed_mentions=discord.AllowedMentions.all()
         )
         message.guild = interaction.guild
 
