@@ -1226,6 +1226,11 @@ We appreciate your understanding and look forward to hearing from you. """, embe
 					await user.send(embed=general_embed)
 				except:
 					pass
+				# Unmutes the user if they were muted before being banned
+				try:
+					await self.remove_all_roles_from_system(user.id)
+				except Exception as e:
+					pass
 				return
 		else:
 			await ctx.send('**Member not found!**', delete_after=3)
