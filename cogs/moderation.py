@@ -185,12 +185,6 @@ class Moderation(*moderation_cogs):
 	@commands.Cog.listener()
 	async def on_member_join(self, member):
 
-		error_log = self.client.get_channel(error_log_channel_id)
-		if error_log:
-			await error_log.send('='*10)
-			await error_log.send(f"Member joined: {member}")
-			await error_log.send('='*10)
-
 		if member.bot:
 			return
 
@@ -205,9 +199,7 @@ class Moderation(*moderation_cogs):
 			muted_role = discord.utils.get(member.guild.roles, id=muted_role_id)
 			await member.add_roles(muted_role)
 			welcome_channel = discord.utils.get(member.guild.channels, id=welcome_channel_id)
-			await error_log.send(f"Unmuted: {member}")
 			await welcome_channel.send(f"**Stop right there, {member.mention}! ✋ You were muted, left and rejoined the server, but that won't work!**")
-			await error_log.send(f"Rigt?: {member}")
 
 		if account_age <= 120:
 			if await self.get_firewall_state():
