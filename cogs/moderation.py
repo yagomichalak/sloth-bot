@@ -35,6 +35,7 @@ senior_mod_role_id: int = int(os.getenv('SENIOR_MOD_ROLE_ID', 123))
 allowed_roles = [int(os.getenv('OWNER_ROLE_ID', 123)), int(os.getenv('ADMIN_ROLE_ID', 123)), senior_mod_role_id, mod_role_id]
 unverified_role_id = int(os.getenv('UNVERIFIED_ROLE_ID', 123))
 join_the_server_channel_id = int(os.getenv('JOIN_THE_SERVER_CHANNEL_ID', 123))
+error_log_channel_id = int(os.getenv('ERROR_LOG_CHANNEL_ID', 123))
 
 server_id = int(os.getenv('SERVER_ID', 123))
 guild_ids: List[int] = [server_id]
@@ -184,6 +185,12 @@ class Moderation(*moderation_cogs):
 	@commands.Cog.listener()
 	async def on_member_join(self, member):
 
+		error_log = self.client.get_channel(error_log_channel_id)
+		if error_log:
+			await error_log.send('='*10)
+			await error_log.send(f"Member joined: {member}")
+			await error_log.send('='*10)
+
 		if member.bot:
 			return
 
@@ -193,6 +200,14 @@ class Moderation(*moderation_cogs):
 		# Actual timestamp
 		time_now = await utils.get_timestamp()
 		account_age = round((time_now - timestamp)/86400)
+
+		if await self.get_muted_roles(member.id):
+			muted_role = discord.utils.get(member.guild.roles, id=muted_role_id)
+			await member.add_roles(muted_role)
+			welcome_channel = discord.utils.get(member.guild.channels, id=welcome_channel_id)
+			await error_log.send(f"Unmuted: {member}")
+			await welcome_channel.send(f"**Stop right there, {member.mention}! ✋ You were muted, left and rejoined the server, but that won't work!**")
+			await error_log.send(f"Rigt?: {member}")
 
 		if account_age <= 120:
 			if await self.get_firewall_state():
@@ -213,12 +228,6 @@ class Moderation(*moderation_cogs):
 		if account_age <= 2:
 			suspect_channel = discord.utils.get(member.guild.channels, id=suspect_channel_id)
 			await suspect_channel.send(f"🔴 Alert! Possible fake account: {member.mention} joined the server. Account was just created.\nAccount age: {account_age} day(s)!")
-
-		if await self.get_muted_roles(member.id):
-			muted_role = discord.utils.get(member.guild.roles, id=muted_role_id)
-			await member.add_roles(muted_role)
-			welcome_channel = discord.utils.get(member.guild.channels, id=welcome_channel_id)
-			await welcome_channel.send(f"**Stop right there, {member.mention}! ✋ You were muted, left and rejoined the server, but that won't work!**")
 
 	@commands.Cog.listener()
 	async def on_message_delete(self, message):
