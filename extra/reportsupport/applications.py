@@ -10,6 +10,7 @@ muffin_id: int = int(os.getenv('MUFFIN_ID', 123))
 guibot_id: int = int(os.getenv('GUIBOT_ID', 123))
 
 moderator_role_id: int = int(os.getenv('MOD_ROLE_ID', 123))
+senior_mod_role_id: int = int(os.getenv('SENIOR_MOD_ROLE_ID', 123))
 admin_role_id: int = int(os.getenv('ADMIN_ROLE_ID', 123))
 lesson_management_role_id: int = int(os.getenv('LESSON_MANAGEMENT_ROLE_ID', 123))
 real_event_manager_role_id: int = int(os.getenv('REAL_EVENT_MANAGER_ROLE_ID', 123))
@@ -87,15 +88,15 @@ class ApplicationsTable(commands.Cog):
             self.moderator_app_channel_id, self.event_host_app_channel_id, self.teacher_app_channel_id, 
             self.debate_manager_app_channel_id, self.ban_appeals_channel_id]:
 
-            if payload.channel_id == self.debate_manager_app_channel_id: # User is an mod+ or lesson manager
+            if payload.channel_id == self.debate_manager_app_channel_id: # User is an admin
                 if await utils.is_allowed([admin_role_id]).predicate(channel=channel, member=payload.member):
                     return await self.handle_application(guild, payload)
-            elif payload.channel_id == self.teacher_app_channel_id: # User is an mod+ or lesson manager
+            elif payload.channel_id == self.teacher_app_channel_id: # User is a mod+
                 if await utils.is_allowed([moderator_role_id]).predicate(channel=channel, member=payload.member):
                     return await self.handle_application(guild, payload)
 
-            elif payload.channel_id == self.ban_appeals_channel_id:
-                if adm:
+            elif payload.channel_id == self.ban_appeals_channel_id: # User is a Staff Manager+
+                if await utils.is_allowed([senior_mod_role_id]).predicate(channel=channel, member=payload.member):
                     return await self.handle_ban_appeal(message, payload)
             elif adm: # User is an adm
                 return await self.handle_application(guild, payload)
