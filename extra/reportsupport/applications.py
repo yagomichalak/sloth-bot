@@ -61,7 +61,7 @@ class ApplicationsTable(commands.Cog):
             "app": debate_manager_app_channel_id,  "interview": debate_manager_interview_vc_id, "parent": debate_manager_parent_channel_id, 
             "cat": debate_manager_app_cat_id, 
             "message": "**Debate Manager Application**\nOur staff has evaluated your Debate Manager application and has come to the conclusion that we are **declining** your application for internal reasons.",
-            "pings": [{"role": False}]}
+            "pings": []}
     }
 
     @commands.Cog.listener(name="on_raw_reaction_add")
