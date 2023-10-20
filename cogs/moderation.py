@@ -1041,34 +1041,26 @@ class Moderation(*moderation_cogs):
 			return await ctx.send('**Member not found!**', delete_after=3)
 			
 		for member in members:
-			should_ban = False
 			if await utils.is_allowed(allowed_roles).predicate(channel=ctx.channel, member=member):
 				if len(members) == 1:
 					return await ctx.send(f"**You cannot ban a staff member, {author.mention}!**")
 				else:
 					continue
 
-			perpetrators = []
-			confirmations = {}
+			should_ban = await utils.is_allowed([senior_mod_role_id]).predicate(ctx)
 
-			perms = channel.permissions_for(author)
-
-			if perms.administrator:
-				should_ban = True
-			else:
-				confirmations[author.id] = author.name
+			if not should_ban:
 				mod_ban_embed = discord.Embed(
-					title=f"Ban Request ({len(confirmations)}/4) → (5mins)",
+					title=f"Ban Request (5mins)",
 					description=f'''
-					{author.mention} wants to ban {member.mention}, it requires 3 more moderator ✅ reactions for it!
+					{author.mention} wants to ban {member.mention}, it requires 1 **Staff Manager** or **Admin** ✅ reaction for it!
 					```Reason: {reason}```''',
 					colour=discord.Colour.dark_red(), timestamp=ctx.message.created_at)
 				mod_ban_embed.set_author(name=f'{member} is going to Brazil...', icon_url=member.display_avatar)
 				msg = await ctx.send(embed=mod_ban_embed)
 				await msg.add_reaction('✅')
 
-				# Prompts for 3 moderator reactions
-				def check_mod(r, u):
+				def check_staff_manager(r, u):
 					if u.bot:
 						return False
 					if r.message.id != msg.id:
@@ -1076,8 +1068,7 @@ class Moderation(*moderation_cogs):
 
 					if str(r.emoji) == '✅':
 						perms = channel.permissions_for(u)
-						if mod_role_id in [r.id for r in u.roles] or perms.administrator:
-							confirmations[u.id] = u.name
+						if senior_mod_role_id in [r.id for r in u.roles] or perms.administrator:
 							return True
 						else:
 							self.client.loop.create_task(
@@ -1093,34 +1084,23 @@ class Moderation(*moderation_cogs):
 
 				while True:
 					try:
-						r, u = await self.client.wait_for('reaction_add', timeout=300, check=check_mod)
+						r, u = await self.client.wait_for('reaction_add', timeout=300, check=check_staff_manager)
 					except asyncio.TimeoutError:
 						mod_ban_embed.description = f'Timeout, {member} is not getting banned!'
 						await msg.remove_reaction('✅', self.client.user)
 						await msg.edit(embed=mod_ban_embed)
 						break
 					else:
-						mod_ban_embed.title = f"Ban Request ({len(confirmations)}/4) → (5mins)"
+						mod_ban_embed.title = f"Ban Request (5mins)"
 						await msg.edit(embed=mod_ban_embed)
-						if channel.permissions_for(u).administrator:
-							should_ban = True
-							break
-						elif len(confirmations) < 4:
-							continue
-						else:
-							should_ban = True
-							break
+						should_ban = True
+						break
 
 			if not should_ban:
 				continue
 
-			# Checks if it was a moderator ban request or just a normal ban
-			if len(confirmations) == 0:
-				perpetrators = ctx.author
-				icon = ctx.author.display_avatar
-			else:
-				perpetrators = ', '.join(confirmations.values())
-				icon = ctx.guild.icon.url
+			perpetrator = ctx.author
+			icon = ctx.author.display_avatar
 
 			# Bans and logs
 			# General embed
@@ -1157,7 +1137,7 @@ We appreciate your understanding and look forward to hearing from you. """, embe
 				embed.add_field(name='Reason:', value=f'```{reason}```')
 				embed.set_author(name=member)
 				embed.set_thumbnail(url=member.display_avatar)
-				embed.set_footer(text=f"Banned by {perpetrators}", icon_url=icon)
+				embed.set_footer(text=f"Banned by {perpetrator}", icon_url=icon)
 				await moderation_log.send(embed=embed)
 				# Inserts a infraction into the database
 				current_ts = await utils.get_timestamp()
@@ -1252,106 +1232,95 @@ We appreciate your understanding and look forward to hearing from you. """, embe
 		if not member:
 			return await ctx.send(f"**Member not found, {author.mention}!**", delete_after=3)
 
-		if not await utils.is_allowed(allowed_roles).predicate(channel=ctx.channel, member=member):
-			perpetrators = []
-			confirmations = {}
+		should_ban = False
+		if await utils.is_allowed(allowed_roles).predicate(channel=ctx.channel, member=member):
+			return await ctx.send(f"**You cannot softban a staff member, {author.mention}!**")
 
-			perms = channel.permissions_for(author)
+		should_ban = await utils.is_allowed([senior_mod_role_id]).predicate(ctx)
 
-			if not perms.administrator:
-				confirmations[author.id] = author.name
-				mod_softban_embed = discord.Embed(
-					title=f"Softban Request ({len(confirmations)}/3) → (5mins)",
-					description=f'''
-					{author.mention} wants to softban {member.mention}, it requires 2 more moderator ✅ reactions for it!
-					```Reason: {reason}```''',
-					colour=discord.Colour.dark_purple(), timestamp=ctx.message.created_at)
-				mod_softban_embed.set_author(name=f'{member} is going to Brazil, but will come back!', icon_url=member.display_avatar)
-				msg = await ctx.send(embed=mod_softban_embed)
-				await msg.add_reaction('✅')
+		if not should_ban:
+			mod_softban_embed = discord.Embed(
+				title=f"Softban Request (5mins)",
+				description=f'''
+				{author.mention} wants to softban {member.mention}, it requires 1 **Staff Manager** or **Admin** ✅ reaction for it!
+				```Reason: {reason}```''',
+				colour=discord.Colour.dark_purple(), timestamp=ctx.message.created_at)
+			mod_softban_embed.set_author(name=f'{member} is going to Brazil, but will come back!', icon_url=member.display_avatar)
+			msg = await ctx.send(embed=mod_softban_embed)
+			await msg.add_reaction('✅')
 
-				# Prompts for 3 moderator reactions
-				def check_mod(r, u):
-					if u.bot:
-						return False
-					if r.message.id != msg.id:
-						return
+			def check_staff_manager(r, u):
+				if u.bot:
+					return False
+				if r.message.id != msg.id:
+					return
 
-					if str(r.emoji) == '✅':
-						perms = channel.permissions_for(u)
-						if mod_role_id in [r.id for r in u.roles] or perms.administrator:
-							confirmations[u.id] = u.name
-							return True
-						else:
-							self.client.loop.create_task(
-								msg.remove_reaction('✅', u)
-								)
-							return False
-
+				if str(r.emoji) == '✅':
+					perms = channel.permissions_for(u)
+					if senior_mod_role_id in [r.id for r in u.roles] or perms.administrator:
+						return True
 					else:
 						self.client.loop.create_task(
-							msg.remove_reaction(r.emoji, u)
+							msg.remove_reaction('✅', u)
 							)
 						return False
 
-				while True:
-					try:
-						r, u = await self.client.wait_for('reaction_add', timeout=300, check=check_mod)
-					except asyncio.TimeoutError:
-						mod_softban_embed.description = f'Timeout, {member} is not getting softbanned!'
-						await msg.remove_reaction('✅', self.client.user)
-						return await msg.edit(embed=mod_softban_embed)
-					else:
-						mod_softban_embed.title = f"Softban Request ({len(confirmations)}/3) → (5mins)"
-						await msg.edit(embed=mod_softban_embed)
-						if channel.permissions_for(u).administrator:
-							break
-						elif len(confirmations) < 3:
-							continue
-						else:
-							break
+				else:
+					self.client.loop.create_task(
+						msg.remove_reaction(r.emoji, u)
+						)
+					return False
 
-			# Checks if it was a moderator ban request or just a normal ban
-			if len(confirmations) == 0:
-				perpetrators = ctx.author
-				icon = ctx.author.display_avatar
-			else:
-				perpetrators = ', '.join(confirmations.values())
-				icon = ctx.guild.icon.url
+			while True:
+				try:
+					r, u = await self.client.wait_for('reaction_add', timeout=300, check=check_staff_manager)
+				except asyncio.TimeoutError:
+					mod_softban_embed.description = f'Timeout, {member} is not getting softbanned!'
+					await msg.remove_reaction('✅', self.client.user)
+					return await msg.edit(embed=mod_softban_embed)
+				else:
+					mod_softban_embed.title = f"Softban Request (5mins)"
+					await msg.edit(embed=mod_softban_embed)
+					should_ban = True
+					break
 
-			# Bans and logs
-			# General embed
-			general_embed = discord.Embed(description=f'**Reason:** {reason}', colour=discord.Colour.dark_purple())
-			general_embed.set_author(name=f'{member} has been softbanned', icon_url=member.display_avatar)
-			await ctx.send(embed=general_embed)
-			try:
-				await member.send(content="https://discord.gg/languages", embed=general_embed)
-			except Exception as e:
-				pass
-			try:
-				await member.ban(delete_message_days=1, reason=reason)
-				await member.unban(reason=reason)
-			except Exception:
-				await ctx.send('**You cannot do that!**', delete_after=3)
-			else:
-				# Moderation log embed
-				moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
-				embed = discord.Embed(title='__**SoftBanishment**__', colour=discord.Colour.dark_purple(),
-									timestamp=ctx.message.created_at)
-				embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nId: {member.id}```',
-								inline=False)
-				embed.add_field(name='Reason:', value=f'```{reason}```')
-				embed.set_author(name=member)
-				embed.set_thumbnail(url=member.display_avatar)
-				embed.set_footer(text=f"Banned by {perpetrators}", icon_url=icon)
-				await moderation_log.send(embed=embed)
-				# Inserts a infraction into the database
-				current_ts = await utils.get_timestamp()
-				await self.insert_user_infraction(
-					user_id=member.id, infr_type="softban", reason=reason,
-					timestamp=current_ts, perpetrator=ctx.author.id)
+		if not should_ban:
+			return
+
+		perpetrator = ctx.author
+		icon = ctx.author.display_avatar
+
+		# Bans and logs
+		# General embed
+		general_embed = discord.Embed(description=f'**Reason:** {reason}', colour=discord.Colour.dark_purple())
+		general_embed.set_author(name=f'{member} has been softbanned', icon_url=member.display_avatar)
+		await ctx.send(embed=general_embed)
+		try:
+			await member.send(content="https://discord.gg/languages", embed=general_embed)
+		except Exception as e:
+			pass
+		try:
+			await member.ban(delete_message_days=1, reason=reason)
+			await member.unban(reason=reason)
+		except Exception:
+			await ctx.send('**You cannot do that!**', delete_after=3)
 		else:
-				await ctx.send(f"**You cannot softban a staff member, {author.mention}!**")
+			# Moderation log embed
+			moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
+			embed = discord.Embed(title='__**SoftBanishment**__', colour=discord.Colour.dark_purple(),
+								timestamp=ctx.message.created_at)
+			embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nId: {member.id}```',
+							inline=False)
+			embed.add_field(name='Reason:', value=f'```{reason}```')
+			embed.set_author(name=member)
+			embed.set_thumbnail(url=member.display_avatar)
+			embed.set_footer(text=f"Banned by {perpetrator}", icon_url=icon)
+			await moderation_log.send(embed=embed)
+			# Inserts a infraction into the database
+			current_ts = await utils.get_timestamp()
+			await self.insert_user_infraction(
+				user_id=member.id, infr_type="softban", reason=reason,
+				timestamp=current_ts, perpetrator=ctx.author.id)
 
 	@commands.command(aliases=['nitrokick', 'nitro'])
 	@utils.is_allowed(allowed_roles, throw_exc=True)
@@ -1371,115 +1340,120 @@ We appreciate your understanding and look forward to hearing from you. """, embe
 		if not member:
 			return await ctx.send(f"**Member not found, {author.mention}!**", delete_after=3)
 
-		if not await utils.is_allowed(allowed_roles).predicate(channel=ctx.channel, member=member):
-			perpetrators = []
-			confirmations = {}
+		if await utils.is_allowed(allowed_roles).predicate(channel=ctx.channel, member=member):
+			return await ctx.send(f"**You cannot nitrokick a staff member, {author.mention}!**")
+		
+		perpetrators = []
+		confirmations = {}
 
-			if not await utils.is_allowed([senior_mod_role_id]).predicate(channel=ctx.channel, member=author):
-				confirmations[author.id] = author.name
-				mod_softban_embed = discord.Embed(
-					title=f"NitroKick Request ({len(confirmations)}/3) → (5mins)",
-					description=f'''
-					{author.mention} wants to nitrokick {member.mention}, it requires 2 more moderator ✅ reactions for it!
-					```Reason: {reason}```''',
-					colour=discord.Colour.nitro_pink(), timestamp=ctx.message.created_at)
-				mod_softban_embed.set_author(name=f'{member} is being NitroKicked!', icon_url=member.display_avatar)
-				msg = await ctx.send(embed=mod_softban_embed)
-				await msg.add_reaction('✅')
+		should_nitro_kick = await utils.is_allowed([senior_mod_role_id]).predicate(channel=ctx.channel, member=author)
 
-				# Prompts for 3 moderator reactions
-				def check_mod(r, u):
-					if u.bot:
-						return False
-					if r.message.id != msg.id:
-						return
+		if not should_nitro_kick:
+			confirmations[author.id] = author.name
+			mod_softban_embed = discord.Embed(
+				title=f"NitroKick Request ({len(confirmations)}/3) → (5mins)",
+				description=f'''
+				{author.mention} wants to nitrokick {member.mention}, it requires 2 more moderator ✅ reactions for it!
+				```Reason: {reason}```''',
+				colour=discord.Colour.nitro_pink(), timestamp=ctx.message.created_at)
+			mod_softban_embed.set_author(name=f'{member} is being NitroKicked!', icon_url=member.display_avatar)
+			msg = await ctx.send(embed=mod_softban_embed)
+			await msg.add_reaction('✅')
 
-					if str(r.emoji) == '✅':
-						perms = channel.permissions_for(u)
-						
-						if mod_role_id in [r.id for r in u.roles] or perms.administrator:
-							confirmations[u.id] = u.name
-							return True
-						else:
-							self.client.loop.create_task(
-								msg.remove_reaction('✅', u)
-							)
-							return False
+			# Prompts for 3 moderator reactions
+			def check_mod(r, u):
+				if u.bot:
+					return False
+				if r.message.id != msg.id:
+					return
 
+				if str(r.emoji) == '✅':
+					perms = channel.permissions_for(u)
+					
+					if mod_role_id in [r.id for r in u.roles] or perms.administrator:
+						confirmations[u.id] = u.name
+						return True
 					else:
 						self.client.loop.create_task(
-							msg.remove_reaction(r.emoji, u)
-							)
+							msg.remove_reaction('✅', u)
+						)
 						return False
 
-				while True:
-					try:
-						r, u = await self.client.wait_for('reaction_add', timeout=300, check=check_mod)
-					except asyncio.TimeoutError:
-						mod_softban_embed.description = f'Timeout, {member} is not getting nitrobanned!'
-						await msg.remove_reaction('✅', self.client.user)
-						return await msg.edit(embed=mod_softban_embed)
+				else:
+					self.client.loop.create_task(
+						msg.remove_reaction(r.emoji, u)
+						)
+					return False
+
+			while True:
+				try:
+					r, u = await self.client.wait_for('reaction_add', timeout=300, check=check_mod)
+				except asyncio.TimeoutError:
+					mod_softban_embed.description = f'Timeout, {member} is not getting nitrobanned!'
+					await msg.remove_reaction('✅', self.client.user)
+					return await msg.edit(embed=mod_softban_embed)
+				else:
+					mod_softban_embed.title = f"NitroKick Request ({len(confirmations)}/3) → (5mins)"
+					await msg.edit(embed=mod_softban_embed)
+					if await utils.is_allowed([senior_mod_role_id]).predicate(channel=ctx.channel, member=u):
+						should_nitro_kick = True
+						break
+					elif len(confirmations) < 3:
+						continue
 					else:
-						mod_softban_embed.title = f"NitroKick Request ({len(confirmations)}/3) → (5mins)"
-						await msg.edit(embed=mod_softban_embed)
-						if await utils.is_allowed([senior_mod_role_id]).predicate(channel=ctx.channel, member=u):
-							break
-						elif len(confirmations) < 3:
-							continue
-						else:
-							break
+						break
 
-			# Checks if it was a moderator ban request or just a normal ban
-			if len(confirmations) == 0:
-				perpetrators = ctx.author
-				icon = ctx.author.display_avatar
-			else:
-				perpetrators = ', '.join(confirmations.values())
-				icon = ctx.guild.icon.url
+		if not should_nitro_kick:
+			return
 
-			# Bans and logs
-			# General embed
-			general_embed = discord.Embed(description=f'**Reason:** {reason}', color=discord.Color.nitro_pink())
-			general_embed.set_author(name=f'{member} has been nitrokicked', icon_url=member.display_avatar)
-			await ctx.send(embed=general_embed)
-			try:
-				await member.send(content="Your account has been compromised and is now sending nitro scam links, please change your password and enable 2 Factor Authentication in order to regain access to our server\n\nhttps://discord.gg/languages", embed=general_embed)
-			except Exception as e:
-				pass
-			try:
-
-				keep_roles, remove_roles = await self.get_remove_roles(member, keep_roles=allowed_roles)
-
-				await member.edit(roles=keep_roles)
-				user_role_ids = [(member.id, rr.id, current_ts, None) for rr in remove_roles]
-				await self.insert_in_muted(user_role_ids)
-				await member.ban(delete_message_days=1, reason=reason)
-				await member.unban(reason=reason)
-			except Exception:
-				await ctx.send('**You cannot do that!**', delete_after=3)
-			else:
-				# Moderation log embed
-				moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
-				embed = discord.Embed(title='__**NitroKick**__', color=discord.Color.nitro_pink(),
-									timestamp=ctx.message.created_at)
-				embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nId: {member.id}```',
-								inline=False)
-				embed.add_field(name='Reason:', value=f'```{reason}```')
-				embed.set_author(name=member)
-				embed.set_thumbnail(url=member.display_avatar)
-				embed.set_footer(text=f"Banned by {perpetrators}", icon_url=icon)
-				await moderation_log.send(embed=embed)
-				# Inserts a infraction into the database
-				current_ts = await utils.get_timestamp()
-				await self.insert_user_infraction(
-					user_id=member.id, infr_type="mute", reason=reason,
-					timestamp=current_ts, perpetrator=ctx.author.id)
-				await self.insert_user_infraction(
-					user_id=member.id, infr_type="softban", reason=reason,
-					timestamp=current_ts, perpetrator=ctx.author.id)
+		# Checks if it was a moderator ban request or just a normal ban
+		if len(confirmations) == 0:
+			perpetrators = ctx.author
+			icon = ctx.author.display_avatar
 		else:
-				await ctx.send(f"**You cannot nitrokick a staff member, {author.mention}!**")
+			perpetrators = ', '.join(confirmations.values())
+			icon = ctx.guild.icon.url
 
+		# Bans and logs
+		# General embed
+		general_embed = discord.Embed(description=f'**Reason:** {reason}', color=discord.Color.nitro_pink())
+		general_embed.set_author(name=f'{member} has been nitrokicked', icon_url=member.display_avatar)
+		await ctx.send(embed=general_embed)
+		try:
+			await member.send(content="Your account has been compromised and is now sending nitro scam links, please change your password and enable 2 Factor Authentication in order to regain access to our server\n\nhttps://discord.gg/languages", embed=general_embed)
+		except Exception as e:
+			pass
+		try:
+
+			keep_roles, remove_roles = await self.get_remove_roles(member, keep_roles=allowed_roles)
+
+			await member.edit(roles=keep_roles)
+			user_role_ids = [(member.id, rr.id, current_ts, None) for rr in remove_roles]
+			await self.insert_in_muted(user_role_ids)
+			await member.ban(delete_message_days=1, reason=reason)
+			await member.unban(reason=reason)
+		except Exception:
+			await ctx.send('**You cannot do that!**', delete_after=3)
+		else:
+			# Moderation log embed
+			moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
+			embed = discord.Embed(title='__**NitroKick**__', color=discord.Color.nitro_pink(),
+								timestamp=ctx.message.created_at)
+			embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nId: {member.id}```',
+							inline=False)
+			embed.add_field(name='Reason:', value=f'```{reason}```')
+			embed.set_author(name=member)
+			embed.set_thumbnail(url=member.display_avatar)
+			embed.set_footer(text=f"Banned by {perpetrators}", icon_url=icon)
+			await moderation_log.send(embed=embed)
+			# Inserts a infraction into the database
+			current_ts = await utils.get_timestamp()
+			await self.insert_user_infraction(
+				user_id=member.id, infr_type="mute", reason=reason,
+				timestamp=current_ts, perpetrator=ctx.author.id)
+			await self.insert_user_infraction(
+				user_id=member.id, infr_type="softban", reason=reason,
+				timestamp=current_ts, perpetrator=ctx.author.id)
 
 	# Hackban a member
 	@commands.command(aliases=['hban'])
@@ -1508,48 +1482,45 @@ We appreciate your understanding and look forward to hearing from you. """, embe
 						return await ctx.send(f"**You cannot hackban a staff member, {author.mention}!**")
 					else:
 						continue
-				
-			perpetrators = []
-			confirmations = {}
 
-			perms = channel.permissions_for(author)
+			should_ban = await utils.is_allowed([senior_mod_role_id]).predicate(ctx)
 
-			if not perms.administrator:
-				confirmations[author.id] = author.name
+			if not should_ban:
 				mod_ban_embed = discord.Embed(
-					title=f"Hackban Request ({len(confirmations)}/4) → (5mins)",
+					title=f"Hackban Request (5mins)",
 					description=f'''
-					{author.mention} wants to hackban {member.mention}, it requires 3 more moderator ✅ reactions for it!
+					{author.mention} wants to hackban {member.mention}, it requires 1 **Staff Manager** or **Admin** ✅ reaction for it!
 					```Reason: {reason}```''',
 					colour=discord.Colour.dark_teal(), timestamp=ctx.message.created_at)
 				mod_ban_embed.set_author(name=f'{member} is going to Brazil 🦜...', icon_url=member.display_avatar)
 				msg = await ctx.send(embed=mod_ban_embed)
 				await msg.add_reaction('✅')
 
-				# Prompts for 3 moderator reactions
-				def check_mod(r, u):
+				def check_staff_manager(r, u):
 					if u.bot:
 						return False
-
 					if r.message.id != msg.id:
 						return
 
 					if str(r.emoji) == '✅':
 						perms = channel.permissions_for(u)
-						if mod_role_id in [r.id for r in u.roles] or perms.administrator:
-							confirmations[u.id] = u.name
+						if senior_mod_role_id in [r.id for r in u.roles] or perms.administrator:
 							return True
 						else:
-							self.client.loop.create_task(msg.remove_reaction('✅', u))
+							self.client.loop.create_task(
+								msg.remove_reaction('✅', u)
+								)
 							return False
 
 					else:
-						self.client.loop.create_task(msg.remove_reaction(r.emoji, u))
+						self.client.loop.create_task(
+							msg.remove_reaction(r.emoji, u)
+							)
 						return False
 
 				while True:
 					try:
-						r, u = await self.client.wait_for('reaction_add', timeout=300, check=check_mod)
+						r, u = await self.client.wait_for('reaction_add', timeout=300, check=check_staff_manager)
 					except asyncio.TimeoutError:
 						mod_ban_embed.description = f'Timeout, {member} is not getting hackbanned!'
 						await msg.remove_reaction('✅', self.client.user)
@@ -1557,23 +1528,16 @@ We appreciate your understanding and look forward to hearing from you. """, embe
 						await msg.edit(embed=mod_ban_embed)
 						break
 					else:
-						mod_ban_embed.title = f"Hackban Request ({len(confirmations)}/4) → (5mins)"
+						mod_ban_embed.title = f"Hackban Request (5mins)"
 						await msg.edit(embed=mod_ban_embed)
+						should_ban = True
+						break
 
-						if channel.permissions_for(u).administrator:
-							break
-						elif len(confirmations) < 4:
-							continue
-						else:
-							break
+			if not should_ban:
+				return
 
-			# Checks if it was a moderator hackban request or just a normal hackban
-			if len(confirmations) == 0:
-				perpetrators = ctx.author
-				icon = ctx.author.display_avatar
-			else:
-				perpetrators = ', '.join(confirmations.values())
-				icon = ctx.guild.icon.url
+			perpetrator = ctx.author
+			icon = ctx.author.display_avatar
 
 			try:
 				await ctx.guild.ban(member, reason=reason)
@@ -1598,7 +1562,7 @@ We appreciate your understanding and look forward to hearing from you. """, embe
 				embed.add_field(name='Reason:', value=f'```{reason}```')
 
 				embed.set_author(name=self.client.get_user(ctx.author.id))
-				embed.set_footer(text=f"HackBanned by {perpetrators}", icon_url=ctx.author.display_avatar)
+				embed.set_footer(text=f"HackBanned by {perpetrator}", icon_url=icon)
 				await moderation_log.send(embed=embed)
 
 				# Inserts a infraction into the database
