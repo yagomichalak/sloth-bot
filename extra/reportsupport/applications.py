@@ -7,7 +7,6 @@ import os
 
 cosmos_role_id: int = int(os.getenv('COSMOS_ROLE_ID', 123))
 muffin_id: int = int(os.getenv('MUFFIN_ID', 123))
-cent_id: int = int(os.getenv('CENT_ID', 123))
 guibot_id: int = int(os.getenv('GUIBOT_ID', 123))
 
 moderator_role_id: int = int(os.getenv('MOD_ROLE_ID', 123))
@@ -62,7 +61,7 @@ class ApplicationsTable(commands.Cog):
             "app": debate_manager_app_channel_id,  "interview": debate_manager_interview_vc_id, "parent": debate_manager_parent_channel_id, 
             "cat": debate_manager_app_cat_id, 
             "message": "**Debate Manager Application**\nOur staff has evaluated your Debate Manager application and has come to the conclusion that we are **declining** your application for internal reasons.",
-            "pings": [{"id": cent_id, "role": False}]}
+            "pings": [{"role": False}]}
     }
 
     @commands.Cog.listener(name="on_raw_reaction_add")
@@ -89,7 +88,7 @@ class ApplicationsTable(commands.Cog):
             self.debate_manager_app_channel_id, self.ban_appeals_channel_id]:
 
             if payload.channel_id == self.debate_manager_app_channel_id: # User is an mod+ or lesson manager
-                if await utils.is_allowed_members([cent_id]).predicate(channel=channel, member=payload.member):
+                if await utils.is_allowed([admin_role_id]).predicate(channel=channel, member=payload.member):
                     return await self.handle_application(guild, payload)
             elif payload.channel_id == self.teacher_app_channel_id: # User is an mod+ or lesson manager
                 if await utils.is_allowed([moderator_role_id]).predicate(channel=channel, member=payload.member):
