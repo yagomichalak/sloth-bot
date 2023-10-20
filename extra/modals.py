@@ -351,9 +351,8 @@ class DebateManagerApplicationModal(Modal):
         **Application successfully made, please, be patient now.**
     • We will let you know when we need a new mod. We check apps when we need it!""", ephemeral=True)
 
-        teacher_app_channel = await self.client.fetch_channel(self.cog.debate_manager_app_channel_id)
-        cent = discord.utils.get(teacher_app_channel.guild.members, id=self.cog.cent_id)
-        app = await teacher_app_channel.send(content=f"{cent.mention}, {member.mention}", embed=embed)
+        debate_app_channel = await self.client.fetch_channel(self.cog.debate_manager_app_channel_id)
+        app = await debate_app_channel.send(content=member.mention, embed=embed)
         await app.add_reaction('✅')
         await app.add_reaction('❌')
         # Saves in the database
