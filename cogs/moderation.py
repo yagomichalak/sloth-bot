@@ -32,7 +32,8 @@ mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 muted_role_id = int(os.getenv('MUTED_ROLE_ID', 123))
 preference_role_id = int(os.getenv('PREFERENCE_ROLE_ID', 123))
 senior_mod_role_id: int = int(os.getenv('SENIOR_MOD_ROLE_ID', 123))
-allowed_roles = [int(os.getenv('OWNER_ROLE_ID', 123)), int(os.getenv('ADMIN_ROLE_ID', 123)), senior_mod_role_id, mod_role_id]
+admin_role_id: int = int(os.getenv('ADMIN_ROLE_ID', 123))
+allowed_roles = [int(os.getenv('OWNER_ROLE_ID', 123)), admin_role_id, senior_mod_role_id, mod_role_id]
 unverified_role_id = int(os.getenv('UNVERIFIED_ROLE_ID', 123))
 join_the_server_channel_id = int(os.getenv('JOIN_THE_SERVER_CHANNEL_ID', 123))
 error_log_channel_id = int(os.getenv('ERROR_LOG_CHANNEL_ID', 123))
@@ -65,6 +66,9 @@ class Moderation(*moderation_cogs):
 
 		if message.author.bot:
 			return
+		
+		# Checks if someone pinged Staff
+		await self.check_if_pinged_staff(message)
 
 		# Banned links
 		await self.check_banned_links(message)
@@ -181,6 +185,30 @@ class Moderation(*moderation_cogs):
 			return True
 		else:
 			return False
+		
+	async def check_if_pinged_staff(self, message: discord.Message) -> None:
+		""" Checks whether the member pinged the Staff in the message.
+		:param message: The message the member sent. """
+
+		guild = message.guild
+		member = message.author
+
+		# If it's Staff, don't check it
+		if await utils.is_allowed(allowed_roles).predicate(member=member): return
+		# Checks for mentioned roles in the message
+		if not (mentioned_roles := await utils.get_roles(message)): return
+
+		# Makes a set with the Staff roles
+		staff_mentions = set([
+			discord.utils.get(guild.roles, id=mod_role_id), # Mod
+			discord.utils.get(guild.roles, id=senior_mod_role_id), # Staff Manager
+			discord.utils.get(guild.roles, id=admin_role_id) # Admin
+		])
+
+		# Checks whether any of the Staff roles were in the list of roles pinged in the message
+		if staff_mentions.intersection(set(mentioned_roles)):
+			report_support_channel = discord.utils.get(guild.text_channels, id=int(os.getenv("REPORT_CHANNEL_ID")))
+			await message.channel.send(f"You should use {report_support_channel.mention} for help reports!")
 
 	@commands.Cog.listener()
 	async def on_member_join(self, member):
