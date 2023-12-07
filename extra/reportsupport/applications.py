@@ -47,7 +47,7 @@ class ApplicationsTable(commands.Cog):
             "app": teacher_app_channel_id, "interview": teacher_interview_vc_id, "parent": teacher_parent_channel_id, 
             "message": "**Teacher Application**\nOur staff has evaluated your Teacher application and has come to the conclusion that we are not in need of this lesson.",
             "cat": teacher_app_cat_id, 
-            "pings": [{"id": muffin_id, "role": False}, {"id": lesson_management_role_id, "role": True}]},
+            "pings": [{"id": lesson_management_role_id, "role": True}]},
         'moderator': {
             "app": moderator_app_channel_id, "interview": moderator_interview_vc_id, "parent": moderator_parent_channel_id,
             "cat": moderator_app_cat_id, 
