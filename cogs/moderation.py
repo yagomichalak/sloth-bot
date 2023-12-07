@@ -194,7 +194,7 @@ class Moderation(*moderation_cogs):
 		member = message.author
 
 		# If it's Staff, don't check it
-		if await utils.is_allowed(allowed_roles).predicate(member=member): return
+		if await utils.is_allowed(allowed_roles).predicate(member=member, channel=message.channel): return
 		# Checks for mentioned roles in the message
 		if not (mentioned_roles := await utils.get_roles(message)): return
 
