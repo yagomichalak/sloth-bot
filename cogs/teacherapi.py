@@ -105,8 +105,8 @@ class TeacherAPI(commands.Cog):
                 im = image.convert('RGBA')
                 return im
 
-    @commands.command(aliases=['mc', 'card'])
-    @commands.has_any_role(*allowed_roles)
+    # @commands.command(aliases=['mc', 'card'])
+    # @commands.has_any_role(*allowed_roles)
     async def make_card(self, ctx, teacher: discord.Member = None, language: str = None, description: str = None, weekday: str = None, time: str = None) -> None:
         """ Makes a teacher card with their class information.
         :param teacher: The teacher for whom to make the card.
@@ -174,8 +174,8 @@ class TeacherAPI(commands.Cog):
         await ctx.send(file=discord.File(saved_path))
         os.remove(saved_path)
 
-    @commands.command(aliases=['epfp'])
-    @commands.has_permissions(administrator=True)
+    # @commands.command(aliases=['epfp'])
+    # @commands.has_permissions(administrator=True)
     async def export_profile_pictures(self, ctx) -> None:
         """ Exports a zip file with all of the teachers' profile picture. """
 
@@ -237,8 +237,8 @@ class TeacherAPI(commands.Cog):
         else:
             return './media/flags/default.png'
 
-    @commands.command(aliases=['uc'])
-    @commands.has_permissions(administrator=True)
+    # @commands.command(aliases=['uc'])
+    # @commands.has_permissions(administrator=True)
     async def update_classes(self, ctx):
         """ Update the teachers' classes, by requesting new cards from
         the server's website """
@@ -297,8 +297,8 @@ class TeacherAPI(commands.Cog):
 
         return weekdays
 
-    @commands.command(aliases=['schedule', 'scheduled', 'scheduled classes', 'cls'])
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    # @commands.command(aliases=['schedule', 'scheduled', 'scheduled classes', 'cls'])
+    # @commands.cooldown(1, 5, commands.BucketType.user)
     async def classes(self, ctx) -> None:
         """ Tells how many classes are scheduled in the website/server. """
 
@@ -461,8 +461,8 @@ class TeacherAPI(commands.Cog):
         await mycursor.close()
         return data
 
-    @commands.command(aliases=['see_cards', 'stc'])
-    @commands.cooldown(1, 10, commands.BucketType.user)
+    # @commands.command(aliases=['see_cards', 'stc'])
+    # @commands.cooldown(1, 10, commands.BucketType.user)
     async def see_teacher_cards(self, ctx, teacher: discord.Member = None):
         """ Shows cards for a given user.
         :param teacher: The teacher from whom you want to see the cards. """
@@ -542,8 +542,8 @@ class TeacherAPI(commands.Cog):
         await db.commit()
         await mycursor.close()
 
-    @commands.command(aliases=['delete_cards', 'dtc'])
-    @utils.is_allowed([*allowed_roles, lesson_manager_role_id])
+    # @commands.command(aliases=['delete_cards', 'dtc'])
+    # @utils.is_allowed([*allowed_roles, lesson_manager_role_id])
     async def delete_teacher_cards(self, ctx, user: discord.User = None) -> None:
         """ Deletes all cards from a given teacher from the database.
         :param user: The user from whom to get the cards. """
