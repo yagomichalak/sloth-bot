@@ -57,12 +57,12 @@ class ApplicationsTable(commands.Cog):
             "app": event_host_app_channel_id,  "interview": event_host_interview_vc_id, "parent": event_host_parent_channel_id, 
             "cat": event_host_app_cat_id, 
             "message": "**Event Host Application**\nOur staff has evaluated your Event Host application and has come to the conclusion that we are not in need of this event.",
-            "pings": [{"id": guibot_id, "role": False}, {"id": real_event_manager_role_id, "role": True}]},
+            "pings": [{"id": real_event_manager_role_id, "role": True}]},
         'debate_manager': {
             "app": debate_manager_app_channel_id,  "interview": debate_manager_interview_vc_id, "parent": debate_manager_parent_channel_id, 
             "cat": debate_manager_app_cat_id, 
             "message": "**Debate Manager Application**\nOur staff has evaluated your Debate Manager application and has come to the conclusion that we are **declining** your application for internal reasons.",
-            "pings": []}
+            "pings": [{"id": real_event_manager_role_id, "role": True}]}
     }
 
     @commands.Cog.listener(name="on_raw_reaction_add")
