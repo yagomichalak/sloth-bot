@@ -990,54 +990,6 @@ class Tools(*tool_cogs):
 		# await ctx.send(embed=embed)
 		await Tools.send_big_message('File Tree', ctx.channel, str(tree), discord.Color.green())
 
-	@commands.command(aliases=["lexi", "lèqçi", "lexis"])
-	async def alexis(self, ctx) -> None:
-		""" A command for telling something about Alexis. """
-
-		sentences = [
-			"**I have a really nice voice**",
-			"**Best sister-in-law ever**",
-			"**z!bj 50**",
-			"**z!bj 2500**",
-		]
-
-		await ctx.send(choice(sentences))
-
-	@commands.command(aliases=["eli", "elj", "elijaaah"])
-	async def elijah(self, ctx) -> None:
-		""" A command for telling something about Elijah. """
-
-		await ctx.send("**Sure, go for it.**")
-
-	@commands.command(aliases=["caro"])
-	async def carola(self, ctx) -> None:
-		""" A command for telling something about Carola. """
-
-		sentences = [
-			"**Elijah stop!**",
-			"**You are so mean**",
-		]
-
-		await ctx.send(choice(sentences))
-
-	@commands.command()
-	async def freak(self, ctx) -> None:
-		""" A command for telling something about Marceline. """
-
-		await ctx.send("You mean missy aka Marceline")
-
-	@commands.command(aliases=["winni", "winnie", "wynni", "wynnie"])
-	async def wyncham(self, ctx) -> None:
-		""" A command for telling something about Wyncham. """
-
-		sentences = [
-			"**You have a really nice voice**",
-			"**Leonarda is my best friend**",
-			"**Elijah and DNK are my brothers**"
-		]
-
-		await ctx.send(choice(sentences))
-
 	@commands.command()
 	@utils.is_allowed([owner_role_id, admin_role_id, mod_role_id], throw_exc=True)
 	async def cosmos(self, ctx) -> None:
@@ -1049,30 +1001,12 @@ class Tools(*tool_cogs):
 
 	@commands.command()
 	@utils.is_allowed([owner_role_id, admin_role_id, mod_role_id], throw_exc=True)
-	async def muffin(self, ctx) -> None:
-		""" A command for pinging Muffin, the rich Lux lass. """
-
-		muffin_id = int(os.getenv('MUFFIN_ID', 123))
-		muffin = discord.utils.get(ctx.guild.members, id=muffin_id)
-		await ctx.send(muffin.mention)
-
-	@commands.command()
-	@utils.is_allowed([owner_role_id, admin_role_id, mod_role_id], throw_exc=True)
 	async def prisca(self, ctx) -> None:
 		""" A command for pinging Prisca, the photoshop Turk. """
 
 		prisca_id = int(os.getenv('PRISCA_ID', 123))
 		prisca = discord.utils.get(ctx.guild.members, id=prisca_id)
 		await ctx.send(prisca.mention)
-
-	@commands.command(aliases=['gui'])
-	@utils.is_allowed([owner_role_id, admin_role_id, mod_role_id], throw_exc=True)
-	async def guibot(self, ctx) -> None:
-		""" A command for pinging GuiBot, the lawyer and demoter guy. """
-
-		guibot_id = int(os.getenv('GUIBOT_ID', 123))
-		guibot = discord.utils.get(ctx.guild.members, id=guibot_id)
-		await ctx.send(guibot.mention)
 
 	@commands.command(aliases=['musicbot', 'music_bot', 'musicbots', 'music', 'mb'])
 	@commands.cooldown(1, 10, commands.BucketType.user)
@@ -1171,8 +1105,8 @@ class Tools(*tool_cogs):
 		member: Option(str, name="member", description="The Staff member to mention/ping.", required=True,
 			choices=[
 				OptionChoice(name="Cosmos", value=os.getenv('COSMOS_ID')), OptionChoice(name="Alex", value=os.getenv('ALEX_ID')),
-				OptionChoice(name="DNK", value=os.getenv('DNK_ID')), OptionChoice(name="Muffin", value=os.getenv('MUFFIN_ID')),
-				OptionChoice(name="Prisca", value=os.getenv('PRISCA_ID')), OptionChoice(name="GuiBot", value=os.getenv('GUIBOT_ID'))
+				OptionChoice(name="DNK", value=os.getenv('DNK_ID')), OptionChoice(name="Elijah", value=os.getenv('ELIJAH_ID')),
+				OptionChoice(name="Prisca", value=os.getenv('PRISCA_ID')), OptionChoice(name="Lemon", value=os.getenv('LEMON_ID'))
 			]
 		)) -> None:
 		""" (ADMIN) Used to mention staff members. """
