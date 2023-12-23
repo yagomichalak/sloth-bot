@@ -55,7 +55,7 @@ class Prestige(commands.Cog):
 
         await ctx.send(choice(sentences))
 
-    @commands.command(aliases=["winni", "winnie", "wynni", "wynnie"])
+    @commands.command(aliases=["not_lime", "lemonade", "citric", "yellow_fruit"])
     async def lemon(self, ctx) -> None:
         """ A command for telling something about Wyncham. """
 
