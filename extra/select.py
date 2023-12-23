@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 import os
 from typing import List, Union, Dict
-from .modals import UserReportSupportDetailModal
+from .modals import UserReportSupportDetailModal, UserReportStaffDetailModal
 
 class ReportSupportSelect(discord.ui.Select):
     """ Select for the Report-Support options. """
@@ -29,6 +29,33 @@ class ReportSupportSelect(discord.ui.Select):
             await interaction.response.send_modal(modal)
         else:
             modal = UserReportSupportDetailModal(self.client, interaction.data['values'][0])
+            await modal.callback(interaction)
+
+        self.view.stop()
+
+class ReportStaffSelect(discord.ui.Select):
+    """ Select for the Report-Support options. """
+
+    def __init__(self, client: commands.Bot) -> None:
+        """ Class init method. """
+
+        super().__init__(
+            custom_id="report_support_select", placeholder="Select what kind of Help you need", 
+            min_values=1, max_values=1, 
+            options=[
+                discord.SelectOption(label="Report", description="Report a staff member for breaking the rules or abusing power.", emoji="<:mod_abooz:730887063481876612>"),
+                discord.SelectOption(label="Oopsie", description="Cancel, I missclicked.", emoji="❌"),
+            ])
+        self.client = client
+    
+    async def callback(self, interaction: discord.Interaction):
+        """ Callback for the ReportSupport's selected option. """
+
+        if interaction.data["values"][0] == "Report":
+            modal = UserReportStaffDetailModal(self.client, interaction.data['values'][0])
+            await interaction.response.send_modal(modal)
+        else:
+            modal = UserReportStaffDetailModal(self.client, interaction.data['values'][0])
             await modal.callback(interaction)
 
         self.view.stop()

@@ -15,6 +15,7 @@ reportsupport_channel_id = int(os.getenv('REPORT_CHANNEL_ID', 123))
 mod_log_id = int(os.getenv('MOD_LOG_CHANNEL_ID', 123))
 dnk_id = int(os.getenv('DNK_ID', 123))
 moderator_role_id = int(os.getenv('MOD_ROLE_ID', 123))
+senior_role_id = int(os.getenv('SENIOR_MOD_ROLE_ID', 123))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID', 123))
 lesson_management_role_id = int(os.getenv('LESSON_MANAGEMENT_ROLE_ID', 123))
 server_id = int(os.getenv('SERVER_ID', 123))
@@ -257,6 +258,69 @@ class ReportSupport(*report_support_classes):
                 await ctx.send(f"**{member.mention} is not in a VC!**")
 
     # - Report someone
+    async def report_staff(self, interaction: discord.Interaction, reportee: str, text: str):
+
+        member = interaction.user
+        guild = interaction.guild
+
+        if open_channel := await self.member_has_open_channel(member.id):
+            if open_channel := discord.utils.get(guild.text_channels, id=open_channel[1]):
+                embed = discord.Embed(title="Error!", description=f"**You already have an open channel! ({open_channel.mention})**", color=discord.Color.red())
+                await interaction.followup.send(embed=embed, ephemeral=True)
+                return False
+            else:
+                await self.remove_user_open_channel(member.id)
+
+        # Report someone
+        case_cat = discord.utils.get(guild.categories, id=case_cat_id)
+        counter = await self.get_case_number()
+        moderator = discord.utils.get(guild.roles, id=moderator_role_id)
+        senior_mod = discord.utils.get(guild.roles, id=senior_role_id)
+        cosmos_role = discord.utils.get(guild.roles, id=self.cosmos_role_id)
+        overwrites = {guild.default_role: discord.PermissionOverwrite(
+            read_messages=False, send_messages=False, connect=False, view_channel=False),
+        member: discord.PermissionOverwrite(
+            read_messages=True, send_messages=True, connect=False, view_channel=True),
+        moderator: discord.PermissionOverwrite(
+            read_messages=False, send_messages=False, connect=False, view_channel=False, manage_messages=False),
+        senior_mod: discord.PermissionOverwrite(
+            read_messages=True, send_messages=True, connect=True, view_channel=True, manage_messages=True)}
+        try:
+            the_channel = await guild.create_text_channel(name=f"staff-case-{counter[0][0]}", category=case_cat, overwrites=overwrites)
+        except Exception as e:
+            print(e)
+            await interaction.followup.send("**Something went wrong with it, please contact an admin!**", ephemeral=True)
+            raise Exception
+        else:
+            created_embed = discord.Embed(
+                title="Report Staff room created!",
+                description=f"**Go to {the_channel.mention}!**",
+                color=discord.Color.green())
+            await interaction.followup.send(embed=created_embed, ephemeral=True)
+            await self.insert_user_open_channel(member.id, the_channel.id)
+            await self.increase_case_number()
+            embed = discord.Embed(title="Report Staff!", description=f"{member.mention}\nReporting `{reportee}`\nFor:```{text}```",
+                color=discord.Color.red())
+            message = await the_channel.send(content=f"{member.mention}, {senior_mod.mention}, {cosmos_role.mention}", embed=embed)
+            ctx = await self.client.get_context(message)
+
+            if member.voice:
+                channel = member.voice.channel
+                members = member.voice.channel.members
+
+                for id, member_in_vc in enumerate(members):
+                    if member == member_in_vc:
+                        del members[id]
+
+                if not members:
+                    await ctx.send(f"**{member.mention} is in the {channel.mention} voice channel alone!**")
+                else:
+                    await ctx.send(f"**{member.mention} is in the {channel.mention} voice channel with other {len(channel.members) - 1} members:** {', '.join([member_in_vc.mention for member_in_vc in members])}")
+
+            else:
+                await ctx.send(f"**{member.mention} is not in a VC!**")
+
+    # - Report someone
     async def generic_help(self, interaction: discord.Interaction, type_help: str, message: str, ping: bool = True) -> None:
         """ Opens a generic help channel.
         :param interaction: The interaction that generated this action.
@@ -407,7 +471,7 @@ class ReportSupport(*report_support_classes):
 
         return await ctx.send(f"**`{forbid}` {'witnesses have' if forbid > 1 else 'witness has'} been forbidden from here!**")
             
-    @commands.command(aliases=['delete_channel', 'archive', 'cc'])
+    @commands.command(aliases=['delete_channel', 'archive', 'cc', "close_case", "end_case", "solve", "solved"])
     @commands.has_any_role(*allowed_roles)
     async def close_channel(self, ctx):
         """ (MOD) Closes a Case-Channel. """

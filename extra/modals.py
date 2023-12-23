@@ -427,6 +427,52 @@ class UserReportSupportDetailModal(Modal):
         elif self.option == 'Oopsie':
             return await interaction.followup.send("**All right, cya!**", ephemeral=True)
 
+class UserReportStaffDetailModal(Modal):
+    """ Class for specifying details for a Report Support request. """
+
+    def __init__(self, client: commands.Bot, option: str) -> None:
+        """ Class init method. """
+
+        super().__init__(title="Report Staff")
+        self.client = client
+        self.cog: commands.Cog = client.get_cog('ReportSupport')
+        self.add_item(
+            InputText(
+                label="Who are you reporting?",
+                placeholder="Type the username of the Staff member you are reporting.",
+                style=discord.InputTextStyle.singleline
+            )
+        )
+        self.add_item(
+            InputText(
+                label="Reason of the report/What did this user do?",
+                placeholder="Describe the situation as much as you can, so we can help you better and faster.",
+                style=discord.InputTextStyle.paragraph
+            )
+        )
+        self.option = option
+
+    async def callback(self, interaction) -> None:
+        """ Callback for the form modal. """
+
+        await interaction.response.defer()
+        reportee = self.children[0].value
+        text = self.children[1].value
+        member = interaction.user
+
+        if self.option == 'Report':
+            try:
+                exists = await self.cog.report_staff(interaction, reportee, text)
+                if exists is False:
+                    return
+            except Exception as e:
+                print(e)
+
+            else:
+                return await self.cog.audio(member, 'case_alert')
+
+        elif self.option == 'Oopsie':
+            return await interaction.followup.send("**All right, cya!**", ephemeral=True)
 
 
 class TravelBuddyModal(Modal):

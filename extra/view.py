@@ -3,7 +3,7 @@ from extra import utils
 from discord.ext import commands
 from typing import List, Union, Optional, Dict, Any
 from .menu import ConfirmSkill
-from .select import ReportSupportSelect
+from .select import ReportSupportSelect, ReportStaffSelect
 from .modals import (
     ModeratorApplicationModal, TeacherApplicationModal,
     EventHostApplicationModal, DebateManagerApplicationModal
@@ -172,6 +172,26 @@ class ReportSupportView(discord.ui.View):
         self.cog.report_cache[member.id] = time_now
         view = discord.ui.View()
         view.add_item(ReportSupportSelect(self.client))
+        await interaction.followup.send(content="How can we help you?", view=view, ephemeral=True)
+
+    @discord.ui.button(label="Report a Staff member!", style=4, custom_id=f"report_staff", emoji="<:mod_abooz:730887063481876612>", row=3)
+    async def report_staff_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Button for reporting a Staff member. """
+
+        await interaction.response.defer()
+        member = interaction.user
+
+        member_ts = self.cog.report_cache.get(member.id)
+        time_now = await utils.get_timestamp()
+        if member_ts:
+            sub = time_now - member_ts
+            if sub <= 240:
+                return await interaction.followup.send(
+                    f"**You are on cooldown to report, try again in {round(240-sub)} seconds**", ephemeral=True)
+
+        self.cog.report_cache[member.id] = time_now
+        view = discord.ui.View()
+        view.add_item(ReportStaffSelect(self.client))
         await interaction.followup.send(content="How can we help you?", view=view, ephemeral=True)
 
 class QuickButtons(discord.ui.View):
