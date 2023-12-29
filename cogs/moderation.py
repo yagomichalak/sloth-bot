@@ -84,6 +84,19 @@ class Moderation(*moderation_cogs):
 				if not is_from_guild:
 					return await self._mute_callback(ctx, member=message.author, reason="Invite Advertisement.")
 
+	@commands.Cog.listener()
+	async def on_member_update(self, before, after):
+		"""Checks if a member is picking roles while muted"""
+		member = after
+		if member.bot:
+			return
+		if len(before.roles) < len(after.roles):
+				if await self.get_muted_roles(member.id):
+					muted_role = discord.utils.get(member.guild.roles, id=muted_role_id)
+					keep_roles, _ = await self.get_remove_roles(member, keep_roles=allowed_roles)
+					keep_roles.append(muted_role)
+					await member.edit(roles=keep_roles)
+
 	async def check_banned_links(self, message: discord.Message) -> None:
 		""" Checks if the message sent was or contains a banned link. """
 
