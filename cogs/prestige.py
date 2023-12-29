@@ -1,8 +1,6 @@
-import discord
 from discord.ext import commands
 
 import os
-from extra import utils
 from random import choice
 
 mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
@@ -66,7 +64,6 @@ class Prestige(commands.Cog):
         ]
 
         await ctx.send(choice(sentences))
-
 
 def setup(client) -> None:
     """ Cog's setup function. """
