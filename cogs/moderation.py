@@ -89,6 +89,30 @@ class Moderation(*moderation_cogs):
 
 				if not is_from_guild:
 					return await self._mute_callback(ctx, member=message.author, reason="Invite Advertisement.")
+				
+	@commands.Cog.listener()
+	async def on_member_update(self, before, after):
+		"""Checks if a member is picking roles while muted"""
+		member = after
+		if member.bot:
+			return
+		if len(before.roles) < len(after.roles):
+			if await self.get_muted_roles(member.id):
+				muted_role = discord.utils.get(member.guild.roles, id=muted_role_id)
+				keep_roles, _ = await self.get_remove_roles(member, keep_roles=allowed_roles)
+				keep_roles.append(muted_role)
+				await member.edit(roles=keep_roles)
+	
+	def get_invite_root(self, message: str) -> str:
+		""" Gets the invite root from an invite link.
+		:param message: The message content. """
+
+		for invite_type in self.INVITE_TYPES:
+			if invite_type in message:
+				return invite_type
+			
+		return ""
+		
 
 	def get_invite_root(self, message: str) -> str:
 		""" Gets the invite root from an invite link.
@@ -721,6 +745,13 @@ class Moderation(*moderation_cogs):
 			embed.set_thumbnail(url=member.display_avatar)
 			embed.set_footer(text=f"Muted by {ctx.author}", icon_url=ctx.author.display_avatar)
 			await moderation_log.send(embed=embed)
+			
+			# Pings them in muted chat
+			muted_channel_id = int(os.getenv('MUTED_CHANNEL_ID', 123))
+			muted_channel = discord.utils.get(ctx.guild.channels, id=muted_channel_id)
+			message = (f"Hello {member.mention}! Please talk to {ctx.author.mention} to solve your mute.")
+			await muted_channel.send(message)
+			
 			# Inserts a infraction into the database
 			await self.insert_user_infraction(
 				user_id=member.id, infr_type="mute", reason=reason,

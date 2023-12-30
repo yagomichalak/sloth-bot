@@ -257,7 +257,7 @@ class ReportSupport(*report_support_classes):
             else:
                 await ctx.send(f"**{member.mention} is not in a VC!**")
 
-    # - Report someone
+    # - Report someone (staff)
     async def report_staff(self, interaction: discord.Interaction, reportee: str, text: str):
 
         member = interaction.user
@@ -271,7 +271,7 @@ class ReportSupport(*report_support_classes):
             else:
                 await self.remove_user_open_channel(member.id)
 
-        # Report someone
+        # Report someone (staff)
         case_cat = discord.utils.get(guild.categories, id=case_cat_id)
         counter = await self.get_case_number()
         moderator = discord.utils.get(guild.roles, id=moderator_role_id)
@@ -429,17 +429,29 @@ class ReportSupport(*report_support_classes):
 
         channel = discord.utils.get(ctx.guild.channels, id=user_channel[0][1])
         allowed: int = 0
+        # Embed
+        current_time = await utils.get_time_now()
+        channel_url = ctx.channel.mention
+        embed = discord.Embed(
+        description=f'Please have a look as it would help us with our investigation so we can keep our community an inclusive and welcoming one.\n{channel_url}',
+        colour=discord.Colour.green(),
+        timestamp=current_time)
+
         for member in members:
             try:
                 await channel.set_permissions(
                     member, read_messages=True, send_messages=True, connect=True, speak=True, view_channel=True)
+
+                
+                embed.set_author(name=f'You have been allowed as a witness', icon_url=member.display_avatar)
+                await member.send(embed=embed)
             except Exception:
                 pass
             else:
                 allowed += 1
 
         return await ctx.send(f"**`{allowed}` {'witnesses have' if allowed > 1 else 'witness has'} been allowed here!**")
-
+    
     @commands.command(aliases=['forbid_case', 'delete_witness', 'remve_witness', 'fw'])
     @commands.has_any_role(*allowed_roles)
     async def forbid_witness(self, ctx):
