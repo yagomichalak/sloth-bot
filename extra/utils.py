@@ -15,7 +15,7 @@ import shlex
 
 session = aiohttp.ClientSession()
 
-async def get_timestamp(tz: str = 'Etc/GMT') -> int:
+async def get_timestamp(tz: str = 'Etc/GMT') -> float:
     """ Gets the current timestamp.
     :param tz: The timezone to get the timstamp from. Default = Etc/GMT """
 
