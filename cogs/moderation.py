@@ -890,13 +890,13 @@ class Moderation(*moderation_cogs):
 			if role in member_roles:
 				member_roles.remove(role)
 
-			await member.edit(roles=member_roles)
-
 			try:
 				await self.remove_all_roles_from_system(member.id)
 			except Exception as e:
 				print(e)
 				pass
+
+			await member.edit(roles=member_roles)
 
 		if muted_galaxies := await self.get_user_muted_galaxies(member.id):
 			await self.add_galaxy_room_perms(member, muted_galaxies)
