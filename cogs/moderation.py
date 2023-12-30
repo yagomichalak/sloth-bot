@@ -50,6 +50,11 @@ moderation_cogs: List[commands.Cog] = [
 class Moderation(*moderation_cogs):
 	""" Moderation related commands. """
 
+	INVITE_TYPES = [
+		"discord.gg/", "discord.com/invites/",
+		"discord.gg/events/", "discord.com/events/"
+	]
+
 	def __init__(self, client):
 		self.client = client
 
@@ -75,15 +80,16 @@ class Moderation(*moderation_cogs):
 
 		# Invite tracker
 		msg = str(message.content)
-		if 'discord.gg/' in msg.lower() or 'discord.com/invite/' in msg.lower():
-			invite_root = 'discord.gg/' if 'discord.gg/' in msg.lower() else 'discord.com/invite/'
+		invite_root = self.get_invite_root(msg.lower().strip())
+
+		if invite_root and invite_root not in ("discord.gg/events/", "discord.com/events/"):
 			ctx = await self.client.get_context(message)
 			if not await utils.is_allowed(allowed_roles).predicate(ctx):
 				is_from_guild = await self.check_invite_guild(msg, message.guild, invite_root)
 
 				if not is_from_guild:
 					return await self._mute_callback(ctx, member=message.author, reason="Invite Advertisement.")
-
+				
 	@commands.Cog.listener()
 	async def on_member_update(self, before, after):
 		"""Checks if a member is picking roles while muted"""
@@ -96,6 +102,17 @@ class Moderation(*moderation_cogs):
 				keep_roles, _ = await self.get_remove_roles(member, keep_roles=allowed_roles)
 				keep_roles.append(muted_role)
 				await member.edit(roles=keep_roles)
+	
+	def get_invite_root(self, message: str) -> str:
+		""" Gets the invite root from an invite link.
+		:param message: The message content. """
+
+		for invite_type in self.INVITE_TYPES:
+			if invite_type in message:
+				return invite_type
+			
+		return ""
+		
 
 	async def check_banned_links(self, message: discord.Message) -> None:
 		""" Checks if the message sent was or contains a banned link. """
@@ -187,6 +204,7 @@ class Moderation(*moderation_cogs):
 			invite_hash = invite_hash.replace(char, '')
 		invite = invite_root + invite_hash
 		inv_code = discord.utils.resolve_invite(invite)
+		print(inv_code)
 		if inv_code == 'languages':
 			return True
 
@@ -717,6 +735,13 @@ class Moderation(*moderation_cogs):
 			embed.set_thumbnail(url=member.display_avatar)
 			embed.set_footer(text=f"Muted by {ctx.author}", icon_url=ctx.author.display_avatar)
 			await moderation_log.send(embed=embed)
+			
+			# Pings them in muted chat
+			muted_channel_id = int(os.getenv('MUTED_CHANNEL_ID', 123))
+			muted_channel = discord.utils.get(ctx.guild.channels, id=muted_channel_id)
+			message = (f"Hello {member.mention}! Please talk to {ctx.author.mention} to solve your mute.")
+			await muted_channel.send(message)
+			
 			# Inserts a infraction into the database
 			await self.insert_user_infraction(
 				user_id=member.id, infr_type="mute", reason=reason,
