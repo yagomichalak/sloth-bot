@@ -208,30 +208,6 @@ class Misc(*misc_cogs):
         await self.delete_member_reminder(reminder_id)
         await ctx.send(f"**Successfully deleted reminder with ID `{reminder_id}`, {member.mention}!**")
 
-    @slash_command(name="dnk", guild_ids=guild_ids)
-    async def _dnk(self, ctx) -> None:
-        """ Tells you something about DNK. """
-        
-        await ctx.respond(f"**`Sapristi ! C'est qui ? Oui, c'est lui le plus grave et inouï keum qu'on n'a jamais ouï-dire, tandis qu'on était si abasourdi et épris de lui d'être ici affranchi lorsqu'il a pris son joli gui qui ne nie ni être suivi par une souris sur son nid ni être mis ici un beau lundi !`**")
-
-    @slash_command(name="gabriel", guild_ids=guild_ids)
-    async def _gabriel_slash(self, ctx) -> None:
-        """ Tells you something about Gabriel. """
-        
-        await ctx.respond(f"**<@366628959657394186>? Il est frais et il est chaud, et quand il rap c'est que du feu**")
-
-    @commands.command(name="gabriel", aliases=["gab", "gabi", "gbrl", "gaburierudesu", "camisa9", "atacante", "rapper"])
-    async def _gabriel_command(self, ctx) -> None:
-        """ Tells you something about Gabriel. """
-        
-        await ctx.send(f"**<@366628959657394186>, desculpa por interromper o seu andamento, é que eu te vi passando, você é artista?**")
-
-    @slash_command(name="twiks", guild_ids=guild_ids)
-    async def _twiks(self, ctx) -> None:
-        """ Tells you something about Twiks. """
-
-        await ctx.respond(f"**Twiks est mon frérot !**")
-
     @user_command(name="Help", guild_ids=guild_ids)
     async def _help(self, ctx, user: discord.Member) -> None:
         """ Help! """
