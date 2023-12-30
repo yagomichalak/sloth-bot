@@ -90,6 +90,52 @@ class Moderation(*moderation_cogs):
 				if not is_from_guild:
 					return await self._mute_callback(ctx, member=message.author, reason="Invite Advertisement.")
 
+	@commands.Cog.listener()
+	async def on_member_update(self, before, after):
+		""" Checks whether a member is picking roles while muted. """
+
+		member = after  # Alias for the member object that will be updated and used
+
+		# It's a bot
+		if member.bot:
+			return
+		
+		# The user left the server
+		if not after.guild:
+			return
+
+		# Before and After roles
+		roles = before.roles
+		roles2 = after.roles
+
+		# User lost a role
+		if len(roles2) < len(roles):
+			return
+
+		new_role = None
+
+		# Gets the new role
+		for r2 in roles2:
+			if r2 not in roles:
+				new_role = r2
+				break
+
+		# Checks, just in case, if the new role was found
+		if not new_role:
+			return
+
+		# Checks whether the user has muted roles in the database
+		if await self.get_muted_roles(member.id):
+			keep_roles, _ = await self.get_remove_roles(member, keep_roles=allowed_roles)
+			muted_role = discord.utils.get(member.guild.roles, id=muted_role_id)
+
+			# If the user, for some reason, doesn't have the muted role, adds it
+			if muted_role not in keep_roles:
+				keep_roles.append(muted_role)
+
+			# Updates the user roles
+			await member.edit(roles=keep_roles)
+
 	def get_invite_root(self, message: str) -> str:
 		""" Gets the invite root from an invite link.
 		:param message: The message content. """
