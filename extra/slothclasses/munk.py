@@ -204,7 +204,7 @@ class Munk(Player):
             timestamp=datetime.fromtimestamp(timestamp)
         )
 
-        munk_embed.set_thumbnail(url="https://discord.languagesloth.com/media/sloth_classes/Munk.png")
+        munk_embed.set_thumbnail(url="https://languagesloth.com/media/sloth_classes/Munk.png")
         munk_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
 
         return munk_embed
@@ -260,7 +260,7 @@ class Munk(Player):
                 'two_emojis': tribe[3],
                 'thumbnail': tribe[4],
                 'form': tribe[5],
-                'link': f"https://discord.languagesloth.com/tribes/{tribe[6]}/"
+                'link': f"https://languagesloth.com/tribes/{tribe[6]}/"
             }
 
         return tribe_info
@@ -292,7 +292,7 @@ class Munk(Player):
                 'two_emojis': tribe[3],
                 'thumbnail': tribe[4],
                 'form': tribe[5],
-                'link': f"https://discord.languagesloth.com/tribes/{tribe[6]}/"
+                'link': f"https://languagesloth.com/tribes/{tribe[6]}/"
             }
 
         return tribe_info
@@ -755,7 +755,7 @@ class Munk(Player):
 
         member = ctx.author
 
-        link = 'https://discord.languagesloth.com/tribes'
+        link = 'https://languagesloth.com/tribes'
 
         tribe_embed = discord.Embed(
             title="__Tribe Creation__",

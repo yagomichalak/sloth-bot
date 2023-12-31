@@ -93,7 +93,7 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
                 description=f"```ini\n{''.join(sloth_classes)}```",
                 color=ctx.author.color,
                 timestamp=ctx.message.created_at,
-                url='https://discord.languagesloth.com/profile/slothclass'
+                url='https://languagesloth.com/profile/slothclass'
             )
 
             await ctx.send(embed=embed)
@@ -172,15 +172,15 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
         sloth_profile = await self.get_sloth_profile(member.id)
 
         view = discord.ui.View()
-        view.add_item(discord.ui.Button(style=5, label="Create Account", emoji="🦥", url="https://discord.languagesloth.com/profile/update"))
+        view.add_item(discord.ui.Button(style=5, label="Create Account", emoji="🦥", url="https://languagesloth.com/profile/update"))
 
         if not sloth_profile:
             return await ctx.send( 
-                embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://discord.languagesloth.com/profile/update) to create one, or in the button below!**"),
+                embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://languagesloth.com/profile/update) to create one, or in the button below!**"),
                 view=view)
         if sloth_profile[1] == 'default':
             return await ctx.send( 
-                embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://discord.languagesloth.com/profile/update) to create one, or in the button below!**"),
+                embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://languagesloth.com/profile/update) to create one, or in the button below!**"),
                 view=view)
 
         the_class = classes.get(sloth_profile[1].lower())
@@ -235,7 +235,7 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
         )
         skills_embed.add_field(name=f"__Skills__:", value=f"```apache\n{cmds_text}```")
         skills_embed.set_author(name=member, icon_url=member.display_avatar)
-        skills_embed.set_thumbnail(url=f"https://discord.languagesloth.com/static/assets/images/sloth_classes/{sloth_profile[1]}.png")
+        skills_embed.set_thumbnail(url=f"https://languagesloth.com/static/assets/images/sloth_classes/{sloth_profile[1]}.png")
         skills_embed.set_footer(text=ctx.guild, icon_url=ctx.guild.icon.url)
         await ctx.send(embed=skills_embed)
 
@@ -277,7 +277,7 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
             description="🟢 - Finished;\n🟠 - Work in Progress;\n🔴 - Not Started.",
             color=member.color,
             timestamp=ctx.message.created_at,
-            url="https://discord.languagesloth.com"
+            url="https://languagesloth.com"
         )
 
         embed.set_thumbnail(url=guild.icon.url)
@@ -308,7 +308,7 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
             description="Showing all skills available for all Sloth Class, respectively.",
             color=member.color,
             timestamp=ctx.message.created_at,
-            url="https://discord.languagesloth.com/profile/slothclass"
+            url="https://languagesloth.com/profile/slothclass"
         )
 
         # Loops all Sloth Classes

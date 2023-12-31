@@ -53,9 +53,9 @@ class Duolingo(DuolingoProfileTable):
         SlothCurrency = self.client.get_cog('SlothCurrency')
         if not await SlothCurrency.get_user_currency(member.id):
             view = discord.ui.View()
-            view.add_item(discord.ui.Button(style=5, label="Create Account", emoji="🦥", url="https://discord.languagesloth.com/profile/update"))
+            view.add_item(discord.ui.Button(style=5, label="Create Account", emoji="🦥", url="https://languagesloth.com/profile/update"))
             return await member.send(
-            embed=discord.Embed(description=f"**{member.mention}, you don't have a Sloth Account yet. Click [here](https://discord.languagesloth.com/profile/update) to create one, or in the button below!**"))
+            embed=discord.Embed(description=f"**{member.mention}, you don't have a Sloth Account yet. Click [here](https://languagesloth.com/profile/update) to create one, or in the button below!**"))
 
         confirm = await Confirm(f"**Are you sure you want to set `{duo_name}` as your Duolingo's username, {member.mention}?**").prompt(ctx)
         if not confirm:
