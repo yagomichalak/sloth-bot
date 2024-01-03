@@ -43,7 +43,7 @@ class ReportSupport(*report_support_classes):
 
         self.client = client
         self.cosmos_role_id: int = int(os.getenv('COSMOS_ROLE_ID', 123))
-        self.muffin_id: int = int(os.getenv('MUFFIN_ID', 123))
+        self.prisca_id: int = int(os.getenv('PRISCA_ID', 123))
         self.cache = {}
         self.report_cache = {}
         self.bot_cache = {}
