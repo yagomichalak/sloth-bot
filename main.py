@@ -5,10 +5,12 @@ from dotenv import load_dotenv
 from discord.ext import commands, tasks
 
 from extra import utils
+from extra.menu import PaginatorView
 from typing import List
 import os
 from datetime import datetime
 from itertools import cycle
+from typing import Dict, Union, Any
 
 from extra.useful_variables import patreon_roles
 
@@ -330,62 +332,120 @@ async def uptime(ctx: commands.Context) -> None:
     await ctx.send(f"I've been online for {uptime_stamp}")
 
 
+async def make_help_embed(req: str, member: Union[discord.Member, discord.User], search: str, example: Any, 
+    offset: int, lentries: int, entries: Dict[str, Any], title: str = None, result: str = None, **kwargs: Dict[str, Any]) -> discord.Embed:
+    """ Makes an embed for .
+    :param req: The request URL link.
+    :param member: The member who triggered the command.
+    :param search: The search that was performed.
+    :param example: The current search example.
+    :param offset: The current page of the total entries.
+    :param lentries: The length of entries for the given search. """
+
+    embed: discord.Embed = None
+    target = kwargs.get("target")
+    if not target:
+        target = member
+
+    per_page = kwargs.get("per_page")
+    current_embed = kwargs.get("current_embed")
+    embed = current_embed
+    embed.clear_fields()
+
+    for i in range(0, per_page, 1):
+        if offset - 1 + i < lentries:
+            entry = entries[offset-1 + i]
+            embed.add_field(**entry)
+        else:
+            break
+
+    # Sets the author of the search
+    embed.set_author(name=target, icon_url=target.display_avatar)
+    # Makes a footer with the a current page and total page counter
+    embed.set_footer(text=f"Requested by {target}", icon_url=target.display_avatar)
+
+    return embed
+
+
 @client.command()
 async def help(ctx, *, cmd: str =  None) -> None:
     """ Shows some information about commands and categories. 
     :param cmd: The command/category. """
 
-
     if not cmd:
-        embed = discord.Embed(
-            title="All commands and categories",
+        fields = []
+        current_embed = discord.Embed(
+            title=f"All commands and categories",
             description=f"```ini\nUse {client.command_prefix}help command or {client.command_prefix}help category to know more about a specific command or category\n\n[Examples]\n[1] Category: {client.command_prefix}help SlothCurrency\n[2] Command : {client.command_prefix}help rep```",
             timestamp=ctx.message.created_at,
             color=ctx.author.color
-            )
+        )
 
         for cog in client.cogs:
             cog = client.get_cog(cog)
             cog_commands = [c for c in cog.__cog_commands__ if hasattr(c, 'parent') and c.parent is None]
             commands = [f"{client.command_prefix}{c.name}" for c in cog_commands if hasattr(c, 'hidden') and not c.hidden]
             if commands:
-                embed.add_field(
-                    name=f"__{cog.qualified_name}__",
-                    value=f"`Commands:` {', '.join(commands)}",
-                    inline=False
-                    )
+                fields.append({
+                    "name": f"__{cog.qualified_name}__",
+                    "value": f"`Commands:` {', '.join(commands)}",
+                    "inline": False}
+                )
 
         cmds = []
         for y in client.walk_commands():
             if not y.cog_name and not y.hidden:
                 cmds.append(f"{client.command_prefix}{y.name}")
 
-        embed.add_field(
-            name='__Uncategorized Commands__',
-            value=f"`Commands:` {', '.join(cmds)}",
-            inline=False)
-        await ctx.send(embed=embed)
+        fields.append({
+            "name": '__Uncategorized Commands__',
+            "value": f"`Commands:` {', '.join(cmds)}",
+            "inline": False}
+        )
+        
+        additional = {
+            "client": client,
+            "change_embed": make_help_embed,
+            "target": ctx.author,
+            "per_page": 25,
+            "current_embed": current_embed
+        }
+        view = PaginatorView(fields, increment=25, **additional)
+        embed = await view.make_embed(ctx.author)
+        await ctx.send(embed=embed, view=view)
 
     else:  
         cmd = escape_mentions(cmd)
         if command := client.get_command(cmd.lower()):
             command_embed = discord.Embed(title=f"__Command:__ {client.command_prefix}{command.qualified_name}", description=f"__**Description:**__\n```{command.help}```", color=ctx.author.color, timestamp=ctx.message.created_at)
             return await ctx.send(embed=command_embed)
+        
+        fields = []
 
         # Checks if it's a cog
         for cog in client.cogs:
             if str(cog).lower() == str(cmd).lower():
                 cog = client.get_cog(cog)
-                cog_embed = discord.Embed(title=f"__Cog:__ {cog.qualified_name}", description=f"__**Description:**__\n```{cog.description}```", color=ctx.author.color, timestamp=ctx.message.created_at)
+                current_embed = discord.Embed(title=f"__Cog:__ {cog.qualified_name}", description=f"__**Description:**__\n```{cog.description}```", color=ctx.author.color, timestamp=ctx.message.created_at)
                 cog_commands = [c for c in cog.__cog_commands__ if hasattr(c, 'hidden') and hasattr(c, 'parent') and c.parent is None]
                 for c in cog_commands:
                     if not c.hidden:
-                        cog_embed.add_field(name=c.qualified_name, value=c.help, inline=False)
-
-                return await ctx.send(embed=cog_embed)
+                        fields.append({"name": c.qualified_name, "value": c.help, "inline": False})
+            
+                additional = {
+                    "client": client,
+                    "change_embed": make_help_embed,
+                    "target": ctx.author,
+                    "per_page": 25,
+                    "current_embed": current_embed
+                }
+                view = PaginatorView(fields, increment=25, **additional)
+                embed = await view.make_embed(ctx.author)
+                return await ctx.send(embed=embed, view=view)
         # Otherwise, it's an invalid parameter (Not found)
         else:
             await ctx.send(f"**Invalid parameter! It is neither a command nor a cog!**")
+
 
 @client.command(aliases=['al', 'alias'])
 async def aliases(ctx, *, cmd: str =  None) -> None:
