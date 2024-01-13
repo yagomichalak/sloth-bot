@@ -176,8 +176,8 @@ class TeacherApplicationModal(Modal):
     • We will let you know when we need a new mod. We check apps when we need it!""", ephemeral=True)
 
         teacher_app_channel = await self.client.fetch_channel(self.cog.teacher_app_channel_id)
-        muffin = discord.utils.get(teacher_app_channel.guild.members, id=self.cog.muffin_id)
-        app = await teacher_app_channel.send(content=f"{muffin.mention}, {member.mention}", embed=embed)
+        prisca = discord.utils.get(teacher_app_channel.guild.members, id=self.cog.prisca_id)
+        app = await teacher_app_channel.send(content=f"{prisca.mention}, {member.mention}", embed=embed)
         await app.add_reaction('✅')
         await app.add_reaction('❌')
         # Saves in the database
