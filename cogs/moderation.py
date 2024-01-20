@@ -28,6 +28,7 @@ suspect_channel_id = int(os.getenv('SUSPECT_CHANNEL_ID', 123))
 
 last_deleted_message = []
 
+sponsor_role_id = int(os.getenv('SPONSOR_ROLE_ID', 123))
 mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 muted_role_id = int(os.getenv('MUTED_ROLE_ID', 123))
 preference_role_id = int(os.getenv('PREFERENCE_ROLE_ID', 123))
@@ -84,7 +85,7 @@ class Moderation(*moderation_cogs):
 
 		if invite_root and invite_root not in ("discord.gg/events/", "discord.com/events/"):
 			ctx = await self.client.get_context(message)
-			if not await utils.is_allowed(allowed_roles).predicate(ctx):
+			if not await utils.is_allowed([*allowed_roles, sponsor_role_id]).predicate(ctx):
 				is_from_guild = await self.check_invite_guild(msg, message.guild, invite_root)
 
 				if not is_from_guild:
