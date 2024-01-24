@@ -320,7 +320,7 @@ class Prawler(Player):
 			steal_embed.description = f"🍃 <@{attacker_id}> tried to steal 5łł from <@{target_id}>, but they didn't have it! 🍃"
 			steal_embed.color = discord.Color.green()
 
-		steal_embed.set_thumbnail(url="https://discord.languagesloth.com/media/sloth_classes/Prawler.png")
+		steal_embed.set_thumbnail(url="https://languagesloth.com/media/sloth_classes/Prawler.png")
 		steal_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
 
 		return steal_embed
@@ -340,7 +340,7 @@ class Prawler(Player):
 		sharpen_embed.description = f"<@{perpetrator_id}> has just sharpened his knife to stack `{stack}` 🔪"
 		sharpen_embed.color = discord.Color.green()
 
-		sharpen_embed.set_thumbnail(url="https://discord.languagesloth.com/media/sloth_classes/Prawler.png")
+		sharpen_embed.set_thumbnail(url="https://languagesloth.com/media/sloth_classes/Prawler.png")
 		sharpen_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
 
 		return sharpen_embed
@@ -362,7 +362,7 @@ class Prawler(Player):
 		rob_doubled_embed.color = discord.Color.green()
 
 		rob_doubled_embed.set_author(name=f"Rob stack {rob_stack} (50% chance)", icon_url=self.client.user.display_avatar)
-		rob_doubled_embed.set_thumbnail(url="https://discord.languagesloth.com/media/sloth_classes/Prawler.png")
+		rob_doubled_embed.set_thumbnail(url="https://languagesloth.com/media/sloth_classes/Prawler.png")
 		rob_doubled_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
 
 		return rob_doubled_embed
@@ -471,7 +471,7 @@ class Prawler(Player):
 			color=discord.Color.green(),
 			timestamp=datetime.fromtimestamp(timestamp)
 		)
-		sabotage_embed.set_thumbnail(url="https://discord.languagesloth.com/media/sloth_classes/Prawler.png")
+		sabotage_embed.set_thumbnail(url="https://languagesloth.com/media/sloth_classes/Prawler.png")
 		sabotage_embed.set_image(url='https://media.tenor.com/images/894e9fe551ffaf9a49969c7cecea15ab/tenor.gif')
 		sabotage_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
 
@@ -649,7 +649,7 @@ class Prawler(Player):
 			color=discord.Color.green(),
 			timestamp=datetime.fromtimestamp(timestamp)
 		)
-		kidnap_embed.set_thumbnail(url="https://discord.languagesloth.com/media/sloth_classes/Prawler.png")
+		kidnap_embed.set_thumbnail(url="https://languagesloth.com/media/sloth_classes/Prawler.png")
 		kidnap_embed.set_image(url='https://c.tenor.com/6JdZPCpRz1UAAAAS/dongwook-lee-dongwook.gif')
 		kidnap_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
 

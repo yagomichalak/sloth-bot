@@ -81,9 +81,9 @@ class WhiteJack(commands.Cog):
         if not user_currency:
             ctx.command.reset_cooldown(ctx)
             view = discord.ui.View()
-            view.add_item(discord.ui.Button(style=5, label="Create Account", emoji="🦥", url="https://discord.languagesloth.com/profile/update"))
+            view.add_item(discord.ui.Button(style=5, label="Create Account", emoji="🦥", url="https://languagesloth.com/profile/update"))
             return await ctx.send( 
-                embed=discord.Embed(description=f"**{player.mention}, you don't have an account yet. Click [here](https://discord.languagesloth.com/profile/update) to create one, or in the button below!**"),
+                embed=discord.Embed(description=f"**{player.mention}, you don't have an account yet. Click [here](https://languagesloth.com/profile/update) to create one, or in the button below!**"),
                 view=view)
 
         player_bal = user_currency[0][1]

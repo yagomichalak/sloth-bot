@@ -228,9 +228,9 @@ class CreateSmartRoom(*smart_room_cogs):
 			user_currency = await SlothCurrency.get_user_currency(member, member.id)
 			if not user_currency:
 				view = discord.ui.View()
-				view.add_item(discord.ui.Button(style=5, label="Create Account", emoji="🦥", url="https://discord.languagesloth.com/profile/update"))
+				view.add_item(discord.ui.Button(style=5, label="Create Account", emoji="🦥", url="https://languagesloth.com/profile/update"))
 				return await member.send( 
-					embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://discord.languagesloth.com/profile/update) to create one, or in the button below!**"),
+					embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://languagesloth.com/profile/update) to create one, or in the button below!**"),
 					view=view)
 
 			if user_currency[0][1] < 5:
@@ -328,9 +328,9 @@ class CreateSmartRoom(*smart_room_cogs):
 			user_currency = await SlothCurrency.get_user_currency(member, member.id)
 			if not user_currency:
 				view = discord.ui.View()
-				view.add_item(discord.ui.Button(style=5, label="Create Account", emoji="🦥", url="https://discord.languagesloth.com/profile/update"))
+				view.add_item(discord.ui.Button(style=5, label="Create Account", emoji="🦥", url="https://languagesloth.com/profile/update"))
 				return await member.send( 
-					embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://discord.languagesloth.com/profile/update) to create one, or in the button below!**"),
+					embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://languagesloth.com/profile/update) to create one, or in the button below!**"),
 					view=view)
 
 			if user_currency[0][1] < 100:
@@ -529,9 +529,9 @@ class CreateSmartRoom(*smart_room_cogs):
 			user_currency = await SlothCurrency.get_user_currency(member, member.id)
 			if not user_currency:
 				view = discord.ui.View()
-				view.add_item(discord.ui.Button(style=5, label="Create Account", emoji="🦥", url="https://discord.languagesloth.com/profile/update"))
+				view.add_item(discord.ui.Button(style=5, label="Create Account", emoji="🦥", url="https://languagesloth.com/profile/update"))
 				return await member.send( 
-					embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://discord.languagesloth.com/profile/update) to create one, or in the button below!**"),
+					embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://languagesloth.com/profile/update) to create one, or in the button below!**"),
 					view=view)
 
 			if user_currency[0][1] < 1500:
@@ -1123,9 +1123,9 @@ You can only add either **threads** **OR** one **voice channel**"""))
 		SlothCurrency = self.client.get_cog('SlothCurrency')
 		if not (user_currency := await SlothCurrency.get_user_currency(member.id)):
 			view = discord.ui.View()
-			view.add_item(discord.ui.Button(style=5, label="Create Account", emoji="🦥", url="https://discord.languagesloth.com/profile/update"))
+			view.add_item(discord.ui.Button(style=5, label="Create Account", emoji="🦥", url="https://languagesloth.com/profile/update"))
 			return await member.send( 
-				embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://discord.languagesloth.com/profile/update) to create one, or in the button below!**"),
+				embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://languagesloth.com/profile/update) to create one, or in the button below!**"),
 				view=view)
 
 		if user_currency[0][1] < 250:
@@ -1195,9 +1195,9 @@ You can only add either **threads** **OR** one **voice channel**"""))
 		SlothCurrency = self.client.get_cog('SlothCurrency')
 		if not (user_currency := await SlothCurrency.get_user_currency(member.id)):
 			view = discord.ui.View()
-			view.add_item(discord.ui.Button(style=5, label="Create Account", emoji="🦥", url="https://discord.languagesloth.com/profile/update"))
+			view.add_item(discord.ui.Button(style=5, label="Create Account", emoji="🦥", url="https://languagesloth.com/profile/update"))
 			return await member.send( 
-				embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://discord.languagesloth.com/profile/update) to create one, or in the button below!**"),
+				embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://languagesloth.com/profile/update) to create one, or in the button below!**"),
 				view=view)
 
 		if user_currency[0][1] < 500:
@@ -1423,9 +1423,9 @@ You can only add either **threads** **OR** one **voice channel**"""))
 		user_currency = await SlothCurrency.get_user_currency(member, member.id)
 		if not user_currency:
 			view = discord.ui.View()
-			view.add_item(discord.ui.Button(style=5, label="Create Account", emoji="🦥", url="https://discord.languagesloth.com/profile/update"))
+			view.add_item(discord.ui.Button(style=5, label="Create Account", emoji="🦥", url="https://languagesloth.com/profile/update"))
 			return await ctx.send( 
-				embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://discord.languagesloth.com/profile/update) to create one, or in the button below!**"),
+				embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://languagesloth.com/profile/update) to create one, or in the button below!**"),
 				view=view)
 
 		if user_currency[0][1] < price:

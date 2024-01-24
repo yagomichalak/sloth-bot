@@ -28,6 +28,7 @@ suspect_channel_id = int(os.getenv('SUSPECT_CHANNEL_ID', 123))
 
 last_deleted_message = []
 
+sponsor_role_id = int(os.getenv('SPONSOR_ROLE_ID', 123))
 mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 muted_role_id = int(os.getenv('MUTED_ROLE_ID', 123))
 preference_role_id = int(os.getenv('PREFERENCE_ROLE_ID', 123))
@@ -84,7 +85,7 @@ class Moderation(*moderation_cogs):
 
 		if invite_root and invite_root not in ("discord.gg/events/", "discord.com/events/"):
 			ctx = await self.client.get_context(message)
-			if not await utils.is_allowed(allowed_roles).predicate(ctx):
+			if not await utils.is_allowed([*allowed_roles, sponsor_role_id]).predicate(ctx):
 				is_from_guild = await self.check_invite_guild(msg, message.guild, invite_root)
 
 				if not is_from_guild:
@@ -113,6 +114,62 @@ class Moderation(*moderation_cogs):
 			
 		return ""
 		
+
+	@commands.Cog.listener()
+	async def on_member_update(self, before, after):
+		""" Checks whether a member is picking roles while muted. """
+
+		member = after  # Alias for the member object that will be updated and used
+
+		# It's a bot
+		if member.bot:
+			return
+		
+		# The user left the server
+		if not after.guild:
+			return
+
+		# Before and After roles
+		roles = before.roles
+		roles2 = after.roles
+
+		# User lost a role
+		if len(roles2) < len(roles):
+			return
+
+		new_role = None
+
+		# Gets the new role
+		for r2 in roles2:
+			if r2 not in roles:
+				new_role = r2
+				break
+
+		# Checks, just in case, if the new role was found
+		if not new_role:
+			return
+
+		# Checks whether the user has muted roles in the database
+		if await self.get_muted_roles(member.id):
+			keep_roles, _ = await self.get_remove_roles(member, keep_roles=allowed_roles)
+			muted_role = discord.utils.get(member.guild.roles, id=muted_role_id)
+
+			# If the user, for some reason, doesn't have the muted role, adds it
+			if muted_role not in keep_roles:
+				keep_roles.append(muted_role)
+
+			# Updates the user roles
+			await member.edit(roles=keep_roles)
+
+	def get_invite_root(self, message: str) -> str:
+		""" Gets the invite root from an invite link.
+		:param message: The message content. """
+
+		for invite_type in self.INVITE_TYPES:
+			if invite_type in message:
+				return invite_type
+			
+		return ""
 
 	async def check_banned_links(self, message: discord.Message) -> None:
 		""" Checks if the message sent was or contains a banned link. """
@@ -865,13 +922,13 @@ class Moderation(*moderation_cogs):
 			if role in member_roles:
 				member_roles.remove(role)
 
-			await member.edit(roles=member_roles)
-
 			try:
 				await self.remove_all_roles_from_system(member.id)
 			except Exception as e:
 				print(e)
 				pass
+
+			await member.edit(roles=member_roles)
 
 		if muted_galaxies := await self.get_user_muted_galaxies(member.id):
 			await self.add_galaxy_room_perms(member, muted_galaxies)

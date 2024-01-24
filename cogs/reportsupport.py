@@ -43,7 +43,7 @@ class ReportSupport(*report_support_classes):
 
         self.client = client
         self.cosmos_role_id: int = int(os.getenv('COSMOS_ROLE_ID', 123))
-        self.muffin_id: int = int(os.getenv('MUFFIN_ID', 123))
+        self.prisca_id: int = int(os.getenv('PRISCA_ID', 123))
         self.cache = {}
         self.report_cache = {}
         self.bot_cache = {}
@@ -641,7 +641,7 @@ class ReportSupport(*report_support_classes):
             description="""Welcome to the Report-Support section, here you can easily find your way into things and/or get help with whatever problem you may be experiencing.""",
             color=ctx.author.color,
             timestamp=ctx.message.created_at,
-            url="https://discord.languagesloth.com"
+            url="https://languagesloth.com"
         )
         embed.set_author(name=self.client.user.display_name, url=self.client.user.display_avatar, icon_url=self.client.user.display_avatar)
         embed.set_thumbnail(url=guild.icon.url)

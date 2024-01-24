@@ -331,12 +331,12 @@ class SlothCurrency(*currency_cogs):
         sloth_profile = await self.client.get_cog('SlothClass').get_sloth_profile(member.id)
 
         view = discord.ui.View()
-        view.add_item(discord.ui.Button(style=5, label="Create Account", emoji="🦥", url="https://discord.languagesloth.com/profile/update"))
+        view.add_item(discord.ui.Button(style=5, label="Create Account", emoji="🦥", url="https://languagesloth.com/profile/update"))
 
         if not user_info or not sloth_profile:
             if author.id == member.id:
                 return await answer( 
-                    embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://discord.languagesloth.com/profile/update) to create one, or in the button below!**"),
+                    embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://languagesloth.com/profile/update) to create one, or in the button below!**"),
                     view=view)
             else:
                 return await answer(f"**{member} doesn't have an account yet!**", delete_after=3)
@@ -344,7 +344,7 @@ class SlothCurrency(*currency_cogs):
         if sloth_profile[1].lower() == 'default':
             if author.id == member.id:
                 return await answer( 
-                    embed=discord.Embed(description=f"**{member.mention}, you don't have a Sloth class yet. Click [here](https://discord.languagesloth.com/profile/slothclass) to choose one, or in the button below!**"),
+                    embed=discord.Embed(description=f"**{member.mention}, you don't have a Sloth class yet. Click [here](https://languagesloth.com/profile/slothclass) to choose one, or in the button below!**"),
                     view=view)
                     
             else:
@@ -770,9 +770,9 @@ class SlothCurrency(*currency_cogs):
         target_user = await self.get_user_currency(member.id)
         if not the_user:
             view = discord.ui.View()
-            view.add_item(discord.ui.Button(style=5, label="Create Account", emoji="🦥", url="https://discord.languagesloth.com/profile/update"))
+            view.add_item(discord.ui.Button(style=5, label="Create Account", emoji="🦥", url="https://languagesloth.com/profile/update"))
             return await ctx.send( 
-                embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://discord.languagesloth.com/profile/update) to create one, or in the button below!**"),
+                embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://languagesloth.com/profile/update) to create one, or in the button below!**"),
                 view=view)
         elif not target_user:
             return await ctx.send(f"**{member} does not have a bank account yet!**", delete_after=5)
