@@ -196,13 +196,15 @@ class Moderation(*moderation_cogs):
 						if role in member_roles:
 							member_roles.remove(role)
 
-						await member.edit(roles=member_roles)
 						try:
 							await self.remove_all_roles_from_system(member.id)
 						except Exception as e:
 							print(e)
 							pass
 						else:
+							# Update member roles
+							await member.edit(roles=member_roles)
+							
 							current_time = await utils.get_time_now()
 
 							# Moderation log embed
