@@ -79,7 +79,7 @@ class UserCurrencyTable(commands.Cog):
         """ Checks whether the UserCurrency table exists in the database. """
 
         mycursor, _ = await the_database()
-        await mycursor.execute("SHOW STATUS LIKE 'UserCurrency'")
+        await mycursor.execute("SHOW TABLE STATUS LIKE 'UserCurrency'")
         exists = await mycursor.fetchone()
         await mycursor.close()
         if exists:

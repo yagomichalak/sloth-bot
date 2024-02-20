@@ -76,7 +76,7 @@ class UserItemsTable(commands.Cog):
         """ Checks whether the UserItems table exists in the database. """
 
         mycursor, _ = await the_database()
-        await mycursor.execute("SHOW STATUS LIKE 'UserItems'")
+        await mycursor.execute("SHOW TABLE STATUS LIKE 'UserItems'")
         exists = await mycursor.fetchone()
         await mycursor.close()
         if exists:
