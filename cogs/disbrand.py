@@ -5,7 +5,7 @@ from typing import List, Dict, Any
 import os
 
 server_id: int = int(os.getenv("SERVER_ID", 123))
-sponsored_by_category_id: int = int(os.getenv("SPONSOR_BY_CATEGORY_ID", 123))
+sponsored_by_category_id: int = int(os.getenv("SPONSORED_BY_CATEGORY_ID", 123))
 
 mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 preference_role_id = int(os.getenv('PREFERENCE_ROLE_ID', 123))
