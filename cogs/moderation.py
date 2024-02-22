@@ -90,6 +90,30 @@ class Moderation(*moderation_cogs):
 
 				if not is_from_guild:
 					return await self._mute_callback(ctx, member=message.author, reason="Invite Advertisement.")
+				
+	@commands.Cog.listener()
+	async def on_member_update(self, before, after):
+		"""Checks if a member is picking roles while muted"""
+		member = after
+		if member.bot:
+			return
+		if len(before.roles) < len(after.roles):
+			if await self.get_muted_roles(member.id):
+				muted_role = discord.utils.get(member.guild.roles, id=muted_role_id)
+				keep_roles, _ = await self.get_remove_roles(member, keep_roles=allowed_roles)
+				keep_roles.append(muted_role)
+				await member.edit(roles=keep_roles)
+	
+	def get_invite_root(self, message: str) -> str:
+		""" Gets the invite root from an invite link.
+		:param message: The message content. """
+
+		for invite_type in self.INVITE_TYPES:
+			if invite_type in message:
+				return invite_type
+			
+		return ""
+		
 
 	@commands.Cog.listener()
 	async def on_member_update(self, before, after):
@@ -770,6 +794,13 @@ class Moderation(*moderation_cogs):
 			embed.set_thumbnail(url=member.display_avatar)
 			embed.set_footer(text=f"Muted by {ctx.author}", icon_url=ctx.author.display_avatar)
 			await moderation_log.send(embed=embed)
+			
+			# Pings them in muted chat
+			muted_channel_id = int(os.getenv('MUTED_CHANNEL_ID', 123))
+			muted_channel = discord.utils.get(ctx.guild.channels, id=muted_channel_id)
+			message = (f"Hello {member.mention}! Please talk to {ctx.author.mention} to solve your mute.")
+			await muted_channel.send(message)
+			
 			# Inserts a infraction into the database
 			await self.insert_user_infraction(
 				user_id=member.id, infr_type="mute", reason=reason,
@@ -1828,32 +1859,40 @@ We appreciate your understanding and look forward to hearing from you. """, embe
 
 		for infr_id in infrs_id:
 			if user_infractions := await self.get_user_infraction_by_infraction_id(infr_id):
-				await self.remove_user_infraction(int(infr_id))
+				current_time = await utils.get_time_now()
 				member = discord.utils.get(ctx.guild.members, id=user_infractions[0][0])
-				await ctx.send(f"**Removed infraction with ID `{infr_id}` for {member}**")
+				
+
+				# General embed
+				general_embed = discord.Embed(color=discord.Color.red(), timestamp=current_time)
+				general_embed.set_author(name=f"Removed infraction with ID {infr_id} for {member}")
+				general_embed.set_footer(text=f"Removed by {ctx.author}", icon_url=ctx.author.display_avatar)
+				
+				await ctx.send(embed=general_embed)
+				await self.remove_user_infraction(int(infr_id)) # Removes the infractons
+
+				# Moderation log embed
+				moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
+				
+				embed = discord.Embed(title=f'__**Removed Infraction **__', colour=discord.Colour.red(),
+									timestamp=ctx.message.created_at)
+
+				embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nId: {member.id}```',
+								inline=False)
+				embed.add_field(name='Reason:', value=f'```{user_infractions[0][2]}```',
+								inline=False)
+				embed.set_author(name=member)
+				embed.set_thumbnail(url=member.display_avatar)
+				embed.set_footer(text=f"Removed by {ctx.author}", icon_url=ctx.author.display_avatar)
+				await moderation_log.send(embed=embed)
+
+				try:
+					general_embed.remove_footer() # So the user can't see who removed the infr
+					await member.send(embed=general_embed) # Sends the user the message
+				except Exception:
+					pass
 			else:
 				await ctx.send(f"**Infraction with ID `{infr_id}` was not found!**")
-
-
-	@commands.command(aliases=['ris', 'remove_warns', 'remove_warnings'])
-	@utils.is_allowed(allowed_roles, throw_exc=True)
-	async def remove_infractions(self, ctx, *, message):
-		""" (MOD) Removes all infractions for one or more users.
-		:param member: The member(s) to get the infractions from. """
-
-		await ctx.message.delete()
-
-		members, _ = await utils.greedy_member_reason(ctx, message)
-
-		if not members:
-			return await ctx.send('**Please, inform a member!**', delete_after=3)
-
-		for member in members:
-			if await self.get_user_infractions(member.id):
-				await self.remove_user_infractions(member.id)
-				await ctx.send(f"**Removed all infractions for {member.mention}!**")
-			else:
-				await ctx.send(f"**{member.mention} doesn't have any existent infractions!**")		
 
 
 	@commands.command(aliases=['ei'])
