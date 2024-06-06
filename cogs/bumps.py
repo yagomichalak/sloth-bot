@@ -25,8 +25,9 @@ class Bumps(commands.Cog):
             return
 
         # Deletes the one to the last message
-        msgs = await channel.history(limit=2).flatten()
-        await msgs[1].delete()
+        msgs = list(await channel.history(limit=2).flatten())
+        if len(msgs) >= 2:
+            await msgs[1].delete()
 
 
 def setup(client):
