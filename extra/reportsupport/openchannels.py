@@ -198,7 +198,7 @@ class OpenChannels(commands.Cog):
 
         mycursor, db = await the_database()
         await mycursor.execute("""
-            UPDATE CaseCounter SET last_message_at = %s WHERE channel_id = %s
+            UPDATE OpenChannels SET last_message_at = %s WHERE channel_id = %s
         """, (current_ts, channel_id))
         await db.commit()
         await mycursor.close()
