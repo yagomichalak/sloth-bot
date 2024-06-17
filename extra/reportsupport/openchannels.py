@@ -84,7 +84,14 @@ class OpenChannels(commands.Cog):
             return await ctx.send("**Table __OpenChannels__ already exists!**")
 
         mycursor, db = await the_database()
-        await mycursor.execute("CREATE TABLE OpenChannels (user_id bigint, channel_id bigint)")
+        await mycursor.execute("""
+            CREATE TABLE OpenChannels (
+                user_id BIGINT,
+                channel_id BIGINT,
+                created_at BIGINT,
+                last_message_at BIGINT
+            )
+        """)
         await db.commit()
         await mycursor.close()
 
@@ -150,13 +157,16 @@ class OpenChannels(commands.Cog):
         await db.commit()
         await mycursor.close()
 
-    async def insert_user_open_channel(self, member_id: int, channel_id: int) -> None:
+    async def insert_user_open_channel(self, member_id: int, channel_id: int, current_ts: int) -> None:
         """ Inserts an open channel for a user.
         :param member_id: The ID of the user who opened the channel.
         :param channel_id: The ID of the channel they opened. """
 
         mycursor, db = await the_database()
-        await mycursor.execute("INSERT INTO OpenChannels (user_id, channel_id) VALUES (%s, %s)", (member_id, channel_id))
+        await mycursor.execute("""
+            INSERT INTO OpenChannels (
+                user_id, channel_id, created_at, last_message_at
+            ) VALUES (%s, %s, %s, %s)""", (member_id, channel_id, current_ts, current_ts))
         await db.commit()
         await mycursor.close()
 
@@ -181,3 +191,27 @@ class OpenChannels(commands.Cog):
         await mycursor.close()
         return channel
 
+    async def update_case_timestamp(self, channel_id: int, current_ts: int) -> None:
+        """ Updates the case last message timestamp.
+        :param channel_id: The channel ID.
+        :param current_ts: The current timestamp. """
+
+        mycursor, db = await the_database()
+        await mycursor.execute("""
+            UPDATE CaseCounter SET last_message_at = %s WHERE channel_id = %s
+        """, (current_ts, channel_id))
+        await db.commit()
+        await mycursor.close()
+
+    async def get_inactive_cases(self, current_ts: int) -> List[List[int]]:
+        """ Gets all case rooms that are inactive for 24h or more.
+        :param current_ts: The current timestamp. """
+
+        mycursor, _ = await the_database()
+        await mycursor.execute("""
+            SELECT * FROM OpenChannels
+            WHERE %s - last_message_at >= 86400
+        """, (current_ts,))
+        danger_rooms = await mycursor.fetchall()
+        await mycursor.close()
+        return danger_rooms
