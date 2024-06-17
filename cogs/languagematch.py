@@ -4,7 +4,7 @@ from typing import List, Any
 import random
 
 
-class LanguageMatch(commands.Bot):
+class LanguageMatch(commands.Cog):
     """ Class for the language match feature. """
     
     def __init__(self, client: commands.Bot) -> None:
