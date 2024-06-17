@@ -1,9 +1,8 @@
 import aiohttp
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 from mysqldb import *
 import asyncio
-from extra.useful_variables import list_of_commands
 from extra.prompt.menu import Confirm
 from extra.view import ReportSupportView
 from typing import List, Optional
@@ -21,7 +20,8 @@ lesson_management_role_id = int(os.getenv('LESSON_MANAGEMENT_ROLE_ID', 123))
 server_id = int(os.getenv('SERVER_ID', 123))
 
 staff_vc_id = int(os.getenv('STAFF_VC_ID', 123))
-webhook_url: str = os.getenv('WEBHOOK_URL')
+webhook_url: str = os.getenv('WEBHOOK_URL', "")
+ban_appeal_webhook_user_id: int = os.getenv("BAN_APPEAL_WEBHOOK_USER_ID", 123)
 
 allowed_roles = [
 int(os.getenv('OWNER_ROLE_ID', 123)), admin_role_id,
@@ -53,25 +53,58 @@ class ReportSupport(*report_support_classes):
     async def on_ready(self) -> None:
 
         self.client.add_view(view=ReportSupportView(self.client))
+        self.check_inactive_cases.start()
         print('ReportSupport cog is online!')
+
+    @tasks.loop(seconds=60)
+    async def check_inactive_cases(self):
+        """ Task that checks Dynamic Rooms expirations. """
+
+        # Get current time
+        current_ts = await utils.get_timestamp()
+
+        # Look inactive case rooms to delete
+        inactive_cases = await self.get_inactive_cases(current_ts)
+        for inactive_case in inactive_cases:
+            guild = self.client.get_guild(server_id)
+            channel = discord.utils.get(guild.channels, id=inactive_case[1])
+
+            if channel:
+                try:
+                    await channel.delete()
+                except Exception as e:
+                    print(f"Failed at deleting the {channel}: {str(e)}")
+            await self.remove_user_open_channel(inactive_case[0])
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message) -> None:
         """ Detects when a webhook is sent from the Sloth Appeals server. """
 
+        author = message.author
+        channel = message.channel
+        category = message.channel.category
+
         # Initiates the session
-        async with aiohttp.ClientSession() as session:
-            # Gets the webhook
-            webhook = discord.Webhook.from_url(webhook_url, session=session)
-            try:
-                # Tries to fetch the message
-                await webhook.fetch_message(message.id)
-            except discord.NotFound:
-                pass
-            else:
-                # Adds the reactions to the message, if fetched
-                await message.add_reaction('✅')
-                await message.add_reaction('❌')
+        if author.id == ban_appeal_webhook_user_id:
+            async with aiohttp.ClientSession() as session:
+                # Gets the webhook
+                webhook = discord.Webhook.from_url(webhook_url, session=session)
+                try:
+                    # Tries to fetch the message
+                    await webhook.fetch_message(message.id)
+                except discord.NotFound:
+                    pass
+                else:
+                    # Adds the reactions to the message, if fetched
+                    await message.add_reaction('✅')
+                    await message.add_reaction('❌')
+
+        if category.id == case_cat_id:
+            current_ts = await utils.get_timestamp()
+            case_channel_aliases = ("general", "role", "case")
+
+            if message.content.startswith(case_channel_aliases):
+                await self.update_case_timestamp(channel.id, current_ts)
 
     async def handle_ban_appeal(self, message: discord.Message, payload) -> None:
         """ Handles ban appeal applications.
@@ -234,7 +267,8 @@ class ReportSupport(*report_support_classes):
                 description=f"**Go to {the_channel.mention}!**",
                 color=discord.Color.green())
             await interaction.followup.send(embed=created_embed, ephemeral=True)
-            await self.insert_user_open_channel(member.id, the_channel.id)
+            current_ts = await utils.get_timestamp()
+            await self.insert_user_open_channel(member.id, the_channel.id, current_ts)
             await self.increase_case_number()
             embed = discord.Embed(title="Report Support!", description=f"{member.mention}\nReporting `{reportee}`\nFor:```{text}```",
                 color=discord.Color.red())
@@ -297,7 +331,8 @@ class ReportSupport(*report_support_classes):
                 description=f"**Go to {the_channel.mention}!**",
                 color=discord.Color.green())
             await interaction.followup.send(embed=created_embed, ephemeral=True)
-            await self.insert_user_open_channel(member.id, the_channel.id)
+            current_ts = await utils.get_timestamp()
+            await self.insert_user_open_channel(member.id, the_channel.id, current_ts)
             await self.increase_case_number()
             embed = discord.Embed(title="Report Staff!", description=f"{member.mention}\nReporting `{reportee}`\nFor:```{text}```",
                 color=discord.Color.red())
@@ -359,7 +394,8 @@ class ReportSupport(*report_support_classes):
                 description=f"**Go to {the_channel.mention}!**",
                 color=discord.Color.green())
             await interaction.followup.send(embed=created_embed, ephemeral=True)
-            await self.insert_user_open_channel(member.id, the_channel.id)
+            current_ts = await utils.get_timestamp()
+            await self.insert_user_open_channel(member.id, the_channel.id, current_ts)
             embed = discord.Embed(title=f"{type_help.title()}!", description=message, color=discord.Color.red())
 
             if ping:
