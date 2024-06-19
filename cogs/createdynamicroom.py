@@ -556,13 +556,17 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
         all_rooms = await self.get_all_dynamic_rooms(object_form=True)
         for room in all_rooms:
             guild = self.client.get_guild(room.guild_id)
+            if not guild:
+                await self.delete_dynamic_rooms_by_vc_id(room.vc_id)
+                continue
+
             channel = discord.utils.get(guild.channels, id=room.vc_id)
             is_perma_room = room.is_perma_room
 
             # if channel is no more
             if not channel:
                 await self.delete_dynamic_rooms_by_vc_id(room.vc_id)
-                return
+                continue
 
             len_users = len(channel.members)
             language_room_data = await self.get_language_room_by_id(room.room_id, object_form=True)
