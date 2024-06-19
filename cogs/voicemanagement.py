@@ -6,6 +6,9 @@ from extra import utils
 
 server_id = int(os.getenv('SERVER_ID', 123))
 bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID', 123))
+mod_role_id: int = int(os.getenv("MOD_ROLE_ID", 123))
+senior_mod_role_id: int = int(os.getenv("SENIOR_MOD_ROLE_ID", 123))
+
 
 class VoiceManagement(commands.Cog):
 
@@ -28,8 +31,10 @@ class VoiceManagement(commands.Cog):
 
         current_ts = await utils.get_timestamp()
         guild = self.client.get_guild(server_id)
-
         bots_and_commands_channel =  guild.get_channel(bots_and_commands_channel_id)
+        
+        # Mods+ shouldn't get disconnected from the Camera only channel
+        if await utils.is_allowed([mod_role_id, senior_mod_role_id]).predicate(member=member, channel=bots_and_commands_channel): return
 
         for user_id in list(self.people.keys()):
             secs = current_ts - self.people[user_id]['timestamp']
@@ -66,7 +71,6 @@ class VoiceManagement(commands.Cog):
                         await member.send(msg)
                     except:
                         await bots_and_commands_channel.send(f"{msg}. {member.mention}")
-
 
     @commands.Cog.listener()
     async def on_voice_state_update(self, member: discord.Member, before: discord.VoiceState, after: discord.VoiceState):
