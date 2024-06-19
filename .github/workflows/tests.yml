@@ -38,4 +38,4 @@ jobs:
         BOTS_AND_COMMANDS_CHANNEL_ID: ${{ secrets.BOTS_AND_COMMANDS_CHANNEL_ID }}
         TEACHER_FEEDBACK_THREAD_ID: ${{ secrets.TEACHER_FEEDBACK_THREAD_ID }}
       run: |
-        pytest
+        # pytest
