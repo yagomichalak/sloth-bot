@@ -30,7 +30,7 @@ class Communication(*tool_cogs):
     @commands.Cog.listener()
     async def on_ready(self):
 
-        self.advertise_patreon.start()
+        # self.advertise_patreon.start()  # Stopped these for now
         print('Communication cog is ready!')
 
     @tasks.loop(seconds=60)
