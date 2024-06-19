@@ -117,66 +117,66 @@ async def on_member_remove(member) -> None:
 @client.event
 async def on_command_error(ctx, error) -> None:
     if isinstance(error, commands.MissingPermissions):
-        await ctx.send("**You can't do that!**")
+        return await ctx.send("**You can't do that!**")
 
     elif isinstance(error, commands.MissingRequiredArgument):
-        await ctx.send('**Please, inform all parameters!**')
+        return await ctx.send('**Please, inform all parameters!**')
 
     elif isinstance(error, commands.NotOwner):
-        await ctx.send("**You're not the bot's owner!**")
+        return await ctx.send("**You're not the bot's owner!**")
 
     elif isinstance(error, commands.CommandOnCooldown):
-        await ctx.send(error)
+        return await ctx.send(error)
 
     elif isinstance(error, commands.MissingAnyRole):
         role_names = [f"**{str(discord.utils.get(ctx.guild.roles, id=role_id))}**" for role_id in error.missing_roles]
-        await ctx.send(f"You are missing at least one of the required roles: {', '.join(role_names)}")
+        return await ctx.send(f"You are missing at least one of the required roles: {', '.join(role_names)}")
 
     elif isinstance(error, commands.errors.RoleNotFound):
-        await ctx.send(f"**Role not found**")
+        return await ctx.send(f"**Role not found**")
 
     elif isinstance(error, commands.ChannelNotFound):
-        await ctx.send("**Channel not found!**")
+        return await ctx.send("**Channel not found!**")
 
     elif isinstance(error, MissingRequiredSlothClass):
-        await ctx.send(f"**{error.error_message}: `{error.required_class.title()}`**")
+        return await ctx.send(f"**{error.error_message}: `{error.required_class.title()}`**")
 
     elif isinstance(error, ActionSkillsLocked):
-        pass
+        return
 
     elif isinstance(error, KidnappedCommandError):
-        await ctx.send(f"**You cannot interact with tribes until any member of your tribe pays your kidnap rescue value**")
+        return await ctx.send(f"**You cannot interact with tribes until any member of your tribe pays your kidnap rescue value**")
 
     elif isinstance(error, CommandNotReady):
-        await ctx.send("**This command is either under construction or on maintenance!**")
+        return await ctx.send("**This command is either under construction or on maintenance!**")
 
     elif isinstance(error, SkillsUsedRequirement):
-        await ctx.send(f"**{error.error_message}**")
+        return await ctx.send(f"**{error.error_message}**")
 
     elif isinstance(error, commands.errors.CheckAnyFailure):
-        await ctx.send("**You can't do that!**")
+        return await ctx.send("**You can't do that!**")
 
     elif isinstance(error, commands.CheckAnyFailure):
         if isinstance(error.errors[0], ActionSkillOnCooldown):
             the_error = error.errors[0]
             cooldown = the_error.skill_ts + the_error.cooldown
-            await ctx.send(f"**You can use your skill again <t:{int(cooldown)}:R>!**")
+            return await ctx.send(f"**You can use your skill again <t:{int(cooldown)}:R>!**")
 
         if isinstance(error.errors[0], StillInRehabError):
             the_error = error.errors[0]
             cooldown = the_error.rehab_ts + the_error.cooldown
-            await ctx.send(f"**You will leave rehab <t:{int(cooldown)}:R>!** <:nervous_sloth:974087109176598579>")
+            return await ctx.send(f"**You will leave rehab <t:{int(cooldown)}:R>!** <:nervous_sloth:974087109176598579>")
 
     elif isinstance(error, ActionSkillOnCooldown):
         cooldown = error.skill_ts + error.cooldown
-        await ctx.send(f"**You can use your skill again <t:{int(cooldown)}:R>!**")
+        return await ctx.send(f"**You can use your skill again <t:{int(cooldown)}:R>!**")
 
     elif isinstance(error, StillInRehabError):
         cooldown = error.rehab_ts + error.cooldown
-        await ctx.send(f"**You will leave rehab <t:{int(cooldown)}:R>!** <:nervous_sloth:974087109176598579>")
+        return await ctx.send(f"**You will leave rehab <t:{int(cooldown)}:R>!** <:nervous_sloth:974087109176598579>")
 
     elif isinstance(error, ActionSkillsLocked):
-        await ctx.send(f"**{error.error_message}**")
+        return await ctx.send(f"**{error.error_message}**")
 
     print('='*10)
     print(f"ERROR: {error} | Class: {error.__class__} | Cause: {error.__cause__}")
