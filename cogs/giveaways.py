@@ -75,7 +75,7 @@ class Giveaways(*giveaway_cogs):
 
             # Edits the embed
             embed = message.embeds[0]
-            embed.title += ' (Ended)'
+            embed.title = f"{embed.title[:248]} (Ended)"
             embed.color = discord.Color.red()
 
             view = discord.ui.View.from_message(message)
