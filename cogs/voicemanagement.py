@@ -32,9 +32,6 @@ class VoiceManagement(commands.Cog):
         current_ts = await utils.get_timestamp()
         guild = self.client.get_guild(server_id)
         bots_and_commands_channel =  guild.get_channel(bots_and_commands_channel_id)
-        
-        # Mods+ shouldn't get disconnected from the Camera only channel
-        if await utils.is_allowed([mod_role_id, senior_mod_role_id]).predicate(member=member, channel=bots_and_commands_channel): return
 
         for user_id in list(self.people.keys()):
             secs = current_ts - self.people[user_id]['timestamp']
@@ -61,6 +58,9 @@ class VoiceManagement(commands.Cog):
                     # Disconnects users with cameras off
                     try:
                         member = guild.get_member(user_id)
+                        # Mods+ shouldn't get disconnected from the Camera only channel
+                        if await utils.is_allowed([mod_role_id, senior_mod_role_id]).predicate(member=member, channel=bots_and_commands_channel): return
+
                         if not member.voice or not (vc := member.voice.channel):
                             continue
 
