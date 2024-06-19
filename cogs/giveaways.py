@@ -84,7 +84,7 @@ class Giveaways(*giveaway_cogs):
             await message.edit(embed=embed, view=view)
             # Sends last message
             await message.reply(
-                f"**Giveaway is over, we had a total of `{len(entries)}` people participating, and the `{giveaway[3]}` winners are: {winners}!**"
+                f"**Giveaway is over, we had a total of `{len(entries)}` people participating, and the `{giveaway[3]}` winners are: {winners[:900]}!**"
             )
             # Notifies the giveaway's termination
             await self.update_giveaway(giveaway[0])
