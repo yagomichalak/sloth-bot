@@ -80,7 +80,6 @@ class ReportSupport(*report_support_classes):
     async def on_message(self, message: discord.Message) -> None:
         """ Detects when a webhook is sent from the Sloth Appeals server. """
 
-        author = message.author
         channel = message.channel
         category = message.channel.category
 
