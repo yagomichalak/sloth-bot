@@ -21,7 +21,7 @@ server_id = int(os.getenv('SERVER_ID', 123))
 
 staff_vc_id = int(os.getenv('STAFF_VC_ID', 123))
 webhook_url: str = os.getenv('WEBHOOK_URL', "")
-ban_appeal_webhook_user_id: int = os.getenv("BAN_APPEAL_WEBHOOK_USER_ID", 123)
+ban_appeal_channel_id: int = os.getenv("BAN_APPEAL_CHANNEL_ID", 123)
 
 allowed_roles = [
 int(os.getenv('OWNER_ROLE_ID', 123)), admin_role_id,
@@ -85,7 +85,7 @@ class ReportSupport(*report_support_classes):
         category = message.channel.category
 
         # Initiates the session
-        if author.id == ban_appeal_webhook_user_id:
+        if channel.id == ban_appeal_channel_id:
             async with aiohttp.ClientSession() as session:
                 # Gets the webhook
                 webhook = discord.Webhook.from_url(webhook_url, session=session)
