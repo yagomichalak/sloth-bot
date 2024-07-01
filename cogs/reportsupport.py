@@ -84,7 +84,7 @@ class ReportSupport(*report_support_classes):
         category = message.channel.category
 
         # Initiates the session
-        if channel.id == ban_appeals_channel_id:
+        if channel.id == int(ban_appeals_channel_id):
             async with aiohttp.ClientSession() as session:
                 # Gets the webhook
                 webhook = discord.Webhook.from_url(webhook_url, session=session)
