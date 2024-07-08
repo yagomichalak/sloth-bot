@@ -42,10 +42,11 @@ currency_cogs: List[commands.Cog] = [
 class SlothCurrency(*currency_cogs):
     """ Sloth Currency commands. """
 
-    def __init__(self, client) -> None:
+    def __init__(self, client: commands.Bot) -> None:
         """ Class init method. """
 
         self.client = client
+        self.db = DatabaseCore()
 
     @commands.Cog.listener()
     async def on_ready(self) -> None:
