@@ -1,7 +1,7 @@
 import discord
 from discord import utils
 from discord.ext import commands, menus
-from mysqldb import *
+from mysqldb import DatabaseCore
 from datetime import datetime
 import asyncio
 from typing import Dict, List, Union
@@ -163,7 +163,6 @@ class TeacherFeedback(commands.Cog):
                             pass
                         finally:
                             await cog.delete_premium_vc(member.id, user_voice_channel.id)
-
 
         if not after.channel:
             return
@@ -1128,6 +1127,7 @@ class TeacherFeedback(commands.Cog):
         else:
             await ctx.send(f"**This isn't a class channel, {member.mention}!**")
 
+
 class TeacherFeedbackDatabaseCreate:
     """ [CREATE] A class for creating things in the database. """
 
@@ -1144,12 +1144,9 @@ class TeacherFeedbackDatabaseInsert:
         :param class_desc: The class description.
         :param taught_in: The language that the class is taught in. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("""
+        await self.db.execute_query("""
             INSERT INTO SavedClasses (teacher_id, language, class_type, class_desc, taught_in)
             VALUES (%s, %s, %s, %s, %s)""", (teacher_id, language, class_type, class_desc, taught_in))
-        await db.commit()
-        await mycursor.close()
 
     async def insert_active_teacher_class(self, teacher_id: int, txt_id: int, vc_id: int, language: str, class_type: str, the_time: int, class_desc: str, taught_in: str = 'English') -> None:
         """ Inserts an active teacher class.
@@ -1162,12 +1159,9 @@ class TeacherFeedbackDatabaseInsert:
         :param class_desc: The class description.
         :param taught_in: The language that the class is taught in. """
         
-        mycursor, db = await the_database()
-        await mycursor.execute("""
+        await self.db.execute_query("""
             INSERT INTO ActiveClasses (teacher_id, txt_id, vc_id, language, class_type, vc_timestamp, class_desc, taught_in)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s)""", (teacher_id, txt_id, vc_id, language, class_type, the_time, class_desc, taught_in))
-        await db.commit()
-        await mycursor.close()
 
     async def insert_student(self, student_id: int, teacher_id: int, vc_id: int, the_time: int = None) -> None:
         """ Inserts a student into the database.
@@ -1176,25 +1170,18 @@ class TeacherFeedbackDatabaseInsert:
         :param vc_id: The voice channel ID.
         :param the_time: The current timestamp. (Optional) """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("INSERT INTO Students (student_id, student_ts, teacher_id, vc_id) VALUES (%s, %s, %s, %s)", (student_id, the_time, teacher_id, vc_id))
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("INSERT INTO Students (student_id, student_ts, teacher_id, vc_id) VALUES (%s, %s, %s, %s)", (student_id, the_time, teacher_id, vc_id))
 
     async def insert_student_reward(self, formatted_active_users: List[List[Union[str, int]]]) -> None:
         """ Inserts reward related data into the database.
         :param formatted_active_users: The formatted data for the rewardable students. """
-
-        mycursor, db = await the_database()
 
         sql = """INSERT INTO RewardStudents (
             reward_message, student_id, student_messages,
             student_time, teacher_id, class_type, language)
             VALUES (%s, %s, %s, %s, %s, %s, %s)"""
 
-        await mycursor.executemany(sql, formatted_active_users)
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query(sql, formatted_active_users, execute_many=True)
 
     async def insert_student_rewarded(self, user: List[Union[int, str]]):
         """ Saves a user to be rewarded later on.
@@ -1202,12 +1189,10 @@ class TeacherFeedbackDatabaseInsert:
 
         print("Here: ", (user[4], user[1], user[6], user[5], user[0]))
 
-        mycursor, db = await the_database()
-        await mycursor.execute("""
+        await self.db.execute_query("""
             INSERT INTO RewardAcceptedStudents (teacher_id, student_id, language, class_type, msg_id)
             VALUES (%s, %s, %s, %s, %s)""", (user[4], user[1], user[6], user[5], user[0]))
-        await db.commit()
-        await mycursor.close()
+
 
 class TeacherFeedbackDatabaseSelect:
     """ [SELECT] A class for selecting things from the database. """
@@ -1217,53 +1202,33 @@ class TeacherFeedbackDatabaseSelect:
         """ Gets an active teacher class by teacher ID.
         :param teacher_id: The teacher's ID. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("SELECT * FROM ActiveClasses WHERE teacher_id = %s", (teacher_id, ))
-        the_class = await mycursor.fetchone()
-        await mycursor.close()
-        return the_class
+        return await self.db.execute_query("SELECT * FROM ActiveClasses WHERE teacher_id = %s", (teacher_id,), fetch="one")
 
     async def get_active_teacher_class_by_vc_id(self, vc_id: int) -> List[Union[str, int]]:
         """ Gets an active teacher class by voice channel ID.
         :param vc_id: The voice channel ID. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("SELECT * FROM ActiveClasses WHERE vc_id = %s", (vc_id,))
-        the_class = await mycursor.fetchone()
-        await mycursor.close()
-        return the_class
+        return await self.db.execute_query("SELECT * FROM ActiveClasses WHERE vc_id = %s", (vc_id,), fetch="one")
 
     async def get_active_teacher_class_by_txt_id(self, txt_id: int) -> List[Union[str, int]]:
         """ Gets an active teacher class by text channel ID.
         :param txt_id: The text channel ID. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("SELECT * FROM ActiveClasses WHERE txt_id = %s", (txt_id,))
-        the_class = await mycursor.fetchone()
-        await mycursor.close()
-        return the_class
+        return await self.db.execute_query("SELECT * FROM ActiveClasses WHERE txt_id = %s", (txt_id,), fetch="one")
 
     async def get_active_teacher_class_by_teacher_and_vc_id(self, teacher_id: int, vc_id: int) -> List[Union[str, int]]:
         """ Gets an active teacher class by teacher and voice channel ID.
         :param teacher_id: The teacher's ID.
         :param vc_id: The voice channel ID. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("SELECT * FROM ActiveClasses WHERE teacher_id = %s AND vc_id = %s", (teacher_id, vc_id))
-        the_class = await mycursor.fetchone()
-        await mycursor.close()
-        return the_class
+        return await self.db.execute_query("SELECT * FROM ActiveClasses WHERE teacher_id = %s AND vc_id = %s", (teacher_id, vc_id), fetch="one")
 
     # ===== Saved Class =====
     async def get_teacher_saved_classes(self, teacher_id: int) -> List[List[Union[str, int]]]:
         """ Gets the teacher's saved classes.
         :param teacher_id: The teacher's ID. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("SELECT * FROM SavedClasses WHERE teacher_id = %s", (teacher_id,))
-        saved_classes = await mycursor.fetchall()
-        await mycursor.close()
-        return saved_classes
+        return await self.db.execute_query("SELECT * FROM SavedClasses WHERE teacher_id = %s", (teacher_id,), fetch="all")
 
     # ===== Active Class =====
 
@@ -1272,11 +1237,9 @@ class TeacherFeedbackDatabaseSelect:
         :param teacher_id: The teacher's ID.
         :param vc_id: The ID of the voice channel attached to that class. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("""
-            SELECT SUM(student_messages) FROM Students WHERE teacher_id = %s AND vc_id = %s""", (teacher_id, vc_id))
-        total_messages = number[0] if (number := await mycursor.fetchone())[0] else 0
-        await mycursor.close()
+        data = await self.db.execute_query("""
+            SELECT SUM(student_messages) FROM Students WHERE teacher_id = %s AND vc_id = %s""", (teacher_id, vc_id), fetch="one")
+        total_messages = number[0] if (number := data)[0] else 0
         return total_messages
 
     async def get_teacher_class_time_by_teacher_and_vc_id(self, teacher_id: int, vc_id: int) -> int:
@@ -1284,11 +1247,9 @@ class TeacherFeedbackDatabaseSelect:
         :param teacher_id: The teacher's ID.
         :param vc_id: The ID of the voice channel attached to that class. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("""
-            SELECT SUM(student_time) FROM Students WHERE teacher_id = %s AND vc_id = %s""", (teacher_id, vc_id))
-        total_time = number[0] if (number := await mycursor.fetchone())[0] else 0
-        await mycursor.close()
+        data = await self.db.execute_query("""
+            SELECT SUM(student_time) FROM Students WHERE teacher_id = %s AND vc_id = %s""", (teacher_id, vc_id), fetch="one")
+        total_time = number[0] if (number := data)[0] else 0
         return total_time
 
     # ===== Student =====
@@ -1297,21 +1258,13 @@ class TeacherFeedbackDatabaseSelect:
         :param student_id: The student's ID.
         :param vc_id: The voice channel ID. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("SELECT * FROM Students WHERE student_id = %s AND vc_id = %s", (student_id, vc_id))
-        the_student = await mycursor.fetchone()
-        await mycursor.close()
-        return the_student
+        return await self.db.execute_query("SELECT * FROM Students WHERE student_id = %s AND vc_id = %s", (student_id, vc_id), fetch="one")
 
     async def get_all_students(self, teacher_id: int) -> List[List[int]]:
         """ Get all students by teacher ID.
         :param teacher_id: The teacher's ID. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("SELECT * FROM Students WHERE teacher_id = %s", (teacher_id,))
-        the_students = await mycursor.fetchall()
-        await mycursor.close()
-        return the_students
+        return await self.db.execute_query("SELECT * FROM Students WHERE teacher_id = %s", (teacher_id,), fetch="one")
 
     # ===== Reward =====
 
@@ -1320,36 +1273,21 @@ class TeacherFeedbackDatabaseSelect:
         :param teacher_id: The teacher's ID.
         :param msg_id: The ID of the message attached to the data. """
 
-        mycursor, _ = await the_database()
-
-        await mycursor.execute("SELECT *, COUNT(*) FROM RewardStudents WHERE reward_message = %s and teacher_id = %s", (msg_id, teacher_id))
-        users = await mycursor.fetchone()
-        await mycursor.close()
-
-        return users
+        return await self.db.execute_query("SELECT *, COUNT(*) FROM RewardStudents WHERE reward_message = %s and teacher_id = %s", (msg_id, teacher_id), fetch="one")
 
     async def get_all_waiting_reward_student(self, teacher_id: int, msg_id: int) -> List[List[Union[str, int]]]:
         """ Gets reward related data that is waiting to be given reviewed.
         :param teacher_id: The teacher's ID.
         :param msg_id: The ID of the message attached to the data. """
 
-        mycursor, _ = await the_database()
-
-        await mycursor.execute("SELECT * FROM RewardStudents WHERE reward_message = %s and teacher_id = %s", (msg_id, teacher_id))
-        users = await mycursor.fetchall()
-        await mycursor.close()
-
-        return users
+        return await self.db.execute_query("SELECT * FROM RewardStudents WHERE reward_message = %s and teacher_id = %s", (msg_id, teacher_id), fetch="all")
 
     async def get_reward_accepted_students(self, msg_id: int) -> List[List[Union[int, str]]]:
         """ Gets reward info for the accepted students by reward message ID.
         :param msg_id: The ID of the message to look for. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("SELECT student_id, language, class_type, msg_id FROM RewardAcceptedStudents WHERE msg_id = %s", (msg_id,))
-        users = await mycursor.fetchall()
-        await mycursor.close()
-        return users
+        return await self.db.execute_query("SELECT student_id, language, class_type, msg_id FROM RewardAcceptedStudents WHERE msg_id = %s", (msg_id,), fetch="all")
+
 
 class TeacherFeedbackDatabaseUpdate:
     """ [UPDATE] A class for updating things in the database. """
@@ -1359,11 +1297,8 @@ class TeacherFeedbackDatabaseUpdate:
         """ Updates all users' attended classes counter.
         :param students_ids: A list containing all ids of the users. """
 
-        mycursor, db = await the_database()
-        await mycursor.executemany("""
-        UPDATE UserCurrency SET user_classes = user_classes + 1 WHERE user_id = %s""", students_ids)
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("""
+        UPDATE UserCurrency SET user_classes = user_classes + 1 WHERE user_id = %s""", students_ids, execute_many=True)
 
     # ===== Teacher =====
     async def update_teacher_class_time(self, teacher_id: int, the_time: int) -> None:
@@ -1371,31 +1306,22 @@ class TeacherFeedbackDatabaseUpdate:
         :param teacher_id: The teacher's ID.
         :param the_time: The current time. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("""
+        await self.db.execute_query("""
             UPDATE ActiveClasses SET vc_time = vc_time + (%s - vc_timestamp), vc_timestamp = NULL
             WHERE teacher_id = %s AND vc_timestamp IS NOT NULL""", (the_time, teacher_id))
-        await db.commit()
-        await mycursor.close()
 
     async def update_teacher_class_ts(self, teacher_id: int, the_time: int) -> None:
         """ Updates the teacher's voice channel timestamp.
         :param teacher_id: The teacher's ID.
         :param the_time: The current time. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("UPDATE ActiveClasses SET vc_timestamp = %s WHERE teacher_id = %s", (the_time, teacher_id))
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("UPDATE ActiveClasses SET vc_timestamp = %s WHERE teacher_id = %s", (the_time, teacher_id))
 
     async def update_teacher_class_members(self, teacher_id: int) -> None:
         """ Updates the teacher's member counter.
         :param teacher_id: The teacher's ID. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("UPDATE ActiveClasses SET members = members + 1 WHERE teacher_id = %s", (teacher_id,))
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("UPDATE ActiveClasses SET members = members + 1 WHERE teacher_id = %s", (teacher_id,))
 
     # ===== Student =====
 
@@ -1405,21 +1331,15 @@ class TeacherFeedbackDatabaseUpdate:
         :param the_time: The current timestamp.
         :param teacher_id: The teacher's ID. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("""
+        await self.db.execute_query("""
             UPDATE Students SET student_ts = %s WHERE student_id = %s AND teacher_id = %s""", (the_time, student_id, teacher_id))
-        await db.commit()
-        await mycursor.close()
 
     async def update_all_students_ts(self, teacher_id: int, the_time: int) -> None:
         """ Updates all students' voice channel timestamp.
         :param teacher_id: The teacher's ID.
         :param the_time: The current timestamp. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("UPDATE Students SET student_ts = %s WHERE teacher_id = %s", (the_time, teacher_id))
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("UPDATE Students SET student_ts = %s WHERE teacher_id = %s", (the_time, teacher_id))
 
     async def update_student_time(self, student_id: int, teacher_id: int, the_time: int) -> None:
         """ Updates the student's voice channel time.
@@ -1427,37 +1347,28 @@ class TeacherFeedbackDatabaseUpdate:
         :param teacher_id: The teacher's ID.
         :param the_time: The current timestamp. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("""
+        await self.db.execute_query("""
             UPDATE Students SET student_time = student_time + (%s - student_ts), student_ts = NULL
             WHERE student_id = %s AND teacher_id = %s AND student_ts IS NOT NULL""", (the_time, student_id, teacher_id))
 
-        await db.commit()
-        await mycursor.close()
 
     async def update_all_students_time(self, teacher_id: int, the_time: int) -> None:
         """ Updates all students' voice channel time.
         :param teacher_id: The teacher's ID.
         :param the_time: The current timestamp. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("""
+        await self.db.execute_query("""
             UPDATE Students SET student_time = student_time + (%s - student_ts), student_ts = NULL
             WHERE teacher_id = %s AND student_ts IS NOT NULL""", (the_time, teacher_id))
-        await db.commit()
-        await mycursor.close()
 
     async def update_student_messages(self, student_id: int, vc_id: int) -> None:
         """ Update student's message counter.
         :param student_id: The student's ID.
         :param vc_id: The class' voice channel ID. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("""
+        await self.db.execute_query("""
             UPDATE Students SET student_messages = student_messages + 1
             WHERE student_id = %s AND vc_id = %s""", (student_id, vc_id))
-        await db.commit()
-        await mycursor.close()
 
 
 class TeacherFeedbackDatabaseDelete:
@@ -1467,10 +1378,7 @@ class TeacherFeedbackDatabaseDelete:
         """ Deletes an active teacher class by teacher ID.
         :param teacher_id: The teacher's ID. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM ActiveClasses WHERE teacher_id = %s", (teacher_id,))
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("DELETE FROM ActiveClasses WHERE teacher_id = %s", (teacher_id,))
 
     async def delete_active_teacher_class_by_teacher_and_vc_id(self, teacher_id: int, vc_id: int) -> None:
         """ Deletes an active teacher class by teacher
@@ -1478,19 +1386,13 @@ class TeacherFeedbackDatabaseDelete:
         :param teacher_id: The teacher's ID.
         :param vc_id: The voice channel ID. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM ActiveClasses WHERE teacher_id = %s AND vc_id = %s", (teacher_id, vc_id))
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("DELETE FROM ActiveClasses WHERE teacher_id = %s AND vc_id = %s", (teacher_id, vc_id))
 
     async def delete_active_students(self, teacher_id: int) -> None:
         """ Deletes active students.
         :param teacher_id: The teacher's ID. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM Students WHERE teacher_id = %s", (teacher_id,))
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("DELETE FROM Students WHERE teacher_id = %s", (teacher_id,))
 
     async def delete_waiting_reward_student(self, msg_id: int, user_id: int, teacher_id: int) -> None:
         """ Deletes a student from the rewards table.
@@ -1498,31 +1400,22 @@ class TeacherFeedbackDatabaseDelete:
         :param user_id: The user's ID.
         :param teacher_id: The teacher's ID. """
 
-        mycursor, db = await the_database()
-
-        await mycursor.execute("DELETE FROM RewardStudents WHERE reward_message = %s AND teacher_id = %s AND student_id = %s", (msg_id, teacher_id, user_id))
-        await db.commit()
-        await mycursor.close()
+        
+        await self.db.execute_query("DELETE FROM RewardStudents WHERE reward_message = %s AND teacher_id = %s AND student_id = %s", (msg_id, teacher_id, user_id))
 
     async def delete_waiting_reward_students(self, msg_id: int, teacher_id: int) -> None:
         """ Deletes students from the rewards table.
         :param msg_id: The ID of the message attached to the user data.
         :param teacher_id: The teacher's ID. """
 
-        mycursor, db = await the_database()
-
-        await mycursor.execute("DELETE FROM RewardStudents WHERE reward_message = %s AND teacher_id = %s", (msg_id, teacher_id))
-        await db.commit()
-        await mycursor.close()
+        
+        await self.db.execute_query("DELETE FROM RewardStudents WHERE reward_message = %s AND teacher_id = %s", (msg_id, teacher_id))
 
     async def delete_rewarded_users(self, msg_id: int) -> None:
         """ Deletes a class rewarding users by message ID:
         :param msg_id: The message ID with which to delete. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM RewardAcceptedStudents WHERE msg_id = %s", (msg_id,))
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("DELETE FROM RewardAcceptedStudents WHERE msg_id = %s", (msg_id,))
 
     async def delete_teacher_saved_class(self, teacher_id: int, language: str, class_type: str, class_desc: str, taught_in: str) -> None:
         """ Deletes a teacher saved class from the system.
@@ -1532,20 +1425,20 @@ class TeacherFeedbackDatabaseDelete:
         :param class_desc: The description of the class.
         :param taught_in: The language that is using to teach the class. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("""
+        await self.db.execute_query("""
             DELETE FROM SavedClasses
             WHERE teacher_id = %s AND language = %s AND class_type = %s AND class_desc = %s AND taught_in = %s""",
              (teacher_id, language, class_type, class_desc, taught_in))
-        await db.commit()
-        await mycursor.close()
+
 
 class TeacherFeedbackDatabaseShow:
     """ [SHOW] A class for checking things in the database. """
 
     pass
 
+
 db_classes: List[object] = [
+    DatabaseCore,
     TeacherFeedbackDatabaseCreate, TeacherFeedbackDatabaseInsert, TeacherFeedbackDatabaseSelect,
     TeacherFeedbackDatabaseUpdate, TeacherFeedbackDatabaseDelete, TeacherFeedbackDatabaseShow
     ]

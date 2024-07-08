@@ -38,6 +38,7 @@ class DatabaseCore:
         query: str,
         values: Iterable,
         connection: Optional[Tuple[object, object]] = None,
+        execute_many: bool = False,
         commit: bool = True,
         close_connection: bool = True,
         fetch: Optional[str] = None
@@ -57,7 +58,10 @@ class DatabaseCore:
             mycursor, db = connection
 
         # Executes the query
-        await mycursor.execute(query, values)
+        if execute_many:
+            await mycursor.executemany(query, values)
+        else:
+            await mycursor.execute(query, values)
 
         if commit:
             await db.commit()
