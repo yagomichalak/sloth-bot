@@ -207,6 +207,10 @@ class QuickButtons(discord.ui.View):
         )
         self.children.insert(4, watchlist_button)
 
+
+
+
+
     @discord.ui.button(label="Infractions", style=4, emoji="❗", custom_id=f"user_infractions")
     async def infractions_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
         """ Shows the member's infractions. """
@@ -217,7 +221,12 @@ class QuickButtons(discord.ui.View):
         if await utils.is_allowed([mod_role_id, admin_role_id]).predicate(new_ctx):
             await interaction.response.defer()
             return await self.client.get_cog("Moderation").infractions(self.ctx, message=str(self.target_member.id))
-    
+        
+
+   
+        
+
+
     @discord.ui.button(label="Profile", style=1, emoji="👤", custom_id=f"user_profile")
     async def profile_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
         """ Shows the member's profile. """
@@ -251,6 +260,8 @@ class QuickButtons(discord.ui.View):
         if await utils.is_allowed([mod_role_id, admin_role_id]).predicate(new_ctx):
             await interaction.response.defer()
             await self.client.get_cog("Moderation").show_moderated_nickname(self.ctx, member=self.target_member)
+
+   
 
 class Test(discord.ui.View):
 

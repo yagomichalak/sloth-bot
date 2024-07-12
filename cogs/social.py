@@ -186,8 +186,13 @@ class Social(*social_cogs):
                 embed.add_field(name="Joined at:", value=f"{member.joined_at.strftime('%d/%m/%y')} ({sorted_time_join}) **GMT**", inline=False)
 
                 embed.add_field(name="Top role:", value=member.top_role.mention, inline=False)
+                if member.voice:
+                        embed.add_field(name="In a vc?", value=member.voice.channel.mention)
+                else:
+                        embed.add_field(name="In a vc?", value="No")
 
-            embed.add_field(name="Bot?", value=member.bot)
+
+            """embed.add_field(name="Bot?", value=member.bot)"""
 
             view = QuickButtons(client=self.client, ctx=ctx, target_member=member)
             if not await utils.is_allowed([mod_role_id, admin_role_id]).predicate(ctx):
