@@ -600,8 +600,9 @@ class ReportSupport(*report_support_classes):
             pass
 
     # In-game commands
+    
     @utils.is_allowed([lesson_management_role_id], throw_exc=True)
-    @commands.command()
+    @commands.command(aliases=['ca'])
     async def close_app(self, ctx) -> None:
         """ (ADMIN) Closes an application channel. """
 
