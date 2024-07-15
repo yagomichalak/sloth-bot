@@ -2,7 +2,7 @@ import aiomysql
 import asyncio
 #from contextlib import asynccontextmanager
 import os
-from typing import Optional, Iterable, Any, Tuple, Literal
+from typing import Optional, Iterable, Any, Tuple, Literal, Union, Dict
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -62,7 +62,8 @@ class DatabaseCore:
         execute_many: bool = False,
         fetch: Optional[Literal["one", "all"]] = None,
         database_name: Literal["sloth", "django"] = "sloth",
-    ) -> Optional[Any]:
+        description: bool = False
+    ) -> Union[Tuple[Dict[str, Any], Optional[Any], Optional[Any]]]:
         """ Executes a database query.
         :param query: The query itself to run.
         :param values: The values to pass in to the query.
@@ -96,6 +97,8 @@ class DatabaseCore:
         finally:
             await mycursor.close()
 
+        if description:
+            return data, description
         return data
 
     async def table_exists(self, table_name: str) -> bool:
