@@ -1,9 +1,7 @@
-import discord
 from discord.ext import commands
-from mysqldb import the_database
-from typing import List, Union, Tuple
-from extra.customerrors import StillInRehabError
-from extra import utils
+from mysqldb import DatabaseCore
+from typing import List
+
 
 class MemoryTable(commands.Cog):
     """ Class for managing the MemoryMember table in the database. """
@@ -12,6 +10,7 @@ class MemoryTable(commands.Cog):
         """ Class init method. """
 
         self.client = client
+        self.db = DatabaseCore()
 
     @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
@@ -23,16 +22,13 @@ class MemoryTable(commands.Cog):
         if await self.check_memory_member_table_exists():
             return await ctx.send(f"**Table `MemoryMember` already exists, {member.mention}!**")
         
-        mycursor, db = await the_database()
-        await mycursor.execute("""
+        await self.db.execute_query("""
             CREATE TABLE MemoryMember (
                 user_id BIGINT NOT NULL,
                 level TINYINT(4) NOT NULL,
                 record_ts BIGINT NOT NULL,
                 PRIMARY KEY (user_id)
             )""")
-        await db.commit()
-        await mycursor.close()
 
         await ctx.send(f"**Table `MemoryMember` created, {member.mention}!**")
 
@@ -46,10 +42,7 @@ class MemoryTable(commands.Cog):
         if not await self.check_memory_member_table_exists():
             return await ctx.send(f"**Table `MemoryMember` doesn't exist, {member.mention}!**")
 
-        mycursor, db = await the_database()
-        await mycursor.execute("DROP TABLE MemoryMember")
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("DROP TABLE MemoryMember")
 
         await ctx.send(f"**Table `MemoryMember` dropped, {member.mention}!**")
 
@@ -63,44 +56,27 @@ class MemoryTable(commands.Cog):
         if not await self.check_memory_member_table_exists():
             return await ctx.send(f"**Table `MemoryMember` doesn't exist yet, {member.mention}!**")
 
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM MemoryMember")
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("DELETE FROM MemoryMember")
 
         await ctx.send(f"**Table `MemoryMember` reset, {member.mention}!**")
 
     async def check_memory_member_table_exists(self) -> bool:
         """ Checks whether the MemoryMember table exists. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("SHOW TABLE STATUS LIKE 'MemoryMember'")
-        exists = await mycursor.fetchone()
-        await mycursor.close()
-        if exists:
-            return True
-        else:
-            return False
+        return await self.db.table_exists("MemoryMember")
 
     async def insert_memory_member(self, user_id: int, level: int, current_ts: int) -> None:
         """ Inserts a member into the MemoryTable.
         :param user_id: The user ID.
         :param level: The highest level they passed in game. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("INSERT INTO MemoryMember (user_id, level, record_ts) VALUES (%s, %s, %s)", (user_id, level, current_ts))
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("INSERT INTO MemoryMember (user_id, level, record_ts) VALUES (%s, %s, %s)", (user_id, level, current_ts))
 
     async def get_memory_member(self, user_id: int) -> List[int]:
         """ Gets a memory member.
         :param user_id: The ID of the member to get. """
 
-        mycursor, _  = await the_database()
-        await mycursor.execute("SELECT * FROM MemoryMember WHERE user_id = %s", (user_id,))
-        memory_member = await mycursor.fetchone()
-        await mycursor.close()
-        return memory_member
+        return await self.db.execute_query("SELECT * FROM MemoryMember WHERE user_id = %s", (user_id,), fetch="one")
 
     async def update_memory_member(self, user_id: int, level: int, current_ts: int) -> None:
         """ Updates a memory member.
@@ -108,25 +84,14 @@ class MemoryTable(commands.Cog):
         :param level: The new level the member got to.
         :param current_ts: The current timestamp. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("UPDATE MemoryMember SET level = %s, record_ts = %s WHERE user_id = %s", (level, current_ts, user_id))
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("UPDATE MemoryMember SET level = %s, record_ts = %s WHERE user_id = %s", (level, current_ts, user_id))
 
     async def get_top_ten_memory_users(self) -> List[List[int]]:
         """ Gets the top ten users with the highest level in the Memory game. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("SELECT * FROM MemoryMember ORDER BY level DESC LIMIT 10")
-        top_ten_members = await mycursor.fetchall()
-        await mycursor.close()
-        return top_ten_members
+        return await self.db.execute_query("SELECT * FROM MemoryMember ORDER BY level DESC LIMIT 10", fetch="all")
 
     async def get_all_memory_users_by_level(self) -> List[List[int]]:
         """ Gets all users from the MemoryMember table ordered by level. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("SELECT * FROM MemoryMember ORDER BY level DESC")
-        users = await mycursor.fetchall()
-        await mycursor.close()
-        return users
+        return await self.db.execute_query("SELECT * FROM MemoryMember ORDER BY level DESC", fetch="all")
