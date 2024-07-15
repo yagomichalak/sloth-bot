@@ -1,7 +1,8 @@
 import discord
 from discord.ext import commands
-from mysqldb import the_database
+from mysqldb import DatabaseCore
 from typing import List, Union
+
 
 class UserItemsTable(commands.Cog):
     """ Class for the UserItems table in the database. """
@@ -10,8 +11,8 @@ class UserItemsTable(commands.Cog):
         """ Class init method. """
 
         self.client = client
+        self.db = DatabaseCore()
 
-    
     # Database commands
     @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
@@ -24,13 +25,10 @@ class UserItemsTable(commands.Cog):
         if await self.check_user_items_table_exists():
             return await ctx.send(f"**The `UserItems` table already exists, {member.mention}!**")
 
-        mycursor, db = await the_database()
-        await mycursor.execute("""
+        await self.db.execute_query("""
         CREATE TABLE UserItems (
             user_id bigint, item_name VARCHAR(30), enable VARCHAR(10), 
             item_type VARCHAR(10), image_name VARCHAR(50))""")
-        await db.commit()
-        await mycursor.close()
 
         return await ctx.send(f"**Table `UserItems` created, {member.mention}!**")
 
@@ -45,10 +43,7 @@ class UserItemsTable(commands.Cog):
         if not await self.check_user_items_table_exists():
             return await ctx.send(f"**The `UserItems` table doesn't exist, {member.mention}!**")
 
-        mycursor, db = await the_database()
-        await mycursor.execute("DROP TABLE UserItems")
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("DROP TABLE UserItems")
 
         return await ctx.send(f"**Table `UserItems` dropped, {member.mention}!**")
 
@@ -63,10 +58,7 @@ class UserItemsTable(commands.Cog):
         if not await self.check_user_items_table_exists():
             return await ctx.send(f"**The `UserItems` table doesn't exist yet, {member.mention}!**")
 
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM UserItems")
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("DELETE FROM UserItems")
 
         return await ctx.send(f"**Table `UserItems` reset, {member.mention}!**")
 
@@ -75,14 +67,7 @@ class UserItemsTable(commands.Cog):
     async def check_user_items_table_exists(self) -> bool:
         """ Checks whether the UserItems table exists in the database. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("SHOW TABLE STATUS LIKE 'UserItems'")
-        exists = await mycursor.fetchone()
-        await mycursor.close()
-        if exists:
-            return True
-        else:
-            return False
+        return await self.db.table_exists("UserItems")
 
     # ===== INSERT =====
 
@@ -94,11 +79,8 @@ class UserItemsTable(commands.Cog):
         :param item_type: The type of the item. (head/foot/hand/body/background)
         :param item_image: The name of the image that illustrates the item. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("INSERT INTO UserItems (user_id, item_name, enable, item_type, image_name) VALUES (%s, %s, %s, %s, %s)",
+        await self.db.execute_query("INSERT INTO UserItems (user_id, item_name, enable, item_type, image_name) VALUES (%s, %s, %s, %s, %s)",
                                (user_id, item_name.title(), enable, item_type.lower(), item_image))
-        await db.commit()
-        await mycursor.close()
 
     # ===== DELETE =====
 
@@ -107,10 +89,7 @@ class UserItemsTable(commands.Cog):
         :param user_id: The ID of the user from whom to remove the item.
         :param item_name: The name of the item to remove. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM UserItems WHERE item_name = %s and user_id = %s", (item_name, user_id))
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("DELETE FROM UserItems WHERE item_name = %s and user_id = %s", (item_name, user_id))
 
     # ===== UPDATE =====
 
@@ -120,10 +99,7 @@ class UserItemsTable(commands.Cog):
         :param item_name: The name of the item.
         :param enable: The new state to set the item to. (equipped/unequipped) """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("UPDATE UserItems SET enable = %s WHERE user_id = %s and item_name = %s", (enable, user_id, item_name))
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("UPDATE UserItems SET enable = %s WHERE user_id = %s and item_name = %s", (enable, user_id, item_name))
 
     # ===== SELECT =====
 
@@ -132,51 +108,36 @@ class UserItemsTable(commands.Cog):
         :param user_id: The ID of the user from whom to get the item.
         :param item_name: The name of the item to get. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("SELECT * FROM UserItems WHERE user_id = %s AND item_name = %s", (user_id, item_name))
-        item_system = await mycursor.fetchone()
-        await mycursor.close()
-        return item_system
+        return await self.db.execute_query("SELECT * FROM UserItems WHERE user_id = %s AND item_name = %s", (user_id, item_name), fetch="one")
 
     async def get_user_items(self, user_id: int) -> List[List[Union[int, str]]]:
         """ Gets all items from the user's inventory.
         :param user_id: The ID of the user from whom to get the items. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("SELECT * FROM UserItems WHERE user_id = %s ORDER BY user_id", (user_id,))
-        item_system = await mycursor.fetchall()
-        await mycursor.close()
-        return item_system
+        return await self.db.execute_query("SELECT * FROM UserItems WHERE user_id = %s ORDER BY user_id", (user_id,), fetch="all")
 
     async def get_user_specific_type_item(self, user_id, item_type) -> str:
         """ Gets a random item of a specific type from the user.
         :param user_id: The ID of the user from whom to get the item.
         :param item_type: The type of the item to get. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("SELECT item_name, image_name FROM UserItems WHERE user_id = %s and item_type = %s and enable = 'equipped'", (user_id, item_type))
-        spec_type_items = await mycursor.fetchone()
-        await mycursor.close()
+        spec_type_items = await self.db.execute_query(
+            "SELECT item_name, image_name FROM UserItems WHERE user_id = %s and item_type = %s and enable = 'equipped'", (user_id, item_type),
+            fetch="one")
         if spec_type_items and spec_type_items[1]:
             return f'./sloth_custom_images/{item_type}/{spec_type_items[1]}'
-
-        else:
-            return f'./sloth_custom_images/{item_type}/base_{item_type}.png'
+        return f'./sloth_custom_images/{item_type}/base_{item_type}.png'
 
     async def check_user_can_equip(self, user_id: int, item_name: str) -> bool:
         """ Checks whether a user can equip a specific item.
         :param user_id: The ID of the user to check.
         :param item_name: The name of the item. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("SELECT item_type FROM UserItems WHERE user_id = %s AND item_name = %s", (user_id, item_name))
-        item_type = await mycursor.fetchone()
+        item_type = await self.db.execute_query("SELECT item_type FROM UserItems WHERE user_id = %s AND item_name = %s", (user_id, item_name), fetch="one")
         
-        await mycursor.execute(
+        equipped_item = await self.db.execute_query(
             "SELECT * FROM UserItems WHERE user_id = %s and item_type = %s and enable = 'equipped'",
-            (user_id, item_type[0]))
-        equipped_item = await mycursor.fetchall()
-        await mycursor.close()
+            (user_id, item_type[0]), fetch="all")
 
         if len(equipped_item) != 0 and len(item_type) != 0:
             return False
@@ -188,11 +149,8 @@ class UserItemsTable(commands.Cog):
         :param user_id: The ID of the user to check.
         :param item_name: The name of the item. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute(
-            "SELECT * FROM UserItems WHERE user_id = %s and item_name = %s and enable = 'unequipped'", (user_id, item_name.title()))
-        unequipped_item = await mycursor.fetchall()
-        await mycursor.close()
+        unequipped_item = await self.db.execute_query(
+            "SELECT * FROM UserItems WHERE user_id = %s and item_name = %s and enable = 'unequipped'", (user_id, item_name.title()), fetch="all")
 
         if len(unequipped_item) != 0:
             return False
@@ -204,40 +162,24 @@ class UserItemsTable(commands.Cog):
         :param user_id: The ID of the user from whom to get the item.
         :param item_name: The name of the item to get. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("SELECT * FROM UserItems WHERE user_id = %s and item_name = %s", (user_id, item_name))
-        item_system = await mycursor.fetchone()
-        await mycursor.close()
-        return item_system
+        return await self.db.execute_query("SELECT * FROM UserItems WHERE user_id = %s and item_name = %s", (user_id, item_name), item_system="one")
 
     async def get_user_registered_items(self, user_id: int) -> List[List[Union[str, int]]]:
         """ Gets all UserItems that are registered on the website.
         :param user_id: The ID of the user to get the items from. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("""
+        return await self.db.execute_query("""
             SELECT SSI.* FROM UserItems AS UI 
             LEFT JOIN slothdjango.shop_shopitem AS SSI ON UI.item_name = SSI.item_name
             WHERE user_id = %s
-        """, (user_id,))
-        user_items = await mycursor.fetchall()
-        await mycursor.close()
-        return user_items
+        """, (user_id,), fetch="all")
 
     async def get_top_ten_item_counter_users(self) -> List[List[int]]:
         """ Gets the item counter of the top ten users with most items. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("SELECT user_id, COUNT(*) FROM UserItems GROUP BY user_id ORDER BY COUNT(*) DESC LIMIT 10")
-        item_counters = await mycursor.fetchall()
-        await mycursor.close()
-        return item_counters
+        return await self.db.execute_query("SELECT user_id, COUNT(*) FROM UserItems GROUP BY user_id ORDER BY COUNT(*) DESC LIMIT 10", fetch="all")
 
     async def get_item_counter_users(self) -> List[List[int]]:
         """ Gets the item counter of the all users with most items. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("SELECT user_id, COUNT(*) FROM UserItems GROUP BY user_id ORDER BY COUNT(*) DESC")
-        item_counters = await mycursor.fetchall()
-        await mycursor.close()
-        return item_counters
+        return await self.db.execute_query("SELECT user_id, COUNT(*) FROM UserItems GROUP BY user_id ORDER BY COUNT(*) DESC", fetch="all")
