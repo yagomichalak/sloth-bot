@@ -1,9 +1,10 @@
 import discord
 from discord.ext import commands
-from mysqldb import the_database
+from mysqldb import DatabaseCore
 
 from typing import Optional, List
 from extra import utils
+
 
 class ModActivityTable(commands.Cog):
     """ Class for managing the ModActivity table in the database. """
@@ -12,6 +13,7 @@ class ModActivityTable(commands.Cog):
         """ Class init method. """
 
         self.client = client
+        self.db = DatabaseCore()
 
     # Database commands
     @commands.command(hidden=True)
@@ -24,8 +26,7 @@ class ModActivityTable(commands.Cog):
         if await self.check_mod_activity_table_exists():
             return await ctx.send(f"**The `ModActivity` table already exists, {member.mention}!**")
 
-        mycursor, db = await the_database()
-        await mycursor.execute("""
+        await self.db.execute_query("""
             CREATE TABLE ModActivity (
                 mod_id BIGINT NOT NULL, 
                 time BIGINT DEFAULT 0, 
@@ -33,8 +34,6 @@ class ModActivityTable(commands.Cog):
                 messages INT DEFAULT 0,
                 PRIMARY KEY (mod_id)
             )""")
-        await db.commit()
-        await mycursor.close()
         await ctx.send(f"**Table `ModActivity` created, {member.mention}!**")
 
     @commands.command(hidden=True)
@@ -46,10 +45,7 @@ class ModActivityTable(commands.Cog):
         if not await self.check_mod_activity_table_exists():
             return await ctx.send(f"**The `ModActivity` table doesn't exist, {member.mention}!**")
 
-        mycursor, db = await the_database()
-        await mycursor.execute('DROP TABLE ModActivity')
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query('DROP TABLE ModActivity')
         await ctx.send(f"**Table `ModActivity` dropped, {member.mention}!**")
 
     @commands.command(hidden=True)
@@ -61,23 +57,13 @@ class ModActivityTable(commands.Cog):
         if not await self.check_mod_activity_table_exists():
             return await ctx.send(f"**The `ModActivity` table doesn't exist yett, {member.mention}!**")
 
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM ModActivity")
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("DELETE FROM ModActivity")
         await ctx.send(f"**Table `ModActivity` reset, {member.mention}!**")
 
     async def check_mod_activity_table_exists(self) -> bool:
         """ Checks whether the ModActivity table exists in the database. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("SHOW TABLE STATUS LIKE 'ModActivity'")
-        exists = await mycursor.fetchone()
-        await mycursor.close()
-        if exists:
-            return True
-        else:
-            return False
+        return await self.db.table_exists("ModActivity")
     
     async def insert_moderator(self, mod_id: int, old_ts: Optional[int] = None, messages: Optional[int] = 0) -> None:
         """ Inserts a moderator.
@@ -85,31 +71,21 @@ class ModActivityTable(commands.Cog):
         :param old_ts: The current timestamp. [Optional]
         :param messages: The initial amount of messages for the moderator to start with. [Optional][Default = 0] """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("""
+        await self.db.execute_query("""
             INSERT INTO ModActivity (mod_id, timestamp, messages) VALUES (%s, %s, %s)
             """, (mod_id, old_ts, messages))
-        await db.commit()
-        await mycursor.close()
 
     async def get_mod_activities(self) -> List[List[int]]:
         """ Gets all Mod activities data from the database. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("SELECT * FROM ModActivity")
-        mod_activities = await mycursor.fetchall()
-        await mycursor.close()
-        return mod_activities
+        return await self.db.execute_query("SELECT * FROM ModActivity", fetch="all")
 
     async def get_moderator_current_timestamp(self, mod_id: int, old_ts: Optional[int] = None) -> int:
         """ Gets the moderator's current timestamp.
         :param mod_id: The moderator ID.
         :param old_ts: The current global timestmap. [Optional]"""
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("SELECT * FROM ModActivity WHERE mod_id = %s", (mod_id,))
-        mod = await mycursor.fetchone()
-        await mycursor.close()
+        mod = await self.db.execute_query("SELECT * FROM ModActivity WHERE mod_id = %s", (mod_id,), fetch="one")
 
         if not mod:
             await self.insert_moderator(mod_id, old_ts)
@@ -121,10 +97,7 @@ class ModActivityTable(commands.Cog):
         """ Gets the moderator's current amount of messages.
         :param mod_id: The moderator ID. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("SELECT * FROM ModActivity WHERE mod_id = %s", (mod_id,))
-        mod = await mycursor.fetchone()
-        await mycursor.close()
+        mod = await self.db.execute_query("SELECT * FROM ModActivity WHERE mod_id = %s", (mod_id,), fetch="one")
 
         if not mod:
             await self.insert_moderator(mod_id, messages=1)
@@ -136,36 +109,23 @@ class ModActivityTable(commands.Cog):
         """ Updates the moderator's message counter.
         :param mod_id: The moderator's ID. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("UPDATE ModActivity SET messages = messages + 1 WHERE mod_id = %s", (mod_id,))
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("UPDATE ModActivity SET messages = messages + 1 WHERE mod_id = %s", (mod_id,))
 
     async def update_moderator_timestamp(self, mod_id: int) -> None:
         """ Updates the moderator's timestamp.
         :param mod_id: The moderator ID. """
 
-        mycursor, db = await the_database()
         current_ts = await utils.get_timestamp()
-        await mycursor.execute("UPDATE ModActivity SET timestamp = %s WHERE mod_id = %s", (current_ts, mod_id))
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("UPDATE ModActivity SET timestamp = %s WHERE mod_id = %s", (current_ts, mod_id))
 
     async def update_moderator_time(self, mod_id: int, addition: int) -> None:
         """ Increments the moderator's time counter.
         :param mod_id: The moderator ID.
         :param addition: The addition value. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("UPDATE ModActivity SET time = time + %s WHERE mod_id = %s", (addition, mod_id))
-        await db.commit()
-        await mycursor.close()
-        await self.update_moderator(mod_id)
+        await self.db.execute_query("UPDATE ModActivity SET time = time + %s WHERE mod_id = %s", (addition, mod_id))
 
     async def delete_mod_activity(self) -> None:
         """ Deletes all the data from the ModActivity table. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM ModActivity")
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("DELETE FROM ModActivity")
