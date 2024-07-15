@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
-from mysqldb import the_database
-from typing import List, Union, Any
+from mysqldb import DatabaseCore
+from typing import List
 from extra import utils
 
 class AspirantsTable(commands.Cog):
@@ -11,6 +11,7 @@ class AspirantsTable(commands.Cog):
         """ Class init method. """
 
         self.client = client
+        self.db = DatabaseCore()
 
     @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
@@ -21,11 +22,9 @@ class AspirantsTable(commands.Cog):
         if await self.check_aspirant_activity_exists():
             return await ctx.send(f"**The AspirantActivity table already exists, {member.mention}!**")
 
-        mycursor, db = await the_database()
-        await mycursor.execute(
-            'CREATE TABLE AspirantActivity (user_id bigint , time bigint, timestamp bigint default null, messages int)')
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query(
+            "CREATE TABLE AspirantActivity (user_id bigint , time bigint, timestamp bigint default null, messages int)"
+        )
         await ctx.send(f"**Table `AspirantActivity` created, {member.mention}!**")
 
     @commands.command(hidden=True)
@@ -37,10 +36,7 @@ class AspirantsTable(commands.Cog):
         if not await self.check_aspirant_activity_exists():
             return await ctx.send(f"**The AspirantActivity table doesn't exist, {member.mention}!**")
 
-        mycursor, db = await the_database()
-        await mycursor.execute('DROP TABLE AspirantActivity')
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query('DROP TABLE AspirantActivity')
         await ctx.send(f"**Table `AspirantActivity` dropped, {member.mention}!**")
 
     @commands.command(hidden=True)
@@ -52,19 +48,13 @@ class AspirantsTable(commands.Cog):
         if not await self.check_aspirant_activity_exists():
             return await ctx.send(f"**The AspirantActivity table doesn't exist yet, {member.mention}!**")
 
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM AspirantActivity")
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("DELETE FROM AspirantActivity")
         await ctx.send(f"**Table `AspirantActivity` reset, {member.mention}!**")
 
     async def check_aspirant_activity_exists(self) -> bool:
         """ Checks whether the AspirantActivity table exists. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("SHOW TABLE STATUS LIKE 'AspirantActivity'")
-        exists = await mycursor.fetchone()
-        await mycursor.close()
+        exists = await self.db.execute_query("SHOW TABLE STATUS LIKE 'AspirantActivity'", fetch="one")
         if exists:
             return True
         else:
@@ -75,20 +65,14 @@ class AspirantsTable(commands.Cog):
         :param user_id: The ID of the aspirant to add.
         :param old_ts: The current timestamp. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute(
+        await self.db.execute_query(
             "INSERT INTO AspirantActivity (user_id, time, timestamp, messages) VALUES (%s, %s, %s, %s)", 
             (user_id, 0, old_ts, 0))
-        await db.commit()
-        await mycursor.close()
 
     async def get_all_aspirants(self) -> List[List[int]]:
         """ Gets all aspirants. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute('SELECT user_id FROM AspirantActivity')
-        users = await mycursor.fetchall()
-        await mycursor.close()
+        users = await self.db.execute_query("SELECT user_id FROM AspirantActivity", fetch="all")
         return list(map(lambda user: user[0], users))
 
     async def get_aspirant_current_timestamp(self, user_id: int, old_ts: int) -> int:
@@ -96,10 +80,7 @@ class AspirantsTable(commands.Cog):
         :param user_id: The ID of the user from whom to get it.
         :param old_ts: The current timestamp. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("SELECT * FROM AspirantActivity WHERE user_id = %s", (user_id,))
-        user = await mycursor.fetchone()
-        await mycursor.close()
+        user = await self.db.execute_query("SELECT * FROM AspirantActivity WHERE user_id = %s", (user_id,), fetch="one")
 
         if not user:
             await self.insert_aspirant(user_id, old_ts)
@@ -114,10 +95,7 @@ class AspirantsTable(commands.Cog):
         """ Gets a specific aspirant's messages counter.
         :param user_id: The ID of the user from whom to get it. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("SELECT * FROM AspirantActivity WHERE user_id = %s", (user_id,))
-        user = await mycursor.fetchone()
-        await mycursor.close()
+        user = await self.db.execute_query("SELECT * FROM AspirantActivity WHERE user_id = %s", (user_id,), fetch="one")
 
         if not user:
             await self.insert_aspirant_message(user_id)
@@ -130,36 +108,24 @@ class AspirantsTable(commands.Cog):
         :param user_id: The ID of the aspirant to add.
         :param addition: The addition to increment to their current time counter. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("UPDATE AspirantActivity SET time = time + %s WHERE user_id = %s", (addition, user_id))
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("UPDATE AspirantActivity SET time = time + %s WHERE user_id = %s", (addition, user_id))
         await self.update_aspirant_time(user_id)
 
     async def update_aspirant_message(self, user_id: int) -> None:
         """ Updates an aspirant's message counter.
         :param user_id: The user for whom to update it. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("UPDATE AspirantActivity SET messages = messages + 1 WHERE user_id = %s", (user_id,))
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("UPDATE AspirantActivity SET messages = messages + 1 WHERE user_id = %s", (user_id,))
 
     async def update_aspirant_time(self, user_id: int) -> None:
         """ Updates an aspirant's timestamp.
         :param user_id: The ID of the aspirant from whom to update it. """
 
-        mycursor, db = await the_database()
         current_ts = await utils.get_timestamp()
-        await mycursor.execute("UPDATE AspirantActivity SET timestamp = %s WHERE user_id = %s", (int(current_ts), user_id))
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("UPDATE AspirantActivity SET timestamp = %s WHERE user_id = %s", (int(current_ts), user_id))
 
     async def reset_users_activity(self, user_id: int) -> None:
         """ Resets an aspirant's statuses.
         :param user_id: The ID of the user to reset. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("UPDATE AspirantActivity SET messages = 0, time = 0 WHERE user_id = %s", (user_id,))
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("UPDATE AspirantActivity SET messages = 0, time = 0 WHERE user_id = %s", (user_id,))
