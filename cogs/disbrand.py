@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands, tasks
-from mysqldb import the_database, the_django_database
+from mysqldb import DatabaseCore
 from typing import List, Dict, Any
 import os
 from extra import utils
@@ -21,7 +21,8 @@ class Disbrand(commands.Cog):
         """ The class init method. """
         
         self.client = client
-        
+        self.db = DatabaseCore()
+
     @commands.Cog.listener()
     async def on_ready(self) -> None:
         """ Tells when the cog's ready to be used. """
@@ -137,8 +138,7 @@ class Disbrand(commands.Cog):
         if await self.check_user_advertisement_channel_table_exists():
             return await ctx.send(f"**The `UserAdvertisementChannel` table already exists, {member.mention}!**")
 
-        mycursor, db = await the_database()
-        await mycursor.execute("""
+        await self.db.execute_query("""
             CREATE TABLE UserAdvertisementChannel (
                 user_id BIGINT NOT NULL,
                 channel_name VARCHAR(75) NOT NULL,
@@ -150,8 +150,6 @@ class Disbrand(commands.Cog):
                 category_id BIGINT DEFAULT NULL,
                 UNIQUE KEY (user_id, server_id))
             """)
-        await db.commit()
-        await mycursor.close()
 
         return await ctx.send(f"**Table `UserAdvertisementChannel` created, {member.mention}!**")
 
@@ -165,10 +163,7 @@ class Disbrand(commands.Cog):
         if not await self.check_user_advertisement_channel_table_exists():
             return await ctx.send(f"**The `UserAdvertisementChannel` table doesn't exist, {member.mention}!**")
 
-        mycursor, db = await the_database()
-        await mycursor.execute("DROP TABLE UserAdvertisementChannel")
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("DROP TABLE UserAdvertisementChannel")
 
         return await ctx.send(f"**Table `UserAdvertisementChannel` dropped, {member.mention}!**")
 
@@ -182,10 +177,7 @@ class Disbrand(commands.Cog):
         if not await self.check_user_advertisement_channel_table_exists():
             return await ctx.send(f"**The `UserAdvertisementChannel` table doesn't exist yet, {member.mention}!**")
 
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM UserAdvertisementChannel")
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("DELETE FROM UserAdvertisementChannel")
 
         return await ctx.send(f"**Table `UserAdvertisementChannel` reset, {member.mention}!**")
 
@@ -193,41 +185,25 @@ class Disbrand(commands.Cog):
     async def check_user_advertisement_channel_table_exists(self) -> bool:
         """ Checks whether the UserAdvertisementChannel table exists in the database. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("SHOW TABLE STATUS LIKE 'UserAdvertisementChannel'")
-        exists = await mycursor.fetchone()
-        await mycursor.close()
-        if exists:
-            return True
-        else:
-            return False
+        return await self.db.table_exists("UserAdvertisementChannel")
     
     async def get_user_advertisement_channels(self, user_id: int, server_id: int) -> List[Any]:
         """ Get User Advertisement Channels by status.
         :param status: The status. """
         
-        mycursor, _ = await the_database()
-        await mycursor.execute("SELECT * FROM UserAdvertisementChannel WHERE user_id = %s AND server_id = %s", (user_id, server_id))
-        channel = await mycursor.fetchone()
-        await mycursor.close()
-        return channel
+        return await self.db.execute_query("SELECT * FROM UserAdvertisementChannel WHERE user_id = %s AND server_id = %s", (user_id, server_id), fetch="one")
 
     async def get_users_advertisement_channels(self, status: str) -> List[List[Any]]:
         """ Get User Advertisement Channels by status.
         :param status: The status. """
         
-        mycursor, _ = await the_database()
-        await mycursor.execute("SELECT * FROM UserAdvertisementChannel WHERE status = %s", (status,))
-        channels = await mycursor.fetchall()
-        await mycursor.close()
-        return channels
+        return await self.db.execute_query("SELECT * FROM UserAdvertisementChannel WHERE status = %s", (status,), fetch="all")
 
     async def update_user_advertisement_channels(self, channels: List[List[Any]]) -> None:
         """ Get User Advertisement Channels by status.
         :param status: The status. """
         
-        mycursor, db = await the_database()
-        await mycursor.executemany("""
+        await self.db.execute_query("""
             UPDATE
                 UserAdvertisementChannel
             SET
@@ -239,9 +215,7 @@ class Disbrand(commands.Cog):
                 status = %(status)s
             WHERE
                 user_id = %(user_id)s AND channel_name = %(old_channel_name)s;
-        """, channels)
-        channels = await db.commit()
-        await mycursor.close()
+        """, channels, execute_many=True)
         
     async def get_pending_messages(self, weekday: str, timestamp: str, time_span: int = 86400) -> List[List[Any]]:
         """ Gets the pending messages to be sent.
@@ -249,8 +223,7 @@ class Disbrand(commands.Cog):
         :param timestamp: The current timestamp to calculate messages due time.
         :param time_span: The time span that a message can be considered pending after the last time it was sent. """
         
-        mycursor, _ = await the_django_database()
-        await mycursor.execute("""
+        return await self.db.execute_query("""
             SELECT
                 *
             FROM
@@ -260,18 +233,14 @@ class Disbrand(commands.Cog):
                 AND ping_role_name IS NOT NULL
                 AND pings_available >= 1
                 AND (%s - IFNULL(last_ping_at, "1970-01-01 00:00:00")) >= %s;
-        """, (weekday, timestamp, time_span))
-        pending_messages = await mycursor.fetchall()
-        await mycursor.close()
-        return pending_messages
+        """, (weekday, timestamp, time_span), database_name="django", fetch="all")
 
     async def update_pending_message(self, user_id: int, current_timestamp: int) -> None:
         """ Updates the pending message status for a specific user.
         :param user_id: The user ID attached to the pending message.
         :param current_timestamp: The current timestamp. """
         
-        mycursor, db = await the_django_database()
-        await mycursor.execute("""
+        return await self.db.execute_query("""
             UPDATE
                 advertisement_advertisementconfig
             SET
@@ -282,9 +251,7 @@ class Disbrand(commands.Cog):
                 last_ping_at = %s
             WHERE
                 user_id = %s;
-        """, (current_timestamp, current_timestamp, user_id))
-        await db.commit()
-        await mycursor.close()
+        """, (current_timestamp, current_timestamp, user_id), database_name="django")
 
 
 def setup(client: commands.Bot) -> None:
