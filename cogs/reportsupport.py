@@ -1,7 +1,7 @@
 import aiohttp
 import discord
 from discord.ext import commands, tasks
-from mysqldb import *
+from mysqldb import DatabaseCore
 import asyncio
 from extra.prompt.menu import Confirm
 from extra.view import ReportSupportView
@@ -31,10 +31,10 @@ from extra.reportsupport.applications import ApplicationsTable
 from extra.reportsupport.verify import Verify
 from extra.reportsupport.openchannels import OpenChannels
 
-
 report_support_classes: List[commands.Cog] = [
     ApplicationsTable, Verify, OpenChannels
 ]
+
 
 class ReportSupport(*report_support_classes):
     """ A cog related to the system of reports and some other things. """
@@ -42,12 +42,12 @@ class ReportSupport(*report_support_classes):
     def __init__(self, client) -> None:
 
         self.client = client
+        self.db = DatabaseCore()
         self.cosmos_role_id: int = int(os.getenv('COSMOS_ROLE_ID', 123))
         self.prisca_id: int = int(os.getenv('PRISCA_ID', 123))
         self.cache = {}
         self.report_cache = {}
         self.bot_cache = {}
-        
 
     @commands.Cog.listener()
     async def on_ready(self) -> None:
