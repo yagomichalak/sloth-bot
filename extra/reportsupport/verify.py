@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 import os
-from extra import utils
+
 
 class Verify(commands.Cog):
     """ Cog for user verification commands and methods. """
@@ -9,7 +9,6 @@ class Verify(commands.Cog):
     verify_reqs_channel_id = int(os.getenv('VERIFY_REQS_CHANNEL_ID', 123))
     verify_reqs_cat_id = int(os.getenv('VERIFY_REQS_CAT_ID', 123))
     verified_role_id = int(os.getenv('VERIFIED_ROLE_ID', 123))
-
 
     @commands.Cog.listener(name="on_raw_reaction_add")
     async def on_raw_reaction_add_verify(self, payload) -> None:
@@ -34,8 +33,6 @@ class Verify(commands.Cog):
             return await message.remove_reaction(payload.emoji, payload.member)
 
         await self.handle_verify_request(guild, payload)
-
-
 
     async def handle_verify_request(self, guild, payload) -> None:
         """ Handles teacher applications.
