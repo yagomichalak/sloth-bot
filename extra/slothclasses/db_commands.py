@@ -1,6 +1,5 @@
-import discord
 from discord.ext import commands
-from mysqldb import the_database
+
 
 class SlothClassDatabaseCommands(commands.Cog):
     """ A class for organizing the bot's table creation/drop/delete/check commands. """
@@ -14,8 +13,7 @@ class SlothClassDatabaseCommands(commands.Cog):
         if await self.table_sloth_skills_exists():
             return await ctx.send("**The `SlothSkills` table already exists!**")
 
-        mycursor, db = await the_database()
-        await mycursor.execute("""
+        await self.db.execute_query("""
             CREATE TABLE SlothSkills (
                 user_id BIGINT NOT NULL, skill_type VARCHAR(30) NOT NULL,
                 skill_timestamp BIGINT NOT NULL, target_id BIGINT DEFAULT NULL,
@@ -25,8 +23,6 @@ class SlothClassDatabaseCommands(commands.Cog):
                 edited_timestamp BIGINT DEFAULT NULL,
                 PRIMARY KEY (target_id, skill_type)
             ) DEFAULT CHARSET=utf8mb4""")
-        await db.commit()
-        await mycursor.close()
         await ctx.send("**Created `SlothSkills` table!**")
 
     @commands.command(hidden=True)
@@ -37,10 +33,7 @@ class SlothClassDatabaseCommands(commands.Cog):
         if not await self.table_sloth_skills_exists():
             return await ctx.send("**The `SlothSkills` table doesn't exist!**")
 
-        mycursor, db = await the_database()
-        await mycursor.execute("DROP TABLE SlothSkills")
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("DROP TABLE SlothSkills")
         await ctx.send("**Dropped `SlothSkills` table!**")
 
     @commands.command(hidden=True)
@@ -51,23 +44,13 @@ class SlothClassDatabaseCommands(commands.Cog):
         if not await self.table_sloth_skills_exists():
             return await ctx.send("**The `SlothSkills` table doesn't exist yet!**")
 
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM SlothSkills")
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("DELETE FROM SlothSkills")
         await ctx.send("**Reset `SlothSkills` table!**")
 
     async def table_sloth_skills_exists(self) -> bool:
         """ Checks whether the SlothSkills table exists. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("SHOW TABLE STATUS LIKE 'SlothSkills'")
-        table_info = await mycursor.fetchall()
-        await mycursor.close()
-        if len(table_info) == 0:
-            return False
-        else:
-            return True
+        return await self.db.table_exists("SlothSkills")
 
     # ======== SkillsCooldown =========
     @commands.command(hidden=True)
@@ -80,8 +63,7 @@ class SlothClassDatabaseCommands(commands.Cog):
         if await self.table_skills_cooldown_exists():
             return await ctx.send(f"**Table `SkillsCooldown` already exists, {member.mention}!**")
 
-        mycursor, db = await the_database()
-        await mycursor.execute("""
+        await self.db.execute_query("""
         CREATE TABLE SkillsCooldown (
             user_id BIGINT NOT NULL,
             skill_one_ts BIGINT DEFAULT NULL,
@@ -93,8 +75,6 @@ class SlothClassDatabaseCommands(commands.Cog):
             CONSTRAINT fk_skills_user_id FOREIGN KEY (user_id) REFERENCES UserCurrency (user_id) ON DELETE CASCADE ON UPDATE CASCADE
         )
         """)
-        await db.commit()
-        await mycursor.close()
         await ctx.send(f"**Table `SkillsCooldown` created, {member.mention}!**")
 
     @commands.command(hidden=True)
@@ -107,10 +87,7 @@ class SlothClassDatabaseCommands(commands.Cog):
         if not await self.table_skills_cooldown_exists():
             return await ctx.send(f"**Table `SkillsCooldown` doesn't exist, {member.mention}!**")
 
-        mycursor, db = await the_database()
-        await mycursor.execute("DROP TABLE SkillsCooldown")
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("DROP TABLE SkillsCooldown")
         await ctx.send(f"**Table `SkillsCooldown` dropped, {member.mention}!**")
 
     @commands.command(hidden=True)
@@ -123,23 +100,13 @@ class SlothClassDatabaseCommands(commands.Cog):
         if not await self.table_skills_cooldown_exists():
             return await ctx.send(f"**Table `SkillsCooldown` doesn't exist yet, {member.mention}!**")
 
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM SkillsCooldown")
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("DELETE FROM SkillsCooldown")
         await ctx.send(f"**Table `SkillsCooldown` reset, {member.mention}!**")
 
     async def table_skills_cooldown_exists(self) -> bool:
         """ Checks whether the SkillsCooldown table exists. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("SHOW TABLE STATUS LIKE 'SkillsCooldown'")
-        exists = await mycursor.fetchall()
-        await mycursor.close()
-        if exists:
-            return True
-        else:
-            return False
+        return await self.db.table_exists("SkillsCooldown")
 
     # ======== UserTribe =========
     @commands.command(hidden=True)
@@ -150,8 +117,7 @@ class SlothClassDatabaseCommands(commands.Cog):
         if await self.table_user_tribe_exists():
             return await ctx.send("**The `UserTribe` table already exists!**")
 
-        mycursor, db = await the_database()
-        await mycursor.execute("""
+        await self.db.execute_query("""
             CREATE TABLE UserTribe (
                 user_id BIGINT NOT NULL, tribe_name VARCHAR(50) NOT NULL,
                 tribe_description VARCHAR(200) NOT NULL, two_emojis VARCHAR(2) NOT NULL,
@@ -160,8 +126,6 @@ class SlothClassDatabaseCommands(commands.Cog):
                 PRIMARY KEY (tribe_name),
                 CONSTRAINT fk_tribe_owner_id FOREIGN KEY (user_id) REFERENCES UserCurrency (user_id) ON DELETE CASCADE ON UPDATE CASCADE
             ) DEFAULT CHARSET=utf8mb4""")
-        await db.commit()
-        await mycursor.close()
         await ctx.send("**Created `UserTribe` table!**")
 
     @commands.command(hidden=True)
@@ -172,10 +136,7 @@ class SlothClassDatabaseCommands(commands.Cog):
         if not await self.table_user_tribe_exists():
             return await ctx.send("**The `UserTribe` table doesn't exist!**")
 
-        mycursor, db = await the_database()
-        await mycursor.execute("DROP TABLE UserTribe")
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("DROP TABLE UserTribe")
         await ctx.send("**Dropped `UserTribe` table!**")
 
     @commands.command(hidden=True)
@@ -186,23 +147,13 @@ class SlothClassDatabaseCommands(commands.Cog):
         if not await self.table_user_tribe_exists():
             return await ctx.send("**The `UserTribe` table doesn't exist yet!**")
 
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM UserTribe")
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("DELETE FROM UserTribe")
         await ctx.send("**Reset `UserTribe` table!**")
 
     async def table_user_tribe_exists(self) -> bool:
         """ Checks whether the UserTribe table exists. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("SHOW TABLE STATUS LIKE 'UserTribe'")
-        table_info = await mycursor.fetchall()
-        await mycursor.close()
-        if len(table_info) == 0:
-            return False
-        else:
-            return True
+        return await self.db.table_exists("UserTribe")
 
     # ======== TribeMember =========
     @commands.command(hidden=True)
@@ -213,8 +164,7 @@ class SlothClassDatabaseCommands(commands.Cog):
         if await self.table_tribe_member_exists():
             return await ctx.send("**The `TribeMember` table already exists!**")
 
-        mycursor, db = await the_database()
-        await mycursor.execute("""
+        await self.db.execute_query("""
             CREATE TABLE TribeMember (
                 owner_id BIGINT NOT NULL,
                 tribe_name VARCHAR(50) NOT NULL,
@@ -224,8 +174,6 @@ class SlothClassDatabaseCommands(commands.Cog):
                 CONSTRAINT fk_tribe_owner FOREIGN KEY (owner_id) REFERENCES UserTribe (user_id) ON DELETE CASCADE ON UPDATE CASCADE,
                 CONSTRAINT fk_tribe_name FOREIGN KEY (tribe_name) REFERENCES UserTribe (tribe_name) ON DELETE CASCADE ON UPDATE CASCADE
             ) DEFAULT CHARSET=utf8mb4""")
-        await db.commit()
-        await mycursor.close()
         await ctx.send("**Created `TribeMember` table!**")
 
     @commands.command(hidden=True)
@@ -236,10 +184,7 @@ class SlothClassDatabaseCommands(commands.Cog):
         if not await self.table_tribe_member_exists():
             return await ctx.send("**The `TribeMember` table doesn't exist!**")
 
-        mycursor, db = await the_database()
-        await mycursor.execute("DROP TABLE TribeMember")
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("DROP TABLE TribeMember")
         await ctx.send("**Dropped `TribeMember` table!**")
 
     @commands.command(hidden=True)
@@ -250,23 +195,13 @@ class SlothClassDatabaseCommands(commands.Cog):
         if not await self.table_tribe_member_exists():
             return await ctx.send("**The `TribeMember` table doesn't exist yet!**")
 
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM TribeMember")
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("DELETE FROM TribeMember")
         await ctx.send("**Reset `TribeMember` table!**")
 
     async def table_tribe_member_exists(self) -> bool:
         """ Checks whether the TribeMember table exists. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("SHOW TABLE STATUS LIKE 'TribeMember'")
-        table_info = await mycursor.fetchall()
-        await mycursor.close()
-        if len(table_info) == 0:
-            return False
-        else:
-            return True
+        return await self.db.table_exists("TribeMember")
 
     # ======== TribeRole =========
     @commands.command(hidden=True)
@@ -277,8 +212,7 @@ class SlothClassDatabaseCommands(commands.Cog):
         if await self.table_tribe_role_exists():
             return await ctx.send("**The `TribeRole` table already exists!**")
 
-        mycursor, db = await the_database()
-        await mycursor.execute("""
+        await self.db.execute_query("""
             CREATE TABLE TribeRole (
                 owner_id BIGINT NOT NULL,
                 tribe_name VARCHAR(50) NOT NULL,
@@ -287,8 +221,6 @@ class SlothClassDatabaseCommands(commands.Cog):
                 CONSTRAINT fk_tr_tribe_owner FOREIGN KEY (owner_id) REFERENCES UserTribe (user_id) ON DELETE CASCADE ON UPDATE CASCADE,
                 CONSTRAINT fk_tr_tribe_name FOREIGN KEY (tribe_name) REFERENCES UserTribe (tribe_name) ON DELETE CASCADE ON UPDATE CASCADE
             ) DEFAULT CHARSET=utf8mb4""")#COLLATE=utf8mb4_unicode_ci
-        await db.commit()
-        await mycursor.close()
         await ctx.send("**Created `TribeRole` table!**")
 
     @commands.command(hidden=True)
@@ -299,10 +231,7 @@ class SlothClassDatabaseCommands(commands.Cog):
         if not await self.table_tribe_role_exists():
             return await ctx.send("**The `TribeRole` table doesn't exist!**")
 
-        mycursor, db = await the_database()
-        await mycursor.execute("DROP TABLE TribeRole")
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("DROP TABLE TribeRole")
         await ctx.send("**Dropped `TribeRole` table!**")
 
     @commands.command(hidden=True)
@@ -313,24 +242,13 @@ class SlothClassDatabaseCommands(commands.Cog):
         if not await self.table_tribe_role_exists():
             return await ctx.send("**The `TribeRole` table doesn't exist yet!**")
 
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM TribeRole")
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("DELETE FROM TribeRole")
         await ctx.send("**Reset `TribeRole` table!**")
 
     async def table_tribe_role_exists(self) -> bool:
         """ Checks whether the TribeRole table exists. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("SHOW TABLE STATUS LIKE 'TribeRole'")
-        table_info = await mycursor.fetchall()
-        await mycursor.close()
-        if len(table_info) == 0:
-            return False
-        else:
-            return True
-
+        return await self.db.table_exists("TribeRole")
 
     # ======== SlothProfile =========
     @commands.command(hidden=True)
@@ -343,8 +261,7 @@ class SlothClassDatabaseCommands(commands.Cog):
         if await self.table_sloth_profile_exists():
             return await ctx.send(f"**Table `SlothProfile` already exists, {member.mention}!**")
 
-        mycursor, db = await the_database()
-        await mycursor.execute("""
+        await self.db.execute_query("""
         CREATE TABLE SlothProfile (
             user_id BIGINT NOT NULL,
             sloth_class VARCHAR(30) DEFAULT 'default',
@@ -362,8 +279,6 @@ class SlothClassDatabaseCommands(commands.Cog):
             CONSTRAINT fk_sloth_pfl_user_id FOREIGN KEY (user_id) REFERENCES UserCurrency (user_id) ON DELETE CASCADE ON UPDATE CASCADE,
             CONSTRAINT fk_sloth_pfl_tribe_name FOREIGN KEY (tribe, tribe_user_id) REFERENCES TribeMember (tribe_name, member_id) ON DELETE SET NULL ON UPDATE CASCADE
         ) DEFAULT CHARSET=utf8mb4""")
-        await db.commit()
-        await mycursor.close()
         await ctx.send(f"**Table `SlothProfile` created, {member.mention}!**")
 
     @commands.command(hidden=True)
@@ -376,10 +291,7 @@ class SlothClassDatabaseCommands(commands.Cog):
         if not await self.table_sloth_profile_exists():
             return await ctx.send(f"**Table `SlothProfile` doesn't exist, {member.mention}!**")
 
-        mycursor, db = await the_database()
-        await mycursor.execute("DROP TABLE SlothProfile")
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("DROP TABLE SlothProfile")
         await ctx.send(f"**Table `SlothProfile` dropped, {member.mention}!**")
 
     @commands.command(hidden=True)
@@ -392,30 +304,17 @@ class SlothClassDatabaseCommands(commands.Cog):
         if not await self.table_sloth_profile_exists():
             return await ctx.send(f"**Table `SlothProfile` doesn't exist yet, {member.mention}!**")
 
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM SlothProfile")
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("DELETE FROM SlothProfile")
         await ctx.send(f"**Table `SlothProfile` reset, {member.mention}!**")
 
     async def table_sloth_profile_exists(self) -> bool:
         """ Checks whether the SlothProfile table exists. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("SHOW TABLE STATUS LIKE 'SlothProfile'")
-        exists = await mycursor.fetchall()
-        await mycursor.close()
-        if exists:
-            return True
-        else:
-            return False
+        return await self.db.table_exists("SlothProfile")
 
     async def update_sloth_profile_class(self, user_id: int, sloth_class: str) -> None:
         """ Updates the user's Sloth Profile's class.
         :param user_id: The ID of the user to update.
         :param sloth_class: The sloth class to update to. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("UPDATE SlothProfile SET sloth_class = %s WHERE user_id = %s", (sloth_class, user_id))
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("UPDATE SlothProfile SET sloth_class = %s WHERE user_id = %s", (sloth_class, user_id))
