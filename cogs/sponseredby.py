@@ -5,7 +5,7 @@ from discord.ext import commands
 import os
 from typing import List, Dict, Optional
 from extra import utils
-from mysqldb import the_database
+from mysqldb import DatabaseCore
 
 guild_ids: List[int] = [int(os.getenv("SERVER_ID", 123))]
 sponsored_by_category_id: int = int(os.getenv("SPONSORED_BY_CATEGORY_ID", 123))
@@ -21,6 +21,7 @@ class SponsoredBy(commands.Cog):
         """ The class init method. """
 
         self.client = client
+        self.db = DatabaseCore()
 
     # Events
 
@@ -97,10 +98,7 @@ class SponsoredBy(commands.Cog):
         await ctx.message.delete()
         if await self.table_user_ping_permission():
             return await ctx.send("**Table __UserPingPermission__ already exists!**")
-        mycursor, db = await the_database()
-        await mycursor.execute("CREATE TABLE UserPingPermission (user_id BIGINT NOT NULL, PRIMARY KEY(user_id));")
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("CREATE TABLE UserPingPermission (user_id BIGINT NOT NULL, PRIMARY KEY(user_id));")
 
         return await ctx.send("**Table __UserPingPermission__ created!**", delete_after=5)
 
@@ -112,10 +110,7 @@ class SponsoredBy(commands.Cog):
         await ctx.message.delete()
         if not await self.table_user_ping_permission():
             return await ctx.send("**Table __UserPingPermission__ doesn't exist!**")
-        mycursor, db = await the_database()
-        await mycursor.execute("DROP TABLE UserPingPermission;")
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("DROP TABLE UserPingPermission;")
 
         return await ctx.send("**Table __UserPingPermission__ dropped!**", delete_after=5)
 
@@ -127,55 +122,35 @@ class SponsoredBy(commands.Cog):
         await ctx.message.delete()
         if not await self.table_user_ping_permission():
             return await ctx.send("**Table __UserPingPermission__ doesn't exist yet!**")
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM UserPingPermission;")
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("DELETE FROM UserPingPermission;")
 
         return await ctx.send("**Table __UserPingPermission__ reset!**", delete_after=5)
 
     async def table_user_ping_permission(self) -> bool:
         """ Checks whether the UserPingPermission table exists. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("SHOW TABLE STATUS LIKE 'UserPingPermission';")
-        exists = await mycursor.fetchone()
-        await mycursor.close()
-        if exists:
-            return True
-        else:
-            return False
+        return await self.db.table_exists("UserPingPermission")
 
     async def insert_user_ping_permission(self, user_id: int) -> None:
         """ Inserts a row into the UserPingPermission table for
         a specific user.
         :param user_id: The ID of the user to insert it for. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("INSERT INTO UserPingPermission (user_id) VALUES (%s);", (user_id,))
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("INSERT INTO UserPingPermission (user_id) VALUES (%s);", (user_id,))
 
     async def get_user_ping_permission(self, user_id: int) -> Optional[Dict[str, int]]:
         """ Gets the data from the UserPingPermission for
         a specific user.
         :param user_id: The ID of the user to fetch. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("SELECT * FROM UserPingPermission WHERE user_id = %s;", (user_id,))
-        user_ping_permission = await mycursor.fetchone()
-        await mycursor.close()
-        return user_ping_permission
+        return await self.db.execute_query("SELECT * FROM UserPingPermission WHERE user_id = %s;", (user_id,), fetch="one")
 
     async def delete_user_ping_permission(self, user_id: int) -> None:
         """ Deletes a row from the UserPingPermission table for
         a specific user.
         :param user_id: The ID of the user to remove it for. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM UserPingPermission WHERE user_id = %s;", (user_id,))
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("DELETE FROM UserPingPermission WHERE user_id = %s;", (user_id,))
 
 
 def setup(client: commands.Bot) -> None:
