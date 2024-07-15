@@ -1,11 +1,10 @@
-import asyncio
 import discord
 from discord.ext import commands
-from mysqldb import *
+from mysqldb import DatabaseCore
 import copy
 import random
 from .blackjack_db import BlackJackDB
-from typing import List, Union, Optional, Dict
+from typing import List
 
 moderation_cogs: List[commands.Cog] = [
 	BlackJackDB
@@ -18,6 +17,7 @@ class BlackJackGame(*moderation_cogs):
         """ Class init method. """
 
         self.client = client
+        self.db = DatabaseCore()
 
         # Initial settings for a blackjack game
         # Player's bet
