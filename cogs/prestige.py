@@ -103,6 +103,24 @@ class Prestige(commands.Cog):
 
         await ctx.send(choice(sentences))
 
+    @commands.command()
+    async def loral(self, ctx) -> None:
+        """ A command for telling something about loral. """
+
+        await ctx.send("<@759049454819999776> Mans annoying")
+
+    @commands.command()
+    async def leonor(self, ctx) -> None:
+        """ A command for telling something about leonor. """
+
+        await ctx.send("<@754678627265675325> Human brain smells like cat piss when it dries out")
+
+    @commands.command()
+    async def anis(self, ctx) -> None:
+        """ A command for telling something about anis. """
+
+        await ctx.send("<@515991382217981952> niso")
+
 def setup(client) -> None:
     """ Cog's setup function. """
 
