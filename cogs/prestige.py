@@ -96,9 +96,9 @@ class Prestige(commands.Cog):
         """ A command for telling something about frenesia. """
         
         sentences = [
-            "# MIAOOOOOOO",
-            "**CIAO SONO FRENESIA**",
-            "hi everyone from <@439110609745870870>"
+            "# MIAOOOOOOO <:cat_wave:924495909595779082>",
+            "**CIAO SONO FRENESIA 🇮🇹**",
+            "AHAHAAHAHAHA <@439110609745870870>"
         ]
 
         await ctx.send(choice(sentences))
