@@ -381,6 +381,14 @@ class UserReportSupportDetailModal(Modal):
                 style=discord.InputTextStyle.paragraph
             )
         )
+        self.add_item(
+            InputText(
+                label="Do you possess evidence of what happened?",
+                placeholder="Recording, screenshots or witnesses can be considered as evidence ",
+                style=discord.InputTextStyle.paragraph,
+                min_length=2
+            )
+        )
         self.option = option
 
     async def callback(self, interaction) -> None:
@@ -389,11 +397,13 @@ class UserReportSupportDetailModal(Modal):
         await interaction.response.defer()
         reportee = self.children[0].value
         text = self.children[1].value
+        print(self.children[2].value)
+        evidence=self.children[2].value
         member = interaction.user
 
         if self.option == 'Report':
             try:
-                exists = await self.cog.report_someone(interaction, reportee, text)
+                exists = await self.cog.report_someone(interaction, reportee, text, evidence)
                 if exists is False:
                     return
             except Exception as e:
@@ -450,6 +460,14 @@ class UserReportStaffDetailModal(Modal):
                 style=discord.InputTextStyle.paragraph
             )
         )
+        self.add_item(
+            InputText(
+                label="Do you possess evidence of what happened?",
+                placeholder="Recording, screenshots or witnesses can be considered as evidence ",
+                style=discord.InputTextStyle.paragraph,
+                min_length=2
+            )
+        )
         self.option = option
 
     async def callback(self, interaction) -> None:
@@ -458,11 +476,12 @@ class UserReportStaffDetailModal(Modal):
         await interaction.response.defer()
         reportee = self.children[0].value
         text = self.children[1].value
+        evidence=self.children[2].value
         member = interaction.user
 
         if self.option == 'Report':
             try:
-                exists = await self.cog.report_staff(interaction, reportee, text)
+                exists = await self.cog.report_staff(interaction, reportee, text, evidence)
                 if exists is False:
                     return
             except Exception as e:
