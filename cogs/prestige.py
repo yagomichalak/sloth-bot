@@ -91,6 +91,18 @@ class Prestige(commands.Cog):
 
         await ctx.send(choice(sentences))
 
+    @commands.command(aliases=["frenzy"])
+    async def frenesia(self, ctx) -> None:
+        """ A command for telling something about frenesia. """
+        
+        sentences = [
+            "# MIAOOOOOOO <:cat_wave:924495909595779082>",
+            "**CIAO SONO FRENESIA 🇮🇹**",
+            "AHAHAAHAHAHA <@439110609745870870>"
+        ]
+
+        await ctx.send(choice(sentences))
+
 def setup(client) -> None:
     """ Cog's setup function. """
 
