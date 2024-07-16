@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands, menus, tasks
-from mysqldb import the_database, the_django_database
+from mysqldb import DatabaseCore
 
 from .player import Player, Skill
 from .enums import QuestEnum
@@ -9,7 +9,6 @@ from extra.prompt.menu import Confirm
 from extra import utils
 
 import os
-import asyncio
 from datetime import datetime
 from typing import List, Tuple, Union, Dict, Any, Optional, Callable
 from random import choice
@@ -24,6 +23,7 @@ class Munk(Player):
 
     def __init__(self, client) -> None:
         self.client = client
+        self.db = DatabaseCore()
 
     @tasks.loop(minutes=1)
     async def check_mission_one_completion(self) -> None:
@@ -237,10 +237,7 @@ class Munk(Player):
         """ Gets information about a specific tribe.
         :param name: The name of the tribe. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("SELECT * FROM UserTribe WHERE tribe_name = %s", (name,))
-        tribe = await mycursor.fetchone()
-        await mycursor.close()
+        tribe = await self.db.execute_query("SELECT * FROM UserTribe WHERE tribe_name = %s", (name,), fetch="one")
 
         tribe_info = {
             'owner_id': None,
@@ -269,10 +266,7 @@ class Munk(Player):
         """ Gets information about a specific tribe.
         :param user_id: The ID of the user owner of the tribe. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("SELECT * FROM UserTribe WHERE user_id = %s", (user_id,))
-        tribe = await mycursor.fetchone()
-        await mycursor.close()
+        tribe = await self.db.execute_query("SELECT * FROM UserTribe WHERE user_id = %s", (user_id,), fetch="one")
 
         tribe_info = {
             'owner_id': None,
@@ -301,11 +295,7 @@ class Munk(Player):
         """ Gets a Tribe Member.
         :param user_id: The ID of the tribe member to get. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("SELECT * FROM TribeMember WHERE member_id = %s", (user_id,))
-        tribe_member = await mycursor.fetchone()
-        await mycursor.close()
-        return tribe_member
+        return await self.db.execute_query("SELECT * FROM TribeMember WHERE member_id = %s", (user_id,), fetch="one")
 
     async def get_tribe_members(self, tribe_owner_id: int = None, tribe_name: str = None) -> List[List[Union[int, str]]]:
         """ Gets a list of IDs of members of a particular tribe.
@@ -313,21 +303,14 @@ class Munk(Player):
         :param tribe_name: The name of the tribe. (Optional).
         Ps: At least one of the parameters has to be provided. """
 
-        mycursor, _ = await the_database()
-
         tribe_members: List[int] = []
 
         if tribe_owner_id:
-            await mycursor.execute("SELECT tribe_name FROM UserTribe WHERE user_id = %s", (tribe_owner_id,))
-            tribe = await mycursor.fetchone()
-            await mycursor.execute("SELECT member_id, tribe_role FROM TribeMember WHERE tribe_name = %s", (tribe[0],))
-            tribe_members = await mycursor.fetchall()
+            tribe = await self.db.execute_query("SELECT tribe_name FROM UserTribe WHERE user_id = %s", (tribe_owner_id,), fetch="one")
+            tribe_members = await self.db.execute_query("SELECT member_id, tribe_role FROM TribeMember WHERE tribe_name = %s", (tribe[0],), fetch="all")
 
         elif tribe_name:
-            await mycursor.execute("SELECT member_id, tribe_role FROM TribeMember WHERE tribe_name = %s", (tribe_name,))
-            tribe_members = await mycursor.fetchall()
-
-        await mycursor.close()
+            tribe_members = await self.db.execute_query("SELECT member_id, tribe_role FROM TribeMember WHERE tribe_name = %s", (tribe_name,), fetch="all")
 
         return tribe_members
 
@@ -335,11 +318,7 @@ class Munk(Player):
         """ Gets a list of Sloth Classes with counters from a specific tribe.
         :param tribe_name: The name of the tribe.. """
 
-        mycursor, _ = await the_database()
-
-        sloth_class_counters: List[int] = []
-
-        await mycursor.execute("""
+        return await self.db.execute_query("""
             SELECT sp.sloth_class, COUNT(*)
             FROM TribeMember AS tm
             RIGHT JOIN
@@ -348,12 +327,7 @@ class Munk(Player):
                 sp.user_id = tm.member_id
             WHERE tm.tribe_name = %s
             GROUP BY sp.sloth_class
-        """, (tribe_name,))
-        sloth_class_counters = await mycursor.fetchall()
-
-        await mycursor.close()
-
-        return sloth_class_counters
+        """, (tribe_name,), fetch="all")
 
     @commands.group(aliases=['tb'])
     @Player.poisoned()
@@ -587,6 +561,7 @@ class Munk(Player):
                 sloth_class_members
             )
         )
+
     @tribe.command(aliases=['kick', 'expel', 'kick_out', 'can_i_show_you_the_door?'])
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def kickout(self, ctx, member: Union[discord.Member, discord.User] = None) -> None:
@@ -679,10 +654,7 @@ class Munk(Player):
         :param user_id: The ID of the user who's gonna be updated.
         :param tribe_name: The name of the tribe the user is gonna be set to. (default = None) """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("UPDATE SlothProfile SET tribe = %s, tribe_user_id = %s WHERE user_id = %s", (tribe_name, user_id, user_id))
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("UPDATE SlothProfile SET tribe = %s, tribe_user_id = %s WHERE user_id = %s", (tribe_name, user_id, user_id))
 
     async def update_tribe_thumbnail(self, user_id: int, tribe_name: str, link: str = None) -> None:
         """ Updates someone's tribe thumbnail link.
@@ -690,19 +662,13 @@ class Munk(Player):
         :param tribe_name: The name of the tribe.
         :param link: The link that the tribe's thumbnail will be set to. """
 
-        mycursor, db = await the_django_database()
-        await mycursor.execute("""
+        await self.db.execute_query("""
             UPDATE tribe_tribe SET tribe_thumbnail = %s
-            WHERE owner_id = %s AND tribe_name = %s""", (link, user_id, tribe_name))
-        await db.commit()
-        await mycursor.close()
+            WHERE owner_id = %s AND tribe_name = %s""", (link, user_id, tribe_name), database_name="django")
 
-        mycursor, db = await the_database()
-        await mycursor.execute("""
+        await self.db.execute_query("""
             UPDATE UserTribe SET tribe_thumbnail = %s
             WHERE user_id = %s AND tribe_name = %s""", (link, user_id, tribe_name))
-        await db.commit()
-        await mycursor.close()
 
     async def update_tribe_name(self, member: discord.Member, two_emojis: str, joining: bool) -> None:
         """ Updates someone's nickname so it has their tribe's two-emoji combination identifier.
@@ -1049,21 +1015,13 @@ class Munk(Player):
         :param owner_id: The ID of the owner of that tribe.
         :param role_name: The name of the role. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("SELECT * FROM TribeRole WHERE owner_id = %s AND LOWER(role_name) =  LOWER(%s)", (owner_id, role_name))
-        tribe_role = await mycursor.fetchone()
-        await mycursor.close()
-        return tribe_role
+        return await self.db.execute_query("SELECT * FROM TribeRole WHERE owner_id = %s AND LOWER(role_name) =  LOWER(%s)", (owner_id, role_name), fetch="one")
 
     async def get_tribe_roles(self, owner_id: int) -> List[List[Union[int, str]]]:
         """ Gets all Tribe Roles from tribe owner's tribe.
         :param owner_id: The ID of the owner of that tribe. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("SELECT * FROM TribeRole WHERE owner_id = %s", (owner_id,))
-        tribe_roles = await mycursor.fetchall()
-        await mycursor.close()
-        return tribe_roles
+        return await self.db.execute_query("SELECT * FROM TribeRole WHERE owner_id = %s", (owner_id,), fetch="all")
 
     async def insert_tribe_role(self, owner_id: int, tribe_name: str, role_name: str) -> None:
         """ Inserts a Tribe Role into the database.
@@ -1071,12 +1029,9 @@ class Munk(Player):
         :param tribe_name: The name of the tribe.
         :param role_name: The name of the role. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("""
+        await self.db.execute_query("""
         INSERT INTO TribeRole (owner_id, tribe_name, role_name) VALUES (%s, %s, %s)
         """, (owner_id, tribe_name, role_name))
-        await db.commit()
-        await mycursor.close()
 
     async def delete_tribe_role(self, owner_id: int, tribe_name: str, role_name: str) -> None:
         """ Deletes a Tribe Role from the database.
@@ -1084,27 +1039,21 @@ class Munk(Player):
         :param tribe_name: The name of the tribe.
         :param role_name: The name of the role. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM TribeRole WHERE owner_id = %s AND LOWER(role_name) = LOWER(%s)", (owner_id, role_name))
-        await mycursor.execute("""
+        await self.db.execute_query("DELETE FROM TribeRole WHERE owner_id = %s AND LOWER(role_name) = LOWER(%s)", (owner_id, role_name))
+        await self.db.execute_query("""
         UPDATE TribeMember SET tribe_role = DEFAULT(tribe_role) WHERE tribe_name = %s AND LOWER(tribe_role) = LOWER(%s)
         """, (tribe_name, role_name))
-        await db.commit()
-        await mycursor.close()
 
     async def delete_tribe_roles(self, owner_id: int, tribe_name: str) -> None:
         """ Deletes all Tribe Roles from the database.
         :param owner_id: The ID of the owner of that tribe.
         :param tribe_name: The name of the tribe. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM TribeRole WHERE owner_id = %s", (owner_id,))
-        await mycursor.execute("""
+        await self.db.execute_query("DELETE FROM TribeRole WHERE owner_id = %s", (owner_id,))
+        await self.db.execute_query("""
         UPDATE TribeMember SET tribe_role = DEFAULT(tribe_role)
          WHERE tribe_name = %s AND tribe_role <> 'Owner'
         """, (tribe_name,))
-        await db.commit()
-        await mycursor.close()
         
     async def insert_tribe_member(self, owner_id: int, tribe_name: str, user_id: int, tribe_role: str = 'Member') -> None:
         """ Inserts a Tribe Member.
@@ -1113,21 +1062,15 @@ class Munk(Player):
         :param user_id: The ID of the user.
         :param tribe_role: The initial role they're gonna have in the tribe. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("""
+        await self.db.execute_query("""
         INSERT INTO TribeMember (owner_id, tribe_name, member_id, tribe_role)
         VALUES (%s, %s, %s, %s)""", (owner_id, tribe_name, user_id, tribe_role))
-        await db.commit()
-        await mycursor.close()
 
     async def delete_tribe_member(self, user_id: int) -> None:
         """ Deletes a Tribe Member.
         :param user_id: The ID of the tribe member. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM TribeMember WHERE member_id = %s", (user_id,))
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("DELETE FROM TribeMember WHERE member_id = %s", (user_id,))
 
     async def get_tribe_role_embed(self, channel: discord.TextChannel, owner_id: int, tribe_info: Dict[str, Union[str, int]], role_name: str) -> discord.Embed:
         """ Makes an embedded message for a Tribe Role creation.
@@ -1158,9 +1101,8 @@ class Munk(Player):
         :param old_owner_id: The old Tribe owner's ID.
         :param new_owner_id: The new Tribe owner's ID. """
 
-        mycursor1, db1 = await the_database()
-        await mycursor1.execute("UPDATE UserTribe SET user_id = %s WHERE user_id = %s", (new_owner_id, old_owner_id))
-        await mycursor1.execute("""
+        await self.db.execute_query("UPDATE UserTribe SET user_id = %s WHERE user_id = %s", (new_owner_id, old_owner_id))
+        await self.db.execute_query("""
             UPDATE TribeMember as GL, (
                 SELECT owner_id, member_id, tribe_role
                 FROM TribeMember
@@ -1178,29 +1120,18 @@ class Munk(Player):
             )
             WHERE GL.member_id in (%s, %s);
         """, (new_owner_id, old_owner_id, new_owner_id, old_owner_id, new_owner_id, old_owner_id))
-        await db1.commit()
-        await mycursor1.close()
 
-        mycursor2, db2 = await the_django_database()
-        await mycursor2.execute("UPDATE tribe_tribe SET owner_id = %s WHERE owner_id = %s", (new_owner_id, old_owner_id))
-        await db2.commit()
-        await mycursor2.close()
+        await self.db.execute_query("UPDATE tribe_tribe SET owner_id = %s WHERE owner_id = %s", (new_owner_id, old_owner_id), database_name="django")
 
     async def update_user_tribe_role(self, user_id: int, role_name: Optional[str] = None) -> None:
         """ Updates the user's Tribe Role.
         :param user_id: The Tribe Member's ID.
         :param role_name: The name of the role. [Optional][Default='Member'] """
 
-        mycursor, db = await the_database()
-
         if not role_name:
-            await mycursor.execute("UPDATE TribeMember SET tribe_role = DEFAULT(tribe_role) WHERE member_id = %s", (user_id,))
+            await self.db.execute_query("UPDATE TribeMember SET tribe_role = DEFAULT(tribe_role) WHERE member_id = %s", (user_id,))
         else:
-            await mycursor.execute("UPDATE TribeMember SET tribe_role = %s WHERE member_id = %s", (role_name, user_id))
-
-        await db.commit()
-        await mycursor.close()
-    
+            await self.db.execute_query("UPDATE TribeMember SET tribe_role = %s WHERE member_id = %s", (role_name, user_id))
 
     @tribe.command(aliases=['to', 'transfer'])
     @commands.cooldown(1, 60, commands.BucketType.user)
@@ -1522,12 +1453,9 @@ class Munk(Player):
         :param current_ts: The current timestamp.
         :param skill_type: The skill type. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("""
+        await self.db.execute_query("""
             UPDATE SlothSkills SET edited_timestamp = %s, content = %s 
             WHERE user_id = %s AND skill_type = %s""", (current_ts, content, user_id, skill_type))
-        await db.commit()
-        await mycursor.close()
 
     async def update_sloth_skill_int_content(self, user_id: int, int_content: int, current_ts: int, skill_type: str) -> None:
         """ Updates the skill's integer content.
@@ -1536,12 +1464,9 @@ class Munk(Player):
         :param current_ts: The current timestamp.
         :param skill_type: The skill type. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("""
+        await self.db.execute_query("""
             UPDATE SlothSkills SET edited_timestamp = %s, int_content = %s 
             WHERE user_id = %s AND skill_type = %s""", (current_ts, int_content, user_id, skill_type))
-        await db.commit()
-        await mycursor.close()
 
     async def update_sloth_skill_target_id(self, user_id: int, target_id: int, current_ts: int, skill_type: str) -> None:
         """ Updates the skill's target id.
@@ -1550,12 +1475,9 @@ class Munk(Player):
         :param current_ts: The current timestamp.
         :param skill_type: The skill type. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("""
+        await self.db.execute_query("""
             UPDATE SlothSkills SET target_id = %s, edited_timestamp = %s 
             WHERE user_id = %s AND skill_type = %s""", (target_id, current_ts, user_id, skill_type))
-        await db.commit()
-        await mycursor.close()
 
     async def update_sloth_skill_user_and_target_id(self, user_id: int, target_id: int, current_ts: int, skill_type: str) -> None:
         """ Updates the skill's user and target id.
@@ -1564,12 +1486,9 @@ class Munk(Player):
         :param current_ts: The current timestamp.
         :param skill_type: The skill type. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("""
+        await self.db.execute_query("""
             UPDATE SlothSkills SET user_id = %s, target_id = %s, edited_timestamp = %s 
             WHERE user_id = %s AND skill_type = %s""", (target_id, target_id, current_ts, user_id, skill_type))
-        await db.commit()
-        await mycursor.close()
 
     async def update_sloth_skill_user_and_target_id_and_int_content(self, user_id: int, target_id: int, int_content: int, current_ts: int, skill_type: str) -> None:
         """ Updates the skill's user and target id.
@@ -1579,12 +1498,9 @@ class Munk(Player):
         :param current_ts: The current timestamp.
         :param skill_type: The skill type. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("""
+        await self.db.execute_query("""
             UPDATE SlothSkills SET user_id = %s, target_id = %s, int_content = %s, edited_timestamp = %s 
             WHERE user_id = %s AND skill_type = %s""", (target_id, target_id, int_content, current_ts, user_id, skill_type))
-        await db.commit()
-        await mycursor.close()
 
     @tribe.command(aliases=["transferquest", "tq"])
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -1635,8 +1551,7 @@ class Munk(Player):
     async def get_top_ten_tribe_leaves(self) -> List[List[Union[str, int]]]:
         """ Gets the top ten tribes with most leaves. """
         
-        mycursor, _ = await the_database()
-        await mycursor.execute("""
+        return await self.db.execute_query("""
             SELECT SP.tribe, SUM(UC.user_money) AS tm
             FROM UserCurrency AS UC
             INNER JOIN
@@ -1645,16 +1560,12 @@ class Munk(Player):
             GROUP BY tribe
             ORDER BY tm DESC
             LIMIT 10
-        """)
-        tribe_leaves = await mycursor.fetchall()
-        await mycursor.close()
-        return tribe_leaves
+        """, fetch="all")
 
     async def get_all_tribe_leaves(self) -> List[List[Union[str, int]]]:
         """ Gets all tribe leaves. """
         
-        mycursor, _ = await the_database()
-        await mycursor.execute("""
+        return await self.db.execute_query("""
             SELECT SP.tribe, SUM(UC.user_money) AS tm
             FROM UserCurrency AS UC
             INNER JOIN
@@ -1662,10 +1573,7 @@ class Munk(Player):
             ON UC.user_id = SP.user_id
             GROUP BY tribe
             ORDER BY tm DESC
-        """)
-        tribe_leaves = await mycursor.fetchall()
-        await mycursor.close()
-        return tribe_leaves
+        """, fetch="all")
     
     @commands.command(aliases=["my_quest", "see_quest", "see_quests", "quest", "quests", "qs"])
     @commands.cooldown(1, 5, commands.BucketType.user)
