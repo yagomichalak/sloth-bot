@@ -110,7 +110,7 @@ class Prestige(commands.Cog):
         sentences = [
             "If you give <@372100977060347906> a cup of coffee, he might tell you a secret...",
             "**<@372100977060347906> He's Simple, He's Dumb, He's The Pilot.**",
-            "Gohan, vê se você me escuta... Não é pecado lutar pela justiça, ao contrário, é uma boa ação, pense... Existem inimigos que não são convencidos com palavras, você só tem que soltar a fúria que está dentro do seu espírito, eu sei como você se sente... Não precisa mais suportar isso Gohan... Gohan, proteja os seres vivos e as plantas desse mundo que eu tanto amei, conto com você."
+            "Gohan, vê se você me escuta... Não é pecado lutar pela justiça, ao contrário, é uma boa ação, pense... Existem inimigos que não são convencidos com palavras, você só tem que soltar a fúria que está dentro do seu espírito, eu sei como você se sente... Não precisa mais suportar isso Gohan... Gohan, proteja os seres vivos e as plantas desse mundo que eu tanto amei, conto com você. <@372100977060347906>"
         ]
 
         await ctx.send(choice(sentences))
