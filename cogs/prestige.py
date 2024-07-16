@@ -96,8 +96,8 @@ class Prestige(commands.Cog):
         """ A command for telling something about frenesia. """
         
         sentences = [
-            "# MIAOOOOOOO <:cat_wave:924495909595779082>",
-            "**CIAO SONO FRENESIA 🇮🇹**",
+            "# MIAOOOOOOO <:cat_wave:924495909595779082> <@439110609745870870>",
+            "**CIAO SONO FRENESIA 🇮🇹 <@439110609745870870>**",
             "AHAHAAHAHAHA <@439110609745870870>"
         ]
 
