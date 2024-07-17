@@ -81,7 +81,7 @@ class ReportSupport(*report_support_classes):
         """ Detects when a webhook is sent from the Sloth Appeals server. """
 
         channel = message.channel
-        category = message.channel.category
+        category = None if not hasattr(message.channel, "category") else message.channel.category
 
         # Initiates the session
         if channel.id == int(ban_appeals_channel_id):
@@ -98,7 +98,7 @@ class ReportSupport(*report_support_classes):
                     await message.add_reaction('✅')
                     await message.add_reaction('❌')
 
-        if category.id == case_cat_id:
+        if category and category.id == case_cat_id:
             current_ts = await utils.get_timestamp()
             case_channel_aliases = ("general", "role", "case")
 
@@ -230,11 +230,10 @@ class ReportSupport(*report_support_classes):
         return await member.send(f"**Request sent, you will get notified here if you get accepted or declined! ✅**")
 
     # - Report someone
-    async def report_someone(self, interaction: discord.Interaction, reportee: str, text: str):
+    async def report_someone(self, interaction: discord.Interaction, reportee: str, text: str, evidence: str):
 
         member = interaction.user
         guild = interaction.guild
-
         if open_channel := await self.member_has_open_channel(member.id):
             if open_channel := discord.utils.get(guild.text_channels, id=open_channel[1]):
                 embed = discord.Embed(title="Error!", description=f"**You already have an open channel! ({open_channel.mention})**", color=discord.Color.red())
@@ -271,6 +270,7 @@ class ReportSupport(*report_support_classes):
             await self.increase_case_number()
             embed = discord.Embed(title="Report Support!", description=f"{member.mention}\nReporting `{reportee}`\nFor:```{text}```",
                 color=discord.Color.red())
+            embed.add_field(name="Evidence:", value=f"```{evidence}```", inline=False)
             message = await the_channel.send(content=f"{member.mention}, {moderator.mention}, {cosmos_role.mention}", embed=embed)
             ctx = await self.client.get_context(message)
 
@@ -291,7 +291,7 @@ class ReportSupport(*report_support_classes):
                 await ctx.send(f"**{member.mention} is not in a VC!**")
 
     # - Report someone
-    async def report_staff(self, interaction: discord.Interaction, reportee: str, text: str):
+    async def report_staff(self, interaction: discord.Interaction, reportee: str, text: str, evidence: str):
 
         member = interaction.user
         guild = interaction.guild
@@ -335,6 +335,7 @@ class ReportSupport(*report_support_classes):
             await self.increase_case_number()
             embed = discord.Embed(title="Report Staff!", description=f"{member.mention}\nReporting `{reportee}`\nFor:```{text}```",
                 color=discord.Color.red())
+            embed.add_field(name="Evidence:", value=f"```{evidence}```", inline=False)
             message = await the_channel.send(content=f"{member.mention}, {senior_mod.mention}, {cosmos_role.mention}", embed=embed)
             ctx = await self.client.get_context(message)
 
