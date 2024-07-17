@@ -268,8 +268,10 @@ class ReportSupport(*report_support_classes):
             current_ts = await utils.get_timestamp()
             await self.insert_user_open_channel(member.id, the_channel.id, current_ts)
             await self.increase_case_number()
-            embed = discord.Embed(title="Report Support!", description=f"{member.mention}\nReporting `{reportee}`\nFor:```{text}```",
-                color=discord.Color.red())
+            embed = discord.Embed(title="Report Support!", description=f"{member.mention}",
+                colour=member.color)
+            embed.add_field(name="Reporting:", value=f"```{reportee}```", inline=False)
+            embed.add_field(name="For:", value=f"```{text}```", inline=False)
             embed.add_field(name="Evidence:", value=f"```{evidence}```", inline=False)
             message = await the_channel.send(content=f"{member.mention}, {moderator.mention}, {cosmos_role.mention}", embed=embed)
             ctx = await self.client.get_context(message)
@@ -333,8 +335,10 @@ class ReportSupport(*report_support_classes):
             current_ts = await utils.get_timestamp()
             await self.insert_user_open_channel(member.id, the_channel.id, current_ts)
             await self.increase_case_number()
-            embed = discord.Embed(title="Report Staff!", description=f"{member.mention}\nReporting `{reportee}`\nFor:```{text}```",
-                color=discord.Color.red())
+            embed = discord.Embed(title="Report Staff!", description=f"{member.mention}",
+                colour=member.color)
+            embed.add_field(name="Reporting:", value=f"```{reportee}```", inline=False)
+            embed.add_field(name="For:", value=f"```{text}```", inline=False)
             embed.add_field(name="Evidence:", value=f"```{evidence}```", inline=False)
             message = await the_channel.send(content=f"{member.mention}, {senior_mod.mention}, {cosmos_role.mention}", embed=embed)
             ctx = await self.client.get_context(message)
