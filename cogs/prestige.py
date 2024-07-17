@@ -14,25 +14,25 @@ class Prestige(commands.Cog):
 
     def __init__(self, client: commands.Bot) -> None:
         """ Class init method. """
-        
+
         self.client = client
 
     @slash_command(name="dnk", guild_ids=guild_ids)
     async def _dnk(self, ctx) -> None:
         """ Tells you something about DNK. """
-        
+
         await ctx.respond(f"**`Sapristi ! C'est qui ? Oui, c'est lui le plus grave et inouï keum qu'on n'a jamais ouï-dire, tandis qu'on était si abasourdi et épris de lui d'être ici affranchi lorsqu'il a pris son joli gui qui ne nie ni être suivi par une souris sur son nid ni être mis ici un beau lundi !`**")
 
     @slash_command(name="gabriel", guild_ids=guild_ids)
     async def _gabriel_slash(self, ctx) -> None:
         """ Tells you something about Gabriel. """
-        
+
         await ctx.respond(f"**<@366628959657394186>? Il est frais et il est chaud, et quand il rap c'est que du feu**")
 
     @commands.command(name="gabriel", aliases=["gab", "gabi", "gbrl", "gaburierudesu", "camisa9", "atacante", "rapper"])
     async def _gabriel_command(self, ctx) -> None:
         """ Tells you something about Gabriel. """
-        
+
         await ctx.send(f"**<@366628959657394186>, desculpa por interromper o seu andamento, é que eu te vi passando, você é artista?**")
 
     @slash_command(name="twiks", guild_ids=guild_ids)
@@ -94,11 +94,23 @@ class Prestige(commands.Cog):
     @commands.command(aliases=["frenzy"])
     async def frenesia(self, ctx) -> None:
         """ A command for telling something about frenesia. """
-        
+
         sentences = [
             "# MIAOOOOOOO <:cat_wave:924495909595779082> <@439110609745870870>",
             "**CIAO SONO FRENESIA 🇮🇹 <@439110609745870870>**",
             "AHAHAAHAHAHA <@439110609745870870>"
+        ]
+
+        await ctx.send(choice(sentences))
+
+    @commands.command(aliases=["felipe"])
+    async def sousa(self, ctx) -> None:
+        """ A command for telling something about Sousa. """
+
+        sentences = [
+            "If you give <@372100977060347906> a cup of coffee, he might tell you a secret...",
+            "**<@372100977060347906> He's Simple, He's Dumb, He's The Pilot.**",
+            "Gohan, vê se você me escuta... Não é pecado lutar pela justiça, ao contrário, é uma boa ação, pense... Existem inimigos que não são convencidos com palavras, você só tem que soltar a fúria que está dentro do seu espírito, eu sei como você se sente... Não precisa mais suportar isso Gohan... Gohan, proteja os seres vivos e as plantas desse mundo que eu tanto amei, conto com você. <@372100977060347906>"
         ]
 
         await ctx.send(choice(sentences))
