@@ -1495,7 +1495,11 @@ We appreciate your understanding and look forward to hearing from you. """, embe
 					elif len(confirmations) < 3:
 						continue
 					else:
-						break
+						if len(confirmations) >= 3:
+							should_nitro_kick = True
+							break
+						else:
+							break
 
 		if not should_nitro_kick:
 			return
