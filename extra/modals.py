@@ -397,7 +397,6 @@ class UserReportSupportDetailModal(Modal):
         await interaction.response.defer()
         reportee = self.children[0].value
         text = self.children[1].value
-        print(self.children[2].value)
         evidence=self.children[2].value
         member = interaction.user
 
