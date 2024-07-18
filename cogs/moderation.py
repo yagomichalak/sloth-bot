@@ -1492,8 +1492,12 @@ We appreciate your understanding and look forward to hearing from you. """, embe
 					if await utils.is_allowed([senior_mod_role_id]).predicate(channel=ctx.channel, member=u):
 						should_nitro_kick = True
 						break
-					elif len(confirmations) < 3:
-						continue
+					elif len(confirmations) > 0:
+						if len(confirmations) < 3:
+							continue
+						elif len(confirmations) >= 3:
+							should_nitro_kick = True
+							break
 					else:
 						break
 
