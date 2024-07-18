@@ -662,7 +662,7 @@ class Prawler(Player):
 		""" Pays off someone's rescue.
 		:param hostage: The hostage for whom to pay the rescue.
 		
-		* Rescue value = 3% of the the sum of the tribe members' balance. """
+		* Rescue value = 0.01% of the the sum of the tribe members' balance. """
 
 		member: discord.Member = ctx.author
 
@@ -694,7 +694,7 @@ class Prawler(Player):
 
 		
 		rescue_money: int = sum(list(map(lambda cr: cr[0], filter(lambda cr: cr[0] >= 0, currencies))))
-		rescue_money = int((rescue_money * 3) / 100)
+		rescue_money = int((rescue_money * 0.01) / 100)
 
 		if user_currency[1] < rescue_money:
 			return await ctx.send(f"**You don't have `{rescue_money}łł` to pay for `{hostage}`'s rescue, {member.mention}!**")
