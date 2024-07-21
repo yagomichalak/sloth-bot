@@ -1,3 +1,4 @@
+import subprocess
 import aiohttp
 import discord
 from discord.ext import commands, tasks
@@ -640,7 +641,7 @@ class ReportSupport(*report_support_classes):
             await msg.add_reaction('🔒')
         except:
             pass
-            
+    
     async def audio(self, member: discord.Member, audio_name: str) -> None:
         """ Plays an audio.
         :param member: A member to get guild context from.
@@ -662,8 +663,12 @@ class ReportSupport(*report_support_classes):
             voice_client: discord.VoiceClient = discord.utils.get(self.client.voice_clients, guild=member.guild)
             # Plays / and they don't stop commin' /
             if voice_client and not voice_client.is_playing():
-                audio_source = discord.FFmpegPCMAudio(f'tts/{audio_name}.mp3')
+                audio_path=f'tts/{audio_name}.mp3'
+                audio_source = discord.FFmpegPCMAudio(audio_path)
+                audio_duration = get_audio_duration(audio_path)
                 voice_client.play(audio_source, after=lambda e: print("Finished Warning Staff!"))
+                await asyncio.sleep(audio_duration + 1)
+                await voice_client.disconnect()
             else:
                 print('couldnt play it!')
 
@@ -693,3 +698,13 @@ class ReportSupport(*report_support_classes):
 
 def setup(client):
     client.add_cog(ReportSupport(client))
+
+def get_audio_duration(audio_path: str) -> float:
+    """Get the duration of the audio file in seconds."""
+    result = subprocess.run(
+        ["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "default=noprint_wrappers=1:nokey=1", audio_path],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT
+    )
+    duration = float(result.stdout)
+    return duration
