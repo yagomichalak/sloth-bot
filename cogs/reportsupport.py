@@ -43,6 +43,7 @@ class ReportSupport(*report_support_classes):
 
         self.client = client
         self.cosmos_role_id: int = int(os.getenv('COSMOS_ROLE_ID', 123))
+        self.elijah_id: int = int(os.getenv('ELIJAH_ID', 123))
         self.prisca_id: int = int(os.getenv('PRISCA_ID', 123))
         self.cache = {}
         self.report_cache = {}
@@ -309,6 +310,8 @@ class ReportSupport(*report_support_classes):
         counter = await self.get_case_number()
         moderator = discord.utils.get(guild.roles, id=moderator_role_id)
         senior_mod = discord.utils.get(guild.roles, id=senior_role_id)
+        admin = discord.utils.get(guild.roles, id=admin_role_id)
+        elijah = discord.utils.get(guild.members, id=self.elijah_id)
         cosmos_role = discord.utils.get(guild.roles, id=self.cosmos_role_id)
         overwrites = {guild.default_role: discord.PermissionOverwrite(
             read_messages=False, send_messages=False, connect=False, view_channel=False),
@@ -317,7 +320,7 @@ class ReportSupport(*report_support_classes):
         moderator: discord.PermissionOverwrite(
             read_messages=False, send_messages=False, connect=False, view_channel=False, manage_messages=False),
         senior_mod: discord.PermissionOverwrite(
-            read_messages=True, send_messages=True, connect=True, view_channel=True, manage_messages=True)}
+            read_messages=False, send_messages=False, connect=False, view_channel=False, manage_messages=False)}
         try:
             the_channel = await guild.create_text_channel(name=f"staff-case-{counter[0][0]}", category=case_cat, overwrites=overwrites)
         except Exception as e:
@@ -336,7 +339,7 @@ class ReportSupport(*report_support_classes):
             embed = discord.Embed(title="Report Staff!", description=f"{member.mention}\nReporting `{reportee}`\nFor:```{text}```",
                 color=discord.Color.red())
             embed.add_field(name="Evidence:", value=f"```{evidence}```", inline=False)
-            message = await the_channel.send(content=f"{member.mention}, {senior_mod.mention}, {cosmos_role.mention}", embed=embed)
+            message = await the_channel.send(content=f"{member.mention}, {admin.mention}, {elijah.mention}, {cosmos_role.mention}", embed=embed)
             ctx = await self.client.get_context(message)
 
             if member.voice:
