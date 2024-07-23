@@ -503,9 +503,9 @@ class Moderation(*moderation_cogs):
 				general_embed.set_author(name=f'{member} has been warned', icon_url=member.display_avatar)
 				await ctx.send(embed=general_embed)
 
-	@commands.command(aliases=['warnado', 'wrn'])
+	@commands.command(aliases=['warn', 'warnado', 'wrn', 'lwarn', 'lwarnado', 'lwrn', 'hwarn', 'hwarnado', 'hwrn'])
 	@utils.is_allowed(allowed_roles, throw_exc=True)
-	async def warn(self, ctx, *, message: Optional[str] = None) -> None:
+	async def _warn(self, ctx, *, message: Optional[str] = None) -> None:
 		"""(MOD) Warns one or more members.
 		:param member: The @ or the ID of one or more users to warn.
 		:param reason: The reason for warning one or all users. (Optional)"""
@@ -523,12 +523,23 @@ class Moderation(*moderation_cogs):
 			for member in members:
 				if ctx.guild.get_member(member.id):
 					# General embed
-					general_embed = discord.Embed(description=f'**Reason:** {reason}', colour=discord.Colour.dark_gold())
-					general_embed.set_author(name=f'{member} has been warned', icon_url=member.display_avatar)
+					## Check warn type
+					warn_type, warn_msg, infr, embed_color = self.get_warn_type(ctx.invoked_with)
+					warn_desc = f'**Reason:** {reason}'
+					user_infractions = await self.get_user_infractions(member.id)
+					hours, days, weeks = await self.get_timeout_time(ctx, member, await self.get_timeout_warns(infr, user_infractions))
+					if hours != 0:
+						warn_desc += f'\n**Timeout:** {hours}h'
+					elif days != 0:
+						warn_desc += f'\n**Timeout:** {days}d'
+					elif weeks != 0:
+						warn_desc += f'\n**Timeout:** {weeks}w'
+					general_embed = discord.Embed(description=warn_desc, colour=embed_color)
+					general_embed.set_author(name=f'{member} has been {warn_msg}warned', icon_url=member.display_avatar)
 					await ctx.send(embed=general_embed)
 					# Moderation log embed
 					moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
-					embed = discord.Embed(title='__**Warning**__', colour=discord.Colour.dark_gold(),
+					embed = discord.Embed(title=f'__**{warn_type.capitalize()} Warning**__', colour=discord.Colour.dark_gold(),
 										timestamp=ctx.message.created_at)
 					embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nId: {member.id}```',
 									inline=False)
@@ -541,19 +552,107 @@ class Moderation(*moderation_cogs):
 					epoch = datetime.utcfromtimestamp(0)
 					current_ts = (datetime.utcnow() - epoch).total_seconds()
 					await self.insert_user_infraction(
-						user_id=member.id, infr_type="warn", reason=reason,
+						user_id=member.id, infr_type=infr, reason=reason,
 						timestamp=current_ts, perpetrator=ctx.author.id)
 					try:
 						await member.send(embed=general_embed)
 					except:
 						pass
-
-					user_infractions = await self.get_user_infractions(member.id)
-					user_warns = [w for w in user_infractions if w[1] == 'warn']
-					if len(user_warns) >= 3:
-						await self._mute_callback(ctx, member=member, reason=reason)
+					await self.timeout(ctx, member, await self.get_warns(user_infractions))
 				else:
 					await ctx.send(f"**The user `{member}` is not on the server**", delete_after = 5)
+     
+	def get_warn_type(self, invoked_with: str) -> Tuple[str, str, str, int]:
+		if invoked_with in ['lwarn', 'lwrn', 'lwarnado']:
+			return 'light', 'lightly ', 'lwarn', int(0x90ffd2)
+		elif invoked_with in ['warn', 'wrn', 'warnado']:
+			return 'serious', '', 'warn', int(0x5aa8ff)
+		elif invoked_with in ['hwarn', 'hwrn', 'hwarnado']:
+			return 'very serious', 'heavily ', 'hwarn', int(0xf9ff5a)
+
+	async def get_timeout_warns(self, infr: str, infractions: List[List[Union[str, int]]]) -> int:
+		"""Returns the number of total warns that user has taking all types of warns.
+  	:param infractions: List of all infractions from a user.
+		:param infr: Name with the whom the command was invoked.
+   	:return: Number of total warns. """
+
+		weight_map = {
+			'lwarn': 1/2,
+			'warn':	1,
+			'hwarn': 2
+		}
+		warnings = await self.get_warns(infractions)
+		return warnings+weight_map[infr]
+ 
+	async def get_warns(self, infractions: List[List[Union[str, int]]]) -> int:
+		"""Returns the number of total warns that user has taking all types of warns.
+  	:param infractions: List of all infractions from a user.
+   	:return: Number of total warns. """
+
+		weight_map = {
+			'lwarn': 1/2,
+			'warn':	1,
+			'hwarn': 2
+		}
+		six_months_ago = datetime.utcnow().timestamp() - 6*30*24*3600	# Approach of 30 days per month
+		warnings = sum(weight_map[w[1]] for w in infractions if w[1] in weight_map and w[3] >= six_months_ago)
+		return int(warnings)
+ 
+	@utils.is_allowed(allowed_roles, throw_exc=True)
+	async def get_timeout_time(self, ctx: commands.Context, member: discord.Member, warns: int) -> List[int]:
+		"""Gets the time of a time out based on their number of warnings.
+		:param warns: The number of warns the user have. """
+
+		weight_map = {
+			0: [0, 0, 0],
+			1: [1, 0, 0],	# 1 hour
+			2: [6, 0, 0],	# 6 hours
+			3: [0, 2, 0],	# 48 hours
+			4: [0, 3, 0],	# 72 hours
+			5: [0, 0, 1],	# 1 week
+			6: [0, 0, 2],	# 2 weeks
+			7: [0, 0, 4]	# 4 weeks
+		}
+		if await utils.is_allowed(allowed_roles).predicate(channel=ctx.channel, member=member):
+			index = 0
+		elif warns in weight_map:
+			index = warns
+		elif warns > 7:
+			index = 7
+		else:
+			index = 0
+		return weight_map[index]
+
+	@utils.is_allowed(allowed_roles, throw_exc=True)
+	async def timeout(self, ctx: commands.Context, member: discord.Member, message: Optional[str] = None) -> None:
+		"""Times out a user based on their number of warnings.
+		:param warns: The number of warns the user have. """
+  
+		if await utils.is_allowed(allowed_roles).predicate(channel=ctx.channel, member=member):
+			return await ctx.send(f"**Timeout won't be applied to {member} since they are part of the staff team, {ctx.author.mention}!**")
+  
+		infractions = await self.get_warns(await self.get_user_infractions(member.id))
+		warns = await self.get_timeout_warns(infractions)
+		hours, days, weeks = await self.get_timeout_time(ctx, member, warns)
+		timeout_msg = f"**{member} has been timed out for "
+		if hours > 0:
+			timeout_msg += f"{hours}h "
+		elif days > 0:
+			timeout_msg += f"{days}d "
+		elif weeks > 0:
+			timeout_msg += f"{weeks}w "
+		timeout_reason = f"{warns} warnings"
+		timeout_msg += f"for: {timeout_reason}**"
+		timeout_duration = (
+			weeks * 604800 + # 1 week = 604800 seconds
+			days * 86400 +   # 1 day = 86400 seconds
+			hours * 3600     # 1 hour = 3600 seconds
+		)
+		try:
+			await member.timeout(duration=timeout_duration, reason=f"Timed out for: {timeout_reason}")
+			await ctx.send(timeout_msg, delete_after = 5)
+		except:
+			pass
 
 	async def get_remove_roles(self, member: discord.Member, keep_roles: Optional[List[Union[int, discord.Role]]] = []
 	) -> List[List[discord.Role]]:
