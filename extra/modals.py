@@ -420,7 +420,7 @@ class UserReportSupportDetailModal(Modal):
             except Exception as e:
                 print(e)
             else:
-                return await self.cog.audio(member, 'general_help_alert')
+                return #await self.cog.audio(member, 'general_help_alert')
                 
         elif self.option == 'Help':
             message = f"Please, {member.mention}, inform us what roles you want, and if you spotted a specific problem with the reaction-role selection."
@@ -431,7 +431,7 @@ class UserReportSupportDetailModal(Modal):
             except Exception as e:
                 print(e)
             else:
-                return await self.cog.audio(member, 'role_help_alert')
+                return #await self.cog.audio(member, 'role_help_alert')
 
         elif self.option == 'Oopsie':
             return await interaction.followup.send("**All right, cya!**", ephemeral=True)
@@ -490,7 +490,7 @@ class UserReportStaffDetailModal(Modal):
                 return await self.cog.audio(member, 'case_alert')
 
         elif self.option == 'Oopsie':
-            return await interaction.followup.send("**All right, cya!**", ephemeral=True)
+            return #await interaction.followup.send("**All right, cya!**", ephemeral=True)
 
 
 class TravelBuddyModal(Modal):

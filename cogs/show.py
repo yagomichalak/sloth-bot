@@ -364,6 +364,25 @@ class Show(commands.Cog):
         view.add_item(discord.ui.Button(style=discord.ButtonStyle.url, url=website_url, label="The Language Sloth"))
         await ctx.send(embed=embed, view=view)
 
+    @commands.command()
+    async def calendar(self, ctx) -> None:
+        """ Shows the calendar link. """
+
+        member: discord.Member = ctx.author
+
+        website_calendar_url = "https://languagesloth.com/class/calendar/"
+
+        embed = discord.Embed(
+            title="Lesson calendar!",
+            color=member.color,
+            timestamp=ctx.message.created_at,
+            url=website_calendar_url
+        )
+        embed.set_footer(text=f"Requested by: {member}", icon_url=member.display_avatar)
+        view: discord.ui.View = discord.ui.View()
+        view.add_item(discord.ui.Button(style=discord.ButtonStyle.url, url=website_calendar_url, label="The Language Sloth"))
+        await ctx.send(embed=embed, view=view)
+
 
 def setup(client):
     client.add_cog(Show(client))
