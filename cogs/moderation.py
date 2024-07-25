@@ -31,6 +31,7 @@ last_deleted_message = []
 sponsor_role_id = int(os.getenv('SPONSOR_ROLE_ID', 123))
 mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 muted_role_id = int(os.getenv('MUTED_ROLE_ID', 123))
+timedout_role_id = int(os.getenv('TIMEDOUT_ROLE_ID', 123))
 preference_role_id = int(os.getenv('PREFERENCE_ROLE_ID', 123))
 senior_mod_role_id: int = int(os.getenv('SENIOR_MOD_ROLE_ID', 123))
 admin_role_id: int = int(os.getenv('ADMIN_ROLE_ID', 123))
@@ -543,25 +544,25 @@ class Moderation(*moderation_cogs):
         if not members:
             await ctx.send("**Please, inform a member!**", delete_after=3)
         else:
-            if len(reason) > 960:
+            if reason is not None and len(reason) > 960:
                 return await ctx.send(f"**Please, inform a reason that is lower than or equal to 960 characters, {ctx.author.mention}!**", delete_after=3)
 
             for member in members:
                 if ctx.guild.get_member(member.id):
                     # General embed
                     ## Check warn type
-                    warn_msg, infr, embed_color = self.get_warn_type(warn_type)
+                    warn_msg, infr = await self.get_warn_type(warn_type)
                     warn_desc = f'**Reason:** {reason}'
                     user_infractions = await self.get_user_infractions(member.id)
                     hours, days, weeks = await self.get_timeout_time(ctx, member, await self.get_timeout_warns(infr, user_infractions))
-                    if hours != 0:
+                    if hours > 0:
                         warn_desc += f'\n**Timeout:** {hours}h'
-                    elif days != 0:
+                    elif days > 0:
                         warn_desc += f'\n**Timeout:** {days}d'
-                    elif weeks != 0:
+                    elif weeks > 0:
                         warn_desc += f'\n**Timeout:** {weeks}w'
-                    general_embed = discord.Embed(description=warn_desc, colour=embed_color)
-                    general_embed.set_author(name=f'{member} has been {warn_msg} warned', icon_url=member.display_avatar)
+                    general_embed = discord.Embed(description=warn_desc, colour=ctx.author.color)
+                    general_embed.set_author(name=f'{member} has been {warn_msg}warned', icon_url=member.display_avatar)
                     await ctx.send(embed=general_embed)
                     # Moderation log embed
                     moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
@@ -583,20 +584,20 @@ class Moderation(*moderation_cogs):
                         await member.send(embed=general_embed)
                     except:
                         pass
-                    await self.timeout(ctx, member, warn_type)
+                    await self.timeout(ctx, member, warn_type, user_infractions)
                 else:
                     await ctx.send(f"**The user `{member}` is not on the server**", delete_after = 5)
     
-    def get_warn_type(self, warn_type: str) -> Tuple[str, str, str, int]:
+    async def get_warn_type(self, warn_type: str) -> Tuple[str, str, str, int]:
         """ Gets the warn info based on the warn type.
-        :param warn_type: The warn type. [light/nromal/heavy] """
+        :param warn_type: The warn type. [light/normal/heavy] """
 
         if warn_type == "lwarn":
-            return "lightly ", "lwarn", int(0x90ffd2)
+            return "lightly ", "lwarn"
         elif warn_type == "warn":
-            return "", "warn", int(0x5aa8ff)
+            return "", "warn"
         elif warn_type == "hwarn":
-            return "heavily ", "hwarn", int(0xf9ff5a)
+            return "heavily ", "hwarn"
 
     async def get_timeout_warns(self, warn_type: str, infractions: List[List[Union[str, int]]]) -> int:
         """Returns the number of total warns that user has taking all types of warns.
@@ -604,23 +605,24 @@ class Moderation(*moderation_cogs):
         :param infractions: The list of all infractions from a user. """
 
         weight_map = {
-            "lwarn": 1 / 2,
+            "lwarn": 0.5,
             "warn": 1,
             "hwarn": 2
         }
-        return len(infractions) + weight_map[warn_type]
+        warns = await self.get_warns(infractions)
+        lwarns = sum(1 for w in warns if w[1] == "lwarn")
+        total = sum(weight_map[w[1]] for w in warns) + weight_map[warn_type]
+        if lwarns % 2 > 0 and warn_type != "lwarn":
+            total -= weight_map["lwarn"]
+        return total
 
-    async def get_warns(self, infractions: List[List[Union[str, int]]]) -> List[Dict[str, Any]]:
+    async def get_warns(self, infractions: List[List[Union[str, int]]]) -> List[List[Union[str, int]]]:
         """Returns the number of total warns that user has taking all types of warns.
         :param infractions: List of all infractions from a user. """
 
-        weight_map = {
-            "lwarn": 1 / 2,
-            "warn":	1,
-            "hwarn": 2
-        }
+        valid_types = {"lwarn", "warn", "hwarn"}
         six_months_ago = await utils.get_timestamp() - 6*30*24*3600	 # Approach of 30 days per month
-        warnings = [weight_map[w[1]] for w in infractions if w[1] in weight_map and w[3] >= six_months_ago]
+        warnings = [w for w in infractions if w[1] in valid_types and w[3] >= six_months_ago]
         return warnings
 
     async def get_timeout_time(self, ctx: commands.Context, member: discord.Member, warns: int) -> List[int]:
@@ -647,37 +649,43 @@ class Moderation(*moderation_cogs):
             index = 0
         return weight_map[index]
 
-    async def timeout(self, ctx: commands.Context, member: discord.Member, warn_type: str) -> None:
+    async def timeout(self, ctx: commands.Context, member: discord.Member, warn_type: str, infractions: List[List[Union[str, int]]]) -> None:
         """Times out a user based on their number of warnings.
         :param ctx: The command context.
         :param member: The member to timeout.
         :param warn_type: The warn type. """
 
         if await utils.is_allowed(allowed_roles).predicate(channel=ctx.channel, member=member):
-            return await ctx.send(f"**Timeout won't be applied to {member} since they are part of the staff team, {ctx.author.mention}!**")
+            return
 
-        infractions = await self.get_warns(await self.get_user_infractions(member.id))
+        muted_role = discord.utils.get(ctx.guild.roles, id=muted_role_id)
+        if muted_role in member.roles:
+            await self._unmute_callback(ctx, member)
+            
+        timedout_role = discord.utils.get(ctx.guild.roles, id=timedout_role_id)
+        if timedout_role not in member.roles:
+            await member.add_roles(timedout_role)
+
         warns = await self.get_timeout_warns(warn_type, infractions)
         hours, days, weeks = await self.get_timeout_time(ctx, member, warns)
-        timeout_msg = f"**{member} has been timed out for "
-        if hours > 0:
-            timeout_msg += f"{hours}h "
-        elif days > 0:
-            timeout_msg += f"{days}d "
-        elif weeks > 0:
-            timeout_msg += f"{weeks}w "
-        timeout_reason = f"{warns} warnings"
-        timeout_msg += f"for: {timeout_reason}**"
+        
+        if hours == 0 and days == 0 and weeks == 0:
+            return
+        
+        timeout_reason = f"{int(warns)} warnings"
         timeout_duration = sum([
             weeks * 604800, # 1 week = 604800 seconds
             days * 86400,   # 1 day = 86400 seconds
-            hours * 3600     # 1 hour = 3600 seconds
+            (hours-1) * 3600    # 1 hour = 3600 seconds
         ])
         try:
             current_ts = await utils.get_timestamp() + timeout_duration
             timedout_until = datetime.fromtimestamp(current_ts)
             await member.timeout(until=timedout_until, reason=f"Timed out for: {timeout_reason}")
-            await ctx.send(timeout_msg, delete_after = 5)
+            
+            await discord.utils.sleep_until(timedout_until)
+            if timedout_role in member.roles:
+                await member.remove_roles(timedout_role)
         except:
             pass
 
