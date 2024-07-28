@@ -32,6 +32,7 @@ class BlackJack(*blackjack_db):
         self.blackjack_games = {server_id: {}}
 
     @commands.command(name='blackjack', aliases=['bj'])
+    @utils.is_subscriber()
     @Player.poisoned()
     @commands.cooldown(1, 3, commands.BucketType.user)
     @RehabMembersTable.in_rehab()
@@ -115,7 +116,7 @@ class BlackJack(*blackjack_db):
         "fix_wj", "fwj", "fixwj", "reset_wj", "rwj", "resetwj",
         "fix_j", "fj", "fixj", "reset_j", "rj", "resetj"
     ])
-    @commands.has_permissions()
+    @utils.is_subscriber()
     async def fix_jack(self, ctx, member: discord.Member = None) -> None:
         """ Fixes the Jack games for a specific user.
         :param member: The member for whom fix the game. """

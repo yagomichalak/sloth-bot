@@ -7,11 +7,14 @@ import re
 from pytz import timezone
 from io import BytesIO
 from PIL import Image, ImageDraw
-from typing import List, Dict, Optional, Union
+from typing import List, Dict, Optional
 
-from extra.customerrors import CommandNotReady
+from extra.customerrors import CommandNotReady, NotSubscribed
 from collections import OrderedDict
 import shlex
+import os
+
+sloth_subscriber_sub_id = int(os.getenv("SLOTH_SUBSCRIBER_SUB_ID", 123))
 
 session = aiohttp.ClientSession()
 
@@ -62,6 +65,32 @@ def is_allowed(roles: List[int], check_adm: Optional[bool] = True, throw_exc: Op
 
         if throw_exc:
             raise commands.MissingAnyRole(roles)
+
+    return commands.check(real_check)
+
+def is_subscriber(check_adm: Optional[bool] = True, throw_exc: Optional[bool] = True) -> bool:
+    """ Checks whether the member has adm perms or has an allowed role.
+    :param check_adm: Whether to check whether the user has adm perms or not. [Optional][Default=True]
+    :param throw_exec: Whether to throw an exception if it returns false. [Optional][Default=False] """
+
+    async def real_check(ctx: Optional[commands.Context] = None, channel: Optional[discord.TextChannel] = None, 
+        member: Optional[discord.Member] = None) -> bool:
+
+        member = member if not ctx else ctx.author
+        channel = channel if not ctx else ctx.channel
+
+        if check_adm:
+            perms = channel.permissions_for(member)
+            if perms.administrator:
+                return True
+
+        entitlements = await member.entitlements().flatten()
+        for entitlement in entitlements:
+            if entitlement.sku_id == sloth_subscriber_sub_id:
+                return True
+
+        if throw_exc:
+            raise NotSubscribed()
 
     return commands.check(real_check)
 
