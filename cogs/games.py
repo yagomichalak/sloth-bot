@@ -2,7 +2,6 @@ import discord
 from discord.ext import commands
 
 from random import randint, sample, shuffle, choice
-import os
 import json
 from typing import List, Dict, Optional, Any, Union
 import asyncio
@@ -322,6 +321,7 @@ class Games(*minigames_cogs):
         await ctx.send(embed=embed)
 
     @commands.command(aliases=['flip_coin', 'flipcoin', 'coinflip', 'cf', 'fc'])
+    @utils.is_subscriber()
     @Player.poisoned()
     @commands.cooldown(1, 5, commands.BucketType.user)
     @RehabMembersTable.in_rehab()
@@ -436,6 +436,7 @@ class Games(*minigames_cogs):
         await ctx.send(embed=embed)
 
     @commands.command()
+    @utils.is_subscriber()
     @Player.poisoned()
     @commands.cooldown(1, 5, commands.BucketType.user)
     @RehabMembersTable.in_rehab()

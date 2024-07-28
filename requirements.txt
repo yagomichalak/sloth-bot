@@ -21,4 +21,4 @@ python-dotenv==0.19.0
 treelib==1.6.1
 emoji==1.4.1
 emojis==0.6.0
-py-cord==2.5.2
+py-cord==2.6.0

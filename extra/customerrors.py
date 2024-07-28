@@ -1,4 +1,3 @@
-import discord
 from discord.ext import commands
 
 
@@ -49,4 +48,7 @@ class PoisonedCommandError(commands.CheckFailure):
     pass
 
 class KidnappedCommandError(commands.CheckFailure):
+    pass
+
+class NotSubscribed(commands.CheckFailure):
     pass
