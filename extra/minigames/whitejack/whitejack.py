@@ -36,6 +36,7 @@ class WhiteJack(commands.Cog):
         }
 
     @commands.command(name='whitejack', aliases=['wj', 'white_jack'])
+    @utils.is_subscriber()
     @Player.poisoned()
     @commands.cooldown(1, 3, commands.BucketType.user)
     @RehabMembersTable.in_rehab()

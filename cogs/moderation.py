@@ -2296,6 +2296,16 @@ We appreciate your understanding and look forward to hearing from you. """, embe
 
         await self.infractions(context=ctx, message=' '.join(muted_members))
 
+    @commands.command()
+    @utils.not_ready()
+    @utils.is_subscriber()
+    async def mutevote(self, ctx, member: discord.Member) -> None:
+        """ Opens a voting for server muting a member for 5 minutes
+        from the voice channels.
+        :param member: The member to open the votation for. """
+        
+        pass
+
 
 def setup(client):
     client.add_cog(Moderation(client))
