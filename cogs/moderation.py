@@ -661,16 +661,16 @@ class Moderation(*moderation_cogs):
         muted_role = discord.utils.get(ctx.guild.roles, id=muted_role_id)
         if muted_role in member.roles:
             await self._unmute_callback(ctx, member)
-            
-        timedout_role = discord.utils.get(ctx.guild.roles, id=timedout_role_id)
-        if timedout_role not in member.roles:
-            await member.add_roles(timedout_role)
-
+          
         warns = await self.get_timeout_warns(warn_type, infractions)
         hours, days, weeks = await self.get_timeout_time(ctx, member, warns)
         
         if hours == 0 and days == 0 and weeks == 0:
             return
+        
+        timedout_role = discord.utils.get(ctx.guild.roles, id=timedout_role_id)
+        if timedout_role not in member.roles:
+            await member.add_roles(timedout_role)
         
         timeout_reason = f"{int(warns)} warnings"
         timeout_duration = sum([
