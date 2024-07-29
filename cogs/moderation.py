@@ -661,16 +661,16 @@ class Moderation(*moderation_cogs):
         muted_role = discord.utils.get(ctx.guild.roles, id=muted_role_id)
         if muted_role in member.roles:
             await self._unmute_callback(ctx, member)
-            
-        timedout_role = discord.utils.get(ctx.guild.roles, id=timedout_role_id)
-        if timedout_role not in member.roles:
-            await member.add_roles(timedout_role)
-
+          
         warns = await self.get_timeout_warns(warn_type, infractions)
         hours, days, weeks = await self.get_timeout_time(ctx, member, warns)
         
         if hours == 0 and days == 0 and weeks == 0:
             return
+        
+        timedout_role = discord.utils.get(ctx.guild.roles, id=timedout_role_id)
+        if timedout_role not in member.roles:
+            await member.add_roles(timedout_role)
         
         timeout_reason = f"{int(warns)} warnings"
         timeout_duration = sum([
@@ -1352,7 +1352,7 @@ We appreciate your understanding and look forward to hearing from you. """, embe
             except Exception:
                 pass
             try:
-                await member.ban(delete_message_days=7, reason=reason)
+                await member.ban(delete_message_seconds=604800, reason=reason)
             except Exception:
                 await ctx.send('**You cannot do that!**', delete_after=3)
             else:
@@ -1528,7 +1528,7 @@ We appreciate your understanding and look forward to hearing from you. """, embe
         except Exception as e:
             pass
         try:
-            await member.ban(delete_message_days=1, reason=reason)
+            await member.ban(delete_message_seconds=86400, reason=reason)
             await member.unban(reason=reason)
         except Exception:
             await ctx.send('**You cannot do that!**', delete_after=3)
@@ -1662,7 +1662,7 @@ We appreciate your understanding and look forward to hearing from you. """, embe
             await member.edit(roles=keep_roles)
             user_role_ids = [(member.id, rr.id, current_ts, None) for rr in remove_roles]
             await self.insert_in_muted(user_role_ids)
-            await member.ban(delete_message_days=1, reason=reason)
+            await member.ban(delete_message_seconds=86400, reason=reason)
             await member.unban(reason=reason)
         except Exception:
             await ctx.send('**You cannot do that!**', delete_after=3)
