@@ -9,6 +9,7 @@ import requests
 senior_mod_role_id: int = int(os.getenv('SENIOR_MOD_ROLE_ID', 123))
 mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 guild_id = int(os.getenv('SERVER_ID', 123))
+bootcamp_api_access_key = os.getenv("BOOTCAMP_API_ACCESS_KEY", "")
 guild_ids = [guild_id]
 
 
@@ -17,8 +18,7 @@ class Bootcamp(commands.Cog):
 
     def __init__(self, client):
         self.client = client
-        self.BASE_URL = "https://linguatarian.com/api"
-        self.BOOTCAMP_API_ACCESS_TOKEN = "123"
+        self.BASE_URL = "https://backend.lovelang.app/api/v1"
 
     @commands.Cog.listener()
     async def on_ready(self) -> None:
@@ -50,9 +50,9 @@ class Bootcamp(commands.Cog):
         """ Posts the user bootcamp feedback data to the API endpoint.
         :param data: The data to send. """
 
-        headers = {"Content-Type": "application/json", "Access-Token": self.BOOTCAMP_API_ACCESS_TOKEN}
+        headers = {"Content-Type": "application/json", "Access-key": bootcamp_api_access_key}
         response = requests.post(
-            url=f"{self.BASE_URL}/user/feedback", data=data, headers=headers, timeout=10
+            url=f"{self.BASE_URL}/feedback", data=data, headers=headers, timeout=10
         )
         if response.status_code != 201:
             print(response.status_code)
