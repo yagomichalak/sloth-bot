@@ -10,6 +10,7 @@ senior_mod_role_id: int = int(os.getenv('SENIOR_MOD_ROLE_ID', 123))
 mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 guild_id = int(os.getenv('SERVER_ID', 123))
 bootcamp_api_access_key = os.getenv("BOOTCAMP_API_ACCESS_KEY", "")
+bootcamp_role_id = int(os.getenv("BOOTCAMP_ROLE_ID", 123))
 guild_ids = [guild_id]
 
 
@@ -27,11 +28,11 @@ class Bootcamp(commands.Cog):
         print('Bootcamp cog is ready!')
 
     @slash_command(name="feedback_user", guild_ids=guild_ids)
-    @utils.is_allowed([senior_mod_role_id], throw_exc=True)
+    @utils.is_allowed([bootcamp_role_id], throw_exc=True)
     async def feedback_user(self,
         interaction: ApplicationContext,
         member: Option(discord.Member, description="The member to give feedback to.", required=True), # type: ignore
-        rating: Option(int, name="color", description="The color for the embed.", required=True,
+        rating: Option(int, name="rating", description="The color for the embed.", required=True,
             choices=[   
                 OptionChoice(name="0⭐", value=0), OptionChoice(name="1⭐", value=1),
                 OptionChoice(name="2⭐", value=2), OptionChoice(name="3⭐", value=3),
