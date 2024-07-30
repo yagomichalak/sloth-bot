@@ -152,7 +152,7 @@ class TeacherFeedback(commands.Cog):
 
                     private_rooms = await cog.get_premium_vc(before.channel.id)
                     if private_rooms:
-                    
+
                         private_vc = discord.utils.get(guild.voice_channels, id=private_rooms[0][1]) # Vc channel
                         private_txt = discord.utils.get(guild.text_channels, id=private_rooms[0][2]) # Txt channel
 
@@ -628,7 +628,7 @@ class TeacherFeedback(commands.Cog):
                     if await SlothCurrency.get_user_currency(member.id):
                         await SlothCurrency.update_user_money(member.id, 10)
                         await SlothCurrency.update_user_class_reward(ru[0])
-                    
+
                     await self.client.loop.create_task(self.ask_for_user_feedback(
                         teacher, language, class_type, member, teacher_feedback_thread))
                 except Exception as e:
@@ -651,7 +651,7 @@ class TeacherFeedback(commands.Cog):
             return await self.db.delete_rewarded_users(msg_id)
 
     async def ask_for_user_feedback(
-        self, teacher: discord.Member, language: str, class_type: str, 
+        self, teacher: discord.Member, language: str, class_type: str,
         member: discord.Member, teacher_feedback_thread: discord.Thread) -> None:
         """ Asks for user feedback regarding a specific teacher class.
         :param teacher: The teacher of that class.
@@ -683,7 +683,7 @@ class TeacherFeedback(commands.Cog):
         if confirm_view.value:
             # Prompts for a feedback
             await member.send("Please, send a feedback message containing a maximum of `1000` characeters.")
-            feedback_message = await prompt_message(self.client, member, member, limit=1000, timeout=6000)
+            feedback_message = await prompt_message(self.client, member, member, limit=1000, timeout=86400)
             # Feedback embed
             user_response_embed = discord.Embed(
                 title="__Feedback__:",
@@ -716,7 +716,7 @@ class TeacherFeedback(commands.Cog):
             # Checks whether the role exists
             if custom_role:
                 language = custom_role.name
-                
+
             else:
                 language = custom_role_name
 
@@ -792,7 +792,7 @@ class TeacherFeedback(commands.Cog):
             if studying_role := discord.utils.get(member.guild.roles, name=f"Studying {taught_in.title()}"):
                 overwrites[studying_role] = discord.PermissionOverwrite(
                     read_messages=True, send_messages=True, connect=True, speak=True, view_channel=True, embed_links=True)
-        
+
         return overwrites
 
     async def get_channel_perms(self, member: discord.Member, language: str, taught_in: str) -> Dict[str, discord.PermissionOverwrite]:
@@ -817,7 +817,7 @@ class TeacherFeedback(commands.Cog):
         overwrites = await self.get_perms_for_language(member, language, overwrites)
         # Class taught in
         overwrites = await self.get_perms_for_taught_in(member, language, taught_in, overwrites)
-  
+
         if queuebot := discord.utils.get(member.guild.members, id=queuebot_id):
             overwrites[queuebot] = discord.PermissionOverwrite(
                 read_messages=True, send_messages=True, view_channel=True
@@ -1161,7 +1161,7 @@ class TeacherFeedbackDatabaseInsert:
         :param the_time: The current timestamp.
         :param class_desc: The class description.
         :param taught_in: The language that the class is taught in. """
-        
+
         mycursor, db = await the_database()
         await mycursor.execute("""
             INSERT INTO ActiveClasses (teacher_id, txt_id, vc_id, language, class_type, vc_timestamp, class_desc, taught_in)
