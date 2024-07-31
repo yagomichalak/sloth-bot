@@ -3,6 +3,7 @@ from discord import slash_command
 
 import os
 from random import choice
+from random import randrange
 
 mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID', 123))
@@ -174,6 +175,20 @@ int main(void)
         """ A command for telling something about anis. """
 
         await ctx.send("<@515991382217981952> niso")
+
+    @commands.command(aliases=["hodjapie", "onekebappls"])
+    async def hodja(self, ctx) -> None:
+        """ A command for telling something about the kebap guy, hodja. """
+
+        sentences = [
+            "**I THOUGHT YOU WERE A GIRL** <@201086628167417857>",
+            "*One kebap, please!* <@201086628167417857>"
+        ]
+
+        if randrange(67) == 33:
+            await ctx.send("**SUPER RARE DOUBLE LAVASH KEBAP PULL!!!** <@201086628167417857>")
+        else:
+            await ctx.send(choice(sentences))
 
 def setup(client) -> None:
     """ Cog's setup function. """
