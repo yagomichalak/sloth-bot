@@ -25,13 +25,13 @@ class ModeratorApplicationModal(Modal):
         )
         self.add_item(
             InputText(
-                label="What's your English level?",
+                label="Languages that you speak and your level on them?",
                 style=discord.InputTextStyle.short
             )
         )
         self.add_item(
             InputText(
-                label="How could you make a better community?", 
+                label="How could you make a better community?",
                 style=discord.InputTextStyle.paragraph)
         )
         self.add_item(
@@ -62,7 +62,7 @@ class ModeratorApplicationModal(Modal):
         embed.add_field(name="Native roles", value=', '.join(member_native_roles), inline=False)
         embed.add_field(name="Age, gender, timezone", value=self.children[1].value, inline=False)
         embed.add_field(name="Discord Activity", value=self.children[0].value, inline=False)
-        embed.add_field(name="English level", value=self.children[2].value, inline=False)
+        embed.add_field(name="Language Levels", value=self.children[2].value, inline=False)
         embed.add_field(name="Approach to make Sloth a better community", value=self.children[3].value, inline=False)
         embed.add_field(name="Motivation for application", value=self.children[4].value, inline=False)
 
@@ -259,7 +259,7 @@ class EventHostApplicationModal(Modal):
 
         if not confirm_view.value:
             return await interaction.followup.send(f"**Not doing it then, {member.mention}!**", ephemeral=True)
- 
+
         self.cog.cache[member.id] = await utils.get_timestamp()
         await confirm_view.interaction.followup.send(content="""
         **Application successfully made, please, be patient now.**
@@ -421,7 +421,7 @@ class UserReportSupportDetailModal(Modal):
                 print(e)
             else:
                 return #await self.cog.audio(member, 'general_help_alert')
-                
+
         elif self.option == 'Help':
             message = f"Please, {member.mention}, inform us what roles you want, and if you spotted a specific problem with the reaction-role selection."
             try:
@@ -546,7 +546,7 @@ class TravelBuddyModal(Modal):
         )
 
         embed.set_thumbnail(url=member.display_avatar)
-    
+
         embed.add_field(name="Who's traveling:", value=member.mention, inline=False)
         embed.add_field(name="Where", value=self.children[0].value, inline=False)
         embed.add_field(name="When", value=self.children[1].value, inline=False)
