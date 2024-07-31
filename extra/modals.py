@@ -25,7 +25,7 @@ class ModeratorApplicationModal(Modal):
         )
         self.add_item(
             InputText(
-                label="Languages that you speak and your level on them?",
+                label="Languages spoken and proficiency level?",
                 style=discord.InputTextStyle.short
             )
         )
