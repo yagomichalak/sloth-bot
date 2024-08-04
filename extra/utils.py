@@ -86,7 +86,8 @@ def is_subscriber(check_adm: Optional[bool] = True, throw_exc: Optional[bool] = 
 
         entitlements = await member.entitlements().flatten()
         for entitlement in entitlements:
-            if entitlement.sku_id == sloth_subscriber_sub_id:
+            print(entitlement.sku_id)
+            if int(entitlement.sku_id) == sloth_subscriber_sub_id:
                 return True
 
         if throw_exc:
