@@ -84,7 +84,7 @@ def is_subscriber(check_adm: Optional[bool] = True, throw_exc: Optional[bool] = 
 
         entitlements = await member.entitlements().flatten()
         for entitlement in entitlements:
-            if isinstance(entitlement.type, EntitlementType.application_subscription):
+            if entitlement.type == EntitlementType.application_subscription:
                 return True
 
         if throw_exc:
