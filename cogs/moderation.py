@@ -676,7 +676,7 @@ class Moderation(*moderation_cogs):
         timeout_duration = sum([
             weeks * 604800, # 1 week = 604800 seconds
             days * 86400,   # 1 day = 86400 seconds
-            (hours-1) * 3600    # 1 hour = 3600 seconds
+            hours * 3600    # 1 hour = 3600 seconds
         ])
         try:
             current_ts = await utils.get_timestamp() + timeout_duration

