@@ -1,4 +1,5 @@
 import discord
+from discord.enums import EntitlementType
 from discord.ext import commands
 from datetime import datetime
 import aiohttp
@@ -12,9 +13,6 @@ from typing import List, Dict, Optional
 from extra.customerrors import CommandNotReady, NotSubscribed
 from collections import OrderedDict
 import shlex
-import os
-
-sloth_subscriber_sub_id = int(os.getenv("SLOTH_SUBSCRIBER_SUB_ID", 123))
 
 session = aiohttp.ClientSession()
 
@@ -86,8 +84,7 @@ def is_subscriber(check_adm: Optional[bool] = True, throw_exc: Optional[bool] = 
 
         entitlements = await member.entitlements().flatten()
         for entitlement in entitlements:
-            print(entitlement.sku_id)
-            if int(entitlement.sku_id) == sloth_subscriber_sub_id:
+            if isinstance(entitlement.type, EntitlementType.application_subscription):
                 return True
 
         if throw_exc:
