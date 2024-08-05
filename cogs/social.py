@@ -197,7 +197,7 @@ class Social(*social_cogs):
             view = QuickButtons(client=self.client, ctx=ctx, target_member=member)
             if not await utils.is_allowed([mod_role_id, admin_role_id]).predicate(ctx):
                 view.children.remove(view.children[4])
-                if not await utils.is_subscriber().predicate(ctx):
+                if not await utils.is_subscriber(throw_exc=False).predicate(ctx):
                     view.children.remove(view.infractions_button)
                 view.children.remove(view.fake_accounts_button)
                 view.children.remove(view.moderated_nickname_button)
