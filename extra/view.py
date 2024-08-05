@@ -214,7 +214,7 @@ class QuickButtons(discord.ui.View):
         new_ctx = self.ctx
         new_ctx.author = interaction.user
 
-        if await utils.is_allowed([mod_role_id, admin_role_id]).predicate(new_ctx):
+        if await utils.is_allowed([mod_role_id, admin_role_id]).predicate(new_ctx) or await utils.is_subscriber().predicate(new_ctx):
             await interaction.response.defer()
             return await self.client.get_cog("Moderation").infractions(self.ctx, message=str(self.target_member.id))
 

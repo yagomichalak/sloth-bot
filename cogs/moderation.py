@@ -1894,7 +1894,7 @@ We appreciate your understanding and look forward to hearing from you. """, embe
 
     # Infraction methods
     @commands.command(aliases=['infr', 'show_warnings', 'sw', 'show_bans', 'sb', 'show_muted', 'sm'])
-    @utils.is_allowed(allowed_roles, throw_exc=True)
+    @commands.check_any(utils.is_allowed(allowed_roles, throw_exc=True), utils.is_subscriber())
     async def infractions(self, ctx, *, message : str = None) -> None:
         """ Shows all infractions of a specific user.
         :param member: The member to show the infractions from. [Optional] [Default = You] """
