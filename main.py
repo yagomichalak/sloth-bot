@@ -180,9 +180,10 @@ async def on_command_error(ctx, error) -> None:
         return await ctx.send(f"**{error.error_message}**")
 
     elif isinstance(error, NotSubscribed):
-        subscription_url = f"https://discord.com/application-directory/{client.user.id}/store/{sloth_subscriber_sub_id}"
+        view = discord.ui.View()
+        view.add_item(discord.ui.Button(sku_id=sloth_subscriber_sub_id))
         return await ctx.send(
-            f"**Subscriber-only feature, if you want to have access to this and other commands, subscribe now:**\n{subscription_url}"
+            f"**Subscriber-only feature, if you want to have access to this and other commands & features, subscribe now:**", view=view
         )
 
     print('='*10)
@@ -226,9 +227,10 @@ async def on_application_command_error(ctx, error) -> None:
         await ctx.respond("**Channel not found!**")
 
     elif isinstance(error, NotSubscribed):
-        subscription_url = f"https://discord.com/application-directory/{client.user.id}/store/{sloth_subscriber_sub_id}"
+        view = discord.ui.View()
+        view.add_item(discord.ui.Button(sku_id=sloth_subscriber_sub_id))
         return await ctx.respond(
-            f"**Subscriber-only feature, if you want to have access to this and other commands, subscribe now:**\n{subscription_url}"
+            f"**Subscriber-only feature, if you want to have access to this and other commands & features, subscribe now:**", view=view
         )
 
     print('='*10)
