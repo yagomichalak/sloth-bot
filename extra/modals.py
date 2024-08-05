@@ -574,3 +574,64 @@ class TravelBuddyModal(Modal):
         message.guild = interaction.guild
 
         await message.create_thread(name=f"{member}'s Trip", auto_archive_duration=10080)
+
+
+class BootcampFeedbackModal(Modal):
+    """ Class for the moderator application. """
+
+    def __init__(self, client: commands.Bot, index_question: int = 1) -> None:
+        """ Class init method. """
+
+        super().__init__(title="Bootcamp Feedback")
+        self.client = client
+        self.cog: commands.Cog = client.get_cog("Bootcamp")
+        self.questions = {
+            1: {"message": "How much has the user improved since start/last meeting?", "type": discord.InputTextStyle.paragraph, "max_length": 200, "answer": "", "rating": 0},
+            2: {"message": "Learner has completed the tasks set by native.", "type": discord.InputTextStyle.singleline, "max_length": 3, "answer": "", "rating": 0},
+            3: {"message": "What's your English level?", "type": discord.InputTextStyle.singleline, "max_length": 3, "answer": "", "rating": 0},
+        }
+        self.index_question = index_question
+        self.add_question()
+
+    def add_question(self) -> None:
+
+        question = self.questions.get(self.index_question)
+        print(question)
+        self.children.clear()  # Clear current inputs
+
+        # Add the question input
+        self.add_item(
+            InputText(
+                label=f"Question {self.index_question}",
+                placeholder=question["message"],
+                style=question["type"],
+                required=True,
+                max_length=question["max_length"],
+            )
+        )
+
+        # Add the rating input
+        self.add_item(
+            InputText(
+                label="Rating",
+                placeholder="Rate it from 0-5.",
+                style=discord.InputTextStyle.singleline,
+                required=True,
+                max_length=1,
+            )
+        )
+
+    async def callback(self, interaction: discord.Interaction) -> None:
+        """ Callback for the moderation application. """
+        
+        self.questions[self.index_question]["answer"] = self.children[0]
+        self.questions[self.index_question]["rating"] = self.children[1] if isinstance(self.children[1], int) else 0
+
+        from pprint import pprint
+        pprint(self.questions)
+        if self.index_question < 3:
+            self.index_question += 1  # Get next question index
+            self.add_question()
+            await interaction.response.send_modal(self)
+
+        pprint(self.children)
