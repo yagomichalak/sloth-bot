@@ -1117,7 +1117,7 @@ class Tools(*tool_cogs):
 			await ctx.respond("**For some reason I couldn't ping them =\ **")
 
 	@commands.command(aliases=['sound', 'board', 'sound_board'])
-	@utils.is_allowed([mod_role_id, admin_role_id, owner_role_id], throw_exc=True)
+	@commands.check_any(utils.is_allowed([mod_role_id, admin_role_id, owner_role_id], throw_exc=True), utils.is_subscriber())
 	@commands.cooldown(1, 60, commands.BucketType.user)
 	async def soundboard(self, ctx) -> None:
 		""" Sends a soundboard into the channel. """
