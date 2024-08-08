@@ -6,11 +6,13 @@ from .menu import ConfirmSkill
 from .select import ReportSupportSelect, ReportStaffSelect
 from .modals import (
     ModeratorApplicationModal, TeacherApplicationModal,
-    EventHostApplicationModal, DebateManagerApplicationModal
+    EventHostApplicationModal, DebateManagerApplicationModal,
+    BootcampFeedbackModal
 )
 import os
 from functools import partial
 import json
+from pprint import pprint
 
 mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID', 123))
@@ -550,3 +552,74 @@ class UserBabyView(discord.ui.View):
         """ Checks whether the click was done by the author of the command. """
 
         return self.member.id == interaction.user.id
+
+
+class BootcampFeedbackView(discord.ui.View):
+
+    def __init__(self, client: commands.Bot, member: discord.Member, perpetrator: discord.Member, current_ts: int) -> None:
+        super().__init__(timeout=60)
+        self.client = client
+        self.cog: commands.Cog = client.get_cog("Bootcamp")
+        self.member = member
+        self.perpetrator = perpetrator
+        self.questions = {
+            1: {"message": "How much has the learner improved since start/last meeting?", "type": discord.InputTextStyle.paragraph, "max_length": 200, "answer": "", "rating": 0},
+            2: {"message": "Has the learner completed the tasks set by native?", "type": discord.InputTextStyle.singleline, "max_length": 3, "answer": "", "rating": 0},
+            3: {"message": "Does the learner show dedication to learning the language?", "type": discord.InputTextStyle.singleline, "max_length": 3, "answer": "", "rating": 0},
+        }
+        
+        self.unique_id = f"{current_ts}-{self.member.id}-{self.perpetrator.id}"
+
+        # Adds the question buttons
+        self.add_question_buttons()
+
+    def add_question_buttons(self) -> None:
+        
+        for qi in self.questions.keys():
+            question_button = discord.ui.Button(
+                label=f"Question #{qi}", style=discord.ButtonStyle.blurple, emoji="❓", custom_id=f"{self.unique_id}-{qi}"
+            )
+            question_button.callback = partial(self.question_callback, question_button)
+            self.children.append(question_button)
+
+        # Adds the feedback button
+        send_feedback_button = discord.ui.Button(
+            label=f"Send Feedback", style=discord.ButtonStyle.danger, emoji="📨", custom_id="send_feedback", disabled=True
+        )
+        send_feedback_button.callback = partial(self.send_feedback, send_feedback_button)
+        self.children.append(send_feedback_button)
+            
+    async def question_callback(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Callback for each click on the questions buttons. """
+
+        question_index = int(button.custom_id.replace(f"{self.unique_id}-", ""))
+        modal = BootcampFeedbackModal(self.client, view=self, questions=self.questions, index_question=question_index)
+        await interaction.response.send_modal(modal=modal)
+
+    async def send_feedback(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Button to send the feedback data to the API. """
+
+        await interaction.response.defer()
+        self.children.clear()
+
+        # Logic here
+        for question_index, question_data in self.questions.items():
+            # Maps the data
+            data = {
+                "user_id": self.member.id,
+                "perpetrator_id": self.perpetrator.id,
+                "question": question_index,
+                "answer": question_data["answer"],
+                "rating": question_data["rating"],
+            }
+            # Sends it to the API
+            await self.cog.post_user_feedback_data(data)
+
+        await interaction.followup.edit_message(
+            interaction.message.id,
+            content=f"Feedback successfully given to {self.member.mention}",
+            view=self
+        )
+
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        return self.perpetrator.id == interaction.user.id

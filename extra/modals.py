@@ -3,6 +3,8 @@ from discord.ui import InputText, Modal
 from discord.ext import commands
 from .prompt.menu import ConfirmButton
 from . import utils
+from typing import Dict, Any
+
 
 class ModeratorApplicationModal(Modal):
     """ Class for the moderator application. """
@@ -579,17 +581,13 @@ class TravelBuddyModal(Modal):
 class BootcampFeedbackModal(Modal):
     """ Class for the moderator application. """
 
-    def __init__(self, client: commands.Bot, index_question: int = 1) -> None:
+    def __init__(self, client: commands.Bot,  view: discord.ui.View, questions: Dict[int, Dict[str, Any]], index_question: int = 1) -> None:
         """ Class init method. """
 
         super().__init__(title="Bootcamp Feedback")
         self.client = client
-        self.cog: commands.Cog = client.get_cog("Bootcamp")
-        self.questions = {
-            1: {"message": "How much has the user improved since start/last meeting?", "type": discord.InputTextStyle.paragraph, "max_length": 200, "answer": "", "rating": 0},
-            2: {"message": "Learner has completed the tasks set by native.", "type": discord.InputTextStyle.singleline, "max_length": 3, "answer": "", "rating": 0},
-            3: {"message": "What's your English level?", "type": discord.InputTextStyle.singleline, "max_length": 3, "answer": "", "rating": 0},
-        }
+        self.view = view
+        self.questions = questions
         self.index_question = index_question
         self.add_question()
 
@@ -623,15 +621,20 @@ class BootcampFeedbackModal(Modal):
 
     async def callback(self, interaction: discord.Interaction) -> None:
         """ Callback for the moderation application. """
-        
-        self.questions[self.index_question]["answer"] = self.children[0]
-        self.questions[self.index_question]["rating"] = self.children[1] if isinstance(self.children[1], int) else 0
 
-        from pprint import pprint
-        pprint(self.questions)
-        if self.index_question < 3:
-            self.index_question += 1  # Get next question index
-            self.add_question()
-            await interaction.response.send_modal(self)
+        self.questions[self.index_question]["answer"] = self.children[0].value
+        rating = 0
+        try:
+            rating = int(self.children[1].value)
+        except Exception:
+            pass
+        self.questions[self.index_question]["rating"] = rating
 
-        pprint(self.children)
+        self.view.questions = self.questions
+        self.view.children[self.index_question-1].disabled = True
+
+        if self.index_question == len(self.questions):
+            self.view.children[-1].disabled = False
+            self.view.children[-1].style = discord.ButtonStyle.success
+
+        await interaction.response.edit_message(view=self.view)

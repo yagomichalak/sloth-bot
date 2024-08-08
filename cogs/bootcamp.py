@@ -3,7 +3,7 @@ from discord.ext import commands
 from discord import slash_command, Option, OptionChoice, ApplicationContext
 import os
 from extra import utils
-from extra.modals import BootcampFeedbackModal
+from extra.view import BootcampFeedbackView
 from typing import Dict
 import requests
 
@@ -35,12 +35,11 @@ class Bootcamp(commands.Cog):
         member: Option(discord.Member, description="The member to give feedback to.", required=True), # type: ignore
     ) -> None:
         """ Gives feedback to a user for the bootcamp. """
-        # Save data
-        # self.post_user_feedback_data(data={
-        #     "user_id": member.id, "rating": rating, "perpetrator_id": interaction.author.id,
-        # })
-        # await interaction.respond(f"Gave {member.mention} a `{rating}⭐` rating for the bootcamp!")
-        await interaction.response.send_modal(modal=BootcampFeedbackModal(self.client))
+
+        await interaction.response.defer(ephemeral=True)
+        current_ts = await utils.get_timestamp()
+        view = BootcampFeedbackView(self.client, member=member, perpetrator=interaction.author, current_ts=current_ts)
+        await interaction.followup.send(view=view, ephemeral=True)
 
     async def post_user_feedback_data(self, data: Dict[str, int]) -> None:
         """ Posts the user bootcamp feedback data to the API endpoint.
@@ -48,9 +47,9 @@ class Bootcamp(commands.Cog):
 
         headers = {"Content-Type": "application/json", "Access-key": bootcamp_api_access_key}
         response = requests.post(
-            url=f"{self.BASE_URL}/feedback", data=data, headers=headers, timeout=10
+            url=f"{self.BASE_URL}/feedback", json=data, headers=headers, timeout=10
         )
-        if response.status_code != 201:
+        if response.status_code != 200:
             print(response.status_code)
             print(response.text)
 
