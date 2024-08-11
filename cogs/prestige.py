@@ -98,7 +98,7 @@ class Prestige(commands.Cog):
 
         sentences = [
             "# MIAOOOOOOO <:cat_wave:924495909595779082> <@439110609745870870>",
-            "**CIAO SONO FRENESIA 🇹🇮 <@439110609745870870>**",
+            "**CIAO SONO FRENESIA 🇮🇹 <@439110609745870870>**",
             "AHAHAAHAHAHA <@439110609745870870>"
         ]
 
