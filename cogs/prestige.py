@@ -68,6 +68,24 @@ class Prestige(commands.Cog):
 
         await ctx.send("You mean missy aka Marceline")
 
+    @commands.command()
+    async def hiba(self, ctx) -> None:
+        """ A command for telling something about Hiba. """
+
+        sentences = [
+            "<@760178072904531988> Give me attention",
+            "<@760178072904531988>\nAll of these girl on some uppercase shi\nThat means they all cap\nBeing the best at whatever i do\nThat’s sounding on brand",
+            "<@760178072904531988> Morning 🤨",
+            "<@760178072904531988> Kant hear you",
+            "<@760178072904531988> Can you move me?",
+            "<@760178072904531988>\nYou wouldnt put it\nSo no point ~",
+            "<@760178072904531988>\nGab\nI have a problem",
+            "<@760178072904531988> mysqli_query($cnx,$req1)",
+            "<@760178072904531988> Caught you there ✨"
+        ]
+
+        await ctx.send(choice(sentences))
+
     @commands.command(aliases=["winni", "winnie", "wynni", "wynnie"])
     async def wyncham(self, ctx) -> None:
         """ A command for telling something about Wyncham. """
@@ -157,6 +175,19 @@ int main(void)
         ]
 
         await ctx.send(choice(sentences))
+
+    @commands.command(aliases=["maksiu", "maks1u", "c4tchme"])
+    async def choose_right(self, ctx) -> None:
+
+        idkWhichOne = [
+            "Oh, <@312940056115544064>. 🧠 He's found... never mind",
+            "<@312940056115544064> If this were a game of 'spot the right one,' I'd say we're still playing 😈",
+            "👌 ||Almost there||, but this one is playing hard to get! <@312940056115544064>",
+            "u got me! 💐 from <@312940056115544064>",
+            "with love to <@439110609745870870> 🇮🇹 from <@312940056115544064>"
+        ]
+
+        await ctx.send(choice(idkWhichOne))
 
     @commands.command(aliases=["birds"])
     async def keybirds(self, ctx) -> None:
