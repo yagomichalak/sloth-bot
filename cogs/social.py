@@ -298,7 +298,7 @@ class Social(*social_cogs):
 
 
     @commands.command(name="change_nickname", aliases=["cn", "update_nick", "un", "changenick", "updatenick"])
-    @commands.cooldown(1, 60, commands.BucketType.user)
+    @commands.cooldown(1, 6, commands.BucketType.user)
     async def _change_nickname_command(self, ctx, *, nickname: Optional[str] = None) -> None:
         """ Changes your nickname.
         :param nickname: The nickname to change to. [Optional]
@@ -308,7 +308,7 @@ class Social(*social_cogs):
         await self._change_nickname_callack(ctx, nickname)
 
     @slash_command(name="change_nickname", guild_ids=guild_ids)
-    @commands.cooldown(1, 60, commands.BucketType.user)
+    @commands.cooldown(1, 6, commands.BucketType.user)
     async def _change_nickname_slash_command(self, ctx,
         nickname: Option(str, name="nickname", description="The nickname to change to.", required=False)
     ) -> None:
