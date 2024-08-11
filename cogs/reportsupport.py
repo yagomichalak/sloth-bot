@@ -44,7 +44,7 @@ class ReportSupport(*report_support_classes):
 
         self.client = client
         self.cosmos_role_id: int = int(os.getenv('COSMOS_ROLE_ID', 123))
-        self.elijah_id: int = int(os.getenv('ELIJAH_ID', 123))
+        self.mayu_id: int = int(os.getenv('MAYU_ID', 123))
         self.prisca_id: int = int(os.getenv('PRISCA_ID', 123))
         self.cache = {}
         self.report_cache = {}
@@ -313,7 +313,6 @@ class ReportSupport(*report_support_classes):
         counter = await self.get_case_number()
         moderator = discord.utils.get(guild.roles, id=moderator_role_id)
         senior_mod = discord.utils.get(guild.roles, id=senior_role_id)
-        elijah = discord.utils.get(guild.members, id=self.elijah_id)
         overwrites = {guild.default_role: discord.PermissionOverwrite(
             read_messages=False, send_messages=False, connect=False, view_channel=False),
         member: discord.PermissionOverwrite(
@@ -342,7 +341,7 @@ class ReportSupport(*report_support_classes):
             embed.add_field(name="Reporting:", value=f"```{reportee}```", inline=False)
             embed.add_field(name="For:", value=f"```{text}```", inline=False)
             embed.add_field(name="Evidence:", value=f"```{evidence}```", inline=False)
-            message = await the_channel.send(content=f"{member.mention}, {elijah.mention}", embed=embed)
+            message = await the_channel.send(content=f"{member.mention}", embed=embed)
             ctx = await self.client.get_context(message)
 
             if member.voice:

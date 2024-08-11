@@ -1,0 +1,14 @@
+venv
+venv2
+mycreds.txt
+credentials.json
+client_secrets.json
+sloth_custom_images/
+texts/
+.vs/
+.vscode/
+sloth.sql
+tests.py
+
+.idea/
+**/__pycache__/
