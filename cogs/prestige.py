@@ -98,7 +98,7 @@ class Prestige(commands.Cog):
 
         sentences = [
             "# MIAOOOOOOO <:cat_wave:924495909595779082> <@439110609745870870>",
-            "**CIAO SONO FRENESIA 🇮🇹 <@439110609745870870>**",
+            "**CIAO SONO FRENESIA 🇹🇮 <@439110609745870870>**",
             "AHAHAAHAHAHA <@439110609745870870>"
         ]
 
@@ -158,14 +158,15 @@ int main(void)
 
         await ctx.send(choice(sentences))
 
-    @commands.command(aliases=["maksiu, maks1u, c4tchme"])
+    @commands.command(aliases=["maksiu", "maks1u", "c4tchme"])
     async def choose_right(self, ctx) -> None:
 
         idkWhichOne = [
             "Oh, <@312940056115544064>. 🧠 He's found... never mind",
             "<@312940056115544064> If this were a game of 'spot the right one,' I'd say we're still playing 😈",
             "👌 ||Almost there||, but this one is playing hard to get! <@312940056115544064>",
-            "u got me! 💐 from <@312940056115544064>"
+            "u got me! 💐 from <@312940056115544064>",
+            "with love to <@439110609745870870> 🇮🇹 from <@312940056115544064>"
         ]
 
         await ctx.send(choice(idkWhichOne))
