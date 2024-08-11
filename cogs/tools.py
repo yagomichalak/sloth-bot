@@ -101,25 +101,24 @@ class Tools(*tool_cogs):
 			finally:
 				await Communication.update_advertising_time(event_label="make_dumps", current_ts=current_ts)
 
-
 	@commands.Cog.listener()
 	async def on_voice_state_update(self, member, before, after) -> None:
 		""" Removes the 'in a VC' role from people who are in the stealth mode,
 		upon joining VCs. """
 
 		# Check voice states
-        if before.mute != after.mute:
-            return
-        if before.deaf != before.deaf:
-            return
-        if before.self_mute != after.self_mute:
-            return
-        if before.self_deaf != after.self_deaf:
-            return
-        if before.self_stream != after.self_stream:
-            return
-        if before.self_video != after.self_video:
-            return
+		if before.mute != after.mute:
+			return
+		if before.deaf != before.deaf:
+			return
+		if before.self_mute != after.self_mute:
+			return
+		if before.self_deaf != after.self_deaf:
+			return
+		if before.self_stream != after.self_stream:
+			return
+		if before.self_video != after.self_video:
+			return
 
 		role = discord.utils.get(member.guild.roles, id=in_a_vc_role_id)  # Replace with your role name
 
