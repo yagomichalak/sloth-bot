@@ -107,6 +107,20 @@ class Tools(*tool_cogs):
 		""" Removes the 'in a VC' role from people who are in the stealth mode,
 		upon joining VCs. """
 
+		# Check voice states
+        if before.mute != after.mute:
+            return
+        if before.deaf != before.deaf:
+            return
+        if before.self_mute != after.self_mute:
+            return
+        if before.self_deaf != after.self_deaf:
+            return
+        if before.self_stream != after.self_stream:
+            return
+        if before.self_video != after.self_video:
+            return
+
 		role = discord.utils.get(member.guild.roles, id=in_a_vc_role_id)  # Replace with your role name
 
 		if after.channel:  # User joins a voice channel
@@ -121,41 +135,6 @@ class Tools(*tool_cogs):
 
 		else:  # User leaves a voice channel
 			await member.remove_roles(role)
-
-	@commands.Cog.listener()
-	async def on_member_update(self, before, after):
-		""" Removes the 'in a VC' role from people who are in the stealth mode,
-		upon getting roles. """
-
-		if not after.guild:
-			return
-
-		roles = before.roles
-		roles2 = after.roles
-		if len(roles2) < len(roles):
-			return
-
-		new_role = None
-
-		for r2 in roles2:
-			if r2 not in roles:
-				new_role = r2
-				break
-
-		if new_role:
-			role = after.get_role(in_a_vc_role_id)
-			if not role:
-				return
-
-			stealth_status = await self.get_stealth_status(after.id)
-			if not stealth_status or not stealth_status[1]:
-				return
-
-			try:
-				await after.remove_roles(role)
-			except:
-				pass
-
 
 	@commands.Cog.listener()
 	async def on_message(self, message) -> None:
