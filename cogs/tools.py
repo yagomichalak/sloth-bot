@@ -107,15 +107,19 @@ class Tools(*tool_cogs):
 		""" Removes the 'in a VC' role from people who are in the stealth mode,
 		upon joining VCs. """
 
-		if after.channel:
-			role = member.get_role(in_a_vc_role_id)
-			if not role:
+		role = discord.utils.get(member.guild.roles, id=in_a_vc_role_id)  # Replace with your role name
+
+		if after.channel:  # User joins a voice channel
+			if member.get_role(role.id):
 				return
 
 			stealth_status = await self.get_stealth_status(member.id)
 			if not stealth_status or not stealth_status[1]:
 				return
 
+			await member.add_roles(role)
+
+		else:  # User leaves a voice channel
 			await member.remove_roles(role)
 
 	@commands.Cog.listener()
