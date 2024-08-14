@@ -1466,7 +1466,7 @@ class Tools(*tool_cogs):
 		await ctx.send(embed=embed)
 
 
-	@commands.command(hidden=True)
+	@commands.command(hidden=False)
 	@commands.has_permissions(administrator=True)
 	async def restart(self,ctx) -> None:
 		""" Restarts the bot"""
