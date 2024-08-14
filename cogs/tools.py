@@ -36,8 +36,6 @@ guild_ids = [int(os.getenv('SERVER_ID', 123))]
 
 from typing import List, Optional, Union
 
-import sys
-
 community_manager_role_id = int(os.getenv('COMMUNITY_MANAGER_ROLE_ID', 123))
 recruiter_role_id = int(os.getenv('RECRUITER_ROLE_ID', 123))
 mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
@@ -1477,15 +1475,7 @@ class Tools(*tool_cogs):
 			return await ctx.send(f"**Not doing it, then, {member.mention}!**")
 		
 		await ctx.send("Restarting the bot")
-	
-		os.execv(sys.executable, [sys.executable] + sys.argv)
-
-	
-
-
-
-
-
+		await self.client.close()
 
 
 def setup(client):
