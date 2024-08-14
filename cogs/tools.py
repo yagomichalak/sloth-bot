@@ -36,6 +36,8 @@ guild_ids = [int(os.getenv('SERVER_ID', 123))]
 
 from typing import List, Optional, Union
 
+import sys
+
 community_manager_role_id = int(os.getenv('COMMUNITY_MANAGER_ROLE_ID', 123))
 recruiter_role_id = int(os.getenv('RECRUITER_ROLE_ID', 123))
 mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
@@ -1462,6 +1464,24 @@ class Tools(*tool_cogs):
 		
 		embed.set_footer(text=f"Requested by: {member}", icon_url=member.display_avatar)
 		await ctx.send(embed=embed)
+
+
+	@commands.command(hidden=True)
+	@commands.has_permissions(administrator=True)
+	async def restart(self,ctx) -> None:
+		""" Restarts the bot"""
+		
+		member = ctx.author
+		confirm = await Confirm(f"**Are you sure you want to restart Dnk's son?**").prompt(ctx)
+		if not confirm:
+			return await ctx.send(f"**Not doing it, then, {member.mention}!**")
+		
+		await ctx.send("restarting the bot")
+	
+		os.execv(sys.executable, [sys.executable] + sys.argv)
+
+	
+
 
 
 
