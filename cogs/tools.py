@@ -1464,8 +1464,18 @@ class Tools(*tool_cogs):
 		await ctx.send(embed=embed)
 
 
-
-
+	@commands.command(hidden=False)
+	@commands.has_permissions(administrator=True)
+	async def restart(self,ctx) -> None:
+		""" Restarts the bot"""
+		
+		member = ctx.author
+		confirm = await Confirm(f"**Are you sure you want to restart Dnk's son?**").prompt(ctx)
+		if not confirm:
+			return await ctx.send(f"**Not doing it, then, {member.mention}!**")
+		
+		await ctx.send("Restarting the bot")
+		await self.client.close()
 
 
 def setup(client):
