@@ -1476,7 +1476,7 @@ class Tools(*tool_cogs):
 		if not confirm:
 			return await ctx.send(f"**Not doing it, then, {member.mention}!**")
 		
-		await ctx.send("restarting the bot")
+		await ctx.send("Restarting the bot")
 	
 		os.execv(sys.executable, [sys.executable] + sys.argv)
 
