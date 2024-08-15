@@ -1,6 +1,5 @@
-import discord
 from discord.ext import commands
-from mysqldb import the_database
+from mysqldb import DatabaseCore
 from typing import List, Union
 
 
@@ -9,6 +8,7 @@ class RoleSelectionDatabaseCommands(commands.Cog):
 
     def __init__(self, client) -> None:
         self.client = client
+        self.db = DatabaseCore()
 
     @commands.command(hidden=True)
     @commands.is_owner()
@@ -21,8 +21,7 @@ class RoleSelectionDatabaseCommands(commands.Cog):
         if await self.check_table_selection_menu_exists():
             return await ctx.send(f"**Table `SelectionMenu` already exists, {member.mention}!**", delete_after=5)
 
-        mycursor, db = await the_database()
-        await mycursor.execute("""
+        await self.db.execute_query("""
         CREATE TABLE SelectionMenu (
             message_id BIGINT NOT NULL,
             channel_id BIGINT NOT NULL,
@@ -34,8 +33,6 @@ class RoleSelectionDatabaseCommands(commands.Cog):
             custom_id VARCHAR(100) NOT NULL
         )
         """)
-        await db.commit()
-        await mycursor.close()
         await ctx.send("**Table `SelectionMenu` has been created!**", delete_after=5)
 
     @commands.command(hidden=True)
@@ -49,10 +46,7 @@ class RoleSelectionDatabaseCommands(commands.Cog):
         if not await self.check_table_selection_menu_exists():
             return await ctx.send(f"**Table `SelectionMenu` doesn't exist, {member.mention}!**", delete_after=5)
 
-        mycursor, db = await the_database()
-        await mycursor.execute("DROP TABLE SelectionMenu")
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("DROP TABLE SelectionMenu")
         await ctx.send("**Table `SelectionMenu` has been dropped!**", delete_after=5)
 
     @commands.command(hidden=True)
@@ -66,23 +60,13 @@ class RoleSelectionDatabaseCommands(commands.Cog):
         if not await self.check_table_selection_menu_exists():
             return await ctx.send(f"**Table `SelectionMenu` doesn't exist yet, {member.mention}!**", delete_after=5)
 
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM SelectionMenu")
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("DELETE FROM SelectionMenu")
         await ctx.send("**Table `SelectionMenu` has been reset!**", delete_after=5)
 
     async def check_table_selection_menu_exists(self) -> bool:
         """ Checks whether the SelectionMenu table exists. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("SHOW TABLE STATUS LIKE 'SelectionMenu'")
-        exists = await mycursor.fetchone()
-        await mycursor.close()
-        if exists:
-            return True
-        else:
-            return False
+        return await self.db.table_exists("SelectionMenu")
 
     # ===== Database Methods =====
     @staticmethod
@@ -92,24 +76,15 @@ class RoleSelectionDatabaseCommands(commands.Cog):
         :param message_id: The message ID in which the button is in.
         :param guild_id: The ID of the guild in which the menu is in. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("""
+        return await DatabaseCore().execute_query("""
         SELECT * FROM SelectionMenu WHERE custom_id = %s AND message_id = %s AND guild_id = %s
-        """, (custom_id, message_id, guild_id))
-        button = await mycursor.fetchone()
-        await mycursor.close()
-        return button
-        
+        """, (custom_id, message_id, guild_id), fetch="one")       
 
     @staticmethod
     async def get_selection_menus() -> List[List[int]]:
         """ Gets all registered Selection Menus. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("SELECT * FROM SelectionMenu ORDER BY guild_id, channel_id, message_id")
-        selection_menus = await mycursor.fetchall()
-        await mycursor.close()
-        return selection_menus
+        return await DatabaseCore().execute_query("SELECT * FROM SelectionMenu ORDER BY guild_id, channel_id, message_id", fetch="all")
 
     @staticmethod
     async def get_selection_menu(message_id: int, guild_id: int) -> List[int]:
@@ -117,11 +92,7 @@ class RoleSelectionDatabaseCommands(commands.Cog):
         :param message_id: The message ID of the Selection Menu.
         :param guild_id: The server ID in which the Selection Menu was created. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("SELECT * FROM SelectionMenu WHERE message_id = %s AND guild_id = %s", (message_id, guild_id))
-        selection_menu = await mycursor.fetchone()
-        await mycursor.close()
-        return selection_menu
+        return await DatabaseCore().execute_query("SELECT * FROM SelectionMenu WHERE message_id = %s AND guild_id = %s", (message_id, guild_id), fetch="one")
 
     @staticmethod
     async def insert_menu_button(
@@ -135,14 +106,9 @@ class RoleSelectionDatabaseCommands(commands.Cog):
         :param emoji: The emoji of the button.
         :param custom_id: The custom ID of the button. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("""INSERT INTO SelectionMenu (
+        await DatabaseCore().execute_query("""INSERT INTO SelectionMenu (
             message_id, channel_id, guild_id, style, label, emoji, custom_id) VALUES (%s, %s, %s, %s, %s, %s, %s)
         """, (message_id, channel_id, guild_id, style, label, emoji, custom_id))
-        await db.commit()
-        await mycursor.close()
-
-
 
     # ===== Delete methods =====
 
@@ -154,13 +120,10 @@ class RoleSelectionDatabaseCommands(commands.Cog):
         :param guild_id:
         :param custom_id: """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("""
+        await DatabaseCore().execute_query("""
         DELETE FROM SelectionMenu
         WHERE message_id = %s AND channel_id = %s AND guild_id = %s AND custom_id = %s
         """, (message_id, channel_id, guild_id, custom_id))
-        await db.commit()
-        await mycursor.close()
 
     @staticmethod
     async def delete_selection_menu_by_message_id(message_id: int, guild_id: int) -> None:
@@ -168,10 +131,7 @@ class RoleSelectionDatabaseCommands(commands.Cog):
         :param message_id: The message ID of the menu.
         :param guild_id: The ID of the server in which the Selection Menu was created. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM SelectionMenu WHERE message_id = %s AND guild_id = %s", (message_id, guild_id))
-        await db.commit()
-        await mycursor.close()
+        await DatabaseCore().execute_query("DELETE FROM SelectionMenu WHERE message_id = %s AND guild_id = %s", (message_id, guild_id))
 
     @staticmethod
     async def delete_selection_menu_by_channel_id(channel_id: int, guild_id: int) -> None:
@@ -179,17 +139,11 @@ class RoleSelectionDatabaseCommands(commands.Cog):
         :param channel_id: The ID of the channel in which the Selection Menu was created.
         :param guild_id: The ID of the server in which the Selection Menu was created. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM SelectionMenu WHERE channel_id = %s AND guild_id = %s", (channel_id, guild_id))
-        await db.commit()
-        await mycursor.close()
+        await DatabaseCore().execute_query("DELETE FROM SelectionMenu WHERE channel_id = %s AND guild_id = %s", (channel_id, guild_id))
 
     @staticmethod
     async def delete_selection_menu_by_guild_id(guild_id: int) -> None:
         """ Deletes a Role Selection menu by guild ID.
         :param guild_id: The ID of the server in which the Selection Menu was created. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM SelectionMenu WHERE guild_id = %s", (guild_id,))
-        await db.commit()
-        await mycursor.close()
+        await DatabaseCore().execute_query("DELETE FROM SelectionMenu WHERE guild_id = %s", (guild_id,))

@@ -55,7 +55,7 @@ class BlackJackDB(commands.Cog):
     async def check_blackjack_exists(self) -> bool:
         """ Checks whether the Blackjack table exists. """
 
-        return await self.db.table_exists("SHOW TABLE STATUS LIKE 'Blackjack'")
+        return await self.db.table_exists("Blackjack")
 
     async def insert_user_database(self, user_id) -> None:
         await self.db.execute_query("""

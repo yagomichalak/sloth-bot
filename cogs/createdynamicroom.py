@@ -262,7 +262,8 @@ class LanguageRoom:
 
 class LanguageRoomDatabase:
     def __init__(self):
-        pass
+        
+        self.db = DatabaseCore()
 
     # ===== LanguageRoom related functions =====
 
@@ -298,7 +299,7 @@ class LanguageRoomDatabase:
     async def table_language_room_exists(self) -> bool:
         """ Checks whether the LanguageRoom table exists. """
 
-        return await self.db.table_exists("LanguageRoom", fetch="all")
+        return await self.db.table_exists("LanguageRoom")
 
     async def get_rooms_by_ids(self, ids: set, object_form: bool=False) -> Union[List[List[object]], List[DynamicRoom]]:
         """ Returns room data from given ids.
