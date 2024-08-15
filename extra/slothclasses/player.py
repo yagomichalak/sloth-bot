@@ -1,6 +1,5 @@
 import discord
 from discord.ext import commands
-from discord.ext.commands.core import cooldown
 
 from extra.customerrors import (
     MissingRequiredSlothClass, ActionSkillOnCooldown, CommandNotReady, 
@@ -9,7 +8,7 @@ from extra.customerrors import (
     )
 from extra import utils
 
-from mysqldb import the_database, the_django_database
+from mysqldb import DatabaseCore
 from typing import Union, List, Tuple, Dict, Any
 from datetime import datetime
 from random import random, choice
@@ -38,6 +37,7 @@ class Player(*additional_cogs):
 
     def __init__(self, client) -> None:
         self.client = client
+        self.db = DatabaseCore()
 
     @commands.Cog.listener()
     async def on_ready(self) -> None:
@@ -52,14 +52,8 @@ class Player(*additional_cogs):
             """ Gets the user Sloth Class from the database.
             :param user_id: The ID of the user to get the Sloth Class. """
 
-            mycursor, db = await the_database()
-            await mycursor.execute("SELECT sloth_class FROM SlothProfile WHERE user_id = %s", (user_id,))
-            user_sloth_class = await mycursor.fetchone()
-            await mycursor.close()
-            if user_sloth_class:
-                return user_sloth_class[0]
-            else:
-                return None
+            user_sloth_class = await DatabaseCore().execute_query("SELECT sloth_class FROM SlothProfile WHERE user_id = %s", (user_id,), fetch="one")
+            return None if not user_sloth_class else user_sloth_class[0]
 
         async def real_check(ctx):
             """ Perfoms the real check. """
@@ -367,12 +361,9 @@ class Player(*additional_cogs):
         :param price: The price of the item or something, if it is for sale.
         :param content: The content of the skill, if any. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("""
+        await self.db.execute_query("""
             INSERT INTO SlothSkills (user_id, skill_type, skill_timestamp, target_id, message_id, channel_id, emoji, price, content)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)""", (user_id, skill_type, skill_timestamp, target_id, message_id, channel_id, emoji, price, content))
-        await db.commit()
-        await mycursor.close()
 
     # ========== GET ========== #
 
@@ -380,63 +371,39 @@ class Player(*additional_cogs):
         """ Gets a skill action by message ID.
         :param message_id: The ID with which to get the skill action. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("SELECT * FROM SlothSkills WHERE message_id = %s", (message_id,))
-        skill_action = await mycursor.fetchone()
-        await mycursor.close()
-        return skill_action
+        return await self.db.execute_query("SELECT * FROM SlothSkills WHERE message_id = %s", (message_id,), fetch="one")
 
     async def get_skill_action_by_skill_type(self, skill_type: str) -> Union[List[Union[int, str]], bool]:
         """ Gets a skill action by skill type.
         :param skill_type: The skill type of the skill action. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("SELECT * FROM SlothSkills WHERE skill_type = %s", (skill_type,))
-        skill_action = await mycursor.fetchone()
-        await mycursor.close()
-        return skill_action
+        return await self.db.execute_query("SELECT * FROM SlothSkills WHERE skill_type = %s", (skill_type,), fetch="one")
 
     async def get_skill_actions_by_skill_type(self, skill_type: str) -> Union[List[Union[int, str]], bool]:
         """ Gets skill actions by skill type.
         :param skill_type: The skill type of the skill action. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("SELECT * FROM SlothSkills WHERE skill_type = %s", (skill_type,))
-        skill_action = await mycursor.fetchall()
-        await mycursor.close()
-        return skill_action
+        return await self.db.execute_query("SELECT * FROM SlothSkills WHERE skill_type = %s", (skill_type,), fetch="all")
 
     async def get_skill_actions_by_skill_type_and_int_content(self, skill_type: str, int_content) -> Union[List[Union[int, str]], bool]:
         """ Gets skill actions by skill type.
         :param skill_type: The skill type of the skill action. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("SELECT * FROM SlothSkills WHERE skill_type = %s AND int_content = %s", (skill_type, int_content))
-        skill_action = await mycursor.fetchall()
-        await mycursor.close()
-        return skill_action
+        return await self.db.execute_query("SELECT * FROM SlothSkills WHERE skill_type = %s AND int_content = %s", (skill_type, int_content), fetch="all")
 
     async def get_skill_action_by_message_id_and_skill_type(self, message_id: int, skill_type: str) -> Union[List[Union[int, str]], bool]:
         """ Gets a skill action by message ID and skill type.
         :param message_id: The ID with which to get the skill action.
         :param skill_type: The skill type of the skill action. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("SELECT * FROM SlothSkills WHERE message_id = %s AND skill_type = %s", (message_id, skill_type))
-        skill_action = await mycursor.fetchone()
-        await mycursor.close()
-        return skill_action
+        return await self.db.execute_query("SELECT * FROM SlothSkills WHERE message_id = %s AND skill_type = %s", (message_id, skill_type), fetch="one")
 
     async def get_skill_action_by_target_id_and_skill_type(self, target_id: int, skill_type: str) -> Union[List[Union[int, str]], bool]:
         """ Gets a skill action by target ID and skill type.
         :param target_id: The target ID with which to get the skill action.
         :param skill_type: The skill type of the skill action. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("SELECT * FROM SlothSkills WHERE target_id = %s and skill_type = %s", (target_id, skill_type))
-        skill_action = await mycursor.fetchone()
-        await mycursor.close()
-        return skill_action
+        return await self.db.execute_query("SELECT * FROM SlothSkills WHERE target_id = %s and skill_type = %s", (target_id, skill_type), fetch="one")
 
     async def get_skill_action_by_user_id_and_skill_type(self, user_id: int, skill_type: str, multiple: bool = False
     ) -> Union[List[List[Union[int, str]]], List[Union[int, str]], bool]:
@@ -444,14 +411,10 @@ class Player(*additional_cogs):
         :param user_id: The user ID with which to get the skill action.
         :param skill_type: The skill type of the skill action. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("SELECT * FROM SlothSkills WHERE user_id = %s and skill_type = %s", (user_id, skill_type))
-        if multiple:
-            skill_actions = await mycursor.fetchall()
-        else:
-            skill_actions = await mycursor.fetchone()
-        await mycursor.close()
-        return skill_actions
+        return await self.db.execute_query(
+            "SELECT * FROM SlothSkills WHERE user_id = %s and skill_type = %s", (user_id, skill_type),
+            fetch="all" if multiple else "one"
+            )
 
     async def get_skill_action_by_user_id_or_target_id_and_skill_type(self, user_id: int, skill_type: str, multiple: bool = False
     ) -> Union[List[List[Union[int, str]]], List[Union[int, str]], bool]:
@@ -459,37 +422,26 @@ class Player(*additional_cogs):
         :param user_id: The user ID with which to get the skill action.
         :param skill_type: The skill type of the skill action. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("SELECT * FROM SlothSkills WHERE (user_id = %s OR target_id = %s) and skill_type = %s", (user_id, user_id, skill_type))
-        if multiple:
-            skill_actions = await mycursor.fetchall()
-        else:
-            skill_actions = await mycursor.fetchone()
-        await mycursor.close()
-        return skill_actions
+        await self.db.execute_query(
+            "SELECT * FROM SlothSkills WHERE (user_id = %s OR target_id = %s) and skill_type = %s", (user_id, user_id, skill_type),
+            fetch="all" if multiple else "one"
+            )
 
     async def get_skill_action_by_reaction_context(self, message_id: int, target_id: int) -> Union[List[Union[int, str]], bool]:
         """ Gets a skill action by reaction context.
         :param message_id: The ID of the message of the skill action.
         :param target_id: The ID of the target member of the skill action. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("SELECT * FROM SlothSkills WHERE message_id = %s AND target_id = %s", (message_id, target_id))
-        skill_action = await mycursor.fetchone()
-        await mycursor.close()
-        return skill_action
+        return await self.db.execute_query("SELECT * FROM SlothSkills WHERE message_id = %s AND target_id = %s", (message_id, target_id), fetch="one")
 
     async def get_user_action_skill_ts(self, user_id: int, skill_field: str) -> List[Union[str, bool]]:
         """ Gets the user's last action skill timestamp from the database.
         :param user_id: The ID of the user to get the action skill timestamp.
         :param skill_field: The skill field to check. """
 
-        mycursor, db = await the_database()
         sql = "SELECT " + skill_field + " FROM SkillsCooldown WHERE user_id = %s"
-        await mycursor.execute(sql, (user_id,))
+        skill_ts = await self.db.execute_query(sql, (user_id,), fetch="one")
 
-        skill_ts = await mycursor.fetchone()
-        await mycursor.close()
         if skill_ts:
             return skill_ts[0], True
         else:
@@ -506,161 +458,108 @@ class Player(*additional_cogs):
         """ Gets expired transmutation skill actions. """
 
         the_time = await utils.get_timestamp()
-        mycursor, db = await the_database()
-        await mycursor.execute("""
+        return await self.db.execute_query("""
             SELECT * FROM SlothSkills
             WHERE skill_type = 'transmutation' AND (%s - skill_timestamp) >= 86400
-            """, (the_time,))
-        transmutations = await mycursor.fetchall()
-        await mycursor.close()
-        return transmutations
+            """, (the_time,), fetch="all")
 
     async def get_expired_frogs(self) -> None:
         """ Gets expired frog skill actions. """
 
         the_time = await utils.get_timestamp()
-        mycursor, db = await the_database()
-        await mycursor.execute("""
+        return await self.db.execute_query("""
             SELECT * FROM SlothSkills
             WHERE skill_type = 'frog' AND (%s - skill_timestamp) >= 86400
-            """, (the_time,))
-        frogs = await mycursor.fetchall()
-        await mycursor.close()
-        return frogs
+            """, (the_time,), fetch="all")
 
     async def get_expired_potion_items(self) -> List[List[Union[str, int]]]:
         """ Gets expired Potion items from the shop. """
 
         the_time = await utils.get_timestamp()
-        mycursor, _ = await the_database()
-        await mycursor.execute("""
+        return await self.db.execute_query("""
             SELECT * FROM SlothSkills
             WHERE skill_type = 'potion' AND (%s - skill_timestamp) >= 86400
-            """, (the_time,))
-        potions = await mycursor.fetchall()
-        await mycursor.close()
-        return potions
+            """, (the_time,), fetch="all")
 
     async def get_expired_ring_items(self) -> List[List[Union[str, int]]]:
         """ Gets expired Wedding Ring items from the shop. """
 
         the_time = await utils.get_timestamp()
-        mycursor, _ = await the_database()
-        await mycursor.execute("""
+        return await self.db.execute_query("""
             SELECT * FROM SlothSkills
             WHERE skill_type = 'ring' AND (%s - skill_timestamp) >= 36000
-            """, (the_time,))
-        rings = await mycursor.fetchall()
-        await mycursor.close()
-        return rings
+            """, (the_time,), fetch="all")
 
     async def get_expired_pet_egg_items(self) -> List[List[Union[str, int]]]:
         """ Gets expired Pet Egg items from the shop. """
 
         the_time = await utils.get_timestamp()
-        mycursor, _ = await the_database()
-        await mycursor.execute("""
+        return await self.db.execute_query("""
             SELECT * FROM SlothSkills
             WHERE skill_type = 'pet_egg' AND (%s - skill_timestamp) >= 432000
-            """, (the_time,))
-        pet_eggs = await mycursor.fetchall()
-        await mycursor.close()
-        return pet_eggs
+            """, (the_time,), fetch="all")
 
     async def get_hacks(self) -> List[List[Union[str, int]]]:
         """ Gets all hack skill actions. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("SELECT * FROM SlothSkills WHERE skill_type = 'hack'")
-        hacks = await mycursor.fetchall()
-        await mycursor.close()
-        return hacks
+        return await self.db.execute_query("SELECT * FROM SlothSkills WHERE skill_type = 'hack'", fetch="all")
     
     async def get_user_target_hacks(self, attacker_id: int) -> List[List[Union[str, int]]]:
         """ Gets all hacks that a specific user commited or spreaded.
         :param attacker_id: The ID of the attacker. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("SELECT * FROM SlothSkills WHERE skill_type = 'hack' AND user_id = %s", (attacker_id,))
-        hacks = await mycursor.fetchall()
-        await mycursor.close()
-        return hacks
+        return await self.db.execute_query("SELECT * FROM SlothSkills WHERE skill_type = 'hack' AND user_id = %s", (attacker_id,), fetch="all")
 
     async def get_expired_hacks(self) -> List[List[Union[str, int]]]:
         """ Gets expired hack skill actions. """
 
         the_time = await utils.get_timestamp()
-        mycursor, db = await the_database()
-        await mycursor.execute("""
+        return await self.db.execute_query("""
             SELECT * FROM SlothSkills
             WHERE skill_type = 'hack' AND (%s - skill_timestamp) >= 86400
-            """, (the_time,))
-        hacks = await mycursor.fetchall()
-        await mycursor.close()
-        return hacks
+            """, (the_time,), fetch="all")
 
     async def get_expired_wires(self) -> None:
         """ Gets expired wires skill actions. """
 
         the_time = await utils.get_timestamp()
-        mycursor, db = await the_database()
-        await mycursor.execute("""
+        return await self.db.execute_query("""
             SELECT * FROM SlothSkills
             WHERE skill_type = 'wire' AND (%s - skill_timestamp) >= 86400
-            """, (the_time,))
-        wires = await mycursor.fetchall()
-        await mycursor.close()
-        return wires
+            """, (the_time,), fetch="all")
 
     async def get_expired_knock_outs(self) -> None:
         """ Gets expired knock-out skill actions. """
 
         the_time = await utils.get_timestamp()
-        mycursor, db = await the_database()
-        await mycursor.execute("""
+        return await self.db.execute_query("""
             SELECT * FROM SlothSkills
             WHERE skill_type = 'hit' AND (%s - skill_timestamp) >= 86400
-            """, (the_time,))
-        knock_outs = await mycursor.fetchall()
-        await mycursor.close()
-        return knock_outs
+            """, (the_time,), fetch="all")
 
     async def get_user_currency(self, user_id: int) -> List[Union[str, int]]:
         """ Gets the user currency.
         :param user_id: The ID of the user to get. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("SELECT * FROM UserCurrency WHERE user_id = %s", (user_id,))
-        user = await mycursor.fetchone()
-        await mycursor.close()
-        return user
+        return await self.db.execute_query("SELECT * FROM UserCurrency WHERE user_id = %s", (user_id,), fetch="one")
 
     async def get_users_currency(self, user_ids: List[int]) -> List[List[Union[str, int]]]:
         """ Gets currency of a list of users.
         :param user_ids: The list of IDs of the users to get the currency from. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("SELECT user_money FROM UserCurrency WHERE user_id in %s", (user_ids,))
-        users = await mycursor.fetchall()
-        await mycursor.close()
-        return users
+        return await self.db.execute_query("SELECT user_money FROM UserCurrency WHERE user_id in %s", (user_ids,), fetch="all")
 
     async def get_sloth_profile(self, user_id: int) -> List[Union[str, int]]:
         """ Gets the SlothProfile for the user.
         :param user_id: The ID of the user to get. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("SELECT * FROM SlothProfile WHERE user_id = %s", (user_id,))
-        user = await mycursor.fetchone()
-        await mycursor.close()
-        return user
+        return await self.db.execute_query("SELECT * FROM SlothProfile WHERE user_id = %s", (user_id,), fetch="one")
 
     async def get_specific_unprotected_users(self, user_ids: int) -> List[Union[str, int]]:
         """ Gets specific SlothProfiles from a list of user IDs.
         :param user_ids: The list of user IDs. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("""
+        return await self.db.execute_query("""
             SELECT UC.user_id, UC.user_money FROM UserCurrency AS UC
             WHERE UC.user_id IN {}
             AND UC.user_id IN (
@@ -668,74 +567,52 @@ class Player(*additional_cogs):
                 WHERE SP.sloth_class <> 'default') 
             AND UC.user_id NOT IN (
                 SELECT SS.target_id FROM SlothSkills AS SS WHERE skill_type = 'divine_protection')
-            """.format(tuple(user_ids)))
-
-        unprotected_users = await mycursor.fetchall()
-        await mycursor.close()
-        return unprotected_users
+            """.format(tuple(user_ids)), fetch="all")
 
     # ========== DELETE ========== #
     async def delete_skill_action_by_message_id(self, message_id: int) -> None:
         """ Deletes a skill action by message ID.
         :param message_id: The ID of the skill action. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM SlothSkills WHERE message_id = %s", (message_id,))
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("DELETE FROM SlothSkills WHERE message_id = %s", (message_id,))
 
     async def delete_skill_action_by_target_id(self, target_id: int) -> None:
         """ Deletes a skill action by target ID.
         :param target_id: The ID of the target member. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM SlothSkills WHERE target_id = %s", (target_id,))
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("DELETE FROM SlothSkills WHERE target_id = %s", (target_id,))
 
     async def delete_debuff_skill_action_by_target_id(self, target_id: int) -> None:
         """ Deletes debuff skill actions by target ID.
         :param target_id: The ID of the target member. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("""
+        await self.db.execute_query("""
         DELETE FROM SlothSkills WHERE target_id = %s AND skill_type IN ('hack', 'wire', 'frog', 'hit', 'sabotage')
         """, (target_id,))
-        await db.commit()
-        await mycursor.close()
 
     async def delete_skill_action_by_target_id_and_skill_type(self, target_id: int, skill_type: str, multiple: bool = False) -> None:
         """ Deletes a skill action by target ID.
         :param target_id: The ID of the target member.
         :param skill_type: The type of the action skill. """
 
-        mycursor, db = await the_database()
         sql = "DELETE FROM SlothSkills WHERE target_id = %s AND skill_type = %s" + "LIMIT 1" if not multiple else ""
-        await mycursor.execute(sql, (target_id, skill_type))
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query(sql, (target_id, skill_type))
 
     async def delete_skill_action_by_user_id_and_skill_type(self, user_id: int, skill_type: str, multiple: bool = False) -> None:
         """ Deletes a skill action by user ID.
         :param user_id: The ID of the user member.
         :param skill_type: The type of the action skill. """
 
-        mycursor, db = await the_database()
         sql = "DELETE FROM SlothSkills WHERE user_id = %s AND skill_type = %s" + "LIMIT 1" if not multiple else ""
-        await mycursor.execute(sql, (user_id, skill_type))
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query(sql, (user_id, skill_type))
 
     async def delete_skill_actions_by_target_id_and_skill_type(self, users: List[Tuple[int, str]]) -> None:
         """ Deletes a skill action by user ID.
         :param user_id: The ID of the user member.
         :param skill_type: The type of the action skill. """
 
-        mycursor, db = await the_database()
         sql = "DELETE FROM SlothSkills WHERE target_id = %s AND skill_type = %s"
-        await mycursor.executemany(sql, users)
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_querymany(sql, users)
 
     async def delete_skill_action_by_user_id_or_target_id_and_skill_type_and_price(self, user_id: int, skill_type: str, price: str, multiple: bool = False) -> None:
         """ Deletes a skill action by user_id or target ID and skill type and price.
@@ -744,11 +621,8 @@ class Player(*additional_cogs):
         :param price: The value for the price field.
         :param multiple: If multiple rows should deleted. """
 
-        mycursor, db = await the_database()
         sql = "DELETE FROM SlothSkills WHERE (user_id = %s OR target_id = %s) AND skill_type = %s AND price = %s" + "LIMIT 1" if not multiple else ""
-        await mycursor.execute(sql, (user_id, user_id, skill_type, price))
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query(sql, (user_id, user_id, skill_type, price))
 
     # ========== UPDATE ========== #
     async def update_user_skills_used(self, user_id: int, addition: int = 1) -> None:
@@ -756,20 +630,14 @@ class Player(*additional_cogs):
         :param user_id: The ID of the user.
         :param addition: What will be added to the user's current number of skills used. (Can be negative numbers)"""
 
-        mycursor, db = await the_database()
-        await mycursor.execute("UPDATE SlothProfile SET skills_used = skills_used + %s WHERE user_id = %s", (addition, user_id))
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("UPDATE SlothProfile SET skills_used = skills_used + %s WHERE user_id = %s", (addition, user_id))
 
     async def update_user_rings(self, user_id: int, addition: int = 1) -> None:
         """ Updates the user's rings counter.
         :param user_id: The ID of the user.
         :param addition: What will be added to the user's current number of rings. (Can be negative numbers)"""
 
-        mycursor, db = await the_database()
-        await mycursor.execute("UPDATE SlothProfile SET rings = rings + %s WHERE user_id = %s", (addition, user_id))
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("UPDATE SlothProfile SET rings = rings + %s WHERE user_id = %s", (addition, user_id))
 
 
     async def update_user_skill_ts(self, user_id: int, skill: Enum, new_skill_ts: int = None) -> None:
@@ -778,53 +646,41 @@ class Player(*additional_cogs):
         :param skill: The Enum of the skill.
         :param new_skill_ts: The new timestamp value for the skill. Default = None. """
 
-        mycursor, db = await the_database()
         sql = "UPDATE SkillsCooldown SET " + skill.value + " = %s WHERE user_id = %s"
-        await mycursor.execute(sql, (new_skill_ts, user_id))
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query(sql, (new_skill_ts, user_id))
 
     async def update_user_skills_ts(self, user_id: int, new_skill_ts: int = None) -> None:
         """ Updates the values of the user's skills.
         :parma user_id: The ID of the user.
         :param new_skill_ts: The new timestamp value for the skills. Default = None. """
 
-        mycursor, db = await the_database()
         sql = """
         UPDATE SkillsCooldown SET 
         skill_one_ts = NULL, skill_two_ts = NULL,
         skill_three_ts = NULL, skill_four_ts = NULL,
         skill_five_ts = NULL WHERE user_id = %s
         """
-        await mycursor.execute(sql, (user_id,))
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query(sql, (user_id,))
 
     async def update_user_skills_ts_increment(self, user_id: int, increment: int) -> None:
         """ Updates the timestamps of the user's skills by incrementing them.
         :parma user_id: The ID of the user.
         :param increment: The increment to apply to the cooldowns. (Can be negative) """
 
-        mycursor, db = await the_database()
         sql = """
         UPDATE SkillsCooldown SET 
         skill_one_ts = skill_one_ts + %s, skill_two_ts = skill_two_ts + %s,
         skill_three_ts = skill_three_ts + %s, skill_four_ts = skill_four_ts + %s,
         skill_five_ts = skill_five_ts + %s WHERE user_id = %s
         """
-        await mycursor.execute(sql, (increment, increment, increment, increment, increment, user_id))
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query(sql, (increment, increment, increment, increment, increment, user_id))
 
     async def update_change_class_ts(self, user_id: int, new_ts: int) -> None:
         """ Updates the user's changing-Sloth-class cooldown.
         :param user_id: The ID of the user.
         :param new_ts: The new timestamp for the cooldown. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("UPDATE SlothProfile SET change_class_ts = %s WHERE user_id = %s", (new_ts, user_id))
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("UPDATE SlothProfile SET change_class_ts = %s WHERE user_id = %s", (new_ts, user_id))
 
     # ========== INSERT ==========
 
@@ -834,8 +690,5 @@ class Player(*additional_cogs):
         :param skill: The Enum of the skill.
         :param skill_ts: The timestamp value for the skill. """
 
-        mycursor, db = await the_database()
         sql = "INSERT INTO SkillsCooldown (user_id, " + skill.value + ") VALUES (%s, %s)"
-        await mycursor.execute(sql, (user_id, skill_ts))
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query(sql, (user_id, skill_ts))

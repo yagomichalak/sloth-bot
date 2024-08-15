@@ -412,13 +412,13 @@ class TeacherAPI(commands.Cog):
         :param member_id: The ID of the member that you are changing it.
         :param state: The state to which you are gonna set the to (0=False/1=True). """
 
-        await self.db.execute_query("UPDATE discordlogin_discorduser SET teacher = %s WHERE id = %s", (state, member_id))
+        await self.db.execute_query("UPDATE discordlogin_discorduser SET teacher = %s WHERE id = %s", (state, member_id), database_name="django")
 
     async def _get_teacher_state(self, member_id: int) -> bool:
         """ Gets the member current state from the website.
         :param member_id: The ID of the member that you are checking it. """
 
-        teacher = await self.db.execute_query("SELECT teacher FROM discordlogin_discorduser WHERE id = %s", (member_id,), fetch="one")
+        teacher = await self.db.execute_query("SELECT teacher FROM discordlogin_discorduser WHERE id = %s", (member_id,), fetch="one", database_name="django")
         if teacher is None:
             return None
         elif teacher[0] == 1:
@@ -450,7 +450,7 @@ class TeacherAPI(commands.Cog):
         """ Gets all cards from a given teacher.
         :param user_id: The ID of the teacher. """
 
-        return await self.db.execute_query("SELECT * FROM teacherclass_teacherclass WHERE owner_id = %s", (user_id,), fetch="all")
+        return await self.db.execute_query("SELECT * FROM teacherclass_teacherclass WHERE owner_id = %s", (user_id,), fetch="all", database_name="django")
 
     # @commands.command(aliases=['see_cards', 'stc'])
     # @commands.cooldown(1, 10, commands.BucketType.user)
@@ -528,7 +528,7 @@ class TeacherAPI(commands.Cog):
         """ Deletes all cards from a given teacher.
         :param user_id: The ID of the teacher from which to delete the cards. """
 
-        await self.db.execute_query("DELETE FROM teacherclass_teacherclass WHERE owner_id = %s", (user_id,))
+        await self.db.execute_query("DELETE FROM teacherclass_teacherclass WHERE owner_id = %s", (user_id,), database_name="django")
 
     # @commands.command(aliases=['delete_cards', 'dtc'])
     # @utils.is_allowed([*allowed_roles, lesson_manager_role_id])
