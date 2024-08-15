@@ -420,6 +420,7 @@ class SlothCurrency(*currency_cogs):
         draw = ImageDraw.Draw(background)
         draw.text((310, 5), f"{str(member)[:10]}", (255, 255, 255), font=small)
         draw.text((80, 525), f"{user_info[0][1]}", (255, 255, 255), font=small)
+        draw.text((730, 525), f"🍂 {user_info[0][7]}", (255, 255, 255), font=small)
         file_path = f'media/temporary/profile_{member.id}.png'
         background.save(file_path, 'png', quality=90)
 

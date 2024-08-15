@@ -1,3 +1,4 @@
+import subprocess
 import aiohttp
 import discord
 from discord.ext import commands, tasks
@@ -44,6 +45,7 @@ class ReportSupport(*report_support_classes):
         self.client = client
         self.db = DatabaseCore()
         self.cosmos_role_id: int = int(os.getenv('COSMOS_ROLE_ID', 123))
+        self.mayu_id: int = int(os.getenv('MAYU_ID', 123))
         self.prisca_id: int = int(os.getenv('PRISCA_ID', 123))
         self.cache = {}
         self.report_cache = {}
@@ -81,7 +83,7 @@ class ReportSupport(*report_support_classes):
         """ Detects when a webhook is sent from the Sloth Appeals server. """
 
         channel = message.channel
-        category = message.channel.category
+        category = None if not hasattr(message.channel, "category") else message.channel.category
 
         # Initiates the session
         if channel.id == int(ban_appeals_channel_id):
@@ -98,7 +100,7 @@ class ReportSupport(*report_support_classes):
                     await message.add_reaction('✅')
                     await message.add_reaction('❌')
 
-        if category.id == case_cat_id:
+        if category and category.id == case_cat_id:
             current_ts = await utils.get_timestamp()
             case_channel_aliases = ("general", "role", "case")
 
@@ -230,11 +232,10 @@ class ReportSupport(*report_support_classes):
         return await member.send(f"**Request sent, you will get notified here if you get accepted or declined! ✅**")
 
     # - Report someone
-    async def report_someone(self, interaction: discord.Interaction, reportee: str, text: str):
+    async def report_someone(self, interaction: discord.Interaction, reportee: str, text: str, evidence: str):
 
         member = interaction.user
         guild = interaction.guild
-
         if open_channel := await self.member_has_open_channel(member.id):
             if open_channel := discord.utils.get(guild.text_channels, id=open_channel[1]):
                 embed = discord.Embed(title="Error!", description=f"**You already have an open channel! ({open_channel.mention})**", color=discord.Color.red())
@@ -269,8 +270,11 @@ class ReportSupport(*report_support_classes):
             current_ts = await utils.get_timestamp()
             await self.insert_user_open_channel(member.id, the_channel.id, current_ts)
             await self.increase_case_number()
-            embed = discord.Embed(title="Report Support!", description=f"{member.mention}\nReporting `{reportee}`\nFor:```{text}```",
-                color=discord.Color.red())
+            embed = discord.Embed(title="Report Support!", description=f"{member.mention}",
+                colour=member.color)
+            embed.add_field(name="Reporting:", value=f"```{reportee}```", inline=False)
+            embed.add_field(name="For:", value=f"```{text}```", inline=False)
+            embed.add_field(name="Evidence:", value=f"```{evidence}```", inline=False)
             message = await the_channel.send(content=f"{member.mention}, {moderator.mention}, {cosmos_role.mention}", embed=embed)
             ctx = await self.client.get_context(message)
 
@@ -291,7 +295,7 @@ class ReportSupport(*report_support_classes):
                 await ctx.send(f"**{member.mention} is not in a VC!**")
 
     # - Report someone
-    async def report_staff(self, interaction: discord.Interaction, reportee: str, text: str):
+    async def report_staff(self, interaction: discord.Interaction, reportee: str, text: str, evidence: str):
 
         member = interaction.user
         guild = interaction.guild
@@ -309,7 +313,6 @@ class ReportSupport(*report_support_classes):
         counter = await self.get_case_number()
         moderator = discord.utils.get(guild.roles, id=moderator_role_id)
         senior_mod = discord.utils.get(guild.roles, id=senior_role_id)
-        cosmos_role = discord.utils.get(guild.roles, id=self.cosmos_role_id)
         overwrites = {guild.default_role: discord.PermissionOverwrite(
             read_messages=False, send_messages=False, connect=False, view_channel=False),
         member: discord.PermissionOverwrite(
@@ -317,7 +320,7 @@ class ReportSupport(*report_support_classes):
         moderator: discord.PermissionOverwrite(
             read_messages=False, send_messages=False, connect=False, view_channel=False, manage_messages=False),
         senior_mod: discord.PermissionOverwrite(
-            read_messages=True, send_messages=True, connect=True, view_channel=True, manage_messages=True)}
+            read_messages=False, send_messages=False, connect=False, view_channel=False, manage_messages=False)}
         try:
             the_channel = await guild.create_text_channel(name=f"staff-case-{counter[0][0]}", category=case_cat, overwrites=overwrites)
         except Exception as e:
@@ -333,9 +336,12 @@ class ReportSupport(*report_support_classes):
             current_ts = await utils.get_timestamp()
             await self.insert_user_open_channel(member.id, the_channel.id, current_ts)
             await self.increase_case_number()
-            embed = discord.Embed(title="Report Staff!", description=f"{member.mention}\nReporting `{reportee}`\nFor:```{text}```",
-                color=discord.Color.red())
-            message = await the_channel.send(content=f"{member.mention}, {senior_mod.mention}, {cosmos_role.mention}", embed=embed)
+            embed = discord.Embed(title="Report Staff!", description=f"{member.mention}",
+                colour=member.color)
+            embed.add_field(name="Reporting:", value=f"```{reportee}```", inline=False)
+            embed.add_field(name="For:", value=f"```{text}```", inline=False)
+            embed.add_field(name="Evidence:", value=f"```{evidence}```", inline=False)
+            message = await the_channel.send(content=f"{member.mention}", embed=embed)
             ctx = await self.client.get_context(message)
 
             if member.voice:
@@ -585,17 +591,26 @@ class ReportSupport(*report_support_classes):
 
         application_type = app[2].title().replace('_', ' ')
 
+        role_mapping = {
+            "Teacher": "Lesson Managers",
+            "Moderator": "Staff Managers",
+            "Event Host": "Event Managers",
+            "Debate Manager": "Debate Managers"
+        }
+
+        role_name = role_mapping.get(application_type, "Managers")
+
         app_embed = discord.Embed(
             title=f"{applicant.name}'s Interview",
             description=f"""
-            Hello, {applicant.mention}, we have received and reviewed your `{application_type}` application. In order to explain how our system works we have to schedule a voice conversation with you.
-            When would be the best time to talk to one of our staff?""",
+            Hello {applicant.mention}, thank you for submitting your `{application_type}` application. We've reviewed it and the next step is an interview to better access who you are as a person.
+            Please talk to one of the {role_name} to schedule a time that works for you.""",
             color=applicant.color)
 
         formatted_pings = await self.format_application_pings(guild, interview_info['pings'])
         await txt_channel.send(content=f"{formatted_pings}, {applicant.mention}", embed=app_embed)
         try:
-            await applicant.send(f"We just opened the {txt_channel.mention} channel for reviewing your `{application_type}` application!")
+            await applicant.send(f"Your {txt_channel.mention} channel has been created, please take a look at it.")
         except:
             pass
 
@@ -635,7 +650,7 @@ class ReportSupport(*report_support_classes):
             await msg.add_reaction('🔒')
         except:
             pass
-            
+    
     async def audio(self, member: discord.Member, audio_name: str) -> None:
         """ Plays an audio.
         :param member: A member to get guild context from.
@@ -657,8 +672,12 @@ class ReportSupport(*report_support_classes):
             voice_client: discord.VoiceClient = discord.utils.get(self.client.voice_clients, guild=member.guild)
             # Plays / and they don't stop commin' /
             if voice_client and not voice_client.is_playing():
-                audio_source = discord.FFmpegPCMAudio(f'tts/{audio_name}.mp3')
+                audio_path=f'tts/{audio_name}.mp3'
+                audio_source = discord.FFmpegPCMAudio(audio_path)
+                audio_duration = get_audio_duration(audio_path)
                 voice_client.play(audio_source, after=lambda e: print("Finished Warning Staff!"))
+                await asyncio.sleep(audio_duration + 1)
+                await voice_client.disconnect()
             else:
                 print('couldnt play it!')
 
@@ -688,3 +707,13 @@ class ReportSupport(*report_support_classes):
 
 def setup(client):
     client.add_cog(ReportSupport(client))
+
+def get_audio_duration(audio_path: str) -> float:
+    """Get the duration of the audio file in seconds."""
+    result = subprocess.run(
+        ["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "default=noprint_wrappers=1:nokey=1", audio_path],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT
+    )
+    duration = float(result.stdout)
+    return duration

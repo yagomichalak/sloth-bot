@@ -20,8 +20,8 @@ class ModerationUserInfractionsTable(commands.Cog):
         await ctx.message.delete()
         await self.db.execute_query("""CREATE TABLE UserInfractions (
             user_id BIGINT NOT NULL,
-            infraction_type VARCHAR(7) NOT NULL,
-            infraction_reason VARCHAR(100) DEFAULT NULL,
+            infraction_type VARCHAR(9) NOT NULL,
+            infraction_reason VARCHAR(1300) DEFAULT NULL,
             infraction_ts BIGINT NOT NULL,
             infraction_id BIGINT NOT NULL AUTO_INCREMENT,
             perpetrator BIGINT NOT NULL,

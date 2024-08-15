@@ -1,4 +1,5 @@
 import discord
+from discord.enums import EntitlementType
 from discord.ext import commands
 from datetime import datetime
 import aiohttp
@@ -7,9 +8,9 @@ import re
 from pytz import timezone
 from io import BytesIO
 from PIL import Image, ImageDraw
-from typing import List, Dict, Optional, Union
+from typing import List, Dict, Optional
 
-from extra.customerrors import CommandNotReady
+from extra.customerrors import CommandNotReady, NotSubscribed
 from collections import OrderedDict
 import shlex
 
@@ -33,7 +34,7 @@ async def get_time_now(tz: str = 'Etc/GMT') -> datetime:
 
 async def parse_time(tz: str = 'Etc/GMT') -> str:
     """ Parses time from the current timestamp.
-    :param tz: The timezone to get the timstamp from. Default = Etc/GMT """
+    :param tz: The timezone to get the timestamp from. Default = Etc/GMT """
 
     tzone = timezone(tz)
     return datetime(*map(int, re.split(r'[^\d]', str(datetime.now(tzone)).replace('+00:00', ''))))
@@ -62,6 +63,32 @@ def is_allowed(roles: List[int], check_adm: Optional[bool] = True, throw_exc: Op
 
         if throw_exc:
             raise commands.MissingAnyRole(roles)
+
+    return commands.check(real_check)
+
+def is_subscriber(check_adm: Optional[bool] = True, throw_exc: Optional[bool] = True) -> bool:
+    """ Checks whether the member has adm perms or has an allowed role.
+    :param check_adm: Whether to check whether the user has adm perms or not. [Optional][Default=True]
+    :param throw_exec: Whether to throw an exception if it returns false. [Optional][Default=False] """
+
+    async def real_check(ctx: Optional[commands.Context] = None, channel: Optional[discord.TextChannel] = None, 
+        member: Optional[discord.Member] = None) -> bool:
+
+        member = member if not ctx else ctx.author
+        channel = channel if not ctx else ctx.channel
+
+        if check_adm:
+            perms = channel.permissions_for(member)
+            if perms.administrator:
+                return True
+
+        entitlements = await member.entitlements().flatten()
+        for entitlement in entitlements:
+            if entitlement.type == EntitlementType.application_subscription:
+                return True
+
+        if throw_exc:
+            raise NotSubscribed()
 
     return commands.check(real_check)
 

@@ -100,57 +100,39 @@ class Tools(*tool_cogs):
 			finally:
 				await Communication.update_advertising_time(event_label="make_dumps", current_ts=current_ts)
 
-
 	@commands.Cog.listener()
 	async def on_voice_state_update(self, member, before, after) -> None:
 		""" Removes the 'in a VC' role from people who are in the stealth mode,
 		upon joining VCs. """
 
-		if after.channel:
-			role = member.get_role(in_a_vc_role_id)
-			if not role:
+		# Check voice states
+		if before.mute != after.mute:
+			return
+		if before.deaf != before.deaf:
+			return
+		if before.self_mute != after.self_mute:
+			return
+		if before.self_deaf != after.self_deaf:
+			return
+		if before.self_stream != after.self_stream:
+			return
+		if before.self_video != after.self_video:
+			return
+
+		role = discord.utils.get(member.guild.roles, id=in_a_vc_role_id)  # Replace with your role name
+
+		if after.channel:  # User joins a voice channel
+			if member.get_role(role.id):
 				return
 
 			stealth_status = await self.get_stealth_status(member.id)
 			if not stealth_status or not stealth_status[1]:
 				return
 
+			await member.add_roles(role)
+
+		else:  # User leaves a voice channel
 			await member.remove_roles(role)
-
-	@commands.Cog.listener()
-	async def on_member_update(self, before, after):
-		""" Removes the 'in a VC' role from people who are in the stealth mode,
-		upon getting roles. """
-
-		if not after.guild:
-			return
-
-		roles = before.roles
-		roles2 = after.roles
-		if len(roles2) < len(roles):
-			return
-
-		new_role = None
-
-		for r2 in roles2:
-			if r2 not in roles:
-				new_role = r2
-				break
-
-		if new_role:
-			role = after.get_role(in_a_vc_role_id)
-			if not role:
-				return
-
-			stealth_status = await self.get_stealth_status(after.id)
-			if not stealth_status or not stealth_status[1]:
-				return
-
-			try:
-				await after.remove_roles(role)
-			except:
-				pass
-
 
 	@commands.Cog.listener()
 	async def on_message(self, message) -> None:
@@ -1080,7 +1062,7 @@ class Tools(*tool_cogs):
 			await ctx.respond("**For some reason I couldn't ping them =\ **")
 
 	@commands.command(aliases=['sound', 'board', 'sound_board'])
-	@utils.is_allowed([mod_role_id, admin_role_id, owner_role_id], throw_exc=True)
+	@commands.check_any(utils.is_allowed([mod_role_id, admin_role_id, owner_role_id], throw_exc=True), utils.is_subscriber())
 	@commands.cooldown(1, 60, commands.BucketType.user)
 	async def soundboard(self, ctx) -> None:
 		""" Sends a soundboard into the channel. """
@@ -1440,6 +1422,19 @@ class Tools(*tool_cogs):
 		
 		embed.set_footer(text=f"Requested by: {member}", icon_url=member.display_avatar)
 		await ctx.send(embed=embed)
+
+	@commands.command(hidden=False)
+	@commands.has_permissions(administrator=True)
+	async def restart(self,ctx) -> None:
+		""" Restarts the bot"""
+		
+		member = ctx.author
+		confirm = await Confirm(f"**Are you sure you want to restart Dnk's son?**").prompt(ctx)
+		if not confirm:
+			return await ctx.send(f"**Not doing it, then, {member.mention}!**")
+		
+		await ctx.send("Restarting the bot")
+		await self.client.close()
 
 
 def setup(client):

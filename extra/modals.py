@@ -3,6 +3,8 @@ from discord.ui import InputText, Modal
 from discord.ext import commands
 from .prompt.menu import ConfirmButton
 from . import utils
+from typing import Dict, Any
+
 
 class ModeratorApplicationModal(Modal):
     """ Class for the moderator application. """
@@ -25,13 +27,13 @@ class ModeratorApplicationModal(Modal):
         )
         self.add_item(
             InputText(
-                label="What's your English level?",
+                label="Languages spoken and proficiency level?",
                 style=discord.InputTextStyle.short
             )
         )
         self.add_item(
             InputText(
-                label="How could you make a better community?", 
+                label="How could you make a better community?",
                 style=discord.InputTextStyle.paragraph)
         )
         self.add_item(
@@ -62,7 +64,7 @@ class ModeratorApplicationModal(Modal):
         embed.add_field(name="Native roles", value=', '.join(member_native_roles), inline=False)
         embed.add_field(name="Age, gender, timezone", value=self.children[1].value, inline=False)
         embed.add_field(name="Discord Activity", value=self.children[0].value, inline=False)
-        embed.add_field(name="English level", value=self.children[2].value, inline=False)
+        embed.add_field(name="Language Levels", value=self.children[2].value, inline=False)
         embed.add_field(name="Approach to make Sloth a better community", value=self.children[3].value, inline=False)
         embed.add_field(name="Motivation for application", value=self.children[4].value, inline=False)
 
@@ -176,8 +178,8 @@ class TeacherApplicationModal(Modal):
     • We will let you know when we need a new mod. We check apps when we need it!""", ephemeral=True)
 
         teacher_app_channel = await self.client.fetch_channel(self.cog.teacher_app_channel_id)
-        prisca = discord.utils.get(teacher_app_channel.guild.members, id=self.cog.prisca_id)
-        app = await teacher_app_channel.send(content=f"{prisca.mention}, {member.mention}", embed=embed)
+        mayu = discord.utils.get(teacher_app_channel.guild.members, id=self.cog.mayu_id)
+        app = await teacher_app_channel.send(content=f"{mayu.mention}, {member.mention}", embed=embed)
         await app.add_reaction('✅')
         await app.add_reaction('❌')
         # Saves in the database
@@ -259,7 +261,7 @@ class EventHostApplicationModal(Modal):
 
         if not confirm_view.value:
             return await interaction.followup.send(f"**Not doing it then, {member.mention}!**", ephemeral=True)
- 
+
         self.cog.cache[member.id] = await utils.get_timestamp()
         await confirm_view.interaction.followup.send(content="""
         **Application successfully made, please, be patient now.**
@@ -381,6 +383,14 @@ class UserReportSupportDetailModal(Modal):
                 style=discord.InputTextStyle.paragraph
             )
         )
+        self.add_item(
+            InputText(
+                label="Do you possess evidence of what happened?",
+                placeholder="Recording, screenshots or witnesses can be considered as evidence ",
+                style=discord.InputTextStyle.paragraph,
+                min_length=2
+            )
+        )
         self.option = option
 
     async def callback(self, interaction) -> None:
@@ -389,11 +399,12 @@ class UserReportSupportDetailModal(Modal):
         await interaction.response.defer()
         reportee = self.children[0].value
         text = self.children[1].value
+        evidence=self.children[2].value
         member = interaction.user
 
         if self.option == 'Report':
             try:
-                exists = await self.cog.report_someone(interaction, reportee, text)
+                exists = await self.cog.report_someone(interaction, reportee, text, evidence)
                 if exists is False:
                     return
             except Exception as e:
@@ -411,8 +422,8 @@ class UserReportSupportDetailModal(Modal):
             except Exception as e:
                 print(e)
             else:
-                return await self.cog.audio(member, 'general_help_alert')
-                
+                return #await self.cog.audio(member, 'general_help_alert')
+
         elif self.option == 'Help':
             message = f"Please, {member.mention}, inform us what roles you want, and if you spotted a specific problem with the reaction-role selection."
             try:
@@ -422,7 +433,7 @@ class UserReportSupportDetailModal(Modal):
             except Exception as e:
                 print(e)
             else:
-                return await self.cog.audio(member, 'role_help_alert')
+                return #await self.cog.audio(member, 'role_help_alert')
 
         elif self.option == 'Oopsie':
             return await interaction.followup.send("**All right, cya!**", ephemeral=True)
@@ -450,6 +461,14 @@ class UserReportStaffDetailModal(Modal):
                 style=discord.InputTextStyle.paragraph
             )
         )
+        self.add_item(
+            InputText(
+                label="Do you possess evidence of what happened?",
+                placeholder="Recording, screenshots or witnesses can be considered as evidence ",
+                style=discord.InputTextStyle.paragraph,
+                min_length=2
+            )
+        )
         self.option = option
 
     async def callback(self, interaction) -> None:
@@ -458,11 +477,12 @@ class UserReportStaffDetailModal(Modal):
         await interaction.response.defer()
         reportee = self.children[0].value
         text = self.children[1].value
+        evidence=self.children[2].value
         member = interaction.user
 
         if self.option == 'Report':
             try:
-                exists = await self.cog.report_staff(interaction, reportee, text)
+                exists = await self.cog.report_staff(interaction, reportee, text, evidence)
                 if exists is False:
                     return
             except Exception as e:
@@ -472,7 +492,7 @@ class UserReportStaffDetailModal(Modal):
                 return await self.cog.audio(member, 'case_alert')
 
         elif self.option == 'Oopsie':
-            return await interaction.followup.send("**All right, cya!**", ephemeral=True)
+            return #await interaction.followup.send("**All right, cya!**", ephemeral=True)
 
 
 class TravelBuddyModal(Modal):
@@ -528,7 +548,7 @@ class TravelBuddyModal(Modal):
         )
 
         embed.set_thumbnail(url=member.display_avatar)
-    
+
         embed.add_field(name="Who's traveling:", value=member.mention, inline=False)
         embed.add_field(name="Where", value=self.children[0].value, inline=False)
         embed.add_field(name="When", value=self.children[1].value, inline=False)
@@ -556,3 +576,65 @@ class TravelBuddyModal(Modal):
         message.guild = interaction.guild
 
         await message.create_thread(name=f"{member}'s Trip", auto_archive_duration=10080)
+
+
+class BootcampFeedbackModal(Modal):
+    """ Class for the moderator application. """
+
+    def __init__(self, client: commands.Bot,  view: discord.ui.View, questions: Dict[int, Dict[str, Any]], index_question: int = 1) -> None:
+        """ Class init method. """
+
+        super().__init__(title="Bootcamp Feedback")
+        self.client = client
+        self.view = view
+        self.questions = questions
+        self.index_question = index_question
+        self.add_question()
+
+    def add_question(self) -> None:
+
+        question = self.questions.get(self.index_question)
+        print(question)
+        self.children.clear()  # Clear current inputs
+
+        # Add the question input
+        self.add_item(
+            InputText(
+                label=f"Question {self.index_question}",
+                placeholder=question["message"],
+                style=question["type"],
+                required=True,
+                max_length=question["max_length"],
+            )
+        )
+
+        # Add the rating input
+        self.add_item(
+            InputText(
+                label="Rating",
+                placeholder="Rate it from 0-5.",
+                style=discord.InputTextStyle.singleline,
+                required=True,
+                max_length=1,
+            )
+        )
+
+    async def callback(self, interaction: discord.Interaction) -> None:
+        """ Callback for the moderation application. """
+
+        self.questions[self.index_question]["answer"] = self.children[0].value
+        rating = 0
+        try:
+            rating = int(self.children[1].value)
+        except Exception:
+            pass
+        self.questions[self.index_question]["rating"] = rating
+
+        self.view.questions = self.questions
+        self.view.children[self.index_question-1].disabled = True
+
+        if self.index_question == len(self.questions):
+            self.view.children[-1].disabled = False
+            self.view.children[-1].style = discord.ButtonStyle.success
+
+        await interaction.response.edit_message(view=self.view)

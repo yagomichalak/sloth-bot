@@ -27,7 +27,8 @@ class UserCurrencyTable:
                 user_classes BIGINT DEFAULT 0, 
                 user_class_reward BIGINT DEFAULT 0, 
                 user_hosted BIGINT DEFAULT 0,
-                user_lotto BIGINT DEFAULT NULL, 
+                user_lotto BIGINT DEFAULT NULL,
+                user_premium_money BIGINT DEFAULT 0
                 PRIMARY KEY (user_id))
             """)
         return await ctx.send(f"**Table `{self.TABLE_NAME}` created, {member.mention}!**")
@@ -109,6 +110,16 @@ class UserCurrencyTable:
         :param money: The money addition. (It can be negative)"""
 
         await self.db.execute_query("UPDATE UserCurrency SET user_money = user_money + %s WHERE user_id = %s", (money, user_id))
+
+    async def update_user_premium_money(self, user_id: int, money: int) -> None:
+        """ Updates the user money.
+        :param user_id: The user's ID.
+        :param premium_money: The money addition. (It can be negative)"""
+
+        mycursor, db = await the_database()
+        await mycursor.execute("UPDATE UserCurrency SET user_premium_money = user_premium_money + %s WHERE user_id = %s", (money, user_id))
+        await db.commit()
+        await mycursor.close()
 
     async def update_user_many_money(self, users: List[int]) -> None:
         """ Updates many the money of many users.

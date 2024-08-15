@@ -17,7 +17,7 @@ from extra.useful_variables import patreon_roles
 from extra.customerrors import (
     MissingRequiredSlothClass, ActionSkillOnCooldown, CommandNotReady, 
     SkillsUsedRequirement, ActionSkillsLocked, KidnappedCommandError,
-    StillInRehabError
+    StillInRehabError, NotSubscribed
 )
 
 load_dotenv()
@@ -30,12 +30,13 @@ booster_role_id = int(os.getenv('BOOSTER_ROLE_ID', 123))
 teacher_role_id = int(os.getenv('TEACHER_ROLE_ID', 123))
 giveaway_manager_role_id: int = int(os.getenv('GIVEAWAY_MANAGER_ROLE_ID', 123))
 
+sloth_subscriber_sub_id = int(os.getenv("SLOTH_SUBSCRIBER_SUB_ID", 123))
 server_id = int(os.getenv('SERVER_ID', 123))
 
 moderation_log_channel_id = int(os.getenv('MOD_LOG_CHANNEL_ID', 123))
 lesson_category_id = int(os.getenv('LESSON_CAT_ID', 123))
 clock_voice_channel_id = int(os.getenv('CLOCK_VC_ID', 123))
-admin_commands_channel_id = int(os.getenv('ADMIN_COMMANDS_CHANNEL_ID', 123))
+join_leave_channel = int(os.getenv('JOIN_THE_SERVER_CHANNEL_ID', 123))
 patreon_role_id = int(os.getenv('SLOTH_EXPLORER_ROLE_ID', 123))
 support_us_channel_id = int(os.getenv('SUPPORT_US_CHANNEL_ID', 123))
 error_log_channel_id = int(os.getenv('ERROR_LOG_CHANNEL_ID', 123))
@@ -178,6 +179,13 @@ async def on_command_error(ctx, error) -> None:
     elif isinstance(error, ActionSkillsLocked):
         return await ctx.send(f"**{error.error_message}**")
 
+    elif isinstance(error, NotSubscribed):
+        view = discord.ui.View()
+        view.add_item(discord.ui.Button(sku_id=sloth_subscriber_sub_id))
+        return await ctx.send(
+            f"**Subscriber-only feature, if you want to have access to this and other commands & features, subscribe now:**", view=view
+        )
+
     print('='*10)
     print(f"ERROR: {error} | Class: {error.__class__} | Cause: {error.__cause__}")
     print('='*10)
@@ -218,6 +226,12 @@ async def on_application_command_error(ctx, error) -> None:
     elif isinstance(error, commands.ChannelNotFound):
         await ctx.respond("**Channel not found!**")
 
+    elif isinstance(error, NotSubscribed):
+        view = discord.ui.View()
+        view.add_item(discord.ui.Button(sku_id=sloth_subscriber_sub_id))
+        return await ctx.respond(
+            f"**Subscriber-only feature, if you want to have access to this and other commands & features, subscribe now:**", view=view
+        )
 
     print('='*10)
     print(f"ERROR: {error} | Class: {error.__class__} | Cause: {error.__cause__}")
