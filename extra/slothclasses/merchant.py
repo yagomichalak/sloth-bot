@@ -389,7 +389,6 @@ class Merchant(Player):
                 timestamp=ctx.message.created_at
                 ))
 
-
     @commands.command()
     @Player.poisoned()
     @Player.skills_used(requirement=5)
@@ -404,7 +403,6 @@ class Merchant(Player):
 
         if ctx.channel.id != bots_and_commands_channel_id:
             return await ctx.send(f"**{merchant.mention}, you can only use this command in {self.bots_txt.mention}!**")
-
 
         merchant_fx = await self.get_user_effects(merchant)
         if 'knocked_out' in merchant_fx:
@@ -506,10 +504,7 @@ class Merchant(Player):
         :param user_id: The ID of the member to update.
         :param has_it: Whether it's gonna be set to true or false. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("UPDATE SlothProfile SET has_potion = %s WHERE user_id = %s", (has_it, user_id))
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("UPDATE SlothProfile SET has_potion = %s WHERE user_id = %s", (has_it, user_id))
 
     async def update_user_rings(self, user_id: int, increment: int = 1) -> None:
         """ Updates the user's ring counter.
@@ -517,30 +512,19 @@ class Merchant(Player):
         :param increment: Incremention value. Default = 1.
         PS: Increment can be negative. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("UPDATE SlothProfile SET rings = rings + %s WHERE user_id = %s", (increment, user_id))
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("UPDATE SlothProfile SET rings = rings + %s WHERE user_id = %s", (increment, user_id))
 
     # ========== Get ===========
     async def get_ring_skill_action_by_user_id(self, user_id: int) -> Union[List[Union[int, str]], None]:
         """ Gets a ring skill action by reaction context.
         :param user_id: The ID of the user of the skill action. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("SELECT * FROM SlothSkills WHERE user_id = %s AND skill_type = 'ring'", (user_id,))
-        skill_action = await mycursor.fetchone()
-        await mycursor.close()
-        return skill_action
+        return await self.db.execute_query("SELECT * FROM SlothSkills WHERE user_id = %s AND skill_type = 'ring'", (user_id,), fetch="one")
 
     async def get_open_shop_items(self) -> List[List[Union[str, int]]]:
         """ Gets all open shop items. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("SELECT * FROM SlothSkills WHERE skill_type in ('potion', 'ring', 'pet_egg')")
-        potions = await mycursor.fetchall()
-        await mycursor.close()
-        return potions
+        return await self.db.execute_query("SELECT * FROM SlothSkills WHERE skill_type in ('potion', 'ring', 'pet_egg')", fetch="all")
 
     async def get_open_shop_embed(self, channel, perpetrator_id: int, price: int, item_name: str, emoji: str = '') -> discord.Embed:
         """ Makes an embedded message for a magic pull action.
@@ -562,7 +546,6 @@ class Merchant(Player):
         open_shop_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
 
         return open_shop_embed
-
         
     @commands.command(aliases=["sellring", "ring"])
     @Player.poisoned()
@@ -628,7 +611,6 @@ class Merchant(Player):
             return await ctx.send(f"**{member.mention}, something went wrong with it, try again later!**")
         else:
             await ctx.send(f"**{member}, your item is now in the shop, check `z!sloth_shop` to see it there!**")
-
 
     @commands.command()
     @Player.poisoned()
@@ -702,7 +684,6 @@ class Merchant(Player):
             self.client.get_command('marry').reset_cooldown(ctx)
             return await ctx.send(f"**Not doing it then, {member.mention}!**")
 
-
         # Asks confirmation
         confirm_view = ConfirmButton(suitor, timeout=60)
         embed = discord.Embed(
@@ -717,7 +698,6 @@ class Merchant(Player):
 
         if not confirm_view.value:
             return await ctx.send(f"**Not doing it then, {suitor.mention}!**")
-
 
         await self.client.get_cog('SlothCurrency').update_user_money(member.id, -1000)
             
@@ -842,7 +822,6 @@ class Merchant(Player):
         pfp1 = await utils.get_user_pfp(p1, 250)
         pfp2 = await utils.get_user_pfp(p2, 250)
 
-
         background.paste(pfp1, (150, 200), pfp1)
         # background.paste(heart, (250, 250), heart)
         background.paste(pfp2, (400, 200), pfp2)
@@ -881,7 +860,6 @@ class Merchant(Player):
 
         return marriage_embed
 
-
     async def get_divorce_embed(self, channel, perpetrator: discord.Member, partner: Union[discord.User, discord.Member]) -> discord.Embed:
         """ Makes an embedded message for a divorce action.
         :param channel: The context channel.
@@ -906,14 +884,11 @@ class Merchant(Player):
         """ Updates marriage content to honeymoon.
         :param member_id: The ID of the member who's married. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("""
+        await self.db.execute_query("""
         UPDATE SlothSkills SET content = 'honeymoon' 
         WHERE user_id = %s AND skill_type = 'marriage' 
         OR target_id = %s AND skill_type = 'marriage'
         """, (member_id, member_id))
-        await db.commit()
-        await mycursor.close()
 
     @commands.command(aliases=['sell_mascot'])
     @Player.poisoned()
@@ -1304,7 +1279,7 @@ class Merchant(Player):
         :param leaves: The user's current amount of leaves. """
 
         temp_points = temp_leaves = 0
-        food_rate: int = self.food_rate # The life points each leaf gives to the pet
+        food_rate: int = self.food_rate  # The life points each leaf gives to the pet
 
         for _ in range(leaves):
             

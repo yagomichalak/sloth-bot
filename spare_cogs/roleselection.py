@@ -1,17 +1,14 @@
 import discord
-from discord.ext import commands, menus
+from discord.ext import commands
 
-from extra.prompt.menu import Confirm, prompt_number, prompt_emoji_guild, prompt_message_guild, get_role_response
+from extra.prompt.menu import prompt_number, prompt_emoji_guild, prompt_message_guild, get_role_response
 
 from extra.roleselection.db_commands import RoleSelectionDatabaseCommands
 from extra.roleselection.menu import RoleButton, ManageRoleSelectionMenu
 from extra.prompt.menu import ConfirmButton
-from extra.roleselection.utils import callback as button_callback
+# from extra.roleselection.utils import callback as button_callback
 
-from functools import partial
-
-from mysqldb import the_database
-from typing import List, Dict, Union, Any
+from typing import Dict
 
 
 class RoleSelection(RoleSelectionDatabaseCommands):
@@ -21,7 +18,6 @@ class RoleSelection(RoleSelectionDatabaseCommands):
 	def __init__(self, client) -> None:
 		self.client = client
 		self.db = super()
-
 
 	@commands.Cog.listener()
 	async def on_ready(self) -> None:
@@ -177,8 +173,6 @@ class RoleSelection(RoleSelectionDatabaseCommands):
 
 		await ctx.send(embed=embed)
 
-
-
 	async def ask_button_questions(self, ctx: commands.Context, message: discord.Message) -> Dict[str, str]:
 
 		member = ctx.author
@@ -243,8 +237,6 @@ class RoleSelection(RoleSelectionDatabaseCommands):
 		await initial_message.delete()
 
 		return btn_configs
-
-		
 
 
 def setup(client) -> None:

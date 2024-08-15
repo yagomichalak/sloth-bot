@@ -26,7 +26,6 @@ class CurseTable(commands.Cog):
         """ (ADM) Drops the CursedMember table. """
 
         await self.db.execute_query("DROP TABLE CursedMember")
-
         return await ctx.send("**Table CursedMember was dropped!**", delete_after=3)
 
     @commands.command(hidden=True)
@@ -35,7 +34,6 @@ class CurseTable(commands.Cog):
         """ (ADM) Resets the CursedMember table. """
 
         await self.db.execute_query("DELETE FROM CursedMember")
-
         return await ctx.send("**Table CursedMember was reseted!**", delete_after=3)
 
     async def insert_cursed_member(self, user_id: int) -> None:

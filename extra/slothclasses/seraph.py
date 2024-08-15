@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 from .player import Player, Skill
-from mysqldb import the_database
+from mysqldb import DatabaseCore
 from extra.prompt.menu import Confirm, ConfirmButton
 from extra import utils
 import os
@@ -18,6 +18,10 @@ bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID', 123
 class Seraph(Player):
 
     emoji = '<:Seraph:839498018998976563>'
+
+    def __init__(self, client) -> None:
+        self.client = client
+        self.db = DatabaseCore()
 
     @commands.command(aliases=['dp', 'divine', 'protection'])
     @Player.poisoned()
@@ -87,7 +91,6 @@ class Seraph(Player):
         divine_protection_embed = await self.get_divine_protection_embed(
             channel=ctx.channel, perpetrator_id=perpetrator.id, target_id=target.id)
         await ctx.send(embed=divine_protection_embed)
-            
 
     @commands.command()
     @Player.poisoned()
@@ -208,37 +211,27 @@ class Seraph(Player):
         :param perpetrator_id: The ID of the perpetrator of those shields.
         :param increment: The amount to increment. Default = 1 day """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("""
+        await self.db.execute_query("""
             UPDATE SlothSkills SET skill_timestamp = skill_timestamp + %s WHERE user_id = %s
             AND skill_type = 'divine_protection'""", (increment, perpetrator_id))
-        await db.commit()
-        await mycursor.close()
 
     async def reinforce_shield(self, user_id: int, increment: Optional[int] = 86400) -> None:
         """ Reinforces a specific active Divine Protection shield.
         :param user_id: The ID of the user.
         :param increment: The amount to increment. Default = 1 day """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("""
+        await self.db.execute_query("""
         UPDATE SlothSkills SET skill_timestamp = skill_timestamp + %s WHERE target_id = %s
         AND skill_type = 'divine_protection'""", (increment, user_id))
-        await db.commit()
-        await mycursor.close()
 
     async def get_expired_protections(self) -> None:
         """ Gets expired divine protection skill actions. """
 
         the_time = await utils.get_timestamp()
-        mycursor, db = await the_database()
-        await mycursor.execute("""
+        return await self.db.execute_query("""
             SELECT * FROM SlothSkills
             WHERE skill_type = 'divine_protection' AND (%s - skill_timestamp) >= 86400
-            """, (the_time,))
-        divine_protections = await mycursor.fetchall()
-        await mycursor.close()
-        return divine_protections
+            """, (the_time,), fetch="all")
 
     async def get_divine_protection_embed(self, channel, perpetrator_id: int, target_id: int) -> discord.Embed:
         """ Makes an embedded message for a divine protection action.
@@ -342,7 +335,6 @@ class Seraph(Player):
         if target_sloth_profile[1] == 'default':
             return await ctx.send(f"**You cannot protect someone who has a `default` Sloth class, {perpetrator.mention}!**")
 
-
         effects = await self.get_user_effects(target)
         debuffs = [fx for fx, values in effects.items() if values['debuff'] and fx not in ['locked', 'poisoned', 'kidnapped']]
 
@@ -372,7 +364,6 @@ class Seraph(Player):
         heal_embed = await self.make_heal_embed(target=target, perpetrator=perpetrator, debuffs_removed=debuffs_removed)
         await ctx.send(embed=heal_embed)
 
-        
     async def remove_debuffs(self, member: discord.Member, debuffs: List[str]) -> int:
         """ Removes all debuffs from a member.
         :param member: The member from whom to remove the debuffs.

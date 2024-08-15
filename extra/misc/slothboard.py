@@ -68,8 +68,4 @@ class SlothboardTable(commands.Cog):
         :param message_id: The ID of the original message.
         :param channel_id: The ID of the message's original channel. """
 
-        mycursor, _ = await the_database()
-        await self.db.execute_query("SELECT * FROM Slothboard WHERE message_id = %s AND channel_id = %s", (message_id, channel_id))
-        slothboard_message = await mycursor.fetchone()
-        await mycursor.close()
-        return slothboard_message
+        return await self.db.execute_query("SELECT * FROM Slothboard WHERE message_id = %s AND channel_id = %s", (message_id, channel_id), fetch="one")

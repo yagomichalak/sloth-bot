@@ -3,7 +3,7 @@ from extra import utils
 from discord.ext import commands, tasks
 import asyncio
 import os
-from mysqldb import DatabaseCore, the_database
+from mysqldb import DatabaseCore
 from typing import List, Union, Any, Dict
 from extra.select import LanguageRoomSelect
 

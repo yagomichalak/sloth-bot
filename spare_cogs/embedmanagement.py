@@ -76,10 +76,7 @@ class EmbedManagement(commands.Cog):
     async def get_embed_names(self) -> List[str]:
         """ Gets all embed names from the DB. """
 
-        await self.db.execute_query("SELECT embed_name FROM EmbedNames")
-        embeds_list: List[str] = await mycursor.fetchall()
-        await mycursor.close()
-        return embeds_list
+        return await self.db.execute_query("SELECT embed_name FROM EmbedNames", fetch="all")
 
     async def get_embed_fields(self, embed_name: str) -> Dict[str, Union[None, List[str]]]:
         """ Get all embed fields from the DB if there are any.
