@@ -348,7 +348,7 @@ class Moderation(*moderation_cogs):
 
         if not last_deleted_message:
             await ctx.message.delete()
-            return await ctx.send("**I couldn't snipe any message**")
+            return await ctx.send("**I couldn't snipe any message.**")
 
         if not member:
             if not message_qtd:
@@ -358,7 +358,7 @@ class Moderation(*moderation_cogs):
             else:
                 # Gets the requested amount of deleted messages
                 if int(message_qtd) <= 0:
-                    return await ctx.send("**I couldn't snipe any message**")
+                    return await ctx.send("**I couldn't snipe any message.**")
 
                 if int(message_qtd) > len(last_deleted_message):
                     message_qtd: int = len(last_deleted_message)
@@ -374,7 +374,7 @@ class Moderation(*moderation_cogs):
             messages: List[Dict] = await self.search_user_deleted_messages(member[0])
 
             if not messages:
-                return await ctx.send("**I couldn't snipe any messages from this member**")
+                return await ctx.send("**I couldn't snipe any messages from this member.**")
 
             menu = menus.MenuPages(MemberSnipeLooping(messages, member[0]))
             await ctx.message.delete()
@@ -1910,8 +1910,9 @@ We appreciate your understanding and look forward to hearing from you. """, embe
             members = [ctx.author]
 
         for member in members:
-            # Try to get user infractions
-            if user_infractions := await self.get_user_infractions(member.id):
+            user_infractions = await self.get_user_infractions(member.id)
+
+            if user_infractions:
                 lwarns = len([w for w in user_infractions if w[1] == 'lwarn'])
                 warns = len([w for w in user_infractions if w[1] == 'warn'])
                 hwarns = len([w for w in user_infractions if w[1] == 'hwarn'])
@@ -1920,39 +1921,78 @@ We appreciate your understanding and look forward to hearing from you. """, embe
                 bans = len([b for b in user_infractions if b[1] == 'ban'])
                 softbans = len([sb for sb in user_infractions if sb[1] == 'softban'])
                 hackbans = len([hb for hb in user_infractions if hb[1] == 'hackban'])
+                wl_entries = len([wl for wl in user_infractions if wl[1] == 'watchlist'])
             else:
-                await ctx.send(f"**<@{member.id}> doesn't have any existent infractions!**")
+                await ctx.send(f"**<@{member.id}> doesn't have any existent infractions or watchlist entries!**")
                 continue
 
-            # Alerts if the user already was unmuted with temporizer
             unmute_alert = ''
             if await self.get_muted_roles(member.id):
                 times = await self.get_mute_time(member.id)
                 if times[1] != None:
-                    unmute_alert = f"\u200b\n**	♦️ This user will be unmuted <t:{times[0] + times[1]}:R>**\n\n"
+                    unmute_alert = f"\u200b\n**♦️ This user will be unmuted <t:{times[0] + times[1]}:R>**\n\n"
 
-            # Makes the initial embed with their amount of infractions
             embed = discord.Embed(
                 title=f"Infractions for {member}",
-                description=f"{unmute_alert}```ini\n[Warns]: {warns+(lwarns/2)+(hwarns*2)} | [Mutes]: {mutes} | [Kicks]: {kicks}\n[Bans]: {bans} | [Softbans]: {softbans} | [Hackbans]: {hackbans}```",
+                description=f"{unmute_alert}```ini\n[Warns]: {warns+(lwarns/2)+(hwarns*2)} | [Mutes]: {mutes} | [Kicks]: {kicks}\n[Bans]: {bans+softbans} | [Hackbans]: {hackbans} | [Watchlist]: {wl_entries}```",
                 color=member.color,
-                timestamp=ctx.message.created_at)
+                timestamp=ctx.message.created_at
+            )
             embed.set_thumbnail(url=member.display_avatar)
-            embed.set_author(name=member.id)
+            embed.set_author(name=member.id)    
             embed.set_footer(text=f"Requested by: {ctx.author}", icon_url=ctx.author.display_avatar)
 
-            # Loops through each infraction and adds a field to the embedded message
-            # 0-user_id, 1-infraction_type, 2-infraction_reason, 3-infraction_ts, 4-infraction_id, 5-perpetrator
-            for infr in user_infractions:
-                if (infr_type := infr[1]) in ["mute", "lwarn", "warn", "hwarn", "ban", "hackban"]:
-                    infr_date = datetime.fromtimestamp(infr[3]).strftime('%Y/%m/%d at %H:%M:%S')
-                    perpetrator = discord.utils.get(ctx.guild.members, id=infr[5])
-                    embed.add_field(
-                        name=f"{infr_type} ID: {infr[4]}",
-                        value=f"```apache\nGiven on {infr_date}\nBy {perpetrator}\nReason: {infr[2]}```",
-                        inline=True)
+            watchlist_list = "```apache\n"
+            mute_list = "```apache\n"
+            ban_list = "```apache\n"
+            warn_list = "```apache\n"
 
-            # Shows the infractions
+            for infr in user_infractions:
+                infr_type = infr[1]
+                infr_date = datetime.fromtimestamp(infr[3]).strftime('%Y/%m/%d at %H:%M')
+                perpetrator = discord.utils.get(ctx.guild.members, id=infr[5]).name
+
+                if infr_type == "watchlist":
+                    watchlist_list += f"{infr_date}\n{infr[4]}: by {perpetrator}\nNote: {infr[2]}\n\n"
+                elif infr_type == "mute":
+                    mute_list += f"{infr_date}\n{infr[4]}: by {perpetrator}\nReason: {infr[2]}\n\n"
+                elif infr_type in ["lwarn", "warn", "hwarn"]:
+                    warn_list += f"{infr_date}\n{infr[4]}: by {perpetrator}\nReason: {infr[2]}\n\n"
+                elif infr_type in ["ban", "softban", "hackban"]:
+                    ban_list += f"{infr_date}\n{infr[4]}: by {perpetrator}\nReason: {infr[2]}\n\n"
+            
+            if watchlist_list != "```apache\n":
+                watchlist_list += "```"
+                embed.add_field(
+                    name="Watchlist",
+                    value=watchlist_list,
+                    inline=False
+                )
+
+            if mute_list != "```apache\n":
+                mute_list += "```"
+                embed.add_field(
+                    name="Mute",
+                    value=mute_list,
+                    inline=False
+                )
+
+            if ban_list != "```apache\n":
+                ban_list += "```"
+                embed.add_field(
+                    name="Ban",
+                    value=ban_list,
+                    inline=False
+                )
+
+            if warn_list != "```apache\n":
+                warn_list += "```"
+                embed.add_field(
+                    name="Warn",
+                    value=warn_list,
+                    inline=False
+                )
+
             await ctx.send(embed=embed)
 
     @commands.command(aliases=['ri', 'remove_warn', 'remove_warning'])
