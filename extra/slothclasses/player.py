@@ -220,12 +220,8 @@ class Player(*additional_cogs):
     async def get_user_effects(self, member: Union[discord.User, discord.Member]) -> List[str]:
         """ Gets the effects that the user is under. """
 
-        # effects = []
-
         effects = {}
         general_cooldown = 86400 # Worth a day in seconds
-        
-
 
         if then := await self.get_skill_action_by_target_id_and_skill_type(target_id=member.id, skill_type='divine_protection'):
             effects['protected'] = {}
@@ -237,7 +233,6 @@ class Player(*additional_cogs):
             effects['protected']['has_gif'] = True
             effects['protected']['debuff'] = False
 
-
         if then := await self.get_skill_action_by_target_id_and_skill_type(target_id=member.id, skill_type='transmutation'):
             effects['transmutated'] = {}
             effects['transmutated']['cooldown'] = f"Ends <t:{int(then[2]) + general_cooldown}:R>" if then else 'Ends in ??'
@@ -247,7 +242,6 @@ class Player(*additional_cogs):
             effects['transmutated']['has_gif'] = True
             effects['transmutated']['debuff'] = False
 
-
         if then := await self.get_skill_action_by_target_id_and_skill_type(target_id=member.id, skill_type='hack'):
             effects['hacked'] = {}
             effects['hacked']['cooldown'] = f"Ends <t:{int(then[2]) + general_cooldown}:R>" if then else 'Ends in ??'
@@ -255,7 +249,6 @@ class Player(*additional_cogs):
             effects['hacked']['cords'] = (0, 0)
             effects['hacked']['resize'] = None
             effects['hacked']['debuff'] = True
-
 
         if then := await self.get_skill_action_by_target_id_and_skill_type(target_id=member.id, skill_type='wire'):
             effects['wired'] = {}
@@ -265,7 +258,6 @@ class Player(*additional_cogs):
             effects['wired']['resize'] = None
             effects['wired']['debuff'] = True
 
-
         if then := await self.get_skill_action_by_target_id_and_skill_type(target_id=member.id, skill_type='hit'):
             effects['knocked_out'] = {}
             effects['knocked_out']['cooldown'] = f"Ends <t:{int(then[2]) + general_cooldown}:R>" if then else 'Ends in ??'
@@ -273,7 +265,6 @@ class Player(*additional_cogs):
             effects['knocked_out']['cords'] = (0, 0)
             effects['knocked_out']['resize'] = None
             effects['knocked_out']['debuff'] = True
-
 
         if then := await self.get_skill_action_by_target_id_and_skill_type(target_id=member.id, skill_type='frog'):
             effects['frogged'] = {}
