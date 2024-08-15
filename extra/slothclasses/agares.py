@@ -4,7 +4,7 @@ import os
 from .player import Player, Skill
 from extra.menu import ConfirmSkill
 from extra import utils
-from mysqldb import the_database
+from mysqldb import DatabaseCore
 from typing import Union, Any
 
 import os
@@ -19,6 +19,7 @@ class Agares(Player):
 
     def __init__(self, client) -> None:
         self.client = client
+        self.db = DatabaseCore()
 
         self.safe_categories = [
             int(os.getenv('LESSON_CAT_ID', 123)),
@@ -346,7 +347,6 @@ class Agares(Player):
 
         return reflect_embed
 
-
     async def get_reflected_attack_embed(self, channel, attacker_id: int, target_id: int, skill_type: str) -> discord.Embed:
         """ Makes an embedded message for a reflected attack.
         :param channel: The context channel.
@@ -384,19 +384,14 @@ class Agares(Player):
                     description=f"**<@{rf[3]}>'s `Reflect Aura` from <@{rf[0]}> just expired!**",
                     color=discord.Color.red()))
 
-
     async def get_expired_reflects(self) -> None:
         """ Gets expired Reflect Aura skill actions. """
 
         the_time = await utils.get_timestamp()
-        mycursor, db = await the_database()
-        await mycursor.execute("""
+        return await self.db.execute_query("""
             SELECT * FROM SlothSkills
             WHERE skill_type = 'reflect' AND (%s - skill_timestamp) >= 86400
-            """, (the_time,))
-        reflects = await mycursor.fetchall()
-        await mycursor.close()
-        return reflects
+            """, (the_time,), fetch="all")
 
     @commands.command()
     @Player.poisoned()
@@ -478,7 +473,6 @@ class Agares(Player):
             await ctx.send(embed=delay_embed)
             if 'reflect' in target_fx:
                 await self.update_user_skills_ts_increment(perpetrator.id, 86400)
-
 
     async def get_delay_embed(self, channel, perpetrator_id: int, target_id: int) -> discord.Embed:
         """ Makes an embedded message for a delay action.

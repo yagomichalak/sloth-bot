@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 from .player import Player, Skill
-from mysqldb import the_database
+from mysqldb import DatabaseCore
 from extra.menu import ConfirmSkill
 from extra import utils
 import os
@@ -16,6 +16,7 @@ class Cybersloth(Player):
 
     def __init__(self, client) -> None:
         self.client = client
+        self.db = DatabaseCore()
 
     @commands.command(aliases=['eb', 'energy', 'boost'])
     @Player.poisoned()
@@ -245,7 +246,6 @@ class Cybersloth(Player):
 
         return wire_embed
 
-
     @commands.command()
     @Player.poisoned()
     @Player.skills_used(requirement=20)
@@ -305,10 +305,7 @@ class Cybersloth(Player):
         """ Updates all content fields of hacks executed by a specific user.
         :param attacker_id: The ID of the attacker. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("UPDATE SlothSkills SET content = 'virus' WHERE user_id = %s", (attacker_id,))
-        await db.commit()
-        await mycursor.close()
+        self.db.execute_query("UPDATE SlothSkills SET content = 'virus' WHERE user_id = %s", (attacker_id,))
 
     async def check_virus(self, ctx: commands.Context, target: discord.Member) -> None:
         """ Checks if the target member has a contagious virus in their hack.

@@ -1,7 +1,7 @@
 
 import discord
 from discord.ext import commands, menus
-from mysqldb import the_database
+from mysqldb import DatabaseCore
 
 from extra import utils
 from extra.menu import ConfirmSkill, prompt_number, OpenShopLoop
@@ -18,6 +18,7 @@ from PIL import Image, ImageDraw, ImageFont, ImageOps
 
 bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID', 123))
 
+
 class Merchant(Player):
 
     emoji = '<:Merchant:839498018532753468>'
@@ -25,6 +26,7 @@ class Merchant(Player):
 
     def __init__(self, client) -> None:
         self.client = client
+        self.db = DatabaseCore()
 
     @commands.command(aliases=['sellpotion', 'potion'])
     @Player.poisoned()
@@ -86,7 +88,6 @@ class Merchant(Player):
             return await ctx.send(f"**{member.mention}, something went wrong with it, try again later!**")
         else:
             await ctx.send(f"**{member}, your item is now in the shop, check `z!sloth_shop` to see it there!**")
-            
 
     @commands.command()
     @Player.poisoned()
@@ -100,7 +101,6 @@ class Merchant(Player):
             await the_menu.start(ctx)
         else:
             return await ctx.send(f"**There are no items in the `Sloth class shop` yet, {ctx.author.mention}!**")
-
 
     @commands.group(aliases=['buy_item', 'buyitem', 'purchase'])
     @Player.poisoned()

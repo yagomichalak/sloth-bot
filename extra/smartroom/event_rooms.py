@@ -20,7 +20,7 @@ class EventRoomsTable(commands.Cog):
         if await self.table_event_rooms_exists():
             return await ctx.send("**The `EventRooms` table already exists!**")
 
-        await mycursor.execute("""
+        await self.db.execute_query("""
             CREATE TABLE EventRooms (
                 user_id BIGINT NOT NULL, vc_id BIGINT DEFAULT NULL,
                 txt_id BIGINT DEFAULT NULL
@@ -35,7 +35,7 @@ class EventRoomsTable(commands.Cog):
         if not await self.table_event_rooms_exists():
             return await ctx.send("**The `EventRooms` table doesn't exist!**")
 
-        await mycursor.execute("DROP TABLE EventRooms")
+        await self.db.execute_query("DROP TABLE EventRooms")
         await ctx.send("**Dropped `EventRooms` table!**")
 
     @commands.command(hidden=True)
@@ -46,20 +46,13 @@ class EventRoomsTable(commands.Cog):
         if not await self.table_event_rooms_exists():
             return await ctx.send("**The `EventRooms` table doesn't exist yet!**")
 
-        await mycursor.execute("DELETE FROM EventRooms")
+        await self.db.execute_query("DELETE FROM EventRooms")
         await ctx.send("**Reset `EventRooms` table!**")
 
     async def table_event_rooms_exists(self) -> bool:
         """ Checks whether the EventRooms table exists. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("SHOW TABLE STATUS LIKE 'EventRooms'")
-        table_info = await mycursor.fetchall()
-        await mycursor.close()
-        if table_info:
-            return True
-        else:
-            return False
+        return await self.db.table_exists("EventRooms")
 
     async def insert_event_room(self, user_id: int, vc_id: int = None, txt_id: int = None) -> None:
         """ Inserts an Event Room by VC ID.
@@ -67,7 +60,7 @@ class EventRoomsTable(commands.Cog):
         :param vc_id: The ID of the VC.
         :param txt_id: The ID of the txt. """
 
-        await mycursor.execute("""
+        await self.db.execute_query("""
             INSERT INTO EventRooms (user_id, vc_id, txt_id)
             VALUES (%s, %s, %s)""", (user_id, vc_id, txt_id))
 
@@ -75,46 +68,34 @@ class EventRoomsTable(commands.Cog):
         """ Gets an Event Room by VC ID.
         :param user_id: The ID of the user that you are looking for. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("SELECT * FROM EventRooms WHERE user_id = %s", (user_id,))
-        event_room = await mycursor.fetchone()
-        await mycursor.close()
-        return event_room
+        return await self.db.execute_query("SELECT * FROM EventRooms WHERE user_id = %s", (user_id,), fetch="one")
 
     async def get_event_room_by_vc_id(self, vc_id: int) -> List[int]:
         """ Gets an Event Room by VC ID.
         :param vc_id: The ID of the VC that you are looking for. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("SELECT * FROM EventRooms WHERE vc_id = %s", (vc_id,))
-        event_room = await mycursor.fetchone()
-        await mycursor.close()
-        return event_room
+        return await self.db.execute_query("SELECT * FROM EventRooms WHERE vc_id = %s", (vc_id,), fetch="one")
 
     async def get_event_room_by_txt_id(self, txt_id: int) -> List[int]:
         """ Gets an Event Room by VC ID.
         :param txt_id: The ID of the txt that you are looking for. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("SELECT * FROM EventRooms WHERE txt_id = %s", (txt_id,))
-        event_room = await mycursor.fetchone()
-        await mycursor.close()
-        return event_room
+        return await self.db.execute_query("SELECT * FROM EventRooms WHERE txt_id = %s", (txt_id,), fetch="one")
 
     async def delete_event_room_by_user_id(self, user_id: int) -> None:
         """ Deletes an Event Room by VC ID.
         :param user_id: The ID of the user that you want to delete event rooms from. """
 
-        await mycursor.execute("DELETE FROM EventRooms WHERE user_id = %s", (user_id,))
+        await self.db.execute_query("DELETE FROM EventRooms WHERE user_id = %s", (user_id,))
 
     async def delete_event_room_by_vc_id(self, vc_id: int) -> None:
         """ Deletes an Event Room by VC ID.
         :param vc_id: The ID of the txt that you want to delete. """
 
-        await mycursor.execute("DELETE FROM EventRooms WHERE vc_id = %s", (vc_id,))
+        await self.db.execute_query("DELETE FROM EventRooms WHERE vc_id = %s", (vc_id,))
 
     async def delete_event_room_by_txt_id(self, txt_id: int) -> None:
         """ Deletes an Event Room by VC ID.
         :param txt_id: The ID of the txt that you want to delete. """
 
-        await mycursor.execute("DELETE FROM EventRooms WHERE txt_id = %s", (txt_id,))
+        await self.db.execute_query("DELETE FROM EventRooms WHERE txt_id = %s", (txt_id,))
