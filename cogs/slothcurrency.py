@@ -183,21 +183,12 @@ class SlothCurrency(*currency_cogs):
         """ Gets a specific item from the shop.
         :param item_name: The name of the item to get. """
 
-        mycursor, db = await the_django_database()
-        await mycursor.execute("SELECT * FROM shop_shopitem WHERE item_name = %s", (item_name,))
-        item = await mycursor.fetchone()
-        await mycursor.close()
-        return item
+        return self.db.execute_query("SELECT * FROM shop_shopitem WHERE item_name = %s", (item_name,), database_name="django", fetch="one")
 
     async def get_shop_items(self) -> List[List[Union[str, int]]]:
         """ Gets all items from the shop. """
 
-        mycursor, db = await the_django_database()
-        await mycursor.execute("SELECT * FROM shop_shopitem")
-        items = await mycursor.fetchall()
-        await mycursor.close()
-        return items
-
+        return self.db.execute_query("SELECT * FROM shop_shopitem", database_name="django", fetch="all")
 
     @commands.command()
     @commands.has_permissions(administrator=True)
