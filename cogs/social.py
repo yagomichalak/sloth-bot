@@ -159,6 +159,11 @@ class Social(*social_cogs):
         :param member: The member to show the info.
         :return: An embedded message with the user's information """
 
+        try:
+            await ctx.message.delete()
+        except:
+            pass
+
         if not await utils.is_allowed([mod_role_id, admin_role_id]).predicate(ctx):
             if message and len(message.split()) > 1:
                 message = message.split()[0]
@@ -199,6 +204,8 @@ class Social(*social_cogs):
                 view.children.remove(view.children[4])
                 if not await utils.is_subscriber(throw_exc=False).predicate(ctx):
                     view.children.remove(view.infractions_button)
+                view.children.remove(view.snipe_button)
+                view.children.remove(view.vh_button)
                 view.children.remove(view.fake_accounts_button)
                 view.children.remove(view.moderated_nickname_button)
             else:
@@ -209,19 +216,11 @@ class Social(*social_cogs):
                     view.children[0].disabled = True
 
                 if not await ModerationFakeAccountsTable.get_fake_accounts(ctx, member.id):
-                    view.children[1].disabled = True
+                    view.children.remove(view.fake_accounts_button)
 
                 if not await ModeratedNicknamesTable.get_moderated_nickname(ctx, member.id):
                     view.children.remove(view.moderated_nickname_button)
                 
-                watchlist = await self.client.get_cog('Moderation').get_user_watchlist(member.id)
-                
-                if watchlist:
-                    message_url = f"https://discord.com/channels/{ctx.guild.id}/{watchlist_channel_id}/{watchlist[1]}"
-                    view.children[2].url = message_url
-                else:
-                    view.children[2].disabled = True
-
             await ctx.send(embed=embed, view=view)
 
 

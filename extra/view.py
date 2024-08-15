@@ -204,14 +204,9 @@ class QuickButtons(discord.ui.View):
         self.ctx = ctx
         self.target_member = target_member
 
-        watchlist_button = discord.ui.Button(
-            label="Watchlist", style=discord.ButtonStyle.url, emoji="⚠️", url=f"https://discord.com/channels/{ctx.guild.id}/{ctx.channel.id}"
-        )
-        self.children.insert(4, watchlist_button)
-
-    @discord.ui.button(label="Infractions", style=4, emoji="❗", custom_id=f"user_infractions")
+    @discord.ui.button(label="File", style=4, emoji="🧾", custom_id=f"user_infractions")
     async def infractions_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
-        """ Shows the member's infractions. """
+        """ Shows the member's infractions and their watchlist entries. """
 
         new_ctx = self.ctx
         new_ctx.author = interaction.user
@@ -234,7 +229,22 @@ class QuickButtons(discord.ui.View):
         await interaction.response.defer()
         await self.client.get_cog("SlothReputation")._info(self.ctx, member=self.target_member)
 
-    @discord.ui.button(label="Fake Accounts", style=2, emoji="🥸", custom_id=f"user_fake_accounts")
+    @discord.ui.button(label="Snipe", style=2, emoji="🔍", custom_id=f"user_snipe")
+    async def snipe_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Show's the member's last deleted messages. """
+
+        await interaction.response.defer()
+        ctx = await self.client.get_context(interaction.message)
+        await self.client.get_cog("Moderation").snipe(ctx, message=str(self.target_member.id))
+
+    @discord.ui.button(label="Voice History", style=2, emoji="📍", custom_id=f"user_vh")
+    async def vh_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Show's the member's voice history. """
+
+        await interaction.response.defer()
+        await self.client.get_cog("VoiceChannelActivity").voice_history(self.ctx, member=self.target_member)
+
+    @discord.ui.button(label="Fake Acc.", style=2, emoji="🥸", custom_id=f"user_fake_accounts")
     async def fake_accounts_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
         """ Shows the member's fake accounts. """
 
