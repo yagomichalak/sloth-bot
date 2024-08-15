@@ -591,17 +591,26 @@ class ReportSupport(*report_support_classes):
 
         application_type = app[2].title().replace('_', ' ')
 
+        role_mapping = {
+            "Teacher": "Lesson Managers",
+            "Moderator": "Staff Managers",
+            "Event Host": "Event Managers",
+            "Debate Manager": "Debate Managers"
+        }
+
+        role_name = role_mapping.get(application_type, "Managers")
+
         app_embed = discord.Embed(
             title=f"{applicant.name}'s Interview",
             description=f"""
-            Hello, {applicant.mention}, we have received and reviewed your `{application_type}` application. In order to explain how our system works we have to schedule a voice conversation with you.
-            When would be the best time to talk to one of our staff?""",
+            Hello {applicant.mention}, thank you for submitting your `{application_type}` application. We've reviewed it and the next step is an interview to better access who you are as a person.
+            Please talk to one of the {role_name} to schedule a time that works for you.""",
             color=applicant.color)
 
         formatted_pings = await self.format_application_pings(guild, interview_info['pings'])
         await txt_channel.send(content=f"{formatted_pings}, {applicant.mention}", embed=app_embed)
         try:
-            await applicant.send(f"We just opened the {txt_channel.mention} channel for reviewing your `{application_type}` application!")
+            await applicant.send(f"Your {txt_channel.mention} channel has been created, please take a look at it.")
         except:
             pass
 

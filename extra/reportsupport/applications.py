@@ -52,7 +52,7 @@ class ApplicationsTable(commands.Cog):
             "app": moderator_app_channel_id, "interview": moderator_interview_vc_id, "parent": moderator_parent_channel_id,
             "cat": moderator_app_cat_id, 
             "message": "**Moderator Application**\nOur staff has evaluated your Moderator application and has come to a conclusion, and due to internal and unspecified reasons we are **declining** it. Thank you anyways",
-            "pings": [{"id": cosmos_role_id, "role": True}, {"id": admin_role_id, "role": True}]},
+            "pings": [{"id": cosmos_role_id, "role": True}, {"id": admin_role_id, "role": True}, {"id": senior_mod_role_id, "role": True}]},
         'event_host': {
             "app": event_host_app_channel_id,  "interview": event_host_interview_vc_id, "parent": event_host_parent_channel_id, 
             "cat": event_host_app_cat_id, 
