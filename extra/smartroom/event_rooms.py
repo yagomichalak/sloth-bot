@@ -1,7 +1,7 @@
-import discord
 from discord.ext import commands
-from mysqldb import the_database
+from mysqldb import DatabaseCore
 from typing import List
+
 
 class EventRoomsTable(commands.Cog):
     """ Class for managing the EventRooms table in the database. """
@@ -10,6 +10,7 @@ class EventRoomsTable(commands.Cog):
         """ Class init method. """
 
         self.client = client
+        self.db = DatabaseCore()
 
     @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
@@ -19,14 +20,11 @@ class EventRoomsTable(commands.Cog):
         if await self.table_event_rooms_exists():
             return await ctx.send("**The `EventRooms` table already exists!**")
 
-        mycursor, db = await the_database()
         await mycursor.execute("""
             CREATE TABLE EventRooms (
                 user_id BIGINT NOT NULL, vc_id BIGINT DEFAULT NULL,
                 txt_id BIGINT DEFAULT NULL
             )""")
-        await db.commit()
-        await mycursor.close()
         await ctx.send("**Created `EventRooms` table!**")
 
     @commands.command(hidden=True)
@@ -37,10 +35,7 @@ class EventRoomsTable(commands.Cog):
         if not await self.table_event_rooms_exists():
             return await ctx.send("**The `EventRooms` table doesn't exist!**")
 
-        mycursor, db = await the_database()
         await mycursor.execute("DROP TABLE EventRooms")
-        await db.commit()
-        await mycursor.close()
         await ctx.send("**Dropped `EventRooms` table!**")
 
     @commands.command(hidden=True)
@@ -51,10 +46,7 @@ class EventRoomsTable(commands.Cog):
         if not await self.table_event_rooms_exists():
             return await ctx.send("**The `EventRooms` table doesn't exist yet!**")
 
-        mycursor, db = await the_database()
         await mycursor.execute("DELETE FROM EventRooms")
-        await db.commit()
-        await mycursor.close()
         await ctx.send("**Reset `EventRooms` table!**")
 
     async def table_event_rooms_exists(self) -> bool:
@@ -75,12 +67,9 @@ class EventRoomsTable(commands.Cog):
         :param vc_id: The ID of the VC.
         :param txt_id: The ID of the txt. """
 
-        mycursor, db = await the_database()
         await mycursor.execute("""
             INSERT INTO EventRooms (user_id, vc_id, txt_id)
             VALUES (%s, %s, %s)""", (user_id, vc_id, txt_id))
-        await db.commit()
-        await mycursor.close()
 
     async def get_event_room_by_user_id(self, user_id: int) -> List[int]:
         """ Gets an Event Room by VC ID.
@@ -116,25 +105,16 @@ class EventRoomsTable(commands.Cog):
         """ Deletes an Event Room by VC ID.
         :param user_id: The ID of the user that you want to delete event rooms from. """
 
-        mycursor, db = await the_database()
         await mycursor.execute("DELETE FROM EventRooms WHERE user_id = %s", (user_id,))
-        await db.commit()
-        await mycursor.close()
 
     async def delete_event_room_by_vc_id(self, vc_id: int) -> None:
         """ Deletes an Event Room by VC ID.
         :param vc_id: The ID of the txt that you want to delete. """
 
-        mycursor, db = await the_database()
         await mycursor.execute("DELETE FROM EventRooms WHERE vc_id = %s", (vc_id,))
-        await db.commit()
-        await mycursor.close()
 
     async def delete_event_room_by_txt_id(self, txt_id: int) -> None:
         """ Deletes an Event Room by VC ID.
         :param txt_id: The ID of the txt that you want to delete. """
 
-        mycursor, db = await the_database()
         await mycursor.execute("DELETE FROM EventRooms WHERE txt_id = %s", (txt_id,))
-        await db.commit()
-        await mycursor.close()
