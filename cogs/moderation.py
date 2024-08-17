@@ -1932,6 +1932,10 @@ We appreciate your understanding and look forward to hearing from you. """, embe
                 if times[1] != None:
                     unmute_alert = f"\u200b\n**♦️ This user will be unmuted <t:{times[0] + times[1]}:R>**\n\n"
 
+            user_infractions = list(user_infractions)
+            priority_order = {"watchlist": 1, "mute": 2, "warn": 4, "ban": 3}
+            user_infractions.sort(key=lambda x: priority_order.get(x[1] if x[1] not in ["hwarn", "lwarn"] else "warn", 5))
+
             embed = discord.Embed(
                 title=f"Infractions for {member}",
                 description=f"{unmute_alert}```ini\n[Warns]: {warns+(lwarns/2)+(hwarns*2)} | [Mutes]: {mutes} | [Kicks]: {kicks}\n[Bans]: {bans+softbans} | [Hackbans]: {hackbans} | [Watchlist]: {wl_entries}```",
@@ -1942,56 +1946,74 @@ We appreciate your understanding and look forward to hearing from you. """, embe
             embed.set_author(name=member.id)    
             embed.set_footer(text=f"Requested by: {ctx.author}", icon_url=ctx.author.display_avatar)
 
-            watchlist_list = "```apache\n"
-            mute_list = "```apache\n"
-            ban_list = "```apache\n"
-            warn_list = "```apache\n"
+            first_watchlist, first_mute, first_warn, first_ban = True, True, True, True
 
-            for infr in user_infractions:
-                infr_type = infr[1]
+            for i, infr in enumerate(user_infractions):
+                infr_type = infr[1] if infr[1] not in ["hwarn", "lwarn"] else "warn"
                 infr_date = datetime.fromtimestamp(infr[3]).strftime('%Y/%m/%d at %H:%M')
-                perpetrator = discord.utils.get(ctx.guild.members, id=infr[5]).name
+                perpetrator_member = discord.utils.get(ctx.guild.members, id=infr[5])
+                perpetrator = perpetrator_member.name if perpetrator_member else "Unknown"
+
+                next_infr_type = user_infractions[i + 1][1] if i + 1 < len(user_infractions) else None
+                next_infr_type = next_infr_type if next_infr_type not in ["hwarn", "lwarn"] else "warn"
+                extra_line = "\n\u200b" if infr_type != next_infr_type else ""
 
                 if infr_type == "watchlist":
-                    watchlist_list += f"{infr_date}\n{infr[4]}: by {perpetrator}\nNote: {infr[2]}\n\n"
+                    if first_watchlist:
+                        embed.add_field(
+                            name="Watchlist",
+                            value=f"\u200b\n> {infr_date}\n> {infr[4]}: by {perpetrator}\n> {infr[2]}{extra_line}",
+                            inline=False
+                        )
+                        first_watchlist = False
+                    else:
+                        embed.add_field(
+                            name="\u200b",
+                            value=f"> {infr_date}\n> {infr[4]}: by {perpetrator}\n> {infr[2]}{extra_line}",
+                            inline=False
+                        )
                 elif infr_type == "mute":
-                    mute_list += f"{infr_date}\n{infr[4]}: by {perpetrator}\nReason: {infr[2]}\n\n"
+                    if first_mute:
+                        embed.add_field(
+                            name="Mute",
+                            value=f"\u200b\n> {infr_date}\n> {infr[4]}: by {perpetrator}\n> {infr[2]}{extra_line}",
+                            inline=False
+                        )
+                        first_mute = False
+                    else:
+                        embed.add_field(
+                            name="\u200b",
+                            value=f"> {infr_date}\n> {infr[4]}: by {perpetrator}\n> {infr[2]}{extra_line}",
+                            inline=False
+                        )
                 elif infr_type in ["lwarn", "warn", "hwarn"]:
-                    warn_list += f"{infr_date}\n{infr[4]}: by {perpetrator}\nReason: {infr[2]}\n\n"
+                    if first_warn:
+                        embed.add_field(
+                            name="Warn",
+                            value=f"\u200b\n> {infr_date}\n> {infr[4]}: by {perpetrator}\n> {infr[2]}{extra_line}",
+                            inline=False
+                        )
+                        first_warn = False
+                    else:
+                        embed.add_field(
+                            name="\u200b",
+                            value=f"> {infr_date}\n> {infr[4]}: by {perpetrator}\n> {infr[2]}{extra_line}",
+                            inline=False
+                        )
                 elif infr_type in ["ban", "softban", "hackban"]:
-                    ban_list += f"{infr_date}\n{infr[4]}: by {perpetrator}\nReason: {infr[2]}\n\n"
-            
-            if watchlist_list != "```apache\n":
-                watchlist_list += "```"
-                embed.add_field(
-                    name="Watchlist",
-                    value=watchlist_list,
-                    inline=False
-                )
-
-            if mute_list != "```apache\n":
-                mute_list += "```"
-                embed.add_field(
-                    name="Mute",
-                    value=mute_list,
-                    inline=False
-                )
-
-            if ban_list != "```apache\n":
-                ban_list += "```"
-                embed.add_field(
-                    name="Ban",
-                    value=ban_list,
-                    inline=False
-                )
-
-            if warn_list != "```apache\n":
-                warn_list += "```"
-                embed.add_field(
-                    name="Warn",
-                    value=warn_list,
-                    inline=False
-                )
+                    if first_ban:
+                        embed.add_field(
+                            name="Ban",
+                            value=f"\u200b\n> {infr_date}\n> {infr[4]}: by {perpetrator}\n> {infr[2]}{extra_line}",
+                            inline=False
+                        )
+                        first_ban = False
+                    else:
+                        embed.add_field(
+                            name="\u200b",
+                            value=f"> {infr_date}\n> {infr[4]}: by {perpetrator}\n> {infr[2]}{extra_line}",
+                            inline=False
+                        )
 
             await ctx.send(embed=embed)
 
