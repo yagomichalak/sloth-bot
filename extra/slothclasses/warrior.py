@@ -2,7 +2,7 @@ from extra.prompt.menu import ConfirmButton
 import discord
 from discord.ext import commands
 from .player import Player, Skill
-from mysqldb import the_database
+from mysqldb import DatabaseCore
 from extra.menu import ConfirmSkill
 from extra.select import WarriorUserItemSelect
 from extra.view import BasicUserCheckView
@@ -21,6 +21,7 @@ class Warrior(Player):
 
     def __init__(self, client) -> None:
         self.client = client
+        self.db = DatabaseCore()
 
     @commands.command(aliases=['ko', 'knock-out', 'knock_out', 'knock'])
     @Player.poisoned()
@@ -339,7 +340,6 @@ class Warrior(Player):
                 channel=ctx.channel, perpetrator_id=attacker.id, target_id=target.id, item=item)
             await ctx.send(embed=rip_off_embed)
 
-
     async def get_rip_off_embed(self, channel, perpetrator_id: int, target_id: int, item: List[Union[str, int]]) -> discord.Embed:
         """ Makes an embedded message for a rip off skill.
         :param channel: The context channel.
@@ -362,7 +362,6 @@ class Warrior(Player):
         rip_off_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
 
         return rip_off_embed
-
 
     @commands.command(aliases=['disorient', 'disorientate'])
     @Player.poisoned()

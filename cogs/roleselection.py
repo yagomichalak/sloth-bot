@@ -222,7 +222,7 @@ class RoleSelection(RoleSelectionDatabaseCommands):
             if not role: return False
             slct_configs['value'] = int(role.id)
 
-            if await self.db.get_select_by_id(int(role.id), message.id, message.guild.id):
+            if await self.get_select_by_id(int(role.id), message.id, message.guild.id):
                 await ctx.send("**There is already a select option with this role in this menu, type another role!**", delete_after=3)
             else:
                 break

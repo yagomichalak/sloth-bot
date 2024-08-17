@@ -1,18 +1,19 @@
 import discord
 from discord.ext import commands
-from mysqldb import the_database
-from datetime import datetime
-from typing import List, Optional, Union
+from mysqldb import DatabaseCore
 import os
 from extra import utils
+from typing import List, Optional, Union
 
 allowed_roles = [int(os.getenv('OWNER_ROLE_ID', 123)), int(os.getenv('ADMIN_ROLE_ID', 123)), int(os.getenv('MOD_ROLE_ID', 123))]
 mod_log_id = int(os.getenv('MOD_LOG_CHANNEL_ID', 123))
+
 
 class ModerationWatchlistTable(commands.Cog):
 
     def __init__(self, client: commands.Bot) -> None:
         self.client = client
+        self.db = DatabaseCore()
 
     @commands.command(aliases=['wl'])
     @utils.is_allowed(allowed_roles, throw_exc=True)
@@ -60,8 +61,6 @@ class ModerationWatchlistTable(commands.Cog):
     async def get_user_wl_entries(self, user_id: int) -> List[List[Union[str, int]]]:
         """ Gets all watchlists from a user. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("SELECT * FROM UserInfractions WHERE user_id = %s AND infraction_type = %s", (user_id, "watchlist"))
-        user_watchlist = await mycursor.fetchall()
-        await mycursor.close()
-        return user_watchlist
+        return await self.db.execute_query(
+            "SELECT * FROM UserInfractions WHERE user_id = %s AND infraction_type = %s", (user_id, "watchlist"), fetch="all"
+            )

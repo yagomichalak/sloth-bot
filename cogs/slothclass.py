@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands, tasks, menus
-from mysqldb import the_database
+from mysqldb import DatabaseCore
 
 from extra import utils
 from extra.menu import SlothClassPagination
@@ -31,6 +31,7 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
 
         self.client = client
         self.classes = classes
+        self.db = DatabaseCore()
         super(SlothClass, self).__init__(client)
 
     @commands.Cog.listener()
@@ -113,30 +114,21 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
         """ Gets all or a specific Sloth Class, grouped or not.
         :param grouped: Whether it's gonna be grouped. [Optional]
         :param class_name: The name of the class to selected. [Optional]
-        
         Ps: You can either specify grouped or the class_name. """
 
-        mycursor, _ = await the_database()
         if grouped:
-            await mycursor.execute("""
+            return await self.db.execute_query("""
                 SELECT sloth_class, COUNT(sloth_class) AS sloth_count
                 FROM SlothProfile
                 WHERE sloth_class != 'default'
                 GROUP BY sloth_class
                 ORDER BY sloth_count DESC
-                """)
+                """, fetch="all")
         elif not grouped and class_name:
-            await mycursor.execute("""
+            return await self.db.execute_query("""
             SELECT user_id, skills_used 
             FROM SlothProfile WHERE sloth_class = %s
-            ORDER BY skills_used DESC""", (class_name,))
-
-
-        all_sloth_classes = await mycursor.fetchall()
-        await mycursor.close()
-        return all_sloth_classes
-        
-
+            ORDER BY skills_used DESC""", (class_name,), fetch="all")
 
     @commands.command()
     @commands.has_permissions()
@@ -339,7 +331,6 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
     async def find_target(self, ctx) -> None:
         """ Finds a random unprotected target, who is offline. """
 
-
         author: discord.Member = ctx.author
         offline: List[int] = list({m.id for m in ctx.guild.members if m.status == discord.Status.offline})
         try: 
@@ -362,7 +353,6 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
                 return await ctx.reply(embed=embed)
         else:
             await ctx.send(f"**No targets found, {author.mention}!**")
-
 
     @commands.command(aliases=["update_sc", "usc"])
     @commands.has_permissions(administrator=True)

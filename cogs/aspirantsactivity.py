@@ -1,6 +1,5 @@
 import discord
 from discord.ext import commands
-from mysqldb import *
 import asyncio
 import os
 from extra import utils
@@ -77,10 +76,7 @@ class AspirantActivity(AspirantsTable):
         if not (users_id := await self.get_all_aspirants()):
             return await ctx.send("**There is no aspirants being moderated**")
 
-        mycursor, _ = await the_database()
-        await mycursor.execute(f'SELECT * FROM AspirantActivity')
-        users = await mycursor.fetchall()
-        await mycursor.close()
+        users = await self.db.execute_query("SELECT * FROM AspirantActivity", fetch="all")
 
         description = ["Aspirants' activity statuses.\n\n"]
 
@@ -138,11 +134,8 @@ class AspirantActivity(AspirantsTable):
         for member in members:
             # Checks if the user is already in the table
             if  not await self.get_user(member.id):
-                mycursor, db = await the_database()
-                await mycursor.execute("INSERT INTO AspirantActivity (user_id, time, timestamp, messages) VALUES (%s, %s, %s, %s)",
+                await self.db.execute_query("INSERT INTO AspirantActivity (user_id, time, timestamp, messages) VALUES (%s, %s, %s, %s)",
                                     (member.id, 0, None, 1))
-                await db.commit()
-                await mycursor.close()
                 await ctx.send(f"**The member {member} was successfully added**")
             else:
                 return await ctx.send(f"**The user {member} is already been monitored**")
@@ -160,10 +153,7 @@ class AspirantActivity(AspirantsTable):
             return await ctx.send("**Please, inform a member**")
 
         for member in members:
-            mycursor, db = await the_database()
-            await mycursor.execute("DELETE FROM AspirantActivity WHERE user_id = %s", (member.id))
-            await db.commit()
-            await mycursor.close()
+            await self.db.execute_query("DELETE FROM AspirantActivity WHERE user_id = %s", (member.id,))
             await ctx.send(f"**The member {member} was successfully removed**")
 
 

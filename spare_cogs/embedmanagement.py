@@ -1,8 +1,8 @@
 import discord
 from discord.ext import commands
 from discord.utils import escape_mentions
-from typing import Any, List, Union, Dict
-from mysqldb import the_database
+from typing import List, Union, Dict
+from mysqldb import DatabaseCore
 import asyncio
 from datetime import datetime
 import os
@@ -17,6 +17,7 @@ class EmbedManagement(commands.Cog):
         """" Class initializing method. """
 
         self.client = client
+        self.db = DatabaseCore()
 
     @commands.Cog.listener()
     async def on_ready(self) -> None:
@@ -29,10 +30,7 @@ class EmbedManagement(commands.Cog):
         :param embed_name: The name of the embed to insert.
         """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("INSERT INTO EmbedNames VALUES (%s)", (embed_name,))
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("INSERT INTO EmbedNames VALUES (%s)", (embed_name,))
 
     async def delete_embed(self, embed_name: str) -> None:
         """ Deletes an embed from the DB.
@@ -47,32 +45,24 @@ class EmbedManagement(commands.Cog):
             "EmbedFields"
         ]
 
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM EmbedNames WHERE embed_name = %s", (embed_name,))
+        await self.db.execute_query("DELETE FROM EmbedNames WHERE embed_name = %s", (embed_name,))
         for field in fields:
             sql = "DELETE FROM " + field + " WHERE embed_name = %s"
-            await mycursor.execute(sql, (embed_name,))
-        await db.commit()
-        await mycursor.close()
+            await self.db.execute_query(sql, (embed_name,))
 
     async def delete_text_field(self, embed_name: str, field_index: int) -> bool:
         """ Deletes a text field from the DB.
         :param embed_name: The name of the embed which the field is gonna be deleted
         :param field_index: The index of the text field that is gonna be deleted from the embed. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("SELECT * FROM EmbedFields WHERE embed_name = %s", (embed_name,))
-        fields = await mycursor.fetchall()
+        fields = await self.db.execute_query("SELECT * FROM EmbedFields WHERE embed_name = %s", (embed_name,), fetch="all")
         try:
             the_field = fields[field_index-1]
             sql = "DELETE FROM EmbedFields WHERE embed_name = %s AND field_name = %s AND field_value = %s"
-            await mycursor.execute(sql, (embed_name, the_field[1], the_field[2]))
-            await db.commit()
+            await self.db.execute_query(sql, (embed_name, the_field[1], the_field[2]))
         except:
-            await mycursor.close()
             return False
         else:
-            await mycursor.close()
             return True
 
     async def delete_field(self, embed_name: str, field_name: str) -> None:
@@ -80,20 +70,13 @@ class EmbedManagement(commands.Cog):
         :param embed_name: The name of the embed which the field is gonna be deleted
         :param field_name: The field that is gonna be deleted from the embed. """
 
-        mycursor, db = await the_database()
         sql = "DELETE FROM " + field_name + " WHERE embed_name = %s"
-        await mycursor.execute(sql, (embed_name,))
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query(sql, (embed_name,))
 
     async def get_embed_names(self) -> List[str]:
         """ Gets all embed names from the DB. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("SELECT embed_name FROM EmbedNames")
-        embeds_list: List[str] = await mycursor.fetchall()
-        await mycursor.close()
-        return embeds_list
+        return await self.db.execute_query("SELECT embed_name FROM EmbedNames", fetch="all")
 
     async def get_embed_fields(self, embed_name: str) -> Dict[str, Union[None, List[str]]]:
         """ Get all embed fields from the DB if there are any.
@@ -111,24 +94,18 @@ class EmbedManagement(commands.Cog):
             "EmbedFields": None
         }
 
-        mycursor, db = await the_database()
         for field in fields:
             sql = "SELECT * FROM " + field + " WHERE embed_name = %s"
-            await mycursor.execute(sql, (embed_name,))
-            field_data: List[str] = await mycursor.fetchall()
+            field_data: List[str] = await self.db.execute_query(sql, (embed_name,), fetch="all")
             fields[field] = field_data[:]
 
-        await mycursor.close()
         return fields
 
     async def embed_exists(self, embed_name: str) -> bool:
         """ Checks if embed exists in the DB.
         :param embed_name: The name of embed which . """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("SELECT embed_name FROM EmbedNames WHERE embed_name = %s", (embed_name,))
-        exists = await mycursor.fetchone()
-        await mycursor.close()
+        exists = await self.db.execute_query("SELECT embed_name FROM EmbedNames WHERE embed_name = %s", (embed_name,), fetch="one")
         if exists:
             return True
         else:
@@ -350,19 +327,13 @@ class EmbedManagement(commands.Cog):
         if not confirmation:
             return
 
-        mycursor, db = await the_database()
-        await mycursor.execute("SELECT embed_name from EmbedAuthor WHERE embed_name = %s", (embed_name,))
-        exists = await mycursor.fetchall()
+        exists = await self.db.execute_query("SELECT embed_name from EmbedAuthor WHERE embed_name = %s", (embed_name,), fetch="all")
 
         if exists:
-            await mycursor.execute("UPDATE EmbedAuthor SET name = %s, icon_link = %s WHERE embed_name = %s", (name, icon_link, embed_name))
-            await db.commit()
-            await mycursor.close()
+            await self.db.execute_query("UPDATE EmbedAuthor SET name = %s, icon_link = %s WHERE embed_name = %s", (name, icon_link, embed_name))
             await ctx.send(f"**Updated `author` for {embed_name}!**")
         else:
-            await mycursor.execute("INSERT INTO EmbedAuthor (embed_name, name, icon_link) VALUES (%s, %s, %s)", (embed_name, name, icon_link))
-            await db.commit()
-            await mycursor.close()
+            await self.db.execute_query("INSERT INTO EmbedAuthor (embed_name, name, icon_link) VALUES (%s, %s, %s)", (embed_name, name, icon_link))
             await ctx.send(f"**Inserted `author` for {embed_name}!**")
 
     @edit.command(aliases=['tt'])
@@ -395,19 +366,13 @@ class EmbedManagement(commands.Cog):
         if not confirmation:
             return
 
-        mycursor, db = await the_database()
-        await mycursor.execute("SELECT embed_name from EmbedTitle WHERE embed_name = %s", (embed_name))
-        exists = await mycursor.fetchall()
+        exists = await self.db.execute_query("SELECT embed_name from EmbedTitle WHERE embed_name = %s", (embed_name), fetch="all")
 
         if exists:
-            await mycursor.execute("UPDATE EmbedTitle SET title = %s WHERE embed_name = %s", (title, embed_name))
-            await db.commit()
-            await mycursor.close()
+            await self.db.execute_query("UPDATE EmbedTitle SET title = %s WHERE embed_name = %s", (title, embed_name))
             await ctx.send(f"**Updated `title` for {embed_name}!**")
         else:
-            await mycursor.execute("INSERT INTO EmbedTitle (embed_name, title) VALUES (%s, %s)", (embed_name, title.title()))
-            await db.commit()
-            await mycursor.close()
+            await self.db.execute_query("INSERT INTO EmbedTitle (embed_name, title) VALUES (%s, %s)", (embed_name, title.title()))
             await ctx.send(f"**Inserted `title` for {embed_name}!**")
 
     @edit.command(aliases=['d', 'dc', 'desc'])
@@ -440,18 +405,12 @@ class EmbedManagement(commands.Cog):
         if not confirmation:
             return
 
-        mycursor, db = await the_database()
-        await mycursor.execute("SELECT embed_name from EmbedDescription WHERE embed_name = %s", (embed_name,))
-        exists = await mycursor.fetchall()
+        exists = await self.db.execute_query("SELECT embed_name from EmbedDescription WHERE embed_name = %s", (embed_name,), fetch="all")
         if exists:
-            await mycursor.execute("UPDATE EmbedDescription SET description_text = %s WHERE embed_name = %s", (description_text, embed_name))
-            await db.commit()
-            await mycursor.close()
+            await self.db.execute_query("UPDATE EmbedDescription SET description_text = %s WHERE embed_name = %s", (description_text, embed_name))
             await ctx.send(f"**Updated `description` for {embed_name}!**")
         else:
-            await mycursor.execute("INSERT INTO EmbedDescription (embed_name, description_text) VALUES (%s, %s)", (embed_name, description_text))
-            await db.commit()
-            await mycursor.close()
+            await self.db.execute_query("INSERT INTO EmbedDescription (embed_name, description_text) VALUES (%s, %s)", (embed_name, description_text))
             await ctx.send(f"**Inserted `description` for {embed_name}!**")
 
     @edit.command(aliases=['tn', 'th', 'thumb'])
@@ -484,19 +443,13 @@ class EmbedManagement(commands.Cog):
         if not confirmation:
             return
 
-        mycursor, db = await the_database()
-        await mycursor.execute("SELECT embed_name FROM EmbedThumbnail WHERE embed_name = %s", (embed_name,))
+        exists = await self.db.execute_query("SELECT embed_name FROM EmbedThumbnail WHERE embed_name = %s", (embed_name,), fetch="all")
 
-        exists = await mycursor.fetchall()
         if exists:
-            await mycursor.execute("UPDATE EmbedThumbnail SET icon_link = %s WHERE embed_name = %s", (icon_link, embed_name))
-            await db.commit()
-            await mycursor.close()
+            await self.db.execute_query("UPDATE EmbedThumbnail SET icon_link = %s WHERE embed_name = %s", (icon_link, embed_name))
             await ctx.send(f"**Updated `thumbnail` for {embed_name}!**")
         else:
-            await mycursor.execute("INSERT INTO EmbedThumbnail (embed_name, icon_link) VALUES (%s, %s)", (embed_name, icon_link))
-            await db.commit()
-            await mycursor.close()
+            await self.db.execute_query("INSERT INTO EmbedThumbnail (embed_name, icon_link) VALUES (%s, %s)", (embed_name, icon_link))
             await ctx.send(f"**Inserted `thumbnail` for {embed_name}!**")
 
     @edit.command(aliases=['i', 'im', 'img', 'pic'])
@@ -529,18 +482,12 @@ class EmbedManagement(commands.Cog):
         if not confirmation:
             return
 
-        mycursor, db = await the_database()
-        await mycursor.execute("SELECT embed_name FROM EmbedImage WHERE embed_name = %s", (embed_name,))
-        exists = await mycursor.fetchall()
+        exists = await self.db.execute_query("SELECT embed_name FROM EmbedImage WHERE embed_name = %s", (embed_name,), fetch="all")
         if exists:
-            await mycursor.execute("UPDATE EmbedImage SET image_link = %s WHERE embed_name = %s", (image_link, embed_name))
-            await db.commit()
-            await mycursor.close()
+            await self.db.execute_query("UPDATE EmbedImage SET image_link = %s WHERE embed_name = %s", (image_link, embed_name))
             await ctx.send(f"**Updated `image` for {embed_name}!**")
         else:
-            await mycursor.execute("INSERT INTO EmbedImage (embed_name, image_link) VALUES (%s, %s)", (embed_name, image_link))
-            await db.commit()
-            await mycursor.close()
+            await self.db.execute_query("INSERT INTO EmbedImage (embed_name, image_link) VALUES (%s, %s)", (embed_name, image_link))
             await ctx.send(f"**Inserted `image` for {embed_name}!**")
 
     @edit.command(aliases=['c', 'co', 'cl', 'clr', 'colour'])
@@ -573,18 +520,12 @@ class EmbedManagement(commands.Cog):
         if not confirmation:
             return
 
-        mycursor, db = await the_database()
-        await mycursor.execute("SELECT embed_name from EmbedColor WHERE embed_name = %s", (embed_name,))
-        exists = await mycursor.fetchall()
+        exists = await self.db.execute_query("SELECT embed_name from EmbedColor WHERE embed_name = %s", (embed_name,), fetch="all")
         if exists:
-            await mycursor.execute("UPDATE EmbedColor SET hex_color = %s WHERE embed_name = %s", (hex_color, embed_name))
-            await db.commit()
-            await mycursor.close()
+            await self.db.execute_query("UPDATE EmbedColor SET hex_color = %s WHERE embed_name = %s", (hex_color, embed_name))
             await ctx.send(f"**Updated `color` for {embed_name}!**")
         else:
-            await mycursor.execute("INSERT INTO EmbedColor (embed_name, hex_color) VALUES (%s, %s)", (embed_name, hex_color))
-            await db.commit()
-            await mycursor.close()
+            await self.db.execute_query("INSERT INTO EmbedColor (embed_name, hex_color) VALUES (%s, %s)", (embed_name, hex_color))
             await ctx.send(f"**Inserted `color` for {embed_name}!**")
 
     @edit.command(aliases=['ft', 'fo', 'foo', 'foot', 'ftr'])
@@ -624,18 +565,12 @@ class EmbedManagement(commands.Cog):
         if not confirmation:
             return
 
-        mycursor, db = await the_database()
-        await mycursor.execute("SELECT embed_name FROM EmbedFooter WHERE embed_name = %s", (embed_name,))
-        exists = await mycursor.fetchall()
+        exists = await self.db.execute_query("SELECT embed_name FROM EmbedFooter WHERE embed_name = %s", (embed_name,), fetch="all")
         if exists:
-            await mycursor.execute("UPDATE EmbedFooter SET text = %s, icon_link = %s WHERE embed_name = %s", (text, icon_link, embed_name))
-            await db.commit()
-            await mycursor.close()
+            await self.db.execute_query("UPDATE EmbedFooter SET text = %s, icon_link = %s WHERE embed_name = %s", (text, icon_link, embed_name))
             await ctx.send(f"**Updated `footer` for {embed_name}!**")
         else:
-            await mycursor.execute("INSERT INTO EmbedFooter (embed_name, text, icon_link) VALUES (%s, %s, %s)", (embed_name, text, icon_link))
-            await db.commit()
-            await mycursor.close()
+            await self.db.execute_query("INSERT INTO EmbedFooter (embed_name, text, icon_link) VALUES (%s, %s, %s)", (embed_name, text, icon_link))
             await ctx.send(f"**Inserted `footer` for {embed_name}!**")
 
     @edit.command(aliases=['ts', 'time'])
@@ -669,18 +604,12 @@ class EmbedManagement(commands.Cog):
         if not confirmation:
             return
 
-        mycursor, db = await the_database()
-        await mycursor.execute("SELECT embed_name FROM EmbedTimestamp WHERE embed_name = %s", (embed_name,))
-        exists = await mycursor.fetchall()
+        exists = await self.db.execute_query("SELECT embed_name FROM EmbedTimestamp WHERE embed_name = %s", (embed_name,), fetch="all")
         if exists:
-            await mycursor.execute("UPDATE EmbedTimestamp SET yes_no = %s WHERE embed_name = %s", (yes_no, embed_name))
-            await db.commit()
-            await mycursor.close()
+            await self.db.execute_query("UPDATE EmbedTimestamp SET yes_no = %s WHERE embed_name = %s", (yes_no, embed_name))
             await ctx.send(f"**Inserted `image` for {embed_name}!**")
         else:
-            await mycursor.execute("INSERT INTO EmbedTimestamp (embed_name, yes_no) VALUES (%s, %s)", (embed_name, yes_no.lower()))
-            await db.commit()
-            await mycursor.close()
+            await self.db.execute_query("INSERT INTO EmbedTimestamp (embed_name, yes_no) VALUES (%s, %s)", (embed_name, yes_no.lower()))
             await ctx.send(f"**Inserted `image` for {embed_name}!**")
 
     @edit.command(aliases=['fi', 'fld'])
@@ -726,12 +655,9 @@ class EmbedManagement(commands.Cog):
         confirmation = await self.reaction_confirmation(ctx, member, f"Name: {field_name} | Value: {field_value}")
         if not confirmation:
             return
-        mycursor, db = await the_database()
-        await mycursor.execute("""
+        await self.db.execute_query("""
             INSERT INTO EmbedFields (embed_name, field_name, field_value, field_inline)
             VALUES (%s, %s, %s, %s)""", (embed_name, field_name, field_value, field_inline))
-        await db.commit()
-        await mycursor.close()
         await ctx.send(f"**Inserted `text_field` for {embed_name}!**")
 
     # Prompts

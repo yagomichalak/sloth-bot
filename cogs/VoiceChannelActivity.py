@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands, tasks
-from mysqldb import the_database
+from mysqldb import DatabaseCore
 
 from datetime import datetime
 from pytz import timezone
@@ -25,6 +25,7 @@ class VoiceChannelActivity(*tool_cogs):
 
         self.client = client
         self.server_id = int(os.getenv('SERVER_ID', 123))
+        self.db = DatabaseCore()
 
     @commands.Cog.listener()
     async def on_ready(self) -> None:
@@ -93,15 +94,12 @@ class VoiceChannelActivity(*tool_cogs):
         if await self.table_voice_channel_activity_exists():
             return await ctx.send("**The __VoiceChannelActivity__ already exists!**")
 
-        mycursor, db = await the_database()
-        await mycursor.execute("""
+        await self.db.execute_query("""
             CREATE TABLE VoiceChannelActivity (
                 the_time TIME NOT NULL, channel_id BIGINT NOT NULL,
                 channel_name VARCHAR(50) NOT NULL, member_id BIGINT NOT NULL,
                 member_name VARCHAR(50) NOT NULL) DEFAULT CHARSET utf8mb4
         """)
-        await db.commit()
-        await mycursor.close()
         await ctx.send("**Table __VoiceChannelActivity__ created!**")
 
     @commands.command(hidden=True)
@@ -112,10 +110,7 @@ class VoiceChannelActivity(*tool_cogs):
         if not await self.table_voice_channel_activity_exists():
             return await ctx.send("**The __VoiceChannelActivity__ doesn't exist!**")
 
-        mycursor, db = await the_database()
-        await mycursor.execute("DROP TABLE VoiceChannelActivity")
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("DROP TABLE VoiceChannelActivity")
         await ctx.send("**Table __VoiceChannelActivity__ dropped!**")
 
     @commands.command(hidden=True)
@@ -126,22 +121,16 @@ class VoiceChannelActivity(*tool_cogs):
         if not await self.table_voice_channel_activity_exists():
             return await ctx.send("**The __VoiceChannelActivity__ doesn't exist yet!**")
 
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM VoiceChannelActivity")
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("DELETE FROM VoiceChannelActivity")
         await ctx.send("**Table __VoiceChannelActivity__ reset!**")
 
     async def insert_first_row(self, channel_members: List[Tuple[Union[int, str]]]) -> None:
         """ Inserts the first row of the minute with the info of all users who are in voice channels.
         :param channel_members: A list of tuples containing the individual members and their info. """
 
-        mycursor, db = await the_database()
-        await mycursor.executemany("""
+        await self.db.execute_querymany("""
             INSERT INTO VoiceChannelActivity (the_time, channel_id, channel_name, member_id, member_name)
             VALUES (%s, %s, %s, %s, %s)""", channel_members)
-        await db.commit()
-        await mycursor.close()
 
     async def insert_row(self, the_time: datetime, channel_id: int, channel_name: str, member_id: int, member_name: str) -> None:
         """ Inserts a row containing info of member and the voice channel that they're currently in.
@@ -151,12 +140,9 @@ class VoiceChannelActivity(*tool_cogs):
         :param member_id: The ID of the member.
         :param member_name: The name of the member. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("""
+        await self.db.execute_query("""
             INSERT INTO VoiceChannelActivity (the_time, channel_id, channel_name, member_id, member_name)
             VALUES (%s, %s, %s, %s, %s)""", (the_time, channel_id, channel_name, member_id, member_name))
-        await db.commit()
-        await mycursor.close()
 
     @tasks.loop(seconds=60)
     async def check_old_record_deletion_time(self, limit_hours: int = 6) -> None:
@@ -165,21 +151,19 @@ class VoiceChannelActivity(*tool_cogs):
         PS: If the number of registered hours in the DB is exceeded, the oldest records will be deleted,
         so the limit is satisfied again. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("SELECT DISTINCT HOUR(the_time) FROM VoiceChannelActivity")
-        hours = [h[0] for h in await mycursor.fetchall()]
+        hours = await self.db.execute_query("SELECT DISTINCT HOUR(the_time) FROM VoiceChannelActivity", fetch="all")
+        hours = [h[0] for h in await hours]
 
         if limit_hours < len(hours):
-            await mycursor.execute("DELETE FROM VoiceChannelActivity WHERE HOUR(the_time) = %s", (hours.pop(0),))
-            await db.commit()
+            await self.db.execute_query("DELETE FROM VoiceChannelActivity WHERE HOUR(the_time) = %s", (hours.pop(0),))
 
     async def get_hour_record_by_channel(self, channel: discord.TextChannel, time: str, time2: str = None) -> List[List[Union[datetime, str, int]]]:
         """ Gets all user records at a given hour and channel.
         :param channel_id: The ID of the channel to which you are filtering.
         :param time: The time to which you are filtering the search. """
 
-        mycursor, db = await the_database()
-        text = ''
+        records = []
+        text = ""
 
         if len(time) < 3:
             time = datetime.strptime(time, '%H')
@@ -187,17 +171,17 @@ class VoiceChannelActivity(*tool_cogs):
             # Checks whether user provided two values
             if time2:
                 time2 = datetime.strptime(time2, '%H')
-                await mycursor.execute("""
+                records = await self.db.execute_query("""
                     SELECT DISTINCT HOUR(the_time), member_name, member_id
                     FROM VoiceChannelActivity WHERE channel_id = %s AND HOUR(the_time) BETWEEN %s AND %s""",
-                    (channel.id, time.hour, time2.hour))
+                    (channel.id, time.hour, time2.hour), fetch="all")
 
                 text = f"Users who joined `{channel}` between `{time.hour}:00` and `{time2.hour}:59`:"
             else:
-                await mycursor.execute("""
+                records = await self.db.execute_query("""
                     SELECT DISTINCT HOUR(the_time), member_name, member_id
                     FROM VoiceChannelActivity WHERE channel_id = %s AND HOUR(the_time) = %s""",
-                    (channel.id, time.hour))
+                    (channel.id, time.hour), fetch="all")
 
                 text = f"Users who joined `{channel}` between `{time.hour}:00` and `{time.hour}:59`:"
 
@@ -212,10 +196,10 @@ class VoiceChannelActivity(*tool_cogs):
 
                 text = f"Users who joined `{channel}` between `{the_time1}` and `{the_time2}`:"
 
-                await mycursor.execute("""
+                records = await self.db.execute_query("""
                     SELECT DISTINCT the_time, member_name, member_id
                     FROM VoiceChannelActivity WHERE channel_id = %s AND the_time BETWEEN %s AND %s""",
-                    (channel.id, the_time1, the_time2))
+                    (channel.id, the_time1, the_time2), fetch="all")
 
             # If not, assumes the second value
             else:
@@ -227,13 +211,11 @@ class VoiceChannelActivity(*tool_cogs):
                     the_time2 = f"{time.hour}:59"
 
                 text = f"Users who joined `{channel}` between `{the_time1}` and `{the_time2}`:"
-                await mycursor.execute("""
+                records = await self.db.execute_query("""
                     SELECT DISTINCT the_time, member_name, member_id
                     FROM VoiceChannelActivity WHERE channel_id = %s AND the_time BETWEEN %s AND %s""",
-                    (channel.id, the_time1, the_time2))
+                    (channel.id, the_time1, the_time2), fetch="all")
 
-        records = await mycursor.fetchall()
-        await mycursor.close()
         return records, time, text
 
     async def get_user_record_by_time(self, member: discord.Member, time: str, time2: str = None) -> List[Union[int, str]]:
@@ -241,28 +223,28 @@ class VoiceChannelActivity(*tool_cogs):
         :param member: The member from whom you want to fetch information.
         :param time: The time at around the user that you are looking for has to have information. """
 
-        mycursor, _ = await the_database()
+        records = []
+        text = ""
 
-        text = ''
         # If in format (HOUR)
         if len(time) < 3:
             time = datetime.strptime(time, '%H')
             # Checks whether user provided two values
             if time2:
                 time2 = datetime.strptime(time2, '%H')
-                await mycursor.execute("""
+                records = await self.db.execute_query("""
                     SELECT DISTINCT HOUR(the_time), channel_id, channel_name,  member_id
                     FROM VoiceChannelActivity WHERE HOUR(the_time) BETWEEN %s AND %s AND member_id = %s""",
-                    (time.hour, time2.hour, member.id))
+                    (time.hour, time2.hour, member.id), fetch="all")
 
                 text = f"User between `{time.hour}` and `{time2.hour}` was in:"
 
             # If not, gets all values from that hour.
             else:
-                await mycursor.execute("""
+                records = await self.db.execute_query("""
                     SELECT DISTINCT HOUR(the_time), channel_id, channel_name,  member_id
                     FROM VoiceChannelActivity WHERE HOUR(the_time) = %s AND member_id = %s""",
-                    (time.hour, member.id))
+                    (time.hour, member.id), fetch="all")
 
                 text = f"User between `{time.hour}` and `{time.hour}` was in:"
 
@@ -276,11 +258,11 @@ class VoiceChannelActivity(*tool_cogs):
                 the_time1 = f"{time.hour}:{time.minute}"
                 the_time2 = f"{time2.hour}:{time2.minute}"
 
-                await mycursor.execute("""
+                records = await self.db.execute_query("""
                     SELECT DISTINCT the_time, channel_id, channel_name, member_id
                     FROM VoiceChannelActivity
                     WHERE the_time BETWEEN %s AND %s AND member_id = %s""",
-                    (the_time1, the_time2, member.id))
+                    (the_time1, the_time2, member.id), fetch="all")
 
                 text = f"{member} between `{the_time1}` and `{the_time2}` was in:"
 
@@ -298,14 +280,12 @@ class VoiceChannelActivity(*tool_cogs):
                     the_time2 = f"{time.hour}:59"
                     text = f"{member} between `{the_time1}` and `{the_time2}` was in:"
 
-                await mycursor.execute("""
+                records = await self.db.execute_query("""
                     SELECT DISTINCT the_time, channel_id, channel_name, member_id
                     FROM VoiceChannelActivity
                     WHERE the_time BETWEEN %s AND %s AND member_id = %s""",
-                    (the_time1, the_time2, member.id))
+                    (the_time1, the_time2, member.id), fetch="all")
 
-        records = await mycursor.fetchall()
-        await mycursor.close()
         return records, time, text
 
     async def format_time(self, time: str) -> str:
@@ -454,7 +434,6 @@ class VoiceChannelActivity(*tool_cogs):
         embed.set_footer(text=f"Requested by {target}", icon_url=target.display_avatar)
 
         return embed        
-
 
 
 def setup(client) -> None:

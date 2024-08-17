@@ -1,6 +1,5 @@
 import discord
 from discord.ext import commands
-from mysqldb import the_database
 from typing import Any, List, Dict, Union
 from extra import utils
 import os
@@ -14,6 +13,7 @@ senior_mod_role_id: int = int(os.getenv('SENIOR_MOD_ROLE_ID', 123))
 admin_role_id: int = int(os.getenv('ADMIN_ROLE_ID', 123))
 lesson_management_role_id: int = int(os.getenv('LESSON_MANAGEMENT_ROLE_ID', 123))
 real_event_manager_role_id: int = int(os.getenv('REAL_EVENT_MANAGER_ROLE_ID', 123))
+
 
 class ApplicationsTable(commands.Cog):
     """ Cog for managing applications. """
@@ -105,7 +105,6 @@ class ApplicationsTable(commands.Cog):
 
             await message.remove_reaction(payload.emoji, payload.member)
 
-
     async def format_application_pings(self, guild: discord.Guild, pings: List[Dict[str, Union[int, bool]]]) -> str:
         """ Formats pings for a specific application title.
         :param guild: The guild to get the users and roles from.
@@ -132,21 +131,13 @@ class ApplicationsTable(commands.Cog):
         """ Gets a application application from the database by message ID.
         :param message_id: The message ID. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("SELECT * FROM Applications WHERE message_id = %s", (message_id,))
-        application_app = await mycursor.fetchone()
-        await mycursor.close()
-        return application_app
+        return await self.db.execute_query("SELECT * FROM Applications WHERE message_id = %s", (message_id,), fetch="one")
 
     async def get_application_by_channel(self, channel_id: int) -> List[str]:
         """ Gets a application application from the database by channel ID.
         :param channel_id: The text channel ID. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("SELECT * FROM Applications WHERE txt_id = %s", (channel_id,))
-        application_app = await mycursor.fetchone()
-        await mycursor.close()
-        return application_app
+        return await self.db.execute_query("SELECT * FROM Applications WHERE txt_id = %s", (channel_id,), fetch="one")
 
     async def insert_application(self, message_id: int, applicant_id: int, application_type: str) -> None:
         """ Saves a application application into the database.
@@ -154,14 +145,11 @@ class ApplicationsTable(commands.Cog):
         :param applicant_id: The application ID.
         :param application_type: The type of the application. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute(
+        await self.db.execute_query(
             """
             INSERT INTO Applications (message_id, applicant_id, application_type)
             VALUES (%s, %s, %s)""", (message_id, applicant_id, application_type)
             )
-        await db.commit()
-        await mycursor.close()
 
     async def update_application(self, applicant_id: int, txt_id: int, vc_id: int, application_type: str) -> None:
         """ Updates the application; adding the txt and vc ids into it.
@@ -170,23 +158,17 @@ class ApplicationsTable(commands.Cog):
         :param vc_id: The voice channel ID.
         :param application_type: The type of application to update. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute(
+        await self.db.execute_query(
             """UPDATE Applications SET
             channel_open = 1, txt_id = %s, vc_id = %s
             WHERE applicant_id = %s AND application_type = %s""", (txt_id, vc_id, applicant_id, application_type)
             )
-        await db.commit()
-        await mycursor.close()
 
     async def delete_application(self, message_id: int) -> None:
         """ Deletes a application application from the database.
         :param message_id: The application message's ID. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM Applications WHERE message_id = %s", (message_id,))
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("DELETE FROM Applications WHERE message_id = %s", (message_id,))
 
     @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
@@ -196,8 +178,7 @@ class ApplicationsTable(commands.Cog):
         if await self.table_applications_exists():
             return await ctx.send("**Table `Applications` already exists!**")
 
-        mycursor, db = await the_database()
-        await mycursor.execute("""
+        await self.db.execute_query("""
             CREATE TABLE Applications (
                 message_id BIGINT, applicant_id BIGINT,
                 application_type VARCHAR(50),
@@ -205,8 +186,6 @@ class ApplicationsTable(commands.Cog):
                 txt_id BIGINT DEFAULT NULL, vc_id BIGINT DEFAULT NULL
             )""")
 
-        await db.commit()
-        await mycursor.close()
 
         await ctx.send("**Table `Applications` created!**")
 
@@ -218,10 +197,7 @@ class ApplicationsTable(commands.Cog):
         if not await self.table_applications_exists():
             return await ctx.send("**Table `Applications` doesn't exist!**")
 
-        mycursor, db = await the_database()
-        await mycursor.execute("DROP TABLE Applications")
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("DROP TABLE Applications")
 
         await ctx.send("**Table `Applications` dropped!**")
 
@@ -233,22 +209,11 @@ class ApplicationsTable(commands.Cog):
         if not await self.table_applications_exists():
             return await ctx.send("**Table `Applications` doesn't exist yet!**")
 
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM Applications")
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("DELETE FROM Applications")
 
         await ctx.send("**Table `Applications` reset!**")
 
     async def table_applications_exists(self) -> bool:
         """ Checks whether the Applications table exists. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("SHOW TABLE STATUS LIKE 'Applications'")
-        exists = await mycursor.fetchall()
-        await mycursor.close()
-
-        if len(exists):
-            return True
-        else:
-            return False
+        return await self.db.table_exists("Applications")

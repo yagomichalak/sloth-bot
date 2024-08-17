@@ -1,12 +1,12 @@
 import discord
 from discord.ext import commands
 from .player import Player, Skill
-from mysqldb import the_database
+from mysqldb import DatabaseCore
 from extra.menu import ConfirmSkill
 from extra import utils
 import os
 from datetime import datetime
-from typing import List, Union, Tuple, Any, Optional
+from typing import Optional
 
 bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID', 123))
 
@@ -17,6 +17,7 @@ class Metamorph(Player):
 
     def __init__(self, client) -> None:
         self.client = client
+        self.db = DatabaseCore()
 
     @commands.command(aliases=['transmutate', 'trans'])
     @Player.poisoned()
@@ -216,7 +217,6 @@ class Metamorph(Player):
 
         return transmutation_embed
 
-
     @commands.command()
     @Player.poisoned()
     @Player.skills_used(requirement=20)
@@ -305,7 +305,6 @@ class Metamorph(Player):
                 channel=ctx.channel, perpetrator_id=perpetrator.id, target_id=target.id, m_skill=m_skill)
             await ctx.send(embed=mirrored_skill_embed)
 
-
     async def get_mirrored_skill_embed(self, channel: discord.TextChannel, perpetrator_id: int, target_id: int, m_skill: str) -> discord.Embed:
         """ Makes an embedded message for a mirrored skill action.
         :param channel:
@@ -327,7 +326,6 @@ class Metamorph(Player):
 
         return mirrored_skill_embed
 
-
     async def handle_mirrored_skill(self, ctx: commands.Context, perpetrator: discord.Member, target: discord.Member, mirrored_class: str) -> None:
         """ Handles the usage of a mirrored skill.
         :param ctx: The context of the command.
@@ -344,7 +342,6 @@ class Metamorph(Player):
         except Exception as e:
             print(e)
             await ctx.send(f"**Something went wrong with it, {perpetrator.mention}!**")
-
     
     @commands.command()
     @Player.poisoned()
@@ -407,7 +404,6 @@ class Metamorph(Player):
         confirm = await ConfirmSkill(f"**Are you sure you want to spend `400łł` to use reborn, {perpetrator.mention}?**").prompt(ctx)
         if not confirm:
             return await ctx.send(f"**Not doing it then, {perpetrator.mention}!**")
-
 
         if perpetrator != target:
             new_ctx = ctx

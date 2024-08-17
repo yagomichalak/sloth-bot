@@ -1,14 +1,15 @@
-from datetime import time
 import discord
 from discord.ext import commands
-from mysqldb import the_database
-from typing import List, Optional, Tuple
+from mysqldb import DatabaseCore
+from typing import List, Tuple
+
 
 class UserMutedGalaxiesTable(commands.Cog):
     """ Class for managing the UserMutedGalaxies table and its methods. """
     
     def __init__(self, client) -> None:
         self.client = client
+        self.db = DatabaseCore()
 
     @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
@@ -21,14 +22,11 @@ class UserMutedGalaxiesTable(commands.Cog):
             return await ctx.send(f"**Table __UserMutedGalaxies__ already exists!, {member.mention}!**")
 
         await ctx.message.delete()
-        mycursor, db = await the_database()
-        await mycursor.execute("""CREATE TABLE UserMutedGalaxies (
+        await self.db.execute_query("""CREATE TABLE UserMutedGalaxies (
             user_id BIGINT NOT NULL,
             cat_id BIGINT NOT NULL,
             PRIMARY KEY (user_id, cat_id)
         )""")
-        await db.commit()
-        await mycursor.close()
 
         return await ctx.send(f"**Table __UserMutedGalaxies__ created!, {member.mention}!**")
 
@@ -43,10 +41,7 @@ class UserMutedGalaxiesTable(commands.Cog):
             return await ctx.send(f"**Table __UserMutedGalaxies__ doesn't exist!, {member.mention}!**")
 
         await ctx.message.delete()
-        mycursor, db = await the_database()
-        await mycursor.execute("DROP TABLE UserMutedGalaxies")
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("DROP TABLE UserMutedGalaxies")
 
         return await ctx.send(f"**Table __UserMutedGalaxies__ dropped!, {member.mention}!**")
 
@@ -61,50 +56,29 @@ class UserMutedGalaxiesTable(commands.Cog):
             return await ctx.send(f"**Table __UserMutedGalaxies__ doesn't exist yet, {member.mention}!**")
 
         await ctx.message.delete()
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM UserMutedGalaxies")
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("DELETE FROM UserMutedGalaxies")
 
         return await ctx.send(f"**Table __UserMutedGalaxies__ reset!, {member.mention}!**")
 
     async def check_table_user_muted_galaxies_exists(self) -> bool:
         """ Checks whether the UserMutedGalaxies table exists """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("SHOW TABLE STATUS LIKE 'UserMutedGalaxies'")
-        exists = await mycursor.fetchone()
-        await mycursor.close()
-
-        if exists:
-            return True
-        else:
-            return False
+        return await self.db.table_exists("UserMutedGalaxies")
 
     async def insert_user_muted_galaxies(self, muted_galaxies: List[Tuple[int, int]]) -> None:
         """ Inserts rows for a user in the UserMutedGalaxies table.
         :param muted_galaxies: The galaxies in which the user got muted. """
 
-        mycursor, db = await the_database()
-        await mycursor.executemany("INSERT INTO UserMutedGalaxies (user_id, cat_id) VALUES (%s, %s)", muted_galaxies)
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_querymany("INSERT INTO UserMutedGalaxies (user_id, cat_id) VALUES (%s, %s)", muted_galaxies)
 
     async def get_user_muted_galaxies(self, user_id: int) -> List[Tuple[int, int]]:
         """ Gets all Muted Galaxies of a user.
         :param user_id: The ID of the user. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("SELECT * FROM UserMutedGalaxies WHERE user_id = %s", (user_id,))
-        muted_galaxies = await mycursor.fetchall()
-        await mycursor.close()
-        return muted_galaxies
+        return await self.db.execute_query("SELECT * FROM UserMutedGalaxies WHERE user_id = %s", (user_id,), fetch="all")
 
     async def delete_user_muted_galaxies(self, user_id: int) -> None:
         """ Removes all muted galaxies rows from a user.
         :param user_id: The ID of the user. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM UserMutedGalaxies WHERE user_id = %s", (user_id,))
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("DELETE FROM UserMutedGalaxies WHERE user_id = %s", (user_id,))

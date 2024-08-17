@@ -1,7 +1,6 @@
-import discord
 from discord.ext import commands
-from mysqldb import the_database
 from typing import List
+
 
 class OpenChannels(commands.Cog):
     """ Cog for managing user open channels. """
@@ -10,11 +9,7 @@ class OpenChannels(commands.Cog):
         """ Checks whether the member has an open channel.
         :param member_id: The ID of the member to check. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("SELECT * FROM OpenChannels WHERE user_id = %s", (member_id,))
-        user = await mycursor.fetchone()
-        await mycursor.close()
-        return user
+        return await self.db.execute_query("SELECT * FROM OpenChannels WHERE user_id = %s", (member_id,), fetch="one")
 
     @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
@@ -24,11 +19,8 @@ class OpenChannels(commands.Cog):
         if await self.table_case_counter_exists():
             return await ctx.send("**Table __CaseCounter__ already exists!**")
 
-        mycursor, db = await the_database()
-        await mycursor.execute("CREATE TABLE CaseCounter (case_number bigint default 0)")
-        await mycursor.execute("INSERT INTO CaseCounter (case_number) VALUES (0)")
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("CREATE TABLE CaseCounter (case_number bigint default 0)")
+        await self.db.execute_query("INSERT INTO CaseCounter (case_number) VALUES (0)")
 
         await ctx.send("**Table __CaseCounter__ created!**")
 
@@ -40,10 +32,7 @@ class OpenChannels(commands.Cog):
         if not await self.table_case_counter_exists():
             return await ctx.send("**Table __CaseCounter__ doesn't exist!**")
 
-        mycursor, db = await the_database()
-        await mycursor.execute("DROP TABLE CaseCounter")
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("DROP TABLE CaseCounter")
 
         return await ctx.send("**Table __CaseCounter__ dropped!**")
 
@@ -55,25 +44,15 @@ class OpenChannels(commands.Cog):
         if not await self.table_case_counter_exists():
             return await ctx.send("**Table __CaseCounter__ doesn't exist yet!**")
 
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM CaseCounter")
-        await mycursor.execute("INSERT INTO CaseCounter (case_number) VALUES (0)")
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("DELETE FROM CaseCounter")
+        await self.db.execute_query("INSERT INTO CaseCounter (case_number) VALUES (0)")
 
         return await ctx.send("**Table __CaseCounter__ reset!**")
 
     async def table_case_counter_exists(self) -> bool:
         """ Checks whether the CaseCounter table exists. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("SHOW TABLE STATUS LIKE 'CaseCounter'")
-        table_info = await mycursor.fetchall()
-        await mycursor.close()
-        if len(table_info) == 0:
-            return False
-        else:
-            return True
+        return await self.db.table_exists("CaseCounter")
 
     @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
@@ -83,8 +62,7 @@ class OpenChannels(commands.Cog):
         if await self.table_open_channels_exists():
             return await ctx.send("**Table __OpenChannels__ already exists!**")
 
-        mycursor, db = await the_database()
-        await mycursor.execute("""
+        await self.db.execute_query("""
             CREATE TABLE OpenChannels (
                 user_id BIGINT,
                 channel_id BIGINT,
@@ -92,8 +70,6 @@ class OpenChannels(commands.Cog):
                 last_message_at BIGINT
             )
         """)
-        await db.commit()
-        await mycursor.close()
 
         await ctx.send("**Table __OpenChannels__ created!**")
 
@@ -105,10 +81,7 @@ class OpenChannels(commands.Cog):
         if not await self.table_open_channels_exists():
             return await ctx.send("**Table __OpenChannels__ doesn't exist!**")
 
-        mycursor, db = await the_database()
-        await mycursor.execute("DROP TABLE OpenChannels")
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("DROP TABLE OpenChannels")
 
         return await ctx.send("**Table __OpenChannels__ dropped!**")
 
@@ -120,64 +93,40 @@ class OpenChannels(commands.Cog):
         if not await self.table_open_channels_exists():
             return await ctx.send("**Table __OpenChannels__ doesn't exist yet!**")
 
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM OpenChannels")
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("DELETE FROM OpenChannels")
 
         return await ctx.send("**Table __OpenChannels__ reset!**")
 
     async def table_open_channels_exists(self) -> bool:
         """ Checks whether the OpenChannels table exists. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute(f"SHOW TABLE STATUS LIKE 'OpenChannels'")
-        table_info = await mycursor.fetchall()
-        await mycursor.close()
-
-        if len(table_info) == 0:
-            return False
-        else:
-            return True
+        return await self.db.table_exists("OpenChannels")
 
     async def get_case_number(self) -> List[int]:
         """ Gets the current case counting number. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("SELECT * FROM CaseCounter")
-        counter = await mycursor.fetchall()
-        await mycursor.close()
-        return counter
+        return await self.db.execute_query("SELECT * FROM CaseCounter", fetch="all")
 
     async def increase_case_number(self) -> None:
         """ Increases the current case counting number. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("UPDATE CaseCounter SET case_number = case_number + 1")
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("UPDATE CaseCounter SET case_number = case_number + 1")
 
     async def insert_user_open_channel(self, member_id: int, channel_id: int, current_ts: int) -> None:
         """ Inserts an open channel for a user.
         :param member_id: The ID of the user who opened the channel.
         :param channel_id: The ID of the channel they opened. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("""
+        await self.db.execute_query("""
             INSERT INTO OpenChannels (
                 user_id, channel_id, created_at, last_message_at
             ) VALUES (%s, %s, %s, %s)""", (member_id, channel_id, current_ts, current_ts))
-        await db.commit()
-        await mycursor.close()
 
     async def remove_user_open_channel(self, member_id: int) -> None:
         """ Removes an open channel.
         :param member_id: The ID of the member whose channel are gonna be deleted. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM OpenChannels WHERE user_id = %s", (member_id,))
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("DELETE FROM OpenChannels WHERE user_id = %s", (member_id,))
 
     async def get_case_channel(self, channel_id: int) -> List[List[int]]:
         """ Gets an open case channel.
@@ -185,33 +134,22 @@ class OpenChannels(commands.Cog):
         
         * Refactor this later so it returns just a list. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("SELECT * FROM OpenChannels WHERE channel_id = %s", (channel_id,))
-        channel = await mycursor.fetchall()
-        await mycursor.close()
-        return channel
+        return await self.db.execute_query("SELECT * FROM OpenChannels WHERE channel_id = %s", (channel_id,), fetch="all")
 
     async def update_case_timestamp(self, channel_id: int, current_ts: int) -> None:
         """ Updates the case last message timestamp.
         :param channel_id: The channel ID.
         :param current_ts: The current timestamp. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("""
+        await self.db.execute_query("""
             UPDATE OpenChannels SET last_message_at = %s WHERE channel_id = %s
         """, (current_ts, channel_id))
-        await db.commit()
-        await mycursor.close()
 
     async def get_inactive_cases(self, current_ts: int) -> List[List[int]]:
         """ Gets all case rooms that are inactive for 24h or more.
         :param current_ts: The current timestamp. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("""
+        return await self.db.execute_query("""
             SELECT * FROM OpenChannels
             WHERE %s - last_message_at >= 86400
-        """, (current_ts,))
-        danger_rooms = await mycursor.fetchall()
-        await mycursor.close()
-        return danger_rooms
+        """, (current_ts,), fetch="all")

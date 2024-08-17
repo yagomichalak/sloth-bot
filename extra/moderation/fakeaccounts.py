@@ -1,7 +1,7 @@
 
 import discord
 from discord.ext import commands
-from mysqldb import the_database
+from mysqldb import DatabaseCore
 from typing import List, Union
 from extra import utils
 from extra.prompt.menu import Confirm
@@ -9,10 +9,12 @@ import os
 
 allowed_roles = [int(os.getenv('OWNER_ROLE_ID', 123)), int(os.getenv('ADMIN_ROLE_ID', 123)), int(os.getenv('MOD_ROLE_ID', 123))]
 
+
 class ModerationFakeAccountsTable(commands.Cog):
     
     def __init__(self, client) -> None:
         self.client = client
+        self.db = DatabaseCore()
 
     @commands.command(aliases=['link_fake', 'linkfake', 'add_fake', 'addfake', 'lfa'])
     @utils.is_allowed(allowed_roles)
@@ -101,7 +103,6 @@ class ModerationFakeAccountsTable(commands.Cog):
         embed.set_footer(text=f"Requested by {author}", icon_url=author.display_avatar)
         await ctx.send(embed=embed)
 
-
     @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
     async def create_table_fake_accounts(self, ctx) -> None:
@@ -111,14 +112,11 @@ class ModerationFakeAccountsTable(commands.Cog):
             return await ctx.send("**Table __FakeAccounts__ already exists!**")
 
         await ctx.message.delete()
-        mycursor, db = await the_database()
-        await mycursor.execute("""CREATE TABLE FakeAccounts (
+        await self.db.execute_query("""CREATE TABLE FakeAccounts (
             user_id BIGINT NOT NULL, 
             fake_user_id BIGINT NOT NULL,
             PRIMARY KEY (user_id, fake_user_id)
             )""")
-        await db.commit()
-        await mycursor.close()
 
         return await ctx.send("**Table __FakeAccounts__ created!**", delete_after=3)
 
@@ -130,10 +128,7 @@ class ModerationFakeAccountsTable(commands.Cog):
         if not await self.check_table_fake_accounts_exists():
             return await ctx.send("**Table __FakeAccounts__ doesn't exist!**")
         await ctx.message.delete()
-        mycursor, db = await the_database()
-        await mycursor.execute("DROP TABLE FakeAccounts")
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("DROP TABLE FakeAccounts")
 
         return await ctx.send("**Table __FakeAccounts__ dropped!**", delete_after=3)
 
@@ -146,43 +141,25 @@ class ModerationFakeAccountsTable(commands.Cog):
             return await ctx.send("**Table __FakeAccounts__ doesn't exist yet**")
 
         await ctx.message.delete()
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM FakeAccounts")
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("DELETE FROM FakeAccounts")
 
         return await ctx.send("**Table __FakeAccounts__ reset!**", delete_after=3)
 
     async def check_table_fake_accounts_exists(self) -> bool:
         """ Checks if the FakeAccounts table exists """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("SHOW TABLE STATUS LIKE 'FakeAccounts'")
-        table_info = await mycursor.fetchall()
-        await mycursor.close()
-
-        if len(table_info) == 0:
-            return False
-
-        else:
-            return True
-
-    
+        return await self.db.table_exists("FakeAccounts")
 
     async def get_fake_account(self, member_id: int, fake_member_id: int) -> List[int]:
         """ Gets a specific fake account.
         :param member_id: The ID of the user's main account.
         :param fake_member_id: The ID of the user's fake account. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("""
+        return await self.db.execute_query("""
         SELECT * FROM FakeAccounts 
         WHERE user_id = %s AND fake_user_id = %s
         OR user_id = %s AND fake_user_id = %s
-        """, (member_id, fake_member_id, fake_member_id, member_id))
-        fake_account = await mycursor.fetchone()
-        await mycursor.close()
-        return fake_account
+        """, (member_id, fake_member_id, fake_member_id, member_id), fetch="one")
 
     async def get_fake_accounts(self, account_id: int) -> List[List[int]]:
         """ Gets all fake account associations with a user account.
@@ -190,57 +167,42 @@ class ModerationFakeAccountsTable(commands.Cog):
 
         all_fake_accounts = []
 
-        mycursor, _ = await the_database()
         sql = "SELECT * FROM FakeAccounts WHERE user_id = %s OR fake_user_id = %s"
-        await mycursor.execute(sql, (account_id, account_id))
-        origin = await mycursor.fetchall()
+        origin = await self.db.execute_query(sql, (account_id, account_id), fetch="all")
         all_fake_accounts.extend(origin)
 
         for fake_account in all_fake_accounts:
             accounts = []
 
             # First combination
-            await mycursor.execute(sql, (fake_account[0], fake_account[0]))
-            first = await mycursor.fetchall()
+            first = await self.db.execute_query(sql, (fake_account[0], fake_account[0]), fetch="all")
             accounts.extend(first)
 
             # Second combination
-            await mycursor.execute(sql, (fake_account[1], fake_account[1]))
-            second = await mycursor.fetchall()
+            second = await self.db.execute_query(sql, (fake_account[1], fake_account[1]), fetch="all")
             accounts.extend(second)
 
             for account in list(set(accounts)):
                 if account not in all_fake_accounts:
                     all_fake_accounts.append(account)
 
-        await mycursor.close()
         return list(set(all_fake_accounts))
-
     
     async def insert_fake_account(self, user_id: int, fake_account_id: int) -> None:
         """ Inserts a fake account association into the database.
         :param user_id: The ID of the user's main account.
         :param fake_account_id: The ID of the user's fake account. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("INSERT INTO FakeAccounts (user_id, fake_user_id) VALUES (%s, %s)", (user_id, fake_account_id))
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("INSERT INTO FakeAccounts (user_id, fake_user_id) VALUES (%s, %s)", (user_id, fake_account_id))
 
     async def delete_fake_account(self, fake_account_id: int) -> None:
         """ Deletes associations with a fake account.
         :param fake_account_id: The ID of the fake account. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM FakeAccounts WHERE fake_user_id = %s", (fake_account_id,))
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("DELETE FROM FakeAccounts WHERE fake_user_id = %s", (fake_account_id,))
 
     async def delete_fake_accounts(self, user_id: int) -> None:
         """ Deletes associations with all fake accounts.
         :param user_id: The ID of the user's main account. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM FakeAccounts WHERE user_id = %s OR fake_user_id = %s", (user_id, user_id))
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("DELETE FROM FakeAccounts WHERE user_id = %s OR fake_user_id = %s", (user_id, user_id))

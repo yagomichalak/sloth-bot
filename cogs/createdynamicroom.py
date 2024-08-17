@@ -3,7 +3,7 @@ from extra import utils
 from discord.ext import commands, tasks
 import asyncio
 import os
-from mysqldb import *
+from mysqldb import DatabaseCore
 from typing import List, Union, Any, Dict
 from extra.select import LanguageRoomSelect
 
@@ -32,10 +32,7 @@ class DynRoomUserVCstampDatabase:
         await ctx.message.delete()
         if await self.table_user_dr_vc_ts_exists():
             return await ctx.send("**Table __DynRoomUserVCstamp__ already exists!**")
-        mycursor, db = await the_database()
-        await mycursor.execute("CREATE TABLE DynRoomUserVCstamp (user_id bigint, user_vc_ts bigint)")
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("CREATE TABLE DynRoomUserVCstamp (user_id bigint, user_vc_ts bigint)")
 
         return await ctx.send("**Table __DynRoomUserVCstamp__ created!**", delete_after=5)
 
@@ -47,10 +44,7 @@ class DynRoomUserVCstampDatabase:
         await ctx.message.delete()
         if not await self.table_user_dr_vc_ts_exists():
             return await ctx.send("**Table __DynRoomUserVCstamp__ doesn't exist!**")
-        mycursor, db = await the_database()
-        await mycursor.execute("DROP TABLE DynRoomUserVCstamp")
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("DROP TABLE DynRoomUserVCstamp")
 
         return await ctx.send("**Table __DynRoomUserVCstamp__ dropped!**", delete_after=5)
 
@@ -62,42 +56,28 @@ class DynRoomUserVCstampDatabase:
         await ctx.message.delete()
         if not await self.table_user_dr_vc_ts_exists():
             return await ctx.send("**Table __DynRoomUserVCstamp__ doesn't exist yet!**")
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM DynRoomUserVCstamp")
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("DELETE FROM DynRoomUserVCstamp")
 
         return await ctx.send("**Table __DynRoomUserVCstamp__ reset!**", delete_after=5)
 
     async def table_user_dr_vc_ts_exists(self) -> bool:
         """ Checks whether the DynRoomUserVCstamp table exists. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("SHOW TABLE STATUS LIKE 'DynRoomUserVCstamp'")
-        table_info = await mycursor.fetchall()
-        await mycursor.close()
-
-        return len(table_info) != 0
+        return await self.db.table_exists("DynRoomUserVCstamp")
 
     async def update_user_dr_vc_ts(self, user_id: int, new_ts: int) -> None:
         """ Updates the user's DynamicRoom voice channel join timestamp.
         :param user_id: The ID of the user.
         :param new_ts: The new/current timestamp. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("UPDATE DynRoomUserVCstamp SET user_vc_ts = %s WHERE user_id = %s", (new_ts, user_id))
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("UPDATE DynRoomUserVCstamp SET user_vc_ts = %s WHERE user_id = %s", (new_ts, user_id))
 
     async def insert_user_dr_vc(self, user_id: int, the_time: int) -> None:
         """ Updates the user's DynamicRoom voice channel join timestamp.
         :param user_id: The ID of the user.
         :param the_time: The current time. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("INSERT INTO DynRoomUserVCstamp (user_id, user_vc_ts) VALUES (%s, %s)", (user_id, the_time - 61))
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("INSERT INTO DynRoomUserVCstamp (user_id, user_vc_ts) VALUES (%s, %s)", (user_id, the_time - 61))
 
     async def upsert_user_dr_vc_ts(self, user_id: int, the_time: int, object_form: bool=False) -> Union[List[List[object]], DynRoomUserVCstamp]:
         """ Gets the user voice channel timestamp, and insert them into the database
@@ -106,18 +86,15 @@ class DynRoomUserVCstampDatabase:
         :param the_time: The current time.
         :param object_form: If the result should be in object form. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("SELECT * FROM DynRoomUserVCstamp WHERE user_id = %s", (user_id,))
-        row = await mycursor.fetchall()
-        await mycursor.close()
+        row, description = await self.db.execute_query("SELECT * FROM DynRoomUserVCstamp WHERE user_id = %s", (user_id,), fetch="all", description=True)
 
         if not row:
             await self.insert_user_dr_vc(user_id, the_time)
             return await self.upsert_user_dr_vc_ts(user_id, the_time, object_form)
 
         if object_form:
-            # this will extract row headers
-            row_headers = [x[0] for x in mycursor.description]
+            # This will extract row headers
+            row_headers = [x[0] for x in description]
             json_data = []
             for result in row:
                 json_data.append(dict(zip(row_headers, result)))
@@ -152,14 +129,11 @@ class DynamicRoomDatabase:
         :param vc_id: The voice channel ID.
         :param object_form: If the result should be in object form. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("SELECT * FROM DynamicRoom WHERE vc_id = %s", (vc_id,))
-        dynamic_rooms = await mycursor.fetchall()
-        await mycursor.close()
+        dynamic_rooms, description = await self.db.execute_query("SELECT * FROM DynamicRoom WHERE vc_id = %s", (vc_id,), fetch="all", description=True)
 
         if object_form:
-            # this will extract row headers
-            row_headers = [x[0] for x in mycursor.description]
+            # This will extract row headers
+            row_headers = [x[0] for x in description]
             json_data = []
             for result in dynamic_rooms:
                 json_data.append(dict(zip(row_headers, result)))
@@ -176,23 +150,17 @@ class DynamicRoomDatabase:
         :param vc_id: The voice channel ID.
         :param the_time: time time to upsert. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("UPDATE DynamicRoom SET empty_since_ts = %s WHERE vc_id = %s", (the_time, vc_id))
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("UPDATE DynamicRoom SET empty_since_ts = %s WHERE vc_id = %s", (the_time, vc_id))
 
     async def get_all_dynamic_rooms(self, object_form: bool=False) -> Union[List[List[object]], List[DynamicRoom]]:
         """ Get all rows from DynamicRoom table.
         :param object_form: If the result should be in object form. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("SELECT * FROM DynamicRoom")
-        rooms = await mycursor.fetchall()
-        await mycursor.close()
+        rooms, description = await self.db.execute_query("SELECT * FROM DynamicRoom", fetch="all", description=True)
 
         if object_form:
-            # this will extract row headers
-            row_headers = [x[0] for x in mycursor.description]
+            # This will extract row headers
+            row_headers = [x[0] for x in description]
             json_data = []
             for result in rooms:
                 json_data.append(dict(zip(row_headers, result)))
@@ -206,20 +174,12 @@ class DynamicRoomDatabase:
         :param user_vc: The voice channel ID.
         :param user_txt: The voice channel timestamp. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("INSERT INTO DynamicRoom (guild_id, room_id, vc_id, room_ts, is_perma_room) VALUES (%s, %s, %s, %s, %s)", (guild_id, room_id, vc_id, room_ts, is_perma_room))
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("INSERT INTO DynamicRoom (guild_id, room_id, vc_id, room_ts, is_perma_room) VALUES (%s, %s, %s, %s, %s)", (guild_id, room_id, vc_id, room_ts, is_perma_room))
 
     async def table_dynamic_rooms_exists(self) -> bool:
         """ Checks whether the DynamicRoom table exists. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("SHOW TABLE STATUS LIKE 'DynamicRoom'")
-        table_info = await mycursor.fetchall()
-        await mycursor.close()
-
-        return any(table_info)
+        return await self.db.table_exists("DynamicRoom")
 
     @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
@@ -229,10 +189,7 @@ class DynamicRoomDatabase:
         if await self.table_dynamic_rooms_exists():
             return await ctx.send("**Table __DynamicRoom__ already exists!**")
 
-        mycursor, db = await the_database()
-        await mycursor.execute("CREATE TABLE DynamicRoom (room_id BIGINT, vc_id BIGINT, room_ts BIGINT)")
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("CREATE TABLE DynamicRoom (room_id BIGINT, vc_id BIGINT, room_ts BIGINT)")
 
         return await ctx.send("**Table __DynamicRoom__ created!**")
 
@@ -244,10 +201,7 @@ class DynamicRoomDatabase:
         if not await self.table_dynamic_rooms_exists():
             return await ctx.send("**Table __DynamicRoom__ doesn't exist!**")
 
-        mycursor, db = await the_database()
-        await mycursor.execute("DROP TABLE DynamicRoom")
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("DROP TABLE DynamicRoom")
 
         return await ctx.send("**Table __DynamicRoom__ dropped!**")
 
@@ -259,48 +213,31 @@ class DynamicRoomDatabase:
         if not await self.table_dynamic_rooms_exists():
             return await ctx.send("**Table __DynamicRoom__ doesn't exist yet!**")
 
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM DynamicRoom")
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("DELETE FROM DynamicRoom")
 
         return await ctx.send("**Table __DynamicRoom__ reset!**")
 
     async def make_perma_dynamic_room(self, vc_id: int) -> None:
-        query = ""
-        if vc_id != 0:
-            query = ""
         
-        mycursor, db = await the_database()
-        await mycursor.execute("UPDATE DynamicRoom SET is_perma_room = true WHERE vc_id = %s", (vc_id,))
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("UPDATE DynamicRoom SET is_perma_room = true WHERE vc_id = %s", (vc_id,))
 
     async def get_count_by_room_ids(self, room_ids: List[int]) -> List[List[object]]:
         """ Returns count of room given ids.
         :param room_ids: The room ids.
         :param object_form: If the result should be in object form. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("SELECT COUNT(room_id), room_id FROM DynamicRoom GROUP BY room_id HAVING room_id IN %s", (room_ids,))
-        rooms = await mycursor.fetchall()
-        await mycursor.close()
-
-        return rooms
+        return await self.db.execute_query("SELECT COUNT(room_id), room_id FROM DynamicRoom GROUP BY room_id HAVING room_id IN %s", (room_ids,), fetch="all")
 
     async def get_dynamic_room_by_room_id(self, room_id: int, object_form: bool=False):
         """ Return dynamic room given room id.
         :param room_id: The room id.
         :param object_form: If the result should be in object form. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("SELECT * FROM DynamicRoom WHERE room_id = %s", (room_id,))
-        rooms = await mycursor.fetchall()
-        await mycursor.close()
+        rooms, description = await self.db.execute_query("SELECT * FROM DynamicRoom WHERE room_id = %s", (room_id,), fetch="all", description=True)
 
         if object_form:
-            # this will extract row headers
-            row_headers = [x[0] for x in mycursor.description]
+            # This will extract row headers
+            row_headers = [x[0] for x in description]
             json_data = []
             for result in rooms:
                 json_data.append(dict(zip(row_headers, result)))
@@ -325,19 +262,15 @@ class LanguageRoom:
 
 class LanguageRoomDatabase:
     def __init__(self):
-        pass
+        
+        self.db = DatabaseCore()
 
     # ===== LanguageRoom related functions =====
 
     async def table_language_room_exists(self) -> bool:
         """ Checks whether the LanguageRoom table exists. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("SHOW TABLE STATUS LIKE 'LanguageRoom'")
-        table_info = await mycursor.fetchall()
-        await mycursor.close()
-
-        return len(table_info) != 0
+        return await self.db.table_exists("LanguageRoom")
 
     @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
@@ -347,10 +280,7 @@ class LanguageRoomDatabase:
         if await self.table_language_room_exists():
             return await ctx.send("**Table __LanguageRoom__ already exists!**")
 
-        mycursor, db = await the_database()
-        await mycursor.execute("CREATE TABLE LanguageRoom (room_id SERIAL, english_name VARCHAR(32), room_name BLOB, room_quant INT, room_capacity INT)")
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("CREATE TABLE LanguageRoom (room_id SERIAL, english_name VARCHAR(32), room_name BLOB, room_quant INT, room_capacity INT)")
 
         return await ctx.send("**Table __LanguageRoom__ created!**")
 
@@ -362,38 +292,25 @@ class LanguageRoomDatabase:
         if not await self.table_language_room_exists():
             return await ctx.send("**Table __LanguageRoom__ doesn't exist!**")
 
-        mycursor, db = await the_database()
-        await mycursor.execute("DROP TABLE LanguageRoom")
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("DROP TABLE LanguageRoom")
 
         return await ctx.send("**Table __LanguageRoom__ dropped!**")
 
     async def table_language_room_exists(self) -> bool:
         """ Checks whether the LanguageRoom table exists. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("SHOW TABLE STATUS LIKE 'LanguageRoom'")
-        table_info = await mycursor.fetchall()
-        await mycursor.close()
-
-        return len(table_info) != 0
+        return await self.db.table_exists("LanguageRoom")
 
     async def get_rooms_by_ids(self, ids: set, object_form: bool=False) -> Union[List[List[object]], List[DynamicRoom]]:
         """ Returns room data from given ids.
         :param ids: The room name.
         :param object_form: If the result should be in object form. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("SELECT * FROM LanguageRoom WHERE room_id IN %s", (tuple(ids),))
-        rooms = await mycursor.fetchall()
-        await mycursor.close()
-
-        # print("rooms:", rooms)
+        rooms, description = await self.db.execute_query("SELECT * FROM LanguageRoom WHERE room_id IN %s", (tuple(ids),), fetch="all", description=True)
 
         if object_form:
-            # this will extract row headers
-            row_headers = [x[0] for x in mycursor.description]
+            # This will extract row headers
+            row_headers = [x[0] for x in description]
             json_data = []
             for result in rooms:
                 json_data.append(dict(zip(row_headers, result)))
@@ -405,22 +322,16 @@ class LanguageRoomDatabase:
         """ Deletes a a Dynamic Room by room ID.
         :param vc_id: The vc_id of the channel. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM DynamicRoom WHERE vc_id = %s", (vc_id,))
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("DELETE FROM DynamicRoom WHERE vc_id = %s", (vc_id,))
 
     async def get_language_room_by_id(self, room_id: int, object_form: bool=False) -> Union[List[List[object]], LanguageRoom]:
         """ Get room id in LanguageRoom table. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("SELECT * FROM LanguageRoom WHERE room_id = %s", (room_id,))
-        row = await mycursor.fetchall()
-        await mycursor.close()
+        row, description = await self.db.execute_query("SELECT * FROM LanguageRoom WHERE room_id = %s", (room_id,), fetch="all", description=True)
 
         if object_form:
-            # this will extract row headers
-            row_headers = [x[0] for x in mycursor.description]
+            # This will extract row headers
+            row_headers = [x[0] for x in description]
             json_data = []
             for result in row:
                 json_data.append(dict(zip(row_headers, result)))
@@ -432,14 +343,11 @@ class LanguageRoomDatabase:
     async def get_all_language_room(self, object_form: bool=False) -> Union[List[List[object]], List[DynamicRoom]]:
         """ Get room id in LanguageRoom table. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("SELECT * FROM LanguageRoom")
-        row = await mycursor.fetchall()
-        await mycursor.close()
+        row, description = await self.db.execute_query("SELECT * FROM LanguageRoom", fetch="all", description=True)
 
         if object_form:
-            # this will extract row headers
-            row_headers = [x[0] for x in mycursor.description]
+            # This will extract row headers
+            row_headers = [x[0] for x in description]
             json_data = []
             for result in row:
                 json_data.append(dict(zip(row_headers, result)))
@@ -469,14 +377,12 @@ class LanguageRoomPermissionsDatabase:
         """ Gets LanguageChannel Permissions by room ID.
         :param room_id: The room ID. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("SELECT * FROM LanguageRoomPermissions WHERE room_id = %s", (room_id,))
-        language_room_permissions = await mycursor.fetchall()
-        await mycursor.close()
+        language_room_permissions, description = await self.db.execute_query(
+            "SELECT * FROM LanguageRoomPermissions WHERE room_id = %s", (room_id,), fetch="all", description=True)
 
         if object_form:
-            # this will extract row headers
-            row_headers = [x[0] for x in mycursor.description]
+            # This will extract row headers
+            row_headers = [x[0] for x in description]
             json_data = []
             for result in language_room_permissions:
                 json_data.append(dict(zip(row_headers, result)))
@@ -500,14 +406,11 @@ class LanguageRoomPermissionsDatabase:
 
         # print(query)
 
-        mycursor, db = await the_database()
-        await mycursor.execute(query)
-        available_rooms = await mycursor.fetchall()
-        await mycursor.close()
+        available_rooms, description = await self.db.execute_query(query, fetch="all", description=True)
 
         if object_form:
-            # this will extract row headers
-            row_headers = [x[0] for x in mycursor.description]
+            # This will extract row headers
+            row_headers = [x[0] for x in description]
             json_data = []
             for result in available_rooms:
                 json_data.append(dict(zip(row_headers, result)))
@@ -533,6 +436,7 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
         self.language_rooms = None
         self.error_log = None
         self.error_log_id = int(os.getenv('ERROR_LOG_CHANNEL_ID', 123))
+        self.db = DatabaseCore()
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -608,13 +512,10 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
     async def setup_dynamic_rooms_callback(self) -> None:
         """ Callback for the setup dynamic rooms commands. """
 
-        mycursor, db = await the_database()
         sql_file = open("./sql/create_dynamic_room_setup.sql", encoding='utf-8')
         sql_as_string = sql_file.read()
         sql_file.close()
-        await mycursor.execute(sql_as_string)
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query(sql_as_string)
 
     async def prefetch_language_room(self):
         """ Prefetches language rooms from database """

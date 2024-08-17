@@ -1,11 +1,11 @@
-import discord
 from discord.ext import commands
-from mysqldb import the_database
-from typing import List, Union
+from mysqldb import DatabaseCore
+from typing import List
 from extra import utils
 import os
 
 afk_channel_id = int(os.getenv('AFK_CHANNEL_ID', 123))
+
 
 class UserVoiceSystem(commands.Cog):
     """ Cog for the inner systems of UserVoice events. """
@@ -14,7 +14,7 @@ class UserVoiceSystem(commands.Cog):
         """ Class init method. """
 
         self.client = client
-
+        self.db = DatabaseCore()
 
     @commands.Cog.listener(name="on_voice_state_update")
     async def on_voice_state_update_join_leave(self, member, before, after) -> None:
@@ -272,10 +272,7 @@ class UserServerActivityTable(commands.Cog):
         if await self.check_user_server_activity_table_exists():
             return await ctx.send("The `UserServerActivity` already exists!**")
 
-        mycursor, db = await the_database()
-        await mycursor.execute("CREATE TABLE UserServerActivity (user_id BIGINT, user_messages BIGINT, user_time BIGINT, user_timestamp BIGINT DEFAULT NULL)")
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("CREATE TABLE UserServerActivity (user_id BIGINT, user_messages BIGINT, user_time BIGINT, user_timestamp BIGINT DEFAULT NULL)")
 
         return await ctx.send("**Table `UserServerActivity` created!**")
 
@@ -289,10 +286,7 @@ class UserServerActivityTable(commands.Cog):
         if not await self.check_user_server_activity_table_exists():
             return await ctx.send("The `UserServerActivity` doesn't exist!**")
 
-        mycursor, db = await the_database()
-        await mycursor.execute("DROP TABLE UserServerActivity")
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("DROP TABLE UserServerActivity")
 
         return await ctx.send("**Table `UserServerActivity` dropped!**")
 
@@ -305,10 +299,7 @@ class UserServerActivityTable(commands.Cog):
         if not await self.check_user_server_activity_table_exists():
             return await ctx.send("The `UserServerActivity` doesn't exist yet!**")
 
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM UserServerActivity")
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("DELETE FROM UserServerActivity")
         return await ctx.send("**Table `UserServerActivity` reset!**")
 
     # ===== SHOW =====
@@ -316,14 +307,7 @@ class UserServerActivityTable(commands.Cog):
     async def check_user_server_activity_table_exists(self) -> bool:
         """ Checks whether the UserServerActivity table exists. """
         
-        mycursor, _ = await the_database()
-        await mycursor.execute("SHOW TABLE STATUS LIKE 'UserServerActivity'")
-        exists = await mycursor.fetchone()
-        await mycursor.close()
-        if exists:
-            return True
-        else:
-            return False
+        return await self.db.table_exists("UserServerActivity")
 
     # ===== INSERT =====
     async def insert_user_server_activity(self, user_id: int, add_msg: int, new_ts: int = None) -> None:
@@ -332,12 +316,9 @@ class UserServerActivityTable(commands.Cog):
         :param add_msg: The initial message counter for the user to have.
         :param new_ts: The current timestamp. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute(
+        await self.db.execute_query(
             "INSERT INTO UserServerActivity (user_id, user_messages, user_time, user_timestamp) VALUES (%s, %s, %s, %s)",
             (user_id, add_msg, 0, new_ts))
-        await db.commit()
-        await mycursor.close()
 
     # ===== SELECT =====
 
@@ -345,11 +326,7 @@ class UserServerActivityTable(commands.Cog):
         """ Gets a user from the UserServerActivity table.
         :param user_id: The ID of the user to get. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("SELECT * FROM UserServerActivity WHERE user_id = %s", (user_id,))
-        user_info = await mycursor.fetchall()
-        await mycursor.close()
-        return user_info
+        return await self.db.execute_query("SELECT * FROM UserServerActivity WHERE user_id = %s", (user_id,), fetch="all")
 
     # ===== UPDATE =====
     async def update_user_server_messages(self, user_id: int, add_msg: int) -> None:
@@ -357,10 +334,7 @@ class UserServerActivityTable(commands.Cog):
         :param user_id: The ID of the user to update.
         :param add_msg: The increment to apply to their current message counter. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("UPDATE UserServerActivity SET user_messages = user_messages + %s WHERE user_id = %s", (add_msg, user_id))
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("UPDATE UserServerActivity SET user_messages = user_messages + %s WHERE user_id = %s", (add_msg, user_id))
 
     async def update_user_server_time(self, user_id: int, increment: int, current_ts: int = None) -> None:
         """ Updates the user's voice time information.
@@ -368,20 +342,13 @@ class UserServerActivityTable(commands.Cog):
         :param increment: The increment value in seconds to apply.
         :param current_ts: The current timestamp. [Optional] """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("""
+        await self.db.execute_query("""
             UPDATE UserServerActivity SET user_time = user_time + %s, user_timestamp = %s WHERE user_id = %s
             """, (increment, current_ts, user_id))
-        await db.commit()
-        await mycursor.close()
 
     async def update_user_server_timestamp(self, user_id: int, new_ts: int) -> None:
         """ Updates the user's Server Activity timestamp.
         :param user_id: The ID of the user to update.
         :param new_ts: The new timestamp to set to. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("UPDATE UserServerActivity SET user_timestamp = %s WHERE user_id = %s", (new_ts, user_id))
-        await db.commit()
-        await mycursor.close()
-
+        await self.db.execute_query("UPDATE UserServerActivity SET user_timestamp = %s WHERE user_id = %s", (new_ts, user_id))

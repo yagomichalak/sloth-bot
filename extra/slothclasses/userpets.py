@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-from mysqldb import the_database
+from mysqldb import DatabaseCore
 from typing import List, Union, Optional
 from extra import utils
 
@@ -12,6 +12,7 @@ class UserPetsTable(commands.Cog):
         """ Class init method. """
 
         self.client = client
+        self.db = DatabaseCore()
 
     @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
@@ -22,8 +23,7 @@ class UserPetsTable(commands.Cog):
         if await self.check_user_pets_table_exists():
             return await ctx.send(f"**The UserPets table already exists, {member.mention}!**")
 
-        mycursor, db = await the_database()
-        await mycursor.execute("""CREATE TABLE UserPets (
+        await self.db.execute_query("""CREATE TABLE UserPets (
             user_id BIGINT NOT NULL,
             pet_name VARCHAR(25) DEFAULT 'Egg',
             pet_breed VARCHAR(25) DEFAULT 'Egg',
@@ -36,8 +36,6 @@ class UserPetsTable(commands.Cog):
             PRIMARY KEY (user_id)
             ) CHARSET utf8mb4 COLLATE utf8mb4_unicode_ci
         """)
-        await db.commit()
-        await mycursor.close()
 
         await ctx.send(f"**`UserPets` table created, {member.mention}!**")
 
@@ -50,10 +48,7 @@ class UserPetsTable(commands.Cog):
         if not await self.check_user_pets_table_exists():
             return await ctx.send(f"**The UserPets table doesn't exist, {member.mention}!**")
 
-        mycursor, db = await the_database()
-        await mycursor.execute("DROP TABLE UserPets")
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("DROP TABLE UserPets")
 
         await ctx.send(f"**`UserPets` table dropped, {member.mention}!**")
 
@@ -66,24 +61,14 @@ class UserPetsTable(commands.Cog):
         if not await self.check_user_pets_table_exists():
             return await ctx.send(f"**The UserPets table doesn't exist yet, {member.mention}!**")
 
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM UserPets")
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("DELETE FROM UserPets")
 
         await ctx.send(f"**`UserPets` table reset, {member.mention}!**")
 
     async def check_user_pets_table_exists(self) -> bool:
         """ Checks whether the UserPets table exists in the database. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("SHOW TABLE STATUS LIKE 'UserPets'")
-        exists = await mycursor.fetchone()
-        await mycursor.close()
-        if exists:
-            return True
-        else:
-            return False
+        return await self.db.table_exists("UserPets")
 
     async def insert_user_pet(self, user_id: int, pet_name: Optional[str] = None, pet_breed: Optional[str] = None) -> None:
         """ Inserts a User Pet.
@@ -94,68 +79,47 @@ class UserPetsTable(commands.Cog):
         current_ts = await utils.get_timestamp()
         other_ts = current_ts + 3600
 
-        mycursor, db = await the_database()
         if pet_name and pet_breed:
-            await mycursor.execute("""
+            await self.db.execute_query("""
             INSERT INTO UserPets (
                 user_id, pet_name, pet_breed, life_points_ts, food_ts, birth_ts
             ) VALUES (%s, %s, %s, %s, %s, %s)""", (user_id, pet_name, pet_breed, other_ts, other_ts, current_ts))
         else:
-            await mycursor.execute("""
+            await self.db.execute_query("""
             INSERT INTO UserPets (
                 user_id, life_points_ts, food_ts, birth_ts
             ) VALUES (%s, %s, %s, %s)""", (user_id, other_ts, other_ts, current_ts))
-        await db.commit()
-        await mycursor.close()
 
     async def get_user_pet(self, user_id: int) -> List[Union[str, int]]:
         """ Get the user's pet.
         :param user_id: The ID of the pet's owner. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("SELECT * FROM UserPets WHERE user_id = %s", (user_id,))
-        user_pet = await mycursor.fetchone()
-        await mycursor.close()
-        return user_pet
+        return await self.db.execute_query("SELECT * FROM UserPets WHERE user_id = %s", (user_id,), fetch="one")
 
     async def get_pets(self) -> List[List[Union[str, int]]]:
         """ Get all user pets. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("SELECT * FROM UserPets")
-        user_pets = await mycursor.fetchall()
-        await mycursor.close()
-        return user_pets
+        return await self.db.execute_query("SELECT * FROM UserPets", fetch="all")
 
     async def get_hungry_pets(self, current_ts: int) -> List[List[Union[str, int]]]:
         """ Get all user hungry pets.
         :param current_ts: The current timestamp. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("SELECT * FROM UserPets WHERE %s - food_ts >= 7200", (current_ts,))
-        user_pets = await mycursor.fetchall()
-        await mycursor.close()
-        return user_pets
+        return await self.db.execute_query("SELECT * FROM UserPets WHERE %s - food_ts >= 7200", (current_ts,), fetch="all")
 
     async def update_user_pet_name(self, user_id: int, pet_name: str) -> None:
         """ Updates the User Pet's name.
         :param user_id: The ID of the pet's owner.
         :param pet_name: The new pet name to update to. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("UPDATE UserPets SET pet_name = %s WHERE user_id = %s", (pet_name, user_id))
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("UPDATE UserPets SET pet_name = %s WHERE user_id = %s", (pet_name, user_id))
 
     async def update_user_pet_breed(self, user_id: int, pet_breed: str) -> None:
         """ Updates the User Pet's breed.
         :param user_id: The ID of the pet's owner.
         :param pet_breed: The new pet breed to update to. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("UPDATE UserPets SET pet_breed = %s WHERE user_id = %s", (pet_breed, user_id))
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("UPDATE UserPets SET pet_breed = %s WHERE user_id = %s", (pet_breed, user_id))
 
     async def update_user_pet_name_breed_and_birth_ts(self, user_id: int, pet_name: str, pet_breed: str, birth_ts: int) -> None:
         """ Updates the User Pet's breed.
@@ -164,12 +128,9 @@ class UserPetsTable(commands.Cog):
         :param pet_breed: The new pet breed to update to.
         :param birth_ts: The birth timestamp """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("""
+        await self.db.execute_query("""
             UPDATE UserPets SET pet_name = %s, pet_breed = %s, birth_ts = %s WHERE user_id = %s
         """, (pet_name, pet_breed, birth_ts, user_id))
-        await db.commit()
-        await mycursor.close()
 
     async def update_user_pet_lp(self, user_id: int, increment: int = 5, current_ts: Optional[int] = None) -> None:
         """ Updates the User Pet's life points.
@@ -177,14 +138,10 @@ class UserPetsTable(commands.Cog):
         :param increment: The increment value to apply. [Default = 5] (Can be negative)
         :param current_ts: The current timestamp. [Optional] """
 
-        mycursor, db = await the_database()
         if current_ts:
-            await mycursor.execute("UPDATE UserPets SET life_points = life_points + %s, life_points_ts = %s WHERE user_id = %s", (increment, current_ts, user_id))
+            await self.db.execute_query("UPDATE UserPets SET life_points = life_points + %s, life_points_ts = %s WHERE user_id = %s", (increment, current_ts, user_id))
         else:
-            await mycursor.execute("UPDATE UserPets SET life_points = life_points + %s WHERE user_id = %s", (increment, user_id))
-
-        await db.commit()
-        await mycursor.close()
+            await self.db.execute_query("UPDATE UserPets SET life_points = life_points + %s WHERE user_id = %s", (increment, user_id))
 
     async def update_user_pet_food(self, user_id: int, increment: int = 5, current_ts: Optional[int] = None) -> None:
         """ Updates the User Pet's food status.
@@ -192,14 +149,10 @@ class UserPetsTable(commands.Cog):
         :param increment: The increment value to apply. [Default = 5] (Can be negative)
         :param current_ts: The current timestamp. [Optional] """
 
-        mycursor, db = await the_database()
         if current_ts:
-            await mycursor.execute("UPDATE UserPets SET food = food + %s, food_ts = %s WHERE user_id = %s", (increment, current_ts, user_id))
+            await self.db.execute_query("UPDATE UserPets SET food = food + %s, food_ts = %s WHERE user_id = %s", (increment, current_ts, user_id))
         else:
-            await mycursor.execute("UPDATE UserPets SET food = food + %s WHERE user_id = %s", (increment, user_id))
-
-        await db.commit()
-        await mycursor.close()
+            await self.db.execute_query("UPDATE UserPets SET food = food + %s WHERE user_id = %s", (increment, user_id))
 
     async def update_pet_auto_feed(self, user_id: int, auto_feed: bool = True) -> None:
         """ Updates the the pet's auto pay mode.
@@ -207,17 +160,10 @@ class UserPetsTable(commands.Cog):
         :param auto_feed: Whether to put it into auto pay mode or not. [Default = True] """
 
         auto_feed = 1 if auto_feed else 0
-        mycursor, db = await the_database()
-        await mycursor.execute("UPDATE UserPets SET auto_feed = %s WHERE user_id = %s", (auto_feed, user_id))
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("UPDATE UserPets SET auto_feed = %s WHERE user_id = %s", (auto_feed, user_id))
 
     async def delete_user_pet(self, user_id: int) -> None:
         """ Deletes the user's pet.
         :param user_id: The ID of the pet's owner. """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM UserPets WHERE user_id = %s", (user_id,))
-        await db.commit()
-        await mycursor.close()
-
+        await self.db.execute_query("DELETE FROM UserPets WHERE user_id = %s", (user_id,))

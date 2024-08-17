@@ -1,6 +1,7 @@
 from discord.ext import commands
-from mysqldb import the_database
+from mysqldb import DatabaseCore
 from typing import List
+
 
 class SlothboardTable(commands.Cog):
     """ Class for managing the Slothboard table in the database. """
@@ -9,6 +10,7 @@ class SlothboardTable(commands.Cog):
         """ Class init method. """
 
         self.client = client
+        self.db = DatabaseCore()
 
     @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
@@ -18,15 +20,12 @@ class SlothboardTable(commands.Cog):
         if await self.table_slothboard_exists():
             return await ctx.send("**The `Slothboard` table already exists!**")
 
-        mycursor, db = await the_database()
-        await mycursor.execute("""
+        await self.db.execute_query("""
             CREATE TABLE Slothboard (
                 message_id BIGINT NOT NULL,
                 channel_id BIGINT NOT NULL,
                 PRIMARY KEY (message_id, channel_id)
             )""")
-        await db.commit()
-        await mycursor.close()
         await ctx.send("**Created `Slothboard` table!**")
 
     @commands.command(hidden=True)
@@ -37,10 +36,7 @@ class SlothboardTable(commands.Cog):
         if not await self.table_slothboard_exists():
             return await ctx.send("**The `Slothboard` table doesn't exist!**")
 
-        mycursor, db = await the_database()
-        await mycursor.execute("DROP TABLE Slothboard")
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("DROP TABLE Slothboard")
         await ctx.send("**Dropped `Slothboard` table!**")
 
     @commands.command(hidden=True)
@@ -51,42 +47,25 @@ class SlothboardTable(commands.Cog):
         if not await self.table_slothboard_exists():
             return await ctx.send("**The `Slothboard` table doesn't exist yet!**")
 
-        mycursor, db = await the_database()
-        await mycursor.execute("DELETE FROM Slothboard")
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("DELETE FROM Slothboard")
         await ctx.send("**Reset `Slothboard` table!**")
 
     async def table_slothboard_exists(self) -> bool:
         """ Checks whether the Slothboard table exists. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("SHOW TABLE STATUS LIKE 'Slothboard'")
-        table_info = await mycursor.fetchone()
-        await mycursor.close()
-        if table_info:
-            return True
-        else:
-            return False
+        return await self.db.table_exists("Slothboard")
 
     async def insert_slothboard_message(self, message_id: int, channel_id: int) -> None:
         """ Inserts a Slothboard message.
         :param message_id: The ID of the original message.
         :param channel_id: The ID of the message's original channel.  """
 
-        mycursor, db = await the_database()
-        await mycursor.execute("INSERT INTO Slothboard (message_id, channel_id) VALUES (%s, %s)", (
+        await self.db.execute_query("INSERT INTO Slothboard (message_id, channel_id) VALUES (%s, %s)", (
             message_id, channel_id))
-        await db.commit()
-        await mycursor.close()
         
     async def get_slothboard_message(self, message_id: int, channel_id: int) -> List[int]:
         """ Gets a Slothboard message.
         :param message_id: The ID of the original message.
         :param channel_id: The ID of the message's original channel. """
 
-        mycursor, _ = await the_database()
-        await mycursor.execute("SELECT * FROM Slothboard WHERE message_id = %s AND channel_id = %s", (message_id, channel_id))
-        slothboard_message = await mycursor.fetchone()
-        await mycursor.close()
-        return slothboard_message
+        return await self.db.execute_query("SELECT * FROM Slothboard WHERE message_id = %s AND channel_id = %s", (message_id, channel_id), fetch="one")

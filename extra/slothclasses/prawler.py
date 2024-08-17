@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 from .player import Player, Skill
-from mysqldb import the_database
+from mysqldb import DatabaseCore
 from extra.prompt.menu import Confirm
 from extra import utils
 import os
@@ -19,7 +19,7 @@ class Prawler(Player):
 
 	def __init__(self, client) -> None:
 		self.client = client
-
+		self.db = DatabaseCore()
 
 	@commands.Cog.listener(name='on_raw_reaction_add')
 	async def on_raw_reaction_add_prawler(self, payload) -> None:
@@ -279,26 +279,19 @@ class Prawler(Player):
 		:param user_id: The ID of the user.
 		:param increment: The value to be incremented (negative numbers to decrement). """
 
-		mycursor, db = await the_database()
-		await mycursor.execute("""
+		await self.db.execute_query("""
 			UPDATE SlothProfile
 			SET knife_sharpness_stack = knife_sharpness_stack + %s
 			WHERE user_id = %s""", (increment, user_id))
-		await db.commit()
-		await mycursor.close()
 
 	async def get_expired_steals(self) -> List[List[Union[str, int]]]:
 		""" Gets expired steal skill actions. """
 
 		the_time = await utils.get_timestamp()
-		mycursor, db = await the_database()
-		await mycursor.execute("""
+		return await self.db.execute_query("""
 			SELECT * FROM SlothSkills
 			WHERE skill_type = 'steal' AND (%s - skill_timestamp) >= 2400
-			""", (the_time,))
-		steals = await mycursor.fetchall()
-		await mycursor.close()
-		return steals
+			""", (the_time,), fetch="all")
 
 	async def get_steal_embed(self, channel, attacker_id: int, target_id: int, attack_succeeded: bool = False) -> discord.Embed:
 		""" Makes an embedded message for a steal action.
@@ -366,7 +359,6 @@ class Prawler(Player):
 		rob_doubled_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
 
 		return rob_doubled_embed
-
 
 	@commands.command()
 	@Player.poisoned()
@@ -457,7 +449,6 @@ class Prawler(Player):
 			if 'reflect' in target_fx:
 				await self.reflect_attack(ctx, attacker, target, 'sabotage')
 
-
 	async def get_sabotage_embed(self, channel, attacker_id: int, target_id: int) -> discord.Embed:
 		""" Makes an embedded message for sabotage.
 		:param channel: The context channel.
@@ -477,7 +468,6 @@ class Prawler(Player):
 
 		return sabotage_embed
 
-	
 	async def check_sabotages(self) -> None:
 		""" Check on-going sabotages and their expiration time. """
 
@@ -497,14 +487,10 @@ class Prawler(Player):
 		""" Gets expired sabotage skill actions. """
 
 		the_time = await utils.get_timestamp()
-		mycursor, _ = await the_database()
-		await mycursor.execute("""
+		return await self.db.execute_query("""
 			SELECT * FROM SlothSkills
 			WHERE skill_type = 'sabotage' AND (%s - skill_timestamp) >= 86400
-			""", (the_time,))
-		sabotages = await mycursor.fetchall()
-		await mycursor.close()
-		return sabotages
+			""", (the_time,), fetch="all")
 
 	async def check_poisons(self) -> None:
 		""" Check on-going poisons and their expiration time. """
@@ -525,14 +511,10 @@ class Prawler(Player):
 		""" Gets expired sabotage skill actions. """
 
 		the_time = await utils.get_timestamp()
-		mycursor, _ = await the_database()
-		await mycursor.execute("""
+		return await self.db.execute_query("""
 			SELECT * FROM SlothSkills
 			WHERE skill_type = 'poison' AND (%s - skill_timestamp) >= 86400
-			""", (the_time,))
-		poisons = await mycursor.fetchall()
-		await mycursor.close()
-		return poisons
+			""", (the_time,), fetch="all")
 
 	@commands.command(aliases=['kn'])
 	@Player.poisoned()
@@ -552,7 +534,6 @@ class Prawler(Player):
 		• Delay = 2 days
 		• Cost = 200łł  """
 
-		
 		attacker = ctx.author
 		
 		if ctx.channel.id != self.bots_txt.id:
@@ -630,11 +611,9 @@ class Prawler(Player):
 		except Exception as e:
 			print(e)
 			await ctx.send(f"**Something went wrong with it, {attacker.mention}!**")
-
 		else:
 			kidnap_embed = await self.get_kidnap_embed(ctx.channel, attacker.id, target.id)
 			await ctx.send(embed=kidnap_embed)
-
 
 	async def get_kidnap_embed(self, channel, attacker_id: int, target_id: int) -> discord.Embed:
 		""" Makes an embedded message for a kidnap.
@@ -654,7 +633,6 @@ class Prawler(Player):
 		kidnap_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
 
 		return kidnap_embed
-
 
 	@commands.command(aliases=["ransom", "pay_rescue", "rescue"])
 	@commands.cooldown(1, 5, commands.BucketType.user)
@@ -692,14 +670,12 @@ class Prawler(Player):
 		tribe_member_ids: List[int] = list(map(lambda m: m[0], tribe_members))
 		currencies = await self.get_users_currency(tribe_member_ids)
 
-		
 		rescue_money: int = sum(list(map(lambda cr: cr[0], filter(lambda cr: cr[0] >= 0, currencies))))
 		rescue_money = int((rescue_money * 3) / 100)
 
 		if user_currency[1] < rescue_money:
 			return await ctx.send(f"**You don't have `{rescue_money}łł` to pay for `{hostage}`'s rescue, {member.mention}!**")
 
-		
 		confirm = await Confirm(f"**Are you sure you want to pay `{rescue_money}łł` to rescue `{hostage}`, {member.mention}?**").prompt(ctx)
 		if not confirm:
 			return await ctx.send(f"**Not doing it then, {member.mention}!**")

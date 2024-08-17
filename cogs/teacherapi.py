@@ -1,6 +1,5 @@
-from dis import disco
 import discord
-from discord.ext import commands, menus
+from discord.ext import commands
 import os
 from datetime import datetime
 from PIL import Image, ImageFont, ImageDraw
@@ -12,7 +11,7 @@ import json
 import asyncio
 from zipfile import ZipFile
 from typing import Dict, List, Union
-from mysqldb import the_django_database
+from mysqldb import DatabaseCore
 from extra.menu import ConfirmSkill
 from extra import utils
 
@@ -26,6 +25,7 @@ allowed_roles = [owner_role_id, admin_role_id, mod_role_id]
 class TeacherAPI(commands.Cog):
     """ (WIP) A category for using The Language Sloth's teacher's API,
     and some other useful commands related to it. """
+
     def __init__(self, client) -> None:
         """ Cog initializer """
 
@@ -35,8 +35,8 @@ class TeacherAPI(commands.Cog):
         self.session = aiohttp.ClientSession(loop=client.loop)
         self.classes_channel_id: int = int(os.getenv('CLASSES_CHANNEL_ID', 123))
         self.website_link: str = 'https://languagesloth.com'
-        # self.website_link: str = 'http://127.0.0.1:8000'
         self.django_website_root = os.getenv('DJANGO_WEBSITE_ROOT')
+        self.db = DatabaseCore()
 
     @commands.Cog.listener()
     async def on_ready(self) -> None:
@@ -77,6 +77,7 @@ class TeacherAPI(commands.Cog):
         :param description: The description rearrange.
         :returns: The rearranged description.
         """
+
         new_description = ''
         i = 0
         for l in description:
@@ -95,13 +96,12 @@ class TeacherAPI(commands.Cog):
         :param teacher: The teacher from whom to get the profile picture.
         :returns: The teacher's profile picture in a Pillow Image object.
         """
+
         async with self.session.get(str(teacher.display_avatar)) as response:
             image_bytes = await response.content.read()
             with BytesIO(image_bytes) as pfp:
                 image = Image.open(pfp)
-                width, height = image.size
                 image = image.resize((128, 128))
-
                 im = image.convert('RGBA')
                 return im
 
@@ -174,8 +174,9 @@ class TeacherAPI(commands.Cog):
         await ctx.send(file=discord.File(saved_path))
         os.remove(saved_path)
 
-    # @commands.command(aliases=['epfp'])
-    # @commands.has_permissions(administrator=True)
+    @commands.command(aliases=['epfp'])
+    @commands.has_permissions(administrator=True)
+    @utils.not_ready()
     async def export_profile_pictures(self, ctx) -> None:
         """ Exports a zip file with all of the teachers' profile picture. """
 
@@ -411,19 +412,13 @@ class TeacherAPI(commands.Cog):
         :param member_id: The ID of the member that you are changing it.
         :param state: The state to which you are gonna set the to (0=False/1=True). """
 
-        mycursor, db = await the_django_database()
-        await mycursor.execute("UPDATE discordlogin_discorduser SET teacher = %s WHERE id = %s", (state, member_id))
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("UPDATE discordlogin_discorduser SET teacher = %s WHERE id = %s", (state, member_id), database_name="django")
 
     async def _get_teacher_state(self, member_id: int) -> bool:
         """ Gets the member current state from the website.
         :param member_id: The ID of the member that you are checking it. """
 
-        mycursor, db = await the_django_database()
-        await mycursor.execute("SELECT teacher FROM discordlogin_discorduser WHERE id = %s", (member_id,))
-        teacher = await mycursor.fetchone()
-        await mycursor.close()
+        teacher = await self.db.execute_query("SELECT teacher FROM discordlogin_discorduser WHERE id = %s", (member_id,), fetch="one", database_name="django")
         if teacher is None:
             return None
         elif teacher[0] == 1:
@@ -455,11 +450,7 @@ class TeacherAPI(commands.Cog):
         """ Gets all cards from a given teacher.
         :param user_id: The ID of the teacher. """
 
-        mycursor, db = await the_django_database()
-        await mycursor.execute("SELECT * FROM teacherclass_teacherclass WHERE owner_id = %s", (user_id,))
-        data = await mycursor.fetchall()
-        await mycursor.close()
-        return data
+        return await self.db.execute_query("SELECT * FROM teacherclass_teacherclass WHERE owner_id = %s", (user_id,), fetch="all", database_name="django")
 
     # @commands.command(aliases=['see_cards', 'stc'])
     # @commands.cooldown(1, 10, commands.BucketType.user)
@@ -537,10 +528,7 @@ class TeacherAPI(commands.Cog):
         """ Deletes all cards from a given teacher.
         :param user_id: The ID of the teacher from which to delete the cards. """
 
-        mycursor, db = await the_django_database()
-        await mycursor.execute("DELETE FROM teacherclass_teacherclass WHERE owner_id = %s", (user_id,))
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("DELETE FROM teacherclass_teacherclass WHERE owner_id = %s", (user_id,), database_name="django")
 
     # @commands.command(aliases=['delete_cards', 'dtc'])
     # @utils.is_allowed([*allowed_roles, lesson_manager_role_id])
