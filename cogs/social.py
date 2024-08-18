@@ -21,6 +21,7 @@ from extra.misc.slothboard import SlothboardTable
 mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID', 123))
 teacher_role_id = int(os.getenv('TEACHER_ROLE_ID', 123))
+analyst_debugger_role_id: int = int(os.getenv('ANALYST_DEBUGGER_ROLE_ID', 123))
 watchlist_channel_id = int(os.getenv('WATCHLIST_CHANNEL_ID', 123))
 slothboard_channel_id = int(os.getenv('SLOTHBOARD_CHANNEL_ID', 123))
 booster_role_id = int(os.getenv('BOOSTER_ROLE_ID', 123))
@@ -200,7 +201,7 @@ class Social(*social_cogs):
             """embed.add_field(name="Bot?", value=member.bot)"""
 
             view = QuickButtons(client=self.client, ctx=ctx, target_member=member)
-            if not await utils.is_allowed([mod_role_id, admin_role_id]).predicate(ctx):
+            if not await utils.is_allowed([analyst_debugger_role_id, mod_role_id, admin_role_id]).predicate(ctx):
                 view.children.remove(view.children[4])
                 if not await utils.is_subscriber(throw_exc=False).predicate(ctx):
                     view.children.remove(view.infractions_button)
