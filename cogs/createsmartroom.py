@@ -145,7 +145,7 @@ class CreateSmartRoom(*smart_room_cogs):
 			df_msg = await member.send(file=discord.File('./images/smart_vc/selection_menu.png'))
 			await df_msg.add_reaction('1️⃣')
 			await df_msg.add_reaction('2️⃣')
-			await df_msg.add_reaction('3️⃣')
+			#await df_msg.add_reaction('3️⃣')
 
 			def check(reaction, user):
 				return user == member and str(reaction.emoji) in '1️⃣2️⃣3️⃣'
@@ -160,8 +160,8 @@ class CreateSmartRoom(*smart_room_cogs):
 				await self.basic_room(member)
 			elif str(reaction.emoji) == '2️⃣':
 				await self.premium_room(member)
-			else:
-				await self.galaxy_room(member)
+			#else:
+				#await self.galaxy_room(member)
 
 	# Room type 1
 	async def basic_room(self, member: discord.Member) -> None:
