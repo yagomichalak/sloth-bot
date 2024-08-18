@@ -34,10 +34,10 @@ async def the_django_database():
 
 class DatabaseCore:
     
-    COMMITABLE_METHODS = [
+    COMMITABLE_METHODS = (
         "CREATE", "DROP", "INSERT",
         "UPDATE", "DELETE",
-    ]
+    )
     
     async def get_connection(self, database_name: str) -> Tuple[object, object]:
         """ Gets the database connection.
@@ -57,7 +57,7 @@ class DatabaseCore:
     
     async def execute_query(self,
         query: str,
-        values: Iterable,
+        values: Iterable = [],
         connection: Optional[Tuple[object, object]] = None,
         execute_many: bool = False,
         fetch: Optional[Literal["one", "all"]] = None,
@@ -70,7 +70,8 @@ class DatabaseCore:
         :param fetch: Whether to fetch one, all or no objects from the cursor.
         """
 
-        data = None
+        data = [] if fetch == "all" else None
+        fetch = None if not fetch else fetch.lower()
         if not connection:
             mycursor, db = await self.get_connection(database_name)
         else:
@@ -98,14 +99,14 @@ class DatabaseCore:
             await mycursor.close()
 
         if description:
-            return data, description
+            return data, mycursor.description
         return data
 
     async def table_exists(self, table_name: str) -> bool:
         """ Checks whether a given table exists or not.
         :param table_name: The table name to check. """
 
-        return any(self.execute_query(
+        return any(await self.execute_query(
             query="SHOW TABLE STATUS LIKE %s;",
             values=(table_name,),
             fetch="all",

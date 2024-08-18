@@ -1141,7 +1141,8 @@ class Merchant(Player):
                             )
 
                             member = self.client.get_user(pet[0])
-                            await member.send(embed=embed)
+                            if member:
+                                await member.send(embed=embed)
                             continue
 
                     # Checks whether pet has lp

@@ -6,7 +6,7 @@ import asyncio
 from PIL import Image, ImageFont, ImageDraw
 import os
 from cogs.slothcurrency import SlothCurrency
-from mysqldb import *
+from mysqldb import DatabaseCore
 from typing import List, Union, Any, Optional
 
 from extra.menu import ConfirmSkill
@@ -25,6 +25,7 @@ class CreateSmartRoom(*smart_room_cogs):
 		self.client = client
 		self.vc_id = int(os.getenv('CREATE_SMART_ROOM_VC_ID', 123))
 		self.cat_id = int(os.getenv('CREATE_SMART_ROOM_CAT_ID', 123))
+		self.db = DatabaseCore()
 
 	@commands.Cog.listener()
 	async def on_ready(self):

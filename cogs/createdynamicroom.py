@@ -120,7 +120,7 @@ class DynamicRoom:
 
 class DynamicRoomDatabase:
     def __init__(self):
-        pass
+        self.db = DatabaseCore()
 
     # ===== Dynamic Rooms related functions =====
 

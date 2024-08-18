@@ -11,6 +11,7 @@ from typing import List
 from extra import utils
 from extra.slothclasses.player import Player
 from extra.misc.reminder import MemberReminderTable
+from mysqldb import DatabaseCore
 
 allowed_roles = [
     int(os.getenv('OWNER_ROLE_ID', 123)), int(os.getenv('ADMIN_ROLE_ID', 123)), int(os.getenv('MOD_ROLE_ID', 123)), int(os.getenv('ASTROSLOTH_ROLE_ID', 123)), 
@@ -22,11 +23,13 @@ guild_ids = [server_id]
 
 misc_cogs: List[commands.Cog] = [MemberReminderTable]
 
+
 class Misc(*misc_cogs):
     """ Miscellaneous related commands. """
 
     def __init__(self, client):
         self.client = client
+        self.db = DatabaseCore()
 
     @commands.Cog.listener()
     async def on_ready(self):

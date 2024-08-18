@@ -17,7 +17,6 @@ class SlothSubscriber(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        self.look_for_due_reminders.start()
         print("SlothSubscriber cog is online!")
     
     @commands.Cog.listener()

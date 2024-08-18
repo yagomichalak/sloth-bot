@@ -5,6 +5,7 @@ from discord.ext import commands, tasks
 from datetime import timedelta
 from extra import utils
 from extra.analytics import SlothAnalyticsTable, DataBumpsTable
+from mysqldb import DatabaseCore
 
 from PIL import Image, ImageFont, ImageDraw
 from typing import List
@@ -24,6 +25,7 @@ class Analytics(*analytics_cogs):
 
         self.client = client
         self.dnk_id: int = int(os.getenv('DNK_ID', 123))
+        self.db = DatabaseCore()
 
     @commands.Cog.listener()
     async def on_ready(self) -> None:
@@ -40,6 +42,8 @@ class Analytics(*analytics_cogs):
         day = time_now.day
         if await self.check_relatory_time(day):
             channel = self.client.get_channel(bots_and_commands_channel_id)
+            if not channel:
+                return
             members = channel.guild.members
             info = await self.get_info()
             online_members = [om for om in members if str(om.status) == "online"]

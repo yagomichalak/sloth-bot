@@ -4,6 +4,7 @@ import asyncio
 import os
 from extra import utils
 from extra.moderation.aspirants import AspirantsTable
+from mysqldb import DatabaseCore
 
 senior_mod_role_id: int = int(os.getenv('SENIOR_MOD_ROLE_ID', 123))
 mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
@@ -15,6 +16,7 @@ class AspirantActivity(AspirantsTable):
 
     def __init__(self, client):
         self.client = client
+        self.db = DatabaseCore()
 
     @commands.Cog.listener()
     async def on_ready(self) -> None:

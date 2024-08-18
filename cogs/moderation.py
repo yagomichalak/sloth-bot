@@ -2,7 +2,7 @@ import discord
 from discord import user_command
 from discord.ext import commands, tasks, menus
 import asyncio
-from mysqldb import *
+from mysqldb import DatabaseCore
 from datetime import datetime
 from typing import List, Union, Optional, Dict, Tuple, Any
 import os
@@ -59,6 +59,7 @@ class Moderation(*moderation_cogs):
 
     def __init__(self, client):
         self.client = client
+        self.db = DatabaseCore()
 
     @commands.Cog.listener()
     async def on_ready(self):

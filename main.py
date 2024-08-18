@@ -68,6 +68,8 @@ async def on_ready() -> None:
 async def change_color() -> None:
     guild = client.get_guild(server_id)
     patreon = discord.utils.get(guild.roles, id=patreon_role_id)
+    if not patreon:
+        return
     r, g, b = next(shades_of_pink)
     await patreon.edit(colour=discord.Colour.from_rgb(r, g, b))
 

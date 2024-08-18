@@ -69,7 +69,7 @@ class UserMutedGalaxiesTable(commands.Cog):
         """ Inserts rows for a user in the UserMutedGalaxies table.
         :param muted_galaxies: The galaxies in which the user got muted. """
 
-        await self.db.execute_querymany("INSERT INTO UserMutedGalaxies (user_id, cat_id) VALUES (%s, %s)", muted_galaxies)
+        await self.db.execute_query("INSERT INTO UserMutedGalaxies (user_id, cat_id) VALUES (%s, %s)", muted_galaxies, execute_many=True)
 
     async def get_user_muted_galaxies(self, user_id: int) -> List[Tuple[int, int]]:
         """ Gets all Muted Galaxies of a user.

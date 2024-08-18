@@ -4,8 +4,8 @@ from discord.ext import commands, tasks
 import os
 from extra import utils
 from typing import List, Optional
-import json
-from random import choice, randint
+from random import randint
+from mysqldb import DatabaseCore
 
 from extra.tool.scheduled_events import ScheduledEventsTable
 
@@ -21,11 +21,13 @@ community_manager_role_id = int(os.getenv('COMMUNITY_MANAGER_ROLE_ID', 123))
 
 tool_cogs: List[commands.Cog] = [ScheduledEventsTable]
 
+
 class Communication(*tool_cogs):
     """ A cog related to communication commands. """
 
     def __init__(self, client):
         self.client = client
+        self.db = DatabaseCore()
 
     @commands.Cog.listener()
     async def on_ready(self):

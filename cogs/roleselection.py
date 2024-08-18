@@ -1,6 +1,6 @@
-from datetime import time
 import discord
 from discord.ext import commands
+from mysqldb import DatabaseCore
 
 from extra.prompt.menu import prompt_emoji_guild, prompt_message_guild, get_role_response
 
@@ -17,8 +17,7 @@ class RoleSelection(RoleSelectionDatabaseCommands):
 
     def __init__(self, client) -> None:
         self.client = client
-        self.db = super()
-
+        self.db = DatabaseCore()
 
     @commands.Cog.listener()
     async def on_ready(self) -> None:

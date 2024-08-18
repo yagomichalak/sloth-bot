@@ -91,7 +91,7 @@ class MemberReminderTable(commands.Cog):
         :param current_ts: The current timestamp. """
 
         reminders = await self.db.execute_query("SELECT * FROM MemberReminder WHERE (%s -  reminder_timestamp) >= remind_in", (current_ts,), fetch="all")
-        return [(m[0], m[1], m[2]) for m in await reminders]
+        return [(m[0], m[1], m[2]) for m in reminders]
 
     async def delete_member_reminder(self, reminder_id: int) -> None:
         """ Updates the user's last seen datetime.

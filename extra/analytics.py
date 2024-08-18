@@ -84,8 +84,7 @@ class SlothAnalyticsTable(commands.Cog):
         info = await self.db.execute_query("SELECT * from SlothAnalytics", fetch="one")
         if info and str(info[3]) != str(time_now):
             return True
-        else:
-            return False
+        return False
 
     async def get_info(self) -> List[int]:
         """ Gets the analytics info. """

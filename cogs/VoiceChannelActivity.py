@@ -128,9 +128,9 @@ class VoiceChannelActivity(*tool_cogs):
         """ Inserts the first row of the minute with the info of all users who are in voice channels.
         :param channel_members: A list of tuples containing the individual members and their info. """
 
-        await self.db.execute_querymany("""
+        await self.db.execute_query("""
             INSERT INTO VoiceChannelActivity (the_time, channel_id, channel_name, member_id, member_name)
-            VALUES (%s, %s, %s, %s, %s)""", channel_members)
+            VALUES (%s, %s, %s, %s, %s)""", channel_members, execute_many=True)
 
     async def insert_row(self, the_time: datetime, channel_id: int, channel_name: str, member_id: int, member_name: str) -> None:
         """ Inserts a row containing info of member and the voice channel that they're currently in.
@@ -152,7 +152,7 @@ class VoiceChannelActivity(*tool_cogs):
         so the limit is satisfied again. """
 
         hours = await self.db.execute_query("SELECT DISTINCT HOUR(the_time) FROM VoiceChannelActivity", fetch="all")
-        hours = [h[0] for h in await hours]
+        hours = [h[0] for h in hours]
 
         if limit_hours < len(hours):
             await self.db.execute_query("DELETE FROM VoiceChannelActivity WHERE HOUR(the_time) = %s", (hours.pop(0),))

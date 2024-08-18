@@ -1,10 +1,11 @@
 import discord
 from discord import SlashCommandGroup, option, Option, ApplicationContext, slash_command
 from discord.ext import commands, tasks
-from typing import List, Union, Any, Optional
+from typing import List, Union, Optional
 import os
 
 from extra import utils
+from mysqldb import DatabaseCore
 from extra.view import GiveawayView
 from extra.prompt.menu import ConfirmButton
 from extra.misc.giveaways import GiveawaysTable, GiveawayEntriesTable
@@ -23,6 +24,7 @@ class Giveaways(*giveaway_cogs):
 
     def __init__(self, client) -> None:
         self.client = client
+        self.db = DatabaseCore()
 
     _giveaway = SlashCommandGroup("giveaway", "Various greeting from cogs!", guild_ids=guild_ids)
 

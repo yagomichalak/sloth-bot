@@ -177,7 +177,7 @@ class GalaxyVcTable(commands.Cog):
 		""" Gets a Galaxy Room by user ID.
 		:param user_id: The user ID. """
 
-		return await self.db.execute_query("SELECT * FROM GalaxyVc WHERE user_id = %s", (user_id,), fetch="One")
+		return await self.db.execute_query("SELECT * FROM GalaxyVc WHERE user_id = %s", (user_id,), fetch="one")
 
 	async def get_all_galaxy_rooms(self, the_time: int):
 		""" Get all expired Galaxy Rooms.

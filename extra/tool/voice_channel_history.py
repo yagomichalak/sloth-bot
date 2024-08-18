@@ -103,7 +103,7 @@ class VoiceChannelHistoryTable(commands.Cog):
         """ Deletes Voice Channels from the users' Voice Channel histories.
         :param users: A list of users from whom to delete records from their history. """
 
-        await self.db.execute_querymany("DELETE FROM VoiceChannelHistory WHERE user_id = %s LIMIT %s", users)
+        await self.db.execute_query("DELETE FROM VoiceChannelHistory WHERE user_id = %s LIMIT %s", users, execute_many=True)
 
 
 class VoiceChannelHistorySystem(commands.Cog):

@@ -603,7 +603,7 @@ class Player(*additional_cogs):
         :param skill_type: The type of the action skill. """
 
         sql = "DELETE FROM SlothSkills WHERE target_id = %s AND skill_type = %s"
-        await self.db.execute_querymany(sql, users)
+        await self.db.execute_query(sql, users, execute_many=True)
 
     async def delete_skill_action_by_user_id_or_target_id_and_skill_type_and_price(self, user_id: int, skill_type: str, price: str, multiple: bool = False) -> None:
         """ Deletes a skill action by user_id or target ID and skill type and price.

@@ -92,7 +92,7 @@ class GiveawaysTable(commands.Cog):
     async def get_giveaways(self) -> List[List[Union[str, int]]]:
         """ Gets all active giveaways. """
 
-        return await self.db.execute_query("SELECT * FROM Giveaways")
+        return await self.db.execute_query("SELECT * FROM Giveaways", fetch="all")
 
     async def get_user_giveaways(self, user_id: int) -> List[List[Union[str, int]]]:
         """ Gets all active giveaways from a specific user.
