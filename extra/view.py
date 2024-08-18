@@ -237,7 +237,7 @@ class QuickButtons(discord.ui.View):
         ctx = await self.client.get_context(interaction.message)
         await self.client.get_cog("Moderation").snipe(ctx, message=str(self.target_member.id))
 
-    @discord.ui.button(label="Voice History", style=2, emoji="📍", custom_id=f"user_vh")
+    @discord.ui.button(label="History", style=2, emoji="📍", custom_id=f"user_vh")
     async def vh_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
         """ Show's the member's voice history. """
 

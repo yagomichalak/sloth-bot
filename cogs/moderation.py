@@ -2106,7 +2106,8 @@ We appreciate your understanding and look forward to hearing from you. """, embe
                 await moderation_log.send(embed=embed)
 
                 try:
-                    await member.send(embed=general_embed)
+                    if user_infraction[0][1] != "watchlist":
+                        await member.send(embed=general_embed)
                 except Exception:
                     pass
 
