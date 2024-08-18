@@ -2,7 +2,7 @@ import discord
 from discord import slash_command, Option
 from discord.ext import commands
 
-from mysqldb import *
+from mysqldb import DatabaseCore
 import os
 from typing import List, Optional, Union
 
@@ -26,6 +26,7 @@ class SlothReputation(*currency_cogs):
 
     def __init__(self, client):
         self.client = client
+        self.db = DatabaseCore()
 
     @commands.Cog.listener()
     async def on_ready(self):

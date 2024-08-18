@@ -6,11 +6,11 @@ from random import randint
 import aiohttp
 import os
 from typing import List, Optional
+from mysqldb import DatabaseCore
 
 from extra import utils, useful_variables
 from extra.view import QuickButtons
 from extra.prompt.menu import ConfirmButton
-from external_cons import the_reddit
 
 from extra.moderation.userinfractions import ModerationUserInfractionsTable
 from extra.moderation.fakeaccounts import ModerationFakeAccountsTable
@@ -33,6 +33,7 @@ class Social(*social_cogs):
 
     def __init__(self, client):
         self.client = client
+        self.db = DatabaseCore()
 
     @commands.Cog.listener()
     async def on_ready(self):
