@@ -35,6 +35,7 @@ timedout_role_id = int(os.getenv('TIMEDOUT_ROLE_ID', 123))
 preference_role_id = int(os.getenv('PREFERENCE_ROLE_ID', 123))
 senior_mod_role_id: int = int(os.getenv('SENIOR_MOD_ROLE_ID', 123))
 admin_role_id: int = int(os.getenv('ADMIN_ROLE_ID', 123))
+analyst_debugger_role_id: int = int(os.getenv('ANALYST_DEBUGGER_ROLE_ID', 123))
 allowed_roles = [int(os.getenv('OWNER_ROLE_ID', 123)), admin_role_id, senior_mod_role_id, mod_role_id]
 unverified_role_id = int(os.getenv('UNVERIFIED_ROLE_ID', 123))
 join_the_server_channel_id = int(os.getenv('JOIN_THE_SERVER_CHANNEL_ID', 123))
@@ -339,7 +340,7 @@ class Moderation(*moderation_cogs):
 
 
     @commands.command()
-    @utils.is_allowed(allowed_roles, throw_exc=True)
+    @utils.is_allowed([allowed_roles, analyst_debugger_role_id], throw_exc=True)
     async def snipe(self, ctx, *, message : str = None):
         """(MOD) Snipes deleted messages.
         :param member: The @ or the ID of one or more users to snipe. (Optional) or
@@ -1895,7 +1896,7 @@ We appreciate your understanding and look forward to hearing from you. """, embe
 
     # Infraction methods
     @commands.command(aliases=['infr', 'show_warnings', 'sw', 'show_bans', 'sb', 'show_muted', 'sm'])
-    @commands.check_any(utils.is_allowed(allowed_roles, throw_exc=True), utils.is_subscriber())
+    @commands.check_any(utils.is_allowed([allowed_roles, analyst_debugger_role_id], throw_exc=True), utils.is_subscriber())
     async def infractions(self, ctx, *, message : str = None) -> None:
         """ Shows all infractions of a specific user.
         :param member: The member to show the infractions from. [Optional] [Default = You] """
