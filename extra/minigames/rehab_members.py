@@ -20,7 +20,7 @@ class RehabMembersTable(commands.Cog):
         async def real_check(ctx):
             """ Perfoms the real check. """
 
-            rehab_member = await RehabMembersTable.get_rehab_member(RehabMembersTable, user_id=ctx.author.id)
+            rehab_member = await ctx.bot.get_cog("Games").get_rehab_member(user_id=ctx.author.id)
 
             if not rehab_member:
                 return True

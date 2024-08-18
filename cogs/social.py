@@ -214,13 +214,14 @@ class Social(*social_cogs):
                 view.children.remove(view.info_button)
                 view.children.remove(view.profile_button)
 
-                if not await ModerationUserInfractionsTable.get_user_infractions(ctx, member.id):
+                moderation_cog = self.client.get_cog("Moderation")
+                if not await moderation_cog.get_user_infractions(member.id):
                     view.children[0].disabled = True
 
-                if not await ModerationFakeAccountsTable.get_fake_accounts(ctx, member.id):
+                if not await moderation_cog.get_fake_accounts(member.id):
                     view.children.remove(view.fake_accounts_button)
 
-                if not await ModeratedNicknamesTable.get_moderated_nickname(ctx, member.id):
+                if not await moderation_cog.get_moderated_nickname(member.id):
                     view.children.remove(view.moderated_nickname_button)
                 
             await ctx.send(embed=embed, view=view)

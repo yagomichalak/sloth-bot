@@ -91,7 +91,7 @@ class Player(*additional_cogs):
         async def real_check(ctx):
             """ Perfoms the real check. """
 
-            locked = await Player.get_skill_action_by_target_id_and_skill_type(Player, target_id=ctx.author.id, skill_type='lock')
+            locked = await ctx.bot.get_cog("SlothClass").get_skill_action_by_target_id_and_skill_type(target_id=ctx.author.id, skill_type='lock')
             if not locked:
                 return True
 
@@ -149,7 +149,7 @@ class Player(*additional_cogs):
         async def real_check(ctx):
             """ Perfoms the real check. """
 
-            poisoned = await Player.get_skill_action_by_target_id_and_skill_type(Player, target_id=ctx.author.id, skill_type='poison')
+            poisoned = await ctx.bot.get_cog("SlothClass").get_skill_action_by_target_id_and_skill_type(target_id=ctx.author.id, skill_type='poison')
             if not poisoned:
                 return True
 
@@ -200,7 +200,7 @@ class Player(*additional_cogs):
         async def real_check(ctx):
             """ Perfoms the real check. """
 
-            kidnapped = await Player.get_skill_action_by_target_id_and_skill_type(Player, target_id=ctx.author.id, skill_type='kidnap')
+            kidnapped = await ctx.bot.get_cog("SlothClass").get_skill_action_by_target_id_and_skill_type(target_id=ctx.author.id, skill_type='kidnap')
             if not kidnapped:
                 return True
 
