@@ -6,6 +6,7 @@ import os
 
 sloth_subscriber_role_id = int(os.getenv("SLOTH_SUBSCRIBER_ROLE_ID", 123))
 on_sloth_sub_log_channel_id = int(os.getenv("ON_SLOTH_SUB_CHANNEL_ID", 123))
+sloth_subscriber_sub_id = int(os.getenv("SLOTH_SUBSCRIBER_SUB_ID", 123))
 server_id = int(os.getenv('SERVER_ID', 123))
 guild_ids = [server_id]
 
@@ -81,6 +82,16 @@ class SlothSubscriber(commands.Cog):
         )
         embed.set_thumbnail(url=member.display_avatar)
         await sloth_sub_log.send(embed=embed)
+
+    @commands.command(aliases=["subscriber", "sub", "slothsubscriber", "slothsub", "sloth_sub"])
+    async def subscribe(self, ctx) -> None:
+        """ Shows the subscription button. """
+
+        view = discord.ui.View()
+        view.add_item(discord.ui.Button(sku_id=sloth_subscriber_sub_id))
+        return await ctx.send(
+            f"**If you want to have access to some extra features & commands, subscribe now:**", view=view
+        )
 
 
 def setup(client):
