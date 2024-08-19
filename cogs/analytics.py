@@ -73,12 +73,14 @@ class Analytics(*analytics_cogs):
     async def on_member_join(self, member) -> None:
         """ Tells the newcomer to assign themselves a native language role, and updates the joined members counter. """
 
+        await self.update_joined()
         channel = discord.utils.get(member.guild.channels, id=select_your_language_channel_id)
+        if not channel:
+            return
         await channel.send(
             f"""Hello {member.mention} ! Scroll up and choose your Native Language by clicking in the flag that best represents it!
 <:zarrowup:688222444292669449> <:zarrowup:688222444292669449> <:zarrowup:688222444292669449> <:zarrowup:688222444292669449> <:zarrowup:688222444292669449> <:zarrowup:688222444292669449> <:zarrowup:688222444292669449> <:zarrowup:688222444292669449>""",
             delete_after=120)
-        await self.update_joined()
 
     @commands.Cog.listener()
     async def on_member_remove(self, member) -> None:

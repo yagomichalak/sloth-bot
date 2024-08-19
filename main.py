@@ -99,7 +99,6 @@ async def on_member_update(before, after) -> None:
                 await support_us_channel.send(patreon_roles[pr][0].format(member=after))
                 return await after.send(patreon_roles[pr][1])
 
-
 @client.event
 async def on_member_remove(member) -> None:
     roles = [role for role in member.roles]
