@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-from mysqldb import *
+from mysqldb import DatabaseCore
 import os
 from extra.misc.curse import CurseTable
 
@@ -14,6 +14,7 @@ class CurseMember(CurseTable):
         """ Class initializing method. """
 
         self.client = client
+        self.db = DatabaseCore()
 
     @commands.Cog.listener()
     async def on_ready(self) -> None:
