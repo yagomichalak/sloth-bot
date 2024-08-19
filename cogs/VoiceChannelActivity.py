@@ -11,8 +11,9 @@ from extra import utils
 from extra.menu import PaginatorView
 from extra.tool.voice_channel_history import VoiceChannelHistoryTable, VoiceChannelHistorySystem
 
-allowed_roles = [int(os.getenv('OWNER_ROLE_ID', 123)), int(os.getenv('ADMIN_ROLE_ID', 123)), int(os.getenv('MOD_ROLE_ID', 123))]
 analyst_debugger_role_id: int = int(os.getenv('ANALYST_DEBUGGER_ROLE_ID', 123))
+allowed_roles = [int(os.getenv('OWNER_ROLE_ID', 123)), int(os.getenv('ADMIN_ROLE_ID', 123)), int(os.getenv('MOD_ROLE_ID', 123))]
+allowed_roles_and_analysts = [int(os.getenv('OWNER_ROLE_ID', 123)), admin_role_id, senior_mod_role_id, mod_role_id, analyst_debugger_role_id]
 
 tool_cogs: List[commands.Cog] = [
     VoiceChannelHistoryTable, VoiceChannelHistorySystem
@@ -359,7 +360,7 @@ class VoiceChannelActivity(*tool_cogs):
         await ctx.send(embed=embed)
 
     @commands.command(aliases=['vh'])
-    @utils.is_allowed([allowed_roles, analyst_debugger_role_id], throw_exc=True)
+    @utils.is_allowed(allowed_roles_and_analysts, throw_exc=True)
     async def voice_history(self, ctx, member: Optional[discord.Member] = None) -> None:
         """ Shows the Voice Channel history of a member.
         :param member: The member from whom to see the history. [Optional][Default = You] """
