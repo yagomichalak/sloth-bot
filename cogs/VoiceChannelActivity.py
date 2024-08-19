@@ -11,9 +11,8 @@ from extra import utils
 from extra.menu import PaginatorView
 from extra.tool.voice_channel_history import VoiceChannelHistoryTable, VoiceChannelHistorySystem
 
-analyst_debugger_role_id: int = int(os.getenv('ANALYST_DEBUGGER_ROLE_ID', 123))
 allowed_roles = [int(os.getenv('OWNER_ROLE_ID', 123)), int(os.getenv('ADMIN_ROLE_ID', 123)), int(os.getenv('MOD_ROLE_ID', 123))]
-allowed_roles_and_analysts = [int(os.getenv('OWNER_ROLE_ID', 123)), admin_role_id, senior_mod_role_id, mod_role_id, analyst_debugger_role_id]
+allowed_roles_and_analysts = [int(os.getenv('OWNER_ROLE_ID', 123)), int(os.getenv('ADMIN_ROLE_ID', 123)), int(os.getenv('MOD_ROLE_ID', 123)), int(os.getenv('ANALYST_DEBUGGER_ROLE_ID', 123))]
 
 tool_cogs: List[commands.Cog] = [
     VoiceChannelHistoryTable, VoiceChannelHistorySystem
