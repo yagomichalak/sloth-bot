@@ -359,7 +359,7 @@ class VoiceChannelActivity(*tool_cogs):
         await ctx.send(embed=embed)
 
     @commands.command(aliases=['vh'])
-    @utils.is_allowed([allowed_roles, analyst_debugger_role_id], throw_exc=True)
+    @utils.is_allowed([*allowed_roles, analyst_debugger_role_id], throw_exc=True)
     async def voice_history(self, ctx, member: Optional[discord.Member] = None) -> None:
         """ Shows the Voice Channel history of a member.
         :param member: The member from whom to see the history. [Optional][Default = You] """

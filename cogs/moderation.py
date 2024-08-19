@@ -340,7 +340,7 @@ class Moderation(*moderation_cogs):
 
 
     @commands.command()
-    @utils.is_allowed([allowed_roles, analyst_debugger_role_id], throw_exc=True)
+    @utils.is_allowed([*allowed_roles, analyst_debugger_role_id], throw_exc=True)
     async def snipe(self, ctx, *, message : str = None):
         """(MOD) Snipes deleted messages.
         :param member: The @ or the ID of one or more users to snipe. (Optional) or
@@ -1896,7 +1896,7 @@ We appreciate your understanding and look forward to hearing from you. """, embe
 
     # Infraction methods
     @commands.command(aliases=['infr', 'show_warnings', 'sw', 'show_bans', 'sb', 'show_muted', 'sm'])
-    @commands.check_any(utils.is_allowed([allowed_roles, analyst_debugger_role_id], throw_exc=True), utils.is_subscriber())
+    @commands.check_any(utils.is_allowed([*allowed_roles, analyst_debugger_role_id], throw_exc=True), utils.is_subscriber())
     async def infractions(self, ctx, *, message : str = None) -> None:
         """ Shows all infractions of a specific user.
         :param member: The member to show the infractions from. [Optional] [Default = You] """
