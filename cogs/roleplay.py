@@ -22,7 +22,7 @@ class RolePlay(commands.Cog):
         async def real_check(ctx) -> bool:
 
             author = ctx.author
-            currency = await SlothCurrency.get_user_currency(Player, author.id)
+            currency = await ctx.bot.get_cog("SlothCurrency").get_user_currency(author.id)
             if not currency:
                 await ctx.send(f"**You don't have a Sloth Account, {author.mention}!**")
                 return False

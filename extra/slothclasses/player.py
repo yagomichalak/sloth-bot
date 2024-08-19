@@ -71,7 +71,7 @@ class Player(*additional_cogs):
         async def real_check(ctx):
             """ Perfoms the real check. """
 
-            skill_ts, exists = await Player.get_user_action_skill_ts(Player, user_id=ctx.author.id, skill_field=skill.value)
+            skill_ts, exists = await ctx.bot.get_cog("SlothClass").get_user_action_skill_ts(user_id=ctx.author.id, skill_field=skill.value)
             if not skill_ts:
                 return True, exists
 
@@ -122,7 +122,7 @@ class Player(*additional_cogs):
         async def real_check(ctx):
             """ Perfoms the real check. """
 
-            sloth_profile = await Player.get_sloth_profile(Player, user_id=ctx.author.id)
+            sloth_profile = await ctx.bot.get_cog("SlothClass").get_sloth_profile(user_id=ctx.author.id)
 
             if sloth_profile[2] >= requirement:
                 return True
@@ -134,7 +134,7 @@ class Player(*additional_cogs):
 
     def mirrored_skill() -> bool:
         async def real_check(ctx) -> bool:
-            mirrored_skill = await Player.get_skill_action_by_user_id_and_skill_type(Player, user_id=ctx.author.id, skill_type='mirror')
+            mirrored_skill = await ctx.bot.get_cog("SlothClass").get_skill_action_by_user_id_and_skill_type(user_id=ctx.author.id, skill_type='mirror')
             if mirrored_skill:
                 return True
             else:
