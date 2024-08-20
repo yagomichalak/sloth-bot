@@ -42,7 +42,7 @@ class TeacherFeedback(commands.Cog):
         """ Class initializing method. """
 
         self.client = client
-        self.db = TeacherFeedbackDatabase().db
+        self.db = TeacherFeedbackDatabase()
         self.teacher_cache: Dict[int, int] = {}
 
     @commands.Cog.listener()
