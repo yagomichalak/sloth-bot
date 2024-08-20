@@ -5,7 +5,6 @@ from datetime import datetime
 import asyncio
 from PIL import Image, ImageFont, ImageDraw
 import os
-from cogs.slothcurrency import SlothCurrency
 from mysqldb import DatabaseCore
 from typing import List, Union, Any, Optional
 
@@ -222,11 +221,12 @@ class CreateSmartRoom(*smart_room_cogs):
 		if reaction is None:
 			return
 
+		SlothCurrency = self.client.get_cog("SlothCurrency")
 		# Confirm configurations
 		if str(reaction.emoji) == '✅':
 
 			# Checks if the user has money for it (5łł)
-			user_currency = await SlothCurrency.get_user_currency(member, member.id)
+			user_currency = await SlothCurrency.get_user_currency(member.id)
 			if not user_currency:
 				view = discord.ui.View()
 				view.add_item(discord.ui.Button(style=5, label="Create Account", emoji="🦥", url="https://languagesloth.com/profile/update"))
@@ -245,7 +245,7 @@ class CreateSmartRoom(*smart_room_cogs):
 
 			await creation.edit(sync_permissions=True)
 			await creation.set_permissions(member, move_members=True)
-			await SlothCurrency.update_user_money(member, member.id, -5)
+			await SlothCurrency.update_user_money(member.id, -5)
 			await member.send(f"**You've been charged `5łł`!**")
 
 			await member.send(file=discord.File('./images/smart_vc/created.png'))
@@ -323,10 +323,11 @@ class CreateSmartRoom(*smart_room_cogs):
 		if reaction is None:
 			return
 
+		SlothCurrency = self.client.get_cog("SlothCurrency")
 		# Confirm configurations
 		if str(reaction.emoji) == '✅':
 			# Checks if the user has money for it (100łł)
-			user_currency = await SlothCurrency.get_user_currency(member, member.id)
+			user_currency = await SlothCurrency.get_user_currency(member.id)
 			if not user_currency:
 				view = discord.ui.View()
 				view.add_item(discord.ui.Button(style=5, label="Create Account", emoji="🦥", url="https://languagesloth.com/profile/update"))
@@ -361,7 +362,7 @@ class CreateSmartRoom(*smart_room_cogs):
 				await self.delete_things(creations)
 				return await member.send(f"**Channels limit reached, creation cannot be completed, try again later!**")
 
-			await SlothCurrency.update_user_money(member, member.id, -100)
+			await SlothCurrency.update_user_money(member.id, -100)
 			await member.send(f"**You've been charged `100łł`!**")
 
 			# Puts the channels ids in the database
@@ -514,6 +515,7 @@ class CreateSmartRoom(*smart_room_cogs):
 		if reaction is None:
 			return
 
+		SlothCurrency = self.client.get_cog("SlothCurrency")
 		# Confirm configurations
 		if str(reaction.emoji) == '✅':
 
@@ -527,7 +529,7 @@ class CreateSmartRoom(*smart_room_cogs):
 				return await member.send(f"**You cannot created a Galaxy Room, because the server reached the limit of Galaxy rooms that can be created at a time; 15!**")
 
 			# Checks if the user has money (1500łł)
-			user_currency = await SlothCurrency.get_user_currency(member, member.id)
+			user_currency = await SlothCurrency.get_user_currency(member.id)
 			if not user_currency:
 				view = discord.ui.View()
 				view.add_item(discord.ui.Button(style=5, label="Create Account", emoji="🦥", url="https://languagesloth.com/profile/update"))
@@ -568,7 +570,7 @@ class CreateSmartRoom(*smart_room_cogs):
 				await self.delete_things(creations)
 				return await member.send(f"**Channels limit reached, creation cannot be completed, try again later!**")
 
-			await SlothCurrency.update_user_money(member, member.id, -1500)
+			await SlothCurrency.update_user_money(member.id, -1500)
 			await member.send(f"**You've been charged `1500łł`!**")
 
 			# Inserts the channels in the database
@@ -1420,8 +1422,9 @@ You can only add either **threads** **OR** one **voice channel**"""))
 		elif type == 2:
 			price = 100
 
+		SlothCurrency = self.client.get_cog("SlothCurrency")
 		# Checks if the user has money for it
-		user_currency = await SlothCurrency.get_user_currency(member, member.id)
+		user_currency = await SlothCurrency.get_user_currency(member.id)
 		if not user_currency:
 			view = discord.ui.View()
 			view.add_item(discord.ui.Button(style=5, label="Create Account", emoji="🦥", url="https://languagesloth.com/profile/update"))
@@ -1466,7 +1469,7 @@ You can only add either **threads** **OR** one **voice channel**"""))
 		if type == 2:
 			await self.insert_premium_vc(member.id, vc_channel.id, txt_channel.id)
 
-		await SlothCurrency.update_user_money(member, member.id, -price)
+		await SlothCurrency.update_user_money(member.id, -price)
 		await ctx.send(f"**Your smartroom {vc_channel.mention} has been created**", delete_after=60)
 
 		try:
