@@ -213,13 +213,14 @@ class Games(*minigames_cogs):
     
     @commands.command(aliases=['lotto'])
     @Player.poisoned()
+    @utils.is_subscriber()
     async def lottery(self, ctx, g1 = None, g2 = None, g3 = None):
         """ Enter the lottery and see if you win!
         :param g1: Guess 1.
         :param g2: Guess 2.
         :param g3: Guess 3.
         
-        * Cost: 1łł.
+        * Cost: 5łł.
         * Prize: 500łł """
 
         author = ctx.author
