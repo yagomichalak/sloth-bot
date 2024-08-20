@@ -65,6 +65,7 @@ class Moderation(*moderation_cogs):
     @commands.Cog.listener()
     async def on_ready(self):
         self.look_for_expired_tempmutes.start()
+        self.look_for_expired_tempmutes.start()
         self.guild = self.client.get_guild(server_id)
         print('Moderation cog is ready!')
 
@@ -684,12 +685,27 @@ class Moderation(*moderation_cogs):
             current_ts = await utils.get_timestamp() + timeout_duration
             timedout_until = datetime.fromtimestamp(current_ts)
             await member.timeout(until=timedout_until, reason=f"Timed out for: {timeout_reason}")
-            
-            await discord.utils.sleep_until(timedout_until)
-            if timedout_role in member.roles:
-                await member.remove_roles(timedout_role)
         except:
             pass
+    
+    @tasks.loop(minutes=10)
+    async def check_timeouts_expirations(self) -> None:
+        """ Task that checks Timeouts expirations. """
+        
+        guild = self.client.get_guild(server_id)
+        role = discord.utils.get(guild.roles, id=timedout_role_id)
+        members = role.members
+        
+        for member in members:
+            try:
+                current_ts = await utils.get_timestamp()
+                timeout_time = member.communication_disabled_until
+                timeout_ts = datetime.timestamp(timeout_time)
+                if timeout_ts < current_ts:
+                    await member.remove_roles(role)
+            except Exception as e:
+                print(e)
+                continue
 
     async def get_remove_roles(self, member: discord.Member, keep_roles: Optional[List[Union[int, discord.Role]]] = []
     ) -> List[List[discord.Role]]:
