@@ -1291,7 +1291,7 @@ class Munk(Player):
         quests: List[Dict[str, Union[str, int]]] = [
             {"message": "Complete 5 `TheLanguageJungle` multiplayer games. (zg!mp)", "enum_value": 1, "disabled": True},
             {"message": "Rep someone and get repped back.", "enum_value": 2},
-            {"message": "Win a coinflip betting 50 leaves.", "enum_value": 3},
+            # {"message": "Win a coinflip betting 50 leaves.", "enum_value": 3},
             {"message": "Get a score 20 in the `Flags` game.", "enum_value": 4},
             {"message": "Spend 4 hours in a Voice Channel.", "enum_value": 5},
             {"message": "Buy any item from the SlothShop, if you have all items you need to get ripped-off first.", "enum_value": 6},
@@ -1301,7 +1301,7 @@ class Munk(Player):
             {"message": "Transfer 25 leaves to two different teachers.", "enum_value": 10},
             # {"message": "Complete 1 `TheLanguageJungle` singleplayer games. (zg!play)", "enum_value": 11},
             {"message": "Feed a pet or a baby", "enum_value": 12},
-            {"message": "Play 3 lottery games", "enum_value": 13},
+            # {"message": "Play 3 lottery games", "enum_value": 13},
             {"message": "Perform 2 different RolePlay commands (z!hug, z!kiss, z!boot, etc.).", "enum_value": 14},
         ]
 
