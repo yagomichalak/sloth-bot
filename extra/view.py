@@ -243,7 +243,8 @@ class QuickButtons(discord.ui.View):
         """ Show's the member's voice history. """
 
         await interaction.response.defer()
-        await self.client.get_cog("VoiceChannelActivity").voice_history(self.ctx, member=self.target_member)
+        ctx = await self.client.get_context(interaction.message)
+        await self.client.get_cog("VoiceChannelActivity").voice_history(ctx, member=self.target_member)
 
     @discord.ui.button(label="Fake Acc.", style=2, emoji="🥸", custom_id=f"user_fake_accounts")
     async def fake_accounts_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:

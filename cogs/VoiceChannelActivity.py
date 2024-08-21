@@ -369,23 +369,23 @@ class VoiceChannelActivity(*tool_cogs):
         if not member:
             member = ctx.author
 
-        channels_in_history = await self.get_voice_channel_history(member.id)
-        if not channels_in_history:
-            if author == member:
-                return await ctx.send(f"**You don't have any Voice Channels in your history, {author.mention}!**")
-            else:
-                return await ctx.send(f"**{member.mention} doesn't have any Voice Channels in their history, {author.mention}!**")
+        async with ctx.typing():
+            channels_in_history = await self.get_voice_channel_history(member.id)
+            if not channels_in_history:
+                if author == member:
+                    return await ctx.send(f"**You don't have any Voice Channels in your history, {author.mention}!**")
+                else:
+                    return await ctx.send(f"**{member.mention} doesn't have any Voice Channels in their history, {author.mention}!**")
 
-        # Additional data:
-        additional = {
-            'client': self.client,
-            'change_embed': self.make_voice_history_embed,
-            'target': member
-        }
-        view = PaginatorView(channels_in_history, increment=6, **additional)
-        embed = await view.make_embed(member)
-        await ctx.send(embed=embed, view=view)
-        return embed
+            # Additional data:
+            additional = {
+                'client': self.client,
+                'change_embed': self.make_voice_history_embed,
+                'target': member
+            }
+            view = PaginatorView(channels_in_history, increment=6, **additional)
+            embed = await view.make_embed(member)
+            await ctx.send(embed=embed, view=view)
 
     async def make_voice_history_embed(self, req: str, member: Union[discord.Member, discord.User], search: str, example: Any, 
         offset: int, lentries: int, entries: Dict[str, Any], title: str = None, result: str = None, **kwargs: Dict[str, Any]) -> discord.Embed:
