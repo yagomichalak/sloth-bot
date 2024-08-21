@@ -8,7 +8,7 @@ import re
 from pytz import timezone
 from io import BytesIO
 from PIL import Image, ImageDraw
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Union, Iterable
 
 from extra.customerrors import CommandNotReady, NotSubscribed
 from collections import OrderedDict
@@ -436,3 +436,16 @@ async def get_member_public_flags(member: discord.Member) -> List[str]:
     public_flags = member.public_flags.all()
     public_flag_names = list(map(lambda pf: pf.name, public_flags))
     return public_flag_names
+
+async def count_members(guild: discord.Guild, roles: Iterable[Union[discord.Role, int]]) -> int:
+    """ Counts the members in one or more roles.
+    :para"""
+
+    member_ids = set()
+    for role in roles:
+        if isinstance(role, int):
+            role = guild.get_role(role)
+        if not role:
+            continue
+        member_ids.update([m.id for m in role.members])
+    return len(member_ids)

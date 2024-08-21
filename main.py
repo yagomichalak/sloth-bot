@@ -59,7 +59,6 @@ client = commands.Bot(command_prefix='z!', intents=discord.Intents.all(), help_c
 # Tells when the bot is online
 @client.event
 async def on_ready() -> None:
-    change_status.start()
     change_color.start()
     print('Bot is ready!')
 
@@ -99,22 +98,22 @@ async def on_member_update(before, after) -> None:
                 await support_us_channel.send(patreon_roles[pr][0].format(member=after))
                 return await after.send(patreon_roles[pr][1])
 
-@client.event
-async def on_member_remove(member) -> None:
-    roles = [role for role in member.roles]
-    channel = discord.utils.get(member.guild.channels, id=admin_commands_channel_id)
-    embed = discord.Embed(title=member.name, description=f"User has left the server.", colour=discord.Colour.dark_red())
-    embed.set_thumbnail(url=member.display_avatar)
-    embed.set_author(name=f"User Info: {member}")
-    embed.add_field(name="ID:", value=member.id, inline=False)
-    embed.add_field(name="Guild name:", value=member.display_name, inline=False)
-    embed.add_field(name="Created at:", value=member.created_at.strftime("%a, %d %B %y, %I %M %p UTC"), inline=False)
-    embed.add_field(name="Joined at:", value=member.joined_at.strftime("%a, %d %B %y, %I %M %p UTC"), inline=False)
-    embed.add_field(name="Left at:", value=datetime.utcnow().strftime("%a, %d %B %y, %I %M %p UTC"), inline=False)
-    embed.add_field(name=f"Roles: {len(roles)}", value=" ".join([role.mention for role in roles]), inline=False)
-    embed.add_field(name="Top role:", value=member.top_role.mention, inline=False)
-    embed.add_field(name="Bot?", value=member.bot)
-    await channel.send(embed=embed)
+# @client.event
+# async def on_member_remove(member) -> None:
+#     roles = [role for role in member.roles]
+#     channel = discord.utils.get(member.guild.channels, id=admin_commands_channel_id)
+#     embed = discord.Embed(title=member.name, description=f"User has left the server.", colour=discord.Colour.dark_red())
+#     embed.set_thumbnail(url=member.display_avatar)
+#     embed.set_author(name=f"User Info: {member}")
+#     embed.add_field(name="ID:", value=member.id, inline=False)
+#     embed.add_field(name="Guild name:", value=member.display_name, inline=False)
+#     embed.add_field(name="Created at:", value=member.created_at.strftime("%a, %d %B %y, %I %M %p UTC"), inline=False)
+#     embed.add_field(name="Joined at:", value=member.joined_at.strftime("%a, %d %B %y, %I %M %p UTC"), inline=False)
+#     embed.add_field(name="Left at:", value=datetime.utcnow().strftime("%a, %d %B %y, %I %M %p UTC"), inline=False)
+#     embed.add_field(name=f"Roles: {len(roles)}", value=" ".join([role.mention for role in roles]), inline=False)
+#     embed.add_field(name="Top role:", value=member.top_role.mention, inline=False)
+#     embed.add_field(name="Bot?", value=member.bot)
+#     await channel.send(embed=embed)
 
 @client.event
 async def on_command_error(ctx, error) -> None:
@@ -256,11 +255,6 @@ async def on_application_command_error(ctx, error) -> None:
     
 
 # Members status update
-@tasks.loop(seconds=10)
-async def change_status() -> None:
-    guild = client.get_guild(server_id)
-    await client.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=f'{len(guild.members)} members.'))
-
 
 @tasks.loop(seconds=60)
 async def update_timezones() -> None:
