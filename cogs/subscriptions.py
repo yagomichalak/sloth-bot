@@ -10,7 +10,7 @@ import os
 sloth_subscriber_role_id = int(os.getenv("SLOTH_SUBSCRIBER_ROLE_ID", 123))
 on_sloth_sub_log_channel_id = int(os.getenv("ON_SLOTH_SUB_CHANNEL_ID", 123))
 sloth_subscriber_sub_id = int(os.getenv("SLOTH_SUBSCRIBER_SUB_ID", 123))
-teacher_role_id = int(os.getenv("TEACHER_ROLE_iD", 123))
+teacher_role_id = int(os.getenv("TEACHER_ROLE_ID", 123))
 server_id = int(os.getenv('SERVER_ID', 123))
 guild_ids = [server_id]
 
@@ -29,7 +29,7 @@ class Subscriptions(commands.Cog):
         self.change_status.start()
         print("SlothSubscriber cog is online!")
 
-    @tasks.loop(seconds=20)
+    @tasks.loop(seconds=10)
     async def change_status(self) -> None:
 
         next_status = next(self.STATUS_CYCLE)
