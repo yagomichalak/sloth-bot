@@ -118,6 +118,10 @@ async def on_member_remove(member) -> None:
 
 @client.event
 async def on_command_error(ctx, error) -> None:
+
+    if isinstance(error, commands.CommandNotFound):
+        return
+
     if isinstance(error, commands.MissingPermissions):
         return await ctx.send("**You can't do that!**")
 
@@ -198,6 +202,9 @@ async def on_command_error(ctx, error) -> None:
 
 @client.event
 async def on_application_command_error(ctx, error) -> None:
+
+    if isinstance(error, commands.CommandNotFound):
+        return
 
     if isinstance(error, commands.MissingPermissions):
         await ctx.respond("**You can't do that!**")
