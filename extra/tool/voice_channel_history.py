@@ -85,7 +85,7 @@ class VoiceChannelHistoryTable(commands.Cog):
         """ Gets the user's Voice Channel history.
         :param user_id: The user's ID. """
 
-        return await self.db.execute_query("SELECT * FROM VoiceChannelHistory WHERE user_id = %s ORDER BY action_ts DESC", (user_id,), fetch="all")
+        return await self.db.execute_query("SELECT * FROM VoiceChannelHistory WHERE user_id = %s ORDER BY action_ts DESC LIMIT 53", (user_id,), fetch="all")
 
     async def get_users_exceeding_records(self, limit: int = 10) -> List[List[int]]:
         """ Gets all IDs of the users that have an amount of Voice Channel records
