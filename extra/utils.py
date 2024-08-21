@@ -40,7 +40,7 @@ async def parse_time(tz: str = 'Etc/GMT') -> str:
     return datetime(*map(int, re.split(r'[^\d]', str(datetime.now(tzone)).replace('+00:00', ''))))
 
 
-def is_allowed(roles: List[int], check_adm: Optional[bool] = True, throw_exc: Optional[bool] = False) -> bool:
+def is_allowed(roles: List[int], check_adm: Optional[bool] = True, throw_exc: Optional[bool] = False):
     """ Checks whether the member has adm perms or has an allowed role.
     :param roles: The roles to check if the user has.
     :param check_adm: Whether to check whether the user has adm perms or not. [Optional][Default=True]
@@ -52,7 +52,10 @@ def is_allowed(roles: List[int], check_adm: Optional[bool] = True, throw_exc: Op
         member = member if not ctx else ctx.author
         channel = channel if not ctx else ctx.channel
 
-        if check_adm:
+        if channel is None or member is None:
+            return False
+
+        if check_adm and isinstance(channel, discord.TextChannel):
             perms = channel.permissions_for(member)
             if perms.administrator:
                 return True
@@ -63,6 +66,8 @@ def is_allowed(roles: List[int], check_adm: Optional[bool] = True, throw_exc: Op
 
         if throw_exc:
             raise commands.MissingAnyRole(roles)
+
+        return False
 
     return commands.check(real_check)
 

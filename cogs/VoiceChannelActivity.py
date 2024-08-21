@@ -360,22 +360,16 @@ class VoiceChannelActivity(*tool_cogs):
 
     @commands.command(aliases=['vh'])
     @utils.is_allowed([*allowed_roles, analyst_debugger_role_id], throw_exc=True)
-    async def voice_history(self, ctx, member: Optional[discord.Member] = None) -> None:
+    async def voice_history(self, ctx, member: Optional[discord.Member] = None) -> discord.Embed:
         """ Shows the Voice Channel history of a member.
         :param member: The member from whom to see the history. [Optional][Default = You] """
 
         author: discord.Member = ctx.author
 
         if not member:
-            member = ctx.author
+            member = author
 
         channels_in_history = await self.get_voice_channel_history(member.id)
-        if not channels_in_history:
-            if author == member:
-                return await ctx.send(f"**You don't have any Voice Channels in the history, {member.mention}!**")
-            else:
-                return await ctx.send(f"**This user doesn't have any Voice Channels in the history, {member.mention}!**")
-
         if not channels_in_history:
             if author == member:
                 return await ctx.send(f"**You don't have any Voice Channels in your history, {author.mention}!**")
