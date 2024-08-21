@@ -44,7 +44,7 @@ class Subscriptions(commands.Cog):
             status_text = f"{patrons} patrons."
 
         elif next_status == "sloth-subscribers":
-            subs = [et for et in await guild.entitlements().flatten() if et.type == EntitlementType.application_subscription]
+            subs = [et for et in await self.client.entitlements().flatten() if et.type == EntitlementType.application_subscription]
             status_text = f"{len(subs)} Sloth bot subs."
 
         elif next_status == "teachers":
@@ -85,7 +85,7 @@ class Subscriptions(commands.Cog):
             description=f"**{member.mention} just became a `Sloth Subscriber`.**",
             color=discord.Color.green(),
         )
-        embed.set_thumbnail(url=guild.display_avatar)
+        embed.set_thumbnail(url=guild.icon.url)
         await sloth_sub_log.send(embed=embed)
 
     @commands.Cog.listener()
