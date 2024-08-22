@@ -291,12 +291,14 @@ class Moderation(*moderation_cogs):
         # Actual timestamp
         time_now = await utils.get_timestamp()
         account_age = round((time_now - timestamp)/86400)
-
         if await self.get_muted_roles(member.id):
             muted_role = discord.utils.get(member.guild.roles, id=muted_role_id)
             await member.add_roles(muted_role)
             welcome_channel = discord.utils.get(member.guild.channels, id=welcome_channel_id)
             await welcome_channel.send(f"**Stop right there, {member.mention}! ✋ You were muted, left and rejoined the server, but that won't work!**")
+        if account_age <= 2:
+            suspect_channel = discord.utils.get(member.guild.channels, id=suspect_channel_id)
+            await suspect_channel.send(f"🔴 Alert! Possible fake account: {member.mention} joined the server. Account was just created.\nAccount age: {account_age} day(s)!")
 
         if account_age <= 120:
             if await self.get_firewall_state():
@@ -314,9 +316,6 @@ class Moderation(*moderation_cogs):
                 else:
                     await self.delete_bypass_firewall_user(member.id)
 
-        if account_age <= 2:
-            suspect_channel = discord.utils.get(member.guild.channels, id=suspect_channel_id)
-            await suspect_channel.send(f"🔴 Alert! Possible fake account: {member.mention} joined the server. Account was just created.\nAccount age: {account_age} day(s)!")
 
     @commands.Cog.listener()
     async def on_message_delete(self, message):

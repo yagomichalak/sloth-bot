@@ -1,3 +1,4 @@
+from random import choice
 import discord
 from discord import slash_command, message_command, user_command, Option, OptionChoice
 from discord.ext import commands, menus, tasks
@@ -18,7 +19,7 @@ import subprocess
 from datetime import datetime
 import pytz
 from pytz import timezone
-from mysqldb import DatabaseCore
+from mysqldb import the_database
 
 from extra.slothclasses.player import Player
 from extra.menu import InroleLooping, InchannelLooping
@@ -34,6 +35,8 @@ from extra.tool.stealthstatus import StealthStatusTable
 guild_ids = [int(os.getenv('SERVER_ID', 123))]
 
 from typing import List, Optional, Union
+
+import sys
 
 community_manager_role_id = int(os.getenv('COMMUNITY_MANAGER_ROLE_ID', 123))
 recruiter_role_id = int(os.getenv('RECRUITER_ROLE_ID', 123))
@@ -67,13 +70,13 @@ class Tools(*tool_cogs):
 
 	def __init__(self, client):
 		self.client = client
-		self.db = DatabaseCore()
 
 	@commands.Cog.listener()
 	async def on_ready(self):
 
 		# self.make_dumps_event.start()
 		print('Tools cog is ready!')
+
 
 	@tasks.loop(seconds=60)
 	async def make_dumps_event(self) -> None:
@@ -193,7 +196,7 @@ class Tools(*tool_cogs):
 		member = ctx.author
 		if not channel:
 			channel = ctx.channel
-
+		
 		members = [ow.mention for ow in channel.overwrites.keys() if isinstance(ow, discord.Member)]
 		if not members:
 			return await ctx.send(f"**No one has permissions in this channel, {member.mention}!**")
@@ -348,6 +351,7 @@ class Tools(*tool_cogs):
 
 		await self._tr_callback(ctx, language, message, True)
 
+
 	@message_command(name="Translate", guild_ids=guild_ids)
 	@Player.poisoned()
 	async def _tr_slash(self, ctx, message: discord.Message) -> None:
@@ -356,6 +360,7 @@ class Tools(*tool_cogs):
 		await ctx.defer(ephemeral=True)
 		language: str = 'en'    
 		await self._tr_callback(ctx, language, message.content)
+
 
 	async def _tr_callback(self, ctx, language: str = None, message: str = None, show_src: bool = False) -> None:
 		""" Translates a message into another language.
@@ -417,16 +422,16 @@ class Tools(*tool_cogs):
 			return await ctx.send("**Invalid value parameter!**", delete_after=3)
 
 		operators = {'+': (lambda x, y: x + y), "plus": (lambda x, y: x + y), '-': (lambda x, y: x - y),
-					"minus": (lambda x, y: x - y),
-					'*': (lambda x, y: x * y), "times": (lambda x, y: x * y), "x": (lambda x, y: x * y),
-					'/': (lambda x, y: x / y),
-					'//': (lambda x, y: x // y), "%": (lambda x, y: x % y), }
+					 "minus": (lambda x, y: x - y),
+					 '*': (lambda x, y: x * y), "times": (lambda x, y: x * y), "x": (lambda x, y: x * y),
+					 '/': (lambda x, y: x / y),
+					 '//': (lambda x, y: x // y), "%": (lambda x, y: x % y), }
 		if not oper.lower() in operators.keys():
 			return await ctx.send("**Invalid operator!**", delete_after=3)
 
 		embed = discord.Embed(title="__Math__",
-							description=f"`{v1}` **{oper}** `{v2}` **=** `{operators[oper](v1, v2)}`",
-							colour=ctx.author.color, timestamp=ctx.message.created_at)
+							  description=f"`{v1}` **{oper}** `{v2}` **=** `{operators[oper](v1, v2)}`",
+							  colour=ctx.author.color, timestamp=ctx.message.created_at)
 		embed.set_author(name=ctx.author, icon_url=ctx.author.display_avatar)
 		return await ctx.send(embed=embed)
 
@@ -831,26 +836,39 @@ class Tools(*tool_cogs):
 		:param user_id: The ID of the user to insert.
 		:param my_timezone: The user's timezone. """
 
-		await self.db.execute_query("INSERT INTO UserTimezones (user_id, my_timezone) VALUES (%s, %s)", (user_id, my_timezone))
+		mycursor, db = await the_database()
+		await mycursor.execute("INSERT INTO UserTimezones (user_id, my_timezone) VALUES (%s, %s)", (user_id, my_timezone))
+		await db.commit()
+		await mycursor.close()
 
 	async def select_user_timezone(self, user_id: int) -> None:
 		""" Gets the user's timezone.
 		:param user_id: The ID of the user to get. """
 
-		return await self.db.execute_query("SELECT * FROM UserTimezones WHERE user_id = %s", (user_id,), fetch="one")
+		mycursor, db = await the_database()
+		await mycursor.execute("SELECT * FROM UserTimezones WHERE user_id = %s", (user_id,))
+		user_timezone = await mycursor.fetchone()
+		await mycursor.close()
+		return user_timezone
 
 	async def update_user_timezone(self, user_id: int, my_timezone: str) -> None:
 		""" Updates the user's timezone.
 		:param user_id: The ID of the user to update.
 		:param my_timezone: The user's new timezone. """
 
-		await self.db.execute_query("UPDATE UserTimezones SET my_timezone = %s WHERE user_id = %s", (my_timezone, user_id))
+		mycursor, db = await the_database()
+		await mycursor.execute("UPDATE UserTimezones SET my_timezone = %s WHERE user_id = %s", (my_timezone, user_id))
+		await db.commit()
+		await mycursor.close()
 
 	async def delete_user_timezone(self, user_id: int) -> None:
 		""" Deletes the user's timezone.
 		:param user_id: The ID of the user to delete. """
 
-		await self.db.execute_query("DELETE FROM UserTimezones WHERE user_id = %s", (user_id,))
+		mycursor, db = await the_database()
+		await mycursor.execute("DELETE FROM UserTimezones WHERE user_id = %s", (user_id,))
+		await db.commit()
+		await mycursor.close()
 
 	@commands.command(hidden=True)
 	@commands.has_permissions(administrator=True)
@@ -861,7 +879,10 @@ class Tools(*tool_cogs):
 			return await ctx.send("**Table __UserTimezones__ already exists!**")
 
 		await ctx.message.delete()
-		await self.db.execute_query("CREATE TABLE UserTimezones (user_id BIGINT NOT NULL, my_timezone VARCHAR(50) NOT NULL)")
+		mycursor, db = await the_database()
+		await mycursor.execute("CREATE TABLE UserTimezones (user_id BIGINT NOT NULL, my_timezone VARCHAR(50) NOT NULL)")
+		await db.commit()
+		await mycursor.close()
 
 		return await ctx.send("**Table __UserTimezones__ created!**", delete_after=3)
 
@@ -872,7 +893,10 @@ class Tools(*tool_cogs):
 		if not await self.check_table_user_timezones():
 			return await ctx.send("**Table __UserTimezones__ doesn't exist!**")
 		await ctx.message.delete()
-		await self.db.execute_query("DROP TABLE UserTimezones")
+		mycursor, db = await the_database()
+		await mycursor.execute("DROP TABLE UserTimezones")
+		await db.commit()
+		await mycursor.close()
 
 		return await ctx.send("**Table __UserTimezones__ dropped!**", delete_after=3)
 
@@ -885,14 +909,27 @@ class Tools(*tool_cogs):
 			return await ctx.send("**Table __UserTimezones__ doesn't exist yet!**")
 
 		await ctx.message.delete()
-		await self.db.execute_query("DELETE FROM UserTimezones")
+		mycursor, db = await the_database()
+		await mycursor.execute("DELETE FROM UserTimezones")
+		await db.commit()
+		await mycursor.close()
 
 		return await ctx.send("**Table __UserTimezones__ reset!**", delete_after=3)
 
 	async def check_table_user_timezones(self) -> bool:
 		""" Checks if the UserTimezones table exists """
 
-		return await self.db.table_exists("UserTimezones")
+		mycursor, db = await the_database()
+		await mycursor.execute("SHOW TABLE STATUS LIKE 'UserTimezones'")
+		table_info = await mycursor.fetchall()
+		await mycursor.close()
+
+		if len(table_info) == 0:
+			return False
+
+		else:
+			return True
+
 
 	@commands.command(aliases=['show_tree', 'file_tree', 'showtree', 'filetree', 'sft'])
 	@commands.has_permissions(administrator=True)
@@ -929,10 +966,12 @@ class Tools(*tool_cogs):
 			else:
 				tree.create_node(file, file, parent='root')
 
-		# the_tree = tree.show(line_type="ascii-em")
-		# embed = discord.Embed(description=tree)
-		# await ctx.send(embed=embed)
 
+		# the_tree = tree.show(line_type="ascii-em")
+
+		# embed = discord.Embed(description=tree)
+
+		# await ctx.send(embed=embed)
 		await Tools.send_big_message('File Tree', ctx.channel, str(tree), discord.Color.green())
 
 	@commands.command()
@@ -1239,6 +1278,7 @@ class Tools(*tool_cogs):
 		else:
 			await ctx.respond(f"**You got moved to {channel.mention}!**")
 
+
 	@commands.command()
 	@utils.is_allowed([*allowed_roles, teacher_role_id], throw_exc=True)
 	async def join(self, ctx, channel: Optional[discord.VoiceChannel]) -> None:
@@ -1419,9 +1459,12 @@ class Tools(*tool_cogs):
 				timestamp = ctx.message.created_at
 			)
 			embed.set_thumbnail(url=inviter.display_avatar)
+
+
 		
 		embed.set_footer(text=f"Requested by: {member}", icon_url=member.display_avatar)
 		await ctx.send(embed=embed)
+
 
 	@commands.command(hidden=False)
 	@commands.has_permissions(administrator=True)
@@ -1433,8 +1476,16 @@ class Tools(*tool_cogs):
 		if not confirm:
 			return await ctx.send(f"**Not doing it, then, {member.mention}!**")
 		
-		await ctx.send("Restarting the bot")
-		await self.client.close()
+		await ctx.send("restarting the bot")
+	
+		os.execv(sys.executable, [sys.executable] + sys.argv)
+
+	
+
+
+
+
+
 
 
 def setup(client):
