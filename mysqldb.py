@@ -84,7 +84,7 @@ class DatabaseCore:
             else:
                 await mycursor.execute(query, values)
 
-            if query.upper().startswith(self.COMMITABLE_METHODS):
+            if query.upper().strip().startswith(self.COMMITABLE_METHODS):
                 await db.commit()
 
             if fetch == "one":

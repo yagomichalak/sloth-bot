@@ -1,8 +1,6 @@
 import discord
 from discord.ext import commands
-from datetime import datetime
-from mysqldb import *
-import asyncio
+from mysqldb import DatabaseCore
 import os
 from extra import utils
 from extra.moderation.modactivity import ModActivityTable
@@ -20,6 +18,7 @@ class ModActivity(ModActivityTable):
         """ Class init method. """
 
         self.client = client
+        self.db = DatabaseCore()
 
     @commands.Cog.listener()
     async def on_ready(self):

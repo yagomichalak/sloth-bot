@@ -1255,7 +1255,7 @@ class Tools(*tool_cogs):
 			await ctx.send(f"**Your stealth mode has been turned `{'off' if on else 'on'}`, {member.mention}!**")
 
 	@slash_command(name="join", guild_ids=guild_ids)
-	@utils.is_allowed([*allowed_roles, teacher_role_id], throw_exc=True)
+	@utils.is_allowed([*allowed_roles, analyst_debugger_role_id], throw_exc=True)
 	@commands.cooldown(1, 5, commands.BucketType.user)
 	async def _join_slash(self, ctx,
 		channel: Option(discord.VoiceChannel, description="The language voice channel you want to join", required=True)) -> None:
@@ -1280,7 +1280,7 @@ class Tools(*tool_cogs):
 
 
 	@commands.command()
-	@utils.is_allowed([*allowed_roles, teacher_role_id], throw_exc=True)
+	@utils.is_allowed([*allowed_roles, analyst_debugger_role_id], throw_exc=True)
 	async def join(self, ctx, channel: Optional[discord.VoiceChannel]) -> None:
 		""" (Patreon) Joins a language channel
 		:param voice_channel: ID of the language voice channel

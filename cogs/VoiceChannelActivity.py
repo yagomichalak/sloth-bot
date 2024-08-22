@@ -359,7 +359,7 @@ class VoiceChannelActivity(*tool_cogs):
         await ctx.send(embed=embed)
 
     @commands.command(aliases=['vh'])
-    @utils.is_allowed([allowed_roles, analyst_debugger_role_id], throw_exc=True)
+    @utils.is_allowed([*allowed_roles, analyst_debugger_role_id], throw_exc=True)
     async def voice_history(self, ctx, member: Optional[discord.Member] = None) -> None:
         """ Shows the Voice Channel history of a member.
         :param member: The member from whom to see the history. [Optional][Default = You] """
@@ -369,29 +369,23 @@ class VoiceChannelActivity(*tool_cogs):
         if not member:
             member = ctx.author
 
-        channels_in_history = await self.get_voice_channel_history(member.id)
-        if not channels_in_history:
-            if author == member:
-                return await ctx.send(f"**You don't have any Voice Channels in the history, {member.mention}!**")
-            else:
-                return await ctx.send(f"**This user doesn't have any Voice Channels in the history, {member.mention}!**")
+        async with ctx.typing():
+            channels_in_history = await self.get_voice_channel_history(member.id)
+            if not channels_in_history:
+                if author == member:
+                    return await ctx.send(f"**You don't have any Voice Channels in your history, {author.mention}!**")
+                else:
+                    return await ctx.send(f"**{member.mention} doesn't have any Voice Channels in their history, {author.mention}!**")
 
-        if not channels_in_history:
-            if author == member:
-                return await ctx.send(f"**You don't have any Voice Channels in your history, {author.mention}!**")
-            else:
-                return await ctx.send(f"**{member.mention} doesn't have any Voice Channels in their history, {author.mention}!**")
-
-        # Additional data:
-        additional = {
-            'client': self.client,
-            'change_embed': self.make_voice_history_embed,
-            'target': member
-        }
-        view = PaginatorView(channels_in_history, increment=6, **additional)
-        embed = await view.make_embed(member)
-        await ctx.send(embed=embed, view=view)
-        return embed
+            # Additional data:
+            additional = {
+                'client': self.client,
+                'change_embed': self.make_voice_history_embed,
+                'target': member
+            }
+            view = PaginatorView(channels_in_history, increment=6, **additional)
+            embed = await view.make_embed(member)
+            await ctx.send(embed=embed, view=view)
 
     async def make_voice_history_embed(self, req: str, member: Union[discord.Member, discord.User], search: str, example: Any, 
         offset: int, lentries: int, entries: Dict[str, Any], title: str = None, result: str = None, **kwargs: Dict[str, Any]) -> discord.Embed:
@@ -404,9 +398,7 @@ class VoiceChannelActivity(*tool_cogs):
         :param lentries: The length of entries for the given search. """
 
         current_time = await utils.get_time_now()
-        target = kwargs.get("target")
-        if not target:
-            target = member
+        target = kwargs.get("target", member)
 
         # Makes the embed's header
         embed = discord.Embed(
@@ -416,10 +408,11 @@ class VoiceChannelActivity(*tool_cogs):
         )
 
         description_list = []
+        index = offset - 1
 
-        for i in range(0, 6, 1):
-            if offset - 1 + i < lentries:
-                entry = entries[offset-1 + i]
+        for i in range(0, 6):
+            if index + i < lentries:
+                entry = entries[index + i]
                 if entry[1] == 'switch':
                     description_list.append(f"(**{entry[1]}**) <#{entry[3]}> **->** <#{entry[4]}>  <t:{entry[2]}>")
                 else:
@@ -430,9 +423,10 @@ class VoiceChannelActivity(*tool_cogs):
         embed.description = '\n'.join(description_list)
 
         # Sets the author of the search
-        embed.set_author(name=target, icon_url=target.display_avatar)
+        avatar_url = target.display_avatar
+        embed.set_author(name=target, icon_url=avatar_url)
         # Makes a footer with the a current page and total page counter
-        embed.set_footer(text=f"Requested by {target}", icon_url=target.display_avatar)
+        embed.set_footer(text=f"Requested by {target}", icon_url=avatar_url)
 
         return embed        
 

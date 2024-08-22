@@ -1,24 +1,57 @@
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 from discord.enums import EntitlementType
 
+from extra import utils
+from extra.useful_variables import patreon_roles
+from itertools import cycle
 import os
 
 sloth_subscriber_role_id = int(os.getenv("SLOTH_SUBSCRIBER_ROLE_ID", 123))
 on_sloth_sub_log_channel_id = int(os.getenv("ON_SLOTH_SUB_CHANNEL_ID", 123))
 sloth_subscriber_sub_id = int(os.getenv("SLOTH_SUBSCRIBER_SUB_ID", 123))
+teacher_role_id = int(os.getenv("TEACHER_ROLE_ID", 123))
 server_id = int(os.getenv('SERVER_ID', 123))
 guild_ids = [server_id]
 
-class SlothSubscriber(commands.Cog):
+
+class Subscriptions(commands.Cog):
     """ Commands and features related to the Sloth Subscribers. """
+
+    STATUS_CYCLE = cycle(["members", "patrons", "sloth-subscribers", "teachers"])
 
     def __init__(self, client):
         self.client = client
 
     @commands.Cog.listener()
     async def on_ready(self):
+
+        self.change_status.start()
         print("SlothSubscriber cog is online!")
+
+    @tasks.loop(seconds=10)
+    async def change_status(self) -> None:
+
+        next_status = next(self.STATUS_CYCLE)
+        guild = self.client.get_guild(server_id)
+
+        status_text = ""
+        if next_status == "members":
+            status_text = f"{len(guild.members)} members."
+
+        elif next_status == "patrons":
+            patrons = await utils.count_members(guild, patreon_roles.keys())
+            status_text = f"{patrons} patrons."
+
+        elif next_status == "sloth-subscribers":
+            subs = [et for et in await self.client.entitlements().flatten() if et.type == EntitlementType.application_subscription]
+            status_text = f"{len(subs)} Sloth bot subs."
+
+        elif next_status == "teachers":
+            patrons = await utils.count_members(guild, [teacher_role_id])
+            status_text = f"{patrons} teachers."
+        
+        await self.client.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=status_text))
     
     @commands.Cog.listener()
     async def on_entitlement_create(self, entitlement: discord.Entitlement) -> None:
@@ -52,7 +85,7 @@ class SlothSubscriber(commands.Cog):
             description=f"**{member.mention} just became a `Sloth Subscriber`.**",
             color=discord.Color.green(),
         )
-        embed.set_thumbnail(url=guild.display_avatar)
+        embed.set_thumbnail(url=guild.icon.url)
         await sloth_sub_log.send(embed=embed)
 
     @commands.Cog.listener()
@@ -95,4 +128,4 @@ class SlothSubscriber(commands.Cog):
 
 
 def setup(client):
-    client.add_cog(SlothSubscriber(client))
+    client.add_cog(Subscriptions(client))

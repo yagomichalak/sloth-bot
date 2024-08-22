@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-from typing import List
+from typing import List, Tuple
 
 
 class UserCurrencyTable:
@@ -116,16 +116,13 @@ class UserCurrencyTable:
         :param user_id: The user's ID.
         :param premium_money: The money addition. (It can be negative)"""
 
-        mycursor, db = await the_database()
-        await mycursor.execute("UPDATE UserCurrency SET user_premium_money = user_premium_money + %s WHERE user_id = %s", (money, user_id))
-        await db.commit()
-        await mycursor.close()
+        await self.db.execute_query("UPDATE UserCurrency SET user_premium_money = user_premium_money + %s WHERE user_id = %s", (money, user_id))
 
-    async def update_user_many_money(self, users: List[int]) -> None:
+    async def update_user_many_money(self, users: List[Tuple[int, int]]) -> None:
         """ Updates many the money of many users.
         :param users: The users to update the money. """
 
-        await self.db.execute_query("UPDATE UserCurrency SET user_money = user_money + %s WHERE user_id = %s", users)
+        await self.db.execute_query("UPDATE UserCurrency SET user_money = user_money + %s WHERE user_id = %s", users, execute_many=True)
 
     async def update_user_purchase_ts(self, user_id: int, the_time: int) -> None:
         """ Updates the user purchase timestamp.

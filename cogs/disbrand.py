@@ -240,7 +240,7 @@ class Disbrand(commands.Cog):
         :param user_id: The user ID attached to the pending message.
         :param current_timestamp: The current timestamp. """
         
-        return await self.db.execute_query("""
+        await self.db.execute_query("""
             UPDATE
                 advertisement_advertisementconfig
             SET

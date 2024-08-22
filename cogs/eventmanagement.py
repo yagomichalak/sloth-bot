@@ -5,6 +5,7 @@ from extra import utils
 import os
 from typing import Dict, Any
 from extra.smartroom.event_rooms import EventRoomsTable
+from mysqldb import DatabaseCore
 
 mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 senior_mod_role_id = int(os.getenv('SENIOR_MOD_ROLE_ID', 123))
@@ -22,6 +23,7 @@ class EventManagement(EventRoomsTable):
         """ Class initializing method. """
 
         self.client = client
+        self.db = DatabaseCore()
 
     @commands.Cog.listener()
     async def on_ready(self) -> None:

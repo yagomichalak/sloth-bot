@@ -254,7 +254,7 @@ class ReportSupport(*report_support_classes):
         member: discord.PermissionOverwrite(
             read_messages=True, send_messages=True, connect=False, view_channel=True),
         moderator: discord.PermissionOverwrite(
-            read_messages=True, send_messages=True, connect=False, view_channel=True, manage_messages=True)}
+            read_messages=True, send_messages=True, connect=False, view_channel=True, manage_messages=True, manage_permissions=True)}
         try:
             the_channel = await guild.create_text_channel(name=f"case-{counter[0][0]}", category=case_cat, overwrites=overwrites)
         except Exception as e:
@@ -455,6 +455,7 @@ class ReportSupport(*report_support_classes):
         """ Allows one or more witnesses to join a case channel.
         :param members: The member(s) to allow. """
 
+        author = ctx.author
         members = await utils.get_mentions(ctx.message)
 
         if not members:
@@ -462,7 +463,7 @@ class ReportSupport(*report_support_classes):
 
         user_channel = await self.get_case_channel(ctx.channel.id)
         if not user_channel:
-            return await ctx.send(f"**This is not a case channel, {ctx.author.mention}!**")
+            return await ctx.send(f"**This is not a case channel, {author.mention}!**")
 
         confirm = await Confirm(f"**Are you sure you want to allow all `{len(members)}` informed {'witnesses' if len(members) > 1 else 'witness'} in this case channel, {ctx.author.mention}?**").prompt(ctx)
         if not confirm:
@@ -470,10 +471,20 @@ class ReportSupport(*report_support_classes):
 
         channel = discord.utils.get(ctx.guild.channels, id=user_channel[0][1])
         allowed: int = 0
+
+        embed = discord.Embed(
+            description=f"It’s just something we’re trying to sort out and your quick input could really help us.\n{channel.mention}",
+            color=author.color,
+            timestamp=ctx.message.created_at
+        )   
+
         for member in members:
             try:
                 await channel.set_permissions(
                     member, read_messages=True, send_messages=True, connect=True, speak=True, view_channel=True)
+
+                embed.set_author(name="You have been allowed as a witness.", icon_url=member.display_avatar)             
+                await member.send(embed=embed)
             except Exception:
                 pass
             else:
