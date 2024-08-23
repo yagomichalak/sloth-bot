@@ -62,31 +62,47 @@ class ModActivity(ModActivityTable):
     @commands.command(aliases=['mods_reputation', 'mod_rep'])
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def modrep(self, ctx):
-        """ (STAFF) Shows all the moderators and their statuses in an embedded message. """
+        """ (STAFF) Shows all the moderators and their statuses in embedded messages. """
 
         mod_activities = await self.get_mod_activities()
-
         member: discord.Member = ctx.author
-
-        embed = discord.Embed(
-            title="This Week's Report", description="Moderators' activity statuses.",
-            url='https://discordapp.com', color=discord.Color.dark_green(), 
-            timestamp=ctx.message.created_at)
-        embed.set_footer(text='Activity Report', icon_url=self.client.user.display_avatar)
-        embed.set_thumbnail(url=ctx.guild.icon.url)
-        embed.set_author(name=ctx.guild.name)
+        is_first_embed = True  # Flag per indicare il primo embed
+        def create_embed(is_first):
+            embed = discord.Embed(
+                url='https://discordapp.com', color=discord.Color.dark_green(), 
+                timestamp=ctx.message.created_at)
+            embed.set_footer(text='Activity Report', icon_url=self.client.user.display_avatar)
+            embed.set_thumbnail(url=ctx.guild.icon.url)
+            
+            if is_first:  # Aggiungi il titolo e l'autore solo al primo embed
+                embed.title = "Moderator's Activity"
+                embed.set_author(name=ctx.guild.name)
+                
+            return embed
+        embed = create_embed(is_first_embed)
+        field_count = 0
         for mod in mod_activities:
             m, s = divmod(mod[1], 60)
             h, m = divmod(m, 60)
             user = discord.utils.get(ctx.guild.members, id=mod[0])
             embed.add_field(
-                name=f'👤__**{user}**__',
-                value=f"**- Voice Chat Activity:**\n{h:d} hours, {m:02d} minutes and {s:02d} seconds\n**- Text Chat Activity:**\n{mod[3]} messages",
+                name=f'👤**{user}**',
+                value=f"**Voice Chat Activity:**\n{h:d} hours, {m:02d} minutes and {s:02d} seconds\n**Text Chat Activity:**\n{mod[3]} messages",
                 inline=False)
 
+            field_count += 1
+            # Quando raggiungiamo 20 campi, inviamo l'embed e ne creiamo uno nuovo
+            if field_count >= 1:
+                await ctx.send(embed=embed)
+                is_first_embed = False  # Imposta il flag a False dopo il primo embed
+                embed = create_embed(is_first_embed)
+                field_count = 0
+
+        # Invia l'ultimo embed se ha campi residui
+        if field_count > 0:
+            await ctx.send(embed=embed)
         confirm_view: discord.ui.View = ConfirmButton(member, timeout=60)
 
-        await ctx.send(embed=embed)
         msg = await ctx.send("**Do you want to reset the data?**", view=confirm_view)
         await confirm_view.wait()
 
