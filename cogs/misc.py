@@ -18,7 +18,7 @@ from mysqldb import DatabaseCore
 allowed_roles = [
     int(os.getenv('OWNER_ROLE_ID', 123)), int(os.getenv('ADMIN_ROLE_ID', 123)), int(os.getenv('MOD_ROLE_ID', 123)), int(os.getenv('ASTROSLOTH_ROLE_ID', 123)), 
     int(os.getenv('SLOTH_EXPLORER_ROLE_ID', 123)),int(os.getenv('SLOTH_NAPPER_ROLE_ID', 123)), int(os.getenv('SLOTH_NATION_ROLE_ID', 123)),
-    int(os.getenv('SLOTH_SUPPORTER_ROLE_ID', 123)), int(os.getenv('SLOTH_LOVERS_ROLE_ID', 123)),
+    int(os.getenv('SLOTH_SUPPORTER_ROLE_ID', 123)),
     ]
 server_id = int(os.getenv('SERVER_ID', 123))
 guild_ids = [server_id]

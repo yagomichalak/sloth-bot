@@ -25,8 +25,6 @@ mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID', 123))
 teacher_role_id = int(os.getenv('TEACHER_ROLE_ID', 123))
 analyst_debugger_role_id: int = int(os.getenv('ANALYST_DEBUGGER_ROLE_ID', 123))
-watchlist_channel_id = int(os.getenv('WATCHLIST_CHANNEL_ID', 123))
-slothboard_channel_id = int(os.getenv('SLOTHBOARD_CHANNEL_ID', 123))
 booster_role_id = int(os.getenv('BOOSTER_ROLE_ID', 123))
 guild_ids = [int(os.getenv('SERVER_ID', 123))]
 
@@ -42,78 +40,6 @@ class Social(*social_cogs):
     @commands.Cog.listener()
     async def on_ready(self):
         print('Social cog is ready!')
-
-    @commands.Cog.listener()
-    async def on_raw_reaction_add(self, payload) -> None:
-        """ Sends messages to the Slothboard channel. """
-        
-        emoji = str(payload.emoji)
-        star = '<:Sloth:686237376510689327>'
-
-        # Checkes whether it's the right emoji
-        if emoji != star:
-            return
-
-        if payload.channel_id == slothboard_channel_id:
-            return
-
-        # Gets message
-        guild = self.client.get_guild(payload.guild_id)
-        channel = guild.get_channel(payload.channel_id)
-        message = await channel.fetch_message(payload.message_id)
-        if message is None:
-            return
-
-        # Checks whether the message has enough reactions
-        for reaction in message.reactions:
-            if str(reaction) != emoji:
-                continue
-
-            if reaction.count < 10:
-                continue
-
-            # Check whether message is already in the Slothboard
-            if not (something := await self.get_slothboard_message(message.id, channel.id)):
-
-                # Checks whether message content contains an embedded image
-                current_date = await utils.get_time_now()
-
-                embed = discord.Embed(
-                    title="__Slothboard__",
-                    color=discord.Color.gold(),
-                    timestamp=current_date
-                )
-
-                # Gets all Discord link attachments
-                attachment_root = 'https://cdn.discordapp.com/attachments/'
-                content = message.content.split()
-                discord_attachments = [att for att in content if att.startswith(attachment_root)]
-                for datt in discord_attachments:
-                    try:
-                        if not embed.image:
-                            embed.set_image(url=datt)
-
-                        content.remove(datt)
-                    except:
-                        pass
-
-                message.content = ' '.join(content).strip() if content else None
-                embed.description=f"[**Original Message**]({message.jump_url})\n\n**Content:** {message.content}"
-
-                # Gets all embedded attachments
-                if all_attachments := message.attachments:
-                    attachments = [att for att in all_attachments if att.content_type.startswith('image')]
-
-                    if attachments:
-                        embed.set_image(url=attachments[0])
-                    else:
-                        return
-
-                embed.set_author(name=message.author, url=message.author.display_avatar, icon_url=message.author.display_avatar)
-                # Posts in #slothboard
-                await self.insert_slothboard_message(message.id, channel.id)
-                slothboard_channel = guild.get_channel(slothboard_channel_id)
-                return await slothboard_channel.send(content=f"**From:** {channel.mention}", embed=embed)
 
     @commands.command(aliases=['si', 'server', 'server_info'])
     async def serverinfo(self, ctx) -> None:

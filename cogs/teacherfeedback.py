@@ -30,8 +30,6 @@ teacher_role_id = int(os.getenv('TEACHER_ROLE_ID', 123))
 preference_role_id = int(os.getenv('PREFERENCE_ROLE_ID', 123))
 lesson_management_role_id = int(os.getenv('LESSON_MANAGEMENT_ROLE_ID', 123))
 sloth_explorer_role_id = int(os.getenv('SLOTH_EXPLORER_ROLE_ID', 123))
-show_me_everything_role_id = int(os.getenv('SHOW_ME_EVERYTHING_ROLE_ID', 123))
-sloth_pass_role_id = int(os.getenv('SLOTH_PASS_ROLE_ID', 123))
 # all_vcs_role_id = int(os.getenv('ALL_VCS_ROLE_ID', 123))
 
 teacher_feedback_thread_id = int(os.getenv('TEACHER_FEEDBACK_THREAD_ID', 123))

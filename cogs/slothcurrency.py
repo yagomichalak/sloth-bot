@@ -816,7 +816,7 @@ class SlothCurrency(*currency_cogs):
         """ Checks the farming status of a specific member.
         :param member: The member of the checking. """
 
-        allowed_roles = [int(os.getenv('OWNER_ROLE_ID', 123)), int(os.getenv('ADMIN_ROLE_ID', 123)), int(os.getenv('MOD_ROLE_ID', 123)), *patreon_roles.keys(), int(os.getenv('SLOTH_LOVERS_ROLE_ID', 123))]
+        allowed_roles = [int(os.getenv('OWNER_ROLE_ID', 123)), int(os.getenv('ADMIN_ROLE_ID', 123)), int(os.getenv('MOD_ROLE_ID', 123)), *patreon_roles.keys()]
         
         allowed: bool = await utils.is_allowed(allowed_roles).predicate(ctx)
 

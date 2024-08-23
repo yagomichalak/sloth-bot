@@ -14,7 +14,7 @@ moderator_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID', 123))
 owner_role_id = int(os.getenv('OWNER_ROLE_ID', 123))
 teacher_role_id = int(os.getenv('TEACHER_ROLE_ID', 123))
-event_host_role_id = int(os.getenv('EVENT_MANAGER_ROLE_ID', 123))
+event_host_role_id = int(os.getenv('EVENT_HOST_ROLE_ID', 123))
 
 class QueueManagement(QueuesTable):
     """ Category for creating, managing and interacting with queues. """

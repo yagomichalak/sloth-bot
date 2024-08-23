@@ -20,8 +20,7 @@ senior_mod_role_id = int(os.getenv('SENIOR_MOD_ROLE_ID', 123))
 allowed_roles = [int(os.getenv('OWNER_ROLE_ID', 123)), int(os.getenv('ADMIN_ROLE_ID', 123)), mod_role_id]
 general_channel_id = int(os.getenv('GENERAL_CHANNEL_ID', 123))
 lesson_manager_role_id = int(os.getenv('LESSON_MANAGEMENT_ROLE_ID', 123))
-real_event_manager_role_id = int(os.getenv('REAL_EVENT_MANAGER_ROLE_ID', 123))
-community_manager_role_id = int(os.getenv('COMMUNITY_MANAGER_ROLE_ID', 123))
+event_manager_role_id = int(os.getenv('EVENT_MANAGER_ROLE_ID', 123))
 
 tool_cogs: List[commands.Cog] = [ScheduledEventsTable]
 
@@ -200,7 +199,7 @@ If you have any questions feel free to ask! And if you experience any type of pr
             
     #greedy_dm
     @commands.command()
-    @utils.is_allowed([senior_mod_role_id, lesson_manager_role_id, real_event_manager_role_id, community_manager_role_id], throw_exc=True)
+    @utils.is_allowed([senior_mod_role_id, lesson_manager_role_id, event_manager_role_id], throw_exc=True)
     async def dm(self, ctx, *, message: Optional[str] = None):
         """ (SeniorMod | Manager) Sends a Direct Message to one or more users.
         :param members: The @ or the ID of one or more users to mute.

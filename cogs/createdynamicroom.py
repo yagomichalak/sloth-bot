@@ -684,9 +684,8 @@ class CreateDynamicRoom(commands.Cog, DynRoomUserVCstampDatabase, DynamicRoomDat
 
     async def get_language_rooms_from_member(self, member: discord.Member) -> List[LanguageRoom]:
         roles_tuple = tuple([role.id for role in member.roles])
-        show_me_everything = any([int(os.getenv('SHOW_ME_EVERYTHING_ROLE_ID', 123)) in roles_tuple])
         is_admin = any([int(os.getenv('ADMIN_ROLE_ID', 123)) in roles_tuple])
-        can_see_everything = any([show_me_everything, is_admin])
+        can_see_everything = any([is_admin])
 
         permissions_rooms = await self.get_available_rooms(roles_tuple, see_everything=can_see_everything, object_form=True)
 

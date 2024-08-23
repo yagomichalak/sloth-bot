@@ -35,10 +35,6 @@ from mysqldb import DatabaseCore
 
 guild_ids = [int(os.getenv('SERVER_ID', 123))]
 
-from typing import List, Optional, Union
-
-community_manager_role_id = int(os.getenv('COMMUNITY_MANAGER_ROLE_ID', 123))
-recruiter_role_id = int(os.getenv('RECRUITER_ROLE_ID', 123))
 mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 senior_mod_role_id: int = int(os.getenv('SENIOR_MOD_ROLE_ID', 123))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID', 123))
@@ -46,9 +42,7 @@ owner_role_id = int(os.getenv('OWNER_ROLE_ID', 123))
 analyst_debugger_role_id: int = int(os.getenv('ANALYST_DEBUGGER_ROLE_ID', 123))
 in_a_vc_role_id: int = int(os.getenv('IN_A_VC_ROLE_ID', 123))
 dnk_id = int(os.getenv('DNK_ID', 123))
-steffen_id = int(os.getenv('STEFFEN_ID', 123))
-
-allowed_roles = [owner_role_id, admin_role_id, mod_role_id, *patreon_roles.keys(), int(os.getenv('SLOTH_LOVERS_ROLE_ID', 123))]
+allowed_roles = [owner_role_id, admin_role_id, mod_role_id, *patreon_roles.keys()]
 teacher_role_id = int(os.getenv('TEACHER_ROLE_ID', 123))
 patreon_channel_id = int(os.getenv('PATREONS_CHANNEL_ID', 123))
 
@@ -548,7 +542,7 @@ class Tools(*tool_cogs):
 			await ctx.send(f"**`{len(all_members)}` members are in a vc atm!**")
 
 	@commands.command(aliases=['stalk', 'voice_channel'])
-	@commands.check_any(utils.is_allowed([*allowed_roles, analyst_debugger_role_id]), utils.is_allowed_members([steffen_id], check_adm=False))
+	@commands.check_any(utils.is_allowed([*allowed_roles, analyst_debugger_role_id]))
 	async def vc(self, ctx) -> None:
 		""" Tells where the given member is at (voice channel).
 		:param member: The member you are looking for. """
@@ -680,7 +674,7 @@ class Tools(*tool_cogs):
 		await ctx.send(' '.join(text))
 
 	@commands.command(aliases=['tp', 'beam'])
-	@commands.check_any(utils.is_allowed([senior_mod_role_id]), utils.is_allowed_members([steffen_id], check_adm=False))
+	@commands.check_any(utils.is_allowed([senior_mod_role_id]))
 	async def teleport(self, ctx, vc_1: discord.VoiceChannel = None, vc_2: discord.VoiceChannel = None) -> None:
 		""" Teleports all members in a given voice channel to another one.
 		:param vc_1: The origin vc.
@@ -1381,49 +1375,6 @@ class Tools(*tool_cogs):
 			print("Error at making dump: ", e)
 		finally:
 			os.remove(file_path); os.remove(file_path2); os.remove(file_path3)
-
-	@commands.command(aliases=["invs"])
-	@utils.is_allowed([recruiter_role_id, community_manager_role_id, admin_role_id], throw_exc=True)
-	async def invites(self, ctx, inviter: Optional[discord.Member] = None) -> None:
-		""" Shows the invites for recruiters if not members are informed.
-		:param inviter: The inviter to show invites from. """
-
-		member: discord.Member = ctx.author
-
-		inviters = []
-
-		invites = await ctx.guild.invites()
-		def get_user_invites_count(member: discord.Member) -> discord.Invite:
-			
-			user_invites = [invite.uses for invite in invites if invite.inviter and invite.inviter.id == member.id]
-			return sum(user_invites)
-
-		if not inviter:
-			inviters = [
-				f"**• {member}**: `{get_user_invites_count(member)}`"
-				for member in ctx.guild.members
-				if member.get_role(recruiter_role_id)
-			]
-			inviters_text = '\n'.join(inviters)
-
-			embed = discord.Embed(
-				title="Recruiter Invites",
-				description=f"Showing invites for `{len(inviters)}` recruiters:\n{inviters_text}",
-				color=member.color,
-				timestamp = ctx.message.created_at
-			)
-			embed.set_thumbnail(url=ctx.guild.icon.url)
-		else:
-			embed = discord.Embed(
-				title=f"{inviter}'s Invites",
-				description=f"• {member.mention} has `{get_user_invites_count(inviter)}` invites",
-				color=inviter.color,
-				timestamp = ctx.message.created_at
-			)
-			embed.set_thumbnail(url=inviter.display_avatar)
-		
-		embed.set_footer(text=f"Requested by: {member}", icon_url=member.display_avatar)
-		await ctx.send(embed=embed)
 
 	@commands.command(hidden=False)
 	@commands.has_permissions(administrator=True)
