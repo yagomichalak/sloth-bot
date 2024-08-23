@@ -33,26 +33,31 @@ from extra.useful_variables import patreon_roles
 from extra.view import BasicUserCheckView, SoundBoardView
 from mysqldb import DatabaseCore
 
+# variables.id
 guild_ids = [int(os.getenv('SERVER_ID', 123))]
+dnk_id = int(os.getenv('DNK_ID', 123))
 
+# variables.role
 mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 senior_mod_role_id: int = int(os.getenv('SENIOR_MOD_ROLE_ID', 123))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID', 123))
 owner_role_id = int(os.getenv('OWNER_ROLE_ID', 123))
 analyst_debugger_role_id: int = int(os.getenv('ANALYST_DEBUGGER_ROLE_ID', 123))
 in_a_vc_role_id: int = int(os.getenv('IN_A_VC_ROLE_ID', 123))
-dnk_id = int(os.getenv('DNK_ID', 123))
 allowed_roles = [owner_role_id, admin_role_id, mod_role_id, *patreon_roles.keys()]
 teacher_role_id = int(os.getenv('TEACHER_ROLE_ID', 123))
-patreon_channel_id = int(os.getenv('PATREONS_CHANNEL_ID', 123))
 
+# variables.category
 popular_lang_cat_id = int(os.getenv('LANGUAGES_CHANNEL_ID', 123))
 more_popular_lang_cat_id = int(os.getenv('MORE_LANGUAGES_CHANNEL_ID', 123))
 smart_room_cat_id = int(os.getenv('CREATE_SMART_ROOM_CAT_ID', 123))
-
-dynamic_vc_id: int = int(os.getenv('CREATE_DYNAMIC_ROOM_VC_ID', 123))
 dynamic_channels_cat_id = int(os.getenv('CREATE_DYNAMIC_ROOM_CAT_ID', 123))
 
+# variables.voicechannel
+dynamic_vc_id: int = int(os.getenv('CREATE_DYNAMIC_ROOM_VC_ID', 123))
+
+# variables.textchannel
+patreon_channel_id = int(os.getenv('PATREONS_CHANNEL_ID', 123))
 
 tool_cogs: List[commands.Cog] = [
 	StealthStatusTable

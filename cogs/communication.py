@@ -13,17 +13,19 @@ from extra import utils
 from extra.tool.scheduled_events import ScheduledEventsTable
 from mysqldb import DatabaseCore
 
-bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID', 123))
-announcement_channel_id = int(os.getenv('ANNOUNCEMENT_CHANNEL_ID', 123))
+# variables.role
 mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 senior_mod_role_id = int(os.getenv('SENIOR_MOD_ROLE_ID', 123))
 allowed_roles = [int(os.getenv('OWNER_ROLE_ID', 123)), int(os.getenv('ADMIN_ROLE_ID', 123)), mod_role_id]
-general_channel_id = int(os.getenv('GENERAL_CHANNEL_ID', 123))
 lesson_manager_role_id = int(os.getenv('LESSON_MANAGEMENT_ROLE_ID', 123))
 event_manager_role_id = int(os.getenv('EVENT_MANAGER_ROLE_ID', 123))
 
-tool_cogs: List[commands.Cog] = [ScheduledEventsTable]
+# variables.textchannel
+bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID', 123))
+announcement_channel_id = int(os.getenv('ANNOUNCEMENT_CHANNEL_ID', 123))
+general_channel_id = int(os.getenv('GENERAL_CHANNEL_ID', 123))
 
+tool_cogs: List[commands.Cog] = [ScheduledEventsTable]
 
 class Communication(*tool_cogs):
     """ A cog related to communication commands. """

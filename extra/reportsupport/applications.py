@@ -9,38 +9,31 @@ from discord.ext import commands
 # import.local
 from extra import utils
 
-cosmos_role_id: int = int(os.getenv('COSMOS_ROLE_ID', 123))
-muffin_id: int = int(os.getenv('MUFFIN_ID', 123))
-guibot_id: int = int(os.getenv('GUIBOT_ID', 123))
-
+# variables.role
+owner_role_id: int = int(os.getenv('OWNER_ROLE_ID', 123))
 moderator_role_id: int = int(os.getenv('MOD_ROLE_ID', 123))
 senior_mod_role_id: int = int(os.getenv('SENIOR_MOD_ROLE_ID', 123))
 admin_role_id: int = int(os.getenv('ADMIN_ROLE_ID', 123))
 lesson_management_role_id: int = int(os.getenv('LESSON_MANAGEMENT_ROLE_ID', 123))
-real_event_manager_role_id: int = int(os.getenv('REAL_EVENT_MANAGER_ROLE_ID', 123))
-
+event_manager_role_id: int = int(os.getenv('EVENT_MANAGER_ROLE_ID', 123))
 
 class ApplicationsTable(commands.Cog):
     """ Cog for managing applications. """
 
     # Teacher application attributes
     teacher_app_channel_id: int = int(os.getenv('TEACHER_APPLICATION_CHANNEL_ID', 123))
-    teacher_app_cat_id: int = int(os.getenv('TEACHER_APPLICATION_CAT_ID', 123))
     teacher_parent_channel_id: int = int(os.getenv('TEACHER_CHANNEL_ID', 123))
     teacher_interview_vc_id: int = int(os.getenv('TEACHER_INTERVIEW_VC_ID', 123))
 
     moderator_app_channel_id: int = int(os.getenv('MODERATOR_APPLICATION_CHANNEL_ID', 123))
-    moderator_app_cat_id: int = int(os.getenv('MODERATOR_APPLICATION_CAT_ID', 123))
     moderator_parent_channel_id: int = int(os.getenv('MODERATOR_CHANNEL_ID', 123))
     moderator_interview_vc_id: int = int(os.getenv('MODERATOR_INTERVIEW_VC_ID', 123))
 
     event_host_app_channel_id: int = int(os.getenv('EVENT_MANAGER_APPLICATION_CHANNEL_ID', 123))
-    event_host_app_cat_id: int = int(os.getenv('EVENT_MANAGER_APPLICATION_CAT_ID', 123))
     event_host_parent_channel_id: int = int(os.getenv('EVENT_MANAGER_CHANNEL_ID', 123))
     event_host_interview_vc_id: int = int(os.getenv('EVENT_MANAGER_INTERVIEW_VC_ID', 123))
 
     debate_manager_app_channel_id: int = int(os.getenv('DEBATE_MANAGER_APPLICATION_CHANNEL_ID', 123))
-    debate_manager_app_cat_id: int = int(os.getenv('DEBATE_MANAGER_APPLICATION_CAT_ID', 123))
     debate_manager_parent_channel_id: int = int(os.getenv('DEBATE_MANAGER_CHANNEL_ID', 123))
     debate_manager_interview_vc_id: int = int(os.getenv('DEBATE_MANAGER_INTERVIEW_VC_ID', 123))
 
@@ -51,23 +44,19 @@ class ApplicationsTable(commands.Cog):
         'teacher': {
             "app": teacher_app_channel_id, "interview": teacher_interview_vc_id, "parent": teacher_parent_channel_id, 
             "message": "**Teacher Application**\nOur staff has evaluated your Teacher application and has come to the conclusion that we are not in need of this lesson.",
-            "cat": teacher_app_cat_id, 
             "pings": [{"id": lesson_management_role_id, "role": True}]},
         'moderator': {
             "app": moderator_app_channel_id, "interview": moderator_interview_vc_id, "parent": moderator_parent_channel_id,
-            "cat": moderator_app_cat_id, 
             "message": "**Moderator Application**\nOur staff has evaluated your Moderator application and has come to a conclusion, and due to internal and unspecified reasons we are **declining** it. Thank you anyways",
-            "pings": [{"id": cosmos_role_id, "role": True}, {"id": admin_role_id, "role": True}, {"id": senior_mod_role_id, "role": True}]},
+            "pings": [{"id": owner_role_id, "role": True}, {"id": admin_role_id, "role": True}, {"id": senior_mod_role_id, "role": True}]},
         'event_host': {
             "app": event_host_app_channel_id,  "interview": event_host_interview_vc_id, "parent": event_host_parent_channel_id, 
-            "cat": event_host_app_cat_id, 
             "message": "**Event Host Application**\nOur staff has evaluated your Event Host application and has come to the conclusion that we are not in need of this event.",
-            "pings": [{"id": real_event_manager_role_id, "role": True}]},
+            "pings": [{"id": event_manager_role_id, "role": True}]},
         'debate_manager': {
             "app": debate_manager_app_channel_id,  "interview": debate_manager_interview_vc_id, "parent": debate_manager_parent_channel_id, 
-            "cat": debate_manager_app_cat_id, 
             "message": "**Debate Manager Application**\nOur staff has evaluated your Debate Manager application and has come to the conclusion that we are **declining** your application for internal reasons.",
-            "pings": [{"id": real_event_manager_role_id, "role": True}]}
+            "pings": [{"id": event_manager_role_id, "role": True}]}
     }
 
     @commands.Cog.listener(name="on_raw_reaction_add")

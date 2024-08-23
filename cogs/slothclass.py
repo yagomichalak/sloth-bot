@@ -24,8 +24,8 @@ classes: Dict[str, object] = {
     'seraph': seraph.Seraph, 'warrior': warrior.Warrior
 }
 
+# variables.textchannel #
 bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID', 123))
-
 
 class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
     """ A category for the Sloth Class system. """

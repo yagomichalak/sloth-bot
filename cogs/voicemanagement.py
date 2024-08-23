@@ -9,11 +9,15 @@ from discord.ext import commands, tasks
 # import.local
 from extra import utils
 
+# variables.id
 server_id = int(os.getenv('SERVER_ID', 123))
-bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID', 123))
+
+# variables.role
 mod_role_id: int = int(os.getenv("MOD_ROLE_ID", 123))
 senior_mod_role_id: int = int(os.getenv("SENIOR_MOD_ROLE_ID", 123))
 
+# variables.textchannel
+bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID', 123))
 
 class VoiceManagement(commands.Cog):
 

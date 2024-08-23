@@ -9,8 +9,8 @@ from discord.ext import commands
 from extra import utils
 from mysqldb import DatabaseCore
 
+# variables.voicechannel
 afk_channel_id = int(os.getenv('AFK_CHANNEL_ID', 123))
-
 
 class UserVoiceSystem(commands.Cog):
     """ Cog for the inner systems of UserVoice events. """

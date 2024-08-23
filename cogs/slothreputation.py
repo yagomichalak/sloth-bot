@@ -15,8 +15,10 @@ from mysqldb import DatabaseCore
 from .slothclass import classes
 from extra.currency.membersscore import MembersScoreTable
 
+# variables.id
 guild_ids = [int(os.getenv('SERVER_ID', 123))]
 
+# variables.textchannel
 commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID', 123))
 
 currency_cogs: List[commands.Cog] = [

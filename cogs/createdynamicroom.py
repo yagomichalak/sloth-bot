@@ -12,6 +12,7 @@ from extra import utils
 from extra.select import LanguageRoomSelect
 from mysqldb import DatabaseCore
 
+# variables.role
 analyst_debugger_role_id = int(os.getenv('ANALYST_DEBUGGER_ROLE_ID', 123))
 
 class DynRoomUserVCstamp:

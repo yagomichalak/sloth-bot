@@ -11,8 +11,8 @@ from extra import utils
 from extra.prompt.menu import Confirm
 from mysqldb import DatabaseCore
 
+# variables.role
 allowed_roles = [int(os.getenv('OWNER_ROLE_ID', 123)), int(os.getenv('ADMIN_ROLE_ID', 123)), int(os.getenv('MOD_ROLE_ID', 123))]
-
 
 class ModerationFakeAccountsTable(commands.Cog):
     

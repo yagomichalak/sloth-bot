@@ -28,12 +28,14 @@ from extra.useful_variables import flag_badges, level_badges, patreon_roles
 from extra.view import ExchangeActivityView
 from mysqldb import *
 
+# variables.id
+guild_ids = [int(os.getenv('SERVER_ID', 123))]
 
+# variables.role
 booster_role_id = int(os.getenv('BOOSTER_ROLE_ID', 123))
 teacher_role_id = int(os.getenv("TEACHER_ROLE_ID", 123))
 mod_role_id = int(os.getenv("MOD_ROLE_ID", 123))
 senior_mod_role_id = int(os.getenv("SENIOR_MOD_ROLE_ID", 123))
-guild_ids = [int(os.getenv('SERVER_ID', 123))]
 
 currency_cogs: List[commands.Cog] = [
     UserItemsTable, UserServerActivityTable, UserCurrencyTable,

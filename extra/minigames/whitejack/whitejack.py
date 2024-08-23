@@ -18,12 +18,14 @@ from extra.useful_variables import patreon_roles
 from mysqldb import *
 from .whitejack_game import WhiteJackGame
 
+# variables.id
 server_id: int = int(os.getenv('SERVER_ID', 123))
+
+# variables.role
 allowed_roles = [
     int(os.getenv('OWNER_ROLE_ID', 123)), int(os.getenv('ADMIN_ROLE_ID', 123)), int(os.getenv('SENIOR_MOD_ROLE_ID', 123)),
     int(os.getenv('MOD_ROLE_ID', 123)), int(os.getenv('ANALYST_DEBUGGER_ROLE_ID', 123)), *patreon_roles.keys()
 ]
-
 
 class WhiteJack(commands.Cog):
     """ To start a Whitejack game in your channel use the 'whitejack <bet>' command,

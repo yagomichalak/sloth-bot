@@ -15,6 +15,7 @@ from extra.tool.voice_channel_history import (VoiceChannelHistorySystem,
                                               VoiceChannelHistoryTable)
 from mysqldb import DatabaseCore
 
+# variables.role
 allowed_roles = [int(os.getenv('OWNER_ROLE_ID', 123)), int(os.getenv('ADMIN_ROLE_ID', 123)), int(os.getenv('MOD_ROLE_ID', 123))]
 analyst_debugger_role_id: int = int(os.getenv('ANALYST_DEBUGGER_ROLE_ID', 123))
 

@@ -6,10 +6,13 @@ from random import choice, randrange
 from discord import slash_command
 from discord.ext import commands
 
+# variables.id
+guild_ids = [int(os.getenv('SERVER_ID', 123))]
+
+# variables.role
 mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID', 123))
 owner_role_id = int(os.getenv('OWNER_ROLE_ID', 123))
-guild_ids = [int(os.getenv('SERVER_ID', 123))]
 
 class Prestige(commands.Cog):
     """ Category for prestige commands. """

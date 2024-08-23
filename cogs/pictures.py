@@ -13,6 +13,7 @@ from discord.ext import commands
 # import.local
 from extra import utils
 
+# variables.id
 guild_ids: List[int] = [int(os.getenv("SERVER_ID", 123))]
 
 class Pictures(commands.Cog):

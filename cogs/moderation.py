@@ -25,13 +25,11 @@ from extra.useful_variables import banned_links
 from extra.view import ReportSupportView
 from mysqldb import DatabaseCore
 
-# IDs
-mod_log_id = int(os.getenv('MOD_LOG_CHANNEL_ID', 123))
-welcome_channel_id = int(os.getenv('WELCOME_CHANNEL_ID', 123))
-suspect_channel_id = int(os.getenv('SUSPECT_CHANNEL_ID', 123))
+# variables.id
+server_id = int(os.getenv('SERVER_ID', 123))
+guild_ids: List[int] = [server_id]
 
-last_deleted_message = []
-
+# variables.role
 sponsor_role_id = int(os.getenv('SPONSOR_ROLE_ID', 123))
 mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 muted_role_id = int(os.getenv('MUTED_ROLE_ID', 123))
@@ -42,11 +40,15 @@ admin_role_id: int = int(os.getenv('ADMIN_ROLE_ID', 123))
 analyst_debugger_role_id: int = int(os.getenv('ANALYST_DEBUGGER_ROLE_ID', 123))
 allowed_roles = [int(os.getenv('OWNER_ROLE_ID', 123)), admin_role_id, senior_mod_role_id, mod_role_id]
 unverified_role_id = int(os.getenv('UNVERIFIED_ROLE_ID', 123))
+
+# variables.textchannel
+mod_log_id = int(os.getenv('MOD_LOG_CHANNEL_ID', 123))
+welcome_channel_id = int(os.getenv('WELCOME_CHANNEL_ID', 123))
+suspect_channel_id = int(os.getenv('SUSPECT_CHANNEL_ID', 123))
 join_the_server_channel_id = int(os.getenv('JOIN_THE_SERVER_CHANNEL_ID', 123))
 error_log_channel_id = int(os.getenv('ERROR_LOG_CHANNEL_ID', 123))
 
-server_id = int(os.getenv('SERVER_ID', 123))
-guild_ids: List[int] = [server_id]
+last_deleted_message = []
 
 moderation_cogs: List[commands.Cog] = [
     ModerationFirewallTable, BypassFirewallTable, ModerationMutedMemberTable, 

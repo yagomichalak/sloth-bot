@@ -12,8 +12,8 @@ from discord.utils import escape_mentions
 # import.local
 from mysqldb import DatabaseCore
 
+# variables.role
 allowed_roles = [int(os.getenv('OWNER_ROLE_ID', 123)), int(os.getenv('ADMIN_ROLE_ID', 123)), int(os.getenv('MOD_ROLE_ID', 123))]
-
 
 class EmbedManagement(commands.Cog):
     """ A category for managing embeds; show, create, delete and edit. """

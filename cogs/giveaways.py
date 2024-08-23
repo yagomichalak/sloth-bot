@@ -15,12 +15,13 @@ from extra.prompt.menu import ConfirmButton
 from extra.view import GiveawayView
 from mysqldb import DatabaseCore
 
+# general.variables #
 server_id = int(os.getenv('SERVER_ID', 123))
+guild_ids: List[int] = [server_id]
+# role.variables #
 giveaway_manager_role_id: int = int(os.getenv('GIVEAWAY_MANAGER_ROLE_ID', 123))
 mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
-
 allowed_roles: List[int] = [giveaway_manager_role_id, mod_role_id, int(os.getenv('ADMIN_ROLE_ID'))]
-guild_ids: List[int] = [server_id]
 
 giveaway_cogs: List[commands.Cog] = [GiveawaysTable, GiveawayEntriesTable]
 

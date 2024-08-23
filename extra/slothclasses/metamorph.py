@@ -13,8 +13,8 @@ from extra.menu import ConfirmSkill
 from mysqldb import DatabaseCore
 from .player import Player, Skill
 
+# variables.textchannel
 bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID', 123))
-
 
 class Metamorph(Player):
 

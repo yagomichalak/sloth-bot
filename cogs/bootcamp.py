@@ -12,13 +12,17 @@ from discord.ext import commands
 from extra import utils
 from extra.view import BootcampFeedbackView
 
-senior_mod_role_id: int = int(os.getenv('SENIOR_MOD_ROLE_ID', 123))
-mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
-guild_id = int(os.getenv('SERVER_ID', 123))
+# variables.api
 bootcamp_api_access_key = os.getenv("BOOTCAMP_API_ACCESS_KEY", "")
 bootcamp_role_id = int(os.getenv("BOOTCAMP_ROLE_ID", 123))
+
+# variables.id
+guild_id = int(os.getenv('SERVER_ID', 123))
 guild_ids = [guild_id]
 
+# variables.role
+senior_mod_role_id: int = int(os.getenv('SENIOR_MOD_ROLE_ID', 123))
+mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 
 class Bootcamp(commands.Cog):
     """ A cog related to the Bootcamp event. """

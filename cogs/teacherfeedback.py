@@ -18,12 +18,24 @@ from extra.prompt.menu import ConfirmButton
 from extra.useful_variables import different_class_roles
 from mysqldb import DatabaseCore
 
-# IDs from .env
-create_room_vc_id = int(os.getenv('CREATE_SMART_CLASSROOM_VC_ID', 123))
+# variables.id
+queuebot_id = int(os.getenv('QUEUE_BOT_ID', 123))
+
+# variables.textchannel
 create_room_txt_id = int(os.getenv('CREATE_CLASSROOM_CHANNEL_ID', 123))
-create_room_cat_id = int(os.getenv('CREATE_ROOM_CAT_ID', 123))
+teacher_feedback_thread_id = int(os.getenv('TEACHER_FEEDBACK_THREAD_ID', 123))
+class_history_channel_id = int(os.getenv('CLASS_HISTORY_CHANNEL_ID', 123))
+reward_channel_id = int(os.getenv('REWARD_CHANNEL_ID', 123))
+bot_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID', 123))
+
+# variables.voicechannel
+create_room_vc_id = int(os.getenv('CREATE_SMART_CLASSROOM_VC_ID', 123))
 create_private_room_vc_id: int = int(os.getenv('CREATE_PRIVATE_ROOM_VC_ID', 123))
 
+# variables.category
+create_room_cat_id = int(os.getenv('CREATE_ROOM_CAT_ID', 123))
+
+# variables.role
 mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID', 123))
 teacher_role_id = int(os.getenv('TEACHER_ROLE_ID', 123))
@@ -31,13 +43,6 @@ preference_role_id = int(os.getenv('PREFERENCE_ROLE_ID', 123))
 lesson_management_role_id = int(os.getenv('LESSON_MANAGEMENT_ROLE_ID', 123))
 sloth_explorer_role_id = int(os.getenv('SLOTH_EXPLORER_ROLE_ID', 123))
 # all_vcs_role_id = int(os.getenv('ALL_VCS_ROLE_ID', 123))
-
-teacher_feedback_thread_id = int(os.getenv('TEACHER_FEEDBACK_THREAD_ID', 123))
-class_history_channel_id = int(os.getenv('CLASS_HISTORY_CHANNEL_ID', 123))
-reward_channel_id = int(os.getenv('REWARD_CHANNEL_ID', 123))
-bot_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID', 123))
-queuebot_id = int(os.getenv('QUEUE_BOT_ID', 123))
-
 
 class TeacherFeedback(commands.Cog):
     """ Category for language class creations

@@ -9,13 +9,15 @@ from discord.ext import commands
 # import.local
 from extra import utils
 
+# variables.id
+guild_ids = [int(os.getenv('SERVER_ID', 123))]
+
+# variables.role
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID', 123))
 owner_role_id = int(os.getenv('OWNER_ROLE_ID', 123))
 mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 senior_mod_role_id = int(os.getenv('SENIOR_MOD_ROLE_ID', 123))
 allowed_roles = [owner_role_id, admin_role_id, mod_role_id]
-
-guild_ids = [int(os.getenv('SERVER_ID', 123))]
 
 class Embeds(commands.Cog):
     """ A cog related to embedded messages. """

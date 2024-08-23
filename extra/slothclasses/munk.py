@@ -16,9 +16,9 @@ from mysqldb import DatabaseCore
 from .enums import QuestEnum
 from .player import Player, Skill
 
+# variables.textchannel
 bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID', 123))
 approve_thumbnail_channel_id = int(os.getenv('APPROVE_THUMBNAIL_CHANNEL_ID', 123))
-
 
 class Munk(Player):
 

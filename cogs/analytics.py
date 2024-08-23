@@ -16,6 +16,7 @@ from extra.analytics import DataBumpsTable, SlothAnalyticsTable
 from mysqldb import DatabaseCore
 
 
+# variables.textchannel
 bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID', 123))
 
 analytics_cogs: List[commands.Cog] = [SlothAnalyticsTable, DataBumpsTable]

@@ -17,6 +17,7 @@ from .modals import (BootcampFeedbackModal, DebateManagerApplicationModal,
                      TeacherApplicationModal)
 from .select import ReportStaffSelect, ReportSupportSelect
 
+# variables.role
 mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID', 123))
 analyst_debugger_role_id: int = int(os.getenv('ANALYST_DEBUGGER_ROLE_ID', 123))

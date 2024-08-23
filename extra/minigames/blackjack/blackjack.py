@@ -17,6 +17,7 @@ from .blackjack_db import BlackJackDB
 from .blackjack_game import BlackJackGame
 from .create_cards_pack import cards_pack
 
+# variables.id
 server_id: int = int(os.getenv('SERVER_ID', 123))
 
 blackjack_db: List[commands.Cog] = [

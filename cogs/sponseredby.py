@@ -11,9 +11,11 @@ from discord.ext import commands
 from extra import utils
 from mysqldb import DatabaseCore
 
+# variables.id
 guild_ids: List[int] = [int(os.getenv("SERVER_ID", 123))]
-sponsored_by_category_id: int = int(os.getenv("SPONSORED_BY_CATEGORY_ID", 123))
 
+# variables.category
+sponsored_by_category_id: int = int(os.getenv("SPONSORED_BY_CATEGORY_ID", 123))
 
 class SponsoredBy(commands.Cog):
     """ A category for managing the Sponsored by category

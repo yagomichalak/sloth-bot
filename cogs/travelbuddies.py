@@ -12,9 +12,11 @@ from extra import utils
 from extra.modals import TravelBuddyModal
 from extra.prompt.menu import ConfirmButton
 
-travel_buddies_channel_id: int = int(os.getenv("TRAVEL_BUDDIES_CHANNEL_ID", 123))
+# variables.id
 guild_ids: List[int] = [int(os.getenv("SERVER_ID", 123))]
 
+# variables.textchannel
+travel_buddies_channel_id: int = int(os.getenv("TRAVEL_BUDDIES_CHANNEL_ID", 123))
 
 class TravelBuddies(commands.Cog):
     """ Category for the Travel Buddies feature. """

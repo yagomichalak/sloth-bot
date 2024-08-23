@@ -10,14 +10,17 @@ from discord.ext import commands, tasks
 from extra import utils
 from mysqldb import DatabaseCore
 
+# variables.id
 server_id: int = int(os.getenv("SERVER_ID", 123))
-sponsored_by_category_id: int = int(os.getenv("SPONSORED_BY_CATEGORY_ID", 123))
 
+# variables.role
 mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 preference_role_id = int(os.getenv('PREFERENCE_ROLE_ID', 123))
 no_ads_role_id = int(os.getenv('NO_ADS_ROLE_ID', 123))
 giveaways_role_id = int(os.getenv('GIVEAWAYS_ROLE_ID', 123))
 
+# variables.category
+sponsored_by_category_id: int = int(os.getenv("SPONSORED_BY_CATEGORY_ID", 123))
 
 class Disbrand(commands.Cog):
     """ A category for the Disbrand features and commands """

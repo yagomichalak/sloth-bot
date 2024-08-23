@@ -14,6 +14,7 @@ from extra import utils
 from .buttons import FlagsGameButton, TicTacToeButton
 from .whitejack.enums import ButtonOppositeStyleEnum, ButtonStyleEnum
 
+# variables.id
 server_id: int = int(os.getenv('SERVER_ID', 123))
 
 class TicTacToeView(discord.ui.View):

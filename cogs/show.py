@@ -17,10 +17,12 @@ from extra.analytics import DataBumpsTable
 from extra.slothclasses.player import Player
 from extra.useful_variables import rules
 
+# variables.id
+guild_ids = [int(os.getenv('SERVER_ID', 123))]
 
+# variables.role
 allowed_roles = [int(os.getenv('OWNER_ROLE_ID', 123)), int(
     os.getenv('ADMIN_ROLE_ID', 123)), int(os.getenv('MOD_ROLE_ID', 123))]
-guild_ids = [int(os.getenv('SERVER_ID', 123))]
 
 
 class Show(commands.Cog):

@@ -12,6 +12,7 @@ from extra.menu import ConfirmSkill
 from extra.smartroom.event_rooms import EventRoomsTable
 from mysqldb import DatabaseCore
 
+# variables.role
 mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 senior_mod_role_id = int(os.getenv('SENIOR_MOD_ROLE_ID', 123))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID', 123))
@@ -19,7 +20,6 @@ owner_role_id = int(os.getenv('OWNER_ROLE_ID', 123))
 event_host_role_id = int(os.getenv('EVENT_HOST_ROLE_ID', 123))
 event_manager_role_id = int(os.getenv('EVENT_MANAGER_ROLE_ID', 123))
 preference_role_id = int(os.getenv('PREFERENCE_ROLE_ID', 123))
-
 
 class EventManagement(EventRoomsTable):
     """ A category for event related commands. """

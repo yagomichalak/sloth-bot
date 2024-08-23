@@ -19,12 +19,12 @@ from extra import utils
 from extra.menu import ConfirmSkill
 from mysqldb import DatabaseCore
 
+# variables.role
 owner_role_id = int(os.getenv('OWNER_ROLE_ID', 123))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID', 123))
 mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 lesson_manager_role_id = int(os.getenv('LESSON_MANAGEMENT_ROLE_ID', 123))
 allowed_roles = [owner_role_id, admin_role_id, mod_role_id]
-
 
 class TeacherAPI(commands.Cog):
     """ (WIP) A category for using The Language Sloth's teacher's API,

@@ -9,8 +9,8 @@ from discord.ext import commands
 from extra.misc.curse import CurseTable
 from mysqldb import DatabaseCore
 
+# variables.id 
 server_id = int(os.getenv('SERVER_ID', 123))
-
 
 class CurseMember(CurseTable):
     """ A cog related to the 'curse a member' feature. """

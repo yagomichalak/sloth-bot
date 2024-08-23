@@ -21,12 +21,15 @@ from extra.slothclasses.player import Player
 from extra.view import QuickButtons
 from mysqldb import DatabaseCore
 
+# variables.id
+guild_ids = [int(os.getenv('SERVER_ID', 123))]
+
+# variables.role
 mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID', 123))
 teacher_role_id = int(os.getenv('TEACHER_ROLE_ID', 123))
 analyst_debugger_role_id: int = int(os.getenv('ANALYST_DEBUGGER_ROLE_ID', 123))
 booster_role_id = int(os.getenv('BOOSTER_ROLE_ID', 123))
-guild_ids = [int(os.getenv('SERVER_ID', 123))]
 
 social_cogs: List[commands.Bot] = [SlothboardTable]
 

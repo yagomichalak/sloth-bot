@@ -18,20 +18,29 @@ from extra.reportsupport.openchannels import OpenChannels
 from extra.reportsupport.verify import Verify
 from mysqldb import DatabaseCore
 
+# variables.webhook #
+webhook_url: str = os.getenv('WEBHOOK_URL', "")
+
+# variables.id #
+server_id = int(os.getenv('SERVER_ID', 123))
+dnk_id = int(os.getenv('DNK_ID', 123))
+
+# variables.category #
 case_cat_id = int(os.getenv('CASE_CAT_ID', 123))
+
+# variables.voicechannel #
+staff_vc_id = int(os.getenv('STAFF_VC_ID', 123))
+
+# variables.textchannel #
 reportsupport_channel_id = int(os.getenv('REPORT_CHANNEL_ID', 123))
 mod_log_id = int(os.getenv('MOD_LOG_CHANNEL_ID', 123))
-dnk_id = int(os.getenv('DNK_ID', 123))
+ban_appeals_channel_id: int = os.getenv("BAN_APPEALS_CHANNEL_ID", 123)
+
+# variables.role #
 moderator_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 senior_role_id = int(os.getenv('SENIOR_MOD_ROLE_ID', 123))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID', 123))
 lesson_management_role_id = int(os.getenv('LESSON_MANAGEMENT_ROLE_ID', 123))
-server_id = int(os.getenv('SERVER_ID', 123))
-
-staff_vc_id = int(os.getenv('STAFF_VC_ID', 123))
-webhook_url: str = os.getenv('WEBHOOK_URL', "")
-ban_appeals_channel_id: int = os.getenv("BAN_APPEALS_CHANNEL_ID", 123)
-
 allowed_roles = [
 int(os.getenv('OWNER_ROLE_ID', 123)), admin_role_id,
 moderator_role_id]
