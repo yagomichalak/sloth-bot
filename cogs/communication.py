@@ -62,7 +62,7 @@ class Communication(*tool_cogs):
 
     # Says something by using the bot
     @commands.command()
-    @utils.is_allowed([senior_mod_role_id, lesson_manager_role_id, real_event_manager_role_id, community_manager_role_id], throw_exc=True)
+    @utils.is_allowed([*allowed_roles, lesson_manager_role_id, real_event_manager_role_id], throw_exc=True)
     async def say(self, ctx):
         """ (MOD) Makes the bot say something. """
 
