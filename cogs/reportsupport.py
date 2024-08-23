@@ -13,6 +13,9 @@ from discord.ext import commands, tasks
 from extra import utils
 from extra.prompt.menu import Confirm
 from extra.view import ReportSupportView
+from extra.reportsupport.applications import ApplicationsTable
+from extra.reportsupport.openchannels import OpenChannels
+from extra.reportsupport.verify import Verify
 from mysqldb import DatabaseCore
 
 case_cat_id = int(os.getenv('CASE_CAT_ID', 123))
