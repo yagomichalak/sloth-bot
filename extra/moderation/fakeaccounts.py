@@ -1,11 +1,15 @@
+# import.standard
+import os
+from typing import List, Union
 
+# import.thirdparty
 import discord
 from discord.ext import commands
-from mysqldb import DatabaseCore
-from typing import List, Union
+
+# import.local
 from extra import utils
 from extra.prompt.menu import Confirm
-import os
+from mysqldb import DatabaseCore
 
 allowed_roles = [int(os.getenv('OWNER_ROLE_ID', 123)), int(os.getenv('ADMIN_ROLE_ID', 123)), int(os.getenv('MOD_ROLE_ID', 123))]
 

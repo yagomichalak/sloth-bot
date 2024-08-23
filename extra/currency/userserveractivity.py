@@ -1,8 +1,13 @@
-from discord.ext import commands
-from mysqldb import DatabaseCore
-from typing import List
-from extra import utils
+# import.standard
 import os
+from typing import List
+
+# import.thirdparty
+from discord.ext import commands
+
+# import.local
+from extra import utils
+from mysqldb import DatabaseCore
 
 afk_channel_id = int(os.getenv('AFK_CHANNEL_ID', 123))
 

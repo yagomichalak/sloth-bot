@@ -1,9 +1,14 @@
+# import.standard
+import os
+from typing import Any, Dict, List
+
+# import.thirdparty
 import discord
 from discord.ext import commands, tasks
-from mysqldb import DatabaseCore
-from typing import List, Dict, Any
-import os
+
+# import.local
 from extra import utils
+from mysqldb import DatabaseCore
 
 server_id: int = int(os.getenv("SERVER_ID", 123))
 sponsored_by_category_id: int = int(os.getenv("SPONSORED_BY_CATEGORY_ID", 123))

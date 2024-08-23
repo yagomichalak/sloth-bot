@@ -1,15 +1,22 @@
+# import.standard
+import asyncio
+import os
+from datetime import datetime
+from typing import Dict, List, Union
+
+# import.thirdparty
 import discord
 from discord import utils
 from discord.ext import commands, menus
-from mysqldb import DatabaseCore
-from datetime import datetime
-import asyncio
-from typing import Dict, List, Union
-import os
-from extra.useful_variables import different_class_roles
-from extra.menu import ConfirmSkill, prompt_message_guild, SwitchSavedClasses, SwitchSavedClassesButtons, prompt_message
-from extra.prompt.menu import ConfirmButton
+
+# import.local
 from extra import utils
+from extra.menu import (ConfirmSkill, SwitchSavedClasses,
+                        SwitchSavedClassesButtons, prompt_message,
+                        prompt_message_guild)
+from extra.prompt.menu import ConfirmButton
+from extra.useful_variables import different_class_roles
+from mysqldb import DatabaseCore
 
 # IDs from .env
 create_room_vc_id = int(os.getenv('CREATE_SMART_CLASSROOM_VC_ID', 123))

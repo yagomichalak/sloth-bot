@@ -1,14 +1,19 @@
-import discord
-from discord import SlashCommandGroup, option, Option, ApplicationContext, slash_command
-from discord.ext import commands, tasks
-from typing import List, Union, Optional
+# import.standard
 import os
+from typing import List, Optional, Union
 
+# import.thirdparty
+import discord
+from discord import (ApplicationContext, Option, SlashCommandGroup, option,
+                     slash_command)
+from discord.ext import commands, tasks
+
+# import.local
 from extra import utils
-from mysqldb import DatabaseCore
-from extra.view import GiveawayView
+from extra.misc.giveaways import GiveawayEntriesTable, GiveawaysTable
 from extra.prompt.menu import ConfirmButton
-from extra.misc.giveaways import GiveawaysTable, GiveawayEntriesTable
+from extra.view import GiveawayView
+from mysqldb import DatabaseCore
 
 server_id = int(os.getenv('SERVER_ID', 123))
 giveaway_manager_role_id: int = int(os.getenv('GIVEAWAY_MANAGER_ROLE_ID', 123))

@@ -1,24 +1,24 @@
-import discord
-from discord.utils import escape_mentions
-from pytz import timezone
-from dotenv import load_dotenv
-from discord.ext import commands, tasks
-
-from extra import utils
-from extra.menu import PaginatorView
-from typing import List
+# import.standard
 import os
 from datetime import datetime
 from itertools import cycle
-from typing import Dict, Union, Any
+from typing import Any, Dict, List, Union
 
+# import.thirdparty
+import discord
+from discord.ext import commands, tasks
+from discord.utils import escape_mentions
+from dotenv import load_dotenv
+from pytz import timezone
+
+# import.local
+from extra import utils
+from extra.customerrors import (ActionSkillOnCooldown, ActionSkillsLocked,
+                                CommandNotReady, KidnappedCommandError,
+                                MissingRequiredSlothClass, NotSubscribed,
+                                SkillsUsedRequirement, StillInRehabError)
+from extra.menu import PaginatorView
 from extra.useful_variables import patreon_roles
-
-from extra.customerrors import (
-    MissingRequiredSlothClass, ActionSkillOnCooldown, CommandNotReady, 
-    SkillsUsedRequirement, ActionSkillsLocked, KidnappedCommandError,
-    StillInRehabError, NotSubscribed
-)
 
 load_dotenv()
 

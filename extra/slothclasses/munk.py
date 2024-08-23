@@ -1,17 +1,20 @@
-import discord
-from discord.ext import commands, menus, tasks
-from mysqldb import DatabaseCore
-
-from .player import Player, Skill
-from .enums import QuestEnum
-from extra.menu import ConfirmSkill, SwitchTribePages
-from extra.prompt.menu import Confirm
-from extra import utils
-
+# import.standard
 import os
 from datetime import datetime
-from typing import List, Tuple, Union, Dict, Any, Optional, Callable
 from random import choice
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+
+# import.thirdparty
+import discord
+from discord.ext import commands, menus, tasks
+
+# import.local
+from extra import utils
+from extra.menu import ConfirmSkill, SwitchTribePages
+from extra.prompt.menu import Confirm
+from mysqldb import DatabaseCore
+from .enums import QuestEnum
+from .player import Player, Skill
 
 bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID', 123))
 approve_thumbnail_channel_id = int(os.getenv('APPROVE_THUMBNAIL_CHANNEL_ID', 123))

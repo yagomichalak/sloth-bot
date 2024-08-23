@@ -1,13 +1,14 @@
+# import.standard
+from functools import partial
+
+# import.thirdparty
 import discord
 from discord.ext import commands
 
-from extra.prompt.menu import ConfirmButton, prompt_number, Confirm
+# import.local
+from extra.prompt.menu import Confirm, ConfirmButton, prompt_number
 from extra.roleselection.db_commands import RoleSelectionDatabaseCommands
 from extra.roleselection.utils import callback as button_callback
-
-from functools import partial
-
-
 
 class ManageRoleSelectionMenu(discord.ui.View):
 	

@@ -1,35 +1,37 @@
-import discord
-from discord import slash_command, message_command, user_command, Option, OptionChoice
-from discord.ext import commands, menus, tasks
+# import.standard
 import asyncio
-from gtts import gTTS
-
-from googletrans import Translator
+import collections
 import inspect
 import io
+import os
+import subprocess
 import textwrap
 import traceback
-import collections
 from contextlib import redirect_stdout
-import os
-from treelib import Tree
-import subprocess
-
 from datetime import datetime
+from typing import List, Optional, Union
+
+# import.thirdparty
+import discord
+import gtts
 import pytz
+from discord import (Option, OptionChoice, message_command, slash_command,
+                     user_command)
+from discord.ext import commands, menus, tasks
+from googletrans import Translator
 from pytz import timezone
-from mysqldb import DatabaseCore
+from treelib import Tree
 
-from extra.slothclasses.player import Player
-from extra.menu import InroleLooping, InchannelLooping
-from extra.prompt.menu import Confirm
-from extra.useful_variables import patreon_roles
+# import.local
 from extra import utils
-
-from extra.view import SoundBoardView, BasicUserCheckView
+from extra.menu import InchannelLooping, InroleLooping
+from extra.prompt.menu import Confirm
 from extra.select import SoundBoardSelect
-
+from extra.slothclasses.player import Player
 from extra.tool.stealthstatus import StealthStatusTable
+from extra.useful_variables import patreon_roles
+from extra.view import BasicUserCheckView, SoundBoardView
+from mysqldb import DatabaseCore
 
 guild_ids = [int(os.getenv('SERVER_ID', 123))]
 

@@ -1,8 +1,13 @@
+# import.standard
+import os
+
+# import.thirdparty
 import discord
 from discord import Option, OptionChoice, slash_command
 from discord.ext import commands
+
+# import.local
 from extra import utils
-import os
 
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID', 123))
 owner_role_id = int(os.getenv('OWNER_ROLE_ID', 123))

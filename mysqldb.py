@@ -1,9 +1,13 @@
-import aiomysql
+# import.standard
 import asyncio
-#from contextlib import asynccontextmanager
 import os
-from typing import Optional, Iterable, Any, Tuple, Literal, Union, Dict
+#from contextlib import asynccontextmanager
+from typing import Any, Dict, Iterable, Literal, Optional, Tuple, Union
+
+# import.thirdparty
+import aiomysql
 from dotenv import load_dotenv
+
 load_dotenv()
 
 loop = asyncio.get_event_loop()

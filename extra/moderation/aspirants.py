@@ -1,8 +1,13 @@
+# import.standard
+from typing import List
+
+# import.thirdparty
 import discord
 from discord.ext import commands
-from mysqldb import DatabaseCore
-from typing import List
+
+# import.local
 from extra import utils
+from mysqldb import DatabaseCore
 
 class AspirantsTable(commands.Cog):
     """ Class for managing the AspirantsTable table in the database. """

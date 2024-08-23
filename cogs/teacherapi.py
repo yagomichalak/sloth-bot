@@ -1,19 +1,23 @@
+# import.standard
+import asyncio
+import json
+import os
+import shutil
+from datetime import datetime
+from io import BytesIO
+from typing import Dict, List, Tuple, Union
+from zipfile import ZipFile
+
+# import.thirdparty
+import aiohttp
 import discord
 from discord.ext import commands
-import os
-from datetime import datetime
-from PIL import Image, ImageFont, ImageDraw
-from typing import Tuple
-import aiohttp
-from io import BytesIO
-import shutil
-import json
-import asyncio
-from zipfile import ZipFile
-from typing import Dict, List, Union
-from mysqldb import DatabaseCore
-from extra.menu import ConfirmSkill
+from PIL import Image, ImageDraw, ImageFont
+
+# import.local
 from extra import utils
+from extra.menu import ConfirmSkill
+from mysqldb import DatabaseCore
 
 owner_role_id = int(os.getenv('OWNER_ROLE_ID', 123))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID', 123))

@@ -1,13 +1,17 @@
+# import.standard
+import os
+from random import randint
+from typing import List, Optional
+
+# import.thirdparty
 import discord
 from discord.errors import NotFound
 from discord.ext import commands, tasks
-import os
-from extra import utils
-from typing import List, Optional
-from random import randint
-from mysqldb import DatabaseCore
 
+# import.local
+from extra import utils
 from extra.tool.scheduled_events import ScheduledEventsTable
+from mysqldb import DatabaseCore
 
 bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID', 123))
 announcement_channel_id = int(os.getenv('ANNOUNCEMENT_CHANNEL_ID', 123))

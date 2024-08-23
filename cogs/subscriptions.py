@@ -1,11 +1,15 @@
-import discord
-from discord.ext import commands, tasks
-from discord.enums import EntitlementType
+# import.standard
+import os
+from itertools import cycle
 
+# import.thirdparty
+import discord
+from discord.enums import EntitlementType
+from discord.ext import commands, tasks
+
+# import.local
 from extra import utils
 from extra.useful_variables import patreon_roles
-from itertools import cycle
-import os
 
 sloth_subscriber_role_id = int(os.getenv("SLOTH_SUBSCRIBER_ROLE_ID", 123))
 on_sloth_sub_log_channel_id = int(os.getenv("ON_SLOTH_SUB_CHANNEL_ID", 123))

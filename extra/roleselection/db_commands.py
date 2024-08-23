@@ -1,7 +1,11 @@
-from discord.ext import commands
-from mysqldb import DatabaseCore
+# import.standard
 from typing import List, Union
 
+# import.thirdparty
+from discord.ext import commands
+
+# import.local
+from mysqldb import DatabaseCore
 
 class RoleSelectionDatabaseCommands(commands.Cog):
     """ Category for the selection menu system's database commands and methods. """

@@ -1,7 +1,12 @@
-from discord.ext import commands
-from mysqldb import DatabaseCore
-from typing import List, Union, Optional
+# import.standard
 from random import choice
+from typing import List, Optional, Union
+
+# import.thirdparty
+from discord.ext import commands
+
+# import.local
+from mysqldb import DatabaseCore
 
 class GiveawaysTable(commands.Cog):
     """ Class for managing the Giveaways table in the database. """

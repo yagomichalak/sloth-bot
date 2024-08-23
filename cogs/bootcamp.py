@@ -1,11 +1,16 @@
-import discord
-from discord.ext import commands
-from discord import slash_command, Option, OptionChoice, ApplicationContext
+# import.standard
 import os
+from typing import Dict
+
+# import.thirdparty
+import discord
+import requests
+from discord import ApplicationContext, Option, OptionChoice, slash_command
+from discord.ext import commands
+
+# import.local
 from extra import utils
 from extra.view import BootcampFeedbackView
-from typing import Dict
-import requests
 
 senior_mod_role_id: int = int(os.getenv('SENIOR_MOD_ROLE_ID', 123))
 mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))

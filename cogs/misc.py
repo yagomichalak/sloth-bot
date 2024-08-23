@@ -1,16 +1,18 @@
+# import.standard
+import os
+from random import randint
+from typing import List
+
+# import.thirdparty
+import aiohttp
 import discord
 from discord import slash_command, user_command
 from discord.ext import commands, tasks
 
-from random import randint
-
-import os
-import aiohttp
-
-from typing import List
+# import.local
 from extra import utils
-from extra.slothclasses.player import Player
 from extra.misc.reminder import MemberReminderTable
+from extra.slothclasses.player import Player
 from mysqldb import DatabaseCore
 
 allowed_roles = [

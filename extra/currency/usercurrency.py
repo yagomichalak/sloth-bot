@@ -1,7 +1,9 @@
-import discord
-from discord.ext import commands
+# import.standard
 from typing import List, Tuple
 
+# import.thirdparty
+import discord
+from discord.ext import commands
 
 class UserCurrencyTable:
     """ Class for the UserCurrency table in the database. """

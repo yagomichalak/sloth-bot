@@ -1,8 +1,12 @@
-import discord
-from discord.ext import commands
-from mysqldb import DatabaseCore
+# import.standard
 from typing import List, Tuple
 
+# import.thirdparty
+import discord
+from discord.ext import commands
+
+# import.local
+from mysqldb import DatabaseCore
 
 class UserMutedGalaxiesTable(commands.Cog):
     """ Class for managing the UserMutedGalaxies table and its methods. """

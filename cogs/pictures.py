@@ -1,11 +1,16 @@
-import discord
-from discord.ext import commands
-from discord import slash_command, Option
-import os
-import aiohttp
+# import.standard
 import json
+import os
 from random import choice
 from typing import List
+
+# import.thirdparty
+import aiohttp
+import discord
+from discord import Option, slash_command
+from discord.ext import commands
+
+# import.local
 from extra import utils
 
 guild_ids: List[int] = [int(os.getenv("SERVER_ID", 123))]

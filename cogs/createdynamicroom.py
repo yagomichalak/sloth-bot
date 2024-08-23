@@ -1,11 +1,16 @@
-import discord
-from extra import utils
-from discord.ext import commands, tasks
+# import.standard
 import asyncio
 import os
-from mysqldb import DatabaseCore
-from typing import List, Union, Any, Dict
+from typing import Any, Dict, List, Union
+
+# import.thirdparty
+import discord
+from discord.ext import commands, tasks
+
+# import.local
+from extra import utils
 from extra.select import LanguageRoomSelect
+from mysqldb import DatabaseCore
 
 analyst_debugger_role_id = int(os.getenv('ANALYST_DEBUGGER_ROLE_ID', 123))
 

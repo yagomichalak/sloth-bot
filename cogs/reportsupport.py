@@ -1,14 +1,19 @@
+# import.standard
+import asyncio
+import os
 import subprocess
+from typing import List, Optional
+
+# import.thirdparty
 import aiohttp
 import discord
 from discord.ext import commands, tasks
-from mysqldb import DatabaseCore
-import asyncio
+
+# import.local
+from extra import utils
 from extra.prompt.menu import Confirm
 from extra.view import ReportSupportView
-from typing import List, Optional
-import os
-from extra import utils
+from mysqldb import DatabaseCore
 
 case_cat_id = int(os.getenv('CASE_CAT_ID', 123))
 reportsupport_channel_id = int(os.getenv('REPORT_CHANNEL_ID', 123))

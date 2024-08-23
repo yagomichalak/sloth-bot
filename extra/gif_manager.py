@@ -1,9 +1,11 @@
-from PIL import Image
-import os
+# import.standard
 import glob
-from typing import Tuple, Dict, Union, Any
+import os
 from itertools import cycle
+from typing import Any, Dict, Tuple, Union
 
+# import.thirdparty
+from PIL import Image
 
 def defragment_gif(path: str, output: str) -> None:
     """ Defragments a gif into frames.

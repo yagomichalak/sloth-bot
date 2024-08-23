@@ -1,7 +1,12 @@
-import discord
-from discord.ext import commands
+# import.standard
 import asyncio
 import os
+
+# import.thirdparty
+import discord
+from discord.ext import commands
+
+# import.local
 from extra import utils
 from extra.moderation.aspirants import AspirantsTable
 from mysqldb import DatabaseCore

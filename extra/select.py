@@ -1,8 +1,13 @@
+# import.standard
+import os
+from typing import Dict, List, Union
+
+# import.thirdparty
 import discord
 from discord.ext import commands
-import os
-from typing import List, Union, Dict
-from .modals import UserReportSupportDetailModal, UserReportStaffDetailModal
+
+# import.local
+from .modals import UserReportStaffDetailModal, UserReportSupportDetailModal
 
 class ReportSupportSelect(discord.ui.Select):
     """ Select for the Report-Support options. """

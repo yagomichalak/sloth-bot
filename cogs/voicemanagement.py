@@ -1,7 +1,12 @@
-import discord
-from discord.ext import commands, tasks
+# import.standard
 import os
 from typing import Dict, Union
+
+# import.thirdparty
+import discord
+from discord.ext import commands, tasks
+
+# import.local
 from extra import utils
 
 server_id = int(os.getenv('SERVER_ID', 123))

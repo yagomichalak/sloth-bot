@@ -1,7 +1,11 @@
-from discord.ext import commands
-from mysqldb import DatabaseCore
+# import.standard
 from typing import List
 
+# import.thirdparty
+from discord.ext import commands
+
+# import.local
+from mysqldb import DatabaseCore
 
 class CurseTable(commands.Cog):
     """ Class for managing the curse table in the database. """

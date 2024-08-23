@@ -1,10 +1,14 @@
-import discord
-from discord.ui import InputText, Modal
-from discord.ext import commands
-from .prompt.menu import ConfirmButton
-from . import utils
-from typing import Dict, Any
+# import.standard
+from typing import Any, Dict
 
+# import.thirdparty
+import discord
+from discord.ext import commands
+from discord.ui import InputText, Modal
+
+# import.local
+from . import utils
+from .prompt.menu import ConfirmButton
 
 class ModeratorApplicationModal(Modal):
     """ Class for the moderator application. """

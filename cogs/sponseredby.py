@@ -1,9 +1,13 @@
+# import.standard
+import os
+from typing import Dict, List, Optional
+
+# import.thirdparty
 import discord
-from discord import slash_command, Option
+from discord import Option, slash_command
 from discord.ext import commands
 
-import os
-from typing import List, Dict, Optional
+# import.local
 from extra import utils
 from mysqldb import DatabaseCore
 

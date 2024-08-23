@@ -1,9 +1,14 @@
+# import.standard
+import os
+from typing import Any, Dict
+
+# import.thirdparty
 import discord
 from discord.ext import commands
-from extra.menu import ConfirmSkill
+
+# import.local
 from extra import utils
-import os
-from typing import Dict, Any
+from extra.menu import ConfirmSkill
 from extra.smartroom.event_rooms import EventRoomsTable
 from mysqldb import DatabaseCore
 

@@ -1,9 +1,13 @@
-from discord.ext import commands
-from mysqldb import DatabaseCore
-from typing import List, Union
-from extra import utils
+# import.standard
 from datetime import datetime
+from typing import List, Union
 
+# import.thirdparty
+from discord.ext import commands
+
+# import.local
+from extra import utils
+from mysqldb import DatabaseCore
 
 class SlothAnalyticsTable(commands.Cog):
     """ Class for managing the SlothAnalytics table in the database. """

@@ -1,14 +1,16 @@
+# import.standard
 import asyncio
 import random
-from typing import Optional, Union, Tuple, List
+from typing import List, Optional, Tuple, Union
 
+# import.thirdparty
 import discord
 import emojis
 from discord.ext import commands
 from discord.ext.commands import guild_only
 
+# import.local
 from extra.slothclasses.player import Player
-
 from ..constants import Emojis
 
 NUMBERS = list(Emojis.number_emojis.values())

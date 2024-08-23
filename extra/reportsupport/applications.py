@@ -1,8 +1,13 @@
+# import.standard
+import os
+from typing import Any, Dict, List, Union
+
+# import.thirdparty
 import discord
 from discord.ext import commands
-from typing import Any, List, Dict, Union
+
+# import.local
 from extra import utils
-import os
 
 cosmos_role_id: int = int(os.getenv('COSMOS_ROLE_ID', 123))
 muffin_id: int = int(os.getenv('MUFFIN_ID', 123))

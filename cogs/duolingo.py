@@ -1,13 +1,18 @@
+# import.standard
+import json
+import os
+from typing import Optional
+
+# import.thirdparty
+import aiohttp
 import discord
 from discord.ext import commands
 from discord.utils import escape_mentions
-import aiohttp
-import json
-from typing import Optional
-import os
+
+# import.local
+from extra.misc.duolingo import DuolingoProfileTable
 from extra.prompt.menu import Confirm
 from extra.slothclasses.player import Player
-from extra.misc.duolingo import DuolingoProfileTable
 
 class Duolingo(DuolingoProfileTable):
     """ Category for Duolingo related commands. """

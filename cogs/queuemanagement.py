@@ -1,8 +1,13 @@
+# import.standard
+import os
+from random import shuffle
+
+# import.thirdparty
 import discord
 from discord.ext import commands
-import os
+
+# import.local
 from extra import utils
-from random import shuffle
 from extra.tool.queue import QueuesTable
 
 moderator_role_id = int(os.getenv('MOD_ROLE_ID', 123))

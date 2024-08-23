@@ -1,25 +1,29 @@
+# import.standard
+import asyncio
+import os
+from datetime import datetime
+from typing import Any, Dict, List, Optional, Tuple, Union
+
+# import.thirdparty
 import discord
 from discord import user_command
-from discord.ext import commands, tasks, menus
-import asyncio
-from mysqldb import DatabaseCore
-from datetime import datetime
-from typing import List, Union, Optional, Dict, Tuple, Any
-import os
+from discord.ext import commands, menus, tasks
 
-from extra.useful_variables import banned_links
-from extra.prompt.menu import Confirm
-from extra.view import ReportSupportView
+# import.local
 from extra import utils
 from extra.menu import MemberSnipeLooping, SnipeLooping
-
-from extra.moderation.firewall import ModerationFirewallTable, BypassFirewallTable
+from extra.moderation.fakeaccounts import ModerationFakeAccountsTable
+from extra.moderation.firewall import (BypassFirewallTable,
+                                       ModerationFirewallTable)
+from extra.moderation.moderatednicknames import ModeratedNicknamesTable
 from extra.moderation.mutedmember import ModerationMutedMemberTable
+from extra.moderation.user_muted_galaxies import UserMutedGalaxiesTable
 from extra.moderation.userinfractions import ModerationUserInfractionsTable
 from extra.moderation.watchlist import ModerationWatchlistTable
-from extra.moderation.fakeaccounts import ModerationFakeAccountsTable
-from extra.moderation.moderatednicknames import ModeratedNicknamesTable
-from extra.moderation.user_muted_galaxies import UserMutedGalaxiesTable
+from extra.prompt.menu import Confirm
+from extra.useful_variables import banned_links
+from extra.view import ReportSupportView
+from mysqldb import DatabaseCore
 
 # IDs
 mod_log_id = int(os.getenv('MOD_LOG_CHANNEL_ID', 123))

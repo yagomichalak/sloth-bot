@@ -1,5 +1,5 @@
+# import.thirdparty
 from discord.ext import commands
-
 
 class SlothClassDatabaseCommands(commands.Cog):
     """ A class for organizing the bot's table creation/drop/delete/check commands. """

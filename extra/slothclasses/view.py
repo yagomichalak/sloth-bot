@@ -1,10 +1,15 @@
+# import.standard
+import json
+from functools import partial
+from random import choice
+from typing import Dict, List, Optional, Union
+
+# import.thirdparty
 import discord
 from discord.ext import commands
-from typing import Optional, List, Dict, Union
-from random import choice
+
+# import.local
 from extra import utils
-from functools import partial
-import json
 
 class HugView(discord.ui.View):
     """ View for the hug skill. """

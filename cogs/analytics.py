@@ -1,16 +1,20 @@
+# import.standard
+import io
+import os
+from datetime import timedelta
+from typing import List
+
+# import.thirdparty
 import discord
 from discord import utils
 from discord.ext import commands, tasks
+from PIL import Image, ImageDraw, ImageFont
 
-from datetime import timedelta
+# import.local
 from extra import utils
-from extra.analytics import SlothAnalyticsTable, DataBumpsTable
+from extra.analytics import DataBumpsTable, SlothAnalyticsTable
 from mysqldb import DatabaseCore
 
-from PIL import Image, ImageFont, ImageDraw
-from typing import List
-import os
-import io
 
 bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID', 123))
 select_your_language_channel_id = int(os.getenv('SELECT_YOUR_LANGUAGE_CHANNEL_ID', 123))

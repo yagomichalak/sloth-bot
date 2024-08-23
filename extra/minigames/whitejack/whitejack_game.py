@@ -1,16 +1,19 @@
+# import.standard
 import asyncio
-import discord
-from discord.ext import commands
-from extra.minigames.blackjack.blackjack_db import BlackJackDB
-from mysqldb import *
 import copy
 import random
+from typing import Dict, List, Optional, Union
+
+# import.thirdparty
+import discord
+from discord.ext import commands
+
+# import.local
+from extra import utils
+from mysqldb import *
 from ..blackjack.blackjack_db import BlackJackDB
 from ..blackjack.create_cards_pack import cards_pack
-from typing import List, Union, Optional, Dict
 from .enums import EmbedColorEnum, EmbedStateEnum
-from extra import utils
-
 
 cogs: List[commands.Cog] = [
 	BlackJackDB

@@ -1,17 +1,21 @@
-import discord
-from discord.ext import commands, tasks, menus
-from mysqldb import DatabaseCore
-
-from extra import utils
-from extra.menu import SlothClassPagination
-from extra.customerrors import ActionSkillOnCooldown, ActionSkillsLocked, SkillsUsedRequirement, CommandNotReady
-from extra.slothclasses import agares, cybersloth, merchant, metamorph, munk, prawler, seraph, warrior, db_commands
-from extra.slothclasses.player import Skill
-from extra.slothclasses.player import Player
-
-from typing import Union, List, Dict, Optional
+# import.standard
 import os
-from random import sample, random
+from random import random, sample
+from typing import Dict, List, Optional, Union
+
+# import.thirdparty
+import discord
+from discord.ext import commands, menus, tasks
+
+# import.local
+from extra import utils
+from extra.customerrors import (ActionSkillOnCooldown, ActionSkillsLocked,
+                                CommandNotReady, SkillsUsedRequirement)
+from extra.menu import SlothClassPagination
+from extra.slothclasses import (agares, cybersloth, db_commands, merchant,
+                                metamorph, munk, prawler, seraph, warrior)
+from extra.slothclasses.player import Player, Skill
+from mysqldb import DatabaseCore
 
 classes: Dict[str, object] = {
     'agares': agares.Agares, 'cybersloth': cybersloth.Cybersloth,

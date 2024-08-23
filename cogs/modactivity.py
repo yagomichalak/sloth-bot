@@ -1,10 +1,15 @@
+# import.standard
+import os
+
+# import.thirdparty
 import discord
 from discord.ext import commands
-from mysqldb import DatabaseCore
-import os
+
+# import.local
 from extra import utils
 from extra.moderation.modactivity import ModActivityTable
 from extra.prompt.menu import ConfirmButton
+from mysqldb import DatabaseCore
 
 senior_mod_role_id: int = int(os.getenv('SENIOR_MOD_ROLE_ID', 123))
 mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))

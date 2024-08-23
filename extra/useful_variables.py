@@ -1,5 +1,9 @@
+# import.standard
 import os
+
+# import.thirdparty
 from dotenv import load_dotenv
+
 load_dotenv()
 
 list_of_commands = [

@@ -1,18 +1,22 @@
-import discord
-from discord import Option, SlashCommandGroup, slash_command
-from discord.ext import commands
-
-from extra.useful_variables import rules
-from extra import utils
-from extra.slothclasses.player import Player
-from extra.analytics import DataBumpsTable
-
-from typing import Dict
+# import.standard
+import json
 import os
 import subprocess
 import sys
-import json
+from typing import Dict
+
+# import.thirdparty
+import discord
 import wikipedia
+from discord import Option, SlashCommandGroup, slash_command
+from discord.ext import commands
+
+# import.local
+from extra import utils
+from extra.analytics import DataBumpsTable
+from extra.slothclasses.player import Player
+from extra.useful_variables import rules
+
 
 allowed_roles = [int(os.getenv('OWNER_ROLE_ID', 123)), int(
     os.getenv('ADMIN_ROLE_ID', 123)), int(os.getenv('MOD_ROLE_ID', 123))]

@@ -1,14 +1,17 @@
-import discord
-from discord.ext import commands
-from extra import utils
-
+# import.standard
+import math
 import os
-from typing import Union, List, Any, Optional
-
-from PIL import Image, ImageDraw, ImageFont, ImageOps
 from io import BytesIO
 from random import choice
-import math
+from typing import Any, List, Optional, Union
+
+# import.thirdparty
+import discord
+from discord.ext import commands
+from PIL import Image, ImageDraw, ImageFont, ImageOps
+
+# import.local
+from extra import utils
 
 class ImageManipulation(commands.Cog):
     """ Categories for image manipulations and visualization. """

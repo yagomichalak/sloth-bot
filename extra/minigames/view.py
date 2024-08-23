@@ -1,16 +1,18 @@
-import discord
-from discord.ext import commands
-from .buttons import TicTacToeButton, FlagsGameButton
-from .whitejack.enums import ButtonStyleEnum, ButtonOppositeStyleEnum
-
-from typing import Dict, List, Tuple, Any, Optional
-from random import randint, choice
-from extra import utils
-from functools import partial
+# import.standard
 import asyncio
 import os
+from functools import partial
+from random import choice, randint
+from typing import Any, Dict, List, Optional, Tuple
 
+# import.thirdparty
+import discord
+from discord.ext import commands
+
+# import.local
 from extra import utils
+from .buttons import FlagsGameButton, TicTacToeButton
+from .whitejack.enums import ButtonOppositeStyleEnum, ButtonStyleEnum
 
 server_id: int = int(os.getenv('SERVER_ID', 123))
 

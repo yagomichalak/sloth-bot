@@ -1,9 +1,10 @@
-from discord.ext import commands
-from discord import slash_command
-
+# import.standard
 import os
-from random import choice
-from random import randrange
+from random import choice, randrange
+
+# import.thirdparty
+from discord import slash_command
+from discord.ext import commands
 
 mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID', 123))

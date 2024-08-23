@@ -1,18 +1,21 @@
+# import.standard
+import re
+import shlex
+from collections import OrderedDict
+from datetime import datetime
+from io import BytesIO
+from typing import Dict, Iterable, List, Optional, Union
+
+# import.thirdparty
+import aiohttp
 import discord
 from discord.enums import EntitlementType
 from discord.ext import commands
-from datetime import datetime
-import aiohttp
-
-import re
-from pytz import timezone
-from io import BytesIO
 from PIL import Image, ImageDraw
-from typing import List, Dict, Optional, Union, Iterable
+from pytz import timezone
 
+# import.local
 from extra.customerrors import CommandNotReady, NotSubscribed
-from collections import OrderedDict
-import shlex
 
 session = aiohttp.ClientSession()
 

@@ -1,15 +1,20 @@
-import discord
-from extra import utils
-from discord.ext import commands, tasks
-from datetime import datetime
+# import.standard
 import asyncio
-from PIL import Image, ImageFont, ImageDraw
 import os
-from mysqldb import DatabaseCore
-from typing import List, Union, Any, Optional
+from datetime import datetime
+from typing import Any, List, Optional, Union
 
+# import.thirdparty
+import discord
+from discord.ext import commands, tasks
+from PIL import Image, ImageDraw, ImageFont
+
+# import.local
+from extra import utils
 from extra.menu import ConfirmSkill
-from extra.smartroom.smartroom import PremiumVcTable, GalaxyVcTable, UserVcStampTable
+from extra.smartroom.smartroom import (GalaxyVcTable, PremiumVcTable,
+                                       UserVcStampTable)
+from mysqldb import DatabaseCore
 
 smart_room_cogs: List[commands.Cog] = [
 	PremiumVcTable, GalaxyVcTable, UserVcStampTable

@@ -1,22 +1,25 @@
+# import.standard
+import os
+from random import randint
+from typing import List, Optional
+
+# import.thirdparty
+import aiohttp
 import discord
 from discord import Option, slash_command
-from discord.utils import escape_mentions
 from discord.ext import commands
-from random import randint
-import aiohttp
-import os
-from typing import List, Optional
-from mysqldb import DatabaseCore
+from discord.utils import escape_mentions
 
-from extra import utils, useful_variables
-from extra.view import QuickButtons
-from extra.prompt.menu import ConfirmButton
-
-from extra.moderation.userinfractions import ModerationUserInfractionsTable
+# import.local
+from extra import useful_variables, utils
+from extra.misc.slothboard import SlothboardTable
 from extra.moderation.fakeaccounts import ModerationFakeAccountsTable
 from extra.moderation.moderatednicknames import ModeratedNicknamesTable
+from extra.moderation.userinfractions import ModerationUserInfractionsTable
+from extra.prompt.menu import ConfirmButton
 from extra.slothclasses.player import Player
-from extra.misc.slothboard import SlothboardTable
+from extra.view import QuickButtons
+from mysqldb import DatabaseCore
 
 mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID', 123))

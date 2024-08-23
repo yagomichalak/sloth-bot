@@ -1,11 +1,15 @@
+# import.standard
 from __future__ import annotations
+import os
+from datetime import datetime
+from typing import Dict, Union
+
+# import.thirdparty
 import discord
 from discord.ext import commands
 
+# import.local
 from extra import utils
-import os
-from typing import Dict, Union
-from datetime import datetime
 
 bots_and_commands_channel_id: int = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID', 123))
 server_id: int = int(os.getenv('SERVER_ID', 123))

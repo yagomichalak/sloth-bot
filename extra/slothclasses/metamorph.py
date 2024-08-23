@@ -1,12 +1,17 @@
-import discord
-from discord.ext import commands
-from .player import Player, Skill
-from mysqldb import DatabaseCore
-from extra.menu import ConfirmSkill
-from extra import utils
+# import.standard
 import os
 from datetime import datetime
 from typing import Optional
+
+# import.thirdparty
+import discord
+from discord.ext import commands
+
+# import.local
+from extra import utils
+from extra.menu import ConfirmSkill
+from mysqldb import DatabaseCore
+from .player import Player, Skill
 
 bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID', 123))
 

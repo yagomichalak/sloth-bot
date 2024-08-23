@@ -1,7 +1,9 @@
-import discord
-from discord.ext import commands
+# import.standard
 import os
 
+# import.thirdparty
+import discord
+from discord.ext import commands
 
 class Verify(commands.Cog):
     """ Cog for user verification commands and methods. """

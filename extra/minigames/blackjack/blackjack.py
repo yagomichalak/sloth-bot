@@ -1,17 +1,21 @@
-import discord
-from discord.ext import commands
-from .blackjack_game import BlackJackGame
-from .create_cards_pack import cards_pack
-from mysqldb import *
-from .blackjack_db import BlackJackDB
-from typing import List, Optional
-
-from extra.slothclasses.player import Player
-from extra.minigames.view import BlackJackActionView
-from extra.minigames.rehab_members import RehabMembersTable
-from extra import utils
+# import.standard
 import asyncio
 import os
+from typing import List, Optional
+
+# import.thirdparty
+import discord
+from discord.ext import commands
+
+# import.local
+from extra import utils
+from extra.minigames.rehab_members import RehabMembersTable
+from extra.minigames.view import BlackJackActionView
+from extra.slothclasses.player import Player
+from mysqldb import * 
+from .blackjack_db import BlackJackDB
+from .blackjack_game import BlackJackGame
+from .create_cards_pack import cards_pack
 
 server_id: int = int(os.getenv('SERVER_ID', 123))
 

@@ -1,15 +1,17 @@
+# import.standard
+from typing import Dict
+
+# import.thirdparty
 import discord
 from discord.ext import commands
 
-from extra.prompt.menu import prompt_number, prompt_emoji_guild, prompt_message_guild, get_role_response
-
+# import.local
+from extra.prompt.menu import (ConfirmButton, get_role_response,
+                               prompt_emoji_guild, prompt_message_guild,
+                               prompt_number)
 from extra.roleselection.db_commands import RoleSelectionDatabaseCommands
-from extra.roleselection.menu import RoleButton, ManageRoleSelectionMenu
-from extra.prompt.menu import ConfirmButton
+from extra.roleselection.menu import ManageRoleSelectionMenu, RoleButton
 # from extra.roleselection.utils import callback as button_callback
-
-from typing import Dict
-
 
 class RoleSelection(RoleSelectionDatabaseCommands):
 	""" Category for creating, managing and interacting with

@@ -1,23 +1,24 @@
+# import.standard
+import os
+from datetime import datetime
+from enum import Enum
+from random import choice, random
+from typing import Any, Dict, List, Tuple, Union
+
+# import.thirdparty
 import discord
 from discord.ext import commands
-
-from extra.customerrors import (
-    MissingRequiredSlothClass, ActionSkillOnCooldown, CommandNotReady, 
-    SkillsUsedRequirement, ActionSkillsLocked, PoisonedCommandError,
-    KidnappedCommandError
-    )
-from extra import utils
-
-from mysqldb import DatabaseCore
-from typing import Union, List, Tuple, Dict, Any
-from datetime import datetime
-from random import random, choice
-import os
 from pytz import timezone
 
-from enum import Enum
-from .userpets import UserPetsTable
+# import.local
+from extra import utils
+from extra.customerrors import (ActionSkillOnCooldown, ActionSkillsLocked,
+                                CommandNotReady, KidnappedCommandError,
+                                MissingRequiredSlothClass,
+                                PoisonedCommandError, SkillsUsedRequirement)
+from mysqldb import DatabaseCore
 from .userbabies import UserBabiesTable
+from .userpets import UserPetsTable
 
 bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID', 123))
 additional_cogs: List[commands.Cog] = [

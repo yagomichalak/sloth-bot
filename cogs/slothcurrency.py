@@ -1,30 +1,32 @@
+# import.standard
+import asyncio
+import glob
+import os
+import shutil
+from itertools import cycle
+from typing import Dict, List, Optional, Tuple, Union
+
+# import.thirdparty
 import discord
-from discord import slash_command, Option
+from discord import Option, slash_command
 from discord.ext import commands, menus
 from discord.member import VoiceState
 from discord.utils import escape_mentions
-from mysqldb import *
-from external_cons import the_drive
 from PIL import Image, ImageDraw, ImageFont
-import os
 
-import shutil
-import asyncio
-import glob
-from itertools import cycle
-
-from extra.view import ExchangeActivityView
-from extra.menu import InventoryLoop
-from typing import List, Dict, Tuple, Union, Optional
-
-from extra.slothclasses.player import Player
-from extra.useful_variables import level_badges, flag_badges, patreon_roles
-from extra.gif_manager import GIF
+# import.local
+from external_cons import the_drive
 from extra import utils
-
-from extra.currency.useritems import UserItemsTable
-from extra.currency.userserveractivity import UserServerActivityTable, UserVoiceSystem
 from extra.currency.usercurrency import UserCurrencyTable
+from extra.currency.useritems import UserItemsTable
+from extra.currency.userserveractivity import (UserServerActivityTable,
+                                               UserVoiceSystem)
+from extra.gif_manager import GIF
+from extra.menu import InventoryLoop
+from extra.slothclasses.player import Player
+from extra.useful_variables import flag_badges, level_badges, patreon_roles
+from extra.view import ExchangeActivityView
+from mysqldb import *
 
 
 booster_role_id = int(os.getenv('BOOSTER_ROLE_ID', 123))

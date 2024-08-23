@@ -1,20 +1,24 @@
+# import.standard
+import asyncio
+import json
+from random import choice, randint, sample, shuffle
+from typing import Any, Dict, List, Optional, Union
+
+# import.thirdparty
 import discord
 from discord.ext import commands
 
-from random import randint, sample, shuffle, choice
-import json
-from typing import List, Dict, Optional, Any, Union
-import asyncio
-
+# import.local
 from extra import utils
-from extra.slothclasses.player import Player
-from extra.minigames.connect_four import ConnectFour
 from extra.minigames.blackjack.blackjack import BlackJack
-from extra.minigames.whitejack.whitejack import WhiteJack
-from extra.minigames.view import MoveObjectGameView, TicTacToeView, FlagsGameView, MemoryGameView
-from extra.minigames.rehab_members import RehabMembersTable
-from extra.minigames.memory import MemoryTable
 from extra.minigames.coinflip import CoinflipMemberTable
+from extra.minigames.connect_four import ConnectFour
+from extra.minigames.memory import MemoryTable
+from extra.minigames.rehab_members import RehabMembersTable
+from extra.minigames.view import (FlagsGameView, MemoryGameView,
+                                  MoveObjectGameView, TicTacToeView)
+from extra.minigames.whitejack.whitejack import WhiteJack
+from extra.slothclasses.player import Player
 
 minigames_cogs: List[commands.Cog] = [
     ConnectFour, BlackJack, WhiteJack, RehabMembersTable,

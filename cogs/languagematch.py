@@ -1,8 +1,10 @@
+# import.standard
+import random
+from typing import Any, List
+
+# import.thirdparty
 import discord
 from discord.ext import commands, tasks
-from typing import List, Any
-import random
-
 
 class LanguageMatch(commands.Cog):
     """ Class for the language match feature. """

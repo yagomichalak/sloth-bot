@@ -1,13 +1,16 @@
-import discord
-from discord import slash_command, Option
-from discord.ext import commands
-
+# import.standard
 import os
 from typing import List
 
+# import.thirdparty
+import discord
+from discord import Option, slash_command
+from discord.ext import commands
+
+# import.local
 from extra import utils
-from extra.prompt.menu import ConfirmButton
 from extra.modals import TravelBuddyModal
+from extra.prompt.menu import ConfirmButton
 
 travel_buddies_channel_id: int = int(os.getenv("TRAVEL_BUDDIES_CHANNEL_ID", 123))
 guild_ids: List[int] = [int(os.getenv("SERVER_ID", 123))]

@@ -1,8 +1,12 @@
+# import.standard
+from typing import List, Optional, Union
+
+# import.thirdparty
 from discord.ext import commands, tasks
 
-from mysqldb import DatabaseCore
-from typing import List, Union, Optional
+# import.local
 from extra import utils
+from mysqldb import DatabaseCore
 
 class VoiceChannelHistoryTable(commands.Cog):
     """ Class for managing the VoiceChannelHistory table in the database. """
