@@ -19,7 +19,6 @@ CROSS_EMOJI = Emojis.incident_unactioned
 Coordinate = Optional[Tuple[int, int]]
 EMOJI_CHECK = Union[discord.Emoji, str]
 
-
 class Game:
     """ A class for the sConnect 4 Game."""
 

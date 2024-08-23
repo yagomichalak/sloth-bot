@@ -64,7 +64,6 @@ class Communication(*tool_cogs):
             
             await general_channel.send(random_message)
 
-
     # Says something by using the bot
     @commands.command()
     @utils.is_allowed([senior_mod_role_id, lesson_manager_role_id, real_event_manager_role_id, community_manager_role_id], throw_exc=True)
@@ -77,7 +76,6 @@ class Communication(*tool_cogs):
 
         msg = ctx.message.content.split('!say', 1)
         await ctx.send(msg[1])
-
 
     # Edits a message sent by the bot
     @commands.command()
@@ -102,8 +100,6 @@ class Communication(*tool_cogs):
 
         except NotFound:
             return await ctx.send("**Message not found. Send the command in the same channel as the original message.**", delete_after=5)
-
-
 
     # Replies a message by using the bot
     @commands.command()

@@ -35,7 +35,6 @@ async def the_django_database():
     mycursor = await db.cursor()
     return mycursor, db
 
-
 class DatabaseCore:
     
     COMMITABLE_METHODS = (

@@ -31,7 +31,6 @@ class Duolingo(DuolingoProfileTable):
         """ Tells when the cog is ready to go. """
 
         print("Duolingo cog is online!")
-
     
     @commands.command(aliases=['set_duolingo', 'set_owl', 'setduo', 'setduolingo'])
     @Player.poisoned()

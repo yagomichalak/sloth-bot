@@ -49,7 +49,6 @@ report_support_classes: List[commands.Cog] = [
     ApplicationsTable, Verify, OpenChannels
 ]
 
-
 class ReportSupport(*report_support_classes):
     """ A cog related to the system of reports and some other things. """
 

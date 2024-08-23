@@ -28,7 +28,6 @@ allowed_roles = [
 
 misc_cogs: List[commands.Cog] = [MemberReminderTable]
 
-
 class Misc(*misc_cogs):
     """ Miscellaneous related commands. """
 

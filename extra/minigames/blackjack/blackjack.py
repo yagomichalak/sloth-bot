@@ -23,6 +23,7 @@ server_id: int = int(os.getenv('SERVER_ID', 123))
 blackjack_db: List[commands.Cog] = [
 	BlackJackDB
 ]
+
 class BlackJack(*blackjack_db):
     """ To start a blackjack game in your channel use the 'blackjack <bet>' command,
     and instead of <bet> put the amount you want to gamble (the value must be an integer).

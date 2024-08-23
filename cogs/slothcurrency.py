@@ -42,7 +42,6 @@ currency_cogs: List[commands.Cog] = [
     UserVoiceSystem
 ]
 
-
 class SlothCurrency(*currency_cogs):
     """ Sloth Currency commands. """
 

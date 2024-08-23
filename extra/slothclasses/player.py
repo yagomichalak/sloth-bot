@@ -35,7 +35,6 @@ class Skill(Enum):
     FOUR = 'skill_four_ts'
     FIVE = 'skill_five_ts'
 
-
 class Player(*additional_cogs):
 
     def __init__(self, client) -> None:

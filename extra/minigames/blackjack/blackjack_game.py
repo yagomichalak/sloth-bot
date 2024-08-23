@@ -14,6 +14,7 @@ from .blackjack_db import BlackJackDB
 moderation_cogs: List[commands.Cog] = [
 	BlackJackDB
 ]
+
 class BlackJackGame(*moderation_cogs):
     """ Class for the BlackJack game. """
 

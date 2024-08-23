@@ -30,7 +30,6 @@ class LanguageMatch(commands.Cog):
         filtered_members = list(filter(filter_fnc, members))
         return random.choice(filtered_members)
 
-
 def setup(client: commands.Bot) -> None:
     """ Cog's setup function. """
 
