@@ -1083,7 +1083,7 @@ class Moderation(*moderation_cogs):
             pass
             
     # Mutes a member temporarily
-    @commands.command(alias=["arab"])
+    @commands.command(aliases=["arab"])
     @utils.is_allowed(allowed_roles, throw_exc=True)
     async def tempmute(self, ctx, member: discord.Member = None, reason: str = None, *, time: str = None):
         """ Mutes a member for a determined amount of time.
