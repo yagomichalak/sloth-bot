@@ -28,8 +28,7 @@ class Agares(Player):
             int(os.getenv('LESSON_CAT_ID', 123)),
             int(os.getenv('CASE_CAT_ID', 123)),
             int(os.getenv('EVENTS_CAT_ID', 123)),
-            int(os.getenv('DEBATE_CAT_ID', 123)),
-            int(os.getenv('CULTURE_CAT_ID', 123))
+            int(os.getenv('DEBATE_CAT_ID', 123))
         ]
 
     @commands.command(aliases=['mp'])
