@@ -59,7 +59,6 @@ class Communication(*tool_cogs):
             
             await general_channel.send(random_message)
 
-
     # Says something by using the bot
     @commands.command()
     @utils.is_allowed([*allowed_roles, lesson_manager_role_id, real_event_manager_role_id], throw_exc=True)
@@ -72,7 +71,6 @@ class Communication(*tool_cogs):
 
         msg = ctx.message.content.split('!say', 1)
         await ctx.send(msg[1])
-
 
     # Edits a message sent by the bot
     @commands.command()
@@ -98,11 +96,9 @@ class Communication(*tool_cogs):
         except NotFound:
             return await ctx.send("**Message not found. Send the command in the same channel as the original message.**", delete_after=5)
 
-
-
     # Replies a message by using the bot
     @commands.command()
-    @commands.has_any_role(*allowed_roles)
+    @utils.is_allowed([*allowed_roles, lesson_manager_role_id, real_event_manager_role_id], throw_exc=True)
     async def reply(self, ctx, message_id : int = None, *, text : str = None):
         """ (Mod) Replies a message with the bot.
         :param message_id: The message id to reply.
@@ -243,6 +239,7 @@ If you have any questions feel free to ask! And if you experience any type of pr
         dm_embed.set_author(name=member, icon_url=member.display_avatar)
         dm_embed.set_footer(text=f"Sent by: {author}", icon_url=author.display_avatar)
         await demote_log.send(embed=dm_embed)
+
 
 def setup(client):
     """ Cog's setup function. """
