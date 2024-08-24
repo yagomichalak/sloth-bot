@@ -92,7 +92,7 @@ class ModActivity(ModActivityTable):
 
             field_count += 1
             # Quando raggiungiamo 20 campi, inviamo l'embed e ne creiamo uno nuovo
-            if field_count >= 1:
+            if field_count >= 20:
                 await ctx.send(embed=embed)
                 is_first_embed = False  # Imposta il flag a False dopo il primo embed
                 embed = create_embed(is_first_embed)
