@@ -17,6 +17,8 @@ from pprint import pprint
 mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID', 123))
 analyst_debugger_role_id: int = int(os.getenv('ANALYST_DEBUGGER_ROLE_ID', 123))
+sloth_subscriber_sub_id = int(os.getenv("SLOTH_SUBSCRIBER_SUB_ID", 123))
+
 
 class ReportSupportView(discord.ui.View):
     """ View for the ReportSupport menu. """
@@ -28,10 +30,12 @@ class ReportSupportView(discord.ui.View):
         self.client = client
         self.cog = client.get_cog('ReportSupport')
         patreon_button = discord.ui.Button(style=5, label="Support us on Patreon!", url="https://www.patreon.com/Languagesloth", emoji="<:patreon:831401582426980422>", row=2)
+        sub_button = discord.ui.Button(sku_id=sloth_subscriber_sub_id, row=2)
         self.children.insert(4, patreon_button)
+        self.children.insert(5, sub_button)
 
 
-    @discord.ui.button(label="Apply for Teacher!", style=3, custom_id=f"apply_to_teach", emoji="🧑‍🏫")
+    @discord.ui.button(label="Apply for Teacher!", style=3, custom_id=f"apply_to_teach", emoji="🧑‍🏫", row=1)
     async def apply_to_teach_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
         """ Button for starting the Teacher application. """
 
@@ -48,7 +52,7 @@ class ReportSupportView(discord.ui.View):
 
         await interaction.response.send_modal(TeacherApplicationModal(self.client))
 
-    @discord.ui.button(label="Apply for Moderator!", style=3, custom_id=f"apply_to_moderate", emoji="👮")
+    @discord.ui.button(label="Apply for Moderator!", style=3, custom_id=f"apply_to_moderate", emoji="👮", row=1)
     async def apply_to_moderate_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
         """ Button for starting the Moderator application. """
 
@@ -65,7 +69,7 @@ class ReportSupportView(discord.ui.View):
 
         await interaction.response.send_modal(ModeratorApplicationModal(self.client))
 
-    @discord.ui.button(label="Apply for Event Host!", style=3, custom_id=f"apply_to_host_events", emoji="🎉")
+    @discord.ui.button(label="Apply for Event Host!", style=3, custom_id=f"apply_to_host_events", emoji="🎉", row=1)
     async def apply_to_event_host_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
         """ Button for starting the Event Host application. """
 
@@ -82,7 +86,7 @@ class ReportSupportView(discord.ui.View):
 
         await interaction.response.send_modal(EventHostApplicationModal(self.client))
 
-    @discord.ui.button(label="Apply for Debate Manager!", style=3, custom_id=f"apply_to_manage_debates", emoji="🌐")
+    @discord.ui.button(label="Apply for Debate Manager!", style=3, custom_id=f"apply_to_manage_debates", emoji="🌐", row=1)
     async def apply_to_debate_manager_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
         """ Button for starting the Debate Manager application. """
 
@@ -99,7 +103,7 @@ class ReportSupportView(discord.ui.View):
 
         await interaction.response.send_modal(DebateManagerApplicationModal(self.client))
 
-    @discord.ui.button(label="Get your own Custom Bot (not for free)", style=1, custom_id=f"get_custom_bot", emoji="🤖", row=2)
+    @discord.ui.button(label="Get your own Custom Bot (not for free)", style=1, custom_id=f"get_custom_bot", emoji="🤖", row=3)
     async def bot_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
         """ Button for buying a custom bot. """
 
@@ -138,7 +142,7 @@ class ReportSupportView(discord.ui.View):
         )
         await interaction.followup.send(embed=embed, view=view, ephemeral=True)
 
-    @discord.ui.button(label="Verify", style=1, custom_id=f"verify_id", emoji="☑️", row=2)
+    @discord.ui.button(label="Verify", style=1, custom_id=f"verify_id", emoji="☑️", row=3)
     async def verify_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
         """ Button for starting the verification process. """
 
@@ -157,7 +161,7 @@ class ReportSupportView(discord.ui.View):
         self.cog.cache[member.id] = time_now
         await self.cog.send_verified_selfies_verification(interaction)
 
-    @discord.ui.button(label="Report a User or Get Server/Role Support!", style=4, custom_id=f"report_support", emoji="<:politehammer:608941633454735360>", row=3)
+    @discord.ui.button(label="Report a User or Get Server/Role Support!", style=4, custom_id=f"report_support", emoji="<:politehammer:608941633454735360>", row=4)
     async def report_support_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
         """ Button for reporting someone. """
 
@@ -177,7 +181,7 @@ class ReportSupportView(discord.ui.View):
         view.add_item(ReportSupportSelect(self.client))
         await interaction.followup.send(content="How can we help you?", view=view, ephemeral=True)
 
-    @discord.ui.button(label="Report a Staff member!", style=4, custom_id=f"report_staff", emoji="<:mod_abooz:730887063481876612>", row=3)
+    @discord.ui.button(label="Report a Staff member!", style=4, custom_id=f"report_staff", emoji="<:leoblabla:978481579590570034>", row=4)
     async def report_staff_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
         """ Button for reporting a Staff member. """
 
