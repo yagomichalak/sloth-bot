@@ -66,7 +66,7 @@ class Communication(*tool_cogs):
 
     # Says something by using the bot
     @commands.command()
-    @utils.is_allowed([senior_mod_role_id, lesson_manager_role_id, real_event_manager_role_id, community_manager_role_id], throw_exc=True)
+    @utils.is_allowed([*allowed_roles, lesson_manager_role_id, event_manager_role_id], throw_exc=True)
     async def say(self, ctx):
         """ (MOD) Makes the bot say something. """
 
@@ -103,7 +103,7 @@ class Communication(*tool_cogs):
 
     # Replies a message by using the bot
     @commands.command()
-    @commands.has_any_role(*allowed_roles)
+    @utils.is_allowed([*allowed_roles, lesson_manager_role_id, event_manager_role_id], throw_exc=True)
     async def reply(self, ctx, message_id : int = None, *, text : str = None):
         """ (Mod) Replies a message with the bot.
         :param message_id: The message id to reply.
