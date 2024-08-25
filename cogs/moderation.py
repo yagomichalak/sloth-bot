@@ -438,16 +438,8 @@ class Moderation(*moderation_cogs):
         """ (MOD) Clears the whole channel. """
 
         special_channels = {
-        int(os.getenv('MUTED_CHANNEL_ID', 123)): 'https://cdn.discordapp.com/attachments/746478846466981938/748605295122448534/Muted.png',
-        int(os.getenv('QUESTION_CHANNEL_ID', 123)): '''**Would you like to ask us a question about the server? Ask them there!**
-    `Questions will be answered and deleted immediately.`''',
-        int(os.getenv('SUGGESTION_CHANNEL_ID', 123)): '''**Would you like to suggest a feature for the server? Please follow this template to submit your feature request**
-
-    **Suggestion:**
-    `A short idea name/description`
-
-    **Explanation:**
-    `Explain the feature in detail and including reasons why you would like this feature to be implemented.`'''
+            int(os.getenv('MUTED_CHANNEL_ID', 123)): 'https://cdn.discordapp.com/attachments/746478846466981938/748605295122448534/Muted.png',
+            int(os.getenv('QUESTION_CHANNEL_ID', 123)): '''**Have a question about the server? Ask it here!**'''
         }
 
         if ctx.channel.id not in special_channels.keys():
