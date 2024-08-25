@@ -338,7 +338,7 @@ class Munk(Player):
     async def tribe(self, ctx) -> None:
         """ Command for managing and interacting with a tribe.
         (Use this without a subcommand to see all subcommands available) """
-        if ctx.invoked_subcommand:verify_thumbnail_channel_id
+        if ctx.invoked_subcommand:
             return
 
         cmd = self.client.get_command('tribe')
