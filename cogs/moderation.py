@@ -43,8 +43,6 @@ unverified_role_id = int(os.getenv('UNVERIFIED_ROLE_ID', 123))
 
 # variables.textchannel
 mod_log_id = int(os.getenv('MOD_LOG_CHANNEL_ID', 123))
-welcome_channel_id = int(os.getenv('WELCOME_CHANNEL_ID', 123))
-suspect_channel_id = int(os.getenv('SUSPECT_CHANNEL_ID', 123))
 join_the_server_channel_id = int(os.getenv('JOIN_THE_SERVER_CHANNEL_ID', 123))
 error_log_channel_id = int(os.getenv('ERROR_LOG_CHANNEL_ID', 123))
 
@@ -302,8 +300,6 @@ class Moderation(*moderation_cogs):
         if await self.get_muted_roles(member.id):
             muted_role = discord.utils.get(member.guild.roles, id=muted_role_id)
             await member.add_roles(muted_role)
-            welcome_channel = discord.utils.get(member.guild.channels, id=welcome_channel_id)
-            await welcome_channel.send(f"**Stop right there, {member.mention}! ✋ You were muted, left and rejoined the server, but that won't work!**")
 
         if account_age <= 120:
             if await self.get_firewall_state():
@@ -320,10 +316,6 @@ class Moderation(*moderation_cogs):
                     return
                 else:
                     await self.delete_bypass_firewall_user(member.id)
-
-        if account_age <= 2:
-            suspect_channel = discord.utils.get(member.guild.channels, id=suspect_channel_id)
-            await suspect_channel.send(f"🔴 Alert! Possible fake account: {member.mention} joined the server. Account was just created.\nAccount age: {account_age} day(s)!")
 
     @commands.Cog.listener()
     async def on_message_delete(self, message):
