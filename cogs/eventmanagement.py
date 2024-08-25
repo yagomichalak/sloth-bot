@@ -595,7 +595,7 @@ class EventManagement(EventRoomsTable):
     @commands.command(aliases=['ph'])
     @utils.is_allowed([owner_role_id, admin_role_id, event_manager_role_id], throw_exc=True)
     async def promote_host(self, ctx, member: discord.Member = None) -> None:
-        """ Promotes a host to a regular user.
+        """ Promotes a regular user to a host.
         :param member: The user that is going to be promoted. """
 
         if not member:
