@@ -23,7 +23,7 @@ class VoiceManagement(commands.Cog):
 
     def __init__(self, client) -> None:
         self.client = client
-        self.vcc_id: int = int(os.getenv('VOICE_CALLS_CHANNEL_ID', 123))
+        self.vcc_id: int = int(os.getenv('VIDEO_CALLS_CHANNEL_ID', 123))
 
         # user_id: {'timestamp': 123, 'camera_on': False, 'notified': False}
 
