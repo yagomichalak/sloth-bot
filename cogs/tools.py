@@ -48,8 +48,8 @@ allowed_roles = [owner_role_id, admin_role_id, mod_role_id, *patreon_roles.keys(
 teacher_role_id = int(os.getenv('TEACHER_ROLE_ID', 123))
 
 # variables.category
-popular_lang_cat_id = int(os.getenv('LANGUAGES_CHANNEL_ID', 123))
-more_popular_lang_cat_id = int(os.getenv('MORE_LANGUAGES_CHANNEL_ID', 123))
+popular_lang_cat_id = int(os.getenv('LANGUAGES_CAT_ID', 123))
+more_popular_lang_cat_id = int(os.getenv('MORE_LANGUAGES_CAT_ID', 123))
 smart_room_cat_id = int(os.getenv('CREATE_SMART_ROOM_CAT_ID', 123))
 dynamic_channels_cat_id = int(os.getenv('CREATE_DYNAMIC_ROOM_CAT_ID', 123))
 
