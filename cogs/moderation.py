@@ -39,11 +39,9 @@ senior_mod_role_id: int = int(os.getenv('SENIOR_MOD_ROLE_ID', 123))
 admin_role_id: int = int(os.getenv('ADMIN_ROLE_ID', 123))
 analyst_debugger_role_id: int = int(os.getenv('ANALYST_DEBUGGER_ROLE_ID', 123))
 allowed_roles = [int(os.getenv('OWNER_ROLE_ID', 123)), admin_role_id, senior_mod_role_id, mod_role_id]
-unverified_role_id = int(os.getenv('UNVERIFIED_ROLE_ID', 123))
 
 # variables.textchannel
 mod_log_id = int(os.getenv('MOD_LOG_CHANNEL_ID', 123))
-join_the_server_channel_id = int(os.getenv('JOIN_THE_SERVER_CHANNEL_ID', 123))
 error_log_channel_id = int(os.getenv('ERROR_LOG_CHANNEL_ID', 123))
 
 last_deleted_message = []
@@ -290,32 +288,9 @@ class Moderation(*moderation_cogs):
         if member.bot:
             return
 
-        # User timestamp
-        the_time = member.created_at
-        timestamp = datetime.timestamp(the_time)
-        # Actual timestamp
-        time_now = await utils.get_timestamp()
-        account_age = round((time_now - timestamp)/86400)
-
         if await self.get_muted_roles(member.id):
             muted_role = discord.utils.get(member.guild.roles, id=muted_role_id)
             await member.add_roles(muted_role)
-
-        if account_age <= 120:
-            if await self.get_firewall_state():
-                if not await self.get_bypass_firewall_user(member.id):
-                    try:
-                        unverified_role = discord.utils.get(member.guild.roles, id=unverified_role_id)
-                        await member.add_roles(unverified_role)
-                    except:
-                        pass
-                    else:
-                        join_the_server_channel = discord.utils.get(member.guild.text_channels, id=join_the_server_channel_id)
-                        msg = await join_the_server_channel.send(member.mention)
-                        await msg.delete()
-                    return
-                else:
-                    await self.delete_bypass_firewall_user(member.id)
 
     @commands.Cog.listener()
     async def on_message_delete(self, message):

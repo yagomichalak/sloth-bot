@@ -46,8 +46,6 @@ clock_voice_channel_id = int(os.getenv('CLOCK_VC_ID', 123))
 
 # variable.textchannel
 moderation_log_channel_id = int(os.getenv('MOD_LOG_CHANNEL_ID', 123))
-join_leave_channel = int(os.getenv('JOIN_THE_SERVER_CHANNEL_ID', 123))
-support_us_channel_id = int(os.getenv('SUPPORT_US_CHANNEL_ID', 123))
 error_log_channel_id = int(os.getenv('ERROR_LOG_CHANNEL_ID', 123))
 
 # colors = cycle([(255, 0, 0), (255, 127, 0), (255, 255, 0), (0, 255, 0), (0, 0, 255), (75, 0, 130), (143, 0, 255)])
@@ -102,8 +100,6 @@ async def on_member_update(before, after) -> None:
     if new_role:
         for pr in patreon_roles.keys():
             if new_role.id == pr:
-                support_us_channel = discord.utils.get(before.guild.channels, id=support_us_channel_id)
-                await support_us_channel.send(patreon_roles[pr][0].format(member=after))
                 return await after.send(patreon_roles[pr][1])
 
 @client.event
