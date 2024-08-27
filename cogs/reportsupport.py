@@ -626,7 +626,7 @@ class ReportSupport(*report_support_classes):
         app_embed = discord.Embed(
             title=f"{applicant.name}'s Interview",
             description=f"""
-            Hello {applicant.mention}, thank you for submitting your `{application_type}` application. We've reviewed it and the next step is an interview to better access who you are as a person.
+            Hello {applicant.mention}, thank you for submitting your {application_type} application. We've reviewed it and the next step is an interview to better access who you are as a person.
             Please talk to one of the {role_name} to schedule a time that works for you.""",
             color=applicant.color)
 

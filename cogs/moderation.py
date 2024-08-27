@@ -323,7 +323,7 @@ class Moderation(*moderation_cogs):
         member, message_qtd = await utils.greedy_member_reason(ctx, message)
 
         if not last_deleted_message:
-            await ctx.message.delete()
+            #await ctx.message.delete()
             return await ctx.send("**I couldn't snipe any message.**")
 
         if not member:
@@ -342,7 +342,7 @@ class Moderation(*moderation_cogs):
                 messages: List[Dict] = sorted(last_deleted_message, key = lambda d:  d[next(iter(d))]['time'])
                 messages: List[Dict] = messages[- int(message_qtd): ]
             menu = menus.MenuPages(SnipeLooping(messages))
-            await ctx.message.delete()
+            #await ctx.message.delete()
             await menu.start(ctx)
 
         else:
@@ -353,7 +353,7 @@ class Moderation(*moderation_cogs):
                 return await ctx.send("**I couldn't snipe any messages from this member.**")
 
             menu = menus.MenuPages(MemberSnipeLooping(messages, member[0]))
-            await ctx.message.delete()
+            #await ctx.message.delete()
             await menu.start(ctx)
 
 

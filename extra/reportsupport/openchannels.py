@@ -148,10 +148,10 @@ class OpenChannels(commands.Cog):
         """, (current_ts, channel_id))
 
     async def get_inactive_cases(self, current_ts: int) -> List[List[int]]:
-        """ Gets all case rooms that are inactive for 24h or more.
+        """ Gets all case rooms that are inactive for 19h or more.
         :param current_ts: The current timestamp. """
 
         return await self.db.execute_query("""
             SELECT * FROM OpenChannels
-            WHERE %s - last_message_at >= 86400
+            WHERE %s - last_message_at >= 68400
         """, (current_ts,), fetch="all")
