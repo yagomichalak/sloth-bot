@@ -1,7 +1,9 @@
-import discord
-from discord.ext import commands
+# import.standard
 from typing import List
 
+# import.thirdparty
+import discord
+from discord.ext import commands
 
 class BlackJackDB(commands.Cog):
     """ Class for the BlackJack game. """

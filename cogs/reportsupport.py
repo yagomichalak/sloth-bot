@@ -1,41 +1,53 @@
+# import.standard
+import asyncio
+import os
 import subprocess
+from typing import List, Optional
+
+# import.thirdparty
 import aiohttp
 import discord
 from discord.ext import commands, tasks
-from mysqldb import DatabaseCore
-import asyncio
+
+# import.local
+from extra import utils
 from extra.prompt.menu import Confirm
 from extra.view import ReportSupportView
-from typing import List, Optional
-import os
-from extra import utils
+from extra.reportsupport.applications import ApplicationsTable
+from extra.reportsupport.openchannels import OpenChannels
+from extra.reportsupport.verify import Verify
+from mysqldb import DatabaseCore
 
+# variables.webhook #
+webhook_url: str = os.getenv('WEBHOOK_URL', "")
+
+# variables.id #
+server_id = int(os.getenv('SERVER_ID', 123))
+dnk_id = int(os.getenv('DNK_ID', 123))
+
+# variables.category #
 case_cat_id = int(os.getenv('CASE_CAT_ID', 123))
+
+# variables.voicechannel #
+staff_vc_id = int(os.getenv('STAFF_VC_ID', 123))
+
+# variables.textchannel #
 reportsupport_channel_id = int(os.getenv('REPORT_CHANNEL_ID', 123))
 mod_log_id = int(os.getenv('MOD_LOG_CHANNEL_ID', 123))
-dnk_id = int(os.getenv('DNK_ID', 123))
+ban_appeals_channel_id: int = os.getenv("BAN_APPEALS_CHANNEL_ID", 123)
+
+# variables.role #
 moderator_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 senior_role_id = int(os.getenv('SENIOR_MOD_ROLE_ID', 123))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID', 123))
 lesson_management_role_id = int(os.getenv('LESSON_MANAGEMENT_ROLE_ID', 123))
-server_id = int(os.getenv('SERVER_ID', 123))
-
-staff_vc_id = int(os.getenv('STAFF_VC_ID', 123))
-webhook_url: str = os.getenv('WEBHOOK_URL', "")
-ban_appeals_channel_id: int = os.getenv("BAN_APPEALS_CHANNEL_ID", 123)
-
 allowed_roles = [
 int(os.getenv('OWNER_ROLE_ID', 123)), admin_role_id,
 moderator_role_id]
 
-from extra.reportsupport.applications import ApplicationsTable
-from extra.reportsupport.verify import Verify
-from extra.reportsupport.openchannels import OpenChannels
-
 report_support_classes: List[commands.Cog] = [
     ApplicationsTable, Verify, OpenChannels
 ]
-
 
 class ReportSupport(*report_support_classes):
     """ A cog related to the system of reports and some other things. """
@@ -44,7 +56,7 @@ class ReportSupport(*report_support_classes):
 
         self.client = client
         self.db = DatabaseCore()
-        self.cosmos_role_id: int = int(os.getenv('COSMOS_ROLE_ID', 123))
+        self.owner_role_id: int = int(os.getenv('OWNER_ROLE_ID', 123))
         self.mayu_id: int = int(os.getenv('MAYU_ID', 123))
         self.prisca_id: int = int(os.getenv('PRISCA_ID', 123))
         self.cache = {}
@@ -248,7 +260,7 @@ class ReportSupport(*report_support_classes):
         case_cat = discord.utils.get(guild.categories, id=case_cat_id)
         counter = await self.get_case_number()
         moderator = discord.utils.get(guild.roles, id=moderator_role_id)
-        cosmos_role = discord.utils.get(guild.roles, id=self.cosmos_role_id)
+        owner_role = discord.utils.get(guild.roles, id=self.owner_role_id)
         overwrites = {guild.default_role: discord.PermissionOverwrite(
             read_messages=False, send_messages=False, connect=False, view_channel=False),
         member: discord.PermissionOverwrite(
@@ -275,7 +287,7 @@ class ReportSupport(*report_support_classes):
             embed.add_field(name="Reporting:", value=f"```{reportee}```", inline=False)
             embed.add_field(name="For:", value=f"```{text}```", inline=False)
             embed.add_field(name="Evidence:", value=f"```{evidence}```", inline=False)
-            message = await the_channel.send(content=f"{member.mention}, {moderator.mention}, {cosmos_role.mention}", embed=embed)
+            message = await the_channel.send(content=f"{member.mention}, {moderator.mention}, {owner_role.mention}", embed=embed)
             ctx = await self.client.get_context(message)
 
             if member.voice:

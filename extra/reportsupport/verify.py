@@ -1,13 +1,14 @@
-import discord
-from discord.ext import commands
+# import.standard
 import os
 
+# import.thirdparty
+import discord
+from discord.ext import commands
 
 class Verify(commands.Cog):
     """ Cog for user verification commands and methods. """
 
     verify_reqs_channel_id = int(os.getenv('VERIFY_REQS_CHANNEL_ID', 123))
-    verify_reqs_cat_id = int(os.getenv('VERIFY_REQS_CAT_ID', 123))
     verified_role_id = int(os.getenv('VERIFIED_ROLE_ID', 123))
 
     @commands.Cog.listener(name="on_raw_reaction_add")

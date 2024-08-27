@@ -1,46 +1,52 @@
-import discord
-from discord.utils import escape_mentions
-from pytz import timezone
-from dotenv import load_dotenv
-from discord.ext import commands, tasks
-
-from extra import utils
-from extra.menu import PaginatorView
-from typing import List
+# import.standard
 import os
 from datetime import datetime
 from itertools import cycle
-from typing import Dict, Union, Any
+from typing import Any, Dict, List, Union
 
+# import.thirdparty
+import discord
+from discord.ext import commands, tasks
+from discord.utils import escape_mentions
+from dotenv import load_dotenv
+from pytz import timezone
+
+# import.local
+from extra import utils
+from extra.customerrors import (ActionSkillOnCooldown, ActionSkillsLocked,
+                                CommandNotReady, KidnappedCommandError,
+                                MissingRequiredSlothClass, NotSubscribed,
+                                SkillsUsedRequirement, StillInRehabError)
+from extra.menu import PaginatorView
 from extra.useful_variables import patreon_roles
-
-from extra.customerrors import (
-    MissingRequiredSlothClass, ActionSkillOnCooldown, CommandNotReady, 
-    SkillsUsedRequirement, ActionSkillsLocked, KidnappedCommandError,
-    StillInRehabError, NotSubscribed
-)
 
 load_dotenv()
 
-# IDs
+# variable.id
+server_id = int(os.getenv('SERVER_ID', 123))
+guild_ids = [server_id]
 user_cosmos_id = int(os.getenv('COSMOS_ID', 123))
+
+# variable.slothsubscription
+sloth_subscriber_sub_id = int(os.getenv("SLOTH_SUBSCRIBER_SUB_ID", 123))
+
+# variable.role
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID', 123))
 moderator_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 booster_role_id = int(os.getenv('BOOSTER_ROLE_ID', 123))
 teacher_role_id = int(os.getenv('TEACHER_ROLE_ID', 123))
 giveaway_manager_role_id: int = int(os.getenv('GIVEAWAY_MANAGER_ROLE_ID', 123))
-
-sloth_subscriber_sub_id = int(os.getenv("SLOTH_SUBSCRIBER_SUB_ID", 123))
-server_id = int(os.getenv('SERVER_ID', 123))
-
-moderation_log_channel_id = int(os.getenv('MOD_LOG_CHANNEL_ID', 123))
-lesson_category_id = int(os.getenv('LESSON_CAT_ID', 123))
-clock_voice_channel_id = int(os.getenv('CLOCK_VC_ID', 123))
-join_leave_channel = int(os.getenv('JOIN_THE_SERVER_CHANNEL_ID', 123))
 patreon_role_id = int(os.getenv('SLOTH_EXPLORER_ROLE_ID', 123))
-support_us_channel_id = int(os.getenv('SUPPORT_US_CHANNEL_ID', 123))
+
+# variable.category
+lesson_category_id = int(os.getenv('LESSON_CAT_ID', 123))
+
+# variable.voicechannel
+clock_voice_channel_id = int(os.getenv('CLOCK_VC_ID', 123))
+
+# variable.textchannel
+moderation_log_channel_id = int(os.getenv('MOD_LOG_CHANNEL_ID', 123))
 error_log_channel_id = int(os.getenv('ERROR_LOG_CHANNEL_ID', 123))
-guild_ids = [server_id]
 
 # colors = cycle([(255, 0, 0), (255, 127, 0), (255, 255, 0), (0, 255, 0), (0, 0, 255), (75, 0, 130), (143, 0, 255)])
 shades_of_pink = cycle([(252, 15, 192), (255, 0, 255), (248, 24, 148),
@@ -94,26 +100,7 @@ async def on_member_update(before, after) -> None:
     if new_role:
         for pr in patreon_roles.keys():
             if new_role.id == pr:
-                support_us_channel = discord.utils.get(before.guild.channels, id=support_us_channel_id)
-                await support_us_channel.send(patreon_roles[pr][0].format(member=after))
                 return await after.send(patreon_roles[pr][1])
-
-# @client.event
-# async def on_member_remove(member) -> None:
-#     roles = [role for role in member.roles]
-#     channel = discord.utils.get(member.guild.channels, id=admin_commands_channel_id)
-#     embed = discord.Embed(title=member.name, description=f"User has left the server.", colour=discord.Colour.dark_red())
-#     embed.set_thumbnail(url=member.display_avatar)
-#     embed.set_author(name=f"User Info: {member}")
-#     embed.add_field(name="ID:", value=member.id, inline=False)
-#     embed.add_field(name="Guild name:", value=member.display_name, inline=False)
-#     embed.add_field(name="Created at:", value=member.created_at.strftime("%a, %d %B %y, %I %M %p UTC"), inline=False)
-#     embed.add_field(name="Joined at:", value=member.joined_at.strftime("%a, %d %B %y, %I %M %p UTC"), inline=False)
-#     embed.add_field(name="Left at:", value=datetime.utcnow().strftime("%a, %d %B %y, %I %M %p UTC"), inline=False)
-#     embed.add_field(name=f"Roles: {len(roles)}", value=" ".join([role.mention for role in roles]), inline=False)
-#     embed.add_field(name="Top role:", value=member.top_role.mention, inline=False)
-#     embed.add_field(name="Bot?", value=member.bot)
-#     await channel.send(embed=embed)
 
 @client.event
 async def on_command_error(ctx, error) -> None:

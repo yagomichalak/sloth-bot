@@ -1,6 +1,11 @@
-import discord
+# import.standard
 import enum
 from typing import Callable
+
+# import.thirdparty
+import discord
+
+# import.local
 from .quests_callbacks import *
 
 class QuestEnum(enum.Enum):

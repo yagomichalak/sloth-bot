@@ -1,26 +1,31 @@
+# import.standard
+import os
+from random import randint
+from typing import List, Optional
+
+# import.thirdparty
 import discord
 from discord.errors import NotFound
 from discord.ext import commands, tasks
-import os
+
+# import.local
 from extra import utils
-from typing import List, Optional
-from random import randint
+from extra.tool.scheduled_events import ScheduledEventsTable
 from mysqldb import DatabaseCore
 
-from extra.tool.scheduled_events import ScheduledEventsTable
-
-bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID', 123))
-announcement_channel_id = int(os.getenv('ANNOUNCEMENT_CHANNEL_ID', 123))
+# variables.role
 mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 senior_mod_role_id = int(os.getenv('SENIOR_MOD_ROLE_ID', 123))
 allowed_roles = [int(os.getenv('OWNER_ROLE_ID', 123)), int(os.getenv('ADMIN_ROLE_ID', 123)), mod_role_id]
-general_channel_id = int(os.getenv('GENERAL_CHANNEL_ID', 123))
 lesson_manager_role_id = int(os.getenv('LESSON_MANAGEMENT_ROLE_ID', 123))
-real_event_manager_role_id = int(os.getenv('REAL_EVENT_MANAGER_ROLE_ID', 123))
-community_manager_role_id = int(os.getenv('COMMUNITY_MANAGER_ROLE_ID', 123))
+event_manager_role_id = int(os.getenv('EVENT_MANAGER_ROLE_ID', 123))
+
+# variables.textchannel
+bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID', 123))
+announcement_channel_id = int(os.getenv('ANNOUNCEMENT_CHANNEL_ID', 123))
+general_channel_id = int(os.getenv('GENERAL_CHANNEL_ID', 123))
 
 tool_cogs: List[commands.Cog] = [ScheduledEventsTable]
-
 
 class Communication(*tool_cogs):
     """ A cog related to communication commands. """
@@ -192,7 +197,7 @@ If you have any questions feel free to ask! And if you experience any type of pr
             
     #greedy_dm
     @commands.command()
-    @utils.is_allowed([senior_mod_role_id, lesson_manager_role_id, real_event_manager_role_id, community_manager_role_id], throw_exc=True)
+    @utils.is_allowed([senior_mod_role_id, lesson_manager_role_id, event_manager_role_id], throw_exc=True)
     async def dm(self, ctx, *, message: Optional[str] = None):
         """ (SeniorMod | Manager) Sends a Direct Message to one or more users.
         :param members: The @ or the ID of one or more users to mute.

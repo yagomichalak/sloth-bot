@@ -1,43 +1,46 @@
+# import.standard
+import asyncio
+import glob
+import os
+import shutil
+from itertools import cycle
+from typing import Dict, List, Optional, Tuple, Union
+
+# import.thirdparty
 import discord
-from discord import slash_command, Option
+from discord import Option, slash_command
 from discord.ext import commands, menus
 from discord.member import VoiceState
 from discord.utils import escape_mentions
-from mysqldb import *
-from external_cons import the_drive
 from PIL import Image, ImageDraw, ImageFont
-import os
 
-import shutil
-import asyncio
-import glob
-from itertools import cycle
-
-from extra.view import ExchangeActivityView
-from extra.menu import InventoryLoop
-from typing import List, Dict, Tuple, Union, Optional
-
-from extra.slothclasses.player import Player
-from extra.useful_variables import level_badges, flag_badges, patreon_roles
-from extra.gif_manager import GIF
+# import.local
+from external_cons import the_drive
 from extra import utils
-
-from extra.currency.useritems import UserItemsTable
-from extra.currency.userserveractivity import UserServerActivityTable, UserVoiceSystem
 from extra.currency.usercurrency import UserCurrencyTable
+from extra.currency.useritems import UserItemsTable
+from extra.currency.userserveractivity import (UserServerActivityTable,
+                                               UserVoiceSystem)
+from extra.gif_manager import GIF
+from extra.menu import InventoryLoop
+from extra.slothclasses.player import Player
+from extra.useful_variables import flag_badges, level_badges, patreon_roles
+from extra.view import ExchangeActivityView
+from mysqldb import *
 
+# variables.id
+guild_ids = [int(os.getenv('SERVER_ID', 123))]
 
+# variables.role
 booster_role_id = int(os.getenv('BOOSTER_ROLE_ID', 123))
 teacher_role_id = int(os.getenv("TEACHER_ROLE_ID", 123))
 mod_role_id = int(os.getenv("MOD_ROLE_ID", 123))
 senior_mod_role_id = int(os.getenv("SENIOR_MOD_ROLE_ID", 123))
-guild_ids = [int(os.getenv('SERVER_ID', 123))]
 
 currency_cogs: List[commands.Cog] = [
     UserItemsTable, UserServerActivityTable, UserCurrencyTable,
     UserVoiceSystem
 ]
-
 
 class SlothCurrency(*currency_cogs):
     """ Sloth Currency commands. """
@@ -814,7 +817,7 @@ class SlothCurrency(*currency_cogs):
         """ Checks the farming status of a specific member.
         :param member: The member of the checking. """
 
-        allowed_roles = [int(os.getenv('OWNER_ROLE_ID', 123)), int(os.getenv('ADMIN_ROLE_ID', 123)), int(os.getenv('MOD_ROLE_ID', 123)), *patreon_roles.keys(), int(os.getenv('SLOTH_LOVERS_ROLE_ID', 123))]
+        allowed_roles = [int(os.getenv('OWNER_ROLE_ID', 123)), int(os.getenv('ADMIN_ROLE_ID', 123)), int(os.getenv('MOD_ROLE_ID', 123)), *patreon_roles.keys()]
         
         allowed: bool = await utils.is_allowed(allowed_roles).predicate(ctx)
 

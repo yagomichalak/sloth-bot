@@ -1,6 +1,8 @@
-from discord.ext import commands
+# import.standard
 from typing import List
 
+# import.thirdparty
+from discord.ext import commands
 
 class OpenChannels(commands.Cog):
     """ Cog for managing user open channels. """

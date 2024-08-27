@@ -1,26 +1,30 @@
+# import.standard
+import asyncio
+import json
+import os
+import shutil
+from datetime import datetime
+from io import BytesIO
+from typing import Dict, List, Tuple, Union
+from zipfile import ZipFile
+
+# import.thirdparty
+import aiohttp
 import discord
 from discord.ext import commands
-import os
-from datetime import datetime
-from PIL import Image, ImageFont, ImageDraw
-from typing import Tuple
-import aiohttp
-from io import BytesIO
-import shutil
-import json
-import asyncio
-from zipfile import ZipFile
-from typing import Dict, List, Union
-from mysqldb import DatabaseCore
-from extra.menu import ConfirmSkill
-from extra import utils
+from PIL import Image, ImageDraw, ImageFont
 
+# import.local
+from extra import utils
+from extra.menu import ConfirmSkill
+from mysqldb import DatabaseCore
+
+# variables.role
 owner_role_id = int(os.getenv('OWNER_ROLE_ID', 123))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID', 123))
 mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 lesson_manager_role_id = int(os.getenv('LESSON_MANAGEMENT_ROLE_ID', 123))
 allowed_roles = [owner_role_id, admin_role_id, mod_role_id]
-
 
 class TeacherAPI(commands.Cog):
     """ (WIP) A category for using The Language Sloth's teacher's API,
@@ -31,9 +35,7 @@ class TeacherAPI(commands.Cog):
 
         self.client = client
         self.teacher_role_id: int = int(os.getenv('TEACHER_ROLE_ID', 123))
-        self.teacher_fun_role_id: int = int(os.getenv('TEACHER_FUN_ROLE_ID', 123))
         self.session = aiohttp.ClientSession(loop=client.loop)
-        self.classes_channel_id: int = int(os.getenv('CLASSES_CHANNEL_ID', 123))
         self.website_link: str = 'https://languagesloth.com'
         self.django_website_root = os.getenv('DJANGO_WEBSITE_ROOT')
         self.db = DatabaseCore()
@@ -238,48 +240,6 @@ class TeacherAPI(commands.Cog):
         else:
             return './media/flags/default.png'
 
-    # @commands.command(aliases=['uc'])
-    # @commands.has_permissions(administrator=True)
-    async def update_classes(self, ctx):
-        """ Update the teachers' classes, by requesting new cards from
-        the server's website """
-
-        channel = discord.utils.get(ctx.guild.channels, id=self.classes_channel_id)
-        async with channel.typing():
-            try:
-                async with self.session.get(f"{self.website_link}/api/teachers/?format=json") as response:
-                    data = json.loads(await response.read())
-
-            except Exception as e:
-                await channel.send("**No!**")
-            else:
-
-                # Checks whether new cards were fetched from the website
-                if not data:
-                    return await channel.send("**No cards available to update!**")
-
-                # Clears the classes channel
-                await self.clear_classes_channel(ctx.guild)
-                sorted_weekdays = await self.sort_weekdays(data)
-                for day, classes in sorted_weekdays.items():
-                    await channel.send(embed=discord.Embed(
-                        title=day,
-                        color=discord.Color.green()))
-                    for teacher_class in classes:
-                        msg = await channel.send(teacher_class)
-                        await asyncio.sleep(0.5)
-
-    async def clear_classes_channel(self, guild: discord.Guild) -> None:
-        """ Clears all messages from the classes channel. """
-
-        channel = discord.utils.get(guild.channels, id=self.classes_channel_id)
-        while True:
-            msgs = await channel.history().flatten()
-            if (lenmsg := len(msgs)) > 0:
-                await channel.purge(limit=lenmsg)
-            else:
-                break
-
     async def sort_weekdays(self, data: List[Dict[str, Union[int, str]]]) -> Dict[str, List[str]]:
         """ Sorts the given data by the days of the week. """
 
@@ -368,13 +328,6 @@ class TeacherAPI(commands.Cog):
         if teacher_role in member.roles:
             try:
                 await member.remove_roles(teacher_role)
-            except:
-                pass
-
-        teacher_fun_role = discord.utils.get(ctx.guild.roles, id=self.teacher_fun_role_id)
-        if teacher_fun_role in member.roles:
-            try:
-                await member.remove_roles(teacher_fun_role)
             except:
                 pass
 

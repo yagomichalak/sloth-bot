@@ -1,15 +1,22 @@
-import discord
-from discord.ext import commands
+# import.standard
 import asyncio
 import os
+
+# import.thirdparty
+import discord
+from discord.ext import commands
+
+# import.local
 from extra import utils
 from extra.moderation.aspirants import AspirantsTable
 from mysqldb import DatabaseCore
 
-senior_mod_role_id: int = int(os.getenv('SENIOR_MOD_ROLE_ID', 123))
-mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
+# variables.id
 guild_id = int(os.getenv('SERVER_ID', 123))
 
+# variables.role
+senior_mod_role_id: int = int(os.getenv('SENIOR_MOD_ROLE_ID', 123))
+mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 
 class AspirantActivity(AspirantsTable):
     """ A cog related to the Aspirant's activity. """

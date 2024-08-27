@@ -1,17 +1,22 @@
-import discord
-from discord import slash_command, Option
-from discord.ext import commands
-
+# import.standard
 import os
 from typing import List
 
-from extra import utils
-from extra.prompt.menu import ConfirmButton
-from extra.modals import TravelBuddyModal
+# import.thirdparty
+import discord
+from discord import Option, slash_command
+from discord.ext import commands
 
-travel_buddies_channel_id: int = int(os.getenv("TRAVEL_BUDDIES_CHANNEL_ID", 123))
+# import.local
+from extra import utils
+from extra.modals import TravelBuddyModal
+from extra.prompt.menu import ConfirmButton
+
+# variables.id
 guild_ids: List[int] = [int(os.getenv("SERVER_ID", 123))]
 
+# variables.textchannel
+travel_buddies_channel_id: int = int(os.getenv("TRAVEL_BUDDIES_CHANNEL_ID", 123))
 
 class TravelBuddies(commands.Cog):
     """ Category for the Travel Buddies feature. """

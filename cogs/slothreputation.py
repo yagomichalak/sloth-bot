@@ -1,21 +1,25 @@
-import discord
-from discord import slash_command, Option
-from discord.ext import commands
-
-from mysqldb import DatabaseCore
+# import.standard
 import os
 from typing import List, Optional, Union
 
-from .slothclass import classes
-from extra import utils
-from extra.view import ExchangeActivityView
-from extra.slothclasses.player import Player
+# import.thirdparty
+import discord
+from discord import Option, slash_command
+from discord.ext import commands
 
+# import.local
+from extra import utils
+from extra.slothclasses.player import Player
+from extra.view import ExchangeActivityView
+from mysqldb import DatabaseCore
+from .slothclass import classes
+from extra.currency.membersscore import MembersScoreTable
+
+# variables.id
 guild_ids = [int(os.getenv('SERVER_ID', 123))]
 
+# variables.textchannel
 commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID', 123))
-
-from extra.currency.membersscore import MembersScoreTable
 
 currency_cogs: List[commands.Cog] = [
     MembersScoreTable

@@ -1,7 +1,11 @@
-from discord.ext import commands
-from mysqldb import DatabaseCore
-from typing import List, Union, Optional
+# import.standard
+from typing import List, Optional, Union
 
+# import.thirdparty
+from discord.ext import commands
+
+# import.local
+from mysqldb import DatabaseCore
 
 class PremiumVcTable(commands.Cog):
 	""" Class for database commands and methods related to the PremiumVc. """

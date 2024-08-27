@@ -1,16 +1,21 @@
+# import.standard
+import os
+from datetime import datetime
+from typing import Any, Dict, List, Optional, Tuple, Union
+
+# import.thirdparty
 import discord
 from discord.ext import commands, tasks
-from mysqldb import DatabaseCore
-
-from datetime import datetime
 from pytz import timezone
-import os
 
-from typing import List, Tuple, Union, Optional, Dict, Any
+# import.local
 from extra import utils
 from extra.menu import PaginatorView
-from extra.tool.voice_channel_history import VoiceChannelHistoryTable, VoiceChannelHistorySystem
+from extra.tool.voice_channel_history import (VoiceChannelHistorySystem,
+                                              VoiceChannelHistoryTable)
+from mysqldb import DatabaseCore
 
+# variables.role
 allowed_roles = [int(os.getenv('OWNER_ROLE_ID', 123)), int(os.getenv('ADMIN_ROLE_ID', 123)), int(os.getenv('MOD_ROLE_ID', 123))]
 analyst_debugger_role_id: int = int(os.getenv('ANALYST_DEBUGGER_ROLE_ID', 123))
 

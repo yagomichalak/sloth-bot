@@ -1,23 +1,24 @@
+# import.standard
+import os
+import random
+from datetime import datetime
+from typing import Dict, List, Optional, Union
 
+# import.thirdparty
 import discord
 from discord.ext import commands, menus
-from mysqldb import DatabaseCore
-
-from extra import utils
-from extra.menu import ConfirmSkill, prompt_number, OpenShopLoop
-from extra.view import UserPetView
-from extra.prompt.menu import Confirm, ConfirmButton
-
-from .player import Player, Skill
-
-import os
-from typing import List, Dict, Union, Optional
-from datetime import datetime
-import random
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 
-bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID', 123))
+# import.local
+from extra import utils
+from extra.menu import ConfirmSkill, OpenShopLoop, prompt_number
+from extra.prompt.menu import Confirm, ConfirmButton
+from extra.view import UserPetView
+from mysqldb import DatabaseCore
+from .player import Player, Skill
 
+# variables.textchannel
+bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID', 123))
 
 class Merchant(Player):
 

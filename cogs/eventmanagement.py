@@ -1,20 +1,25 @@
+# import.standard
+import os
+from typing import Any, Dict
+
+# import.thirdparty
 import discord
 from discord.ext import commands
-from extra.menu import ConfirmSkill
+
+# import.local
 from extra import utils
-import os
-from typing import Dict, Any
+from extra.menu import ConfirmSkill
 from extra.smartroom.event_rooms import EventRoomsTable
 from mysqldb import DatabaseCore
 
+# variables.role
 mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 senior_mod_role_id = int(os.getenv('SENIOR_MOD_ROLE_ID', 123))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID', 123))
 owner_role_id = int(os.getenv('OWNER_ROLE_ID', 123))
-event_host_role_id = int(os.getenv('EVENT_MANAGER_ROLE_ID', 123))
-event_manager_role_id = int(os.getenv('REAL_EVENT_MANAGER_ROLE_ID', 123))
+event_host_role_id = int(os.getenv('EVENT_HOST_ROLE_ID', 123))
+event_manager_role_id = int(os.getenv('EVENT_MANAGER_ROLE_ID', 123))
 preference_role_id = int(os.getenv('PREFERENCE_ROLE_ID', 123))
-
 
 class EventManagement(EventRoomsTable):
     """ A category for event related commands. """
@@ -302,9 +307,8 @@ class EventManagement(EventRoomsTable):
         else:
             await ctx.send(f"**{member.mention}, {text_channel.mention} is up and running!**")
 
-    # WELLNESS GOT REMOVED
-    # @create_event.command()
-    @commands.has_any_role(*[admin_role_id, owner_role_id])
+    @create_event.command()
+    @commands.has_any_role(*[event_host_role_id, event_manager_role_id, mod_role_id, admin_role_id, owner_role_id])
     @commands.cooldown(1, 60, commands.BucketType.user)
     async def wellness(self, ctx) -> None:
         """ Creates a Wellness Event voice and text channel. """
@@ -326,9 +330,9 @@ class EventManagement(EventRoomsTable):
         overwrites = await self.get_event_permissions(guild)
 
         wellness_role = discord.utils.get(
-            guild.roles, id=int(os.getenv('WELLNESS_ROLE_ID', 123))
+            guild.roles, id=int(os.getenv('FITNESS_HEALTH_ROLE_ID', 123))
         )
-        # Adds some perms to the Culture Club role
+
         overwrites[wellness_role] = discord.PermissionOverwrite(
             read_messages=True, send_messages=True,
             connect=True, speak=True, view_channel=True)
@@ -355,60 +359,6 @@ class EventManagement(EventRoomsTable):
 
         else:
             await ctx.send(f"**{member.mention}, {text_channel.mention} is up and running!**")
-
-    @create_event.command()
-    @commands.has_any_role(*[event_host_role_id, event_manager_role_id, mod_role_id, admin_role_id, owner_role_id])
-    @commands.cooldown(1, 60, commands.BucketType.user)
-    async def science(self, ctx) -> None:
-        """ Creates a Science Event voice and text channel. """
-
-        member = ctx.author
-        guild = ctx.guild
-        room = await self.get_event_room_by_user_id(member.id)
-        channel = discord.utils.get(guild.text_channels, id=room[2]) if room else None
-
-        if room and channel:
-            return await ctx.send(f"**{member.mention}, you already have an event room going on! ({channel.mention})**")
-        elif room and not channel:
-            await self.delete_event_room_by_txt_id(room[2])
-
-        confirm = await ConfirmSkill("Do you want to create a `Science Event`?").prompt(ctx)
-        if not confirm:
-            return await ctx.send("**Not creating it then!**")
-
-        overwrites = await self.get_event_permissions(guild)
-
-        science_club_role = discord.utils.get(
-            guild.roles, id=int(os.getenv('SCIENCE_CLUB_ROLE_ID', 123))
-        )
-        # Adds some perms to the Science Club role
-        overwrites[science_club_role] = discord.PermissionOverwrite(
-            read_messages=True, send_messages=True,
-            connect=True, speak=True, view_channel=True)
-
-        events_category = discord.utils.get(
-            guild.categories, id=int(os.getenv('EVENTS_CAT_ID', 123)))
-
-        try:
-            # Creating text channel
-            text_channel = await events_category.create_text_channel(
-                name=f"🦠 Science Event 🦠",
-                overwrites=overwrites)
-            # Creating voice channel
-            voice_channel = await events_category.create_voice_channel(
-                name=f"🦠 Science Event 🦠",
-                user_limit=None,
-                overwrites=overwrites)
-            # Inserts it into the database
-            await self.insert_event_room(
-                user_id=member.id, vc_id=voice_channel.id, txt_id=text_channel.id)
-        except Exception as e:
-            print(e)
-            await ctx.send(f"**{member.mention}, something went wrong, try again later!**")
-
-        else:
-            await ctx.send(f"**{member.mention}, {text_channel.mention} is up and running!**")
-
 
     @create_event.command()
     @commands.has_any_role(*[event_host_role_id, event_manager_role_id, mod_role_id, admin_role_id, owner_role_id])
@@ -486,7 +436,7 @@ class EventManagement(EventRoomsTable):
         overwrites = await self.get_event_permissions(guild)
 
         gamer_role = discord.utils.get(
-            guild.roles, id=int(os.getenv('GAMER_ROLE_ID', 123))
+            guild.roles, id=int(os.getenv('PARTY_GAMES_ROLE_ID', 123))
         )
         # Adds some perms to the Gamer role
         overwrites[gamer_role] = discord.PermissionOverwrite(
@@ -539,7 +489,7 @@ class EventManagement(EventRoomsTable):
         overwrites = await self.get_event_permissions(guild)
 
         gamer_role = discord.utils.get(
-            guild.roles, id=int(os.getenv('SPORT_CLUB_ROLE_ID', 123))
+            guild.roles, id=int(os.getenv('FITNESS_HEALTH_ROLE_ID', 123))
         )
         # Adds some perms to the Sport Club role
         overwrites[gamer_role] = discord.PermissionOverwrite(
@@ -645,7 +595,7 @@ class EventManagement(EventRoomsTable):
     @commands.command(aliases=['ph'])
     @utils.is_allowed([owner_role_id, admin_role_id, event_manager_role_id], throw_exc=True)
     async def promote_host(self, ctx, member: discord.Member = None) -> None:
-        """ Promotes a host to a regular user.
+        """ Promotes a regular user to a host.
         :param member: The user that is going to be promoted. """
 
         if not member:

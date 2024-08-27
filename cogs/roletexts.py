@@ -1,6 +1,8 @@
+import os
+
 import discord
 from discord.ext import commands
-import os
+
 
 class RoleTexts(commands.Cog):
     """ A class focused on giving members a text

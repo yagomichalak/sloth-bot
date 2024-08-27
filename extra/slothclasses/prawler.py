@@ -1,17 +1,22 @@
-import discord
-from discord.ext import commands
-from .player import Player, Skill
-from mysqldb import DatabaseCore
-from extra.prompt.menu import Confirm
-from extra import utils
+# import.standard
+import asyncio
 import os
+import random
 from datetime import datetime
 from typing import List, Union
-import random
-import asyncio
 
+# import.thirdparty
+import discord
+from discord.ext import commands
+
+# import.local
+from extra import utils
+from extra.prompt.menu import Confirm
+from mysqldb import DatabaseCore
+from .player import Player, Skill
+
+# variable.textchannel
 bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID', 123))
-
 
 class Prawler(Player):
 

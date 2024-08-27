@@ -1,19 +1,23 @@
+# import.standard
+import io
+import os
+from datetime import timedelta
+from typing import List
+
+# import.thirdparty
 import discord
 from discord import utils
 from discord.ext import commands, tasks
+from PIL import Image, ImageDraw, ImageFont
 
-from datetime import timedelta
+# import.local
 from extra import utils
-from extra.analytics import SlothAnalyticsTable, DataBumpsTable
+from extra.analytics import DataBumpsTable, SlothAnalyticsTable
 from mysqldb import DatabaseCore
 
-from PIL import Image, ImageFont, ImageDraw
-from typing import List
-import os
-import io
 
+# variables.textchannel
 bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID', 123))
-select_your_language_channel_id = int(os.getenv('SELECT_YOUR_LANGUAGE_CHANNEL_ID', 123))
 
 analytics_cogs: List[commands.Cog] = [SlothAnalyticsTable, DataBumpsTable]
 
@@ -74,13 +78,6 @@ class Analytics(*analytics_cogs):
         """ Tells the newcomer to assign themselves a native language role, and updates the joined members counter. """
 
         await self.update_joined()
-        channel = discord.utils.get(member.guild.channels, id=select_your_language_channel_id)
-        if not channel:
-            return
-        await channel.send(
-            f"""Hello {member.mention} ! Scroll up and choose your Native Language by clicking in the flag that best represents it!
-<:zarrowup:688222444292669449> <:zarrowup:688222444292669449> <:zarrowup:688222444292669449> <:zarrowup:688222444292669449> <:zarrowup:688222444292669449> <:zarrowup:688222444292669449> <:zarrowup:688222444292669449> <:zarrowup:688222444292669449>""",
-            delete_after=120)
 
     @commands.Cog.listener()
     async def on_member_remove(self, member) -> None:

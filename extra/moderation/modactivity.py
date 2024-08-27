@@ -1,10 +1,13 @@
+# import.standard
+from typing import List, Optional
+
+# import.thirdparty
 import discord
 from discord.ext import commands
-from mysqldb import DatabaseCore
 
-from typing import Optional, List
+# import.local
 from extra import utils
-
+from mysqldb import DatabaseCore
 
 class ModActivityTable(commands.Cog):
     """ Class for managing the ModActivity table in the database. """

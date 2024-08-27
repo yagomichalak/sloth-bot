@@ -1,14 +1,20 @@
-import discord
-from discord.ext import commands
-from mysqldb import DatabaseCore
+# import.standard
 import copy
 import random
-from .blackjack_db import BlackJackDB
 from typing import List
+
+# import.thirdparty
+import discord
+from discord.ext import commands
+
+# import.local
+from mysqldb import DatabaseCore
+from .blackjack_db import BlackJackDB
 
 moderation_cogs: List[commands.Cog] = [
 	BlackJackDB
 ]
+
 class BlackJackGame(*moderation_cogs):
     """ Class for the BlackJack game. """
 

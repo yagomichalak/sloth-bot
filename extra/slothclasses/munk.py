@@ -1,21 +1,24 @@
-import discord
-from discord.ext import commands, menus, tasks
-from mysqldb import DatabaseCore
-
-from .player import Player, Skill
-from .enums import QuestEnum
-from extra.menu import ConfirmSkill, SwitchTribePages
-from extra.prompt.menu import Confirm
-from extra import utils
-
+# import.standard
 import os
 from datetime import datetime
-from typing import List, Tuple, Union, Dict, Any, Optional, Callable
 from random import choice
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
+# import.thirdparty
+import discord
+from discord.ext import commands, menus, tasks
+
+# import.local
+from extra import utils
+from extra.menu import ConfirmSkill, SwitchTribePages
+from extra.prompt.menu import Confirm
+from mysqldb import DatabaseCore
+from .enums import QuestEnum
+from .player import Player, Skill
+
+# variables.textchannel
 bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID', 123))
-approve_thumbnail_channel_id = int(os.getenv('APPROVE_THUMBNAIL_CHANNEL_ID', 123))
-
+verify_thumbnail_channel_id = int(os.getenv('VERIFY_REQS_CHANNEL_ID', 123))
 
 class Munk(Player):
 
@@ -67,7 +70,7 @@ class Munk(Player):
         if not payload.member or payload.member.bot:
             return
 
-        if payload.channel_id != approve_thumbnail_channel_id:
+        if payload.channel_id != verify_thumbnail_channel_id:
             return
 
         skill_action = await self.get_skill_action_by_message_id_and_skill_type(message_id=payload.message_id, skill_type='thumbnail_request')
@@ -386,7 +389,7 @@ class Munk(Player):
             msg=f"**Are you sure you want to request [this]({image_url}) to be `{user_tribe['name']}`'s thumbnail/logo?**").prompt(ctx)
         if confirm:
             # Sends message to a moderation-clearance room
-            room = self.client.get_channel(approve_thumbnail_channel_id)
+            room = self.client.get_channel(verify_thumbnail_channel_id)
             request_embed = discord.Embed(
                 title="__Thumbnail Request__",
                 description=f"{requester.mention} is requesting the image below to be their tribe's (`{user_tribe['name']}`) thumbnail/logo.",

@@ -1,17 +1,20 @@
-import discord
-from discord.ext import commands
-import os
-from .player import Player, Skill
-from extra.menu import ConfirmSkill
-from extra import utils
-from mysqldb import DatabaseCore
-from typing import Union, Any
-
+# import.standard
 import os
 from datetime import datetime
+from typing import Any, Union
 
+# import.thirdparty
+import discord
+from discord.ext import commands
+
+# import.local
+from extra import utils
+from extra.menu import ConfirmSkill
+from mysqldb import DatabaseCore
+from .player import Player, Skill
+
+# variables.textchannel
 bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID', 123))
-
 
 class Agares(Player):
 
@@ -25,12 +28,7 @@ class Agares(Player):
             int(os.getenv('LESSON_CAT_ID', 123)),
             int(os.getenv('CASE_CAT_ID', 123)),
             int(os.getenv('EVENTS_CAT_ID', 123)),
-            int(os.getenv('DEBATE_CAT_ID', 123)),
-            int(os.getenv('CULTURE_CAT_ID', 123)),
-            int(os.getenv('TEACHER_APPLICATION_CAT_ID', 123)),
-            int(os.getenv('MODERATOR_APPLICATION_CAT_ID', 123)),
-            int(os.getenv('EVENT_MANAGER_APPLICATION_CAT_ID', 123)),
-            int(os.getenv('POMODORO_CAT_ID', 123))
+            int(os.getenv('DEBATE_CAT_ID', 123))
         ]
 
     @commands.command(aliases=['mp'])

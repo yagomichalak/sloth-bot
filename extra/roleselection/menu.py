@@ -1,16 +1,18 @@
+# import.standard
+from functools import partial
+from typing import List
+
+# import.thirdparty
 import discord
 from discord.ext import commands
 
+# import.local
+from extra import utils
+from extra.buttons import ValueButton
 from extra.prompt.menu import ConfirmButton, prompt_number
 from extra.roleselection.db_commands import RoleSelectionDatabaseCommands
 from extra.roleselection.utils import callback as button_callback
 from extra.view import BasicUserCheckView
-from extra.buttons import ValueButton
-
-from typing import List
-from functools import partial
-
-
 
 class ManageRoleSelectionMenu(discord.ui.View):
 	""" View for handling the Role Selection menu's editing action buttons """

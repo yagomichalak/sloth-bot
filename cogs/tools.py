@@ -1,62 +1,63 @@
-import discord
-from discord import slash_command, message_command, user_command, Option, OptionChoice
-from discord.ext import commands, menus, tasks
+# import.standard
 import asyncio
-from gtts import gTTS
-
-from googletrans import Translator
+import collections
 import inspect
 import io
+import os
+import subprocess
 import textwrap
 import traceback
-import collections
 from contextlib import redirect_stdout
-import os
-from treelib import Tree
-import subprocess
-
 from datetime import datetime
-import pytz
-from pytz import timezone
-from mysqldb import DatabaseCore
-
-from extra.slothclasses.player import Player
-from extra.menu import InroleLooping, InchannelLooping
-from extra.prompt.menu import Confirm
-from extra.useful_variables import patreon_roles
-from extra import utils
-
-from extra.view import SoundBoardView, BasicUserCheckView
-from extra.select import SoundBoardSelect
-
-from extra.tool.stealthstatus import StealthStatusTable
-
-guild_ids = [int(os.getenv('SERVER_ID', 123))]
-
 from typing import List, Optional, Union
 
-community_manager_role_id = int(os.getenv('COMMUNITY_MANAGER_ROLE_ID', 123))
-recruiter_role_id = int(os.getenv('RECRUITER_ROLE_ID', 123))
+# import.thirdparty
+import discord
+import gtts
+import pytz
+from discord import (Option, OptionChoice, message_command, slash_command,
+                     user_command)
+from discord.ext import commands, menus, tasks
+from googletrans import Translator
+from pytz import timezone
+from treelib import Tree
+
+# import.local
+from extra import utils
+from extra.menu import InchannelLooping, InroleLooping
+from extra.prompt.menu import Confirm
+from extra.select import SoundBoardSelect
+from extra.slothclasses.player import Player
+from extra.tool.stealthstatus import StealthStatusTable
+from extra.useful_variables import patreon_roles
+from extra.view import BasicUserCheckView, SoundBoardView
+from mysqldb import DatabaseCore
+
+# variables.id
+guild_ids = [int(os.getenv('SERVER_ID', 123))]
+dnk_id = int(os.getenv('DNK_ID', 123))
+
+# variables.role
 mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 senior_mod_role_id: int = int(os.getenv('SENIOR_MOD_ROLE_ID', 123))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID', 123))
 owner_role_id = int(os.getenv('OWNER_ROLE_ID', 123))
 analyst_debugger_role_id: int = int(os.getenv('ANALYST_DEBUGGER_ROLE_ID', 123))
 in_a_vc_role_id: int = int(os.getenv('IN_A_VC_ROLE_ID', 123))
-dnk_id = int(os.getenv('DNK_ID', 123))
-steffen_id = int(os.getenv('STEFFEN_ID', 123))
-
-allowed_roles = [owner_role_id, admin_role_id, mod_role_id, *patreon_roles.keys(), int(os.getenv('SLOTH_LOVERS_ROLE_ID', 123))]
+allowed_roles = [owner_role_id, admin_role_id, mod_role_id, *patreon_roles.keys()]
 teacher_role_id = int(os.getenv('TEACHER_ROLE_ID', 123))
-patreon_channel_id = int(os.getenv('PATREONS_CHANNEL_ID', 123))
 
-popular_lang_cat_id = int(os.getenv('LANGUAGES_CHANNEL_ID', 123))
-more_popular_lang_cat_id = int(os.getenv('MORE_LANGUAGES_CHANNEL_ID', 123))
+# variables.category
+popular_lang_cat_id = int(os.getenv('LANGUAGES_CAT_ID', 123))
+more_popular_lang_cat_id = int(os.getenv('MORE_LANGUAGES_CAT_ID', 123))
 smart_room_cat_id = int(os.getenv('CREATE_SMART_ROOM_CAT_ID', 123))
-
-dynamic_vc_id: int = int(os.getenv('CREATE_DYNAMIC_ROOM_VC_ID', 123))
 dynamic_channels_cat_id = int(os.getenv('CREATE_DYNAMIC_ROOM_CAT_ID', 123))
 
+# variables.voicechannel
+dynamic_vc_id: int = int(os.getenv('CREATE_DYNAMIC_ROOM_VC_ID', 123))
+
+# variables.textchannel
+patreon_channel_id = int(os.getenv('PATREONS_CHANNEL_ID', 123))
 
 tool_cogs: List[commands.Cog] = [
 	StealthStatusTable
@@ -71,34 +72,8 @@ class Tools(*tool_cogs):
 
 	@commands.Cog.listener()
 	async def on_ready(self):
-
-		# self.make_dumps_event.start()
+		
 		print('Tools cog is ready!')
-
-	@tasks.loop(seconds=60)
-	async def make_dumps_event(self) -> None:
-		""" Checks the time for advertising Patreon. """
-
-		current_ts = await utils.get_timestamp()
-
-		Communication = self.client.get_cog('Communication')
-
-		# Checks whether the MakeDumps event exists
-		if not await Communication.get_advertising_event(event_label='make_dumps'):
-			# If not, creates it
-			return await Communication.insert_advertising_event(event_label='make_dumps', current_ts=current_ts-43200)
-
-		# Checks whether event time is due
-		if await Communication.check_advertising_time(
-			current_ts=int(current_ts), event_label="make_dumps", ad_time=43200): # Every 12 hours
-
-			# Updates time and makes the dumps.
-			guild = self.client.get_guild(int(os.getenv("SERVER_ID")))
-			dumps_channel = discord.utils.get(guild.channels, id=int(os.getenv("DUMPS_CHANNEL_ID")))
-			try:
-				await self.make_dump_callback(channel=dumps_channel)
-			finally:
-				await Communication.update_advertising_time(event_label="make_dumps", current_ts=current_ts)
 
 	@commands.Cog.listener()
 	async def on_voice_state_update(self, member, before, after) -> None:
@@ -546,7 +521,7 @@ class Tools(*tool_cogs):
 			await ctx.send(f"**`{len(all_members)}` members are in a vc atm!**")
 
 	@commands.command(aliases=['stalk', 'voice_channel'])
-	@commands.check_any(utils.is_allowed([*allowed_roles, analyst_debugger_role_id]), utils.is_allowed_members([steffen_id], check_adm=False))
+	@commands.check_any(utils.is_allowed([*allowed_roles, analyst_debugger_role_id]))
 	async def vc(self, ctx) -> None:
 		""" Tells where the given member is at (voice channel).
 		:param member: The member you are looking for. """
@@ -678,7 +653,7 @@ class Tools(*tool_cogs):
 		await ctx.send(' '.join(text))
 
 	@commands.command(aliases=['tp', 'beam'])
-	@commands.check_any(utils.is_allowed([senior_mod_role_id]), utils.is_allowed_members([steffen_id], check_adm=False))
+	@commands.check_any(utils.is_allowed([senior_mod_role_id]))
 	async def teleport(self, ctx, vc_1: discord.VoiceChannel = None, vc_2: discord.VoiceChannel = None) -> None:
 		""" Teleports all members in a given voice channel to another one.
 		:param vc_1: The origin vc.
@@ -1314,114 +1289,6 @@ class Tools(*tool_cogs):
 			pass
 		else:
 			await ctx.send(f"**{member.mention}, is back home, after a long day of surfing!**")
-
-	@commands.command(aliases=["make_dump", "mkdps", "mkdp"])
-	@commands.cooldown(1, 15, commands.BucketType.guild)
-	@commands.has_permissions(administrator=True)
-	async def make_dumps(self, ctx) -> None:
-		""" Makes dumps of the databases and posts them in a specific channel. """
-
-		member: discord.Member = ctx.author
-		current_ts = await utils.get_timestamp()
-		dumps_channel = discord.utils.get(ctx.guild.channels, id=int(os.getenv("DUMPS_CHANNEL_ID")))
-
-		Communication = self.client.get_cog('Communication')
-		try:
-			await self.make_dump_callback(dumps_channel)
-			await ctx.send(f"**Posted dumps in {dumps_channel.mention}, {member.mention}!**")
-		finally:
-			await Communication.update_advertising_time(event_label="make_dumps", current_ts=current_ts)
-
-	async def make_dump_callback(self, channel: Union[discord.TextChannel, discord.Thread]) -> None:
-		""" Callback for the make dumps command.
-		:param channel: The channel to which to send the dumps. """
-
-		# Gets current date
-		current_time = await utils.get_time_now()
-		# Separates current date into vars, to name the dump files
-		(
-			d, m, y, h, m
-		) = (
-			current_time.day,
-			current_time.month,
-			current_time.year,
-			current_time.hour,
-			current_time.minute
-		)
-
-		# Makes the dump
-		file_path: str = f'media/temporary/sloth_db_dump_{d}_{m}_{y}_{h}_{m}.sql'
-		file_path2: str = f'media/temporary/slothdjango_db_dump_{d}_{m}_{y}_{h}_{m}.sql'
-		file_path3: str = f'media/temporary/.env_schema_{d}_{m}_{y}_{h}_{m}.txt'
-		try:
-			if pw := os.getenv('SLOTH_DB_PASSWORD'):
-				command = f"mysqldump -u {os.getenv('SLOTH_DB_USER')} -p{pw} {os.getenv('SLOTH_DB_NAME')}" \
-					f" > {file_path}"
-			else:
-				command = f"mysqldump -u {os.getenv('SLOTH_DB_USER')} {os.getenv('SLOTH_DB_NAME')}" \
-					f" > {file_path}"
-			subprocess.getstatusoutput(command)
-
-			if pw2 := os.getenv('DJANGO_DB_PASSWORD'):
-				command2 = f"mysqldump -u {os.getenv('DJANGO_DB_USER')} -p{pw2} {os.getenv('DJANGO_DB_NAME')}" \
-					f" > {file_path2}"
-			else:
-				command2 = f"mysqldump -u {os.getenv('DJANGO_DB_USER')} {os.getenv('DJANGO_DB_NAME')}" \
-					f" > {file_path2}"
-			subprocess.getstatusoutput(command2)
-
-			with open(file_path3, 'w') as f3:
-				f3.writelines('\n'.join(map(lambda key: f"{key} = 123", os.environ.__dict__['_data'].keys())))
-
-			# Posts it
-			await channel.send(files=[discord.File(file_path), discord.File(file_path2), discord.File(file_path3)])
-		except Exception as e:
-			print("Error at making dump: ", e)
-		finally:
-			os.remove(file_path); os.remove(file_path2); os.remove(file_path3)
-
-	@commands.command(aliases=["invs"])
-	@utils.is_allowed([recruiter_role_id, community_manager_role_id, admin_role_id], throw_exc=True)
-	async def invites(self, ctx, inviter: Optional[discord.Member] = None) -> None:
-		""" Shows the invites for recruiters if not members are informed.
-		:param inviter: The inviter to show invites from. """
-
-		member: discord.Member = ctx.author
-
-		inviters = []
-
-		invites = await ctx.guild.invites()
-		def get_user_invites_count(member: discord.Member) -> discord.Invite:
-			
-			user_invites = [invite.uses for invite in invites if invite.inviter and invite.inviter.id == member.id]
-			return sum(user_invites)
-
-		if not inviter:
-			inviters = [
-				f"**• {member}**: `{get_user_invites_count(member)}`"
-				for member in ctx.guild.members
-				if member.get_role(recruiter_role_id)
-			]
-			inviters_text = '\n'.join(inviters)
-
-			embed = discord.Embed(
-				title="Recruiter Invites",
-				description=f"Showing invites for `{len(inviters)}` recruiters:\n{inviters_text}",
-				color=member.color,
-				timestamp = ctx.message.created_at
-			)
-			embed.set_thumbnail(url=ctx.guild.icon.url)
-		else:
-			embed = discord.Embed(
-				title=f"{inviter}'s Invites",
-				description=f"• {member.mention} has `{get_user_invites_count(inviter)}` invites",
-				color=inviter.color,
-				timestamp = ctx.message.created_at
-			)
-			embed.set_thumbnail(url=inviter.display_avatar)
-		
-		embed.set_footer(text=f"Requested by: {member}", icon_url=member.display_avatar)
-		await ctx.send(embed=embed)
 
 	@commands.command(hidden=False)
 	@commands.has_permissions(administrator=True)

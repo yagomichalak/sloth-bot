@@ -1,25 +1,31 @@
-import discord
-from discord.ext import commands
-from .whitejack_game import WhiteJackGame
-from mysqldb import *
-from typing import List, Union, Optional, Dict, Any
-
-from extra.slothclasses.player import Player
-from extra.minigames.view import WhiteJackActionView
-from extra.minigames.rehab_members import RehabMembersTable
-from extra.useful_variables import patreon_roles
-from extra import utils
+# import.standard
 import asyncio
 import os
-import string
 import random
+import string
+from typing import Any, Dict, List, Optional, Union
 
+# import.thirdparty
+import discord
+from discord.ext import commands
+
+# import.local
+from extra import utils
+from extra.minigames.rehab_members import RehabMembersTable
+from extra.minigames.view import WhiteJackActionView
+from extra.slothclasses.player import Player
+from extra.useful_variables import patreon_roles
+from mysqldb import *
+from .whitejack_game import WhiteJackGame
+
+# variables.id
 server_id: int = int(os.getenv('SERVER_ID', 123))
+
+# variables.role
 allowed_roles = [
     int(os.getenv('OWNER_ROLE_ID', 123)), int(os.getenv('ADMIN_ROLE_ID', 123)), int(os.getenv('SENIOR_MOD_ROLE_ID', 123)),
     int(os.getenv('MOD_ROLE_ID', 123)), int(os.getenv('ANALYST_DEBUGGER_ROLE_ID', 123)), *patreon_roles.keys()
 ]
-
 
 class WhiteJack(commands.Cog):
     """ To start a Whitejack game in your channel use the 'whitejack <bet>' command,

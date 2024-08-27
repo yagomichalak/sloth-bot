@@ -1,10 +1,12 @@
+# import.standard
+import asyncio
+import re
+from typing import Any, List, Union
+
+# import.thirdparty
 import discord
 from discord.ext import commands, menus
-import asyncio
-from typing import Union, List, Any
-
-import re
-from emoji.core import emojize, demojize
+from emoji.core import demojize, emojize
 
 class ConfirmButton(discord.ui.View):
 	def __init__(self, member: Union[discord.User, discord.Member], timeout: int = 180):

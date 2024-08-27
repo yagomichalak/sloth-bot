@@ -1,10 +1,14 @@
-import discord
-from discord.ui import InputText, Modal
-from discord.ext import commands
-from .prompt.menu import ConfirmButton
-from . import utils
-from typing import Dict, Any
+# import.standard
+from typing import Any, Dict
 
+# import.thirdparty
+import discord
+from discord.ext import commands
+from discord.ui import InputText, Modal
+
+# import.local
+from . import utils
+from .prompt.menu import ConfirmButton
 
 class ModeratorApplicationModal(Modal):
     """ Class for the moderator application. """
@@ -88,8 +92,8 @@ class ModeratorApplicationModal(Modal):
 
 
         moderator_app_channel = await self.client.fetch_channel(self.cog.moderator_app_channel_id)
-        cosmos_role = discord.utils.get(moderator_app_channel.guild.roles, id=self.cog.cosmos_role_id)
-        app = await moderator_app_channel.send(content=f"{cosmos_role.mention}, {member.mention}", embed=embed)
+        owner_role = discord.utils.get(moderator_app_channel.guild.roles, id=self.cog.owner_role_id)
+        app = await moderator_app_channel.send(content=f"{owner_role.mention}, {member.mention}", embed=embed)
         await app.add_reaction('✅')
         await app.add_reaction('❌')
         # Saves in the database

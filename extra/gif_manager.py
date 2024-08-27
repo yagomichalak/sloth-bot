@@ -1,9 +1,11 @@
-from PIL import Image
-import os
+# import.standard
 import glob
-from typing import Tuple, Dict, Union, Any
+import os
 from itertools import cycle
+from typing import Any, Dict, Tuple, Union
 
+# import.thirdparty
+from PIL import Image
 
 def defragment_gif(path: str, output: str) -> None:
     """ Defragments a gif into frames.
@@ -17,7 +19,6 @@ def defragment_gif(path: str, output: str) -> None:
         imageObject.seek(frame)
         imageObject.convert('RGBA')
         imageObject.save(f"{output}_{frame+1}.png", transparency=0)
-
 
 def remove_background(path: str, output: str) -> None:
     """ Removes the background of image frames.
@@ -44,7 +45,6 @@ def remove_background(path: str, output: str) -> None:
 
         im.putdata(newData)
         im.save(f"{output}_{i+1}.png")
-
 
 class GIF:
     """ A handler for GIF creations."""
@@ -77,7 +77,6 @@ class GIF:
         image.paste(self._frames[0], self._frames[0])
         image.save(path, "GIF", save_all=True, append_images=self._frames,
                    duration=self._frame_duration, transparency=0, loop=0, **kwargs)
-
 
 if __name__ == '__main__':
 

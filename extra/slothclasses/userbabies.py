@@ -1,9 +1,13 @@
+# import.standard
+from typing import List, Optional, Union
+
+# import.thirdparty
 import discord
 from discord.ext import commands
-from mysqldb import DatabaseCore
-from typing import List, Union, Optional
-from extra import utils
 
+# import.local
+from extra import utils
+from mysqldb import DatabaseCore
 
 class UserBabiesTable(commands.Cog):
     """ Class for the UserBabies table and its commands and methods. """

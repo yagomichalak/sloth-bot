@@ -1,28 +1,32 @@
+# import.standard
+import os
+from random import randint
+from typing import List
+
+# import.thirdparty
+import aiohttp
 import discord
 from discord import slash_command, user_command
 from discord.ext import commands, tasks
 
-from random import randint
-
-import os
-import aiohttp
-
-from typing import List
+# import.local
 from extra import utils
-from extra.slothclasses.player import Player
 from extra.misc.reminder import MemberReminderTable
+from extra.slothclasses.player import Player
 from mysqldb import DatabaseCore
 
-allowed_roles = [
-    int(os.getenv('OWNER_ROLE_ID', 123)), int(os.getenv('ADMIN_ROLE_ID', 123)), int(os.getenv('MOD_ROLE_ID', 123)), int(os.getenv('ASTROSLOTH_ROLE_ID', 123)), 
-    int(os.getenv('SLOTH_EXPLORER_ROLE_ID', 123)),int(os.getenv('SLOTH_NAPPER_ROLE_ID', 123)), int(os.getenv('SLOTH_NATION_ROLE_ID', 123)),
-    int(os.getenv('SLOTH_SUPPORTER_ROLE_ID', 123)), int(os.getenv('SLOTH_LOVERS_ROLE_ID', 123)),
-    ]
+# variables.id
 server_id = int(os.getenv('SERVER_ID', 123))
 guild_ids = [server_id]
 
-misc_cogs: List[commands.Cog] = [MemberReminderTable]
+# variables.role
+allowed_roles = [
+    int(os.getenv('OWNER_ROLE_ID', 123)), int(os.getenv('ADMIN_ROLE_ID', 123)), int(os.getenv('MOD_ROLE_ID', 123)), int(os.getenv('ASTROSLOTH_ROLE_ID', 123)), 
+    int(os.getenv('SLOTH_EXPLORER_ROLE_ID', 123)),int(os.getenv('SLOTH_NAPPER_ROLE_ID', 123)), int(os.getenv('SLOTH_NATION_ROLE_ID', 123)),
+    int(os.getenv('SLOTH_SUPPORTER_ROLE_ID', 123)),
+    ]
 
+misc_cogs: List[commands.Cog] = [MemberReminderTable]
 
 class Misc(*misc_cogs):
     """ Miscellaneous related commands. """

@@ -1,19 +1,23 @@
-import discord
-from extra import utils
-from discord.ext import commands
-from typing import List, Union, Optional, Dict, Any
-from .menu import ConfirmSkill
-from .select import ReportSupportSelect, ReportStaffSelect
-from .modals import (
-    ModeratorApplicationModal, TeacherApplicationModal,
-    EventHostApplicationModal, DebateManagerApplicationModal,
-    BootcampFeedbackModal
-)
+# import.standard
+import json
 import os
 from functools import partial
-import json
 from pprint import pprint
+from typing import Any, Dict, List, Optional, Union
 
+# import.thirdparty
+import discord
+from discord.ext import commands
+
+# import.local
+from extra import utils
+from .menu import ConfirmSkill
+from .modals import (BootcampFeedbackModal, DebateManagerApplicationModal,
+                     EventHostApplicationModal, ModeratorApplicationModal,
+                     TeacherApplicationModal)
+from .select import ReportStaffSelect, ReportSupportSelect
+
+# variables.role
 mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID', 123))
 analyst_debugger_role_id: int = int(os.getenv('ANALYST_DEBUGGER_ROLE_ID', 123))

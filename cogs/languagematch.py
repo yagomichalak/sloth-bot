@@ -1,8 +1,10 @@
+# import.standard
+import random
+from typing import Any, List
+
+# import.thirdparty
 import discord
 from discord.ext import commands, tasks
-from typing import List, Any
-import random
-
 
 class LanguageMatch(commands.Cog):
     """ Class for the language match feature. """
@@ -27,7 +29,6 @@ class LanguageMatch(commands.Cog):
 
         filtered_members = list(filter(filter_fnc, members))
         return random.choice(filtered_members)
-
 
 def setup(client: commands.Bot) -> None:
     """ Cog's setup function. """

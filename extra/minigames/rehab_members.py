@@ -1,9 +1,13 @@
-from discord.ext import commands
-from mysqldb import DatabaseCore
+# import.standard
 from typing import Tuple
-from extra.customerrors import StillInRehabError
-from extra import utils
 
+# import.thirdparty
+from discord.ext import commands
+
+# import.local
+from extra import utils
+from extra.customerrors import StillInRehabError
+from mysqldb import DatabaseCore
 
 class RehabMembersTable(commands.Cog):
     """ Class for managing the RehabMembers table in the database. """

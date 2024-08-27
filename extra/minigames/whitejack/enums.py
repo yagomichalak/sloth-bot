@@ -1,5 +1,8 @@
-import discord
+# import.standard
 import enum
+
+# import.thirdparty
+import discord
 
 class EmbedColorEnum(enum.Enum):
     """ Class for the WhiteJack's embed's color enum. """

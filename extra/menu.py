@@ -1,7 +1,10 @@
+# import.standard
+import asyncio
+from typing import Any, Dict, List, Optional, Union
+
+# import.thirdparty
 import discord
 from discord.ext import commands, menus
-from typing import Union, List, Dict, Optional, Any
-import asyncio
 
 class ConfirmSkill(menus.Menu):
     """ Class related to confirmation skill actions. """

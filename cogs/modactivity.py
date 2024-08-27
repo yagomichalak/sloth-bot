@@ -1,15 +1,22 @@
+# import.standard
+import os
+
+# import.thirdparty
 import discord
 from discord.ext import commands
-from mysqldb import DatabaseCore
-import os
+
+# import.local
 from extra import utils
 from extra.moderation.modactivity import ModActivityTable
 from extra.prompt.menu import ConfirmButton
+from mysqldb import DatabaseCore
 
-senior_mod_role_id: int = int(os.getenv('SENIOR_MOD_ROLE_ID', 123))
-mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
+# variables.id
 guild_id = int(os.getenv('SERVER_ID', 123))
 
+# variables.role
+senior_mod_role_id: int = int(os.getenv('SENIOR_MOD_ROLE_ID', 123))
+mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 
 class ModActivity(ModActivityTable):
     """ A cog related to the Moderators' activity. """

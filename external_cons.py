@@ -1,8 +1,11 @@
-import praw
+# import.standard
 import os
+from typing import Any
+
+# import.thirdparty
+import praw
 from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
-from typing import Any
 
 async def the_reddit() -> Any:
     """ Gets the Reddit connection. """

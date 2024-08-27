@@ -8,7 +8,6 @@ class Emojis:
     ok_hand = ":ok_hand:"
     hand_raised = "\U0001F64B"
 
-
     number_emojis = {
         1: "\u0031\ufe0f\u20e3",
         2: "\u0032\ufe0f\u20e3",

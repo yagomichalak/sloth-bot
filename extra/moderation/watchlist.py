@@ -1,13 +1,20 @@
-import discord
-from discord.ext import commands
-from mysqldb import DatabaseCore
+# import.standard
 import os
-from extra import utils
 from typing import List, Optional, Union
 
-allowed_roles = [int(os.getenv('OWNER_ROLE_ID', 123)), int(os.getenv('ADMIN_ROLE_ID', 123)), int(os.getenv('MOD_ROLE_ID', 123))]
-mod_log_id = int(os.getenv('MOD_LOG_CHANNEL_ID', 123))
+# import.thirdparty
+import discord
+from discord.ext import commands
 
+# import.local
+from extra import utils
+from mysqldb import DatabaseCore
+
+# variables.role
+allowed_roles = [int(os.getenv('OWNER_ROLE_ID', 123)), int(os.getenv('ADMIN_ROLE_ID', 123)), int(os.getenv('MOD_ROLE_ID', 123))]
+
+# variables.textchannel
+mod_log_id = int(os.getenv('MOD_LOG_CHANNEL_ID', 123))
 
 class ModerationWatchlistTable(commands.Cog):
 

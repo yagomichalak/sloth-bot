@@ -1,15 +1,17 @@
+from typing import List
+
 import discord
 from discord.ext import commands
+
 from cogs.slothcurrency import SlothCurrency
-from extra.slothclasses.player import Player
-from extra.slothclasses.view import (
-    HugView, BootView, KissView, SlapView, 
-    HoneymoonView, PunchView, GiveView, TickleView,
-    YeetView, BegView, PatView, WhisperView,
-    HandshakeView, PeekView, DriveOverView, HighFiveView
-)
 from extra import utils
 from extra.prompt.menu import ConfirmButton
+from extra.slothclasses.player import Player
+from extra.slothclasses.view import (BegView, BootView, DriveOverView,
+                                     GiveView, HandshakeView, HighFiveView,
+                                     HoneymoonView, HugView, KissView, PatView,
+                                     PeekView, PunchView, SlapView, TickleView,
+                                     WhisperView, YeetView)
 
 class RolePlay(commands.Cog):
     """ Category for roleplaying commands. """

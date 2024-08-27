@@ -1,8 +1,12 @@
-import discord
-from discord.ext import commands
-from mysqldb import DatabaseCore
+# import.standard
 from typing import List, Union
 
+# import.thirdparty
+import discord
+from discord.ext import commands
+
+# import.local
+from mysqldb import DatabaseCore
 
 class MembersScoreTable(commands.Cog):
     """ Class for the MembersScore table in the database. """

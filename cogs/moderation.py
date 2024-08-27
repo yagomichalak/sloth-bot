@@ -1,33 +1,35 @@
+# import.standard
+import asyncio
+import os
+from datetime import datetime
+from typing import Any, Dict, List, Optional, Tuple, Union
+
+# import.thirdparty
 import discord
 from discord import user_command
-from discord.ext import commands, tasks, menus
-import asyncio
-from mysqldb import DatabaseCore
-from datetime import datetime
-from typing import List, Union, Optional, Dict, Tuple, Any
-import os
+from discord.ext import commands, menus, tasks
 
-from extra.useful_variables import banned_links
-from extra.prompt.menu import Confirm
-from extra.view import ReportSupportView
+# import.local
 from extra import utils
 from extra.menu import MemberSnipeLooping, SnipeLooping
-
-from extra.moderation.firewall import ModerationFirewallTable, BypassFirewallTable
+from extra.moderation.fakeaccounts import ModerationFakeAccountsTable
+from extra.moderation.firewall import (BypassFirewallTable,
+                                       ModerationFirewallTable)
+from extra.moderation.moderatednicknames import ModeratedNicknamesTable
 from extra.moderation.mutedmember import ModerationMutedMemberTable
+from extra.moderation.user_muted_galaxies import UserMutedGalaxiesTable
 from extra.moderation.userinfractions import ModerationUserInfractionsTable
 from extra.moderation.watchlist import ModerationWatchlistTable
-from extra.moderation.fakeaccounts import ModerationFakeAccountsTable
-from extra.moderation.moderatednicknames import ModeratedNicknamesTable
-from extra.moderation.user_muted_galaxies import UserMutedGalaxiesTable
+from extra.prompt.menu import Confirm
+from extra.useful_variables import banned_links
+from extra.view import ReportSupportView
+from mysqldb import DatabaseCore
 
-# IDs
-mod_log_id = int(os.getenv('MOD_LOG_CHANNEL_ID', 123))
-welcome_channel_id = int(os.getenv('WELCOME_CHANNEL_ID', 123))
-suspect_channel_id = int(os.getenv('SUSPECT_CHANNEL_ID', 123))
+# variables.id
+server_id = int(os.getenv('SERVER_ID', 123))
+guild_ids: List[int] = [server_id]
 
-last_deleted_message = []
-
+# variables.role
 sponsor_role_id = int(os.getenv('SPONSOR_ROLE_ID', 123))
 mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 muted_role_id = int(os.getenv('MUTED_ROLE_ID', 123))
@@ -37,12 +39,12 @@ senior_mod_role_id: int = int(os.getenv('SENIOR_MOD_ROLE_ID', 123))
 admin_role_id: int = int(os.getenv('ADMIN_ROLE_ID', 123))
 analyst_debugger_role_id: int = int(os.getenv('ANALYST_DEBUGGER_ROLE_ID', 123))
 allowed_roles = [int(os.getenv('OWNER_ROLE_ID', 123)), admin_role_id, senior_mod_role_id, mod_role_id]
-unverified_role_id = int(os.getenv('UNVERIFIED_ROLE_ID', 123))
-join_the_server_channel_id = int(os.getenv('JOIN_THE_SERVER_CHANNEL_ID', 123))
+
+# variables.textchannel
+mod_log_id = int(os.getenv('MOD_LOG_CHANNEL_ID', 123))
 error_log_channel_id = int(os.getenv('ERROR_LOG_CHANNEL_ID', 123))
 
-server_id = int(os.getenv('SERVER_ID', 123))
-guild_ids: List[int] = [server_id]
+last_deleted_message = []
 
 moderation_cogs: List[commands.Cog] = [
     ModerationFirewallTable, BypassFirewallTable, ModerationMutedMemberTable, 
@@ -286,38 +288,9 @@ class Moderation(*moderation_cogs):
         if member.bot:
             return
 
-        # User timestamp
-        the_time = member.created_at
-        timestamp = datetime.timestamp(the_time)
-        # Actual timestamp
-        time_now = await utils.get_timestamp()
-        account_age = round((time_now - timestamp)/86400)
-
         if await self.get_muted_roles(member.id):
             muted_role = discord.utils.get(member.guild.roles, id=muted_role_id)
             await member.add_roles(muted_role)
-            welcome_channel = discord.utils.get(member.guild.channels, id=welcome_channel_id)
-            await welcome_channel.send(f"**Stop right there, {member.mention}! ✋ You were muted, left and rejoined the server, but that won't work!**")
-
-        if account_age <= 120:
-            if await self.get_firewall_state():
-                if not await self.get_bypass_firewall_user(member.id):
-                    try:
-                        unverified_role = discord.utils.get(member.guild.roles, id=unverified_role_id)
-                        await member.add_roles(unverified_role)
-                    except:
-                        pass
-                    else:
-                        join_the_server_channel = discord.utils.get(member.guild.text_channels, id=join_the_server_channel_id)
-                        msg = await join_the_server_channel.send(member.mention)
-                        await msg.delete()
-                    return
-                else:
-                    await self.delete_bypass_firewall_user(member.id)
-
-        if account_age <= 2:
-            suspect_channel = discord.utils.get(member.guild.channels, id=suspect_channel_id)
-            await suspect_channel.send(f"🔴 Alert! Possible fake account: {member.mention} joined the server. Account was just created.\nAccount age: {account_age} day(s)!")
 
     @commands.Cog.listener()
     async def on_message_delete(self, message):
@@ -432,16 +405,8 @@ class Moderation(*moderation_cogs):
         """ (MOD) Clears the whole channel. """
 
         special_channels = {
-        int(os.getenv('MUTED_CHANNEL_ID', 123)): 'https://cdn.discordapp.com/attachments/746478846466981938/748605295122448534/Muted.png',
-        int(os.getenv('QUESTION_CHANNEL_ID', 123)): '''**Would you like to ask us a question about the server? Ask them there!**
-    `Questions will be answered and deleted immediately.`''',
-        int(os.getenv('SUGGESTION_CHANNEL_ID', 123)): '''**Would you like to suggest a feature for the server? Please follow this template to submit your feature request**
-
-    **Suggestion:**
-    `A short idea name/description`
-
-    **Explanation:**
-    `Explain the feature in detail and including reasons why you would like this feature to be implemented.`'''
+            int(os.getenv('MUTED_CHANNEL_ID', 123)): 'https://cdn.discordapp.com/attachments/746478846466981938/748605295122448534/Muted.png',
+            int(os.getenv('QUESTION_CHANNEL_ID', 123)): '''**Have a question about the server? Ask it here!**'''
         }
 
         if ctx.channel.id not in special_channels.keys():

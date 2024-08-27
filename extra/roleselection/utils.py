@@ -1,4 +1,7 @@
+# import.standard
 from functools import partial
+
+# import.thirdparty
 import discord
 
 async def callback(button, interaction) -> None:

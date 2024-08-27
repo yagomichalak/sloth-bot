@@ -1,10 +1,10 @@
+# import.standard
+import asyncio
+from typing import Dict, List, Optional, Tuple
+
+# import.thirdparty
 import discord
 from discord.ext import commands
-
-from typing import Dict, List, Tuple, Optional
-
-import asyncio
-
 
 class TicTacToeButton(discord.ui.Button):
     """ Button for the TicTacToe game. """

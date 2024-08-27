@@ -1,14 +1,19 @@
+# import.standard
+import asyncio
+import os
+from datetime import datetime
+from typing import Dict, List, Union
+
+# import.thirdparty
 import discord
 from discord.ext import commands
 from discord.utils import escape_mentions
-from typing import List, Union, Dict
+
+# import.local
 from mysqldb import DatabaseCore
-import asyncio
-from datetime import datetime
-import os
 
+# variables.role
 allowed_roles = [int(os.getenv('OWNER_ROLE_ID', 123)), int(os.getenv('ADMIN_ROLE_ID', 123)), int(os.getenv('MOD_ROLE_ID', 123))]
-
 
 class EmbedManagement(commands.Cog):
     """ A category for managing embeds; show, create, delete and edit. """
