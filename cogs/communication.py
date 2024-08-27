@@ -66,7 +66,7 @@ class Communication(*tool_cogs):
 
     # Says something by using the bot
     @commands.command()
-    @utils.is_allowed([*allowed_roles, lesson_manager_role_id, event_manager_role_id], throw_exc=True)
+    @utils.is_allowed([*allowed_roles, lesson_manager_role_id, real_event_manager_role_id], throw_exc=True)
     async def say(self, ctx):
         """ (MOD) Makes the bot say something. """
 
@@ -103,7 +103,7 @@ class Communication(*tool_cogs):
 
     # Replies a message by using the bot
     @commands.command()
-    @utils.is_allowed([*allowed_roles, lesson_manager_role_id, event_manager_role_id], throw_exc=True)
+    @utils.is_allowed([*allowed_roles, lesson_manager_role_id, real_event_manager_role_id], throw_exc=True)
     async def reply(self, ctx, message_id : int = None, *, text : str = None):
         """ (Mod) Replies a message with the bot.
         :param message_id: The message id to reply.
@@ -244,6 +244,7 @@ If you have any questions feel free to ask! And if you experience any type of pr
         dm_embed.set_author(name=member, icon_url=member.display_avatar)
         dm_embed.set_footer(text=f"Sent by: {author}", icon_url=author.display_avatar)
         await demote_log.send(embed=dm_embed)
+
 
 def setup(client):
     """ Cog's setup function. """

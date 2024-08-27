@@ -808,7 +808,7 @@ class Moderation(*moderation_cogs):
 
         return removed_grooms
 
-    @commands.command(name="mute", aliases=["shutup", "shut_up", "stfu", "zitto", "zitta", "shh", "tg", "ta_gueule", "tagueule", "mutado", "xiu", "calaboca", "callate"])
+    @commands.command(name="mute", aliases=["shutup", "shut_up", "stfu", "zitto", "zitta", "shh", "tg", "ta_gueule", "tagueule", "mutado", "xiu", "calaboca", "callate", "calma_calabreso"])
     @utils.is_allowed(allowed_roles, throw_exc=True)
     async def _mute_command(self, ctx, *, message : str = None) -> None:
         """(MOD) Mutes one or more members.
@@ -1048,7 +1048,7 @@ class Moderation(*moderation_cogs):
             pass
             
     # Mutes a member temporarily
-    @commands.command()
+    @commands.command(aliases=["arab"])
     @utils.is_allowed(allowed_roles, throw_exc=True)
     async def tempmute(self, ctx, member: discord.Member = None, reason: str = None, *, time: str = None):
         """ Mutes a member for a determined amount of time.
@@ -1533,7 +1533,7 @@ We appreciate your understanding and look forward to hearing from you. """, embe
                 user_id=member.id, infr_type="softban", reason=reason,
                 timestamp=current_ts, perpetrator=ctx.author.id)
 
-    @commands.command(aliases=['nitrokick', 'nitro'])
+    @commands.command(aliases=['nitrokick', 'nitro', 'scam', 'phish', 'phishing'])
     @utils.is_allowed(allowed_roles, throw_exc=True)
     async def nitro_kick(self, ctx, member: Optional[discord.Member] = None) -> None:
         """ (ModTeam/ADM) Mutes & Softbans a member from the server who's posting Nitro scam links.
