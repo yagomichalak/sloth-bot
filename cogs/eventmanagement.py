@@ -19,6 +19,7 @@ admin_role_id = int(os.getenv('ADMIN_ROLE_ID', 123))
 owner_role_id = int(os.getenv('OWNER_ROLE_ID', 123))
 event_host_role_id = int(os.getenv('EVENT_HOST_ROLE_ID', 123))
 event_manager_role_id = int(os.getenv('EVENT_MANAGER_ROLE_ID', 123))
+debate_organizer_role_id = int(os.getenv('DEBATE_ORGANIZER_ROLE_ID', 123))
 preference_role_id = int(os.getenv('PREFERENCE_ROLE_ID', 123))
 
 class EventManagement(EventRoomsTable):
@@ -631,6 +632,87 @@ class EventManagement(EventRoomsTable):
             await member.send(f"**You have been promoted to `Event Host`**")
         except:
             pass
+
+    @commands.command(aliases=['ddo'])
+    @utils.is_allowed([owner_role_id, admin_role_id, event_manager_role_id], throw_exc=True)
+    async def demote_debate_organizer(self, ctx, member: discord.Member = None) -> None:
+        """ Demotes a debate organizer to a regular user.
+        :param member: The host that is going to be demoted. """
+
+        if not member:
+            return await ctx.send("**Please, inform a member to demote to a regular user!**")
+
+        author: discord.Member = ctx.author
+
+        debate_organizer = discord.utils.get(ctx.guild.roles, id=debate_organizer_role_id)
+        if debate_organizer not in member.roles:
+            return await ctx.send(f"**{member.mention} is not even a `Debate Organizer`!**")
+
+        try:
+            await member.remove_roles(debate_organizer)
+        except:
+            pass
+
+        # General log
+        demote_embed = discord.Embed(
+            title="__Debate Organizer Demotion__",
+            description=f"{member.mention} has been demoted from a `Debate Organizer` to `regular user` by {author.mention}",
+            color=discord.Color.dark_red(),
+            timestamp=ctx.message.created_at
+        )
+        await ctx.send(embed=demote_embed)
+
+        # Moderation log
+        if demote_log := discord.utils.get(ctx.guild.text_channels, id=int(os.getenv('PROMOTE_DEMOTE_LOG_ID', 123))):
+            demote_embed.set_author(name=member, icon_url=member.display_avatar)
+            demote_embed.set_footer(text=f"Demoted by {author}", icon_url=author.display_avatar)
+            await demote_log.send(embed=demote_embed)
+
+        try:
+            await member.send(f"**You have been demoted from a `Debate Organizer` to a regular user!**")
+        except:
+            pass
+    
+    @commands.command(aliases=['pdo'])
+    @utils.is_allowed([owner_role_id, admin_role_id, event_manager_role_id], throw_exc=True)
+    async def promote_debate_organizer(self, ctx, member: discord.Member = None) -> None:
+        """ Promotes a regular user to a debate organizer.
+        :param member: The user that is going to be promoted. """
+
+        if not member:
+            return await ctx.send("**Please, inform a member to promote to debate organizer!**")
+
+        author: discord.Member = ctx.author
+
+        debate_organizer = discord.utils.get(ctx.guild.roles, id=debate_organizer_role_id)
+        if debate_organizer in member.roles:
+            return await ctx.send(f"**{member.mention} already is a `Debate Organizer`!**")
+
+        try:
+            await member.add_roles(debate_organizer)
+        except:
+            pass
+
+        # General log
+        promote_embed = discord.Embed(
+            title="__Debate Organizer Promotion__",
+            description=f"{member.mention} has been promoted to `Debate Organizer` by {author.mention}",
+            color=discord.Color.dark_red(),
+            timestamp=ctx.message.created_at
+        )
+        await ctx.send(embed=promote_embed)
+
+        # Moderation log
+        if promote_log := discord.utils.get(ctx.guild.text_channels, id=int(os.getenv('PROMOTE_DEMOTE_LOG_ID', 123))):
+            promote_embed.set_author(name=member, icon_url=member.display_avatar)
+            promote_embed.set_footer(text=f"Promoted by {author}", icon_url=author.display_avatar)
+            await promote_log.send(embed=promote_embed)
+
+        try:
+            await member.send(f"**You have been promoted to `Debate Organizer`**")
+        except:
+            pass
+
 
 def setup(client) -> None:
     """ Cog's setup function. """
