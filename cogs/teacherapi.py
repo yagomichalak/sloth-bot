@@ -26,6 +26,10 @@ mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 lesson_manager_role_id = int(os.getenv('LESSON_MANAGEMENT_ROLE_ID', 123))
 allowed_roles = [owner_role_id, admin_role_id, mod_role_id]
 
+# variables.channel
+promote_demote_log_channel_id = int(os.getenv('PROMOTE_DEMOTE_LOG_ID', 123))
+
+
 class TeacherAPI(commands.Cog):
     """ (WIP) A category for using The Language Sloth's teacher's API,
     and some other useful commands related to it. """
@@ -282,6 +286,8 @@ class TeacherAPI(commands.Cog):
         """ Promotes a member to a teacher.
         :param member: The member that is gonna be promoted. """
 
+        author = ctx.author
+
         if not member:
             return await ctx.send("**Please, inform a member to promote to a teacher!**")
 
@@ -299,10 +305,12 @@ class TeacherAPI(commands.Cog):
             return await ctx.send(f"**{member.mention} is already a teacher on the website!**")
 
         await self._change_teacher_state(member.id, 1)
+
+        # Chat embed
         teacher_embed = discord.Embed(
             title=f"__Promoted!__",
             description=(
-                f"{member.mention} has been `promoted` to a teacher! "
+                f"{member.mention} has been **promoted** to a `Teacher`! "
                 f"Click [here]({self.website_link}/profile) to access your profile or in the button below."
                 ),
             color=member.color,
@@ -312,6 +320,26 @@ class TeacherAPI(commands.Cog):
         view = discord.ui.View()
         view.add_item(discord.ui.Button(style=5, label="Access Profile!", url=f"{self.website_link}/profile", emoji="🧑‍🏫"))
         await ctx.send(embed=teacher_embed, view=view)
+
+        # Log embed
+        demote_embed = discord.Embed(
+            title="__Teacher Promotion__",
+            description=f"{member.mention} has been promoted to a `Teacher` by {author.mention}",
+            color=discord.Color.green(),
+            timestamp=ctx.message.created_at
+        )
+
+        # Moderation log
+        if promote_log := discord.utils.get(ctx.guild.text_channels, id=promote_demote_log_channel_id):
+            demote_embed.set_author(name=member, icon_url=member.display_avatar)
+            demote_embed.set_footer(text=f"Promoted by {author}", icon_url=author.display_avatar)
+            await promote_log.send(embed=demote_embed)
+
+        # User message
+        try:
+            await member.send(f"**You have been promoted to a `Teacher`!**")
+        except:
+            pass
 
     @commands.command(aliases=['dt'])
     @utils.is_allowed([owner_role_id, admin_role_id, lesson_manager_role_id], throw_exc=True)
@@ -340,7 +368,7 @@ class TeacherAPI(commands.Cog):
         await self._change_teacher_state(member.id, 0)
         # General log
         demote_embed = discord.Embed(
-            title="__Demotion__",
+            title="__Teacher Demotion__",
             description=f"{member.mention} has been demoted from a `Teacher` to `regular user` by {author.mention}",
             color=discord.Color.dark_red(),
             timestamp=ctx.message.created_at
@@ -349,7 +377,7 @@ class TeacherAPI(commands.Cog):
         await ctx.send(embed=demote_embed)
 
         # Moderation log
-        if demote_log := discord.utils.get(ctx.guild.text_channels, id=int(os.getenv('PROMOTE_DEMOTE_LOG_ID', 123))):
+        if demote_log := discord.utils.get(ctx.guild.text_channels, id=promote_demote_log_channel_id):
             demote_embed.set_author(name=member, icon_url=member.display_avatar)
             demote_embed.set_footer(text=f"Demoted by {author}", icon_url=author.display_avatar)
             await demote_log.send(embed=demote_embed)
