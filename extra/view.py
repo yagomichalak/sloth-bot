@@ -27,12 +27,12 @@ sloth_subscriber_sub_id = int(os.getenv("SLOTH_SUBSCRIBER_SUB_ID", 123))
 class ReportSupportView(discord.ui.View):
     """ View for the ReportSupport menu. """
 
-    def __init__(self, client: commands.Bot) -> None:
+    def __init__(self, client: commands.Bot, cog: commands.Cog) -> None:
         """ Class init method. """
 
         super().__init__(timeout=None)
         self.client = client
-        self.cog = client.get_cog('ReportSupport')
+        self.cog = cog
         patreon_button = discord.ui.Button(style=5, label="Support us on Patreon!", url="https://www.patreon.com/Languagesloth", emoji="<:patreon:831401582426980422>", row=1)
         website_button = discord.ui.Button(style=5, label="Our website", url="https://languagesloth.com", emoji="<:Sloth:686237376510689327>", row=1)
         sub_button = discord.ui.Button(sku_id=sloth_subscriber_sub_id, row=2)
