@@ -22,6 +22,10 @@ event_manager_role_id = int(os.getenv('EVENT_MANAGER_ROLE_ID', 123))
 debate_organizer_role_id = int(os.getenv('DEBATE_ORGANIZER_ROLE_ID', 123))
 preference_role_id = int(os.getenv('PREFERENCE_ROLE_ID', 123))
 
+# variables.channel
+promote_demote_log_channel_id = int(os.getenv('PROMOTE_DEMOTE_LOG_ID', 123))
+
+
 class EventManagement(EventRoomsTable):
     """ A category for event related commands. """
 
@@ -583,7 +587,7 @@ class EventManagement(EventRoomsTable):
         await ctx.send(embed=demote_embed)
 
         # Moderation log
-        if demote_log := discord.utils.get(ctx.guild.text_channels, id=int(os.getenv('PROMOTE_DEMOTE_LOG_ID', 123))):
+        if demote_log := discord.utils.get(ctx.guild.text_channels, id=promote_demote_log_channel_id):
             demote_embed.set_author(name=member, icon_url=member.display_avatar)
             demote_embed.set_footer(text=f"Demoted by {author}", icon_url=author.display_avatar)
             await demote_log.send(embed=demote_embed)
@@ -617,13 +621,13 @@ class EventManagement(EventRoomsTable):
         promote_embed = discord.Embed(
             title="__Event Host Promotion__",
             description=f"{member.mention} has been promoted to `Event Host` by {author.mention}",
-            color=discord.Color.dark_red(),
+            color=discord.Color.green(),
             timestamp=ctx.message.created_at
         )
         await ctx.send(embed=promote_embed)
 
         # Moderation log
-        if promote_log := discord.utils.get(ctx.guild.text_channels, id=int(os.getenv('PROMOTE_DEMOTE_LOG_ID', 123))):
+        if promote_log := discord.utils.get(ctx.guild.text_channels, id=promote_demote_log_channel_id):
             promote_embed.set_author(name=member, icon_url=member.display_avatar)
             promote_embed.set_footer(text=f"Promoted by {author}", icon_url=author.display_avatar)
             await promote_log.send(embed=promote_embed)
@@ -663,7 +667,7 @@ class EventManagement(EventRoomsTable):
         await ctx.send(embed=demote_embed)
 
         # Moderation log
-        if demote_log := discord.utils.get(ctx.guild.text_channels, id=int(os.getenv('PROMOTE_DEMOTE_LOG_ID', 123))):
+        if demote_log := discord.utils.get(ctx.guild.text_channels, id=promote_demote_log_channel_id):
             demote_embed.set_author(name=member, icon_url=member.display_avatar)
             demote_embed.set_footer(text=f"Demoted by {author}", icon_url=author.display_avatar)
             await demote_log.send(embed=demote_embed)
@@ -697,13 +701,13 @@ class EventManagement(EventRoomsTable):
         promote_embed = discord.Embed(
             title="__Debate Organizer Promotion__",
             description=f"{member.mention} has been promoted to `Debate Organizer` by {author.mention}",
-            color=discord.Color.dark_red(),
+            color=discord.Color.green(),
             timestamp=ctx.message.created_at
         )
         await ctx.send(embed=promote_embed)
 
         # Moderation log
-        if promote_log := discord.utils.get(ctx.guild.text_channels, id=int(os.getenv('PROMOTE_DEMOTE_LOG_ID', 123))):
+        if promote_log := discord.utils.get(ctx.guild.text_channels, id=promote_demote_log_channel_id):
             promote_embed.set_author(name=member, icon_url=member.display_avatar)
             promote_embed.set_footer(text=f"Promoted by {author}", icon_url=author.display_avatar)
             await promote_log.send(embed=promote_embed)
