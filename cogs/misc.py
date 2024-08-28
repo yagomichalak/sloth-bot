@@ -23,7 +23,7 @@ guild_ids = [server_id]
 allowed_roles = [
     int(os.getenv('OWNER_ROLE_ID', 123)), int(os.getenv('ADMIN_ROLE_ID', 123)), int(os.getenv('MOD_ROLE_ID', 123)), int(os.getenv('ASTROSLOTH_ROLE_ID', 123)), 
     int(os.getenv('SLOTH_EXPLORER_ROLE_ID', 123)),int(os.getenv('SLOTH_NAPPER_ROLE_ID', 123)), int(os.getenv('SLOTH_NATION_ROLE_ID', 123)),
-    int(os.getenv('SLOTH_SUPPORTER_ROLE_ID', 123)),
+    int(os.getenv('SLOTH_SUPPORTER_ROLE_ID', 123)), int(os.getenv('BOOSTER_ROLE_ID', 123)),
     ]
 
 misc_cogs: List[commands.Cog] = [MemberReminderTable]

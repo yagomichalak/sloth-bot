@@ -40,7 +40,6 @@ class ReportSupportView(discord.ui.View):
         self.add_item(website_button)
         self.add_item(sub_button)
 
-
     @discord.ui.button(label="Apply for Teacher!", style=3, custom_id=f"apply_to_teach", emoji="🧑‍🏫", row=0)
     async def apply_to_teach_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
         """ Button for starting the Teacher application. """
