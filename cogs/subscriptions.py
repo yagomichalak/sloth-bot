@@ -93,7 +93,7 @@ class Subscriptions(commands.Cog):
             description=f"**{member.mention} just became a `Sloth Subscriber`.**",
             color=discord.Color.green(),
         )
-        embed.set_thumbnail(url=guild.icon.url)
+        embed.set_thumbnail(url=member.display_avatar)
         await sloth_sub_log.send(embed=embed)
 
     @commands.Cog.listener()
