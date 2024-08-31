@@ -654,7 +654,7 @@ class Moderation(*moderation_cogs):
         except:
             pass
     
-    @tasks.loop(minutes=10)
+    @tasks.loop(minutes=3)
     async def check_timeouts_expirations(self) -> None:
         """ Task that checks Timeouts expirations. """
         
@@ -664,10 +664,8 @@ class Moderation(*moderation_cogs):
         
         for member in members:
             try:
-                current_ts = await utils.get_timestamp()
                 timeout_time = member.communication_disabled_until
-                timeout_ts = datetime.timestamp(timeout_time)
-                if timeout_ts < current_ts:
+                if timeout_time == None:
                     await member.remove_roles(role)
             except Exception as e:
                 print(e)
