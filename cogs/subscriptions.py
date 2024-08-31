@@ -52,7 +52,7 @@ class Subscriptions(commands.Cog):
             status_text = f"{patrons} patrons."
 
         elif next_status == "sloth-subscribers":
-            subs = [et for et in await self.client.entitlements().flatten() if et.type == EntitlementType.application_subscription]
+            subs = list(set([et.user_id for et in await self.client.entitlements().flatten() if et.type == EntitlementType.application_subscription]))
             status_text = f"{len(subs)} Sloth bot subs."
 
         elif next_status == "teachers":
