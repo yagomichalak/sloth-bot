@@ -2368,9 +2368,9 @@ We appreciate your understanding and look forward to hearing from you. """, embe
                     await agent_channel.set_permissions(member, view_channel=True, send_messages=True)
                     await ctx.send(f"**{member.mention} has been added as an agent, {author.mention}!**")
                 else:
-                    await ctx.send(f"**This member ({member.mention}) is already an agent, {author.mention}!**")
+                    await ctx.send(f"**{member.mention} is already an agent, {author.mention}!**")
             else:
-                await ctx.send(f"**You are using this command in the wrong room, {author.mention}!**")
+                await ctx.send(f"**{author.mention}, you can only use this this command in {ctx.channel.mention}!**")
                 break
 
     @commands.command(aliases=['ra', 'revoke_agent'])
@@ -2398,9 +2398,9 @@ We appreciate your understanding and look forward to hearing from you. """, embe
                     await agent_channel.set_permissions(member, overwrite=None)
                     await ctx.send(f"**{member.mention} is no longer an agent, {author.mention}!**")
                 else:
-                    await ctx.send(f"**This member ({member.mention}) is already not an agent, {author.mention}!**")
+                    await ctx.send(f"**{member.mention} is already not an agent, {author.mention}!**")
             else:
-                await ctx.send(f"**You are using this command in the wrong room, {author.mention}!**")
+                await ctx.send(f"**{author.mention}, you can only use this this command in {ctx.channel.mention}!**")
                 break
 
     @commands.command()
