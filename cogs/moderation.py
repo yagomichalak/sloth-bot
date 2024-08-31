@@ -42,6 +42,7 @@ allowed_roles = [int(os.getenv('OWNER_ROLE_ID', 123)), admin_role_id, senior_mod
 
 # variables.textchannel
 mod_log_id = int(os.getenv('MOD_LOG_CHANNEL_ID', 123))
+secret_agent_channel_id = int(os.getenv('SECRET_AGENTS_CHANNEL_ID', 123))
 error_log_channel_id = int(os.getenv('ERROR_LOG_CHANNEL_ID', 123))
 
 last_deleted_message = []
@@ -2341,6 +2342,66 @@ We appreciate your understanding and look forward to hearing from you. """, embe
             return await ctx.send("**There is no muted members**")
 
         await self.infractions(context=ctx, message=' '.join(muted_members))
+
+    @commands.command(aliases=['aa', 'assign_agent'])
+    @utils.is_allowed(allowed_roles, throw_exc=True)
+    async def assign_secret_agent(self, ctx, *, message : str = None) -> None:
+
+        author = ctx.author
+        is_admin = author.guild_permissions.administrator
+        agent_channel = self.client.get_channel(secret_agent_channel_id)
+
+        try:
+            await ctx.message.delete()
+        except:
+            pass
+
+        members, _ = await utils.greedy_member_reason(ctx, message)
+
+        if not members:
+            return await ctx.send(f"**Please, inform a member, {author.mention}!**")
+
+        for member in members:
+            perms = agent_channel.permissions_for(member)
+            if is_admin or ctx.channel.id == secret_agent_channel_id:
+                if not perms.view_channel:
+                    await agent_channel.set_permissions(member, view_channel=True, send_messages=True)
+                    await ctx.send(f"**{member.mention} has been added as an agent, {author.mention}!**")
+                else:
+                    await ctx.send(f"**This member ({member.mention}) is already an agent, {author.mention}!**")
+            else:
+                await ctx.send(f"**You are using this command in the wrong room, {author.mention}!**")
+                break
+
+    @commands.command(aliases=['ra', 'revoke_agent'])
+    @utils.is_allowed(allowed_roles, throw_exc=True)
+    async def revoke_secret_agent(self, ctx, *, message : str = None) -> None:
+
+        author = ctx.author
+        is_admin = author.guild_permissions.administrator
+        agent_channel = self.client.get_channel(secret_agent_channel_id)
+
+        try:
+            await ctx.message.delete()
+        except:
+            pass
+
+        members, _ = await utils.greedy_member_reason(ctx, message)
+
+        if not members:
+            return await ctx.send(f"**Please, inform a member, {author.mention}!**")
+
+        for member in members:
+            perms = agent_channel.permissions_for(member)
+            if is_admin or ctx.channel.id == secret_agent_channel_id:
+                if perms.view_channel:
+                    await agent_channel.set_permissions(member, overwrite=None)
+                    await ctx.send(f"**{member.mention} is no longer an agent, {author.mention}!**")
+                else:
+                    await ctx.send(f"**This member ({member.mention}) is already not an agent, {author.mention}!**")
+            else:
+                await ctx.send(f"**You are using this command in the wrong room, {author.mention}!**")
+                break
 
     @commands.command()
     @utils.not_ready()
