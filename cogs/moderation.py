@@ -2346,6 +2346,8 @@ We appreciate your understanding and look forward to hearing from you. """, embe
     @commands.command(aliases=['aa', 'assign_agent'])
     @utils.is_allowed(allowed_roles, throw_exc=True)
     async def assign_secret_agent(self, ctx, *, message : str = None) -> None:
+        """ Assigns member(s) as secret agent(s).
+        :param member: The member(s) to assign. """
 
         author = ctx.author
         is_admin = author.guild_permissions.administrator
@@ -2376,6 +2378,8 @@ We appreciate your understanding and look forward to hearing from you. """, embe
     @commands.command(aliases=['ra', 'revoke_agent'])
     @utils.is_allowed(allowed_roles, throw_exc=True)
     async def revoke_secret_agent(self, ctx, *, message : str = None) -> None:
+        """ Revokes secret agent status from member(s).
+        :param member: The member(s) to revoke. """
 
         author = ctx.author
         is_admin = author.guild_permissions.administrator
