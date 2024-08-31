@@ -142,72 +142,72 @@ class TeacherFeedback(commands.Cog):
             if await self.db.get_student_by_vc_id(member.id, the_class[2]):
                 await self.db.update_student_messages(member.id, the_class[2])
 
-    @commands.Cog.listener(name="on_voice_state_update")
-    async def on_voice_state_update_private(self, member, before, after) -> None:
-        """ For teachers to create private classes. """
+    # @commands.Cog.listener(name="on_voice_state_update")
+    # async def on_voice_state_update_private(self, member, before, after) -> None:
+    #     """ For teachers to create private classes. """
 
-        cog = self.client.get_cog('CreateSmartRoom')
+    #     cog = self.client.get_cog('CreateSmartRoom')
 
-        # # Checks if the user is leaving the vc and whether there still are people in there
-        guild = member.guild
+    #     # # Checks if the user is leaving the vc and whether there still are people in there
+    #     guild = member.guild
 
-        # Checks whether user is leaving their private class
-        if before.channel:
-            if not before.channel.category: return
+    #     # Checks whether user is leaving their private class
+    #     if before.channel:
+    #         if not before.channel.category: return
 
-            if before.channel.category.id == create_room_cat_id:
-                user_voice_channel = before.channel
-                len_users = len(user_voice_channel.members)
-                if len_users == 0 and user_voice_channel.id not in [create_room_vc_id, create_private_room_vc_id]:
+    #         if before.channel.category.id == create_room_cat_id:
+    #             user_voice_channel = before.channel
+    #             len_users = len(user_voice_channel.members)
+    #             if len_users == 0 and user_voice_channel.id not in [create_room_vc_id, create_private_room_vc_id]:
 
-                    private_rooms = await cog.get_premium_vc(before.channel.id)
-                    if private_rooms:
+    #                 private_rooms = await cog.get_premium_vc(before.channel.id)
+    #                 if private_rooms:
 
-                        private_vc = discord.utils.get(guild.voice_channels, id=private_rooms[0][1]) # Vc channel
-                        private_txt = discord.utils.get(guild.text_channels, id=private_rooms[0][2]) # Txt channel
+    #                     private_vc = discord.utils.get(guild.voice_channels, id=private_rooms[0][1]) # Vc channel
+    #                     private_txt = discord.utils.get(guild.text_channels, id=private_rooms[0][2]) # Txt channel
 
-                        try:
-                            await user_voice_channel.delete()
-                            await private_txt.delete()
-                        except:
-                            pass
-                        finally:
-                            await cog.delete_premium_vc(member.id, user_voice_channel.id)
+    #                     try:
+    #                         await user_voice_channel.delete()
+    #                         await private_txt.delete()
+    #                     except:
+    #                         pass
+    #                     finally:
+    #                         await cog.delete_premium_vc(member.id, user_voice_channel.id)
 
-        if not after.channel:
-            return
+    #     if not after.channel:
+    #         return
 
-        # Checks if the user is joining the create a room VC
-        if after.channel.id == create_private_room_vc_id:
+    #     # Checks if the user is joining the create a room VC
+    #     if after.channel.id == create_private_room_vc_id:
 
-            # Creates base overwrites for rooms (Txt and Vc)
-            overwrites: Dict[
-                Union[discord.Member, discord.Role],
-                discord.PermissionOverwrite
-            ] = {
-                guild.default_role: discord.PermissionOverwrite(
-				    read_messages=False, send_messages=False, connect=False, speak=False, view_channel=False),
-                member: discord.PermissionOverwrite(
-                    manage_permissions=True, read_messages=True, send_messages=True, view_channel=True, manage_channels=True,
-                    connect=True, speak=True)
-            }
+    #         # Creates base overwrites for rooms (Txt and Vc)
+    #         overwrites: Dict[
+    #             Union[discord.Member, discord.Role],
+    #             discord.PermissionOverwrite
+    #         ] = {
+    #             guild.default_role: discord.PermissionOverwrite(
+	# 			    read_messages=False, send_messages=False, connect=False, speak=False, view_channel=False),
+    #             member: discord.PermissionOverwrite(
+    #                 manage_permissions=True, read_messages=True, send_messages=True, view_channel=True, manage_channels=True,
+    #                 connect=True, speak=True)
+    #         }
 
-            class_category = discord.utils.get(guild.categories, id=create_room_cat_id)
+    #         class_category = discord.utils.get(guild.categories, id=create_room_cat_id)
 
-            # Creates Voice Channel
-            private_vc: discord.VoiceChannel = await class_category.create_voice_channel(
-                name=f"{member.display_name}'s Private Room", user_limit=2, overwrites=overwrites
-            )
-            # Creates Text Channel
-            private_txt: discord.TextChannel = await class_category.create_text_channel(
-                name=f"{member.display_name}'s Private Room", overwrites=overwrites
-            )
+    #         # Creates Voice Channel
+    #         private_vc: discord.VoiceChannel = await class_category.create_voice_channel(
+    #             name=f"{member.display_name}'s Private Room", user_limit=2, overwrites=overwrites
+    #         )
+    #         # Creates Text Channel
+    #         private_txt: discord.TextChannel = await class_category.create_text_channel(
+    #             name=f"{member.display_name}'s Private Room", overwrites=overwrites
+    #         )
 
-            await cog.insert_premium_vc(member.id, private_vc.id, private_txt.id)
-            try:
-                await member.move_to(private_vc)
-            finally:
-                await private_txt.send(f"**Welcome to your private room, {member.mention} ({private_vc.mention})!**")
+    #         await cog.insert_premium_vc(member.id, private_vc.id, private_txt.id)
+    #         try:
+    #             await member.move_to(private_vc)
+    #         finally:
+    #             await private_txt.send(f"**Welcome to your private room, {member.mention} ({private_vc.mention})!**")
 
     @commands.Cog.listener(name="on_voice_state_update")
     async def on_voice_state_update_public(self, member, before, after) -> None:
