@@ -43,6 +43,7 @@ allowed_roles = [int(os.getenv('OWNER_ROLE_ID', 123)), admin_role_id, senior_mod
 # variables.textchannel
 mod_log_id = int(os.getenv('MOD_LOG_CHANNEL_ID', 123))
 error_log_channel_id = int(os.getenv('ERROR_LOG_CHANNEL_ID', 123))
+watchlist_disallowed_channels = [int(os.getenv('MUTED_CHANNEL_ID', 123))]
 
 last_deleted_message = []
 
@@ -1882,6 +1883,8 @@ We appreciate your understanding and look forward to hearing from you. """, embe
         """ Shows all infractions of a specific user.
         :param member: The member to show the infractions from. [Optional] [Default = You] """
 
+        allowed_room_and_user = ctx.channel.id not in watchlist_disallowed_channels and any(role.id in allowed_roles for role in ctx.author.roles)
+
         try:
             await ctx.message.delete()
         except:
@@ -1905,6 +1908,11 @@ We appreciate your understanding and look forward to hearing from you. """, embe
                 softbans = len([sb for sb in user_infractions if sb[1] == 'softban'])
                 hackbans = len([hb for hb in user_infractions if hb[1] == 'hackban'])
                 wl_entries = len([wl for wl in user_infractions if wl[1] == 'watchlist'])
+
+                non_wl_infractions = lwarns + warns + hwarns + mutes + kicks + bans + softbans + hackbans
+                if not allowed_room_and_user and not non_wl_infractions and wl_entries:
+                    await ctx.send(f"**<@{member.id}> doesn't have any existent infractions or watchlist entries!**")
+                    continue
             else:
                 await ctx.send(f"**<@{member.id}> doesn't have any existent infractions or watchlist entries!**")
                 continue
@@ -1942,6 +1950,8 @@ We appreciate your understanding and look forward to hearing from you. """, embe
                 extra_line = "\n\u200b" if infr_type != next_infr_type else ""
 
                 if infr_type == "watchlist":
+                    if not allowed_room_and_user: continue
+
                     if first_watchlist:
                         embed.add_field(
                             name="Watchlist",
