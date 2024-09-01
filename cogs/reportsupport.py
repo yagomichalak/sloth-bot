@@ -66,7 +66,7 @@ class ReportSupport(*report_support_classes):
     @commands.Cog.listener()
     async def on_ready(self) -> None:
 
-        self.client.add_view(view=ReportSupportView(self.client, self))
+        self.client.add_view(view=ReportSupportView(self.client))
         self.check_inactive_cases.start()
         print('ReportSupport cog is online!')
 
@@ -724,7 +724,7 @@ class ReportSupport(*report_support_classes):
         embed.set_author(name=self.client.user.display_name, url=self.client.user.display_avatar, icon_url=self.client.user.display_avatar)
         embed.set_thumbnail(url=guild.icon.url)
         embed.set_footer(text=guild.name, icon_url=guild.icon.url)
-        view = ReportSupportView(self.client, self)
+        view = ReportSupportView(self.client)
         await ctx.send(embed=embed, view=view)
         self.client.add_view(view=view)
 

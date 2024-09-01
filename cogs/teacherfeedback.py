@@ -479,7 +479,7 @@ class TeacherFeedback(commands.Cog):
 
             await self.show_class_history(member, teacher_class)
 
-            await self.db.update_all_user_classes([(uf[0],) for uf in users_feedback])
+            await self.db.update_all_user_classes([int(uf[0]) for uf in users_feedback])
 
             await self.ask_class_reward(member, teacher_class, users_feedback)
 
@@ -1308,7 +1308,7 @@ class TeacherFeedbackDatabaseUpdate:
         :param students_ids: A list containing all ids of the users. """
 
         await self.db.execute_query("""
-        UPDATE UserCurrency SET user_classes = user_classes + 1 WHERE user_id = %s""", students_ids, execute_many=True)
+        UPDATE UserCurrency SET user_classes = user_classes + 1 WHERE user_id IN %s""", students_ids)
 
     # ===== Teacher =====
     async def update_teacher_class_time(self, teacher_id: int, the_time: int) -> None:

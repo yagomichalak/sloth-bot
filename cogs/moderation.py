@@ -2136,7 +2136,7 @@ We appreciate your understanding and look forward to hearing from you. """, embe
         message = await channel.fetch_message(message_id) # Message containing the application buttons
         if not message:
             return await ctx.send(f"**Message not found, {member.mentio}!**")
-        view = ReportSupportView.from_message(message, self.client.get_cog("ReportSupport"))
+        view = ReportSupportView.from_message(message)
 
         buttons = view.children
 

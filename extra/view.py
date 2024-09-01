@@ -27,12 +27,12 @@ sloth_subscriber_sub_id = int(os.getenv("SLOTH_SUBSCRIBER_SUB_ID", 123))
 class ReportSupportView(discord.ui.View):
     """ View for the ReportSupport menu. """
 
-    def __init__(self, client: commands.Bot, cog: commands.Cog) -> None:
+    def __init__(self, client: commands.Bot) -> None:
         """ Class init method. """
 
         super().__init__(timeout=None)
         self.client = client
-        self.cog = cog
+        self.cog = client.get_cog("ReportSupport")
         patreon_button = discord.ui.Button(style=5, label="Support us on Patreon!", url="https://www.patreon.com/Languagesloth", emoji="<:patreon:831401582426980422>", row=1)
         website_button = discord.ui.Button(style=5, label="Our website", url="https://languagesloth.com", emoji="<:Sloth:686237376510689327>", row=1)
         sub_button = discord.ui.Button(sku_id=sloth_subscriber_sub_id, row=2)
@@ -40,7 +40,7 @@ class ReportSupportView(discord.ui.View):
         self.add_item(website_button)
         self.add_item(sub_button)
 
-    @discord.ui.button(label="Apply for Teacher!", style=3, custom_id=f"apply_to_teach", emoji="🧑‍🏫", row=0)
+    @discord.ui.button(label="Apply for Teacher!", style=3, custom_id="apply_to_teach", emoji="🧑‍🏫", row=0)
     async def apply_to_teach_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
         """ Button for starting the Teacher application. """
 
@@ -57,7 +57,7 @@ class ReportSupportView(discord.ui.View):
 
         await interaction.response.send_modal(TeacherApplicationModal(self.client))
 
-    @discord.ui.button(label="Apply for Moderator!", style=3, custom_id=f"apply_to_moderate", emoji="👮", row=0)
+    @discord.ui.button(label="Apply for Moderator!", style=3, custom_id="apply_to_moderate", emoji="👮", row=0)
     async def apply_to_moderate_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
         """ Button for starting the Moderator application. """
 
@@ -74,7 +74,7 @@ class ReportSupportView(discord.ui.View):
 
         await interaction.response.send_modal(ModeratorApplicationModal(self.client))
 
-    @discord.ui.button(label="Apply for Event Host!", style=3, custom_id=f"apply_to_host_events", emoji="🎉", row=0)
+    @discord.ui.button(label="Apply for Event Host!", style=3, custom_id="apply_to_host_events", emoji="🎉", row=0)
     async def apply_to_event_host_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
         """ Button for starting the Event Host application. """
 
@@ -91,7 +91,7 @@ class ReportSupportView(discord.ui.View):
 
         await interaction.response.send_modal(EventHostApplicationModal(self.client))
 
-    @discord.ui.button(label="Apply for Debate Manager!", style=3, custom_id=f"apply_to_manage_debates", emoji="🌐", row=0)
+    @discord.ui.button(label="Apply for Debate Manager!", style=3, custom_id="apply_to_manage_debates", emoji="🌐", row=0)
     async def apply_to_debate_manager_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
         """ Button for starting the Debate Manager application. """
 
@@ -108,46 +108,46 @@ class ReportSupportView(discord.ui.View):
 
         await interaction.response.send_modal(DebateManagerApplicationModal(self.client))
 
-    @discord.ui.button(label="Get your own Custom Bot (not for free)", style=1, custom_id=f"get_custom_bot", emoji="🤖", row=2)
-    async def bot_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
-        """ Button for buying a custom bot. """
+    # @discord.ui.button(label="Get your own Custom Bot (not for free)", style=1, custom_id="get_custom_bot", emoji="🤖", row=2)
+    # async def bot_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+    #     """ Button for buying a custom bot. """
 
-        member = interaction.user
-        guild = interaction.guild
-        await interaction.response.defer(ephemeral=True)
+    #     member = interaction.user
+    #     guild = interaction.guild
+    #     await interaction.response.defer(ephemeral=True)
 
-        member_ts = self.cog.bot_cache.get(member.id)
-        time_now = await utils.get_timestamp()
-        if member_ts:
-            sub = time_now - member_ts
-            if sub <= 240:
-                return await interaction.followup.send(
-                    f"**You are on cooldown to use this, try again in {round(240-sub)} seconds**", ephemeral=True)
+    #     member_ts = self.cog.bot_cache.get(member.id)
+    #     time_now = await utils.get_timestamp()
+    #     if member_ts:
+    #         sub = time_now - member_ts
+    #         if sub <= 240:
+    #             return await interaction.followup.send(
+    #                 f"**You are on cooldown to use this, try again in {round(240-sub)} seconds**", ephemeral=True)
 
-        self.cog.bot_cache[member.id] = time_now
+    #     self.cog.bot_cache[member.id] = time_now
 
-        with open('extra/random/texts/other/dnk.txt', 'r', encoding="utf-8") as file:
-            dnk_text = file.read()
+    #     with open('extra/random/texts/other/dnk.txt', 'r', encoding="utf-8") as file:
+    #         dnk_text = file.read()
 
-        website_link = "https://languagesloth.com/bots/commission"
+    #     website_link = "https://languagesloth.com/bots/commission"
 
-        # Order a bot
-        embed = discord.Embed(
-            title="__Commission a Bot!__",
-            description=dnk_text,
-            color=member.color,
-            timestamp=interaction.message.created_at,
-            url=website_link
-        )
-        embed.set_thumbnail(url=member.display_avatar)
-        embed.set_footer(text=guild.name, icon_url=guild.icon.url)
-        view = discord.ui.View()
-        view.add_item(
-            discord.ui.Button(label="Go to website!", url=website_link)
-        )
-        await interaction.followup.send(embed=embed, view=view, ephemeral=True)
+    #     # Order a bot
+    #     embed = discord.Embed(
+    #         title="__Commission a Bot!__",
+    #         description=dnk_text,
+    #         color=member.color,
+    #         timestamp=interaction.message.created_at,
+    #         url=website_link
+    #     )
+    #     embed.set_thumbnail(url=member.display_avatar)
+    #     embed.set_footer(text=guild.name, icon_url=guild.icon.url)
+    #     view = discord.ui.View()
+    #     view.add_item(
+    #         discord.ui.Button(label="Go to website!", url=website_link)
+    #     )
+    #     await interaction.followup.send(embed=embed, view=view, ephemeral=True)
 
-    @discord.ui.button(label="Verify", style=1, custom_id=f"verify_id", emoji="☑️", row=2)
+    @discord.ui.button(label="Verify", style=1, custom_id="verify_id", emoji="☑️", row=2)
     async def verify_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
         """ Button for starting the verification process. """
 
@@ -166,7 +166,7 @@ class ReportSupportView(discord.ui.View):
         self.cog.cache[member.id] = time_now
         await self.cog.send_verified_selfies_verification(interaction)
 
-    @discord.ui.button(label="Report a User or Get Server/Role Support!", style=4, custom_id=f"report_support", emoji="<:politehammer:608941633454735360>", row=3)
+    @discord.ui.button(label="Report a User or Get Server/Role Support!", style=4, custom_id="report_support", emoji="<:politehammer:608941633454735360>", row=3)
     async def report_support_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
         """ Button for reporting someone. """
 
@@ -186,7 +186,7 @@ class ReportSupportView(discord.ui.View):
         view.add_item(ReportSupportSelect(self.client))
         await interaction.followup.send(content="How can we help you?", view=view, ephemeral=True)
 
-    @discord.ui.button(label="Report a Staff member!", style=4, custom_id=f"report_staff", emoji="<:leoblabla:978481579590570034>", row=3)
+    @discord.ui.button(label="Report a Staff member!", style=4, custom_id="report_staff", emoji="<:leoblabla:978481579590570034>", row=3)
     async def report_staff_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
         """ Button for reporting a Staff member. """
 
