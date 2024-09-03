@@ -76,8 +76,14 @@
 
 # z!eval
 
+# from extra import utils
+
+# sloth_subscriber_sub_id = int(os.getenv("SLOTH_SUBSCRIBER_SUB_ID", 123))
+# ts = await utils.get_timestamp()
+# minutes_left = 180
+
 # embed = discord.Embed(
-# title="Nitro", description="Expires in 46 hours", color=int('36393F', 16))
+# title="Nitro", description=f"Expires <t:{int(ts)+180}:R>", color=int('36393F', 16))
 # space = '\u2800 '*8
 # embed.set_author(name="A WILD GIFT APPEARS")
 # view = discord.ui.View(timeout=None)
@@ -86,7 +92,10 @@
 #         super().__init__(style=discord.ButtonStyle.success, label=f"{space}ACCEPT{space}", custom_id="nitro_id")
 
 #     async def callback(self, interaction: discord.Interaction) -> None:
-#         await interaction.response.send_message(f"{interaction.user.mention}\nhttps://c.tenor.com/Z6gmDPeM6dgAAAAM/dance-moves.gif")
+        
+#         sub_view = discord.ui.View()
+#         sub_view.add_item(discord.ui.Button(sku_id=sloth_subscriber_sub_id))
+#         await interaction.response.send_message(f"{interaction.user.mention}\n[Sub to the Sloth bot](https://c.tenor.com/Z6gmDPeM6dgAAAAM/dance-moves.gif)", view=sub_view, ephemeral=True)
 
 # view.add_item(MyButton())
 # embed.set_thumbnail(url="https://pbs.twimg.com/media/EmSIbDzXYAAb4R7.png")

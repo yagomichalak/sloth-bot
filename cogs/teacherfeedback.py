@@ -874,18 +874,22 @@ class TeacherFeedback(commands.Cog):
         elif class_info['type'].title() == 'Programming':
             cemoji = '💻'
 
+        print("gooooooood")
         # Creates the text channel
         text_channel = await class_category.create_text_channel(
             name=f"{cemoji} {class_info['language'].title()} Classroom",
             topic=class_info['desc'],
             overwrites=overwrites)
+        print("and?")
 
+        print("sadasdas")
         # Creates the voice channel
         voice_channel = await class_category.create_voice_channel(
             name=f"{cemoji} {class_info['language'].title()} Classroom",
             user_limit=None,
             overwrites=overwrites)
 
+        print("sha")
         # Tries to move the user to the voice channel, otherwise delete the channels.
         try:
             await member.move_to(voice_channel)
