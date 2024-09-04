@@ -17,6 +17,7 @@ from extra.menu import (ConfirmSkill, SwitchSavedClasses,
 from extra.prompt.menu import ConfirmButton
 from extra.useful_variables import different_class_roles
 from mysqldb import DatabaseCore
+from extra import utils
 
 # variables.id
 queuebot_id = int(os.getenv('QUEUE_BOT_ID', 123))
@@ -79,7 +80,7 @@ class TeacherFeedback(commands.Cog):
 
         # Checks if it's a reward message
         user = await self.db.get_waiting_reward_student(payload.user_id, payload.message_id)
-        lenactive = user[-1]
+        lenactive = 0 if not user else user[-1]
         if lenactive:
             emoji = str(payload.emoji)
             channel = discord.utils.get(guild.channels, id=reward_channel_id)
@@ -91,14 +92,14 @@ class TeacherFeedback(commands.Cog):
                 await self.db.delete_waiting_reward_student(user[0], user[1], user[4])
                 await asyncio.sleep(0.5)
                 user = await self.db.get_waiting_reward_student(payload.user_id, payload.message_id)
-                lenactive = user[-1]
+                lenactive = 0 if not user else user[-1]
                 await self.show_user_feedback(msg=msg, guild=guild, user=user, lenactive=lenactive, teacher=payload.member)
 
             elif emoji == '❌':
                 await self.db.delete_waiting_reward_student(msg_id=user[0], user_id=user[1], teacher_id=user[4])
                 await asyncio.sleep(0.5)
                 user = await self.db.get_waiting_reward_student(payload.user_id, payload.message_id)
-                lenactive = user[-1]
+                lenactive = 0 if not user else user[-1]
                 return await self.show_user_feedback(msg=msg, guild=guild, user=user, lenactive=lenactive, teacher=payload.member)
 
             elif emoji == '👥':
@@ -112,9 +113,6 @@ class TeacherFeedback(commands.Cog):
                 done_embed = discord.Embed(title="__**DONE!**__", color=discord.Color.green())
                 await msg.edit(embed=done_embed, delete_after=3)
                 return await self.reward_accepted_students(payload.member, all_formated_users)
-
-        else:
-            pass
 
     @commands.Cog.listener()
     async def on_message(self, message):
@@ -476,11 +474,9 @@ class TeacherFeedback(commands.Cog):
 
         # Checks whether the class duration was greater or equal than 10 minutes.
         if int(teacher_class[6]) >= 600:
-
             await self.show_class_history(member, teacher_class)
-
-            await self.db.update_all_user_classes([int(uf[0]) for uf in users_feedback])
-
+            if users_feedback:
+                await self.db.update_all_user_classes([int(uf[0]) for uf in users_feedback])
             await self.ask_class_reward(member, teacher_class, users_feedback)
 
     async def show_class_history(self, member: discord.Member, teacher_class: List[int]) -> None:
@@ -533,7 +529,7 @@ class TeacherFeedback(commands.Cog):
         )
 
         user = await self.db.get_waiting_reward_student(member.id, simple.id)
-        lenactive = user[-1]
+        lenactive = 0 if not user else user[-1]
         await self.show_user_feedback(msg=simple, guild=guild, user=user, lenactive=lenactive, teacher=member)
 
     async def save_class_feedback(self, msg: discord.Message, teacher: discord.Member, users_feedback: List[List[int]], class_type: str, language: str, guild: discord.Guild) -> None:
@@ -579,7 +575,7 @@ class TeacherFeedback(commands.Cog):
             await self.db.delete_waiting_reward_student(msg_id=user[0], user_id=user[1], teacher_id=user[4])
             await asyncio.sleep(0.5)
             user = await self.db.get_waiting_reward_student(user[4], user[0])
-            lenactive = user[-1]
+            lenactive = 0 if not user else user[-1]
             if lenactive:
                 return await self.show_user_feedback(msg=msg, guild=guild, user=user, lenactive=lenactive, teacher=teacher)
             else:
@@ -874,22 +870,18 @@ class TeacherFeedback(commands.Cog):
         elif class_info['type'].title() == 'Programming':
             cemoji = '💻'
 
-        print("gooooooood")
         # Creates the text channel
         text_channel = await class_category.create_text_channel(
             name=f"{cemoji} {class_info['language'].title()} Classroom",
             topic=class_info['desc'],
             overwrites=overwrites)
-        print("and?")
 
-        print("sadasdas")
         # Creates the voice channel
         voice_channel = await class_category.create_voice_channel(
             name=f"{cemoji} {class_info['language'].title()} Classroom",
             user_limit=None,
             overwrites=overwrites)
 
-        print("sha")
         # Tries to move the user to the voice channel, otherwise delete the channels.
         try:
             await member.move_to(voice_channel)
@@ -1122,7 +1114,7 @@ class TeacherFeedback(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.command(aliases=['end_class', 'closeclass', 'endclass', 'end', 'finishclass', 'finish', 'finish_class'])
-    @commands.has_any_role(*[mod_role_id, admin_role_id])
+    @utils.is_allowed(*[mod_role_id, admin_role_id])
     async def close_class(self, ctx) -> None:
         """ (MOD) Ends an on-going class. """
 
@@ -1278,7 +1270,7 @@ class TeacherFeedbackDatabaseSelect:
         """ Get all students by teacher ID.
         :param teacher_id: The teacher's ID. """
 
-        return await self.db.execute_query("SELECT * FROM Students WHERE teacher_id = %s", (teacher_id,), fetch="one")
+        return await self.db.execute_query("SELECT * FROM Students WHERE teacher_id = %s", (teacher_id,), fetch="all")
 
     # ===== Reward =====
 
@@ -1287,7 +1279,9 @@ class TeacherFeedbackDatabaseSelect:
         :param teacher_id: The teacher's ID.
         :param msg_id: The ID of the message attached to the data. """
 
-        return await self.db.execute_query("SELECT *, COUNT(*) FROM RewardStudents WHERE reward_message = %s and teacher_id = %s", (msg_id, teacher_id), fetch="one")
+        return await self.db.execute_query("""
+            SELECT *, COUNT(*) FROM RewardStudents WHERE reward_message = %s and teacher_id = %s
+            GROUP by reward_message, student_id, student_messages, student_time, teacher_id, class_type, language""", (msg_id, teacher_id), fetch="one")
 
     async def get_all_waiting_reward_student(self, teacher_id: int, msg_id: int) -> List[List[Union[str, int]]]:
         """ Gets reward related data that is waiting to be given reviewed.
@@ -1311,8 +1305,7 @@ class TeacherFeedbackDatabaseUpdate:
         """ Updates all users' attended classes counter.
         :param students_ids: A list containing all ids of the users. """
 
-        await self.db.execute_query("""
-        UPDATE UserCurrency SET user_classes = user_classes + 1 WHERE user_id IN %s""", students_ids)
+        await self.db.execute_query("UPDATE UserCurrency SET user_classes = user_classes + 1 WHERE user_id IN %s", (students_ids,))
 
     # ===== Teacher =====
     async def update_teacher_class_time(self, teacher_id: int, the_time: int) -> None:

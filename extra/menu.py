@@ -1,10 +1,11 @@
 # import.standard
 import asyncio
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, Optional, Union
 
 # import.thirdparty
 import discord
 from discord.ext import commands, menus
+
 
 class ConfirmSkill(menus.Menu):
     """ Class related to confirmation skill actions. """
@@ -20,8 +21,11 @@ class ConfirmSkill(menus.Menu):
 
     async def send_initial_message(self, ctx, channel) -> discord.Message:
         """ Sends the initial message. """
-
-        self.sent_msg = await channel.send(content=self.content, embed=discord.Embed(description=self.msg, color=discord.Color.orange()))
+        self.sent_msg = None
+        try:
+            self.sent_msg = await channel.send(content=self.content, embed=discord.Embed(description=self.msg, color=discord.Color.orange()))
+        except Exception:
+            pass
         return self.sent_msg
 
     async def finalize(self, timed_out) -> None:
