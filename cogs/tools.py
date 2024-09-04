@@ -102,7 +102,7 @@ class Tools(*tool_cogs):
 				return
 
 			stealth_status = await self.get_stealth_status(member.id)
-			if not stealth_status or not stealth_status[1]:
+			if stealth_status and stealth_status[1]:
 				return
 
 			await member.add_roles(role)
