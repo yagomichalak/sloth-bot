@@ -26,7 +26,7 @@ teacher_role_id = int(os.getenv("TEACHER_ROLE_ID", 123))
 class Subscriptions(commands.Cog):
     """ Commands and features related to the Sloth Subscribers. """
 
-    STATUS_CYCLE = cycle(["members", "patrons", "sloth-subscribers", "teachers"])
+    STATUS_CYCLE = cycle(["members"])  #, "patrons", "sloth-subscribers", "teachers"])
 
     def __init__(self, client):
         self.client = client
@@ -47,17 +47,17 @@ class Subscriptions(commands.Cog):
         if next_status == "members":
             status_text = f"{len(guild.members)} members."
 
-        elif next_status == "patrons":
-            patrons = await utils.count_members(guild, patreon_roles.keys())
-            status_text = f"{patrons} patrons."
+        # elif next_status == "patrons":
+        #     patrons = await utils.count_members(guild, patreon_roles.keys())
+        #     status_text = f"{patrons} patrons."
 
-        elif next_status == "sloth-subscribers":
-            subs = list(set([et.user_id for et in await self.client.entitlements().flatten() if et.type == EntitlementType.application_subscription]))
-            status_text = f"{len(subs)} Sloth bot subs."
+        # elif next_status == "sloth-subscribers":
+        #     subs = list(set([et.user_id for et in await self.client.entitlements().flatten() if et.type == EntitlementType.application_subscription]))
+        #     status_text = f"{len(subs)} Sloth bot subs."
 
-        elif next_status == "teachers":
-            patrons = await utils.count_members(guild, [teacher_role_id])
-            status_text = f"{patrons} teachers."
+        # elif next_status == "teachers":
+        #     patrons = await utils.count_members(guild, [teacher_role_id])
+        #     status_text = f"{patrons} teachers."
         
         await self.client.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=status_text))
     
