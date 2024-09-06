@@ -53,7 +53,7 @@ class ModActivity(ModActivityTable):
         moderator_role = discord.utils.get(guild.roles, id=mod_role_id)
         if moderator_role not in member.roles:
             return
-            
+
         current_ts = await utils.get_timestamp()
         old_time = await self.get_moderator_current_timestamp(member.id, current_ts)
         addition = current_ts - old_time
@@ -76,25 +76,27 @@ class ModActivity(ModActivityTable):
         is_first_embed = True  # Flag per indicare il primo embed
         def create_embed(is_first):
             embed = discord.Embed(
-                url='https://discordapp.com', color=discord.Color.dark_green(), 
+                url='https://discordapp.com', color=discord.Color.dark_green(),
                 timestamp=ctx.message.created_at)
             embed.set_footer(text='Activity Report', icon_url=self.client.user.display_avatar)
             embed.set_thumbnail(url=ctx.guild.icon.url)
-            
+
             if is_first:  # Aggiungi il titolo e l'autore solo al primo embed
                 embed.title = "Moderator's Activity"
                 embed.set_author(name=ctx.guild.name)
-                
+
             return embed
         embed = create_embed(is_first_embed)
         field_count = 0
         for mod in mod_activities:
-            m, s = divmod(mod[1], 60)
+            mod_id, time_in_vc, _, messages = mod
+            m, s = divmod(time_in_vc, 60)
             h, m = divmod(m, 60)
-            user = discord.utils.get(ctx.guild.members, id=mod[0])
+            user = discord.utils.get(ctx.guild.members, id=mod_id)
+            icon = '🔸' if not h and not m and not s and not messages else '🔹'
             embed.add_field(
-                name=f'👤**{user}**',
-                value=f"**Voice Chat Activity:**\n{h:d} hours, {m:02d} minutes and {s:02d} seconds\n**Text Chat Activity:**\n{mod[3]} messages",
+                name=f'{icon}**{user}**',
+                value=f"**Voice Chat Activity:**\n{h:d} hours, {m:02d} minutes and {s:02d} seconds\n**Text Chat Activity:**\n{messages} messages",
                 inline=False)
 
             field_count += 1
@@ -126,7 +128,7 @@ class ModActivity(ModActivityTable):
 
         await msg.delete()
 
-                
+
 
 def setup(client):
     client.add_cog(ModActivity(client))
