@@ -121,13 +121,28 @@ class ModActivity(ModActivityTable):
         if confirm_view.value is None:
             await ctx.send(f"**Timeout, not deleting it, {member.mention}!**", delete_after=3)
         elif confirm_view.value:
-            await self.delete_mod_activity()
+            await self.reset_mod_activity()
             await ctx.send(f"**Mod Activity data reset, {member.mention}!**", delete_after=3)
         else:
             await ctx.send(f"**Not deleting it then, {member.mention}!**", delete_after=3)
 
         await msg.delete()
 
+    @utils.is_allowed([senior_mod_role_id], throw_exc=True)
+    @commands.command(aliases=['track_mod'])
+    async def track_mod_activity(self, ctx, mod: discord.Member):
+        guild = self.client.get_guild(guild_id)
+        moderator_role = discord.utils.get(guild.roles, id=mod_role_id)
+
+        if moderator_role not in mod.roles:
+            return await ctx.send(f"**{mod.mention} is not a moderator!**")
+
+        print("TESTE CARALHO")
+        if await self.check_mod_activity_exists(mod.id):
+            return await ctx.send(f"**Moderator {mod.mention} is already being tracked!**")
+
+        await self.insert_moderator(mod.id)
+        return await ctx.send(f"**Tracking {mod.mention} activity!**")
 
 
 def setup(client):
