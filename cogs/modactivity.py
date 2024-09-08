@@ -107,6 +107,7 @@ class ModActivity(ModActivityTable):
 
         async def add_mods_to_embed(mods):
             nonlocal field_count
+            nonlocal embed
             for mod in mods:
                 embed.add_field(
                 name=f"{mod['icon']}**{mod['user']}**",
@@ -149,6 +150,7 @@ class ModActivity(ModActivityTable):
     @utils.is_allowed([senior_mod_role_id], throw_exc=True)
     @commands.command(aliases=['track_mod'])
     async def track_mod_activity(self, ctx, mod: discord.Member):
+        """ (STAFF) Starts tracking a moderator activity. """
         guild = self.client.get_guild(guild_id)
         moderator_role = discord.utils.get(guild.roles, id=mod_role_id)
 
@@ -160,6 +162,23 @@ class ModActivity(ModActivityTable):
 
         await self.insert_moderator(mod.id)
         return await ctx.send(f"**Tracking {mod.mention} activity!**")
+
+    @utils.is_allowed([senior_mod_role_id], throw_exc=True)
+    @commands.command(aliases=['untrack_mod'])
+    async def untrack_mod_activity(self, ctx, mod: discord.Member):
+        """ (STAFF) Stop tracking a moderator activity. Use this command if an user is no longer a moderator. """
+
+        guild = self.client.get_guild(guild_id)
+        moderator_role = discord.utils.get(guild.roles, id=mod_role_id)
+
+        if moderator_role not in mod.roles:
+            return await ctx.send(f"**{mod.mention} is not a moderator!**")
+
+        if not await self.check_mod_activity_exists(mod.id):
+            return await ctx.send(f"**Moderator {mod.mention} is not being tracked!**")
+
+        await self.remove_moderator(mod.id)
+        return await ctx.send(f"**Untracking {mod.mention} activity!**")
 
 
 def setup(client):

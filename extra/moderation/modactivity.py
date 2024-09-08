@@ -84,6 +84,14 @@ class ModActivityTable(commands.Cog):
         await self.db.execute_query("""
             INSERT INTO ModActivity (mod_id, timestamp, messages) VALUES (%s, %s, %s)
             """, (mod_id, old_ts, messages))
+    async def remove_moderator(self, mod_id: int) -> None:
+        """ Removes a moderator from ModActivity table.
+        :param mod_id: The ID of the moderator to remove.
+        """
+
+        await self.db.execute_query("""
+            DELETE FROM ModActivity WHERE mod_id = %s
+            """, (mod_id,))
 
     async def get_mod_activities(self) -> List[List[int]]:
         """ Gets all Mod activities data from the database. """
