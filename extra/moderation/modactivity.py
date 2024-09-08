@@ -31,9 +31,9 @@ class ModActivityTable(commands.Cog):
 
         await self.db.execute_query("""
             CREATE TABLE ModActivity (
-                mod_id BIGINT NOT NULL, 
-                time BIGINT DEFAULT 0, 
-                timestamp BIGINT DEFAULT NULL, 
+                mod_id BIGINT NOT NULL,
+                time BIGINT DEFAULT 0,
+                timestamp BIGINT DEFAULT NULL,
                 messages INT DEFAULT 0,
                 PRIMARY KEY (mod_id)
             )""")
@@ -67,7 +67,7 @@ class ModActivityTable(commands.Cog):
         """ Checks whether the ModActivity table exists in the database. """
 
         return await self.db.table_exists("ModActivity")
-    
+
     async def insert_moderator(self, mod_id: int, old_ts: Optional[int] = None, messages: Optional[int] = 0) -> None:
         """ Inserts a moderator.
         :param mod_id: The ID of the moderator to insert.
@@ -81,7 +81,7 @@ class ModActivityTable(commands.Cog):
     async def get_mod_activities(self) -> List[List[int]]:
         """ Gets all Mod activities data from the database. """
 
-        return await self.db.execute_query("SELECT * FROM ModActivity", fetch="all")
+        return await self.db.execute_query("SELECT * FROM ModActivity ORDER BY time DESC", fetch="all")
 
     async def get_moderator_current_timestamp(self, mod_id: int, old_ts: Optional[int] = None) -> int:
         """ Gets the moderator's current timestamp.
