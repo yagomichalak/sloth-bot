@@ -137,7 +137,6 @@ class ModActivity(ModActivityTable):
         if moderator_role not in mod.roles:
             return await ctx.send(f"**{mod.mention} is not a moderator!**")
 
-        print("TESTE CARALHO")
         if await self.check_mod_activity_exists(mod.id):
             return await ctx.send(f"**Moderator {mod.mention} is already being tracked!**")
 
