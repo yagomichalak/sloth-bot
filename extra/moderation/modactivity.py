@@ -68,6 +68,13 @@ class ModActivityTable(commands.Cog):
 
         return await self.db.table_exists("ModActivity")
 
+    async def check_mod_activity_exists(self, mod_id: int) -> bool:
+        """ Checks if a moderator already exists in the ModActivity table. """
+
+        mod = await self.db.execute_query("SELECT 1 FROM ModActivity WHERE mod_id = %s", (mod_id,), fetch="one")
+
+        return bool(mod)
+
     async def insert_moderator(self, mod_id: int, old_ts: Optional[int] = None, messages: Optional[int] = 0) -> None:
         """ Inserts a moderator.
         :param mod_id: The ID of the moderator to insert.
@@ -77,11 +84,19 @@ class ModActivityTable(commands.Cog):
         await self.db.execute_query("""
             INSERT INTO ModActivity (mod_id, timestamp, messages) VALUES (%s, %s, %s)
             """, (mod_id, old_ts, messages))
+    async def remove_moderator(self, mod_id: int) -> None:
+        """ Removes a moderator from ModActivity table.
+        :param mod_id: The ID of the moderator to remove.
+        """
+
+        await self.db.execute_query("""
+            DELETE FROM ModActivity WHERE mod_id = %s
+            """, (mod_id,))
 
     async def get_mod_activities(self) -> List[List[int]]:
         """ Gets all Mod activities data from the database. """
 
-        return await self.db.execute_query("SELECT * FROM ModActivity ORDER BY time DESC", fetch="all")
+        return await self.db.execute_query("SELECT * FROM ModActivity ORDER BY time DESC, messages DESC", fetch="all")
 
     async def get_moderator_current_timestamp(self, mod_id: int, old_ts: Optional[int] = None) -> int:
         """ Gets the moderator's current timestamp.
@@ -127,6 +142,11 @@ class ModActivityTable(commands.Cog):
         :param addition: The addition value. """
 
         await self.db.execute_query("UPDATE ModActivity SET time = time + %s WHERE mod_id = %s", (addition, mod_id))
+
+    async def reset_mod_activity(self) -> None:
+        """ Reset data from the ModActivity table """
+
+        await self.db.execute_query("UPDATE ModActivity SET time = 0, timestamp = 0, messages = 0")
 
     async def delete_mod_activity(self) -> None:
         """ Deletes all the data from the ModActivity table. """
