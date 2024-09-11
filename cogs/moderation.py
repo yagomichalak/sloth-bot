@@ -285,8 +285,8 @@ class Moderation(*moderation_cogs):
             report_support_channel = discord.utils.get(guild.text_channels, id=int(os.getenv("REPORT_CHANNEL_ID")))
             await message.channel.send(f"You should use {report_support_channel.mention} for help reports!")
 
-    @commands.Cog.listener()
-    async def on_member_join(self, member):
+    @commands.Cog.listener(name="on_member_join")
+    async def on_member_join_check_muted_user(self, member):
 
         if member.bot:
             return
@@ -294,6 +294,19 @@ class Moderation(*moderation_cogs):
         if await self.get_muted_roles(member.id):
             muted_role = discord.utils.get(member.guild.roles, id=muted_role_id)
             await member.add_roles(muted_role)
+
+    @commands.Cog.listener(name="on_member_join")
+    async def on_member_join_check_account_age_firewall(self, member):
+
+        if member.bot:
+            return
+        
+        # Logic of checking if the account age is >= the one set in the firewall
+        firewall_state = await self.get_firewall_state()
+        if not firewall_state:
+            return
+        
+        # if firewall_state[1]:  # Get minimum account age set in firewall
 
     @commands.Cog.listener()
     async def on_message_delete(self, message):
