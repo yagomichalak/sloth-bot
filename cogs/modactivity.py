@@ -53,7 +53,7 @@ class ModActivity(ModActivityTable):
         moderator_role = discord.utils.get(guild.roles, id=mod_role_id)
         if moderator_role not in member.roles:
             return
-            
+
         current_ts = await utils.get_timestamp()
         old_time = await self.get_moderator_current_timestamp(member.id, current_ts)
         addition = current_ts - old_time
@@ -76,40 +76,61 @@ class ModActivity(ModActivityTable):
         is_first_embed = True  # Flag per indicare il primo embed
         def create_embed(is_first):
             embed = discord.Embed(
-                url='https://discordapp.com', color=discord.Color.dark_green(), 
+                url='https://discordapp.com', color=discord.Color.dark_green(),
                 timestamp=ctx.message.created_at)
             embed.set_footer(text='Activity Report', icon_url=self.client.user.display_avatar)
             embed.set_thumbnail(url=ctx.guild.icon.url)
-            
-            if is_first:  # Aggiungi il titolo e l'autore solo al primo embed
+
+            if is_first:
                 embed.title = "Moderator's Activity"
                 embed.set_author(name=ctx.guild.name)
-                
+
             return embed
+
         embed = create_embed(is_first_embed)
         field_count = 0
+        active_mods = []
+        inactive_mods = []
+
         for mod in mod_activities:
-            m, s = divmod(mod[1], 60)
+            mod_id, time_in_vc, _, messages = mod
+            m, s = divmod(time_in_vc, 60)
             h, m = divmod(m, 60)
-            user = discord.utils.get(ctx.guild.members, id=mod[0])
-            embed.add_field(
-                name=f'👤**{user}**',
-                value=f"**Voice Chat Activity:**\n{h:d} hours, {m:02d} minutes and {s:02d} seconds\n**Text Chat Activity:**\n{mod[3]} messages",
-                inline=False)
+            user = discord.utils.get(ctx.guild.members, id=mod_id)
+            is_active =  h >= 3 and messages >= 30
+            icon = '🔹' if is_active else '🔸'
+            moderator_data = {"user": user,"icon": icon, "hours": h, "minutes": m, "seconds": s, "messages": messages }
+            if is_active:
+                active_mods.append(moderator_data)
+            else:
+                inactive_mods.append(moderator_data)
 
-            field_count += 1
-            # Quando raggiungiamo 20 campi, inviamo l'embed e ne creiamo uno nuovo
-            if field_count >= 20:
-                await ctx.send(embed=embed)
-                is_first_embed = False  # Imposta il flag a False dopo il primo embed
-                embed = create_embed(is_first_embed)
-                field_count = 0
+        async def add_mods_to_embed(mods):
+            nonlocal field_count
+            nonlocal embed
+            for mod in mods:
+                embed.add_field(
+                name=f"{mod['icon']}**{mod['user']}**",
+                value=(
+                    f"**Voice Chat Activity:**\n"
+                    f"{mod['hours']:d} hours, {mod['minutes']:02d} minutes and {mod['seconds']:02d} seconds\n"
+                    f"**Text Chat Activity:**\n{mod['messages']} messages"
+                ),
+                inline=False
+            )
+                field_count += 1
+                if field_count >= 20:
+                    await ctx.send(embed=embed)
+                    embed = create_embed(is_first_embed=False)
+            return embed
 
-        # Invia l'ultimo embed se ha campi residui
+        embed = await add_mods_to_embed(active_mods)
+        embed = await add_mods_to_embed(inactive_mods)
+
         if field_count > 0:
             await ctx.send(embed=embed)
-        confirm_view: discord.ui.View = ConfirmButton(member, timeout=60)
 
+        confirm_view: discord.ui.View = ConfirmButton(member, timeout=60)
         msg = await ctx.send("**Do you want to reset the data?**", view=confirm_view)
         await confirm_view.wait()
 
@@ -119,14 +140,46 @@ class ModActivity(ModActivityTable):
         if confirm_view.value is None:
             await ctx.send(f"**Timeout, not deleting it, {member.mention}!**", delete_after=3)
         elif confirm_view.value:
-            await self.delete_mod_activity()
+            await self.reset_mod_activity()
             await ctx.send(f"**Mod Activity data reset, {member.mention}!**", delete_after=3)
         else:
             await ctx.send(f"**Not deleting it then, {member.mention}!**", delete_after=3)
 
         await msg.delete()
 
-                
+    @utils.is_allowed([senior_mod_role_id], throw_exc=True)
+    @commands.command(aliases=['track_mod'])
+    async def track_mod_activity(self, ctx, mod: discord.Member):
+        """ (STAFF) Starts tracking a moderator activity. """
+        guild = self.client.get_guild(guild_id)
+        moderator_role = discord.utils.get(guild.roles, id=mod_role_id)
+
+        if moderator_role not in mod.roles:
+            return await ctx.send(f"**{mod.mention} is not a moderator!**")
+
+        if await self.check_mod_activity_exists(mod.id):
+            return await ctx.send(f"**Moderator {mod.mention} is already being tracked!**")
+
+        await self.insert_moderator(mod.id)
+        return await ctx.send(f"**Tracking {mod.mention} activity!**")
+
+    @utils.is_allowed([senior_mod_role_id], throw_exc=True)
+    @commands.command(aliases=['untrack_mod'])
+    async def untrack_mod_activity(self, ctx, mod: discord.Member):
+        """ (STAFF) Stop tracking a moderator activity. Use this command if an user is no longer a moderator. """
+
+        guild = self.client.get_guild(guild_id)
+        moderator_role = discord.utils.get(guild.roles, id=mod_role_id)
+
+        if moderator_role not in mod.roles:
+            return await ctx.send(f"**{mod.mention} is not a moderator!**")
+
+        if not await self.check_mod_activity_exists(mod.id):
+            return await ctx.send(f"**Moderator {mod.mention} is not being tracked!**")
+
+        await self.remove_moderator(mod.id)
+        return await ctx.send(f"**Untracking {mod.mention} activity!**")
+
 
 def setup(client):
     client.add_cog(ModActivity(client))

@@ -44,6 +44,7 @@ allowed_roles = [int(os.getenv('OWNER_ROLE_ID', 123)), admin_role_id, senior_mod
 mod_log_id = int(os.getenv('MOD_LOG_CHANNEL_ID', 123))
 secret_agent_channel_id = int(os.getenv('SECRET_AGENTS_CHANNEL_ID', 123))
 error_log_channel_id = int(os.getenv('ERROR_LOG_CHANNEL_ID', 123))
+muted_chat_id = int(os.getenv('MUTED_CHANNEL_ID', 123))
 watchlist_disallowed_channels = [int(os.getenv('MUTED_CHANNEL_ID', 123))]
 
 last_deleted_message = []
@@ -875,6 +876,24 @@ class Moderation(*moderation_cogs):
             general_embed.set_author(name=f'{member} has been muted', icon_url=member.display_avatar)
             await answer(embed=general_embed)
 
+            # Sends the muted channel rules to the user
+            rules_embed = discord.Embed(color=discord.Color.dark_grey(), timestamp=current_time,
+                description=
+                f"""**You have been muted. You can see the reason of your mute below.**
+                You can get unmuted only by talking to the Staff member that muted you.
+
+                Behaviours in the <#{muted_chat_id}> that might result in a ban:
+                **1**. Trolling
+                **2**. Insulting Staff Members
+                **3**. Pinging Admins/Moderators
+
+                **P.S.** Being muted does not mean you are banned or being punished. It means that a Staff member wants to talk to you to solve an ongoing case, colaborate with them to be unmuted asap.
+            """)
+            try:
+                await member.send(embed=rules_embed)
+            except:
+                pass
+
             # Moderation log embed
             moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
             embed = discord.Embed(title='__**Mute**__', color=discord.Color.dark_grey(),
@@ -887,30 +906,13 @@ class Moderation(*moderation_cogs):
             embed.set_thumbnail(url=member.display_avatar)
             embed.set_footer(text=f"Muted by {ctx.author}", icon_url=ctx.author.display_avatar)
             await moderation_log.send(embed=embed)
+
             # Inserts a infraction into the database
             await self.insert_user_infraction(
                 user_id=member.id, infr_type="mute", reason=reason,
                 timestamp=current_ts, perpetrator=ctx.author.id)
             try:
                 await member.send(embed=general_embed)
-            except:
-                pass
-
-            # Sends the muted channel rules to the user
-            rules_embed = discord.Embed(color=discord.Color.dark_grey(), timestamp=current_time,
-                description=
-                """**You have been muted. You can see the reason of your mute above.**
-                You can get unmuted only by talking to the Staff member that muted you.
-
-                Behaviours in the <#656730447857975296> that might result in a ban:
-                **1**. Trolling
-                **2**. Insulting Staff Members
-                **3**. Pinging Admins/Moderators
-
-                **P.S.** Being muted does not mean you are banned or being punished. It means that a Staff member wants to talk to you to solve an ongoing case, colaborate with them to be unmuted asap.
-            """)
-            try:
-                await member.send(embed=rules_embed)
             except:
                 pass
 
