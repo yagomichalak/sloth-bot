@@ -41,6 +41,8 @@ moderator_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 senior_role_id = int(os.getenv('SENIOR_MOD_ROLE_ID', 123))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID', 123))
 lesson_management_role_id = int(os.getenv('LESSON_MANAGEMENT_ROLE_ID', 123))
+analyst_debugger_role_id: int = int(os.getenv('ANALYST_DEBUGGER_ROLE_ID', 123)) # used by temp check command
+timedout_role_id = int(os.getenv('TIMEDOUT_ROLE_ID', 123)) # used by temp check command
 allowed_roles = [
 int(os.getenv('OWNER_ROLE_ID', 123)), admin_role_id,
 moderator_role_id]
@@ -89,6 +91,44 @@ class ReportSupport(*report_support_classes):
                 except Exception as e:
                     print(f"Failed at deleting the {channel}: {str(e)}")
             await self.remove_user_open_channel(inactive_case[0])
+
+    @commands.command()
+    @utils.is_allowed(analyst_debugger_role_id, throw_exc=True)
+    @commands.cooldown(1, 30, commands.BucketType.user)
+    async def check(self, ctx: commands.Context) -> None:
+        """ Temporary command for checking cases and timeouts. """
+
+        guild = self.client.get_guild(server_id)
+
+        # Look for people who completed their timeout time 
+        role = discord.utils.get(guild.roles, id=timedout_role_id)
+        members = role.members
+
+        for member in members:
+            try:
+                timeout_time = member.communication_disabled_until
+                if timeout_time == None:
+                    await member.remove_roles(role)
+            except Exception as e:
+                print(e)
+                continue
+
+        # Look inactive case rooms to delete
+        current_ts = await utils.get_timestamp()
+        inactive_cases = await self.get_inactive_cases(current_ts)
+
+        for inactive_case in inactive_cases:
+            channel = discord.utils.get(guild.channels, id=inactive_case[1])
+
+            if channel:
+                try:
+                    await channel.delete()
+                except Exception as e:
+                    print(f"Failed at deleting the {channel}: {str(e)}")
+            await self.remove_user_open_channel(inactive_case[0])
+
+        emoji = "<:patao:1261308730918572163>"
+        await ctx.send(emoji)
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message) -> None:
