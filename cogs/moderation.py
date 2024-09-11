@@ -1800,7 +1800,8 @@ We appreciate your understanding and look forward to hearing from you. """, embe
         if not await self.check_table_firewall_exists():
             return await ctx.send(f"**It looks like the firewall is on maintenance, {member.mention}!**")
 
-        if await self.get_firewall_state():
+        firewall_state: Tuple[int] = await self.get_firewall_state()
+        if firewall_state and firewall_state[0]:
             confirm = await Confirm(f"The Firewall is activated, do you want to turn it off, {member.mention}?").prompt(ctx)
             if confirm:
                 await self.set_firewall_state(0)
