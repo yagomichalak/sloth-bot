@@ -97,7 +97,7 @@ class ModActivity(ModActivityTable):
             m, s = divmod(time_in_vc, 60)
             h, m = divmod(m, 60)
             user = discord.utils.get(ctx.guild.members, id=mod_id)
-            is_active =  h >= 3 and messages >= 30
+            is_active =  h >= 3 or messages >= 30
             icon = '🔹' if is_active else '🔸'
             moderator_data = {"user": user,"icon": icon, "hours": h, "minutes": m, "seconds": s, "messages": messages }
             if is_active:
@@ -121,7 +121,7 @@ class ModActivity(ModActivityTable):
                 field_count += 1
                 if field_count >= 20:
                     await ctx.send(embed=embed)
-                    embed = create_embed(is_first_embed=False)
+                    embed = create_embed(is_first=False)
             return embed
 
         embed = await add_mods_to_embed(active_mods)
