@@ -1,5 +1,6 @@
 # import.standard
 import os
+from typing import List
 
 # import.thirdparty
 import discord
@@ -73,7 +74,8 @@ class ModActivity(ModActivityTable):
 
         mod_activities = await self.get_mod_activities()
         member: discord.Member = ctx.author
-        def create_embed(is_first: bool):
+
+        def create_embed(is_first: bool) -> discord.Embed:
             embed = discord.Embed(
                 url='https://discordapp.com', color=discord.Color.dark_green(),
                 timestamp=ctx.message.created_at)
@@ -86,28 +88,8 @@ class ModActivity(ModActivityTable):
 
             return embed
 
-        # Create first embed
-        embed = create_embed(is_first=True)
-        field_count = 0
-        active_mods = []
-        inactive_mods = []
-
-        for mod in mod_activities:
-            mod_id, time_in_vc, _, messages = mod
-            m, s = divmod(time_in_vc, 60)
-            h, m = divmod(m, 60)
-            user = discord.utils.get(ctx.guild.members, id=mod_id)
-            is_active =  h >= 3 or messages >= 30
-            icon = '🔹' if is_active else '🔸'
-            moderator_data = {"user": user,"icon": icon, "hours": h, "minutes": m, "seconds": s, "messages": messages }
-            if is_active:
-                active_mods.append(moderator_data)
-            else:
-                inactive_mods.append(moderator_data)
-
-        async def add_mods_to_embed(mods):
+        async def add_mods_to_embed(embed: discord.Embed, mods: List):
             nonlocal field_count
-            nonlocal embed
             for mod in mods:
                 embed.add_field(
                 name=f"{mod['icon']}**{mod['user']}**",
@@ -125,8 +107,27 @@ class ModActivity(ModActivityTable):
                     field_count = 0
             return embed
 
-        embed = await add_mods_to_embed(active_mods)
-        embed = await add_mods_to_embed(inactive_mods)
+
+        active_mods = []
+        inactive_mods = []
+
+        for mod in mod_activities:
+            mod_id, time_in_vc, _, messages = mod
+            m, s = divmod(time_in_vc, 60)
+            h, m = divmod(m, 60)
+            user = discord.utils.get(ctx.guild.members, id=mod_id)
+            is_active =  h >= 3 or messages >= 30
+            icon = '🔹' if is_active else '🔸'
+            moderator_data = {"user": user,"icon": icon, "hours": h, "minutes": m, "seconds": s, "messages": messages }
+            if is_active:
+                active_mods.append(moderator_data)
+            else:
+                inactive_mods.append(moderator_data)
+
+        field_count = 0
+        embed = create_embed(is_first=True)
+        embed = await add_mods_to_embed(embed, active_mods)
+        embed = await add_mods_to_embed(embed, inactive_mods)
 
         if field_count > 0:
             await ctx.send(embed=embed)
