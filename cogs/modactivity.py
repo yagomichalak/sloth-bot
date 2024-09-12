@@ -73,8 +73,7 @@ class ModActivity(ModActivityTable):
 
         mod_activities = await self.get_mod_activities()
         member: discord.Member = ctx.author
-        is_first_embed = True  # Flag per indicare il primo embed
-        def create_embed(is_first):
+        def create_embed(is_first: bool):
             embed = discord.Embed(
                 url='https://discordapp.com', color=discord.Color.dark_green(),
                 timestamp=ctx.message.created_at)
@@ -87,7 +86,8 @@ class ModActivity(ModActivityTable):
 
             return embed
 
-        embed = create_embed(is_first_embed)
+        # Create first embed
+        embed = create_embed(is_first=True)
         field_count = 0
         active_mods = []
         inactive_mods = []
@@ -122,6 +122,7 @@ class ModActivity(ModActivityTable):
                 if field_count >= 20:
                     await ctx.send(embed=embed)
                     embed = create_embed(is_first=False)
+                    field_count = 0
             return embed
 
         embed = await add_mods_to_embed(active_mods)
