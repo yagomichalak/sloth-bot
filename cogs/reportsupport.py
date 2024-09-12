@@ -93,7 +93,7 @@ class ReportSupport(*report_support_classes):
             await self.remove_user_open_channel(inactive_case[0])
 
     @commands.command()
-    @utils.is_allowed(analyst_debugger_role_id, throw_exc=True)
+    @utils.is_allowed([analyst_debugger_role_id], throw_exc=True)
     @commands.cooldown(1, 30, commands.BucketType.user)
     async def check(self, ctx: commands.Context) -> None:
         """ Temporary command for checking cases and timeouts. """
@@ -101,7 +101,7 @@ class ReportSupport(*report_support_classes):
         guild = self.client.get_guild(server_id)
 
         # Look for people who completed their timeout time 
-        role = discord.utils.get(guild.roles, id=timedout_role_id)
+        role = guild.get_role(timedout_role_id)
         members = role.members
 
         for member in members:
