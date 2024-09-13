@@ -1,5 +1,6 @@
 # import.standard
 import os
+from typing import List
 
 # import.thirdparty
 import discord
@@ -73,8 +74,8 @@ class ModActivity(ModActivityTable):
 
         mod_activities = await self.get_mod_activities()
         member: discord.Member = ctx.author
-        is_first_embed = True  # Flag per indicare il primo embed
-        def create_embed(is_first):
+
+        def create_embed(is_first: bool) -> discord.Embed:
             embed = discord.Embed(
                 url='https://discordapp.com', color=discord.Color.dark_green(),
                 timestamp=ctx.message.created_at)
@@ -87,8 +88,26 @@ class ModActivity(ModActivityTable):
 
             return embed
 
-        embed = create_embed(is_first_embed)
-        field_count = 0
+        async def add_mods_to_embed(embed: discord.Embed, mods: List):
+            nonlocal field_count
+            for mod in mods:
+                embed.add_field(
+                name=f"{mod['icon']}**{mod['user']}**",
+                value=(
+                    f"**Voice Chat Activity:**\n"
+                    f"{mod['hours']:d} hours, {mod['minutes']:02d} minutes and {mod['seconds']:02d} seconds\n"
+                    f"**Text Chat Activity:**\n{mod['messages']} messages"
+                ),
+                inline=False
+            )
+                field_count += 1
+                if field_count >= 20:
+                    await ctx.send(embed=embed)
+                    embed = create_embed(is_first=False)
+                    field_count = 0
+            return embed
+
+
         active_mods = []
         inactive_mods = []
 
@@ -105,27 +124,10 @@ class ModActivity(ModActivityTable):
             else:
                 inactive_mods.append(moderator_data)
 
-        async def add_mods_to_embed(mods):
-            nonlocal field_count
-            nonlocal embed
-            for mod in mods:
-                embed.add_field(
-                name=f"{mod['icon']}**{mod['user']}**",
-                value=(
-                    f"**Voice Chat Activity:**\n"
-                    f"{mod['hours']:d} hours, {mod['minutes']:02d} minutes and {mod['seconds']:02d} seconds\n"
-                    f"**Text Chat Activity:**\n{mod['messages']} messages"
-                ),
-                inline=False
-            )
-                field_count += 1
-                if field_count >= 20:
-                    await ctx.send(embed=embed)
-                    embed = create_embed(is_first=False)
-            return embed
-
-        embed = await add_mods_to_embed(active_mods)
-        embed = await add_mods_to_embed(inactive_mods)
+        field_count = 0
+        embed = create_embed(is_first=True)
+        embed = await add_mods_to_embed(embed, active_mods)
+        embed = await add_mods_to_embed(embed, inactive_mods)
 
         if field_count > 0:
             await ctx.send(embed=embed)
