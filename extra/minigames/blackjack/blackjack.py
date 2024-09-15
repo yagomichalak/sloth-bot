@@ -47,11 +47,11 @@ class BlackJack(*blackjack_db):
         :param bet: The amount of money you wanna bet.
         
         * Minimum bet = 50 leaves.
-        * Maximum bet = 2500 leaves. """
+        * Maximum bet = 5000 leaves. """
 
         player: discord.Member = ctx.author
         guild_id = ctx.guild.id
-        max_bet: int = 2500
+        max_bet: int = 5000
 
         if not bet:
             ctx.command.reset_cooldown(ctx)

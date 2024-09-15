@@ -892,7 +892,7 @@ You can only add either **threads** **OR** one **voice channel**"""))
 		- +250 for each Thread
 		- +500 for the additional Voice Channel, if there is one.
 		
-		Max Rent Possible: 2500łł
+		Max Rent Possible: 5000łł
 		
 		PS: You can either have an extra Voice Channel or up to 4 Threads. """
 

@@ -21,7 +21,7 @@ class SlothClassDatabaseCommands(commands.Cog):
                 emoji VARCHAR(50) DEFAULT NULL, PRICE INT DEFAULT 0,
                 content VARCHAR(200) DEFAULT NULL, int_content BIGINT DEFAULT 0,
                 edited_timestamp BIGINT DEFAULT NULL,
-                PRIMARY KEY (target_id, skill_type)
+                PRIMARY KEY (user_id, target_id, skill_type)
             ) DEFAULT CHARSET=utf8mb4""")
         await ctx.send("**Created `SlothSkills` table!**")
 

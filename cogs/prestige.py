@@ -54,7 +54,7 @@ class Prestige(commands.Cog):
             "**I have a really nice voice**",
             "**Best sister-in-law ever**",
             "**z!bj 50**",
-            "**z!bj 2500**",
+            "**z!bj 5000**",
             "**I see where you're coming from**",
         ]
 
