@@ -416,7 +416,7 @@ class Player(*additional_cogs):
         :param user_id: The user ID with which to get the skill action.
         :param skill_type: The skill type of the skill action. """
 
-        await self.db.execute_query(
+        return await self.db.execute_query(
             "SELECT * FROM SlothSkills WHERE (user_id = %s OR target_id = %s) and skill_type = %s", (user_id, user_id, skill_type),
             fetch="all" if multiple else "one"
             )
