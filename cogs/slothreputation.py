@@ -115,7 +115,6 @@ class SlothReputation(*currency_cogs):
         else:
             answer = ctx.respond
 
-
         if not await self.check_members_score_table_exists():
             return await answer("**This command may be on maintenance!**")
 
@@ -193,14 +192,8 @@ class SlothReputation(*currency_cogs):
         > 🧑‍🏫 `Hosted`: {ucur[0][5]}
         """, inline=True)
 
-        # embed.add_field(name="📊 __**Level:**__", value=f"{lvl}.", inline=True)
-        # embed.add_field(name="🍃 __**Balance:**__", value=f"{ucur[0][1]}łł", inline=True)
         progress_bar = await self.get_progress_bar(xp=xp, goal_xp=goal_xp)
         embed.add_field(name="🔮 __**Progress Bar:**__", value=progress_bar, inline=False)
-
-        # embed.add_field(name="🧑‍🎓 __**Participated in:**__", value=f"{ucur[0][3]} classes.", inline=True)
-        # embed.add_field(name="🌟 __**Rewarded in:**__", value=f"{ucur[0][4]} classes.", inline=True)
-        # embed.add_field(name="🧑‍🏫 __**Hosted:**__", value=f"{ucur[0][5]} classes.", inline=True)
 
         emoji = user_class.emoji if (user_class := classes.get(sloth_profile[1].lower())) else ''
         embed.add_field(name="__**Sloth:**__", value=f"""
@@ -219,21 +212,6 @@ class SlothReputation(*currency_cogs):
         > 🧤 `Sabotaged:` {await SlothClass.has_effect(effects, 'sabotaged')}
         > 🤐 `Kidnapped:` {True if await SlothClass.has_effect(effects, 'kidnapped') else False}
         """, inline=True)
-
-        # embed.add_field(name="🕵️ __**Sloth Class:**__", value=f"{sloth_profile[1]} {emoji}", inline=True)
-        # embed.add_field(name="🍯 __**Has Potion:**__", value=f"{True if sloth_profile[5] else False}", inline=True)
-        # embed.add_field(name="💍 __**Rings:**__", value=f"{sloth_profile[7]}/2 rings." if sloth_profile else '0 rings.', inline=True)
-        # embed.add_field(name="🛡️ __**Protected:**__", value=f"{await SlothClass.has_effect(effects, 'protected')}", inline=True)
-        # embed.add_field(name="😵 __**Knocked Out:**__", value=f"{await SlothClass.has_effect(effects, 'knocked_out')}", inline=True)
-        # embed.add_field(name="🔌 __**Wired:**__", value=f"{await SlothClass.has_effect(effects, 'wired')}", inline=True)
-        # embed.add_field(name="🐸 __**Frogged:**__", value=f"{await SlothClass.has_effect(effects, 'frogged')}", inline=True)
-        # embed.add_field(name="🔪 __**Knife Sharpness Stack:**__", value=f"{sloth_profile[6]}/5", inline=True)
-        # embed.add_field(name="🧤 __**Sabotaged:**__", value=f"{await SlothClass.has_effect(effects, 'sabotaged')}", inline=True)
-        # embed.add_field(name="🤐 __**Kidnapped:**__", value=f"{True if await SlothClass.has_effect(effects, 'kidnapped') else False}", inline=True)
-
-        # embed.add_field(name=f"💰 __**Exchangeable Activity:**__", value=f"{h:d} hours, {m:02d} minutes and {user_info[0][1]} messages.", inline=True)
-        # embed.add_field(name=f"🏆 __**Leaderboard Info:**__", value=f"{position[1]}. pts | #{position[0]}", inline=True)
-        # embed.add_field(name="🧮 __**Skills Used:**__", value=f"{sloth_profile[2]} skills.")
 
         # Gets tribe information for the given user
         if sloth_profile[3]:
