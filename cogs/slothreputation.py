@@ -236,10 +236,10 @@ class SlothReputation(*currency_cogs):
                 inline=True)
 
         if marriages := await SlothClass.get_user_marriages(member.id):
-            text = f"Married to: "
+            text = f"Married to:\n"
             for marriage in marriages:
-                text += f"<@{marriage['partner']}> (<t:{marriage['timestamp']}:R>).{' 🌛' if marriage['honeymoon'] else ''}\n"
-            embed.add_field(name="💍 __**Marriage:**__", value=text if sloth_profile else '0 rings.', inline=False)
+                text += f"> <@{marriage['partner']}> (<t:{marriage['timestamp']}:R>).{' 🌛' if marriage['honeymoon'] else ''}\n"
+            embed.add_field(name="💍 __**Marriages:**__", value=text if sloth_profile else '0 rings.', inline=False)
 
         embed.set_thumbnail(url=member.display_avatar)
         embed.set_author(name=member, icon_url=member.display_avatar, url=member.display_avatar)

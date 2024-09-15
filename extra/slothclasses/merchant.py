@@ -631,12 +631,6 @@ class Merchant(Player):
         poly_marriage_price = 3  # Golden leaves
         first_marriage_price = 1000  # Leaves
 
-        member_marriages = await self.get_user_marriages(member.id)
-        if len(member_marriages) >= partner_limit:
-            return await ctx.send(f"**You cannot have more than {partner_limit} partners, {member.mention}!**")
-
-        member_currency = await self.get_user_currency(member.id)
-
         if not suitor:
             self.client.get_command('marry').reset_cooldown(ctx)
             return await ctx.send(f"**Please, inform who you want to marry, {member.mention}!**")
@@ -644,6 +638,15 @@ class Merchant(Player):
         if member.id == suitor.id:
             self.client.get_command('marry').reset_cooldown(ctx)
             return await ctx.send(f"**You cannot marry yourself, {member.mention}!**")
+
+        if await self.get_user_marriage(member.id, suitor.id):
+            return await ctx.send(f"**You are already married to that person, {member.mention}!**")
+
+        member_marriages = await self.get_user_marriages(member.id)
+        if len(member_marriages) >= partner_limit:
+            return await ctx.send(f"**You cannot have more than {partner_limit} partners, {member.mention}!**")
+
+        member_currency = await self.get_user_currency(member.id)
 
         no_pf_view = discord.ui.View()
         no_pf_view.add_item(discord.ui.Button(style=5, label="Create Account", emoji="🦥", url="https://languagesloth.com/profile/update"))
@@ -655,6 +658,10 @@ class Merchant(Player):
         if not (target_sloth_profile := await self.get_sloth_profile(suitor.id)):
             self.client.get_command('marry').reset_cooldown(ctx)
             return await ctx.send(f"**Your suitor doesn't have a Sloth Account, tell them to create one before trying this again, {member.mention}!**")
+
+        suitor_marriages = await self.get_user_marriages(suitor.id)
+        if len(suitor_marriages) >= partner_limit:
+            return await ctx.send(f"**Your suitor alreay has the limit of {partner_limit} partners, {member.mention}!**")
 
         p1_rings, p2_rings = sloth_profile[7], target_sloth_profile[7]
 
@@ -747,10 +754,12 @@ class Merchant(Player):
         member = ctx.author
 
         if not partner:
+            self.client.get_command('divorce').reset_cooldown(ctx)
             return await ctx.send(f"**Please, specify who you want to divorce, {member.mention}!**")
 
         member_marriage = await self.get_user_marriage(member.id, partner.id)
         if not member_marriage:
+            self.client.get_command('divorce').reset_cooldown(ctx)
             return await ctx.send(f"**This person is not married to you, {member.mention}!** 😔")
 
         partner = discord.utils.get(ctx.guild.members, id=member_marriage['partner'])
@@ -802,7 +811,7 @@ class Merchant(Player):
 
         return {
             "user": marriage[0] if kind == "user" else marriage[1],
-            "partner": marriage[1] if kind == "partner" else marriage[0],
+            "partner": marriage[1] if kind == "user" else marriage[0],
             "timestamp": marriage[2],
             "honeymoon": marriage[3],
         }
