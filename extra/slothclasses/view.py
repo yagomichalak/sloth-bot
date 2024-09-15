@@ -228,8 +228,7 @@ class SlapView(discord.ui.View):
             'https://c.tenor.com/2o9uTHxpw3UAAAAC/punishment-beat-ass.gif',
             'https://c.tenor.com/Zl2DQ6lc2-gAAAAC/slap-butt-naughty.gif',
             'https://c.tenor.com/oUwdLFkrzaMAAAAd/walrus-slaps.gif',
-            'https://c.tenor.com/H3lLTaQZRuwAAAAC/butt-slap-adventure-time.gif'
-
+            'https://c.tenor.com/H3lLTaQZRuwAAAAC/butt-slap-adventure-time.gif',
         ]
 
         embed = discord.Embed(
@@ -244,10 +243,12 @@ class SlapView(discord.ui.View):
         embed.set_image(url=choice(slaps))
         embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
 
-        member_marriage = await self.client.get_cog('SlothClass').get_user_marriage(self.member.id)
+        member_marriages = await self.client.get_cog('SlothClass').get_user_marriages(self.member.id)
         cheating_view = None
-        if (partner := member_marriage['partner']) and self.target.id != partner:
-            cheating_view = CheatingView(self.client, self.member, self.target, member_marriage)
+        for member_marriage in member_marriages:
+            if (partner := member_marriage['partner']) and self.target.id != partner:
+                cheating_view = CheatingView(self.client, self.member, self.target, member_marriages)
+                break
 
         if cheating_view:
             await interaction.response.send_message(
@@ -365,10 +366,12 @@ class KissView(discord.ui.View):
         embed.set_image(url=choice(m_kisses))
         embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
 
-        member_marriage = await self.client.get_cog('SlothClass').get_user_marriage(self.member.id)
+        member_marriages = await self.client.get_cog('SlothClass').get_user_marriages(self.member.id)
         cheating_view = None
-        if (partner := member_marriage['partner']) and self.target.id != partner:
-            cheating_view = CheatingView(self.client, self.member, self.target, member_marriage)
+        for member_marriage in member_marriages:
+            if (partner := member_marriage['partner']) and self.target.id != partner:
+                cheating_view = CheatingView(self.client, self.member, self.target, member_marriages)
+                break
 
         if cheating_view:
             await interaction.response.send_message(
@@ -404,18 +407,18 @@ class KissView(discord.ui.View):
             await interaction.response.edit_message(view=self)
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
-        return self.member.id == interaction.user.id
+        return any(map(lambda marriage: marriage["partner"] == interaction.user.id, self.marriages)) 
 
 
 class CheatingView(discord.ui.View):
     """ View for the spot cheating feature. """
 
-    def __init__(self, client, cheater: discord.Member, lover: discord.Member, marriage: Dict[str, Union[str, int]]):
+    def __init__(self, client, cheater: discord.Member, lover: discord.Member, marriages: List[Dict[str, Union[str, int]]]):
         super().__init__(timeout=300)
         self.client = client
         self.cheater = cheater
         self.lover = lover
-        self.marriage = marriage
+        self.marriages = marriages
 
     @discord.ui.button(label="Spot Cheating", style=discord.ButtonStyle.red, custom_id='cheating_id', emoji='<:pepeOO:572067085371572224>')
     async def spot_cheating_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
@@ -434,17 +437,17 @@ class CheatingView(discord.ui.View):
 
         embed = discord.Embed(
             title="__I Caught You!__",
-            description=f"<:tony:686282295141072950> <@{self.marriage['partner']}> caught {self.cheater.mention} cheating on them with {self.lover.mention} <:tony:686282295141072950>",
+            description=f"<:tony:686282295141072950> <@{interaction.user.id}> caught {self.cheater.mention} cheating on them with {self.lover.mention} <:tony:686282295141072950>",
             color=discord.Color.dark_red(),
             timestamp=interaction.message.created_at
         )
 
-        partner = await interaction.guild.fetch_member(self.marriage['partner'])
+        partner = await interaction.guild.fetch_member(interaction.user.id)
         embed.set_author(name=partner.display_name, url=partner.display_avatar, icon_url=partner.display_avatar)
         embed.set_thumbnail(url=self.lover.display_avatar)
         embed.set_image(url=choice(catches))
         embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
-        view = CheatingActionView(self.client, self.cheater, self.lover, self.marriage)
+        view = CheatingActionView(self.client, self.cheater, self.lover, self.marriages)
 
         await interaction.response.send_message(content=self.cheater.mention, embed=embed, view=view)
 
@@ -461,19 +464,18 @@ class CheatingView(discord.ui.View):
             await interaction.response.edit_message(view=self)
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
-        return self.marriage['partner'] == interaction.user.id
-
+        return any(map(lambda marriage: marriage["partner"] == interaction.user.id, self.marriages)) 
 
 
 class CheatingActionView(discord.ui.View):
     """ View for the cheating spotted feature. """
 
-    def __init__(self, client, cheater: discord.Member, lover: discord.Member, marriage: Dict[str, Union[str, int]]):
+    def __init__(self, client, cheater: discord.Member, lover: discord.Member, marriages: List[Dict[str, Union[str, int]]]):
         super().__init__(timeout=60)
         self.client = client
         self.cheater = cheater
         self.lover = lover
-        self.marriage = marriage
+        self.marriages = marriages
         self.sloth_class = client.get_cog('SlothClass')
 
     @discord.ui.button(label="Forgive", style=discord.ButtonStyle.green, custom_id='forgive_id', emoji='<:zslothcow:870057897718079558>')
@@ -492,12 +494,12 @@ class CheatingActionView(discord.ui.View):
 
         embed = discord.Embed(
             title="__That Sin has been Forgiven!__",
-            description=f"<:zslotheyesrolling:688071367505215560> <@{self.marriage['partner']}> has forgiven {self.cheater.mention} for cheating on them <:zslotheyesrolling:688071367505215560>",
+            description=f"<:zslotheyesrolling:688071367505215560> <@{interaction.user.id}> has forgiven {self.cheater.mention} for cheating on them <:zslotheyesrolling:688071367505215560>",
             color=discord.Color.green(),
             timestamp=interaction.message.created_at
         )
 
-        partner = await interaction.guild.fetch_member(self.marriage['partner'])
+        partner = await interaction.guild.fetch_member(interaction.user.id)
 
         embed.set_author(name=partner.display_name, url=partner.display_avatar, icon_url=partner.display_avatar)
         embed.set_thumbnail(url=self.lover.display_avatar)
@@ -524,12 +526,12 @@ class CheatingActionView(discord.ui.View):
 
         embed = discord.Embed(
             title="__That Sin cannot be Forgiven!__",
-            description=f"<:wrong:735204715415076954> <@{self.marriage['partner']}> didn't forgive {self.cheater.mention}'s betrayal and force-divorced them, making them pay for the divorce cost. They broke up! <:wrong:735204715415076954>",
+            description=f"<:wrong:735204715415076954> <@{interaction.user.id}> didn't forgive {self.cheater.mention}'s betrayal and force-divorced them, making them pay for the divorce cost. They broke up! <:wrong:735204715415076954>",
             color=discord.Color.dark_red(),
             timestamp=interaction.message.created_at
         )
 
-        partner = await interaction.guild.fetch_member(self.marriage['partner'])
+        partner = await interaction.guild.fetch_member(interaction.user.id)
 
         embed.set_author(name=partner.display_name, url=partner.display_avatar, icon_url=partner.display_avatar)
         embed.set_thumbnail(url=self.lover.display_avatar)
@@ -538,8 +540,8 @@ class CheatingActionView(discord.ui.View):
 
         # Updates marital status and subtracts the cheater's money
         try:
-            await self.sloth_class.delete_skill_action_by_target_id_and_skill_type(partner.id, skill_type='marriage')
-            await self.sloth_class.delete_skill_action_by_user_id_and_skill_type(partner.id, skill_type='marriage')
+            await self.sloth_class.delete_user_marriage(partner.id, self.cheater.id)
+            await self.sloth_class.delete_user_marriage(self.cheater.id, partner.id)
             await self.client.get_cog('SlothCurrency').update_user_money(self.cheater.id, -500)
         except Exception as e:
             print(e)
@@ -554,7 +556,7 @@ class CheatingActionView(discord.ui.View):
     async def knock_out_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
         """ Beats and knocks-your partner out, so they rethink before cheating on you again. """
 
-        partner_id = self.marriage['partner']
+        partner_id = interaction.user.id
         embed = await self.sloth_class.get_hit_embed(interaction.channel, partner_id, self.cheater.id)
 
         current_ts = await utils.get_timestamp()
@@ -571,7 +573,6 @@ class CheatingActionView(discord.ui.View):
             await self.disable_buttons(interaction, followup=True)
             self.used = True
 
-
     async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
         """ Disables all buttons of the view menu. """
 
@@ -584,8 +585,7 @@ class CheatingActionView(discord.ui.View):
             await interaction.response.edit_message(view=self)
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
-        return self.marriage['partner'] == interaction.user.id
-
+        return any(map(lambda marriage: marriage["partner"] == interaction.user.id, self.marriages)) 
 
 
 class HoneymoonView(discord.ui.View):

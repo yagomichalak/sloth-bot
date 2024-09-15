@@ -621,17 +621,21 @@ class Merchant(Player):
         :param suitor: The person to marry.
         PS: You need wedding rings to propose someone, buy one from your local Merchant.
         
-        * Cost: 1000łł
+        * Cost: 1000łł or 5gł when marrying more than 1 person
 
         Ps: Both you and your suitor must have a sum of at least 2 rings in order to marry.
         """
 
         member = ctx.author
+        partner_limit = 4
+        poly_marriage_price = 3  # Golden leaves
+        first_marriage_price = 1000  # Leaves
 
-        member_marriage = await self.get_user_marriage(member.id)
-        if member_marriage['partner']:
-            self.client.get_command('marry').reset_cooldown(ctx)
-            return await ctx.send(f"**You already have a partner, what do you think you're doing, {member.mention}?** 🤨")
+        member_marriages = await self.get_user_marriages(member.id)
+        if len(member_marriages) >= partner_limit:
+            return await ctx.send(f"**You cannot have more than {partner_limit} partners, {member.mention}!**")
+
+        member_currency = await self.get_user_currency(member.id)
 
         if not suitor:
             self.client.get_command('marry').reset_cooldown(ctx)
@@ -652,11 +656,6 @@ class Merchant(Player):
             self.client.get_command('marry').reset_cooldown(ctx)
             return await ctx.send(f"**Your suitor doesn't have a Sloth Account, tell them to create one before trying this again, {member.mention}!**")
 
-        suitor_marriage = await self.get_user_marriage(suitor.id)
-        if suitor_marriage['partner']:
-            self.client.get_command('marry').reset_cooldown(ctx)
-            return await ctx.send(f"**{suitor.mention} already has a partner, you savage, {member.mention}!** 😏")
-
         p1_rings, p2_rings = sloth_profile[7], target_sloth_profile[7]
 
         if p1_rings + p2_rings < 2:
@@ -664,10 +663,15 @@ class Merchant(Player):
             return await ctx.send(f"**You two don't have enough rings to marry each other! The sum of your rings must be greater or equal to 2, {member.mention}!**")
 
         # Checks the member's money
-        member_currency = await self.get_user_currency(member.id)
-        if member_currency[1] < 1000:
-            self.client.get_command('marry').reset_cooldown(ctx)
-            return await ctx.send(f"**You don't have `1000łł` to marry {suitor.mention}, {member.mention}!**")
+        if len(member_marriages) >= 1:  # Poly marriage uses golden leaves
+            if member_currency[7] < poly_marriage_price:
+                return await ctx.send(
+                    f"**For having more than 1 partner it costs `{poly_marriage_price}gł` golden leaves, you have `{member_currency[7]}gł`, {member.mention}!**"
+                )
+        else:  # Where as normal ones use leaves 
+            if member_currency[1] < 1000:
+                self.client.get_command('marry').reset_cooldown(ctx)
+                return await ctx.send(f"**You don't have `1000łł` to marry {suitor.mention}, {member.mention}!**")
 
         # Asks confirmation
         confirm_view = ConfirmButton(member, timeout=60)
@@ -700,7 +704,10 @@ class Merchant(Player):
         if not confirm_view.value:
             return await ctx.send(f"**Not doing it then, {suitor.mention}!**")
 
-        await self.client.get_cog('SlothCurrency').update_user_money(member.id, -1000)
+        if len(member_marriages) >= 1:
+            await self.client.get_cog('SlothCurrency').update_user_premium_money(member.id, -poly_marriage_price)
+        else:
+            await self.client.get_cog('SlothCurrency').update_user_money(member.id, -first_marriage_price)
             
         # Update ring counters
         if p1_rings == 2 and p2_rings >= 1:
@@ -715,11 +722,8 @@ class Merchant(Player):
             await self.update_user_rings(suitor.id, -2)
 
         # Update marital status
-        current_ts = await utils.get_timestamp()
         try:
-            await self.insert_skill_action(
-                user_id=member.id, skill_type='marriage', skill_timestamp=current_ts,
-                target_id=suitor.id)
+            await self.insert_user_marriage(user_id=member.id, partner_id=suitor.id)
             filename, filepath = await self.make_marriage_image(member, suitor)
         except Exception as e:
             print(e)
@@ -733,16 +737,21 @@ class Merchant(Player):
     @commands.command()
     @Player.poisoned()
     @commands.cooldown(1, 180, commands.BucketType.user)
-    async def divorce(self, ctx) -> None:
+    async def divorce(self, ctx, partner: discord.Member = None) -> None:
         """ Divorces your partner.
-        
+
+        :param partner: The person who to divorce.
+
         Cost: 500łł """
 
         member = ctx.author
 
-        member_marriage = await self.get_user_marriage(member.id)
-        if not member_marriage['partner']:
-            return await ctx.send(f"**You don't even have a partner, {member.mention}!** 😔")
+        if not partner:
+            return await ctx.send(f"**Please, specify who you want to divorce, {member.mention}!**")
+
+        member_marriage = await self.get_user_marriage(member.id, partner.id)
+        if not member_marriage:
+            return await ctx.send(f"**This person is not married to you, {member.mention}!** 😔")
 
         partner = discord.utils.get(ctx.guild.members, id=member_marriage['partner'])
         partner = discord.Object(id=member_marriage['partner']) if not partner else partner
@@ -771,8 +780,8 @@ class Merchant(Player):
 
         # Update marital status
         try:
-            await self.delete_skill_action_by_target_id_and_skill_type(member.id, skill_type='marriage')
-            await self.delete_skill_action_by_user_id_and_skill_type(member.id, skill_type='marriage')
+            await self.delete_user_marriage(member.id, partner.id)
+            await self.delete_user_marriage(partner.id, member.id)
         except Exception as e:
             print(e)
             await ctx.send(f"**Something went wrong with this, {member.mention}!**")
@@ -780,36 +789,45 @@ class Merchant(Player):
             divorce_embed = await self.get_divorce_embed(ctx.channel, member, partner)
             await ctx.send(content=f"<@{partner.id}>", embed=divorce_embed)
 
-    async def get_user_marriage(self, user_id: int) -> Dict[str, Union[str, int]]:
+    async def get_user_marriage(self, user_id: int, partner_id: int) -> Optional[Dict[str, Optional[int]]]:
+        """ Gets the user's partner.
+        :param user_id: The ID of the user.
+        :param partner_id: The partner ID. """
+
+        marriage = await self._get_user_marriage(user_id, partner_id)
+        if not marriage:
+            return
+
+        kind = "user" if marriage[0] == user_id else "partner"
+
+        return {
+            "user": marriage[0] if kind == "user" else marriage[1],
+            "partner": marriage[1] if kind == "partner" else marriage[0],
+            "timestamp": marriage[2],
+            "honeymoon": marriage[3],
+        }
+
+    async def get_user_marriages(self, user_id: int) -> List[Dict[str, Optional[int]]]:
         """ Gets the user's partner.
         :param user_id: The ID of the user. """
 
-        kind = None
+        marriages = await self._get_user_marriages(user_id)
+        if not marriages:
+            return []
 
-        skill_action = await self.get_skill_action_by_user_id_and_skill_type(user_id=user_id, skill_type='marriage')
-        if skill_action:
-            kind = 1
-        else:
-            skill_action = await self.get_skill_action_by_target_id_and_skill_type(target_id=user_id, skill_type='marriage')
-            kind = 2
+        marriage_maps: List[Dict[str, Optional[int]]] = []
 
-        marriage = {
-            'user': None,
-            'partner': None,
-            'timestamp': None,
-            'honeymoon': False
-        }
+        for marriage in marriages:
 
-        if not skill_action:
-            return marriage
+            kind = "user" if marriage[0] == user_id else "partner"
 
-        if kind == 1:
-            marriage = {'user': skill_action[0], 'partner': skill_action[3], 'timestamp': skill_action[2], "honeymoon": skill_action[8]}
-        elif kind == 2:
-            marriage = {'user': skill_action[3], 'partner': skill_action[0], 'timestamp': skill_action[2], "honeymoon": skill_action[8]}
-
-        return marriage
-
+            marriage_maps.append({
+                "user": marriage[0] if kind == "user" else marriage[1],
+                "partner": marriage[1] if kind == "user" else marriage[0],
+                "timestamp": marriage[2],
+                "honeymoon": marriage[3],
+            })
+        return marriage_maps
 
     async def make_marriage_image(self, p1: discord.Member, p2: discord.Member) -> List[str]:
 
@@ -880,16 +898,6 @@ class Merchant(Player):
         marriage_embed.set_footer(text=channel.guild, icon_url=channel.guild.icon.url)
 
         return marriage_embed
-        
-    async def update_marriage_content(self, member_id: int) -> None:
-        """ Updates marriage content to honeymoon.
-        :param member_id: The ID of the member who's married. """
-
-        await self.db.execute_query("""
-        UPDATE SlothSkills SET content = 'honeymoon' 
-        WHERE user_id = %s AND skill_type = 'marriage' 
-        OR target_id = %s AND skill_type = 'marriage'
-        """, (member_id, member_id))
 
     @commands.command(aliases=['sell_mascot'])
     @Player.poisoned()

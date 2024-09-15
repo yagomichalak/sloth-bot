@@ -431,11 +431,12 @@ class Seraph(Player):
     @Player.skills_locked()
     @Player.user_is_class('seraph')
     @Player.skill_mark()
-    async def attain_grace(self, ctx, target: Optional[discord.Member] = None) -> None:
+    async def attain_grace(self, ctx, target: Optional[discord.Member] = None, target_partner: Optional[discord.Member] = None) -> None:
         """ Tries with a 10% chance of success to attain the grace from the deity
          so the person, who must be honeymoon'd receives a baby to take care of, 
          together with their spouse.
-        :param target: The target member to attain the grace to. [Optional][Default=You]
+        :param target: The target member to attain the grace to.
+        :param target_partner: The target member to attain the grace to.
         
         PS: Don't forget to feed your baby, that's crucial and vital.
 
@@ -451,18 +452,21 @@ class Seraph(Player):
         if 'knocked_out' in perpetrator_fx:
             return await ctx.send(f"**{perpetrator.mention}, you can't use your skill, because you are knocked-out!**")
 
-        if not target:
-            target = perpetrator
+        if not target_partner:
+            return await ctx.send(f"**You also have to specify the person's partner, {perpetrator.mention}!**")
 
-        if target.bot:
-            return await ctx.send(f"**You cannot use it on a bot, {perpetrator.mention}!**")
+        if not target:
+            return await ctx.send(f"**You have to specify the married people who you want to attain the grace to, {perpetrator.mention}!**")
+
+        if target.bot or target_partner.bot:
+            return await ctx.send(f"**You cannot use it on bots, {perpetrator.mention}!**")
 
         target_sloth_profile = await self.get_sloth_profile(target.id)
         if not target_sloth_profile:
-            return await ctx.send(f"**You cannot attain the grace for someone who doesn't have an account, {perpetrator.mention}!**")
+            return await ctx.send(f"**You cannot attain the grace to someone who doesn't have an account, {perpetrator.mention}!**")
 
-        if target_sloth_profile[1] == 'default':
-            return await ctx.send(f"**You cannot attain the grace for someone who has a `default` Sloth class, {perpetrator.mention}!**")
+        if target_sloth_profile[1] == "default":
+            return await ctx.send(f"**You cannot attain the grace to someone who has a `default` Sloth class, {perpetrator.mention}!**")
 
         SlothClass = self.client.get_cog('SlothClass')
         user_baby = await SlothClass.get_user_baby(target.id)
@@ -471,12 +475,12 @@ class Seraph(Player):
 
         marriage = await SlothClass.get_user_marriage(target.id)
         if not marriage['partner']:
-            return await ctx.send(f"**You cannot attain the grace for someone who is not married, {perpetrator.mention}!**")
+            return await ctx.send(f"**You cannot attain the grace to someone who is not married, {perpetrator.mention}!**")
 
         if not marriage['honeymoon']:
-            return await ctx.send(f"**You cannot attain the grace for someone who is not honeymoon'd, {perpetrator.mention}!**")
+            return await ctx.send(f"**You cannot attain the grace to someone who is not honeymoon'd, {perpetrator.mention}!**")
 
-        confirm = await Confirm(f"**Are you sure you want to spend `500` to try to attain the grace for {target.mention}, {perpetrator.mention}?**").prompt(ctx)
+        confirm = await Confirm(f"**Are you sure you want to spend `500` to try to attain the grace to {target.mention}, {perpetrator.mention}?**").prompt(ctx)
         if not confirm:
             return await ctx.send(f"**Not doing it, then, {target.mention}!**")
 
@@ -525,8 +529,6 @@ class Seraph(Player):
                     await SlothCurrency.update_user_money(perpetrator.id, 500)
                 else:
                     await ctx.send(f"**You had a `50%` chance of getting your money back after failing your `attain grace`, but you missed it, {perpetrator.mention}!** 😢")
-
-
 
     async def attained_grace_embed(self, perpetrator: int, target: int, emoji: str) -> discord.Embed:
         """ Makes an embedded message for an attain grace action.

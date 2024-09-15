@@ -188,10 +188,7 @@ class SlothReputation(*currency_cogs):
         emoji = user_class.emoji if (user_class := classes.get(sloth_profile[1].lower())) else ''
         embed.add_field(name="🕵️ __**Sloth Class:**__", value=f"{sloth_profile[1]} {emoji}", inline=True)
         embed.add_field(name="🍯 __**Has Potion:**__", value=f"{True if sloth_profile[5] else False}", inline=True)
-        marriage = await SlothClass.get_user_marriage(member.id)
-        if not marriage['partner']:
-            embed.add_field(name="💍 __**Rings:**__", value=f"{sloth_profile[7]}/2 rings." if sloth_profile else '0 rings.', inline=True)
-
+        embed.add_field(name="💍 __**Rings:**__", value=f"{sloth_profile[7]}/2 rings." if sloth_profile else '0 rings.', inline=True)
         embed.add_field(name="🛡️ __**Protected:**__", value=f"{await SlothClass.has_effect(effects, 'protected')}", inline=True)
         embed.add_field(name="😵 __**Knocked Out:**__", value=f"{await SlothClass.has_effect(effects, 'knocked_out')}", inline=True)
         embed.add_field(name="🔌 __**Wired:**__", value=f"{await SlothClass.has_effect(effects, 'wired')}", inline=True)
@@ -238,12 +235,11 @@ class SlothReputation(*currency_cogs):
                 value=f"`{user_pet[1]}` (<t:{user_pet[7]}:R>). `{user_pet[2]}`", 
                 inline=True)
 
-        if marriage['partner']:
-            embed.add_field(
-                name="💍 __**Marriage:**__", 
-                value=f"Married to <@{marriage['partner']}> (<t:{marriage['timestamp']}:R>).{' 🌛' if marriage['honeymoon'] else ''}" 
-                if sloth_profile else '0 rings.', 
-                inline=False)
+        if marriages := await SlothClass.get_user_marriages(member.id):
+            text = f"Married to: "
+            for marriage in marriages:
+                text += f"<@{marriage['partner']}> (<t:{marriage['timestamp']}:R>).{' 🌛' if marriage['honeymoon'] else ''}\n"
+            embed.add_field(name="💍 __**Marriage:**__", value=text if sloth_profile else '0 rings.', inline=False)
 
         embed.set_thumbnail(url=member.display_avatar)
         embed.set_author(name=member, icon_url=member.display_avatar, url=member.display_avatar)

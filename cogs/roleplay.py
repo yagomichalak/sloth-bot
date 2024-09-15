@@ -187,17 +187,22 @@ class RolePlay(commands.Cog):
     @commands.command()
     @Player.poisoned()
     @commands.cooldown(1, 240, commands.BucketType.user)
-    async def honeymoon(self, ctx) -> None:
+    async def honeymoon(self, ctx, partner_id: int = None) -> None:
         """ Celebrates a honey moon with your partner.
+
+        :param partner_id: The partner you want to go on a honeymoon with. (Since you can have up to 4)
         
         Benefits: It heals the couple, protects and resets all skills
         cooldowns and change class cooldown. """
 
         member = ctx.author
 
+        if not partner_id:
+            return await ctx.send(f"**Please, inform the partner who you want to go on a honeymoon with!**")
+        
         SlothClass = self.client.get_cog('SlothClass')
 
-        member_marriage = await SlothClass.get_user_marriage(member.id)
+        member_marriage = await SlothClass.get_user_marriage(member.id, partner_id)
         if not member_marriage['partner']:
             self.client.get_command('honeymoon').reset_cooldown(ctx)
             return await ctx.send(f"**You don't have a partner, you can't have a honeymoon by yourself, {member.mention}!** 😔")
@@ -266,15 +271,14 @@ class RolePlay(commands.Cog):
         if not confirmation_view.value:
             return
 
-        member_marriage = await SlothClass.get_user_marriage(member.id)
+        member_marriage = await SlothClass.get_user_marriage(member.id, partner.id)
         if member_marriage['honeymoon']:
-            return await ctx.send(f"**You already had your honeymoon, {member.mention}!**")
+            return await ctx.send(f"**You already had your honeymoon with this person, {member.mention}!**")
 
         await self.client.get_cog('SlothCurrency').update_user_money(member.id, -1500) # Updates user money
-        await SlothClass.update_marriage_content(member.id)
+        await SlothClass.update_user_honeymoon_ts(member.id, partner.id)
 
         place, activity = view.place, view.activity
-
 
         final_embed = view.embed
         final_embed.clear_fields()

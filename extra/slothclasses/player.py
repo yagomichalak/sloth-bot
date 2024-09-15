@@ -19,12 +19,13 @@ from extra.customerrors import (ActionSkillOnCooldown, ActionSkillsLocked,
 from mysqldb import DatabaseCore
 from .userbabies import UserBabiesTable
 from .userpets import UserPetsTable
+from .usermarriages import UserMarriagesTable
 
 # variables.textchannel
 bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID', 123))
 
 additional_cogs: List[commands.Cog] = [
-    UserPetsTable, UserBabiesTable
+    UserPetsTable, UserBabiesTable, UserMarriagesTable
 ]
 
 class Skill(Enum):
