@@ -473,8 +473,8 @@ class Seraph(Player):
         if user_baby:
             return await ctx.send(f"**This user already has a baby, {perpetrator.mention}!**")
 
-        marriage = await SlothClass.get_user_marriage(target.id)
-        if not marriage['partner']:
+        marriage = await SlothClass.get_user_marriage(target.id, target_partner.id)
+        if not marriage:
             return await ctx.send(f"**You cannot attain the grace to someone who is not married, {perpetrator.mention}!**")
 
         if not marriage['honeymoon']:
