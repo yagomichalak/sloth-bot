@@ -19,6 +19,7 @@ from .player import Player, Skill
 
 # variables.textchannel
 bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID', 123))
+sloth_subscriber_sub_id = int(os.getenv("SLOTH_SUBSCRIBER_SUB_ID", 123))
 
 class Merchant(Player):
 
@@ -672,8 +673,13 @@ class Merchant(Player):
         # Checks the member's money
         if len(member_marriages) >= 1:  # Poly marriage uses golden leaves
             if member_currency[7] < poly_marriage_price:
+                view = None
+                if not await utils.is_subscriber().predicate(ctx):
+                    view = discord.ui.View()
+                    view.add_item(discord.ui.Button(sku_id=sloth_subscriber_sub_id))
                 return await ctx.send(
-                    f"**For having more than 1 partner it costs `{poly_marriage_price}gł` golden leaves, you have `{member_currency[7]}gł`, {member.mention}!**"
+                    f"**For having more than 1 partner it costs `{poly_marriage_price}gł` golden leaves, you have `{member_currency[7]}gł`, {member.mention}!**",
+                    view=view
                 )
         else:  # Where as normal ones use leaves 
             if member_currency[1] < 1000:
