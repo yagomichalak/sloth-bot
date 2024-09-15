@@ -246,9 +246,10 @@ class SlapView(discord.ui.View):
         member_marriages = await self.client.get_cog('SlothClass').get_user_marriages(self.member.id)
         cheating_view = None
         for member_marriage in member_marriages:
-            if (partner := member_marriage['partner']) and self.target.id != partner:
-                cheating_view = CheatingView(self.client, self.member, self.target, member_marriages)
+            if self.target.id in (member_marriage["user"], member_marriage["partner"]):
                 break
+        else:
+            cheating_view = CheatingView(self.client, self.member, self.target, member_marriages)
 
         if cheating_view:
             await interaction.response.send_message(
@@ -293,7 +294,6 @@ class KissView(discord.ui.View):
         self.member = member
         self.target = target
         self.used: bool = False
-
 
     @discord.ui.button(label='Kiss on the Cheek', style=discord.ButtonStyle.blurple, custom_id='cheek_kiss_id', emoji="☺️")
     async def cheek_kiss_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
@@ -369,9 +369,10 @@ class KissView(discord.ui.View):
         member_marriages = await self.client.get_cog('SlothClass').get_user_marriages(self.member.id)
         cheating_view = None
         for member_marriage in member_marriages:
-            if (partner := member_marriage['partner']) and self.target.id != partner:
-                cheating_view = CheatingView(self.client, self.member, self.target, member_marriages)
+            if self.target.id in (member_marriage["user"], member_marriage["partner"]):
                 break
+        else:
+            cheating_view = CheatingView(self.client, self.member, self.target, member_marriages)
 
         if cheating_view:
             await interaction.response.send_message(
@@ -386,14 +387,12 @@ class KissView(discord.ui.View):
         self.used = True
         self.stop()
 
-
     @discord.ui.button(label='Nevermind', style=discord.ButtonStyle.red, custom_id='nevermind_id', emoji="❌")
     async def nevermind_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
         """ Cancels the slap action. """
 
         await self.disable_buttons(interaction)
         self.stop()
-
 
     async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
         """ Disables all buttons of the view menu. """
@@ -407,7 +406,7 @@ class KissView(discord.ui.View):
             await interaction.response.edit_message(view=self)
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
-        return any(map(lambda marriage: marriage["partner"] == interaction.user.id, self.marriages)) 
+        return self.member.id == interaction.user.id
 
 
 class CheatingView(discord.ui.View):
@@ -585,7 +584,10 @@ class CheatingActionView(discord.ui.View):
             await interaction.response.edit_message(view=self)
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
-        return any(map(lambda marriage: marriage["partner"] == interaction.user.id, self.marriages)) 
+        for marriage in self.marriages:
+            if interaction.user.id == self.cheater.id:
+                return False
+            return interaction.user.id in (marriage["user"], marriage["partner"])
 
 
 class HoneymoonView(discord.ui.View):
