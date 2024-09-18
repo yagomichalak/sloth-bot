@@ -6,6 +6,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# variables.textchannel #
+reportsupport_channel_id = int(os.getenv('REPORT_CHANNEL_ID', 123))
+
 list_of_commands = [
 ['• Moderation ',
 '''
@@ -78,7 +81,7 @@ rules = {
 
         "Do not impersonate others": """ Do not impersonate other users or Staff members. """,
 
-        "Do not beg": """Do not ask to be granted roles such as moderator, teacher or event manager. You may apply for those roles in <#729454413290143774> 
+        "Do not beg": f"""Do not ask to be granted roles such as moderator, teacher or event manager. You may apply for those roles in <#{reportsupport_channel_id}>
             Repeatedly begging the Staff for things may result in warnings or a ban.""",
 
         "Drama": """Do your best to keep drama out of this server. Any active attempt to start drama, or refusal to end a dispute within the server, may result in consequences."""
