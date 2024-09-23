@@ -198,12 +198,13 @@ class RolePlay(commands.Cog):
         member = ctx.author
 
         if not partner:
+            self.client.get_command('honeymoon').reset_cooldown(ctx)
             return await ctx.send(f"**Please, inform the partner who you want to go on a honeymoon with!**")
         
         SlothClass = self.client.get_cog('SlothClass')
 
         member_marriage = await SlothClass.get_user_marriage(member.id, partner.id)
-        if not member_marriage['partner']:
+        if not member_marriage:
             self.client.get_command('honeymoon').reset_cooldown(ctx)
             return await ctx.send(f"**You don't have a partner, you can't have a honeymoon by yourself, {member.mention}!** 😔")
 
@@ -240,6 +241,7 @@ class RolePlay(commands.Cog):
         # Check user currency
         user_currency = await SlothClass.get_user_currency(member.id)
         if user_currency[1] < 1500:
+            self.client.get_command('honeymoon').reset_cooldown(ctx)
             return await ctx.send(f"**You don't have `1500łł` to have a honeymoon, {member.mention}!**")
 
         # Confirmation view
@@ -273,6 +275,7 @@ class RolePlay(commands.Cog):
 
         member_marriage = await SlothClass.get_user_marriage(member.id, partner.id)
         if member_marriage['honeymoon']:
+            self.client.get_command('honeymoon').reset_cooldown(ctx)
             return await ctx.send(f"**You already had your honeymoon with this person, {member.mention}!**")
 
         await self.client.get_cog('SlothCurrency').update_user_money(member.id, -1500) # Updates user money
