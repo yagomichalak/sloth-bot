@@ -1151,7 +1151,7 @@ class Moderation(*moderation_cogs):
 
             current_ts = await utils.get_timestamp()
 
-            async for muted_member in muted_members:
+            for muted_member in muted_members:
                 try:
                     # Kicks the muted member
                     await muted_member.kick(reason=reason)

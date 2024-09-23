@@ -166,7 +166,7 @@ class UserItemsTable(commands.Cog):
         :param user_id: The ID of the user from whom to get the item.
         :param item_name: The name of the item to get. """
 
-        return await self.db.execute_query("SELECT * FROM UserItems WHERE user_id = %s and item_name = %s", (user_id, item_name), item_system="one")
+        return await self.db.execute_query("SELECT * FROM UserItems WHERE user_id = %s and item_name = %s", (user_id, item_name), fetch="one")
 
     async def get_user_registered_items(self, user_id: int) -> List[List[Union[str, int]]]:
         """ Gets all UserItems that are registered on the website.

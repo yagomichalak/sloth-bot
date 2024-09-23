@@ -21,7 +21,7 @@ from .select import ReportStaffSelect, ReportSupportSelect
 mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID', 123))
 analyst_debugger_role_id: int = int(os.getenv('ANALYST_DEBUGGER_ROLE_ID', 123))
-sloth_subscriber_sub_id = int(os.getenv("SLOTH_SUBSCRIBER_SUB_ID", 123))
+# sloth_subscriber_sub_id = int(os.getenv("SLOTH_SUBSCRIBER_SUB_ID", 123))
 
 
 class ReportSupportView(discord.ui.View):
@@ -35,10 +35,10 @@ class ReportSupportView(discord.ui.View):
         self.cog = client.get_cog("ReportSupport")
         patreon_button = discord.ui.Button(style=5, label="Support us on Patreon!", url="https://www.patreon.com/Languagesloth", emoji="<:patreon:831401582426980422>", row=1)
         website_button = discord.ui.Button(style=5, label="Our website", url="https://languagesloth.com", emoji="<:Sloth:686237376510689327>", row=1)
-        sub_button = discord.ui.Button(sku_id=sloth_subscriber_sub_id, row=2)
+        # sub_button = discord.ui.Button(sku_id=sloth_subscriber_sub_id, row=2)
         self.add_item(patreon_button)
         self.add_item(website_button)
-        self.add_item(sub_button)
+        # self.add_item(sub_button)
 
     @discord.ui.button(label="Apply for Teacher!", style=3, custom_id="apply_to_teach", emoji="🧑‍🏫", row=0)
     async def apply_to_teach_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
