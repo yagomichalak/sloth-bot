@@ -106,7 +106,7 @@ class UserMarriagesTable(commands.Cog):
 
         current_ts = await utils.get_timestamp()
 
-        await self.db.execute_query("UPDATE UserMarriages SET honeymoon_ts = %s WHERE user_id = %s AND partner_id = %s", (current_ts, user_id, partner_id))
+        await self.db.execute_query("UPDATE UserMarriages SET honeymoon_ts = %s WHERE (user_id = %s AND partner_id = %s) OR (user_id = %s AND partner_id = %s)", (current_ts, user_id, partner_id, partner_id, user_id))
 
     async def delete_user_marriage(self, user_id: int, partner_id: int) -> None:
         """ Deletes a user marriage.
