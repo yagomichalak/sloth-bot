@@ -1,4 +1,4 @@
-from typing import List
+from typing import Union
 
 import discord
 from discord.ext import commands
@@ -187,7 +187,7 @@ class RolePlay(commands.Cog):
     @commands.command()
     @Player.poisoned()
     @commands.cooldown(1, 240, commands.BucketType.user)
-    async def honeymoon(self, ctx, partner_id: int = None) -> None:
+    async def honeymoon(self, ctx, partner: Union[discord.User, discord.Member] = None) -> None:
         """ Celebrates a honey moon with your partner.
 
         :param partner_id: The partner you want to go on a honeymoon with. (Since you can have up to 4)
@@ -197,12 +197,12 @@ class RolePlay(commands.Cog):
 
         member = ctx.author
 
-        if not partner_id:
+        if not partner:
             return await ctx.send(f"**Please, inform the partner who you want to go on a honeymoon with!**")
         
         SlothClass = self.client.get_cog('SlothClass')
 
-        member_marriage = await SlothClass.get_user_marriage(member.id, partner_id)
+        member_marriage = await SlothClass.get_user_marriage(member.id, partner.id)
         if not member_marriage['partner']:
             self.client.get_command('honeymoon').reset_cooldown(ctx)
             return await ctx.send(f"**You don't have a partner, you can't have a honeymoon by yourself, {member.mention}!** 😔")
