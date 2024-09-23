@@ -90,7 +90,7 @@ class UserMarriagesTable(commands.Cog):
 
         return await self.db.execute_query("""
             SELECT * FROM UserMarriages
-            WHERE (user_id = %s AND partner_id = %s) OR (partner_id = %s AND user_id = %s)
+            WHERE (user_id = %s AND partner_id = %s) OR (user_id = %s AND partner_id = %s)
         """, (user_id, partner_id, partner_id, user_id), fetch="one")
 
     async def _get_user_marriages(self, user_id: int) -> List[Union[str, int]]:

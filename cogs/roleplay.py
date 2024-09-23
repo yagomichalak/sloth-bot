@@ -206,7 +206,7 @@ class RolePlay(commands.Cog):
         member_marriage = await SlothClass.get_user_marriage(member.id, partner.id)
         if not member_marriage:
             self.client.get_command('honeymoon').reset_cooldown(ctx)
-            return await ctx.send(f"**You don't have a partner, you can't have a honeymoon by yourself, {member.mention}!** 😔")
+            return await ctx.send(f"**This person is not your partner, you can't have a honeymoon by yourself, {member.mention}!** 😔")
 
         if member_marriage['honeymoon']:
             self.client.get_command('honeymoon').reset_cooldown(ctx)
