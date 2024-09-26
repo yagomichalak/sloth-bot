@@ -1313,6 +1313,11 @@ class Moderation(*moderation_cogs):
                         r, u = await self.client.wait_for('reaction_add', timeout=300, check=check_staff_manager)
                     except asyncio.TimeoutError:
                         mod_ban_embed.description = f'Timeout, {member} is not getting banned!'
+                        mod_ban_embed.add_field(
+                            name="Command",
+                            value=f"```z!ban {member.id} {reason}```",
+                            inline=False
+                        )
                         await msg.remove_reaction('✅', self.client.user)
                         await msg.edit(embed=mod_ban_embed)
                         break
