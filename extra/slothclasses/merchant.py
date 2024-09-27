@@ -797,6 +797,8 @@ class Merchant(Player):
         try:
             await self.delete_user_marriage(member.id, partner.id)
             await self.delete_user_marriage(partner.id, member.id)
+            SlothReputation = self.client.get_cog("SlothReputation")
+            await SlothReputation.insert_sloth_actions(label="divorce", user_id=member.id, target_id=partner.id)
         except Exception as e:
             print(e)
             await ctx.send(f"**Something went wrong with this, {member.mention}!**")

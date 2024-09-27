@@ -262,6 +262,7 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
     @Player.poisoned()
+    @utils.not_ready()
     async def skills_update(self, ctx) -> None:
         """ Shows the updates/current status of upcoming Sloth Class Skills. """
 

@@ -14,6 +14,7 @@ from extra.view import ExchangeActivityView
 from mysqldb import DatabaseCore
 from .slothclass import classes
 from extra.currency.membersscore import MembersScoreTable
+from extra.misc.slothactions import SlothActionsTable
 
 # variables.id
 guild_ids = [int(os.getenv('SERVER_ID', 123))]
@@ -22,7 +23,7 @@ guild_ids = [int(os.getenv('SERVER_ID', 123))]
 commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID', 123))
 
 currency_cogs: List[commands.Cog] = [
-    MembersScoreTable
+    MembersScoreTable, SlothActionsTable
 ]
 
 class SlothReputation(*currency_cogs):
@@ -249,6 +250,10 @@ class SlothReputation(*currency_cogs):
             for marriage in marriages:
                 text += f"> <@{marriage['partner']}> (<t:{marriage['timestamp']}:R>).{' 🌛' if marriage['honeymoon'] else ''}\n"
             embed.add_field(name="💍 __**Marriages:**__", value=text, inline=False)
+
+            sloth_actions = await self.get_sloth_actions_counter(member.id)
+            divorces = len([sa for sa in sloth_actions if sa[0] == "divorce"])
+            embed.add_field(name="💔 __**Divorces:**__", value=f"{divorces} divorce(s).", inline=False)
 
         embed.set_thumbnail(url=member.display_avatar)
         embed.set_author(name=member, icon_url=member.display_avatar, url=member.display_avatar)
@@ -708,6 +713,22 @@ class SlothReputation(*currency_cogs):
         if target_quest and target_quest[3] == author.id:
             # Tries to complete a Quest, if possible
             await SlothClass.complete_quest(member.id, 2)
+
+    @commands.command(aliases=["actions", "divorces", "transfers", ])
+    @Player.poisoned()
+    async def sloth_actions(self, ctx, member: discord.Member = None) -> None:
+        """ Shows the status for Sloth Actions.
+        :param member: The member to show it from. [Default = You] """
+
+        member = member if member else ctx.author
+        sloth_actions = await self.get_sloth_actions_counter(member.id)
+        divorces = len([sa for sa in sloth_actions if sa[0] == "divorce"])
+        transfers = len([sa for sa in sloth_actions if sa[0] == "transfer"])
+
+        embed = discord.Embed(title=f"Sloth Actions {member}", timestamp=ctx.message.created_at, color=ctx.author.color)
+        embed.description=(f"```{divorces} divorce(s) 💔\n{transfers} leaves transfer(s) 💸```")
+        await ctx.send(embed=embed)
+
 
 def setup(client):
     client.add_cog(SlothReputation(client))

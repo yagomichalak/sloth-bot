@@ -803,6 +803,10 @@ class SlothCurrency(*currency_cogs):
         else:
             await self.update_user_money(member.id, money)
             await self.update_user_money(ctx.author.id, -money)
+            SlothReputation = self.client.get_cog("SlothReputation")
+            await SlothReputation.insert_sloth_actions(
+                label="transfer", user_id=ctx.author.id, target_id=member.id, int_content=money
+            )
             await ctx.send(f"**{ctx.author.mention} transferred {money}łł to {member.mention}!**")
 
         if money == 25:
