@@ -253,7 +253,7 @@ class SlothReputation(*currency_cogs):
 
             sloth_actions = await self.get_sloth_actions_counter(member.id)
             divorces = len([sa for sa in sloth_actions if sa[0] == "divorce"])
-            embed.add_field(name="💔 __**Divorces:**__", value=f"{divorces} divorce(s).", inline=False)
+            embed.add_field(name="💔 __**Divorces:**__", value=f"{divorces} divorces.", inline=False)
 
         embed.set_thumbnail(url=member.display_avatar)
         embed.set_author(name=member, icon_url=member.display_avatar, url=member.display_avatar)
@@ -726,7 +726,7 @@ class SlothReputation(*currency_cogs):
         transfers = len([sa for sa in sloth_actions if sa[0] == "transfer"])
 
         embed = discord.Embed(title=f"Sloth Actions {member}", timestamp=ctx.message.created_at, color=ctx.author.color)
-        embed.description=(f"```{divorces} divorce(s) 💔\n{transfers} leaves transfer(s) 💸```")
+        embed.description=(f"```{divorces} divorces 💔\n{transfers} leaves transfers 💸```")
         await ctx.send(embed=embed)
 
 
