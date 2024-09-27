@@ -537,7 +537,7 @@ class TeacherFeedback(commands.Cog):
         :param msg: The message to attach the students' data to.
         :param teacher: The teacher.
         :param users_feedback: The students' class participation data.
-        :param class_type: The type of the class (Pronunciation / Grammar / Programming)
+        :param class_type: The type of the class (Pronunciation / Grammar / Speaking / Revision / Programming)
         :param language: The language taught in the class.
         :param guild: The server in which the class was hosted in. """
 
@@ -661,7 +661,7 @@ class TeacherFeedback(commands.Cog):
         """ Asks for user feedback regarding a specific teacher class.
         :param teacher: The teacher of that class.
         :param language: The language taught in the class.
-        :param class_type: The type of class. [Pronunciation/grammar/programming]
+        :param class_type: The type of class. [Pronunciation/grammar/speaking/revision/programming]
         :param teacher_feedback_thread: The thread channel to send the user feedback message to. """
 
         # Embed
@@ -867,6 +867,12 @@ class TeacherFeedback(commands.Cog):
         elif class_info['type'].title() == 'Grammar':
             cemoji = '📖'
 
+        elif class_info['type'].title() == 'Speaking':
+            cemoji = '🎙️'
+
+        elif class_info['type'].title() == 'Revision':
+            cemoji = '📓'
+
         elif class_info['type'].title() == 'Programming':
             cemoji = '💻'
 
@@ -911,11 +917,11 @@ class TeacherFeedback(commands.Cog):
             return await ctx.send(f"**Bye, {member.mention}!**")
 
         # Question 2 - Type
-        await cc_channel.send(f"**{member}, what is the type of your class? (Pronunciation / Grammar / Programming)**")
+        await cc_channel.send(f"**{member}, what is the type of your class? (Pronunciation / Grammar / Speaking / Revision / Programming)**")
         while True:
             if not (class_type := await prompt_message_guild(client=self.client, member=member, channel=cc_channel, limit=13)):
                 return
-            if class_type.lower() in ['pronunciation', 'grammar', 'programming']:
+            if class_type.lower() in ['pronunciation', 'grammar', 'speaking', 'revision', 'programming']:
                 break
 
         # Question 3 - Description
@@ -1146,7 +1152,7 @@ class TeacherFeedbackDatabaseInsert:
         """ Inserts a saved teacher class.
         :param teacher_id: The teacher's ID.
         :param language: The language being taught in the class.
-        :param class_type: The class type (pronunciation, grammar, programming)
+        :param class_type: The class type (pronunciation, grammar, speaking, revision, programming)
         :param class_desc: The class description.
         :param taught_in: The language that the class is taught in. """
 
@@ -1160,7 +1166,7 @@ class TeacherFeedbackDatabaseInsert:
         :param txt_id: The text channel ID.
         :param vc_id: The voice channel ID.
         :param language: The language being taught in the class.
-        :param class_type: The class type (pronunciation, grammar, programming)
+        :param class_type: The class type (pronunciation, grammar, speaking, revision, programming)
         :param the_time: The current timestamp.
         :param class_desc: The class description.
         :param taught_in: The language that the class is taught in. """
@@ -1426,7 +1432,7 @@ class TeacherFeedbackDatabaseDelete:
         """ Deletes a teacher saved class from the system.
         :param teacher_id: The teacher's ID.
         :param language: The language of the class.
-        :param class_type: The type of class (Pronunciation / Grammar / Programming)
+        :param class_type: The type of class (Pronunciation / Grammar / Speaking / Revision / Programming)
         :param class_desc: The description of the class.
         :param taught_in: The language that is using to teach the class. """
 
