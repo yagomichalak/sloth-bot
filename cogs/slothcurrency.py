@@ -881,7 +881,7 @@ class SlothCurrency(*currency_cogs):
 
         await ctx.send(embed=embed)
 
-    @commands.command(aliases=['balance', 'bal', 'fric'])
+    @commands.command(aliases=["balance", "bal", "fric"])
     @commands.cooldown(1, 3, commands.BucketType.user)
     async def money(self, ctx, member: Optional[Union[discord.Member, discord.User]] = None) -> None:
         """ Shows the user's money.
@@ -895,7 +895,7 @@ class SlothCurrency(*currency_cogs):
             return await ctx.send(f"**User doesn't have a Sloth Account, {ctx.author.mention}!**")
 
         embed = discord.Embed(
-            description=f"**{member.mention}'s money: {user_currency[0][1]} 🍃**",
+            description=f"**{member.mention}'s money: {user_currency[0][1]} 🍃 & {user_currency[0][7]} <:golden_leaf:1289365306413813810>**",
             color=member.color
         )
         await ctx.send(embed=embed)
