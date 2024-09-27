@@ -1178,7 +1178,8 @@ class Merchant(Player):
                     else:
                         # Pet died
                         channel = self.bots_txt
-
+                        SlothReputation = self.client.get_cog("SlothReputation")
+                        await SlothReputation.insert_sloth_actions(label="pet_death", user_id=pet[0], target_id=pet[1])
                         await self.delete_user_pet(pet[0])
 
                         embed: discord.Embed = discord.Embed(

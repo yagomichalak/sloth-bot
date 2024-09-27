@@ -724,7 +724,8 @@ class Seraph(Player):
                     else:
                         # Baby died
                         channel = self.bots_txt
-
+                        SlothReputation = self.client.get_cog("SlothReputation")
+                        await SlothReputation.insert_sloth_actions(label="baby_death", user_id=baby[0], target_id=baby[1])
                         await self.delete_user_baby(baby[0])
 
                         embed: discord.Embed = discord.Embed(

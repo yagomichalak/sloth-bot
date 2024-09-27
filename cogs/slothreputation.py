@@ -714,19 +714,36 @@ class SlothReputation(*currency_cogs):
             # Tries to complete a Quest, if possible
             await SlothClass.complete_quest(member.id, 2)
 
-    @commands.command(aliases=["actions", "divorces", "transfers", ])
+    @commands.command(aliases=["actions", "divorces", "transfers", "baby_deaths", "pet_deaths", "deaths"])
     @Player.poisoned()
     async def sloth_actions(self, ctx, member: discord.Member = None) -> None:
         """ Shows the status for Sloth Actions.
         :param member: The member to show it from. [Default = You] """
 
-        member = member if member else ctx.author
+        author = ctx.author
+        member = member if member else author
         sloth_actions = await self.get_sloth_actions_counter(member.id)
         divorces = len([sa for sa in sloth_actions if sa[0] == "divorce"])
         transfers = len([sa for sa in sloth_actions if sa[0] == "transfer"])
+        baby_deaths = len([sa for sa in sloth_actions if sa[0] == "baby_death"])
+        pet_deaths = len([sa for sa in sloth_actions if sa[0] == "pet_death"])
 
-        embed = discord.Embed(title=f"Sloth Actions {member}", timestamp=ctx.message.created_at, color=ctx.author.color)
-        embed.description=(f"```{divorces} divorces 💔\n{transfers} leaves transfers 💸```")
+        actions_map = (
+            {"text": "divorces", "emoji": "💔", "count": divorces},
+            {"text": "money transfers", "emoji": "💸", "count": transfers},
+            {"text": "baby deaths", "emoji": "👶", "count": baby_deaths},
+            {"text": "pet deaths", "emoji": "🥚", "count": pet_deaths},
+        )
+
+        description = "\n".join([f"{a['count']} {a['text']} {a['emoji']}" for a in actions_map])
+        embed = discord.Embed(
+            title=f"Sloth Actions",
+            description=f"```{description}```",
+            timestamp=ctx.message.created_at,
+            color=ctx.author.color
+        )
+        embed.set_author(name=member, icon_url=member.display_avatar)
+        embed.set_footer(text=f"Requested by: {author}", icon_url=author.display_avatar)
         await ctx.send(embed=embed)
 
 
