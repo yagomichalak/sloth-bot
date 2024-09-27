@@ -422,7 +422,7 @@ class Moderation(*moderation_cogs):
 
         special_channels = {
             int(os.getenv('MUTED_CHANNEL_ID', 123)): 'https://cdn.discordapp.com/attachments/746478846466981938/748605295122448534/Muted.png',
-            int(os.getenv('QUESTION_CHANNEL_ID', 123)): '''**Have a question about the server? Ask it here!**'''
+            int(os.getenv('QUESTION_CHANNEL_ID', 123)): '''**Have a question about the server? Ask it here!**\nThe chat will be cleared once questions are answered.'''
         }
 
         if ctx.channel.id not in special_channels.keys():
