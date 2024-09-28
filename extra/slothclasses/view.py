@@ -1490,28 +1490,28 @@ class DominateView(SlothAction):
         """ Dominate someone. """
 
         slaps: List[str] = [
-            "https://tenor.com/bkNBI.gif",
-            "https://tenor.com/VKBw.gif",
-            "https://tenor.com/boBDU.gif",
-            "https://tenor.com/bFGEf.gif"
-            "https://tenor.com/boPIB.gif",
-            "https://tenor.com/bIEu0.gif",
-            "https://tenor.com/Y7wr.gif",
-            "https://tenor.com/beaxl.gif",
-            "https://tenor.com/SVxi.gif",
-            "https://tenor.com/ZG3X.gif",
-            "https://tenor.com/8CmQ.gif",
-            "https://tenor.com/bAJfp.gif",
-            "https://tenor.com/2BdN.gif",
-            "https://tenor.com/8Chr.gif",
-            "https://tenor.com/bSxwu.gif",
-            "https://tenor.com/Q1ub.gif",
-            "https://tenor.com/boD7B.gif",
+            "https://c.tenor.com/bkNBI.gif",
+            "https://c.tenor.com/VKBw.gif",
+            "https://c.tenor.com/boBDU.gif",
+            "https://c.tenor.com/bFGEf.gif"
+            "https://c.tenor.com/boPIB.gif",
+            "https://c.tenor.com/bIEu0.gif",
+            "https://c.tenor.com/Y7wr.gif",
+            "https://c.tenor.com/beaxl.gif",
+            "https://c.tenor.com/SVxi.gif",
+            "https://c.tenor.com/ZG3X.gif",
+            "https://c.tenor.com/8CmQ.gif",
+            "https://c.tenor.com/bAJfp.gif",
+            "https://c.tenor.com/2BdN.gif",
+            "https://c.tenor.com/8Chr.gif",
+            "https://c.tenor.com/bSxwu.gif",
+            "https://c.tenor.com/Q1ub.gif",
+            "https://c.tenor.com/boD7B.gif",
         ]
 
         embed = discord.Embed(
             title="__Dominate__",
-            description=f"🫨 {self.member.mention} slapped {self.target.mention} 🫦",
+            description=f"🫨 {self.member.mention} dominated {self.target.mention} 🫦",
             color=self.member.color,
             timestamp=interaction.message.created_at
         )

@@ -740,7 +740,7 @@ class RolePlay(commands.Cog):
     @send_if_money()
     async def dominate(self, ctx, *, member: discord.Member = None) -> None:
         """ Dominates someone.
-        :param member: The member to ominate.
+        :param member: The member to dominate.
         
         * Cooldown: 2 minutes """
 
