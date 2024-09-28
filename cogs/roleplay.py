@@ -11,7 +11,7 @@ from extra.slothclasses.view import (BegView, BootView, DriveOverView,
                                      GiveView, HandshakeView, HighFiveView,
                                      HoneymoonView, HugView, KissView, PatView,
                                      PeekView, PunchView, SlapView, TickleView,
-                                     WhisperView, YeetView)
+                                     WhisperView, YeetView, DominateView)
 
 class RolePlay(commands.Cog):
     """ Category for roleplaying commands. """
@@ -733,6 +733,43 @@ class RolePlay(commands.Cog):
             await self.client.get_cog('SlothCurrency').update_user_money(author.id, -5)
             # Tries to complete a quest, if possible.
             await self.client.get_cog('SlothClass').complete_quest(author.id, 14, command_name=ctx.command.name)
+
+    @commands.command(aliases=["dom"])
+    @Player.poisoned()
+    @commands.cooldown(1, 30, commands.BucketType.user)
+    @send_if_money()
+    async def dominate(self, ctx, *, member: discord.Member = None) -> None:
+        """ Dominates someone.
+        :param member: The member to ominate.
+        
+        * Cooldown: 2 minutes """
+
+        author = ctx.author
+
+        if not member:
+            self.client.get_command(ctx.command.name).reset_cooldown(ctx)
+            return await ctx.send(f"**Please, inform a member, {author.mention}!**")
+
+        if author.id == member.id:
+            self.client.get_command('dominate').reset_cooldown(ctx)
+            return await ctx.send(f"**You can't dominate yourself, {author.mention}!**")
+
+        embed = discord.Embed(
+            title="__Dominate Prompt__",
+            description=f"Do you really want to dominate {member.mention}, {author.mention}?",
+            color=author.color,
+            timestamp=ctx.message.created_at
+        )
+        embed.set_author(name="This costs 5łł")
+        embed.set_footer(text=f"Requested by {author}", icon_url=author.display_avatar)
+        view = DominateView(self.client, member=author, target=member, timeout=60)
+        await ctx.send(embed=embed, view=view)
+        await view.wait()
+        if view.used:
+            await self.client.get_cog('SlothCurrency').update_user_money(author.id, -5)
+            # Tries to complete a quest, if possible.
+            await self.client.get_cog('SlothClass').complete_quest(author.id, 14, command_name=ctx.command.name)
+
 
 def setup(client):
     client.add_cog(RolePlay(client))

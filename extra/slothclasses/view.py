@@ -11,6 +11,24 @@ from discord.ext import commands
 # import.local
 from extra import utils
 
+
+class SlothAction(discord.ui.View):
+
+    async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
+        """ Disables all buttons of the view menu. """
+
+        for child in self.children:
+            child.disabled = True
+
+        if followup:
+            await interaction.followup.edit_message(message_id=interaction.message.id, view=self)
+        else:
+            await interaction.response.edit_message(view=self)
+
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        return self.member.id == interaction.user.id
+
+
 class HugView(discord.ui.View):
     """ View for the hug skill. """
 
@@ -19,7 +37,6 @@ class HugView(discord.ui.View):
         self.member = member
         self.target = target
         self.used: bool = False
-
 
     @discord.ui.button(label='Hug', style=discord.ButtonStyle.blurple, custom_id='hug_id', emoji="🤗")
     async def hug_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
@@ -57,19 +74,6 @@ class HugView(discord.ui.View):
         await self.disable_buttons(interaction)
         self.stop()
 
-    async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
-        """ Disables all buttons of the view menu. """
-
-        for child in self.children:
-            child.disabled = True
-
-        if followup:
-            await interaction.followup.edit_message(message_id=interaction.message.id, view=self)
-        else:
-            await interaction.response.edit_message(view=self)
-
-    async def interaction_check(self, interaction: discord.Interaction) -> bool:
-        return self.member.id == interaction.user.id
 
 class BootView(discord.ui.View):
     """ View for the boot skill. """
@@ -79,7 +83,6 @@ class BootView(discord.ui.View):
         self.member = member
         self.target = target
         self.used: bool = False
-
 
     @discord.ui.button(label='Where it hits', style=discord.ButtonStyle.blurple, custom_id='general_kick_id', emoji="🦵")
     async def general_kick_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
@@ -156,19 +159,6 @@ class BootView(discord.ui.View):
         await self.disable_buttons(interaction)
         self.stop()
 
-    async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
-        """ Disables all buttons of the view menu. """
-
-        for child in self.children:
-            child.disabled = True
-
-        if followup:
-            await interaction.followup.edit_message(message_id=interaction.message.id, view=self)
-        else:
-            await interaction.response.edit_message(view=self)
-
-    async def interaction_check(self, interaction: discord.Interaction) -> bool:
-        return self.member.id == interaction.user.id
 
 class SlapView(discord.ui.View):
     """ View for the slap skill. """
@@ -179,7 +169,6 @@ class SlapView(discord.ui.View):
         self.member = member
         self.target = target
         self.used: bool = False
-
 
     @discord.ui.button(label='Angry Slap', style=discord.ButtonStyle.blurple, custom_id='angry_slap_id', emoji="<:zslothree:695411876581867610>")
     async def angry_slap_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
@@ -271,19 +260,6 @@ class SlapView(discord.ui.View):
         await self.disable_buttons(interaction)
         self.stop()
 
-    async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
-        """ Disables all buttons of the view menu. """
-
-        for child in self.children:
-            child.disabled = True
-
-        if followup:
-            await interaction.followup.edit_message(message_id=interaction.message.id, view=self)
-        else:
-            await interaction.response.edit_message(view=self)
-
-    async def interaction_check(self, interaction: discord.Interaction) -> bool:
-        return self.member.id == interaction.user.id
 
 class KissView(discord.ui.View):
     """ View for the kiss skill. """
@@ -350,8 +326,7 @@ class KissView(discord.ui.View):
             'https://c.tenor.com/cK2c6eQ7Is8AAAAC/cony-and-brown-hug.gif',
             'https://c.tenor.com/sXNJMF5vI8oAAAAC/love-peachcat.gif',
             'https://c.tenor.com/MXd8Xby7jnMAAAAC/davydoff-love.gif',
-            'https://c.tenor.com/yWGhrAd0cioAAAAC/kissing-couple.gif'
-
+            'https://c.tenor.com/yWGhrAd0cioAAAAC/kissing-couple.gif',
         ]
 
         embed = discord.Embed(
@@ -393,20 +368,6 @@ class KissView(discord.ui.View):
 
         await self.disable_buttons(interaction)
         self.stop()
-
-    async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
-        """ Disables all buttons of the view menu. """
-
-        for child in self.children:
-            child.disabled = True
-
-        if followup:
-            await interaction.followup.edit_message(message_id=interaction.message.id, view=self)
-        else:
-            await interaction.response.edit_message(view=self)
-
-    async def interaction_check(self, interaction: discord.Interaction) -> bool:
-        return self.member.id == interaction.user.id
 
 
 class CheatingView(discord.ui.View):
@@ -693,24 +654,8 @@ class HoneymoonView(discord.ui.View):
         """ Cancels the slap action. """
 
         self.value = False
-
         await self.disable_buttons(interaction)
         self.stop()
-
-
-    async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
-        """ Disables all buttons of the view menu. """
-
-        for child in self.children:
-            child.disabled = True
-
-        if followup:
-            await interaction.followup.edit_message(message_id=interaction.message.id, view=self)
-        else:
-            await interaction.response.edit_message(view=self)
-
-    async def interaction_check(self, interaction: discord.Interaction) -> bool:
-        return self.member.id == interaction.user.id
 
 
 class PunchView(discord.ui.View):
@@ -721,7 +666,6 @@ class PunchView(discord.ui.View):
         self.member = member
         self.target = target
         self.used: bool = False
-
 
     @discord.ui.button(label='Punch Face', style=discord.ButtonStyle.blurple, custom_id='punch_face_id', emoji="👊")
     async def punch_face_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
@@ -903,22 +847,8 @@ class PunchView(discord.ui.View):
         await self.disable_buttons(interaction)
         self.stop()
 
-    async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
-        """ Disables all buttons of the view menu. """
 
-        for child in self.children:
-            child.disabled = True
-
-        if followup:
-            await interaction.followup.edit_message(message_id=interaction.message.id, view=self)
-        else:
-            await interaction.response.edit_message(view=self)
-
-    async def interaction_check(self, interaction: discord.Interaction) -> bool:
-        return self.member.id == interaction.user.id
-
-
-class GiveView(discord.ui.View):
+class GiveView(SlothAction):
     """ View for the give skill. """
 
     def __init__(self, member: discord.Member, target: discord.Member, timeout: Optional[float] = 180):
@@ -977,20 +907,6 @@ class GiveView(discord.ui.View):
         await self.disable_buttons(interaction)
         self.stop()
 
-    async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
-        """ Disables all buttons of the view menu. """
-
-        for child in self.children:
-            child.disabled = True
-
-        if followup:
-            await interaction.followup.edit_message(message_id=interaction.message.id, view=self)
-        else:
-            await interaction.response.edit_message(view=self)
-
-    async def interaction_check(self, interaction: discord.Interaction) -> bool:
-        return self.member.id == interaction.user.id
-
 
 class TickleView(discord.ui.View):
     """ View for the tickle skill. """
@@ -1000,7 +916,6 @@ class TickleView(discord.ui.View):
         self.member = member
         self.target = target
         self.used: bool = False
-
 
     @discord.ui.button(label='Tickle', style=discord.ButtonStyle.blurple, custom_id='tickle_id', emoji="<:zslothlmao:686697712074490055>")
     async def tickle_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
@@ -1043,19 +958,6 @@ class TickleView(discord.ui.View):
         await self.disable_buttons(interaction)
         self.stop()
 
-    async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
-        """ Disables all buttons of the view menu. """
-
-        for child in self.children:
-            child.disabled = True
-
-        if followup:
-            await interaction.followup.edit_message(message_id=interaction.message.id, view=self)
-        else:
-            await interaction.response.edit_message(view=self)
-
-    async def interaction_check(self, interaction: discord.Interaction) -> bool:
-        return self.member.id == interaction.user.id
 
 class YeetView(discord.ui.View):
     """ View for the yeet skill. """
@@ -1065,7 +967,6 @@ class YeetView(discord.ui.View):
         self.member = member
         self.target = target
         self.used: bool = False
-
 
     @discord.ui.button(label='Something', style=discord.ButtonStyle.blurple, custom_id='yeet_something_id', emoji="🤾‍♂️")
     async def yeet_something_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
@@ -1144,19 +1045,6 @@ class YeetView(discord.ui.View):
         await self.disable_buttons(interaction)
         self.stop()
 
-    async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
-        """ Disables all buttons of the view menu. """
-
-        for child in self.children:
-            child.disabled = True
-
-        if followup:
-            await interaction.followup.edit_message(message_id=interaction.message.id, view=self)
-        else:
-            await interaction.response.edit_message(view=self)
-
-    async def interaction_check(self, interaction: discord.Interaction) -> bool:
-        return self.member.id == interaction.user.id
 
 class BegView(discord.ui.View):
     """ View for the beg skill. """
@@ -1166,7 +1054,6 @@ class BegView(discord.ui.View):
         self.member = member
         self.target = target
         self.used: bool = False
-
 
     @discord.ui.button(label='Beg', style=discord.ButtonStyle.blurple, custom_id='beg_id', emoji="🙏")
     async def beg_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
@@ -1220,19 +1107,6 @@ class BegView(discord.ui.View):
         await self.disable_buttons(interaction)
         self.stop()
 
-    async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
-        """ Disables all buttons of the view menu. """
-
-        for child in self.children:
-            child.disabled = True
-
-        if followup:
-            await interaction.followup.edit_message(message_id=interaction.message.id, view=self)
-        else:
-            await interaction.response.edit_message(view=self)
-
-    async def interaction_check(self, interaction: discord.Interaction) -> bool:
-        return self.member.id == interaction.user.id
 
 class PatView(discord.ui.View):
     """ View for the pat skill. """
@@ -1242,7 +1116,6 @@ class PatView(discord.ui.View):
         self.member = member
         self.target = target
         self.used: bool = False
-
 
     @discord.ui.button(label='Pat', style=discord.ButtonStyle.blurple, custom_id='beg_id', emoji="🖐️")
     async def pat_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
@@ -1271,7 +1144,6 @@ class PatView(discord.ui.View):
             'https://c.tenor.com/QzypKfkMA9MAAAAd/guinea-pig-pet.gif',
             'https://c.tenor.com/cQ2VwOHNDJsAAAAC/baby-panda.gif',
             'https://c.tenor.com/XVgmW5qJpcsAAAAC/felizins-pet-pet.gif',
-            
         ]
 
         embed = discord.Embed(
@@ -1298,19 +1170,6 @@ class PatView(discord.ui.View):
         await self.disable_buttons(interaction)
         self.stop()
 
-    async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
-        """ Disables all buttons of the view menu. """
-
-        for child in self.children:
-            child.disabled = True
-
-        if followup:
-            await interaction.followup.edit_message(message_id=interaction.message.id, view=self)
-        else:
-            await interaction.response.edit_message(view=self)
-
-    async def interaction_check(self, interaction: discord.Interaction) -> bool:
-        return self.member.id == interaction.user.id
 
 class WhisperView(discord.ui.View):
     """ View for the whisper skill. """
@@ -1321,7 +1180,6 @@ class WhisperView(discord.ui.View):
         self.target = target
         self.used: bool = False
         self.text = text
-
 
     @discord.ui.button(label='Whisper', style=discord.ButtonStyle.blurple, custom_id='whisper_id', emoji="🤫")
     async def whisper_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
@@ -1372,22 +1230,6 @@ class WhisperView(discord.ui.View):
         await self.disable_buttons(interaction)
         self.stop()
 
-    async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
-        """ Disables all buttons of the view menu. """
-
-        for child in self.children:
-            child.disabled = True
-
-        if followup:
-            await interaction.followup.edit_message(message_id=interaction.message.id, view=self)
-        else:
-            await interaction.response.edit_message(view=self)
-
-    async def interaction_check(self, interaction: discord.Interaction) -> bool:
-        return self.member.id == interaction.user.id
-
-
-
 
 class HandshakeView(discord.ui.View):
     """ A view for the handshaking skill """
@@ -1397,7 +1239,6 @@ class HandshakeView(discord.ui.View):
         self.member = member
         self.target = target
         self.used: bool = False
-
 
     @discord.ui.button(label='Handshake', style=discord.ButtonStyle.blurple, custom_id='handshake_id', emoji="🤝")
     async def handshake_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
@@ -1450,20 +1291,6 @@ class HandshakeView(discord.ui.View):
         await self.disable_buttons(interaction)
         self.stop()
 
-    async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
-        """ Disables all buttons of the view menu. """
-
-        for child in self.children:
-            child.disabled = True
-
-        if followup:
-            await interaction.followup.edit_message(message_id=interaction.message.id, view=self)
-        else:
-            await interaction.response.edit_message(view=self)
-
-    async def interaction_check(self, interaction: discord.Interaction) -> bool:
-        return self.member.id == interaction.user.id
-
 
 class PeekView(discord.ui.View):
     """ A view for the peek skill """
@@ -1473,7 +1300,6 @@ class PeekView(discord.ui.View):
         self.member = member
         self.target = target
         self.used: bool = False
-
 
     @discord.ui.button(label='Peek', style=discord.ButtonStyle.blurple, custom_id='peek_id', emoji="👀")
     async def peek_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
@@ -1528,19 +1354,6 @@ class PeekView(discord.ui.View):
         await self.disable_buttons(interaction)
         self.stop()
 
-    async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
-        """ Disables all buttons of the view menu. """
-
-        for child in self.children:
-            child.disabled = True
-
-        if followup:
-            await interaction.followup.edit_message(message_id=interaction.message.id, view=self)
-        else:
-            await interaction.response.edit_message(view=self)
-
-    async def interaction_check(self, interaction: discord.Interaction) -> bool:
-        return self.member.id == interaction.user.id
 
 class DriveOverView(discord.ui.View):
     """ A view for the drive over skill """
@@ -1550,7 +1363,6 @@ class DriveOverView(discord.ui.View):
         self.member = member
         self.target = target
         self.used: bool = False
-
 
     @discord.ui.button(label='Drive Over', style=discord.ButtonStyle.blurple, custom_id='drive_over_id', emoji="🚗")
     async def drive_over_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
@@ -1593,20 +1405,6 @@ class DriveOverView(discord.ui.View):
         await self.disable_buttons(interaction)
         self.stop()
 
-    async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
-        """ Disables all buttons of the view menu. """
-
-        for child in self.children:
-            child.disabled = True
-
-        if followup:
-            await interaction.followup.edit_message(message_id=interaction.message.id, view=self)
-        else:
-            await interaction.response.edit_message(view=self)
-
-    async def interaction_check(self, interaction: discord.Interaction) -> bool:
-        return self.member.id == interaction.user.id
-
 
 class HighFiveView(discord.ui.View):
     """ A view for the high five skill """
@@ -1616,7 +1414,6 @@ class HighFiveView(discord.ui.View):
         self.member = member
         self.target = target
         self.used: bool = False
-
 
     @discord.ui.button(label='High Five', style=discord.ButtonStyle.blurple, custom_id='peek_id', emoji="🖐️")
     async def high_five_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
@@ -1677,16 +1474,78 @@ class HighFiveView(discord.ui.View):
         await self.disable_buttons(interaction)
         self.stop()
 
-    async def disable_buttons(self, interaction: discord.Interaction, followup: bool = False) -> None:
-        """ Disables all buttons of the view menu. """
 
-        for child in self.children:
-            child.disabled = True
+class DominateView(SlothAction):
+    """ View for the slap skill. """
 
-        if followup:
-            await interaction.followup.edit_message(message_id=interaction.message.id, view=self)
+    def __init__(self, client: commands.Cog, member: discord.Member, target: discord.Member, timeout: Optional[float] = 180):
+        super().__init__(timeout=timeout)
+        self.client = client
+        self.member = member
+        self.target = target
+        self.used: bool = False
+
+    @discord.ui.button(label='Dominate', style=discord.ButtonStyle.red, custom_id='dominate_id', emoji="🫦")
+    async def dominate_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Dominate someone. """
+
+        slaps: List[str] = [
+            "https://tenor.com/bkNBI.gif",
+            "https://tenor.com/VKBw.gif",
+            "https://tenor.com/boBDU.gif",
+            "https://tenor.com/bFGEf.gif"
+            "https://tenor.com/boPIB.gif",
+            "https://tenor.com/bIEu0.gif",
+            "https://tenor.com/Y7wr.gif",
+            "https://tenor.com/beaxl.gif",
+            "https://tenor.com/SVxi.gif",
+            "https://tenor.com/ZG3X.gif",
+            "https://tenor.com/8CmQ.gif",
+            "https://tenor.com/bAJfp.gif",
+            "https://tenor.com/2BdN.gif",
+            "https://tenor.com/8Chr.gif",
+            "https://tenor.com/bSxwu.gif",
+            "https://tenor.com/Q1ub.gif",
+            "https://tenor.com/boD7B.gif",
+
+        ]
+
+        embed = discord.Embed(
+            title="__Dominate__",
+            description=f"🫨 {self.member.mention} slapped {self.target.mention} 🫦",
+            color=self.member.color,
+            timestamp=interaction.message.created_at
+        )
+
+        embed.set_author(name=self.member.display_name, url=self.member.display_avatar, icon_url=self.member.display_avatar)
+        embed.set_thumbnail(url=self.target.display_avatar)
+        embed.set_image(url=choice(slaps))
+        embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
+
+        member_marriages = await self.client.get_cog('SlothClass').get_user_marriages(self.member.id)
+        cheating_view = None
+        for member_marriage in member_marriages:
+            if self.target.id in (member_marriage["user"], member_marriage["partner"]):
+                break
         else:
-            await interaction.response.edit_message(view=self)
+            cheating_view = CheatingView(self.client, self.member, self.target, member_marriages)
 
-    async def interaction_check(self, interaction: discord.Interaction) -> bool:
-        return self.member.id == interaction.user.id
+        if cheating_view:
+            await interaction.response.send_message(
+                content=self.target.mention, embed=embed, 
+                view=cheating_view
+            )
+        else:
+            await interaction.response.send_message(
+                content=self.target.mention, embed=embed)
+            
+        await self.disable_buttons(interaction, followup=True)
+        self.used = True
+        self.stop()
+
+    @discord.ui.button(label='Nevermind', style=discord.ButtonStyle.red, custom_id='nevermind_id', emoji="❌")
+    async def nevermind_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Cancels the slap action. """
+
+        await self.disable_buttons(interaction)
+        self.stop()
