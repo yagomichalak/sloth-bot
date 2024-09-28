@@ -251,9 +251,8 @@ class SlothReputation(*currency_cogs):
                 text += f"> <@{marriage['partner']}> (<t:{marriage['timestamp']}:R>).{' 🌛' if marriage['honeymoon'] else ''}\n"
             embed.add_field(name="💍 __**Marriages:**__", value=text, inline=False)
 
-            sloth_actions = await self.get_sloth_actions_counter(member.id)
-            divorces = len([sa for sa in sloth_actions if sa[0] == "divorce"])
-            embed.add_field(name="💔 __**Divorces:**__", value=f"{divorces} divorces.", inline=False)
+            divorces = await self.get_sloth_actions(member.id, "divorce")
+            embed.add_field(name="💔 __**Divorces:**__", value=f"{len(divorces)} divorces.", inline=False)
 
         embed.set_thumbnail(url=member.display_avatar)
         embed.set_author(name=member, icon_url=member.display_avatar, url=member.display_avatar)
@@ -722,11 +721,11 @@ class SlothReputation(*currency_cogs):
 
         author = ctx.author
         member = member if member else author
-        sloth_actions = await self.get_sloth_actions_counter(member.id)
-        divorces = len([sa for sa in sloth_actions if sa[0] == "divorce"])
-        transfers = len([sa for sa in sloth_actions if sa[0] == "transfer"])
-        baby_deaths = len([sa for sa in sloth_actions if sa[0] == "baby_death"])
-        pet_deaths = len([sa for sa in sloth_actions if sa[0] == "pet_death"])
+        sloth_actions = await self.get_sloth_actions(member.id)
+        divorces = len([sa[1] for sa in sloth_actions if sa[0] == "divorce"])
+        transfers = len([sa[1] for sa in sloth_actions if sa[0] == "transfer"])
+        baby_deaths = len([sa[1] for sa in sloth_actions if sa[0] == "baby_death"])
+        pet_deaths = len([sa[1] for sa in sloth_actions if sa[0] == "pet_death"])
 
         actions_map = (
             {"text": "divorces", "emoji": "💔", "count": divorces},

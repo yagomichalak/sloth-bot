@@ -97,18 +97,7 @@ class SlothActionsTable(commands.Cog):
 
         if label:
             return await self.db.execute_query("SELECT * FROM SlothActions WHERE user_id = %s AND label = %s", (user_id, label), fetch="all")
-        else:
-            return await self.db.execute_query("SELECT * FROM SlothActions WHERE user_id = %s", (user_id,), fetch="all")
-
-    async def get_sloth_actions_counter(self, user_id: int, label: Optional[str] = None) -> List[List[Union[str, int]]]:
-        """ Gets the user's sloth actions.
-        :param user_id: The ID of the user.
-        :param label: The label of the actions. [Optional] """
-
-        if label:
-            return await self.db.execute_query("SELECT label, COUNT(*) FROM SlothActions WHERE user_id = %s AND label = %s GROUP BY label", (user_id, label), fetch="all")
-
-        return await self.db.execute_query("SELECT label, COUNT(*) FROM SlothActions WHERE user_id = %s GROUP BY label", (user_id,), fetch="all")
+        return await self.db.execute_query("SELECT * FROM SlothActions WHERE user_id = %s", (user_id,), fetch="all")
 
     async def delete_sloth_actions(self, user_id: int, label: Optional[str] = None) -> None:
         """ Deletes all Sloth Actions from a user.
