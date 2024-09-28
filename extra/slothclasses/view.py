@@ -1489,24 +1489,24 @@ class DominateView(SlothAction):
     async def dominate_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
         """ Dominate someone. """
 
-        slaps: List[str] = [
-            "https://c.tenor.com/bkNBI.gif",
-            "https://c.tenor.com/VKBw.gif",
-            "https://c.tenor.com/boBDU.gif",
-            "https://c.tenor.com/bFGEf.gif"
-            "https://c.tenor.com/boPIB.gif",
-            "https://c.tenor.com/bIEu0.gif",
-            "https://c.tenor.com/Y7wr.gif",
-            "https://c.tenor.com/beaxl.gif",
-            "https://c.tenor.com/SVxi.gif",
-            "https://c.tenor.com/ZG3X.gif",
-            "https://c.tenor.com/8CmQ.gif",
-            "https://c.tenor.com/bAJfp.gif",
-            "https://c.tenor.com/2BdN.gif",
-            "https://c.tenor.com/8Chr.gif",
-            "https://c.tenor.com/bSxwu.gif",
-            "https://c.tenor.com/Q1ub.gif",
-            "https://c.tenor.com/boD7B.gif",
+        dominations: List[str] = [
+            "https://media1.tenor.com/m/ikzMZDcbmUAAAAAd/exo-universe.gif",
+            "https://media1.tenor.com/m/VliyAOYladAAAAAC/handcuffs-shackles.gif",
+            "https://media1.tenor.com/m/oc6RP1L4SZcAAAAC/tied-up-freaks-youre-one-of-us.gif",
+            "https://media1.tenor.com/m/dpgkgL9AuVcAAAAd/damsel.gif"
+            "https://media1.tenor.com/m/8w51w_OnnCYAAAAC/tying-dark.gif",
+            "https://media1.tenor.com/m/gc2pM_WmoU4AAAAd/struggling-gawain.gif",
+            "https://media1.tenor.com/m/ag8kaw9gNvgAAAAd/tied-up-tie.gif",
+            "https://media1.tenor.com/m/dEgCqPU5ZgMAAAAd/bound-tied.gif",
+            "https://media1.tenor.com/m/UTXVg45p-cEAAAAC/pain-plead.gif",
+            "https://media1.tenor.com/m/WxrwVugl9mQAAAAC/petty-family-nwp.gif",
+            "https://media1.tenor.com/m/OMCnFbXW0iIAAAAC/karen-allen-marion-ravenwood.gif",
+            "https://media1.tenor.com/m/mPxwWQWlxJkAAAAd/erica-durance-bdsm.gif",
+            "https://media1.tenor.com/m/tfuedf01_98AAAAd/bondage-rope.gif",
+            "https://media1.tenor.com/m/5epHjNqChXoAAAAC/gemma-arterton-gagged.gif",
+            "https://media1.tenor.com/m/V5IEfSditGMAAAAC/hands-up.gif",
+            "https://media1.tenor.com/m/RwpAIEr50vYAAAAC/got-game-og-thrones.gif",
+            "https://media1.tenor.com/m/Z55TwWdtBvEAAAAC/korra-bdsm.gif",
         ]
 
         embed = discord.Embed(
@@ -1518,7 +1518,7 @@ class DominateView(SlothAction):
 
         embed.set_author(name=self.member.display_name, url=self.member.display_avatar, icon_url=self.member.display_avatar)
         embed.set_thumbnail(url=self.target.display_avatar)
-        embed.set_image(url=choice(slaps))
+        embed.set_image(url=choice(dominations))
         embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
 
         member_marriages = await self.client.get_cog('SlothClass').get_user_marriages(self.member.id)
