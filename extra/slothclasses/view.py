@@ -235,7 +235,7 @@ class SlapView(discord.ui.View):
         member_marriages = await self.client.get_cog('SlothClass').get_user_marriages(self.member.id)
         cheating_view = None
         for member_marriage in member_marriages:
-            if self.target.id in (member_marriage["user"], member_marriage["partner"]):
+            if self.member.id in (member_marriage["user"], member_marriage["partner"]):
                 break
         else:
             cheating_view = CheatingView(self.client, self.member, self.target, member_marriages)
@@ -344,7 +344,7 @@ class KissView(discord.ui.View):
         member_marriages = await self.client.get_cog('SlothClass').get_user_marriages(self.member.id)
         cheating_view = None
         for member_marriage in member_marriages:
-            if self.target.id in (member_marriage["user"], member_marriage["partner"]):
+            if self.member.id in (member_marriage["user"], member_marriage["partner"]):
                 break
         else:
             cheating_view = CheatingView(self.client, self.member, self.target, member_marriages)
@@ -1507,7 +1507,6 @@ class DominateView(SlothAction):
             "https://tenor.com/bSxwu.gif",
             "https://tenor.com/Q1ub.gif",
             "https://tenor.com/boD7B.gif",
-
         ]
 
         embed = discord.Embed(
@@ -1525,7 +1524,7 @@ class DominateView(SlothAction):
         member_marriages = await self.client.get_cog('SlothClass').get_user_marriages(self.member.id)
         cheating_view = None
         for member_marriage in member_marriages:
-            if self.target.id in (member_marriage["user"], member_marriage["partner"]):
+            if self.member.id in (member_marriage["user"], member_marriage["partner"]):
                 break
         else:
             cheating_view = CheatingView(self.client, self.member, self.target, member_marriages)
