@@ -33,7 +33,7 @@ class Embeds(commands.Cog):
 
     # Sends an embedded message
     @commands.command(aliases=['emb'])
-    @utils.is_allowed([*allowed_roles, lesson_manager_role_id], throw_exc=True)
+    @commands.has_any_role(*allowed_roles, lesson_manager_role_id)
     async def embed(self, ctx):
         """ (MOD) Sends an embedded message. """
 
