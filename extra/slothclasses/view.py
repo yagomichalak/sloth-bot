@@ -29,7 +29,7 @@ class SlothAction(discord.ui.View):
         return self.member.id == interaction.user.id
 
 
-class HugView(discord.ui.View):
+class HugView(SlothAction):
     """ View for the hug skill. """
 
     def __init__(self, member: discord.Member, target: discord.Member, timeout: Optional[float] = 180):
@@ -75,7 +75,7 @@ class HugView(discord.ui.View):
         self.stop()
 
 
-class BootView(discord.ui.View):
+class BootView(SlothAction):
     """ View for the boot skill. """
 
     def __init__(self, member: discord.Member, target: discord.Member, timeout: Optional[float] = 180):
@@ -160,7 +160,7 @@ class BootView(discord.ui.View):
         self.stop()
 
 
-class SlapView(discord.ui.View):
+class SlapView(SlothAction):
     """ View for the slap skill. """
 
     def __init__(self, client: commands.Cog, member: discord.Member, target: discord.Member, timeout: Optional[float] = 180):
@@ -261,7 +261,7 @@ class SlapView(discord.ui.View):
         self.stop()
 
 
-class KissView(discord.ui.View):
+class KissView(SlothAction):
     """ View for the kiss skill. """
 
     def __init__(self, client: commands.Cog, member: discord.Member, target: discord.Member, timeout: Optional[float] = 180):
@@ -551,7 +551,7 @@ class CheatingActionView(discord.ui.View):
             return interaction.user.id in (marriage["user"], marriage["partner"])
 
 
-class HoneymoonView(discord.ui.View):
+class HoneymoonView(SlothAction):
     """ View for the honeymoon skill. """
 
     def __init__(self, member: discord.Member, target: discord.Member, timeout: Optional[float] = 180):
@@ -648,7 +648,6 @@ class HoneymoonView(discord.ui.View):
         await self.disable_buttons(interaction)
         self.stop()
 
-
     @discord.ui.button(label='Nevermind', style=discord.ButtonStyle.red, custom_id='nevermind_id', emoji="❌", row=2)
     async def nevermind_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
         """ Cancels the slap action. """
@@ -658,7 +657,7 @@ class HoneymoonView(discord.ui.View):
         self.stop()
 
 
-class PunchView(discord.ui.View):
+class PunchView(SlothAction):
     """ View for the punch skill. """
 
     def __init__(self, member: discord.Member, target: discord.Member, timeout: Optional[float] = 180):
@@ -908,7 +907,7 @@ class GiveView(SlothAction):
         self.stop()
 
 
-class TickleView(discord.ui.View):
+class TickleView(SlothAction):
     """ View for the tickle skill. """
 
     def __init__(self, member: discord.Member, target: discord.Member, timeout: Optional[float] = 180):
@@ -959,7 +958,7 @@ class TickleView(discord.ui.View):
         self.stop()
 
 
-class YeetView(discord.ui.View):
+class YeetView(SlothAction):
     """ View for the yeet skill. """
 
     def __init__(self, member: discord.Member, target: discord.Member, timeout: Optional[float] = 180):
@@ -1046,7 +1045,7 @@ class YeetView(discord.ui.View):
         self.stop()
 
 
-class BegView(discord.ui.View):
+class BegView(SlothAction):
     """ View for the beg skill. """
 
     def __init__(self, member: discord.Member, target: discord.Member, timeout: Optional[float] = 180):
@@ -1108,7 +1107,7 @@ class BegView(discord.ui.View):
         self.stop()
 
 
-class PatView(discord.ui.View):
+class PatView(SlothAction):
     """ View for the pat skill. """
 
     def __init__(self, member: discord.Member, target: discord.Member, timeout: Optional[float] = 180):
@@ -1171,7 +1170,7 @@ class PatView(discord.ui.View):
         self.stop()
 
 
-class WhisperView(discord.ui.View):
+class WhisperView(SlothAction):
     """ View for the whisper skill. """
 
     def __init__(self, member: discord.Member, target: discord.Member, text: str, timeout: Optional[float] = 180):
@@ -1231,7 +1230,7 @@ class WhisperView(discord.ui.View):
         self.stop()
 
 
-class HandshakeView(discord.ui.View):
+class HandshakeView(SlothAction):
     """ A view for the handshaking skill """
 
     def __init__(self, member: discord.Member, target: discord.Member, timeout: Optional[float] = 180):
@@ -1292,7 +1291,7 @@ class HandshakeView(discord.ui.View):
         self.stop()
 
 
-class PeekView(discord.ui.View):
+class PeekView(SlothAction):
     """ A view for the peek skill """
 
     def __init__(self, member: discord.Member, target: discord.Member, timeout: Optional[float] = 180):
@@ -1355,7 +1354,7 @@ class PeekView(discord.ui.View):
         self.stop()
 
 
-class DriveOverView(discord.ui.View):
+class DriveOverView(SlothAction):
     """ A view for the drive over skill """
 
     def __init__(self, member: discord.Member, target: discord.Member, timeout: Optional[float] = 180):
@@ -1406,7 +1405,7 @@ class DriveOverView(discord.ui.View):
         self.stop()
 
 
-class HighFiveView(discord.ui.View):
+class HighFiveView(SlothAction):
     """ A view for the high five skill """
 
     def __init__(self, member: discord.Member, target: discord.Member, timeout: Optional[float] = 180):

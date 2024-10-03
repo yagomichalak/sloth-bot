@@ -215,8 +215,8 @@ class SlothReputation(*currency_cogs):
         """, inline=True)
 
         # Gets tribe information for the given user
-        if sloth_profile[3]:
-            tribe_member = await SlothClass.get_tribe_member(user_id=member.id)
+        tribe_member = await SlothClass.get_tribe_member(user_id=member.id)
+        if tribe_member:
             user_tribe = await SlothClass.get_tribe_info_by_name(name=sloth_profile[3])
             tribe_owner = tribe_member[0] == tribe_member[2]
             embed.add_field(
