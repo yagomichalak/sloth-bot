@@ -72,7 +72,7 @@
 #     color=discord.Color.gold()
 # )
 # await ctx.send(embed=embed, view=view)
-
+# "Black Cat": {"name": "Black Cat", "description": "Gato da raça prikito.", "emoji": "🐈‍⬛", "url": "https://i.pinimg.com/736x/33/53/99/3353994f1547a59f6ee9d4a6da8410fd.jpg"}
 
 # z!eval
 
