@@ -87,7 +87,7 @@ def is_subscriber(check_adm: Optional[bool] = True, throw_exc: Optional[bool] = 
 
         entitlements = await member.entitlements().flatten()
         for entitlement in entitlements:
-            if entitlement.type == EntitlementType.application_subscription:
+            if entitlement.type in (EntitlementType.application_subscription, EntitlementType.purchase) and entitlement.application_id == ctx.bot.application_id:
                 return True
 
         if throw_exc:
