@@ -16,6 +16,7 @@ from pytz import timezone
 
 # import.local
 from extra.customerrors import CommandNotReady, NotSubscribed
+from extra import utils
 
 session = aiohttp.ClientSession()
 
@@ -85,10 +86,23 @@ def is_subscriber(check_adm: Optional[bool] = True, throw_exc: Optional[bool] = 
             if perms.administrator:
                 return True
 
+        current_date = await utils.get_time_now()
         entitlements = await member.entitlements().flatten()
         for entitlement in entitlements:
-            if entitlement.type in (EntitlementType.application_subscription, EntitlementType.purchase) and entitlement.application_id == ctx.bot.application_id:
-                return True
+
+            # Checks whether it's a subscription entitlement
+            if entitlement.type not in (EntitlementType.application_subscription, EntitlementType.purchase):
+                continue
+            
+            # Checks if it's the Sloth's subscription
+            if entitlement.application_id != ctx.bot.application_id:
+                continue
+            
+            # Checks if the subscription is expired
+            if entitlement.ends_at and entitlement.ends_at < current_date:
+                continue
+
+            return True
 
         if throw_exc:
             raise NotSubscribed()
