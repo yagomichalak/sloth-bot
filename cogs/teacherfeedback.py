@@ -135,7 +135,8 @@ class TeacherFeedback(commands.Cog):
 
         # Checks if the channel is an active class
         the_class = await self.db.get_active_teacher_class_by_txt_id(mc.id)
-        if the_class and not the_class[0] == member.id:
+        the_class_vc = await self.db.get_active_teacher_class_by_vc_id(mc.id)
+        if (the_class and the_class[0] != member.id) or (the_class_vc and the_class_vc[0] != member.id):
             # Checks if user is an active student
             if await self.db.get_student_by_vc_id(member.id, the_class[2]):
                 await self.db.update_student_messages(member.id, the_class[2])
