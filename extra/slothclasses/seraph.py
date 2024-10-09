@@ -497,8 +497,11 @@ class Seraph(Player):
 
         # Calculates the chance (10%) of attaining the grace for the a member
         rn = random.random()
-        attained_grace: bool = rn <= 0.10
+        percentage = 0.10
+        if await utils.is_subscriber(check_adm=False, throw_exc=False).predicate(ctx):
+            percentage += 0.20
 
+        attained_grace: bool = rn <= percentage
         try:
             current_timestamp = await utils.get_timestamp()
             if attained_grace:
@@ -522,7 +525,7 @@ class Seraph(Player):
                 attained_grace_embed = await self.attained_grace_embed(perpetrator=perpetrator, target=target, emoji=emoji)
                 await ctx.send(embed=attained_grace_embed)
             else:
-                await ctx.send(f"**You had a `10%` chance of attaining the grace for {target.mention}, but you missed it, {perpetrator.mention}!**")
+                await ctx.send(f"**You had a `{int(percentage * 100)}%` chance of attaining the grace for {target.mention}, but you missed it, {perpetrator.mention}!**")
 
                 if random.random() <= 0.5:
                     await ctx.send(f"**You had a `50%` chance of getting your money back after failing your `attain grace`, and you got it, {perpetrator.mention}!** 😄")

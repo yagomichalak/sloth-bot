@@ -674,7 +674,7 @@ class Merchant(Player):
         if len(member_marriages) >= 1:  # Poly marriage uses golden leaves
             if member_currency[7] < poly_marriage_price:
                 view = None
-                if not await utils.is_subscriber().predicate(ctx):
+                if not await utils.is_subscriber(throw_exc=False).predicate(ctx):
                     view = discord.ui.View()
                     view.add_item(discord.ui.Button(sku_id=sloth_subscriber_sub_id))
                 return await ctx.send(
