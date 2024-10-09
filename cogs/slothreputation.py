@@ -180,38 +180,38 @@ class SlothReputation(*currency_cogs):
         m, s = divmod(user_info[0][2], 60)
         h, m = divmod(m, 60)
 
-        embed.add_field(name="__**General:**__", value=f"""
-        > 📊 `Level`: {lvl}
-        > 🍃 `Balance`: {ucur[0][1]}łł & {ucur[0][7]}gł
-        > 💰 `Exchangeable Activity`: {h:d} hours, {m:02d} minutes and {user_info[0][1]} messages.
-        > 🏆 `Leaderboard Info`: {position[1]}. pts | #{position[0]}
+        embed.add_field(name="__**`General`**__", value=f"""
+        > 📊 **Level**: {lvl}
+        > 🍃 **Balance**: {ucur[0][1]}łł & {ucur[0][7]}gł
+        > 💰 **Exchangeable Activity**: {h:d} hours, {m:02d} minutes and {user_info[0][1]} messages.
+        > 🏆 **Reputation**: {position[1]} pts | #{position[0]}
         """, inline=True)
 
-        embed.add_field(name="__**Classes:**__", value=f"""
-        > 🧑‍🎓 `Participated in:` {ucur[0][3]}
-        > 🌟 `Rewarded in`: {ucur[0][4]}
-        > 🧑‍🏫 `Hosted`: {ucur[0][5]}
+        embed.add_field(name="__**`Classes`**__", value=f"""
+        > 🧑‍🎓 **Participated in:** {ucur[0][3]}
+        > 🌟 **Rewarded in**: {ucur[0][4]}
+        > 🧑‍🏫 **Hosted**: {ucur[0][5]}
         """, inline=True)
 
         progress_bar = await self.get_progress_bar(xp=xp, goal_xp=goal_xp)
         embed.add_field(name="🔮 __**Progress Bar:**__", value=progress_bar, inline=False)
 
         emoji = user_class.emoji if (user_class := classes.get(sloth_profile[1].lower())) else ''
-        embed.add_field(name="__**Sloth:**__", value=f"""
-        > 🕵️ `Sloth Class:` {sloth_profile[1]} {emoji}
-        > 🧮 `Skills Used:` {sloth_profile[2]}
-        > 🔪 `Knife Sharpness Stack:` {ucur[0][5]}
-        > 🍯 `Has Potion:` {True if sloth_profile[5] else False}
-        > 💍 `Rings:` {sloth_profile[7]}/2
+        embed.add_field(name="__**`Sloth`**__", value=f"""
+        > 🕵️ **Sloth Class:** {sloth_profile[1]} {emoji}
+        > 🧮 **Skills Used:** {sloth_profile[2]}
+        > 🔪 **Knife Sharpness Stack:** {ucur[0][5]}
+        > 🍯 **Has Potion:** {True if sloth_profile[5] else False}
+        > 💍 **Rings:** {sloth_profile[7]}/2
         """, inline=True)
 
-        embed.add_field(name="__**Buffs & Debuffs:**__", value=f"""
-        > 🛡️ `Protected:` {await SlothClass.has_effect(effects, 'protected')}
-        > 😵 `Knocked Out:` {await SlothClass.has_effect(effects, 'knocked_out')}
-        > 🔌 `Wired:` {await SlothClass.has_effect(effects, 'wired')}
-        > 🐸 `Frogged:` {await SlothClass.has_effect(effects, 'frogged')}
-        > 🧤 `Sabotaged:` {await SlothClass.has_effect(effects, 'sabotaged')}
-        > 🤐 `Kidnapped:` {True if await SlothClass.has_effect(effects, 'kidnapped') else False}
+        embed.add_field(name="__**`Buffs & Debuffs`**__", value=f"""
+        > 🛡️ **Protected:** {await SlothClass.has_effect(effects, 'protected')}
+        > 😵 **Knocked Out:** {await SlothClass.has_effect(effects, 'knocked_out')}
+        > 🔌 **Wired:** {await SlothClass.has_effect(effects, 'wired')}
+        > 🐸 **Frogged:** {await SlothClass.has_effect(effects, 'frogged')}
+        > 🧤 **Sabotaged:** {await SlothClass.has_effect(effects, 'sabotaged')}
+        > 🤐 **Kidnapped:** {True if await SlothClass.has_effect(effects, 'kidnapped') else False}
         """, inline=True)
 
         # Gets tribe information for the given user
@@ -220,12 +220,11 @@ class SlothReputation(*currency_cogs):
             user_tribe = await SlothClass.get_tribe_info_by_name(name=sloth_profile[3])
             tribe_owner = tribe_member[0] == tribe_member[2]
             embed.add_field(
-                name="🏕️ __**Tribe:**__", 
+                name="🏕️ __**`Tribe`**__", 
                 value=f"[{user_tribe['name']}]({user_tribe['link']}) ({user_tribe['two_emojis']}){' 👑' if tribe_owner else ''}", 
                 inline=False)
-                
         else:
-            embed.add_field(name="🏕️ __**Tribe:**__", value="None", inline=False)
+            embed.add_field(name="🏕️ __**`Tribe`**__", value="None", inline=False)
 
         if user_baby := await SlothClass.get_user_baby(member.id):
             baby_emoji: str = ''
@@ -235,24 +234,24 @@ class SlothReputation(*currency_cogs):
                 baby_emoji = '🥚'
 
             embed.add_field(
-                name=f"{baby_emoji} __**Baby:**__", 
-                value=f"`{user_baby[2]}` (<t:{user_baby[8]}:R>).", 
+                name=f"{baby_emoji} __**`Baby`**__", 
+                value=f"**{user_baby[2]}** (<t:{user_baby[8]}:R>).", 
                 inline=True)
 
         if user_pet := await SlothClass.get_user_pet(member.id):
             embed.add_field(
-                name="🐸 __**Pet:**__", 
-                value=f"`{user_pet[1]}` (<t:{user_pet[7]}:R>). `{user_pet[2]}`", 
+                name="🐸 __**`Pet`**__", 
+                value=f"**{user_pet[1]}** (<t:{user_pet[7]}:R>). **{user_pet[2]}**", 
                 inline=True)
 
         if marriages := await SlothClass.get_user_marriages(member.id):
-            text = f"`Married to:`\n"
+            text = f"**Married to:**\n"
             for marriage in marriages:
                 text += f"> <@{marriage['partner']}> (<t:{marriage['timestamp']}:R>).{' 🌛' if marriage['honeymoon'] else ''}\n"
-            embed.add_field(name="💍 __**Marriages:**__", value=text, inline=False)
+            embed.add_field(name="💍 __**`Marriages`**__", value=text, inline=False)
 
             divorces = await self.get_sloth_actions(member.id, "divorce")
-            embed.add_field(name="💔 __**Divorces:**__", value=f"{len(divorces)} divorces.", inline=False)
+            embed.add_field(name="💔 __**`Divorces`**__", value=f"{len(divorces)} divorces.", inline=True)
 
         embed.set_thumbnail(url=member.display_avatar)
         embed.set_author(name=member, icon_url=member.display_avatar, url=member.display_avatar)
@@ -270,7 +269,6 @@ class SlothReputation(*currency_cogs):
                 view.children[0].disabled = True
 
             return await answer(embed=embed, view=view)
-
 
     @slash_command(name="leaderboard", guild_ids=guild_ids)
     @Player.poisoned()
