@@ -466,3 +466,15 @@ async def count_members(guild: discord.Guild, roles: Iterable[Union[discord.Role
             continue
         member_ids.update([m.id for m in role.members])
     return len(member_ids)
+
+async def get_subscriptions_count(member_id: int, guild: discord.Guild) -> int:
+    """ Gets the subscription count for a member.
+    :param member_id: The member ID.
+    :param guild: The guild. """
+
+    member = discord.utils.get(guild.members, id=member_id)
+    entitlements = await member.entitlements().flatten()
+    return len([
+        ent for ent in entitlements
+        if ent.type in (EntitlementType.application_subscription, EntitlementType.purchase)
+    ])

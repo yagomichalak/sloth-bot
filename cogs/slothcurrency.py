@@ -960,8 +960,5 @@ class SlothCurrency(*currency_cogs):
         await ctx.send(embed=embed, view=view)
 
 
-
-
-
 def setup(client):
     client.add_cog(SlothCurrency(client))

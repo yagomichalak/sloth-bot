@@ -85,13 +85,31 @@ class Subscriptions(commands.Cog):
             await SlothCurrency.update_user_premium_money(member.id, 5)
         except Exception:
             pass
-        
+
+        # Resets all skills cooldown
+        try:
+            SlothClass = self.client.get_cog("SlothClass")
+            await SlothClass.update_user_skills_ts(member.id)
+        except Exception:
+            pass
+
+        emb_title = "New subscriber"
+        emb_desc = f"**{member.mention} just became a `Sloth Subscriber`.**"
+        emb_color = discord.Color.green()
+
+        try:
+            # Checks if it's a subscription renewal
+            if await utils.get_subscriptions_count(member.id, guild) > 1:
+                emb_title = "Subscription Renewal!"
+                emb_desc = f"**{member.mention} got his subscription renewed.**"
+                emb_color = discord.Color.yellow()
+        except Exception:
+            pass
+
         # Log when a member subscribes
         sloth_sub_log = self.client.get_channel(on_sloth_sub_log_channel_id)
         embed = discord.Embed(
-            title="New subscriber!",
-            description=f"**{member.mention} just became a `Sloth Subscriber`.**",
-            color=discord.Color.green(),
+            title=emb_title, description=emb_desc, color=emb_color,
         )
         embed.set_thumbnail(url=member.display_avatar)
         await sloth_sub_log.send(embed=embed)
