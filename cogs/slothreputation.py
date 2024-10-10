@@ -75,15 +75,16 @@ class SlothReputation(*currency_cogs):
             return await channel.send(f"**{user.mention} has leveled up to lvl {the_user[0][2] + 1}! <:zslothrich:701157794686042183> Here's {(the_user[0][2] + 1) * 5}łł! <:zslothrich:701157794686042183>**")
 
 
-    async def get_progress_bar(self, xp: int, goal_xp, length_progress_bar: int = 17) -> str:
+    async def get_progress_bar(self, lvl: int, xp: int, goal_xp, length_progress_bar: int = 17) -> str:
         """ Gets a string/emoji progress bar.
+        :param lvl: The user level.
         :param xp: The current XP of the user.
         :param goal_xp: The XP they are trying to achieve.
         :param length_progress_bar: The amount of blocks in the bar. Default=20 """
 
         percentage = int((xp / goal_xp) * 100)
         boxes = int((percentage * length_progress_bar) / 100)
-        progress_bar = f"{xp}xp / {goal_xp}xp\n{':blue_square:' * boxes}{':white_large_square:' * (length_progress_bar - boxes)}"
+        progress_bar = f"> 📊 **Level**: {lvl} ({xp}xp / {goal_xp}xp) {percentage}%\n> {':blue_square:' * boxes}{':white_large_square:' * (length_progress_bar - boxes)}"
         return progress_bar
 
     @commands.command(name="info", aliases=['status', 'exchange', 'level', 'lvl', 'exp', 'xp'])
@@ -177,12 +178,24 @@ class SlothReputation(*currency_cogs):
         goal_xp = ((user[0][2]+1)**5)
         lvl = user[0][2]
         
-        m, s = divmod(user_info[0][2], 60)
+        # All time activity
+        all_msgs = await self.get_sloth_actions(member.id, "message-exchange")
+        all_msgs = sum([int(am[4]) for am in all_msgs]) + int(user_info[0][1])
+
+        all_time = await self.get_sloth_actions(member.id, "time-exchange")
+        all_time = sum([int(at[4]) for at in all_time]) + user_info[0][2]
+
+        a_m, _ = divmod(all_time, 60)
+        a_h, a_m = divmod(a_m, 60)
+
+        # Exchangeable activity
+        m, _ = divmod(user_info[0][2], 60)
         h, m = divmod(m, 60)
+        
 
         embed.add_field(name="__**`General`**__", value=f"""
-        > 📊 **Level**: {lvl}
         > 🍃 **Balance**: {ucur[0][1]}łł & {ucur[0][7]}gł
+        > 📈 **All Time Activity**: {a_h:d} hours, {a_m:02d} minutes and {all_msgs} messages.
         > 💰 **Exchangeable Activity**: {h:d} hours, {m:02d} minutes and {user_info[0][1]} messages.
         > 🏆 **Reputation**: {position[1]} pts | #{position[0]}
         """, inline=True)
@@ -193,8 +206,8 @@ class SlothReputation(*currency_cogs):
         > 🧑‍🏫 **Hosted**: {ucur[0][5]}
         """, inline=True)
 
-        progress_bar = await self.get_progress_bar(xp=xp, goal_xp=goal_xp)
-        embed.add_field(name="🔮 __**Progress Bar:**__", value=progress_bar, inline=False)
+        progress_bar = await self.get_progress_bar(lvl=lvl, xp=xp, goal_xp=goal_xp)
+        embed.add_field(name="__**`Progress Bar`:**__", value=progress_bar, inline=False)
 
         emoji = user_class.emoji if (user_class := classes.get(sloth_profile[1].lower())) else ''
         embed.add_field(name="__**`Sloth`**__", value=f"""

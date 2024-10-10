@@ -353,6 +353,9 @@ class ExchangeActivityView(discord.ui.View):
         await SlothCurrency.update_user_server_messages(member.id, -message_times * 50)
         await SlothCurrency.update_user_server_time(member.id, -time_times * 1800)
         await SlothCurrency.update_user_money(member.id, expected_money)
+        SlothReputation = self.client.get_cog("SlothReputation")
+        await SlothReputation.insert_sloth_actions(label="message-exchange", user_id=member.id, target_id=member.id, int_content=message_times * 50)
+        await SlothReputation.insert_sloth_actions(label="time-exchange", user_id=member.id, target_id=member.id, int_content=time_times * 1800)
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
 
