@@ -47,7 +47,7 @@ class Bootcamp(commands.Cog):
 
         await interaction.response.defer(ephemeral=True)
         current_ts = await utils.get_timestamp()
-        view = BootcampFeedbackView(self.client, member=member, perpetrator=interaction.author, current_ts=current_ts)
+        view = BootcampFeedbackView(self.client, member=member, perpetrator=interaction.user, current_ts=current_ts)
         await interaction.followup.send(view=view, ephemeral=True)
 
     async def post_user_feedback_data(self, data: Dict[str, int]) -> None:

@@ -11,6 +11,7 @@ from discord.ext import commands
 
 # import.local
 from extra import utils
+from extra.prompt.menu import ConfirmButton
 from .menu import ConfirmSkill
 from .modals import (BootcampFeedbackModal, DebateManagerApplicationModal,
                      EventHostApplicationModal, ModeratorApplicationModal,
@@ -321,23 +322,37 @@ class ExchangeActivityView(discord.ui.View):
 
         await interaction.response.defer()
         SlothCurrency = self.client.get_cog('SlothCurrency')
-        cmsg, message_times = await SlothCurrency.convert_messages(self.user_info[1])
-        ctime, time_times = await SlothCurrency.convert_time(self.user_info[2])
+        is_sub = await utils.is_subscriber(check_adm=False, throw_exc=False).predicate(ctx)
+        cmsg, message_times = await SlothCurrency.convert_messages(self.user_info[1], is_sub)
+        ctime, time_times = await SlothCurrency.convert_time(self.user_info[2], is_sub)
 
         if cmsg == ctime == 0:
             return await interaction.followup.send(f"**You have nothing to exchange, {member.mention}!**")
 
         expected_money: int = cmsg + ctime
-        
-        confirmed = await ConfirmSkill(f"**{member.mention}, are you sure you want to exchange your `{h:d}h`, `{m:02d}m` and `{self.user_info[1]} messages` for `{expected_money}łł`?**").prompt(ctx)
-        if confirmed:
-            await SlothCurrency.exchange(ctx, cmsg, message_times, ctime, time_times)
-            # Updates user Activity Status and Money
-            await SlothCurrency.update_user_server_messages(member.id, -message_times * 50)
-            await SlothCurrency.update_user_server_time(member.id, -time_times * 1800)
-            await SlothCurrency.update_user_money(member.id, expected_money)
-        else:
-            await interaction.followup.send(f"**{member.mention}, not exchanging, then!**")
+        confirm_view = ConfirmButton(member, timeout=60)
+
+        await interaction.followup.send(
+            embed=discord.Embed(
+                description=f"**{member.mention}, are you sure you want to exchange your `{h:d}h`, `{m:02d}m` and `{self.user_info[1]} messages` for `{expected_money}łł`?**",
+                color=member.color,
+            ), view=confirm_view
+        )
+        await confirm_view.wait()
+        await utils.disable_buttons(confirm_view)
+        await confirm_view.interaction.message.edit(view=confirm_view)
+
+        if confirm_view.value is None:
+            return await confirm_view.interaction.followup.send(f"**{member.mention}, you took too long to answer...**")
+
+        if not confirm_view.value:
+            return await confirm_view.interaction.followup.send(f"**{member.mention}, not exchanging, then!**")
+
+        await SlothCurrency.exchange(confirm_view.interaction, cmsg, message_times, ctime, time_times)
+        # Updates user Activity Status and Money
+        await SlothCurrency.update_user_server_messages(member.id, -message_times * 50)
+        await SlothCurrency.update_user_server_time(member.id, -time_times * 1800)
+        await SlothCurrency.update_user_money(member.id, expected_money)
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
 
@@ -350,7 +365,6 @@ class GiveawayView(discord.ui.View):
         super().__init__(timeout=None)
         self.client = client
         self.role_id = role_id
-
 
     @discord.ui.button(label="Participate", emoji="🎉", custom_id="giveaway_btn_id", style=discord.ButtonStyle.success)
     async def participate_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:

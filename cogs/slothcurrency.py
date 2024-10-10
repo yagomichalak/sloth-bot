@@ -658,7 +658,7 @@ class SlothCurrency(*currency_cogs):
                 return await ctx.send("**Category not found!**", delete_after=3)
 
 
-    async def exchange(self, ctx, cmsg, message_times, ctime, time_times):
+    async def exchange(self, interaction, cmsg, message_times, ctime, time_times):
         """ Exchange your status into leaves (łł).
         :param ctx: The context of the command.
         :param cmsg: The amount of leaves gotten from messages.
@@ -666,8 +666,8 @@ class SlothCurrency(*currency_cogs):
         :param ctime: The amount of leaves gotten from time.
         :param time_times: The amount of loops it took to get to the time result. """
         
-        embed = discord.Embed(title="Exchange", color=ctx.author.color, timestamp=ctx.message.created_at)
-        embed.set_author(name=ctx.author, url=ctx.author.display_avatar)
+        embed = discord.Embed(title="Exchange", color=interaction.user.color, timestamp=interaction.message.created_at)
+        embed.set_author(name=interaction.user, url=interaction.user.display_avatar)
         if cmsg > 0:
             embed.add_field(name="__**Messages:**__",
                             value=f"Exchanged `{message_times * 50}` messages for `{cmsg}`łł;", inline=False)
@@ -675,39 +675,46 @@ class SlothCurrency(*currency_cogs):
             embed.add_field(name="__**Time:**__",
                             value=f"Exchanged `{(time_times * 1800) / 60}` minutes for `{ctime}`łł;", inline=False)
 
-        return await ctx.send(embed=embed)
+        return await interaction.followup.send(embed=embed)
 
-
-    async def convert_messages(self, user_message: int) -> List[int]:
+    async def convert_messages(self, user_message: int, is_sub: bool = False) -> Tuple[int, int]:
         """ Converts the user's message counter to leaves.
-        :param user_message: The message counter the user has. """
+        :param user_message: The message counter the user has.
+        :param is_sub: Whether the user is a subscriber. """
 
         messages_left = user_message
         exchanged_money = times = 0
+        money_rate = 2
+        if is_sub:  # Subscribers get a +2 on the exchange
+            money_rate += 2
 
         while True:
             if messages_left >= 50:
                 times += 1
                 messages_left -= 50
-                exchanged_money += 2
+                exchanged_money += money_rate
                 await asyncio.sleep(0)
                 continue
             else:
                 
                 return exchanged_money, times
 
-    async def convert_time(self, user_time: int) -> List[int]:
+    async def convert_time(self, user_time: int, is_sub: bool = False) -> Tuple[int, int]:
         """ Converts the user's time counter to leaves.
-        :param user_time: The amount of time in seconds the user has. """
+        :param user_time: The amount of time in seconds the user has.
+        :param is_sub: Whether the user is a subscriber. """
 
         time_left = user_time
         exchanged_money = times = 0
+        money_rate = 2
+        if is_sub:  # Subscribers get a +2 on the exchange
+            money_rate += 2
 
         while True:
             if time_left >= 1800:
                 times += 1
                 time_left -= 1800
-                exchanged_money += 2
+                exchanged_money += money_rate
                 await asyncio.sleep(0)
                 continue
             else:
