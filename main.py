@@ -387,7 +387,16 @@ async def help(ctx, *, cmd: str =  None) -> None:
         for cog in client.cogs:
             cog = client.get_cog(cog)
             cog_commands = [c for c in cog.__cog_commands__ if hasattr(c, 'parent') and c.parent is None]
-            commands = [f"{client.command_prefix}{c.name}" for c in cog_commands if hasattr(c, 'hidden') and not c.hidden]
+            commands = []
+            for c in cog_commands:
+                if not (hasattr(c, "hidden") and not c.hidden):
+                    continue
+                try:
+                    await c.can_run(ctx)
+                except Exception:
+                    continue
+                commands.append(f"{client.command_prefix}{c.name}")
+
             if commands:
                 fields.append({
                     "name": f"__{cog.qualified_name}__",
@@ -398,6 +407,10 @@ async def help(ctx, *, cmd: str =  None) -> None:
         cmds = []
         for y in client.walk_commands():
             if not y.cog_name and not y.hidden:
+                try:
+                    await y.can_run(ctx)
+                except Exception:
+                    continue
                 cmds.append(f"{client.command_prefix}{y.name}")
 
         fields.append({
@@ -430,8 +443,14 @@ async def help(ctx, *, cmd: str =  None) -> None:
             if str(cog).lower() == str(cmd).lower():
                 cog = client.get_cog(cog)
                 current_embed = discord.Embed(title=f"__Cog:__ {cog.qualified_name}", description=f"__**Description:**__\n```{cog.description}```", color=ctx.author.color, timestamp=ctx.message.created_at)
-                cog_commands = [c for c in cog.__cog_commands__ if hasattr(c, 'hidden') and hasattr(c, 'parent') and c.parent is None]
-                for c in cog_commands:
+                cog_commands = []
+                for c in cog.__cog_commands__:
+                    if not (hasattr(c, "hidden") and hasattr(c, "parent") and c.parent is None):
+                        continue
+                    try:
+                        c.can_run(ctx)
+                    except Exception:
+                        continue
                     if not c.hidden:
                         fields.append({"name": c.qualified_name, "value": c.help, "inline": False})
             
@@ -448,7 +467,6 @@ async def help(ctx, *, cmd: str =  None) -> None:
         # Otherwise, it's an invalid parameter (Not found)
         else:
             await ctx.send(f"**Invalid parameter! It is neither a command nor a cog!**")
-
 
 @client.command(aliases=['al', 'alias'])
 async def aliases(ctx, *, cmd: str =  None) -> None:
