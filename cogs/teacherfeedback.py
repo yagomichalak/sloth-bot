@@ -1121,7 +1121,7 @@ class TeacherFeedback(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.command(aliases=['end_class', 'closeclass', 'endclass', 'end', 'finishclass', 'finish', 'finish_class'])
-    @utils.is_allowed(*[mod_role_id, admin_role_id])
+    @utils.is_allowed(*[mod_role_id, admin_role_id], throw_exc=True)
     async def close_class(self, ctx) -> None:
         """ (MOD) Ends an on-going class. """
 

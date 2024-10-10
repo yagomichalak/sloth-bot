@@ -21,7 +21,7 @@ class ModerationFakeAccountsTable(commands.Cog):
         self.db = DatabaseCore()
 
     @commands.command(aliases=['link_fake', 'linkfake', 'add_fake', 'addfake', 'lfa'])
-    @utils.is_allowed(allowed_roles)
+    @utils.is_allowed(allowed_roles, throw_exc=True)
     async def link_fake_account(self, ctx, member: Union[discord.User, discord.Member] = None, fake_member: Union[discord.User, discord.Member] = None) -> None:
         """ Links a member to their fake account.
         :param member: The member's main account.
@@ -48,7 +48,7 @@ class ModerationFakeAccountsTable(commands.Cog):
         await ctx.send(f"**Successfully associated `{member}` with `{fake_member}`, {author.mention}!**")
 
     @commands.command(aliases=['unlink_fakes', 'unlinkfakes', 'dissociate_fakes', 'remove_fakes', 'removefakes', 'ufa'])
-    @utils.is_allowed(allowed_roles)
+    @utils.is_allowed(allowed_roles, throw_exc=True)
     async def unlink_fake_accounts(self, ctx, member: Union[discord.Member, discord.User] = None) -> None:
         """ Unlinks all associations with a specific member.
         :param member: The member to dissociate.
@@ -72,7 +72,7 @@ class ModerationFakeAccountsTable(commands.Cog):
         await ctx.send(f"**Successfully dissociated `{member}` from `{len(fakes)}` accounts, {author.mention}!**")
 
     @commands.command(aliases=['fakes'])
-    @utils.is_allowed(allowed_roles)
+    @utils.is_allowed(allowed_roles, throw_exc=True)
     async def fake_accounts(self, ctx, member: Union[discord.Member, discord.User] = None) -> None:
         """ Shows fake accounts associated with a user.
         :param member: The user to show the fake accounts from. """

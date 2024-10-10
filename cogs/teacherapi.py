@@ -512,7 +512,7 @@ class TeacherAPI(commands.Cog):
         await self.db.execute_query("DELETE FROM teacherclass_teacherclass WHERE owner_id = %s", (user_id,), database_name="django")
 
     # @commands.command(aliases=['delete_cards', 'dtc'])
-    # @utils.is_allowed([*allowed_roles, lesson_manager_role_id])
+    # @utils.is_allowed([*allowed_roles, lesson_manager_role_id], throw_exc=True)
     async def delete_teacher_cards(self, ctx, user: discord.User = None) -> None:
         """ Deletes all cards from a given teacher from the database.
         :param user: The user from whom to get the cards. """

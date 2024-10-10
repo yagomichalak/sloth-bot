@@ -447,12 +447,13 @@ async def help(ctx, *, cmd: str =  None) -> None:
                 for c in cog.__cog_commands__:
                     if not (hasattr(c, "hidden") and hasattr(c, "parent") and c.parent is None):
                         continue
+                    if c.hidden:
+                        continue
                     try:
                         c.can_run(ctx)
                     except Exception:
                         continue
-                    if not c.hidden:
-                        fields.append({"name": c.qualified_name, "value": c.help, "inline": False})
+                    fields.append({"name": c.qualified_name, "value": c.help, "inline": False})
             
                 additional = {
                     "client": client,

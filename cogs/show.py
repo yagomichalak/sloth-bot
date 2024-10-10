@@ -106,7 +106,7 @@ class Show(commands.Cog):
     # Shows the specific rule
 
     @slash_command(name="rules", guild_ids=guild_ids)
-    @utils.is_allowed(allowed_roles)
+    @utils.is_allowed(allowed_roles, throw_exc=True)
     async def _rules_slash(self, ctx,
                            rule_number: Option(int, name="rule_number", description="The number of the rule you wanna show.", choices=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], required=False),
                            rule_lang: Option(str, name="rule_language", description="The language of the rule you wanna show.", choices=["English", "Italian", "Portuguese", "Russian", "Turkish"], required=False, default='english'),
@@ -119,7 +119,7 @@ class Show(commands.Cog):
             await self._rules(ctx, rule_lang, reply_message)
 
     @commands.command(name="rule")
-    @utils.is_allowed(allowed_roles)
+    @utils.is_allowed(allowed_roles, throw_exc=True)
     async def _rule_command(self, ctx, numb: int = None, lang: str = 'english') -> None:
         """ Shows a specific server rule.
         :param numb: The number of the rule to show. 
@@ -164,7 +164,7 @@ class Show(commands.Cog):
             await ctx.channel.send(embed=embed)
 
     @commands.command(name="rules")
-    @utils.is_allowed(allowed_roles)
+    @utils.is_allowed(allowed_roles, throw_exc=True)
     async def _rules_command(self, ctx, lang: str = 'english') -> None:
         """ (MOD) Sends an embedded message containing all rules in it. """
 
