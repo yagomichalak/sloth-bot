@@ -929,13 +929,32 @@ class SlothCurrency(*currency_cogs):
             color=member.color
         )
 
-        m, s = divmod(user_info[0][2], 60)
+        # All time activity
+        SlothReputation = self.client.get_cog("SlothReputation")
+        all_msgs = await SlothReputation.get_sloth_actions(member.id, "message-exchange")
+        all_msgs = sum([int(am[4]) for am in all_msgs]) + int(user_info[0][1])
+
+        all_time = await SlothReputation.get_sloth_actions(member.id, "time-exchange")
+        all_time = sum([int(at[4]) for at in all_time]) + user_info[0][2]
+
+        a_m, _ = divmod(all_time, 60)
+        a_h, a_m = divmod(a_m, 60)
+
+        # Exchangeable activity
+        m, _ = divmod(user_info[0][2], 60)
         h, m = divmod(m, 60)
+
+        embed.add_field(
+            name=f"📈 __**All Time Activity:**__",
+            value=f"{a_h:d} hours, {a_m:02d} minutes and {all_msgs} messages.",
+        )
 
         embed.add_field(
             name=f"💰 __**Exchangeable Activity:**__",
             value=f"{h:d} hours, {m:02d} minutes and {user_info[0][1]} messages.",
         )
+
+        embed.set_footer(text=f"{member}'s Activity", icon_url=member.display_avatar)
 
         view = ExchangeActivityView(self.client, user_info[0])
         await ctx.send(embed=embed, view=view)
