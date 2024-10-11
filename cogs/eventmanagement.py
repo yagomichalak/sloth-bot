@@ -81,6 +81,7 @@ class EventManagement(EventRoomsTable):
     # CREATE EVENT
 
     @commands.group()
+    @commands.has_any_role(*[event_host_role_id, event_manager_role_id, mod_role_id, admin_role_id, owner_role_id])
     async def create_event(self, ctx) -> None:
         """ Creates an event. """
 

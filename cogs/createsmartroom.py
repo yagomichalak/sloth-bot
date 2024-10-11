@@ -758,6 +758,7 @@ You can only add either **threads** **OR** one **voice channel**"""))
 
 
 	@commands.group(aliases=['gr', 'galaxy_room', 'galaxyroom'])
+	@utils.not_ready()
 	async def galaxy(self, ctx) -> None:
 		""" Command for managing Galaxy Rooms. """
 
