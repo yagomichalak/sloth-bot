@@ -14,7 +14,7 @@ from extra.misc.duolingo import DuolingoProfileTable
 from extra.prompt.menu import Confirm
 from extra.slothclasses.player import Player
 
-class Duolingo(DuolingoProfileTable):
+class Duolingo(DuolingoProfileTable, command_attrs=dict(hidden=True)):
     """ Category for Duolingo related commands. """
 
     def __init__(self, client) -> None:

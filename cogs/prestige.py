@@ -14,7 +14,7 @@ mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID', 123))
 owner_role_id = int(os.getenv('OWNER_ROLE_ID', 123))
 
-class Prestige(commands.Cog):
+class Prestige(commands.Cog, command_attrs=dict(hidden=True)):
     """ Category for prestige commands. """
 
     def __init__(self, client: commands.Bot) -> None:
