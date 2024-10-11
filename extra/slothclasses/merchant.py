@@ -108,7 +108,10 @@ class Merchant(Player):
     @Player.poisoned()
     async def buy(self, ctx) -> None:
         """ Buys a specific item from a Merchant.
-        (Use this without an item name to see what items you can possibly buy with this command) """
+        (Use this without an item name to see what items you can possibly buy with this command)
+        
+        Ex:
+        z!buy ring/potion/pet @member  """
         if ctx.invoked_subcommand:
             return
 
