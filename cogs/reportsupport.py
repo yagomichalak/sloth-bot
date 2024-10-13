@@ -393,7 +393,7 @@ class ReportSupport(*report_support_classes):
             embed.add_field(name="Reporting:", value=f"```{reportee}```", inline=False)
             embed.add_field(name="For:", value=f"```{text}```", inline=False)
             embed.add_field(name="Evidence:", value=f"```{evidence}```", inline=False)
-            message = await the_channel.send(content=f"{member.mention}", embed=embed)
+            message = await the_channel.send(content=f"{member.mention}, {senior_mod.mention}", embed=embed)
             ctx = await self.client.get_context(message)
 
             if member.voice:
