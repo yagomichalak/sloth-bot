@@ -179,7 +179,7 @@ class TeacherApplicationModal(Modal):
         self.cog.cache[member.id] = await utils.get_timestamp()
         await confirm_view.interaction.followup.send(content="""
         **Application successfully made, please, be patient now.**
-    • We will let you know when we need a new mod. We check apps when we need it!""", ephemeral=True)
+    • We will let you know when we need a new teacher. We check apps when we need it!""", ephemeral=True)
 
         teacher_app_channel = await self.client.fetch_channel(self.cog.teacher_app_channel_id)
         mayu = discord.utils.get(teacher_app_channel.guild.members, id=self.cog.mayu_id)
@@ -269,7 +269,7 @@ class EventHostApplicationModal(Modal):
         self.cog.cache[member.id] = await utils.get_timestamp()
         await confirm_view.interaction.followup.send(content="""
         **Application successfully made, please, be patient now.**
-    • We will let you know when we need a new mod. We check apps when we need it!""", ephemeral=True)
+    • We will let you know when we need a new event host. We check apps when we need it!""", ephemeral=True)
 
         teacher_app_channel = await self.client.fetch_channel(self.cog.event_host_app_channel_id)
         app = await teacher_app_channel.send(content=member.mention, embed=embed)
@@ -355,7 +355,7 @@ class DebateManagerApplicationModal(Modal):
         self.cog.cache[member.id] = await utils.get_timestamp()
         await confirm_view.interaction.followup.send(content="""
         **Application successfully made, please, be patient now.**
-    • We will let you know when we need a new mod. We check apps when we need it!""", ephemeral=True)
+    • We will let you know when we need a new debate manager. We check apps when we need it!""", ephemeral=True)
 
         debate_app_channel = await self.client.fetch_channel(self.cog.debate_manager_app_channel_id)
         app = await debate_app_channel.send(content=member.mention, embed=embed)
