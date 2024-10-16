@@ -234,11 +234,12 @@ class SlapView(SlothAction):
 
         member_marriages = await self.client.get_cog('SlothClass').get_user_marriages(self.member.id)
         cheating_view = None
-        for member_marriage in member_marriages:
-            if self.member.id in (member_marriage["user"], member_marriage["partner"]):
-                break
-        else:
-            cheating_view = CheatingView(self.client, self.member, self.target, member_marriages)
+        if member_marriages:
+            for member_marriage in member_marriages:
+                if self.target.id in (member_marriage["user"], member_marriage["partner"]):
+                    break
+            else:
+                cheating_view = CheatingView(self.client, self.member, self.target, member_marriages)
 
         if cheating_view:
             await interaction.response.send_message(
@@ -343,11 +344,12 @@ class KissView(SlothAction):
 
         member_marriages = await self.client.get_cog('SlothClass').get_user_marriages(self.member.id)
         cheating_view = None
-        for member_marriage in member_marriages:
-            if self.member.id in (member_marriage["user"], member_marriage["partner"]):
-                break
-        else:
-            cheating_view = CheatingView(self.client, self.member, self.target, member_marriages)
+        if member_marriages:
+            for member_marriage in member_marriages:
+                if self.target.id in (member_marriage["user"], member_marriage["partner"]):
+                    break
+            else:
+                cheating_view = CheatingView(self.client, self.member, self.target, member_marriages)
 
         if cheating_view:
             await interaction.response.send_message(
@@ -1522,11 +1524,12 @@ class DominateView(SlothAction):
 
         member_marriages = await self.client.get_cog('SlothClass').get_user_marriages(self.member.id)
         cheating_view = None
-        for member_marriage in member_marriages:
-            if self.member.id in (member_marriage["user"], member_marriage["partner"]):
-                break
-        else:
-            cheating_view = CheatingView(self.client, self.member, self.target, member_marriages)
+        if member_marriages:
+            for member_marriage in member_marriages:
+                if self.target.id in (member_marriage["user"], member_marriage["partner"]):
+                    break
+            else:
+                cheating_view = CheatingView(self.client, self.member, self.target, member_marriages)
 
         if cheating_view:
             await interaction.response.send_message(
