@@ -48,3 +48,11 @@ class KidnappedCommandError(commands.CheckFailure):
 
 class NotSubscribed(commands.CheckFailure):
     pass
+
+class SlothAccountNotFound(commands.CheckFailure):
+    pass
+
+class NotEnoughMoneyError(commands.CheckFailure):
+
+    def __init__(self, required_money: int) -> None:
+        self.required_money = required_money

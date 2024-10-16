@@ -16,7 +16,8 @@ from extra import utils
 from extra.customerrors import (ActionSkillOnCooldown, ActionSkillsLocked,
                                 CommandNotReady, KidnappedCommandError,
                                 MissingRequiredSlothClass, NotSubscribed,
-                                SkillsUsedRequirement, StillInRehabError)
+                                SkillsUsedRequirement, StillInRehabError,
+                                SlothAccountNotFound, NotEnoughMoneyError)
 from extra.menu import PaginatorView
 from extra.useful_variables import patreon_roles
 
@@ -173,9 +174,17 @@ async def on_command_error(ctx, error) -> None:
     elif isinstance(error, NotSubscribed):
         view = discord.ui.View()
         view.add_item(discord.ui.Button(sku_id=sloth_subscriber_sub_id))
-        return await ctx.send(
+        return await ctx.reply(
             f"**Subscriber-only feature, if you want to have access to this and other commands & features, subscribe now:**", view=view
         )
+
+    elif isinstance(error, SlothAccountNotFound):
+        required_money = error.required_money
+        return await ctx.send(f"**You don't have a Sloth Account!**")
+
+    elif isinstance(error, NotEnoughMoneyError):
+        required_money = error.required_money
+        return await ctx.send(f"**You don't have {required_money}łł to use this command!**")
 
     print('='*10)
     print(f"ERROR: {error} | Class: {error.__class__} | Cause: {error.__cause__}")
@@ -226,6 +235,14 @@ async def on_application_command_error(ctx, error) -> None:
         return await ctx.respond(
             f"**Subscriber-only feature, if you want to have access to this and other commands & features, subscribe now:**", view=view
         )
+
+    elif isinstance(error, SlothAccountNotFound):
+        required_money = error.required_money
+        return await ctx.respond(f"**You don't have a Sloth Account!**")
+
+    elif isinstance(error, NotEnoughMoneyError):
+        required_money = error.required_money
+        return await ctx.respond(f"**You don't have {required_money}łł to use this command!**")
 
     print('='*10)
     print(f"ERROR: {error} | Class: {error.__class__} | Cause: {error.__cause__}")

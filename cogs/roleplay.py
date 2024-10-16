@@ -3,7 +3,6 @@ from typing import Union
 import discord
 from discord.ext import commands
 
-from cogs.slothcurrency import SlothCurrency
 from extra import utils
 from extra.prompt.menu import ConfirmButton
 from extra.slothclasses.player import Player
@@ -12,13 +11,15 @@ from extra.slothclasses.view import (BegView, BootView, DriveOverView,
                                      HoneymoonView, HugView, KissView, PatView,
                                      PeekView, PunchView, SlapView, TickleView,
                                      WhisperView, YeetView, DominateView)
+from extra.customerrors import SlothAccountNotFound, NotEnoughMoneyError
+
 
 class RolePlay(commands.Cog):
     """ Category for roleplaying commands. """
 
     def __init__(self, client) -> None:
         self.client  = client
-    
+
     def send_if_money(required_money: int = 5) -> bool:
 
         async def real_check(ctx) -> bool:
@@ -26,15 +27,13 @@ class RolePlay(commands.Cog):
             author = ctx.author
             currency = await ctx.bot.get_cog("SlothCurrency").get_user_currency(author.id)
             if not currency:
-                await ctx.send(f"**You don't have a Sloth Account, {author.mention}!**")
-                return False
+                raise SlothAccountNotFound
 
             if currency[0][1] < required_money:
-                await ctx.send(f"**You don't have 5łł to use this command, {author.mention}!**")
-                return False
-            
+                raise NotEnoughMoneyError(required_money=5)
+
             return True
-        
+
         return commands.check(real_check)
 
     @commands.command()
