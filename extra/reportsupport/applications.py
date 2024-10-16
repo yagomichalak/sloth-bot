@@ -86,7 +86,7 @@ class ApplicationsTable(commands.Cog):
                 if await utils.is_allowed([admin_role_id]).predicate(channel=channel, member=payload.member):
                     return await self.handle_application(guild, payload)
             elif payload.channel_id == self.teacher_app_channel_id: # User is a mod+
-                if await utils.is_allowed([moderator_role_id]).predicate(channel=channel, member=payload.member):
+                if await utils.is_allowed([lesson_management_role_id]).predicate(channel=channel, member=payload.member):
                     return await self.handle_application(guild, payload)
             elif payload.channel_id == self.moderator_app_channel_id: # User is a Staff Manager+
                 if await utils.is_allowed([senior_mod_role_id]).predicate(channel=channel, member=payload.member):

@@ -372,7 +372,7 @@ class ReportSupport(*report_support_classes):
         moderator: discord.PermissionOverwrite(
             read_messages=False, send_messages=False, connect=False, view_channel=False, manage_messages=False),
         senior_mod: discord.PermissionOverwrite(
-            read_messages=False, send_messages=False, connect=False, view_channel=False, manage_messages=False)}
+            read_messages=True, send_messages=True, connect=False, view_channel=True, manage_messages=True)}
         try:
             the_channel = await guild.create_text_channel(name=f"staff-case-{counter[0][0]}", category=case_cat, overwrites=overwrites)
         except Exception as e:
@@ -393,7 +393,7 @@ class ReportSupport(*report_support_classes):
             embed.add_field(name="Reporting:", value=f"```{reportee}```", inline=False)
             embed.add_field(name="For:", value=f"```{text}```", inline=False)
             embed.add_field(name="Evidence:", value=f"```{evidence}```", inline=False)
-            message = await the_channel.send(content=f"{member.mention}", embed=embed)
+            message = await the_channel.send(content=f"{member.mention}, {senior_mod.mention}", embed=embed)
             ctx = await self.client.get_context(message)
 
             if member.voice:
