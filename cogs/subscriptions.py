@@ -101,7 +101,7 @@ class Subscriptions(commands.Cog):
             # Checks if it's a subscription renewal
             if await utils.get_subscriptions_count(member.id, guild) > 1:
                 emb_title = "Subscription Renewal!"
-                emb_desc = f"**{member.mention} got his subscription renewed.**"
+                emb_desc = f"**{member.mention} got their subscription renewed.**"
                 emb_color = discord.Color.yellow()
         except Exception:
             pass
