@@ -614,21 +614,18 @@ class Moderation(*moderation_cogs):
         :param warns: The number of warns the user have. """
 
         weight_map = {
-            0: [0, 0, 0],
-            1: [1, 0, 0],	# 1 hour
-            2: [6, 0, 0],	# 6 hours
-            3: [0, 2, 0],	# 48 hours
-            4: [0, 3, 0],	# 72 hours
-            5: [0, 0, 1],	# 1 week
-            6: [0, 0, 2],	# 2 weeks
-            7: [0, 0, 3]	# 3 weeks
+            0: [0, 0, 0, False],
+            1: [6, 0, 0, False],	# 6 hours
+            2: [0, 2, 0, False],	# 2 days
+            3: [0, 0, 1, False],	# 1 week
+            4: [0, 0, 0, True]      # Ban!
         }
         if await utils.is_allowed(allowed_roles).predicate(channel=ctx.channel, member=member):
             index = 0
         elif warns in weight_map:
             index = warns
-        elif warns > 7:
-            index = 7
+        elif warns > 4:
+            index = 4
         else:
             index = 0
         return weight_map[index]
