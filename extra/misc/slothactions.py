@@ -90,10 +90,15 @@ class SlothActionsTable(commands.Cog):
             ) VALUES (%s, %s, %s, %s, %s, %s)
         """, (label, user_id, target_id, text_content, int_content, created_ts))
 
-    async def get_sloth_actions(self, user_id: int, label: Optional[str] = None) -> List[List[Union[str, int]]]:
+    async def get_sloth_actions(self, user_id: int, label: Optional[str] = None, check_target: bool = False) -> List[List[Union[str, int]]]:
         """ Gets the user's sloth actions.
         :param user_id: The ID of the user.
         :param label: The label of the actions. [Optional] """
+
+        if check_target:
+            if label:
+                return await self.db.execute_query("SELECT * FROM SlothActions WHERE (user_id = %s OR target_id = %s) AND label = %s", (user_id, user_id, label), fetch="all")
+            return await self.db.execute_query("SELECT * FROM SlothActions WHERE user_id = %s OR target_id = %s", (user_id, user_id), fetch="all")
 
         if label:
             return await self.db.execute_query("SELECT * FROM SlothActions WHERE user_id = %s AND label = %s", (user_id, label), fetch="all")
