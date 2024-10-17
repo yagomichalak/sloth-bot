@@ -682,7 +682,7 @@ class Moderation(*moderation_cogs):
             await self._unmute_callback(ctx, member)
           
         warns = await self.get_timeout_warns(warn_type, infractions)
-        hours, days, weeks = await self.get_timeout_time(ctx, member, warns)
+        hours, days, weeks, ban = await self.get_timeout_time(ctx, member, warns)
         
         if hours == 0 and days == 0 and weeks == 0:
             return
