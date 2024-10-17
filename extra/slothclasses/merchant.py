@@ -691,7 +691,7 @@ class Merchant(Player):
         else:  # Where as normal ones use leaves
             is_suitor_sub = await utils.is_subscriber(member=suitor, check_adm=False, throw_exc=False).predicate(ctx)
             if len(suitor_marriages) > 0 and not is_suitor_sub:
-                return await ctx.send(f"**You can only put a non-subscriber into polygamy if it's not your first marriage, {member.mention}!**")
+                return await ctx.send(f"**You can only put or join a non-subscriber polygamy if it's not your first marriage, {member.mention}!**")
 
             if member_currency[1] < 1000:
                 self.client.get_command('marry').reset_cooldown(ctx)
