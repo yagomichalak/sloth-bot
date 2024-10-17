@@ -644,10 +644,12 @@ class Merchant(Player):
             return await ctx.send(f"**You cannot marry yourself, {member.mention}!**")
 
         if await self.get_user_marriage(member.id, suitor.id):
+            self.client.get_command('marry').reset_cooldown(ctx)
             return await ctx.send(f"**You are already married to that person, {member.mention}!**")
 
         member_marriages = await self.get_user_marriages(member.id)
         if len(member_marriages) >= partner_limit:
+            self.client.get_command('marry').reset_cooldown(ctx)
             return await ctx.send(f"**You cannot have more than {partner_limit} partners, {member.mention}!**")
 
         member_currency = await self.get_user_currency(member.id)
@@ -665,6 +667,7 @@ class Merchant(Player):
 
         suitor_marriages = await self.get_user_marriages(suitor.id)
         if len(suitor_marriages) >= partner_limit:
+            self.client.get_command('marry').reset_cooldown(ctx)
             return await ctx.send(f"**Your suitor alreay has the limit of {partner_limit} partners, {member.mention}!**")
 
         p1_rings, p2_rings = sloth_profile[7], target_sloth_profile[7]
@@ -677,14 +680,19 @@ class Merchant(Player):
         if len(member_marriages) >= 1:  # Poly marriage uses golden leaves
             if member_currency[7] < poly_marriage_price:
                 view = None
-                if not await utils.is_subscriber(throw_exc=False).predicate(ctx):
+                is_member_sub = await utils.is_subscriber(check_adm=False, throw_exc=False).predicate(ctx)
+                if not is_member_sub:
                     view = discord.ui.View()
                     view.add_item(discord.ui.Button(sku_id=sloth_subscriber_sub_id))
                 return await ctx.send(
                     f"**For having more than 1 partner it costs `{poly_marriage_price}gł` golden leaves, you have `{member_currency[7]}gł`, {member.mention}!**",
                     view=view
                 )
-        else:  # Where as normal ones use leaves 
+        else:  # Where as normal ones use leaves
+            is_suitor_sub = await utils.is_subscriber(member=suitor, check_adm=False, throw_exc=False).predicate(ctx)
+            if len(suitor_marriages) > 0 and not is_suitor_sub:
+                return await ctx.send(f"**You can only put a non-subscriber into polygamy if it's not your first marriage, {member.mention}!**")
+
             if member_currency[1] < 1000:
                 self.client.get_command('marry').reset_cooldown(ctx)
                 return await ctx.send(f"**You don't have `1000łł` to marry {suitor.mention}, {member.mention}!**")
