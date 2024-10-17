@@ -523,7 +523,9 @@ class Moderation(*moderation_cogs):
 
         await ctx.message.delete()
 
+        icon = ctx.author.display_avatar
         members, reason = await utils.greedy_member_reason(ctx, message)
+        ban_reason = "You have been banned from Language Sloth for exceeding the maximum warn limit within 6 months."
 
         if not members:
             await ctx.send("**Please, inform a member!**", delete_after=3)
@@ -538,13 +540,16 @@ class Moderation(*moderation_cogs):
                     warn_msg, infr = await self.get_warn_type(warn_type)
                     warn_desc = f'**Reason:** {reason}'
                     user_infractions = await self.get_user_infractions(member.id)
-                    hours, days, weeks = await self.get_timeout_time(ctx, member, await self.get_timeout_warns(infr, user_infractions))
-                    if hours > 0:
-                        warn_desc += f'\n**Timeout:** {hours}h'
-                    elif days > 0:
-                        warn_desc += f'\n**Timeout:** {days}d'
-                    elif weeks > 0:
-                        warn_desc += f'\n**Timeout:** {weeks}w'
+                    hours, days, weeks, ban = await self.get_timeout_time(ctx, member, await self.get_timeout_warns(infr, user_infractions))
+                    if ban:
+                        warn_desc += '\n**User has exceeded the maximum warn limit within 6 months and will be banned!**'
+                    else:
+                        if hours > 0:
+                            warn_desc += f'\n**Timeout:** {hours}h'
+                        elif days > 0:
+                            warn_desc += f'\n**Timeout:** {days}d'
+                        elif weeks > 0:
+                            warn_desc += f'\n**Timeout:** {weeks}w'
                     general_embed = discord.Embed(description=warn_desc, colour=ctx.author.color)
                     general_embed.set_author(name=f'{member} has been {warn_msg}warned', icon_url=member.display_avatar)
                     await ctx.send(embed=general_embed)
@@ -568,7 +573,40 @@ class Moderation(*moderation_cogs):
                         await member.send(embed=general_embed)
                     except:
                         pass
-                    await self.timeout(ctx, member, warn_type, user_infractions)
+
+                    if ban:
+                        # Ban log embed
+                        ban_embed = discord.Embed(title='__**Banishment**__', colour=discord.Colour.dark_red(),
+                                            timestamp=ctx.message.created_at)
+                        ban_embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nId: {member.id}```',
+                                        inline=False)
+                        ban_embed.add_field(name='Reason:', value=f'```{ban_reason}```')
+                        ban_embed.set_author(name=member)
+                        ban_embed.set_thumbnail(url=member.display_avatar)
+                        ban_embed.set_footer(text=f"Banned by {ctx.author}", icon_url=icon)
+                        await moderation_log.send(embed=ban_embed)
+
+                        # Inserts a ban infraction into the database
+                        current_ts = await utils.get_timestamp()
+                        await self.insert_user_infraction(
+                            user_id=member.id, infr_type="ban", reason=ban_reason,
+                            timestamp=current_ts, perpetrator=ctx.author.id)
+                        
+                        # General ban embed
+                        general_ban_embed = discord.Embed(description=f"**Reason:** {ban_reason}", colour=discord.Colour.dark_red())
+                        general_ban_embed.set_author(name=f'{member} has been banned', icon_url=member.display_avatar)
+                        await ctx.send(embed=general_ban_embed)
+
+                        # Ban!
+                        await member.ban(delete_message_seconds=604800, reason=ban_reason)
+
+                        # Also send the general ban embed to the banned user
+                        try:
+                            await member.send(embed=general_ban_embed)
+                        except:
+                            pass
+                    else:
+                        await self.timeout(ctx, member, warn_type, user_infractions)
                 else:
                     await ctx.send(f"**The user `{member}` is not on the server**", delete_after = 5)
     
@@ -614,21 +652,18 @@ class Moderation(*moderation_cogs):
         :param warns: The number of warns the user have. """
 
         weight_map = {
-            0: [0, 0, 0],
-            1: [1, 0, 0],	# 1 hour
-            2: [6, 0, 0],	# 6 hours
-            3: [0, 2, 0],	# 48 hours
-            4: [0, 3, 0],	# 72 hours
-            5: [0, 0, 1],	# 1 week
-            6: [0, 0, 2],	# 2 weeks
-            7: [0, 0, 3]	# 3 weeks
+            0: [0, 0, 0, False],
+            1: [6, 0, 0, False],	# 6 hours
+            2: [0, 2, 0, False],	# 2 days
+            3: [0, 0, 1, False],	# 1 week
+            4: [0, 0, 0, True]      # Ban!
         }
         if await utils.is_allowed(allowed_roles).predicate(channel=ctx.channel, member=member):
             index = 0
         elif warns in weight_map:
             index = warns
-        elif warns > 7:
-            index = 7
+        elif warns > 4:
+            index = 4
         else:
             index = 0
         return weight_map[index]
