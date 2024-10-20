@@ -27,7 +27,7 @@ create_room_txt_id = int(os.getenv('CREATE_CLASSROOM_CHANNEL_ID', 123))
 teacher_feedback_thread_id = int(os.getenv('TEACHER_FEEDBACK_THREAD_ID', 123))
 class_history_channel_id = int(os.getenv('CLASS_HISTORY_CHANNEL_ID', 123))
 reward_channel_id = int(os.getenv('REWARD_CHANNEL_ID', 123))
-bot_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID', 123))
+reward_log_thread_id = int(os.getenv('REWARD_LOG_THREAD_ID', 123))
 
 # variables.voicechannel
 create_room_vc_id = int(os.getenv('CREATE_SMART_CLASSROOM_VC_ID', 123))
@@ -652,8 +652,8 @@ class TeacherFeedback(commands.Cog):
                     print(e)
                     pass
 
-            commands_channel = discord.utils.get(teacher.guild.channels, id=bot_commands_channel_id)
-            await commands_channel.send(embed=the_reward_embed)
+            reward_log_thread: discord.Thread = discord.utils.get(teacher.guild.threads, id=reward_log_thread_id)
+            await reward_log_thread.send(embed=the_reward_embed)
             return await self.db.delete_rewarded_users(msg_id)
 
     async def ask_for_user_feedback(
