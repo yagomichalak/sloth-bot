@@ -689,7 +689,7 @@ class Merchant(Player):
                     view=view
                 )
         else:  # Where as normal ones use leaves
-            is_suitor_sub = await utils.is_subscriber(member=suitor, check_adm=False, throw_exc=False).predicate(ctx)
+            is_suitor_sub = await utils.is_subscriber(check_adm=False, throw_exc=False).predicate(ctx, member=suitor)
             if len(suitor_marriages) > 0 and not is_suitor_sub:
                 return await ctx.send(f"**You can only put or join a non-subscriber polygamy if it's not your first marriage, {member.mention}!**")
 
