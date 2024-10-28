@@ -301,12 +301,30 @@ class Moderation(*moderation_cogs):
         if member.bot:
             return
         
-        # Logic of checking if the account age is >= the one set in the firewall
-        firewall_state = await self.get_firewall_state()
+        firewall_state, firewall_minimum_age = await self.get_firewall_state(), await self.get_firewall_min_account_age()
         if not firewall_state:
             return
         
-        # if firewall_state[1]:  # Get minimum account age set in firewall
+        if firewall_state[0]:
+            try:
+                bypass_check = await self.get_bypass_firewall_user(member.id)
+                if bypass_check:
+                    return
+                
+                minimum_age = firewall_minimum_age[0] if firewall_minimum_age else 43200
+                current_time, account_age = await utils.get_timestamp(), member.created_at.timestamp()
+                time_check = current_time - account_age
+                
+                if time_check < minimum_age:
+                    
+                    from_time = current_time + time_check
+                    timedout_until = datetime.fromtimestamp(from_time)
+                    
+                    await member.timeout(until=timedout_until, reason="Account is less than 12 hours old.")
+                else:
+                    return
+            except Exception as e:
+                pass
 
     @commands.Cog.listener()
     async def on_message_delete(self, message):
