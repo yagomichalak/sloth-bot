@@ -109,8 +109,8 @@ class ModerationFirewallTable(commands.Cog):
 
         await ctx.message.delete()
         await self.db.execute_query("""CREATE TABLE Firewall (
-            state TINYINT(1) NOT NULL DEFAULT 0, minimum_account_age INT DEFAULT 86400)""")
-        await self.db.execute_query("INSERT INTO Firewall VALUES(0)")
+            state TINYINT(1) NOT NULL DEFAULT 0, minimum_account_age INT DEFAULT 43200)""")
+        await self.db.execute_query("INSERT INTO Firewall VALUES(0, 43200)")
 
         return await ctx.send("**Table __Firewall__ created!**", delete_after=3)
 
@@ -156,3 +156,13 @@ class ModerationFirewallTable(commands.Cog):
 
         return await self.db.execute_query("SELECT state FROM Firewall", fetch="one")
 
+    async def set_firewall_min_account_age(self, min_age: int) -> int:
+        """ Sets the firewall's current minimum account age limit.
+        :param min_age: The minimum account age limit to set. """
+        
+        await self.db.execute_query("UPDATE Firewall SET minimum_account_age = %s", (min_age,))
+
+    async def get_firewall_min_account_age(self) -> int:
+        """ Gets the firewall's current minimum account age limit. """
+
+        return await self.db.execute_query("SELECT minimum_account_age FROM Firewall", fetch="one")

@@ -1,6 +1,7 @@
 # import.standard
 import asyncio
 import os
+import re
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple, Union
 
@@ -301,12 +302,30 @@ class Moderation(*moderation_cogs):
         if member.bot:
             return
         
-        # Logic of checking if the account age is >= the one set in the firewall
-        firewall_state = await self.get_firewall_state()
+        firewall_state, firewall_minimum_age = await self.get_firewall_state(), await self.get_firewall_min_account_age()
         if not firewall_state:
             return
         
-        # if firewall_state[1]:  # Get minimum account age set in firewall
+        if firewall_state[0]:
+            try:
+                bypass_check = await self.get_bypass_firewall_user(member.id)
+                if bypass_check:
+                    return
+                
+                minimum_age = firewall_minimum_age[0] if firewall_minimum_age else 43200
+                current_time, account_age = await utils.get_timestamp(), member.created_at.timestamp()
+                time_check = current_time - account_age
+                
+                if time_check < minimum_age:
+                    
+                    from_time = current_time + time_check
+                    timedout_until = datetime.fromtimestamp(from_time)
+                    
+                    await member.timeout(until=timedout_until, reason="Account is less than 12 hours old.")
+                else:
+                    return
+            except Exception as e:
+                pass
 
     @commands.Cog.listener()
     async def on_message_delete(self, message):
@@ -1863,6 +1882,53 @@ We appreciate your understanding and look forward to hearing from you. """, embe
                 await self.set_firewall_state(1)
                 await ctx.send(f"**Firewall activated, {member.mention}!**")
                 await self.client.get_cog('ReportSupport').audio(member, 'troll_firewall_on')
+                
+    @commands.command(aliases=['fw_min_age', 'wall_min_age', 'fw_min'])
+    @commands.has_permissions(administrator=True)
+    async def firewall_min_age(self, ctx, *, message : str = None) -> None:
+        """ Changes the minimum account age limit for the Firewall. """
+
+        member = ctx.author
+
+        if not await self.check_table_firewall_exists():
+            return await ctx.send(f"**It looks like the firewall is on maintenance, {member.mention}!**")
+
+        if not message:
+            return await ctx.send("**Please specify a time, all these examples work: `1w`, `3d 12h`, `12h 30m 30s` or you can also provide the time like this `43200` directly in seconds.**")
+
+        def look_at_the_time_whoa(time):
+            pattern = r'((?P<weeks>\d+)w)?\s*((?P<days>\d+)d)?\s*((?P<hours>\d+)h)?\s*((?P<minutes>\d+)m)?\s*((?P<seconds>\d+)s)?'
+            match = re.match(pattern, time)
+            
+            if not match:
+                return None
+            
+            time_data = match.groupdict(default="0")
+            total_seconds = (
+                int(time_data["weeks"]) * 604800 +
+                int(time_data["days"]) * 86400 +
+                int(time_data["hours"]) * 3600 +
+                int(time_data["minutes"]) * 60 +
+                int(time_data["seconds"])
+            )
+            
+            return total_seconds
+
+        try:
+            total_seconds = int(message)
+        except ValueError:
+            total_seconds = look_at_the_time_whoa(message)
+            if total_seconds is None:
+                return await ctx.send(f"**Invalid time format, {member.mention}. Examples of working formats: `1w`, `3d 12h`, `12h 30m 30s` or you can also provide the time like this `43200` directly in seconds.**")
+
+        firewall_min_age = await self.get_firewall_min_account_age()
+        if firewall_min_age:
+            confirm = await Confirm(f"Current firewall minimum account age limit is `{firewall_min_age[0]} seconds`.\nAre you sure you want to change it to `{total_seconds} seconds`, {member.mention}?").prompt(ctx)
+            if confirm:
+                await self.set_firewall_min_account_age(total_seconds)
+                await ctx.send(f"**Firewall minimum account age has been changed to `{total_seconds}`!**")
+        else:
+            return await ctx.send(f"**Can't get minimum account age limit information. Try resetting the firewall database before changing the limit.**")
 
     @commands.command(aliases=['bfw', 'bypassfirewall', 'bypass_fire', 'bypassfire'])
     @utils.is_allowed([senior_mod_role_id, mod_role_id], throw_exc=True)
