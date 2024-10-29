@@ -90,7 +90,7 @@ class BypassFirewallTable(commands.Cog):
         :param user_id: The ID of the user to delete. """
 
         await self.db.execute_query("DELETE FROM BypassFirewall WHERE user_id = %s", (user_id,))
-    
+
 
 class ModerationFirewallTable(commands.Cog):
     """ Category for the Firewall system and its commands and methods. """
@@ -108,9 +108,14 @@ class ModerationFirewallTable(commands.Cog):
             return await ctx.send("**Table __Firewall__ already exists!**")
 
         await ctx.message.delete()
-        await self.db.execute_query("""CREATE TABLE Firewall (
-            state TINYINT(1) NOT NULL DEFAULT 0, minimum_account_age INT DEFAULT 43200)""")
-        await self.db.execute_query("INSERT INTO Firewall VALUES(0, 43200)")
+        await self.db.execute_query(
+            """CREATE TABLE Firewall (
+                state TINYINT(1) NOT NULL DEFAULT 0,
+                type VARCHAR(13) DEFAULT 'timeout',
+                minimum_account_age INT DEFAULT 43200,
+                reason VARCHAR(1300) DEFAULT 'Account is less than 12 hours old.')
+            """)
+        await self.db.execute_query("INSERT INTO Firewall VALUES(0, 'timeout', 43200, 'Account is less than 12 hours old.')")
 
         return await ctx.send("**Table __Firewall__ created!**", delete_after=3)
 
@@ -136,7 +141,7 @@ class ModerationFirewallTable(commands.Cog):
 
         await ctx.message.delete()
         await self.db.execute_query("DELETE FROM Firewall")
-        await self.db.execute_query("INSERT INTO Firewall VALUES(0)")
+        await self.db.execute_query("INSERT INTO Firewall VALUES(0, 'timeout', 43200, 'Account is less than 12 hours old.')")
 
         return await ctx.send("**Table __Firewall__ reset!**", delete_after=3)
 
@@ -159,10 +164,32 @@ class ModerationFirewallTable(commands.Cog):
     async def set_firewall_min_account_age(self, min_age: int) -> int:
         """ Sets the firewall's current minimum account age limit.
         :param min_age: The minimum account age limit to set. """
-        
+
         await self.db.execute_query("UPDATE Firewall SET minimum_account_age = %s", (min_age,))
 
     async def get_firewall_min_account_age(self) -> int:
         """ Gets the firewall's current minimum account age limit. """
 
         return await self.db.execute_query("SELECT minimum_account_age FROM Firewall", fetch="one")
+
+    async def set_firewall_reason(self, reason: str) -> str:
+        """ Sets the firewall's current response reason.
+        :param reason: The reason to set. """
+
+        await self.db.execute_query("UPDATE Firewall SET reason = %s", (reason,))
+
+    async def get_firewall_reason(self) -> str:
+        """ Gets the firewall's current response reason. """
+
+        return await self.db.execute_query("SELECT reason FROM Firewall", fetch="one")
+
+    async def set_firewall_type(self, type: str) -> str:
+        """ Sets the firewall's current response type.
+        :param type: The type to set. """
+
+        await self.db.execute_query("UPDATE Firewall SET type = %s", (type,))
+
+    async def get_firewall_type(self) -> str:
+        """ Gets the firewall's current response type. """
+
+        return await self.db.execute_query("SELECT type FROM Firewall", fetch="one")
