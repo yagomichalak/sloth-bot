@@ -302,7 +302,7 @@ class Moderation(*moderation_cogs):
         if member.bot:
             return
         
-        firewall_state, firewall_minimum_age = await self.get_firewall_state(), await self.get_firewall_min_account_age()
+        firewall_state = await self.get_firewall_state()
         if not firewall_state:
             return
         
@@ -312,16 +312,25 @@ class Moderation(*moderation_cogs):
                 if bypass_check:
                     return
                 
+                firewall_minimum_age, firewall_reason, firewall_type = await self.get_firewall_min_account_age(), await self.get_firewall_reason(), await self.get_firewall_type()
+                
                 minimum_age = firewall_minimum_age[0] if firewall_minimum_age else 43200
                 current_time, account_age = await utils.get_timestamp(), member.created_at.timestamp()
                 time_check = current_time - account_age
-                
                 if time_check < minimum_age:
-                    
-                    from_time = current_time + time_check
-                    timedout_until = datetime.fromtimestamp(from_time)
-                    
-                    await member.timeout(until=timedout_until, reason="Account is less than 12 hours old.")
+                    if firewall_type == "timeout":
+                        from_time = current_time + time_check
+                        timedout_until = datetime.fromtimestamp(from_time)
+                        
+                        timedout_role = discord.utils.get(member.guild.roles, id=timedout_role_id)
+                        if timedout_role not in member.roles:
+                            await member.add_roles(timedout_role)
+                            
+                        await member.timeout(until=timedout_until, reason=firewall_reason[0])
+                        await member.send(f"**You have been automatically timed-out in the Language Sloth.**\n- **Reason:** {firewall_reason[0]}")
+                    elif firewall_type == "kick":
+                        await member.kick(reason=firewall_reason[0])
+                        await member.send(f"**You have been automatically kicked from the Language Sloth.**\n- **Reason:** {firewall_reason[0]}")
                 else:
                     return
             except Exception as e:
@@ -1929,6 +1938,62 @@ We appreciate your understanding and look forward to hearing from you. """, embe
                 await ctx.send(f"**Firewall minimum account age has been changed to `{total_seconds}`!**")
         else:
             return await ctx.send(f"**Can't get minimum account age limit information. Try resetting the firewall database before changing the limit.**")
+
+    @commands.command(aliases=['fw_reason', 'wall_reason'])
+    @commands.has_permissions(administrator=True)
+    async def firewall_reason(self, ctx, *, message : str = None) -> None:
+        """ Changes the response reason for the Firewall. """
+
+        member = ctx.author
+        
+        await ctx.message.delete()
+
+        if not await self.check_table_firewall_exists():
+            return await ctx.send(f"**It looks like the firewall is on maintenance, {member.mention}!**")
+
+        if not message:
+            return await ctx.send("**Please write a reason that's going to change the current one.**")
+
+        firewall_reason = await self.get_firewall_reason()
+        if firewall_reason:
+            confirm = await Confirm(f"Current firewall response reason is `{firewall_reason[0]}`.\nAre you sure you want to change it to `{message}`, {member.mention}?").prompt(ctx)
+            if confirm:
+                await self.set_firewall_reason(message)
+                await ctx.send(f"**Firewall response reason has been changed to `{message}`!**")
+        else:
+            return await ctx.send(f"**Can't get firewall's response reason from the database. Try resetting the firewall database before changing the reason.**")
+        
+    @commands.command(aliases=['fw_type', 'wall_type'])
+    @commands.has_permissions(administrator=True)
+    async def firewall_type(self, ctx, *, message : str = None) -> None:
+        """ Changes the response type for the Firewall. """
+
+        member = ctx.author
+
+        await ctx.message.delete()
+
+        print(message)
+
+        if not await self.check_table_firewall_exists():
+            return await ctx.send(f"**It looks like the firewall is on maintenance, {member.mention}!**")
+
+        if not message:
+            return await ctx.send("**You haven't provided anything in your message.**\n- Please provide one of these `timeout, kick` response types to change the current one.")
+        
+        if message not in ["timeout", "kick"]:
+            return await ctx.send("**Type you've provided is not a possible response type for the Firewall.**\n- Please provide one of these `timeout, kick` response types to change the current one.")
+            
+        firewall_type = await self.get_firewall_type()
+        if firewall_type:
+            if firewall_type[0] != message:            
+                confirm = await Confirm(f"Current firewall response type is `{firewall_type[0]}`.\nAre you sure you want to change it to `{message}`, {member.mention}?").prompt(ctx)
+                if confirm:
+                    await self.set_firewall_type(message)
+                    await ctx.send(f"**Firewall response type has been changed to `{message}`!**")
+            else:
+                return await ctx.send("**Type you've provided is already the current firewall response type.**")
+        else:
+            return await ctx.send(f"**Can't get firewall's response type from the database. Try resetting the firewall database before changing the reason.**")
 
     @commands.command(aliases=['bfw', 'bypassfirewall', 'bypass_fire', 'bypassfire'])
     @utils.is_allowed([senior_mod_role_id, mod_role_id], throw_exc=True)
