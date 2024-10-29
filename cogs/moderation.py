@@ -311,26 +311,35 @@ class Moderation(*moderation_cogs):
                 bypass_check = await self.get_bypass_firewall_user(member.id)
                 if bypass_check:
                     return
-                
-                firewall_minimum_age, firewall_reason, firewall_type = await self.get_firewall_min_account_age(), await self.get_firewall_reason(), await self.get_firewall_type()
-                
+
+                firewall_type, firewall_minimum_age, firewall_reason = (
+                    await self.get_firewall_type(),
+                    await self.get_firewall_min_account_age(),
+                    await self.get_firewall_reason(),
+                )
+
+                response_type = firewall_type[0] if firewall_type else "timeout"
                 minimum_age = firewall_minimum_age[0] if firewall_minimum_age else 43200
-                current_time, account_age = await utils.get_timestamp(), member.created_at.timestamp()
+                reason = firewall_reason[0] if firewall_reason else "Account is less than 12 hours old."
+                current_time, account_age = (
+                    await utils.get_timestamp(),
+                    member.created_at.timestamp(),
+                )
                 time_check = current_time - account_age
                 if time_check < minimum_age:
-                    if firewall_type == "timeout":
+                    if response_type == "timeout":
                         from_time = current_time + time_check
                         timedout_until = datetime.fromtimestamp(from_time)
-                        
+
                         timedout_role = discord.utils.get(member.guild.roles, id=timedout_role_id)
                         if timedout_role not in member.roles:
                             await member.add_roles(timedout_role)
-                            
-                        await member.timeout(until=timedout_until, reason=firewall_reason[0])
-                        await member.send(f"**You have been automatically timed-out in the Language Sloth.**\n- **Reason:** {firewall_reason[0]}")
-                    elif firewall_type == "kick":
-                        await member.kick(reason=firewall_reason[0])
-                        await member.send(f"**You have been automatically kicked from the Language Sloth.**\n- **Reason:** {firewall_reason[0]}")
+
+                        await member.timeout(until=timedout_until, reason=reason)
+                        await member.send(f"**You have been automatically timed-out in the Language Sloth.**\n- **Reason:** {reason}")
+                    elif response_type == "kick":
+                        await member.kick(reason=reason)
+                        await member.send(f"**You have been automatically kicked from the Language Sloth.**\n- **Reason:** {reason}")
                 else:
                     return
             except Exception as e:
