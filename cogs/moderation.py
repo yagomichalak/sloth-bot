@@ -532,7 +532,10 @@ class Moderation(*moderation_cogs):
         :param member: The @ or the ID of one or more users to soft warn.
         :param reason: The reason for warning one or all users. (Optional)"""
 
-        await self._warn_callback(ctx=ctx, message=message, warn_type="lwarn")
+        if not message:
+            await self._easy_warn_callback(ctx=ctx, warn_type="lwarn")
+        else:
+            await self._warn_callback(ctx=ctx, message=message, warn_type="lwarn")
 
     @commands.command(aliases=["warnado", "wrn"])
     @utils.is_allowed(allowed_roles, throw_exc=True)
@@ -541,7 +544,10 @@ class Moderation(*moderation_cogs):
         :param member: The @ or the ID of one or more users to warn.
         :param reason: The reason for warning one or all users. (Optional)"""
 
-        await self._warn_callback(ctx=ctx, message=message, warn_type="warn")
+        if not message:
+            await self._easy_warn_callback(ctx=ctx, warn_type="warn")
+        else:
+            await self._warn_callback(ctx=ctx, message=message, warn_type="warn")
 
     @commands.command(aliases=["hwarn", "hwarnado", "hwrn"])
     @utils.is_allowed(allowed_roles, throw_exc=True)
@@ -550,7 +556,11 @@ class Moderation(*moderation_cogs):
         :param member: The @ or the ID of one or more users to warn.
         :param reason: The reason for warning one or all users. (Optional)"""
         
-        await self._warn_callback(ctx=ctx, message=message, warn_type="hwarn")
+        if not message:
+            await self._easy_warn_callback(ctx=ctx, warn_type="hwarn")
+        else:
+            await self._warn_callback(ctx=ctx, message=message, warn_type="hwarn")
+        
     async def _easy_warn_callback(self, ctx, warn_type: str = "warn") -> None:
         """ Callback for the easy warn.
         :param warn_type: The warn type. [light/normal/heavy]"""
