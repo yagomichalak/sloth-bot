@@ -626,6 +626,8 @@ class Moderation(*moderation_cogs):
         else:
             if reason is not None and len(reason) > 960:
                 return await ctx.send(f"**Please, inform a reason that is lower than or equal to 960 characters, {ctx.author.mention}!**", delete_after=3)
+            elif reason is None or len(reason) < 16:
+                return await ctx.send(f"**Please, inform a reason that is higher than 15 characters, {ctx.author.mention}!**", delete_after=3)
 
             for member in members:
                 if ctx.guild.get_member(member.id):
@@ -998,6 +1000,12 @@ class Moderation(*moderation_cogs):
         role = discord.utils.get(ctx.guild.roles, id=muted_role_id)
         if not member:
             return await ctx.send("**Please, specify a member!**")
+        
+        if reason is not None and len(reason) > 960:
+            return await ctx.send(f"**Please, inform a reason that is lower than or equal to 960 characters, {ctx.author.mention}!**", delete_after=3)
+        elif reason is None or len(reason) < 16:
+            return await ctx.send(f"**Please, inform a reason that is higher than 15 characters, {ctx.author.mention}!**", delete_after=3)
+                                  
         if role not in member.roles:
             await member.move_to(None)
             keep_roles, remove_roles = await self.get_remove_roles(member, keep_roles=allowed_roles)
@@ -1394,7 +1402,12 @@ class Moderation(*moderation_cogs):
 
         if not members:
             return await ctx.send('**Member not found!**', delete_after=3)
-            
+        
+        if reason is not None and len(reason) > 960:
+            return await ctx.send(f"**Please, inform a reason that is lower than or equal to 960 characters, {ctx.author.mention}!**", delete_after=3)
+        elif reason is None or len(reason) < 16:
+            return await ctx.send(f"**Please, inform a reason that is higher than 15 characters, {ctx.author.mention}!**", delete_after=3)
+        
         for member in members:
             if await utils.is_allowed(allowed_roles).predicate(channel=ctx.channel, member=member):
                 if len(members) == 1:
@@ -1833,6 +1846,11 @@ We appreciate your understanding and look forward to hearing from you. """, embe
 
         if not members:
             return await ctx.send('**Member not found!**', delete_after=3)
+
+        if reason is not None and len(reason) > 960:
+            return await ctx.send(f"**Please, inform a reason that is lower than or equal to 960 characters, {ctx.author.mention}!**", delete_after=3)
+        elif reason is None or len(reason) < 16:
+            return await ctx.send(f"**Please, inform a reason that is higher than 15 characters, {ctx.author.mention}!**", delete_after=3)
 
         for member in members:
             if isinstance(member, discord.Member):
@@ -2316,6 +2334,11 @@ We appreciate your understanding and look forward to hearing from you. """, embe
         await ctx.message.delete()
         if not infractions_ids:
             return await ctx.send("**Please, inform an infraction id!**", delete_after=3)
+
+        if reason is not None and len(reason) > 960:
+            return await ctx.send(f"**Please, inform a reason that is lower than or equal to 960 characters, {ctx.author.mention}!**", delete_after=3)
+        elif reason is None or len(reason) < 16:
+            return await ctx.send(f"**Please, inform a reason that is higher than 15 characters, {ctx.author.mention}!**", delete_after=3)
 
         for infr_id in infractions_ids:
             if user_infraction := await self.get_user_infraction_by_infraction_id(infr_id):
