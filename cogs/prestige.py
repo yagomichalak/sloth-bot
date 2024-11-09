@@ -85,7 +85,8 @@ class Prestige(commands.Cog, command_attrs=dict(hidden=True)):
             "<@760178072904531988>\nYou wouldnt put it\nSo no point ~",
             "<@760178072904531988>\nGab\nI have a problem",
             "<@760178072904531988> mysqli_query($cnx,$req1)",
-            "<@760178072904531988> Caught you there ✨"
+            "<@760178072904531988> Caught you there ✨",
+            "<@760178072904531988> I’m restarted",
         ]
 
         await ctx.send(choice(sentences))
@@ -236,6 +237,20 @@ int main(void)
             await ctx.send("**SUPER RARE DOUBLE LAVASH KEBAP PULL!!!** <@201086628167417857>")
         else:
             await ctx.send(choice(sentences))
+            
+    @commands.command(aliases=["jelly", "jellyfish", "jellytimet", "jogurt", "doctor"])
+    async def _jelly(self, ctx) -> None:
+        """ A command for telling something about jelly. """
+
+        sentences = [
+            "love you all from <@781007535267119138>",
+            "<@781007535267119138> я самый лучший доктор, а <@703017795738402827> замечательный, я его так люблю <:cutes:686224659448201220>",
+            "<@781007535267119138> don't call me if you are sick, i'm busy jellying :p",
+            "<@781007535267119138> womp womp womp fellas",
+            "<@781007535267119138> I'm a doctor, not a magician"
+        ]
+
+        await ctx.send(choice(sentences))
 
 def setup(client) -> None:
     """ Cog's setup function. """
