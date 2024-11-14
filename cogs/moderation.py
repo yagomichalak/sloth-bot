@@ -618,15 +618,16 @@ class Moderation(*moderation_cogs):
         await ctx.message.delete()
 
         icon = ctx.author.display_avatar
+        is_admin = ctx.author.guild_permissions.administrator
         members, reason = await utils.greedy_member_reason(ctx, message)
         ban_reason = "You have been banned from Language Sloth for exceeding the maximum warn limit within 6 months."
 
         if not members:
             await ctx.send("**Please, inform a member!**", delete_after=3)
         else:
-            if reason is not None and len(reason) > 960:
+            if not is_admin and (reason is not None and len(reason) > 960):
                 return await ctx.send(f"**Please, inform a reason that is lower than or equal to 960 characters, {ctx.author.mention}!**", delete_after=3)
-            elif reason is None or len(reason) < 16:
+            elif not is_admin and (reason is None or len(reason) < 16):
                 return await ctx.send(f"**Please, inform a reason that is higher than 15 characters, {ctx.author.mention}!**", delete_after=3)
 
             for member in members:
