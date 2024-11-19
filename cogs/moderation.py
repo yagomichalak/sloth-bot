@@ -458,7 +458,7 @@ class Moderation(*moderation_cogs):
         """ (MOD) Clears the whole channel. """
 
         special_channels = {
-            int(os.getenv('MUTED_CHANNEL_ID', 123)): 'https://cdn.discordapp.com/attachments/746478846466981938/748605295122448534/Muted.png',
+            int(os.getenv('MUTED_CHANNEL_ID', 123)): 'https://tenor.com/view/you-are-muted-jeremy-clarkson-gif-24026601',
             int(os.getenv('QUESTION_CHANNEL_ID', 123)): '''**Have a question about the server? Ask it here!**\nThe chat will be cleared once questions are answered.'''
         }
 
