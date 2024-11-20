@@ -458,7 +458,7 @@ class Moderation(*moderation_cogs):
         """ (MOD) Clears the whole channel. """
 
         special_channels = {
-            int(os.getenv('MUTED_CHANNEL_ID', 123)): 'https://cdn.discordapp.com/attachments/746478846466981938/748605295122448534/Muted.png',
+            int(os.getenv('MUTED_CHANNEL_ID', 123)): 'https://tenor.com/view/you-are-muted-jeremy-clarkson-gif-24026601',
             int(os.getenv('QUESTION_CHANNEL_ID', 123)): '''**Have a question about the server? Ask it here!**\nThe chat will be cleared once questions are answered.'''
         }
 
@@ -618,15 +618,16 @@ class Moderation(*moderation_cogs):
         await ctx.message.delete()
 
         icon = ctx.author.display_avatar
+        is_admin = ctx.author.guild_permissions.administrator
         members, reason = await utils.greedy_member_reason(ctx, message)
         ban_reason = "You have been banned from Language Sloth for exceeding the maximum warn limit within 6 months."
 
         if not members:
             await ctx.send("**Please, inform a member!**", delete_after=3)
         else:
-            if reason is not None and len(reason) > 960:
+            if not is_admin and (reason is not None and len(reason) > 960):
                 return await ctx.send(f"**Please, inform a reason that is lower than or equal to 960 characters, {ctx.author.mention}!**", delete_after=3)
-            elif reason is None or len(reason) < 16:
+            elif not is_admin and (reason is None or len(reason) < 16):
                 return await ctx.send(f"**Please, inform a reason that is higher than 15 characters, {ctx.author.mention}!**", delete_after=3)
 
             for member in members:
@@ -1397,15 +1398,16 @@ class Moderation(*moderation_cogs):
 
         channel = ctx.channel
         author = ctx.author
+        is_admin = author.guild_permissions.administrator
 
         members, reason = await utils.greedy_member_reason(ctx, reason)
 
         if not members:
             return await ctx.send('**Member not found!**', delete_after=3)
         
-        if reason is not None and len(reason) > 960:
+        if not is_admin and (reason is not None and len(reason) > 960):
             return await ctx.send(f"**Please, inform a reason that is lower than or equal to 960 characters, {ctx.author.mention}!**", delete_after=3)
-        elif reason is None or len(reason) < 16:
+        elif not is_admin and (reason is None or len(reason) < 16):
             return await ctx.send(f"**Please, inform a reason that is higher than 15 characters, {ctx.author.mention}!**", delete_after=3)
         
         for member in members:
