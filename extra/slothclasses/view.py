@@ -46,8 +46,13 @@ class HugView(SlothAction):
             'https://c.tenor.com/OXCV_qL-V60AAAAC/mochi-peachcat-mochi.gif',
             'https://c.tenor.com/wqCAHtQuTnkAAAAC/milk-and-mocha-hug.gif',
             'https://c.tenor.com/7xJoTToAJC8AAAAd/hug-love.gif',
-            'https://c.tenor.com/Zd3o8HgqWKYAAAAC/milk-and-mocha-hug.gif',
-            'https://c.tenor.com/0PIj7XctFr4AAAAC/a-whisker-away-hug.gif'
+            'https://c.tenor.com/0PIj7XctFr4AAAAC/a-whisker-away-hug.gif',
+            'https://media1.tenor.com/m/9IuynGgYlccAAAAd/love-hug.gif',
+            'https://media1.tenor.com/m/aLF8700Drh0AAAAd/eszan-hugging-couple.gif',
+            'https://media1.tenor.com/m/ibqSyUnC6YsAAAAd/hugs-cuddle.gif',
+            'https://media1.tenor.com/m/Kg4s88v378QAAAAd/couple-hug.gif',
+            'https://media1.tenor.com/m/CtGDmaEW_XoAAAAd/tj-watt.gif',
+            'https://media1.tenor.com/m/YFOXic-OlMUAAAAd/hug-varchie.gif',
         ]
 
         embed = discord.Embed(
