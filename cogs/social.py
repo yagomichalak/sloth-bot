@@ -130,9 +130,6 @@ class Social(*social_cogs):
                 else:
                         embed.add_field(name="In a vc?", value="No")
 
-
-            """embed.add_field(name="Bot?", value=member.bot)"""
-
             view = QuickButtons(client=self.client, ctx=ctx, target_member=member)
             if not await utils.is_allowed([analyst_debugger_role_id, mod_role_id, admin_role_id]).predicate(ctx):
                 if not await utils.is_subscriber(throw_exc=False).predicate(ctx):
