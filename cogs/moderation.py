@@ -47,6 +47,7 @@ secret_agent_channel_id = int(os.getenv('SECRET_AGENTS_CHANNEL_ID', 123))
 error_log_channel_id = int(os.getenv('ERROR_LOG_CHANNEL_ID', 123))
 muted_chat_id = int(os.getenv('MUTED_CHANNEL_ID', 123))
 watchlist_disallowed_channels = [int(os.getenv('MUTED_CHANNEL_ID', 123))]
+frog_catchers_channel_id: int = int(os.getenv("FROG_CATCHERS_CHANNEL_ID", 123))
 
 last_deleted_message = []
 
@@ -2150,7 +2151,11 @@ We appreciate your understanding and look forward to hearing from you. """, embe
         """ Shows all infractions of a specific user.
         :param member: The member to show the infractions from. [Optional] [Default = You] """
 
-        allowed_room_and_user = ctx.channel.id not in watchlist_disallowed_channels and any(role.id in allowed_roles for role in ctx.author.roles)
+        allowed_room_and_user = ctx.channel.id not in watchlist_disallowed_channels and any(role.id in allowed_roles + [analyst_debugger_role_id] for role in ctx.author.roles)
+
+        is_sub = await utils.is_subscriber(throw_exc=False).predicate(ctx)
+        if is_sub and ctx.channel.id != frog_catchers_channel_id:
+            return await ctx.send(f"**Subs can only see infractions in the <#{frog_catchers_channel_id}> channel!**")
 
         try:
             await ctx.message.delete()

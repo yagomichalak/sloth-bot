@@ -228,7 +228,7 @@ class QuickButtons(discord.ui.View):
         is_allowed = await utils.is_allowed([mod_role_id, admin_role_id, analyst_debugger_role_id]).predicate(new_ctx)
         is_sub = await utils.is_subscriber(throw_exc=False).predicate(new_ctx)
         if is_allowed or is_sub:
-            if not is_allowed:
+            if not is_allowed and interaction.channel.id != frog_catchers_channel_id:
                 return await interaction.response.send_message(f"**Subs can only see infractions in the <#{frog_catchers_channel_id}> channel!**")
             await interaction.response.defer()
             return await self.client.get_cog("Moderation").infractions(self.ctx, message=str(self.target_member.id))
