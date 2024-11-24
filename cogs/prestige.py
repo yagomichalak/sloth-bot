@@ -244,13 +244,15 @@ int main(void)
 
         sentences = [
             "love you all from <@781007535267119138>",
-            "<@781007535267119138> я самый лучший доктор, а <@703017795738402827> замечательный, я его так люблю <:cutes:686224659448201220>",
             "<@781007535267119138> don't call me if you are sick, i'm busy jellying :p",
-            "<@781007535267119138> womp womp womp fellas",
-            "<@781007535267119138> I'm a doctor, not a magician"
+            "<@781007535267119138> I'm a doctor, not a magician",
+            "be nice not mean, spread love not hate 💞",
+            "<@781007535267119138> at your service, how may I help?",
+            "An apple a day keeps a doctor away",
         ]
 
         await ctx.send(choice(sentences))
+
 
 def setup(client) -> None:
     """ Cog's setup function. """

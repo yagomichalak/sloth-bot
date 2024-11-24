@@ -81,7 +81,7 @@ class Player(*additional_cogs):
             current_time = await utils.get_timestamp()
             cooldown_in_seconds = current_time - skill_ts
             seconds_until = seconds
-            if await utils.is_subscriber(throw_exc=False).predicate(ctx):
+            if await utils.is_subscriber(check_adm=False, throw_exc=False).predicate(ctx):
                 seconds_until = seconds_until / 2
 
             if cooldown_in_seconds >= seconds_until:
