@@ -2438,9 +2438,10 @@ We appreciate your understanding and look forward to hearing from you. """, embe
                                     value=f"> {infr_date}\n> {infr[4]}: by {perpetrator}\n> {infr[2]}{extra_line}",
                                     inline=False
                                 )
-                    # Infraction removal
-                    await moderation_log.send(embed=embed)
                     
+                    await moderation_log.send(embed=embed)
+                
+                # Infraction removal    
                 await self.remove_user_infractions(member.id)
                 await ctx.send(f"**Removed all infractions for {member.mention}!**")
             else:
