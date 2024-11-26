@@ -2319,7 +2319,7 @@ We appreciate your understanding and look forward to hearing from you. """, embe
                     embed.set_thumbnail(url=member.display_avatar)
                     embed.set_footer(text=f"Removed by {author}", icon_url=icon)
                     await moderation_log.send(embed=embed)
-                
+                # Infraction removal
                 await self.remove_user_infraction(int(infr_id))
                 await ctx.send(f"**Removed infraction with ID `{infr_id}` for {member}**")
             else:
@@ -2438,7 +2438,7 @@ We appreciate your understanding and look forward to hearing from you. """, embe
                                     value=f"> {infr_date}\n> {infr[4]}: by {perpetrator}\n> {infr[2]}{extra_line}",
                                     inline=False
                                 )
-                                
+                    # Infraction removal
                     await moderation_log.send(embed=embed)
                     
                 await self.remove_user_infractions(member.id)
