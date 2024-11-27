@@ -2289,6 +2289,9 @@ We appreciate your understanding and look forward to hearing from you. """, embe
         """ (MOD) Removes one or more infractions by their IDs.
         :param infr_id: The infraction(s) IDs. """
 
+        author = ctx.author
+        icon = ctx.author.display_avatar
+
         await ctx.message.delete()
 
         if not infrs_id:
@@ -2296,12 +2299,31 @@ We appreciate your understanding and look forward to hearing from you. """, embe
 
         for infr_id in infrs_id:
             if user_infractions := await self.get_user_infraction_by_infraction_id(infr_id):
-                await self.remove_user_infraction(int(infr_id))
+                # Moderation log embed
                 member = discord.utils.get(ctx.guild.members, id=user_infractions[0][0])
+                perms = ctx.channel.permissions_for(ctx.author)
+                if not perms.administrator:
+                    moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
+                    infr_date = datetime.fromtimestamp(user_infractions[0][3]).strftime('%Y/%m/%d at %H:%M')
+                    infr_type = user_infractions[0][1]
+                    reason = user_infractions[0][2]
+                    perpetrator_member = discord.utils.get(ctx.guild.members, id=user_infractions[0][5])
+                    perpetrator = perpetrator_member.name if perpetrator_member else "Unknown"
+                    
+                    embed = discord.Embed(title=f'__**Removed Infraction**__ ({infr_type})', colour=discord.Colour.dark_red(),
+                                        timestamp=ctx.message.created_at)
+                    embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nID: {member.id}```',
+                                    inline=False)
+                    embed.add_field(name='Infraction info:', value=f"\u200b\n> {infr_date}\n> {infr_id}: by {perpetrator}\n> {reason}")
+                    embed.set_author(name=member)
+                    embed.set_thumbnail(url=member.display_avatar)
+                    embed.set_footer(text=f"Removed by {author}", icon_url=icon)
+                    await moderation_log.send(embed=embed)
+                # Infraction removal
+                await self.remove_user_infraction(int(infr_id))
                 await ctx.send(f"**Removed infraction with ID `{infr_id}` for {member}**")
             else:
                 await ctx.send(f"**Infraction with ID `{infr_id}` was not found!**")
-
 
     @commands.command(aliases=['ris', 'remove_warns', 'remove_warnings'])
     @utils.is_allowed(allowed_roles, throw_exc=True)
@@ -2317,7 +2339,109 @@ We appreciate your understanding and look forward to hearing from you. """, embe
             return await ctx.send('**Please, inform a member!**', delete_after=3)
 
         for member in members:
-            if await self.get_user_infractions(member.id):
+            if user_infractions := await self.get_user_infractions(member.id):
+                # Moderation log embed
+                perms = ctx.channel.permissions_for(ctx.author)
+                if not perms.administrator:
+                    moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
+
+                    if user_infractions:
+                        lwarns = len([w for w in user_infractions if w[1] == 'lwarn'])
+                        warns = len([w for w in user_infractions if w[1] == 'warn'])
+                        hwarns = len([w for w in user_infractions if w[1] == 'hwarn'])
+                        mutes = len([m for m in user_infractions if m[1] == 'mute'])
+                        kicks = len([k for k in user_infractions if k[1] == 'kick'])
+                        bans = len([b for b in user_infractions if b[1] == 'ban'])
+                        softbans = len([sb for sb in user_infractions if sb[1] == 'softban'])
+                        hackbans = len([hb for hb in user_infractions if hb[1] == 'hackban'])
+                        wl_entries = len([wl for wl in user_infractions if wl[1] == 'watchlist'])
+
+                    user_infractions = list(user_infractions)
+                    priority_order = {"watchlist": 1, "mute": 2, "warn": 4, "ban": 3}
+                    user_infractions.sort(key=lambda x: priority_order.get(x[1] if x[1] not in ["hwarn", "lwarn"] else "warn", 5))
+
+                    embed = discord.Embed(
+                        title=f"Removed Infractions for {member}",
+                        description=f"```ini\n[Warns]: {warns+(lwarns/2)+(hwarns*2)} | [Mutes]: {mutes} | [Kicks]: {kicks}\n[Bans]: {bans+softbans} | [Hackbans]: {hackbans} | [Watchlist]: {wl_entries}```",
+                        colour=discord.Colour.dark_red(),
+                        timestamp=ctx.message.created_at
+                    )
+                    embed.set_thumbnail(url=member.display_avatar)
+                    embed.set_author(name=member.id)
+                    embed.set_footer(text=f"Removed by: {ctx.author}", icon_url=ctx.author.display_avatar)
+
+                    first_watchlist, first_mute, first_warn, first_ban = True, True, True, True
+
+                    for i, infr in enumerate(user_infractions):
+                        infr_type = infr[1] if infr[1] not in ["hwarn", "lwarn"] else "warn"
+                        infr_date = datetime.fromtimestamp(infr[3]).strftime('%Y/%m/%d at %H:%M')
+                        perpetrator_member = discord.utils.get(ctx.guild.members, id=infr[5])
+                        perpetrator = perpetrator_member.name if perpetrator_member else "Unknown"
+
+                        next_infr_type = user_infractions[i + 1][1] if i + 1 < len(user_infractions) else None
+                        next_infr_type = next_infr_type if next_infr_type not in ["hwarn", "lwarn"] else "warn"
+                        extra_line = "\n\u200b" if infr_type != next_infr_type else ""
+
+                        if infr_type == "watchlist":
+                            if first_watchlist:
+                                embed.add_field(
+                                    name="Watchlist",
+                                    value=f"\u200b\n> {infr_date}\n> {infr[4]}: by {perpetrator}\n> {infr[2]}{extra_line}",
+                                    inline=False
+                                )
+                                first_watchlist = False
+                            else:
+                                embed.add_field(
+                                    name="\u200b",
+                                    value=f"> {infr_date}\n> {infr[4]}: by {perpetrator}\n> {infr[2]}{extra_line}",
+                                    inline=False
+                                )
+                        elif infr_type == "mute":
+                            if first_mute:
+                                embed.add_field(
+                                    name="Mute",
+                                    value=f"\u200b\n> {infr_date}\n> {infr[4]}: by {perpetrator}\n> {infr[2]}{extra_line}",
+                                    inline=False
+                                )
+                                first_mute = False
+                            else:
+                                embed.add_field(
+                                    name="\u200b",
+                                    value=f"> {infr_date}\n> {infr[4]}: by {perpetrator}\n> {infr[2]}{extra_line}",
+                                    inline=False
+                                )
+                        elif infr_type in ["lwarn", "warn", "hwarn"]:
+                            if first_warn:
+                                embed.add_field(
+                                    name="Warn",
+                                    value=f"\u200b\n> {infr_date}\n> {infr[4]}: by {perpetrator}\n> {infr[2]}{extra_line}",
+                                    inline=False
+                                )
+                                first_warn = False
+                            else:
+                                embed.add_field(
+                                    name="\u200b",
+                                    value=f"> {infr_date}\n> {infr[4]}: by {perpetrator}\n> {infr[2]}{extra_line}",
+                                    inline=False
+                                )
+                        elif infr_type in ["ban", "softban", "hackban"]:
+                            if first_ban:
+                                embed.add_field(
+                                    name="Ban",
+                                    value=f"\u200b\n> {infr_date}\n> {infr[4]}: by {perpetrator}\n> {infr[2]}{extra_line}",
+                                    inline=False
+                                )
+                                first_ban = False
+                            else:
+                                embed.add_field(
+                                    name="\u200b",
+                                    value=f"> {infr_date}\n> {infr[4]}: by {perpetrator}\n> {infr[2]}{extra_line}",
+                                    inline=False
+                                )
+                    
+                    await moderation_log.send(embed=embed)
+                
+                # Infraction removal    
                 await self.remove_user_infractions(member.id)
                 await ctx.send(f"**Removed all infractions for {member.mention}!**")
             else:
