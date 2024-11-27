@@ -526,7 +526,7 @@ class Moderation(*moderation_cogs):
                 general_embed.set_author(name=f'{member} has been warned', icon_url=member.display_avatar)
                 await ctx.send(embed=general_embed)
 
-    @commands.command(aliases=["lwarn", "lwarnado", "lwrn"])
+    @commands.command(aliases=["lwarn", "lwarnado", "lwrn", "lw"])
     @utils.is_allowed(allowed_roles, throw_exc=True)
     async def light_warn(self, ctx, *, message: Optional[str] = None) -> None:
         """(MOD) Soft-Warns one or more members.
@@ -538,7 +538,7 @@ class Moderation(*moderation_cogs):
         else:
             await self._warn_callback(ctx=ctx, message=message, warn_type="lwarn")
 
-    @commands.command(aliases=["warnado", "wrn"])
+    @commands.command(aliases=["warnado", "wrn", "w"])
     @utils.is_allowed(allowed_roles, throw_exc=True)
     async def warn(self, ctx, *, message: Optional[str] = None) -> None:
         """(MOD) Warns one or more members.
@@ -550,7 +550,7 @@ class Moderation(*moderation_cogs):
         else:
             await self._warn_callback(ctx=ctx, message=message, warn_type="warn")
 
-    @commands.command(aliases=["hwarn", "hwarnado", "hwrn"])
+    @commands.command(aliases=["hwarn", "hwarnado", "hwrn", "hw"])
     @utils.is_allowed(allowed_roles, throw_exc=True)
     async def heavy_warn(self, ctx, *, message: Optional[str] = None) -> None:
         """(MOD) Warns one or more members.
