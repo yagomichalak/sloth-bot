@@ -316,7 +316,7 @@ class Show(commands.Cog):
         )
         await ctx.respond(embed=embed)
 
-    @commands.command(aliases=['wk', 'w', 'wiki'])
+    @commands.command(aliases=['wk', 'wiki'])
     @commands.cooldown(1, 10, type=commands.BucketType.user)
     async def wikipedia(self, ctx, *, topic: str = None):
         '''
