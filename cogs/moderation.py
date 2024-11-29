@@ -39,6 +39,7 @@ preference_role_id = int(os.getenv('PREFERENCE_ROLE_ID', 123))
 senior_mod_role_id: int = int(os.getenv('SENIOR_MOD_ROLE_ID', 123))
 admin_role_id: int = int(os.getenv('ADMIN_ROLE_ID', 123))
 analyst_debugger_role_id: int = int(os.getenv('ANALYST_DEBUGGER_ROLE_ID', 123))
+event_manager_role_id = int(os.getenv('EVENT_MANAGER_ROLE_ID', 123))
 allowed_roles = [int(os.getenv('OWNER_ROLE_ID', 123)), admin_role_id, senior_mod_role_id, mod_role_id]
 
 # variables.textchannel
@@ -2146,12 +2147,12 @@ We appreciate your understanding and look forward to hearing from you. """, embe
 
     # Infraction methods
     @commands.command(aliases=['infr', 'show_warnings', 'sw', 'show_bans', 'sb', 'show_muted', 'sm'])
-    @commands.check_any(utils.is_allowed([*allowed_roles, analyst_debugger_role_id], throw_exc=True), utils.is_subscriber())
+    @commands.check_any(utils.is_allowed([*allowed_roles, event_manager_role_id, analyst_debugger_role_id], throw_exc=True), utils.is_subscriber())
     async def infractions(self, ctx, *, message : str = None) -> None:
         """ Shows all infractions of a specific user.
         :param member: The member to show the infractions from. [Optional] [Default = You] """
 
-        allowed_room_and_user = ctx.channel.id not in watchlist_disallowed_channels and any(role.id in allowed_roles + [analyst_debugger_role_id] for role in ctx.author.roles)
+        allowed_room_and_user = ctx.channel.id not in watchlist_disallowed_channels and any(role.id in allowed_roles for role in ctx.author.roles)
 
         is_allowed = await utils.is_allowed(allowed_roles).predicate(ctx)
         is_sub = await utils.is_subscriber(throw_exc=False).predicate(ctx)
