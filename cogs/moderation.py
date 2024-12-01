@@ -2154,7 +2154,7 @@ We appreciate your understanding and look forward to hearing from you. """, embe
 
         allowed_room_and_user = ctx.channel.id not in watchlist_disallowed_channels and any(role.id in allowed_roles for role in ctx.author.roles)
 
-        is_allowed = await utils.is_allowed(allowed_roles).predicate(ctx)
+        is_allowed = await utils.is_allowed([*allowed_roles, event_manager_role_id]).predicate(ctx)
         is_sub = await utils.is_subscriber(throw_exc=False).predicate(ctx)
         if not is_allowed and is_sub and ctx.channel.id != frog_catchers_channel_id:
             return await ctx.send(f"**Subs can only see infractions in the <#{frog_catchers_channel_id}> channel!**")
