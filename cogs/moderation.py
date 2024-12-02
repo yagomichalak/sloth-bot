@@ -39,6 +39,7 @@ preference_role_id = int(os.getenv('PREFERENCE_ROLE_ID', 123))
 senior_mod_role_id: int = int(os.getenv('SENIOR_MOD_ROLE_ID', 123))
 admin_role_id: int = int(os.getenv('ADMIN_ROLE_ID', 123))
 analyst_debugger_role_id: int = int(os.getenv('ANALYST_DEBUGGER_ROLE_ID', 123))
+lesson_manager_role_id: int = int(os.getenv('LESSON_MANAGEMENT_ROLE_ID', 123))
 event_manager_role_id = int(os.getenv('EVENT_MANAGER_ROLE_ID', 123))
 allowed_roles = [int(os.getenv('OWNER_ROLE_ID', 123)), admin_role_id, senior_mod_role_id, mod_role_id]
 
@@ -49,6 +50,8 @@ error_log_channel_id = int(os.getenv('ERROR_LOG_CHANNEL_ID', 123))
 muted_chat_id = int(os.getenv('MUTED_CHANNEL_ID', 123))
 watchlist_disallowed_channels = [int(os.getenv('MUTED_CHANNEL_ID', 123))]
 frog_catchers_channel_id: int = int(os.getenv("FROG_CATCHERS_CHANNEL_ID", 123))
+teacher_applicant_infraction_thread_id: int = int(os.getenv("TEACHER_APPLICANT_INFRACTION_THREAD_ID", 123))
+host_applicant_infraction_thread_id: int = int(os.getenv("HOST_APPLICANT_INFRACTION_THREAD_ID", 123))
 
 last_deleted_message = []
 
@@ -2156,8 +2159,24 @@ We appreciate your understanding and look forward to hearing from you. """, embe
 
         is_allowed = await utils.is_allowed([*allowed_roles, event_manager_role_id]).predicate(ctx)
         is_sub = await utils.is_subscriber(throw_exc=False).predicate(ctx)
-        if not is_allowed and is_sub and ctx.channel.id != frog_catchers_channel_id:
+        is_lesson_manager = await utils.is_allowed([lesson_manager_role_id]).predicate(ctx)
+        is_event_manager = await utils.is_allowed([event_manager_role_id]).predicate(ctx)
+
+        # sub, not in sub infr channel
+        if not is_allowed and is_sub and not (is_lesson_manager or is_event_manager) and ctx.channel.id != frog_catchers_channel_id:
             return await ctx.send(f"**Subs can only see infractions in the <#{frog_catchers_channel_id}> channel!**")
+
+        # lesson manager, not in the infr thread
+        if not is_allowed and is_lesson_manager and not (is_sub or is_event_manager) and ctx.channel.id != teacher_applicant_infraction_thread_id:
+            return await ctx.send(f"**Lesson managers can only see infractions in the <#{teacher_applicant_infraction_thread_id}> thread!**")
+
+        # event manager, not in the infr thread
+        if not is_allowed and is_event_manager and not (is_sub or is_lesson_manager) and ctx.channel.id != host_applicant_infraction_thread_id:
+            return await ctx.send(f"**Event managers can only see infractions in the <#{host_applicant_infraction_thread_id}> channel!**")
+
+        # multiple roles, not in the respective channel/thread
+        if not is_allowed and (is_sub or is_lesson_manager or is_event_manager) and ctx.channel.id not in {frog_catchers_channel_id, teacher_applicant_infraction_thread_id, host_applicant_infraction_thread_id}:
+            return await ctx.send(f"**Users with multiple roles that has the limited infraction perms can only see infractions in their respective channels: <#{frog_catchers_channel_id}>, <#{teacher_applicant_infraction_thread_id}>, or <#{host_applicant_infraction_thread_id}>!")
 
         try:
             await ctx.message.delete()
