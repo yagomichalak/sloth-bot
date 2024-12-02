@@ -2176,7 +2176,7 @@ We appreciate your understanding and look forward to hearing from you. """, embe
 
         # multiple roles, not in the respective channel/thread
         if not is_allowed and (is_sub or is_lesson_manager or is_event_manager) and ctx.channel.id not in {frog_catchers_channel_id, teacher_applicant_infraction_thread_id, host_applicant_infraction_thread_id}:
-            return await ctx.send(f"**Users with multiple roles that has the limited infraction perms can only see infractions in their respective channels: <#{frog_catchers_channel_id}>, <#{teacher_applicant_infraction_thread_id}>, or <#{host_applicant_infraction_thread_id}>!")
+            return await ctx.send(f"**Users with multiple roles that has the limited infraction perms can only see infractions in their respective channels: <#{frog_catchers_channel_id}>, <#{teacher_applicant_infraction_thread_id}>, or <#{host_applicant_infraction_thread_id}>!**")
 
         try:
             await ctx.message.delete()
