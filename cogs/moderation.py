@@ -2157,7 +2157,7 @@ We appreciate your understanding and look forward to hearing from you. """, embe
 
         allowed_room_and_user = ctx.channel.id not in watchlist_disallowed_channels and any(role.id in allowed_roles for role in ctx.author.roles)
 
-        is_allowed = await utils.is_allowed([*allowed_roles, event_manager_role_id]).predicate(ctx)
+        is_allowed = await utils.is_allowed(allowed_roles).predicate(ctx)
         is_sub = await utils.is_subscriber(throw_exc=False).predicate(ctx)
         is_lesson_manager = await utils.is_allowed([lesson_manager_role_id]).predicate(ctx)
         is_event_manager = await utils.is_allowed([event_manager_role_id]).predicate(ctx)
