@@ -270,11 +270,13 @@ class SlapView(SlothAction):
 class KissView(SlothAction):
     """ View for the kiss skill. """
 
-    def __init__(self, client: commands.Cog, member: discord.Member, target: discord.Member, timeout: Optional[float] = 180):
+    def __init__(self, client: commands.Cog, member: discord.Member, target: discord.Member, cmd: commands.Command, replied: bool = False, timeout: Optional[float] = 180):
         super().__init__(timeout=timeout)
         self.client = client
         self.member = member
         self.target = target
+        self.cmd = cmd
+        self.replied: bool = replied
         self.used: bool = False
 
     @discord.ui.button(label='Kiss on the Cheek', style=discord.ButtonStyle.blurple, custom_id='cheek_kiss_id', emoji="☺️")
@@ -352,24 +354,25 @@ class KissView(SlothAction):
         embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
 
         member_marriages = await self.client.get_cog('SlothClass').get_user_marriages(self.member.id)
-        cheating_view = None
+        response_view = None
         if member_marriages:
             for member_marriage in member_marriages:
                 if self.target.id in (member_marriage["user"], member_marriage["partner"]):
-                    # ADD: ReplyActionView(self.client, self.member, self.target, self.action)
+                    if not self.replied:
+                        response_view = ReplyActionView(self.target, self.member, self.cmd)
                     break
             else:
-                cheating_view = SpotCheatingView(self.client, self.member, self.target, member_marriages)
+                response_view = SpotCheatingView(self.target, self.member, self.cmd)
 
-        if cheating_view:
+        if response_view:
             await interaction.response.send_message(
                 content=self.target.mention, embed=embed, 
-                view=cheating_view
+                view=response_view
             )
         else:
             await interaction.response.send_message(
                 content=self.target.mention, embed=embed)
-            
+
         await self.disable_buttons(interaction, followup=True)
         self.used = True
         self.stop()
@@ -1560,3 +1563,31 @@ class DominateView(SlothAction):
 
         await self.disable_buttons(interaction)
         self.stop()
+
+
+class ReplyActionView(SlothAction):
+    """ View for the spot cheating feature. """
+
+    def __init__(self, member: discord.Member, target: discord.Member, cmd: commands.Command, timeout: Optional[float] = 180):
+        super().__init__(timeout=timeout)
+        self.member = member
+        self.target = target
+        self.cmd = cmd
+        self.used: bool = False
+
+    @discord.ui.button(label="Reply", style=discord.ButtonStyle.green, custom_id='reply_action_id', emoji='🔁')
+    async def reply_action_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Replies to an action. """
+
+        interaction.context = {
+            "cmd": self.cmd,
+            "replied": True
+        }
+        await self.cmd(context=interaction, member=self.target)
+        await self.disable_buttons(interaction, followup=True)
+        self.used = True
+        self.stop()
+
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        print(self.member.id, interaction.user.id)
+        return self.member.id == interaction.user.id

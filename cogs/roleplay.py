@@ -121,15 +121,29 @@ class RolePlay(commands.Cog):
         
         * Cooldown: 2 minutes """
 
-        author = ctx.author
+        author = None
+        answer = None
+        cmd = None
+        replied = False
+
+        if isinstance(ctx, commands.Context):
+            author = ctx.author
+            answer = ctx.send
+            cmd = ctx.command
+            cmd.message = ctx.message
+        else:
+            author = ctx.user
+            answer = ctx.respond
+            cmd = ctx.context["cmd"]
+            replied = True
 
         if not member:
             self.client.get_command(ctx.command.name).reset_cooldown(ctx)
-            return await ctx.send(f"**Please, inform a member, {author.mention}!**")
+            return await answer(f"**Please, inform a member, {author.mention}!**")
 
         if author.id == member.id:
             self.client.get_command('kiss').reset_cooldown(ctx)
-            return await ctx.send(f"**You can't kiss yourself, {author.mention}!**")
+            return await answer(f"**You can't kiss yourself, {author.mention}!**")
 
         embed = discord.Embed(
             title="__Kiss Prompt__",
@@ -139,13 +153,13 @@ class RolePlay(commands.Cog):
         )
         embed.set_author(name="This costs 5łł")
         embed.set_footer(text=f"Requested by {author}", icon_url=author.display_avatar)
-        view = KissView(self.client, member=author, target=member, timeout=60)
-        await ctx.send(embed=embed, view=view)
+        view = KissView(self.client, member=author, target=member, cmd=cmd, replied=replied, timeout=60)
+        await answer(embed=embed, view=view)
         await view.wait()
         if view.used:
             await self.client.get_cog('SlothCurrency').update_user_money(author.id, -5)
             # Tries to complete a quest, if possible.
-            await self.client.get_cog('SlothClass').complete_quest(author.id, 14, command_name=ctx.command.name)
+            await self.client.get_cog('SlothClass').complete_quest(author.id, 14, command_name=cmd.name)
 
     @commands.command()
     @Player.poisoned()
