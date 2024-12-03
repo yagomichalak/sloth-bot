@@ -362,7 +362,7 @@ class KissView(SlothAction):
                         response_view = ReplyActionView(self.target, self.member, self.cmd)
                     break
             else:
-                response_view = SpotCheatingView(self.target, self.member, self.cmd)
+                response_view = SpotCheatingView(self.client, self.member, self.target, member_marriages)
 
         if response_view:
             await interaction.response.send_message(
