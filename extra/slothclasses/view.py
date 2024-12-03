@@ -244,7 +244,7 @@ class SlapView(SlothAction):
                 if self.target.id in (member_marriage["user"], member_marriage["partner"]):
                     break
             else:
-                cheating_view = CheatingView(self.client, self.member, self.target, member_marriages)
+                cheating_view = SpotCheatingView(self.client, self.member, self.target, member_marriages)
 
         if cheating_view:
             await interaction.response.send_message(
@@ -356,9 +356,10 @@ class KissView(SlothAction):
         if member_marriages:
             for member_marriage in member_marriages:
                 if self.target.id in (member_marriage["user"], member_marriage["partner"]):
+                    # ADD: ReplyActionView(self.client, self.member, self.target, self.action)
                     break
             else:
-                cheating_view = CheatingView(self.client, self.member, self.target, member_marriages)
+                cheating_view = SpotCheatingView(self.client, self.member, self.target, member_marriages)
 
         if cheating_view:
             await interaction.response.send_message(
@@ -381,7 +382,7 @@ class KissView(SlothAction):
         self.stop()
 
 
-class CheatingView(discord.ui.View):
+class SpotCheatingView(discord.ui.View):
     """ View for the spot cheating feature. """
 
     def __init__(self, client, cheater: discord.Member, lover: discord.Member, marriages: List[Dict[str, Union[str, int]]]):
@@ -418,7 +419,7 @@ class CheatingView(discord.ui.View):
         embed.set_thumbnail(url=self.lover.display_avatar)
         embed.set_image(url=choice(catches))
         embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
-        view = CheatingActionView(self.client, self.cheater, self.lover, self.marriages)
+        view = CheatingView(self.client, self.cheater, self.lover, self.marriages)
 
         await interaction.response.send_message(content=self.cheater.mention, embed=embed, view=view)
 
@@ -435,10 +436,10 @@ class CheatingView(discord.ui.View):
             await interaction.response.edit_message(view=self)
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
-        return any(map(lambda marriage: marriage["partner"] == interaction.user.id, self.marriages)) 
+        return any(map(lambda marriage: marriage["partner"] == interaction.user.id, self.marriages))
 
 
-class CheatingActionView(discord.ui.View):
+class CheatingView(discord.ui.View):
     """ View for the cheating spotted feature. """
 
     def __init__(self, client, cheater: discord.Member, lover: discord.Member, marriages: List[Dict[str, Union[str, int]]]):
@@ -1538,7 +1539,7 @@ class DominateView(SlothAction):
                 if self.target.id in (member_marriage["user"], member_marriage["partner"]):
                     break
             else:
-                cheating_view = CheatingView(self.client, self.member, self.target, member_marriages)
+                cheating_view = SpotCheatingView(self.client, self.member, self.target, member_marriages)
 
         if cheating_view:
             await interaction.response.send_message(
