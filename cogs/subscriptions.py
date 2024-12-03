@@ -9,7 +9,7 @@ from discord.ext import commands, tasks
 
 # import.local
 from extra import utils
-from extra.useful_variables import patreon_roles
+# from extra.useful_variables import patreon_roles
 
 # variables.id
 server_id = int(os.getenv('SERVER_ID', 123))
@@ -79,9 +79,10 @@ class Subscriptions(commands.Cog):
         except Exception:
             pass
         
-        # Update the member's Golden Leaves
+        # Update the member's leaves and Golden Leaves
         try:
             SlothCurrency = self.client.get_cog("SlothCurrency")
+            await SlothCurrency.update_user_money(member.id, 3000)
             await SlothCurrency.update_user_premium_money(member.id, 5)
         except Exception:
             pass
