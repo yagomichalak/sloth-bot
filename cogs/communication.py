@@ -37,22 +37,24 @@ class Communication(*tool_cogs):
     @commands.Cog.listener()
     async def on_ready(self):
 
-        # self.advertise_patreon.start()  # Stopped these for now
+        self.advertise_patreon.start()
         print('Communication cog is ready!')
 
     @tasks.loop(seconds=60)
     async def advertise_patreon(self) -> None:
         """ Checks the time for advertising Patreon. """
 
+        ad_interval = 43200  # 12 hours in seconds
+
         current_ts = await utils.get_timestamp()
         # Checks whether Patreon advertising event exists
         if not await self.get_advertising_event(event_label='patreon_ad'):
             # If not, creates it
-            return await self.insert_advertising_event(event_label='patreon_ad', current_ts=current_ts-14400)
+            return await self.insert_advertising_event(event_label='patreon_ad', current_ts=current_ts-ad_interval)
 
         # Checks whether advertising time is due
         if await self.check_advertising_time(
-            current_ts=int(current_ts), event_label="patreon_ad", ad_time=14400):
+            current_ts=int(current_ts), event_label="patreon_ad", ad_time=ad_interval):
             # Updates time and advertises.
             await self.update_advertising_time(event_label="patreon_ad", current_ts=current_ts)
             general_channel = self.client.get_channel(general_channel_id)
@@ -61,7 +63,7 @@ class Communication(*tool_cogs):
             i = randint(1, 5)
             with open(f'./extra/random/texts/other/patreon_ad_{i}.txt', 'r', encoding="utf-8") as f:
                 random_message = f.read()
-            
+
             await general_channel.send(random_message)
 
     # Says something by using the bot
