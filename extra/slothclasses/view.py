@@ -333,6 +333,10 @@ class KissView(SlothAction):
             'https://c.tenor.com/sXNJMF5vI8oAAAAC/love-peachcat.gif',
             'https://c.tenor.com/MXd8Xby7jnMAAAAC/davydoff-love.gif',
             'https://c.tenor.com/yWGhrAd0cioAAAAC/kissing-couple.gif',
+            'https://media1.tenor.com/m/Men3yDvwzxIAAAAd/hugh-grant-renee-zellweger.gif',
+            'https://media1.tenor.com/m/BELRk-ZL1ZkAAAAd/sensual-kiss.gif',
+            'https://media1.tenor.com/m/c5H2dojPxuwAAAAd/bellyjere-bellyjere-kiss.gif',
+            'https://media1.tenor.com/m/4xJCbk-T7fMAAAAd/bughead-couple.gif',
         ]
 
         embed = discord.Embed(
