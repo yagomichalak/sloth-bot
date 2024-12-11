@@ -949,8 +949,10 @@ class Tools(*tool_cogs):
 
 	@commands.command(aliases=["pd"])
 	@commands.has_permissions(administrator=True)
+	@utils.not_ready()
 	async def payday(self, ctx) -> None:
-		""" Pays all Patreon members when run. (Generally run on the 6th) """
+		""" (DEPRECATED) Pays all Patreon members when run.
+		- Patreons no longer earn leaves. """
 
 		SlothCurrency = self.client.get_cog('SlothCurrency')
 

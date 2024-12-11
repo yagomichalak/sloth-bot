@@ -158,7 +158,7 @@ class SlothCurrency(*currency_cogs):
 
 
     @commands.command()
-    @commands.has_permissions(administrator=True)
+    @commands.is_owner()
     async def add_member(self, ctx, member: discord.Member = None, *, item_name: str = None) -> None:
         """ (ADM) Gives a member an item.
         :param member: The member to give the item.
@@ -194,7 +194,7 @@ class SlothCurrency(*currency_cogs):
         return await self.db.execute_query("SELECT * FROM shop_shopitem", database_name="django", fetch="all")
 
     @commands.command()
-    @commands.has_permissions(administrator=True)
+    @commands.is_owner()
     async def remove_member_item(self, ctx, member: discord.Member = None, *, item_name: str = None) -> None:
         """ (ADM) Removes an item from the member.
         :param member: The member to remove the item.
@@ -506,7 +506,7 @@ class SlothCurrency(*currency_cogs):
             return gif_file_path
 
     @commands.command()
-    @commands.has_permissions(administrator=True)
+    @commands.is_owner()
     async def add_money(self, ctx, member: discord.Member = None, money: int = None) -> None:
         """ (ADM) Adds money to a member.
         :param member: The member to add money to.
