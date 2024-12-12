@@ -19,6 +19,10 @@ guild_ids = [server_id]
 sloth_subscriber_role_id = int(os.getenv("SLOTH_SUBSCRIBER_ROLE_ID", 123))
 on_sloth_sub_log_channel_id = int(os.getenv("ON_SLOTH_SUB_CHANNEL_ID", 123))
 sloth_subscriber_sub_id = int(os.getenv("SLOTH_SUBSCRIBER_SUB_ID", 123))
+sloth_twenty_k_leaves_bundle_id = int(os.getenv("SLOTH_TWENTY_K_LEAVES_BUNDLE_ID", 123))
+sloth_marriage_bundle_id = int(os.getenv("SLOTH_MARRIAGE_BUNDLE_ID", 123))
+sloth_golden_leaf_id = int(os.getenv("SLOTH_GOLDEN_LEAF_ID", 123))
+frog_catchers_channel_id: int = int(os.getenv("FROG_CATCHERS_CHANNEL_ID", 123))
 
 # variables.role
 teacher_role_id = int(os.getenv("TEACHER_ROLE_ID", 123))
@@ -147,11 +151,52 @@ class Subscriptions(commands.Cog):
     async def subscribe(self, ctx) -> None:
         """ Shows the subscription button. """
 
+        # Descriptive Embed
+        embed = discord.Embed(
+            title="__Sloth Subscriber__",
+            description="For getting access to some extra features, commands and server perks.",
+            color=discord.Color.green()
+        )
+        embed.add_field(
+            name="🎲 __Gambling__",
+            value="> Access to gambling commands like `z!coinflip`, `z!blackjack`, `z!whitejack`, `z!slots`, etc. Also `z!soundboard`.",
+            inline=False
+        )
+        embed.add_field(
+            name="💍 __Polygamy & Golden Leaves__",
+            value="> You'll receive `5 Golden Leaves` <:golden_leaf:1289365306413813810> per month, and you can also `marry up to 4 people` at the same time.",
+            inline=False
+        )
+        embed.add_field(
+            name="<:richsloth:701157794686042183> __Bonus Activity Exchange & Leaves__",
+            value="> Receive `3000 leaves` 🍃 per month, and get twice as many leaves for exchanging your activity statuses, that is, the time you spent in the VCs and messages sent.",
+            inline=False
+        )
+        embed.add_field(
+            name="🕰️ __Cooldown Reset & Reduction__",
+            value="> Reset all of your Sloth Skills automatically upon subscribing (and on subscription renewal), and reduce by `50% the cooldown` of your next skills.",
+            inline=False
+        )
+        embed.add_field(
+            name="🚨 __Check Infractions__",
+            value=f"> Check other people's infractions in <#{frog_catchers_channel_id}>.",
+            inline=False
+        )
+        embed.add_field(
+            name="🦥 __Sloth Subscriber role__",
+            value=f"> Get the <@&{sloth_subscriber_role_id}>, whose color can be changed once a week for `1 Golden Leaf` <:golden_leaf:1289365306413813810>.",
+            inline=False
+        )
+        embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/980613341858914376/1316585723570163722/image.png?ex=675b9581&is=675a4401&hm=e69b1ec43d9ff32d1a641e17925fd874715c24b4bd8f86dba3f6ba72ee9b12ec&")
+
+        # Subscription Views
         view = discord.ui.View()
         view.add_item(discord.ui.Button(sku_id=sloth_subscriber_sub_id))
-        return await ctx.send(
-            f"**If you want to have access to some extra features & commands, subscribe now:**", view=view
-        )
+        view.add_item(discord.ui.Button(sku_id=sloth_golden_leaf_id))
+        view.add_item(discord.ui.Button(sku_id=sloth_twenty_k_leaves_bundle_id))
+        view.add_item(discord.ui.Button(sku_id=sloth_golden_leaf_id))
+
+        return await ctx.send(embed=embed, view=view)
 
 
 def setup(client):
