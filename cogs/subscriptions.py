@@ -194,7 +194,7 @@ class Subscriptions(commands.Cog):
         view.add_item(discord.ui.Button(sku_id=sloth_subscriber_sub_id))
         view.add_item(discord.ui.Button(sku_id=sloth_golden_leaf_id))
         view.add_item(discord.ui.Button(sku_id=sloth_twenty_k_leaves_bundle_id))
-        view.add_item(discord.ui.Button(sku_id=sloth_golden_leaf_id))
+        view.add_item(discord.ui.Button(sku_id=sloth_marriage_bundle_id))
 
         return await ctx.send(embed=embed, view=view)
 
