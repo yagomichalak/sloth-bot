@@ -993,6 +993,8 @@ class Moderation(*moderation_cogs):
         :param member: The @ or the ID of the user to mute.
         :param reason: The reason for the mute. """
 
+        is_admin = ctx.author.guild_permissions.administrator
+
         answer: discord.PartialMessageable = None
         if isinstance(ctx, commands.Context):
             answer = ctx.send
@@ -1007,9 +1009,9 @@ class Moderation(*moderation_cogs):
         if not member:
             return await ctx.send("**Please, specify a member!**")
         
-        if reason is not None and len(reason) > 960:
+        if not is_admin and (reason is not None and len(reason) > 960):
             return await ctx.send(f"**Please, inform a reason that is lower than or equal to 960 characters, {ctx.author.mention}!**", delete_after=3)
-        elif reason is None or len(reason) < 16:
+        elif not is_admin and (reason is None or len(reason) < 16):
             return await ctx.send(f"**Please, inform a reason that is higher than 15 characters, {ctx.author.mention}!**", delete_after=3)
                                   
         if role not in member.roles:
@@ -1848,15 +1850,16 @@ We appreciate your understanding and look forward to hearing from you. """, embe
 
         channel = ctx.channel
         author = ctx.author
+        is_admin = ctx.author.guild_permissions.administrator
 
         members, reason = await utils.greedy_member_reason(ctx, reason)
 
         if not members:
             return await ctx.send('**Member not found!**', delete_after=3)
 
-        if reason is not None and len(reason) > 960:
+        if not is_admin and (reason is not None and len(reason) > 960):
             return await ctx.send(f"**Please, inform a reason that is lower than or equal to 960 characters, {ctx.author.mention}!**", delete_after=3)
-        elif reason is None or len(reason) < 16:
+        elif not is_admin and (reason is None or len(reason) < 16):
             return await ctx.send(f"**Please, inform a reason that is higher than 15 characters, {ctx.author.mention}!**", delete_after=3)
 
         for member in members:
@@ -2475,6 +2478,8 @@ We appreciate your understanding and look forward to hearing from you. """, embe
         :param infr_id: The infraction(s) ID(s).
         :param reason: The updated reason of the infraction(s)."""
         
+        is_admin = ctx.author.guild_permissions.administrator
+        
         # Remove numbers with less than 5 digits
         string_ids = [str(int_id) for int_id in infractions_ids]
         for i, infr in enumerate(string_ids):
@@ -2487,9 +2492,9 @@ We appreciate your understanding and look forward to hearing from you. """, embe
         if not infractions_ids:
             return await ctx.send("**Please, inform an infraction id!**", delete_after=3)
 
-        if reason is not None and len(reason) > 960:
+        if not is_admin and (reason is not None and len(reason) > 960):
             return await ctx.send(f"**Please, inform a reason that is lower than or equal to 960 characters, {ctx.author.mention}!**", delete_after=3)
-        elif reason is None or len(reason) < 16:
+        elif not is_admin and (reason is None or len(reason) < 16):
             return await ctx.send(f"**Please, inform a reason that is higher than 15 characters, {ctx.author.mention}!**", delete_after=3)
 
         for infr_id in infractions_ids:
