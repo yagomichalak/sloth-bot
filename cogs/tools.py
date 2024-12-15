@@ -13,7 +13,7 @@ from typing import List, Optional, Union
 
 # import.thirdparty
 import discord
-import gtts
+from gtts import gTTS
 import pytz
 from discord import (Option, OptionChoice, message_command, slash_command,
                      user_command)
