@@ -2315,6 +2315,8 @@ We appreciate your understanding and look forward to hearing from you. """, embe
         author = ctx.author
         icon = ctx.author.display_avatar
 
+        is_staff_manager = await utils.is_allowed([senior_mod_role_id]).predicate(ctx)
+
         await ctx.message.delete()
 
         if not infrs_id:
@@ -2322,29 +2324,33 @@ We appreciate your understanding and look forward to hearing from you. """, embe
 
         for infr_id in infrs_id:
             if user_infractions := await self.get_user_infraction_by_infraction_id(infr_id):
-                # Moderation log embed
-                member = discord.utils.get(ctx.guild.members, id=user_infractions[0][0])
                 perms = ctx.channel.permissions_for(ctx.author)
-                if not perms.administrator:
-                    moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
-                    infr_date = datetime.fromtimestamp(user_infractions[0][3]).strftime('%Y/%m/%d at %H:%M')
-                    infr_type = user_infractions[0][1]
-                    reason = user_infractions[0][2]
-                    perpetrator_member = discord.utils.get(ctx.guild.members, id=user_infractions[0][5])
-                    perpetrator = perpetrator_member.name if perpetrator_member else "Unknown"
-                    
-                    embed = discord.Embed(title=f'__**Removed Infraction**__ ({infr_type})', colour=discord.Colour.dark_red(),
-                                        timestamp=ctx.message.created_at)
-                    embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nID: {member.id}```',
-                                    inline=False)
-                    embed.add_field(name='Infraction info:', value=f"\u200b\n> {infr_date}\n> {infr_id}: by {perpetrator}\n> {reason}")
-                    embed.set_author(name=member)
-                    embed.set_thumbnail(url=member.display_avatar)
-                    embed.set_footer(text=f"Removed by {author}", icon_url=icon)
-                    await moderation_log.send(embed=embed)
-                # Infraction removal
-                await self.remove_user_infraction(int(infr_id))
-                await ctx.send(f"**Removed infraction with ID `{infr_id}` for {member}**")
+                perpetrator_member = discord.utils.get(ctx.guild.members, id=user_infractions[0][5])
+                
+                if perpetrator_member == ctx.author or (is_staff_manager or perms.administrator):
+                    # Moderation log embed
+                    member = discord.utils.get(ctx.guild.members, id=user_infractions[0][0])
+                    if not perms.administrator:
+                        moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
+                        infr_date = datetime.fromtimestamp(user_infractions[0][3]).strftime('%Y/%m/%d at %H:%M')
+                        infr_type = user_infractions[0][1]
+                        reason = user_infractions[0][2]
+                        perpetrator = perpetrator_member.name if perpetrator_member else "Unknown"
+                        
+                        embed = discord.Embed(title=f'__**Removed Infraction**__ ({infr_type})', colour=discord.Colour.dark_red(),
+                                            timestamp=ctx.message.created_at)
+                        embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nID: {member.id}```',
+                                        inline=False)
+                        embed.add_field(name='Infraction info:', value=f"\u200b\n> {infr_date}\n> {infr_id}: by {perpetrator}\n> {reason}")
+                        embed.set_author(name=member)
+                        embed.set_thumbnail(url=member.display_avatar)
+                        embed.set_footer(text=f"Removed by {author}", icon_url=icon)
+                        await moderation_log.send(embed=embed)
+                    # Infraction removal
+                    await self.remove_user_infraction(int(infr_id))
+                    await ctx.send(f"**Removed infraction with ID `{infr_id}` for {member}**")
+                else:
+                    await ctx.send(f"**You can only remove infractions issued by yourself!**")
             else:
                 await ctx.send(f"**Infraction with ID `{infr_id}` was not found!**")
 
