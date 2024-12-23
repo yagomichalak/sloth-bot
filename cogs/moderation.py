@@ -2192,12 +2192,12 @@ We appreciate your understanding and look forward to hearing from you. """, embe
             members = [ctx.author]
 
         for member in members:
-            user_infractions = await self.get_user_infractions(member.id)
+            user_infractions, user_warns = await self.get_user_infractions(member.id), await self.get_latest_user_infractions(member.id)
 
             if user_infractions:
-                lwarns = len([w for w in user_infractions if w[1] == 'lwarn'])
-                warns = len([w for w in user_infractions if w[1] == 'warn'])
-                hwarns = len([w for w in user_infractions if w[1] == 'hwarn'])
+                lwarns = len([w for w in user_warns if w[1] == 'lwarn'])
+                warns = len([w for w in user_warns if w[1] == 'warn'])
+                hwarns = len([w for w in user_warns if w[1] == 'hwarn'])
                 mutes = len([m for m in user_infractions if m[1] == 'mute'])
                 kicks = len([k for k in user_infractions if k[1] == 'kick'])
                 bans = len([b for b in user_infractions if b[1] == 'ban'])

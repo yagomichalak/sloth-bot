@@ -6,6 +6,7 @@ from discord.ext import commands
 
 # import.local
 from mysqldb import DatabaseCore
+from extra import utils
 
 class ModerationUserInfractionsTable(commands.Cog):
     
@@ -82,6 +83,16 @@ class ModerationUserInfractionsTable(commands.Cog):
         """ Gets a specific infraction by ID. """
 
         return await self.db.execute_query(f"SELECT * FROM UserInfractions WHERE infraction_id = {infraction_id}", fetch="all")
+
+    async def get_latest_user_infractions(self, user_id: int) -> List[List[Union[str, int]]]:
+        """ Gets only the latest infractions from a user. """
+        
+        # How many months back to filter the infractions
+        months = 6
+        # Time ago variable to feed into the query
+        time_ago = await utils.get_timestamp() - months*30*24*3600
+        
+        return await self.db.execute_query(f"SELECT * FROM UserInfractions WHERE user_id = {user_id} AND infraction_ts >= {time_ago}", fetch="all")
 
     async def remove_user_infraction(self, infraction_id: int) -> None:
         """ Removes a specific infraction by ID. """
