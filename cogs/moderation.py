@@ -993,6 +993,8 @@ class Moderation(*moderation_cogs):
         :param member: The @ or the ID of the user to mute.
         :param reason: The reason for the mute. """
 
+        is_admin = ctx.author.guild_permissions.administrator
+
         answer: discord.PartialMessageable = None
         if isinstance(ctx, commands.Context):
             answer = ctx.send
@@ -1007,9 +1009,9 @@ class Moderation(*moderation_cogs):
         if not member:
             return await ctx.send("**Please, specify a member!**")
         
-        if reason is not None and len(reason) > 960:
+        if not is_admin and (reason is not None and len(reason) > 960):
             return await ctx.send(f"**Please, inform a reason that is lower than or equal to 960 characters, {ctx.author.mention}!**", delete_after=3)
-        elif reason is None or len(reason) < 16:
+        elif not is_admin and (reason is None or len(reason) < 16):
             return await ctx.send(f"**Please, inform a reason that is higher than 15 characters, {ctx.author.mention}!**", delete_after=3)
                                   
         if role not in member.roles:
@@ -1848,15 +1850,16 @@ We appreciate your understanding and look forward to hearing from you. """, embe
 
         channel = ctx.channel
         author = ctx.author
+        is_admin = ctx.author.guild_permissions.administrator
 
         members, reason = await utils.greedy_member_reason(ctx, reason)
 
         if not members:
             return await ctx.send('**Member not found!**', delete_after=3)
 
-        if reason is not None and len(reason) > 960:
+        if not is_admin and (reason is not None and len(reason) > 960):
             return await ctx.send(f"**Please, inform a reason that is lower than or equal to 960 characters, {ctx.author.mention}!**", delete_after=3)
-        elif reason is None or len(reason) < 16:
+        elif not is_admin and (reason is None or len(reason) < 16):
             return await ctx.send(f"**Please, inform a reason that is higher than 15 characters, {ctx.author.mention}!**", delete_after=3)
 
         for member in members:
@@ -2189,12 +2192,12 @@ We appreciate your understanding and look forward to hearing from you. """, embe
             members = [ctx.author]
 
         for member in members:
-            user_infractions = await self.get_user_infractions(member.id)
+            user_infractions, user_warns = await self.get_user_infractions(member.id), await self.get_latest_user_infractions(member.id)
 
             if user_infractions:
-                lwarns = len([w for w in user_infractions if w[1] == 'lwarn'])
-                warns = len([w for w in user_infractions if w[1] == 'warn'])
-                hwarns = len([w for w in user_infractions if w[1] == 'hwarn'])
+                lwarns = len([w for w in user_warns if w[1] == 'lwarn'])
+                warns = len([w for w in user_warns if w[1] == 'warn'])
+                hwarns = len([w for w in user_warns if w[1] == 'hwarn'])
                 mutes = len([m for m in user_infractions if m[1] == 'mute'])
                 kicks = len([k for k in user_infractions if k[1] == 'kick'])
                 bans = len([b for b in user_infractions if b[1] == 'ban'])
@@ -2312,6 +2315,8 @@ We appreciate your understanding and look forward to hearing from you. """, embe
         author = ctx.author
         icon = ctx.author.display_avatar
 
+        is_staff_manager = await utils.is_allowed([senior_mod_role_id]).predicate(ctx)
+
         await ctx.message.delete()
 
         if not infrs_id:
@@ -2319,29 +2324,33 @@ We appreciate your understanding and look forward to hearing from you. """, embe
 
         for infr_id in infrs_id:
             if user_infractions := await self.get_user_infraction_by_infraction_id(infr_id):
-                # Moderation log embed
-                member = discord.utils.get(ctx.guild.members, id=user_infractions[0][0])
                 perms = ctx.channel.permissions_for(ctx.author)
-                if not perms.administrator:
-                    moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
-                    infr_date = datetime.fromtimestamp(user_infractions[0][3]).strftime('%Y/%m/%d at %H:%M')
-                    infr_type = user_infractions[0][1]
-                    reason = user_infractions[0][2]
-                    perpetrator_member = discord.utils.get(ctx.guild.members, id=user_infractions[0][5])
-                    perpetrator = perpetrator_member.name if perpetrator_member else "Unknown"
-                    
-                    embed = discord.Embed(title=f'__**Removed Infraction**__ ({infr_type})', colour=discord.Colour.dark_red(),
-                                        timestamp=ctx.message.created_at)
-                    embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nID: {member.id}```',
-                                    inline=False)
-                    embed.add_field(name='Infraction info:', value=f"\u200b\n> {infr_date}\n> {infr_id}: by {perpetrator}\n> {reason}")
-                    embed.set_author(name=member)
-                    embed.set_thumbnail(url=member.display_avatar)
-                    embed.set_footer(text=f"Removed by {author}", icon_url=icon)
-                    await moderation_log.send(embed=embed)
-                # Infraction removal
-                await self.remove_user_infraction(int(infr_id))
-                await ctx.send(f"**Removed infraction with ID `{infr_id}` for {member}**")
+                perpetrator_member = discord.utils.get(ctx.guild.members, id=user_infractions[0][5])
+                
+                if perpetrator_member == ctx.author or (is_staff_manager or perms.administrator):
+                    # Moderation log embed
+                    member = discord.utils.get(ctx.guild.members, id=user_infractions[0][0])
+                    if not perms.administrator:
+                        moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
+                        infr_date = datetime.fromtimestamp(user_infractions[0][3]).strftime('%Y/%m/%d at %H:%M')
+                        infr_type = user_infractions[0][1]
+                        reason = user_infractions[0][2]
+                        perpetrator = perpetrator_member.name if perpetrator_member else "Unknown"
+                        
+                        embed = discord.Embed(title=f'__**Removed Infraction**__ ({infr_type})', colour=discord.Colour.dark_red(),
+                                            timestamp=ctx.message.created_at)
+                        embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nID: {member.id}```',
+                                        inline=False)
+                        embed.add_field(name='Infraction info:', value=f"\u200b\n> {infr_date}\n> {infr_id}: by {perpetrator}\n> {reason}")
+                        embed.set_author(name=member)
+                        embed.set_thumbnail(url=member.display_avatar)
+                        embed.set_footer(text=f"Removed by {author}", icon_url=icon)
+                        await moderation_log.send(embed=embed)
+                    # Infraction removal
+                    await self.remove_user_infraction(int(infr_id))
+                    await ctx.send(f"**Removed infraction with ID `{infr_id}` for {member}**")
+                else:
+                    await ctx.send(f"**You can only remove infractions issued by yourself!**")
             else:
                 await ctx.send(f"**Infraction with ID `{infr_id}` was not found!**")
 
@@ -2475,6 +2484,8 @@ We appreciate your understanding and look forward to hearing from you. """, embe
         :param infr_id: The infraction(s) ID(s).
         :param reason: The updated reason of the infraction(s)."""
         
+        is_admin = ctx.author.guild_permissions.administrator
+        
         # Remove numbers with less than 5 digits
         string_ids = [str(int_id) for int_id in infractions_ids]
         for i, infr in enumerate(string_ids):
@@ -2487,9 +2498,9 @@ We appreciate your understanding and look forward to hearing from you. """, embe
         if not infractions_ids:
             return await ctx.send("**Please, inform an infraction id!**", delete_after=3)
 
-        if reason is not None and len(reason) > 960:
+        if not is_admin and (reason is not None and len(reason) > 960):
             return await ctx.send(f"**Please, inform a reason that is lower than or equal to 960 characters, {ctx.author.mention}!**", delete_after=3)
-        elif reason is None or len(reason) < 16:
+        elif not is_admin and (reason is None or len(reason) < 16):
             return await ctx.send(f"**Please, inform a reason that is higher than 15 characters, {ctx.author.mention}!**", delete_after=3)
 
         for infr_id in infractions_ids:
