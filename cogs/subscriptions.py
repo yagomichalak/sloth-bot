@@ -70,8 +70,7 @@ class Subscriptions(commands.Cog):
         """ Handles subscriptions to the Sloth Subscriber subscription.
         :param entitlement: The entitlement/subscription. """
 
-        if not isinstance(entitlement.type, EntitlementType):
-            return
+        print("On sub: ", entitlement)
         
         guild = self.client.get_guild(server_id)
         sloth_subscriber_role = discord.utils.get(guild.roles, id=sloth_subscriber_role_id)
@@ -124,8 +123,7 @@ class Subscriptions(commands.Cog):
         """ Handles subscriptions to the Sloth Subscriber subscription.
         :param entitlement: The entitlement/subscription. """
 
-        if not isinstance(entitlement.type, EntitlementType):
-            return
+        print("On unsub: ", entitlement)
         
         guild = self.client.get_guild(server_id)
         sloth_subscriber_role = discord.utils.get(guild.roles, id=sloth_subscriber_role_id)
