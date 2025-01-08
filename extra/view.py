@@ -18,6 +18,8 @@ from .modals import (BootcampFeedbackModal, DebateManagerApplicationModal,
                      TeacherApplicationModal)
 from .select import ReportStaffSelect, ReportSupportSelect
 
+from .modals import UserReportStaffDetailModal, UserReportSupportDetailModal
+
 # variables.role
 mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID', 123))
@@ -33,182 +35,129 @@ class ReportSupportView(discord.ui.View):
 
     def __init__(self, client: commands.Bot) -> None:
         """ Class init method. """
-
         super().__init__(timeout=None)
         self.client = client
         self.cog = client.get_cog("ReportSupport")
-        patreon_button = discord.ui.Button(style=5, label="Support us on Patreon!", url="https://www.patreon.com/Languagesloth", emoji="<:patreon:831401582426980422>", row=1)
-        website_button = discord.ui.Button(style=5, label="Our website", url="https://languagesloth.com", emoji="<:Sloth:686237376510689327>", row=1)
-        # sub_button = discord.ui.Button(sku_id=sloth_subscriber_sub_id, row=2)
+
+        patreon_button = discord.ui.Button(style=5, label="Support us on Patreon!",
+                                           url="https://www.patreon.com/Languagesloth",
+                                           emoji="<:patreon:831401582426980422>", row=0)
+        website_button = discord.ui.Button(style=5, label="Our website", url="https://languagesloth.com",
+                                           emoji="<:Sloth:686237376510689327>", row=0)
         self.add_item(patreon_button)
         self.add_item(website_button)
-        # self.add_item(sub_button)
 
-    @discord.ui.button(label="Apply for Teacher!", style=3, custom_id="apply_to_teach", emoji="🧑‍🏫", row=0)
-    async def apply_to_teach_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
-        """ Button for starting the Teacher application. """
+        report_select = discord.ui.Select(
+            placeholder="Report/Be verified",
+            options=[
+                discord.SelectOption(label="Support", description="I need help with the server in general.",
+                                     value="report_support", emoji="<:slothconfused:738579956598046802>"),
+                discord.SelectOption(label="Help", description="I need to change some roles and I can't.",
+                                     value="report_help", emoji="<:irrelevant:673334940632481793>"),
+                discord.SelectOption(label="Report a User", description="Report another user for breaking the rules.",
+                                     value="report_user", emoji="<:politehammer:608941633454735360>"),
+                discord.SelectOption(label="Report a Staff member", description="Report a staff member for breaking the rules or abusing power.",
+                                     value="report_staff", emoji="<:mod_abooz:730887063481876612>"),
 
-        member = interaction.user
-
-        # Apply to be a Teacher
-        member_ts = self.cog.cache.get(member.id)
-        time_now = await utils.get_timestamp()
-        if member_ts:
-            sub = time_now - member_ts
-            if sub <= 1800:
-                return await interaction.response.send_message(
-                    f"**You are on cooldown to apply, try again in {(1800-sub)/60:.1f} minutes**", ephemeral=True)
-
-        await interaction.response.send_modal(TeacherApplicationModal(self.client))
-
-    @discord.ui.button(label="Apply for Moderator!", style=3, custom_id="apply_to_moderate", emoji="👮", row=0)
-    async def apply_to_moderate_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
-        """ Button for starting the Moderator application. """
-
-        member = interaction.user
-
-        # Apply to be a Moderator
-        member_ts = self.cog.cache.get(member.id)
-        time_now = await utils.get_timestamp()
-        if member_ts:
-            sub = time_now - member_ts
-            if sub <= 1800:
-                return await interaction.response.send_message(
-                    f"**You are on cooldown to apply, try again in {(1800-sub)/60:.1f} minutes**", ephemeral=True)
-
-        await interaction.response.send_modal(ModeratorApplicationModal(self.client))
-
-    @discord.ui.button(label="Apply for Event Host!", style=3, custom_id="apply_to_host_events", emoji="🎉", row=0)
-    async def apply_to_event_host_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
-        """ Button for starting the Event Host application. """
-
-        member = interaction.user
-
-        # Apply to be an Event Host
-        member_ts = self.cog.cache.get(member.id)
-        time_now = await utils.get_timestamp()
-        if member_ts:
-            sub = time_now - member_ts
-            if sub <= 1800:
-                return await interaction.response.send_message(
-                    f"**You are on cooldown to apply, try again in {(1800-sub)/60:.1f} minutes**", ephemeral=True)
-
-        await interaction.response.send_modal(EventHostApplicationModal(self.client))
-
-    @discord.ui.button(label="Apply for Debate Manager!", style=3, custom_id="apply_to_manage_debates", emoji="🌐", row=0)
-    async def apply_to_debate_manager_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
-        """ Button for starting the Debate Manager application. """
-
-        member = interaction.user
-
-        # Apply to be a Debate Manager
-        member_ts = self.cog.cache.get(member.id)
-        time_now = await utils.get_timestamp()
-        if member_ts:
-            sub = time_now - member_ts
-            if sub <= 1800:
-                return await interaction.response.send_message(
-                    f"**You are on cooldown to apply, try again in {(1800-sub)/60:.1f} minutes**", ephemeral=True)
-
-        await interaction.response.send_modal(DebateManagerApplicationModal(self.client))
-
-    @discord.ui.button(label="Get your own Custom Bot (not for free)", style=1, custom_id="get_custom_bot", emoji="🤖", row=2)
-    async def bot_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
-        """ Button for buying a custom bot. """
-
-        member = interaction.user
-        guild = interaction.guild
-        await interaction.response.defer(ephemeral=True)
-
-        member_ts = self.cog.bot_cache.get(member.id)
-        time_now = await utils.get_timestamp()
-        if member_ts:
-            sub = time_now - member_ts
-            if sub <= 240:
-                return await interaction.followup.send(
-                    f"**You are on cooldown to use this, try again in {round(240-sub)} seconds**", ephemeral=True)
-
-        self.cog.bot_cache[member.id] = time_now
-
-        with open('extra/random/texts/other/dnk.txt', 'r', encoding="utf-8") as file:
-            dnk_text = file.read()
-
-        website_link = "https://languagesloth.com/bots/commission"
-
-        # Order a bot
-        embed = discord.Embed(
-            title="__Commission a Bot!__",
-            description=dnk_text,
-            color=member.color,
-            timestamp=interaction.message.created_at,
-            url=website_link
+                discord.SelectOption(label="Verify", description="Get 'Verified' role.",
+                                     value="verify", emoji="☑️"),
+                discord.SelectOption(label="Clear select", value="clear", emoji="❌"),
+            ],
+            custom_id="report_select",
+            row=1
         )
-        embed.set_thumbnail(url=member.display_avatar)
-        embed.set_footer(text=guild.name, icon_url=guild.icon.url)
-        view = discord.ui.View()
-        view.add_item(
-            discord.ui.Button(label="Go to website!", url=website_link)
+        report_select.callback = self.report_select_callback
+        self.add_item(report_select)
+
+        apply_select = discord.ui.Select(
+            placeholder="Apply for a position...",
+            options=[
+                discord.SelectOption(label="Apply for Teacher", value="apply_to_teach", emoji="🧑‍🏫"),
+                discord.SelectOption(label="Apply for Moderator", value="apply_to_moderate", emoji="👮"),
+                discord.SelectOption(label="Apply for Event Host", value="apply_to_host_events", emoji="🎉"),
+                discord.SelectOption(label="Apply for Debate Manager", value="apply_to_manage_debates", emoji="🌐"),
+                discord.SelectOption(label="Clear select", value="clear", emoji="❌"),
+            ],
+            custom_id="apply_select",
+            row=2
         )
-        await interaction.followup.send(embed=embed, view=view, ephemeral=True)
+        apply_select.callback = self.apply_select_callback
+        self.add_item(apply_select)
 
-    @discord.ui.button(label="Verify", style=1, custom_id="verify_id", emoji="☑️", row=2)
-    async def verify_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
-        """ Button for starting the verification process. """
-
-        await interaction.response.defer()
-
+    async def report_select_callback(self, interaction: discord.Interaction) -> None:
+        """ Callback for report select menu. """
         member = interaction.user
-        member_ts = self.cog.cache.get(member.id)
         time_now = await utils.get_timestamp()
 
-        if member_ts:
-            sub = time_now - member_ts
-            if sub <= 240:
+        if interaction.data["values"][0] == "report_staff":
+            modal = UserReportStaffDetailModal(self.client, interaction.data['values'][0])
+            await interaction.response.send_modal(modal)
+
+        elif interaction.data["values"][0] == "report_user":
+            modal = UserReportSupportDetailModal(self.client, interaction.data['values'][0])
+            await interaction.response.send_modal(modal)
+
+        elif interaction.data["values"][0] == "report_help" or interaction.data["values"][0] == "report_support":
+            modal = UserReportSupportDetailModal(self.client, interaction.data['values'][0])
+            await modal.callback(interaction)
+
+        elif interaction.data["values"][0] == "verify":
+            member_ts = self.cog.cache.get(member.id)
+            if member_ts and time_now - member_ts <= 240:
                 return await interaction.followup.send(
-                    f"**You are on cooldown to use this, try again in {round(240-sub)} seconds, {member.mention}!**", ephemeral=True)
+                    f"**You are on cooldown to use this, try again in {round(240 - (time_now - member_ts))} seconds, {member.mention}!**",
+                    ephemeral=True)
+            else:
+                await interaction.response.edit_message(view=self)
+            self.cog.cache[member.id] = time_now
+            await self.cog.send_verified_selfies_verification(interaction)
 
-        self.cog.cache[member.id] = time_now
-        await self.cog.send_verified_selfies_verification(interaction)
+        else:
+            await interaction.response.edit_message(view=self)
 
-    @discord.ui.button(label="Report a User or Get Server/Role Support!", style=4, custom_id="report_support", emoji="<:politehammer:608941633454735360>", row=3)
-    async def report_support_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
-        """ Button for reporting someone. """
-
-        await interaction.response.defer()
+    async def apply_select_callback(self, interaction: discord.Interaction) -> None:
+        """ Callback for apply select menu. """
         member = interaction.user
-
-        member_ts = self.cog.report_cache.get(member.id)
         time_now = await utils.get_timestamp()
-        if member_ts:
-            sub = time_now - member_ts
-            if sub <= 240:
+
+        if interaction.data["values"][0] == "apply_to_teach":
+            member_ts = self.cog.cache.get(member.id)
+            if member_ts and time_now - member_ts <= 1800:
                 return await interaction.followup.send(
-                    f"**You are on cooldown to report, try again in {round(240-sub)} seconds**", ephemeral=True)
+                    f"**You are on cooldown to apply, try again in {(1800 - (time_now - member_ts)) / 60:.1f} minutes**",
+                    ephemeral=True)
+            else:
+                await interaction.response.send_modal(TeacherApplicationModal(self.client))
 
-        self.cog.report_cache[member.id] = time_now
-        view = discord.ui.View()
-        view.add_item(ReportSupportSelect(self.client))
-        await interaction.followup.send(content="How can we help you?", view=view, ephemeral=True)
-
-    @discord.ui.button(label="Report a Staff member!", style=4, custom_id="report_staff", emoji="<:leoblabla:978481579590570034>", row=3)
-    async def report_staff_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
-        """ Button for reporting a Staff member. """
-
-        await interaction.response.defer()
-        member = interaction.user
-
-        member_ts = self.cog.report_cache.get(member.id)
-        time_now = await utils.get_timestamp()
-        if member_ts:
-            sub = time_now - member_ts
-            if sub <= 240:
+        elif interaction.data["values"][0] == "apply_to_moderate":
+            member_ts = self.cog.cache.get(member.id)
+            if member_ts and time_now - member_ts <= 1800:
                 return await interaction.followup.send(
-                    f"**You are on cooldown to report, try again in {round(240-sub)} seconds**", ephemeral=True)
+                    f"**You are on cooldown to apply, try again in {(1800 - (time_now - member_ts)) / 60:.1f} minutes**",
+                    ephemeral=True)
+            else:
+                await interaction.response.send_modal(ModeratorApplicationModal(self.client))
 
-        self.cog.report_cache[member.id] = time_now
-        view = discord.ui.View()
-        view.add_item(ReportStaffSelect(self.client))
-        await interaction.followup.send(content="How can we help you?", view=view, ephemeral=True)
+        elif interaction.data["values"][0] == "apply_to_host_events":
+            member_ts = self.cog.cache.get(member.id)
+            if member_ts and time_now - member_ts <= 1800:
+                return await interaction.followup.send(
+                    f"**You are on cooldown to apply, try again in {(1800 - (time_now - member_ts)) / 60:.1f} minutes**",
+                    ephemeral=True)
+            else:
+                await interaction.response.send_modal(EventHostApplicationModal(self.client))
+
+        elif interaction.data["values"][0] == "apply_to_manage_debates":
+            member_ts = self.cog.cache.get(member.id)
+            if member_ts and time_now - member_ts <= 1800:
+                return await interaction.followup.send(
+                    f"**You are on cooldown to apply, try again in {(1800 - (time_now - member_ts)) / 60:.1f} minutes**",
+                    ephemeral=True)
+            else:
+                await interaction.response.send_modal(DebateManagerApplicationModal(self.client))
+
+        else:
+            await interaction.response.edit_message(view=self)
 
 class QuickButtons(discord.ui.View):
 
