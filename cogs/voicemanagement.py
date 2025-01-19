@@ -91,15 +91,15 @@ class VoiceManagement(commands.Cog):
             return
 
         # Check voice states
-        if before.mute != after.mute:
+        if before and before.mute != after.mute:
             return
-        if before.deaf != before.deaf:
+        if before and before.deaf != before.deaf:
             return
-        if before.self_mute != after.self_mute:
+        if before and before.self_mute != after.self_mute:
             return
-        if before.self_deaf != after.self_deaf:
+        if before and before.self_deaf != after.self_deaf:
             return
-        if before.self_stream != after.self_stream:
+        if before and before.self_stream != after.self_stream:
             return
 
         # Get before/after channels and their categories
