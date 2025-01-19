@@ -16,6 +16,9 @@ from extra import utils
 # variables.id
 guild_ids: List[int] = [int(os.getenv("SERVER_ID", 123))]
 
+designed_role_id: int = int(os.getenv("DESIGNED_ROLE_ID", 123))
+wyncham_id: int = int(os.getenv("WYNCHAM_ID", 123))
+
 class Pictures(commands.Cog):
     """ Category for getting random pictures from the internet. """
 
@@ -95,7 +98,7 @@ class Pictures(commands.Cog):
 
 
     @slash_command(name="change_server")
-    @utils.is_allowed_members([228296480643874826], throw_exc=True) # Wynnie's ID
+    @commands.check_any(utils.is_allowed_members([wyncham_id], throw_exc=True), utils.is_allowed([designed_role_id], throw_exc=True))
     async def _change_server(self, ctx,
         icon: Option(discord.Attachment, name="icon", description="The new server icon.", required=False),
         banner: Option(discord.Attachment, name="banner", description="The new server banner.", required=False)
