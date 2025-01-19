@@ -1,5 +1,5 @@
 # import.standard
-from typing import List
+from typing import List, Union
 
 # import.thirdparty
 from discord.ext import commands
@@ -27,7 +27,7 @@ class EventRoomsTable(commands.Cog):
         await self.db.execute_query("""
             CREATE TABLE EventRooms (
                 user_id BIGINT NOT NULL, vc_id BIGINT DEFAULT NULL,
-                txt_id BIGINT DEFAULT NULL
+                txt_id BIGINT DEFAULT NULL, event_name VARCHAR(255) DEFAULT NULL
             )""")
         await ctx.send("**Created `EventRooms` table!**")
 
@@ -58,15 +58,22 @@ class EventRoomsTable(commands.Cog):
 
         return await self.db.table_exists("EventRooms")
 
-    async def insert_event_room(self, user_id: int, vc_id: int = None, txt_id: int = None) -> None:
+    async def insert_event_room(self, user_id: int, vc_id: int = None, txt_id: int = None, event_name: str = None) -> None:
         """ Inserts an Event Room by VC ID.
         :param user_id: The ID of the user who's gonna be attached to the rooms.
         :param vc_id: The ID of the VC.
-        :param txt_id: The ID of the txt. """
+        :param txt_id: The ID of the txt.
+        :param event_name: The event name """
 
         await self.db.execute_query("""
-            INSERT INTO EventRooms (user_id, vc_id, txt_id)
-            VALUES (%s, %s, %s)""", (user_id, vc_id, txt_id))
+            INSERT INTO EventRooms (user_id, vc_id, txt_id, event_name)
+            VALUES (%s, %s, %s, %s)""", (user_id, vc_id, txt_id, event_name))
+
+    async def get_all_events_by_event_name(self, event_name: str) -> List[List[Union[int, str]]]:
+        """ Gets all events by event name.
+        :param event_name: The event name. """
+
+        return await self.db.execute_query("SELECT * FROM EventRooms WHERE event_name = %s", (event_name,), fetch="all")
 
     async def get_event_room_by_user_id(self, user_id: int) -> List[int]:
         """ Gets an Event Room by VC ID.

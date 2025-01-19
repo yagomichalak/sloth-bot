@@ -68,13 +68,15 @@ class VoiceManagement(commands.Cog):
                     try:
                         member = guild.get_member(user_id)
                         # Mods+ shouldn't get disconnected from the Camera only channel
-                        if await utils.is_allowed([mod_role_id, senior_mod_role_id]).predicate(member=member, channel=bots_and_commands_channel): return
+                        if await utils.is_allowed([mod_role_id, senior_mod_role_id]).predicate(member=member, channel=bots_and_commands_channel):
+                            continue
 
                         if not member.voice or not (vc := member.voice.channel):
                             continue
 
                         if self.vcc_id != vc.id:
                             continue
+
                         msg = f"**You got disconnected for not turning on your camera in the `Video Calls` voice channel!**"
                         await member.move_to(None)
                         await member.send(msg)

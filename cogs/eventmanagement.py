@@ -1,10 +1,10 @@
 # import.standard
 import os
-from typing import Any, Dict
+from typing import Any, Dict, List, Union
 
 # import.thirdparty
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 
 # import.local
 from extra import utils
@@ -24,7 +24,7 @@ preference_role_id = int(os.getenv('PREFERENCE_ROLE_ID', 123))
 
 # variables.channel
 promote_demote_log_channel_id = int(os.getenv('PROMOTE_DEMOTE_LOG_ID', 123))
-
+bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID', 123))
 
 class EventManagement(EventRoomsTable):
     """ A category for event related commands. """
@@ -34,12 +34,90 @@ class EventManagement(EventRoomsTable):
 
         self.client = client
         self.db = DatabaseCore()
+        self.people: Dict[int, Dict[str, Union[int, bool]]] = {}
+        self.productivity_club_vcs_ids: List[int] = []
 
     @commands.Cog.listener()
     async def on_ready(self) -> None:
         """ Tells when the cog is ready to use. """
 
+        productivity_events = await self.get_all_events_by_event_name(event_name="productivity")
+        self.productivity_club_vcs_ids = [active_event[1] for active_event in productivity_events]
+        self.check_camera_on_in_productivity_events.start()
         print("EventManagement cog is online!")
+
+    @tasks.loop(seconds=60)
+    async def check_camera_on_in_productivity_events(self) -> None:
+        """ Checks whether people in the Productivity Events channels have their cameras on. """
+
+        current_ts = await utils.get_timestamp()
+        guild = self.client.get_guild(guild)
+        bots_and_commands_channel =  guild.get_channel(bots_and_commands_channel_id)
+
+        for user_id in list(self.people.keys()):
+            secs = current_ts - self.people[user_id]["timestamp"]
+            if secs < 60:
+                continue
+
+            if self.people[user_id]["camera_on"]:
+                continue
+
+            del self.people[user_id]
+
+            # Disconnects users with cameras off
+            try:
+                member = guild.get_member(user_id)
+                # Mods+ shouldn't get disconnected from the Camera only channel
+                if await utils.is_allowed([mod_role_id, senior_mod_role_id]).predicate(member=member, channel=bots_and_commands_channel):
+                    continue
+
+                if not member.voice or not (vc := member.voice.channel):
+                    continue
+
+                if vc.id not in self.productivity_club_vcs_ids:
+                    continue
+
+                msg = f"**You got disconnected for not turning on your camera in the `Productivity Club` voice channel!**"
+                await member.move_to(None)
+                await member.send(msg)
+            except:
+                await bots_and_commands_channel.send(f"{msg}. {member.mention}")
+
+    @commands.Cog.listener()
+    async def on_voice_state_update(self, member: discord.Member, before: discord.VoiceState, after: discord.VoiceState):
+        """ Checks whether people have open cameras in the voice channel. """
+
+        if member.bot:
+            return
+
+        # Check voice states
+        if before.mute != after.mute:
+            return
+        if before.deaf != before.deaf:
+            return
+        if before.self_mute != after.self_mute:
+            return
+        if before.self_deaf != after.self_deaf:
+            return
+        if before.self_stream != after.self_stream:
+            return
+
+        # Get before/after channels and their categories
+        ac = after.channel
+
+        current_ts = await utils.get_timestamp()
+
+        # Joining the Video Calls channel
+        if ac and ac.id in self.productivity_club_vcs_ids:
+            self.people[member.id] = {
+                "timestamp": current_ts,
+                "camera_on": after.self_video,
+                "notified": False
+            }
+
+        # Leaving the Video Calls channel
+        elif not ac or ac.id not in self.productivity_club_vcs_ids:
+            self.people.pop(member.id, None)
 
     async def get_event_permissions(self, guild: discord.Guild) -> Dict[Any, Any]:
         """ Gets permissions for event rooms. """
@@ -146,7 +224,8 @@ class EventManagement(EventRoomsTable):
                 overwrites=overwrites)
             # Inserts it into the database
             await self.insert_event_room(
-                user_id=member.id, vc_id=voice_channel.id, txt_id=text_channel.id)
+                user_id=member.id, vc_id=voice_channel.id, txt_id=text_channel.id, event_name="movie"
+            )
         except Exception as e:
             print(e)
             await ctx.send(f"**{member.mention}, something went wrong, try again later!**")
@@ -199,7 +278,8 @@ class EventManagement(EventRoomsTable):
                 overwrites=overwrites)
             # Inserts it into the database
             await self.insert_event_room(
-                user_id=member.id, vc_id=voice_channel.id, txt_id=text_channel.id)
+                user_id=member.id, vc_id=voice_channel.id, txt_id=text_channel.id, event_name="karaoke"
+            )
         except Exception as e:
             print(e)
             await ctx.send(f"**{member.mention}, something went wrong, try again later!**")
@@ -252,7 +332,8 @@ class EventManagement(EventRoomsTable):
                 overwrites=overwrites)
             # Inserts it into the database
             await self.insert_event_room(
-                user_id=member.id, vc_id=voice_channel.id, txt_id=text_channel.id)
+                user_id=member.id, vc_id=voice_channel.id, txt_id=text_channel.id, event_name="culture"
+            )
         except Exception as e:
             print(e)
             await ctx.send(f"**{member.mention}, something went wrong, try again later!**")
@@ -305,7 +386,8 @@ class EventManagement(EventRoomsTable):
                 overwrites=overwrites)
             # Inserts it into the database
             await self.insert_event_room(
-                user_id=member.id, vc_id=voice_channel.id, txt_id=text_channel.id)
+                user_id=member.id, vc_id=voice_channel.id, txt_id=text_channel.id, event_name="art"
+            )
         except Exception as e:
             print(e)
             await ctx.send(f"**{member.mention}, something went wrong, try again later!**")
@@ -358,7 +440,8 @@ class EventManagement(EventRoomsTable):
                 overwrites=overwrites)
             # Inserts it into the database
             await self.insert_event_room(
-                user_id=member.id, vc_id=voice_channel.id, txt_id=text_channel.id)
+                user_id=member.id, vc_id=voice_channel.id, txt_id=text_channel.id, event_name="wellness"
+            )
         except Exception as e:
             print(e)
             await ctx.send(f"**{member.mention}, something went wrong, try again later!**")
@@ -411,7 +494,8 @@ class EventManagement(EventRoomsTable):
                 overwrites=overwrites)
             # Inserts it into the database
             await self.insert_event_room(
-                user_id=member.id, vc_id=voice_channel.id, txt_id=text_channel.id)
+                user_id=member.id, vc_id=voice_channel.id, txt_id=text_channel.id, event_name="reading"
+            )
         except Exception as e:
             print(e)
             await ctx.send(f"**{member.mention}, something went wrong, try again later!**")
@@ -464,7 +548,8 @@ class EventManagement(EventRoomsTable):
                 overwrites=overwrites)
             # Inserts it into the database
             await self.insert_event_room(
-                user_id=member.id, vc_id=voice_channel.id, txt_id=text_channel.id)
+                user_id=member.id, vc_id=voice_channel.id, txt_id=text_channel.id, event_name="gaming"
+            )
         except Exception as e:
             print(e)
             await ctx.send(f"**{member.mention}, something went wrong, try again later!**")
@@ -517,7 +602,66 @@ class EventManagement(EventRoomsTable):
                 overwrites=overwrites)
             # Inserts it into the database
             await self.insert_event_room(
-                user_id=member.id, vc_id=voice_channel.id, txt_id=text_channel.id)
+                user_id=member.id, vc_id=voice_channel.id, txt_id=text_channel.id, event_name="sport"
+            )
+        except Exception as e:
+            print(e)
+            await ctx.send(f"**{member.mention}, something went wrong, try again later!**")
+
+        else:
+            await ctx.send(f"**{member.mention}, {text_channel.mention} is up and running!**")
+
+    @create_event.command()
+    @commands.has_any_role(*[event_host_role_id, event_manager_role_id, mod_role_id, admin_role_id, owner_role_id])
+    @commands.cooldown(1, 60, commands.BucketType.user)
+    async def productivity(self, ctx) -> None:
+        """ Creates a Productivity Event voice and text channel. """
+
+        member = ctx.author
+        guild = ctx.guild
+        room = await self.get_event_room_by_user_id(member.id)
+        channel = discord.utils.get(guild.text_channels, id=room[2]) if room else None
+
+        if room and channel:
+            return await ctx.send(f"**{member.mention}, you already have an event room going on! ({channel.mention})**")
+        elif room and not channel:
+            await self.delete_event_room_by_txt_id(room[2])
+
+        confirm = await ConfirmSkill("Do you want to create a `Productivity Event`?").prompt(ctx)
+        if not confirm:
+            return await ctx.send("**Not creating it then!**")
+
+        overwrites = await self.get_event_permissions(guild)
+
+        gamer_role = discord.utils.get(
+            guild.roles, id=int(os.getenv('PRODUCTIVITY_CLUB_ROLE_ID', 123))
+        )
+        # Adds some perms to the Productivity Club role
+        overwrites[gamer_role] = discord.PermissionOverwrite(
+            read_messages=True, send_messages=True,
+            connect=True, speak=True, view_channel=True)
+
+        events_category = discord.utils.get(
+            guild.categories, id=int(os.getenv('EVENTS_CAT_ID', 123)))
+
+        try:
+            # Creating text channel
+            text_channel = await events_category.create_text_channel(
+                name=f"🍅 Productivity Event 🍅",
+                overwrites=overwrites)
+            # Creating voice channel
+            voice_channel = await events_category.create_voice_channel(
+                name=f"🍅 Productivity Event 🍅",
+                user_limit=None,
+                overwrites=overwrites)
+            # Inserts it into the database
+            await self.insert_event_room(
+                user_id=member.id, vc_id=voice_channel.id, txt_id=text_channel.id, event_name="productivity"
+            )
+            
+            # Inserts the productivity event into the list of active ones
+            self.productivity_club_vcs_ids.append(voice_channel.id)
+
         except Exception as e:
             print(e)
             await ctx.send(f"**{member.mention}, something went wrong, try again later!**")
@@ -555,6 +699,13 @@ class EventManagement(EventRoomsTable):
                 except Exception as e:
                     print(e)
                     await ctx.send(f"**Something went wrong with it, try again later, {member.mention}!**")
+
+                # Removes the room ID from the active productivity rooms list (if available)
+                if room[3] == "productivity":
+                    try:
+                        self.productivity_club_vcs_ids.pop(room[1])
+                    except IndexError:
+                        pass
             else:
                 await ctx.send(f"**Not deleting them, then, {member.mention}!**")
 
