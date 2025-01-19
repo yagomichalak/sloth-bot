@@ -136,6 +136,7 @@ class TeacherApplicationModal(Modal):
             InputText(
                 label="Motivation for applying",
                 placeholder="Please explain why you would be a great teacher.",
+                max_length=1000,
                 style=discord.InputTextStyle.paragraph))
 
     async def callback(self, interaction: discord.Interaction) -> None:
