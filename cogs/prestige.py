@@ -208,13 +208,13 @@ int main(void)
 
     @commands.command()
     async def loral(self, ctx) -> None:
-        """ A command for telling something about loral. """
+        """ A command for telling something about Loral. """
 
         await ctx.send("<@759049454819999776> Mans annoying")
 
     @commands.command()
     async def leonor(self, ctx) -> None:
-        """ A command for telling something about leonor. """
+        """ A command for telling something about Leonor. """
 
         await ctx.send("<@754678627265675325> Human brain smells like cat piss when it dries out")
 
@@ -226,7 +226,7 @@ int main(void)
 
     @commands.command(aliases=["hodjapie", "onekebappls"])
     async def hodja(self, ctx) -> None:
-        """ A command for telling something about the kebap guy, hodja. """
+        """ A command for telling something about the kebap guy, Hodja. """
 
         sentences = [
             "**I THOUGHT YOU WERE A GIRL** <@201086628167417857>",
@@ -240,7 +240,7 @@ int main(void)
             
     @commands.command(aliases=["jelly", "jellyfish", "jellytimet", "jogurt", "doctor"])
     async def _jelly(self, ctx) -> None:
-        """ A command for telling something about jelly. """
+        """ A command for telling something about Jelly. """
 
         sentences = [
             "love you all from <@781007535267119138>",
@@ -249,6 +249,25 @@ int main(void)
             "be nice not mean, spread love not hate 💞",
             "<@781007535267119138> at your service, how may I help?",
             "An apple a day keeps a doctor away",
+        ]
+
+        await ctx.send(choice(sentences))
+
+    @commands.command(aliases=["vasi", "kwas"])
+    async def _vasi(self, ctx) -> None:
+        """ A command for telling something about Vasi. """
+
+        sentences = [
+            "Oh you!",
+            "We'll see... or maybe not",
+            "I'm in the VaySay",
+            "Jag vill prata på svenska!",
+            "Noooooo!",
+            "Eu sou uma laranja 🟠",
+            "Shush!",
+            "Aghhhh ***Dutch noises intensifies***",
+            "We don't talk about Cosmos, mos, mos mos",
+            "Limão 🍋",
         ]
 
         await ctx.send(choice(sentences))
