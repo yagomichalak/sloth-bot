@@ -12,6 +12,9 @@ from extra.menu import ConfirmSkill
 from extra.smartroom.event_rooms import EventRoomsTable
 from mysqldb import DatabaseCore
 
+# variables.id
+server_id = int(os.getenv('SERVER_ID', 123))
+
 # variables.role
 mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 senior_mod_role_id = int(os.getenv('SENIOR_MOD_ROLE_ID', 123))
@@ -51,7 +54,7 @@ class EventManagement(EventRoomsTable):
         """ Checks whether people in the Productivity Events channels have their cameras on. """
 
         current_ts = await utils.get_timestamp()
-        guild = self.client.get_guild(guild)
+        guild = self.client.get_guild(server_id)
         bots_and_commands_channel =  guild.get_channel(bots_and_commands_channel_id)
 
         for user_id in list(self.people.keys()):
