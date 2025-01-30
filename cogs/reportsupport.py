@@ -471,31 +471,31 @@ class ReportSupport(*report_support_classes):
         
         if (vc_name == "Staff"):
             senior_mod = discord.utils.get(guild.roles, id=senior_role_id)
-            overwrites |= {
+            overwrites.update({
                 moderator: discord.PermissionOverwrite(
                     read_messages=False, 
                     send_messages=False, 
                     connect=False, 
                     view_channel=False, 
-                    manage_messages=False,),
+                    manage_messages=False),
                 senior_mod: discord.PermissionOverwrite(
                     read_messages=True, 
                     send_messages=True, 
                     connect=False, 
                     view_channel=True, 
-                    manage_messages=True,)
-            }
+                    manage_messages=True)
+            })
         else:
-            overwrites |= {
+            overwrites.update({
                 moderator: discord.PermissionOverwrite(
                     read_messages=True, 
                     send_messages=True, 
                     connect=False, 
                     view_channel=True, 
                     manage_messages=True, 
-                    manage_permissions=True,)
-            }
-        
+                    manage_permissions=True)
+            })
+
         # Verifies if the user already has an open text channel
         if open_channel := await self.member_has_open_channel(member.id):
             if open_channel := discord.utils.get(guild.text_channels, id=open_channel[1]):
