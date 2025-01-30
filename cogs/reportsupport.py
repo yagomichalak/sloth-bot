@@ -1,10 +1,15 @@
 # import.standard
+from collections import defaultdict
+import time
 import asyncio
 import os
 import subprocess
+import re
 from typing import List, Optional
 
 # import.thirdparty
+import httpx
+import anthropic
 import aiohttp
 import discord
 from discord.ext import commands, tasks
@@ -31,6 +36,9 @@ case_cat_id = int(os.getenv('CASE_CAT_ID', 123))
 # variables.voicechannel #
 staff_vc_id = int(os.getenv('STAFF_VC_ID', 123))
 
+# variables.anthropic #
+api_key = str(os.getenv('ANTHROPIC_API_KEY', 'abc'))
+
 # variables.textchannel #
 reportsupport_channel_id = int(os.getenv('REPORT_CHANNEL_ID', 123))
 mod_log_id = int(os.getenv('MOD_LOG_CHANNEL_ID', 123))
@@ -43,9 +51,7 @@ admin_role_id = int(os.getenv('ADMIN_ROLE_ID', 123))
 lesson_management_role_id = int(os.getenv('LESSON_MANAGEMENT_ROLE_ID', 123))
 analyst_debugger_role_id: int = int(os.getenv('ANALYST_DEBUGGER_ROLE_ID', 123)) # used by temp check command
 timedout_role_id = int(os.getenv('TIMEDOUT_ROLE_ID', 123)) # used by temp check command
-allowed_roles = [
-int(os.getenv('OWNER_ROLE_ID', 123)), admin_role_id,
-moderator_role_id]
+allowed_roles = [int(os.getenv('OWNER_ROLE_ID', 123)), admin_role_id, moderator_role_id]
 
 report_support_classes: List[commands.Cog] = [
     ApplicationsTable, Verify, OpenChannels
@@ -58,6 +64,11 @@ class ReportSupport(*report_support_classes):
 
         self.client = client
         self.db = DatabaseCore()
+        self.conversation_history = {}
+        self.role_history = {}
+        self.summary_sent = {}
+        self.last_message_time = defaultdict(float)
+        self.active_channels = set()
         self.owner_role_id: int = int(os.getenv('OWNER_ROLE_ID', 123))
         self.mayu_id: int = int(os.getenv('MAYU_ID', 123))
         self.prisca_id: int = int(os.getenv('PRISCA_ID', 123))
@@ -130,12 +141,32 @@ class ReportSupport(*report_support_classes):
         emoji = "<:patao:1261308730918572163>"
         await ctx.send(emoji)
 
+    def split_into_chunks(self, text: str, max_length: int) -> List[str]:
+        """Splits text into chunks of a specified maximum length, respecting word boundaries."""
+        chunks = []
+        while len(text) > max_length:
+            # Find the last newline or space within the max_length limit
+            split_index = text.rfind('\n', 0, max_length)
+            if split_index == -1:  # If no newline, try to split by space
+                split_index = text.rfind(' ', 0, max_length)
+            if split_index == -1:  # If no space, hard split at max_length
+                split_index = max_length
+
+            # Append the chunk and update the remaining text
+            chunks.append(text[:split_index].strip())
+            text = text[split_index:].strip()
+
+        # Append the remaining text as the last chunk
+        if text:
+            chunks.append(text)
+
+        return chunks
+
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message) -> None:
         """ Detects when a webhook is sent from the Sloth Appeals server. """
-
         channel = message.channel
-        category = None if not hasattr(message.channel, "category") else message.channel.category
+        category = message.channel.category if hasattr(message.channel, "category") else None
 
         # Initiates the session
         if channel.id == int(ban_appeals_channel_id):
@@ -151,13 +182,124 @@ class ReportSupport(*report_support_classes):
                     # Adds the reactions to the message, if fetched
                     await message.add_reaction('✅')
                     await message.add_reaction('❌')
-
+        
+        category = getattr(message.channel, "category", None)
+        # If the channel is part of the category of case reports
         if category and category.id == case_cat_id:
+            
+            # Initiate the user_id variable
+            user_id = 0
+            
+            # Grabs the channel ID
+            channel_id = message.channel.id
+
+            # Initialize the channel conversation and roles history if not present
+            if all(channel_id not in d for d in 
+                (
+                self.conversation_history, 
+                self.role_history, 
+                self.summary_sent,)
+                ):
+                    self.conversation_history[channel_id] = []
+                    self.role_history[channel_id] = []
+                    self.summary_sent[channel_id] = False
+            
             current_ts = await utils.get_timestamp()
             case_channel_aliases = ("general", "role", "case")
-
+        
             if channel.name.startswith(case_channel_aliases):
                 await self.update_case_timestamp(channel.id, current_ts)
+        
+            # Handles messages in report channels and forwards them to Claude
+            # Ignore bot's own messages
+            if message.author == self.client.user:
+                return
+
+            # Add the user's message to the conversation history
+            self.conversation_history[channel_id].append((f"{message.author}: {message.content}", time.time()))
+            
+            # Add the message time to the time history variable
+            self.last_message_time[channel_id] = time.time()
+            
+            # Adds mod's user roles to the role history variable
+            # This will them be checked to avoid the AI from being called
+            # When a mod gets into the case
+            if any(role.id == moderator_role_id for role in message.author.roles):
+                self.role_history.setdefault(channel_id, []).extend(role.id for role in message.author.roles)
+                user_id = message.author.id
+            
+            # Start monitoring for multiple messages sent
+            if channel_id not in self.active_channels:
+                self.active_channels.add(channel_id)
+                
+                # Verifies if the user who sent the message is a mod
+                mod_appeared = moderator_role_id in self.role_history[channel_id]
+                asyncio.create_task(self.monitor_channel_inactivity(channel_id, mod_appeared, user_id))  # Start a task for inactivity monitoring
+
+    async def monitor_channel_inactivity(self, channel_id: int, mod_appeared: bool, user_id: int):
+        """Monitor a channel for inactivity and send data to Claude API."""
+        
+        while not mod_appeared:
+            # Wait for 1 second to check for inactivity
+            await asyncio.sleep(1)
+            
+            time_diff = time.time() - self.last_message_time[channel_id]
+            
+            # Will verify if multiple messages have been sent in less than 10 seconds
+            if time_diff > 10:  # No messages for 10 seconds
+
+                # Fetch and format conversation history
+                messages = "\n".join(
+                    msg if isinstance(msg, str) else msg[0]  # Extract the message text from the tuple
+                    for msg in self.conversation_history[channel_id]
+                )
+
+                # Send messages to Claude API
+                response = await self.get_claude_response(messages)
+                
+                # Add AI response to the history
+                self.conversation_history[channel_id].append(f"Assistant: {response}")
+
+                # Send response back to the channel
+                if channel := self.client.get_channel(channel_id):
+                    response_chunks = self.split_into_chunks(response, 2000)
+                    for chunk in response_chunks:
+                        await channel.send(f"{chunk}")
+
+                # Stop monitoring each instance to make space for a new one
+                self.active_channels.remove(channel_id)
+                break
+        
+        # Once a mod appears on the channel (aka sends a message)
+        # The AI will send a recap of the report case on the mod's DM
+        if mod_appeared and not self.summary_sent[channel_id]:
+            await asyncio.sleep(1)
+            
+            # Fetch and format conversation history
+            messages = "\n".join(
+                msg if isinstance(msg, str) else msg[0]  # Extract the message text from the tuple
+                for msg in self.conversation_history[channel_id]
+            )
+            
+            messages += "\n\nDo a summary of the entire conversation history as of now for a moderator user " \
+                        "to review the full case and better understand what is occurring."
+            
+            # Send messages to Claude API
+            response = await self.get_claude_response(messages)
+            
+            # Send Claude response to mod's DM
+            if user := self.client.get_user(user_id):
+                response_chunks = self.split_into_chunks(response, 2000)
+                for chunk in response_chunks:
+                    try:
+                        await user.send(f"{chunk}")
+                    except Exception as e:
+                        print(f"Failed to send DM: {e}")
+                # Set a new flag for summary sent var
+                self.summary_sent[channel_id] = True
+
+            # Stop monitoring each instance to make space for a new one
+            self.active_channels.remove(channel_id)
 
     async def handle_ban_appeal(self, message: discord.Message, payload) -> None:
         """ Handles ban appeal applications.
@@ -178,7 +320,6 @@ class ReportSupport(*report_support_classes):
             finally:
                 await self.delete_application(message.id)
                 await message.add_reaction('❤️‍🩹')
-
 
         elif emoji == '❌':
             # Tries to delete the ban appeal app from the db, in case it is registered
@@ -283,75 +424,79 @@ class ReportSupport(*report_support_classes):
         await self.insert_application(verify_msg.id, member.id, 'verify')
         return await member.send(f"**Request sent, you will get notified here if you get accepted or declined! ✅**")
 
-    # - Report someone
-    async def report_someone(self, interaction: discord.Interaction, reportee: str, text: str, evidence: str):
+    # Sends the report information to Claude AI and sends a response on the chat for the user
+    async def get_claude_response(self, prompt: str) -> str:
+        """Fetches a response from Claude 3 using the Anthropic API."""
+        client = anthropic.Anthropic()  # Initialize the Anthropic client
+        
+        try:
+            message = client.messages.create(
+                model="claude-3-5-sonnet-20241022",
+                max_tokens=1000,
+                temperature=0,
+                system="You are a helpful assistant for processing staff reports.",
+                messages=[
+                    {
+                        "role": "user",
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": prompt
+                            }
+                        ]
+                    }
+                ]
+            )
+            
+            # Extract the text content from the TextBlock
+            raw_content = ''.join(block.text for block in message.content if hasattr(block, 'text'))
+            return raw_content.strip()
+        
+        except Exception as e:
+            print(f"Error interacting with Claude: {e}")
+            return "An error occurred while communicating with the AI."
 
+    async def report_action(self, interaction: discord.Interaction, vc_name: str, reportee: str, text: str, evidence: str):
+        # sourcery skip: low-code-quality
         member = interaction.user
         guild = interaction.guild
-        if open_channel := await self.member_has_open_channel(member.id):
-            if open_channel := discord.utils.get(guild.text_channels, id=open_channel[1]):
-                embed = discord.Embed(title="Error!", description=f"**You already have an open channel! ({open_channel.mention})**", color=discord.Color.red())
-                await interaction.followup.send(embed=embed, ephemeral=True)
-                return False
-            else:
-                await self.remove_user_open_channel(member.id)
-
-        # Report someone
-        case_cat = discord.utils.get(guild.categories, id=case_cat_id)
         counter = await self.get_case_number()
         moderator = discord.utils.get(guild.roles, id=moderator_role_id)
         owner_role = discord.utils.get(guild.roles, id=self.owner_role_id)
-        overwrites = {guild.default_role: discord.PermissionOverwrite(
-            read_messages=False, send_messages=False, connect=False, view_channel=False),
-        member: discord.PermissionOverwrite(
-            read_messages=True, send_messages=True, connect=False, view_channel=True),
-        moderator: discord.PermissionOverwrite(
-            read_messages=True, send_messages=True, connect=False, view_channel=True, manage_messages=True, manage_permissions=True)}
-        try:
-            the_channel = await guild.create_text_channel(name=f"case-{counter[0][0]}", category=case_cat, overwrites=overwrites)
-        except Exception as e:
-            print(e)
-            await interaction.followup.send("**Something went wrong with it, please contact an admin!**", ephemeral=True)
-            raise Exception
+        
+        overwrites = {
+            guild.default_role: discord.PermissionOverwrite(read_messages=False, send_messages=False, connect=False, view_channel=False),
+            member: discord.PermissionOverwrite(read_messages=True, send_messages=True, connect=False, view_channel=True)
+        }
+        
+        if (vc_name == "Staff"):
+            senior_mod = discord.utils.get(guild.roles, id=senior_role_id)
+            overwrites |= {
+                moderator: discord.PermissionOverwrite(
+                    read_messages=False, 
+                    send_messages=False, 
+                    connect=False, 
+                    view_channel=False, 
+                    manage_messages=False,),
+                senior_mod: discord.PermissionOverwrite(
+                    read_messages=True, 
+                    send_messages=True, 
+                    connect=False, 
+                    view_channel=True, 
+                    manage_messages=True,)
+            }
         else:
-            created_embed = discord.Embed(
-                title="Report room created!",
-                description=f"**Go to {the_channel.mention}!**",
-                color=discord.Color.green())
-            await interaction.followup.send(embed=created_embed, ephemeral=True)
-            current_ts = await utils.get_timestamp()
-            await self.insert_user_open_channel(member.id, the_channel.id, current_ts)
-            await self.increase_case_number()
-            embed = discord.Embed(title="Report Support!", description=f"{member.mention}",
-                colour=member.color)
-            embed.add_field(name="Reporting:", value=f"```{reportee}```", inline=False)
-            embed.add_field(name="For:", value=f"```{text}```", inline=False)
-            embed.add_field(name="Evidence:", value=f"```{evidence}```", inline=False)
-            message = await the_channel.send(content=f"{member.mention}, {moderator.mention}, {owner_role.mention}", embed=embed)
-            ctx = await self.client.get_context(message)
-
-            if member.voice:
-                channel = member.voice.channel
-                members = member.voice.channel.members
-
-                for id, member_in_vc in enumerate(members):
-                    if member == member_in_vc:
-                        del members[id]
-
-                if not members:
-                    await ctx.send(f"**{member.mention} is in the {channel.mention} voice channel alone!**")
-                else:
-                    await ctx.send(f"**{member.mention} is in the {channel.mention} voice channel with other {len(channel.members) - 1} members:** {', '.join([member_in_vc.mention for member_in_vc in members])}")
-
-            else:
-                await ctx.send(f"**{member.mention} is not in a VC!**")
-
-    # - Report someone
-    async def report_staff(self, interaction: discord.Interaction, reportee: str, text: str, evidence: str):
-
-        member = interaction.user
-        guild = interaction.guild
-
+            overwrites |= {
+                moderator: discord.PermissionOverwrite(
+                    read_messages=True, 
+                    send_messages=True, 
+                    connect=False, 
+                    view_channel=True, 
+                    manage_messages=True, 
+                    manage_permissions=True,)
+            }
+        
+        # Verifies if the user already has an open text channel
         if open_channel := await self.member_has_open_channel(member.id):
             if open_channel := discord.utils.get(guild.text_channels, id=open_channel[1]):
                 embed = discord.Embed(title="Error!", description=f"**You already have an open channel! ({open_channel.mention})**", color=discord.Color.red())
@@ -359,43 +504,45 @@ class ReportSupport(*report_support_classes):
                 return False
             else:
                 await self.remove_user_open_channel(member.id)
-
-        # Report someone
+        
+        # Verifies if the cases category ID is correct
         case_cat = discord.utils.get(guild.categories, id=case_cat_id)
-        counter = await self.get_case_number()
-        moderator = discord.utils.get(guild.roles, id=moderator_role_id)
-        senior_mod = discord.utils.get(guild.roles, id=senior_role_id)
-        overwrites = {guild.default_role: discord.PermissionOverwrite(
-            read_messages=False, send_messages=False, connect=False, view_channel=False),
-        member: discord.PermissionOverwrite(
-            read_messages=True, send_messages=True, connect=False, view_channel=True),
-        moderator: discord.PermissionOverwrite(
-            read_messages=False, send_messages=False, connect=False, view_channel=False, manage_messages=False),
-        senior_mod: discord.PermissionOverwrite(
-            read_messages=True, send_messages=True, connect=False, view_channel=True, manage_messages=True)}
+        if not case_cat:
+            print("Invalid case_cat_id")
+            return
+        
+        # Tries to create the report case text channel
         try:
-            the_channel = await guild.create_text_channel(name=f"staff-case-{counter[0][0]}", category=case_cat, overwrites=overwrites)
+            the_channel = await guild.create_text_channel(name=f"{vc_name}-{counter[0][0]}", category=case_cat, overwrites=overwrites)
         except Exception as e:
-            print(e)
+            print(f"Error creating text channel: {e}")
             await interaction.followup.send("**Something went wrong with it, please contact an admin!**", ephemeral=True)
-            raise Exception
+            raise ValueError from e
         else:
             created_embed = discord.Embed(
-                title="Report Staff room created!",
+                title=f"Report {vc_name} room created!",
                 description=f"**Go to {the_channel.mention}!**",
-                color=discord.Color.green())
+                color=discord.Color.green()
+            )
             await interaction.followup.send(embed=created_embed, ephemeral=True)
             current_ts = await utils.get_timestamp()
             await self.insert_user_open_channel(member.id, the_channel.id, current_ts)
             await self.increase_case_number()
-            embed = discord.Embed(title="Report Staff!", description=f"{member.mention}",
-                colour=member.color)
+
+            # Creates the UI message with the report result and sends to the user who reported
+            embed = discord.Embed(title=f"Report {vc_name}!", description=f"{member.mention}", colour=member.color)
             embed.add_field(name="Reporting:", value=f"```{reportee}```", inline=False)
             embed.add_field(name="For:", value=f"```{text}```", inline=False)
             embed.add_field(name="Evidence:", value=f"```{evidence}```", inline=False)
-            message = await the_channel.send(content=f"{member.mention}, {senior_mod.mention}", embed=embed)
+            
+            if (vc_name == "Staff"):
+                message = await the_channel.send(content=f"{member.mention}, {senior_mod.mention}", embed=embed)
+            else:
+                message = await the_channel.send(content=f"{member.mention}, {moderator.mention}, {owner_role.mention}", embed=embed)
+            
             ctx = await self.client.get_context(message)
-
+            
+            # Verifies if the reported member is on a VC at the moment
             if member.voice:
                 channel = member.voice.channel
                 members = member.voice.channel.members
@@ -411,8 +558,52 @@ class ReportSupport(*report_support_classes):
 
             else:
                 await ctx.send(f"**{member.mention} is not in a VC!**")
+                
+            # Calls the function to communicate with Claude's API
+            await self.call_ai(reportee, text, evidence, the_channel)
+    
+    async def call_ai(self, reportee: str, text: str, evidence: str, the_channel):
+        # Prepare the AI prompt
+        responseBuffer = f"""
+        A user submitted a report against a user of the Language Sloth Discord server.
+        You are the AI assistant that will help users initially with their reports before a mod appears.
+        
+        Here are the details about the report:
+        - The user that is being reported: {reportee}
+        - The reason for the report: {text}
+        - The evidence for the report case: {evidence}
 
-    # - Report someone
+        Please respond as a helpful assistant by asking follow-up questions to clarify the situation.
+        """
+        
+        # Initialize conversation history for this channel
+        channel_id = the_channel.id
+        if channel_id not in self.conversation_history:
+            self.conversation_history[channel_id] = []
+
+        # Add the initial user input to the conversation history
+        self.conversation_history[channel_id].append(f"User: {responseBuffer.strip()}")
+
+        # Get response from Claude
+        response = await self.get_claude_response("\n".join(self.conversation_history[channel_id]))
+
+        # Add AI response to the history
+        self.conversation_history[channel_id].append(f"Assistant: {response}")
+
+        # Send the AI response in the channel
+        await the_channel.send(content=f"{response}")
+
+    # - Report a Staff member
+    async def report_staff(self, interaction: discord.Interaction, reportee: str, text: str, evidence: str):
+        # Calls the function to perform the report
+        await self.report_action(interaction, "Staff", reportee, text, evidence)
+
+    # - Report a standard User
+    async def report_someone(self, interaction: discord.Interaction, reportee: str, text: str, evidence: str):
+        # Calls the function to perform the report
+        await self.report_action(interaction, "User", reportee, text, evidence)
+
+    # - Get generic help
     async def generic_help(self, interaction: discord.Interaction, type_help: str, message: str, ping: bool = True) -> None:
         """ Opens a generic help channel.
         :param interaction: The interaction that generated this action.
@@ -762,8 +953,13 @@ class ReportSupport(*report_support_classes):
             url="https://languagesloth.com"
         )
         embed.set_author(name=self.client.user.display_name, url=self.client.user.display_avatar, icon_url=self.client.user.display_avatar)
-        embed.set_thumbnail(url=guild.icon.url)
-        embed.set_footer(text=guild.name, icon_url=guild.icon.url)
+        
+        if guild.icon:
+            embed.set_thumbnail(url=guild.icon.url)
+            embed.set_footer(text=guild.name, icon_url=guild.icon.url)
+        else:
+            embed.set_footer(text=guild.name)
+        
         view = ReportSupportView(self.client)
         await ctx.send(embed=embed, view=view)
         self.client.add_view(view=view)
