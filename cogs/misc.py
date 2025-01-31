@@ -236,7 +236,7 @@ class Misc(*misc_cogs):
             await ctx.send(f"**{author.mention}, you can't use this command in this room!**")
             
     @commands.command(aliases=['monkeys'])
-    async def everyone(self, ctx, *, message : str = None) -> None:
+    async def all(self, ctx, *, message : str = None) -> None:
         """ Pings everyone in the Analyst command room. """
 
         author = ctx.author
