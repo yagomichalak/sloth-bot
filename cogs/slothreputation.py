@@ -12,7 +12,7 @@ from extra import utils
 from extra.slothclasses.player import Player
 from extra.view import ExchangeActivityView
 from mysqldb import DatabaseCore
-from .slothclass import classes
+from extra.slothclasses.mastersloth import classes
 from extra.currency.membersscore import MembersScoreTable
 from extra.misc.slothactions import SlothActionsTable
 

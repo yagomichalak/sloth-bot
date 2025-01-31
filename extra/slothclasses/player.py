@@ -62,7 +62,7 @@ class Player(*additional_cogs):
             """ Perfoms the real check. """
 
             user_sloth_class = await get_user_sloth_class(ctx.author.id)
-            if user_sloth_class and user_sloth_class.lower() == command_class:
+            if user_sloth_class and user_sloth_class.lower() in (command_class, "mastersloth"):
                 return True
             raise MissingRequiredSlothClass(
                 required_class=command_class, error_message="You don't have the required Sloth Class to run this command!")

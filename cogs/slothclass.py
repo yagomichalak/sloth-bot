@@ -12,29 +12,23 @@ from extra import utils
 from extra.customerrors import (ActionSkillOnCooldown, ActionSkillsLocked,
                                 CommandNotReady, SkillsUsedRequirement)
 from extra.menu import SlothClassPagination
-from extra.slothclasses import (agares, cybersloth, db_commands, merchant,
-                                metamorph, munk, prawler, seraph, warrior)
+from extra.slothclasses import (db_commands, mastersloth)
 from extra.slothclasses.player import Player, Skill
 from mysqldb import DatabaseCore
 
-classes: Dict[str, object] = {
-    'agares': agares.Agares, 'cybersloth': cybersloth.Cybersloth,
-    'merchant': merchant.Merchant, 'metamorph': metamorph.Metamorph,
-    'munk': munk.Munk, 'prawler': prawler.Prawler,
-    'seraph': seraph.Seraph, 'warrior': warrior.Warrior
-}
 
 # variables.textchannel #
 bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID', 123))
 
-class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
+class SlothClass(mastersloth.Mastersloth, db_commands.SlothClassDatabaseCommands):
     """ A category for the Sloth Class system. """
 
     def __init__(self, client) -> None:
         """ Class initializing method. """
 
         self.client = client
-        self.classes = classes
+        self.classes = mastersloth.classes
+        self.classes.update({"mastersloth": mastersloth.Mastersloth})
         self.db = DatabaseCore()
         super(SlothClass, self).__init__(client)
 
@@ -85,10 +79,10 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
         or showed a full list with all members of the given class ordered by used skills.
         :param class_name: The class name to search members from. [Optional] """
 
-        if class_name and class_name.lower() not in classes:
+        if class_name and class_name.lower() not in self.classes:
             return await ctx.send(f"**This is not a valid Sloth Class, {ctx.author.mention}!**")
 
-        if not class_name or class_name.lower() not in classes:
+        if not class_name or class_name.lower() not in self.classes:
             all_sloth_classes = await self.get_sloth_classes(grouped=True)
             sloth_classes = [f"[Class]: {sc[0]:<10} | [Count]: {sc[1]}\n" for sc in all_sloth_classes]
             # print([sc for sc in sloth_classes])
@@ -103,7 +97,7 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
 
             await ctx.send(embed=embed)
         else:
-            selected_class = classes.get(class_name.lower())
+            selected_class = self.classes.get(class_name.lower())
 
             sloth_classes = await self.get_sloth_classes(class_name=selected_class.__name__)
             members = [f"<@{m[0]}> ({m[1]})" for m in sloth_classes]
@@ -179,7 +173,7 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
                 embed=discord.Embed(description=f"**{member.mention}, you don't have an account yet. Click [here](https://languagesloth.com/profile/update) to create one, or in the button below!**"),
                 view=view)
 
-        the_class = classes.get(sloth_profile[1].lower())
+        the_class = self.classes.get(sloth_profile[1].lower())
         class_commands = the_class.__dict__['__cog_commands__']
         prefix = self.client.command_prefix
         cmds = []
@@ -200,21 +194,21 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
                         cmds.append(f"{prefix}{c.qualified_name:<18} [Mirrored -> {mirrored_skill[8]}]")        
                         continue
                     
-                cmds.append(f"{prefix}{c.qualified_name:<18} [Ready to use]")
+                cmds.append(f"• {prefix}{c.qualified_name:<18} [Ready to use]")
             except commands.CommandError as e:
                 if isinstance(e, ActionSkillOnCooldown):
-                    cmds.append(f"{prefix}{c.qualified_name:<18} [On cooldown]")
+                    cmds.append(f"- {prefix}{c.qualified_name:<18} [On cooldown]")
                 elif isinstance(e, ActionSkillsLocked):
-                    cmds.append(f"{prefix}{c.qualified_name:<18} [Locked]")
+                    cmds.append(f"- {prefix}{c.qualified_name:<18} [Locked]")
                 elif isinstance(e, SkillsUsedRequirement):
-                    cmds.append(f"{prefix}{c.qualified_name:<18} [Requires {e.skills_required} used skills]")
+                    cmds.append(f"- {prefix}{c.qualified_name:<18} [Requires {e.skills_required} used skills]")
                 elif isinstance(e, CommandNotReady):
-                    cmds.append(f"{prefix}{c.qualified_name:<18} [Not Ready]")
+                    cmds.append(f"# {prefix}{c.qualified_name:<18} [Not Ready]")
                 elif isinstance(e, commands.CheckFailure):
                     if isinstance(e.errors[0], ActionSkillOnCooldown):
-                        cmds.append(f"{prefix}{c.qualified_name:<18} [On cooldown]")
+                        cmds.append(f"- {prefix}{c.qualified_name:<18} [On cooldown]")
                         continue
-                    cmds.append(f"{prefix}{c.qualified_name:<18} [Failure]")
+                    cmds.append(f"- {prefix}{c.qualified_name:<18} [Failure]")
                 continue
                 
             except Exception as e:
@@ -222,14 +216,30 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
 
         cmds_text = '\n'.join(cmds)
 
-        emoji = user_class.emoji if (user_class := classes.get(sloth_profile[1].lower())) else ''
+        emoji = user_class.emoji if (user_class := self.classes.get(sloth_profile[1].lower())) else ''
 
         skills_embed = discord.Embed(
             title=f"__Available Skills for__: `{sloth_profile[1]}` {emoji}",
             color=member.color,
             timestamp=ctx.message.created_at
         )
-        skills_embed.add_field(name=f"__Skills__:", value=f"```apache\n{cmds_text}```")
+        if sloth_profile[1].lower() != "mastersloth":
+            skills_embed.add_field(name=f"__Skills__:", value=f"```diff\n{cmds_text}```")
+        else:
+            num_parts = 8
+            chunk_size = len(cmds) // num_parts
+            remainder = len(cmds) % num_parts
+
+            start = 0
+            for i in range(num_parts):
+                extra = 1 if i < remainder else 0  # Distribute remainder among first few chunks
+                end = start + chunk_size + extra
+                cmds_part = '\n'.join(cmds[start:end])  # Get the current part
+                start = end
+
+                # Add field dynamically
+                skills_embed.add_field(name=f"__Skills {i+1}__:", value=f"```diff\n{cmds_part}```", inline=False)
+
         skills_embed.set_author(name=member, icon_url=member.display_avatar)
         skills_embed.set_thumbnail(url=f"https://languagesloth.com/static/assets/images/sloth_classes/{sloth_profile[1]}.png")
         skills_embed.set_footer(text=ctx.guild, icon_url=ctx.guild.icon.url)
@@ -309,7 +319,7 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
         )
 
         # Loops all Sloth Classes
-        for name, sloth_class in classes.items():
+        for name, sloth_class in self.classes.items():
 
             cog_commands = [c for c in sloth_class.__cog_commands__ if hasattr(c, 'parent') and c.parent is None]
             class_cmds = cog_commands
@@ -367,7 +377,7 @@ class SlothClass(*classes.values(), db_commands.SlothClassDatabaseCommands):
         :sloth_class: The sloth class to update to. """
 
         author: discord.Member = ctx.author
-        available_classes: List[str] = ['default', *classes.keys()]
+        available_classes: List[str] = ['default', *self.classes.keys()]
 
         if not sloth_class:
             return await ctx.send(f"**Please, type a `Sloth Class`, {member.mention}!**")
