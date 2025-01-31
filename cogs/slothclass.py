@@ -84,9 +84,9 @@ class SlothClass(mastersloth.Mastersloth, db_commands.SlothClassDatabaseCommands
 
         if not class_name or class_name.lower() not in self.classes:
             all_sloth_classes = await self.get_sloth_classes(grouped=True)
-            sloth_classes = [f"[Class]: {sc[0]:<10} | [Count]: {sc[1]}\n" for sc in all_sloth_classes]
+            sloth_classes = [f"[Class]: {sc[0]:<11} | [Count]: {sc[1]}\n" for sc in all_sloth_classes]
             # print([sc for sc in sloth_classes])
-            sloth_classes.append(f"``````ini\n[Class]: {'ALL':<10} | [Count]: {sum([sc[1] for sc in all_sloth_classes])}\n")
+            sloth_classes.append(f"``````ini\n[Class]: {'ALL':<11} | [Count]: {sum([sc[1] for sc in all_sloth_classes])}\n")
             embed = discord.Embed(
                 title="__Sloth Classes__",
                 description=f"```ini\n{''.join(sloth_classes)}```",
@@ -238,7 +238,7 @@ class SlothClass(mastersloth.Mastersloth, db_commands.SlothClassDatabaseCommands
                 start = end
 
                 # Add field dynamically
-                skills_embed.add_field(name=f"__Skills {i+1}__:", value=f"```diff\n{cmds_part}```", inline=False)
+                skills_embed.add_field(name=f"__Skill set {i+1}__:", value=f"```diff\n{cmds_part}```", inline=False)
 
         skills_embed.set_author(name=member, icon_url=member.display_avatar)
         skills_embed.set_thumbnail(url=f"https://languagesloth.com/static/assets/images/sloth_classes/{sloth_profile[1]}.png")
