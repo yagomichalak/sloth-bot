@@ -40,7 +40,7 @@ staff_vc_id = int(os.getenv('STAFF_VC_ID', 123))
 
 # variables.anthropic #
 api_key = str(os.getenv('ANTHROPIC_API_KEY', 'abc'))
-prompt_url = str(os.getenv('ANTHROPIC_PROMPT', 'abc'))
+drive_file_id = str(os.getenv('GOOGLE_DRIVE_FILE_ID', 'abc'))
 
 # variables.textchannel #
 reportsupport_channel_id = int(os.getenv('REPORT_CHANNEL_ID', 123))
@@ -264,7 +264,7 @@ class ReportSupport(*report_support_classes):
                 time_diff = time.time() - self.last_message_time[channel_id]
                 
                 # Will verify if multiple messages have been sent in less than 10 seconds
-                if time_diff > 10:  # No messages for 10 seconds
+                if time_diff > 5:  # No messages for 10 seconds
 
                     # Fetch and format conversation history
                     messages = "\n".join(
@@ -455,19 +455,29 @@ class ReportSupport(*report_support_classes):
     async def get_claude_response(self, prompt: str) -> str:
         """Fetches a response from Claude 3 using the Anthropic API."""
         client = anthropic.Anthropic()  # Initialize the Anthropic client
-        response = requests.get(prompt_url)
         
+        # Download the system prompt from Google Drive
+        url = f"https://drive.google.com/uc?export=download&id={drive_file_id}"
+        session = requests.Session()
+        response = session.get(url, stream=True)
+
+        for key, value in response.cookies.items():
+            if key.startswith('download_warning'):
+                url = f"https://drive.google.com/uc?export=download&confirm={value}&id={drive_file_id}"
+                response = session.get(url, stream=True)
+
         if response.status_code == 200:
-            file_content = response.text
+            content = response.text
         else:
-            print(f"Failed to retrieve the file. Status code: {response.status_code}")
+            print("Failed to access Google Drive file")
         
+        # Send request to Claude API
         try:
             message = client.messages.create(
                 model="claude-3-5-sonnet-20241022",
                 max_tokens=1000,
                 temperature=0,
-                system=f"""{file_content}""",
+                system=f"""{content}""",
                 messages=[
                     {
                         "role": "user",
@@ -496,6 +506,11 @@ class ReportSupport(*report_support_classes):
         counter = await self.get_case_number()
         moderator = discord.utils.get(guild.roles, id=moderator_role_id)
         owner_role = discord.utils.get(guild.roles, id=self.owner_role_id)
+        
+        for role in member.roles:
+            if role.name.startswith("Native"):
+                language_role = role
+                break
         
         overwrites = {
             guild.default_role: discord.PermissionOverwrite(read_messages=False, send_messages=False, connect=False, view_channel=False),
@@ -593,20 +608,24 @@ class ReportSupport(*report_support_classes):
                 await ctx.send(f"**{member.mention} is not in a VC!**")
                 
             # Calls the function to communicate with Claude's API
-            await self.call_ai(reportee, text, evidence, the_channel)
+            await self.call_ai(reportee, text, evidence, the_channel, language_role)
     
-    async def call_ai(self, reportee: str, text: str, evidence: str, the_channel):
+    async def call_ai(self, reportee: str, text: str, evidence: str, the_channel, language_role: str):
         # Prepare the AI prompt
         responseBuffer = f"""
         A user submitted a report against a user of the Language Sloth Discord server.
         You are the AI assistant that will help users initially with their reports before a mod appears.
+        Their native language is {language_role}, ask if they want to discuss in their native language
+        or in english.
         
         Here are the details about the report:
         - The user that is being reported: {reportee}
         - The reason for the report: {text}
         - The evidence for the report case: {evidence}
 
-        Please respond as a helpful assistant by asking follow-up questions to clarify the situation.
+        Please respond as a helpful assistant by asking brief short follow-up questions, with a maximum of 3 questions.
+        You don't want to overwhelm with questions, be precise.
+        Dont' ask in what voice or text channel it occured, because the mods already know it.
         """
         
         # Initialize conversation history for this channel
