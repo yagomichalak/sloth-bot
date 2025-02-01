@@ -253,25 +253,6 @@ int main(void)
 
         await ctx.send(choice(sentences))
 
-    @commands.command(aliases=["vasi", "kwas"])
-    async def _vasi(self, ctx) -> None:
-        """ A command for telling something about Vasi. """
-
-        sentences = [
-            "Oh you!",
-            "We'll see... or maybe not",
-            "I'm in the VaySay",
-            "Jag vill prata på svenska!",
-            "Noooooo!",
-            "Eu sou uma laranja 🟠",
-            "Shush!",
-            "Aghhhh ***Dutch noises intensifies***",
-            "We don't talk about Cosmos, mos, mos mos",
-            "Limão 🍋",
-        ]
-
-        await ctx.send(choice(sentences))
-
 
 def setup(client) -> None:
     """ Cog's setup function. """
