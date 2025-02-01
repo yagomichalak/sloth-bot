@@ -18,6 +18,7 @@ from mysqldb import DatabaseCore
 # variables.id
 server_id = int(os.getenv('SERVER_ID', 123))
 guild_ids = [server_id]
+brazilian_ids = [875915997767430214]
 
 # variables.role
 allowed_roles = [
@@ -25,6 +26,9 @@ allowed_roles = [
     int(os.getenv('SLOTH_EXPLORER_ROLE_ID', 123)),int(os.getenv('SLOTH_NAPPER_ROLE_ID', 123)), int(os.getenv('SLOTH_NATION_ROLE_ID', 123)),
     int(os.getenv('SLOTH_SUPPORTER_ROLE_ID', 123)), int(os.getenv('BOOSTER_ROLE_ID', 123)),
     ]
+
+# variables.textchannel
+analyst_command_channel_id = int(os.getenv('ANALYST_COMMAND_CHANNEL_ID', 123))
 
 misc_cogs: List[commands.Cog] = [MemberReminderTable]
 
@@ -215,6 +219,48 @@ class Misc(*misc_cogs):
 
         await self.delete_member_reminder(reminder_id)
         await ctx.send(f"**Successfully deleted reminder with ID `{reminder_id}`, {member.mention}!**")
+        
+    @commands.command(aliases=['macacos'])
+    async def br(self, ctx, *, message : str = None) -> None:
+        """ Pings the Brazilians in the Analyst command room. """
+
+        author = ctx.author
+
+        try:
+            await ctx.message.delete()
+        except:
+            pass
+
+        if ctx.channel.id == analyst_command_channel_id:            
+            brazilian_members = [ctx.guild.get_member(member_id) for member_id in brazilian_ids if ctx.guild.get_member(member_id) and not ctx.guild.get_member(member_id).guild_permissions.administrator]
+            if brazilian_members:
+                mentions = [member.mention for member in brazilian_members]
+            
+                await ctx.send("**Acordem, macacos!**")
+                await ctx.send(" ".join(mentions))
+            else:
+                await ctx.send("**No brazilians found!** *How is that possible?*")
+        else:
+            await ctx.send(f"**{author.mention}, you can't use this command in this room!**")
+            
+    @commands.command(aliases=['monkeys'])
+    async def all(self, ctx, *, message : str = None) -> None:
+        """ Pings everyone in the Analyst command room. """
+
+        author = ctx.author
+
+        try:
+            await ctx.message.delete()
+        except:
+            pass
+
+        if ctx.channel.id == analyst_command_channel_id:
+            mentions = [member.mention for member in ctx.channel.members if not member.guild_permissions.administrator]
+            
+            await ctx.send("**Wake up, monkeys!**")
+            await ctx.send(" ".join(mentions))
+        else:
+            await ctx.send(f"**{author.mention}, you can't use this command in this room!**")
 
     @user_command(name="Help", guild_ids=guild_ids)
     async def _help(self, ctx, user: discord.Member) -> None:
