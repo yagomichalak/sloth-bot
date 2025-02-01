@@ -57,7 +57,7 @@ class Communication(*tool_cogs):
             return await self.insert_advertising_event(event_label='patreon_ad', current_ts=current_ts-ad_interval)
 
         # Checks whether advertising time is due
-        if await self.check_advertising_time(
+        if not await self.check_advertising_time(
             current_ts=int(current_ts), event_label="patreon_ad", ad_time=ad_interval):
             return
 
