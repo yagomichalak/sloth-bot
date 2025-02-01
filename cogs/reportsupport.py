@@ -72,6 +72,8 @@ class ReportSupport(*report_support_classes):
         self.db = DatabaseCore()
         self.conversation_history = {}
         self.summary_sent = {}
+        self.send_summary = {}
+        self.mod_appeared = {}
         self.last_message_time = defaultdict(float)
         self.active_channels = set()
         self.active_channels_lock = Lock()
@@ -201,22 +203,26 @@ class ReportSupport(*report_support_classes):
             # Grabs the channel ID
             channel_id = message.channel.id
 
-            # Initialize the channel conversation and roles history if not present
+            # Initialize the channel conversation history
             if all(channel_id not in d for d in 
                 (
-                self.conversation_history, 
+                self.mod_appeared,
+                self.conversation_history,
+                self.send_summary,
                 self.summary_sent,)
                 ):
                     self.conversation_history[channel_id] = []
                     self.summary_sent[channel_id] = False
+                    self.send_summary[channel_id] = False
+                    self.mod_appeared[channel_id] = False
             
             current_ts = await utils.get_timestamp()
             case_channel_aliases = ("general", "role", "case")
             report_channel_aliases = ("user", "staff")
-        
+
             if channel.name.startswith(case_channel_aliases):
                 await self.update_case_timestamp(channel.id, current_ts)
-        
+            
             if channel.name.startswith(report_channel_aliases):
                 await asyncio.sleep(1) # Add a delay to avoid race conditions
                 await self.update_case_timestamp(channel.id, current_ts)
@@ -236,21 +242,22 @@ class ReportSupport(*report_support_classes):
                     # Start monitoring for multiple messages sent
                     if channel_id not in self.active_channels:
                         self.active_channels.add(channel_id)
-                        mod_appeared = False
-                        
-                        # Verify if a mod/admin or owner has mentioned the Sloth bot
-                        if any(role.name == moderator_role_id or admin_role_id for role in message.author.roles):
-                            user_id = message.author.id
-                            for user in message.mentions:
-                                if user.id == sloth_both_id:
-                                    mod_appeared = True
-                        # Start a task for inactivity monitoring
-                        asyncio.create_task(self.monitor_channel_inactivity(channel_id, mod_appeared, user_id))
 
-    async def monitor_channel_inactivity(self, channel_id: int, mod_appeared: bool, user_id: int):
+                    # Verify if a mod/admin or owner has mentioned the Sloth bot
+                    if any(role.id in [moderator_role_id, admin_role_id] for role in message.author.roles):
+                        user_id = message.author.id
+                        self.mod_appeared[channel_id] = True
+                        for user in message.mentions:
+                            if user.id == sloth_both_id:
+                                self.send_summary[channel_id] = True
+                    
+                    # Start a task for inactivity monitoring
+                    asyncio.create_task(self.monitor_channel_inactivity(channel_id, user_id))
+
+    async def monitor_channel_inactivity(self, channel_id: int, user_id: int):
         """Monitor a channel for inactivity and send data to Claude API."""
         async with self.active_channels_lock:
-            while not mod_appeared:
+            while not self.mod_appeared[channel_id]:
                 # Wait for 1 second to check for inactivity
                 await asyncio.sleep(1)
                 
@@ -281,9 +288,9 @@ class ReportSupport(*report_support_classes):
                     self.active_channels.remove(channel_id)
                     break
             
-            # Once a mod appears on the channel (aka sends a message)
+            # Once a mod appears on the channel (aka mentions the sloth bot)
             # The AI will send a recap of the report case on the mod's DM
-            if mod_appeared and not self.summary_sent[channel_id]:
+            if self.send_summary[channel_id] and not self.summary_sent[channel_id]:
                 await asyncio.sleep(1)
                 
                 # Fetch and format conversation history
