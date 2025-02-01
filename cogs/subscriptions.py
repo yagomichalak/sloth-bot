@@ -1,6 +1,7 @@
 # import.standard
 import os
 from itertools import cycle
+from datetime import datetime
 
 # import.thirdparty
 import discord
@@ -72,6 +73,7 @@ class Subscriptions(commands.Cog):
         :param entitlement: The entitlement/subscription. """
 
         print("On sub: ", entitlement)
+        print(datetime.now())
         
         guild = self.client.get_guild(server_id)
         sloth_subscriber_role = discord.utils.get(guild.roles, id=sloth_subscriber_role_id)
@@ -98,33 +100,66 @@ class Subscriptions(commands.Cog):
         except Exception:
             pass
 
-        emb_title = "New subscriber"
-        emb_desc = f"**{member.mention} just became a `Sloth Subscriber`.**"
-        emb_color = discord.Color.green()
+        # Log when a member subscribes
+        sloth_sub_log = self.client.get_channel(on_sloth_sub_log_channel_id)
+        embed = discord.Embed(
+            title="New subscriber",
+            description=f"**{member.mention} just became a `Sloth Subscriber`.**",
+            color=discord.Color.green(),
+        )
+        embed.set_thumbnail(url=member.display_avatar)
+        await sloth_sub_log.send(embed=embed)
 
+    @commands.Cog.listener()
+    async def on_entitlement_update(self, entitlement: discord.Entitlement) -> None:
+        """ Handles subscription renewals to the Sloth Subscriber subscription.
+        :param entitlement: The entitlement/subscription. """
+
+        print("On resub: ", entitlement)
+        print(datetime.now())
+        
+        guild = self.client.get_guild(server_id)
+        sloth_subscriber_role = discord.utils.get(guild.roles, id=sloth_subscriber_role_id)
+        member = discord.utils.get(guild.members, id=entitlement.user_id)
+
+        # Add the Sloth Subscriber role to the member
         try:
-            # Checks if it's a subscription renewal
-            if await utils.get_subscriptions_count(member.id, guild) > 1:
-                emb_title = "Subscription Renewal!"
-                emb_desc = f"**{member.mention} got their subscription renewed.**"
-                emb_color = discord.Color.yellow()
+            await member.add_roles(sloth_subscriber_role)
+        except Exception:
+            pass
+        
+        # Update the member's leaves and Golden Leaves
+        try:
+            SlothCurrency = self.client.get_cog("SlothCurrency")
+            await SlothCurrency.update_user_money(member.id, 3000)
+            await SlothCurrency.update_user_premium_money(member.id, 5)
+        except Exception:
+            pass
+
+        # Resets all skills cooldown
+        try:
+            SlothClass = self.client.get_cog("SlothClass")
+            await SlothClass.update_user_skills_ts(member.id)
         except Exception:
             pass
 
         # Log when a member subscribes
         sloth_sub_log = self.client.get_channel(on_sloth_sub_log_channel_id)
         embed = discord.Embed(
-            title=emb_title, description=emb_desc, color=emb_color,
+            title="Subscription Renewal!",
+            description=f"**{member.mention} got their subscription renewed.**",
+            color=discord.Color.yellow(),
         )
         embed.set_thumbnail(url=member.display_avatar)
         await sloth_sub_log.send(embed=embed)
 
     @commands.Cog.listener()
     async def on_entitlement_delete(self, entitlement: discord.Entitlement) -> None:
-        """ Handles subscriptions to the Sloth Subscriber subscription.
+        """ Handles subscription cancellations to the Sloth Subscriber subscription.
         :param entitlement: The entitlement/subscription. """
 
         print("On unsub: ", entitlement)
+        print(datetime.now())
         
         guild = self.client.get_guild(server_id)
         sloth_subscriber_role = discord.utils.get(guild.roles, id=sloth_subscriber_role_id)
