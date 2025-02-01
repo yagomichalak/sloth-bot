@@ -18,7 +18,43 @@ from mysqldb import DatabaseCore
 # variables.id
 server_id = int(os.getenv('SERVER_ID', 123))
 guild_ids = [server_id]
-brazilian_ids = [875915997767430214]
+macaco_ids = [
+    138771568233938945,
+    550814431949488137,
+    1148803028011462717,
+    273794653738762240,
+    924376185482407986,
+    943648169273753651,
+    587012785343299595,
+    372100977060347906,
+    647452832852869120,
+    251406136090165248,
+]
+monkey_ids = [
+    138771568233938945,
+    550814431949488137,
+    1148803028011462717,
+    273794653738762240,
+    924376185482407986,
+    943648169273753651,
+    587012785343299595,
+    372100977060347906,
+    647452832852869120,
+    251406136090165248,
+    584699027421921280,
+    734805401333399603,
+    450702998864265217,
+    897856008909619240,
+    595446056028995585,
+    875915997767430214,
+    393273722200653824,
+    201086628167417857,
+    312940056115544064,
+    760178072904531988,
+    439110609745870870,
+    703017795738402827,
+    650500643856973846,
+]
 
 # variables.role
 allowed_roles = [
@@ -232,9 +268,9 @@ class Misc(*misc_cogs):
             pass
 
         if ctx.channel.id == analyst_command_channel_id:            
-            brazilian_members = [ctx.guild.get_member(member_id) for member_id in brazilian_ids if ctx.guild.get_member(member_id) and not ctx.guild.get_member(member_id).guild_permissions.administrator]
-            if brazilian_members:
-                mentions = [member.mention for member in brazilian_members]
+            macaco_members = [ctx.guild.get_member(member_id) for member_id in macaco_ids if ctx.guild.get_member(member_id) and not ctx.guild.get_member(member_id).guild_permissions.administrator]
+            if macaco_members:
+                mentions = [member.mention for member in macaco_members]
             
                 await ctx.send("**Acordem, macacos!**")
                 await ctx.send(" ".join(mentions))
@@ -255,11 +291,14 @@ class Misc(*misc_cogs):
             pass
 
         if ctx.channel.id == analyst_command_channel_id:
-            members = [member for member in ctx.channel.members if not member.guild_permissions.administrator]
-            mentions = [member.mention for member in members]
-            
-            await ctx.send("**Wake up, monkeys!**")
-            await ctx.send(" ".join(mentions))
+            monkey_members = [ctx.guild.get_member(member_id) for member_id in monkey_ids if ctx.guild.get_member(member_id) and not ctx.guild.get_member(member_id).guild_permissions.administrator]
+            if monkey_members:
+                mentions = [member.mention for member in monkey_members]
+                
+                await ctx.send("**Wake up, monkeys!**")
+                await ctx.send(" ".join(mentions))
+            else:
+                await ctx.send("**This must be the apocalypse!** *NO ONE'S LEFT?*")
         else:
             await ctx.send(f"**{author.mention}, you can't use this command in this room!**")
 
