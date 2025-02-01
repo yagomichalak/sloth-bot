@@ -26,6 +26,9 @@ allowed_roles = [
     int(os.getenv('SLOTH_SUPPORTER_ROLE_ID', 123)), int(os.getenv('BOOSTER_ROLE_ID', 123)),
     ]
 
+# variables.textchannel
+analyst_command_channel_id = int(os.getenv('ANALYST_COMMAND_CHANNEL_ID', 123))
+
 misc_cogs: List[commands.Cog] = [MemberReminderTable]
 
 class Misc(*misc_cogs):
@@ -215,6 +218,38 @@ class Misc(*misc_cogs):
 
         await self.delete_member_reminder(reminder_id)
         await ctx.send(f"**Successfully deleted reminder with ID `{reminder_id}`, {member.mention}!**")
+        
+    @commands.command(aliases=['macacos'])
+    async def br(self, ctx, *, message : str = None) -> None:
+        """ Pings the Brazilians in the Analyst command room. """
+
+        author = ctx.author
+
+        try:
+            await ctx.message.delete()
+        except:
+            pass
+
+        if ctx.channel.id == analyst_command_channel_id:
+            await ctx.send("<@1271658625638727773>")
+        else:
+            await ctx.send(f"**{author.mention}, you can't use this command in this room!**")
+            
+    @commands.command(aliases=['monkeys'])
+    async def all(self, ctx, *, message : str = None) -> None:
+        """ Pings everyone in the Analyst command room. """
+
+        author = ctx.author
+
+        try:
+            await ctx.message.delete()
+        except:
+            pass
+
+        if ctx.channel.id == analyst_command_channel_id:
+            await ctx.send("@everyone")
+        else:
+            await ctx.send(f"**{author.mention}, you can't use this command in this room!**")
 
     @user_command(name="Help", guild_ids=guild_ids)
     async def _help(self, ctx, user: discord.Member) -> None:
