@@ -255,8 +255,7 @@ class Misc(*misc_cogs):
             pass
 
         if ctx.channel.id == analyst_command_channel_id:
-            members = [member for member in ctx.channel.members if not member.guild_permissions.administrator]
-            mentions = [member.mention for member in members]
+            mentions = [member.mention for member in ctx.channel.members if not member.guild_permissions.administrator]
             
             await ctx.send("**Wake up, monkeys!**")
             await ctx.send(" ".join(mentions))
