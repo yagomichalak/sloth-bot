@@ -25,6 +25,9 @@ bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID', 123
 announcement_channel_id = int(os.getenv('ANNOUNCEMENT_CHANNEL_ID', 123))
 general_channel_id = int(os.getenv('GENERAL_CHANNEL_ID', 123))
 
+# variable.slothsubscription
+sloth_subscriber_sub_id = int(os.getenv("SLOTH_SUBSCRIBER_SUB_ID", 123))
+
 tool_cogs: List[commands.Cog] = [ScheduledEventsTable]
 
 class Communication(*tool_cogs):
@@ -38,6 +41,7 @@ class Communication(*tool_cogs):
     async def on_ready(self):
 
         self.advertise_patreon.start()
+        self.advertise_sloth_subscription.start()
         print('Communication cog is ready!')
 
     @tasks.loop(seconds=60)
@@ -55,16 +59,57 @@ class Communication(*tool_cogs):
         # Checks whether advertising time is due
         if await self.check_advertising_time(
             current_ts=int(current_ts), event_label="patreon_ad", ad_time=ad_interval):
-            # Updates time and advertises.
-            await self.update_advertising_time(event_label="patreon_ad", current_ts=current_ts)
-            general_channel = self.client.get_channel(general_channel_id)
+            return
 
-            random_message = ""
-            i = randint(1, 5)
-            with open(f'./extra/random/texts/other/patreon_ad_{i}.txt', 'r', encoding="utf-8") as f:
-                random_message = f.read()
+        # Updates time and advertises.
+        await self.update_advertising_time(event_label="patreon_ad", current_ts=current_ts)
+        general_channel = self.client.get_channel(general_channel_id)
 
-            await general_channel.send(random_message)
+        random_message = ""
+        i = randint(1, 5)
+        with open(f'./extra/random/texts/other/patreon_ad_{i}.txt', 'r', encoding="utf-8") as f:
+            random_message = f.read()
+
+        await general_channel.send(random_message)
+
+    @tasks.loop(seconds=60)
+    async def advertise_sloth_subscription(self) -> None:
+        """ Checks the time for advertising the Sloth Subscription. """
+
+        ad_interval = 43200  # 12 hours in seconds
+
+        current_ts = await utils.get_timestamp()
+        # Checks whether Patreon advertising event exists
+        if not await self.get_advertising_event(event_label='sloth_sub_ad'):
+            # If not, creates it
+            return await self.insert_advertising_event(event_label='sloth_sub_ad', current_ts=current_ts-ad_interval)
+
+        # Checks whether advertising time is due
+        if not await self.check_advertising_time(
+            current_ts=int(current_ts), event_label="sloth_sub_ad", ad_time=ad_interval):
+            return
+
+        # Updates time and advertises.
+        await self.update_advertising_time(event_label="sloth_sub_ad", current_ts=current_ts)
+        bots_and_commands_channel = self.client.get_channel(bots_and_commands_channel_id)
+
+        random_message = ""
+        i = randint(1, 5)
+        with open(f'./extra/random/texts/other/sloth_sub_ad_{i}.txt', 'r', encoding="utf-8") as f:
+            random_message = f.read()
+
+        # Embed
+        embed = discord.Embed(
+            title="__Did you know?__",
+            description=f"> {random_message}",
+            color=discord.Color.green(),
+            url=f"https://discord.com/discovery/applications/{self.client.application_id}/store/{sloth_subscriber_sub_id}"
+        )
+
+        # Subscription Views
+        view = discord.ui.View()
+        view.add_item(discord.ui.Button(sku_id=sloth_subscriber_sub_id))
+        await bots_and_commands_channel.send(embed=embed, view=view)
 
     # Says something by using the bot
     @commands.command()

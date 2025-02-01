@@ -10,6 +10,7 @@ from discord.ext import commands, tasks
 # import.local
 from extra import utils
 # from extra.useful_variables import patreon_roles
+from extra.slothclasses.mastersloth import Mastersloth
 
 # variables.id
 server_id = int(os.getenv('SERVER_ID', 123))
@@ -157,7 +158,7 @@ class Subscriptions(commands.Cog):
         )
         embed.add_field(
             name="🎲 __Gambling__",
-            value="> Access to gambling commands like `z!coinflip`, `z!blackjack`, `z!whitejack`, `z!slots`, etc. Also `z!soundboard`.",
+            value="> Access to gambling commands like `z!coinflip`, `z!blackjack`, `z!whitejack`, `z!slots`, etc.",
             inline=False
         )
         embed.add_field(
@@ -183,6 +184,11 @@ class Subscriptions(commands.Cog):
         embed.add_field(
             name="🦥 __Sloth Subscriber role__",
             value=f"> Get the <@&{sloth_subscriber_role_id}>, whose color can be changed once a week for `1 Golden Leaf` <:golden_leaf:1289365306413813810>.",
+            inline=False
+        )
+        embed.add_field(
+            name=f"{Mastersloth.emoji} __Mastersloth Class__",
+            value=f"> Become a `Mastersloth` for `5 Golden Leaves` <:golden_leaf:1289365306413813810> and have ALL skills of the other Sloth Classes in your skill set.",
             inline=False
         )
         embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/980613341858914376/1316585723570163722/image.png?ex=675b9581&is=675a4401&hm=e69b1ec43d9ff32d1a641e17925fd874715c24b4bd8f86dba3f6ba72ee9b12ec&")
