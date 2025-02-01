@@ -18,6 +18,7 @@ from mysqldb import DatabaseCore
 # variables.id
 server_id = int(os.getenv('SERVER_ID', 123))
 guild_ids = [server_id]
+brazilian_ids = [875915997767430214]
 
 # variables.role
 allowed_roles = [
@@ -230,8 +231,15 @@ class Misc(*misc_cogs):
         except:
             pass
 
-        if ctx.channel.id == analyst_command_channel_id:
-            await ctx.send("<@1271658625638727773>")
+        if ctx.channel.id == analyst_command_channel_id:            
+            brazilian_members = [ctx.guild.get_member(member_id) for member_id in brazilian_ids if ctx.guild.get_member(member_id) and not ctx.guild.get_member(member_id).guild_permissions.administrator]
+            if brazilian_members:
+                mentions = [member.mention for member in brazilian_members]
+            
+                await ctx.send("**Acordem, macacos!**")
+                await ctx.send(" ".join(mentions))
+            else:
+                await ctx.send("**No brazilians found!** *How is that possible?*")
         else:
             await ctx.send(f"**{author.mention}, you can't use this command in this room!**")
             
@@ -247,7 +255,10 @@ class Misc(*misc_cogs):
             pass
 
         if ctx.channel.id == analyst_command_channel_id:
-            await ctx.send("@everyone")
+            mentions = [member.mention for member in ctx.channel.members if not member.guild_permissions.administrator]
+            
+            await ctx.send("**Wake up, monkeys!**")
+            await ctx.send(" ".join(mentions))
         else:
             await ctx.send(f"**{author.mention}, you can't use this command in this room!**")
 
