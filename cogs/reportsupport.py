@@ -46,6 +46,7 @@ drive_file_id = str(os.getenv('GOOGLE_DRIVE_FILE_ID', 'abc'))
 reportsupport_channel_id = int(os.getenv('REPORT_CHANNEL_ID', 123))
 mod_log_id = int(os.getenv('MOD_LOG_CHANNEL_ID', 123))
 ban_appeals_channel_id: int = os.getenv("BAN_APPEALS_CHANNEL_ID", 123)
+muted_channel_id: int = os.getenv("MUTED_CHANNEL_ID", 123)
 
 # variables.role #
 moderator_role_id = int(os.getenv('MOD_ROLE_ID', 123))
@@ -195,7 +196,7 @@ class ReportSupport(*report_support_classes):
         
         category = getattr(message.channel, "category", None)
         # If the channel is part of the category of case reports
-        if category and category.id == case_cat_id:
+        if category and category.id == case_cat_id and message.channel.id != muted_channel_id:
             
             # Initiate the user_id variable
             user_id = 0
