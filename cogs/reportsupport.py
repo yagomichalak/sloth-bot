@@ -40,7 +40,6 @@ staff_vc_id = int(os.getenv('STAFF_VC_ID', 123))
 
 # variables.anthropic #
 api_key = str(os.getenv('ANTHROPIC_API_KEY', 'abc'))
-drive_file_id = str(os.getenv('GOOGLE_DRIVE_FILE_ID', 'abc'))
 
 # variables.textchannel #
 reportsupport_channel_id = int(os.getenv('REPORT_CHANNEL_ID', 123))
@@ -55,9 +54,6 @@ lesson_management_role_id = int(os.getenv('LESSON_MANAGEMENT_ROLE_ID', 123))
 analyst_debugger_role_id: int = int(os.getenv('ANALYST_DEBUGGER_ROLE_ID', 123)) # used by temp check command
 timedout_role_id = int(os.getenv('TIMEDOUT_ROLE_ID', 123)) # used by temp check command
 allowed_roles = [int(os.getenv('OWNER_ROLE_ID', 123)), admin_role_id, moderator_role_id]
-
-# variables.user #
-sloth_both_id = int(os.getenv('SLOTH_BOT_ID', 123))
 
 report_support_classes: List[commands.Cog] = [
     ApplicationsTable, Verify, OpenChannels
@@ -243,12 +239,14 @@ class ReportSupport(*report_support_classes):
                     if channel_id not in self.active_channels:
                         self.active_channels.add(channel_id)
 
-                    # Verify if a mod/admin or owner has mentioned the Sloth bot
+                    # Verify if a mod/admin has sent a message
+                    # This will be later used to stop the Claude AI from sending messages
                     if any(role.id in [moderator_role_id, admin_role_id] for role in message.author.roles):
                         user_id = message.author.id
                         self.mod_appeared[channel_id] = True
+                        # Verify if the message is pinging the Sloth Bot
                         for user in message.mentions:
-                            if user.id == sloth_both_id:
+                            if user.id == self.client.application_id:
                                 self.send_summary[channel_id] = True
                     
                     # Start a task for inactivity monitoring
@@ -456,20 +454,8 @@ class ReportSupport(*report_support_classes):
         """Fetches a response from Claude 3 using the Anthropic API."""
         client = anthropic.Anthropic()  # Initialize the Anthropic client
         
-        # Download the system prompt from Google Drive
-        url = f"https://drive.google.com/uc?export=download&id={drive_file_id}"
-        session = requests.Session()
-        response = session.get(url, stream=True)
-
-        for key, value in response.cookies.items():
-            if key.startswith('download_warning'):
-                url = f"https://drive.google.com/uc?export=download&confirm={value}&id={drive_file_id}"
-                response = session.get(url, stream=True)
-
-        if response.status_code == 200:
-            content = response.text
-        else:
-            print("Failed to access Google Drive file")
+        with open('./extra/random/texts/other/report.txt', 'r') as file:
+            content = file.readlines()
         
         # Send request to Claude API
         try:
