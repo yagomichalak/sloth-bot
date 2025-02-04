@@ -1,6 +1,7 @@
 # import.standard
 import os
 from itertools import cycle
+from datetime import datetime
 
 # import.thirdparty
 import discord
@@ -10,6 +11,7 @@ from discord.ext import commands, tasks
 # import.local
 from extra import utils
 # from extra.useful_variables import patreon_roles
+from extra.slothclasses.mastersloth import Mastersloth
 
 # variables.id
 server_id = int(os.getenv('SERVER_ID', 123))
@@ -71,6 +73,7 @@ class Subscriptions(commands.Cog):
         :param entitlement: The entitlement/subscription. """
 
         print("On sub: ", entitlement)
+        print(datetime.now())
         
         guild = self.client.get_guild(server_id)
         sloth_subscriber_role = discord.utils.get(guild.roles, id=sloth_subscriber_role_id)
@@ -97,33 +100,66 @@ class Subscriptions(commands.Cog):
         except Exception:
             pass
 
-        emb_title = "New subscriber"
-        emb_desc = f"**{member.mention} just became a `Sloth Subscriber`.**"
-        emb_color = discord.Color.green()
+        # Log when a member subscribes
+        sloth_sub_log = self.client.get_channel(on_sloth_sub_log_channel_id)
+        embed = discord.Embed(
+            title="New subscriber",
+            description=f"**{member.mention} just became a `Sloth Subscriber`.**",
+            color=discord.Color.green(),
+        )
+        embed.set_thumbnail(url=member.display_avatar)
+        await sloth_sub_log.send(embed=embed)
 
+    @commands.Cog.listener()
+    async def on_entitlement_update(self, entitlement: discord.Entitlement) -> None:
+        """ Handles subscription renewals to the Sloth Subscriber subscription.
+        :param entitlement: The entitlement/subscription. """
+
+        print("On resub: ", entitlement)
+        print(datetime.now())
+        
+        guild = self.client.get_guild(server_id)
+        sloth_subscriber_role = discord.utils.get(guild.roles, id=sloth_subscriber_role_id)
+        member = discord.utils.get(guild.members, id=entitlement.user_id)
+
+        # Add the Sloth Subscriber role to the member
         try:
-            # Checks if it's a subscription renewal
-            if await utils.get_subscriptions_count(member.id, guild) > 1:
-                emb_title = "Subscription Renewal!"
-                emb_desc = f"**{member.mention} got their subscription renewed.**"
-                emb_color = discord.Color.yellow()
+            await member.add_roles(sloth_subscriber_role)
+        except Exception:
+            pass
+        
+        # Update the member's leaves and Golden Leaves
+        try:
+            SlothCurrency = self.client.get_cog("SlothCurrency")
+            await SlothCurrency.update_user_money(member.id, 3000)
+            await SlothCurrency.update_user_premium_money(member.id, 5)
+        except Exception:
+            pass
+
+        # Resets all skills cooldown
+        try:
+            SlothClass = self.client.get_cog("SlothClass")
+            await SlothClass.update_user_skills_ts(member.id)
         except Exception:
             pass
 
         # Log when a member subscribes
         sloth_sub_log = self.client.get_channel(on_sloth_sub_log_channel_id)
         embed = discord.Embed(
-            title=emb_title, description=emb_desc, color=emb_color,
+            title="Subscription Renewal!",
+            description=f"**{member.mention} got their subscription renewed.**",
+            color=discord.Color.yellow(),
         )
         embed.set_thumbnail(url=member.display_avatar)
         await sloth_sub_log.send(embed=embed)
 
     @commands.Cog.listener()
     async def on_entitlement_delete(self, entitlement: discord.Entitlement) -> None:
-        """ Handles subscriptions to the Sloth Subscriber subscription.
+        """ Handles subscription cancellations to the Sloth Subscriber subscription.
         :param entitlement: The entitlement/subscription. """
 
         print("On unsub: ", entitlement)
+        print(datetime.now())
         
         guild = self.client.get_guild(server_id)
         sloth_subscriber_role = discord.utils.get(guild.roles, id=sloth_subscriber_role_id)
@@ -157,7 +193,7 @@ class Subscriptions(commands.Cog):
         )
         embed.add_field(
             name="🎲 __Gambling__",
-            value="> Access to gambling commands like `z!coinflip`, `z!blackjack`, `z!whitejack`, `z!slots`, etc. Also `z!soundboard`.",
+            value="> Access to gambling commands like `z!coinflip`, `z!blackjack`, `z!whitejack`, `z!slots`, etc.",
             inline=False
         )
         embed.add_field(
@@ -183,6 +219,11 @@ class Subscriptions(commands.Cog):
         embed.add_field(
             name="🦥 __Sloth Subscriber role__",
             value=f"> Get the <@&{sloth_subscriber_role_id}>, whose color can be changed once a week for `1 Golden Leaf` <:golden_leaf:1289365306413813810>.",
+            inline=False
+        )
+        embed.add_field(
+            name=f"{Mastersloth.emoji} __Mastersloth Class__",
+            value=f"> Become a `Mastersloth` for `5 Golden Leaves` <:golden_leaf:1289365306413813810> and have ALL skills of the other Sloth Classes in your skill set.",
             inline=False
         )
         embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/980613341858914376/1316585723570163722/image.png?ex=675b9581&is=675a4401&hm=e69b1ec43d9ff32d1a641e17925fd874715c24b4bd8f86dba3f6ba72ee9b12ec&")
