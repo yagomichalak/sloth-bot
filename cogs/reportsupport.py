@@ -69,6 +69,7 @@ class ReportSupport(*report_support_classes):
         self.conversation_history = {}
         self.send_summary = {}
         self.mod_appeared = {}
+        self.max_ai_responses = {}
         self.last_message_time = defaultdict(float)
         self.active_channels = set()
         self.active_channels_lock = Lock()
@@ -203,9 +204,11 @@ class ReportSupport(*report_support_classes):
                 (
                 self.mod_appeared,
                 self.conversation_history,
-                self.send_summary,)
+                self.send_summary,
+                self.max_ai_responses,)
                 ):
                     self.conversation_history[channel_id] = []
+                    self.max_ai_responses[channel_id] = []
                     self.send_summary[channel_id] = False
                     self.mod_appeared[channel_id] = False
             
@@ -285,11 +288,10 @@ class ReportSupport(*report_support_classes):
                     # Start a task for inactivity monitoring
                     asyncio.create_task(self.monitor_channel_inactivity(channel_id, user_id))
 
-
     async def monitor_channel_inactivity(self, channel_id: int, user_id: int):
         """Monitor a channel for inactivity and send data to Claude API."""
         async with self.active_channels_lock:
-            while not self.mod_appeared[channel_id]:
+            while not self.mod_appeared[channel_id] and len(self.max_ai_responses[channel_id]) < 2:
                 # Wait for 1 second to check for inactivity
                 await asyncio.sleep(1)
                 
@@ -310,6 +312,9 @@ class ReportSupport(*report_support_classes):
                     # Add AI response to the history
                     self.conversation_history[channel_id].append(f"Assistant: {response}")
 
+                    # Add AI response count to the max AI responses sent
+                    self.max_ai_responses[channel_id].append(1)
+
                     # Send response back to the channel
                     if channel := self.client.get_channel(channel_id):
                         response_chunks = self.split_into_chunks(response, 2000)
@@ -320,7 +325,6 @@ class ReportSupport(*report_support_classes):
                     self.active_channels.remove(channel_id)
                     break
                 
-
     async def handle_ban_appeal(self, message: discord.Message, payload) -> None:
         """ Handles ban appeal applications.
         :param guild: The server in which the application is running.
@@ -614,6 +618,11 @@ class ReportSupport(*report_support_classes):
         if channel_id not in self.conversation_history:
             self.conversation_history[channel_id] = []
 
+        # Initialize the maximum responses AI
+        # This will define how many messages the AI has sent and then will stop it
+        if channel_id not in self.max_ai_responses:
+            self.max_ai_responses[channel_id] = []
+
         # Add the initial user input to the conversation history
         self.conversation_history[channel_id].append(f"User: {responseBuffer.strip()}")
 
@@ -622,6 +631,9 @@ class ReportSupport(*report_support_classes):
 
         # Add AI response to the history
         self.conversation_history[channel_id].append(f"Assistant: {response}")
+
+        # Add AI response count to the max AI responses sent
+        self.max_ai_responses[channel_id].append(1)
 
         # Send the AI response in the channel
         await the_channel.send(content=f"{response}")
