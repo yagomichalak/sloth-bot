@@ -875,7 +875,7 @@ class ReportSupport(*report_support_classes):
         message = None
         # message = await app_parent.send('Uncomment this in your development environment')
 
-        txt_channel = await app_parent.create_thread(name=f"{applicant.display_name}'s-interview", message=message, reason=f"{app[2].title()} Interview Room")
+        txt_channel = await app_parent.create_thread(name=f"{applicant.display_name}'s-interview", message=message, auto_archive_duration=10080, reason=f"{app[2].title()} Interview Room")
 
         # Add permissions for the user in the interview room
         parent_channel = self.client.get_channel(interview_info['parent'])
