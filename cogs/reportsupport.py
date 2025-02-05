@@ -45,7 +45,6 @@ api_key = str(os.getenv('ANTHROPIC_API_KEY', 'abc'))
 reportsupport_channel_id = int(os.getenv('REPORT_CHANNEL_ID', 123))
 mod_log_id = int(os.getenv('MOD_LOG_CHANNEL_ID', 123))
 ban_appeals_channel_id: int = os.getenv("BAN_APPEALS_CHANNEL_ID", 123)
-muted_channel_id: int = os.getenv("MUTED_CHANNEL_ID", 123)
 
 # variables.role #
 moderator_role_id = int(os.getenv('MOD_ROLE_ID', 123))
@@ -68,9 +67,9 @@ class ReportSupport(*report_support_classes):
         self.client = client
         self.db = DatabaseCore()
         self.conversation_history = {}
-        self.summary_sent = {}
         self.send_summary = {}
         self.mod_appeared = {}
+        self.max_ai_responses = {}
         self.last_message_time = defaultdict(float)
         self.active_channels = set()
         self.active_channels_lock = Lock()
@@ -192,7 +191,7 @@ class ReportSupport(*report_support_classes):
         
         category = getattr(message.channel, "category", None)
         # If the channel is part of the category of case reports
-        if category and category.id == case_cat_id and message.channel.id != muted_channel_id:
+        if category and category.id == case_cat_id:
             
             # Initiate the user_id variable
             user_id = 0
@@ -206,10 +205,10 @@ class ReportSupport(*report_support_classes):
                 self.mod_appeared,
                 self.conversation_history,
                 self.send_summary,
-                self.summary_sent,)
+                self.max_ai_responses,)
                 ):
                     self.conversation_history[channel_id] = []
-                    self.summary_sent[channel_id] = False
+                    self.max_ai_responses[channel_id] = []
                     self.send_summary[channel_id] = False
                     self.mod_appeared[channel_id] = False
             
@@ -245,10 +244,46 @@ class ReportSupport(*report_support_classes):
                     if any(role.id in [moderator_role_id, admin_role_id] for role in message.author.roles):
                         user_id = message.author.id
                         self.mod_appeared[channel_id] = True
+
                         # Verify if the message is pinging the Sloth Bot
                         for user in message.mentions:
+                            # Once a mod appears on the channel (aka mentions the sloth bot)
+                            # The AI will send a recap of the report case on the mod's DM
                             if user.id == self.client.application_id:
-                                self.send_summary[channel_id] = True
+                                await asyncio.sleep(1)
+                
+                                # Fetch and format conversation history
+                                messages = "\n".join(
+                                    msg if isinstance(msg, str) else msg[0]  # Extract the message text from the tuple
+                                    for msg in self.conversation_history[channel_id]
+                                )
+                
+                                messages += """
+                                            Compile a brief and clear summary of the report in English, regardless of the original language.
+                                            Example output:
+                                            **Summary of Report:**  
+                                            - **User Reported:**   
+                                            - **Reason:** 
+                                            - **Evidence Provided:** (Summarized details or mention if missing)  
+                                            - **Time of Incident:** (Extracted from the conversation)  
+                                            - **Additional Notes:** (Any relevant context, such as prior offenses)  
+                                            - **Recommended Action:**
+                                            """
+                
+                                # Send messages to Claude API
+                                response = await self.get_claude_response(messages)
+                
+                                # Send Claude response to mod's DM
+                                if user := self.client.get_user(user_id):
+                                    response_chunks = self.split_into_chunks(response, 2000)
+                                    for chunk in response_chunks:
+                                        try:
+                                            await user.send(f"{chunk}")
+                                        except Exception as e:
+                                            print(f"Failed to send DM: {e}")
+
+                                # Stop monitoring each instance to make space for a new one
+                                self.active_channels.remove(channel_id)
                     
                     # Start a task for inactivity monitoring
                     asyncio.create_task(self.monitor_channel_inactivity(channel_id, user_id))
@@ -256,7 +291,7 @@ class ReportSupport(*report_support_classes):
     async def monitor_channel_inactivity(self, channel_id: int, user_id: int):
         """Monitor a channel for inactivity and send data to Claude API."""
         async with self.active_channels_lock:
-            while not self.mod_appeared[channel_id]:
+            while not self.mod_appeared[channel_id] and len(self.max_ai_responses[channel_id]) < 2:
                 # Wait for 1 second to check for inactivity
                 await asyncio.sleep(1)
                 
@@ -277,6 +312,9 @@ class ReportSupport(*report_support_classes):
                     # Add AI response to the history
                     self.conversation_history[channel_id].append(f"Assistant: {response}")
 
+                    # Add AI response count to the max AI responses sent
+                    self.max_ai_responses[channel_id].append(1)
+
                     # Send response back to the channel
                     if channel := self.client.get_channel(channel_id):
                         response_chunks = self.split_into_chunks(response, 2000)
@@ -286,51 +324,11 @@ class ReportSupport(*report_support_classes):
                     # Stop monitoring each instance to make space for a new one
                     self.active_channels.remove(channel_id)
                     break
-            
-            # Once a mod appears on the channel (aka mentions the sloth bot)
-            # The AI will send a recap of the report case on the mod's DM
-            if self.send_summary[channel_id] and not self.summary_sent[channel_id]:
-                await asyncio.sleep(1)
                 
-                # Fetch and format conversation history
-                messages = "\n".join(
-                    msg if isinstance(msg, str) else msg[0]  # Extract the message text from the tuple
-                    for msg in self.conversation_history[channel_id]
-                )
-                
-                messages += """
-                            Compile a brief and clear summary of the report in English, regardless of the original language.
-                            Example output:
-                            **Summary of Report:**  
-                            - **User Reported:**   
-                            - **Reason:** 
-                            - **Evidence Provided:** (Summarized details or mention if missing)  
-                            - **Time of Incident:** (Extracted from the conversation)  
-                            - **Additional Notes:** (Any relevant context, such as prior offenses)  
-                            - **Recommended Action:**
-                            """
-                
-                # Send messages to Claude API
-                response = await self.get_claude_response(messages)
-                
-                # Send Claude response to mod's DM
-                if user := self.client.get_user(user_id):
-                    response_chunks = self.split_into_chunks(response, 2000)
-                    for chunk in response_chunks:
-                        try:
-                            await user.send(f"{chunk}")
-                        except Exception as e:
-                            print(f"Failed to send DM: {e}")
-                    # Set a new flag for summary sent var
-                    self.summary_sent[channel_id] = True
-
-                # Stop monitoring each instance to make space for a new one
-                self.active_channels.remove(channel_id)
-
     async def handle_ban_appeal(self, message: discord.Message, payload) -> None:
         """ Handles ban appeal applications.
         :param guild: The server in which the application is running.
-        :param payload: Data about the Staff member who is opening the application. """
+        :param payload: Data about the staff member who is opening the application. """
 
         emoji = str(payload.emoji)
         if emoji == '✅':
@@ -361,7 +359,7 @@ class ReportSupport(*report_support_classes):
     async def handle_application(self, guild, payload) -> None:
         """ Handles applications.
         :param guild: The server in which the application is running.
-        :param payload: Data about the Staff member who is opening the application. """
+        :param payload: Data about the staff member who is opening the application. """
 
         emoji = str(payload.emoji)
         if emoji == '✅':
@@ -504,7 +502,7 @@ class ReportSupport(*report_support_classes):
             member: discord.PermissionOverwrite(read_messages=True, send_messages=True, connect=False, view_channel=True)
         }
         
-        if (vc_name == "Staff"):
+        if (vc_name == "staff"):
             senior_mod = discord.utils.get(guild.roles, id=senior_role_id)
             overwrites.update({
                 moderator: discord.PermissionOverwrite(
@@ -570,7 +568,7 @@ class ReportSupport(*report_support_classes):
             embed.add_field(name="For:", value=f"```{text}```", inline=False)
             embed.add_field(name="Evidence:", value=f"```{evidence}```", inline=False)
             
-            if (vc_name == "Staff"):
+            if (vc_name == "staff"):
                 message = await the_channel.send(content=f"{member.mention}, {senior_mod.mention}", embed=embed)
             else:
                 message = await the_channel.send(content=f"{member.mention}, {moderator.mention}, {owner_role.mention}", embed=embed)
@@ -620,6 +618,11 @@ class ReportSupport(*report_support_classes):
         if channel_id not in self.conversation_history:
             self.conversation_history[channel_id] = []
 
+        # Initialize the maximum responses AI
+        # This will define how many messages the AI has sent and then will stop it
+        if channel_id not in self.max_ai_responses:
+            self.max_ai_responses[channel_id] = []
+
         # Add the initial user input to the conversation history
         self.conversation_history[channel_id].append(f"User: {responseBuffer.strip()}")
 
@@ -629,10 +632,13 @@ class ReportSupport(*report_support_classes):
         # Add AI response to the history
         self.conversation_history[channel_id].append(f"Assistant: {response}")
 
+        # Add AI response count to the max AI responses sent
+        self.max_ai_responses[channel_id].append(1)
+
         # Send the AI response in the channel
         await the_channel.send(content=f"{response}")
 
-    # - Report a Staff member
+    # - Report a staff member
     async def report_staff(self, interaction: discord.Interaction, reportee: str, text: str, evidence: str):
         # Calls the function to perform the report
         await self.report_action(interaction, "staff", reportee, text, evidence)
@@ -886,7 +892,7 @@ class ReportSupport(*report_support_classes):
 
         role_mapping = {
             "Teacher": "Lesson Managers",
-            "Moderator": "Staff Managers",
+            "Moderator": "staff Managers",
             "Event Host": "Event Managers",
             "Debate Manager": "Debate Managers"
         }
@@ -968,7 +974,7 @@ class ReportSupport(*report_support_classes):
                 audio_path=f'tts/{audio_name}.mp3'
                 audio_source = discord.FFmpegPCMAudio(audio_path)
                 audio_duration = get_audio_duration(audio_path)
-                voice_client.play(audio_source, after=lambda e: print("Finished Warning Staff!"))
+                voice_client.play(audio_source, after=lambda e: print("Finished Warning staff!"))
                 await asyncio.sleep(audio_duration + 1)
                 await voice_client.disconnect()
             else:
