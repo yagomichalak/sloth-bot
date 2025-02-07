@@ -19,7 +19,7 @@ from discord.ext import commands, tasks
 # import.local
 from extra import utils
 from extra.prompt.menu import Confirm
-from extra.view import ReportSupportView
+from extra.view import ApplyView, PremiumView, ReportView
 from extra.reportsupport.applications import ApplicationsTable
 from extra.reportsupport.openchannels import OpenChannels
 from extra.reportsupport.verify import Verify
@@ -83,7 +83,9 @@ class ReportSupport(*report_support_classes):
     @commands.Cog.listener()
     async def on_ready(self) -> None:
 
-        self.client.add_view(view=ReportSupportView(self.client))
+        self.client.add_view(view=ApplyView(self.client))
+        self.client.add_view(view=PremiumView(self.client))
+        self.client.add_view(view=ReportView(self.client))
         self.check_inactive_cases.start()
         print('ReportSupport cog is online!')
 
@@ -988,26 +990,40 @@ class ReportSupport(*report_support_classes):
     @commands.has_permissions(administrator=True)
     async def make_report_support_message(self, ctx) -> None:
         """ (ADM) Makes a Report-Support message. """
-        
-        guild = ctx.guild
-        embed = discord.Embed(
-            title="__Report-Support Section__",
-            description="""Welcome to the Report-Support section, here you can easily find your way into things and/or get help with whatever problem you may be experiencing.""",
-            color=ctx.author.color,
-            timestamp=ctx.message.created_at,
-            url="https://languagesloth.com"
+
+        premiumEmbed = discord.Embed(
+            title="Language Sloth | Premium",
+            description="""Support the server and get access to special privileges and features\n
+<:green_dot:1337401557506986045> **Patrons:** Join full rooms, access to soundboard, own customizable permanent voice channel, receive leaves monthly (server currency), support your favorite lesson
+
+<:green_dot:1337401557506986045> **Frog Catcher:** Join full rooms, access to gambling commands, marry up to 4 people at the same time, role that changes color, check other users infractions in the server""",
+            color=0x3A9D76,
         )
-        embed.set_author(name=self.client.user.display_name, url=self.client.user.display_avatar, icon_url=self.client.user.display_avatar)
         
-        if guild.icon:
-            embed.set_thumbnail(url=guild.icon.url)
-            embed.set_footer(text=guild.name, icon_url=guild.icon.url)
-        else:
-            embed.set_footer(text=guild.name)
-        
-        view = ReportSupportView(self.client)
-        await ctx.send(embed=embed, view=view)
-        self.client.add_view(view=view)
+        premiumView = PremiumView(self.client)
+        await ctx.send(embed=premiumEmbed, view=premiumView)
+
+        staffEmbed = discord.Embed(
+            title="Language Sloth | Staff",
+            description="""<:blue_dot:1337402507286151168> Do you like the server and want to join our family? Check out the positions below and choose the one that interests""",
+            color=0x4795ce,
+        )
+
+        applyView = ApplyView(self.client)
+        await ctx.send(embed=staffEmbed, view=applyView)
+
+        reportEmbed = discord.Embed(
+            title="Language Sloth | Support - Report",
+            description="""<:red_dot:1337404624625209406> Get help from staff members, report issues and stay informed about the latest server updates""",
+            color=0xdd3849,
+        )
+
+        reportView = ReportView(self.client)
+        await ctx.send(embed=reportEmbed, view=reportView)
+
+        self.client.add_view(view=premiumView)
+        self.client.add_view(view=applyView)
+        self.client.add_view(view=reportView)
 
 def setup(client):
     client.add_cog(ReportSupport(client))
