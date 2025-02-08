@@ -407,7 +407,7 @@ class UserReportSupportDetailModal(Modal):
         evidence=self.children[2].value
         member = interaction.user
 
-        if self.option == 'Report':
+        if self.option == 'report_user':
             try:
                 exists = await self.cog.report_someone(interaction, reportee, text, evidence)
                 if exists is False:
@@ -418,7 +418,7 @@ class UserReportSupportDetailModal(Modal):
             else:
                 return await self.cog.audio(member, 'case_alert')
 
-        elif self.option == 'Support':
+        elif self.option == 'report_support':
             message = f"Please, {member.mention}, try to explain what kind of help you want related to the server."
             try:
                 exists = await self.cog.generic_help(interaction, 'general help', message)
@@ -429,7 +429,7 @@ class UserReportSupportDetailModal(Modal):
             else:
                 return #await self.cog.audio(member, 'general_help_alert')
 
-        elif self.option == 'Help':
+        elif self.option == 'report_help':
             message = f"Please, {member.mention}, inform us what roles you want, and if you spotted a specific problem with the reaction-role selection."
             try:
                 exists = await self.cog.generic_help(interaction, 'role help', message)
@@ -485,7 +485,7 @@ class UserReportStaffDetailModal(Modal):
         evidence=self.children[2].value
         member = interaction.user
 
-        if self.option == 'Report':
+        if self.option == 'report_staff':
             try:
                 exists = await self.cog.report_staff(interaction, reportee, text, evidence)
                 if exists is False:

@@ -23,7 +23,7 @@ from extra.moderation.userinfractions import ModerationUserInfractionsTable
 from extra.moderation.watchlist import ModerationWatchlistTable
 from extra.prompt.menu import Confirm
 from extra.useful_variables import banned_links
-from extra.view import ReportSupportView, WarnRulesView
+from extra.view import WarnRulesView
 from mysqldb import DatabaseCore
 
 # variables.id
@@ -2540,62 +2540,6 @@ We appreciate your understanding and look forward to hearing from you. """, embe
 
             else:
                 await ctx.send(f"**Infraction `{infr_id}` not found**")
-
-
-    @commands.command(aliases=['apps'])
-    @commands.has_permissions(administrator=True)
-    async def applications(self, ctx, message_id: int = None, *, title: str = None) -> None:
-        """ Opens/closes the applications for a title in the server.
-        :param message_id: The ID of the Report-Support message to edit.
-        :param title: The title that appliacations are opening/closing for. Ex: teacher/moderator. """
-
-        member = ctx.author
-
-        mod_app = ['moderator', 'mod', 'staff', 'm', 'moderation']
-
-        teacher_app = ['teacher', 't', 'tchr', 'teaching']
-
-        event_host_app = ['eventhost', 'event host', 'em', 'evnt mng']
-
-        if not message_id:
-            return await ctx.send(f"**Please, inform a message ID, {member.mention}!**")
-
-        if not title:
-            return await ctx.send(f"**Please, inform a `title`, {member.mention}!**")
-
-        if title.lower() not in mod_app + teacher_app + event_host_app:
-            return await ctx.send(f"**Invalid title, {member.mention}!**")
-
-        channel = discord.utils.get(ctx.guild.text_channels, id=int(os.getenv('REPORT_CHANNEL_ID', 123)))
-        message = await channel.fetch_message(message_id) # Message containing the application buttons
-        if not message:
-            return await ctx.send(f"**Message not found, {member.mentio}!**")
-        view = ReportSupportView.from_message(message)
-
-        buttons = view.children
-
-        if title.lower() in mod_app:
-            buttons[1].disabled = False if buttons[1].disabled else True
-
-            await ctx.send(f"**Moderator applications are now {'closed' if buttons[1].disabled else 'open'}, {member.mention}!**")
-
-        elif title.lower() in teacher_app:
-            buttons[0].disabled = False if buttons[0].disabled else True
-
-            await ctx.send(f"**Teacher applications are now {'closed' if buttons[0].disabled else 'open'}, {member.mention}!**")
-        
-        elif title.lower() in event_host_app:
-            buttons[2].disabled = False if buttons[2].disabled else True
-
-            await ctx.send(f"**Event Manager applications are now {'closed' if buttons[2].disabled else 'open'}, {member.mention}!**")
-
-
-        confirm = await Confirm(f"**Do you wanna confirm the changes? Otherwise you can disregard the message above, {member.mention}.**").prompt(ctx)
-        if confirm:
-            await message.edit(view=view)
-            await ctx.send(f"**Done!**")
-        else:
-            await ctx.send("**Not changing it, then...**")
 
 
     @commands.command()
