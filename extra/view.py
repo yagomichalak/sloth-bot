@@ -149,6 +149,66 @@ class PremiumView(discord.ui.View):
             view.add_item(button)
             await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
 
+        elif interaction.data["values"][0] == "frog_catcher":
+            sloth_subscriber_role_id = int(os.getenv("SLOTH_SUBSCRIBER_ROLE_ID", 123))
+            sloth_subscriber_sub_id = int(os.getenv("SLOTH_SUBSCRIBER_SUB_ID", 123))
+            sloth_twenty_k_leaves_bundle_id = int(os.getenv("SLOTH_TWENTY_K_LEAVES_BUNDLE_ID", 123))
+            sloth_marriage_bundle_id = int(os.getenv("SLOTH_MARRIAGE_BUNDLE_ID", 123))
+            sloth_golden_leaf_id = int(os.getenv("SLOTH_GOLDEN_LEAF_ID", 123))
+
+            # Descriptive Embed
+            embed = discord.Embed(
+                title="__Sloth Subscriber__",
+                description="For getting access to some extra features, commands and server perks.",
+                color=0x3A9D76
+            )
+            embed.add_field(
+                name="🎲 __Gambling__",
+                value="> Access to gambling commands like `z!coinflip`, `z!blackjack`, `z!whitejack`, `z!slots`, etc.",
+                inline=False
+            )
+            embed.add_field(
+                name="💍 __Polygamy & Golden Leaves__",
+                value="> You'll receive `5 Golden Leaves` <:golden_leaf:1289365306413813810> per month, and you can also `marry up to 4 people` at the same time.",
+                inline=False
+            )
+            embed.add_field(
+                name="<:richsloth:701157794686042183> __Bonus Activity Exchange & Leaves__",
+                value="> Receive `3000 leaves` 🍃 per month, and get twice as many leaves for exchanging your activity statuses, that is, the time you spent in the VCs and messages sent.",
+                inline=False
+            )
+            embed.add_field(
+                name="🕰️ __Cooldown Reset & Reduction__",
+                value="> Reset all of your Sloth Skills automatically upon subscribing (and on subscription renewal), and reduce by `50% the cooldown` of your next skills.",
+                inline=False
+            )
+            embed.add_field(
+                name="🚨 __Check Infractions__",
+                value=f"> Check other people's infractions in <#{frog_catchers_channel_id}>.",
+                inline=False
+            )
+            embed.add_field(
+                name="🦥 __Sloth Subscriber role__",
+                value=f"> Get the <@&{sloth_subscriber_role_id}>, whose color can be changed once a week for `1 Golden Leaf` <:golden_leaf:1289365306413813810>.",
+                inline=False
+            )
+            embed.add_field(
+                name=f"__Mastersloth Class__",
+                value=f"> Become a `Mastersloth` for `5 Golden Leaves` <:golden_leaf:1289365306413813810> and have ALL skills of the other Sloth Classes in your skill set.",
+                inline=False
+            )
+            embed.set_thumbnail(
+                url="https://cdn.discordapp.com/attachments/980613341858914376/1316585723570163722/image.png?ex=675b9581&is=675a4401&hm=e69b1ec43d9ff32d1a641e17925fd874715c24b4bd8f86dba3f6ba72ee9b12ec&")
+
+            # Subscription Views
+            view = discord.ui.View()
+            view.add_item(discord.ui.Button(sku_id=sloth_subscriber_sub_id, row=0))
+            view.add_item(discord.ui.Button(sku_id=sloth_golden_leaf_id, row=0))
+            view.add_item(discord.ui.Button(sku_id=sloth_twenty_k_leaves_bundle_id, row=1))
+            view.add_item(discord.ui.Button(sku_id=sloth_marriage_bundle_id, row=1))
+
+            return await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
+
         else:
             await interaction.response.edit_message(view=self)
 
@@ -161,7 +221,7 @@ class ApplyView(discord.ui.View):
         self.cog = client.get_cog("ReportSupport")
 
         apply_select = discord.ui.Select(
-            placeholder="Apply for Staff",
+            placeholder="Apply for staff positions",
             options=[
                 discord.SelectOption(label="Moderator",
                                      description="Enforce rules to maintain a positive environment",
