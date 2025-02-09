@@ -994,9 +994,9 @@ class ReportSupport(*report_support_classes):
         premiumEmbed = discord.Embed(
             title="Language Sloth | Premium",
             description="""Support the server and get access to special privileges and features\n
-<:green_dot:1337401557506986045> **Patrons:** Join full rooms, access to soundboard, own customizable permanent voice channel, receive leaves monthly (server currency), support your favorite lesson
+<:green_dot:1338144193754955819> **Patrons:** Join full rooms, access to soundboard, own customizable permanent voice channel, receive leaves monthly (server currency), support your favorite lesson
 
-<:green_dot:1337401557506986045> **Frog Catcher:** Join full rooms, access to gambling commands, marry up to 4 people at the same time, role that changes color, check other users infractions in the server""",
+<:green_dot:1338144193754955819> **Frog Catcher:** Join full rooms, access to gambling commands, marry up to 4 people at the same time, role that changes color, check other users infractions in the server""",
             color=0x3A9D76,
         )
         
@@ -1005,7 +1005,7 @@ class ReportSupport(*report_support_classes):
 
         staffEmbed = discord.Embed(
             title="Language Sloth | Staff",
-            description="""<:blue_dot:1337402507286151168> Do you like the server and want to join our family? Check out the positions below and choose the one that interests""",
+            description="""<:blue_dot:1338144172615536661> Do you like the server and want to join our family? Check out the positions below and choose the one that interests""",
             color=0x4795ce,
         )
 
@@ -1014,7 +1014,7 @@ class ReportSupport(*report_support_classes):
 
         reportEmbed = discord.Embed(
             title="Language Sloth | Support - Report",
-            description="""<:red_dot:1337404624625209406> Get help from staff members, report issues and stay informed about the latest server updates""",
+            description="""<:red_dot:1338144150935044197> Get help from staff members, report issues and stay informed about the latest server updates""",
             color=0xdd3849,
         )
 
