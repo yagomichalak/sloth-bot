@@ -129,7 +129,7 @@ class Communication(*tool_cogs):
     @commands.has_any_role(*allowed_roles)
     async def edit(self, ctx, message_id : int = None, *, text : str = None):
         """ (Mod) Edits a message sent by the bot.
-        :param nessage_id: The message id."""
+        :param message_id: The message id."""
 
         await ctx.message.delete()
 
@@ -172,6 +172,16 @@ class Communication(*tool_cogs):
 
         except NotFound:
             return await ctx.send("**Message not found. Send the command in the same channel as the original message.**", delete_after=5)
+
+    # Sends a reminder to the users to hydrate theirselves (BD Event)
+    @commands.command()
+    @utils.is_allowed([*allowed_roles, lesson_manager_role_id, event_manager_role_id], throw_exc=True)
+    async def hydrate(self, ctx):
+        """ (Mod) Sends a reminder to the users to hydrate theirselves (BD Event). """
+
+        await ctx.message.delete()
+        message = "Hey there! You're doing an amazing job, and I’m proud of you! 💪 Don’t forget to **hydrate** and **take a deep breath**. You’ve got this! 💧✨"
+        await ctx.send(message)
 
     # Spies a channel
     @commands.command()
