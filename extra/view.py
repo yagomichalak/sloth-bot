@@ -123,7 +123,7 @@ class PremiumView(discord.ui.View):
             placeholder="Get access to special privileges",
             options=[
                 discord.SelectOption(label="Patrons", description="Support the server by becoming a patreon",
-                                     value="partons", emoji="<:Patreon:1337398905364811776>"),
+                                     value="patrons", emoji="<:Patreon:1337398905364811776>"),
                 discord.SelectOption(label="Frog Catcher", description="Support the server by becoming a frog catcher",
                                      value="frog_catcher", emoji="<:FrogCatcher:1337398915816882176>"),
                 discord.SelectOption(label="Clear select", value="clear", emoji="<:green_clear:1337404379875115071>")
@@ -140,10 +140,10 @@ class PremiumView(discord.ui.View):
         member = interaction.user
         time_now = await utils.get_timestamp()
 
-        if interaction.data["values"][0] == "partons":
+        if interaction.data["values"][0] == "patrons":
             embed = discord.Embed(description="Become a Patreon",
                                   color=0x3A9D76)
-            button = discord.ui.Button(label="Patreon", url="https://languagesloth.com/class/calendar/",
+            button = discord.ui.Button(label="Patreon", url="https://www.patreon.com/languagesloth/",
                                        emoji="<:Patreon:1337398905364811776>")
             view = discord.ui.View()
             view.add_item(button)
