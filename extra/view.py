@@ -40,20 +40,20 @@ class ReportView(discord.ui.View):
         report_select = discord.ui.Select(
             placeholder="Get help or report someone",
             options=[
-                discord.SelectOption(label="Our Website", description="Check our website and create your sloth account",
-                                     value="website", emoji="<:Website:1337405716645810186>"),
-                discord.SelectOption(label="Lessons Calendar", description="Stay up to date with all our classes",
-                                     value="calendar", emoji="<:Calendar:1337406344835104809>"),
+                discord.SelectOption(label="Report a User", description="File a complaint against a user breaking the rules of the server",
+                                     value="report_user", emoji="<:ReportUser:1337405689500405880>"),
+                discord.SelectOption(label="Staff misconduct", description="File a complaint against a staff member",
+                                     value="report_staff", emoji="<:ReportStaff:1337405681829154827>"),
                 discord.SelectOption(label="Role help", description="Get help for setting up your roles",
                                      value="report_help", emoji="<:Role:1337405699931504676>"),
                 discord.SelectOption(label="General Help", description="Ask general questions about the server to a staff member ",
                                      value="report_support", emoji="<:General:1337405674157637662>"),
-                discord.SelectOption(label="Report a User", description="File a complaint against a user breaking the rules of the server",
-                                     value="report_user", emoji="<:ReportUser:1337405689500405880>"),
                 discord.SelectOption(label="Verify", description="Get the verified role in the server",
                                      value="verify", emoji="<:Verify:1337405709050187819>"),
-                discord.SelectOption(label="Staff misconduct", description="File a complaint against a staff member",
-                                     value="report_staff", emoji="<:ReportStaff:1337405681829154827>"),
+                discord.SelectOption(label="Our Website", description="Check our website and create your sloth account",
+                                     value="website", emoji="<:Website:1337405716645810186>"),
+                discord.SelectOption(label="Lessons Calendar", description="Stay up to date with all our classes",
+                                     value="calendar", emoji="<:Calendar:1337406344835104809>"),
                 discord.SelectOption(label="Clear select", value="clear", emoji="<:red_clear:1337404359624888350>"),
             ],
             custom_id="report_select",
@@ -123,7 +123,7 @@ class PremiumView(discord.ui.View):
             placeholder="Get access to special privileges",
             options=[
                 discord.SelectOption(label="Patrons", description="Support the server by becoming a patreon",
-                                     value="partons", emoji="<:Patreon:1337398905364811776>"),
+                                     value="patrons", emoji="<:Patreon:1337398905364811776>"),
                 discord.SelectOption(label="Frog Catcher", description="Support the server by becoming a frog catcher",
                                      value="frog_catcher", emoji="<:FrogCatcher:1337398915816882176>"),
                 discord.SelectOption(label="Clear select", value="clear", emoji="<:green_clear:1337404379875115071>")
@@ -140,10 +140,10 @@ class PremiumView(discord.ui.View):
         member = interaction.user
         time_now = await utils.get_timestamp()
 
-        if interaction.data["values"][0] == "partons":
+        if interaction.data["values"][0] == "patrons":
             embed = discord.Embed(description="Become a Patreon",
                                   color=0x3A9D76)
-            button = discord.ui.Button(label="Patreon", url="https://languagesloth.com/class/calendar/",
+            button = discord.ui.Button(label="Patreon", url="https://www.patreon.com/languagesloth/",
                                        emoji="<:Patreon:1337398905364811776>")
             view = discord.ui.View()
             view.add_item(button)

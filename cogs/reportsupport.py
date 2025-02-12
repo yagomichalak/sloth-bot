@@ -1013,7 +1013,7 @@ class ReportSupport(*report_support_classes):
         await ctx.send(embed=staffEmbed, view=applyView)
 
         reportEmbed = discord.Embed(
-            title="Language Sloth | Support - Report",
+            title="Language Sloth | Report - Support",
             description="""<:red_dot:1338144150935044197> Get help from staff members, report issues and stay informed about the latest server updates""",
             color=0xdd3849,
         )
