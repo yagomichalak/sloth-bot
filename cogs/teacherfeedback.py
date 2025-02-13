@@ -1290,9 +1290,18 @@ class TeacherFeedbackDatabaseSelect:
         :param teacher_id: The teacher's ID.
         :param msg_id: The ID of the message attached to the data. """
 
-        return await self.db.execute_query("""
-            SELECT *, COUNT(*) FROM RewardStudents WHERE reward_message = %s and teacher_id = %s
+        select = await self.db.execute_query("""
+            SELECT * FROM RewardStudents WHERE reward_message = %s and teacher_id = %s
             GROUP by reward_message, student_id, student_messages, student_time, teacher_id, class_type, language""", (msg_id, teacher_id), fetch="one")
+        count_result = await self.db.execute_query("SELECT COUNT(*) FROM RewardStudents WHERE reward_message = %s and teacher_id = %s", (msg_id, teacher_id), fetch="all") or (0,) 
+        count = count_result[0]
+        
+        if select is None:
+            return None
+        
+        combined = select + count
+
+        return combined
 
     async def get_all_waiting_reward_student(self, teacher_id: int, msg_id: int) -> List[List[Union[str, int]]]:
         """ Gets reward related data that is waiting to be given reviewed.
