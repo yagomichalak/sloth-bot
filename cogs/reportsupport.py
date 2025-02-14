@@ -896,7 +896,7 @@ class ReportSupport(*report_support_classes):
             "Teacher": "Lesson Managers",
             "Moderator": "staff Managers",
             "Event Host": "Event Managers",
-            "Debate Manager": "Debate Managers"
+            "Debate Organizer": "Debate Managers"
         }
 
         role_name = role_mapping.get(application_type, "Managers")

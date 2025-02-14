@@ -279,13 +279,13 @@ class EventHostApplicationModal(Modal):
         # Saves in the database
         await self.cog.insert_application(app.id, member.id, 'event_host')
 
-class DebateManagerApplicationModal(Modal):
-    """ Class for the Event Host application. """
+class DebateOrganizerApplicationModal(Modal):
+    """ Class for the Debate Organizer application. """
 
     def __init__(self, client: commands.Bot) -> None:
         """ Class init method. """
 
-        super().__init__(title="Debate Manager Application")
+        super().__init__(title="Debate Organizer Application")
         self.client = client
         self.cog: commands.Cog = client.get_cog('ReportSupport')
 
@@ -296,18 +296,18 @@ class DebateManagerApplicationModal(Modal):
 
         self.add_item(
             InputText(
-                label="In what languages do you wanna host events?",
+                label="In what languages do you wanna host debates?",
                 style=discord.InputTextStyle.short))
 
         self.add_item(
             InputText(
                 label="Do you have any experience with:",
-                placeholder="Moderating events? Organizing events?",
+                placeholder="Moderating or organizing debates/events?",
                 style=discord.InputTextStyle.multiline))
 
         self.add_item(
             InputText(
-                label="Why are you applying to be a Debate Mod?",
+                label="Why are you applying to be a Debate Org.?",
                 style=discord.InputTextStyle.paragraph))
 
         self.add_item(
@@ -322,7 +322,7 @@ class DebateManagerApplicationModal(Modal):
         member: discord.Member = interaction.user
 
         embed = discord.Embed(
-            title=f"__Event Host Application__",
+            title=f"__Debate Organizer Application__",
             description=f"{member.mention} ({member.id})",
             color=member.color
         )
@@ -337,8 +337,8 @@ class DebateManagerApplicationModal(Modal):
         embed.add_field(name="Joined the server", value=member.joined_at.strftime("%a, %d %B %y, %I %M %p UTC"), inline=False)
         embed.add_field(name="Native roles", value=', '.join(member_native_roles), inline=False)
         embed.add_field(name="Age, timezone, active", value=self.children[0].value, inline=False)
-        embed.add_field(name="Host debates in", value=self.children[1].value.title(), inline=False)
-        embed.add_field(name="Experience with moderating, organizing events", value=self.children[2].value.title(), inline=False)
+        embed.add_field(name="Organize debates in", value=self.children[1].value.title(), inline=False)
+        embed.add_field(name="Experience with moderating, organizing debates", value=self.children[2].value.title(), inline=False)
         embed.add_field(name="Motivation", value=self.children[3].value.capitalize(), inline=False)
         embed.add_field(name="What would you change?", value=self.children[4].value.capitalize(), inline=False)
         confirm_view = ConfirmButton(member, timeout=60)
@@ -356,14 +356,14 @@ class DebateManagerApplicationModal(Modal):
         self.cog.cache[member.id] = await utils.get_timestamp()
         await confirm_view.interaction.followup.send(content="""
         **Application successfully made, please, be patient now.**
-    • We will let you know when we need a new debate manager. We check apps when we need it!""", ephemeral=True)
+    • We will let you know when we need a new debate organizer. We check apps when we need it!""", ephemeral=True)
 
-        debate_app_channel = await self.client.fetch_channel(self.cog.debate_manager_app_channel_id)
+        debate_app_channel = await self.client.fetch_channel(self.cog.debate_organizer_app_channel_id)
         app = await debate_app_channel.send(content=member.mention, embed=embed)
         await app.add_reaction('✅')
         await app.add_reaction('❌')
         # Saves in the database
-        await self.cog.insert_application(app.id, member.id, 'debate_manager')
+        await self.cog.insert_application(app.id, member.id, 'debate_organizer')
 
 class UserReportSupportDetailModal(Modal):
     """ Class for specifying details for a Report Support request. """

@@ -13,7 +13,7 @@ from discord.ext import commands
 from extra import utils
 from extra.prompt.menu import ConfirmButton
 from .menu import ConfirmSkill
-from .modals import (BootcampFeedbackModal, DebateManagerApplicationModal,
+from .modals import (BootcampFeedbackModal, DebateOrganizerApplicationModal,
                      EventHostApplicationModal, ModeratorApplicationModal,
                      TeacherApplicationModal)
 from .select import ReportStaffSelect, ReportSupportSelect
@@ -236,8 +236,12 @@ class ApplyView(discord.ui.View):
                                      value="apply_to_teach", emoji="<:Teacher:1337403258196721746>"),
 
                 discord.SelectOption(label="Event Host",
-                                     description="Organize movies, debates, and other events",
+                                     description="Host movies and other events",
                                      value="apply_to_host_events", emoji="<:Event:1337403220544323634>"),
+                
+                discord.SelectOption(label="Debate Organizer",
+                                     description="Organize debates and discussions",
+                                     value="apply_to_organize_debates", emoji="<:Event:1337403220544323634>"),
 
                 discord.SelectOption(label="Content Creator", # APPLICATION DOESN'T EXIST
                                      description="Promote the server on TikTok/YouTube",
@@ -293,14 +297,14 @@ class ApplyView(discord.ui.View):
             else:
                 await interaction.response.send_modal(EventHostApplicationModal(self.client))
 
-        elif interaction.data["values"][0] == "apply_to_manage_debates":
+        elif interaction.data["values"][0] == "apply_to_organize_debates":
             member_ts = self.cog.cache.get(member.id)
             if member_ts and time_now - member_ts <= 1800:
                 return await interaction.followup.send(
                     f"**You are on cooldown to apply, try again in {(1800 - (time_now - member_ts)) / 60:.1f} minutes**",
                     ephemeral=True)
             else:
-                await interaction.response.send_modal(DebateManagerApplicationModal(self.client))
+                await interaction.response.send_modal(DebateOrganizerApplicationModal(self.client))
 
         elif interaction.data["values"][0] == "clear":
             await interaction.response.edit_message(view=self)
