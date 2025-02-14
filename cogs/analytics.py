@@ -15,9 +15,9 @@ from extra import utils
 from extra.analytics import DataBumpsTable, SlothAnalyticsTable
 from mysqldb import DatabaseCore
 
-
 # variables.textchannel
 bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID', 123))
+join_leave_log_channel_id = int(os.getenv('JOIN_LEAVE_LOG_CHANNEL_ID', 123))
 
 analytics_cogs: List[commands.Cog] = [SlothAnalyticsTable, DataBumpsTable]
 
@@ -75,15 +75,64 @@ class Analytics(*analytics_cogs):
 
     @commands.Cog.listener()
     async def on_member_join(self, member) -> None:
-        """ Tells the newcomer to assign themselves a native language role, and updates the joined members counter. """
+        """ Tells the newcomer to assign themselves a native language role, sends an embed to the joined-left log and updates the joined members counter. """
 
         await self.update_joined()
 
+        channel = self.client.get_channel(join_leave_log_channel_id)
+        user = await self.client.fetch_user(member.id)
+        time = discord.utils.utcnow()
+
+        embed = discord.Embed(
+                title="Member Joined",
+                description=f"{member.mention} {member.name}",
+                color=discord.Colour.green(),
+                timestamp=time
+            )
+        
+        account_age = time - member.created_at
+        days = account_age.days
+        hours, remainder = divmod(account_age.seconds, 3600)
+        minutes, _ = divmod(remainder, 60)
+        embed.add_field(name="**Account Age**", value=f"{days} days, {hours} hours, {minutes} minutes", inline=True)
+        embed.set_thumbnail(url=member.display_avatar)
+        embed.set_footer(text=str(member.id))
+
+        if user.banner:
+            embed.set_image(url=user.banner.url)
+
+        await channel.send(embed=embed)
+
     @commands.Cog.listener()
     async def on_member_remove(self, member) -> None:
-        """ Updates the let members counter. """
+        """ Sends an embed to the joined-left log and updates the let members counter. """
 
         await self.update_left()
+
+        channel = self.client.get_channel(join_leave_log_channel_id)
+        user = await self.client.fetch_user(member.id)
+        time = discord.utils.utcnow()
+
+        embed = discord.Embed(
+                title="Member Left",
+                description=f"{member.mention} {member.nick if member.nick else member.name}\n",
+                color=discord.Colour.red(),
+                timestamp=time
+            )
+        
+        embed.add_field(name="**Joined**", value=f"<t:{int(member.joined_at.timestamp())}:f>", inline=True)
+        embed.add_field(name="**Left**", value=f"<t:{int(time.timestamp())}:f>", inline=True)
+        embed.set_thumbnail(url=member.display_avatar)
+        embed.set_footer(text=member.id)
+
+        roles = [role.mention for role in member.roles if role.name != "@everyone"]
+        if roles:
+            embed.add_field(name="Roles", value=", ".join(roles), inline=False)
+
+        if user.banner:
+            embed.set_image(url=user.banner.url)
+
+        await channel.send(embed=embed)
 
     @commands.Cog.listener()
     async def on_message(self, message) -> None:
