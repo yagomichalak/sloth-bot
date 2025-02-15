@@ -657,17 +657,19 @@ class Moderation(*moderation_cogs):
                     await ctx.send(embed=general_embed)
                     # Moderation log embed
                     moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
+                    current_ts = await utils.get_timestamp()
+                    infr_date = datetime.fromtimestamp(current_ts).strftime('%Y/%m/%d at %H:%M')
+                    perpetrator = ctx.author.name if ctx.author else "Unknown"
                     embed = discord.Embed(title=f'__**{warn_type.capitalize()} Warning**__', colour=discord.Colour.dark_gold(),
                                         timestamp=ctx.message.created_at)
                     embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nId: {member.id}```',
                                     inline=False)
-                    embed.add_field(name='Reason:', value=f'```{reason}```')
+                    embed.add_field(name='Reason:', value=f"> -# **{infr_date}**\n> -# by {perpetrator}\n> {reason}")
                     embed.set_author(name=member)
                     embed.set_thumbnail(url=member.display_avatar)
                     embed.set_footer(text=f"Warned by {ctx.author}", icon_url=ctx.author.display_avatar)
                     await moderation_log.send(embed=embed)
                     # Inserts a infraction into the database
-                    current_ts = await utils.get_timestamp()
                     await self.insert_user_infraction(
                         user_id=member.id, infr_type=infr, reason=reason,
                         timestamp=current_ts, perpetrator=ctx.author.id)
@@ -682,14 +684,13 @@ class Moderation(*moderation_cogs):
                                             timestamp=ctx.message.created_at)
                         ban_embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nId: {member.id}```',
                                         inline=False)
-                        ban_embed.add_field(name='Reason:', value=f'```{ban_reason}```')
+                        ban_embed.add_field(name='Reason:', value=f"> -# **{infr_date}**\n> -# by {perpetrator}\n> {ban_reason}")
                         ban_embed.set_author(name=member)
                         ban_embed.set_thumbnail(url=member.display_avatar)
                         ban_embed.set_footer(text=f"Banned by {ctx.author}", icon_url=icon)
                         await moderation_log.send(embed=ban_embed)
 
                         # Inserts a ban infraction into the database
-                        current_ts = await utils.get_timestamp()
                         await self.insert_user_infraction(
                             user_id=member.id, infr_type="ban", reason=ban_reason,
                             timestamp=current_ts, perpetrator=ctx.author.id)
