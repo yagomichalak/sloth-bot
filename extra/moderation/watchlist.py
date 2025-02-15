@@ -67,6 +67,8 @@ class ModerationWatchlistTable(commands.Cog):
                 # Inserts a watchlist into the database
                 await self.insert_user_infraction(user_id=member.id, infr_type=infr, reason=note, timestamp=current_ts, perpetrator=ctx.author.id)
 
+
+    # Retrieves all watchlist from the database. Could be useful in future.
     async def get_user_wl_entries(self, user_id: int) -> List[List[Union[str, int]]]:
         """ Gets all watchlists from a user. """
 
