@@ -657,17 +657,19 @@ class Moderation(*moderation_cogs):
                     await ctx.send(embed=general_embed)
                     # Moderation log embed
                     moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
+                    current_ts = await utils.get_timestamp()
+                    infr_date = datetime.fromtimestamp(current_ts).strftime('%Y/%m/%d at %H:%M')
+                    perpetrator = ctx.author.name if ctx.author else "Unknown"
                     embed = discord.Embed(title=f'__**{warn_type.capitalize()} Warning**__', colour=discord.Colour.dark_gold(),
                                         timestamp=ctx.message.created_at)
                     embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nId: {member.id}```',
                                     inline=False)
-                    embed.add_field(name='Reason:', value=f'```{reason}```')
+                    embed.add_field(name='Reason:', value=f"> -# **{infr_date}**\n> -# by {perpetrator}\n> {reason}")
                     embed.set_author(name=member)
                     embed.set_thumbnail(url=member.display_avatar)
                     embed.set_footer(text=f"Warned by {ctx.author}", icon_url=ctx.author.display_avatar)
                     await moderation_log.send(embed=embed)
                     # Inserts a infraction into the database
-                    current_ts = await utils.get_timestamp()
                     await self.insert_user_infraction(
                         user_id=member.id, infr_type=infr, reason=reason,
                         timestamp=current_ts, perpetrator=ctx.author.id)
@@ -682,14 +684,13 @@ class Moderation(*moderation_cogs):
                                             timestamp=ctx.message.created_at)
                         ban_embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nId: {member.id}```',
                                         inline=False)
-                        ban_embed.add_field(name='Reason:', value=f'```{ban_reason}```')
+                        ban_embed.add_field(name='Reason:', value=f"> -# **{infr_date}**\n> -# by {perpetrator}\n> {ban_reason}")
                         ban_embed.set_author(name=member)
                         ban_embed.set_thumbnail(url=member.display_avatar)
                         ban_embed.set_footer(text=f"Banned by {ctx.author}", icon_url=icon)
                         await moderation_log.send(embed=ban_embed)
 
                         # Inserts a ban infraction into the database
-                        current_ts = await utils.get_timestamp()
                         await self.insert_user_infraction(
                             user_id=member.id, infr_type="ban", reason=ban_reason,
                             timestamp=current_ts, perpetrator=ctx.author.id)
@@ -1054,12 +1055,13 @@ class Moderation(*moderation_cogs):
 
             # Moderation log embed
             moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
+            infr_date = datetime.fromtimestamp(current_ts).strftime('%Y/%m/%d at %H:%M')
+            perpetrator = ctx.author.name if ctx.author else "Unknown"
             embed = discord.Embed(title='__**Mute**__', color=discord.Color.dark_grey(),
                                 timestamp=current_time)
             embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nId: {member.id}```',
                             inline=False)
-            embed.add_field(name='Reason:', value=f'```{reason}```')
-
+            embed.add_field(name='Reason:', value=f"> -# **{infr_date}**\n> -# by {perpetrator}\n> {reason}")
             embed.set_author(name=member)
             embed.set_thumbnail(url=member.display_avatar)
             embed.set_footer(text=f"Muted by {ctx.author}", icon_url=ctx.author.display_avatar)
@@ -1372,17 +1374,19 @@ class Moderation(*moderation_cogs):
                     else:
                         # Moderation log embed
                         moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
+                        current_ts = await utils.get_timestamp()
+                        infr_date = datetime.fromtimestamp(current_ts).strftime('%Y/%m/%d at %H:%M')
+                        perpetrator = ctx.author.name if ctx.author else "Unknown"
                         embed = discord.Embed(title='__**Kick**__', colour=discord.Colour.magenta(),
                                                 timestamp=ctx.message.created_at)
                         embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nId: {member.id}```',
                                         inline=False)
-                        embed.add_field(name='Reason:', value=f'```{reason}```')
+                        embed.add_field(name='Reason:', value=f"> -# **{infr_date}**\n> -# by {perpetrator}\n> {reason}")
                         embed.set_author(name=member)
                         embed.set_thumbnail(url=member.display_avatar)
                         embed.set_footer(text=f"Kicked by {ctx.author}", icon_url=ctx.author.display_avatar)
                         await moderation_log.send(embed=embed)
                         # Inserts a infraction into the database
-                        current_ts = await utils.get_timestamp()
                         await self.insert_user_infraction(
                             user_id=member.id, infr_type="kick", reason=reason,
                             timestamp=current_ts, perpetrator=ctx.author.id)
@@ -1507,17 +1511,19 @@ We appreciate your understanding and look forward to hearing from you. """, embe
             else:
                 # Moderation log embed
                 moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
+                current_ts = await utils.get_timestamp()
+                infr_date = datetime.fromtimestamp(current_ts).strftime('%Y/%m/%d at %H:%M')
+                perpetrator = ctx.author.name if ctx.author else "Unknown"
                 embed = discord.Embed(title='__**Banishment**__', colour=discord.Colour.dark_red(),
                                     timestamp=ctx.message.created_at)
                 embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nId: {member.id}```',
                                 inline=False)
-                embed.add_field(name='Reason:', value=f'```{reason}```')
+                embed.add_field(name='Reason:', value=f"> -# **{infr_date}**\n> -# by {perpetrator}\n> {reason}")
                 embed.set_author(name=member)
                 embed.set_thumbnail(url=member.display_avatar)
                 embed.set_footer(text=f"Banned by {perpetrator}", icon_url=icon)
                 await moderation_log.send(embed=embed)
                 # Inserts a infraction into the database
-                current_ts = await utils.get_timestamp()
                 await self.insert_user_infraction(
                 user_id=member.id, infr_type="ban", reason=reason,
                 timestamp=current_ts, perpetrator=ctx.author.id)
@@ -1684,17 +1690,19 @@ We appreciate your understanding and look forward to hearing from you. """, embe
         else:
             # Moderation log embed
             moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
+            current_ts = await utils.get_timestamp()
+            infr_date = datetime.fromtimestamp(current_ts).strftime('%Y/%m/%d at %H:%M')
+            perpetrator = ctx.author.name if ctx.author else "Unknown"
             embed = discord.Embed(title='__**SoftBanishment**__', colour=discord.Colour.dark_purple(),
                                 timestamp=ctx.message.created_at)
             embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nId: {member.id}```',
                             inline=False)
-            embed.add_field(name='Reason:', value=f'```{reason}```')
+            embed.add_field(name='Reason:', value=f"> -# **{infr_date}**\n> -# by {perpetrator}\n> {reason}")
             embed.set_author(name=member)
             embed.set_thumbnail(url=member.display_avatar)
             embed.set_footer(text=f"Banned by {perpetrator}", icon_url=icon)
             await moderation_log.send(embed=embed)
             # Inserts a infraction into the database
-            current_ts = await utils.get_timestamp()
             await self.insert_user_infraction(
                 user_id=member.id, infr_type="softban", reason=reason,
                 timestamp=current_ts, perpetrator=ctx.author.id)
@@ -1818,17 +1826,19 @@ We appreciate your understanding and look forward to hearing from you. """, embe
         else:
             # Moderation log embed
             moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
+            current_ts = await utils.get_timestamp()
+            infr_date = datetime.fromtimestamp(current_ts).strftime('%Y/%m/%d at %H:%M')
+            perpetrator = ctx.author.name if ctx.author else "Unknown"
             embed = discord.Embed(title='__**NitroKick**__', color=discord.Color.nitro_pink(),
                                 timestamp=ctx.message.created_at)
             embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nId: {member.id}```',
                             inline=False)
-            embed.add_field(name='Reason:', value=f'```{reason}```')
+            embed.add_field(name='Reason:', value=f"> -# **{infr_date}**\n> -# by {perpetrator}\n> {reason}")
             embed.set_author(name=member)
             embed.set_thumbnail(url=member.display_avatar)
             embed.set_footer(text=f"Banned by {perpetrators}", icon_url=icon)
             await moderation_log.send(embed=embed)
             # Inserts a infraction into the database
-            current_ts = await utils.get_timestamp()
             await self.insert_user_infraction(
                 user_id=member.id, infr_type="mute", reason=reason,
                 timestamp=current_ts, perpetrator=ctx.author.id)
@@ -1942,12 +1952,14 @@ We appreciate your understanding and look forward to hearing from you. """, embe
 
                 # Moderation log embed
                 moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
+                current_ts = await utils.get_timestamp()
+                infr_date = datetime.fromtimestamp(current_ts).strftime('%Y/%m/%d at %H:%M')
+                perpetrator = ctx.author.name if ctx.author else "Unknown"
                 embed = discord.Embed(title='__**HackBanishment**__', colour=discord.Colour.dark_teal(),
                                     timestamp=ctx.message.created_at)
                 embed.add_field(name='User info:', value=f'```Name: {self.client.get_user(member.id)}\nId: {member.id}```',
                                 inline=False)
-                embed.add_field(name='Reason:', value=f'```{reason}```')
-
+                embed.add_field(name='Reason:', value=f"> -# **{infr_date}**\n> -# by {perpetrator}\n> {reason}")
                 embed.set_author(name=self.client.get_user(ctx.author.id))
                 embed.set_footer(text=f"HackBanned by {perpetrator}", icon_url=icon)
                 await moderation_log.send(embed=embed)
@@ -2232,7 +2244,7 @@ We appreciate your understanding and look forward to hearing from you. """, embe
             embed.set_author(name=member.id)    
             embed.set_footer(text=f"Requested by: {ctx.author}", icon_url=ctx.author.display_avatar)
 
-            for i, infr in enumerate(user_infractions):
+            for _, infr in enumerate(user_infractions):
                 infr_date = datetime.fromtimestamp(infr[3]).strftime('%Y/%m/%d at %H:%M')
                 perpetrator_member = discord.utils.get(ctx.guild.members, id=infr[5])
                 perpetrator = perpetrator_member.name if perpetrator_member else "Unknown"
@@ -2283,7 +2295,7 @@ We appreciate your understanding and look forward to hearing from you. """, embe
                                             timestamp=ctx.message.created_at)
                         embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nID: {member.id}```',
                                         inline=False)
-                        embed.add_field(name='Infraction info:', value=f"\u200b\n> {infr_date}\n> {infr_id}: by {perpetrator}\n> {reason}")
+                        embed.add_field(name='Infraction info:', value=f"> #{infr_id}\n> -# **{infr_date}**\n> -# by {perpetrator}\n> {reason}")
                         embed.set_author(name=member)
                         embed.set_thumbnail(url=member.display_avatar)
                         embed.set_footer(text=f"Removed by {author}", icon_url=icon)
@@ -2328,8 +2340,7 @@ We appreciate your understanding and look forward to hearing from you. """, embe
                         wl_entries = len([wl for wl in user_infractions if wl[1] == 'watchlist'])
 
                     user_infractions = list(user_infractions)
-                    priority_order = {"watchlist": 1, "mute": 2, "warn": 4, "ban": 3}
-                    user_infractions.sort(key=lambda x: priority_order.get(x[1] if x[1] not in ["hwarn", "lwarn"] else "warn", 5))
+                    user_infractions.sort(key=lambda x: x[3], reverse=True)
 
                     embed = discord.Embed(
                         title=f"Removed Infractions for {member}",
@@ -2341,74 +2352,16 @@ We appreciate your understanding and look forward to hearing from you. """, embe
                     embed.set_author(name=member.id)
                     embed.set_footer(text=f"Removed by: {ctx.author}", icon_url=ctx.author.display_avatar)
 
-                    first_watchlist, first_mute, first_warn, first_ban = True, True, True, True
-
-                    for i, infr in enumerate(user_infractions):
-                        infr_type = infr[1] if infr[1] not in ["hwarn", "lwarn"] else "warn"
+                    for _, infr in enumerate(user_infractions):
                         infr_date = datetime.fromtimestamp(infr[3]).strftime('%Y/%m/%d at %H:%M')
                         perpetrator_member = discord.utils.get(ctx.guild.members, id=infr[5])
                         perpetrator = perpetrator_member.name if perpetrator_member else "Unknown"
 
-                        next_infr_type = user_infractions[i + 1][1] if i + 1 < len(user_infractions) else None
-                        next_infr_type = next_infr_type if next_infr_type not in ["hwarn", "lwarn"] else "warn"
-                        extra_line = "\n\u200b" if infr_type != next_infr_type else ""
-
-                        if infr_type == "watchlist":
-                            if first_watchlist:
-                                embed.add_field(
-                                    name="Watchlist",
-                                    value=f"\u200b\n> {infr_date}\n> {infr[4]}: by {perpetrator}\n> {infr[2]}{extra_line}",
-                                    inline=False
-                                )
-                                first_watchlist = False
-                            else:
-                                embed.add_field(
-                                    name="\u200b",
-                                    value=f"> {infr_date}\n> {infr[4]}: by {perpetrator}\n> {infr[2]}{extra_line}",
-                                    inline=False
-                                )
-                        elif infr_type == "mute":
-                            if first_mute:
-                                embed.add_field(
-                                    name="Mute",
-                                    value=f"\u200b\n> {infr_date}\n> {infr[4]}: by {perpetrator}\n> {infr[2]}{extra_line}",
-                                    inline=False
-                                )
-                                first_mute = False
-                            else:
-                                embed.add_field(
-                                    name="\u200b",
-                                    value=f"> {infr_date}\n> {infr[4]}: by {perpetrator}\n> {infr[2]}{extra_line}",
-                                    inline=False
-                                )
-                        elif infr_type in ["lwarn", "warn", "hwarn"]:
-                            if first_warn:
-                                embed.add_field(
-                                    name="Warn",
-                                    value=f"\u200b\n> {infr_date}\n> {infr[4]}: by {perpetrator}\n> {infr[2]}{extra_line}",
-                                    inline=False
-                                )
-                                first_warn = False
-                            else:
-                                embed.add_field(
-                                    name="\u200b",
-                                    value=f"> {infr_date}\n> {infr[4]}: by {perpetrator}\n> {infr[2]}{extra_line}",
-                                    inline=False
-                                )
-                        elif infr_type in ["ban", "softban", "hackban"]:
-                            if first_ban:
-                                embed.add_field(
-                                    name="Ban",
-                                    value=f"\u200b\n> {infr_date}\n> {infr[4]}: by {perpetrator}\n> {infr[2]}{extra_line}",
-                                    inline=False
-                                )
-                                first_ban = False
-                            else:
-                                embed.add_field(
-                                    name="\u200b",
-                                    value=f"> {infr_date}\n> {infr[4]}: by {perpetrator}\n> {infr[2]}{extra_line}",
-                                    inline=False
-                                )
+                        embed.add_field(
+                            name="\u200b",
+                            value=f"> **{infr[1]}** #{infr[4]}\n> -# **{infr_date}**\n> -# by {perpetrator}\n> {infr[2]}",
+                            inline=False
+                        )
                     
                     await moderation_log.send(embed=embed)
                 
@@ -2460,13 +2413,16 @@ We appreciate your understanding and look forward to hearing from you. """, embe
 
                 # Moderation log embed
                 moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
+                current_ts = await utils.get_timestamp()
+                infr_date = datetime.fromtimestamp(current_ts).strftime('%Y/%m/%d at %H:%M')
+                perpetrator = ctx.author.name if ctx.author else "Unknown"
 
                 embed = discord.Embed(title=f'__**{user_infraction[0][1].lower()} Edited**__', colour=discord.Colour.lighter_grey(),
                                     timestamp=ctx.message.created_at)
 
                 embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nId: {member.id}```',
                                 inline=False)
-                embed.add_field(name='New reason:', value=f'```{reason}```')
+                embed.add_field(name='New reason:', value=f"> -# **{infr_date}**\n> -# by {perpetrator}\n> {reason}")
                 embed.set_author(name=member)
                 embed.set_thumbnail(url=member.display_avatar)
                 embed.set_footer(text=f"Edited by {ctx.author}", icon_url=ctx.author.display_avatar)
