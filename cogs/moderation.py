@@ -1055,12 +1055,13 @@ class Moderation(*moderation_cogs):
 
             # Moderation log embed
             moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
+            infr_date = datetime.fromtimestamp(current_ts).strftime('%Y/%m/%d at %H:%M')
+            perpetrator = ctx.author.name if ctx.author else "Unknown"
             embed = discord.Embed(title='__**Mute**__', color=discord.Color.dark_grey(),
                                 timestamp=current_time)
             embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nId: {member.id}```',
                             inline=False)
-            embed.add_field(name='Reason:', value=f'```{reason}```')
-
+            embed.add_field(name='Reason:', value=f"> -# **{infr_date}**\n> -# by {perpetrator}\n> {reason}")
             embed.set_author(name=member)
             embed.set_thumbnail(url=member.display_avatar)
             embed.set_footer(text=f"Muted by {ctx.author}", icon_url=ctx.author.display_avatar)
