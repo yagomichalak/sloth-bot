@@ -1,5 +1,6 @@
 # import.standard
 import os
+from datetime import datetime
 from typing import List, Optional, Union
 
 # import.thirdparty
@@ -46,23 +47,24 @@ class ModerationWatchlistTable(commands.Cog):
                 # General embed
                 infr = "watchlist"
                 whitelist_desc = f'**Note:** {note}'
-                user_watchlist = await self.get_user_wl_entries(member.id)
                 general_embed = discord.Embed(description=whitelist_desc, colour=author.color)
                 general_embed.set_author(name=f'{member} has been watchlisted', icon_url=member.display_avatar)
                 await ctx.send(embed=general_embed)
                 # Moderation log embed
                 moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
+                current_ts = await utils.get_timestamp()
+                infr_date = datetime.fromtimestamp(current_ts).strftime('%Y/%m/%d at %H:%M')
+                perpetrator = ctx.author.name if ctx.author else "Unknown"
                 embed = discord.Embed(title='__**Watchlist**__', colour=discord.Colour.lighter_gray(),
                                 timestamp=ctx.message.created_at)
                 embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nId: {member.id}```',
                                 inline=False)
-                embed.add_field(name='Note:', value=f'```{note}```')
+                embed.add_field(name='Note:', value=f"> -# **{infr_date}**\n> -# by {perpetrator}\n> {note}")
                 embed.set_author(name=member)
                 embed.set_thumbnail(url=member.display_avatar)
                 embed.set_footer(text=f"Watchlisted by {author}", icon_url=author.display_avatar)
                 await moderation_log.send(embed=embed)
                 # Inserts a watchlist into the database
-                current_ts = await utils.get_timestamp()
                 await self.insert_user_infraction(user_id=member.id, infr_type=infr, reason=note, timestamp=current_ts, perpetrator=ctx.author.id)
 
     async def get_user_wl_entries(self, user_id: int) -> List[List[Union[str, int]]]:
