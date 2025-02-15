@@ -2401,13 +2401,16 @@ We appreciate your understanding and look forward to hearing from you. """, embe
 
                 # Moderation log embed
                 moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
+                current_ts = await utils.get_timestamp()
+                infr_date = datetime.fromtimestamp(current_ts).strftime('%Y/%m/%d at %H:%M')
+                perpetrator = ctx.author.name if ctx.author else "Unknown"
 
                 embed = discord.Embed(title=f'__**{user_infraction[0][1].lower()} Edited**__', colour=discord.Colour.lighter_grey(),
                                     timestamp=ctx.message.created_at)
 
                 embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nId: {member.id}```',
                                 inline=False)
-                embed.add_field(name='New reason:', value=f'```{reason}```')
+                embed.add_field(name='New reason:', value=f"> -# **{infr_date}**\n> -# by {perpetrator}\n> {reason}")
                 embed.set_author(name=member)
                 embed.set_thumbnail(url=member.display_avatar)
                 embed.set_footer(text=f"Edited by {ctx.author}", icon_url=ctx.author.display_avatar)
