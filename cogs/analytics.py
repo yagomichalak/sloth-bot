@@ -91,10 +91,8 @@ class Analytics(*analytics_cogs):
             )
         
         account_age = time - member.created_at
-        days = account_age.days
-        hours, remainder = divmod(account_age.seconds, 3600)
-        minutes, _ = divmod(remainder, 60)
-        embed.add_field(name="**Account Age**", value=f"{days} days, {hours} hours, {minutes} minutes", inline=True)
+        age_string = self.get_age_string(account_age)
+        embed.add_field(name="**Account Age**", value=age_string, inline=True)
         embed.set_thumbnail(url=member.display_avatar)
         embed.set_footer(text=str(member.id))
 
@@ -102,6 +100,48 @@ class Analytics(*analytics_cogs):
             embed.set_image(url=user.banner.url)
 
         await channel.send(embed=embed)
+
+    @staticmethod
+    def get_age_string(delta: timedelta) -> str:
+        total_seconds = delta.total_seconds()
+    
+        years = int(total_seconds // (365 * 24 * 3600))
+        remaining_seconds = total_seconds % (365 * 24 * 3600)
+        
+        months = int(remaining_seconds // (30 * 24 * 3600))
+        remaining_seconds %= 30 * 24 * 3600
+        
+        days = int(remaining_seconds // (24 * 3600))
+        remaining_seconds %= 24 * 3600
+        
+        hours = int(remaining_seconds // 3600)
+        remaining_seconds %= 3600
+        
+        minutes = int(remaining_seconds // 60)
+        remaining_seconds %= 60
+        
+        seconds = int(remaining_seconds)
+
+        parts = []
+        if years > 0:
+            parts.append(f"{years} year{'s' if years != 1 else ''}")
+        if months > 0:
+            parts.append(f"{months} month{'s' if months != 1 else ''}")
+        if days > 0:
+            parts.append(f"{days} day{'s' if days != 1 else ''}")
+        if hours > 0:
+            parts.append(f"{hours} hour{'s' if hours != 1 else ''}")
+        if minutes > 0:
+            parts.append(f"{minutes} minute{'s' if minutes != 1 else ''}")
+        if seconds > 0 or not parts:
+            parts.append(f"{seconds} second{'s' if seconds != 1 else ''}")
+
+        if years > 0 or months > 0 or days > 0:
+            selected = parts[:2]
+        else:
+            selected = parts[:3]
+        
+        return ', '.join(selected)
 
     @commands.Cog.listener()
     async def on_member_remove(self, member) -> None:
