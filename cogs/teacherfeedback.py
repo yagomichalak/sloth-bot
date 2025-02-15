@@ -542,7 +542,7 @@ class TeacherFeedback(commands.Cog):
         :param msg: The message to attach the students' data to.
         :param teacher: The teacher.
         :param users_feedback: The students' class participation data.
-        :param class_type: The type of the class (Pronunciation / Grammar / Speaking / Revision / Programming)
+        :param class_type: The type of the class (Pronunciation / Grammar / Comprehension / Speaking / Revision / Programming)
         :param language: The language taught in the class.
         :param guild: The server in which the class was hosted in. """
 
@@ -666,7 +666,7 @@ class TeacherFeedback(commands.Cog):
         """ Asks for user feedback regarding a specific teacher class.
         :param teacher: The teacher of that class.
         :param language: The language taught in the class.
-        :param class_type: The type of class. [Pronunciation/grammar/speaking/revision/programming]
+        :param class_type: The type of class. [Pronunciation/grammar/comprehension/speaking/revision/programming]
         :param teacher_feedback_thread: The thread channel to send the user feedback message to. """
 
         # Embed
@@ -872,6 +872,9 @@ class TeacherFeedback(commands.Cog):
         elif class_info['type'].title() == 'Grammar':
             cemoji = '📖'
 
+        elif class_info['type'].title() == 'Comprehension':
+            cemoji = '🧠'
+
         elif class_info['type'].title() == 'Speaking':
             cemoji = '🎙️'
 
@@ -922,11 +925,11 @@ class TeacherFeedback(commands.Cog):
             return await ctx.send(f"**Bye, {member.mention}!**")
 
         # Question 2 - Type
-        await cc_channel.send(f"**{member}, what is the type of your class? (Pronunciation / Grammar / Speaking / Revision / Programming)**")
+        await cc_channel.send(f"**{member}, what is the type of your class? (Pronunciation / Grammar / Comprehension / Speaking / Revision / Programming)**")
         while True:
             if not (class_type := await prompt_message_guild(client=self.client, member=member, channel=cc_channel, limit=13)):
                 return
-            if class_type.lower() in ['pronunciation', 'grammar', 'speaking', 'revision', 'programming']:
+            if class_type.lower() in ['pronunciation', 'grammar', 'comprehension', 'speaking', 'revision', 'programming']:
                 break
 
         # Question 3 - Description
@@ -1157,7 +1160,7 @@ class TeacherFeedbackDatabaseInsert:
         """ Inserts a saved teacher class.
         :param teacher_id: The teacher's ID.
         :param language: The language being taught in the class.
-        :param class_type: The class type (pronunciation, grammar, speaking, revision, programming)
+        :param class_type: The class type (pronunciation, grammar, comprehension, speaking, revision, programming)
         :param class_desc: The class description.
         :param taught_in: The language that the class is taught in. """
 
@@ -1171,7 +1174,7 @@ class TeacherFeedbackDatabaseInsert:
         :param txt_id: The text channel ID.
         :param vc_id: The voice channel ID.
         :param language: The language being taught in the class.
-        :param class_type: The class type (pronunciation, grammar, speaking, revision, programming)
+        :param class_type: The class type (pronunciation, grammar, comprehension, speaking, revision, programming)
         :param the_time: The current timestamp.
         :param class_desc: The class description.
         :param taught_in: The language that the class is taught in. """
@@ -1290,9 +1293,18 @@ class TeacherFeedbackDatabaseSelect:
         :param teacher_id: The teacher's ID.
         :param msg_id: The ID of the message attached to the data. """
 
-        return await self.db.execute_query("""
-            SELECT *, COUNT(*) FROM RewardStudents WHERE reward_message = %s and teacher_id = %s
+        select = await self.db.execute_query("""
+            SELECT * FROM RewardStudents WHERE reward_message = %s and teacher_id = %s
             GROUP by reward_message, student_id, student_messages, student_time, teacher_id, class_type, language""", (msg_id, teacher_id), fetch="one")
+        count_result = await self.db.execute_query("SELECT COUNT(*) FROM RewardStudents WHERE reward_message = %s and teacher_id = %s", (msg_id, teacher_id), fetch="all") or (0,) 
+        count = count_result[0]
+        
+        if select is None:
+            return None
+        
+        combined = select + count
+
+        return combined
 
     async def get_all_waiting_reward_student(self, teacher_id: int, msg_id: int) -> List[List[Union[str, int]]]:
         """ Gets reward related data that is waiting to be given reviewed.
@@ -1437,7 +1449,7 @@ class TeacherFeedbackDatabaseDelete:
         """ Deletes a teacher saved class from the system.
         :param teacher_id: The teacher's ID.
         :param language: The language of the class.
-        :param class_type: The type of class (Pronunciation / Grammar / Speaking / Revision / Programming)
+        :param class_type: The type of class (Pronunciation / Grammar / Comprehension / Speaking / Revision / Programming)
         :param class_desc: The description of the class.
         :param taught_in: The language that is using to teach the class. """
 

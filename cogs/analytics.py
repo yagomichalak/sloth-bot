@@ -15,9 +15,9 @@ from extra import utils
 from extra.analytics import DataBumpsTable, SlothAnalyticsTable
 from mysqldb import DatabaseCore
 
-
 # variables.textchannel
 bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID', 123))
+join_leave_log_channel_id = int(os.getenv('JOIN_LEAVE_LOG_CHANNEL_ID', 123))
 
 analytics_cogs: List[commands.Cog] = [SlothAnalyticsTable, DataBumpsTable]
 
@@ -75,15 +75,104 @@ class Analytics(*analytics_cogs):
 
     @commands.Cog.listener()
     async def on_member_join(self, member) -> None:
-        """ Tells the newcomer to assign themselves a native language role, and updates the joined members counter. """
+        """ Tells the newcomer to assign themselves a native language role, sends an embed to the joined-left log and updates the joined members counter. """
 
         await self.update_joined()
 
+        channel = self.client.get_channel(join_leave_log_channel_id)
+        user = await self.client.fetch_user(member.id)
+        time = discord.utils.utcnow()
+
+        embed = discord.Embed(
+                title="Member Joined",
+                description=f"{member.mention} {member.name}",
+                color=discord.Colour.green(),
+                timestamp=time
+            )
+        
+        account_age = time - member.created_at
+        age_string = self.get_age_string(account_age)
+        embed.add_field(name="**Account Age**", value=age_string, inline=True)
+        embed.set_thumbnail(url=member.display_avatar)
+        embed.set_footer(text=str(member.id))
+
+        if user.banner:
+            embed.set_image(url=user.banner.url)
+
+        await channel.send(embed=embed)
+
+    @staticmethod
+    def get_age_string(delta: timedelta) -> str:
+        total_seconds = delta.total_seconds()
+    
+        years = int(total_seconds // (365 * 24 * 3600))
+        remaining_seconds = total_seconds % (365 * 24 * 3600)
+        
+        months = int(remaining_seconds // (30 * 24 * 3600))
+        remaining_seconds %= 30 * 24 * 3600
+        
+        days = int(remaining_seconds // (24 * 3600))
+        remaining_seconds %= 24 * 3600
+        
+        hours = int(remaining_seconds // 3600)
+        remaining_seconds %= 3600
+        
+        minutes = int(remaining_seconds // 60)
+        remaining_seconds %= 60
+        
+        seconds = int(remaining_seconds)
+
+        parts = []
+        if years > 0:
+            parts.append(f"{years} year{'s' if years != 1 else ''}")
+        if months > 0:
+            parts.append(f"{months} month{'s' if months != 1 else ''}")
+        if days > 0:
+            parts.append(f"{days} day{'s' if days != 1 else ''}")
+        if hours > 0:
+            parts.append(f"{hours} hour{'s' if hours != 1 else ''}")
+        if minutes > 0:
+            parts.append(f"{minutes} minute{'s' if minutes != 1 else ''}")
+        if seconds > 0 or not parts:
+            parts.append(f"{seconds} second{'s' if seconds != 1 else ''}")
+
+        if years > 0 or months > 0 or days > 0:
+            selected = parts[:2]
+        else:
+            selected = parts[:3]
+        
+        return ', '.join(selected)
+
     @commands.Cog.listener()
     async def on_member_remove(self, member) -> None:
-        """ Updates the let members counter. """
+        """ Sends an embed to the joined-left log and updates the let members counter. """
 
         await self.update_left()
+
+        channel = self.client.get_channel(join_leave_log_channel_id)
+        user = await self.client.fetch_user(member.id)
+        time = discord.utils.utcnow()
+
+        embed = discord.Embed(
+                title="Member Left",
+                description=f"{member.mention} {member.nick if member.nick else member.name}\n",
+                color=discord.Colour.red(),
+                timestamp=time
+            )
+        
+        embed.add_field(name="**Joined**", value=f"<t:{int(member.joined_at.timestamp())}:f>", inline=True)
+        embed.add_field(name="**Left**", value=f"<t:{int(time.timestamp())}:f>", inline=True)
+        embed.set_thumbnail(url=member.display_avatar)
+        embed.set_footer(text=member.id)
+
+        roles = [role.mention for role in member.roles if role.name != "@everyone"]
+        if roles:
+            embed.add_field(name="Roles", value=", ".join(roles), inline=False)
+
+        if user.banner:
+            embed.set_image(url=user.banner.url)
+
+        await channel.send(embed=embed)
 
     @commands.Cog.listener()
     async def on_message(self, message) -> None:
