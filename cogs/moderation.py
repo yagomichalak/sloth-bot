@@ -1952,12 +1952,14 @@ We appreciate your understanding and look forward to hearing from you. """, embe
 
                 # Moderation log embed
                 moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
+                current_ts = await utils.get_timestamp()
+                infr_date = datetime.fromtimestamp(current_ts).strftime('%Y/%m/%d at %H:%M')
+                perpetrator = ctx.author.name if ctx.author else "Unknown"
                 embed = discord.Embed(title='__**HackBanishment**__', colour=discord.Colour.dark_teal(),
                                     timestamp=ctx.message.created_at)
                 embed.add_field(name='User info:', value=f'```Name: {self.client.get_user(member.id)}\nId: {member.id}```',
                                 inline=False)
-                embed.add_field(name='Reason:', value=f'```{reason}```')
-
+                embed.add_field(name='Reason:', value=f"> -# **{infr_date}**\n> -# by {perpetrator}\n> {reason}")
                 embed.set_author(name=self.client.get_user(ctx.author.id))
                 embed.set_footer(text=f"HackBanned by {perpetrator}", icon_url=icon)
                 await moderation_log.send(embed=embed)
