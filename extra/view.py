@@ -249,7 +249,11 @@ class ApplyView(discord.ui.View):
 
                 discord.SelectOption(label="Analyst & Debugger", # APPLICATION DOESN'T EXIST
                                      description="sudo rm -rf / *",
-                                     value="apply_to_analyst_debugget", emoji="<:Developer:1337403211912319078>"),
+                                     value="apply_to_analyst_debugger", emoji="<:Developer:1337403211912319078>"),
+
+                discord.SelectOption(label="Debate Organizer",  # APPLICATION DOESN'T EXIST
+                                     description="Host debates",
+                                     value="apply_to_debate", emoji="<:Debate:1340355499325001809>"),
 
 
                 discord.SelectOption(label="Clear select", value="clear", emoji="<:blue_clear:1337404369699737641>"),
