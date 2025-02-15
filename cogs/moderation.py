@@ -1374,17 +1374,19 @@ class Moderation(*moderation_cogs):
                     else:
                         # Moderation log embed
                         moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
+                        current_ts = await utils.get_timestamp()
+                        infr_date = datetime.fromtimestamp(current_ts).strftime('%Y/%m/%d at %H:%M')
+                        perpetrator = ctx.author.name if ctx.author else "Unknown"
                         embed = discord.Embed(title='__**Kick**__', colour=discord.Colour.magenta(),
                                                 timestamp=ctx.message.created_at)
                         embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nId: {member.id}```',
                                         inline=False)
-                        embed.add_field(name='Reason:', value=f'```{reason}```')
+                        embed.add_field(name='Reason:', value=f"> -# **{infr_date}**\n> -# by {perpetrator}\n> {reason}")
                         embed.set_author(name=member)
                         embed.set_thumbnail(url=member.display_avatar)
                         embed.set_footer(text=f"Kicked by {ctx.author}", icon_url=ctx.author.display_avatar)
                         await moderation_log.send(embed=embed)
                         # Inserts a infraction into the database
-                        current_ts = await utils.get_timestamp()
                         await self.insert_user_infraction(
                             user_id=member.id, infr_type="kick", reason=reason,
                             timestamp=current_ts, perpetrator=ctx.author.id)
