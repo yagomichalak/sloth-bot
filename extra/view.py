@@ -241,7 +241,7 @@ class ApplyView(discord.ui.View):
                 
                 discord.SelectOption(label="Debate Organizer",
                                      description="Organize debates and discussions",
-                                     value="apply_to_organize_debates", emoji="<:Event:1337403220544323634>"),
+                                     value="apply_to_organize_debates", emoji="<:Debate:1340355499325001809>"),
 
                 discord.SelectOption(label="Content Creator", # APPLICATION DOESN'T EXIST
                                      description="Promote the server on TikTok/YouTube",
