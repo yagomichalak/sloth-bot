@@ -845,12 +845,10 @@ class TeacherFeedback(commands.Cog):
             read_messages=True, send_messages=True, manage_messages=True, mute_members=True, embed_links=True, connect=True,
             speak=True, move_members=True, view_channel=True, manage_channels=True, manage_permissions=True)
 
-        overwrites[sloth_explorer_role] = discord.PermissionOverwrite(
-            read_messages=True, send_messages=True, connect=True, speak=True, view_channel=True, embed_links=True)
-
         # overwrites[all_vcs_role] = discord.PermissionOverwrite(
         #     read_messages=True, send_messages=True)
 
+        overwrites = {k: v for k, v in overwrites.items() if k is not None}
         return overwrites
 
     async def create_channels(self, member: discord.Member, cc_channel, class_info: Dict[str, str]) -> List[Union[discord.TextChannel, discord.VoiceChannel]]:
