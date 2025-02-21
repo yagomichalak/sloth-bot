@@ -83,14 +83,15 @@ class Moderation(*moderation_cogs):
 
     @commands.Cog.listener()
     async def on_message(self, message):
-        if not message.guild:
-            return
+        if not message.guild: return
 
         if message.author.bot:
-            return
-        
-        if message.webhook_id:
-            await self.check_unban_infractions(message)
+            if not message.webhook_id: return
+            else:
+                return await self.check_unban_infractions(message)
+
+        # Checks if there is a new appeal in the ban appeal room
+        await self.check_unban_infractions(message)
         
         # Checks if someone pinged Staff
         await self.check_if_pinged_staff(message)
