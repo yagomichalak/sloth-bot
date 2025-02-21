@@ -238,10 +238,6 @@ class ApplyView(discord.ui.View):
                 discord.SelectOption(label="Event Host",
                                      description="Host movies and other events",
                                      value="apply_to_host_events", emoji="<:Event:1337403220544323634>"),
-                
-                discord.SelectOption(label="Debate Organizer",
-                                     description="Organize debates and discussions",
-                                     value="apply_to_organize_debates", emoji="<:Debate:1340355499325001809>"),
 
                 discord.SelectOption(label="Content Creator", # APPLICATION DOESN'T EXIST
                                      description="Promote the server on TikTok/YouTube",
@@ -254,6 +250,10 @@ class ApplyView(discord.ui.View):
                 discord.SelectOption(label="Analyst & Debugger", # APPLICATION DOESN'T EXIST
                                      description="sudo rm -rf / *",
                                      value="apply_to_analyst_debugger", emoji="<:Developer:1337403211912319078>"),
+                
+                discord.SelectOption(label="Debate Organizer",
+                                     description="Organize debates and discussions",
+                                     value="apply_to_organize_debates", emoji="<:Debate:1340355499325001809>"),
 
                 discord.SelectOption(label="Clear select", value="clear", emoji="<:blue_clear:1337404369699737641>"),
             ],
