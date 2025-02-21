@@ -850,10 +850,13 @@ class Moderation(*moderation_cogs):
                 if member_role.id == role.id:
                     keep_list.append(role)
                     continue
-
+            
             if member_role < bot.top_role:
-                if not member_role.is_premium_subscriber():
+                if not member_role.is_premium_subscriber() or not member_role.managed:
                     remove_list.append(member_role)
+
+            if member_role.managed:
+                keep_list.append(member_role)
 
             if member_role.is_premium_subscriber():
                 keep_list.append(member_role)
