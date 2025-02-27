@@ -45,6 +45,7 @@ allowed_roles = [int(os.getenv('OWNER_ROLE_ID', 123)), admin_role_id, senior_mod
 
 # variables.textchannel
 mod_log_id = int(os.getenv('MOD_LOG_CHANNEL_ID', 123))
+ban_appeals_channel_id: int = os.getenv("BAN_APPEALS_CHANNEL_ID", 123)
 secret_agent_channel_id = int(os.getenv('SECRET_AGENTS_CHANNEL_ID', 123))
 error_log_channel_id = int(os.getenv('ERROR_LOG_CHANNEL_ID', 123))
 muted_chat_id = int(os.getenv('MUTED_CHANNEL_ID', 123))
@@ -82,11 +83,12 @@ class Moderation(*moderation_cogs):
 
     @commands.Cog.listener()
     async def on_message(self, message):
-        if not message.guild:
-            return
+        if not message.guild: return
 
         if message.author.bot:
-            return
+            if not message.webhook_id: return
+            else:
+                return await self.check_unban_infractions(message)
         
         # Checks if someone pinged Staff
         await self.check_if_pinged_staff(message)
@@ -180,6 +182,17 @@ class Moderation(*moderation_cogs):
                 ctx = await self.client.get_context(message)
                 if not await utils.is_allowed(allowed_roles).predicate(ctx):
                     return await self._mute_callback(ctx, member=message.author, reason="Banned Link")
+
+    async def check_unban_infractions(self, message: discord.Message) -> None:
+        """ Checks and send an infractions list of the user from the unban appeal request. """
+        
+        if message.channel.id == ban_appeals_channel_id:
+            if len(message.mentions) > 0 and len(message.role_mentions) > 0:
+                unban_requester = message.mentions[0]
+                ctx = await self.client.get_context(message)
+                ctx.author = unban_requester
+
+                await self.infractions(ctx, message=unban_requester.mention)
 
     @tasks.loop(minutes=1)
     async def look_for_expired_tempmutes(self) -> None:
@@ -850,10 +863,13 @@ class Moderation(*moderation_cogs):
                 if member_role.id == role.id:
                     keep_list.append(role)
                     continue
-
+            
             if member_role < bot.top_role:
-                if not member_role.is_premium_subscriber():
+                if not member_role.is_premium_subscriber() or not member_role.managed:
                     remove_list.append(member_role)
+
+            if member_role.managed:
+                keep_list.append(member_role)
 
             if member_role.is_premium_subscriber():
                 keep_list.append(member_role)
