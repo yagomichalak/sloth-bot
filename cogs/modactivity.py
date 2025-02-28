@@ -182,6 +182,21 @@ class ModActivity(ModActivityTable):
         await self.remove_moderator(mod.id)
         return await ctx.send(f"**Untracking {mod.mention} activity!**")
 
+    @utils.is_allowed([senior_mod_role_id], throw_exc=True)
+    @commands.command(aliases=['sync_mods'])
+    async def sync_mod_activity(self, ctx):
+        await self.delete_mod_activity()
+        guild = self.client.get_guild(guild_id)
+        mods_role = discord.utils.get(guild.roles, id=mod_role_id)
+        mods = [m for m in guild.members if mods_role in m.roles]
+
+        if not mods:
+            return await ctx.send("**There are no mods to track**")
+
+        for mod in mods:
+            await self.insert_moderator(mod.id)
+
+        return await ctx.send(f"**Tracking {len(mods)} activity!**")
 
 def setup(client):
     client.add_cog(ModActivity(client))
