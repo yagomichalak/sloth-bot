@@ -2,7 +2,7 @@
 import asyncio
 import os
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 # import.thirdparty
@@ -1352,6 +1352,85 @@ class Moderation(*moderation_cogs):
         else:
             await ctx.send(f"**Not kicking them, then, {perpetrator.mention}!**")
 
+    @commands.command(aliases=["shush"])
+    @utils.is_allowed(allowed_roles, throw_exc=True)
+    async def silence(self, ctx, member: discord.Member = None):
+        """ Silences a muted member and gives them a timeout for 6 hours. 
+        :param member: The @ or the ID of the user. """
+        
+        await ctx.message.delete()
+        
+        role = discord.utils.get(ctx.guild.roles, id=muted_role_id)
+
+        if not member:
+            return await ctx.send("**Please, specify a member!**", delete_after=3)
+
+        if role in member.roles:
+            seconds = 6 * 60 * 60  # 6 hours
+
+            await member.timeout(discord.utils.utcnow() + timedelta(seconds=seconds), reason="Muted user has been silenced for 6 hours.")
+            
+            timedout_role = discord.utils.get(ctx.guild.roles, id=timedout_role_id)
+            if timedout_role not in member.roles:
+                await member.add_roles(timedout_role)
+            
+            current_time = await utils.get_time_now()
+            general_embed = discord.Embed(colour=discord.Colour.light_grey(), timestamp=current_time)
+            general_embed.set_author(name=f'{member} has been silenced', icon_url=member.display_avatar)
+            await ctx.send(embed=general_embed)
+            
+            moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
+            embed = discord.Embed(title='__**Silence**__', colour=discord.Colour.light_grey(),
+                                    timestamp=current_time)
+            embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nId: {member.id}```',
+                            inline=False)
+            embed.set_author(name=member)
+            embed.set_thumbnail(url=member.display_avatar)
+            embed.set_footer(text=f"Silenced by {ctx.author}", icon_url=ctx.author.display_avatar)
+            await moderation_log.send(embed=embed)
+        else:
+            await ctx.send(f"**{member} is not muted!**", delete_after=5)
+
+    @commands.command(aliases=["unshush"])
+    @utils.is_allowed(allowed_roles, throw_exc=True)
+    async def unsilence(self, ctx, member: discord.Member = None):
+        """ Removes timeout from a muted member if they are already silenced. 
+        :param member: The @ or the ID of the user. """
+        
+        await ctx.message.delete()
+        
+        role = discord.utils.get(ctx.guild.roles, id=muted_role_id)
+
+        if not member:
+            return await ctx.send("**Please, specify a member!**", delete_after=3)
+
+        if role in member.roles and member.communication_disabled_until:
+            remaining_time = (member.communication_disabled_until - discord.utils.utcnow()).total_seconds()
+            if remaining_time <= 6 * 60 * 60:
+                await member.timeout(None)
+
+                timedout_role = discord.utils.get(ctx.guild.roles, id=timedout_role_id)
+                if timedout_role in member.roles:
+                    await member.remove_roles(timedout_role)
+
+                current_time = await utils.get_time_now()
+                embed = discord.Embed(colour=discord.Colour.light_grey(), timestamp=current_time)
+                embed.set_author(name=f'{member} has been unsilenced', icon_url=member.display_avatar)
+                await ctx.send(embed=embed)
+                
+                moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
+                embed = discord.Embed(title='__**Unsilence**__', colour=discord.Colour.light_grey(),
+                                        timestamp=current_time)
+                embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nId: {member.id}```',
+                                inline=False)
+                embed.set_author(name=member)
+                embed.set_thumbnail(url=member.display_avatar)
+                embed.set_footer(text=f"Unsilenced by {ctx.author}", icon_url=ctx.author.display_avatar)
+                await moderation_log.send(embed=embed)
+            else:
+                await ctx.send(f"**{member}'s timeout is longer than 6 hours!**", delete_after=5)
+        else:
+            await ctx.send(f"**{member} is not muted or has no timeout!**", delete_after=5)
 
     @commands.command(aliases=['kickado'])
     @utils.is_allowed(allowed_roles, throw_exc=True)
