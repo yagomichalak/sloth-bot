@@ -116,7 +116,7 @@ class ModActivity(ModActivityTable):
             m, s = divmod(time_in_vc, 60)
             h, m = divmod(m, 60)
             user = discord.utils.get(ctx.guild.members, id=mod_id)
-            is_active =  h >= 3 or messages >= 30
+            is_active = h >= 3 or messages >= 30
             icon = '🔹' if is_active else '🔸'
             moderator_data = {"user": user,"icon": icon, "hours": h, "minutes": m, "seconds": s, "messages": messages }
             if is_active:
@@ -142,6 +142,33 @@ class ModActivity(ModActivityTable):
         if confirm_view.value is None:
             await ctx.send(f"**Timeout, not deleting it, {member.mention}!**", delete_after=3)
         elif confirm_view.value:
+            for mod in mod_activities:
+                mod_id, time_in_vc, _, messages = mod
+                m, s = divmod(time_in_vc, 60)
+                h, m = divmod(m, 60)
+                user = discord.utils.get(ctx.guild.members, id=mod_id)
+                is_active = h >= 3 or messages >= 30
+                
+                if user and not is_active:
+                    embed = discord.Embed(
+                        title="Staff Activity Reminder",
+                        description=(
+                            f"Dear <@{mod_id}>,\n\n"
+                            "This is a gentle **automated** reminder to remain active and engaged as a member of the staff team. "
+                            "Consistent moderation, community interaction, and assistance are essential "
+                            "to maintaining a positive and organized server environment.\n\n"
+                            "**Please ensure that you are:**\n"
+                            "✔ Taking on and handling cases efficiently.\n"
+                            "✔ Addressing issues and concerns brought up by members.\n\n"
+                            "If you are unable to stay active for any reason, kindly inform "
+                            "the staff management team to make the necessary arrangements.\n\n"
+                            "Thank you for your dedication and efforts in keeping the server running smoothly!"
+                        ),
+                        color=discord.Color.orange()
+                    ).set_footer(text="Your cooperation is highly appreciated.")
+                    
+                    await user.send(embed=embed)
+            
             await self.reset_mod_activity()
             await ctx.send(f"**Mod Activity data reset, {member.mention}!**", delete_after=3)
         else:
