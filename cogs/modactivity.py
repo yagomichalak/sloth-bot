@@ -116,7 +116,7 @@ class ModActivity(ModActivityTable):
             m, s = divmod(time_in_vc, 60)
             h, m = divmod(m, 60)
             user = discord.utils.get(ctx.guild.members, id=mod_id)
-            is_active =  h >= 3 or messages >= 30
+            is_active = h >= 3 or messages >= 30
             icon = '🔹' if is_active else '🔸'
             moderator_data = {"user": user,"icon": icon, "hours": h, "minutes": m, "seconds": s, "messages": messages }
             if is_active:
@@ -142,12 +142,62 @@ class ModActivity(ModActivityTable):
         if confirm_view.value is None:
             await ctx.send(f"**Timeout, not deleting it, {member.mention}!**", delete_after=3)
         elif confirm_view.value:
+            for mod in mod_activities:
+                mod_id, time_in_vc, _, messages = mod
+                m, s = divmod(time_in_vc, 60)
+                h, m = divmod(m, 60)
+                user = discord.utils.get(ctx.guild.members, id=mod_id)
+                is_active = h >= 3 or messages >= 30
+                
+                reason = (
+                    f"Dear <@{mod_id}>,\n\n"
+                    "This is a gentle **automated** reminder to remain active and engaged as a member of the staff team. "
+                    "Consistent moderation, community interaction, and assistance are essential "
+                    "to maintaining a positive and organized server environment.\n\n"
+                    "**Please ensure that you are:**\n"
+                    "✔ Taking on and handling cases efficiently.\n"
+                    "✔ Addressing issues and concerns brought up by members.\n\n"
+                    "If you are unable to stay active for any reason, kindly inform "
+                    "the staff management team to make the necessary arrangements.\n\n"
+                    "Thank you for your dedication and efforts in keeping the server running smoothly!"
+                )
+                
+                if user and not is_active:
+                    embed = discord.Embed(
+                        title="Staff Activity Reminder",
+                        description=reason,
+                        color=discord.Color.orange()
+                    ).set_footer(text="Your cooperation is highly appreciated.")
+                    
+                    await user.send(embed=embed)
+                    await self.log_automated_dm(ctx, user, reason)
+            
             await self.reset_mod_activity()
             await ctx.send(f"**Mod Activity data reset, {member.mention}!**", delete_after=3)
         else:
             await ctx.send(f"**Not deleting it then, {member.mention}!**", delete_after=3)
 
         await msg.delete()
+        
+    async def log_automated_dm(self, ctx, user: discord.Member, message: str) -> None:
+        """ Log's the automated DM message sent by the bot.
+        :param ctx: The context.
+        :param user: The member who's the receiver of the message.
+        :param message: The message. """
+
+        # Moderation log
+        if not (demote_log := discord.utils.get(ctx.guild.text_channels, id=int(os.getenv('DM_LOG_CHANNEL_ID', 123)))):
+            return
+
+        dm_embed = discord.Embed(
+            title="__DM Message__",
+            description=f"{self.client.user.mention} DM'd {user.mention}.\n**Message:** {message}",
+            color=discord.Color.orange(),
+            timestamp=ctx.message.created_at
+        )
+        dm_embed.set_author(name=user, icon_url=user.display_avatar)
+        dm_embed.set_footer(text=f"Sent by: Sloth")
+        await demote_log.send(embed=dm_embed)
 
     @utils.is_allowed([senior_mod_role_id], throw_exc=True)
     @commands.command(aliases=['track_mod'])
