@@ -146,10 +146,15 @@ class Moderation(*moderation_cogs):
         if await self.get_muted_roles(member.id):
             keep_roles, _ = await self.get_remove_roles(member, keep_roles=allowed_roles)
             muted_role = discord.utils.get(member.guild.roles, id=muted_role_id)
+            timedout_role = discord.utils.get(member.guild.roles, id=timedout_role_id)
 
             # If the user, for some reason, doesn't have the muted role, adds it
             if muted_role not in keep_roles:
                 keep_roles.append(muted_role)
+                
+            # If the user gets silenced has the timeout role is preserved if it is already present
+            if timedout_role in member.roles and timedout_role not in keep_roles:
+                keep_roles.append(timedout_role)
 
             # Updates the user roles
             await member.edit(roles=keep_roles)
