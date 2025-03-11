@@ -38,6 +38,24 @@ class ModActivityTable(commands.Cog):
                 PRIMARY KEY (mod_id)
             )""")
         await ctx.send(f"**Table `ModActivity` created, {member.mention}!**")
+        
+    @commands.command(hidden=True)
+    @commands.has_permissions(administrator=True)
+    async def create_mod_activity_settings_table(self, ctx) -> None:
+        """ (ADM) Creates the ModActivitySettings table. """
+
+        member: discord.Member = ctx.author
+
+        if await self.check_mod_activity_settings_table_exists():
+            return await ctx.send(f"**The `ModActivitySettings` table already exists, {member.mention}!**")
+
+        await self.db.execute_query("""
+            CREATE TABLE ModActivitySettings (
+                min_voice_time BIGINT DEFAULT 10800,
+                min_text_messages INT DEFAULT 30
+            )""")
+        await self.db.execute_query("INSERT INTO ModActivitySettings VALUES(10800, 30)")
+        await ctx.send(f"**Table `ModActivitySettings` created, {member.mention}!**")
 
     @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
@@ -50,6 +68,18 @@ class ModActivityTable(commands.Cog):
 
         await self.db.execute_query('DROP TABLE ModActivity')
         await ctx.send(f"**Table `ModActivity` dropped, {member.mention}!**")
+        
+    @commands.command(hidden=True)
+    @commands.has_permissions(administrator=True)
+    async def drop_mod_activity_settings_table(self, ctx) -> None:
+        """ (ADM) Drops the ModActivitySettings table. """
+
+        member: discord.Member = ctx.author
+        if not await self.check_mod_activity_settings_table_exists():
+            return await ctx.send(f"**The `ModActivitySettings` table doesn't exist, {member.mention}!**")
+
+        await self.db.execute_query('DROP TABLE ModActivitySettings')
+        await ctx.send(f"**Table `ModActivitySettings` dropped, {member.mention}!**")
 
     @commands.command(hidden=True)
     @commands.has_permissions(administrator=True)
@@ -62,11 +92,29 @@ class ModActivityTable(commands.Cog):
 
         await self.db.execute_query("DELETE FROM ModActivity")
         await ctx.send(f"**Table `ModActivity` reset, {member.mention}!**")
+        
+    @commands.command(hidden=True)
+    @commands.has_permissions(administrator=True)
+    async def reset_mod_activity_settings_table(self, ctx) -> None:
+        """ (ADM) Resets the ModActivitySettings table. """
+
+        member: discord.Member = ctx.author
+        if not await self.check_mod_activity_settings_table_exists():
+            return await ctx.send(f"**The `ModActivitySettings` table doesn't exist yett, {member.mention}!**")
+
+        await self.db.execute_query("DELETE FROM ModActivitySettings")
+        await self.db.execute_query("INSERT INTO ModActivitySettings VALUES(10800, 30)")
+        await ctx.send(f"**Table `ModActivitySettings` reset, {member.mention}!**")
 
     async def check_mod_activity_table_exists(self) -> bool:
         """ Checks whether the ModActivity table exists in the database. """
 
         return await self.db.table_exists("ModActivity")
+    
+    async def check_mod_activity_settings_table_exists(self) -> bool:
+        """ Checks whether the ModActivitySettings table exists in the database. """
+
+        return await self.db.table_exists("ModActivitySettings")
 
     async def check_mod_activity_exists(self, mod_id: int) -> bool:
         """ Checks if a moderator already exists in the ModActivity table. """
@@ -152,3 +200,25 @@ class ModActivityTable(commands.Cog):
         """ Deletes all the data from the ModActivity table. """
 
         await self.db.execute_query("DELETE FROM ModActivity")
+        
+    async def set_mod_activity_min_text(self, min_text: int) -> int:
+        """ Sets the mod activity list's current minimum text message limit.
+        :param min_text: The minimum text message limit to set. """
+
+        await self.db.execute_query("UPDATE ModActivitySettings SET min_text_messages = %s", (min_text,))
+
+    async def get_mod_activity_min_text(self) -> int:
+        """ Gets the mod activity list's current minimum text message limit. """
+
+        return await self.db.execute_query("SELECT min_text_messages FROM ModActivitySettings", fetch="one")
+
+    async def set_mod_activity_min_voice(self, min_voice: str) -> str:
+        """ Sets the mod activity list's current minimum voice time limit.
+        :param min_voice: The minimum voice time limit to set. """
+
+        await self.db.execute_query("UPDATE ModActivitySettings SET min_voice_time = %s", (min_voice,))
+
+    async def get_mod_activity_min_voice(self) -> str:
+        """ Gets the mod activity list's current minimum voice time limit. """
+
+        return await self.db.execute_query("SELECT min_voice_time FROM ModActivitySettings", fetch="one")
