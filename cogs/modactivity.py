@@ -178,8 +178,12 @@ class ModActivity(ModActivityTable):
                         color=discord.Color.orange()
                     ).set_footer(text="Your cooperation is highly appreciated.")
                     
-                    await user.send(embed=embed)
-                    await self.log_automated_dm(ctx, user, reason)
+                    try:
+                        await user.send(embed=embed)
+                        await self.log_automated_dm(ctx, user, reason)
+                    except discord.errors.HTTPException as e:
+                        print(f"Failed to send message to {user.name}: {e}")
+                        await ctx.send(f"**Failed to send message to {user.name}!**", delete_after=3)
             
             await self.reset_mod_activity()
             await ctx.send(f"**Mod Activity data reset, {member.mention}!**", delete_after=3)
