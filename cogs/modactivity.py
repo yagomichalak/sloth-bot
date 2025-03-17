@@ -1,5 +1,6 @@
 # import.standard
 import os
+import re
 from typing import List
 
 # import.thirdparty
@@ -9,7 +10,7 @@ from discord.ext import commands
 # import.local
 from extra import utils
 from extra.moderation.modactivity import ModActivityTable
-from extra.prompt.menu import ConfirmButton
+from extra.prompt.menu import ConfirmButton, Confirm
 from mysqldb import DatabaseCore
 
 # variables.id
@@ -115,8 +116,13 @@ class ModActivity(ModActivityTable):
             mod_id, time_in_vc, _, messages = mod
             m, s = divmod(time_in_vc, 60)
             h, m = divmod(m, 60)
-            user = discord.utils.get(ctx.guild.members, id=mod_id)
-            is_active = h >= 3 or messages >= 30
+            user = discord.utils.get(ctx.guild.members, id=mod_id) 
+            minimum_voice, minimum_text = await self.get_mod_activity_min_voice(), await self.get_mod_activity_min_text()
+            if minimum_voice and minimum_text is not False:
+                min_voice, min_text = minimum_voice[0], minimum_text[0]
+            else:
+                min_voice, min_text = 10800, 30
+            is_active = time_in_vc >= min_voice or messages >= min_text
             icon = '🔹' if is_active else '🔸'
             moderator_data = {"user": user,"icon": icon, "hours": h, "minutes": m, "seconds": s, "messages": messages }
             if is_active:
@@ -144,10 +150,13 @@ class ModActivity(ModActivityTable):
         elif confirm_view.value:
             for mod in mod_activities:
                 mod_id, time_in_vc, _, messages = mod
-                m, s = divmod(time_in_vc, 60)
-                h, m = divmod(m, 60)
                 user = discord.utils.get(ctx.guild.members, id=mod_id)
-                is_active = h >= 3 or messages >= 30
+                minimum_voice, minimum_text = await self.get_mod_activity_min_voice(), await self.get_mod_activity_min_text()
+                if minimum_voice and minimum_text is not False:
+                    min_voice, min_text = minimum_voice[0], minimum_text[0]
+                else:
+                    min_voice, min_text = 10800, 30
+                is_active = time_in_vc >= min_voice or messages >= min_text
                 
                 reason = (
                     f"Dear <@{mod_id}>,\n\n"
@@ -169,8 +178,13 @@ class ModActivity(ModActivityTable):
                         color=discord.Color.orange()
                     ).set_footer(text="Your cooperation is highly appreciated.")
                     
-                    await user.send(embed=embed)
-                    await self.log_automated_dm(ctx, user, reason)
+                    try:
+                        await user.send(embed=embed)
+                        await self.log_automated_dm(ctx, user, reason)
+                    except discord.Forbidden:
+                        await ctx.send(f"**Failed to send message to `{user.name}`!** Their DM's may be closed.", delete_after=3)
+                    except discord.HTTPException as e:
+                        await ctx.send(f"**Failed to send message to `{user.name}`!** ERROR: `{e}`", delete_after=3)
             
             await self.reset_mod_activity()
             await ctx.send(f"**Mod Activity data reset, {member.mention}!**", delete_after=3)
@@ -186,7 +200,7 @@ class ModActivity(ModActivityTable):
         :param message: The message. """
 
         # Moderation log
-        if not (demote_log := discord.utils.get(ctx.guild.text_channels, id=int(os.getenv('DM_LOG_CHANNEL_ID', 123)))):
+        if not (dm_log := discord.utils.get(ctx.guild.text_channels, id=int(os.getenv('DM_LOG_CHANNEL_ID', 123)))):
             return
 
         dm_embed = discord.Embed(
@@ -197,7 +211,7 @@ class ModActivity(ModActivityTable):
         )
         dm_embed.set_author(name=user, icon_url=user.display_avatar)
         dm_embed.set_footer(text=f"Sent by: Sloth")
-        await demote_log.send(embed=dm_embed)
+        await dm_log.send(embed=dm_embed)
 
     @utils.is_allowed([senior_mod_role_id], throw_exc=True)
     @commands.command(aliases=['track_mod'])
@@ -247,6 +261,82 @@ class ModActivity(ModActivityTable):
             await self.insert_moderator(mod.id)
 
         return await ctx.send(f"**Tracking {len(mods)} activity!**")
+    
+    @commands.command()
+    @commands.has_permissions(administrator=True)
+    async def modrep_min_text(self, ctx, *, message : str = None) -> None:
+        """ Changes the minimum text message limit for the mod activity list. """
+
+        member = ctx.author
+
+        if not await self.check_mod_activity_settings_table_exists():
+            return await ctx.send(f"**It looks like the mod activity list is on maintenance, {member.mention}!**")
+
+        if not message:
+            return await ctx.send("**Please specify the amount of messages that would be the minimum for the inactivity limit.**")
+
+        try:
+            total_messages = int(message)
+        except ValueError:
+            return await ctx.send(f"**Invalid input, {member.mention}. Please specify a number.**")
+
+        modactivity_min_text = await self.get_mod_activity_min_text()
+        if modactivity_min_text:
+            confirm = await Confirm(f"Current mod activity minimum text message limit is `{modactivity_min_text[0]} messages`.\nAre you sure you want to change it to `{total_messages} messages`, {member.mention}?").prompt(ctx)
+            if confirm:
+                await self.set_mod_activity_min_text(total_messages)
+                await ctx.send(f"**Mod activity minimum text message limit has been changed to `{total_messages}`!**")
+        else:
+            return await ctx.send(f"**Can't get minimum text message limit information. Try resetting the mod activity settings database before changing the limit.**")
+
+    @commands.command()
+    @commands.has_permissions(administrator=True)
+    async def modrep_min_voice(self, ctx, *, message : str = None) -> None:
+        """ Changes the minimum voice time limit for the mod activity list. """
+
+        member = ctx.author
+        
+        await ctx.message.delete()
+
+        if not await self.check_mod_activity_settings_table_exists():
+            return await ctx.send(f"**It looks like the mod activity list is on maintenance, {member.mention}!**")
+
+        if not message:
+            return await ctx.send("**Please specify a time, all these examples work: `1w`, `3d 12h`, `12h 30m 30s` or you can also provide the time like this `43200` directly in seconds.**")
+
+        def look_at_the_time_whoa(time):
+            pattern = r'((?P<weeks>\d+)w)?\s*((?P<days>\d+)d)?\s*((?P<hours>\d+)h)?\s*((?P<minutes>\d+)m)?\s*((?P<seconds>\d+)s)?'
+            match = re.match(pattern, time)
+            
+            if not match:
+                return None
+            
+            time_data = match.groupdict(default="0")
+            total_seconds = (
+                int(time_data["weeks"]) * 604800 +
+                int(time_data["days"]) * 86400 +
+                int(time_data["hours"]) * 3600 +
+                int(time_data["minutes"]) * 60 +
+                int(time_data["seconds"])
+            )
+            
+            return total_seconds
+
+        try:
+            total_seconds = int(message)
+        except ValueError:
+            total_seconds = look_at_the_time_whoa(message)
+            if total_seconds is None:
+                return await ctx.send(f"**Invalid time format, {member.mention}. Examples of working formats: `1w`, `3d 12h`, `12h 30m 30s` or you can also provide the time like this `43200` directly in seconds.**")
+
+        modactivity_min_voice = await self.get_mod_activity_min_voice()
+        if modactivity_min_voice:
+            confirm = await Confirm(f"Current mod activity minimum voice time limit is `{modactivity_min_voice[0]} seconds`.\nAre you sure you want to change it to `{total_seconds} seconds`, {member.mention}?").prompt(ctx)
+            if confirm:
+                await self.set_mod_activity_min_voice(total_seconds)
+                await ctx.send(f"**Mod activity minimum voice time limit has been changed to `{total_seconds}`!**")
+        else:
+            return await ctx.send(f"**Can't get minimum voice time limit information. Try resetting the mod activity settings database before changing the limit.**")
 
 def setup(client):
     client.add_cog(ModActivity(client))
