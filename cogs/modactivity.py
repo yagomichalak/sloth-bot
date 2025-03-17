@@ -200,7 +200,7 @@ class ModActivity(ModActivityTable):
         :param message: The message. """
 
         # Moderation log
-        if not (demote_log := discord.utils.get(ctx.guild.text_channels, id=int(os.getenv('DM_LOG_CHANNEL_ID', 123)))):
+        if not (dm_log := discord.utils.get(ctx.guild.text_channels, id=int(os.getenv('DM_LOG_CHANNEL_ID', 123)))):
             return
 
         dm_embed = discord.Embed(
@@ -211,7 +211,7 @@ class ModActivity(ModActivityTable):
         )
         dm_embed.set_author(name=user, icon_url=user.display_avatar)
         dm_embed.set_footer(text=f"Sent by: Sloth")
-        await demote_log.send(embed=dm_embed)
+        await dm_log.send(embed=dm_embed)
 
     @utils.is_allowed([senior_mod_role_id], throw_exc=True)
     @commands.command(aliases=['track_mod'])
