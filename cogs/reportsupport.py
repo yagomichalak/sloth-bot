@@ -124,7 +124,7 @@ class ReportSupport(*report_support_classes):
         for member in members:
             try:
                 timeout_time = member.communication_disabled_until
-                if timeout_time == None:
+                if timeout_time is None or (timeout_time and timeout_time.timestamp() < time.time()):
                     await member.remove_roles(role)
             except Exception as e:
                 print(e)
