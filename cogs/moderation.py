@@ -772,13 +772,15 @@ class Moderation(*moderation_cogs):
         """Gets the time of a time out based on their number of warnings.
         :param warns: The number of warns the user have. """
 
+        autoBan = False # Auto Ban if the user exceeds the maximum warn limit within 6 months
         weight_map = {
             0: [0, 0, 0, False],
             1: [6, 0, 0, False],	# 6 hours
             2: [0, 2, 0, False],	# 2 days
             3: [0, 0, 1, False],	# 1 week
-            4: [0, 0, 0, True]      # Ban!
+            4: [0, 0, 1, False] if not autoBan else [0, 0, 0, True] # 1 week, or Ban if autoBan variable is True
         }
+        
         if await utils.is_allowed(allowed_roles).predicate(channel=ctx.channel, member=member):
             index = 0
         elif warns in weight_map:
