@@ -2335,7 +2335,7 @@ We appreciate your understanding and look forward to hearing from you. """, embe
                     unmute_alert = f"\u200b\n**♦️ This user will be unmuted <t:{times[0] + times[1]}:R>**\n\n"
 
             user_infractions = list(user_infractions)
-            user_infractions.sort(key=lambda x: x[3], reverse=True)
+            user_infractions.sort(key=lambda x: x[3], reverse=False) # "reverse=True" for newest to oldest, "reverse=False" for oldest to newest 
 
             embed = discord.Embed(
                 title=f"Infractions for {member}",
