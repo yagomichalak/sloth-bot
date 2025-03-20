@@ -772,8 +772,9 @@ class Moderation(*moderation_cogs):
         """Gets the time of a time out based on their number of warnings.
         :param warns: The number of warns the user have. """
 
-        autoBan = False # Auto Ban if the user exceeds the maximum warn limit within 6 months
+        autoBan = False # Auto-ban option for when the user exceeds the maximum warn limit within 6 months
         weight_map = {
+            # n: [hour, day, week, ban]
             0: [0, 0, 0, False],
             1: [6, 0, 0, False],	# 6 hours
             2: [0, 2, 0, False],	# 2 days
