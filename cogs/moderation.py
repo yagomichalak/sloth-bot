@@ -773,13 +773,16 @@ class Moderation(*moderation_cogs):
         """Gets the time of a time out based on their number of warnings.
         :param warns: The number of warns the user have. """
 
+        autoBan = False # Auto-ban option for when the user exceeds the maximum warn limit within 6 months
         weight_map = {
+            # n: [hour, day, week, ban]
             0: [0, 0, 0, False],
             1: [6, 0, 0, False],	# 6 hours
             2: [0, 2, 0, False],	# 2 days
             3: [0, 0, 1, False],	# 1 week
-            4: [0, 0, 0, True]      # Ban!
+            4: [0, 0, 1, False] if not autoBan else [0, 0, 0, True] # 1 week, or Ban if autoBan variable is True
         }
+        
         if await utils.is_allowed(allowed_roles).predicate(channel=ctx.channel, member=member):
             index = 0
         elif warns in weight_map:
@@ -2333,7 +2336,7 @@ We appreciate your understanding and look forward to hearing from you. """, embe
                     unmute_alert = f"\u200b\n**♦️ This user will be unmuted <t:{times[0] + times[1]}:R>**\n\n"
 
             user_infractions = list(user_infractions)
-            user_infractions.sort(key=lambda x: x[3], reverse=True)
+            user_infractions.sort(key=lambda x: x[3], reverse=False) # "reverse=True" for newest to oldest, "reverse=False" for oldest to newest 
 
             embed = discord.Embed(
                 title=f"Infractions for {member}",
