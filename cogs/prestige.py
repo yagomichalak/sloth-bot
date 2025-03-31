@@ -40,9 +40,12 @@ class Prestige(commands.Cog, command_attrs=dict(hidden=True)):
 
         await ctx.send(f"**<@366628959657394186>, desculpa por interromper o seu andamento, é que eu te vi passando, você é artista?**")
 
+        await ctx.message.delete()
     @commands.command(aliases=["lexi", "lèqçi", "lexis"])
     async def alexis(self, ctx) -> None:
         """ A command for telling something about Alexis. """
+
+        await ctx.message.delete()
 
         sentences = [
             "**I have a really nice voice**",
@@ -58,12 +61,15 @@ class Prestige(commands.Cog, command_attrs=dict(hidden=True)):
     async def freak(self, ctx) -> None:
         """ A command for telling something about Marceline. """
 
+        await ctx.message.delete()
         await ctx.send("You mean missy aka Marceline")
 
     @commands.command()
     async def hiba(self, ctx) -> None:
         """ A command for telling something about Hiba. """
 
+        await ctx.message.delete()
+        
         sentences = [
             "<@760178072904531988> Give me attention",
             "<@760178072904531988>\nAll of these girl on some uppercase shi\nThat means they all cap\nBeing the best at whatever i do\nThat’s sounding on brand",
@@ -82,6 +88,7 @@ class Prestige(commands.Cog, command_attrs=dict(hidden=True)):
     @commands.command(aliases=["not_lime", "lemonade", "citric", "yellow_fruit"])
     async def lemon(self, ctx) -> None:
         """ A command for telling something about Wyncham. """
+        await ctx.message.delete()
 
         sentences = [
             "**Easy peasy, lemon squeezy** �",
@@ -95,6 +102,8 @@ class Prestige(commands.Cog, command_attrs=dict(hidden=True)):
     async def sousa(self, ctx) -> None:
         """ A command for telling something about Sousa. """
 
+        await ctx.message.delete()
+
         sentences = [
             "If you give <@372100977060347906> a cup of coffee, he might tell you a secret...",
             "**<@372100977060347906> He's Simple, He's Dumb, He's The Pilot.**",
@@ -105,6 +114,7 @@ class Prestige(commands.Cog, command_attrs=dict(hidden=True)):
 
     @commands.command(aliases=["maksiu", "maks1u", "c4tchme"])
     async def choose_right(self, ctx) -> None:
+        await ctx.message.delete()
 
         idkWhichOne = [
             "Oh, <@312940056115544064>. 🧠 He's found... never mind",
@@ -120,6 +130,8 @@ class Prestige(commands.Cog, command_attrs=dict(hidden=True)):
     async def keybirds(self, ctx) -> None:
         """ A command for telling something about Keybirds. """
 
+        await ctx.message.delete()
+
         sentences = [
             "<@584699027421921280> Well, sounds like a good idea",
             "<@584699027421921280> Stina wants to go outside",
@@ -132,23 +144,28 @@ class Prestige(commands.Cog, command_attrs=dict(hidden=True)):
     async def loral(self, ctx) -> None:
         """ A command for telling something about Loral. """
 
+        await ctx.message.delete()
         await ctx.send("<@759049454819999776> Mans annoying")
 
     @commands.command()
     async def leonor(self, ctx) -> None:
         """ A command for telling something about Leonor. """
 
+        await ctx.message.delete()
         await ctx.send("<@754678627265675325> Human brain smells like cat piss when it dries out")
 
     @commands.command()
     async def anis(self, ctx) -> None:
         """ A command for telling something about anis. """
 
+        await ctx.message.delete()
         await ctx.send("<@515991382217981952> niso")
 
     @commands.command(aliases=["hodjapie", "onekebappls"])
     async def hodja(self, ctx) -> None:
         """ A command for telling something about the kebap guy, Hodja. """
+
+        await ctx.message.delete()
 
         sentences = [
             "**I THOUGHT YOU WERE A GIRL** <@201086628167417857>",
@@ -163,6 +180,8 @@ class Prestige(commands.Cog, command_attrs=dict(hidden=True)):
     @commands.command(aliases=["jelly", "jellyfish", "jellytimet", "jogurt", "doctor"])
     async def _jelly(self, ctx) -> None:
         """ A command for telling something about Jelly. """
+
+        await ctx.message.delete()
 
         sentences = [
             "love you all from <@781007535267119138>",
