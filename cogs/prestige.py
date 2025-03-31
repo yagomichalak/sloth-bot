@@ -32,15 +32,15 @@ class Prestige(commands.Cog, command_attrs=dict(hidden=True)):
     async def _gabriel_slash(self, ctx) -> None:
         """ Tells you something about Gabriel. """
 
-        await ctx.respond(f"**<@366628959657394186>? Il est frais et il est chaud, et quand il rap c'est que du feu**")
+        await ctx.respond(f"**<@875915997767430214>? Il est frais et il est chaud, et quand il rap c'est que du feu**")
 
     @commands.command(name="gabriel", aliases=["gab", "gabi", "gbrl", "gaburierudesu", "camisa9", "atacante", "rapper"])
     async def _gabriel_command(self, ctx) -> None:
         """ Tells you something about Gabriel. """
 
-        await ctx.send(f"**<@366628959657394186>, desculpa por interromper o seu andamento, é que eu te vi passando, você é artista?**")
-
         await ctx.message.delete()
+        await ctx.send(f"**<@875915997767430214>, desculpa por interromper o seu andamento, é que eu te vi passando, você é artista?**")
+        
     @commands.command(aliases=["lexi", "lèqçi", "lexis"])
     async def alexis(self, ctx) -> None:
         """ A command for telling something about Alexis. """
