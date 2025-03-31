@@ -87,7 +87,8 @@ class Prestige(commands.Cog, command_attrs=dict(hidden=True)):
 
     @commands.command(aliases=["not_lime", "lemonade", "citric", "yellow_fruit"])
     async def lemon(self, ctx) -> None:
-        """ A command for telling something about Wyncham. """
+        """ A command for telling something about Lemon. """
+
         await ctx.message.delete()
 
         sentences = [
@@ -114,6 +115,8 @@ class Prestige(commands.Cog, command_attrs=dict(hidden=True)):
 
     @commands.command(aliases=["maksiu", "maks1u", "c4tchme"])
     async def choose_right(self, ctx) -> None:
+        """ A command for telling something about maksiu. """
+
         await ctx.message.delete()
 
         idkWhichOne = [
