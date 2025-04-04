@@ -223,33 +223,37 @@ class ApplyView(discord.ui.View):
         apply_select = discord.ui.Select(
             placeholder="Apply for staff positions",
             options=[
+                discord.SelectOption(label="Teacher",
+                                     description="Share your knowledge and educate the community",
+                                     value="apply_to_teach", emoji="<:Teacher:1337403258196721746>"),
+                
                 discord.SelectOption(label="Moderator",
                                      description="Enforce rules to maintain a positive environment",
                                      value="apply_to_moderate", emoji="<:Moderator:1337403244628148234>"),
 
-                discord.SelectOption(label="Designer", # APPLICATION DOESN'T EXIST
-                                     description="Keep the server visually appealing and fresh",
-                                     value="apply_to_designer", emoji="<:Designer:1337403199539384413>"),
-
-                discord.SelectOption(label="Teacher",
-                                     description="Share your knowledge and educate the community",
-                                     value="apply_to_teach", emoji="<:Teacher:1337403258196721746>"),
+                ### APPLICATION DOESN'T EXIST
+                # discord.SelectOption(label="Designer",
+                #                     description="Keep the server visually appealing and fresh",
+                #                     value="apply_to_designer", emoji="<:Designer:1337403199539384413>"),
 
                 discord.SelectOption(label="Event Host",
                                      description="Host movies and other events",
                                      value="apply_to_host_events", emoji="<:Event:1337403220544323634>"),
 
-                discord.SelectOption(label="Content Creator", # APPLICATION DOESN'T EXIST
-                                     description="Promote the server on TikTok/YouTube",
-                                     value="apply_to_content_creator", emoji="<:Contenter:1337403191314092043>"),
+                ### APPLICATION DOESN'T EXIST
+                # discord.SelectOption(label="Content Creator",
+                #                     description="Promote the server on TikTok/YouTube",
+                #                     value="apply_to_content_creator", emoji="<:Contenter:1337403191314092043>"),
 
-                discord.SelectOption(label="Giveaway Manager", # APPLICATION DOESN'T EXIST
-                                     description="Plan and manage giveaways for our community",
-                                     value="apply_to_giveaway_manager", emoji="<:Giveaway:1337403233391476778>"),
+                ### APPLICATION DOESN'T EXIST
+                # discord.SelectOption(label="Giveaway Manager",
+                #                     description="Plan and manage giveaways for our community",
+                #                     value="apply_to_giveaway_manager", emoji="<:Giveaway:1337403233391476778>"),
 
-                discord.SelectOption(label="Analyst & Debugger", # APPLICATION DOESN'T EXIST
-                                     description="sudo rm -rf / *",
-                                     value="apply_to_analyst_debugger", emoji="<:Developer:1337403211912319078>"),
+                ### APPLICATION DOESN'T EXIST
+                # discord.SelectOption(label="Analyst & Debugger",
+                #                     description="sudo rm -rf / *",
+                #                     value="apply_to_analyst_debugger", emoji="<:Developer:1337403211912319078>"),
                 
                 discord.SelectOption(label="Debate Organizer",
                                      description="Organize debates and discussions",
