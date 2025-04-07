@@ -2536,6 +2536,7 @@ We appreciate your understanding and look forward to hearing from you. """, embe
 
                 try:
                     if user_infraction[0][1] != "watchlist":
+                        general_embed.set_footer() # Clears the footer so it doesn't show the staff member in the DM
                         await member.send(embed=general_embed)
                 except Exception:
                     pass
