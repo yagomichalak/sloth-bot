@@ -728,7 +728,7 @@ class Moderation(*moderation_cogs):
                         except:
                             pass
                     else:
-                        await self.timeout(ctx, member, warn_type, user_infractions)
+                        await self._timeout_callback(ctx, member, warn_type, user_infractions)
                 else:
                     await ctx.send(f"**The user `{member}` is not on the server**", delete_after = 5)
     
@@ -793,7 +793,7 @@ class Moderation(*moderation_cogs):
             index = 0
         return weight_map[index]
 
-    async def timeout(self, ctx: commands.Context, member: discord.Member, warn_type: str, infractions: List[List[Union[str, int]]]) -> None:
+    async def _timeout_callback(self, ctx: commands.Context, member: discord.Member, warn_type: str, infractions: List[List[Union[str, int]]]) -> None:
         """Times out a user based on their number of warnings.
         :param ctx: The command context.
         :param member: The member to timeout.
@@ -829,6 +829,76 @@ class Moderation(*moderation_cogs):
         except:
             pass
     
+    @commands.command(aliases=["to"])
+    @commands.has_permissions(administrator=True)
+    async def timeout(self, ctx, member: discord.Member = None, *, time: str = None):
+        """(ADM) Temporarily times out a member and adds the timeout role.
+        :param member: The @ or the ID of the user to timeout.
+        :param time: The duration of the timeout. """
+
+        await ctx.message.delete()
+
+        if not member:
+            return await ctx.send("**Please, specify a member!**", delete_after=3)
+
+        if not time:
+            return await ctx.send("**Please, specify a time, all these examples work: `1d`, `3d 12h`, `12h 30m 30s`.**", delete_after=6)
+
+        time_dict, seconds = await utils.get_time_from_text(ctx, time=time)
+        if not seconds:
+            return
+
+        timedout_role = discord.utils.get(ctx.guild.roles, id=timedout_role_id)
+        try:
+            timeout_until = discord.utils.utcnow() + timedelta(seconds=seconds)
+            await member.timeout(until=timeout_until, reason=f"Timed out by {ctx.author}")
+            if timedout_role and timedout_role not in member.roles:
+                await member.add_roles(timedout_role)
+        except Exception as e:
+            print(f"Error timing out user: {e}")
+            return await ctx.send(f"**Failed to timeout {member.mention}.**", delete_after=3)
+
+        # General embed
+        general_embed = discord.Embed(
+            description=f"**For:** `{time_dict['days']}d`, `{time_dict['hours']}h`, `{time_dict['minutes']}m` and `{time_dict['seconds']}s`",
+            colour=discord.Colour.orange(),
+            timestamp=ctx.message.created_at
+        )
+        general_embed.set_author(name=f"{member} has been timed out", icon_url=member.display_avatar)
+        await ctx.send(embed=general_embed)
+        
+    @commands.command(aliases=["rto", "remove_to"])
+    @commands.has_permissions(administrator=True)
+    async def remove_timeout(self, ctx, member: discord.Member = None):
+        """(ADM) Removes the timeout from a member and removes the timeout role.
+        :param member: The @ or the ID of the user to remove the timeout from."""
+
+        await ctx.message.delete()
+
+        if not member:
+            return await ctx.send("**Please, specify a member!**", delete_after=3)
+
+        if not member.communication_disabled_until:
+            return await ctx.send(f"**{member.mention} is not currently timed out!**", delete_after=3)
+
+        timedout_role = discord.utils.get(ctx.guild.roles, id=timedout_role_id)
+        try:
+            await member.timeout(None, reason=f"Timeout removed by {ctx.author}")
+            if timedout_role and timedout_role in member.roles:
+                await member.remove_roles(timedout_role)
+        except Exception as e:
+            print(f"Error removing timeout: {e}")
+            return await ctx.send(f"**Failed to remove timeout for {member.mention}.**", delete_after=3)
+
+        # General embed
+        general_embed = discord.Embed(
+            description=f"**Timeout removed.**",
+            colour=discord.Colour.green(),
+            timestamp=ctx.message.created_at
+        )
+        general_embed.set_author(name=f"{member} is no longer timed out", icon_url=member.display_avatar)
+        await ctx.send(embed=general_embed)
+        
     @tasks.loop(minutes=3)
     async def check_timeouts_expirations(self) -> None:
         """ Task that checks Timeouts expirations. """
