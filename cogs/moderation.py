@@ -1639,8 +1639,12 @@ class Moderation(*moderation_cogs):
 
                 while True:
                     try:
-                        r, u = await self.client.wait_for('reaction_add', check=check_reaction)
+                        r, u = await self.client.wait_for('reaction_add', timeout=3600, check=check_reaction)
                     except asyncio.TimeoutError:
+                        mod_ban_embed.description = f'Timeout, {member} is not getting banned!'
+                        await msg.remove_reaction('✅', self.client.user)
+                        await msg.remove_reaction('❎', self.client.user)
+                        await msg.edit(embed=mod_ban_embed)
                         break
                     else:
                         if str(r.emoji) == '✅':
