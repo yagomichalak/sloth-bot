@@ -867,7 +867,7 @@ class Moderation(*moderation_cogs):
         general_embed.set_author(name=f"{member} has been timed out", icon_url=member.display_avatar)
         await ctx.send(embed=general_embed)
         
-    @commands.command(aliases=["rto", "remove_to"])
+    @commands.command(aliases=["rto", "rtimeout", "remove_to"])
     @commands.has_permissions(administrator=True)
     async def remove_timeout(self, ctx, member: discord.Member = None):
         """(ADM) Removes the timeout from a member and removes the timeout role.
