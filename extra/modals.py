@@ -391,7 +391,7 @@ class UserReportSupportDetailModal(Modal):
         self.add_item(
             InputText(
                 label="Do you possess evidence of what happened?",
-                placeholder="Recording, screenshots or witnesses can be considered as evidence ",
+                placeholder="Only recordings or screenshots can be considered as evidence ",
                 style=discord.InputTextStyle.paragraph,
                 min_length=2
             )
@@ -469,7 +469,7 @@ class UserReportStaffDetailModal(Modal):
         self.add_item(
             InputText(
                 label="Do you possess evidence of what happened?",
-                placeholder="Recording, screenshots or witnesses can be considered as evidence ",
+                placeholder="Only recordings or screenshots can be considered as evidence ",
                 style=discord.InputTextStyle.paragraph,
                 min_length=2
             )
