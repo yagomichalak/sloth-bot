@@ -18,7 +18,7 @@ from .modals import (BootcampFeedbackModal, DebateOrganizerApplicationModal,
                      TeacherApplicationModal)
 from .select import ReportStaffSelect, ReportSupportSelect
 
-from .modals import UserReportStaffDetailModal, UserReportSupportDetailModal
+from .modals import UserReportStaffDetailModal, UserReportSupportDetailModal, UserReportHelpDetailModal
 
 # variables.role
 mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
@@ -94,8 +94,8 @@ class ReportView(discord.ui.View):
             await interaction.response.send_modal(modal)
 
         elif interaction.data["values"][0] == "report_help" or interaction.data["values"][0] == "report_support":
-            modal = UserReportSupportDetailModal(self.client, interaction.data['values'][0])
-            await modal.callback(interaction)
+            modal = UserReportHelpDetailModal(self.client, interaction.data['values'][0])
+            await interaction.response.send_modal(modal)
 
         elif interaction.data["values"][0] == "verify":
             member_ts = self.cog.cache.get(member.id)

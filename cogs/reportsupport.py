@@ -651,7 +651,7 @@ class ReportSupport(*report_support_classes):
         await self.report_action(interaction, "user", reportee, text, evidence)
 
     # - Get generic help
-    async def generic_help(self, interaction: discord.Interaction, type_help: str, message: str, ping: bool = True) -> None:
+    async def generic_help(self, interaction: discord.Interaction, type_help: str, desc: str, ping: bool = True) -> None:
         """ Opens a generic help channel.
         :param interaction: The interaction that generated this action.
         :param type_help: The kind of general help.
@@ -691,7 +691,8 @@ class ReportSupport(*report_support_classes):
             await interaction.followup.send(embed=created_embed, ephemeral=True)
             current_ts = await utils.get_timestamp()
             await self.insert_user_open_channel(member.id, the_channel.id, current_ts)
-            embed = discord.Embed(title=f"{type_help.title()}!", description=message, color=discord.Color.red())
+            embed = discord.Embed(title=f"{type_help.title()}!", description=f"{member.mention}", colour=member.color)
+            embed.add_field(name="Description:", value=f"```{desc}```", inline=False)
 
             if ping:
                 await the_channel.send(content=f"{member.mention}, {moderator.mention}", embed=embed)
