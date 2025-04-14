@@ -728,7 +728,7 @@ class Moderation(*moderation_cogs):
                         except:
                             pass
                     else:
-                        await self.timeout(ctx, member, warn_type, user_infractions)
+                        await self._timeout_callback(ctx, member, warn_type, user_infractions)
                 else:
                     await ctx.send(f"**The user `{member}` is not on the server**", delete_after = 5)
     
@@ -793,7 +793,7 @@ class Moderation(*moderation_cogs):
             index = 0
         return weight_map[index]
 
-    async def timeout(self, ctx: commands.Context, member: discord.Member, warn_type: str, infractions: List[List[Union[str, int]]]) -> None:
+    async def _timeout_callback(self, ctx: commands.Context, member: discord.Member, warn_type: str, infractions: List[List[Union[str, int]]]) -> None:
         """Times out a user based on their number of warnings.
         :param ctx: The command context.
         :param member: The member to timeout.
@@ -829,6 +829,76 @@ class Moderation(*moderation_cogs):
         except:
             pass
     
+    @commands.command(aliases=["to"])
+    @commands.has_permissions(administrator=True)
+    async def timeout(self, ctx, member: discord.Member = None, *, time: str = None):
+        """(ADM) Temporarily times out a member and adds the timeout role.
+        :param member: The @ or the ID of the user to timeout.
+        :param time: The duration of the timeout. """
+
+        await ctx.message.delete()
+
+        if not member:
+            return await ctx.send("**Please, specify a member!**", delete_after=3)
+
+        if not time:
+            return await ctx.send("**Please, specify a time, all these examples work: `1d`, `3d 12h`, `12h 30m 30s`.**", delete_after=6)
+
+        time_dict, seconds = await utils.get_time_from_text(ctx, time=time)
+        if not seconds:
+            return
+
+        timedout_role = discord.utils.get(ctx.guild.roles, id=timedout_role_id)
+        try:
+            timeout_until = discord.utils.utcnow() + timedelta(seconds=seconds)
+            await member.timeout(until=timeout_until, reason=f"Timed out by {ctx.author}")
+            if timedout_role and timedout_role not in member.roles:
+                await member.add_roles(timedout_role)
+        except Exception as e:
+            print(f"Error timing out user: {e}")
+            return await ctx.send(f"**Failed to timeout {member.mention}.**", delete_after=3)
+
+        # General embed
+        general_embed = discord.Embed(
+            description=f"**For:** `{time_dict['days']}d`, `{time_dict['hours']}h`, `{time_dict['minutes']}m` and `{time_dict['seconds']}s`",
+            colour=discord.Colour.orange(),
+            timestamp=ctx.message.created_at
+        )
+        general_embed.set_author(name=f"{member} has been timed out", icon_url=member.display_avatar)
+        await ctx.send(embed=general_embed)
+        
+    @commands.command(aliases=["rto", "rtimeout", "remove_to"])
+    @commands.has_permissions(administrator=True)
+    async def remove_timeout(self, ctx, member: discord.Member = None):
+        """(ADM) Removes the timeout from a member and removes the timeout role.
+        :param member: The @ or the ID of the user to remove the timeout from."""
+
+        await ctx.message.delete()
+
+        if not member:
+            return await ctx.send("**Please, specify a member!**", delete_after=3)
+
+        if not member.communication_disabled_until:
+            return await ctx.send(f"**{member.mention} is not currently timed out!**", delete_after=3)
+
+        timedout_role = discord.utils.get(ctx.guild.roles, id=timedout_role_id)
+        try:
+            await member.timeout(None, reason=f"Timeout removed by {ctx.author}")
+            if timedout_role and timedout_role in member.roles:
+                await member.remove_roles(timedout_role)
+        except Exception as e:
+            print(f"Error removing timeout: {e}")
+            return await ctx.send(f"**Failed to remove timeout for {member.mention}.**", delete_after=3)
+
+        # General embed
+        general_embed = discord.Embed(
+            description=f"**Timeout removed.**",
+            colour=discord.Colour.green(),
+            timestamp=ctx.message.created_at
+        )
+        general_embed.set_author(name=f"{member} is no longer timed out", icon_url=member.display_avatar)
+        await ctx.send(embed=general_embed)
+        
     @tasks.loop(minutes=3)
     async def check_timeouts_expirations(self) -> None:
         """ Task that checks Timeouts expirations. """
@@ -1536,7 +1606,7 @@ class Moderation(*moderation_cogs):
 
             if not should_ban:
                 mod_ban_embed = discord.Embed(
-                    title=f"Ban Request (5mins)",
+                    title=f"Ban Request",
                     description=f'''
                     {author.mention} wants to ban {member.mention}, it requires 1 **Staff Manager** or **Admin** ✅ reaction for it!
                     ```Reason: {reason}```''',
@@ -1544,42 +1614,48 @@ class Moderation(*moderation_cogs):
                 mod_ban_embed.set_author(name=f'{member} is going to Brazil...', icon_url=member.display_avatar)
                 msg = await ctx.send(embed=mod_ban_embed)
                 await msg.add_reaction('✅')
+                await msg.add_reaction('❎')
 
-                def check_staff_manager(r, u):
+                def check_reaction(r, u):
                     if u.bot:
                         return False
                     if r.message.id != msg.id:
-                        return
+                        return False
 
-                    if str(r.emoji) == '✅':
+                    if str(r.emoji) in ['✅', '❎']:
                         perms = channel.permissions_for(u)
                         if senior_mod_role_id in [r.id for r in u.roles] or perms.administrator:
                             return True
                         else:
                             self.client.loop.create_task(
-                                msg.remove_reaction('✅', u)
-                                )
+                                msg.remove_reaction(r.emoji, u)
+                            )
                             return False
-
                     else:
                         self.client.loop.create_task(
                             msg.remove_reaction(r.emoji, u)
-                            )
+                        )
                         return False
 
                 while True:
                     try:
-                        r, u = await self.client.wait_for('reaction_add', timeout=300, check=check_staff_manager)
+                        r, u = await self.client.wait_for('reaction_add', timeout=3600, check=check_reaction)
                     except asyncio.TimeoutError:
                         mod_ban_embed.description = f'Timeout, {member} is not getting banned!'
                         await msg.remove_reaction('✅', self.client.user)
+                        await msg.remove_reaction('❎', self.client.user)
                         await msg.edit(embed=mod_ban_embed)
                         break
                     else:
-                        mod_ban_embed.title = f"Ban Request (5mins)"
-                        await msg.edit(embed=mod_ban_embed)
-                        should_ban = True
-                        break
+                        if str(r.emoji) == '✅':
+                            should_ban = True
+                            await msg.remove_reaction('❎', self.client.user)
+                            break
+                        elif str(r.emoji) == '❎':
+                            mod_ban_embed.description = f'Ban request denied.'
+                            await msg.remove_reaction('✅', self.client.user)
+                            await msg.edit(embed=mod_ban_embed)
+                            break
 
             if not should_ban:
                 continue
@@ -2534,6 +2610,7 @@ We appreciate your understanding and look forward to hearing from you. """, embe
 
                 try:
                     if user_infraction[0][1] != "watchlist":
+                        general_embed.set_footer() # Clears the footer so it doesn't show the staff member in the DM
                         await member.send(embed=general_embed)
                 except Exception:
                     pass

@@ -391,7 +391,7 @@ class UserReportSupportDetailModal(Modal):
         self.add_item(
             InputText(
                 label="Do you possess evidence of what happened?",
-                placeholder="Recording, screenshots or witnesses can be considered as evidence ",
+                placeholder="Only recordings or screenshots can be considered as evidence ",
                 style=discord.InputTextStyle.paragraph,
                 min_length=2
             )
@@ -469,7 +469,7 @@ class UserReportStaffDetailModal(Modal):
         self.add_item(
             InputText(
                 label="Do you possess evidence of what happened?",
-                placeholder="Recording, screenshots or witnesses can be considered as evidence ",
+                placeholder="Only recordings or screenshots can be considered as evidence ",
                 style=discord.InputTextStyle.paragraph,
                 min_length=2
             )
@@ -499,6 +499,52 @@ class UserReportStaffDetailModal(Modal):
         elif self.option == 'Oopsie':
             return #await interaction.followup.send("**All right, cya!**", ephemeral=True)
 
+class UserReportHelpDetailModal(Modal):
+    """ Class for specifying details for a Role Help and General Help request. """
+
+    def __init__(self, client: commands.Bot, option: str) -> None:
+        """ Class init method. """
+
+        super().__init__(title="Help Request")
+        self.client = client
+        self.cog: commands.Cog = client.get_cog('ReportSupport')
+        self.add_item(
+            InputText(
+                label="What kind of help do you need?",
+                placeholder="Describe what you need help with in detail, so we can assist you better and faster.",
+                style=discord.InputTextStyle.paragraph
+            )
+        )
+        self.option = option
+
+    async def callback(self, interaction: discord.Interaction) -> None:
+        """ Callback for the form modal. """
+
+        await interaction.response.defer()
+        help_request = self.children[0].value
+
+        if self.option == 'report_help':
+            try:
+                exists = await self.cog.generic_help(interaction, 'role help', help_request)
+                if exists is False:
+                    return
+            except Exception as e:
+                print(e)
+            else:
+                return
+
+        elif self.option == 'report_support':
+            try:
+                exists = await self.cog.generic_help(interaction, 'general help', help_request)
+                if exists is False:
+                    return
+            except Exception as e:
+                print(e)
+            else:
+                return
+
+        elif self.option == 'Oopsie':
+            return await interaction.followup.send("**All right, cya!**", ephemeral=True)
 
 class TravelBuddyModal(Modal):
     """ Class for the TravelBuddies feature. """
