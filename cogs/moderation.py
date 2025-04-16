@@ -1892,7 +1892,7 @@ We appreciate your understanding and look forward to hearing from you. """, embe
                 user_id=member.id, infr_type="softban", reason=reason,
                 timestamp=current_ts, perpetrator=ctx.author.id)
 
-    @commands.command(aliases=['nitrokick', 'nitro', 'scam', 'phish', 'phishing'])
+    @commands.command(aliases=['nitrokick', 'nitro', 'nk', 'scam', 'phish', 'phishing'])
     @utils.is_allowed(allowed_roles, throw_exc=True)
     async def nitro_kick(self, ctx, member: Optional[discord.Member] = None) -> None:
         """ (ModTeam/ADM) Mutes & Softbans a member from the server who's posting Nitro scam links.
