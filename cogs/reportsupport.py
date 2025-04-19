@@ -826,10 +826,14 @@ class ReportSupport(*report_support_classes):
             return await ctx.send(f"**What do you think that you are doing? You cannot delete this channel, {member.mention}!**")
             
         channel = discord.utils.get(ctx.guild.text_channels, id=user_channel[0][1])
+        case_name = channel.name
+        case_number = case_name.split('-')[-1] if case_name.split('-')[-1].isdigit() else "N/A"  # Extract the case number if there is one
+
         embed = discord.Embed(title="Confirmation",
             description="Are you sure that you want to delete this channel?",
             color=member.color,
-            timestamp=ctx.message.created_at)
+            timestamp=ctx.message.created_at
+        )
         confirmation = await ctx.send(content=member.mention, embed=embed)
         await confirmation.add_reaction('✅')
         await confirmation.add_reaction('❌')
@@ -837,24 +841,29 @@ class ReportSupport(*report_support_classes):
             reaction, user = await self.client.wait_for('reaction_add', timeout=20,
                 check=lambda r, u: u == member and r.message.channel == ctx.channel and str(r.emoji) in ['✅', '❌'])
         except asyncio.TimeoutError:
-            embed = discord.Embed(title="Confirmation",
-            description="You took too long to answer the question; not deleting it!",
-            color=discord.Color.red(),
-            timestamp=ctx.message.created_at)
+            embed = discord.Embed(
+                title="Confirmation",
+                description="You took too long to answer the question; not deleting it!",
+                color=discord.Color.red(),
+                timestamp=ctx.message.created_at
+            )
             return await confirmation.edit(content=member.mention, embed=embed)
         else:
             if str(reaction.emoji) == '✅':
-                embed.description = f"**Channel {ctx.channel.mention} is being deleted...**"
+                embed.description = f"**Channel {channel.mention} is being deleted...**"
                 await confirmation.edit(content=member.mention, embed=embed)
                 await asyncio.sleep(3)
                 await channel.delete()
                 await self.remove_user_open_channel(user_channel[0][0])
+
                 # Moderation log embed
                 moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
                 embed = discord.Embed(
                     title='__**Case Closed**__',
                     color=discord.Color.red(),
-                    timestamp=ctx.message.created_at)
+                    timestamp=ctx.message.created_at
+                )
+                embed.add_field(name="Case Number", value=f"#{case_number}")
                 embed.set_footer(text=f"Closed by {member}", icon_url=member.display_avatar)
                 await moderation_log.send(embed=embed)
             else:
