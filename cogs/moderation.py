@@ -1737,7 +1737,7 @@ We appreciate your understanding and look forward to hearing from you. """, embe
 
     # Unbans a member
     @commands.command()
-    @commands.has_permissions(administrator=True)
+    @utils.is_allowed([senior_mod_role_id], throw_exc=True)
     async def unban(self, ctx, *, member=None):
         """ (ADM) Unbans a member from the server.
         :param member: The full nickname and # of the user to unban. """
