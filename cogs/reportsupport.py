@@ -51,7 +51,10 @@ moderator_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 senior_role_id = int(os.getenv('SENIOR_MOD_ROLE_ID', 123))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID', 123))
 lesson_management_role_id = int(os.getenv('LESSON_MANAGEMENT_ROLE_ID', 123))
+event_management_role_id = int(os.getenv('EVENT_MANAGER_ROLE_ID', 123))
+giveaway_management_role_id = int(os.getenv('GIVEAWAY_MANAGER_ROLE_ID', 123))
 allowed_roles = [int(os.getenv('OWNER_ROLE_ID', 123)), admin_role_id, moderator_role_id]
+witness_roles = [lesson_management_role_id, event_management_role_id, giveaway_management_role_id]
 
 report_support_classes: List[commands.Cog] = [
     ApplicationsTable, Verify, OpenChannels
@@ -703,20 +706,22 @@ class ReportSupport(*report_support_classes):
     @commands.command(aliases=['permit_case', 'allow_case', 'add_witness', 'witness', 'aw'])
     @commands.has_any_role(*allowed_roles)
     async def allow_witness(self, ctx):
-        """ Allows one or more witnesses to join a case channel.
-        :param members: The member(s) to allow. """
+        """ Allows one or more witnesses or roles to join a case channel.
+        :param members: The member(s) or role(s) to allow. """
 
         author = ctx.author
         members = await utils.get_mentions(ctx.message)
+        roles = await utils.get_roles(ctx.message)
+        witness_r = [role for role in roles if role.id in witness_roles]
 
-        if not members:
-            return await ctx.send("**Inform at least one witness to allow!**")
+        if not members and not witness_r:
+            return await ctx.send("**Inform at least one witness or role to allow!**")
 
         user_channel = await self.get_case_channel(ctx.channel.id)
         if not user_channel:
             return await ctx.send(f"**This is not a case channel, {author.mention}!**")
 
-        confirm = await Confirm(f"**Are you sure you want to allow all `{len(members)}` informed {'witnesses' if len(members) > 1 else 'witness'} in this case channel, {ctx.author.mention}?**").prompt(ctx)
+        confirm = await Confirm(f"**Are you sure you want to allow all `{len(members) + len(witness_r)}` informed {'witnesses/roles' if len(members) + len(witness_r) > 1 else 'witness/role'} in this case channel, {ctx.author.mention}?**").prompt(ctx)
         if not confirm:
             return await ctx.send(f"**Not allowing them, then!**")
 
@@ -741,23 +746,35 @@ class ReportSupport(*report_support_classes):
             else:
                 allowed += 1
 
-        return await ctx.send(f"**`{allowed}` {'witnesses have' if allowed > 1 else 'witness has'} been allowed here!**")
+        for role in witness_r:
+            try:
+                await channel.set_permissions(
+                    role, read_messages=True, send_messages=True, connect=True, speak=True, view_channel=True)
+            except Exception:
+                pass
+            else:
+                allowed += 1
 
-    @commands.command(aliases=['forbid_case', 'delete_witness', 'remve_witness', 'fw'])
+        return await ctx.send(f"**`{allowed}` {'witnesses/roles have' if allowed > 1 else 'witness/role has'} been allowed here!**")
+
+    @commands.command(aliases=['forbid_case', 'delete_witness', 'remove_witness', 'fw'])
     @commands.has_any_role(*allowed_roles)
     async def forbid_witness(self, ctx):
-        """ Forbids one or more witnesses from a case channel.
-        :param members: The member(s) to forbid. """
+        """ Forbids one or more witnesses or roles from a case channel.
+        :param members: The member(s) or role(s) to forbid. """
 
         members = await utils.get_mentions(ctx.message)
-        if not members:
-            return await ctx.send("**Inform a witness to forbid!**")
+        roles = await utils.get_roles(ctx.message)
+        witness_r = [role for role in roles if role.id in witness_roles]
+
+        if not members and not witness_r:
+            return await ctx.send("**Inform a witness or role to forbid!**")
 
         user_channel = await self.get_case_channel(ctx.channel.id)
         if not user_channel:
             return await ctx.send(f"**This is not a case channel, {ctx.author.mention}!**")
 
-        confirm = await Confirm(f"**Are you sure you want to forbid all `{len(members)}` informed {'witnesses' if len(members) > 1 else 'witness'} from this case channel, {ctx.author.mention}?**").prompt(ctx)
+        confirm = await Confirm(f"**Are you sure you want to forbid all `{len(members) + len(witness_r)}` informed {'witnesses/roles' if len(members) + len(witness_r) > 1 else 'witness/role'} from this case channel, {ctx.author.mention}?**").prompt(ctx)
         if not confirm:
             return await ctx.send(f"**Not forbidding them, then!**")
 
@@ -772,7 +789,16 @@ class ReportSupport(*report_support_classes):
             else:
                 forbid += 1
 
-        return await ctx.send(f"**`{forbid}` {'witnesses have' if forbid > 1 else 'witness has'} been forbidden from here!**")
+        for role in witness_r:
+            try:
+                await channel.set_permissions(
+                    role, read_messages=False, send_messages=False, connect=False, speak=False, view_channel=False)
+            except Exception:
+                pass
+            else:
+                forbid += 1
+
+        return await ctx.send(f"**`{forbid}` {'witnesses/roles have' if forbid > 1 else 'witness/role has'} been forbidden from here!**")
             
     @commands.command(aliases=['delete_channel', 'archive', 'cc', "close_case", "end_case", "solve", "solved"])
     @commands.has_any_role(*allowed_roles)
