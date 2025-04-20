@@ -296,30 +296,70 @@ class ReportSupport(*report_support_classes):
         :param payload: Data about the staff member who is opening the application. """
 
         emoji = str(payload.emoji)
-        if emoji == '✅':
+        guild = self.client.get_guild(server_id)
+        
+        try:
+            if emoji == '✅':
             # Gets the ban appeal app and does the magic
-            if not (app := await self.get_application_by_message(payload.message_id)):
-                return
+                try:
+                    app = await self.get_application_by_message(payload.message_id)
+                    if not app:
+                        return
 
-            try:
-                user = discord.Object(app[1])
-                await message.guild.unban(user)
-            except discord.NotFound:
-                pass
-            finally:
-                await self.delete_application(message.id)
-                await message.add_reaction('❤️‍🩹')
+                    try:
+                        user = discord.Object(app[1])
+                        await guild.unban(user)
+                    except discord.NotFound:
+                        if channel := self.client.get_channel(payload.channel_id):
+                            await channel.send(f"**Let Hodja know:** User with ID {app[1]} not found in the ban list.")
+                    except Exception as e:
+                        if channel := self.client.get_channel(payload.channel_id):
+                            await channel.send(f"**Let Hodja know:** Error unbanning user: {e}")
+                    finally:
+                        try:
+                            await self.delete_application(message.id)
+                        except Exception as e:
+                            if channel := self.client.get_channel(payload.channel_id):
+                                await channel.send(f"**Let Hodja know:** Error deleting application: {e}")
+                        try:
+                            await message.add_reaction('❤️‍🩹')
+                        except Exception as e:
+                            if channel := self.client.get_channel(payload.channel_id):
+                                await channel.send(f"**Let Hodja know:** Error adding reaction to message: {e}")
 
-        elif emoji == '❌':
+                except Exception as e:
+                    if channel := self.client.get_channel(payload.channel_id):
+                        await channel.send(f"**Let Hodja know:** Error handling '✅' reaction: {e}")
+
+            elif emoji == '❌':
             # Tries to delete the ban appeal app from the db, in case it is registered
-            app = await self.get_application_by_message(payload.message_id)
-            if app and not app[3]:
-                await self.delete_application(payload.message_id)
+                try:
+                    app = await self.get_application_by_message(payload.message_id)
+                    if not app:
+                        return
 
+                    if app and not app[3]:
+                        try:
+                            await self.delete_application(payload.message_id)
+                        except Exception as e:
+                            if channel := self.client.get_channel(payload.channel_id):
+                                await channel.send(f"**Let Hodja know:** Error deleting application: {e}")
 
-                app_channel = self.client.get_channel(self.ban_appeals_channel_id)
-                app_msg = await app_channel.fetch_message(payload.message_id)
-                await app_msg.add_reaction('🚫')
+                        try:
+                            app_channel = self.client.get_channel(self.ban_appeals_channel_id)
+                            app_msg = await app_channel.fetch_message(payload.message_id)
+                            await app_msg.add_reaction('🚫')
+                        except Exception as e:
+                            if channel := self.client.get_channel(payload.channel_id):
+                                await channel.send(f"**Let Hodja know:** Error handling message in ban appeals channel: {e}")
+
+                except Exception as e:
+                    if channel := self.client.get_channel(payload.channel_id):
+                        await channel.send(f"**Let Hodja know:** Error handling '❌' reaction: {e}")
+
+        except Exception as e:
+            if channel := self.client.get_channel(payload.channel_id):
+                await channel.send(f"**Let Hodja know:** Unexpected error in handle_ban_appeal: {e}")
 
     async def handle_application(self, guild, payload) -> None:
         """ Handles applications.
