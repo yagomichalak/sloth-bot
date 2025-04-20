@@ -107,7 +107,20 @@ class Moderation(*moderation_cogs):
                 is_from_guild = await self.check_invite_guild(msg, message.guild, invite_root)
 
                 if not is_from_guild:
-                    return await self._mute_callback(ctx, member=message.author, reason="Invite Advertisement.")
+                    # return await self._mute_callback(ctx, member=message.author, reason="Invite Advertisement.")
+                    
+                    timeout_duration = 30 * 60  # 30 minutes in seconds
+                    timeout_until = discord.utils.utcnow() + timedelta(seconds=timeout_duration)
+                    await message.author.timeout(until=timeout_until, reason="Invite Advertisement.")
+                    
+                    # send a dm to the user
+                    try:
+                        await message.author.send(
+                            f"**You have been timed out for 30 minutes in Language Sloth.**\n"
+                            f"**Reason:** Invite advertisement."
+                        )
+                    except discord.Forbidden:
+                        pass
 
     @commands.Cog.listener()
     async def on_member_update(self, before, after):
