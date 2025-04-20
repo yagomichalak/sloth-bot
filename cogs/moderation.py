@@ -2082,7 +2082,7 @@ We appreciate your understanding and look forward to hearing from you. """, embe
 
             if not should_ban:
                 mod_ban_embed = discord.Embed(
-                    title=f"Hackban Request (5mins)",
+                    title=f"Hackban Request",
                     description=f'''
                     {author.mention} wants to hackban {member.mention}, it requires 1 **Staff Manager** or **Admin** ✅ reaction for it!
                     ```Reason: {reason}```''',
@@ -2090,43 +2090,49 @@ We appreciate your understanding and look forward to hearing from you. """, embe
                 mod_ban_embed.set_author(name=f'{member} is going to Brazil 🦜...', icon_url=member.display_avatar)
                 msg = await ctx.send(embed=mod_ban_embed)
                 await msg.add_reaction('✅')
+                await msg.add_reaction('❎')
 
-                def check_staff_manager(r, u):
+                def check_reaction(r, u):
                     if u.bot:
                         return False
                     if r.message.id != msg.id:
-                        return
+                        return False
 
-                    if str(r.emoji) == '✅':
+                    if str(r.emoji) in ['✅', '❎']:
                         perms = channel.permissions_for(u)
                         if senior_mod_role_id in [r.id for r in u.roles] or perms.administrator:
                             return True
                         else:
                             self.client.loop.create_task(
-                                msg.remove_reaction('✅', u)
-                                )
+                                msg.remove_reaction(r.emoji, u)
+                            )
                             return False
 
                     else:
                         self.client.loop.create_task(
                             msg.remove_reaction(r.emoji, u)
-                            )
+                        )
                         return False
 
                 while True:
                     try:
-                        r, u = await self.client.wait_for('reaction_add', timeout=300, check=check_staff_manager)
+                        r, u = await self.client.wait_for('reaction_add', timeout=3600, check=check_reaction)
                     except asyncio.TimeoutError:
                         mod_ban_embed.description = f'Timeout, {member} is not getting hackbanned!'
                         await msg.remove_reaction('✅', self.client.user)
-                        
+                        await msg.remove_reaction('❎', self.client.user)
                         await msg.edit(embed=mod_ban_embed)
                         break
                     else:
-                        mod_ban_embed.title = f"Hackban Request (5mins)"
-                        await msg.edit(embed=mod_ban_embed)
-                        should_ban = True
-                        break
+                        if str(r.emoji) == '✅':
+                            should_ban = True
+                            await msg.remove_reaction('❎', self.client.user)
+                            break
+                        elif str(r.emoji) == '❎':
+                            mod_ban_embed.description = f'Ban request denied.'
+                            await msg.remove_reaction('✅', self.client.user)
+                            await msg.edit(embed=mod_ban_embed)
+                            break
 
             if not should_ban:
                 return
