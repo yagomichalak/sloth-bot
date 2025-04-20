@@ -178,7 +178,7 @@ class Prestige(commands.Cog, command_attrs=dict(hidden=True)):
             ("**muazzam** <@201086628167417857>", "https://tenor.com/view/christmas-christmas-tree-throw-angry-gif-15936546"),
             ("*type shi* <@201086628167417857>", "https://tenor.com/view/suit-black-man-sitting-posing-gif-27703959"),
             ("*burada demokrasi yok hocam* <@201086628167417857>", "https://tenor.com/view/1984-gif-19260546"),
-            ("*my honest reaction* <@201086628167417857>", "https://tenor.com/view/my-honest-reaction-meme-meme-reaction-thugga-trying-not-to-laugh-gif-17796125959159847090")
+            ("*my honest reaction* <@201086628167417857>", "https://tenor.com/view/my-honest-reaction-meme-meme-reaction-thugga-trying-not-to-laugh-gif-17796125959159847090"),
             ("**allahümmeyarab** <@201086628167417857>", "https://tenor.com/view/praise-allah-gif-24350702"),
             ("*haydaaa* <@201086628167417857>", "https://tenor.com/view/bruh-bruh-triggered-bruh-bttv-meme-gif-16887494"),
             ("*şeytan müzik listener* <@201086628167417857>", "https://tenor.com/view/bad-omens-artificial-suicide-the-death-of-peace-of-mind-metalcore-metal-gif-24779206"),
