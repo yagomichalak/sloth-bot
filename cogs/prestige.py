@@ -164,26 +164,29 @@ class Prestige(commands.Cog, command_attrs=dict(hidden=True)):
         await ctx.message.delete()
         await ctx.send("<@515991382217981952> niso")
 
-    @commands.command(aliases=["hodjapie", "kebap", "kebapguy", "onekebappls"])
+    @commands.command(aliases=["hodjapie", "kebap", "kebapguy", "onekebappls", "muazzam"])
     async def hodja(self, ctx) -> None:
         """ A command for telling something about the kebap guy, Hodja. """
 
         await ctx.message.delete()
 
         sentences = [
-            "**I THOUGHT YOU WERE A GIRL** <@201086628167417857>",
-            "*one kebap pls* <@201086628167417857>",
-            "**the f-ck is up yo?** <@201086628167417857>",
-            "*aferin* <@201086628167417857>",
-            "**muazzam** <@201086628167417857>",
-            "*type shi* <@201086628167417857>",
-            "*burada demokrasi yok hocam* <@201086628167417857>",
-            "**allahümmeyarab** <@201086628167417857>",
-            "*haydaaa* <@201086628167417857>",
-            "*şeytan müzik listener* <@201086628167417857>"
+            ("**I THOUGHT YOU WERE A GIRL** <@201086628167417857>", "https://tenor.com/view/teen-angel-body-swap-transformation-transform-shapeshift-gif-20282289"),
+            ("*one kebap pls* <@201086628167417857>", "https://tenor.com/view/kebap%C3%A7%C4%B1-abi-terleyen-kebap%C3%A7%C4%B1-abi-kebap-yapan-abi-terleyen-abi-terleyen-adam-gif-16683983459963325554"),
+            ("**the f-ck is up yo?** <@201086628167417857>", "https://tenor.com/view/k%C4%B1l%C4%B1%C3%A7daro%C4%9Flu-gif-17522471039651255534"),
+            ("*aferin* <@201086628167417857>", "https://tenor.com/view/anime-fight-anime-argue-suisei-suisei-fight-gif-4325572992682955548"),
+            ("**muazzam** <@201086628167417857>", "https://tenor.com/view/christmas-christmas-tree-throw-angry-gif-15936546"),
+            ("*type shi* <@201086628167417857>", "https://tenor.com/view/suit-black-man-sitting-posing-gif-27703959"),
+            ("*burada demokrasi yok hocam* <@201086628167417857>", "https://tenor.com/view/1984-gif-19260546"),
+            ("*my honest reaction* <@201086628167417857>", "https://tenor.com/view/my-honest-reaction-meme-meme-reaction-thugga-trying-not-to-laugh-gif-17796125959159847090"),
+            ("**allahümmeyarab** <@201086628167417857>", "https://tenor.com/view/praise-allah-gif-24350702"),
+            ("*haydaaa* <@201086628167417857>", "https://tenor.com/view/bruh-bruh-triggered-bruh-bttv-meme-gif-16887494"),
+            ("*şeytan müzik listener* <@201086628167417857>", "https://tenor.com/view/bad-omens-artificial-suicide-the-death-of-peace-of-mind-metalcore-metal-gif-24779206"),
+            ("bro like when a mf deadass says *“hojda”* like what the **ACTUAL** hell is that supposed to be. it’s *“hodja.”* it’s literally right there. not even a hard word. like it’s not some advanced quantum linguistics olympiad, it’s five damn letters. just say *“hoca”* if you’re gonna butcher it anyway. mf acting like vowels are optional and spelling is interpretive art. like imagine being so **braindead** your brain is just two neutrons drifting past each other in a fog of stupid and you somehow manage to say *“hojda”* with your whole chest like you did something.\n**I SWEAR TO GOD MFFFFFFFFFFFFFFFFFFFFFFFFF**\n**YOU HAD ONE JOB**\n**RAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA**\nlike it’s not even a typo at this point, it’s a full-blown declaration of war on phonetics. *“hojda”* sounds like a medieval cough. like some peasant sneezed in 1347 and accidentally invented that word while dying of the plague. and don’t even get me started on the smugness. mf say it like they dropping ancient wisdom. no, you're not profound. you just misspelled *“hodja”* and now i’m gonna have to sit in a dark room and rethink the future of communication.\n**RAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA**\n**YOU GOT 26 LETTERS AND STILL MADE THE WRONG CHOICE**\n**THE BAR WAS ON THE FLOOR**\n**AND YOU BROUGHT A SHOVEL**\nthis is why i got trust issues bro. someone says *“hojda”* and all my neurons just short-circuit out of sheer disappointment. like how do you even get it that wrong. i’m gonna start charging people a stupidity tax for every time i hear that nonsense. bro just log off. delete your keyboard. seek help.\n**RAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA**\n*ok, i'm calm now* <@201086628167417857>", "https://tenor.com/view/low-tier-god-gif-25175746"),
         ]
 
         gifs = [
+            "https://tenor.com/view/yayl%C4%B1-oyuncak-yayl%C4%B1-emoji-g%C3%B6z-k%C4%B1rpan-emoji-g%C3%B6z-k%C4%B1rparak-g%C3%BClen-emoji-wink-gif-2176531366822319352",
             "https://tenor.com/view/gopher-groundhod-groundhog-eating-gopher-eating-gopher-eating-carrot-gif-26389545",
             "https://tenor.com/view/cerbervt-cerber-vtuber-gif-543256581190828359",
             "https://tenor.com/view/meme-down-syndrome-funny-tongue-action-tongue-out-meme-gif-572114404054760484",
@@ -201,7 +204,6 @@ class Prestige(commands.Cog, command_attrs=dict(hidden=True)):
             "https://tenor.com/view/low-tier-god-awesome-mario-twerking-gif-23644561",
             "https://tenor.com/view/recep-ivedik-gif-17979851115064014078",
             "https://tenor.com/view/u%C4%9Fur-d%C3%BCndar-gif-21913397",
-            "https://tenor.com/view/k%C4%B1l%C4%B1%C3%A7daro%C4%9Flu-gif-17522471039651255534",
             "https://tenor.com/view/recep-ivedik-gif-20643754",
             "https://tenor.com/view/bruh-gif-23441586",
             "https://tenor.com/view/cute-anime-anime-girl-pink-hearts-gif-2859182496452245481",
@@ -209,10 +211,10 @@ class Prestige(commands.Cog, command_attrs=dict(hidden=True)):
             "https://tenor.com/view/%C3%A7okzorya-cokzorua-cokzorya-%C3%A7ok-zor-ya-%C3%A7ok-zor-ya-diyen-adam-gif-10957057876352588846",
             "https://tenor.com/view/fbi-kana-gif-7441334008951759059",
             "https://tenor.com/view/ali-ko%C3%A7-gif-18426190093325981609",
+            "https://tenor.com/view/black-man-sitting-snazzy-gif-26181918",
             "https://tenor.com/view/shrek-smirk-gif-10170997843933469713",
             "https://tenor.com/view/discord-ban-appeal-gif-3829887507116417894",
             "https://tenor.com/view/homer-simpson-simpsons-kebab-gif-9043334",
-            "https://tenor.com/view/kebap%C3%A7%C4%B1-abi-terleyen-kebap%C3%A7%C4%B1-abi-kebap-yapan-abi-terleyen-abi-terleyen-adam-gif-16683983459963325554",
             "https://tenor.com/view/khontkar-zenci-ensar-nas%C4%B1l-olunuyor-peki-rk-dance-gif-13595955285171961629",
             "https://media.discordapp.net/attachments/1107006693503684638/1202297577589194805/bruhgif.gif",
             "https://tenor.com/view/lowtiergod-ltg-excuse-me-what-huh-gif-16649578861553422481",
@@ -220,11 +222,9 @@ class Prestige(commands.Cog, command_attrs=dict(hidden=True)):
             "https://tenor.com/view/rterahatsiz-gif-7057240225373514376",
             "https://tenor.com/view/monkey-shocked-monkey-disappointed-disappointed-monkey-gif-25631537",
             "https://tenor.com/view/transitions-kinemaster-black-guy-suit-tiktok-gif-25279479",
-            "https://tenor.com/view/suit-black-man-sitting-posing-gif-27703959",
             "https://tenor.com/view/side-eye-dog-gif-22972113",
             "https://tenor.com/view/abdulhamit-abdul-kalam-abdulh-abdulham-abdulhami-gif-26119085",
             "https://tenor.com/view/pepe-the-frog-cave-get-inside-walk-in-gif-16937105",
-            "https://tenor.com/view/praise-allah-gif-24350702",
             "https://tenor.com/view/bruh-bruh-triggered-bruh-bttv-meme-gif-16887494"
         ]
 
@@ -236,7 +236,11 @@ class Prestige(commands.Cog, command_attrs=dict(hidden=True)):
             await ctx.send("**SUPER RARE DOUBLE LAVASH KEBAP PULL!!!** <@201086628167417857>", delete_after=11)
             await ctx.send("https://tenor.com/view/ayran-gif-10772760", delete_after=11)
         else:
-            await ctx.send(choice(sentences), delete_after=11)
+            sentence, gif = choice(sentences)
+            
+            await ctx.send(sentence, delete_after=11)
+            if gif is not None:
+                await ctx.send(gif, delete_after=11)
             
     @commands.command(aliases=["jelly", "jellyfish", "jellytimet", "jogurt", "doctor"])
     async def _jelly(self, ctx) -> None:

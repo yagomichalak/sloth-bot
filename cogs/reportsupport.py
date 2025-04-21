@@ -51,9 +51,10 @@ moderator_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 senior_role_id = int(os.getenv('SENIOR_MOD_ROLE_ID', 123))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID', 123))
 lesson_management_role_id = int(os.getenv('LESSON_MANAGEMENT_ROLE_ID', 123))
-analyst_debugger_role_id: int = int(os.getenv('ANALYST_DEBUGGER_ROLE_ID', 123)) # used by temp check command
-timedout_role_id = int(os.getenv('TIMEDOUT_ROLE_ID', 123)) # used by temp check command
+event_management_role_id = int(os.getenv('EVENT_MANAGER_ROLE_ID', 123))
+giveaway_management_role_id = int(os.getenv('GIVEAWAY_MANAGER_ROLE_ID', 123))
 allowed_roles = [int(os.getenv('OWNER_ROLE_ID', 123)), admin_role_id, moderator_role_id]
+witness_roles = [lesson_management_role_id, event_management_role_id, giveaway_management_role_id]
 
 report_support_classes: List[commands.Cog] = [
     ApplicationsTable, Verify, OpenChannels
@@ -108,44 +109,6 @@ class ReportSupport(*report_support_classes):
                 except Exception as e:
                     print(f"Failed at deleting the {channel}: {str(e)}")
             await self.remove_user_open_channel(inactive_case[0])
-
-    @commands.command()
-    @utils.is_allowed([analyst_debugger_role_id], throw_exc=True)
-    @commands.cooldown(1, 30, commands.BucketType.user)
-    async def check(self, ctx: commands.Context) -> None:
-        """ Temporary command for checking cases and timeouts. """
-
-        guild = self.client.get_guild(server_id)
-
-        # Look for people who completed their timeout time 
-        role = guild.get_role(timedout_role_id)
-        members = role.members
-
-        for member in members:
-            try:
-                timeout_time = member.communication_disabled_until
-                if timeout_time is None or (timeout_time and timeout_time.timestamp() < time.time()):
-                    await member.remove_roles(role)
-            except Exception as e:
-                print(e)
-                continue
-
-        # Look inactive case rooms to delete
-        current_ts = await utils.get_timestamp()
-        inactive_cases = await self.get_inactive_cases(current_ts)
-
-        for inactive_case in inactive_cases:
-            channel = discord.utils.get(guild.channels, id=inactive_case[1])
-
-            if channel:
-                try:
-                    await channel.delete()
-                except Exception as e:
-                    print(f"Failed at deleting the {channel}: {str(e)}")
-            await self.remove_user_open_channel(inactive_case[0])
-
-        emoji = "<:patao:1261308730918572163>"
-        await ctx.send(emoji)
 
     def split_into_chunks(self, text: str, max_length: int) -> List[str]:
         """Splits text into chunks of a specified maximum length, respecting word boundaries."""
@@ -333,30 +296,70 @@ class ReportSupport(*report_support_classes):
         :param payload: Data about the staff member who is opening the application. """
 
         emoji = str(payload.emoji)
-        if emoji == '✅':
+        guild = self.client.get_guild(server_id)
+        
+        try:
+            if emoji == '✅':
             # Gets the ban appeal app and does the magic
-            if not (app := await self.get_application_by_message(payload.message_id)):
-                return
+                try:
+                    app = await self.get_application_by_message(payload.message_id)
+                    if not app:
+                        return
 
-            try:
-                user = discord.Object(app[1])
-                await message.guild.unban(user)
-            except discord.NotFound:
-                pass
-            finally:
-                await self.delete_application(message.id)
-                await message.add_reaction('❤️‍🩹')
+                    try:
+                        user = discord.Object(app[1])
+                        await guild.unban(user)
+                    except discord.NotFound:
+                        if channel := self.client.get_channel(payload.channel_id):
+                            await channel.send(f"**Let Hodja know:** User with ID {app[1]} not found in the ban list.")
+                    except Exception as e:
+                        if channel := self.client.get_channel(payload.channel_id):
+                            await channel.send(f"**Let Hodja know:** Error unbanning user: {e}")
+                    finally:
+                        try:
+                            await self.delete_application(message.id)
+                        except Exception as e:
+                            if channel := self.client.get_channel(payload.channel_id):
+                                await channel.send(f"**Let Hodja know:** Error deleting application: {e}")
+                        try:
+                            await message.add_reaction('❤️‍🩹')
+                        except Exception as e:
+                            if channel := self.client.get_channel(payload.channel_id):
+                                await channel.send(f"**Let Hodja know:** Error adding reaction to message: {e}")
 
-        elif emoji == '❌':
+                except Exception as e:
+                    if channel := self.client.get_channel(payload.channel_id):
+                        await channel.send(f"**Let Hodja know:** Error handling '✅' reaction: {e}")
+
+            elif emoji == '❌':
             # Tries to delete the ban appeal app from the db, in case it is registered
-            app = await self.get_application_by_message(payload.message_id)
-            if app and not app[3]:
-                await self.delete_application(payload.message_id)
+                try:
+                    app = await self.get_application_by_message(payload.message_id)
+                    if not app:
+                        return
 
+                    if app and not app[3]:
+                        try:
+                            await self.delete_application(payload.message_id)
+                        except Exception as e:
+                            if channel := self.client.get_channel(payload.channel_id):
+                                await channel.send(f"**Let Hodja know:** Error deleting application: {e}")
 
-                app_channel = self.client.get_channel(self.ban_appeals_channel_id)
-                app_msg = await app_channel.fetch_message(payload.message_id)
-                await app_msg.add_reaction('🚫')
+                        try:
+                            app_channel = self.client.get_channel(self.ban_appeals_channel_id)
+                            app_msg = await app_channel.fetch_message(payload.message_id)
+                            await app_msg.add_reaction('🚫')
+                        except Exception as e:
+                            if channel := self.client.get_channel(payload.channel_id):
+                                await channel.send(f"**Let Hodja know:** Error handling message in ban appeals channel: {e}")
+
+                except Exception as e:
+                    if channel := self.client.get_channel(payload.channel_id):
+                        await channel.send(f"**Let Hodja know:** Error handling '❌' reaction: {e}")
+
+        except Exception as e:
+            if channel := self.client.get_channel(payload.channel_id):
+                await channel.send(f"**Let Hodja know:** Unexpected error in handle_ban_appeal: {e}")
 
     async def handle_application(self, guild, payload) -> None:
         """ Handles applications.
@@ -743,20 +746,22 @@ class ReportSupport(*report_support_classes):
     @commands.command(aliases=['permit_case', 'allow_case', 'add_witness', 'witness', 'aw'])
     @commands.has_any_role(*allowed_roles)
     async def allow_witness(self, ctx):
-        """ Allows one or more witnesses to join a case channel.
-        :param members: The member(s) to allow. """
+        """ Allows one or more witnesses or roles to join a case channel.
+        :param members: The member(s) or role(s) to allow. """
 
         author = ctx.author
         members = await utils.get_mentions(ctx.message)
+        roles = await utils.get_roles(ctx.message)
+        witness_r = [role for role in roles if role.id in witness_roles]
 
-        if not members:
-            return await ctx.send("**Inform at least one witness to allow!**")
+        if not members and not witness_r:
+            return await ctx.send("**Inform at least one witness or role to allow!**")
 
         user_channel = await self.get_case_channel(ctx.channel.id)
         if not user_channel:
             return await ctx.send(f"**This is not a case channel, {author.mention}!**")
 
-        confirm = await Confirm(f"**Are you sure you want to allow all `{len(members)}` informed {'witnesses' if len(members) > 1 else 'witness'} in this case channel, {ctx.author.mention}?**").prompt(ctx)
+        confirm = await Confirm(f"**Are you sure you want to allow all `{len(members) + len(witness_r)}` informed {'witnesses/roles' if len(members) + len(witness_r) > 1 else 'witness/role'} in this case channel, {ctx.author.mention}?**").prompt(ctx)
         if not confirm:
             return await ctx.send(f"**Not allowing them, then!**")
 
@@ -781,23 +786,35 @@ class ReportSupport(*report_support_classes):
             else:
                 allowed += 1
 
-        return await ctx.send(f"**`{allowed}` {'witnesses have' if allowed > 1 else 'witness has'} been allowed here!**")
+        for role in witness_r:
+            try:
+                await channel.set_permissions(
+                    role, read_messages=True, send_messages=True, connect=True, speak=True, view_channel=True)
+            except Exception:
+                pass
+            else:
+                allowed += 1
 
-    @commands.command(aliases=['forbid_case', 'delete_witness', 'remve_witness', 'fw'])
+        return await ctx.send(f"**`{allowed}` {'witnesses/roles have' if allowed > 1 else 'witness/role has'} been allowed here!**")
+
+    @commands.command(aliases=['forbid_case', 'delete_witness', 'remove_witness', 'fw'])
     @commands.has_any_role(*allowed_roles)
     async def forbid_witness(self, ctx):
-        """ Forbids one or more witnesses from a case channel.
-        :param members: The member(s) to forbid. """
+        """ Forbids one or more witnesses or roles from a case channel.
+        :param members: The member(s) or role(s) to forbid. """
 
         members = await utils.get_mentions(ctx.message)
-        if not members:
-            return await ctx.send("**Inform a witness to forbid!**")
+        roles = await utils.get_roles(ctx.message)
+        witness_r = [role for role in roles if role.id in witness_roles]
+
+        if not members and not witness_r:
+            return await ctx.send("**Inform a witness or role to forbid!**")
 
         user_channel = await self.get_case_channel(ctx.channel.id)
         if not user_channel:
             return await ctx.send(f"**This is not a case channel, {ctx.author.mention}!**")
 
-        confirm = await Confirm(f"**Are you sure you want to forbid all `{len(members)}` informed {'witnesses' if len(members) > 1 else 'witness'} from this case channel, {ctx.author.mention}?**").prompt(ctx)
+        confirm = await Confirm(f"**Are you sure you want to forbid all `{len(members) + len(witness_r)}` informed {'witnesses/roles' if len(members) + len(witness_r) > 1 else 'witness/role'} from this case channel, {ctx.author.mention}?**").prompt(ctx)
         if not confirm:
             return await ctx.send(f"**Not forbidding them, then!**")
 
@@ -812,7 +829,16 @@ class ReportSupport(*report_support_classes):
             else:
                 forbid += 1
 
-        return await ctx.send(f"**`{forbid}` {'witnesses have' if forbid > 1 else 'witness has'} been forbidden from here!**")
+        for role in witness_r:
+            try:
+                await channel.set_permissions(
+                    role, read_messages=False, send_messages=False, connect=False, speak=False, view_channel=False)
+            except Exception:
+                pass
+            else:
+                forbid += 1
+
+        return await ctx.send(f"**`{forbid}` {'witnesses/roles have' if forbid > 1 else 'witness/role has'} been forbidden from here!**")
             
     @commands.command(aliases=['delete_channel', 'archive', 'cc', "close_case", "end_case", "solve", "solved"])
     @commands.has_any_role(*allowed_roles)
@@ -826,10 +852,14 @@ class ReportSupport(*report_support_classes):
             return await ctx.send(f"**What do you think that you are doing? You cannot delete this channel, {member.mention}!**")
             
         channel = discord.utils.get(ctx.guild.text_channels, id=user_channel[0][1])
+        case_name = channel.name
+        case_number = case_name.split('-')[-1] if case_name.split('-')[-1].isdigit() else "N/A"  # Extract the case number if there is one
+
         embed = discord.Embed(title="Confirmation",
             description="Are you sure that you want to delete this channel?",
             color=member.color,
-            timestamp=ctx.message.created_at)
+            timestamp=ctx.message.created_at
+        )
         confirmation = await ctx.send(content=member.mention, embed=embed)
         await confirmation.add_reaction('✅')
         await confirmation.add_reaction('❌')
@@ -837,24 +867,29 @@ class ReportSupport(*report_support_classes):
             reaction, user = await self.client.wait_for('reaction_add', timeout=20,
                 check=lambda r, u: u == member and r.message.channel == ctx.channel and str(r.emoji) in ['✅', '❌'])
         except asyncio.TimeoutError:
-            embed = discord.Embed(title="Confirmation",
-            description="You took too long to answer the question; not deleting it!",
-            color=discord.Color.red(),
-            timestamp=ctx.message.created_at)
+            embed = discord.Embed(
+                title="Confirmation",
+                description="You took too long to answer the question; not deleting it!",
+                color=discord.Color.red(),
+                timestamp=ctx.message.created_at
+            )
             return await confirmation.edit(content=member.mention, embed=embed)
         else:
             if str(reaction.emoji) == '✅':
-                embed.description = f"**Channel {ctx.channel.mention} is being deleted...**"
+                embed.description = f"**Channel {channel.mention} is being deleted...**"
                 await confirmation.edit(content=member.mention, embed=embed)
                 await asyncio.sleep(3)
                 await channel.delete()
                 await self.remove_user_open_channel(user_channel[0][0])
+
                 # Moderation log embed
                 moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
                 embed = discord.Embed(
                     title='__**Case Closed**__',
                     color=discord.Color.red(),
-                    timestamp=ctx.message.created_at)
+                    timestamp=ctx.message.created_at
+                )
+                embed.add_field(name="Case Number", value=f"#{case_number}")
                 embed.set_footer(text=f"Closed by {member}", icon_url=member.display_avatar)
                 await moderation_log.send(embed=embed)
             else:

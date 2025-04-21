@@ -107,7 +107,20 @@ class Moderation(*moderation_cogs):
                 is_from_guild = await self.check_invite_guild(msg, message.guild, invite_root)
 
                 if not is_from_guild:
-                    return await self._mute_callback(ctx, member=message.author, reason="Invite Advertisement.")
+                    # return await self._mute_callback(ctx, member=message.author, reason="Invite Advertisement.")
+                    
+                    timeout_duration = 30 * 60  # 30 minutes in seconds
+                    timeout_until = discord.utils.utcnow() + timedelta(seconds=timeout_duration)
+                    await message.author.timeout(until=timeout_until, reason="Invite Advertisement.")
+                    
+                    # send a dm to the user
+                    try:
+                        await message.author.send(
+                            f"**You have been timed out for 30 minutes in Language Sloth.**\n"
+                            f"**Reason:** Invite advertisement."
+                        )
+                    except discord.Forbidden:
+                        pass
 
     @commands.Cog.listener()
     async def on_member_update(self, before, after):
@@ -556,10 +569,12 @@ class Moderation(*moderation_cogs):
         :param member: The @ or the ID of one or more users to soft warn.
         :param reason: The reason for warning one or all users. (Optional)"""
 
-        if not message:
-            await self._easy_warn_callback(ctx=ctx, warn_type="lwarn")
-        else:
-            await self._warn_callback(ctx=ctx, message=message, warn_type="lwarn")
+        await ctx.send("**Light warn is disabled until further notice.** Use `z!warn`.", delete_after=6)
+
+        #if not message:
+        #    await self._easy_warn_callback(ctx=ctx, warn_type="lwarn")
+        #else:
+        #    await self._warn_callback(ctx=ctx, message=message, warn_type="lwarn")
 
     @commands.command(aliases=["warnado", "wrn", "w"])
     @utils.is_allowed(allowed_roles, throw_exc=True)
@@ -580,10 +595,12 @@ class Moderation(*moderation_cogs):
         :param member: The @ or the ID of one or more users to warn.
         :param reason: The reason for warning one or all users. (Optional)"""
         
-        if not message:
-            await self._easy_warn_callback(ctx=ctx, warn_type="hwarn")
-        else:
-            await self._warn_callback(ctx=ctx, message=message, warn_type="hwarn")
+        await ctx.send("**Heavy warn is disabled until further notice.** Use `z!warn`.", delete_after=6)
+        
+        #if not message:
+        #    await self._easy_warn_callback(ctx=ctx, warn_type="hwarn")
+        #else:
+        #    await self._warn_callback(ctx=ctx, message=message, warn_type="hwarn")
         
     async def _easy_warn_callback(self, ctx, warn_type: str = "warn") -> None:
         """ Callback for the easy warn.
@@ -667,10 +684,13 @@ class Moderation(*moderation_cogs):
                     else:
                         if hours > 0:
                             warn_desc += f'\n**Timeout:** {hours}h'
+                            log_timeout = f'\n**Timedout for:** {hours}h'
                         elif days > 0:
                             warn_desc += f'\n**Timeout:** {days}d'
+                            log_timeout = f'\n**Timedout for:** {days}d'
                         elif weeks > 0:
                             warn_desc += f'\n**Timeout:** {weeks}w'
+                            log_timeout = f'\n**Timedout for:** {weeks}w'
                     general_embed = discord.Embed(description=warn_desc, colour=ctx.author.color)
                     general_embed.set_author(name=f'{member} has been {warn_msg}warned', icon_url=member.display_avatar)
                     await ctx.send(embed=general_embed)
@@ -684,6 +704,8 @@ class Moderation(*moderation_cogs):
                     embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nId: {member.id}```',
                                     inline=False)
                     embed.add_field(name='Reason:', value=f"> -# **{infr_date}**\n> -# by {perpetrator}\n> {reason}")
+                    if log_timeout:
+                        embed.add_field(name='Timeout:', value=f"> -# {log_timeout}")
                     embed.set_author(name=member)
                     embed.set_thumbnail(url=member.display_avatar)
                     embed.set_footer(text=f"Warned by {ctx.author}", icon_url=ctx.author.display_avatar)
@@ -1732,7 +1754,7 @@ We appreciate your understanding and look forward to hearing from you. """, embe
 
     # Unbans a member
     @commands.command()
-    @commands.has_permissions(administrator=True)
+    @utils.is_allowed([senior_mod_role_id], throw_exc=True)
     async def unban(self, ctx, *, member=None):
         """ (ADM) Unbans a member from the server.
         :param member: The full nickname and # of the user to unban. """
@@ -1887,7 +1909,7 @@ We appreciate your understanding and look forward to hearing from you. """, embe
                 user_id=member.id, infr_type="softban", reason=reason,
                 timestamp=current_ts, perpetrator=ctx.author.id)
 
-    @commands.command(aliases=['nitrokick', 'nitro', 'scam', 'phish', 'phishing'])
+    @commands.command(aliases=['nitrokick', 'nitro', 'nk', 'scam', 'phish', 'phishing'])
     @utils.is_allowed(allowed_roles, throw_exc=True)
     async def nitro_kick(self, ctx, member: Optional[discord.Member] = None) -> None:
         """ (ModTeam/ADM) Mutes & Softbans a member from the server who's posting Nitro scam links.
@@ -2064,7 +2086,7 @@ We appreciate your understanding and look forward to hearing from you. """, embe
 
             if not should_ban:
                 mod_ban_embed = discord.Embed(
-                    title=f"Hackban Request (5mins)",
+                    title=f"Hackban Request",
                     description=f'''
                     {author.mention} wants to hackban {member.mention}, it requires 1 **Staff Manager** or **Admin** ✅ reaction for it!
                     ```Reason: {reason}```''',
@@ -2072,43 +2094,49 @@ We appreciate your understanding and look forward to hearing from you. """, embe
                 mod_ban_embed.set_author(name=f'{member} is going to Brazil 🦜...', icon_url=member.display_avatar)
                 msg = await ctx.send(embed=mod_ban_embed)
                 await msg.add_reaction('✅')
+                await msg.add_reaction('❎')
 
-                def check_staff_manager(r, u):
+                def check_reaction(r, u):
                     if u.bot:
                         return False
                     if r.message.id != msg.id:
-                        return
+                        return False
 
-                    if str(r.emoji) == '✅':
+                    if str(r.emoji) in ['✅', '❎']:
                         perms = channel.permissions_for(u)
                         if senior_mod_role_id in [r.id for r in u.roles] or perms.administrator:
                             return True
                         else:
                             self.client.loop.create_task(
-                                msg.remove_reaction('✅', u)
-                                )
+                                msg.remove_reaction(r.emoji, u)
+                            )
                             return False
 
                     else:
                         self.client.loop.create_task(
                             msg.remove_reaction(r.emoji, u)
-                            )
+                        )
                         return False
 
                 while True:
                     try:
-                        r, u = await self.client.wait_for('reaction_add', timeout=300, check=check_staff_manager)
+                        r, u = await self.client.wait_for('reaction_add', timeout=3600, check=check_reaction)
                     except asyncio.TimeoutError:
                         mod_ban_embed.description = f'Timeout, {member} is not getting hackbanned!'
                         await msg.remove_reaction('✅', self.client.user)
-                        
+                        await msg.remove_reaction('❎', self.client.user)
                         await msg.edit(embed=mod_ban_embed)
                         break
                     else:
-                        mod_ban_embed.title = f"Hackban Request (5mins)"
-                        await msg.edit(embed=mod_ban_embed)
-                        should_ban = True
-                        break
+                        if str(r.emoji) == '✅':
+                            should_ban = True
+                            await msg.remove_reaction('❎', self.client.user)
+                            break
+                        elif str(r.emoji) == '❎':
+                            mod_ban_embed.description = f'Ban request denied.'
+                            await msg.remove_reaction('✅', self.client.user)
+                            await msg.edit(embed=mod_ban_embed)
+                            break
 
             if not should_ban:
                 return
