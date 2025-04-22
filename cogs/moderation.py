@@ -684,13 +684,13 @@ class Moderation(*moderation_cogs):
                     else:
                         if hours > 0:
                             warn_desc += f'\n**Timeout:** {hours}h'
-                            log_timeout = f'\n**Timedout for:** {hours}h'
+                            log_timeout = f'{hours}h'
                         elif days > 0:
                             warn_desc += f'\n**Timeout:** {days}d'
-                            log_timeout = f'\n**Timedout for:** {days}d'
+                            log_timeout = f'{days}d'
                         elif weeks > 0:
                             warn_desc += f'\n**Timeout:** {weeks}w'
-                            log_timeout = f'\n**Timedout for:** {weeks}w'
+                            log_timeout = f'{weeks}w'
                     general_embed = discord.Embed(description=warn_desc, colour=ctx.author.color)
                     general_embed.set_author(name=f'{member} has been {warn_msg}warned', icon_url=member.display_avatar)
                     await ctx.send(embed=general_embed)
@@ -703,9 +703,11 @@ class Moderation(*moderation_cogs):
                                         timestamp=ctx.message.created_at)
                     embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nId: {member.id}```',
                                     inline=False)
-                    embed.add_field(name='Reason:', value=f"> -# **{infr_date}**\n> -# by {perpetrator}\n> {reason}")
+                    embed.add_field(name='Reason:', value=f"> -# **{infr_date}**\n> -# by {perpetrator}\n> {reason}",
+                                    inline=False)
                     if log_timeout:
-                        embed.add_field(name='Timeout:', value=f"> -# {log_timeout}")
+                        embed.add_field(name='Timeout:', value=f"> {log_timeout}",
+                                        inline=False)
                     embed.set_author(name=member)
                     embed.set_thumbnail(url=member.display_avatar)
                     embed.set_footer(text=f"Warned by {ctx.author}", icon_url=ctx.author.display_avatar)
