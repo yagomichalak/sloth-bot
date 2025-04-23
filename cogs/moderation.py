@@ -278,7 +278,7 @@ class Moderation(*moderation_cogs):
             await evidence_channel.send(embed=embed)
 
             # Nitro kick them if the member is not a staff member
-            await self.nitro_kick(ctx, member=message.author)
+            await self.nitro_kick(ctx, member=message.author, bypass_request=True)
 
     async def check_unban_infractions(self, message: discord.Message) -> None:
         """ Checks and send an infractions list of the user from the unban appeal request. """
@@ -1991,9 +1991,10 @@ We appreciate your understanding and look forward to hearing from you. """, embe
 
     @commands.command(aliases=['nitrokick', 'nitro', 'nk', 'scam', 'phish', 'phishing'])
     @utils.is_allowed(allowed_roles, throw_exc=True)
-    async def nitro_kick(self, ctx, member: Optional[discord.Member] = None) -> None:
+    async def nitro_kick(self, ctx, member: Optional[discord.Member] = None, bypass_request: bool = False) -> None:
         """ (ModTeam/ADM) Mutes & Softbans a member from the server who's posting Nitro scam links.
-        :param member: The @ or ID of the user to nitrokick. """
+        :param member: The @ or ID of the user to nitrokick.
+        :param bypass_request: Whether to bypass the moderator request process. """
     
         await ctx.message.delete()
 
@@ -2013,9 +2014,9 @@ We appreciate your understanding and look forward to hearing from you. """, embe
         perpetrators = []
         confirmations = {}
 
-        should_nitro_kick = await utils.is_allowed([senior_mod_role_id]).predicate(channel=ctx.channel, member=author)
+        should_nitro_kick = bypass_request or await utils.is_allowed([senior_mod_role_id]).predicate(channel=ctx.channel, member=author)
 
-        if not should_nitro_kick:
+        if not should_nitro_kick and not bypass_request:
             confirmations[author.id] = author.name
             mod_softban_embed = discord.Embed(
                 title=f"NitroKick Request ({len(confirmations)}/3) → (5mins)",
