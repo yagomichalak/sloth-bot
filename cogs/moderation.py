@@ -107,6 +107,7 @@ class Moderation(*moderation_cogs):
     def __init__(self, client):
         self.client = client
         self.db = DatabaseCore()
+        self.user_last_notification = {}
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -260,11 +261,11 @@ class Moderation(*moderation_cogs):
 
         embed = discord.Embed(
             color=discord.Color.red(),
-            description=f"- SCAM notification\n- [Message Link]({message.jump_url})",
+            description=f"-# SCAM notification\n-# [Message Link]({message.jump_url})",
             timestamp=discord.utils.utcnow(),
         )
 
-        created_at, joined_at = int(message.author.created_at.timestamp()), int(message.member.joined_at.timestamp())
+        created_at, joined_at = int(message.author.created_at.timestamp()), int(message.author.joined_at.timestamp())
         
         embed.add_field(name="User", value=f"**ID:** {message.author.id}\n**Username:** {message.author}", inline=True)
         embed.add_field(name="Account Info", value=f"**Created:** <t:{created_at}:F>\n**Joined:** <t:{joined_at}:F>", inline=True)
