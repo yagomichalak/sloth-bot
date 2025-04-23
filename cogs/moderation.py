@@ -46,6 +46,7 @@ allowed_roles = [int(os.getenv('OWNER_ROLE_ID', 123)), admin_role_id, senior_mod
 
 # variables.textchannel
 mod_log_id = int(os.getenv('MOD_LOG_CHANNEL_ID', 123))
+evidence_channel_id = int(os.getenv('EVIDENCE_CHANNEL_ID', 123))
 ban_appeals_channel_id: int = os.getenv("BAN_APPEALS_CHANNEL_ID", 123)
 secret_agent_channel_id = int(os.getenv('SECRET_AGENTS_CHANNEL_ID', 123))
 error_log_channel_id = int(os.getenv('ERROR_LOG_CHANNEL_ID', 123))
@@ -54,6 +55,38 @@ watchlist_disallowed_channels = [int(os.getenv('MUTED_CHANNEL_ID', 123))]
 frog_catchers_channel_id: int = int(os.getenv("FROG_CATCHERS_CHANNEL_ID", 123))
 teacher_applicant_infraction_thread_id: int = int(os.getenv("TEACHER_APPLICANT_INFRACTION_THREAD_ID", 123))
 host_applicant_infraction_thread_id: int = int(os.getenv("HOST_APPLICANT_INFRACTION_THREAD_ID", 123))
+
+# list.scam
+autoModList = [
+    "steam gift 50$",
+    "steamcommunity.com/gift-card/pay/50",
+    "u.to",
+    "Nicholas_Wallace2",
+    "+1 (618) 913-0036",
+    "I’ll teach 20 interested people on how to earn $50k",
+    "more within 72 hours from the crypto market",
+    "I’ll teach 20 interested people on how to earn $50k or more within 72 hours from the crypto market, but you’ll promise to pay me 10% of the profit. Note only interested people should massage me for more info",
+    "massage me for more info",
+    "if interested send me a direct massage. for more info via",
+    "ONLINE ASSISTANT NEEDED URGENTLY",
+    "+1 (626) 514-0696",
+    "+1 (814) 813-1670",
+    "Job Opportunity: Online Personal Assistant",
+    "Competitive weekly salary of $900",
+    "Allowances and benefits package",
+    "I have a nice idea and you can get regular income  $50-100 every month",
+    "$50-100 every month",
+    "Don't miss this exciting opportunity! Apply now",
+    "Kathryn_Aubry115",
+    "Kathryn_Aubry",
+    "help first 10 interested people how to earn 30k or more in crypto market within 48 hours but you",
+    "10% of your profits Dm",
+    "https://airdrop-stake.com/",
+    "https://xcoin-presale.com/",
+    "Hi, I received a referral link for the pre-market of the X token.",
+    "Exclusive bonuses for early stakers and loyal holders!",
+    "Hurry Up! This is a limited-time event – grab your rewards while you can!",
+]
 
 last_deleted_message = []
 
@@ -90,6 +123,12 @@ class Moderation(*moderation_cogs):
             if not message.webhook_id: return
             else:
                 return await self.check_unban_infractions(message)
+        
+        # Checks if the message is a spam/scam message
+        if any(word.lower() in message.content.lower() for word in autoModList):
+            await self.handle_scam(message)
+            await message.delete()
+            return
         
         # Checks if someone pinged Staff
         await self.check_if_pinged_staff(message)
@@ -201,6 +240,44 @@ class Moderation(*moderation_cogs):
                 ctx = await self.client.get_context(message)
                 if not await utils.is_allowed(allowed_roles).predicate(ctx):
                     return await self._mute_callback(ctx, member=message.author, reason="Banned Link")
+
+    async def handle_scam(self, message):
+        ctx = await self.client.get_context(message)
+        
+        try:
+            evidence_channel = self.client.get_channel(evidence_channel_id)
+        except discord.NotFound:
+            return
+
+        user_id = message.author.id
+        current_time = time.time() * 1000  # Convert to milliseconds
+
+        last_notification = self.user_last_notification.get(user_id, 0)
+        if current_time - last_notification < 5 * 60 * 1000:
+            return
+
+        self.user_last_notification[user_id] = current_time
+
+        embed = discord.Embed(
+            color=discord.Color.red(),
+            description=f"- SCAM notification\n- [Message Link]({message.jump_url})",
+            timestamp=discord.utils.utcnow(),
+        )
+
+        created_at, joined_at = int(message.author.created_at.timestamp()), int(message.member.joined_at.timestamp())
+        
+        embed.add_field(name="User", value=f"**ID:** {message.author.id}\n**Username:** {message.author}", inline=True)
+        embed.add_field(name="Account Info", value=f"**Created:** <t:{created_at}:F>\n**Joined:** <t:{joined_at}:F>", inline=True)
+        embed.add_field(name="Message Content", value=message.content, inline=False)
+
+        embed.set_footer(text="User muted and kicked", icon_url=message.guild.icon.url if message.guild.icon else None)
+
+        if not await utils.is_allowed(allowed_roles).predicate(ctx, member=message.author):
+            # Send the embed to the evidence channel if the member is not a staff member
+            await evidence_channel.send(embed=embed)
+
+            # Nitro kick them if the member is not a staff member
+            await self.nitro_kick(ctx, member=message.author)
 
     async def check_unban_infractions(self, message: discord.Message) -> None:
         """ Checks and send an infractions list of the user from the unban appeal request. """
