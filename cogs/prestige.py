@@ -168,6 +168,12 @@ class Prestige(commands.Cog, command_attrs=dict(hidden=True)):
     async def hodja(self, ctx) -> None:
         """ A command for telling something about the kebap guy, Hodja. """
 
+        if not hasattr(self, "_last_hodja_sentence"):
+            self._last_hodja_sentence = None
+        
+        if not hasattr(self, "_last_hodja_gif"):
+            self._last_hodja_gif = None
+
         await ctx.message.delete()
 
         sentences = [
@@ -229,15 +235,25 @@ class Prestige(commands.Cog, command_attrs=dict(hidden=True)):
         ]
 
         chance = randrange(67)
-        if chance in [3, 6, 11, 13, 16, 22, 23, 26, 36, 43, 46, 44, 53, 55, 56, 63, 66]: # don't even ask 
+        if chance in [3, 6, 11, 13, 16, 22, 23, 26, 36, 43, 46, 44, 53, 55, 56, 63, 66]: # don't even ask
+            while True:
+                gif = choice(gifs)
+                if gif != self._last_hodja_gif:
+                    self._last_hodja_gif = gif
+                    break
+            
             await ctx.send("<@201086628167417857>", delete_after=11)
-            await ctx.send(choice(gifs), delete_after=11)
+            await ctx.send(gif, delete_after=11)
         elif chance == 33:
             await ctx.send("**SUPER RARE DOUBLE LAVASH KEBAP PULL!!!** <@201086628167417857>", delete_after=11)
             await ctx.send("https://tenor.com/view/ayran-gif-10772760", delete_after=11)
         else:
-            sentence, gif = choice(sentences)
-            
+            while True:
+                sentence, gif = choice(sentences)
+                if (sentence, gif) != self._last_hodja_sentence:
+                    self._last_hodja_sentence = (sentence, gif)
+                    break
+
             await ctx.send(sentence, delete_after=11)
             if gif is not None:
                 await ctx.send(gif, delete_after=11)

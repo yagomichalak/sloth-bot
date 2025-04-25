@@ -236,16 +236,16 @@ class ReportSupport(*report_support_classes):
                                             """
                 
                                 # Send messages to Claude API
-                                response = await self.get_claude_response(messages)
+                                # response = await self.get_claude_response(messages)
                 
                                 # Send Claude response to mod's DM
-                                if user := self.client.get_user(user_id):
-                                    response_chunks = self.split_into_chunks(response, 2000)
-                                    for chunk in response_chunks:
-                                        try:
-                                            await user.send(f"{chunk}")
-                                        except Exception as e:
-                                            print(f"Failed to send DM: {e}")
+                                # if user := self.client.get_user(user_id):
+                                #     response_chunks = self.split_into_chunks(response, 2000)
+                                #     for chunk in response_chunks:
+                                #         try:
+                                #             await user.send(f"{chunk}")
+                                #         except Exception as e:
+                                #             print(f"Failed to send DM: {e}")
 
                                 # Stop monitoring each instance to make space for a new one
                                 self.active_channels.remove(channel_id)
@@ -266,25 +266,25 @@ class ReportSupport(*report_support_classes):
                 if time_diff > 5:  # No messages for 10 seconds
 
                     # Fetch and format conversation history
-                    messages = "\n".join(
-                        msg if isinstance(msg, str) else msg[0]
-                        for msg in self.conversation_history[channel_id]
-                    )
+                    # messages = "\n".join(
+                    #     msg if isinstance(msg, str) else msg[0]
+                    #     for msg in self.conversation_history[channel_id]
+                    # )
 
                     # Send messages to Claude API
-                    response = await self.get_claude_response(messages)
+                    # response = await self.get_claude_response(messages)
                     
                     # Add AI response to the history
-                    self.conversation_history[channel_id].append(f"Assistant: {response}")
+                    # self.conversation_history[channel_id].append(f"Assistant: {response}")
 
                     # Add AI response count to the max AI responses sent
                     self.max_ai_responses[channel_id].append(1)
 
                     # Send response back to the channel
-                    if channel := self.client.get_channel(channel_id):
-                        response_chunks = self.split_into_chunks(response, 2000)
-                        for chunk in response_chunks:
-                            await channel.send(f"{chunk}")
+                    # if channel := self.client.get_channel(channel_id):
+                    #     response_chunks = self.split_into_chunks(response, 2000)
+                    #     for chunk in response_chunks:
+                    #         await channel.send(f"{chunk}")
 
                     # Stop monitoring each instance to make space for a new one
                     self.active_channels.remove(channel_id)
@@ -632,16 +632,16 @@ class ReportSupport(*report_support_classes):
         self.conversation_history[channel_id].append(f"User: {responseBuffer.strip()}")
 
         # Get response from Claude
-        response = await self.get_claude_response("\n".join(self.conversation_history[channel_id]))
+        # response = await self.get_claude_response("\n".join(self.conversation_history[channel_id]))
 
         # Add AI response to the history
-        self.conversation_history[channel_id].append(f"Assistant: {response}")
+        # self.conversation_history[channel_id].append(f"Assistant: {response}")
 
         # Add AI response count to the max AI responses sent
-        self.max_ai_responses[channel_id].append(1)
+        # self.max_ai_responses[channel_id].append(1)
 
         # Send the AI response in the channel
-        await the_channel.send(content=f"{response}")
+        # await the_channel.send(content=f"{response}")
 
     # - Report a staff member
     async def report_staff(self, interaction: discord.Interaction, reportee: str, text: str, evidence: str):
