@@ -152,6 +152,7 @@ class Moderation(*moderation_cogs):
                     timeout_duration = 30 * 60  # 30 minutes in seconds
                     timeout_until = discord.utils.utcnow() + timedelta(seconds=timeout_duration)
                     await message.author.timeout(until=timeout_until, reason="Invite Advertisement.")
+                    await message.delete()
                     
                     # send a dm to the user
                     try:
