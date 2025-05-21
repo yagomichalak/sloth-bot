@@ -57,8 +57,10 @@ teacher_applicant_infraction_thread_id: int = int(os.getenv("TEACHER_APPLICANT_I
 host_applicant_infraction_thread_id: int = int(os.getenv("HOST_APPLICANT_INFRACTION_THREAD_ID", 123))
 
 # list.scam
-autoModList = [
+scamwords = [
     "steam gift 50$",
+    "50$ steam gift",
+    "https://steamncommynity.com/",
     "steamcommunity.com/gift-card/pay/50",
     "u.to",
     "Nicholas_Wallace2",
@@ -126,7 +128,7 @@ class Moderation(*moderation_cogs):
                 return await self.check_unban_infractions(message)
         
         # Checks if the message is a spam/scam message
-        if any(word.lower() in message.content.lower() for word in autoModList):
+        if any(word.lower() in message.content.lower() for word in scamwords):
             await self.handle_scam(message)
             await message.delete()
             return
@@ -279,7 +281,7 @@ class Moderation(*moderation_cogs):
             await evidence_channel.send(embed=embed)
 
             # Nitro kick them if the member is not a staff member
-            await self.nitro_kick(ctx, member=message.author, bypass_request=True)
+            await self.nitro_kick(ctx, member=message.author, internal_use=True)
 
     async def check_unban_infractions(self, message: discord.Message) -> None:
         """ Checks and send an infractions list of the user from the unban appeal request. """
@@ -1992,10 +1994,10 @@ We appreciate your understanding and look forward to hearing from you. """, embe
 
     @commands.command(aliases=["nitrokick", "nitro", "nk", "scam", "phish", "phishing"])
     @utils.is_allowed(allowed_roles, throw_exc=True)
-    async def nitro_kick(self, ctx, member: Optional[discord.Member] = None, bypass_request: bool = False) -> None:
+    async def nitro_kick(self, ctx, member: Optional[discord.Member] = None, internal_use: bool = False) -> None:
         """ (ModTeam/ADM) Mutes & Softbans a member from the server who's posting Nitro scam links.
         :param member: The @ or ID of the user to nitrokick.
-        :param bypass_request: Whether to bypass the moderator request process. """
+        :param internal_use: Whether to bypass the moderator request process for internal use. """
     
         await ctx.message.delete()
 
@@ -2015,9 +2017,9 @@ We appreciate your understanding and look forward to hearing from you. """, embe
         perpetrators = []
         confirmations = {}
 
-        should_nitro_kick = bypass_request or await utils.is_allowed([senior_mod_role_id]).predicate(channel=ctx.channel, member=author)
+        should_nitro_kick = internal_use or await utils.is_allowed([senior_mod_role_id]).predicate(channel=ctx.channel, member=author)
 
-        if not should_nitro_kick and not bypass_request:
+        if not should_nitro_kick and not internal_use:
             confirmations[author.id] = author.name
             mod_softban_embed = discord.Embed(
                 title=f"NitroKick Request ({len(confirmations)}/3)",
@@ -2111,7 +2113,6 @@ We appreciate your understanding and look forward to hearing from you. """, embe
         except Exception as e:
             pass
         try:
-
             keep_roles, remove_roles = await self.get_remove_roles(member, keep_roles=allowed_roles)
 
             await member.edit(roles=keep_roles)
