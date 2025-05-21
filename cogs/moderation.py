@@ -224,6 +224,8 @@ class Moderation(*moderation_cogs):
         :param member: The member that will be updated.
         :param new_role: The new role that was added. """
 
+        guild = self.client.get_guild(server_id)
+
         # Restricted roles to monitor
         restricted_roles = [
             int(os.getenv('NATIVE_CENTISH_ID', 123)),
@@ -235,15 +237,26 @@ class Moderation(*moderation_cogs):
         # Check if the new role is restricted
         if new_role.id in restricted_roles:
             # Fetch the audit log to find who added the role
-            async for entry in member.guild.audit_logs(limit=1, action=discord.AuditLogAction.member_role_update):
+            async for entry in guild.audit_logs(limit=1, action=discord.AuditLogAction.member_role_update):
                 if entry.target.id == member.id and new_role in entry.after.roles:
                     moderator = entry.user
 
                     # Check if the moderator has the staff manager role or admin permissions
-                    staff_manager_role = discord.utils.get(member.guild.roles, id=senior_mod_role_id)
+                    staff_manager_role = discord.utils.get(guild.roles, id=senior_mod_role_id)
                     if not (staff_manager_role in moderator.roles or moderator.guild_permissions.administrator):
                         # Remove the restricted role
                         await member.remove_roles(new_role)
+
+                        # Send a log to the moderation log channel
+                        moderation_log = discord.utils.get(guild.channels, id=mod_log_id)
+                        embed = discord.Embed(title='__**Unauthorized Role Addition**__', colour=discord.Colour.red(), timestamp=discord.utils.utcnow())
+                        embed.add_field(name='Moderator Info:', value=f'```Name: {moderator.display_name}\nId: {moderator.id}```',
+                            inline=False)
+                        embed.add_field(name='User Info:', value=f'```Name: {member.display_name}\nId: {member.id}```', inline=False)
+                        embed.add_field(name='Role Info:', value=f'{new_role.mention}',
+                            inline=False)
+                        embed.set_thumbnail(url=moderator.display_avatar)
+                        await moderation_log.send(embed=embed)
 
                         # Send a DM to the moderator
                         try:
