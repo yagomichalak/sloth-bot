@@ -2132,7 +2132,10 @@ We appreciate your understanding and look forward to hearing from you. """, embe
                                 timestamp=ctx.message.created_at)
             embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nId: {member.id}```',
                             inline=False)
-            embed.add_field(name='Reason:', value=f"> -# **{infr_date}**\n> -# by {perpetrator}\n> {reason}")
+            if internal_use:
+                embed.add_field(name='Reason:', value=f"> -# **{infr_date}**\n> -# by {self.client.user.name}\n> {reason}")
+            else:
+                embed.add_field(name='Reason:', value=f"> -# **{infr_date}**\n> -# by {perpetrator}\n> {reason}")
             embed.set_author(name=member)
             embed.set_thumbnail(url=member.display_avatar)
             embed.set_footer(text=f"Banned by {perpetrators}", icon_url=icon)
