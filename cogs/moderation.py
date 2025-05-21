@@ -1990,7 +1990,7 @@ We appreciate your understanding and look forward to hearing from you. """, embe
                 user_id=member.id, infr_type="softban", reason=reason,
                 timestamp=current_ts, perpetrator=ctx.author.id)
 
-    @commands.command(aliases=['nitrokick', 'nitro', 'nk', 'scam', 'phish', 'phishing'])
+    @commands.command(aliases=["nitrokick", "nitro", "nk", "scam", "phish", "phishing"])
     @utils.is_allowed(allowed_roles, throw_exc=True)
     async def nitro_kick(self, ctx, member: Optional[discord.Member] = None, bypass_request: bool = False) -> None:
         """ (ModTeam/ADM) Mutes & Softbans a member from the server who's posting Nitro scam links.
@@ -2004,7 +2004,7 @@ We appreciate your understanding and look forward to hearing from you. """, embe
 
         current_ts: int = await utils.get_timestamp()
 
-        reason = 'Nitro Scam'
+        reason = "Nitro Scam"
 
         if not member:
             return await ctx.send(f"**Member not found, {author.mention}!**", delete_after=3)
@@ -2020,14 +2020,15 @@ We appreciate your understanding and look forward to hearing from you. """, embe
         if not should_nitro_kick and not bypass_request:
             confirmations[author.id] = author.name
             mod_softban_embed = discord.Embed(
-                title=f"NitroKick Request ({len(confirmations)}/3) → (5mins)",
+                title=f"NitroKick Request ({len(confirmations)}/3)",
                 description=f'''
                 {author.mention} wants to nitrokick {member.mention}, it requires 2 more moderator ✅ reactions for it!
                 ```Reason: {reason}```''',
                 colour=discord.Colour.nitro_pink(), timestamp=ctx.message.created_at)
             mod_softban_embed.set_author(name=f'{member} is being NitroKicked!', icon_url=member.display_avatar)
             msg = await ctx.send(embed=mod_softban_embed)
-            await msg.add_reaction('✅')
+            await msg.add_reaction("✅")
+            await msg.add_reaction("❎")
 
             # Prompts for 3 moderator reactions
             def check_mod(r, u):
@@ -2036,43 +2037,56 @@ We appreciate your understanding and look forward to hearing from you. """, embe
                 if r.message.id != msg.id:
                     return
 
-                if str(r.emoji) == '✅':
+                if str(r.emoji) in ["✅", "❎"]:
                     perms = channel.permissions_for(u)
-                    
                     if mod_role_id in [r.id for r in u.roles] or perms.administrator:
-                        confirmations[u.id] = u.name
+                        if str(r.emoji) == "✅":
+                            confirmations[u.id] = u.name
                         return True
                     else:
                         self.client.loop.create_task(
-                            msg.remove_reaction('✅', u)
+                            msg.remove_reaction(r.emoji, u)
                         )
                         return False
-
                 else:
                     self.client.loop.create_task(
                         msg.remove_reaction(r.emoji, u)
-                        )
+                    )
                     return False
 
             while True:
                 try:
-                    r, u = await self.client.wait_for('reaction_add', timeout=300, check=check_mod)
+                    r, u = await self.client.wait_for("reaction_add", timeout=3600, check=check_mod)
                 except asyncio.TimeoutError:
-                    mod_softban_embed.description = f'Timeout, {member} is not getting nitrobanned!'
-                    await msg.remove_reaction('✅', self.client.user)
+                    mod_softban_embed.description = f"Timeout, {member} is not getting nitrobanned!"
+                    await msg.remove_reaction("✅", self.client.user)
+                    await msg.remove_reaction("❎", self.client.user)
                     return await msg.edit(embed=mod_softban_embed)
                 else:
-                    mod_softban_embed.title = f"NitroKick Request ({len(confirmations)}/3) → (5mins)"
+                    mod_softban_embed.title = f"NitroKick Request ({len(confirmations)}/3)"
                     await msg.edit(embed=mod_softban_embed)
-                    if await utils.is_allowed([senior_mod_role_id]).predicate(channel=ctx.channel, member=u):
-                        should_nitro_kick = True
-                        break
-                    elif len(confirmations) >= 0:
-                        if len(confirmations) < 3:
-                            continue
-                        elif len(confirmations) >= 3:
+                    if str(r.emoji) == "✅":
+                        if await utils.is_allowed([senior_mod_role_id]).predicate(channel=ctx.channel, member=u):
                             should_nitro_kick = True
                             break
+                        elif len(confirmations) >= 0:
+                            if len(confirmations) < 3:
+                                continue
+                            elif len(confirmations) >= 3:
+                                should_nitro_kick = True
+                                await msg.remove_reaction("❎", self.client.user)
+                                break
+                    elif str(r.emoji) == "❎":
+                        if await utils.is_allowed([senior_mod_role_id]).predicate(channel=ctx.channel, member=u):
+                            mod_softban_embed.title = "NitroKick Request"
+                            mod_softban_embed.description = "NitroKick request denied."
+                            await msg.edit(embed=mod_softban_embed)
+                            await msg.remove_reaction("✅", self.client.user)
+                            await msg.remove_reaction("❎", self.client.user)
+                            break
+                        else:
+                            await msg.remove_reaction("❎", u)
+                            continue
                     else:
                         break
 
