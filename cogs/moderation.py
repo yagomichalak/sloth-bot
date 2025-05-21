@@ -198,6 +198,9 @@ class Moderation(*moderation_cogs):
         # Checks, just in case, if the new role was found
         if not new_role:
             return
+        
+        # Check for restricted roles
+        await self.check_restricted_roles(member, new_role)
 
         # Checks whether the user has muted roles in the database
         if await self.get_muted_roles(member.id):
@@ -215,6 +218,45 @@ class Moderation(*moderation_cogs):
 
             # Updates the user roles
             await member.edit(roles=keep_roles)
+
+    async def check_restricted_roles(self, member, new_role):
+        """ Checks if a restricted role is added by unauthorized users and removes it.
+        :param member: The member that will be updated.
+        :param new_role: The new role that was added. """
+
+        # Restricted roles to monitor
+        restricted_roles = [
+            int(os.getenv('NATIVE_CENTISH_ID', 123)),
+            int(os.getenv('BASED_ID', 123)),
+            int(os.getenv('FEW_BRAINCELLS_ID', 123)),
+            int(os.getenv('MET_DNK_IRL_ID', 123))
+        ]
+
+        # Check if the new role is restricted
+        if new_role.id in restricted_roles:
+            # Fetch the audit log to find who added the role
+            async for entry in member.guild.audit_logs(limit=1, action=discord.AuditLogAction.member_role_update):
+                if entry.target.id == member.id and new_role in entry.after.roles:
+                    moderator = entry.user
+
+                    # Check if the moderator has the staff manager role or admin permissions
+                    staff_manager_role = discord.utils.get(member.guild.roles, id=senior_mod_role_id)
+                    if not (staff_manager_role in moderator.roles or moderator.guild_permissions.administrator):
+                        # Remove the restricted role
+                        await member.remove_roles(new_role)
+
+                        # Send a DM to the moderator
+                        try:
+                            embed = discord.Embed(
+                                title="Unauthorized Role Addition",
+                                description=f"`{new_role.name}` is restricted and cannot be added by you.\n-# **The role has been removed from `{member.name}`.**",
+                                color=discord.Color.red(),
+                                timestamp=discord.utils.utcnow()
+                            )
+                            await moderator.send(embed=embed)
+                        except discord.Forbidden:
+                            pass
+                    break
 
     def get_invite_root(self, message: str) -> str:
         """ Gets the invite root from an invite link.
