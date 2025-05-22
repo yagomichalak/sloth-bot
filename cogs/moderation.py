@@ -58,36 +58,40 @@ host_applicant_infraction_thread_id: int = int(os.getenv("HOST_APPLICANT_INFRACT
 
 # list.scam
 scamwords = [
+    # steam scam
     "steam gift 50$",
     "50$ steam gift",
-    "https://steamncommynity.com/",
+    # links
+    "steamncommynity.com",
     "steamcommunity.com/gift-card/pay/50",
+    "airdrop-stake.com",
+    "xcoin-presale.com",
+    "ainexusca.com",
     "u.to",
-    "Nicholas_Wallace2",
+    # numbers
     "+1 (618) 913-0036",
+    "+1 (626) 514-0696",
+    "+1 (814) 813-1670",
+    # nicks
+    "Nicholas_Wallace2",
+    "Kathryn_Aubry115",
+    "Kathryn_Aubry",
+    # other
     "I’ll teach 20 interested people on how to earn $50k",
     "more within 72 hours from the crypto market",
-    "I’ll teach 20 interested people on how to earn $50k or more within 72 hours from the crypto market, but you’ll promise to pay me 10% of the profit. Note only interested people should massage me for more info",
     "massage me for more info",
     "if interested send me a direct massage. for more info via",
     "ONLINE ASSISTANT NEEDED URGENTLY",
-    "+1 (626) 514-0696",
-    "+1 (814) 813-1670",
     "Job Opportunity: Online Personal Assistant",
     "Competitive weekly salary of $900",
-    "Allowances and benefits package",
     "I have a nice idea and you can get regular income  $50-100 every month",
     "$50-100 every month",
     "Don't miss this exciting opportunity! Apply now",
-    "Kathryn_Aubry115",
-    "Kathryn_Aubry",
     "help first 10 interested people how to earn 30k or more in crypto market within 48 hours but you",
     "10% of your profits Dm",
-    "https://airdrop-stake.com/",
-    "https://xcoin-presale.com/",
     "Hi, I received a referral link for the pre-market of the X token.",
     "Exclusive bonuses for early stakers and loyal holders!",
-    "Hurry Up! This is a limited-time event – grab your rewards while you can!",
+    "Hurry Up! This is a limited-time event – grab your rewards while you can!"
 ]
 
 last_deleted_message = []
@@ -1774,7 +1778,7 @@ class Moderation(*moderation_cogs):
                 mod_ban_embed.set_author(name=f'{member} is going to Brazil...', icon_url=member.display_avatar)
                 msg = await ctx.send(embed=mod_ban_embed)
                 await msg.add_reaction('✅')
-                await msg.add_reaction('❎')
+                await msg.add_reaction('❌')
 
                 def check_reaction(r, u):
                     if u.bot:
@@ -1782,7 +1786,7 @@ class Moderation(*moderation_cogs):
                     if r.message.id != msg.id:
                         return False
 
-                    if str(r.emoji) in ['✅', '❎']:
+                    if str(r.emoji) in ['✅', '❌']:
                         perms = channel.permissions_for(u)
                         if senior_mod_role_id in [r.id for r in u.roles] or perms.administrator:
                             return True
@@ -1803,15 +1807,15 @@ class Moderation(*moderation_cogs):
                     except asyncio.TimeoutError:
                         mod_ban_embed.description = f'Timeout, {member} is not getting banned!'
                         await msg.remove_reaction('✅', self.client.user)
-                        await msg.remove_reaction('❎', self.client.user)
+                        await msg.remove_reaction('❌', self.client.user)
                         await msg.edit(embed=mod_ban_embed)
                         break
                     else:
                         if str(r.emoji) == '✅':
                             should_ban = True
-                            await msg.remove_reaction('❎', self.client.user)
+                            await msg.remove_reaction('❌', self.client.user)
                             break
-                        elif str(r.emoji) == '❎':
+                        elif str(r.emoji) == '❌':
                             mod_ban_embed.description = f'Ban request denied.'
                             await msg.remove_reaction('✅', self.client.user)
                             await msg.edit(embed=mod_ban_embed)
@@ -2085,7 +2089,7 @@ We appreciate your understanding and look forward to hearing from you. """, embe
             mod_softban_embed.set_author(name=f'{member} is being NitroKicked!', icon_url=member.display_avatar)
             msg = await ctx.send(embed=mod_softban_embed)
             await msg.add_reaction("✅")
-            await msg.add_reaction("❎")
+            await msg.add_reaction("❌")
 
             # Prompts for 3 moderator reactions
             def check_mod(r, u):
@@ -2094,7 +2098,7 @@ We appreciate your understanding and look forward to hearing from you. """, embe
                 if r.message.id != msg.id:
                     return
 
-                if str(r.emoji) in ["✅", "❎"]:
+                if str(r.emoji) in ["✅", "❌"]:
                     perms = channel.permissions_for(u)
                     if mod_role_id in [r.id for r in u.roles] or perms.administrator:
                         if str(r.emoji) == "✅":
@@ -2117,7 +2121,7 @@ We appreciate your understanding and look forward to hearing from you. """, embe
                 except asyncio.TimeoutError:
                     mod_softban_embed.description = f"Timeout, {member} is not getting nitrobanned!"
                     await msg.remove_reaction("✅", self.client.user)
-                    await msg.remove_reaction("❎", self.client.user)
+                    await msg.remove_reaction("❌", self.client.user)
                     return await msg.edit(embed=mod_softban_embed)
                 else:
                     mod_softban_embed.title = f"NitroKick Request ({len(confirmations)}/3)"
@@ -2125,24 +2129,25 @@ We appreciate your understanding and look forward to hearing from you. """, embe
                     if str(r.emoji) == "✅":
                         if await utils.is_allowed([senior_mod_role_id]).predicate(channel=ctx.channel, member=u):
                             should_nitro_kick = True
+                            await msg.remove_reaction("❌", self.client.user)
                             break
                         elif len(confirmations) >= 0:
                             if len(confirmations) < 3:
                                 continue
                             elif len(confirmations) >= 3:
                                 should_nitro_kick = True
-                                await msg.remove_reaction("❎", self.client.user)
+                                await msg.remove_reaction("❌", self.client.user)
                                 break
-                    elif str(r.emoji) == "❎":
+                    elif str(r.emoji) == "❌":
                         if await utils.is_allowed([senior_mod_role_id]).predicate(channel=ctx.channel, member=u):
                             mod_softban_embed.title = "NitroKick Request"
                             mod_softban_embed.description = "NitroKick request denied."
                             await msg.edit(embed=mod_softban_embed)
                             await msg.remove_reaction("✅", self.client.user)
-                            await msg.remove_reaction("❎", self.client.user)
+                            await msg.remove_reaction("❌", self.client.user)
                             break
                         else:
-                            await msg.remove_reaction("❎", u)
+                            await msg.remove_reaction("❌", u)
                             continue
                     else:
                         break
@@ -2249,7 +2254,7 @@ We appreciate your understanding and look forward to hearing from you. """, embe
                 mod_ban_embed.set_author(name=f'{member} is going to Brazil 🦜...', icon_url=member.display_avatar)
                 msg = await ctx.send(embed=mod_ban_embed)
                 await msg.add_reaction('✅')
-                await msg.add_reaction('❎')
+                await msg.add_reaction('❌')
 
                 def check_reaction(r, u):
                     if u.bot:
@@ -2257,7 +2262,7 @@ We appreciate your understanding and look forward to hearing from you. """, embe
                     if r.message.id != msg.id:
                         return False
 
-                    if str(r.emoji) in ['✅', '❎']:
+                    if str(r.emoji) in ['✅', '❌']:
                         perms = channel.permissions_for(u)
                         if senior_mod_role_id in [r.id for r in u.roles] or perms.administrator:
                             return True
@@ -2279,15 +2284,15 @@ We appreciate your understanding and look forward to hearing from you. """, embe
                     except asyncio.TimeoutError:
                         mod_ban_embed.description = f'Timeout, {member} is not getting hackbanned!'
                         await msg.remove_reaction('✅', self.client.user)
-                        await msg.remove_reaction('❎', self.client.user)
+                        await msg.remove_reaction('❌', self.client.user)
                         await msg.edit(embed=mod_ban_embed)
                         break
                     else:
                         if str(r.emoji) == '✅':
                             should_ban = True
-                            await msg.remove_reaction('❎', self.client.user)
+                            await msg.remove_reaction('❌', self.client.user)
                             break
-                        elif str(r.emoji) == '❎':
+                        elif str(r.emoji) == '❌':
                             mod_ban_embed.description = f'Ban request denied.'
                             await msg.remove_reaction('✅', self.client.user)
                             await msg.edit(embed=mod_ban_embed)
