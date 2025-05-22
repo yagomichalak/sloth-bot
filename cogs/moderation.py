@@ -2125,6 +2125,7 @@ We appreciate your understanding and look forward to hearing from you. """, embe
                     if str(r.emoji) == "✅":
                         if await utils.is_allowed([senior_mod_role_id]).predicate(channel=ctx.channel, member=u):
                             should_nitro_kick = True
+                            await msg.remove_reaction("❌", self.client.user)
                             break
                         elif len(confirmations) >= 0:
                             if len(confirmations) < 3:
