@@ -57,8 +57,10 @@ teacher_applicant_infraction_thread_id: int = int(os.getenv("TEACHER_APPLICANT_I
 host_applicant_infraction_thread_id: int = int(os.getenv("HOST_APPLICANT_INFRACTION_THREAD_ID", 123))
 
 # list.scam
-autoModList = [
+scamwords = [
     "steam gift 50$",
+    "50$ steam gift",
+    "https://steamncommynity.com/",
     "steamcommunity.com/gift-card/pay/50",
     "u.to",
     "Nicholas_Wallace2",
@@ -126,7 +128,7 @@ class Moderation(*moderation_cogs):
                 return await self.check_unban_infractions(message)
         
         # Checks if the message is a spam/scam message
-        if any(word.lower() in message.content.lower() for word in autoModList):
+        if any(word.lower() in message.content.lower() for word in scamwords):
             await self.handle_scam(message)
             await message.delete()
             return
@@ -196,6 +198,9 @@ class Moderation(*moderation_cogs):
         # Checks, just in case, if the new role was found
         if not new_role:
             return
+        
+        # Check for restricted roles
+        await self.check_restricted_roles(member, new_role)
 
         # Checks whether the user has muted roles in the database
         if await self.get_muted_roles(member.id):
@@ -213,6 +218,58 @@ class Moderation(*moderation_cogs):
 
             # Updates the user roles
             await member.edit(roles=keep_roles)
+
+    async def check_restricted_roles(self, member, new_role):
+        """ Checks if a restricted role is added by unauthorized users and removes it.
+        :param member: The member that will be updated.
+        :param new_role: The new role that was added. """
+
+        guild = self.client.get_guild(server_id)
+
+        # Restricted roles to monitor
+        restricted_roles = [
+            int(os.getenv('NATIVE_CENTISH_ID', 123)),
+            int(os.getenv('BASED_ID', 123)),
+            int(os.getenv('FEW_BRAINCELLS_ID', 123)),
+            int(os.getenv('MET_DNK_IRL_ID', 123))
+        ]
+
+        # Check if the new role is restricted
+        if new_role.id in restricted_roles:
+            # Fetch the audit log to find who added the role
+            async for entry in guild.audit_logs(limit=1, action=discord.AuditLogAction.member_role_update):
+                if entry.target.id == member.id and new_role in entry.after.roles:
+                    moderator = entry.user
+
+                    # Check if the moderator has the staff manager role or admin permissions
+                    staff_manager_role = discord.utils.get(guild.roles, id=senior_mod_role_id)
+                    if not (staff_manager_role in moderator.roles or moderator.guild_permissions.administrator):
+                        # Remove the restricted role
+                        await member.remove_roles(new_role)
+
+                        # Send a log to the moderation log channel
+                        moderation_log = discord.utils.get(guild.channels, id=mod_log_id)
+                        embed = discord.Embed(title='__**Unauthorized Role Addition**__', colour=discord.Colour.red(), timestamp=discord.utils.utcnow())
+                        embed.add_field(name='Moderator Info:', value=f'```Name: {moderator.display_name}\nId: {moderator.id}```',
+                            inline=False)
+                        embed.add_field(name='User Info:', value=f'```Name: {member.display_name}\nId: {member.id}```', inline=False)
+                        embed.add_field(name='Role Info:', value=f'{new_role.mention}',
+                            inline=False)
+                        embed.set_thumbnail(url=moderator.display_avatar)
+                        await moderation_log.send(embed=embed)
+
+                        # Send a DM to the moderator
+                        try:
+                            embed = discord.Embed(
+                                title="Unauthorized Role Addition",
+                                description=f"`{new_role.name}` is restricted and cannot be added by you.\n-# **The role has been removed from `{member.name}`.**",
+                                color=discord.Color.red(),
+                                timestamp=discord.utils.utcnow()
+                            )
+                            await moderator.send(embed=embed)
+                        except discord.Forbidden:
+                            pass
+                    break
 
     def get_invite_root(self, message: str) -> str:
         """ Gets the invite root from an invite link.
@@ -279,7 +336,7 @@ class Moderation(*moderation_cogs):
             await evidence_channel.send(embed=embed)
 
             # Nitro kick them if the member is not a staff member
-            await self.nitro_kick(ctx, member=message.author, bypass_request=True)
+            await self.nitro_kick(ctx, member=message.author, internal_use=True)
 
     async def check_unban_infractions(self, message: discord.Message) -> None:
         """ Checks and send an infractions list of the user from the unban appeal request. """
@@ -1990,12 +2047,12 @@ We appreciate your understanding and look forward to hearing from you. """, embe
                 user_id=member.id, infr_type="softban", reason=reason,
                 timestamp=current_ts, perpetrator=ctx.author.id)
 
-    @commands.command(aliases=['nitrokick', 'nitro', 'nk', 'scam', 'phish', 'phishing'])
+    @commands.command(aliases=["nitrokick", "nitro", "nk", "scam", "phish", "phishing"])
     @utils.is_allowed(allowed_roles, throw_exc=True)
-    async def nitro_kick(self, ctx, member: Optional[discord.Member] = None, bypass_request: bool = False) -> None:
+    async def nitro_kick(self, ctx, member: Optional[discord.Member] = None, internal_use: bool = False) -> None:
         """ (ModTeam/ADM) Mutes & Softbans a member from the server who's posting Nitro scam links.
         :param member: The @ or ID of the user to nitrokick.
-        :param bypass_request: Whether to bypass the moderator request process. """
+        :param internal_use: Whether to bypass the moderator request process for internal use. """
     
         await ctx.message.delete()
 
@@ -2004,7 +2061,7 @@ We appreciate your understanding and look forward to hearing from you. """, embe
 
         current_ts: int = await utils.get_timestamp()
 
-        reason = 'Nitro Scam'
+        reason = "Nitro Scam"
 
         if not member:
             return await ctx.send(f"**Member not found, {author.mention}!**", delete_after=3)
@@ -2015,19 +2072,20 @@ We appreciate your understanding and look forward to hearing from you. """, embe
         perpetrators = []
         confirmations = {}
 
-        should_nitro_kick = bypass_request or await utils.is_allowed([senior_mod_role_id]).predicate(channel=ctx.channel, member=author)
+        should_nitro_kick = internal_use or await utils.is_allowed([senior_mod_role_id]).predicate(channel=ctx.channel, member=author)
 
-        if not should_nitro_kick and not bypass_request:
+        if not should_nitro_kick and not internal_use:
             confirmations[author.id] = author.name
             mod_softban_embed = discord.Embed(
-                title=f"NitroKick Request ({len(confirmations)}/3) → (5mins)",
+                title=f"NitroKick Request ({len(confirmations)}/3)",
                 description=f'''
                 {author.mention} wants to nitrokick {member.mention}, it requires 2 more moderator ✅ reactions for it!
                 ```Reason: {reason}```''',
                 colour=discord.Colour.nitro_pink(), timestamp=ctx.message.created_at)
             mod_softban_embed.set_author(name=f'{member} is being NitroKicked!', icon_url=member.display_avatar)
             msg = await ctx.send(embed=mod_softban_embed)
-            await msg.add_reaction('✅')
+            await msg.add_reaction("✅")
+            await msg.add_reaction("❎")
 
             # Prompts for 3 moderator reactions
             def check_mod(r, u):
@@ -2036,43 +2094,56 @@ We appreciate your understanding and look forward to hearing from you. """, embe
                 if r.message.id != msg.id:
                     return
 
-                if str(r.emoji) == '✅':
+                if str(r.emoji) in ["✅", "❎"]:
                     perms = channel.permissions_for(u)
-                    
                     if mod_role_id in [r.id for r in u.roles] or perms.administrator:
-                        confirmations[u.id] = u.name
+                        if str(r.emoji) == "✅":
+                            confirmations[u.id] = u.name
                         return True
                     else:
                         self.client.loop.create_task(
-                            msg.remove_reaction('✅', u)
+                            msg.remove_reaction(r.emoji, u)
                         )
                         return False
-
                 else:
                     self.client.loop.create_task(
                         msg.remove_reaction(r.emoji, u)
-                        )
+                    )
                     return False
 
             while True:
                 try:
-                    r, u = await self.client.wait_for('reaction_add', timeout=300, check=check_mod)
+                    r, u = await self.client.wait_for("reaction_add", timeout=3600, check=check_mod)
                 except asyncio.TimeoutError:
-                    mod_softban_embed.description = f'Timeout, {member} is not getting nitrobanned!'
-                    await msg.remove_reaction('✅', self.client.user)
+                    mod_softban_embed.description = f"Timeout, {member} is not getting nitrobanned!"
+                    await msg.remove_reaction("✅", self.client.user)
+                    await msg.remove_reaction("❎", self.client.user)
                     return await msg.edit(embed=mod_softban_embed)
                 else:
-                    mod_softban_embed.title = f"NitroKick Request ({len(confirmations)}/3) → (5mins)"
+                    mod_softban_embed.title = f"NitroKick Request ({len(confirmations)}/3)"
                     await msg.edit(embed=mod_softban_embed)
-                    if await utils.is_allowed([senior_mod_role_id]).predicate(channel=ctx.channel, member=u):
-                        should_nitro_kick = True
-                        break
-                    elif len(confirmations) >= 0:
-                        if len(confirmations) < 3:
-                            continue
-                        elif len(confirmations) >= 3:
+                    if str(r.emoji) == "✅":
+                        if await utils.is_allowed([senior_mod_role_id]).predicate(channel=ctx.channel, member=u):
                             should_nitro_kick = True
                             break
+                        elif len(confirmations) >= 0:
+                            if len(confirmations) < 3:
+                                continue
+                            elif len(confirmations) >= 3:
+                                should_nitro_kick = True
+                                await msg.remove_reaction("❎", self.client.user)
+                                break
+                    elif str(r.emoji) == "❎":
+                        if await utils.is_allowed([senior_mod_role_id]).predicate(channel=ctx.channel, member=u):
+                            mod_softban_embed.title = "NitroKick Request"
+                            mod_softban_embed.description = "NitroKick request denied."
+                            await msg.edit(embed=mod_softban_embed)
+                            await msg.remove_reaction("✅", self.client.user)
+                            await msg.remove_reaction("❎", self.client.user)
+                            break
+                        else:
+                            await msg.remove_reaction("❎", u)
+                            continue
                     else:
                         break
 
@@ -2097,7 +2168,6 @@ We appreciate your understanding and look forward to hearing from you. """, embe
         except Exception as e:
             pass
         try:
-
             keep_roles, remove_roles = await self.get_remove_roles(member, keep_roles=allowed_roles)
 
             await member.edit(roles=keep_roles)
@@ -2117,7 +2187,10 @@ We appreciate your understanding and look forward to hearing from you. """, embe
                                 timestamp=ctx.message.created_at)
             embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nId: {member.id}```',
                             inline=False)
-            embed.add_field(name='Reason:', value=f"> -# **{infr_date}**\n> -# by {perpetrator}\n> {reason}")
+            if internal_use:
+                embed.add_field(name='Reason:', value=f"> -# **{infr_date}**\n> -# by {self.client.user.name}\n> {reason}")
+            else:
+                embed.add_field(name='Reason:', value=f"> -# **{infr_date}**\n> -# by {perpetrator}\n> {reason}")
             embed.set_author(name=member)
             embed.set_thumbnail(url=member.display_avatar)
             embed.set_footer(text=f"Banned by {perpetrators}", icon_url=icon)
