@@ -58,36 +58,40 @@ host_applicant_infraction_thread_id: int = int(os.getenv("HOST_APPLICANT_INFRACT
 
 # list.scam
 scamwords = [
+    # steam scam
     "steam gift 50$",
     "50$ steam gift",
-    "https://steamncommynity.com/",
+    # links
+    "steamncommynity.com",
     "steamcommunity.com/gift-card/pay/50",
+    "airdrop-stake.com",
+    "xcoin-presale.com",
+    "ainexusca.com",
     "u.to",
-    "Nicholas_Wallace2",
+    # numbers
     "+1 (618) 913-0036",
+    "+1 (626) 514-0696",
+    "+1 (814) 813-1670",
+    # nicks
+    "Nicholas_Wallace2",
+    "Kathryn_Aubry115",
+    "Kathryn_Aubry",
+    # other
     "I’ll teach 20 interested people on how to earn $50k",
     "more within 72 hours from the crypto market",
-    "I’ll teach 20 interested people on how to earn $50k or more within 72 hours from the crypto market, but you’ll promise to pay me 10% of the profit. Note only interested people should massage me for more info",
     "massage me for more info",
     "if interested send me a direct massage. for more info via",
     "ONLINE ASSISTANT NEEDED URGENTLY",
-    "+1 (626) 514-0696",
-    "+1 (814) 813-1670",
     "Job Opportunity: Online Personal Assistant",
     "Competitive weekly salary of $900",
-    "Allowances and benefits package",
     "I have a nice idea and you can get regular income  $50-100 every month",
     "$50-100 every month",
     "Don't miss this exciting opportunity! Apply now",
-    "Kathryn_Aubry115",
-    "Kathryn_Aubry",
     "help first 10 interested people how to earn 30k or more in crypto market within 48 hours but you",
     "10% of your profits Dm",
-    "https://airdrop-stake.com/",
-    "https://xcoin-presale.com/",
     "Hi, I received a referral link for the pre-market of the X token.",
     "Exclusive bonuses for early stakers and loyal holders!",
-    "Hurry Up! This is a limited-time event – grab your rewards while you can!",
+    "Hurry Up! This is a limited-time event – grab your rewards while you can!"
 ]
 
 last_deleted_message = []
