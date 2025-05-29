@@ -23,7 +23,7 @@ server_id: int = int(os.getenv('SERVER_ID', 123))
 
 # variables.role
 allowed_roles = [
-    int(os.getenv('OWNER_ROLE_ID', 123)), int(os.getenv('ADMIN_ROLE_ID', 123)), int(os.getenv('SENIOR_MOD_ROLE_ID', 123)),
+    int(os.getenv('OWNER_ROLE_ID', 123)), int(os.getenv('ADMIN_ROLE_ID', 123)), int(os.getenv('STAFF_MANAGER_ROLE_ID', 123)),
     int(os.getenv('MOD_ROLE_ID', 123)), int(os.getenv('ANALYST_DEBUGGER_ROLE_ID', 123)), *patreon_roles.keys()
 ]
 

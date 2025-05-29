@@ -16,7 +16,7 @@ guild_ids = [int(os.getenv('SERVER_ID', 123))]
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID', 123))
 owner_role_id = int(os.getenv('OWNER_ROLE_ID', 123))
 mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
-senior_mod_role_id = int(os.getenv('SENIOR_MOD_ROLE_ID', 123))
+staff_manager_role_id = int(os.getenv('STAFF_MANAGER_ROLE_ID', 123))
 lesson_manager_role_id = int(os.getenv('LESSON_MANAGEMENT_ROLE_ID', 123))
 allowed_roles = [owner_role_id, admin_role_id, mod_role_id]
 
@@ -80,7 +80,7 @@ class Embeds(commands.Cog):
         await ctx.send(embed=embed)
 
     @slash_command(name="embed", default_permission=False, guild_ids=guild_ids)
-    @utils.is_allowed([senior_mod_role_id], throw_exc=True)
+    @utils.is_allowed([staff_manager_role_id], throw_exc=True)
     async def _embed(self, ctx,
         description: Option(str, name="description", description="Description.", required=False),
         title: Option(str, name="title", description="Title.", required=False),

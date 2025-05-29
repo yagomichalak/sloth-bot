@@ -35,7 +35,7 @@ guild_ids = [int(os.getenv('SERVER_ID', 123))]
 booster_role_id = int(os.getenv('BOOSTER_ROLE_ID', 123))
 teacher_role_id = int(os.getenv("TEACHER_ROLE_ID", 123))
 mod_role_id = int(os.getenv("MOD_ROLE_ID", 123))
-senior_mod_role_id = int(os.getenv("SENIOR_MOD_ROLE_ID", 123))
+staff_manager_role_id = int(os.getenv("STAFF_MANAGER_ROLE_ID", 123))
 
 currency_cogs: List[commands.Cog] = [
     UserItemsTable, UserServerActivityTable, UserCurrencyTable,
@@ -817,7 +817,7 @@ class SlothCurrency(*currency_cogs):
             await ctx.send(f"**{ctx.author.mention} transferred {money}łł to {member.mention}!**")
 
         if money == 25:
-            if await utils.is_allowed([mod_role_id, senior_mod_role_id]).predicate(channel=ctx.channel, member=member):
+            if await utils.is_allowed([mod_role_id, staff_manager_role_id]).predicate(channel=ctx.channel, member=member):
                 await SlothClass.complete_quest(author.id, 7, staff_id=member.id)
             if await utils.is_allowed([teacher_role_id]).predicate(channel=ctx.channel, member=member):
                 await SlothClass.complete_quest(author.id, 10, teacher_id=member.id)

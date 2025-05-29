@@ -15,7 +15,7 @@ from mysqldb import DatabaseCore
 guild_id = int(os.getenv('SERVER_ID', 123))
 
 # variables.role
-senior_mod_role_id: int = int(os.getenv('SENIOR_MOD_ROLE_ID', 123))
+staff_manager_role_id: int = int(os.getenv('STAFF_MANAGER_ROLE_ID', 123))
 mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 
 class AspirantActivity(AspirantsTable):
@@ -77,7 +77,7 @@ class AspirantActivity(AspirantsTable):
             await self.add_aspirant_time(member.id, addition)
 
     ### Commands
-    @utils.is_allowed([senior_mod_role_id], throw_exc=True)
+    @utils.is_allowed([staff_manager_role_id], throw_exc=True)
     @commands.command(aliases=['asprep', 'asp_rep'])
     async def aspirant_rep(self, ctx) -> None:
         """ (STAFF) Shows all the aspirants and their statuses in an embedded message. """
@@ -129,7 +129,7 @@ class AspirantActivity(AspirantsTable):
             return await resp.delete()
 
 
-    @utils.is_allowed([senior_mod_role_id], throw_exc=True)
+    @utils.is_allowed([staff_manager_role_id], throw_exc=True)
     @commands.command(aliases=['addasp', 'add_asp'])
     async def add_aspirant(self, ctx, members: commands.Greedy[discord.Member] = None) -> None:
         """Adds an aspirant from the activity monitor
@@ -150,7 +150,7 @@ class AspirantActivity(AspirantsTable):
                 return await ctx.send(f"**The user {member} is already been monitored**")
 
 
-    @utils.is_allowed([senior_mod_role_id], throw_exc=True)
+    @utils.is_allowed([staff_manager_role_id], throw_exc=True)
     @commands.command(aliases=['del_asp', 'delasp'])
     async def remove_aspirant(self, ctx, members: commands.Greedy[discord.Member] = None) -> None:
         """Removes an aspirant from the activity monitor
