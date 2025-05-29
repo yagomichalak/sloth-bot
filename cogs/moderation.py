@@ -820,6 +820,8 @@ class Moderation(*moderation_cogs):
                     warn_desc = f'**Reason:** {reason}'
                     user_infractions = await self.get_user_infractions(member.id)
                     hours, days, weeks, ban = await self.get_timeout_time(ctx, member, await self.get_timeout_warns(infr, user_infractions))
+                    
+                    log_timeout = None # otherwise warn shits itself and dies
                     if ban:
                         warn_desc += '\n**User has exceeded the maximum warn limit within 6 months and will be banned!**'
                     else:
