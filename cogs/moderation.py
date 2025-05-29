@@ -68,6 +68,7 @@ scamwords = [
     "xcoin-presale.com",
     "ainexusca.com",
     "u.to",
+    "e.vg",
     # numbers
     "+1 (618) 913-0036",
     "+1 (626) 514-0696",
