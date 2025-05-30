@@ -17,7 +17,7 @@ server_id = int(os.getenv('SERVER_ID', 123))
 
 # variables.role
 mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
-senior_mod_role_id = int(os.getenv('SENIOR_MOD_ROLE_ID', 123))
+staff_manager_role_id = int(os.getenv('STAFF_MANAGER_ROLE_ID', 123))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID', 123))
 owner_role_id = int(os.getenv('OWNER_ROLE_ID', 123))
 event_host_role_id = int(os.getenv('EVENT_HOST_ROLE_ID', 123))
@@ -71,7 +71,7 @@ class EventManagement(EventRoomsTable):
             try:
                 member = guild.get_member(user_id)
                 # Mods+ shouldn't get disconnected from the Camera only channel
-                if await utils.is_allowed([mod_role_id, senior_mod_role_id]).predicate(member=member, channel=bots_and_commands_channel):
+                if await utils.is_allowed([mod_role_id, staff_manager_role_id]).predicate(member=member, channel=bots_and_commands_channel):
                     continue
 
                 if not member.voice or not (vc := member.voice.channel):

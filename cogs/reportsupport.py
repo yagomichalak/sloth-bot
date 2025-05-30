@@ -48,7 +48,7 @@ ban_appeals_channel_id: int = os.getenv("BAN_APPEALS_CHANNEL_ID", 123)
 
 # variables.role #
 moderator_role_id = int(os.getenv('MOD_ROLE_ID', 123))
-senior_role_id = int(os.getenv('SENIOR_MOD_ROLE_ID', 123))
+staff_manager_role_id = int(os.getenv('SENIOR_MOD_ROLE_ID', 123))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID', 123))
 lesson_management_role_id = int(os.getenv('LESSON_MANAGEMENT_ROLE_ID', 123))
 event_management_role_id = int(os.getenv('EVENT_MANAGER_ROLE_ID', 123))
@@ -508,7 +508,7 @@ class ReportSupport(*report_support_classes):
         }
         
         if (vc_name == "staff"):
-            senior_mod = discord.utils.get(guild.roles, id=senior_role_id)
+            senior_mod = discord.utils.get(guild.roles, id=staff_manager_role_id)
             overwrites.update({
                 moderator: discord.PermissionOverwrite(
                     read_messages=False, 
@@ -953,7 +953,7 @@ class ReportSupport(*report_support_classes):
 
     # In-game commands
     
-    @utils.is_allowed([lesson_management_role_id], throw_exc=True)
+    @utils.is_allowed([staff_manager_role_id, lesson_management_role_id, event_management_role_id], throw_exc=True)
     @commands.command(aliases=['ca'])
     async def close_app(self, ctx) -> None:
         """ (ADMIN) Closes an application channel. """

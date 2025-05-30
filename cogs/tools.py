@@ -39,7 +39,7 @@ dnk_id = int(os.getenv('DNK_ID', 123))
 
 # variables.role
 mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
-senior_mod_role_id: int = int(os.getenv('SENIOR_MOD_ROLE_ID', 123))
+staff_manager_role_id: int = int(os.getenv('STAFF_MANAGER_ROLE_ID', 123))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID', 123))
 owner_role_id = int(os.getenv('OWNER_ROLE_ID', 123))
 analyst_debugger_role_id: int = int(os.getenv('ANALYST_DEBUGGER_ROLE_ID', 123))
@@ -233,7 +233,7 @@ class Tools(*tool_cogs):
 
 	# Countsdown from a given number
 	@commands.command()
-	@utils.is_allowed([senior_mod_role_id], throw_exc=True)
+	@utils.is_allowed([staff_manager_role_id], throw_exc=True)
 	async def count(self, ctx, amount=0):
 		""" (ADM) Countsdown by a given number
 		:param amount: The start point. """
@@ -654,7 +654,7 @@ class Tools(*tool_cogs):
 		await ctx.send(' '.join(text))
 
 	@commands.command(aliases=['tp', 'beam'])
-	@commands.check_any(utils.is_allowed([senior_mod_role_id]))
+	@commands.check_any(utils.is_allowed([staff_manager_role_id]))
 	async def teleport(self, ctx, vc_1: discord.VoiceChannel = None, vc_2: discord.VoiceChannel = None) -> None:
 		""" Teleports all members in a given voice channel to another one.
 		:param vc_1: The origin vc.
@@ -1164,7 +1164,7 @@ class Tools(*tool_cogs):
 			await ctx.respond(f"**They were brought to {user_vc.channel.mention}!**")
 
 	@commands.command()
-	@utils.is_allowed([senior_mod_role_id], throw_exc=True)
+	@utils.is_allowed([staff_manager_role_id], throw_exc=True)
 	async def stealth(self, ctx, member: Optional[discord.Member] = None) -> None:
 		""" Makes you stealth, so when you join a VC you don't get the 'in a VC' role.
 		:param member: The member to make stealth. [Optional][Default = You] """
@@ -1244,7 +1244,7 @@ class Tools(*tool_cogs):
 			await ctx.respond(f"**You got moved to {channel.mention}!**")
 
 	@commands.command()
-	@utils.is_allowed([senior_mod_role_id, admin_role_id, owner_role_id], throw_exc=True)
+	@utils.is_allowed([staff_manager_role_id, admin_role_id, owner_role_id], throw_exc=True)
 	async def surf(self, ctx, member: Optional[discord.Member] = None) -> None:
 		""" Makes a member surf in the empty Dynamic Rooms, to delete them.
 		:param member: The member who's gonna surf. [Optional][Default = You] """

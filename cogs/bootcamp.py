@@ -21,7 +21,7 @@ guild_id = int(os.getenv('SERVER_ID', 123))
 guild_ids = [guild_id]
 
 # variables.role
-senior_mod_role_id: int = int(os.getenv('SENIOR_MOD_ROLE_ID', 123))
+staff_manager_role_id: int = int(os.getenv('STAFF_MANAGER_ROLE_ID', 123))
 mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 
 class Bootcamp(commands.Cog):

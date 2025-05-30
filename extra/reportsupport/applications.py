@@ -12,7 +12,7 @@ from extra import utils
 # variables.role
 owner_role_id: int = int(os.getenv('OWNER_ROLE_ID', 123))
 moderator_role_id: int = int(os.getenv('MOD_ROLE_ID', 123))
-senior_mod_role_id: int = int(os.getenv('SENIOR_MOD_ROLE_ID', 123))
+staff_manager_role_id: int = int(os.getenv('STAFF_MANAGER_ROLE_ID', 123))
 admin_role_id: int = int(os.getenv('ADMIN_ROLE_ID', 123))
 lesson_management_role_id: int = int(os.getenv('LESSON_MANAGEMENT_ROLE_ID', 123))
 event_manager_role_id: int = int(os.getenv('EVENT_MANAGER_ROLE_ID', 123))
@@ -48,7 +48,7 @@ class ApplicationsTable(commands.Cog):
         'moderator': {
             "app": moderator_app_channel_id, "interview": moderator_interview_vc_id, "parent": moderator_parent_channel_id,
             "message": "**Moderator Application**\nOur staff has evaluated your Moderator application and has come to a conclusion, and due to internal and unspecified reasons we are **declining** it. Thank you anyways",
-            "pings": [{"id": owner_role_id, "role": True}, {"id": admin_role_id, "role": True}, {"id": senior_mod_role_id, "role": True}]},
+            "pings": [{"id": owner_role_id, "role": True}, {"id": admin_role_id, "role": True}, {"id": staff_manager_role_id, "role": True}]},
         'event_host': {
             "app": event_host_app_channel_id,  "interview": event_host_interview_vc_id, "parent": event_host_parent_channel_id, 
             "message": "**Event Host Application**\nOur staff has evaluated your Event Host application and has come to the conclusion that we are not in need of this event.",
@@ -89,10 +89,10 @@ class ApplicationsTable(commands.Cog):
                 if await utils.is_allowed([lesson_management_role_id]).predicate(channel=channel, member=payload.member):
                     return await self.handle_application(guild, payload)
             elif payload.channel_id == self.moderator_app_channel_id: # User is a Staff Manager+
-                if await utils.is_allowed([senior_mod_role_id]).predicate(channel=channel, member=payload.member):
+                if await utils.is_allowed([staff_manager_role_id]).predicate(channel=channel, member=payload.member):
                     return await self.handle_application(guild, payload)
             elif payload.channel_id == self.ban_appeals_channel_id: # User is a Staff Manager+
-                if await utils.is_allowed([senior_mod_role_id]).predicate(channel=channel, member=payload.member):
+                if await utils.is_allowed([staff_manager_role_id]).predicate(channel=channel, member=payload.member):
                     return await self.handle_ban_appeal(guild, payload)
             elif adm: # User is an adm
                 return await self.handle_application(guild, payload)

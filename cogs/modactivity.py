@@ -17,7 +17,7 @@ from mysqldb import DatabaseCore
 guild_id = int(os.getenv('SERVER_ID', 123))
 
 # variables.role
-senior_mod_role_id: int = int(os.getenv('SENIOR_MOD_ROLE_ID', 123))
+staff_manager_role_id: int = int(os.getenv('STAFF_MANAGER_ROLE_ID', 123))
 mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 
 class ModActivity(ModActivityTable):
@@ -67,7 +67,7 @@ class ModActivity(ModActivityTable):
             await self.update_moderator_time(member.id, addition)
 
 
-    @utils.is_allowed([senior_mod_role_id], throw_exc=True)
+    @utils.is_allowed([staff_manager_role_id], throw_exc=True)
     @commands.command(aliases=['mods_reputation', 'mod_rep'])
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def modrep(self, ctx):
@@ -213,7 +213,7 @@ class ModActivity(ModActivityTable):
         dm_embed.set_footer(text=f"Sent by: Sloth")
         await dm_log.send(embed=dm_embed)
 
-    @utils.is_allowed([senior_mod_role_id], throw_exc=True)
+    @utils.is_allowed([staff_manager_role_id], throw_exc=True)
     @commands.command(aliases=['track_mod'])
     async def track_mod_activity(self, ctx, mod: discord.Member):
         """ (STAFF) Starts tracking a moderator activity. """
@@ -229,7 +229,7 @@ class ModActivity(ModActivityTable):
         await self.insert_moderator(mod.id)
         return await ctx.send(f"**Tracking {mod.mention} activity!**")
 
-    @utils.is_allowed([senior_mod_role_id], throw_exc=True)
+    @utils.is_allowed([staff_manager_role_id], throw_exc=True)
     @commands.command(aliases=['untrack_mod'])
     async def untrack_mod_activity(self, ctx, mod: discord.Member):
         """ (STAFF) Stop tracking a moderator activity. Use this command if an user is no longer a moderator. """
@@ -246,7 +246,7 @@ class ModActivity(ModActivityTable):
         await self.remove_moderator(mod.id)
         return await ctx.send(f"**Untracking {mod.mention} activity!**")
 
-    @utils.is_allowed([senior_mod_role_id], throw_exc=True)
+    @utils.is_allowed([staff_manager_role_id], throw_exc=True)
     @commands.command(aliases=['sync_mods'])
     async def sync_mod_activity(self, ctx):
         await self.delete_mod_activity()

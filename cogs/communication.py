@@ -15,7 +15,7 @@ from mysqldb import DatabaseCore
 
 # variables.role
 mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
-senior_mod_role_id = int(os.getenv('SENIOR_MOD_ROLE_ID', 123))
+staff_manager_role_id = int(os.getenv('STAFF_MANAGER_ROLE_ID', 123))
 allowed_roles = [int(os.getenv('OWNER_ROLE_ID', 123)), int(os.getenv('ADMIN_ROLE_ID', 123)), mod_role_id]
 lesson_manager_role_id = int(os.getenv('LESSON_MANAGEMENT_ROLE_ID', 123))
 event_manager_role_id = int(os.getenv('EVENT_MANAGER_ROLE_ID', 123))
@@ -254,7 +254,7 @@ If you have any questions feel free to ask! And if you experience any type of pr
             
     #greedy_dm
     @commands.command()
-    @utils.is_allowed([senior_mod_role_id, lesson_manager_role_id, event_manager_role_id], throw_exc=True)
+    @utils.is_allowed([staff_manager_role_id, lesson_manager_role_id, event_manager_role_id], throw_exc=True)
     async def dm(self, ctx, *, message: Optional[str] = None):
         """ (SeniorMod | Manager) Sends a Direct Message to one or more users.
         :param members: The @ or the ID of one or more users to mute.
