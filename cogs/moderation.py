@@ -37,12 +37,12 @@ mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 muted_role_id = int(os.getenv('MUTED_ROLE_ID', 123))
 timedout_role_id = int(os.getenv('TIMEDOUT_ROLE_ID', 123))
 preference_role_id = int(os.getenv('PREFERENCE_ROLE_ID', 123))
-senior_mod_role_id: int = int(os.getenv('SENIOR_MOD_ROLE_ID', 123))
+staff_manager_role_id: int = int(os.getenv('STAFF_MANAGER_ROLE_ID', 123))
 admin_role_id: int = int(os.getenv('ADMIN_ROLE_ID', 123))
 analyst_debugger_role_id: int = int(os.getenv('ANALYST_DEBUGGER_ROLE_ID', 123))
 lesson_manager_role_id: int = int(os.getenv('LESSON_MANAGEMENT_ROLE_ID', 123))
 event_manager_role_id = int(os.getenv('EVENT_MANAGER_ROLE_ID', 123))
-allowed_roles = [int(os.getenv('OWNER_ROLE_ID', 123)), admin_role_id, senior_mod_role_id, mod_role_id]
+allowed_roles = [int(os.getenv('OWNER_ROLE_ID', 123)), admin_role_id, staff_manager_role_id, mod_role_id]
 
 # variables.textchannel
 mod_log_id = int(os.getenv('MOD_LOG_CHANNEL_ID', 123))
@@ -247,7 +247,7 @@ class Moderation(*moderation_cogs):
                     moderator = entry.user
 
                     # Check if the moderator has the staff manager role or admin permissions
-                    staff_manager_role = discord.utils.get(guild.roles, id=senior_mod_role_id)
+                    staff_manager_role = discord.utils.get(guild.roles, id=staff_manager_role_id)
                     if not (staff_manager_role in moderator.roles or moderator.guild_permissions.administrator):
                         # Remove the restricted role
                         await member.remove_roles(new_role)
@@ -455,7 +455,7 @@ class Moderation(*moderation_cogs):
         # Makes a set with the Staff roles
         staff_mentions = set([
             discord.utils.get(guild.roles, id=mod_role_id), # Mod
-            discord.utils.get(guild.roles, id=senior_mod_role_id), # Staff Manager
+            discord.utils.get(guild.roles, id=staff_manager_role_id), # Staff Manager
             discord.utils.get(guild.roles, id=admin_role_id) # Admin
         ])
 
@@ -607,7 +607,7 @@ class Moderation(*moderation_cogs):
             return await ctx.send("**Please, insert a valid amount of messages to delete**", delete_after=5)
 
         perms = ctx.channel.permissions_for(ctx.author)
-        if not perms.administrator and not ctx.author.get_role(senior_mod_role_id):
+        if not perms.administrator and not ctx.author.get_role(staff_manager_role_id):
             if int(amount) > 30:
                 return await ctx.send(f"**You cannot delete more than `30` messages at a time, {ctx.author.mention}!**")
 
@@ -1769,7 +1769,7 @@ class Moderation(*moderation_cogs):
                 else:
                     continue
 
-            should_ban = await utils.is_allowed([senior_mod_role_id]).predicate(ctx)
+            should_ban = await utils.is_allowed([staff_manager_role_id]).predicate(ctx)
 
             if not should_ban:
                 mod_ban_embed = discord.Embed(
@@ -1791,7 +1791,7 @@ class Moderation(*moderation_cogs):
 
                     if str(r.emoji) in ['✅', '❌']:
                         perms = channel.permissions_for(u)
-                        if senior_mod_role_id in [r.id for r in u.roles] or perms.administrator:
+                        if staff_manager_role_id in [r.id for r in u.roles] or perms.administrator:
                             return True
                         else:
                             self.client.loop.create_task(
@@ -1899,7 +1899,7 @@ We appreciate your understanding and look forward to hearing from you. """, embe
 
     # Unbans a member
     @commands.command()
-    @utils.is_allowed([senior_mod_role_id], throw_exc=True)
+    @utils.is_allowed([staff_manager_role_id], throw_exc=True)
     async def unban(self, ctx, *, member=None):
         """ (ADM) Unbans a member from the server.
         :param member: The full nickname and # of the user to unban. """
@@ -1966,7 +1966,7 @@ We appreciate your understanding and look forward to hearing from you. """, embe
         if await utils.is_allowed(allowed_roles).predicate(channel=ctx.channel, member=member):
             return await ctx.send(f"**You cannot softban a staff member, {author.mention}!**")
 
-        should_ban = await utils.is_allowed([senior_mod_role_id]).predicate(ctx)
+        should_ban = await utils.is_allowed([staff_manager_role_id]).predicate(ctx)
 
         if not should_ban:
             mod_softban_embed = discord.Embed(
@@ -1987,7 +1987,7 @@ We appreciate your understanding and look forward to hearing from you. """, embe
 
                 if str(r.emoji) == '✅':
                     perms = channel.permissions_for(u)
-                    if senior_mod_role_id in [r.id for r in u.roles] or perms.administrator:
+                    if staff_manager_role_id in [r.id for r in u.roles] or perms.administrator:
                         return True
                     else:
                         self.client.loop.create_task(
@@ -2079,7 +2079,7 @@ We appreciate your understanding and look forward to hearing from you. """, embe
         perpetrators = []
         confirmations = {}
 
-        should_nitro_kick = internal_use or await utils.is_allowed([senior_mod_role_id]).predicate(channel=ctx.channel, member=author)
+        should_nitro_kick = internal_use or await utils.is_allowed([staff_manager_role_id]).predicate(channel=ctx.channel, member=author)
 
         if not should_nitro_kick and not internal_use:
             confirmations[author.id] = author.name
@@ -2130,7 +2130,7 @@ We appreciate your understanding and look forward to hearing from you. """, embe
                     mod_softban_embed.title = f"NitroKick Request ({len(confirmations)}/3)"
                     await msg.edit(embed=mod_softban_embed)
                     if str(r.emoji) == "✅":
-                        if await utils.is_allowed([senior_mod_role_id]).predicate(channel=ctx.channel, member=u):
+                        if await utils.is_allowed([staff_manager_role_id]).predicate(channel=ctx.channel, member=u):
                             should_nitro_kick = True
                             await msg.remove_reaction("❌", self.client.user)
                             break
@@ -2142,7 +2142,7 @@ We appreciate your understanding and look forward to hearing from you. """, embe
                                 await msg.remove_reaction("❌", self.client.user)
                                 break
                     elif str(r.emoji) == "❌":
-                        if await utils.is_allowed([senior_mod_role_id]).predicate(channel=ctx.channel, member=u):
+                        if await utils.is_allowed([staff_manager_role_id]).predicate(channel=ctx.channel, member=u):
                             mod_softban_embed.title = "NitroKick Request"
                             mod_softban_embed.description = "NitroKick request denied."
                             await msg.edit(embed=mod_softban_embed)
@@ -2245,7 +2245,7 @@ We appreciate your understanding and look forward to hearing from you. """, embe
                     else:
                         continue
 
-            should_ban = await utils.is_allowed([senior_mod_role_id]).predicate(ctx)
+            should_ban = await utils.is_allowed([staff_manager_role_id]).predicate(ctx)
 
             if not should_ban:
                 mod_ban_embed = discord.Embed(
@@ -2267,7 +2267,7 @@ We appreciate your understanding and look forward to hearing from you. """, embe
 
                     if str(r.emoji) in ['✅', '❌']:
                         perms = channel.permissions_for(u)
-                        if senior_mod_role_id in [r.id for r in u.roles] or perms.administrator:
+                        if staff_manager_role_id in [r.id for r in u.roles] or perms.administrator:
                             return True
                         else:
                             self.client.loop.create_task(
@@ -2345,7 +2345,7 @@ We appreciate your understanding and look forward to hearing from you. """, embe
                 await ctx.send("**Invalid user id!**", delete_after=3)
 
     @commands.command(aliases=['fire', 'wall', 'fire_wall'])
-    @utils.is_allowed([senior_mod_role_id], throw_exc=True)
+    @utils.is_allowed([staff_manager_role_id], throw_exc=True)
     async def firewall(self, ctx) -> None:
         """ Turns on and off the firewall.
         When turned on, it'll kick new members having accounts created in less than 4 days. """
@@ -2473,7 +2473,7 @@ We appreciate your understanding and look forward to hearing from you. """, embe
             return await ctx.send(f"**Can't get firewall's response type from the database. Try resetting the firewall database before changing the reason.**")
 
     @commands.command(aliases=['bfw', 'bypassfirewall', 'bypass_fire', 'bypassfire'])
-    @utils.is_allowed([senior_mod_role_id, mod_role_id], throw_exc=True)
+    @utils.is_allowed([staff_manager_role_id, mod_role_id], throw_exc=True)
     async def bypass_firewall(self, ctx, user: discord.User = None) -> None:
         """ Makes a user able to bypass the Firewall.
         :param user: The user to make able to do so. """
@@ -2493,7 +2493,7 @@ We appreciate your understanding and look forward to hearing from you. """, embe
         await ctx.send(f"**The `{user}` user can now bypass the Firewall, {member.mention}!**")
 
     @commands.command(aliases=['ubfw', 'unbypassfirewall', 'unbypass_fire', 'unbypassfire'])
-    @utils.is_allowed([senior_mod_role_id], throw_exc=True)
+    @utils.is_allowed([staff_manager_role_id], throw_exc=True)
     async def unbypass_firewall(self, ctx, user: discord.User = None) -> None:
         """ Makes a user not able to bypass the Firewall anymore.
         :param user: The user to make able to do so. """
@@ -2510,7 +2510,7 @@ We appreciate your understanding and look forward to hearing from you. """, embe
         await ctx.send(f"**The `{user}` user can no longer bypass the Firewall now, {member.mention}!**")
 
     @commands.command(aliases=['sbfw', 'showbypassfirewall', 'show_bypass_fire', 'showbypassfire'])
-    @utils.is_allowed([senior_mod_role_id], throw_exc=True)
+    @utils.is_allowed([staff_manager_role_id], throw_exc=True)
     async def show_bypass_firewall(self, ctx) -> None:
         """ Checks the users who are able to bypass the Firewall. """
 
@@ -2640,7 +2640,7 @@ We appreciate your understanding and look forward to hearing from you. """, embe
         author = ctx.author
         icon = ctx.author.display_avatar
 
-        is_staff_manager = await utils.is_allowed([senior_mod_role_id]).predicate(ctx)
+        is_staff_manager = await utils.is_allowed([staff_manager_role_id]).predicate(ctx)
 
         await ctx.message.delete()
 
@@ -2823,11 +2823,11 @@ We appreciate your understanding and look forward to hearing from you. """, embe
 
         perms = ctx.channel.permissions_for(ctx.author)
 
-        senior_mod_role = discord.utils.get(ctx.guild.roles, id=senior_mod_role_id)
+        staff_manager_role = discord.utils.get(ctx.guild.roles, id=staff_manager_role_id)
 
         members, _ = await utils.greedy_member_reason(ctx, message)
 
-        if perms.administrator or senior_mod_role in ctx.author.roles:
+        if perms.administrator or staff_manager_role in ctx.author.roles:
             members = members if members else [ctx.message.author]
         else:
             if members:
@@ -2981,7 +2981,7 @@ We appreciate your understanding and look forward to hearing from you. """, embe
         await ctx.send(embed=embed)
     
     @commands.command(aliases=['minfr', 'muted_infr'])
-    @utils.is_allowed([senior_mod_role_id], throw_exc=True)
+    @utils.is_allowed([staff_manager_role_id], throw_exc=True)
     async def muted_infractions(self, ctx) -> None:
         """Shows the infractions for all muted members"""
 

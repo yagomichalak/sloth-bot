@@ -48,7 +48,7 @@ ban_appeals_channel_id: int = os.getenv("BAN_APPEALS_CHANNEL_ID", 123)
 
 # variables.role #
 moderator_role_id = int(os.getenv('MOD_ROLE_ID', 123))
-staff_manager_role_id = int(os.getenv('SENIOR_MOD_ROLE_ID', 123))
+staff_manager_role_id = int(os.getenv('STAFF_MANAGER_ROLE_ID', 123))
 admin_role_id = int(os.getenv('ADMIN_ROLE_ID', 123))
 lesson_management_role_id = int(os.getenv('LESSON_MANAGEMENT_ROLE_ID', 123))
 event_management_role_id = int(os.getenv('EVENT_MANAGER_ROLE_ID', 123))
@@ -508,7 +508,7 @@ class ReportSupport(*report_support_classes):
         }
         
         if (vc_name == "staff"):
-            senior_mod = discord.utils.get(guild.roles, id=staff_manager_role_id)
+            staff_manager = discord.utils.get(guild.roles, id=staff_manager_role_id)
             overwrites.update({
                 moderator: discord.PermissionOverwrite(
                     read_messages=False, 
@@ -516,7 +516,7 @@ class ReportSupport(*report_support_classes):
                     connect=False, 
                     view_channel=False, 
                     manage_messages=False),
-                senior_mod: discord.PermissionOverwrite(
+                staff_manager: discord.PermissionOverwrite(
                     read_messages=True, 
                     send_messages=True, 
                     connect=False, 
@@ -574,7 +574,7 @@ class ReportSupport(*report_support_classes):
             embed.add_field(name="Evidence:", value=f"```{evidence}```", inline=False)
             
             if (vc_name == "staff"):
-                message = await the_channel.send(content=f"{member.mention}, {senior_mod.mention}", embed=embed)
+                message = await the_channel.send(content=f"{member.mention}, {staff_manager.mention}", embed=embed)
             else:
                 message = await the_channel.send(content=f"{member.mention}, {moderator.mention}, {owner_role.mention}", embed=embed)
             
