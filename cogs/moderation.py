@@ -885,18 +885,22 @@ class Moderation(*moderation_cogs):
         weight_map = {
             # n: [hour, day, week, ban]
             0: [0, 0, 0, False],
-            1: [6, 0, 0, False],	# 6 hours
-            2: [0, 2, 0, False],	# 2 days
-            3: [0, 0, 1, False],	# 1 week
-            4: [0, 0, 1, False] if not autoBan else [0, 0, 0, True] # 1 week, or Ban if autoBan variable is True
+            1: [1, 0, 0, False],	# 1 hour
+            2: [3, 0, 0, False],	# 3 hours
+            3: [6, 0, 0, False],	# 6 hours
+            4: [12, 0, 0, False],	# 12 hours
+            5: [0, 1, 0, False],	# 1 day
+            6: [0, 2, 0, False],	# 2 days
+            7: [0, 3, 0, False],	# 3 days
+            8: [0, 0, 1, False] if not autoBan else [0, 0, 0, True] # 1 week or Ban if autoBan variable is True
         }
         
         if await utils.is_allowed(allowed_roles).predicate(channel=ctx.channel, member=member):
             index = 0
         elif warns in weight_map:
             index = warns
-        elif warns > 4:
-            index = 4
+        elif warns > 8:
+            index = 8
         else:
             index = 0
         return weight_map[index]
