@@ -14,7 +14,7 @@ class Files(commands.Cog):
     # Events
     @commands.Cog.listener()
     async def on_ready(self):
-        print('Files cog is ready.')
+        print('[.cogs] Files cog is ready!')
 
     @commands.command()
     @commands.has_permissions(administrator=True)

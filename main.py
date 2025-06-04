@@ -67,7 +67,7 @@ client = commands.Bot(command_prefix='z!', intents=discord.Intents.all(), help_c
 @client.event
 async def on_ready() -> None:
     change_color.start()
-    print('Bot is ready!')
+    print('[sloth] Bot is ready!')
 
 
 @tasks.loop(seconds=65)

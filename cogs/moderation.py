@@ -24,7 +24,6 @@ from extra.moderation.userinfractions import ModerationUserInfractionsTable
 from extra.moderation.watchlist import ModerationWatchlistTable
 from extra.prompt.menu import Confirm
 from extra.useful_variables import banned_links
-from extra.view import WarnRulesView
 from mysqldb import DatabaseCore
 
 # variables.id
@@ -46,7 +45,7 @@ allowed_roles = [int(os.getenv('OWNER_ROLE_ID', 123)), admin_role_id, staff_mana
 
 # variables.textchannel
 mod_log_id = int(os.getenv('MOD_LOG_CHANNEL_ID', 123))
-evidence_channel_id = int(os.getenv('EVIDENCE_CHANNEL_ID', 123))
+spam_log_channel_id = int(os.getenv('SPAM_LOG_CHANNEL_ID', 123))
 ban_appeals_channel_id: int = os.getenv("BAN_APPEALS_CHANNEL_ID", 123)
 secret_agent_channel_id = int(os.getenv('SECRET_AGENTS_CHANNEL_ID', 123))
 error_log_channel_id = int(os.getenv('ERROR_LOG_CHANNEL_ID', 123))
@@ -121,7 +120,7 @@ class Moderation(*moderation_cogs):
         self.look_for_expired_tempmutes.start()
         self.check_timeouts_expirations.start()
         self.guild = self.client.get_guild(server_id)
-        print('Moderation cog is ready!')
+        print('[.cogs] Moderation cog is ready!')
 
     @commands.Cog.listener()
     async def on_message(self, message):
@@ -309,7 +308,7 @@ class Moderation(*moderation_cogs):
         ctx = await self.client.get_context(message)
         
         try:
-            evidence_channel = self.client.get_channel(evidence_channel_id)
+            scam_channel = self.client.get_channel(spam_log_channel_id)
         except discord.NotFound:
             return
 
@@ -337,8 +336,8 @@ class Moderation(*moderation_cogs):
         embed.set_footer(text="User muted and kicked", icon_url=message.guild.icon.url if message.guild.icon else None)
 
         if not await utils.is_allowed(allowed_roles).predicate(ctx, member=message.author):
-            # Send the embed to the evidence channel if the member is not a staff member
-            await evidence_channel.send(embed=embed)
+            # Send the embed to the scam channel if the member is not a staff member
+            await scam_channel.send(embed=embed)
 
             # Nitro kick them if the member is not a staff member
             await self.nitro_kick(ctx, member=message.author, internal_use=True)
@@ -710,12 +709,7 @@ class Moderation(*moderation_cogs):
         :param member: The @ or the ID of one or more users to soft warn.
         :param reason: The reason for warning one or all users. (Optional)"""
 
-        await ctx.send("**Light warn is disabled until further notice.** Use `z!warn`.", delete_after=6)
-
-        #if not message:
-        #    await self._easy_warn_callback(ctx=ctx, warn_type="lwarn")
-        #else:
-        #    await self._warn_callback(ctx=ctx, message=message, warn_type="lwarn")
+        await self._warn_callback(ctx=ctx, message=message, warn_type="lwarn")
 
     @commands.command(aliases=["warnado", "wrn", "w"])
     @utils.is_allowed(allowed_roles, throw_exc=True)
@@ -724,72 +718,19 @@ class Moderation(*moderation_cogs):
         :param member: The @ or the ID of one or more users to warn.
         :param reason: The reason for warning one or all users. (Optional)"""
 
-        if not message:
-            await self._easy_warn_callback(ctx=ctx, warn_type="warn")
-        else:
-            await self._warn_callback(ctx=ctx, message=message, warn_type="warn")
+        await self._warn_callback(ctx=ctx, message=message, warn_type="warn")
 
-    @commands.command(aliases=["hwarn", "hwarnado", "hwrn", "hw"])
-    @utils.is_allowed(allowed_roles, throw_exc=True)
-    async def heavy_warn(self, ctx, *, message: Optional[str] = None) -> None:
-        """(MOD) Warns one or more members.
-        :param member: The @ or the ID of one or more users to warn.
-        :param reason: The reason for warning one or all users. (Optional)"""
-        
-        await ctx.send("**Heavy warn is disabled until further notice.** Use `z!warn`.", delete_after=6)
-        
-        #if not message:
-        #    await self._easy_warn_callback(ctx=ctx, warn_type="hwarn")
-        #else:
-        #    await self._warn_callback(ctx=ctx, message=message, warn_type="hwarn")
-        
-    async def _easy_warn_callback(self, ctx, warn_type: str = "warn") -> None:
-        """ Callback for the easy warn.
-        :param warn_type: The warn type. [light/normal/heavy]"""
-        
-        author = ctx.author
-        channel = ctx.channel
-
-        await ctx.send(f"**{author.mention}, type the ID of the user that will to get warned.\n- (Multiple ID's work as well.)**")
-        if not (ids := await prompt_message_guild(client=self.client, member=author, channel=channel, limit=180)):
-            return
-
-        rule_embed: discord.Embed = discord.Embed(
-            title="__Warn Rule Selection__",
-            color=author.color,
-            timestamp=ctx.message.created_at
-        )
-        rule_embed.set_author(name=author, icon_url=author.display_avatar)
-        rule_embed.set_thumbnail(url=author.display_avatar)
-        rule_embed.set_footer(text="3 minutes to select.", icon_url=ctx.guild.icon.url)
-
-        view: discord.ui.View = WarnRulesView(author)
-        msg = await ctx.send(embed=rule_embed, view=view)
-        await view.wait()
-        await utils.disable_buttons(view)
-        await msg.edit(view=view)
-
-        if view.selected_rule is None:
-            await ctx.send(f"- **Rule selection cancelled, warn aborted.**")
-            return
-
-        if not view.selected_rule:
-            await ctx.send(f"- **No rules have been selected, warn aborted.**")
-            return
-
-        await ctx.send(f"**- Rule selection successful!**")
-
-        await ctx.send(f"- **{author.mention}, specify the reason you're warning this/these member(s).**")
-        if not (personal_message := await prompt_message_guild(client=self.client, member=author, channel=channel, limit=860)):
-            return
-            
-        reason_output = f"{view.selected_rule.label}: {view.selected_rule.description}"
-
-        output = f"{ids} {reason_output} {personal_message}"
-        
-        confirm = await Confirm(f"**Are you sure about about this/these `{warn_type}(s)`?**\n- ID(s): `{ids}` \n- Selected rule: `{reason_output}`\n- Reason: `{personal_message}`").prompt(ctx)
-        if confirm:
-            await self._warn_callback(ctx=ctx, message=output, warn_type=warn_type)
+    # not removed from the code, just in case we want to use it in the future
+    # and also, we need the heavy warn type to exist because of the previous heavy warn infractions
+    #
+    # @commands.command(aliases=["hwarn", "hwarnado", "hwrn", "hw"])
+    # @utils.is_allowed(allowed_roles, throw_exc=True)
+    # async def heavy_warn(self, ctx, *, message: Optional[str] = None) -> None:
+    #     """(MOD) Warns one or more members.
+    #     :param member: The @ or the ID of one or more users to warn.
+    #     :param reason: The reason for warning one or all users. (Optional)"""
+    #     
+    #     await self._warn_callback(ctx=ctx, message=message, warn_type="hwarn")
 
     async def _warn_callback(self, ctx, *, message: Optional[str] = None, warn_type: str = "warn") -> None:
         """ Callback for the warn commands.
@@ -944,18 +885,22 @@ class Moderation(*moderation_cogs):
         weight_map = {
             # n: [hour, day, week, ban]
             0: [0, 0, 0, False],
-            1: [6, 0, 0, False],	# 6 hours
-            2: [0, 2, 0, False],	# 2 days
-            3: [0, 0, 1, False],	# 1 week
-            4: [0, 0, 1, False] if not autoBan else [0, 0, 0, True] # 1 week, or Ban if autoBan variable is True
+            1: [1, 0, 0, False],	# 1 hour
+            2: [3, 0, 0, False],	# 3 hours
+            3: [6, 0, 0, False],	# 6 hours
+            4: [12, 0, 0, False],	# 12 hours
+            5: [0, 1, 0, False],	# 1 day
+            6: [0, 2, 0, False],	# 2 days
+            7: [0, 3, 0, False],	# 3 days
+            8: [0, 0, 1, False] if not autoBan else [0, 0, 0, True] # 1 week or Ban if autoBan variable is True
         }
         
         if await utils.is_allowed(allowed_roles).predicate(channel=ctx.channel, member=member):
             index = 0
         elif warns in weight_map:
             index = warns
-        elif warns > 4:
-            index = 4
+        elif warns > 8:
+            index = 8
         else:
             index = 0
         return weight_map[index]
@@ -1177,51 +1122,6 @@ class Moderation(*moderation_cogs):
 
         await ctx.send(embed=embed)
 
-    async def add_galaxy_room_perms(self, member: discord.Member, muted_galaxies: List[Tuple[int, int]]) -> List[Tuple[int, int]]:
-        """ Removes teh user's permissions in all Galaxy Rooms.
-        :param member: The member from whom to remove the permissions. """
-
-        # Gets all Galaxy rooms that are created
-        SmartRoom = self.client.get_cog('CreateSmartRoom')
-        all_galaxies = await SmartRoom.get_galaxy_rooms()
-        
-        # Gets all Galaxy categories to give perms back
-        galaxy_categories: Dict[discord.CategoryChannel, List[int]] = {
-            gcat: galaxy for galaxy in all_galaxies
-            for mgalaxy in muted_galaxies
-            if galaxy[1] == mgalaxy[1]
-            and (gcat := discord.utils.get(member.guild.categories, id=galaxy[1]))
-        }
-        # Gives perms to all Galaxy categories
-        for gcat, ginfo in galaxy_categories.items():
-            await SmartRoom.handle_permissions([member], ginfo, member.guild, allow=True)
-
-    async def remove_galaxy_room_perms(self, member: discord.Member) -> List[Tuple[int, int]]:
-        """ Removes teh user's permissions in all Galaxy Rooms.
-        :param member: The member from whom to remove the permissions. """
-
-        removed_grooms = []
-        # Gets all Galaxy rooms that are created
-        SmartRoom = self.client.get_cog('CreateSmartRoom')
-        all_galaxies = await SmartRoom.get_galaxy_rooms()
-
-        # Gets all selected Galaxy categories to remove perms
-        galaxy_categories: Dict[discord.CategoryChannel, List[int]] = {
-            gcat: galaxy for galaxy in all_galaxies
-            if (gcat := discord.utils.get(member.guild.categories, id=galaxy[1]))
-        }
-
-        # Removes perms from the selected Galaxy categories
-        for gcat, ginfo in galaxy_categories.items():
-            overwrites = gcat.overwrites
-            if not overwrites.get(member):
-                continue
-
-            await SmartRoom.handle_permissions([member], ginfo, member.guild, allow=False)
-            removed_grooms.append((member.id, gcat.id))
-
-        return removed_grooms
-
     @commands.command(name="mute", aliases=["shutup", "shut_up", "stfu", "zitto", "zitta", "shh", "tg", "ta_gueule", "tagueule", "mutado", "xiu", "calaboca", "callate", "calma_calabreso"])
     @utils.is_allowed(allowed_roles, throw_exc=True)
     async def _mute_command(self, ctx, *, message : str = None) -> None:
@@ -1287,9 +1187,6 @@ class Moderation(*moderation_cogs):
             await member.edit(roles=keep_roles)
             user_role_ids = [(member.id, rr.id, current_ts, None) for rr in remove_roles]
             await self.insert_in_muted(user_role_ids)
-
-            removed_grooms = await self.remove_galaxy_room_perms(member)
-            await self.insert_user_muted_galaxies(removed_grooms)
 
             # General embed
             current_time = await utils.get_time_now()
@@ -1441,10 +1338,6 @@ class Moderation(*moderation_cogs):
                 pass
 
             await member.edit(roles=member_roles)
-
-        if muted_galaxies := await self.get_user_muted_galaxies(member.id):
-            await self.add_galaxy_room_perms(member, muted_galaxies)
-            await self.delete_user_muted_galaxies(member.id)
 
         try:
             await member.remove_roles(role)

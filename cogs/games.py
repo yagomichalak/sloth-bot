@@ -40,7 +40,7 @@ class Games(*minigames_cogs):
     async def on_ready(self) -> None:
         """ Tells when the Games cog is ready to go. """
 
-        print("Game cog is online!")
+        print("[.cogs] Game cog is ready!")
 
     @commands.command()
     @Player.poisoned()

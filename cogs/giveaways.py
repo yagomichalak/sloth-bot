@@ -48,7 +48,7 @@ class Giveaways(*giveaway_cogs):
 
         self.check_old_giveaways.start() # Deletes old giveaways
         self.check_due_giveaways.start() # Checks due giveaways
-        print('Giveaways cog is online!')
+        print('[.cogs] Giveaways cog is ready!')
 
 
     @tasks.loop(minutes=1)

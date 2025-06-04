@@ -1,17 +1,10 @@
 # import.standard
-from collections import defaultdict
-import time
 import asyncio
-from asyncio import Lock
 import os
 import subprocess
-import re
 from typing import List, Optional
-import requests
 
 # import.thirdparty
-import httpx
-import anthropic
 import aiohttp
 import discord
 from discord.ext import commands, tasks
@@ -37,9 +30,6 @@ case_cat_id = int(os.getenv('CASE_CAT_ID', 123))
 
 # variables.voicechannel #
 staff_vc_id = int(os.getenv('STAFF_VC_ID', 123))
-
-# variables.anthropic #
-api_key = str(os.getenv('ANTHROPIC_API_KEY', 'abc'))
 
 # variables.textchannel #
 reportsupport_channel_id = int(os.getenv('REPORT_CHANNEL_ID', 123))
@@ -67,19 +57,8 @@ class ReportSupport(*report_support_classes):
 
         self.client = client
         self.db = DatabaseCore()
-        self.conversation_history = {}
-        self.send_summary = {}
-        self.mod_appeared = {}
-        self.max_ai_responses = {}
-        self.last_message_time = defaultdict(float)
-        self.active_channels = set()
-        self.active_channels_lock = Lock()
         self.owner_role_id: int = int(os.getenv('OWNER_ROLE_ID', 123))
         self.mayu_id: int = int(os.getenv('MAYU_ID', 123))
-        self.prisca_id: int = int(os.getenv('PRISCA_ID', 123))
-        self.cache = {}
-        self.report_cache = {}
-        self.bot_cache = {}
 
     @commands.Cog.listener()
     async def on_ready(self) -> None:
@@ -88,11 +67,11 @@ class ReportSupport(*report_support_classes):
         self.client.add_view(view=PremiumView(self.client))
         self.client.add_view(view=ReportView(self.client))
         self.check_inactive_cases.start()
-        print('ReportSupport cog is online!')
+        print('[.cogs] ReportSupport cog is ready!')
 
     @tasks.loop(seconds=60)
     async def check_inactive_cases(self):
-        """ Task that checks Dynamic Rooms expirations. """
+        """ Task that checks for inactive cases and removes them. """
 
         # Get current time
         current_ts = await utils.get_timestamp()
@@ -109,29 +88,6 @@ class ReportSupport(*report_support_classes):
                 except Exception as e:
                     print(f"Failed at deleting the {channel}: {str(e)}")
             await self.remove_user_open_channel(inactive_case[0])
-
-    def split_into_chunks(self, text: str, max_length: int) -> List[str]:
-        """Splits text into chunks of a specified maximum length, respecting word boundaries."""
-        max_length = min(max_length, 2000)  # Discord messages are limited to 2000 chars
-        chunks = []
-        
-        while len(text) > max_length:
-            # Find the last newline or space within the max_length limit
-            split_index = text.rfind('\n', 0, max_length)
-            if split_index == -1:  # If no newline, try to split by space
-                split_index = text.rfind(' ', 0, max_length)
-            if split_index == -1:  # If no space, hard split at max_length
-                split_index = max_length
-
-            # Append the chunk and update the remaining text
-            chunks.append(text[:split_index].strip())
-            text = text[split_index:].strip()
-
-        # Append the remaining text as the last chunk
-        if text:
-            chunks.append(text)
-
-        return chunks
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message) -> None:
@@ -157,138 +113,13 @@ class ReportSupport(*report_support_classes):
         category = getattr(message.channel, "category", None)
         # If the channel is part of the category of case reports
         if category and category.id == case_cat_id:
-            
-            # Initiate the user_id variable
-            user_id = 0
-            
-            # Grabs the channel ID
-            channel_id = message.channel.id
 
-            # Initialize the channel conversation history
-            if all(channel_id not in d for d in 
-                (
-                self.mod_appeared,
-                self.conversation_history,
-                self.send_summary,
-                self.max_ai_responses,)
-                ):
-                    self.conversation_history[channel_id] = []
-                    self.max_ai_responses[channel_id] = []
-                    self.send_summary[channel_id] = False
-                    self.mod_appeared[channel_id] = False
-            
             current_ts = await utils.get_timestamp()
             case_channel_aliases = ("general", "role", "case")
             report_channel_aliases = ("user", "staff")
 
             if channel.name.startswith(case_channel_aliases):
                 await self.update_case_timestamp(channel.id, current_ts)
-            
-            if channel.name.startswith(report_channel_aliases):
-                await asyncio.sleep(1) # Add a delay to avoid race conditions
-                await self.update_case_timestamp(channel.id, current_ts)
-                
-                # Handles messages in report channels and forwards them to Claude
-                # Ignore bot's own messages
-                if message.author == self.client.user:
-                    return
-
-                # Add the user's message to the conversation history
-                self.conversation_history[channel_id].append((f"{message.author}: {message.content}", time.time()))
-                
-                # Add the message time to the time history variable
-                self.last_message_time[channel_id] = time.time()
-                
-                async with self.active_channels_lock:
-                    # Start monitoring for multiple messages sent
-                    if channel_id not in self.active_channels:
-                        self.active_channels.add(channel_id)
-
-                    # Verify if a mod/admin has sent a message
-                    # This will be later used to stop the Claude AI from sending messages
-                    if any(role.id in [moderator_role_id, admin_role_id] for role in message.author.roles):
-                        user_id = message.author.id
-                        self.mod_appeared[channel_id] = True
-
-                        # Verify if the message is pinging the Sloth Bot
-                        for user in message.mentions:
-                            # Once a mod appears on the channel (aka mentions the sloth bot)
-                            # The AI will send a recap of the report case on the mod's DM
-                            if user.id == self.client.application_id:
-                                await asyncio.sleep(1)
-                
-                                # Fetch and format conversation history
-                                messages = "\n".join(
-                                    msg if isinstance(msg, str) else msg[0]  # Extract the message text from the tuple
-                                    for msg in self.conversation_history[channel_id]
-                                )
-                
-                                messages += """
-                                            Compile a brief and clear summary of the report in English, regardless of the original language.
-                                            Example output:
-                                            **Summary of Report:**  
-                                            - **User Reported:**   
-                                            - **Reason:** 
-                                            - **Evidence Provided:** (Summarized details or mention if missing)  
-                                            - **Time of Incident:** (Extracted from the conversation)  
-                                            - **Additional Notes:** (Any relevant context, such as prior offenses)  
-                                            - **Recommended Action:**
-                                            """
-                
-                                # Send messages to Claude API
-                                # response = await self.get_claude_response(messages)
-                
-                                # Send Claude response to mod's DM
-                                # if user := self.client.get_user(user_id):
-                                #     response_chunks = self.split_into_chunks(response, 2000)
-                                #     for chunk in response_chunks:
-                                #         try:
-                                #             await user.send(f"{chunk}")
-                                #         except Exception as e:
-                                #             print(f"Failed to send DM: {e}")
-
-                                # Stop monitoring each instance to make space for a new one
-                                self.active_channels.remove(channel_id)
-                    
-                    # Start a task for inactivity monitoring
-                    asyncio.create_task(self.monitor_channel_inactivity(channel_id, user_id))
-
-    async def monitor_channel_inactivity(self, channel_id: int, user_id: int):
-        """Monitor a channel for inactivity and send data to Claude API."""
-        async with self.active_channels_lock:
-            while not self.mod_appeared[channel_id] and len(self.max_ai_responses[channel_id]) < 2:
-                # Wait for 1 second to check for inactivity
-                await asyncio.sleep(1)
-                
-                time_diff = time.time() - self.last_message_time[channel_id]
-                
-                # Will verify if multiple messages have been sent in less than 10 seconds
-                if time_diff > 5:  # No messages for 10 seconds
-
-                    # Fetch and format conversation history
-                    # messages = "\n".join(
-                    #     msg if isinstance(msg, str) else msg[0]
-                    #     for msg in self.conversation_history[channel_id]
-                    # )
-
-                    # Send messages to Claude API
-                    # response = await self.get_claude_response(messages)
-                    
-                    # Add AI response to the history
-                    # self.conversation_history[channel_id].append(f"Assistant: {response}")
-
-                    # Add AI response count to the max AI responses sent
-                    self.max_ai_responses[channel_id].append(1)
-
-                    # Send response back to the channel
-                    # if channel := self.client.get_channel(channel_id):
-                    #     response_chunks = self.split_into_chunks(response, 2000)
-                    #     for chunk in response_chunks:
-                    #         await channel.send(f"{chunk}")
-
-                    # Stop monitoring each instance to make space for a new one
-                    self.active_channels.remove(channel_id)
-                    break
                 
     async def handle_ban_appeal(self, message: discord.Message, payload) -> None:
         """ Handles ban appeal applications.
@@ -453,44 +284,7 @@ class ReportSupport(*report_support_classes):
         await self.insert_application(verify_msg.id, member.id, 'verify')
         return await member.send(f"**Request sent, you will get notified here if you get accepted or declined! ✅**")
 
-    # Sends the report information to Claude AI and sends a response on the chat for the user
-    async def get_claude_response(self, prompt: str) -> str:
-        """Fetches a response from Claude 3 using the Anthropic API."""
-        client = anthropic.Anthropic()  # Initialize the Anthropic client
-        
-        with open('./extra/random/texts/other/report.txt', 'r') as file:
-            content = file.readlines()
-        
-        # Send request to Claude API
-        try:
-            message = client.messages.create(
-                model="claude-3-5-sonnet-20241022",
-                max_tokens=1000,
-                temperature=0,
-                system=f"""{content}""",
-                messages=[
-                    {
-                        "role": "user",
-                        "content": [
-                            {
-                                "type": "text",
-                                "text": prompt
-                            }
-                        ]
-                    }
-                ]
-            )
-            
-            # Extract the text content from the TextBlock
-            raw_content = ''.join(block.text for block in message.content if hasattr(block, 'text'))
-            return raw_content.strip()
-        
-        except Exception as e:
-            print(f"Error interacting with Claude: {e}")
-            return "An error occurred while communicating with the AI."
-
     async def report_action(self, interaction: discord.Interaction, vc_name: str, reportee: str, text: str, evidence: str):
-        # sourcery skip: low-code-quality
         member = interaction.user
         guild = interaction.guild
         counter = await self.get_case_number()
@@ -596,52 +390,6 @@ class ReportSupport(*report_support_classes):
 
             else:
                 await ctx.send(f"**{member.mention} is not in a VC!**")
-                
-            # Calls the function to communicate with Claude's API
-            await self.call_ai(reportee, text, evidence, the_channel, language_role)
-    
-    async def call_ai(self, reportee: str, text: str, evidence: str, the_channel, language_role: str):
-        # Prepare the AI prompt
-        responseBuffer = f"""
-        A user submitted a report against a user of the Language Sloth Discord server.
-        You are the AI assistant that will help users initially with their reports before a mod appears.
-        Their native language is {language_role}, ask if they want to discuss in their native language
-        or in english.
-        
-        Here are the details about the report:
-        - The user that is being reported: {reportee}
-        - The reason for the report: {text}
-        - The evidence for the report case: {evidence}
-
-        Please respond as a helpful assistant by asking brief short follow-up questions, with a maximum of 3 questions.
-        You don't want to overwhelm with questions, be precise.
-        Dont' ask in what voice or text channel it occured, because the mods already know it.
-        """
-        
-        # Initialize conversation history for this channel
-        channel_id = the_channel.id
-        if channel_id not in self.conversation_history:
-            self.conversation_history[channel_id] = []
-
-        # Initialize the maximum responses AI
-        # This will define how many messages the AI has sent and then will stop it
-        if channel_id not in self.max_ai_responses:
-            self.max_ai_responses[channel_id] = []
-
-        # Add the initial user input to the conversation history
-        self.conversation_history[channel_id].append(f"User: {responseBuffer.strip()}")
-
-        # Get response from Claude
-        # response = await self.get_claude_response("\n".join(self.conversation_history[channel_id]))
-
-        # Add AI response to the history
-        # self.conversation_history[channel_id].append(f"Assistant: {response}")
-
-        # Add AI response count to the max AI responses sent
-        # self.max_ai_responses[channel_id].append(1)
-
-        # Send the AI response in the channel
-        # await the_channel.send(content=f"{response}")
 
     # - Report a staff member
     async def report_staff(self, interaction: discord.Interaction, reportee: str, text: str, evidence: str):
@@ -702,22 +450,6 @@ class ReportSupport(*report_support_classes):
             else:
                 await the_channel.send(content=member.mention, embed=embed)
 
-    async def get_message_content(self, member, check, timeout: Optional[int] = 300) -> str:
-        """ Gets a message content.
-        :param member: The member to get the message from.
-        :param check: The check for the event.
-        :param timeout: Timeout for getting the message. [Optional] """
-
-        try:
-            message = await self.client.wait_for('message', timeout=timeout,
-            check=check)
-        except asyncio.TimeoutError:
-            await member.send("**Timeout! Try again.**")
-            return None
-        else:
-            content = message.content
-            return content
-
     async def get_message(self, member, check, timeout: Optional[int] = 300) -> discord.Message:
         """ Gets a message.
         :param member: The member to get the message from.
@@ -732,16 +464,6 @@ class ReportSupport(*report_support_classes):
             return None
         else:
             return message
-
-    async def get_reaction(self, member, check, timeout: int = 300):
-        try:
-            reaction, _ = await self.client.wait_for('reaction_add',
-            timeout=timeout, check=check)
-        except asyncio.TimeoutError:
-            await member.send("**Timeout! Try again.**")
-            return None
-        else:
-            return str(reaction.emoji)
 
     @commands.command(aliases=['permit_case', 'allow_case', 'add_witness', 'witness', 'aw'])
     @commands.has_any_role(*allowed_roles)

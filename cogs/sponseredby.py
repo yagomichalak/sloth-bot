@@ -35,7 +35,7 @@ class SponsoredBy(commands.Cog):
     async def on_ready(self) -> None:
         """ Tells when the cog is ready to go. """
 
-        print("The SponsoredBy cog is ready!")
+        print("[.cogs] SponsoredBy cog is ready!")
 
     # Commands
 

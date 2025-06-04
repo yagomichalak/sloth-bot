@@ -25,7 +25,7 @@ class QueueManagement(QueuesTable):
 
     @commands.Cog.listener()
     async def on_ready(self) -> None:
-        print('QueueManagement cog is online!')
+        print('[.cogs] QueueManagement cog is ready!')
 
     @commands.group()
     @utils.is_allowed([event_host_role_id, teacher_role_id, moderator_role_id, admin_role_id, owner_role_id], throw_exc=True)

@@ -54,9 +54,6 @@ more_popular_lang_cat_id = int(os.getenv('MORE_LANGUAGES_CAT_ID', 123))
 smart_room_cat_id = int(os.getenv('CREATE_SMART_ROOM_CAT_ID', 123))
 dynamic_channels_cat_id = int(os.getenv('CREATE_DYNAMIC_ROOM_CAT_ID', 123))
 
-# variables.voicechannel
-dynamic_vc_id: int = int(os.getenv('CREATE_DYNAMIC_ROOM_VC_ID', 123))
-
 # variables.textchannel
 patreon_channel_id = int(os.getenv('PATREONS_CHANNEL_ID', 123))
 
@@ -74,7 +71,7 @@ class Tools(*tool_cogs):
 	@commands.Cog.listener()
 	async def on_ready(self):
 		
-		print('Tools cog is ready!')
+		print('[.cogs] Tools cog is ready!')
 
 	@commands.Cog.listener()
 	async def on_voice_state_update(self, member, before, after) -> None:
@@ -920,15 +917,6 @@ class Tools(*tool_cogs):
 		cosmos = discord.utils.get(ctx.guild.members, id=cosmos_id)
 		await ctx.send(cosmos.mention)
 
-	@commands.command()
-	@utils.is_allowed([owner_role_id, admin_role_id, mod_role_id], throw_exc=True)
-	async def prisca(self, ctx) -> None:
-		""" A command for pinging Prisca, the photoshop Turk. """
-
-		prisca_id = int(os.getenv('PRISCA_ID', 123))
-		prisca = discord.utils.get(ctx.guild.members, id=prisca_id)
-		await ctx.send(prisca.mention)
-
 	@commands.command(aliases=['musicbot', 'music_bot', 'musicbots', 'music', 'mb'])
 	@commands.cooldown(1, 10, commands.BucketType.user)
 	@Player.poisoned()
@@ -1022,22 +1010,24 @@ class Tools(*tool_cogs):
 
 		await ctx.respond(embed=embed, ephemeral=True)
 
-	@commands.slash_command(name="mention", guild_ids=guild_ids)
-	@utils.is_allowed([mod_role_id, admin_role_id, owner_role_id], throw_exc=True)
-	async def _mention(self, ctx, 
-		member: Option(str, name="member", description="The Staff member to mention/ping.", required=True,
-			choices=[
-				OptionChoice(name="Cosmos", value=os.getenv('COSMOS_ID')), OptionChoice(name="Alex", value=os.getenv('ALEX_ID')),
-				OptionChoice(name="DNK", value=os.getenv('DNK_ID')), OptionChoice(name="Elijah", value=os.getenv('ELIJAH_ID')),
-				OptionChoice(name="Prisca", value=os.getenv('PRISCA_ID')), OptionChoice(name="Lemon", value=os.getenv('LEMON_ID'))
-			]
-		)) -> None:
-		""" (ADMIN) Used to mention staff members. """
+	# will remake it with all the admins, later
+	# @commands.slash_command(name="mention", guild_ids=guild_ids)
+	# @utils.is_allowed([mod_role_id, admin_role_id, owner_role_id], throw_exc=True)
+	# async def _mention(self, ctx, 
+	# 	member: Option(str, name="member", description="The Staff member to mention/ping.", required=True,
+	# 		choices =[
+	# 			OptionChoice(name="Cosmos", value=os.getenv('COSMOS_ID')),
+	# 			OptionChoice(name="DNK", value=os.getenv('DNK_ID')),
+	# 			OptionChoice(name="Lemon", value=os.getenv('LEMON_ID')),
+	# 		]
+	# 	)) -> None:
+	# 	""" (ADMIN) Used to mention staff members. """
 
-		if staff_member := discord.utils.get(ctx.guild.members, id=int(member)):
-			await ctx.respond(staff_member.mention)
-		else:
-			await ctx.respond("**For some reason I couldn't ping them =\ **")
+	# 	# Try to get the staff member by ID and mention them, otherwise send an error message.
+	# 	if staff_member := discord.utils.get(ctx.guild.members, id=int(member)):
+	# 		await ctx.respond(staff_member.mention)
+	# 	else:
+	# 		await ctx.respond("**For some reason I couldn't ping them =\ **")
 
 	@commands.command(aliases=['sound', 'board', 'sound_board'])
 	@commands.check_any(utils.is_allowed([mod_role_id, admin_role_id, owner_role_id], throw_exc=True), utils.is_subscriber())
@@ -1242,56 +1232,6 @@ class Tools(*tool_cogs):
 			await ctx.respond(f"**For some reason I couldn't move you to there, {ctx.author.mention}!**")
 		else:
 			await ctx.respond(f"**You got moved to {channel.mention}!**")
-
-	@commands.command()
-	@utils.is_allowed([staff_manager_role_id, admin_role_id, owner_role_id], throw_exc=True)
-	async def surf(self, ctx, member: Optional[discord.Member] = None) -> None:
-		""" Makes a member surf in the empty Dynamic Rooms, to delete them.
-		:param member: The member who's gonna surf. [Optional][Default = You] """
-
-		author: discord.Member = ctx.author
-
-		if not member:
-			member = ctx.author
-
-		dynamic_channels: List[discord.TextChannel] = [
-			dynamic_vc for dynamic_vc in ctx.guild.voice_channels
-			if dynamic_vc.category and dynamic_vc.category.id == dynamic_channels_cat_id
-			and dynamic_vc.id != dynamic_vc_id and len(dynamic_vc.members) == 0
-		]
-
-		if not len(dynamic_channels):
-			return await ctx.send(f"**It seems like there are no VCs to surf on today, {author.mention}!**")
-
-		original_vc: discord.VoiceChannel
-
-		if not member.voice or not (original_vc := member.voice.channel):
-			if member.id == author.id:
-				return await ctx.send(f"**You are not in a VC, you cannot surf, {member.mention}!**")
-			else:
-				return await ctx.send(f"**{member.mention} is not in a VC, they cannot surf, {author.mention}!**")
-
-		# Resets the Dynamic Rooms' states.
-		await self.client.get_cog('CreateDynamicRoom').setup_dynamic_rooms_callback()
-
-		await ctx.send(f"**{member.mention} is gonna surf on `{len(dynamic_channels)}` VCs!**")
-
-		# Moves the user to all of the channels
-		for dynamic_vc in dynamic_channels:
-			try: 
-				await member.move_to(dynamic_vc)
-			except:
-				pass
-			else:
-				await asyncio.sleep(1.5)
-		
-		# Moves the user back to the channel they were in before
-		try:  
-			await member.move_to(original_vc)
-		except: 
-			pass
-		else:
-			await ctx.send(f"**{member.mention}, is back home, after a long day of surfing!**")
 
 	@commands.command(hidden=False)
 	@commands.has_permissions(administrator=True)

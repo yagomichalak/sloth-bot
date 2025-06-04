@@ -27,7 +27,7 @@ class EmbedManagement(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self) -> None:
         """ Tells when the cog is ready to use. """
-        print("EmbedManagement cog is online!")
+        print("[.cogs] EmbedManagement cog is ready!")
 
     # Database methods
     async def insert_embed(self, embed_name: str) -> None:

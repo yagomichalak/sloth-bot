@@ -47,7 +47,7 @@ class EventManagement(EventRoomsTable):
         productivity_events = await self.get_all_events_by_event_name(event_name="productivity")
         self.productivity_club_vcs_ids = [active_event[1] for active_event in productivity_events]
         self.check_camera_on_in_productivity_events.start()
-        print("EventManagement cog is online!")
+        print("[.cogs] EventManagement cog is ready!")
 
     @tasks.loop(seconds=60)
     async def check_camera_on_in_productivity_events(self) -> None:

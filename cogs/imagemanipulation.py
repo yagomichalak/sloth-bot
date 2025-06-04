@@ -28,7 +28,7 @@ class ImageManipulation(commands.Cog):
     async def on_ready(self) -> None:
         """ Tells when the cog is ready to go. """
 
-        print('ImageManipulation cog is ready!')
+        print('[.cogs] ImageManipulation cog is ready!')
 
     @commands.command(aliases=['av', 'pfp', 'pic', 'picture', 'profile_picture'])
     async def avatar(self, ctx, member: Optional[discord.Member] = None) -> None:

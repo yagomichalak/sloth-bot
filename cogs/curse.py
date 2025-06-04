@@ -25,7 +25,7 @@ class CurseMember(CurseTable):
     async def on_ready(self) -> None:
         """ Tells when the cog's ready to be used. """
 
-        print('CurseMember cog is online!')
+        print('[.cogs] CurseMember cog is ready!')
 
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after) -> None:

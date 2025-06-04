@@ -60,7 +60,7 @@ class TeacherFeedback(commands.Cog):
     async def on_ready(self) -> None:
         """ Tells when the cog is ready to use. """
 
-        print("TeacherFeedback cog is online!")
+        print("[.cogs] TeacherFeedback cog is ready!")
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload) -> None:
@@ -144,73 +144,6 @@ class TeacherFeedback(commands.Cog):
             # Checks if user is an active student
             if await self.db.get_student_by_vc_id(member.id, the_class_vc[2]):
                 await self.db.update_student_messages(member.id, the_class_vc[2])
-
-    # @commands.Cog.listener(name="on_voice_state_update")
-    # async def on_voice_state_update_private(self, member, before, after) -> None:
-    #     """ For teachers to create private classes. """
-
-    #     cog = self.client.get_cog('CreateSmartRoom')
-
-    #     # # Checks if the user is leaving the vc and whether there still are people in there
-    #     guild = member.guild
-
-    #     # Checks whether user is leaving their private class
-    #     if before.channel:
-    #         if not before.channel.category: return
-
-    #         if before.channel.category.id == create_room_cat_id:
-    #             user_voice_channel = before.channel
-    #             len_users = len(user_voice_channel.members)
-    #             if len_users == 0 and user_voice_channel.id not in [create_room_vc_id, create_private_room_vc_id]:
-
-    #                 private_rooms = await cog.get_premium_vc(before.channel.id)
-    #                 if private_rooms:
-
-    #                     private_vc = discord.utils.get(guild.voice_channels, id=private_rooms[0][1]) # Vc channel
-    #                     private_txt = discord.utils.get(guild.text_channels, id=private_rooms[0][2]) # Txt channel
-
-    #                     try:
-    #                         await user_voice_channel.delete()
-    #                         await private_txt.delete()
-    #                     except:
-    #                         pass
-    #                     finally:
-    #                         await cog.delete_premium_vc(member.id, user_voice_channel.id)
-
-    #     if not after.channel:
-    #         return
-
-    #     # Checks if the user is joining the create a room VC
-    #     if after.channel.id == create_private_room_vc_id:
-
-    #         # Creates base overwrites for rooms (Txt and Vc)
-    #         overwrites: Dict[
-    #             Union[discord.Member, discord.Role],
-    #             discord.PermissionOverwrite
-    #         ] = {
-    #             guild.default_role: discord.PermissionOverwrite(
-	# 			    read_messages=False, send_messages=False, connect=False, speak=False, view_channel=False),
-    #             member: discord.PermissionOverwrite(
-    #                 manage_permissions=True, read_messages=True, send_messages=True, view_channel=True, manage_channels=True,
-    #                 connect=True, speak=True)
-    #         }
-
-    #         class_category = discord.utils.get(guild.categories, id=create_room_cat_id)
-
-    #         # Creates Voice Channel
-    #         private_vc: discord.VoiceChannel = await class_category.create_voice_channel(
-    #             name=f"{member.display_name}'s Private Room", user_limit=2, overwrites=overwrites
-    #         )
-    #         # Creates Text Channel
-    #         private_txt: discord.TextChannel = await class_category.create_text_channel(
-    #             name=f"{member.display_name}'s Private Room", overwrites=overwrites
-    #         )
-
-    #         await cog.insert_premium_vc(member.id, private_vc.id, private_txt.id)
-    #         try:
-    #             await member.move_to(private_vc)
-    #         finally:
-    #             await private_txt.send(f"**Welcome to your private room, {member.mention} ({private_vc.mention})!**")
 
     @commands.Cog.listener(name="on_voice_state_update")
     async def on_voice_state_update_public(self, member, before, after) -> None:
@@ -1011,78 +944,6 @@ class TeacherFeedback(commands.Cog):
                 return False
         except Exception as e:
             return False
-
-    # ====== In-Discord commands ======
-    @commands.command(aliases=['allow_private', 'private_student', 'privatestudent', 'aps'])
-    @utils.is_allowed([teacher_role_id, mod_role_id, admin_role_id], throw_exc=True)
-    async def allow_private_student(self, ctx, *, member: discord.Member = None) -> None:
-        """ Allows a private student to an existing private class.
-        :param member: The member to allow. """
-
-        teacher = ctx.author
-        channel = ctx.channel
-        guild = channel.guild
-
-        if not member:
-            return await ctx.send(f"**Please, inform a member to allow into your private class, {teacher.mention}!**")
-
-        cog = self.client.get_cog('CreateSmartRoom')
-        private_room: List[List[int]] = await cog.get_premium_txt(channel.id)
-        if not private_room:
-            return await ctx.send(f"**This is not a private class, {teacher.mention}!**")
-
-        class_vc = discord.utils.get(guild.voice_channels, id=private_room[0][1]) # Voice channel
-        class_txt = discord.utils.get(guild.text_channels, id=private_room[0][2]) # Text channel
-
-        confirm = await ConfirmSkill(f"**Are you sure you want to allow {member.mention} in your private class, {teacher.mention}?**").prompt(ctx)
-        if not confirm:
-            return await ctx.send(f"**Not doing it, then, {teacher.mention}!**")
-
-        try:
-            await class_vc.set_permissions(member, view_channel=True, connect=True, speak=True)
-            await class_txt.set_permissions(member, view_channel=True, read_messages=True, send_messages=True)
-        except Exception as e:
-            print(e)
-            await ctx.send(f"**For some reason I couldn't give this user permissions, {teacher.mention}!**")
-        else:
-            await ctx.send(f"**Successfully given permissions to {member.mention}, {teacher.mention}!**")
-
-    @commands.command(aliases=['disallow_private', 'remove_private_student', 'removeprivatestudent', 'rps'])
-    @utils.is_allowed([teacher_role_id, mod_role_id, admin_role_id], throw_exc=True)
-    async def disallow_private_student(self, ctx, *, member: discord.Member = None) -> None:
-        """ Removes a private student from an existing private class.
-        :param member: The member to disallow. """
-
-        teacher = ctx.author
-        channel = ctx.channel
-        guild = channel.guild
-
-        if not member:
-            return await ctx.send(f"**Please, inform a member to disallow into your private class, {teacher.mention}!**")
-
-        cog = self.client.get_cog('CreateSmartRoom')
-        private_room: List[List[int]] = await cog.get_premium_txt(channel.id)
-        if not private_room:
-            return await ctx.send(f"**This is not a private class, {teacher.mention}!**")
-
-        if member.id == private_room[0][0]:
-            return await ctx.send(f"**You can't disallow the owner of the class, {teacher.mention}!**")
-
-        class_vc = discord.utils.get(guild.voice_channels, id=private_room[0][1]) # Voice channel
-        class_txt = discord.utils.get(guild.text_channels, id=private_room[0][2]) # Text channel
-
-        confirm = await ConfirmSkill(f"**Are you sure you want to allow {member.mention} in your private class, {teacher.mention}?**").prompt(ctx)
-        if not confirm:
-            return await ctx.send(f"**Not doing it, then, {teacher.mention}!**")
-
-        try:
-            await class_vc.set_permissions(member, overwrite=None)
-            await class_txt.set_permissions(member, overwrite=None)
-        except Exception as e:
-            print(e)
-            await ctx.send(f"**For some reason I couldn't give this user permissions, {teacher.mention}!**")
-        else:
-            await ctx.send(f"**Successfully given permissions to {member.mention}, {teacher.mention}!**")
 
     @commands.command(aliases=['showclass', 'view_class', 'viewclass', 'class_info', 'classinfo', 'class_status', 'classstatus'])
     @utils.is_allowed([teacher_role_id, mod_role_id, admin_role_id], throw_exc=True)

@@ -1,8 +1,11 @@
+# import.standard
 from typing import Union
 
+# import.thirdparty
 import discord
 from discord.ext import commands
 
+# import.local
 from extra import utils
 from extra.prompt.menu import ConfirmButton
 from extra.slothclasses.player import Player
@@ -12,7 +15,6 @@ from extra.slothclasses.view import (BegView, BootView, DriveOverView,
                                      PeekView, PunchView, SlapView, TickleView,
                                      WhisperView, YeetView, DominateView)
 from extra.customerrors import SlothAccountNotFound, NotEnoughMoneyError
-
 
 class RolePlay(commands.Cog):
     """ Category for roleplaying commands. """

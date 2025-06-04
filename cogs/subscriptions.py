@@ -41,7 +41,7 @@ class Subscriptions(commands.Cog):
     async def on_ready(self):
 
         self.change_status.start()
-        print("SlothSubscriber cog is online!")
+        print("[.cogs] SlothSubscriber cog is ready!")
 
     @tasks.loop(seconds=10)
     async def change_status(self) -> None:

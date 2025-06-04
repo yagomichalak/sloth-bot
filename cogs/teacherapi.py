@@ -48,7 +48,7 @@ class TeacherAPI(commands.Cog):
     async def on_ready(self) -> None:
         """ For when the bot starts up """
 
-        print('TeacherAPI cog is online!')
+        print('[.cogs] TeacherAPI cog is ready!')
 
     async def get_flag(self, language: str) -> str:
         """ Gets a flag from the media files.

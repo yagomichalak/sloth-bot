@@ -38,7 +38,7 @@ class Show(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self) -> None:
-        print('Show cog is ready!')
+        print('[.cogs] Show cog is ready!')
 
     # Shows how many members there are in the server
     @commands.command()

@@ -30,7 +30,7 @@ class Duolingo(DuolingoProfileTable, command_attrs=dict(hidden=True)):
     async def on_ready(self) -> None:
         """ Tells when the cog is ready to go. """
 
-        print("Duolingo cog is online!")
+        print("[.cogs] Duolingo cog is ready!")
     
     @commands.command(aliases=['set_duolingo', 'set_owl', 'setduo', 'setduolingo'])
     @Player.poisoned()
