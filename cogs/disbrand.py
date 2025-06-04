@@ -35,9 +35,10 @@ class Disbrand(commands.Cog):
     async def on_ready(self) -> None:
         """ Tells when the cog's ready to be used. """
 
-        self.create_pending_user_advertisement_channels.start()
-        self.check_pending_user_advertisement_messages.start()
-        print("Disbrand cog is online!")
+        if os.getenv("DJANGO_DB_HOST", "123") != "123": # fix for unnecessary errors on local dev environment
+            self.create_pending_user_advertisement_channels.start()
+            self.check_pending_user_advertisement_messages.start()
+        print("[.cogs] Disbrand cog is ready!")
         
     @tasks.loop(seconds=60)
     async def create_pending_user_advertisement_channels(self) -> None:
