@@ -71,7 +71,7 @@ class ReportSupport(*report_support_classes):
 
     @tasks.loop(seconds=60)
     async def check_inactive_cases(self):
-        """ Task that checks Dynamic Rooms expirations. """
+        """ Task that checks for inactive cases and removes them. """
 
         # Get current time
         current_ts = await utils.get_timestamp()
