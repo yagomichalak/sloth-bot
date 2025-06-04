@@ -1122,51 +1122,6 @@ class Moderation(*moderation_cogs):
 
         await ctx.send(embed=embed)
 
-    async def add_galaxy_room_perms(self, member: discord.Member, muted_galaxies: List[Tuple[int, int]]) -> List[Tuple[int, int]]:
-        """ Removes teh user's permissions in all Galaxy Rooms.
-        :param member: The member from whom to remove the permissions. """
-
-        # Gets all Galaxy rooms that are created
-        SmartRoom = self.client.get_cog('CreateSmartRoom')
-        all_galaxies = await SmartRoom.get_galaxy_rooms()
-        
-        # Gets all Galaxy categories to give perms back
-        galaxy_categories: Dict[discord.CategoryChannel, List[int]] = {
-            gcat: galaxy for galaxy in all_galaxies
-            for mgalaxy in muted_galaxies
-            if galaxy[1] == mgalaxy[1]
-            and (gcat := discord.utils.get(member.guild.categories, id=galaxy[1]))
-        }
-        # Gives perms to all Galaxy categories
-        for gcat, ginfo in galaxy_categories.items():
-            await SmartRoom.handle_permissions([member], ginfo, member.guild, allow=True)
-
-    async def remove_galaxy_room_perms(self, member: discord.Member) -> List[Tuple[int, int]]:
-        """ Removes teh user's permissions in all Galaxy Rooms.
-        :param member: The member from whom to remove the permissions. """
-
-        removed_grooms = []
-        # Gets all Galaxy rooms that are created
-        SmartRoom = self.client.get_cog('CreateSmartRoom')
-        all_galaxies = await SmartRoom.get_galaxy_rooms()
-
-        # Gets all selected Galaxy categories to remove perms
-        galaxy_categories: Dict[discord.CategoryChannel, List[int]] = {
-            gcat: galaxy for galaxy in all_galaxies
-            if (gcat := discord.utils.get(member.guild.categories, id=galaxy[1]))
-        }
-
-        # Removes perms from the selected Galaxy categories
-        for gcat, ginfo in galaxy_categories.items():
-            overwrites = gcat.overwrites
-            if not overwrites.get(member):
-                continue
-
-            await SmartRoom.handle_permissions([member], ginfo, member.guild, allow=False)
-            removed_grooms.append((member.id, gcat.id))
-
-        return removed_grooms
-
     @commands.command(name="mute", aliases=["shutup", "shut_up", "stfu", "zitto", "zitta", "shh", "tg", "ta_gueule", "tagueule", "mutado", "xiu", "calaboca", "callate", "calma_calabreso"])
     @utils.is_allowed(allowed_roles, throw_exc=True)
     async def _mute_command(self, ctx, *, message : str = None) -> None:
@@ -1232,9 +1187,6 @@ class Moderation(*moderation_cogs):
             await member.edit(roles=keep_roles)
             user_role_ids = [(member.id, rr.id, current_ts, None) for rr in remove_roles]
             await self.insert_in_muted(user_role_ids)
-
-            removed_grooms = await self.remove_galaxy_room_perms(member)
-            await self.insert_user_muted_galaxies(removed_grooms)
 
             # General embed
             current_time = await utils.get_time_now()
@@ -1386,10 +1338,6 @@ class Moderation(*moderation_cogs):
                 pass
 
             await member.edit(roles=member_roles)
-
-        if muted_galaxies := await self.get_user_muted_galaxies(member.id):
-            await self.add_galaxy_room_perms(member, muted_galaxies)
-            await self.delete_user_muted_galaxies(member.id)
 
         try:
             await member.remove_roles(role)
