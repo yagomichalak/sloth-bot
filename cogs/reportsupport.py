@@ -59,7 +59,6 @@ class ReportSupport(*report_support_classes):
         self.db = DatabaseCore()
         self.owner_role_id: int = int(os.getenv('OWNER_ROLE_ID', 123))
         self.mayu_id: int = int(os.getenv('MAYU_ID', 123))
-        self.prisca_id: int = int(os.getenv('PRISCA_ID', 123))
 
     @commands.Cog.listener()
     async def on_ready(self) -> None:

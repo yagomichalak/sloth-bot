@@ -920,15 +920,6 @@ class Tools(*tool_cogs):
 		cosmos = discord.utils.get(ctx.guild.members, id=cosmos_id)
 		await ctx.send(cosmos.mention)
 
-	@commands.command()
-	@utils.is_allowed([owner_role_id, admin_role_id, mod_role_id], throw_exc=True)
-	async def prisca(self, ctx) -> None:
-		""" A command for pinging Prisca, the photoshop Turk. """
-
-		prisca_id = int(os.getenv('PRISCA_ID', 123))
-		prisca = discord.utils.get(ctx.guild.members, id=prisca_id)
-		await ctx.send(prisca.mention)
-
 	@commands.command(aliases=['musicbot', 'music_bot', 'musicbots', 'music', 'mb'])
 	@commands.cooldown(1, 10, commands.BucketType.user)
 	@Player.poisoned()
