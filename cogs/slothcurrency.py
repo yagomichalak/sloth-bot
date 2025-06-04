@@ -55,7 +55,7 @@ class SlothCurrency(*currency_cogs):
     async def on_ready(self) -> None:
         """ Tells when the cog is ready to go. """
 
-        print("SlothCurrency cog is online!")
+        print("[.cogs] SlothCurrency cog is ready!")
 
     @commands.Cog.listener()
     async def on_message(self, message) -> None:

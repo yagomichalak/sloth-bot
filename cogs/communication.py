@@ -42,7 +42,7 @@ class Communication(*tool_cogs):
 
         self.advertise_patreon.start()
         self.advertise_sloth_subscription.start()
-        print('Communication cog is ready!')
+        print('[.cogs] Communication cog is ready!')
 
     @tasks.loop(seconds=60)
     async def advertise_patreon(self) -> None:

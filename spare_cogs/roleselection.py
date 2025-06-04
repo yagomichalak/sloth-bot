@@ -49,7 +49,7 @@ class RoleSelection(RoleSelectionDatabaseCommands):
 			else:
 				continue
 			
-		print('RoleSelection cog is online!')
+		print('[.cogs] RoleSelection cog is online!')
 
 	@commands.command(aliases=['create_menu', 'createmenu', 'make_menu', 'makemenu', 'startmenu'])
 	@commands.has_permissions(administrator=True)

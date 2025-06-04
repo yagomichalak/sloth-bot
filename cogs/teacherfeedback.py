@@ -60,7 +60,7 @@ class TeacherFeedback(commands.Cog):
     async def on_ready(self) -> None:
         """ Tells when the cog is ready to use. """
 
-        print("TeacherFeedback cog is online!")
+        print("[.cogs] TeacherFeedback cog is ready!")
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload) -> None:

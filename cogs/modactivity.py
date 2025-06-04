@@ -31,7 +31,7 @@ class ModActivity(ModActivityTable):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        print('ModActivity cog is ready!')
+        print('[.cogs] ModActivity cog is ready!')
 
     @commands.Cog.listener()
     async def on_message(self, message):

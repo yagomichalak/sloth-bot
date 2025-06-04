@@ -32,7 +32,7 @@ class VoiceManagement(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self) -> None:
         self.check_camera_on.start()
-        print('VoiceManagement cog is online!')
+        print('[.cogs] VoiceManagement cog is ready!')
 
     @tasks.loop(seconds=60)
     async def check_camera_on(self) -> None:

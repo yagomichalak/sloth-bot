@@ -42,7 +42,7 @@ class Social(*social_cogs):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        print('Social cog is ready!')
+        print('[.cogs] Social cog is ready!')
 
     @commands.command(aliases=['si', 'server', 'server_info'])
     async def serverinfo(self, ctx) -> None:

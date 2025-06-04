@@ -35,7 +35,7 @@ class Analytics(*analytics_cogs):
     async def on_ready(self) -> None:
         """ Tells when the cog's ready to be used. """
 
-        print("Analytics cog is online!")
+        print("[.cogs] Analytics cog is ready!")
         self.check_midnight.start()
 
     @tasks.loop(minutes=1)

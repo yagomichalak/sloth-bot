@@ -32,7 +32,7 @@ class Pictures(commands.Cog):
     async def on_ready(self) -> None:
         """ Tells when the cog is ready to go. """
 
-        print("Pictures cog is online!")
+        print("[.cogs] Pictures cog is ready!")
 
 
     @commands.command(aliases=['tak'])

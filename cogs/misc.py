@@ -78,7 +78,7 @@ class Misc(*misc_cogs):
     @commands.Cog.listener()
     async def on_ready(self):
         self.look_for_due_reminders.start()
-        print("Misc cog is online!")
+        print("[.cogs] Misc cog is ready!")
 
     @tasks.loop(minutes=1)
     async def look_for_due_reminders(self) -> None:

@@ -35,7 +35,7 @@ class SlothReputation(*currency_cogs):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        print("SlothReputation cog is ready!")
+        print("[.cogs] SlothReputation cog is ready!")
 
     # In-game commands
     @commands.Cog.listener()

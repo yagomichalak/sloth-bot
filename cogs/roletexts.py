@@ -18,7 +18,7 @@ class RoleTexts(commands.Cog):
     async def on_ready(self) -> None:
         """ Tells when the cog is ready to use. """
 
-        print('RoleTexts cog is online!')
+        print('[.cogs] RoleTexts cog is ready!')
         # await SlothCurrency.text_download_update(self.client)
 
     @commands.Cog.listener()

@@ -67,7 +67,7 @@ class ReportSupport(*report_support_classes):
         self.client.add_view(view=PremiumView(self.client))
         self.client.add_view(view=ReportView(self.client))
         self.check_inactive_cases.start()
-        print('ReportSupport cog is online!')
+        print('[.cogs] ReportSupport cog is ready!')
 
     @tasks.loop(seconds=60)
     async def check_inactive_cases(self):

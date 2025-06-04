@@ -120,7 +120,7 @@ class Moderation(*moderation_cogs):
         self.look_for_expired_tempmutes.start()
         self.check_timeouts_expirations.start()
         self.guild = self.client.get_guild(server_id)
-        print('Moderation cog is ready!')
+        print('[.cogs] Moderation cog is ready!')
 
     @commands.Cog.listener()
     async def on_message(self, message):

@@ -29,7 +29,7 @@ class Embeds(commands.Cog):
     # Events
     @commands.Cog.listener()
     async def on_ready(self):
-        print('Embeds cog is ready.')
+        print('[.cogs] Embeds cog is ready!')
 
     # Sends an embedded message
     @commands.command(aliases=['emb'])

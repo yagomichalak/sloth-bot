@@ -41,7 +41,7 @@ class VoiceChannelActivity(*tool_cogs):
         self.check_old_record_deletion_time.start()
         self.check_exceeding_voice_channels_from_history.start()
 
-        print('VoiceChannelActivity cog is online!')
+        print('[.cogs] VoiceChannelActivity cog is ready!')
 
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):

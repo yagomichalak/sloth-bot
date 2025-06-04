@@ -40,7 +40,7 @@ class SlothClass(mastersloth.Mastersloth, db_commands.SlothClassDatabaseCommands
         self.check_skill_actions.start()
         self.check_mission_one_completion.start()
         self.check_mission_six_completion.start()
-        print("SlothClass cog is online")
+        print("[.cogs] SlothClass cog is ready!")
 
     @tasks.loop(minutes=1)
     async def check_skill_actions(self):

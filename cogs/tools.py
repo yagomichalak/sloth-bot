@@ -74,7 +74,7 @@ class Tools(*tool_cogs):
 	@commands.Cog.listener()
 	async def on_ready(self):
 		
-		print('Tools cog is ready!')
+		print('[.cogs] Tools cog is ready!')
 
 	@commands.Cog.listener()
 	async def on_voice_state_update(self, member, before, after) -> None:
