@@ -45,7 +45,7 @@ allowed_roles = [int(os.getenv('OWNER_ROLE_ID', 123)), admin_role_id, staff_mana
 
 # variables.textchannel
 mod_log_id = int(os.getenv('MOD_LOG_CHANNEL_ID', 123))
-evidence_channel_id = int(os.getenv('EVIDENCE_CHANNEL_ID', 123))
+spam_log_channel_id = int(os.getenv('SPAM_LOG_CHANNEL_ID', 123))
 ban_appeals_channel_id: int = os.getenv("BAN_APPEALS_CHANNEL_ID", 123)
 secret_agent_channel_id = int(os.getenv('SECRET_AGENTS_CHANNEL_ID', 123))
 error_log_channel_id = int(os.getenv('ERROR_LOG_CHANNEL_ID', 123))
@@ -308,7 +308,7 @@ class Moderation(*moderation_cogs):
         ctx = await self.client.get_context(message)
         
         try:
-            evidence_channel = self.client.get_channel(evidence_channel_id)
+            scam_channel = self.client.get_channel(spam_log_channel_id)
         except discord.NotFound:
             return
 
@@ -336,8 +336,8 @@ class Moderation(*moderation_cogs):
         embed.set_footer(text="User muted and kicked", icon_url=message.guild.icon.url if message.guild.icon else None)
 
         if not await utils.is_allowed(allowed_roles).predicate(ctx, member=message.author):
-            # Send the embed to the evidence channel if the member is not a staff member
-            await evidence_channel.send(embed=embed)
+            # Send the embed to the scam channel if the member is not a staff member
+            await scam_channel.send(embed=embed)
 
             # Nitro kick them if the member is not a staff member
             await self.nitro_kick(ctx, member=message.author, internal_use=True)
