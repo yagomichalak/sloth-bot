@@ -199,46 +199,6 @@ class Communication(*tool_cogs):
         embed = discord.Embed(description=msg[1], colour=discord.Colour.dark_green())
         await spychannel.send(embed=embed)
 
-    # Welcomes an user by telling them to assign a role
-    @commands.command()
-    @commands.has_any_role(474774889778380820, 574265899801116673, 699296718705000559)
-    async def welcome(self, ctx, member: discord.Member = None):
-        """ (WELCOMER) Welcomes a user.
-        :param member: The member to welcome. """
-
-        await ctx.message.delete()
-        if not member:
-            return await ctx.send('Inform a member!')
-
-        bots_and_commands_channel = discord.utils.get(ctx.guild.channels, id=bots_and_commands_channel_id)
-        await bots_and_commands_channel.send(
-            f'''__**Welcome to the Language Sloth**__! {member.mention}
-This is a community of people who are practicing and studying languages from all around the world! While you're here, you will also make tons of new friends! There is a lot to do here in the server but there are some things you should do to start off.
-
-1. Make sure you go check out the <#688967996512665655> and the informations page. These rules are very important and are taken seriously here on the server.
-2. After you have finished reading those, you can assign yourself some roles at <#679333977705676830> <#683987207065042944> <#688037387561205824> and <#562019509477703697>! These roles will give you access to different voice and text channels! To choose your role click on the flag that best represents your native language.
-
-If you have any questions feel free to ask! And if you experience any type of problem make sure you let a staff member know right away''')
-
-    # Pretends that a role has been given to an user by the bot
-    @commands.command()
-    @commands.has_any_role(474774889778380820, 574265899801116673, 699296718705000559)
-    async def auto(self, ctx, member: discord.Member = None, language: str = None):
-        """ (WELCOMER) Makes the bot send an 'automatic' message to someone.
-        :param member: The member:
-        :param  language: The language. """
-
-        await ctx.message.delete()
-        if not language:
-            return await ctx.send('**Inform a language!**', delete_after=3)
-
-        elif not member:
-            return await ctx.send('**Inform a member!**', delete_after=3)
-
-        bots_and_commands_channel = discord.utils.get(ctx.guild.channels, id=bots_and_commands_channel_id)
-        await bots_and_commands_channel.send(
-            f'''{member.mention} - Hey! since you didn't assign your native language I went ahead and assigned it for you automatically based on my best guess of what is your native language, I came to the conclusion that it is {language.title()}.  If I'm incorrect please let me know!''')
-
     @commands.command()
     @commands.has_permissions(administrator=True)
     async def announce(self, ctx):

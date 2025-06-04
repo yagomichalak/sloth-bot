@@ -24,7 +24,6 @@ from extra.moderation.userinfractions import ModerationUserInfractionsTable
 from extra.moderation.watchlist import ModerationWatchlistTable
 from extra.prompt.menu import Confirm
 from extra.useful_variables import banned_links
-from extra.view import WarnRulesView
 from mysqldb import DatabaseCore
 
 # variables.id
@@ -710,12 +709,7 @@ class Moderation(*moderation_cogs):
         :param member: The @ or the ID of one or more users to soft warn.
         :param reason: The reason for warning one or all users. (Optional)"""
 
-        await ctx.send("**Light warn is disabled until further notice.** Use `z!warn`.", delete_after=6)
-
-        #if not message:
-        #    await self._easy_warn_callback(ctx=ctx, warn_type="lwarn")
-        #else:
-        #    await self._warn_callback(ctx=ctx, message=message, warn_type="lwarn")
+        await self._warn_callback(ctx=ctx, message=message, warn_type="lwarn")
 
     @commands.command(aliases=["warnado", "wrn", "w"])
     @utils.is_allowed(allowed_roles, throw_exc=True)
@@ -724,72 +718,19 @@ class Moderation(*moderation_cogs):
         :param member: The @ or the ID of one or more users to warn.
         :param reason: The reason for warning one or all users. (Optional)"""
 
-        if not message:
-            await self._easy_warn_callback(ctx=ctx, warn_type="warn")
-        else:
-            await self._warn_callback(ctx=ctx, message=message, warn_type="warn")
+        await self._warn_callback(ctx=ctx, message=message, warn_type="warn")
 
-    @commands.command(aliases=["hwarn", "hwarnado", "hwrn", "hw"])
-    @utils.is_allowed(allowed_roles, throw_exc=True)
-    async def heavy_warn(self, ctx, *, message: Optional[str] = None) -> None:
-        """(MOD) Warns one or more members.
-        :param member: The @ or the ID of one or more users to warn.
-        :param reason: The reason for warning one or all users. (Optional)"""
-        
-        await ctx.send("**Heavy warn is disabled until further notice.** Use `z!warn`.", delete_after=6)
-        
-        #if not message:
-        #    await self._easy_warn_callback(ctx=ctx, warn_type="hwarn")
-        #else:
-        #    await self._warn_callback(ctx=ctx, message=message, warn_type="hwarn")
-        
-    async def _easy_warn_callback(self, ctx, warn_type: str = "warn") -> None:
-        """ Callback for the easy warn.
-        :param warn_type: The warn type. [light/normal/heavy]"""
-        
-        author = ctx.author
-        channel = ctx.channel
-
-        await ctx.send(f"**{author.mention}, type the ID of the user that will to get warned.\n- (Multiple ID's work as well.)**")
-        if not (ids := await prompt_message_guild(client=self.client, member=author, channel=channel, limit=180)):
-            return
-
-        rule_embed: discord.Embed = discord.Embed(
-            title="__Warn Rule Selection__",
-            color=author.color,
-            timestamp=ctx.message.created_at
-        )
-        rule_embed.set_author(name=author, icon_url=author.display_avatar)
-        rule_embed.set_thumbnail(url=author.display_avatar)
-        rule_embed.set_footer(text="3 minutes to select.", icon_url=ctx.guild.icon.url)
-
-        view: discord.ui.View = WarnRulesView(author)
-        msg = await ctx.send(embed=rule_embed, view=view)
-        await view.wait()
-        await utils.disable_buttons(view)
-        await msg.edit(view=view)
-
-        if view.selected_rule is None:
-            await ctx.send(f"- **Rule selection cancelled, warn aborted.**")
-            return
-
-        if not view.selected_rule:
-            await ctx.send(f"- **No rules have been selected, warn aborted.**")
-            return
-
-        await ctx.send(f"**- Rule selection successful!**")
-
-        await ctx.send(f"- **{author.mention}, specify the reason you're warning this/these member(s).**")
-        if not (personal_message := await prompt_message_guild(client=self.client, member=author, channel=channel, limit=860)):
-            return
-            
-        reason_output = f"{view.selected_rule.label}: {view.selected_rule.description}"
-
-        output = f"{ids} {reason_output} {personal_message}"
-        
-        confirm = await Confirm(f"**Are you sure about about this/these `{warn_type}(s)`?**\n- ID(s): `{ids}` \n- Selected rule: `{reason_output}`\n- Reason: `{personal_message}`").prompt(ctx)
-        if confirm:
-            await self._warn_callback(ctx=ctx, message=output, warn_type=warn_type)
+    # not removed from the code, just in case we want to use it in the future
+    # and also, we need the heavy warn type to exist because of the previous heavy warn infractions
+    #
+    # @commands.command(aliases=["hwarn", "hwarnado", "hwrn", "hw"])
+    # @utils.is_allowed(allowed_roles, throw_exc=True)
+    # async def heavy_warn(self, ctx, *, message: Optional[str] = None) -> None:
+    #     """(MOD) Warns one or more members.
+    #     :param member: The @ or the ID of one or more users to warn.
+    #     :param reason: The reason for warning one or all users. (Optional)"""
+    #     
+    #     await self._warn_callback(ctx=ctx, message=message, warn_type="hwarn")
 
     async def _warn_callback(self, ctx, *, message: Optional[str] = None, warn_type: str = "warn") -> None:
         """ Callback for the warn commands.

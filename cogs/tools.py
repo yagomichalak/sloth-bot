@@ -1022,22 +1022,24 @@ class Tools(*tool_cogs):
 
 		await ctx.respond(embed=embed, ephemeral=True)
 
-	@commands.slash_command(name="mention", guild_ids=guild_ids)
-	@utils.is_allowed([mod_role_id, admin_role_id, owner_role_id], throw_exc=True)
-	async def _mention(self, ctx, 
-		member: Option(str, name="member", description="The Staff member to mention/ping.", required=True,
-			choices=[
-				OptionChoice(name="Cosmos", value=os.getenv('COSMOS_ID')), OptionChoice(name="Alex", value=os.getenv('ALEX_ID')),
-				OptionChoice(name="DNK", value=os.getenv('DNK_ID')), OptionChoice(name="Elijah", value=os.getenv('ELIJAH_ID')),
-				OptionChoice(name="Prisca", value=os.getenv('PRISCA_ID')), OptionChoice(name="Lemon", value=os.getenv('LEMON_ID'))
-			]
-		)) -> None:
-		""" (ADMIN) Used to mention staff members. """
+	# will remake it with all the admins, later
+	# @commands.slash_command(name="mention", guild_ids=guild_ids)
+	# @utils.is_allowed([mod_role_id, admin_role_id, owner_role_id], throw_exc=True)
+	# async def _mention(self, ctx, 
+	# 	member: Option(str, name="member", description="The Staff member to mention/ping.", required=True,
+	# 		choices =[
+	# 			OptionChoice(name="Cosmos", value=os.getenv('COSMOS_ID')),
+	# 			OptionChoice(name="DNK", value=os.getenv('DNK_ID')),
+	# 			OptionChoice(name="Lemon", value=os.getenv('LEMON_ID')),
+	# 		]
+	# 	)) -> None:
+	# 	""" (ADMIN) Used to mention staff members. """
 
-		if staff_member := discord.utils.get(ctx.guild.members, id=int(member)):
-			await ctx.respond(staff_member.mention)
-		else:
-			await ctx.respond("**For some reason I couldn't ping them =\ **")
+	# 	# Try to get the staff member by ID and mention them, otherwise send an error message.
+	# 	if staff_member := discord.utils.get(ctx.guild.members, id=int(member)):
+	# 		await ctx.respond(staff_member.mention)
+	# 	else:
+	# 		await ctx.respond("**For some reason I couldn't ping them =\ **")
 
 	@commands.command(aliases=['sound', 'board', 'sound_board'])
 	@commands.check_any(utils.is_allowed([mod_role_id, admin_role_id, owner_role_id], throw_exc=True), utils.is_subscriber())
