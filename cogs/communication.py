@@ -16,9 +16,9 @@ from mysqldb import DatabaseCore
 # variables.role
 mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 staff_manager_role_id = int(os.getenv('STAFF_MANAGER_ROLE_ID', 123))
-allowed_roles = [int(os.getenv('OWNER_ROLE_ID', 123)), int(os.getenv('ADMIN_ROLE_ID', 123)), mod_role_id]
 lesson_manager_role_id = int(os.getenv('LESSON_MANAGEMENT_ROLE_ID', 123))
 event_manager_role_id = int(os.getenv('EVENT_MANAGER_ROLE_ID', 123))
+allowed_roles = [int(os.getenv('OWNER_ROLE_ID', 123)), int(os.getenv('ADMIN_ROLE_ID', 123)), mod_role_id]
 
 # variables.textchannel
 bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID', 123))

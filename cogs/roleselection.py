@@ -1,15 +1,17 @@
+# import.standard
 from functools import partial
 from typing import Dict
 
+# import.thirdparty
 import discord
 from discord.ext import commands
 
+# import.local
 from extra.prompt.menu import (ConfirmButton, get_role_response,
                                prompt_emoji_guild, prompt_message_guild)
 from extra.roleselection.db_commands import RoleSelectionDatabaseCommands
 from extra.roleselection.menu import ManageRoleSelectionMenu, RoleSelect
 from mysqldb import DatabaseCore
-
 
 class RoleSelection(RoleSelectionDatabaseCommands):
     """ Category for managing and interacting with Role Selection menus. """
