@@ -84,6 +84,20 @@ class ReportSupport(*report_support_classes):
 
             if channel:
                 try:
+                    # Moderation log embed
+                    moderation_log = discord.utils.get(guild.channels, id=mod_log_id)
+                    case_name = channel.name
+                    case_number = case_name.split('-')[-1] if case_name.split('-')[-1].isdigit() else "N/A"  # Extract the case number if there is one
+                    
+                    embed = discord.Embed(
+                        title='__**Case Closed (Timeout)**__',
+                        color=discord.Color.red(),
+                        timestamp=discord.utils.utcnow()
+                    )
+                    embed.add_field(name="Case Number", value=f"#{case_number}")
+                    embed.set_footer(text=f"Closed automatically by {self.client.user.name}", icon_url=self.client.user.display_avatar)
+                    await moderation_log.send(embed=embed)
+                    
                     await channel.delete()
                 except Exception as e:
                     print(f"Failed at deleting the {channel}: {str(e)}")
