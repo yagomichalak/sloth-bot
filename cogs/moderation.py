@@ -1226,6 +1226,21 @@ class Moderation(*moderation_cogs):
             embed.set_footer(text=f"Muted by {ctx.author}", icon_url=ctx.author.display_avatar)
             await moderation_log.send(embed=embed)
 
+            # Muted chat embed
+            muted_chat = discord.utils.get(ctx.guild.channels, id=muted_chat_id)
+            muted_embed = discord.Embed(
+                title="You've been muted",
+                description=(
+                    f"{member.mention}, you have been muted by {ctx.author.mention}.\n\n"
+                    f"**Reason:** {reason}\n\n"
+                    "Wait until they are available to talk with you. Do not ping them or any other staff member."
+                ),
+                color=discord.Color.dark_grey(),
+                timestamp=current_time
+            )
+            muted_embed.set_thumbnail(url=member.display_avatar)
+            await muted_chat.send(embed=muted_embed)
+
             # Inserts a infraction into the database
             await self.insert_user_infraction(
                 user_id=member.id, infr_type="mute", reason=reason,
