@@ -44,7 +44,7 @@ lesson_management_role_id = int(os.getenv('LESSON_MANAGEMENT_ROLE_ID', 123))
 event_management_role_id = int(os.getenv('EVENT_MANAGER_ROLE_ID', 123))
 giveaway_management_role_id = int(os.getenv('GIVEAWAY_MANAGER_ROLE_ID', 123))
 allowed_roles = [int(os.getenv('OWNER_ROLE_ID', 123)), admin_role_id, moderator_role_id]
-witness_roles = [lesson_management_role_id, event_management_role_id, giveaway_management_role_id]
+witness_roles = [moderator_role_id, staff_manager_role_id, lesson_management_role_id, event_management_role_id, giveaway_management_role_id]
 
 report_support_classes: List[commands.Cog] = [
     ApplicationsTable, Verify, OpenChannels
@@ -84,6 +84,20 @@ class ReportSupport(*report_support_classes):
 
             if channel:
                 try:
+                    # Moderation log embed
+                    moderation_log = discord.utils.get(guild.channels, id=mod_log_id)
+                    case_name = channel.name
+                    case_number = case_name.split('-')[-1] if case_name.split('-')[-1].isdigit() else "N/A"  # Extract the case number if there is one
+                    
+                    embed = discord.Embed(
+                        title='__**Case Closed (Timeout)**__',
+                        color=discord.Color.red(),
+                        timestamp=discord.utils.utcnow()
+                    )
+                    embed.add_field(name="Case Number", value=f"#{case_number}")
+                    embed.set_footer(text=f"Closed automatically by {self.client.user.name}", icon_url=self.client.user.display_avatar)
+                    await moderation_log.send(embed=embed)
+                    
                     await channel.delete()
                 except Exception as e:
                     print(f"Failed at deleting the {channel}: {str(e)}")
@@ -118,7 +132,8 @@ class ReportSupport(*report_support_classes):
             case_channel_aliases = ("general", "role", "case")
             report_channel_aliases = ("user", "staff")
 
-            if channel.name.startswith(case_channel_aliases):
+            if channel.name.startswith(case_channel_aliases) or channel.name.startswith(report_channel_aliases):
+                await asyncio.sleep(1)
                 await self.update_case_timestamp(channel.id, current_ts)
                 
     async def handle_ban_appeal(self, message: discord.Message, payload) -> None:
@@ -752,7 +767,7 @@ class ReportSupport(*report_support_classes):
         premiumEmbed = discord.Embed(
             title="Language Sloth | Premium",
             description="""Support the server and get access to special privileges and features\n
-<:green_dot:1338144193754955819> **Patrons:** Join full rooms, access to soundboard, own customizable permanent voice channel, receive leaves monthly (server currency), support your favorite lesson
+<:green_dot:1338144193754955819> **Patron:** Join full rooms, access to soundboard, own customizable permanent voice channel, receive leaves monthly (server currency), support your favorite lesson
 
 <:green_dot:1338144193754955819> **Frog Catcher:** Join full rooms, access to gambling commands, marry up to 4 people at the same time, role that changes color, check other users infractions in the server""",
             color=0x3A9D76,

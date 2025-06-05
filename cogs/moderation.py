@@ -1195,18 +1195,22 @@ class Moderation(*moderation_cogs):
             await answer(embed=general_embed)
 
             # Sends the muted channel rules to the user
-            rules_embed = discord.Embed(color=discord.Color.dark_grey(), timestamp=current_time,
-                description=
-                f"""**You have been muted. You can see the reason of your mute below.**
-                You can get unmuted only by talking to the Staff member that muted you.
+            rules_embed = discord.Embed(
+                color=discord.Color.dark_grey(),
+                timestamp=current_time,
+                description=(
+                    "**You have been muted** on The Language Sloth.\n"
+                    f"You are **not banned, you can get unmuted by talking to a staff member** in <#{muted_chat_id}>.\n\n"
+                    "While you are there, it is especially **important that you refrain from:**\n\n"
+                    "**:x: NSFW/Inappropriate Posts\n"
+                    ":x: Insulting Staff Members\n"
+                    ":x: Pinging Staff Members**\n\n"
+                    "Such behaviors, amongst others, **may result in a ban.**\n\n"
+                    "Being muted **does not mean you are being punished.**\n"
+                    "It means that **a staff member needs to talk to you** to resolve an ongoing case, **cooperate with them and be polite if you want to get unmuted.**"
+                )
+            )
 
-                Behaviours in the <#{muted_chat_id}> that might result in a ban:
-                **1**. Trolling
-                **2**. Insulting Staff Members
-                **3**. Pinging Admins/Moderators
-
-                **P.S.** Being muted does not mean you are banned or being punished. It means that a Staff member wants to talk to you to solve an ongoing case, colaborate with them to be unmuted asap.
-            """)
             try:
                 await member.send(embed=rules_embed)
             except:
@@ -1225,6 +1229,21 @@ class Moderation(*moderation_cogs):
             embed.set_thumbnail(url=member.display_avatar)
             embed.set_footer(text=f"Muted by {ctx.author}", icon_url=ctx.author.display_avatar)
             await moderation_log.send(embed=embed)
+
+            # Muted chat embed
+            muted_chat = discord.utils.get(ctx.guild.channels, id=muted_chat_id)
+            muted_embed = discord.Embed(
+                title="You've been muted",
+                description=(
+                    f"{member.mention}, you have been muted by {ctx.author.mention}.\n\n"
+                    f"**Reason:** {reason}\n\n"
+                    "Wait until they are available to talk with you. Do not ping them or any other staff member."
+                ),
+                color=discord.Color.dark_grey(),
+                timestamp=current_time
+            )
+            muted_embed.set_thumbnail(url=member.display_avatar)
+            await muted_chat.send(embed=muted_embed)
 
             # Inserts a infraction into the database
             await self.insert_user_infraction(
