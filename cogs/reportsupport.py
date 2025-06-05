@@ -44,7 +44,7 @@ lesson_management_role_id = int(os.getenv('LESSON_MANAGEMENT_ROLE_ID', 123))
 event_management_role_id = int(os.getenv('EVENT_MANAGER_ROLE_ID', 123))
 giveaway_management_role_id = int(os.getenv('GIVEAWAY_MANAGER_ROLE_ID', 123))
 allowed_roles = [int(os.getenv('OWNER_ROLE_ID', 123)), admin_role_id, moderator_role_id]
-witness_roles = [lesson_management_role_id, event_management_role_id, giveaway_management_role_id]
+witness_roles = [moderator_role_id, staff_manager_role_id, lesson_management_role_id, event_management_role_id, giveaway_management_role_id]
 
 report_support_classes: List[commands.Cog] = [
     ApplicationsTable, Verify, OpenChannels
