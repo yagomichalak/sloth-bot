@@ -118,7 +118,8 @@ class ReportSupport(*report_support_classes):
             case_channel_aliases = ("general", "role", "case")
             report_channel_aliases = ("user", "staff")
 
-            if channel.name.startswith(case_channel_aliases):
+            if channel.name.startswith(case_channel_aliases) or channel.name.startswith(report_channel_aliases):
+                await asyncio.sleep(1)
                 await self.update_case_timestamp(channel.id, current_ts)
                 
     async def handle_ban_appeal(self, message: discord.Message, payload) -> None:
