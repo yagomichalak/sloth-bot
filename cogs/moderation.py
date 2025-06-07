@@ -2097,19 +2097,28 @@ We appreciate your understanding and look forward to hearing from you. """, embe
                             inline=False)
             if internal_use:
                 embed.add_field(name='Reason:', value=f"> -# **{infr_date}**\n> -# by {self.client.user.name}\n> {reason}")
+                embed.set_footer(text=f"Banned by {self.client.user.name}", icon_url=ctx.guild.icon.url)
             else:
                 embed.add_field(name='Reason:', value=f"> -# **{infr_date}**\n> -# by {perpetrator}\n> {reason}")
+                embed.set_footer(text=f"Banned by {perpetrators}", icon_url=icon)
             embed.set_author(name=member)
             embed.set_thumbnail(url=member.display_avatar)
-            embed.set_footer(text=f"Banned by {perpetrators}", icon_url=icon)
             await moderation_log.send(embed=embed)
             # Inserts a infraction into the database
-            await self.insert_user_infraction(
-                user_id=member.id, infr_type="mute", reason=reason,
-                timestamp=current_ts, perpetrator=ctx.author.id)
-            await self.insert_user_infraction(
-                user_id=member.id, infr_type="softban", reason=reason,
-                timestamp=current_ts, perpetrator=ctx.author.id)
+            if internal_use:
+                await self.insert_user_infraction(
+                    user_id=member.id, infr_type="mute", reason=reason,
+                    timestamp=current_ts, perpetrator=self.client.user.id)
+                await self.insert_user_infraction(
+                    user_id=member.id, infr_type="softban", reason=reason,
+                    timestamp=current_ts, perpetrator=self.client.user.id)
+            else:
+                await self.insert_user_infraction(
+                    user_id=member.id, infr_type="mute", reason=reason,
+                    timestamp=current_ts, perpetrator=ctx.author.id)
+                await self.insert_user_infraction(
+                    user_id=member.id, infr_type="softban", reason=reason,
+                    timestamp=current_ts, perpetrator=ctx.author.id)
 
     # Hackban a member
     @commands.command(aliases=['hban'])
