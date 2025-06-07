@@ -32,16 +32,25 @@ guild_ids: List[int] = [server_id]
 
 # variables.role
 sponsor_role_id = int(os.getenv('SPONSOR_ROLE_ID', 123))
-mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 muted_role_id = int(os.getenv('MUTED_ROLE_ID', 123))
 timedout_role_id = int(os.getenv('TIMEDOUT_ROLE_ID', 123))
 preference_role_id = int(os.getenv('PREFERENCE_ROLE_ID', 123))
+## variables.role.staff
+mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 staff_manager_role_id: int = int(os.getenv('STAFF_MANAGER_ROLE_ID', 123))
 admin_role_id: int = int(os.getenv('ADMIN_ROLE_ID', 123))
 analyst_debugger_role_id: int = int(os.getenv('ANALYST_DEBUGGER_ROLE_ID', 123))
 lesson_manager_role_id: int = int(os.getenv('LESSON_MANAGEMENT_ROLE_ID', 123))
 event_manager_role_id = int(os.getenv('EVENT_MANAGER_ROLE_ID', 123))
 allowed_roles = [int(os.getenv('OWNER_ROLE_ID', 123)), admin_role_id, staff_manager_role_id, mod_role_id]
+## variables.role.restricted
+native_centish_role_id = int(os.getenv('NATIVE_CENTISH_ID', 123))
+based_role_id = int(os.getenv('BASED_ID', 123))
+few_braincells_role_id = int(os.getenv('FEW_BRAINCELLS_ID', 123))
+met_dnk_irl_role_id = int(os.getenv('MET_DNK_IRL_ID', 123))
+sloth_nation_role_id = int(os.getenv('SLOTH_NATION_ROLE_ID', 123))
+frog_catcher_role_id = int(os.getenv('FROG_CATCHER_ROLE_ID', 123))
+native_ancient_latin_role_id = int(os.getenv('NATIVE_ANCIENT_LATIN_ID', 123))
 
 # variables.textchannel
 mod_log_id = int(os.getenv('MOD_LOG_CHANNEL_ID', 123))
@@ -58,40 +67,15 @@ host_applicant_infraction_thread_id: int = int(os.getenv("HOST_APPLICANT_INFRACT
 # list.scam
 scamwords = [
     # steam scam
-    "steam gift 50$",
-    "50$ steam gift",
+    "steam gift 50$", "50$ steam gift",
     # links
-    "steamncommynity.com",
-    "steamcommunity.com/gift-card/pay/50",
-    "airdrop-stake.com",
-    "xcoin-presale.com",
-    "ainexusca.com",
-    "u.to",
-    "e.vg",
+    "steamncommynity.com", "steamcommunity.com/gift-card/pay/50", "airdrop-stake.com", "xcoin-presale.com", "ainexusca.com", "u.to", "e.vg",
     # numbers
-    "+1 (618) 913-0036",
-    "+1 (626) 514-0696",
-    "+1 (814) 813-1670",
+    "+1 (618) 913-0036", "+1 (626) 514-0696", "+1 (814) 813-1670",
     # nicks
-    "Nicholas_Wallace2",
-    "Kathryn_Aubry115",
-    "Kathryn_Aubry",
+    "Nicholas_Wallace2", "Kathryn_Aubry115", "Kathryn_Aubry",
     # other
-    "I’ll teach 20 interested people on how to earn $50k",
-    "more within 72 hours from the crypto market",
-    "massage me for more info",
-    "if interested send me a direct massage. for more info via",
-    "ONLINE ASSISTANT NEEDED URGENTLY",
-    "Job Opportunity: Online Personal Assistant",
-    "Competitive weekly salary of $900",
-    "I have a nice idea and you can get regular income  $50-100 every month",
-    "$50-100 every month",
-    "Don't miss this exciting opportunity! Apply now",
-    "help first 10 interested people how to earn 30k or more in crypto market within 48 hours but you",
-    "10% of your profits Dm",
-    "Hi, I received a referral link for the pre-market of the X token.",
-    "Exclusive bonuses for early stakers and loyal holders!",
-    "Hurry Up! This is a limited-time event – grab your rewards while you can!"
+    "teach 20 interested people on how to earn $50k", "more within 72 hours from the crypto market", "massage me for more info", "if interested send me a direct massage. for more info via", "ONLINE ASSISTANT NEEDED URGENTLY", "Job Opportunity: Online Personal Assistant", "Competitive weekly salary of $900", "I have a nice idea and you can get regular income  $50-100 every month", "$50-100 every month", "Don't miss this exciting opportunity! Apply now", "help first 10 interested people how to earn 30k or more in crypto market within 48 hours but you", "10% of your profits Dm", "Hi, I received a referral link for the pre-market of the X token.", "Exclusive bonuses for early stakers and loyal holders!", "Hurry Up! This is a limited-time event"
 ]
 
 last_deleted_message = []
@@ -232,11 +216,14 @@ class Moderation(*moderation_cogs):
 
         # Restricted roles to monitor
         restricted_roles = [
-            int(os.getenv('NATIVE_CENTISH_ID', 123)),
-            int(os.getenv('BASED_ID', 123)),
-            int(os.getenv('FEW_BRAINCELLS_ID', 123)),
-            int(os.getenv('MET_DNK_IRL_ID', 123))
-        ]
+            native_centish_role_id, # Native Centish
+            based_role_id, # Based
+            few_braincells_role_id, # Few Braincells
+            met_dnk_irl_role_id, # Met DNK IRL
+            sloth_nation_role_id, # Sloth Nation
+            frog_catcher_role_id, # Frog Catcher
+            native_ancient_latin_role_id # Native (ancient) Latin
+        ] # these comments were definitely needed fr
 
         # Check if the new role is restricted
         if new_role.id in restricted_roles:
@@ -1235,7 +1222,7 @@ class Moderation(*moderation_cogs):
             muted_embed = discord.Embed(
                 title="You've been muted",
                 description=(
-                    f"{member.mention}, you have been muted by {ctx.author.mention}.\n\n"
+                    f"**{member.display_name}**, you have been muted by **{ctx.author.name}**.\n\n"
                     f"**Reason:** {reason}\n\n"
                     "Wait until they are available to talk with you. Do not ping them or any other staff member."
                 ),
@@ -1243,6 +1230,7 @@ class Moderation(*moderation_cogs):
                 timestamp=current_time
             )
             muted_embed.set_thumbnail(url=member.display_avatar)
+            await muted_chat.send(f"{member.mention} {ctx.author.mention}")
             await muted_chat.send(embed=muted_embed)
 
             # Inserts a infraction into the database
@@ -2109,19 +2097,28 @@ We appreciate your understanding and look forward to hearing from you. """, embe
                             inline=False)
             if internal_use:
                 embed.add_field(name='Reason:', value=f"> -# **{infr_date}**\n> -# by {self.client.user.name}\n> {reason}")
+                embed.set_footer(text=f"Banned by {self.client.user.name}", icon_url=ctx.guild.icon.url)
             else:
                 embed.add_field(name='Reason:', value=f"> -# **{infr_date}**\n> -# by {perpetrator}\n> {reason}")
+                embed.set_footer(text=f"Banned by {perpetrators}", icon_url=icon)
             embed.set_author(name=member)
             embed.set_thumbnail(url=member.display_avatar)
-            embed.set_footer(text=f"Banned by {perpetrators}", icon_url=icon)
             await moderation_log.send(embed=embed)
             # Inserts a infraction into the database
-            await self.insert_user_infraction(
-                user_id=member.id, infr_type="mute", reason=reason,
-                timestamp=current_ts, perpetrator=ctx.author.id)
-            await self.insert_user_infraction(
-                user_id=member.id, infr_type="softban", reason=reason,
-                timestamp=current_ts, perpetrator=ctx.author.id)
+            if internal_use:
+                await self.insert_user_infraction(
+                    user_id=member.id, infr_type="mute", reason=reason,
+                    timestamp=current_ts, perpetrator=self.client.user.id)
+                await self.insert_user_infraction(
+                    user_id=member.id, infr_type="softban", reason=reason,
+                    timestamp=current_ts, perpetrator=self.client.user.id)
+            else:
+                await self.insert_user_infraction(
+                    user_id=member.id, infr_type="mute", reason=reason,
+                    timestamp=current_ts, perpetrator=ctx.author.id)
+                await self.insert_user_infraction(
+                    user_id=member.id, infr_type="softban", reason=reason,
+                    timestamp=current_ts, perpetrator=ctx.author.id)
 
     # Hackban a member
     @commands.command(aliases=['hban'])

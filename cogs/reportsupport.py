@@ -767,9 +767,9 @@ class ReportSupport(*report_support_classes):
         premiumEmbed = discord.Embed(
             title="Language Sloth | Premium",
             description="""Support the server and get access to special privileges and features\n
-<:green_dot:1338144193754955819> **Patron:** Join full rooms, access to soundboard, own customizable permanent voice channel, receive leaves monthly (server currency), support your favorite lesson
+<:green_dot:1338144193754955819> **Patron:** Join full rooms, own customizable permanent voice channel, receive leaves monthly (server currency), support your favorite lesson
 
-<:green_dot:1338144193754955819> **Frog Catcher:** Join full rooms, access to gambling commands, marry up to 4 people at the same time, role that changes color, check other users infractions in the server""",
+<:green_dot:1338144193754955819> **Frog Catcher:** Access to gambling commands, marry up to 4 people at the same time, role that changes color, check other users infractions in the server""",
             color=0x3A9D76,
         )
         

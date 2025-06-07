@@ -1208,7 +1208,7 @@ class Tools(*tool_cogs):
 			await ctx.respond(f"**You got moved to {channel.mention}!**")
 
 	@commands.command()
-	@utils.is_allowed([*allowed_roles, analyst_debugger_role_id], throw_exc=True)
+	@utils.is_allowed([*allowed_roles, teacher_role_id, analyst_debugger_role_id], throw_exc=True)
 	async def join(self, ctx, channel: Optional[discord.VoiceChannel]) -> None:
 		""" (Patreon) Joins a language channel
 		:param voice_channel: ID of the language voice channel
