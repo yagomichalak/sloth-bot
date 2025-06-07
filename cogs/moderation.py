@@ -43,6 +43,14 @@ analyst_debugger_role_id: int = int(os.getenv('ANALYST_DEBUGGER_ROLE_ID', 123))
 lesson_manager_role_id: int = int(os.getenv('LESSON_MANAGEMENT_ROLE_ID', 123))
 event_manager_role_id = int(os.getenv('EVENT_MANAGER_ROLE_ID', 123))
 allowed_roles = [int(os.getenv('OWNER_ROLE_ID', 123)), admin_role_id, staff_manager_role_id, mod_role_id]
+## variables.role.restricted
+native_centish_role_id = int(os.getenv('NATIVE_CENTISH_ID', 123))
+based_role_id = int(os.getenv('BASED_ID', 123))
+few_braincells_role_id = int(os.getenv('FEW_BRAINCELLS_ID', 123))
+met_dnk_irl_role_id = int(os.getenv('MET_DNK_IRL_ID', 123))
+sloth_nation_role_id = int(os.getenv('SLOTH_NATION_ROLE_ID', 123))
+frog_catcher_role_id = int(os.getenv('FROG_CATCHER_ROLE_ID', 123))
+native_ancient_latin_role_id = int(os.getenv('NATIVE_ANCIENT_LATIN_ID', 123))
 
 # variables.textchannel
 mod_log_id = int(os.getenv('MOD_LOG_CHANNEL_ID', 123))
@@ -208,11 +216,14 @@ class Moderation(*moderation_cogs):
 
         # Restricted roles to monitor
         restricted_roles = [
-            int(os.getenv('NATIVE_CENTISH_ID', 123)),
-            int(os.getenv('BASED_ID', 123)),
-            int(os.getenv('FEW_BRAINCELLS_ID', 123)),
-            int(os.getenv('MET_DNK_IRL_ID', 123))
-        ]
+            native_centish_role_id, # Native Centish
+            based_role_id, # Based
+            few_braincells_role_id, # Few Braincells
+            met_dnk_irl_role_id, # Met DNK IRL
+            sloth_nation_role_id, # Sloth Nation
+            frog_catcher_role_id, # Frog Catcher
+            native_ancient_latin_role_id # Native (ancient) Latin
+        ] # these comments were definitely needed fr
 
         # Check if the new role is restricted
         if new_role.id in restricted_roles:
