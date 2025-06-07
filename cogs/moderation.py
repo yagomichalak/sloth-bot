@@ -32,10 +32,11 @@ guild_ids: List[int] = [server_id]
 
 # variables.role
 sponsor_role_id = int(os.getenv('SPONSOR_ROLE_ID', 123))
-mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 muted_role_id = int(os.getenv('MUTED_ROLE_ID', 123))
 timedout_role_id = int(os.getenv('TIMEDOUT_ROLE_ID', 123))
 preference_role_id = int(os.getenv('PREFERENCE_ROLE_ID', 123))
+## variables.role.staff
+mod_role_id = int(os.getenv('MOD_ROLE_ID', 123))
 staff_manager_role_id: int = int(os.getenv('STAFF_MANAGER_ROLE_ID', 123))
 admin_role_id: int = int(os.getenv('ADMIN_ROLE_ID', 123))
 analyst_debugger_role_id: int = int(os.getenv('ANALYST_DEBUGGER_ROLE_ID', 123))
@@ -58,40 +59,15 @@ host_applicant_infraction_thread_id: int = int(os.getenv("HOST_APPLICANT_INFRACT
 # list.scam
 scamwords = [
     # steam scam
-    "steam gift 50$",
-    "50$ steam gift",
+    "steam gift 50$", "50$ steam gift",
     # links
-    "steamncommynity.com",
-    "steamcommunity.com/gift-card/pay/50",
-    "airdrop-stake.com",
-    "xcoin-presale.com",
-    "ainexusca.com",
-    "u.to",
-    "e.vg",
+    "steamncommynity.com", "steamcommunity.com/gift-card/pay/50", "airdrop-stake.com", "xcoin-presale.com", "ainexusca.com", "u.to", "e.vg",
     # numbers
-    "+1 (618) 913-0036",
-    "+1 (626) 514-0696",
-    "+1 (814) 813-1670",
+    "+1 (618) 913-0036", "+1 (626) 514-0696", "+1 (814) 813-1670",
     # nicks
-    "Nicholas_Wallace2",
-    "Kathryn_Aubry115",
-    "Kathryn_Aubry",
+    "Nicholas_Wallace2", "Kathryn_Aubry115", "Kathryn_Aubry",
     # other
-    "I’ll teach 20 interested people on how to earn $50k",
-    "more within 72 hours from the crypto market",
-    "massage me for more info",
-    "if interested send me a direct massage. for more info via",
-    "ONLINE ASSISTANT NEEDED URGENTLY",
-    "Job Opportunity: Online Personal Assistant",
-    "Competitive weekly salary of $900",
-    "I have a nice idea and you can get regular income  $50-100 every month",
-    "$50-100 every month",
-    "Don't miss this exciting opportunity! Apply now",
-    "help first 10 interested people how to earn 30k or more in crypto market within 48 hours but you",
-    "10% of your profits Dm",
-    "Hi, I received a referral link for the pre-market of the X token.",
-    "Exclusive bonuses for early stakers and loyal holders!",
-    "Hurry Up! This is a limited-time event – grab your rewards while you can!"
+    "teach 20 interested people on how to earn $50k", "more within 72 hours from the crypto market", "massage me for more info", "if interested send me a direct massage. for more info via", "ONLINE ASSISTANT NEEDED URGENTLY", "Job Opportunity: Online Personal Assistant", "Competitive weekly salary of $900", "I have a nice idea and you can get regular income  $50-100 every month", "$50-100 every month", "Don't miss this exciting opportunity! Apply now", "help first 10 interested people how to earn 30k or more in crypto market within 48 hours but you", "10% of your profits Dm", "Hi, I received a referral link for the pre-market of the X token.", "Exclusive bonuses for early stakers and loyal holders!", "Hurry Up! This is a limited-time event"
 ]
 
 last_deleted_message = []
