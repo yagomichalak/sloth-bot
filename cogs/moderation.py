@@ -1235,7 +1235,7 @@ class Moderation(*moderation_cogs):
             muted_embed = discord.Embed(
                 title="You've been muted",
                 description=(
-                    f"{member.mention}, you have been muted by {ctx.author.mention}.\n\n"
+                    f"**{member.display_name}**, you have been muted by **{ctx.author.name}**.\n\n"
                     f"**Reason:** {reason}\n\n"
                     "Wait until they are available to talk with you. Do not ping them or any other staff member."
                 ),
@@ -1243,6 +1243,7 @@ class Moderation(*moderation_cogs):
                 timestamp=current_time
             )
             muted_embed.set_thumbnail(url=member.display_avatar)
+            await muted_chat.send(f"{member.mention} {ctx.author.mention}")
             await muted_chat.send(embed=muted_embed)
 
             # Inserts a infraction into the database
