@@ -275,6 +275,33 @@ class Prestige(commands.Cog, command_attrs=dict(hidden=True)):
 
         await ctx.send(choice(sentences))
 
+    @commands.command()
+    async def jager(self, ctx) -> None:
+        """ A command for telling something about Jager. """
+        
+        if not hasattr(self, "_last_jager_gif"):
+            self._last_jager_gif = None
+        
+        await ctx.message.delete()
+        
+        gifs = [
+            "https://tenor.com/view/gopnik-opa-break-dance-bboy-gif-9883682",
+            "https://tenor.com/ru/view/squats-bissen-squatting-intensifies-gif-15052026",
+            "https://tenor.com/ru/view/blyat-russian-cat-gif-25643634",
+            "https://tenor.com/ru/view/opa-pizdec-russia-shower-pzdc-gif-20533311",
+            "https://tenor.com/ru/view/streched-gif-21513890",
+            "https://tenor.com/ru/view/meme-gif-12025494061090948219",
+            "https://tenor.com/ru/view/soviet-cat-sovicat-soviet-ussr-cat-gif-21826197"
+        ]
+        
+        while True:
+            gif = choice(gifs)
+            if gif != self._last_jager_gif:
+                self._last_jager_gif = gif
+                break
+        
+        await ctx.send("<@266279161625051136>", delete_after=10)
+        await ctx.send(gif, delete_after=10)
 
 def setup(client) -> None:
     """ Cog's setup function. """
