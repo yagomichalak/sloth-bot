@@ -224,6 +224,11 @@ class Moderation(*moderation_cogs):
             frog_catcher_role_id, # Frog Catcher
             native_ancient_latin_role_id # Native (ancient) Latin
         ] # these comments were definitely needed fr
+        
+        # Unrestricted users and bots
+        unrestricted = [
+            216303189073461248 # Patreon Bot
+        ] # these comments ARE definitely needed
 
         # Check if the new role is restricted
         if new_role.id in restricted_roles:
@@ -234,7 +239,7 @@ class Moderation(*moderation_cogs):
 
                     # Check if the moderator has the staff manager role or admin permissions
                     staff_manager_role = discord.utils.get(guild.roles, id=staff_manager_role_id)
-                    if not (staff_manager_role in moderator.roles or moderator.guild_permissions.administrator):
+                    if not (moderator.id in unrestricted or staff_manager_role in moderator.roles or moderator.guild_permissions.administrator):
                         # Remove the restricted role
                         await member.remove_roles(new_role)
 
