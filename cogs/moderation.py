@@ -1187,28 +1187,6 @@ class Moderation(*moderation_cogs):
             general_embed.set_author(name=f'{member} has been muted', icon_url=member.display_avatar)
             await answer(embed=general_embed)
 
-            # Sends the muted channel rules to the user
-            rules_embed = discord.Embed(
-                color=discord.Color.dark_grey(),
-                timestamp=current_time,
-                description=(
-                    "**You have been muted** on The Language Sloth.\n"
-                    f"You are **not banned, you can get unmuted by talking to a staff member** in <#{muted_chat_id}>.\n\n"
-                    "While you are there, it is especially **important that you refrain from:**\n\n"
-                    "**:x: NSFW/Inappropriate Posts\n"
-                    ":x: Insulting Staff Members\n"
-                    ":x: Pinging Staff Members**\n\n"
-                    "Such behaviors, amongst others, **may result in a ban.**\n\n"
-                    "Being muted **does not mean you are being punished.**\n"
-                    "It means that **a staff member needs to talk to you** to resolve an ongoing case, **cooperate with them and be polite if you want to get unmuted.**"
-                )
-            )
-
-            try:
-                await member.send(embed=rules_embed)
-            except:
-                pass
-
             # Moderation log embed
             moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
             infr_date = datetime.fromtimestamp(current_ts).strftime('%Y/%m/%d at %H:%M')
@@ -1236,8 +1214,23 @@ class Moderation(*moderation_cogs):
                 timestamp=current_time
             )
             muted_embed.set_thumbnail(url=member.display_avatar)
+            rules_embed = discord.Embed(
+                description=(
+                    f"You are **not banned, you can get unmuted by talking to your staff member**.\n\n"
+                    "While you are there, it is especially **important that you refrain from:**\n\n"
+                    "**:x: NSFW/Inappropriate Posts\n"
+                    ":x: Insulting Staff Members\n"
+                    ":x: Pinging Staff Members**\n\n"
+                    "Such behaviors, amongst others, **may result in a ban.**\n\n"
+                    "Being muted **does not mean you are being punished.**\n"
+                    "It means that **a staff member needs to talk to you** to resolve an ongoing case, **cooperate with them and be polite if you want to get unmuted.**"
+                ),
+                color=discord.Color.dark_grey(),
+                timestamp=current_time
+            )
             await muted_chat.send(f"{member.mention} {ctx.author.mention}")
             await muted_chat.send(embed=muted_embed)
+            await muted_chat.send(embed=rules_embed)
 
             # Inserts a infraction into the database
             await self.insert_user_infraction(
