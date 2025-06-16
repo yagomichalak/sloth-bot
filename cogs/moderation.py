@@ -1225,8 +1225,7 @@ class Moderation(*moderation_cogs):
                     "Being muted **does not mean you are being punished.**\n"
                     "It means that **a staff member needs to talk to you** to resolve an ongoing case, **cooperate with them and be polite if you want to get unmuted.**"
                 ),
-                color=discord.Color.dark_grey(),
-                timestamp=current_time
+                color=discord.Color.dark_grey()
             )
             await muted_chat.send(f"{member.mention} {ctx.author.mention}")
             await muted_chat.send(embed=muted_embed)
