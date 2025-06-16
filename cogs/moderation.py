@@ -31,7 +31,6 @@ server_id = int(os.getenv('SERVER_ID', 123))
 guild_ids: List[int] = [server_id]
 
 # variables.role
-sponsor_role_id = int(os.getenv('SPONSOR_ROLE_ID', 123))
 muted_role_id = int(os.getenv('MUTED_ROLE_ID', 123))
 timedout_role_id = int(os.getenv('TIMEDOUT_ROLE_ID', 123))
 preference_role_id = int(os.getenv('PREFERENCE_ROLE_ID', 123))
@@ -48,6 +47,7 @@ native_centish_role_id = int(os.getenv('NATIVE_CENTISH_ID', 123))
 based_role_id = int(os.getenv('BASED_ID', 123))
 few_braincells_role_id = int(os.getenv('FEW_BRAINCELLS_ID', 123))
 met_dnk_irl_role_id = int(os.getenv('MET_DNK_IRL_ID', 123))
+sponsor_role_id = int(os.getenv('SPONSOR_ROLE_ID', 123))
 sloth_nation_role_id = int(os.getenv('SLOTH_NATION_ROLE_ID', 123))
 frog_catcher_role_id = int(os.getenv('FROG_CATCHER_ROLE_ID', 123))
 native_ancient_latin_role_id = int(os.getenv('NATIVE_ANCIENT_LATIN_ID', 123))
@@ -220,6 +220,7 @@ class Moderation(*moderation_cogs):
             based_role_id, # Based
             few_braincells_role_id, # Few Braincells
             met_dnk_irl_role_id, # Met DNK IRL
+            sponsor_role_id, # Server Sponsor
             sloth_nation_role_id, # Sloth Nation
             frog_catcher_role_id, # Frog Catcher
             native_ancient_latin_role_id # Native (ancient) Latin
