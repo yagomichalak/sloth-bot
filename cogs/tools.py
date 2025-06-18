@@ -1041,6 +1041,14 @@ class Tools(*tool_cogs):
 		if not (vc := author_state and author_state.channel):
 			ctx.command.reset_cooldown(ctx)
 			return await ctx.send(f"**You're not in a VC!**")
+ 
+    # Check if the bot is already connected to a voice channel
+		if ctx.voice_client:
+			if ctx.voice_client.channel != vc:
+				await ctx.voice_client.disconnect()
+				await vc.connect()
+		else:
+			await vc.connect()
 
 		embed = discord.Embed(
 			title="__Soundboard__",
