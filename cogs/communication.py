@@ -236,10 +236,14 @@ class Communication(*tool_cogs):
         # If there's a user, DM them
         for member in members:
             if ctx.guild.get_member(member.id):
-                await member.send(reason) # Sends DM message
-                await self.log_dm(ctx, author, member, reason) # Triggers DM log
+                try:
+                    await member.send(reason) # Sends DM message
+                except discord.Forbidden:
+                    await ctx.send(f"**ERROR:** Unable to DM {member.mention}.", delete_after=11)
+                else:
+                    await self.log_dm(ctx, author, member, reason) # Triggers DM log
             else:
-                await ctx.send(f"**Member: {member} not found!", delete_after=3)
+                await ctx.send(f"**ERROR:** Unable to find {member}!", delete_after=11)
         
     async def log_dm(self, ctx, author: discord.Member, member: discord.Member, message: str) -> None:
         """ Log's a DM message.
