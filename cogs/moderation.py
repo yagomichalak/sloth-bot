@@ -2275,12 +2275,12 @@ We appreciate your understanding and look forward to hearing from you. """, embe
     @utils.is_allowed([staff_manager_role_id], throw_exc=True)
     async def firewall(self, ctx) -> None:
         """ Turns on and off the firewall.
-        When turned on, it'll kick new members having accounts created in less than 4 days. """
+        When turned on, it'll kick new members having accounts created in less than the set time. """
 
         member = ctx.author
 
         if not await self.check_table_firewall_exists():
-            return await ctx.send(f"**It looks like the firewall is on maintenance, {member.mention}!**")
+            return await ctx.send(f"**It looks like the firewall is on maintenance, {member.mention}!**", delete_after=6)
 
         firewall_state: Tuple[int] = await self.get_firewall_state()
         if firewall_state and firewall_state[0]:
@@ -2375,8 +2375,6 @@ We appreciate your understanding and look forward to hearing from you. """, embe
         member = ctx.author
 
         await ctx.message.delete()
-
-        print(message)
 
         if not await self.check_table_firewall_exists():
             return await ctx.send(f"**It looks like the firewall is on maintenance, {member.mention}!**")
