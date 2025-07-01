@@ -116,7 +116,15 @@ class Moderation(*moderation_cogs):
                 return await self.check_unban_infractions(message)
         
         # Checks if the message is a spam/scam message
-        if any(word.lower() in message.content.lower() for word in scamwords):
+        message_content_lower = message.content.lower()
+        scam_detected = False
+        for word in scamwords:
+            word_lower = word.lower()
+            # Use regex for whole word or exact match
+            if re.search(rf'\b{re.escape(word_lower)}\b', message_content_lower):
+                scam_detected = True
+                break
+        if scam_detected:
             await self.handle_scam(message)
             await message.delete()
             return
