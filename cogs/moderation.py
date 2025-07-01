@@ -29,6 +29,7 @@ from mysqldb import DatabaseCore
 # variables.id
 server_id = int(os.getenv('SERVER_ID', 123))
 guild_ids: List[int] = [server_id]
+gabs_id = int(os.getenv('GABS_ID', 123))
 
 # variables.role
 muted_role_id = int(os.getenv('MUTED_ROLE_ID', 123))
@@ -1244,7 +1245,10 @@ class Moderation(*moderation_cogs):
                 timestamp=current_time
             )
             muted_embed.set_thumbnail(url=member.display_avatar)
-            await muted_chat.send(f"{member.mention} {ctx.author.mention}")
+            if ctx.author.id == gabs_id:
+                await muted_chat.send(f"{member.mention}")
+            else:
+                await muted_chat.send(f"{member.mention} {ctx.author.mention}")
             await muted_chat.send(embed=muted_embed)
 
             # Inserts a infraction into the database
