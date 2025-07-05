@@ -28,7 +28,6 @@ from extra.menu import InchannelLooping, InroleLooping
 from extra.prompt.menu import Confirm
 from extra.select import SoundBoardSelect
 from extra.slothclasses.player import Player
-from extra.tool.stealthstatus import StealthStatusTable
 from extra.useful_variables import patreon_roles
 from extra.view import BasicUserCheckView, SoundBoardView
 from mysqldb import DatabaseCore
@@ -57,11 +56,7 @@ dynamic_channels_cat_id = int(os.getenv('CREATE_DYNAMIC_ROOM_CAT_ID', 123))
 # variables.textchannel
 patreon_channel_id = int(os.getenv('PATREONS_CHANNEL_ID', 123))
 
-tool_cogs: List[commands.Cog] = [
-	StealthStatusTable
-]
-
-class Tools(*tool_cogs):
+class Tools(commands.Cog):
 	""" Some useful tool commands. """
 
 	def __init__(self, client):
@@ -72,40 +67,6 @@ class Tools(*tool_cogs):
 	async def on_ready(self):
 		
 		print('[.cogs] Tools cog is ready!')
-
-	@commands.Cog.listener()
-	async def on_voice_state_update(self, member, before, after) -> None:
-		""" Removes the 'in a VC' role from people who are in the stealth mode,
-		upon joining VCs. """
-
-		# Check voice states
-		if before.mute != after.mute:
-			return
-		if before.deaf != before.deaf:
-			return
-		if before.self_mute != after.self_mute:
-			return
-		if before.self_deaf != after.self_deaf:
-			return
-		if before.self_stream != after.self_stream:
-			return
-		if before.self_video != after.self_video:
-			return
-
-		role = discord.utils.get(member.guild.roles, id=in_a_vc_role_id)  # Replace with your role name
-
-		if after.channel:  # User joins a voice channel
-			if member.get_role(role.id):
-				return
-
-			stealth_status = await self.get_stealth_status(member.id)
-			if stealth_status and stealth_status[1]:
-				return
-
-			await member.add_roles(role)
-
-		else:  # User leaves a voice channel
-			await member.remove_roles(role)
 
 	@commands.Cog.listener()
 	async def on_message(self, message) -> None:
@@ -1160,36 +1121,6 @@ class Tools(*tool_cogs):
 			await ctx.respond(f"**For some reason I couldn't bring them here, {author.mention}!**")
 		else:
 			await ctx.respond(f"**They were brought to {user_vc.channel.mention}!**")
-
-	@commands.command()
-	@utils.is_allowed([staff_manager_role_id], throw_exc=True)
-	async def stealth(self, ctx, member: Optional[discord.Member] = None) -> None:
-		""" Makes you stealth, so when you join a VC you don't get the 'in a VC' role.
-		:param member: The member to make stealth. [Optional][Default = You] """
-
-		if not member:
-			member = ctx.author
-
-		stealth_status = await self.get_stealth_status(member.id)
-		
-		on = True if stealth_status and stealth_status[1] else False
-
-		text: str = "Your Stealth" if ctx.author == member else f"{member}'s Stealth"
-		
-		confirm = await Confirm(f"**{text} mode is `{'online' if on else 'offline'}` wanna turn it `{'off' if on else 'on'}`?**").prompt(ctx)
-		if not confirm:
-			return await ctx.send(f"**Not doing it, then, {member.mention}!**")
-
-		try:
-			if stealth_status:
-				await self.update_stealth_status(member.id, 0 if on else 1)
-			else:
-				await self.insert_stealth_status(member.id, 1)
-		except Exception as e:
-			print('stealth error: ', e)
-			await ctx.send(f"**Something went wrong, try again or talk with DNK!**")
-		else:
-			await ctx.send(f"**Your stealth mode has been turned `{'off' if on else 'on'}`, {member.mention}!**")
 
 	@slash_command(name="join", guild_ids=guild_ids)
 	@utils.is_allowed([*allowed_roles, analyst_debugger_role_id], throw_exc=True)
