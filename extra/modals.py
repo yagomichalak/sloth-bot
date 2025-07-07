@@ -376,6 +376,15 @@ class UserReportSupportDetailModal(Modal):
         self.cog: commands.Cog = client.get_cog('ReportSupport')
         self.add_item(
             InputText(
+                label="Before we start, quick reminder.",
+                value="Please mind your language with the staff team, we are all volunteers and will get back to you asap, be respectful.",
+                placeholder="Anything written here will be ignored. This text box is just for the reminder message.",
+                style=discord.InputTextStyle.paragraph,
+                required=False # just a reminder, not a mandatory field
+            )
+        )
+        self.add_item(
+            InputText(
                 label="Who are you reporting?",
                 placeholder="Type the username of the user you are reporting.",
                 style=discord.InputTextStyle.singleline
@@ -402,9 +411,9 @@ class UserReportSupportDetailModal(Modal):
         """ Callback for the form modal. """
 
         await interaction.response.defer()
-        reportee = self.children[0].value
-        text = self.children[1].value
-        evidence=self.children[2].value
+        reportee = self.children[1].value
+        text = self.children[2].value
+        evidence = self.children[3].value
         member = interaction.user
 
         if self.option == 'report_user':
@@ -454,6 +463,15 @@ class UserReportStaffDetailModal(Modal):
         self.cog: commands.Cog = client.get_cog('ReportSupport')
         self.add_item(
             InputText(
+                label="Before we start, quick reminder.",
+                value="Please mind your language with the management team, we are all volunteers and will get back to you asap, be respectful.",
+                placeholder="Anything written here will be ignored. This text box is just for the reminder message.",
+                style=discord.InputTextStyle.paragraph,
+                required=False # just a reminder, not a mandatory field
+            )
+        )
+        self.add_item(
+            InputText(
                 label="Who are you reporting?",
                 placeholder="Type the username of the Staff member you are reporting.",
                 style=discord.InputTextStyle.singleline
@@ -480,9 +498,9 @@ class UserReportStaffDetailModal(Modal):
         """ Callback for the form modal. """
 
         await interaction.response.defer()
-        reportee = self.children[0].value
-        text = self.children[1].value
-        evidence=self.children[2].value
+        reportee = self.children[1].value
+        text = self.children[2].value
+        evidence=self.children[3].value
         member = interaction.user
 
         if self.option == 'report_staff':
@@ -510,6 +528,15 @@ class UserReportHelpDetailModal(Modal):
         self.cog: commands.Cog = client.get_cog('ReportSupport')
         self.add_item(
             InputText(
+                label="Before we start, quick reminder.",
+                value="Please mind your language with the staff team, we are all volunteers and will get back to you asap, be respectful.",
+                placeholder="Anything written here will be ignored. This text box is just for the reminder message.",
+                style=discord.InputTextStyle.paragraph,
+                required=False # just a reminder, not a mandatory field
+            )
+        )
+        self.add_item(
+            InputText(
                 label="What kind of help do you need?",
                 placeholder="Describe what you need help with in detail, so we can assist you better and faster.",
                 style=discord.InputTextStyle.paragraph
@@ -521,7 +548,7 @@ class UserReportHelpDetailModal(Modal):
         """ Callback for the form modal. """
 
         await interaction.response.defer()
-        help_request = self.children[0].value
+        help_request = self.children[1].value
 
         if self.option == 'report_help':
             try:
