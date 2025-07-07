@@ -146,9 +146,9 @@ class Tools(commands.Cog):
 
 	@commands.command(aliases=["ping_inrole", "pir"])
 	@commands.cooldown(1, 5, commands.BucketType.user)
-	@utils.is_allowed(allowed_roles, throw_exc=True)
+	@utils.is_allowed([*allowed_roles, teacher_role_id], throw_exc=True)
 	async def ping_intersection_role(self, ctx, roles: commands.Greedy[discord.Role] = None) -> None:
-		""" Shows everyone who have that role in the server.
+		""" Pings all users who has the combination of roles provided. Only users with every single role in the provided roles will get pinged.
 		:param roles: The set of roles you want to check. """
 
 		member = ctx.author
