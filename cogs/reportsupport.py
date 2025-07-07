@@ -583,6 +583,8 @@ class ReportSupport(*report_support_classes):
     async def close_channel(self, ctx):
         """ (MOD) Closes a Case-Channel and logs the case details. """
 
+        await ctx.message.delete()
+
         member: discord.Member = ctx.author
 
         user_channel = await self.get_case_channel(ctx.channel.id)
