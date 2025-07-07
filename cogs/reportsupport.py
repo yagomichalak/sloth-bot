@@ -130,10 +130,9 @@ class ReportSupport(*report_support_classes):
         if category and category.id == case_cat_id:
 
             current_ts = await utils.get_timestamp()
-            case_channel_aliases = ("general", "role", "case")
-            report_channel_aliases = ("user", "staff")
+            channel_aliases = ("general", "role", "case", "staff-case")
 
-            if channel.name.startswith(case_channel_aliases) or channel.name.startswith(report_channel_aliases):
+            if any(alias in channel.name for alias in channel_aliases):
                 await asyncio.sleep(1)
                 await self.update_case_timestamp(channel.id, current_ts)
                 
@@ -317,7 +316,7 @@ class ReportSupport(*report_support_classes):
             member: discord.PermissionOverwrite(read_messages=True, send_messages=True, connect=False, view_channel=True)
         }
         
-        if (vc_name == "staff"):
+        if (vc_name == "staff-case"):
             staff_manager = discord.utils.get(guild.roles, id=staff_manager_role_id)
             overwrites.update({
                 moderator: discord.PermissionOverwrite(
@@ -383,7 +382,7 @@ class ReportSupport(*report_support_classes):
             embed.add_field(name="For:", value=f"```{text}```", inline=False)
             embed.add_field(name="Evidence:", value=f"```{evidence}```", inline=False)
             
-            if (vc_name == "staff"):
+            if (vc_name == "staff-case"):
                 message = await the_channel.send(content=f"{member.mention}, {staff_manager.mention}", embed=embed)
             else:
                 message = await the_channel.send(content=f"{member.mention}, {moderator.mention}, {owner_role.mention}", embed=embed)
@@ -410,12 +409,12 @@ class ReportSupport(*report_support_classes):
     # - Report a staff member
     async def report_staff(self, interaction: discord.Interaction, reportee: str, text: str, evidence: str):
         # Calls the function to perform the report
-        await self.report_action(interaction, "staff", reportee, text, evidence)
+        await self.report_action(interaction, "staff-case", reportee, text, evidence)
 
     # - Report a standard User
     async def report_someone(self, interaction: discord.Interaction, reportee: str, text: str, evidence: str):
         # Calls the function to perform the report
-        await self.report_action(interaction, "user", reportee, text, evidence)
+        await self.report_action(interaction, "case", reportee, text, evidence)
 
     # - Get generic help
     async def generic_help(self, interaction: discord.Interaction, type_help: str, desc: str, ping: bool = True) -> None:
@@ -446,7 +445,7 @@ class ReportSupport(*report_support_classes):
         moderator: discord.PermissionOverwrite(
             read_messages=True, send_messages=True, connect=False, view_channel=True, manage_messages=True)}
         try:
-            the_channel = await guild.create_text_channel(name=f"{'-'.join(type_help.split())}", category=case_cat, overwrites=overwrites)
+            the_channel = await guild.create_text_channel(name=f"🎟️・{'-'.join(type_help.split())}", category=case_cat, overwrites=overwrites)
         except:
             await interaction.followup.send("**Something went wrong with it, please contact an admin!**", ephemeral=True)
             raise Exception
