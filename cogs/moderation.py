@@ -1264,7 +1264,7 @@ class Moderation(*moderation_cogs):
             await answer(f'**{member} is already muted!**')
 
     # Unmutes a member
-    @commands.command(name="unmute")
+    @commands.command(name="unmute", aliases=["unm", "openmute", "openm"])
     @utils.is_allowed(allowed_roles, throw_exc=True)
     async def _unmute_command(self, ctx, *, message : str = None) -> None:
         """(MOD) Unmutes one or more members instantly or after a determined amount of time.

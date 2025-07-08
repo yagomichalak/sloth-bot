@@ -34,6 +34,7 @@ staff_vc_id = int(os.getenv('STAFF_VC_ID', 123))
 # variables.textchannel #
 reportsupport_channel_id = int(os.getenv('REPORT_CHANNEL_ID', 123))
 mod_log_id = int(os.getenv('MOD_LOG_CHANNEL_ID', 123))
+case_log_id = int(os.getenv('CASE_LOG_CHANNEL_ID', 123))
 ban_appeals_channel_id: int = os.getenv("BAN_APPEALS_CHANNEL_ID", 123)
 
 # variables.role #
@@ -130,10 +131,9 @@ class ReportSupport(*report_support_classes):
         if category and category.id == case_cat_id:
 
             current_ts = await utils.get_timestamp()
-            case_channel_aliases = ("general", "role", "case")
-            report_channel_aliases = ("user", "staff")
+            channel_aliases = ("general", "role", "case", "staff-case")
 
-            if channel.name.startswith(case_channel_aliases) or channel.name.startswith(report_channel_aliases):
+            if any(alias in channel.name for alias in channel_aliases):
                 await asyncio.sleep(1)
                 await self.update_case_timestamp(channel.id, current_ts)
                 
@@ -317,7 +317,7 @@ class ReportSupport(*report_support_classes):
             member: discord.PermissionOverwrite(read_messages=True, send_messages=True, connect=False, view_channel=True)
         }
         
-        if (vc_name == "staff"):
+        if (vc_name == "staff-case"):
             staff_manager = discord.utils.get(guild.roles, id=staff_manager_role_id)
             overwrites.update({
                 moderator: discord.PermissionOverwrite(
@@ -383,7 +383,7 @@ class ReportSupport(*report_support_classes):
             embed.add_field(name="For:", value=f"```{text}```", inline=False)
             embed.add_field(name="Evidence:", value=f"```{evidence}```", inline=False)
             
-            if (vc_name == "staff"):
+            if (vc_name == "staff-case"):
                 message = await the_channel.send(content=f"{member.mention}, {staff_manager.mention}", embed=embed)
             else:
                 message = await the_channel.send(content=f"{member.mention}, {moderator.mention}, {owner_role.mention}", embed=embed)
@@ -410,12 +410,12 @@ class ReportSupport(*report_support_classes):
     # - Report a staff member
     async def report_staff(self, interaction: discord.Interaction, reportee: str, text: str, evidence: str):
         # Calls the function to perform the report
-        await self.report_action(interaction, "staff", reportee, text, evidence)
+        await self.report_action(interaction, "staff-case", reportee, text, evidence)
 
     # - Report a standard User
     async def report_someone(self, interaction: discord.Interaction, reportee: str, text: str, evidence: str):
         # Calls the function to perform the report
-        await self.report_action(interaction, "user", reportee, text, evidence)
+        await self.report_action(interaction, "case", reportee, text, evidence)
 
     # - Get generic help
     async def generic_help(self, interaction: discord.Interaction, type_help: str, desc: str, ping: bool = True) -> None:
@@ -446,7 +446,7 @@ class ReportSupport(*report_support_classes):
         moderator: discord.PermissionOverwrite(
             read_messages=True, send_messages=True, connect=False, view_channel=True, manage_messages=True)}
         try:
-            the_channel = await guild.create_text_channel(name=f"{'-'.join(type_help.split())}", category=case_cat, overwrites=overwrites)
+            the_channel = await guild.create_text_channel(name=f"🎟️・{'-'.join(type_help.split())}", category=case_cat, overwrites=overwrites)
         except:
             await interaction.followup.send("**Something went wrong with it, please contact an admin!**", ephemeral=True)
             raise Exception
@@ -581,7 +581,9 @@ class ReportSupport(*report_support_classes):
     @commands.command(aliases=['delete_channel', 'archive', 'cc', "close_case", "end_case", "solve", "solved"])
     @commands.has_any_role(*allowed_roles)
     async def close_channel(self, ctx):
-        """ (MOD) Closes a Case-Channel. """
+        """ (MOD) Closes a Case-Channel and logs the case details. """
+
+        await ctx.message.delete()
 
         member: discord.Member = ctx.author
 
@@ -617,10 +619,108 @@ class ReportSupport(*report_support_classes):
                 embed.description = f"**Channel {channel.mention} is being deleted...**"
                 await confirmation.edit(content=member.mention, embed=embed)
                 await asyncio.sleep(3)
+
+                # log the case details in the case-log room
+                case_log_channel = discord.utils.get(ctx.guild.channels, id=case_log_id)
+                if not case_log_channel:
+                    return await ctx.send("**Case-log channel not found! Please contact an admin.**")
+
+                # gather the list of users who sent messages in the case channel
+                user_ids = set()
+                user_mentions = []
+                async for message in channel.history(limit=None, oldest_first=True):
+                    if message.author.id not in user_ids and not message.author.bot:
+                        user_ids.add(message.author.id)
+                        user_mentions.append(message.author.mention)
+                users_list = ", ".join(user_mentions) if user_mentions else "None"
+                user_ids.clear()
+
+                # send the case info embed to the case log channel
+                log_embed = discord.Embed(
+                    title="Case Closed",
+                    description=(
+                        f"**Case Number:** #{case_number}\n"
+                        f"**Involved Users:** {users_list}\n\n"
+                        f"**Closed By:** {member.mention}"
+                    ),
+                    color=discord.Color.red(),
+                    timestamp=ctx.message.created_at
+                )
+                log_message = await case_log_channel.send(embed=log_embed)
+
+                # create the thread
+                if case_number == "N/A":
+                    thread = await log_message.create_thread(name=f"help-{ctx.channel.id}-log")
+                else:
+                    thread = await log_message.create_thread(name=f"case-{case_number}-log")
+
+                # create a webhook in the case-log channel
+                webhook = await case_log_channel.create_webhook(name=".case.logger")
+
+                # collect all messages from the case channel, sort them, then forward to the thread using the webhook
+                messages = []
+                async for message in channel.history(limit=None, oldest_first=True):
+                    messages.append(message)
+
+                for message in messages:
+                    if message.content or message.attachments or message.embeds:
+                        user_name = message.author.display_name
+                        user_avatar = message.author.display_avatar.url
+
+                        # disable the pings
+                        safe_content = message.content
+                        if message.mentions:
+                            for user in message.mentions:
+                                safe_content = safe_content.replace(f"<@{user.id}>", f"`@{user.display_name}`")
+                                safe_content = safe_content.replace(f"<@!{user.id}>", f"`@{user.display_name}`")
+                        if message.role_mentions:
+                            for role in message.role_mentions:
+                                safe_content = safe_content.replace(f"<@&{role.id}>", f"`@{role.name}`")
+                        if message.channel_mentions:
+                            for ch in message.channel_mentions:
+                                safe_content = safe_content.replace(f"<#{ch.id}>", f"`#{ch.name}`")
+                        # remove @everyone and @here
+                        safe_content = safe_content.replace("@everyone", "@\u200beveryone").replace("@here", "@\u200bhere")
+
+                        # forward the messages (content, embeds and attachments)
+                        if message.content or message.embeds:
+                            if message.embeds:
+                                for i in range(0, len(message.embeds), 10):
+                                    await webhook.send(
+                                        content=safe_content if message.content and i == 0 else None,
+                                        username=user_name,
+                                        avatar_url=user_avatar,
+                                        embeds=message.embeds[i:i+10],
+                                        thread=thread
+                                    )
+                            else:
+                                await webhook.send(
+                                    content=safe_content if message.content else None,
+                                    username=user_name,
+                                    avatar_url=user_avatar,
+                                    thread=thread
+                                )
+
+                        if message.attachments:
+                            files = [await attachment.to_file() for attachment in message.attachments]
+                            await webhook.send(
+                                username=user_name,
+                                avatar_url=user_avatar,
+                                files=files,
+                                thread=thread
+                            )
+
+                # close/archive the thread after forwarding all messages
+                await thread.edit(archived=True, locked=True)
+
+                # delete the webhook after use
+                await webhook.delete()
+
+                # delete the case channel
                 await channel.delete()
                 await self.remove_user_open_channel(user_channel[0][0])
 
-                # Moderation log embed
+                # moderation log embed
                 moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
                 embed = discord.Embed(
                     title='__**Case Closed**__',
