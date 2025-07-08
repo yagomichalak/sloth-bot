@@ -625,6 +625,36 @@ class ReportSupport(*report_support_classes):
                 if not case_log_channel:
                     return await ctx.send("**Case-log channel not found! Please contact an admin.**")
 
+                # if this is a staff case, skip logging for privacy
+                if "staff-case" in channel.name:
+                    await channel.delete()
+                    await self.remove_user_open_channel(user_channel[0][0])
+
+                    # send to case log
+                    embed = discord.Embed(
+                        title='Staff Case Closed',
+                        description=(
+                            f"**Case Number:** #{case_number}\n"
+                            f"**Involved Users:** *(Not logged for privacy)*\n\n"
+                            f"**Closed By:** {member.mention}"
+                        ),
+                        color=discord.Color.red(),
+                        timestamp=ctx.message.created_at
+                    )
+                    await case_log_channel.send(embed=embed)
+
+                    # send to moderation log
+                    moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
+                    embed = discord.Embed(
+                        title='__**Case Closed**__',
+                        color=discord.Color.red(),
+                        timestamp=ctx.message.created_at
+                    )
+                    embed.add_field(name="Case Number", value=f"#{case_number}")
+                    embed.set_footer(text=f"Closed by {member}", icon_url=member.display_avatar)
+                    await moderation_log.send(embed=embed)
+                    return
+
                 # gather the list of users who sent messages in the case channel
                 user_ids = set()
                 user_mentions = []
