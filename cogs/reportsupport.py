@@ -317,7 +317,7 @@ class ReportSupport(*report_support_classes):
             member: discord.PermissionOverwrite(read_messages=True, send_messages=True, connect=False, view_channel=True)
         }
         
-        if (vc_name == "staff-case"):
+        if (vc_name == "staff case"):
             staff_manager = discord.utils.get(guild.roles, id=staff_manager_role_id)
             overwrites.update({
                 moderator: discord.PermissionOverwrite(
@@ -361,7 +361,7 @@ class ReportSupport(*report_support_classes):
         
         # Tries to create the report case text channel
         try:
-            the_channel = await guild.create_text_channel(name=f"{vc_name}-{counter[0][0]}", category=case_cat, overwrites=overwrites)
+            the_channel = await guild.create_text_channel(name=f"🎟️・{vc_name}-{counter[0][0]}", category=case_cat, overwrites=overwrites)
         except Exception as e:
             print(f"Error creating text channel: {e}")
             await interaction.followup.send("**Something went wrong with it, please contact an admin!**", ephemeral=True)
@@ -383,7 +383,7 @@ class ReportSupport(*report_support_classes):
             embed.add_field(name="For:", value=f"```{text}```", inline=False)
             embed.add_field(name="Evidence:", value=f"```{evidence}```", inline=False)
             
-            if (vc_name == "staff-case"):
+            if (vc_name == "staff case"):
                 message = await the_channel.send(content=f"{member.mention}, {staff_manager.mention}", embed=embed)
             else:
                 message = await the_channel.send(content=f"{member.mention}, {moderator.mention}, {owner_role.mention}", embed=embed)
@@ -410,7 +410,7 @@ class ReportSupport(*report_support_classes):
     # - Report a staff member
     async def report_staff(self, interaction: discord.Interaction, reportee: str, text: str, evidence: str):
         # Calls the function to perform the report
-        await self.report_action(interaction, "staff-case", reportee, text, evidence)
+        await self.report_action(interaction, "staff case", reportee, text, evidence)
 
     # - Report a standard User
     async def report_someone(self, interaction: discord.Interaction, reportee: str, text: str, evidence: str):
@@ -624,6 +624,36 @@ class ReportSupport(*report_support_classes):
                 case_log_channel = discord.utils.get(ctx.guild.channels, id=case_log_id)
                 if not case_log_channel:
                     return await ctx.send("**Case-log channel not found! Please contact an admin.**")
+
+                # if this is a staff case, skip logging for privacy
+                if "staff-case" in channel.name:
+                    await channel.delete()
+                    await self.remove_user_open_channel(user_channel[0][0])
+
+                    # send to case log
+                    embed = discord.Embed(
+                        title='Staff Case Closed',
+                        description=(
+                            f"**Case Number:** #{case_number}\n"
+                            f"**Involved Users:** *(Not logged for privacy)*\n\n"
+                            f"**Closed By:** {member.mention}"
+                        ),
+                        color=discord.Color.red(),
+                        timestamp=ctx.message.created_at
+                    )
+                    await case_log_channel.send(embed=embed)
+
+                    # send to moderation log
+                    moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
+                    embed = discord.Embed(
+                        title='__**Case Closed**__',
+                        color=discord.Color.red(),
+                        timestamp=ctx.message.created_at
+                    )
+                    embed.add_field(name="Case Number", value=f"#{case_number}")
+                    embed.set_footer(text=f"Closed by {member}", icon_url=member.display_avatar)
+                    await moderation_log.send(embed=embed)
+                    return
 
                 # gather the list of users who sent messages in the case channel
                 user_ids = set()
