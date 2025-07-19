@@ -47,12 +47,12 @@ class HugView(SlothAction):
             'https://c.tenor.com/wqCAHtQuTnkAAAAC/milk-and-mocha-hug.gif',
             'https://c.tenor.com/7xJoTToAJC8AAAAd/hug-love.gif',
             'https://c.tenor.com/0PIj7XctFr4AAAAC/a-whisker-away-hug.gif',
-            'https://media1.tenor.com/m/9IuynGgYlccAAAAd/love-hug.gif',
-            'https://media1.tenor.com/m/aLF8700Drh0AAAAd/eszan-hugging-couple.gif',
-            'https://media1.tenor.com/m/ibqSyUnC6YsAAAAd/hugs-cuddle.gif',
-            'https://media1.tenor.com/m/Kg4s88v378QAAAAd/couple-hug.gif',
-            'https://media1.tenor.com/m/CtGDmaEW_XoAAAAd/tj-watt.gif',
-            'https://media1.tenor.com/m/YFOXic-OlMUAAAAd/hug-varchie.gif',
+            'https://c.tenor.com/9IuynGgYlccAAAAd/love-hug.gif',
+            'https://c.tenor.com/aLF8700Drh0AAAAd/eszan-hugging-couple.gif',
+            'https://c.tenor.com/ibqSyUnC6YsAAAAd/hugs-cuddle.gif',
+            'https://c.tenor.com/Kg4s88v378QAAAAd/couple-hug.gif',
+            'https://c.tenor.com/CtGDmaEW_XoAAAAd/tj-watt.gif',
+            'https://c.tenor.com/YFOXic-OlMUAAAAd/hug-varchie.gif',
         ]
 
         embed = discord.Embed(
@@ -335,10 +335,10 @@ class KissView(SlothAction):
             'https://c.tenor.com/sXNJMF5vI8oAAAAC/love-peachcat.gif',
             'https://c.tenor.com/MXd8Xby7jnMAAAAC/davydoff-love.gif',
             'https://c.tenor.com/yWGhrAd0cioAAAAC/kissing-couple.gif',
-            'https://media1.tenor.com/m/Men3yDvwzxIAAAAd/hugh-grant-renee-zellweger.gif',
-            'https://media1.tenor.com/m/BELRk-ZL1ZkAAAAd/sensual-kiss.gif',
-            'https://media1.tenor.com/m/c5H2dojPxuwAAAAd/bellyjere-bellyjere-kiss.gif',
-            'https://media1.tenor.com/m/4xJCbk-T7fMAAAAd/bughead-couple.gif',
+            'https://c.tenor.com/Men3yDvwzxIAAAAd/hugh-grant-renee-zellweger.gif',
+            'https://c.tenor.com/BELRk-ZL1ZkAAAAd/sensual-kiss.gif',
+            'https://c.tenor.com/c5H2dojPxuwAAAAd/bellyjere-bellyjere-kiss.gif',
+            'https://c.tenor.com/4xJCbk-T7fMAAAAd/bughead-couple.gif',
         ]
 
         embed = discord.Embed(
@@ -382,14 +382,14 @@ class KissView(SlothAction):
         """ Kisses someone on the hand. """
 
         h_kisses: List[str] = [
-            "https://media1.tenor.com/m/q9P2KA1AsAsAAAAC/puuung-puuung-gif.gif",
-            "https://media1.tenor.com/m/WWPwB-xs-5UAAAAC/val-ally-kiss.gif",
-            "https://media1.tenor.com/m/wR-B1U4K37wAAAAC/val-ally-anime.gif",
-            "https://media1.tenor.com/m/e9Y1BIbj77UAAAAC/kiss-beso.gif",
-            "https://media1.tenor.com/m/4Y-EeC47KcEAAAAC/bugs-bunny-kiss.gif",
-            "https://media1.tenor.com/m/SQElVM8S8LwAAAAC/barry-allen-iris-west.gif",
-            "https://media1.tenor.com/m/SHNuYdCiTXsAAAAC/damon-salvatore-kissing-a-hand.gif",
-            "https://media1.tenor.com/m/jzNHCLiHMo8AAAAC/morticia-gomez.gif"
+            "https://c.tenor.com/q9P2KA1AsAsAAAAC/puuung-puuung-gif.gif",
+            "https://c.tenor.com/WWPwB-xs-5UAAAAC/val-ally-kiss.gif",
+            "https://c.tenor.com/wR-B1U4K37wAAAAC/val-ally-anime.gif",
+            "https://c.tenor.com/e9Y1BIbj77UAAAAC/kiss-beso.gif",
+            "https://c.tenor.com/4Y-EeC47KcEAAAAC/bugs-bunny-kiss.gif",
+            "https://c.tenor.com/SQElVM8S8LwAAAAC/barry-allen-iris-west.gif",
+            "https://c.tenor.com/SHNuYdCiTXsAAAAC/damon-salvatore-kissing-a-hand.gif",
+            "https://c.tenor.com/jzNHCLiHMo8AAAAC/morticia-gomez.gif"
         ]
 
         embed = discord.Embed(
@@ -1555,23 +1555,23 @@ class DominateView(SlothAction):
         """ Dominate someone. """
 
         dominations: List[str] = [
-            "https://media1.tenor.com/m/ikzMZDcbmUAAAAAd/exo-universe.gif",
-            "https://media1.tenor.com/m/VliyAOYladAAAAAC/handcuffs-shackles.gif",
-            "https://media1.tenor.com/m/oc6RP1L4SZcAAAAC/tied-up-freaks-youre-one-of-us.gif",
-            "https://media1.tenor.com/m/dpgkgL9AuVcAAAAd/damsel.gif"
-            "https://media1.tenor.com/m/8w51w_OnnCYAAAAC/tying-dark.gif",
-            "https://media1.tenor.com/m/gc2pM_WmoU4AAAAd/struggling-gawain.gif",
-            "https://media1.tenor.com/m/ag8kaw9gNvgAAAAd/tied-up-tie.gif",
-            "https://media1.tenor.com/m/dEgCqPU5ZgMAAAAd/bound-tied.gif",
-            "https://media1.tenor.com/m/UTXVg45p-cEAAAAC/pain-plead.gif",
-            "https://media1.tenor.com/m/WxrwVugl9mQAAAAC/petty-family-nwp.gif",
-            "https://media1.tenor.com/m/OMCnFbXW0iIAAAAC/karen-allen-marion-ravenwood.gif",
-            "https://media1.tenor.com/m/mPxwWQWlxJkAAAAd/erica-durance-bdsm.gif",
-            "https://media1.tenor.com/m/tfuedf01_98AAAAd/bondage-rope.gif",
-            "https://media1.tenor.com/m/5epHjNqChXoAAAAC/gemma-arterton-gagged.gif",
-            "https://media1.tenor.com/m/V5IEfSditGMAAAAC/hands-up.gif",
-            "https://media1.tenor.com/m/RwpAIEr50vYAAAAC/got-game-og-thrones.gif",
-            "https://media1.tenor.com/m/Z55TwWdtBvEAAAAC/korra-bdsm.gif",
+            "https://c.tenor.com/ikzMZDcbmUAAAAAd/exo-universe.gif",
+            "https://c.tenor.com/VliyAOYladAAAAAC/handcuffs-shackles.gif",
+            "https://c.tenor.com/oc6RP1L4SZcAAAAC/tied-up-freaks-youre-one-of-us.gif",
+            "https://c.tenor.com/dpgkgL9AuVcAAAAd/damsel.gif"
+            "https://c.tenor.com/8w51w_OnnCYAAAAC/tying-dark.gif",
+            "https://c.tenor.com/gc2pM_WmoU4AAAAd/struggling-gawain.gif",
+            "https://c.tenor.com/ag8kaw9gNvgAAAAd/tied-up-tie.gif",
+            "https://c.tenor.com/dEgCqPU5ZgMAAAAd/bound-tied.gif",
+            "https://c.tenor.com/UTXVg45p-cEAAAAC/pain-plead.gif",
+            "https://c.tenor.com/WxrwVugl9mQAAAAC/petty-family-nwp.gif",
+            "https://c.tenor.com/OMCnFbXW0iIAAAAC/karen-allen-marion-ravenwood.gif",
+            "https://c.tenor.com/mPxwWQWlxJkAAAAd/erica-durance-bdsm.gif",
+            "https://c.tenor.com/tfuedf01_98AAAAd/bondage-rope.gif",
+            "https://c.tenor.com/5epHjNqChXoAAAAC/gemma-arterton-gagged.gif",
+            "https://c.tenor.com/V5IEfSditGMAAAAC/hands-up.gif",
+            "https://c.tenor.com/RwpAIEr50vYAAAAC/got-game-og-thrones.gif",
+            "https://c.tenor.com/Z55TwWdtBvEAAAAC/korra-bdsm.gif",
         ]
 
         embed = discord.Embed(
