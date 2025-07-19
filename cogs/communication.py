@@ -1,6 +1,6 @@
 # import.standard
 import os
-from random import randint
+from random import choice, randint
 from typing import List, Optional
 
 # import.thirdparty
@@ -23,7 +23,7 @@ allowed_roles = [int(os.getenv('OWNER_ROLE_ID', 123)), int(os.getenv('ADMIN_ROLE
 # variables.textchannel
 bots_and_commands_channel_id = int(os.getenv('BOTS_AND_COMMANDS_CHANNEL_ID', 123))
 announcement_channel_id = int(os.getenv('ANNOUNCEMENT_CHANNEL_ID', 123))
-general_channel_id = int(os.getenv('GENERAL_CHANNEL_ID', 123))
+global_chat_channel_id = int(os.getenv('GLOBAL_CHAT_CHANNEL_ID', 123))
 
 # variable.slothsubscription
 sloth_subscriber_sub_id = int(os.getenv("SLOTH_SUBSCRIBER_SUB_ID", 123))
@@ -36,13 +36,45 @@ class Communication(*tool_cogs):
     def __init__(self, client):
         self.client = client
         self.db = DatabaseCore()
+        
+        # global chat name change variables
+        self.last_global_chat_name = None
+        self.global_chat_names = [ "boost-the-server-chat", "sub-to-patreon-chat", "what-will-tomorrow-bring", "english-chat-v12-turbo", "galaxy-chat", "thick-global-chat", "texting-kingdom", "text-here-if-you-can", "ultra-mega-super-global-chat", "giga-chat", "peak-sigma-thomas-shelby-global-chat", "no-more-english-chat", "yes-any-language-is-allowed", "not-just-a-fancy-global-chat", "brain-rot-chat", "negative-iq-chat", "what-chat-is-this", "who-keeps-changing-the-chat", "what-is-going-on", "wait-chat-is-this-global-chat", "chat-number-1", "f-english-chat" ]
 
     @commands.Cog.listener()
     async def on_ready(self):
 
         self.advertise_patreon.start()
         self.advertise_sloth_subscription.start()
+        
+        # starts the daily global chat name change
+        self.daily_global_chat_name_change.start()
         print('[.cogs] Communication cog is ready!')
+
+    @tasks.loop(hours=24)
+    async def daily_global_chat_name_change(self) -> None:
+        """ Changes the name of the global chat once a day. """
+
+        channel = self.client.get_channel(global_chat_channel_id)
+        if not channel: return
+        
+        if self.last_global_chat_name is None:
+            self.last_global_chat_name = channel.name
+        
+        # gets names that aren't the last used one
+        possible_names = [name for name in self.global_chat_names if name != self.last_global_chat_name]
+        if not possible_names: return
+        
+        # Select a random name
+        new_name = choice(possible_names)
+        
+        try:
+            await channel.edit(name=new_name)
+            self.last_global_chat_name = new_name
+        except discord.HTTPException as e:
+            print(f"Failed to change channel name: {e}")
+        except Exception as e:
+            print(f"Unexpected error changing channel name: {e}")
 
     @tasks.loop(seconds=60)
     async def advertise_patreon(self) -> None:
@@ -63,14 +95,14 @@ class Communication(*tool_cogs):
 
         # Updates time and advertises.
         await self.update_advertising_time(event_label="patreon_ad", current_ts=current_ts)
-        general_channel = self.client.get_channel(general_channel_id)
+        global_channel = self.client.get_channel(global_chat_channel_id)
 
         random_message = ""
         i = randint(1, 5)
         with open(f'./extra/random/texts/other/patreon_ad_{i}.txt', 'r', encoding="utf-8") as f:
             random_message = f.read()
 
-        await general_channel.send(random_message)
+        await global_channel.send(random_message)
 
     @tasks.loop(seconds=60)
     async def advertise_sloth_subscription(self) -> None:
