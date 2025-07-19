@@ -376,10 +376,61 @@ class KissView(SlothAction):
         await self.disable_buttons(interaction, followup=True)
         self.used = True
         self.stop()
+        
+    @discord.ui.button(label='Hand Kiss', style=discord.ButtonStyle.blurple, custom_id='hand_kiss_id', emoji="🫳")
+    async def hand_kiss_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
+        """ Kisses someone on the hand. """
+
+        h_kisses: List[str] = [
+            "https://media1.tenor.com/m/q9P2KA1AsAsAAAAC/puuung-puuung-gif.gif",
+            "https://media1.tenor.com/m/WWPwB-xs-5UAAAAC/val-ally-kiss.gif",
+            "https://media1.tenor.com/m/wR-B1U4K37wAAAAC/val-ally-anime.gif",
+            "https://media1.tenor.com/m/e9Y1BIbj77UAAAAC/kiss-beso.gif",
+            "https://media1.tenor.com/m/4Y-EeC47KcEAAAAC/bugs-bunny-kiss.gif",
+            "https://media1.tenor.com/m/SQElVM8S8LwAAAAC/barry-allen-iris-west.gif",
+            "https://media1.tenor.com/m/SHNuYdCiTXsAAAAC/damon-salvatore-kissing-a-hand.gif",
+            "https://media1.tenor.com/m/jzNHCLiHMo8AAAAC/morticia-gomez.gif"
+        ]
+
+        embed = discord.Embed(
+            title="__Hand Kiss__",
+            description=f"😚🫳 {self.member.mention} gently kissed the hand of {self.target.mention} 😚🫳",
+            color=discord.Color.dark_red(),
+            timestamp=interaction.message.created_at
+        )
+
+        embed.set_author(name=self.member.display_name, url=self.member.display_avatar, icon_url=self.member.display_avatar)
+        embed.set_thumbnail(url=self.target.display_avatar)
+        embed.set_image(url=choice(h_kisses))
+        embed.set_footer(text=interaction.guild.name, icon_url=interaction.guild.icon.url)
+
+        member_marriages = await self.client.get_cog('SlothClass').get_user_marriages(self.member.id)
+        response_view = None
+        if member_marriages:
+            for member_marriage in member_marriages:
+                if self.target.id in (member_marriage["user"], member_marriage["partner"]):
+                    if not self.replied:
+                        response_view = ReplyActionView(self.target, self.member, self.cmd)
+                    break
+            else:
+                response_view = SpotCheatingView(self.client, self.member, self.target, member_marriages)
+
+        if response_view:
+            await interaction.response.send_message(
+                content=self.target.mention, embed=embed, 
+                view=response_view
+            )
+        else:
+            await interaction.response.send_message(
+                content=self.target.mention, embed=embed)
+
+        await self.disable_buttons(interaction, followup=True)
+        self.used = True
+        self.stop()
 
     @discord.ui.button(label='Nevermind', style=discord.ButtonStyle.red, custom_id='nevermind_id', emoji="❌")
     async def nevermind_button(self, button: discord.ui.button, interaction: discord.Interaction) -> None:
-        """ Cancels the slap action. """
+        """ Cancels the kiss action. """
 
         await self.disable_buttons(interaction)
         self.stop()

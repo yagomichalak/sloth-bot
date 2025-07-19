@@ -33,10 +33,6 @@ class ApplicationsTable(commands.Cog):
     event_host_parent_channel_id: int = int(os.getenv('EVENT_MANAGER_CHANNEL_ID', 123))
     event_host_interview_vc_id: int = int(os.getenv('EVENT_MANAGER_INTERVIEW_VC_ID', 123))
 
-    debate_organizer_app_channel_id: int = int(os.getenv('DEBATE_MANAGER_APPLICATION_CHANNEL_ID', 123))
-    debate_organizer_parent_channel_id: int = int(os.getenv('DEBATE_MANAGER_CHANNEL_ID', 123))
-    debate_organizer_interview_vc_id: int = int(os.getenv('DEBATE_MANAGER_INTERVIEW_VC_ID', 123))
-
     ban_appeals_channel_id: int = int(os.getenv('BAN_APPEALS_CHANNEL_ID', 123))
 
 
@@ -54,7 +50,7 @@ class ApplicationsTable(commands.Cog):
             "message": "**Event Host Application**\nOur staff has evaluated your Event Host application and has come to the conclusion that we are not in need of this event.",
             "pings": [{"id": event_manager_role_id, "role": True}]},
         'debate_organizer': {
-            "app": debate_organizer_app_channel_id,  "interview": debate_organizer_interview_vc_id, "parent": debate_organizer_parent_channel_id, 
+            "app": event_host_app_channel_id,  "interview": event_host_interview_vc_id, "parent": event_host_parent_channel_id, 
             "message": "**Debate Organizer Application**\nOur staff has evaluated your Debate Organizer application and has come to the conclusion that we are **declining** your application for internal reasons.",
             "pings": [{"id": event_manager_role_id, "role": True}]}
     }
@@ -78,11 +74,9 @@ class ApplicationsTable(commands.Cog):
 
         adm = channel.permissions_for(payload.member).administrator
         # Checks if it's in an applications channel
-        if payload.channel_id in [
-            self.moderator_app_channel_id, self.event_host_app_channel_id, self.teacher_app_channel_id, 
-            self.debate_organizer_app_channel_id, self.ban_appeals_channel_id]:
+        if payload.channel_id in [self.moderator_app_channel_id, self.event_host_app_channel_id, self.teacher_app_channel_id, self.ban_appeals_channel_id]:
 
-            if payload.channel_id == self.debate_organizer_app_channel_id: # User is an admin
+            if payload.channel_id == self.event_host_app_channel_id: # User is an admin
                 if await utils.is_allowed([admin_role_id]).predicate(channel=channel, member=payload.member):
                     return await self.handle_application(guild, payload)
             elif payload.channel_id == self.teacher_app_channel_id: # User is a mod+
