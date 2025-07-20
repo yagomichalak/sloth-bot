@@ -62,15 +62,16 @@ class Communication(*tool_cogs):
             self.last_global_chat_name = channel.name
         
         # gets names that aren't the last used one
-        possible_names = [name for name in self.global_chat_names if name != self.last_global_chat_name]
+        possible_names = [name for name in self.global_chat_names if f"💬・{name}" != self.last_global_chat_name]
         if not possible_names: return
-        
-        # Select a random name
+
+        # select a random name
         new_name = choice(possible_names)
-        
+        prefixed_new_name = f"💬・{new_name}"
+
         try:
-            await channel.edit(name=new_name)
-            self.last_global_chat_name = new_name
+            await channel.edit(name=prefixed_new_name)
+            self.last_global_chat_name = prefixed_new_name
         except discord.HTTPException as e:
             print(f"Failed to change channel name: {e}")
         except Exception as e:
