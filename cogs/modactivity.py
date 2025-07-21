@@ -182,14 +182,14 @@ class ModActivity(ModActivityTable):
                         await user.send(embed=embed)
                         await self.log_automated_dm(ctx, user, reason)
                     except discord.Forbidden:
-                        await ctx.send(f"**Failed to send message to `{user.name}`!** Their DM's may be closed.", delete_after=3)
+                        await ctx.send(f"**Failed to send message to `{user.name}`!** Their DM's may be closed.")
                     except discord.HTTPException as e:
-                        await ctx.send(f"**Failed to send message to `{user.name}`!** ERROR: `{e}`", delete_after=3)
+                        await ctx.send(f"**Failed to send message to `{user.name}`!** ERROR: `{e}`")
             
             await self.reset_mod_activity()
-            await ctx.send(f"**Mod Activity data reset, {member.mention}!**", delete_after=3)
+            await ctx.send(f"**Mod Activity data reset, {member.mention}!**")
         else:
-            await ctx.send(f"**Not deleting it then, {member.mention}!**", delete_after=3)
+            await ctx.send(f"**Not deleting it then, {member.mention}!**", delete_after=6)
 
         await msg.delete()
         
