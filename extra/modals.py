@@ -358,7 +358,7 @@ class DebateOrganizerApplicationModal(Modal):
         **Application successfully made, please, be patient now.**
     • We will let you know when we need a new debate organizer. We check apps when we need it!""", ephemeral=True)
 
-        debate_app_channel = await self.client.fetch_channel(self.cog.debate_organizer_app_channel_id)
+        debate_app_channel = await self.client.fetch_channel(self.cog.event_host_app_channel_id)
         app = await debate_app_channel.send(content=member.mention, embed=embed)
         await app.add_reaction('✅')
         await app.add_reaction('❌')
