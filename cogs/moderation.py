@@ -29,6 +29,7 @@ from mysqldb import DatabaseCore
 # variables.id
 server_id = int(os.getenv('SERVER_ID', 123))
 guild_ids: List[int] = [server_id]
+gabs_id = int(os.getenv('GABS_ID', 123))
 
 # variables.role
 muted_role_id = int(os.getenv('MUTED_ROLE_ID', 123))
@@ -116,7 +117,15 @@ class Moderation(*moderation_cogs):
                 return await self.check_unban_infractions(message)
         
         # Checks if the message is a spam/scam message
-        if any(word.lower() in message.content.lower() for word in scamwords):
+        message_content_lower = message.content.lower()
+        scam_detected = False
+        for word in scamwords:
+            word_lower = word.lower()
+            # Use regex for whole word or exact match
+            if re.search(rf'\b{re.escape(word_lower)}\b', message_content_lower):
+                scam_detected = True
+                break
+        if scam_detected:
             await self.handle_scam(message)
             await message.delete()
             return
@@ -1236,7 +1245,10 @@ class Moderation(*moderation_cogs):
                 timestamp=current_time
             )
             muted_embed.set_thumbnail(url=member.display_avatar)
-            await muted_chat.send(f"{member.mention} {ctx.author.mention}")
+            if ctx.author.id == gabs_id:
+                await muted_chat.send(f"{member.mention}")
+            else:
+                await muted_chat.send(f"{member.mention} {ctx.author.mention}")
             await muted_chat.send(embed=muted_embed)
 
             # Inserts a infraction into the database
@@ -1252,7 +1264,7 @@ class Moderation(*moderation_cogs):
             await answer(f'**{member} is already muted!**')
 
     # Unmutes a member
-    @commands.command(name="unmute")
+    @commands.command(name="unmute", aliases=["unm", "openmute", "openm"])
     @utils.is_allowed(allowed_roles, throw_exc=True)
     async def _unmute_command(self, ctx, *, message : str = None) -> None:
         """(MOD) Unmutes one or more members instantly or after a determined amount of time.
@@ -2263,12 +2275,12 @@ We appreciate your understanding and look forward to hearing from you. """, embe
     @utils.is_allowed([staff_manager_role_id], throw_exc=True)
     async def firewall(self, ctx) -> None:
         """ Turns on and off the firewall.
-        When turned on, it'll kick new members having accounts created in less than 4 days. """
+        When turned on, it'll kick new members having accounts created in less than the set time. """
 
         member = ctx.author
 
         if not await self.check_table_firewall_exists():
-            return await ctx.send(f"**It looks like the firewall is on maintenance, {member.mention}!**")
+            return await ctx.send(f"**It looks like the firewall is on maintenance, {member.mention}!**", delete_after=6)
 
         firewall_state: Tuple[int] = await self.get_firewall_state()
         if firewall_state and firewall_state[0]:
@@ -2363,8 +2375,6 @@ We appreciate your understanding and look forward to hearing from you. """, embe
         member = ctx.author
 
         await ctx.message.delete()
-
-        print(message)
 
         if not await self.check_table_firewall_exists():
             return await ctx.send(f"**It looks like the firewall is on maintenance, {member.mention}!**")
