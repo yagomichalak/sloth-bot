@@ -91,7 +91,7 @@ class Moderation(*moderation_cogs):
     """ Moderation related commands. """
 
     INVITE_TYPES = [
-        "discord.gg/", "discord.com/invites/",
+        "discord.gg/", "discord.com/invites/", "discordapp.com/invite/",
         "discord.gg/events/", "discord.com/events/"
     ]
 
