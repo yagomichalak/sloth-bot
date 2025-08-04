@@ -148,7 +148,7 @@ class Moderation(*moderation_cogs):
                 if not is_from_guild:
                     # return await self._mute_callback(ctx, member=message.author, reason="Invite Advertisement.")
                     
-                    timeout_duration = 30 * 60  # 30 minutes in seconds
+                    timeout_duration = 10 * 60  # 10 minutes in seconds
                     timeout_until = discord.utils.utcnow() + timedelta(seconds=timeout_duration)
                     await message.author.timeout(until=timeout_until, reason="Invite Advertisement.")
                     await message.delete()
