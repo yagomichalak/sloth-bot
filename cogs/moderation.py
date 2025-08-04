@@ -70,7 +70,7 @@ scamwords = [
     # steam scam
     "steam gift 50$", "50$ steam gift",
     # links
-    "steamncommynity.com", "steamcommunity.com/gift-card/pay/50", "airdrop-stake.com", "xcoin-presale.com", "ainexusca.com", "u.to", "e.vg",
+    "steamncommynity.com", "steamcommunity.com/gift-card/pay/50", "airdrop-stake.com", "xcoin-presale.com", "ainexusca.com", "u.to", "e.vg", "leaksdaily.com",
     # numbers
     "+1 (618) 913-0036", "+1 (626) 514-0696", "+1 (814) 813-1670",
     # nicks
