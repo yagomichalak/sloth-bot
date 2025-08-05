@@ -175,6 +175,15 @@ class Moderation(*moderation_cogs):
         # The user left the server
         if not after.guild:
             return
+        
+        # Check for moderated nickname
+        if await self.get_moderated_nickname(member.id):
+            if after.nick != "Moderated Nickname":
+                try:
+                    await member.edit(nick="Moderated Nickname")
+                except discord.Forbidden: pass
+                except discord.HTTPException as e:
+                    pass
 
         # Before and After roles
         roles = before.roles
