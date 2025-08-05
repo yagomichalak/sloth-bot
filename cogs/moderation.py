@@ -475,10 +475,17 @@ class Moderation(*moderation_cogs):
             await message.channel.send(f"You should use {report_support_channel.mention} for help reports!")
 
     @commands.Cog.listener(name="on_member_join")
-    async def on_member_join_check_muted_user(self, member):
+    async def on_member_join_check_moderation(self, member):
 
         if member.bot:
             return
+
+        if await self.get_moderated_nickname(member.id):
+            try:
+                await member.edit(nick="Moderated Nickname")
+            except discord.Forbidden: pass
+            except discord.HTTPException as e:
+                pass
 
         if await self.get_muted_roles(member.id):
             muted_role = discord.utils.get(member.guild.roles, id=muted_role_id)
