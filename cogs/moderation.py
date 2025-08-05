@@ -224,6 +224,40 @@ class Moderation(*moderation_cogs):
 
             # Updates the user roles
             await member.edit(roles=keep_roles)
+        
+    @commands.Cog.listener()
+    async def on_member_unban(self, guild: discord.Guild, user: discord.User):
+        """ Checks audit log for manual unban details and logs the action. """
+
+        # check the audit log entry to get admin info
+        try:
+            async for entry in guild.audit_logs(limit=1, action=discord.AuditLogAction.unban):
+                if entry.target.id == user.id:
+                    if entry.user.bot: return # ignore bot unbans, this should only log manual unbans
+                    
+                    admin = entry.user # if it was a manual unban, get the admin
+                    break
+                else:
+                    continue
+        except discord.Forbidden: return # if the bot doesn't have permission to view audit logs, which would be crazy, do nothing
+        if admin is None: return # if no admin was found for some reason, stick to the safe option and do nothing
+
+        # moderation log channel
+        moderation_log = discord.utils.get(guild.channels, id=mod_log_id)
+        if moderation_log is None: return # just in case
+
+        # log embed
+        current_ts = await utils.get_timestamp()
+        infr_date = datetime.fromtimestamp(current_ts).strftime('%Y/%m/%d at %H:%M')
+        perpetrator, icon = admin.name, admin.display_avatar
+        embed = discord.Embed(title='__**Manual Unbanishment**__', colour=discord.Colour.red(), timestamp=datetime.fromtimestamp(current_ts))
+        embed.add_field(name='User info:', value=f'```Name: {user.display_name}\nId: {user.id}```', inline=False)
+        embed.set_author(name=user)
+        embed.set_thumbnail(url=user.display_avatar)
+        embed.set_footer(text=f"Unbanned by {perpetrator}", icon_url=icon)
+
+        # send the log and insert a ban infraction to the database
+        await moderation_log.send(embed=embed)
 
     async def check_restricted_roles(self, member, new_role):
         """ Checks if a restricted role is added by unauthorized users and removes it.
