@@ -1272,6 +1272,76 @@ class Moderation(*moderation_cogs):
         else:
             await answer(f'**{member} is already muted!**')
 
+    # mutes a member who isn't in the server anymore. when the member joins back, they will be muted.
+    @commands.command(aliases=["hmute"])
+    @utils.is_allowed(allowed_roles, throw_exc=True)
+    async def hackmute(self, ctx, *, message: str = None) -> None:
+        """ Mutes a member who isn't in the server anymore. When the member joins back, they will be muted. 
+        :param member: The @ or the ID of one or more users to hackmute.
+        :param reason: The reason for hackmuting one or all users."""
+        
+        members, reason = await utils.greedy_member_reason(ctx, message)
+
+        await ctx.message.delete()
+
+        if not members:
+            return await ctx.send("**Please, inform a member!**", delete_after=3)
+
+        author = ctx.author
+        is_admin = ctx.author.guild_permissions.administrator
+
+        if not is_admin and (reason is not None and len(reason) > 960):
+            return await ctx.send(f"**Please, inform a reason that is lower than or equal to 960 characters, {ctx.author.mention}!**", delete_after=3)
+        elif not is_admin and (reason is None or len(reason) < 16):
+            return await ctx.send(f"**Please, inform a reason that is higher than 15 characters, {ctx.author.mention}!**", delete_after=3)
+
+        for member in members:
+            # checks if user is still in the server, if they are, refers to the regular mute command
+            if ctx.guild.get_member(member.id):
+                await ctx.send(f"**{member} is still in the server!** *Use the regular mute command instead.*", delete_after=6)
+                continue
+            
+            # checks if user is already muted, if they are, skips to next member on the line if there are any
+            if not await self.get_muted_roles(member.id):
+                perpetrator = ctx.author
+                icon = ctx.author.display_avatar
+
+                try:
+                    # general embed
+                    general_embed = discord.Embed(description=f'**Reason:** {reason}', colour=discord.Colour.dark_teal(),
+                                                timestamp=ctx.message.created_at)
+                    general_embed.set_author(name=f'{self.client.get_user(member.id)} has been hackmuted')
+
+                    await ctx.send(embed=general_embed)
+
+                    # moderation log embed
+                    moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
+                    current_ts = await utils.get_timestamp()
+                    infr_date = datetime.fromtimestamp(current_ts).strftime('%Y/%m/%d at %H:%M')
+                    perpetrator = ctx.author.name if ctx.author else "Unknown"
+                    embed = discord.Embed(title='__**HackMute**__', colour=discord.Colour.dark_teal(),
+                                        timestamp=ctx.message.created_at)
+                    embed.add_field(name='User info:', value=f'```Name: {self.client.get_user(member.id)}\nId: {member.id}```',
+                                    inline=False)
+                    embed.add_field(name='Reason:', value=f"> -# **{infr_date}**\n> -# by {perpetrator}\n> {reason}")
+                    embed.set_author(name=self.client.get_user(ctx.author.id))
+                    embed.set_footer(text=f"HackMuted by {perpetrator}", icon_url=icon)
+                    await moderation_log.send(embed=embed)
+
+                    # inserts a infraction into the database
+                    current_ts = await utils.get_timestamp()
+                    user_role_ids = [(member.id, preference_role_id, current_ts, None)]
+                    await self.insert_in_muted(user_role_ids)
+                    await self.insert_user_infraction(
+                        user_id=member.id, infr_type="mute", reason=reason,
+                        timestamp=current_ts, perpetrator=ctx.author.id)
+
+                except discord.errors.NotFound:
+                    await ctx.send("**Invalid user id!**", delete_after=3)
+            else:
+                await ctx.send(f'**{member} is already muted!**', delete_after=6)
+                continue
+
     # Unmutes a member
     @commands.command(name="unmute", aliases=["unm", "openmute", "openm"])
     @utils.is_allowed(allowed_roles, throw_exc=True)
