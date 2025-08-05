@@ -156,7 +156,7 @@ class Moderation(*moderation_cogs):
                     # send a dm to the user
                     try:
                         await message.author.send(
-                            f"**You have been timed out for 30 minutes in Language Sloth.**\n"
+                            f"**You have been timed out for 10 minutes in Language Sloth.**\n"
                             f"**Reason:** Invite advertisement."
                         )
                     except discord.Forbidden:
