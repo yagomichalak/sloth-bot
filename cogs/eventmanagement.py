@@ -23,6 +23,7 @@ owner_role_id = int(os.getenv('OWNER_ROLE_ID', 123))
 event_host_role_id = int(os.getenv('EVENT_HOST_ROLE_ID', 123))
 event_manager_role_id = int(os.getenv('EVENT_MANAGER_ROLE_ID', 123))
 debate_organizer_role_id = int(os.getenv('DEBATE_ORGANIZER_ROLE_ID', 123))
+giveaway_manager_role_id = int(os.getenv('GIVEAWAY_MANAGER_ROLE_ID', 123))
 preference_role_id = int(os.getenv('PREFERENCE_ROLE_ID', 123))
 
 # variables.channel
@@ -869,6 +870,86 @@ class EventManagement(EventRoomsTable):
 
         try:
             await member.send(f"**You have been promoted to `Debate Organizer`**")
+        except:
+            pass
+        
+    @commands.command(aliases=['pgm'])
+    @utils.is_allowed([owner_role_id, admin_role_id, event_manager_role_id], throw_exc=True)
+    async def promote_giveaway_manager(self, ctx, member: discord.Member = None) -> None:
+        """ Promotes a regular user to a giveaway manager.
+        :param member: The user that is going to be promoted. """
+
+        if not member:
+            return await ctx.send("**Please, inform a member to promote to giveaway manager!**")
+
+        author: discord.Member = ctx.author
+
+        giveaway_manager = discord.utils.get(ctx.guild.roles, id=giveaway_manager_role_id)
+        if giveaway_manager in member.roles:
+            return await ctx.send(f"**{member.mention} already is a `Giveaway Manager`!**")
+
+        try:
+            await member.add_roles(giveaway_manager)
+        except:
+            pass
+
+        # General log
+        promote_embed = discord.Embed(
+            title="__Giveaway Manager Promotion__",
+            description=f"{member.mention} has been promoted to `Giveaway Manager` by {author.mention}",
+            color=discord.Color.green(),
+            timestamp=ctx.message.created_at
+        )
+        await ctx.send(embed=promote_embed)
+
+        # Moderation log
+        if promote_log := discord.utils.get(ctx.guild.text_channels, id=promote_demote_log_channel_id):
+            promote_embed.set_author(name=member, icon_url=member.display_avatar)
+            promote_embed.set_footer(text=f"Promoted by {author}", icon_url=author.display_avatar)
+            await promote_log.send(embed=promote_embed)
+
+        try:
+            await member.send(f"**You have been promoted to `Giveaway Manager`**")
+        except:
+            pass
+    
+    @commands.command(aliases=['dgm'])
+    @utils.is_allowed([owner_role_id, admin_role_id, event_manager_role_id], throw_exc=True)
+    async def demote_giveaway_manager(self, ctx, member: discord.Member = None) -> None:
+        """ Demotes a giveaway manager to a regular user.
+        :param member: The host that is going to be demoted. """
+
+        if not member:
+            return await ctx.send("**Please, inform a member to demote to a regular user!**")
+
+        author: discord.Member = ctx.author
+
+        giveaway_manager = discord.utils.get(ctx.guild.roles, id=giveaway_manager_role_id)
+        if giveaway_manager not in member.roles:
+            return await ctx.send(f"**{member.mention} is not even a `Giveaway Manager`!**")
+
+        try:
+            await member.remove_roles(giveaway_manager)
+        except:
+            pass
+
+        # General log
+        demote_embed = discord.Embed(
+            title="__Giveaway Manager Demotion__",
+            description=f"{member.mention} has been demoted from a `Giveaway Manager` to `regular user` by {author.mention}",
+            color=discord.Color.dark_red(),
+            timestamp=ctx.message.created_at
+        )
+        await ctx.send(embed=demote_embed)
+
+        # Moderation log
+        if demote_log := discord.utils.get(ctx.guild.text_channels, id=promote_demote_log_channel_id):
+            demote_embed.set_author(name=member, icon_url=member.display_avatar)
+            demote_embed.set_footer(text=f"Demoted by {author}", icon_url=author.display_avatar)
+            await demote_log.send(embed=demote_embed)
+
+        try:
+            await member.send(f"**You have been demoted from a `Giveaway Manager` to a regular user!**")
         except:
             pass
 
