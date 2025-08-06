@@ -70,7 +70,7 @@ scamwords = [
     # steam scam
     "steam gift 50$", "50$ steam gift",
     # links
-    "steamncommynity.com", "steamcommunity.com/gift-card/pay/50", "airdrop-stake.com", "xcoin-presale.com", "ainexusca.com", "u.to", "e.vg",
+    "steamncommynity.com", "steamcommunity.com/gift-card/pay/50", "airdrop-stake.com", "xcoin-presale.com", "ainexusca.com", "u.to", "e.vg", "leaksdaily.com",
     # numbers
     "+1 (618) 913-0036", "+1 (626) 514-0696", "+1 (814) 813-1670",
     # nicks
@@ -91,7 +91,7 @@ class Moderation(*moderation_cogs):
     """ Moderation related commands. """
 
     INVITE_TYPES = [
-        "discord.gg/", "discord.com/invites/",
+        "discord.gg/", "discord.com/invites/", "discordapp.com/invite/",
         "discord.gg/events/", "discord.com/events/"
     ]
 
@@ -148,7 +148,7 @@ class Moderation(*moderation_cogs):
                 if not is_from_guild:
                     # return await self._mute_callback(ctx, member=message.author, reason="Invite Advertisement.")
                     
-                    timeout_duration = 30 * 60  # 30 minutes in seconds
+                    timeout_duration = 10 * 60  # 10 minutes in seconds
                     timeout_until = discord.utils.utcnow() + timedelta(seconds=timeout_duration)
                     await message.author.timeout(until=timeout_until, reason="Invite Advertisement.")
                     await message.delete()
@@ -156,7 +156,7 @@ class Moderation(*moderation_cogs):
                     # send a dm to the user
                     try:
                         await message.author.send(
-                            f"**You have been timed out for 30 minutes in Language Sloth.**\n"
+                            f"**You have been timed out for 10 minutes in Language Sloth.**\n"
                             f"**Reason:** Invite advertisement."
                         )
                     except discord.Forbidden:
@@ -175,6 +175,15 @@ class Moderation(*moderation_cogs):
         # The user left the server
         if not after.guild:
             return
+        
+        # Check for moderated nickname
+        if await self.get_moderated_nickname(member.id):
+            if after.nick != "Moderated Nickname":
+                try:
+                    await member.edit(nick="Moderated Nickname")
+                except discord.Forbidden: pass
+                except discord.HTTPException as e:
+                    pass
 
         # Before and After roles
         roles = before.roles
@@ -215,6 +224,40 @@ class Moderation(*moderation_cogs):
 
             # Updates the user roles
             await member.edit(roles=keep_roles)
+        
+    @commands.Cog.listener()
+    async def on_member_unban(self, guild: discord.Guild, user: discord.User):
+        """ Checks audit log for manual unban details and logs the action. """
+
+        # check the audit log entry to get admin info
+        try:
+            async for entry in guild.audit_logs(limit=1, action=discord.AuditLogAction.unban):
+                if entry.target.id == user.id:
+                    if entry.user.bot: return # ignore bot unbans, this should only log manual unbans
+                    
+                    admin = entry.user # if it was a manual unban, get the admin
+                    break
+                else:
+                    continue
+        except discord.Forbidden: return # if the bot doesn't have permission to view audit logs, which would be crazy, do nothing
+        if admin is None: return # if no admin was found for some reason, stick to the safe option and do nothing
+
+        # moderation log channel
+        moderation_log = discord.utils.get(guild.channels, id=mod_log_id)
+        if moderation_log is None: return # just in case
+
+        # log embed
+        current_ts = await utils.get_timestamp()
+        infr_date = datetime.fromtimestamp(current_ts).strftime('%Y/%m/%d at %H:%M')
+        perpetrator, icon = admin.name, admin.display_avatar
+        embed = discord.Embed(title='__**Manual Unbanishment**__', colour=discord.Colour.red(), timestamp=datetime.fromtimestamp(current_ts))
+        embed.add_field(name='User info:', value=f'```Name: {user.display_name}\nId: {user.id}```', inline=False)
+        embed.set_author(name=user)
+        embed.set_thumbnail(url=user.display_avatar)
+        embed.set_footer(text=f"Unbanned by {perpetrator}", icon_url=icon)
+
+        # send the log and insert a ban infraction to the database
+        await moderation_log.send(embed=embed)
 
     async def check_restricted_roles(self, member, new_role):
         """ Checks if a restricted role is added by unauthorized users and removes it.
@@ -466,10 +509,17 @@ class Moderation(*moderation_cogs):
             await message.channel.send(f"You should use {report_support_channel.mention} for help reports!")
 
     @commands.Cog.listener(name="on_member_join")
-    async def on_member_join_check_muted_user(self, member):
+    async def on_member_join_check_moderation(self, member):
 
         if member.bot:
             return
+
+        if await self.get_moderated_nickname(member.id):
+            try:
+                await member.edit(nick="Moderated Nickname")
+            except discord.Forbidden: pass
+            except discord.HTTPException as e:
+                pass
 
         if await self.get_muted_roles(member.id):
             muted_role = discord.utils.get(member.guild.roles, id=muted_role_id)
@@ -1262,6 +1312,76 @@ class Moderation(*moderation_cogs):
 
         else:
             await answer(f'**{member} is already muted!**')
+
+    # mutes a member who isn't in the server anymore. when the member joins back, they will be muted.
+    @commands.command(aliases=["hmute"])
+    @utils.is_allowed(allowed_roles, throw_exc=True)
+    async def hackmute(self, ctx, *, message: str = None) -> None:
+        """ Mutes a member who isn't in the server anymore. When the member joins back, they will be muted. 
+        :param member: The @ or the ID of one or more users to hackmute.
+        :param reason: The reason for hackmuting one or all users."""
+        
+        members, reason = await utils.greedy_member_reason(ctx, message)
+
+        await ctx.message.delete()
+
+        if not members:
+            return await ctx.send("**Please, inform a member!**", delete_after=3)
+
+        author = ctx.author
+        is_admin = ctx.author.guild_permissions.administrator
+
+        if not is_admin and (reason is not None and len(reason) > 960):
+            return await ctx.send(f"**Please, inform a reason that is lower than or equal to 960 characters, {ctx.author.mention}!**", delete_after=3)
+        elif not is_admin and (reason is None or len(reason) < 16):
+            return await ctx.send(f"**Please, inform a reason that is higher than 15 characters, {ctx.author.mention}!**", delete_after=3)
+
+        for member in members:
+            # checks if user is still in the server, if they are, refers to the regular mute command
+            if ctx.guild.get_member(member.id):
+                await ctx.send(f"**{member} is still in the server!** *Use the regular mute command instead.*", delete_after=6)
+                continue
+            
+            # checks if user is already muted, if they are, skips to next member on the line if there are any
+            if not await self.get_muted_roles(member.id):
+                perpetrator = ctx.author
+                icon = ctx.author.display_avatar
+
+                try:
+                    # general embed
+                    general_embed = discord.Embed(description=f'**Reason:** {reason}', colour=discord.Colour.dark_teal(),
+                                                timestamp=ctx.message.created_at)
+                    general_embed.set_author(name=f'{self.client.get_user(member.id)} has been hackmuted')
+
+                    await ctx.send(embed=general_embed)
+
+                    # moderation log embed
+                    moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
+                    current_ts = await utils.get_timestamp()
+                    infr_date = datetime.fromtimestamp(current_ts).strftime('%Y/%m/%d at %H:%M')
+                    perpetrator = ctx.author.name if ctx.author else "Unknown"
+                    embed = discord.Embed(title='__**HackMute**__', colour=discord.Colour.dark_teal(),
+                                        timestamp=ctx.message.created_at)
+                    embed.add_field(name='User info:', value=f'```Name: {self.client.get_user(member.id)}\nId: {member.id}```',
+                                    inline=False)
+                    embed.add_field(name='Reason:', value=f"> -# **{infr_date}**\n> -# by {perpetrator}\n> {reason}")
+                    embed.set_author(name=self.client.get_user(ctx.author.id))
+                    embed.set_footer(text=f"HackMuted by {perpetrator}", icon_url=icon)
+                    await moderation_log.send(embed=embed)
+
+                    # inserts a infraction into the database
+                    current_ts = await utils.get_timestamp()
+                    user_role_ids = [(member.id, preference_role_id, current_ts, None)]
+                    await self.insert_in_muted(user_role_ids)
+                    await self.insert_user_infraction(
+                        user_id=member.id, infr_type="mute", reason=reason,
+                        timestamp=current_ts, perpetrator=ctx.author.id)
+
+                except discord.errors.NotFound:
+                    await ctx.send("**Invalid user id!**", delete_after=3)
+            else:
+                await ctx.send(f'**{member} is already muted!**', delete_after=6)
+                continue
 
     # Unmutes a member
     @commands.command(name="unmute", aliases=["unm", "openmute", "openm"])
