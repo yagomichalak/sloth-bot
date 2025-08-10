@@ -46,6 +46,7 @@ class VoiceChannelActivity(*tool_cogs):
         self.calculate.start()
         self.check_old_record_deletion_time.start()
         self.check_exceeding_voice_channels_from_history.start()
+        self.update_vc_member_counter_banner.start()
 
         print('[.cogs] VoiceChannelActivity cog is ready!')
 
@@ -60,7 +61,7 @@ class VoiceChannelActivity(*tool_cogs):
         path = 'media/effects'
         effect = 'vc_member_counter'
         full_path = f"{path}/{effect}"
-        save_path = 'media/temporary/tem_vc_member_counter.gif'
+        save_path = 'media/temporary/temp_vc_member_counter.gif'
         banner: Optional[Image.Image] = None
 
         # VC counter
