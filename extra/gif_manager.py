@@ -70,7 +70,7 @@ class GIF:
 
         return self._base_image.copy()
 
-    def export(self, path: str, paste_mask: bool = True, **kwargs) -> None:
+    def export(self, path: str, paste_mask: bool = True, **kwargs) -> Image:
         """ Saves the gif.
         :param path: The path that the GIF is gonna be saved in. """
 
@@ -81,6 +81,9 @@ class GIF:
             image.paste(self._frames[0])
         image.save(path, "GIF", save_all=True, append_images=self._frames,
                    duration=self._frame_duration, transparency=self._frame_transparency, loop=0, **kwargs)
+
+        return image
+
 
 if __name__ == '__main__':
 
