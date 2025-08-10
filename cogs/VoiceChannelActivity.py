@@ -90,7 +90,7 @@ class VoiceChannelActivity(*tool_cogs):
         # Updates the banner
         cog = self.client.get_cog("ImageManipulation")
         banner_to_bytes_arr = await cog.image_to_byte_array(banner)
-        await guild.edit(banner=BytesIO(banner_to_bytes_arr))
+        await guild.edit(banner=banner_to_bytes_arr)
 
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):
