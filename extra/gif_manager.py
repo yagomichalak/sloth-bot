@@ -5,7 +5,7 @@ from itertools import cycle
 from typing import Any, Dict, Tuple, Union
 
 # import.thirdparty
-from PIL import Image
+from PIL import Image, ImageFont, ImageDraw
 
 def defragment_gif(path: str, output: str) -> None:
     """ Defragments a gif into frames.
@@ -49,7 +49,7 @@ def remove_background(path: str, output: str) -> None:
 class GIF:
     """ A handler for GIF creations."""
 
-    def __init__(self, image: Image.Image, frame_duration: int) -> None:
+    def __init__(self, image: Image.Image, frame_duration: int, frame_transparency: int = 0) -> None:
         """ Class initializing method.
         :param image: The base image of the GIF.
         :param frame_duration: The duration of each frame. """
@@ -57,6 +57,7 @@ class GIF:
         self._base_image = image
         self._frames = []
         self._frame_duration = frame_duration
+        self._frame_transparency = frame_transparency
 
     def add_frame(self, image: Image.Image) -> None:
         if not isinstance(image, Image.Image):
@@ -69,38 +70,49 @@ class GIF:
 
         return self._base_image.copy()
 
-    def export(self, path: str, **kwargs) -> None:
+    def export(self, path: str, paste_mask: bool = True, **kwargs) -> Image:
         """ Saves the gif.
         :param path: The path that the GIF is gonna be saved in. """
 
         image = self._base_image.copy()
-        image.paste(self._frames[0], self._frames[0])
+        if paste_mask:
+            image.paste(self._frames[0], self._frames[0])
+        else:
+            image.paste(self._frames[0])
         image.save(path, "GIF", save_all=True, append_images=self._frames,
-                   duration=self._frame_duration, transparency=0, loop=0, **kwargs)
+                   duration=self._frame_duration, transparency=self._frame_transparency, loop=0, **kwargs)
+
+        return image
+
 
 if __name__ == '__main__':
 
     # Puts a single effect onto an image #
 
     # profile = Image.open('../profile.png').convert('RGBA')
-    # gif = GIF(image=profile, frame_duration=40)
+    # profile = Image.open('../media/effects/vc_member_counter/vc_member_counter_1.png').convert('RGBA')
+    # gif = GIF(image=profile, frame_duration=40, frame_transparency=100)
 
     # path = '../media/effects'
-    # effect = 'fidget_spinner'
+    # effect = 'vc_member_counter'
     # full_path = f"{path}/{effect}"
 
     # if os.path.isdir(full_path):
-    #     for i in range(len(glob.glob('../media/effects/fidget_spinner/*.png'))):
+    #     for i in range(len(glob.glob('../media/effects/vc_member_counter/*.png'))):
 
     #         base = gif.new_frame()
-    #         frame = Image.open(f"{full_path}/{effect}_{i+1}.png").resize((150, 150)).convert('RGBA')
+    #         frame = Image.open(f"{full_path}/{effect}_{i+1}.png").convert('RGBA')#.resize((150, 150))#.convert('RGBA')
+    #         font = ImageFont.truetype("../media/fonts/SF-Pro-Display-Bold.otf", 150)
+    #         draw = ImageDraw.Draw(frame)
+    #         vc_counter = 137
+    #         draw.text((620, 230), str(vc_counter), (255, 255, 255), font=font)
 
-    #         base.paste(frame, (218, 222), frame)
+    #         base.paste(frame, (0, 0))
     #         gif.add_frame(base)
 
     #     else:
 
-    #         gif.export('../temp_profile.gif')
+    #         gif.export('../tem_vc_member_counter.gif', paste_mask=False)
     #         print('Finished!')
 
     # =========================================================#

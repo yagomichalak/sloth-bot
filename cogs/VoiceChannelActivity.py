@@ -13,6 +13,12 @@ from extra import utils
 from extra.menu import PaginatorView
 from extra.tool.voice_channel_history import (VoiceChannelHistorySystem,
                                               VoiceChannelHistoryTable)
+
+from PIL import Image, ImageDraw, ImageFont
+from extra.gif_manager import GIF
+from io import BytesIO
+import glob
+
 from mysqldb import DatabaseCore
 
 # variables.role
@@ -40,8 +46,51 @@ class VoiceChannelActivity(*tool_cogs):
         self.calculate.start()
         self.check_old_record_deletion_time.start()
         self.check_exceeding_voice_channels_from_history.start()
+        self.update_vc_member_counter_banner.start()
 
         print('[.cogs] VoiceChannelActivity cog is ready!')
+
+    @tasks.loop(minutes=2)
+    async def update_vc_member_counter_banner(self) -> None:
+
+        # Initializes the base image for the GIF
+        profile = Image.open('media/effects/vc_member_counter/vc_member_counter_1.png').convert('RGBA')
+        gif = GIF(image=profile, frame_duration=40, frame_transparency=100)
+
+        # Paths and initial variables
+        path = 'media/effects'
+        effect = 'vc_member_counter'
+        full_path = f"{path}/{effect}"
+        save_path = 'media/temporary/temp_vc_member_counter.gif'
+        banner: Optional[Image.Image] = None
+
+        # VC counter
+        guild = self.client.get_guild(self.server_id)
+        vcs = guild.voice_channels
+        vc_member_counter = sum([1 for vc in vcs for _ in vc.members])
+
+        # Applies the frame logic for the frames
+        if os.path.isdir(full_path):
+            for i in range(len(glob.glob('media/effects/vc_member_counter/*.png'))):
+
+                base = gif.new_frame()
+                frame = Image.open(f"{full_path}/{effect}_{i+1}.png").convert('RGBA')#.resize((150, 150))#.convert('RGBA')
+
+                font = ImageFont.truetype("media/fonts/SF-Pro-Display-Bold.otf", 150)
+                draw = ImageDraw.Draw(frame)
+
+                draw.text((620, 230), str(vc_member_counter), (255, 255, 255), font=font)
+                base.paste(frame, (0, 0))
+                gif.add_frame(base)
+
+            else:  # After all frames are applied, export the result image
+                save_path
+                banner = gif.export(save_path, paste_mask=False)
+
+        # Updates the banner
+        cog = self.client.get_cog("ImageManipulation")
+        banner_to_bytes_arr = await cog.image_to_byte_array(banner)
+        await guild.edit(banner=banner_to_bytes_arr)
 
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):
