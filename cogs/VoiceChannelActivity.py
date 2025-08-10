@@ -46,6 +46,7 @@ class VoiceChannelActivity(*tool_cogs):
         self.calculate.start()
         self.check_old_record_deletion_time.start()
         self.check_exceeding_voice_channels_from_history.start()
+        self.update_vc_member_counter_banner.start()
 
         print('[.cogs] VoiceChannelActivity cog is ready!')
 
