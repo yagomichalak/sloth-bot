@@ -84,12 +84,13 @@ class VoiceChannelActivity(*tool_cogs):
 
             else:  # After all frames are applied, export the result image
                 save_path
-                banner = gif.export(save_path, paste_mask=False)
+                gif.export(save_path, paste_mask=False)
 
         # Updates the banner
-        cog = self.client.get_cog("ImageManipulation")
-        banner_to_bytes_arr = await cog.image_to_byte_array(banner)
-        await guild.edit(banner=BytesIO(banner_to_bytes_arr))
+        with open(save_path, "rb") as f:
+            banner_bytes = f.read()
+
+        await guild.edit(banner=banner_bytes)
 
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):
