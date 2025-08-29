@@ -79,8 +79,19 @@ class GIF:
             image.paste(self._frames[0], self._frames[0])
         else:
             image.paste(self._frames[0])
-        image.save(path, "GIF", save_all=True, append_images=self._frames,
-                   duration=self._frame_duration, transparency=self._frame_transparency, loop=0, **kwargs)
+
+        image.save(
+            path,
+            "GIF",
+            save_all=True,
+            append_images=self._frames,
+            duration=self._frame_duration,
+            transparency=self._frame_transparency,
+            loop=0,
+            disposal=2,
+            optimize=True, 
+            **kwargs
+        )
 
         return image
 
@@ -91,7 +102,7 @@ if __name__ == '__main__':
 
     # profile = Image.open('../profile.png').convert('RGBA')
     # profile = Image.open('../media/effects/vc_member_counter/vc_member_counter_1.png').convert('RGBA')
-    # gif = GIF(image=profile, frame_duration=40, frame_transparency=100)
+    # gif = GIF(image=profile, frame_duration=90, frame_transparency=100)
 
     # path = '../media/effects'
     # effect = 'vc_member_counter'

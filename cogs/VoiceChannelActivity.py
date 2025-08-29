@@ -55,7 +55,7 @@ class VoiceChannelActivity(*tool_cogs):
 
         # Initializes the base image for the GIF
         profile = Image.open('media/effects/vc_member_counter/vc_member_counter_1.png').convert('RGBA')
-        gif = GIF(image=profile, frame_duration=40, frame_transparency=100)
+        gif = GIF(image=profile, frame_duration=90, frame_transparency=100)
 
         # Paths and initial variables
         path = 'media/effects'
