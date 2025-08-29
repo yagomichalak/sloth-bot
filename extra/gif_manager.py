@@ -88,7 +88,6 @@ class GIF:
             duration=self._frame_duration,
             transparency=self._frame_transparency,
             loop=0,
-            disposal=2,
             optimize=True, 
             **kwargs
         )
