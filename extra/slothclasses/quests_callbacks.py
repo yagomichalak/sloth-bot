@@ -78,7 +78,7 @@ async def quest_five_callback(client: commands.Bot, user_id: int, quest: Dict[st
     guild = client.get_guild(server_id)
     member = guild.get_member(user_id)
     cog = client.get_cog('SlothClass')
-    money = 100
+    money = 1000
 
     # Checks whether the int content reached its expected mark, else increments it
     quest = await cog.get_skill_action_by_user_id_and_skill_type(user_id=user_id, skill_type="quest")
@@ -102,7 +102,7 @@ async def quest_six_callback(client: commands.Bot, user_id: int, quest: Dict[str
     :param quest: The quest information and data.
     :param kwargs: Additional data. """
 
-    await money_callback(client, user_id, 'Six', 100, quest)
+    await money_callback(client, user_id, 'Six', 1000, quest)
 
 async def quest_seven_callback(client: commands.Bot, user_id: int, quest: Dict[str, Union[str, int]], **kwargs) -> None:
     """ Callback for the quest six.
