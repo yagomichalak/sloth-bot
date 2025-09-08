@@ -694,10 +694,10 @@ class Moderation(*moderation_cogs):
             return await ctx.send("**You cannot do that here!**")
 
         embed = discord.Embed(
-        title="Confirmation",
-        description="Clear the whole channel, **are you sure?**",
-        color=discord.Color.green(),
-        timestamp=ctx.message.created_at)
+            title="Confirmation",
+            description="Clear the whole channel, **are you sure?**",
+            color=discord.Color.green(),
+            timestamp=ctx.message.created_at)
         msg = await ctx.send(embed=embed)
 
         await msg.add_reaction('✅')
@@ -771,17 +771,14 @@ class Moderation(*moderation_cogs):
 
         await self._warn_callback(ctx=ctx, message=message, warn_type="warn")
 
-    # not removed from the code, just in case we want to use it in the future
-    # and also, we need the heavy warn type to exist because of the previous heavy warn infractions
-    #
-    # @commands.command(aliases=["hwarn", "hwarnado", "hwrn", "hw"])
-    # @utils.is_allowed(allowed_roles, throw_exc=True)
-    # async def heavy_warn(self, ctx, *, message: Optional[str] = None) -> None:
-    #     """(MOD) Warns one or more members.
-    #     :param member: The @ or the ID of one or more users to warn.
-    #     :param reason: The reason for warning one or all users. (Optional)"""
-    #     
-    #     await self._warn_callback(ctx=ctx, message=message, warn_type="hwarn")
+    @commands.command(aliases=["hwarn", "hwarnado", "hwrn", "hw"])
+    @utils.is_allowed([staff_manager_role_id], throw_exc=True)
+    async def heavy_warn(self, ctx, *, message: Optional[str] = None) -> None:
+        """(MOD) Heavy-Warns one or more members.
+        :param member: The @ or the ID of one or more users to warn.
+        :param reason: The reason for warning one or all users. (Optional)"""
+        
+        await self._warn_callback(ctx=ctx, message=message, warn_type="hwarn")
 
     async def _warn_callback(self, ctx, *, message: Optional[str] = None, warn_type: str = "warn") -> None:
         """ Callback for the warn commands.
