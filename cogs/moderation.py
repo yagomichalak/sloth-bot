@@ -115,16 +115,31 @@ class Moderation(*moderation_cogs):
             if not message.webhook_id: return
             else:
                 return await self.check_unban_infractions(message)
-        
-        # Checks if the message is a spam/scam message
+
         message_content_lower = message.content.lower()
         scam_detected = False
+
+        # check for scam words in text
         for word in scamwords:
             word_lower = word.lower()
-            # Use regex for whole word or exact match
             if re.search(rf'\b{re.escape(word_lower)}\b', message_content_lower):
                 scam_detected = True
                 break
+
+        # check for scam image patterns
+        if message.attachments:
+            image_names = [a.filename.lower() for a in message.attachments if a.filename]
+            if image_names:
+                # "1.png, 2.png, 3.png, 4.png" or "1.jpg, 2.jpg, 3.jpg, 4.jpg"
+                png_pattern = ["1.png", "2.png", "3.png", "4.png"]
+                jpg_pattern = ["1.jpg", "2.jpg", "3.jpg", "4.jpg"]
+                if all(name in image_names for name in png_pattern) or all(name in image_names for name in jpg_pattern):
+                    scam_detected = True
+
+                # "image.png x4, @everyone" or "image.jpg x4, @everyone"
+                if ((image_names.count("image.png") >= 4 or image_names.count("image.jpg") >= 4) and "@everyone" in message_content_lower):
+                    scam_detected = True
+
         if scam_detected:
             await self.handle_scam(message)
             await message.delete()
