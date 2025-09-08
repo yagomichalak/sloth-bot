@@ -1172,6 +1172,16 @@ class Tools(commands.Cog):
 			await ctx.respond(f"**For some reason I couldn't move you to there, {ctx.author.mention}!**")
 		else:
 			await ctx.respond(f"**You got moved to {channel.mention}!**")
+   
+	@commands.command()
+	@commands.cooldown(1, 60, commands.BucketType.user)
+	async def admin(self, ctx) -> None:
+		""" Pings the admin role, as it's not a pingable role unless it's done by other admins or the bot itself. """
+		
+		admin_role = discord.utils.get(ctx.guild.roles, id=admin_role_id)
+		if not admin_role: return await ctx.send("**Admin role not found!**", delete_after=6)
+
+		await ctx.send(f"{ctx.author.mention} pinged {admin_role.mention}!")
 
 	@commands.command(hidden=False)
 	@commands.has_permissions(administrator=True)
