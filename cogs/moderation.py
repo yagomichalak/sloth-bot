@@ -130,14 +130,14 @@ class Moderation(*moderation_cogs):
         if message.attachments:
             image_names = [a.filename.lower() for a in message.attachments if a.filename]
             if image_names:
+                # current known image scam patterns:
                 # "1.png, 2.png, 3.png, 4.png" or "1.jpg, 2.jpg, 3.jpg, 4.jpg"
+                # "image.png x4, @everyone" or "image.jpg x4, @everyone"
                 png_pattern = ["1.png", "2.png", "3.png", "4.png"]
                 jpg_pattern = ["1.jpg", "2.jpg", "3.jpg", "4.jpg"]
                 if all(name in image_names for name in png_pattern) or all(name in image_names for name in jpg_pattern):
                     scam_detected = True
-
-                # "image.png x4, @everyone" or "image.jpg x4, @everyone"
-                if ((image_names.count("image.png") >= 4 or image_names.count("image.jpg") >= 4) and "@everyone" in message_content_lower):
+                elif ((image_names.count("image.png") >= 4 or image_names.count("image.jpg") >= 4) and "@everyone" in message_content_lower):
                     scam_detected = True
 
         if scam_detected:
