@@ -115,16 +115,31 @@ class Moderation(*moderation_cogs):
             if not message.webhook_id: return
             else:
                 return await self.check_unban_infractions(message)
-        
-        # Checks if the message is a spam/scam message
+
         message_content_lower = message.content.lower()
         scam_detected = False
+
+        # check for scam words in text
         for word in scamwords:
             word_lower = word.lower()
-            # Use regex for whole word or exact match
             if re.search(rf'\b{re.escape(word_lower)}\b', message_content_lower):
                 scam_detected = True
                 break
+
+        # check for scam image patterns
+        if message.attachments:
+            image_names = [a.filename.lower() for a in message.attachments if a.filename]
+            if image_names:
+                # current known image scam patterns:
+                # "1.png, 2.png, 3.png, 4.png" or "1.jpg, 2.jpg, 3.jpg, 4.jpg"
+                # "image.png x4, @everyone" or "image.jpg x4, @everyone"
+                png_pattern = ["1.png", "2.png", "3.png", "4.png"]
+                jpg_pattern = ["1.jpg", "2.jpg", "3.jpg", "4.jpg"]
+                if all(name in image_names for name in png_pattern) or all(name in image_names for name in jpg_pattern):
+                    scam_detected = True
+                elif ((image_names.count("image.png") >= 4 or image_names.count("image.jpg") >= 4) and "@everyone" in message_content_lower):
+                    scam_detected = True
+
         if scam_detected:
             await self.handle_scam(message)
             await message.delete()
@@ -640,10 +655,10 @@ class Moderation(*moderation_cogs):
 
 
     # Purge command
-    @commands.command()
+    @commands.command(aliases=["p"])
     @commands.has_permissions(manage_messages=True)
     async def purge(self, ctx, *, message : str = None):
-        """ (MOD) Purges messages.
+        """ (MOD) Purges messages in the used channel.
         :param member: The member from whom to purge the messages. (Optional)
         :param amount: The amount of messages to purge. """
 
@@ -675,8 +690,7 @@ class Moderation(*moderation_cogs):
                 await msgs.pop(0).delete()
                 deleted += 1
 
-            await ctx.send(f"**`{deleted}` messages deleted from `{' and '.join(member.name for member in members)}`**",
-                delete_after=5)
+            await ctx.send(f"**`{deleted}` messages deleted from `{' and '.join(member.name for member in members)}`**", delete_after=6)
 
         else:
             await ctx.channel.purge(limit=int(amount))
@@ -695,10 +709,10 @@ class Moderation(*moderation_cogs):
             return await ctx.send("**You cannot do that here!**")
 
         embed = discord.Embed(
-        title="Confirmation",
-        description="Clear the whole channel, **are you sure?**",
-        color=discord.Color.green(),
-        timestamp=ctx.message.created_at)
+            title="Confirmation",
+            description="Clear the whole channel, **are you sure?**",
+            color=discord.Color.green(),
+            timestamp=ctx.message.created_at)
         msg = await ctx.send(embed=embed)
 
         await msg.add_reaction('✅')
@@ -772,17 +786,14 @@ class Moderation(*moderation_cogs):
 
         await self._warn_callback(ctx=ctx, message=message, warn_type="warn")
 
-    # not removed from the code, just in case we want to use it in the future
-    # and also, we need the heavy warn type to exist because of the previous heavy warn infractions
-    #
-    # @commands.command(aliases=["hwarn", "hwarnado", "hwrn", "hw"])
-    # @utils.is_allowed(allowed_roles, throw_exc=True)
-    # async def heavy_warn(self, ctx, *, message: Optional[str] = None) -> None:
-    #     """(MOD) Warns one or more members.
-    #     :param member: The @ or the ID of one or more users to warn.
-    #     :param reason: The reason for warning one or all users. (Optional)"""
-    #     
-    #     await self._warn_callback(ctx=ctx, message=message, warn_type="hwarn")
+    @commands.command(aliases=["hwarn", "hwarnado", "hwrn", "hw"])
+    @utils.is_allowed([staff_manager_role_id], throw_exc=True)
+    async def heavy_warn(self, ctx, *, message: Optional[str] = None) -> None:
+        """(MOD) Heavy-Warns one or more members.
+        :param member: The @ or the ID of one or more users to warn.
+        :param reason: The reason for warning one or all users. (Optional)"""
+        
+        await self._warn_callback(ctx=ctx, message=message, warn_type="hwarn")
 
     async def _warn_callback(self, ctx, *, message: Optional[str] = None, warn_type: str = "warn") -> None:
         """ Callback for the warn commands.
@@ -2685,6 +2696,7 @@ We appreciate your understanding and look forward to hearing from you. """, embe
         author = ctx.author
         icon = ctx.author.display_avatar
 
+        is_admin = ctx.author.guild_permissions.administrator
         is_staff_manager = await utils.is_allowed([staff_manager_role_id]).predicate(ctx)
 
         await ctx.message.delete()
@@ -2694,10 +2706,9 @@ We appreciate your understanding and look forward to hearing from you. """, embe
 
         for infr_id in infrs_id:
             if user_infractions := await self.get_user_infraction_by_infraction_id(infr_id):
-                perms = ctx.channel.permissions_for(ctx.author)
                 perpetrator_member = discord.utils.get(ctx.guild.members, id=user_infractions[0][5])
                 
-                if perpetrator_member == ctx.author or (is_staff_manager or perms.administrator):
+                if perpetrator_member == ctx.author or (is_staff_manager or is_admin):
                     # Moderation log embed
                     member = discord.utils.get(ctx.guild.members, id=user_infractions[0][0])
                     if not perms.administrator:
@@ -2707,16 +2718,31 @@ We appreciate your understanding and look forward to hearing from you. """, embe
                         reason = user_infractions[0][2]
                         perpetrator = perpetrator_member.name if perpetrator_member else "Unknown"
                         
+                        # fix for not being able to remove infractions of users that left the server
+                        if member:
+                            user_name, user_id, user_icon = member.display_name, member.id, member.display_avatar
+                        else:
+                            left_user = await self.client.fetch_user(user_infractions[0][0])
+                            user_name, user_id, user_icon = left_user.name, left_user.id, left_user.display_avatar
+
                         embed = discord.Embed(title=f'__**Removed Infraction**__ ({infr_type})', colour=discord.Colour.dark_red(),
                                             timestamp=ctx.message.created_at)
-                        embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nID: {member.id}```',
+                        embed.add_field(name='User info:', value=f'```Name: {user_name}\nID: {user_id}```',
                                         inline=False)
                         embed.add_field(name='Infraction info:', value=f"> #{infr_id}\n> -# **{infr_date}**\n> -# by {perpetrator}\n> {reason}")
-                        embed.set_author(name=member)
-                        embed.set_thumbnail(url=member.display_avatar)
+                        embed.set_author(name=user_name)
+                        embed.set_thumbnail(url=user_icon)
                         embed.set_footer(text=f"Removed by {author}", icon_url=icon)
                         await moderation_log.send(embed=embed)
-                    # Infraction removal
+                        
+                        try:
+                            if user_infractions[0][1] != "watchlist":
+                                embed.set_footer() # clears the footer so it doesn't show the staff member in the DM
+                                await member.send(embed=embed)
+                        except Exception:
+                            pass
+                        
+                   # Infraction removal
                     await self.remove_user_infraction(int(infr_id))
                     await ctx.send(f"**Removed infraction with ID `{infr_id}` for {member}**")
                 else:
@@ -2796,6 +2822,7 @@ We appreciate your understanding and look forward to hearing from you. """, embe
         :param reason: The updated reason of the infraction(s)."""
         
         is_admin = ctx.author.guild_permissions.administrator
+        is_staff_manager = await utils.is_allowed([staff_manager_role_id]).predicate(ctx)
         
         # Remove numbers with less than 5 digits
         string_ids = [str(int_id) for int_id in infractions_ids]
@@ -2809,49 +2836,53 @@ We appreciate your understanding and look forward to hearing from you. """, embe
         if not infractions_ids:
             return await ctx.send("**Please, inform an infraction id!**", delete_after=3)
 
-        if not is_admin and (reason is not None and len(reason) > 960):
+        if (not is_admin and not is_staff_manager) and (reason is not None and len(reason) > 960):
             return await ctx.send(f"**Please, inform a reason that is lower than or equal to 960 characters, {ctx.author.mention}!**", delete_after=3)
-        elif not is_admin and (reason is None or len(reason) < 16):
+        elif (not is_admin and not is_staff_manager) and (reason is None or len(reason) < 16):
             return await ctx.send(f"**Please, inform a reason that is higher than 15 characters, {ctx.author.mention}!**", delete_after=3)
 
         for infr_id in infractions_ids:
             if user_infraction := await self.get_user_infraction_by_infraction_id(infr_id):
+                perpetrator_member = discord.utils.get(ctx.guild.members, id=user_infraction[0][5])
 
-                # Get user by id
-                member = await self.client.fetch_user(user_infraction[0][0])
+                if perpetrator_member == ctx.author or (is_staff_manager or is_admin):
+                    # get user by id
+                    member = await self.client.fetch_user(user_infraction[0][0])
 
-                # General embed
-                general_embed = discord.Embed(description=f'**New Reason:** {reason}', color=discord.Color.lighter_grey())
-                general_embed.set_author(name=f"{member}'s {user_infraction[0][1].capitalize()} reason has been edited", icon_url=member.display_avatar)
-                general_embed.set_footer(text=f"Edited by {ctx.author}", icon_url=ctx.author.display_avatar)
+                    # general embed
+                    general_embed = discord.Embed(description=f'**New Reason:** {reason}', color=discord.Color.lighter_grey())
+                    general_embed.set_author(name=f"{member}'s {user_infraction[0][1].capitalize()} reason has been edited", icon_url=member.display_avatar)
+                    general_embed.set_footer(text=f"Edited by {ctx.author}", icon_url=ctx.author.display_avatar)
 
-                await ctx.send(embed=general_embed)
+                    await ctx.send(embed=general_embed)
 
-                # Moderation log embed
-                moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
-                current_ts = await utils.get_timestamp()
-                infr_date = datetime.fromtimestamp(current_ts).strftime('%Y/%m/%d at %H:%M')
-                perpetrator = ctx.author.name if ctx.author else "Unknown"
+                    # moderation log embed
+                    moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
+                    current_ts = await utils.get_timestamp()
+                    infr_date = datetime.fromtimestamp(current_ts).strftime('%Y/%m/%d at %H:%M')
+                    perpetrator = ctx.author.name if ctx.author else "Unknown"
 
-                embed = discord.Embed(title=f'__**{user_infraction[0][1].lower()} Edited**__', colour=discord.Colour.lighter_grey(),
-                                    timestamp=ctx.message.created_at)
+                    embed = discord.Embed(title=f'__**{user_infraction[0][1].lower()} Edited**__', colour=discord.Colour.lighter_grey(),
+                                        timestamp=ctx.message.created_at)
 
-                embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nId: {member.id}```',
-                                inline=False)
-                embed.add_field(name='New reason:', value=f"> -# **{infr_date}**\n> -# by {perpetrator}\n> {reason}")
-                embed.set_author(name=member)
-                embed.set_thumbnail(url=member.display_avatar)
-                embed.set_footer(text=f"Edited by {ctx.author}", icon_url=ctx.author.display_avatar)
-                await moderation_log.send(embed=embed)
+                    embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nId: {member.id}```',
+                                    inline=False)
+                    embed.add_field(name='New reason:', value=f"> -# **{infr_date}**\n> -# by {perpetrator}\n> {reason}")
+                    embed.set_author(name=member)
+                    embed.set_thumbnail(url=member.display_avatar)
+                    embed.set_footer(text=f"Edited by {ctx.author}", icon_url=ctx.author.display_avatar)
+                    await moderation_log.send(embed=embed)
 
-                try:
-                    if user_infraction[0][1] != "watchlist":
-                        general_embed.set_footer() # Clears the footer so it doesn't show the staff member in the DM
-                        await member.send(embed=general_embed)
-                except Exception:
-                    pass
+                    try:
+                        if user_infraction[0][1] != "watchlist":
+                            general_embed.set_footer() # clears the footer so it doesn't show the staff member in the DM
+                            await member.send(embed=general_embed)
+                    except Exception:
+                        pass
 
-                await self.edit_user_infractions(infr_id, reason)
+                    await self.edit_user_infractions(infr_id, reason)
+                else:
+                    await ctx.send(f"**You can only remove infractions issued by yourself!**")
 
             else:
                 await ctx.send(f"**Infraction `{infr_id}` not found**")

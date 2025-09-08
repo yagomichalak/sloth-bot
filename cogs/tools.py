@@ -1001,6 +1001,12 @@ class Tools(commands.Cog):
 			ctx.command.reset_cooldown(ctx)
 			return await ctx.send(f"**You're not in a VC!**")
 
+		# check if the bot is already connected to a voice channel
+		if ctx.voice_client:
+			if ctx.voice_client.channel != vc: await ctx.send(f"**I'm currently connected to {ctx.voice_client.channel.mention}, {author.mention}!**")
+		else:
+			await vc.connect()
+
 		embed = discord.Embed(
 			title="__Soundboard__",
 			description="Click any of the buttons below to play different sounds in the Voice Channel.",
@@ -1011,8 +1017,13 @@ class Tools(commands.Cog):
 		embed.set_footer(text=f"Started by {author}", icon_url=author.display_avatar)
 		view: discord.ui.View = BasicUserCheckView(author)
 		select: discord.ui.Select = SoundBoardSelect(ctx, self.client, sb_view=SoundBoardView, settings=[
-			['General', 'sounds'], ['General 2', 'sounds2'], ['General 3', 'sounds3'], ['Cosmos', 'cosmos'],
-			['DNK', 'dnk'], ['Other', 'other']
+			# ['General', 'sounds'],
+   			# ['General 2', 'sounds2'],
+      		# ['General 3', 'sounds3'],
+        	['Cosmos', 'cosmos'],
+			['DNK', 'dnk'],
+			['Friendos', 'friendos'],
+   			['Other', 'other']
 		])
 		view.add_item(select)
 		await ctx.send(embed=embed, view=view)
@@ -1161,6 +1172,16 @@ class Tools(commands.Cog):
 			await ctx.respond(f"**For some reason I couldn't move you to there, {ctx.author.mention}!**")
 		else:
 			await ctx.respond(f"**You got moved to {channel.mention}!**")
+   
+	@commands.command()
+	@commands.cooldown(1, 60, commands.BucketType.user)
+	async def admin(self, ctx) -> None:
+		""" Pings the admin role, as it's not a pingable role unless it's done by other admins or the bot itself. """
+		
+		admin_role = discord.utils.get(ctx.guild.roles, id=admin_role_id)
+		if not admin_role: return await ctx.send("**Admin role not found!**", delete_after=6)
+
+		await ctx.send(f"{ctx.author.mention} pinged {admin_role.mention}!")
 
 	@commands.command(hidden=False)
 	@commands.has_permissions(administrator=True)

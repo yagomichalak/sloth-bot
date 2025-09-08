@@ -44,7 +44,7 @@ class ApplicationsTable(commands.Cog):
         'moderator': {
             "app": moderator_app_channel_id, "interview": moderator_interview_vc_id, "parent": moderator_parent_channel_id,
             "message": "**Moderator Application**\nOur staff has evaluated your Moderator application and has come to a conclusion, and due to internal and unspecified reasons we are **declining** it. Thank you anyways",
-            "pings": [{"id": owner_role_id, "role": True}, {"id": admin_role_id, "role": True}, {"id": staff_manager_role_id, "role": True}]},
+            "pings": [{"id": staff_manager_role_id, "role": True}]},
         'event_host': {
             "app": event_host_app_channel_id,  "interview": event_host_interview_vc_id, "parent": event_host_parent_channel_id, 
             "message": "**Event Host Application**\nOur staff has evaluated your Event Host application and has come to the conclusion that we are not in need of this event.",

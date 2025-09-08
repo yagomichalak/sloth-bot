@@ -3,6 +3,7 @@ import asyncio
 import os
 import subprocess
 from typing import List, Optional
+from datetime import datetime
 
 # import.thirdparty
 import aiohttp
@@ -35,6 +36,7 @@ staff_vc_id = int(os.getenv('STAFF_VC_ID', 123))
 reportsupport_channel_id = int(os.getenv('REPORT_CHANNEL_ID', 123))
 mod_log_id = int(os.getenv('MOD_LOG_CHANNEL_ID', 123))
 case_log_id = int(os.getenv('CASE_LOG_CHANNEL_ID', 123))
+staff_case_log_id = int(os.getenv('STAFF_CASE_LOG_CHANNEL_ID', 123))
 ban_appeals_channel_id: int = os.getenv("BAN_APPEALS_CHANNEL_ID", 123)
 
 # variables.role #
@@ -59,6 +61,7 @@ class ReportSupport(*report_support_classes):
         self.client = client
         self.db = DatabaseCore()
         self.owner_role_id: int = int(os.getenv('OWNER_ROLE_ID', 123))
+        self.staff_manager_role_id: int = int(os.getenv('STAFF_MANAGER_ROLE_ID', 123))
         self.mayu_id: int = int(os.getenv('MAYU_ID', 123))
         self.cache = {}
 
@@ -86,23 +89,10 @@ class ReportSupport(*report_support_classes):
 
             if channel:
                 try:
-                    # Moderation log embed
-                    moderation_log = discord.utils.get(guild.channels, id=mod_log_id)
-                    case_name = channel.name
-                    case_number = case_name.split('-')[-1] if case_name.split('-')[-1].isdigit() else "N/A"  # Extract the case number if there is one
-                    
-                    embed = discord.Embed(
-                        title='__**Case Closed (Timeout)**__',
-                        color=discord.Color.red(),
-                        timestamp=discord.utils.utcnow()
-                    )
-                    embed.add_field(name="Case Number", value=f"#{case_number}")
-                    embed.set_footer(text=f"Closed automatically by {self.client.user.name}", icon_url=self.client.user.display_avatar)
-                    await moderation_log.send(embed=embed)
-                    
-                    await channel.delete()
+                    await self.close_and_log_case_channel(guild, channel, self.client.user, True)
                 except Exception as e:
                     print(f"Failed at deleting the {channel}: {str(e)}")
+                    return
             await self.remove_user_open_channel(inactive_case[0])
 
     @commands.Cog.listener()
@@ -282,18 +272,20 @@ class ReportSupport(*report_support_classes):
 
             break
 
-        # Sends verified request to admins
+        staff_manager = discord.utils.get(guild.roles, id=staff_manager_role_id)
+        verify_req_channel = discord.utils.get(guild.text_channels, id=self.verify_reqs_channel_id)
+
+        # embed
         verify_embed = discord.Embed(
             title=f"__Verification Request__",
             description=f"{member} ({member.id})",
             color=member.color,
             timestamp=interaction.message.created_at
         )
-
         verify_embed.set_thumbnail(url=member.display_avatar)
         verify_embed.set_image(url=attachments[0])
-        verify_req_channel_id = discord.utils.get(guild.text_channels, id=self.verify_reqs_channel_id)
-        verify_msg = await verify_req_channel_id.send(content=member.mention, embed=verify_embed)
+
+        verify_msg = await verify_req_channel.send(content=f"{staff_manager.mention} {member.mention}", embed=verify_embed)
         await verify_msg.add_reaction('✅')
         await verify_msg.add_reaction('❌')
         # Saves
@@ -592,8 +584,6 @@ class ReportSupport(*report_support_classes):
             return await ctx.send(f"**What do you think that you are doing? You cannot delete this channel, {member.mention}!**")
             
         channel = discord.utils.get(ctx.guild.text_channels, id=user_channel[0][1])
-        case_name = channel.name
-        case_number = case_name.split('-')[-1] if case_name.split('-')[-1].isdigit() else "N/A"  # Extract the case number if there is one
 
         embed = discord.Embed(title="Confirmation",
             description="Are you sure that you want to delete this channel?",
@@ -618,151 +608,143 @@ class ReportSupport(*report_support_classes):
             if str(reaction.emoji) == '✅':
                 embed.description = f"**Channel {channel.mention} is being deleted...**"
                 await confirmation.edit(content=member.mention, embed=embed)
-                await asyncio.sleep(3)
+                await asyncio.sleep(1)
 
-                # log the case details in the case-log room
-                case_log_channel = discord.utils.get(ctx.guild.channels, id=case_log_id)
-                if not case_log_channel:
-                    return await ctx.send("**Case-log channel not found! Please contact an admin.**")
-
-                # if this is a staff case, skip logging for privacy
-                if "staff-case" in channel.name:
-                    await channel.delete()
-                    await self.remove_user_open_channel(user_channel[0][0])
-
-                    # send to case log
-                    embed = discord.Embed(
-                        title='Staff Case Closed',
-                        description=(
-                            f"**Case Number:** #{case_number}\n"
-                            f"**Involved Users:** *(Not logged for privacy)*\n\n"
-                            f"**Closed By:** {member.mention}"
-                        ),
-                        color=discord.Color.red(),
-                        timestamp=ctx.message.created_at
-                    )
-                    await case_log_channel.send(embed=embed)
-
-                    # send to moderation log
-                    moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
-                    embed = discord.Embed(
-                        title='__**Case Closed**__',
-                        color=discord.Color.red(),
-                        timestamp=ctx.message.created_at
-                    )
-                    embed.add_field(name="Case Number", value=f"#{case_number}")
-                    embed.set_footer(text=f"Closed by {member}", icon_url=member.display_avatar)
-                    await moderation_log.send(embed=embed)
-                    return
-
-                # gather the list of users who sent messages in the case channel
-                user_ids = set()
-                user_mentions = []
-                async for message in channel.history(limit=None, oldest_first=True):
-                    if message.author.id not in user_ids and not message.author.bot:
-                        user_ids.add(message.author.id)
-                        user_mentions.append(message.author.mention)
-                users_list = ", ".join(user_mentions) if user_mentions else "None"
-                user_ids.clear()
-
-                # send the case info embed to the case log channel
-                log_embed = discord.Embed(
-                    title="Case Closed",
-                    description=(
-                        f"**Case Number:** #{case_number}\n"
-                        f"**Involved Users:** {users_list}\n\n"
-                        f"**Closed By:** {member.mention}"
-                    ),
-                    color=discord.Color.red(),
-                    timestamp=ctx.message.created_at
-                )
-                log_message = await case_log_channel.send(embed=log_embed)
-
-                # create the thread
-                if case_number == "N/A":
-                    thread = await log_message.create_thread(name=f"help-{ctx.channel.id}-log")
-                else:
-                    thread = await log_message.create_thread(name=f"case-{case_number}-log")
-
-                # create a webhook in the case-log channel
-                webhook = await case_log_channel.create_webhook(name=".case.logger")
-
-                # collect all messages from the case channel, sort them, then forward to the thread using the webhook
-                messages = []
-                async for message in channel.history(limit=None, oldest_first=True):
-                    messages.append(message)
-
-                for message in messages:
-                    if message.content or message.attachments or message.embeds:
-                        user_name = message.author.display_name
-                        user_avatar = message.author.display_avatar.url
-
-                        # disable the pings
-                        safe_content = message.content
-                        if message.mentions:
-                            for user in message.mentions:
-                                safe_content = safe_content.replace(f"<@{user.id}>", f"`@{user.display_name}`")
-                                safe_content = safe_content.replace(f"<@!{user.id}>", f"`@{user.display_name}`")
-                        if message.role_mentions:
-                            for role in message.role_mentions:
-                                safe_content = safe_content.replace(f"<@&{role.id}>", f"`@{role.name}`")
-                        if message.channel_mentions:
-                            for ch in message.channel_mentions:
-                                safe_content = safe_content.replace(f"<#{ch.id}>", f"`#{ch.name}`")
-                        # remove @everyone and @here
-                        safe_content = safe_content.replace("@everyone", "@\u200beveryone").replace("@here", "@\u200bhere")
-
-                        # forward the messages (content, embeds and attachments)
-                        if message.content or message.embeds:
-                            if message.embeds:
-                                for i in range(0, len(message.embeds), 10):
-                                    await webhook.send(
-                                        content=safe_content if message.content and i == 0 else None,
-                                        username=user_name,
-                                        avatar_url=user_avatar,
-                                        embeds=message.embeds[i:i+10],
-                                        thread=thread
-                                    )
-                            else:
-                                await webhook.send(
-                                    content=safe_content if message.content else None,
-                                    username=user_name,
-                                    avatar_url=user_avatar,
-                                    thread=thread
-                                )
-
-                        if message.attachments:
-                            files = [await attachment.to_file() for attachment in message.attachments]
-                            await webhook.send(
-                                username=user_name,
-                                avatar_url=user_avatar,
-                                files=files,
-                                thread=thread
-                            )
-
-                # close/archive the thread after forwarding all messages
-                await thread.edit(archived=True, locked=True)
-
-                # delete the webhook after use
-                await webhook.delete()
-
-                # delete the case channel
-                await channel.delete()
+                await self.close_and_log_case_channel(ctx.guild, channel, member, False)
                 await self.remove_user_open_channel(user_channel[0][0])
-
-                # moderation log embed
-                moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
-                embed = discord.Embed(
-                    title='__**Case Closed**__',
-                    color=discord.Color.red(),
-                    timestamp=ctx.message.created_at
-                )
-                embed.add_field(name="Case Number", value=f"#{case_number}")
-                embed.set_footer(text=f"Closed by {member}", icon_url=member.display_avatar)
-                await moderation_log.send(embed=embed)
             else:
                 embed.description = "Not deleting it!"
                 await confirmation.edit(content='', embed=embed)
+
+    async def close_and_log_case_channel(self, guild: discord.Guild, channel: discord.TextChannel, closed_by: discord.Member, is_timedout: bool) -> None:
+        """ Closes and logs a case channel.
+        :param guild: The guild in which the channel exists.
+        :param channel: The channel to close.
+        :param closed_by: The member who closed the channel. """
+        
+        case_name = channel.name
+        case_number = case_name.split('-')[-1] if case_name.split('-')[-1].isdigit() else "N/A" # extract the case number if there is one
+        
+        # log the case details in the case-log room
+        case_log_channel = discord.utils.get(guild.channels, id=case_log_id)
+        staff_case_log_channel = discord.utils.get(guild.channels, id=staff_case_log_id)
+        if not case_log_channel and not staff_case_log_channel:
+            return await channel.send("**Case-log channel not found! Please contact an admin.**")
+        
+        # gather the list of users who sent messages in the case channel
+        user_ids = set()
+        user_mentions = []
+        async for message in channel.history(limit=None, oldest_first=True):
+            if message.author.id not in user_ids and not message.author.bot:
+                user_ids.add(message.author.id)
+                user_mentions.append(message.author.mention)
+        users_list = ", ".join(user_mentions) if user_mentions else "None"
+        user_ids.clear()
+        
+        # send the case info embed to the case log channel
+        current_ts = await utils.get_time_now()
+        timeout_message = " (Timeout)" if is_timedout else ""
+        log_embed = discord.Embed(
+            title=f"Case Closed{timeout_message}" if not "staff-case" in case_name else f"Staff Case Closed{timeout_message}",
+            description=(
+                f"**Case Number:** #{case_number}\n"
+                f"**Involved Users:** {users_list}\n\n"
+                f"**Closed By:** {closed_by.mention}"
+            ),
+            color=discord.Color.red(),
+            timestamp=current_ts
+        )
+        if not "staff-case" in case_name:
+            log_message = await case_log_channel.send(embed=log_embed)
+        else:
+            log_message = await staff_case_log_channel.send(embed=log_embed)
+        
+        # create the thread
+        if "staff-case" in case_name:
+            thread = await log_message.create_thread(name=f"staff-case-{case_number}-log")
+        elif case_number == "N/A":
+            thread = await log_message.create_thread(name=f"help-{channel.id}-log")
+        else:
+            thread = await log_message.create_thread(name=f"case-{case_number}-log")
+
+        # create a webhook in the case-log channel
+        if "staff-case" in case_name:
+            webhook = await staff_case_log_channel.create_webhook(name=".staff.case.logger")
+        else:
+            webhook = await case_log_channel.create_webhook(name=".case.logger")
+        
+        # collect all messages from the case channel, sort them, then forward to the thread using the webhook
+        messages = []
+        async for message in channel.history(limit=None, oldest_first=True):
+            messages.append(message)
+
+        for message in messages:
+            if message.content or message.attachments or message.embeds:
+                user_name = message.author.display_name
+                user_avatar = message.author.display_avatar.url
+
+                # disable the pings
+                safe_content = message.content
+                if message.mentions:
+                    for user in message.mentions:
+                        safe_content = safe_content.replace(f"<@{user.id}>", f"`@{user.display_name}`")
+                        safe_content = safe_content.replace(f"<@!{user.id}>", f"`@{user.display_name}`")
+                if message.role_mentions:
+                    for role in message.role_mentions:
+                        safe_content = safe_content.replace(f"<@&{role.id}>", f"`@{role.name}`")
+                if message.channel_mentions:
+                    for ch in message.channel_mentions:
+                        safe_content = safe_content.replace(f"<#{ch.id}>", f"`#{ch.name}`")
+                # remove @everyone and @here
+                safe_content = safe_content.replace("@everyone", "@\u200beveryone").replace("@here", "@\u200bhere")
+
+                # forward the messages (content, embeds and attachments)
+                if message.content or message.embeds:
+                    if message.embeds:
+                        for i in range(0, len(message.embeds), 10):
+                            await webhook.send(
+                                content=safe_content if message.content and i == 0 else None,
+                                username=user_name,
+                                avatar_url=user_avatar,
+                                embeds=message.embeds[i:i+10],
+                                thread=thread
+                            )
+                    else:
+                        await webhook.send(
+                            content=safe_content if message.content else None,
+                            username=user_name,
+                            avatar_url=user_avatar,
+                            thread=thread
+                        )
+
+                if message.attachments:
+                    files = [await attachment.to_file() for attachment in message.attachments]
+                    await webhook.send(
+                        username=user_name,
+                        avatar_url=user_avatar,
+                        files=files,
+                        thread=thread
+                    )
+                
+        # close/archive the thread after forwarding all messages
+        await thread.edit(archived=True, locked=True)
+
+        # delete the webhook after use
+        await webhook.delete()
+        
+        # delete the case channel
+        await channel.delete()
+        
+        # moderation log embed
+        moderation_log = discord.utils.get(guild.channels, id=mod_log_id)
+        embed = discord.Embed(
+            title=f'__**Case Closed{timeout_message}**__' if not "staff-case" in case_name else f'__**Staff Case Closed{timeout_message}**__',
+            color=discord.Color.red(),
+            timestamp=current_ts
+        )
+        embed.add_field(name="Case Number", value=f"#{case_number}")
+        embed.set_footer(text=f"Closed by {closed_by}" if not is_timedout else f"Closed automatically by {closed_by}", icon_url=closed_by.display_avatar)
+        await moderation_log.send(embed=embed)
 
     # Discord methods
     async def create_interview_room(self, guild: discord.Guild, app: List[str]) -> None:
@@ -792,13 +774,13 @@ class ReportSupport(*report_support_classes):
 
         # Set channel perms for the user.
         await parent_channel.set_permissions(applicant, read_messages=True, send_messages=False, view_channel=True)
-        await interview_vc.set_permissions(applicant, speak=True, connect=True, view_channel=True)
+        # await interview_vc.set_permissions(applicant, speak=True, connect=True, view_channel=True)
 
         application_type = app[2].title().replace('_', ' ')
 
         role_mapping = {
             "Teacher": "Lesson Managers",
-            "Moderator": "staff Managers",
+            "Moderator": "Staff Managers",
             "Event Host": "Event Managers",
             "Debate Organizer": "Debate Managers"
         }

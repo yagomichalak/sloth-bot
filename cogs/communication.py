@@ -39,7 +39,7 @@ class Communication(*tool_cogs):
         
         # global chat name change variables
         self.last_global_chat_name = None
-        self.global_chat_names = [ "boost-the-server-chat", "sub-to-patreon-chat", "what-will-tomorrow-bring", "english-chat-v12-turbo", "galaxy-chat", "thick-global-chat", "texting-kingdom", "text-here-if-you-can", "ultra-mega-super-global-chat", "giga-chat", "peak-sigma-thomas-shelby-global-chat", "no-more-english-chat", "yes-any-language-is-allowed", "not-just-a-fancy-global-chat", "brain-rot-chat", "negative-iq-chat", "what-chat-is-this", "who-keeps-changing-the-chat", "what-is-going-on", "wait-chat-is-this-global-chat", "chat-number-1", "f-english-chat" ]
+        self.global_chat_names = [ "boost-the-server-chat", "sub-to-patreon-chat", "what-will-tomorrow-bring", "english-chat-v12-turbo", "galaxy-chat", "thick-global-chat", "texting-kingdom", "text-here-if-you-can", "ultra-mega-super-global-chat", "giga-chat", "peak-sigma-thomas-shelby-global-chat", "no-more-english-chat", "yes-any-language-is-allowed", "not-just-a-fancy-global-chat", "brain-rot-chat", "negative-iq-chat", "what-chat-is-this", "who-keeps-changing-the-chat", "what-is-going-on", "wait-chat-is-this-global-chat", "chat-number-1", "f-english-chat", "best-chat-in-the-server", "is-this-the-english-chat", "not-english-chat", "no-french-people-allowed", "no-italians-allowed", "no-brazilians-allowed", "no-americans-allowed", "no-korean-characters-allowed", "do-not-type-here", "no-typing-allowed", "no-audio-messages-allowed", "no-memes-allowed", "french-is-forbidden-here", "jokes-are-forbidden-here", "cosmic-chat", "esperanto-chat", "interlingua-chat", "übermensch-chat", "kebab-chat", "gabagool-chat", "speak-french-get-banned", "speak-portuguese-get-banned", "speak-spanish-get-banned", "autism-chat", "weaponized-autism", "neurodivergent-chat", "adhd-chat", "ocd-chat", "tourette-syndrome-chat", "no-meowing-allowed", "bad-grammar-gets-you-banned", "bing-back-sloth-bot" ]
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -62,12 +62,12 @@ class Communication(*tool_cogs):
             self.last_global_chat_name = channel.name
         
         # gets names that aren't the last used one
-        possible_names = [name for name in self.global_chat_names if f"💬・{name}" != self.last_global_chat_name]
+        possible_names = [name for name in self.global_chat_names if f"🌐・{name}" != self.last_global_chat_name]
         if not possible_names: return
 
         # select a random name
         new_name = choice(possible_names)
-        prefixed_new_name = f"💬・{new_name}"
+        prefixed_new_name = f"🌐・{new_name}"
 
         try:
             await channel.edit(name=prefixed_new_name)
