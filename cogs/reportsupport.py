@@ -59,6 +59,7 @@ class ReportSupport(*report_support_classes):
         self.client = client
         self.db = DatabaseCore()
         self.owner_role_id: int = int(os.getenv('OWNER_ROLE_ID', 123))
+        self.staff_manager_role_id: int = int(os.getenv('STAFF_MANAGER_ROLE_ID', 123))
         self.mayu_id: int = int(os.getenv('MAYU_ID', 123))
         self.cache = {}
 
@@ -282,18 +283,20 @@ class ReportSupport(*report_support_classes):
 
             break
 
-        # Sends verified request to admins
+        staff_manager = discord.utils.get(guild.roles, id=staff_manager_role_id)
+        verify_req_channel = discord.utils.get(guild.text_channels, id=self.verify_reqs_channel_id)
+
+        # embed
         verify_embed = discord.Embed(
             title=f"__Verification Request__",
             description=f"{member} ({member.id})",
             color=member.color,
             timestamp=interaction.message.created_at
         )
-
         verify_embed.set_thumbnail(url=member.display_avatar)
         verify_embed.set_image(url=attachments[0])
-        verify_req_channel_id = discord.utils.get(guild.text_channels, id=self.verify_reqs_channel_id)
-        verify_msg = await verify_req_channel_id.send(content=member.mention, embed=verify_embed)
+
+        verify_msg = await verify_req_channel.send(content=f"{staff_manager.mention} {member.mention}", embed=verify_embed)
         await verify_msg.add_reaction('✅')
         await verify_msg.add_reaction('❌')
         # Saves

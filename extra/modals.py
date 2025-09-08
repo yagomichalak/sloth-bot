@@ -90,10 +90,9 @@ class ModeratorApplicationModal(Modal):
         **Application successfully made, please, be patient now.**
     • We will let you know when we need a new mod. We check apps when we need it!""", ephemeral=True)
 
-
         moderator_app_channel = await self.client.fetch_channel(self.cog.moderator_app_channel_id)
-        owner_role = discord.utils.get(moderator_app_channel.guild.roles, id=self.cog.owner_role_id)
-        app = await moderator_app_channel.send(content=f"{owner_role.mention}, {member.mention}", embed=embed)
+        staff_manager_role = discord.utils.get(moderator_app_channel.guild.roles, id=self.cog.staff_manager_role_id)
+        app = await moderator_app_channel.send(content=f"{staff_manager_role.mention}, {member.mention}", embed=embed)
         await app.add_reaction('✅')
         await app.add_reaction('❌')
         # Saves in the database
