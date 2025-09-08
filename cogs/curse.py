@@ -80,9 +80,15 @@ class CurseMember(CurseTable):
             return await ctx.send("**Inform a member to curse!**", delete_after=3)
 
         if member.voice:
-            await self.is_connected(ctx)
-            voicechannel = discord.utils.get(member.guild.channels, id=member.voice.channel.id)
-            vc = await voicechannel.connect()
+            # check if the bot is already connected to a voice channel
+            vc = discord.utils.get(member.guild.channels, id=member.voice.channel.id)
+            if ctx.voice_client:
+                if ctx.voice_client.channel != vc:
+                    await ctx.voice_client.disconnect()
+                    await vc.connect()
+            else:
+                await vc.connect()
+
             await self.play_earrape(member.id, vc)
 
         await self.delete_cursed_member()
