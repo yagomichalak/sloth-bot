@@ -640,10 +640,10 @@ class Moderation(*moderation_cogs):
 
 
     # Purge command
-    @commands.command()
+    @commands.command(aliases=["p"])
     @commands.has_permissions(manage_messages=True)
     async def purge(self, ctx, *, message : str = None):
-        """ (MOD) Purges messages.
+        """ (MOD) Purges messages in the used channel.
         :param member: The member from whom to purge the messages. (Optional)
         :param amount: The amount of messages to purge. """
 
@@ -675,8 +675,7 @@ class Moderation(*moderation_cogs):
                 await msgs.pop(0).delete()
                 deleted += 1
 
-            await ctx.send(f"**`{deleted}` messages deleted from `{' and '.join(member.name for member in members)}`**",
-                delete_after=5)
+            await ctx.send(f"**`{deleted}` messages deleted from `{' and '.join(member.name for member in members)}`**", delete_after=6)
 
         else:
             await ctx.channel.purge(limit=int(amount))
