@@ -2681,6 +2681,7 @@ We appreciate your understanding and look forward to hearing from you. """, embe
         author = ctx.author
         icon = ctx.author.display_avatar
 
+        is_admin = ctx.author.guild_permissions.administrator
         is_staff_manager = await utils.is_allowed([staff_manager_role_id]).predicate(ctx)
 
         await ctx.message.delete()
@@ -2690,10 +2691,9 @@ We appreciate your understanding and look forward to hearing from you. """, embe
 
         for infr_id in infrs_id:
             if user_infractions := await self.get_user_infraction_by_infraction_id(infr_id):
-                perms = ctx.channel.permissions_for(ctx.author)
                 perpetrator_member = discord.utils.get(ctx.guild.members, id=user_infractions[0][5])
                 
-                if perpetrator_member == ctx.author or (is_staff_manager or perms.administrator):
+                if perpetrator_member == ctx.author or (is_staff_manager or is_admin):
                     # Moderation log embed
                     member = discord.utils.get(ctx.guild.members, id=user_infractions[0][0])
                     if not perms.administrator:
@@ -2703,16 +2703,31 @@ We appreciate your understanding and look forward to hearing from you. """, embe
                         reason = user_infractions[0][2]
                         perpetrator = perpetrator_member.name if perpetrator_member else "Unknown"
                         
+                        # fix for not being able to remove infractions of users that left the server
+                        if member:
+                            user_name, user_id, user_icon = member.display_name, member.id, member.display_avatar
+                        else:
+                            left_user = await self.client.fetch_user(user_infractions[0][0])
+                            user_name, user_id, user_icon = left_user.name, left_user.id, left_user.display_avatar
+
                         embed = discord.Embed(title=f'__**Removed Infraction**__ ({infr_type})', colour=discord.Colour.dark_red(),
                                             timestamp=ctx.message.created_at)
-                        embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nID: {member.id}```',
+                        embed.add_field(name='User info:', value=f'```Name: {user_name}\nID: {user_id}```',
                                         inline=False)
                         embed.add_field(name='Infraction info:', value=f"> #{infr_id}\n> -# **{infr_date}**\n> -# by {perpetrator}\n> {reason}")
-                        embed.set_author(name=member)
-                        embed.set_thumbnail(url=member.display_avatar)
+                        embed.set_author(name=user_name)
+                        embed.set_thumbnail(url=user_icon)
                         embed.set_footer(text=f"Removed by {author}", icon_url=icon)
                         await moderation_log.send(embed=embed)
-                    # Infraction removal
+                        
+                        try:
+                            if user_infractions[0][1] != "watchlist":
+                                embed.set_footer() # clears the footer so it doesn't show the staff member in the DM
+                                await member.send(embed=embed)
+                        except Exception:
+                            pass
+                        
+                   # Infraction removal
                     await self.remove_user_infraction(int(infr_id))
                     await ctx.send(f"**Removed infraction with ID `{infr_id}` for {member}**")
                 else:
@@ -2792,6 +2807,7 @@ We appreciate your understanding and look forward to hearing from you. """, embe
         :param reason: The updated reason of the infraction(s)."""
         
         is_admin = ctx.author.guild_permissions.administrator
+        is_staff_manager = await utils.is_allowed([staff_manager_role_id]).predicate(ctx)
         
         # Remove numbers with less than 5 digits
         string_ids = [str(int_id) for int_id in infractions_ids]
@@ -2805,49 +2821,53 @@ We appreciate your understanding and look forward to hearing from you. """, embe
         if not infractions_ids:
             return await ctx.send("**Please, inform an infraction id!**", delete_after=3)
 
-        if not is_admin and (reason is not None and len(reason) > 960):
+        if (not is_admin and not is_staff_manager) and (reason is not None and len(reason) > 960):
             return await ctx.send(f"**Please, inform a reason that is lower than or equal to 960 characters, {ctx.author.mention}!**", delete_after=3)
-        elif not is_admin and (reason is None or len(reason) < 16):
+        elif (not is_admin and not is_staff_manager) and (reason is None or len(reason) < 16):
             return await ctx.send(f"**Please, inform a reason that is higher than 15 characters, {ctx.author.mention}!**", delete_after=3)
 
         for infr_id in infractions_ids:
             if user_infraction := await self.get_user_infraction_by_infraction_id(infr_id):
+                perpetrator_member = discord.utils.get(ctx.guild.members, id=user_infraction[0][5])
 
-                # Get user by id
-                member = await self.client.fetch_user(user_infraction[0][0])
+                if perpetrator_member == ctx.author or (is_staff_manager or is_admin):
+                    # get user by id
+                    member = await self.client.fetch_user(user_infraction[0][0])
 
-                # General embed
-                general_embed = discord.Embed(description=f'**New Reason:** {reason}', color=discord.Color.lighter_grey())
-                general_embed.set_author(name=f"{member}'s {user_infraction[0][1].capitalize()} reason has been edited", icon_url=member.display_avatar)
-                general_embed.set_footer(text=f"Edited by {ctx.author}", icon_url=ctx.author.display_avatar)
+                    # general embed
+                    general_embed = discord.Embed(description=f'**New Reason:** {reason}', color=discord.Color.lighter_grey())
+                    general_embed.set_author(name=f"{member}'s {user_infraction[0][1].capitalize()} reason has been edited", icon_url=member.display_avatar)
+                    general_embed.set_footer(text=f"Edited by {ctx.author}", icon_url=ctx.author.display_avatar)
 
-                await ctx.send(embed=general_embed)
+                    await ctx.send(embed=general_embed)
 
-                # Moderation log embed
-                moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
-                current_ts = await utils.get_timestamp()
-                infr_date = datetime.fromtimestamp(current_ts).strftime('%Y/%m/%d at %H:%M')
-                perpetrator = ctx.author.name if ctx.author else "Unknown"
+                    # moderation log embed
+                    moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
+                    current_ts = await utils.get_timestamp()
+                    infr_date = datetime.fromtimestamp(current_ts).strftime('%Y/%m/%d at %H:%M')
+                    perpetrator = ctx.author.name if ctx.author else "Unknown"
 
-                embed = discord.Embed(title=f'__**{user_infraction[0][1].lower()} Edited**__', colour=discord.Colour.lighter_grey(),
-                                    timestamp=ctx.message.created_at)
+                    embed = discord.Embed(title=f'__**{user_infraction[0][1].lower()} Edited**__', colour=discord.Colour.lighter_grey(),
+                                        timestamp=ctx.message.created_at)
 
-                embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nId: {member.id}```',
-                                inline=False)
-                embed.add_field(name='New reason:', value=f"> -# **{infr_date}**\n> -# by {perpetrator}\n> {reason}")
-                embed.set_author(name=member)
-                embed.set_thumbnail(url=member.display_avatar)
-                embed.set_footer(text=f"Edited by {ctx.author}", icon_url=ctx.author.display_avatar)
-                await moderation_log.send(embed=embed)
+                    embed.add_field(name='User info:', value=f'```Name: {member.display_name}\nId: {member.id}```',
+                                    inline=False)
+                    embed.add_field(name='New reason:', value=f"> -# **{infr_date}**\n> -# by {perpetrator}\n> {reason}")
+                    embed.set_author(name=member)
+                    embed.set_thumbnail(url=member.display_avatar)
+                    embed.set_footer(text=f"Edited by {ctx.author}", icon_url=ctx.author.display_avatar)
+                    await moderation_log.send(embed=embed)
 
-                try:
-                    if user_infraction[0][1] != "watchlist":
-                        general_embed.set_footer() # Clears the footer so it doesn't show the staff member in the DM
-                        await member.send(embed=general_embed)
-                except Exception:
-                    pass
+                    try:
+                        if user_infraction[0][1] != "watchlist":
+                            general_embed.set_footer() # clears the footer so it doesn't show the staff member in the DM
+                            await member.send(embed=general_embed)
+                    except Exception:
+                        pass
 
-                await self.edit_user_infractions(infr_id, reason)
+                    await self.edit_user_infractions(infr_id, reason)
+                else:
+                    await ctx.send(f"**You can only remove infractions issued by yourself!**")
 
             else:
                 await ctx.send(f"**Infraction `{infr_id}` not found**")
