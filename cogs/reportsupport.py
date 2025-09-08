@@ -774,13 +774,13 @@ class ReportSupport(*report_support_classes):
 
         # Set channel perms for the user.
         await parent_channel.set_permissions(applicant, read_messages=True, send_messages=False, view_channel=True)
-        await interview_vc.set_permissions(applicant, speak=True, connect=True, view_channel=True)
+        # await interview_vc.set_permissions(applicant, speak=True, connect=True, view_channel=True)
 
         application_type = app[2].title().replace('_', ' ')
 
         role_mapping = {
             "Teacher": "Lesson Managers",
-            "Moderator": "staff Managers",
+            "Moderator": "Staff Managers",
             "Event Host": "Event Managers",
             "Debate Organizer": "Debate Managers"
         }
