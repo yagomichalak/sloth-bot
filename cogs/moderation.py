@@ -126,15 +126,29 @@ class Moderation(*moderation_cogs):
                 scam_detected = True
                 break
 
-        # check for scam image patterns
+        # current known image scam patterns:
+        # "1.png, 2.png, 3.png, 4.png" or "1.jpg, 2.jpg, 3.jpg, 4.jpg"
+        # or 4x "image.png" or "image.jpg" with @everyone ping
+        png_pattern = ["1.png", "2.png", "3.png", "4.png"]
+        jpg_pattern = ["1.jpg", "2.jpg", "3.jpg", "4.jpg"]
+
+        # check for scam image patterns (with links)
+        if message.content:
+            links = re.findall(r'(https?://[^\s]+|http://[^\s]+)', message.content)
+            if links:
+                link_names = [link.split("/")[-1].lower() for link in links]
+                if all(name in link_names for name in png_pattern) or all(name in link_names for name in jpg_pattern):
+                    scam_detected = True
+                else:
+                    image_png_count = sum(1 for name in link_names if name == "image.png")
+                    image_jpg_count = sum(1 for name in link_names if name == "image.jpg")
+                    if ((image_png_count >= 4 or image_jpg_count >= 4) and "@everyone" in message_content_lower):
+                        scam_detected = True
+
+        # check for scam image patterns (with attachments)
         if message.attachments:
             image_names = [a.filename.lower() for a in message.attachments if a.filename]
             if image_names:
-                # current known image scam patterns:
-                # "1.png, 2.png, 3.png, 4.png" or "1.jpg, 2.jpg, 3.jpg, 4.jpg"
-                # "image.png x4, @everyone" or "image.jpg x4, @everyone"
-                png_pattern = ["1.png", "2.png", "3.png", "4.png"]
-                jpg_pattern = ["1.jpg", "2.jpg", "3.jpg", "4.jpg"]
                 if all(name in image_names for name in png_pattern) or all(name in image_names for name in jpg_pattern):
                     scam_detected = True
                 elif ((image_names.count("image.png") >= 4 or image_names.count("image.jpg") >= 4) and "@everyone" in message_content_lower):
@@ -1185,7 +1199,7 @@ class Moderation(*moderation_cogs):
 
         await ctx.send(embed=embed)
 
-    @commands.command(name="mute", aliases=["shutup", "shut_up", "stfu", "zitto", "zitta", "shh", "tg", "ta_gueule", "tagueule", "mutado", "xiu", "calaboca", "callate", "calma_calabreso"])
+    @commands.command(name="mute", aliases=["m", "shutup", "shut_up", "stfu", "zitto", "zitta", "shh", "tg", "ta_gueule", "tagueule", "mutado", "xiu", "calaboca", "callate", "calma_calabreso"])
     @utils.is_allowed(allowed_roles, throw_exc=True)
     async def _mute_command(self, ctx, *, message : str = None) -> None:
         """(MOD) Mutes one or more members.
@@ -1325,7 +1339,7 @@ class Moderation(*moderation_cogs):
             await answer(f'**{member} is already muted!**')
 
     # mutes a member who isn't in the server anymore. when the member joins back, they will be muted.
-    @commands.command(aliases=["hmute"])
+    @commands.command(aliases=["hmute", "hm"])
     @utils.is_allowed(allowed_roles, throw_exc=True)
     async def hackmute(self, ctx, *, message: str = None) -> None:
         """ Mutes a member who isn't in the server anymore. When the member joins back, they will be muted. 
@@ -2711,36 +2725,35 @@ We appreciate your understanding and look forward to hearing from you. """, embe
                 if perpetrator_member == ctx.author or (is_staff_manager or is_admin):
                     # Moderation log embed
                     member = discord.utils.get(ctx.guild.members, id=user_infractions[0][0])
-                    if not perms.administrator:
-                        moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
-                        infr_date = datetime.fromtimestamp(user_infractions[0][3]).strftime('%Y/%m/%d at %H:%M')
-                        infr_type = user_infractions[0][1]
-                        reason = user_infractions[0][2]
-                        perpetrator = perpetrator_member.name if perpetrator_member else "Unknown"
-                        
-                        # fix for not being able to remove infractions of users that left the server
-                        if member:
-                            user_name, user_id, user_icon = member.display_name, member.id, member.display_avatar
-                        else:
-                            left_user = await self.client.fetch_user(user_infractions[0][0])
-                            user_name, user_id, user_icon = left_user.name, left_user.id, left_user.display_avatar
+                    moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
+                    infr_date = datetime.fromtimestamp(user_infractions[0][3]).strftime('%Y/%m/%d at %H:%M')
+                    infr_type = user_infractions[0][1]
+                    reason = user_infractions[0][2]
+                    perpetrator = perpetrator_member.name if perpetrator_member else "Unknown"
+                    
+                    # fix for not being able to remove infractions of users that left the server
+                    if member:
+                        user_name, user_id, user_icon = member.display_name, member.id, member.display_avatar
+                    else:
+                        left_user = await self.client.fetch_user(user_infractions[0][0])
+                        user_name, user_id, user_icon = left_user.name, left_user.id, left_user.display_avatar
 
-                        embed = discord.Embed(title=f'__**Removed Infraction**__ ({infr_type})', colour=discord.Colour.dark_red(),
-                                            timestamp=ctx.message.created_at)
-                        embed.add_field(name='User info:', value=f'```Name: {user_name}\nID: {user_id}```',
-                                        inline=False)
-                        embed.add_field(name='Infraction info:', value=f"> #{infr_id}\n> -# **{infr_date}**\n> -# by {perpetrator}\n> {reason}")
-                        embed.set_author(name=user_name)
-                        embed.set_thumbnail(url=user_icon)
-                        embed.set_footer(text=f"Removed by {author}", icon_url=icon)
-                        await moderation_log.send(embed=embed)
-                        
-                        try:
-                            if user_infractions[0][1] != "watchlist":
-                                embed.set_footer() # clears the footer so it doesn't show the staff member in the DM
-                                await member.send(embed=embed)
-                        except Exception:
-                            pass
+                    embed = discord.Embed(title=f'__**Removed Infraction**__ ({infr_type})', colour=discord.Colour.dark_red(),
+                                        timestamp=ctx.message.created_at)
+                    embed.add_field(name='User info:', value=f'```Name: {user_name}\nID: {user_id}```',
+                                    inline=False)
+                    embed.add_field(name='Infraction info:', value=f"> #{infr_id}\n> -# **{infr_date}**\n> -# by {perpetrator}\n> {reason}")
+                    embed.set_author(name=user_name)
+                    embed.set_thumbnail(url=user_icon)
+                    embed.set_footer(text=f"Removed by {author}", icon_url=icon)
+                    await moderation_log.send(embed=embed)
+                    
+                    try:
+                        if user_infractions[0][1] != "watchlist":
+                            embed.set_footer() # clears the footer so it doesn't show the staff member in the DM
+                            await member.send(embed=embed)
+                    except Exception:
+                        pass
                         
                    # Infraction removal
                     await self.remove_user_infraction(int(infr_id))
