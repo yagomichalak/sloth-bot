@@ -126,15 +126,29 @@ class Moderation(*moderation_cogs):
                 scam_detected = True
                 break
 
-        # check for scam image patterns
+        # current known image scam patterns:
+        # "1.png, 2.png, 3.png, 4.png" or "1.jpg, 2.jpg, 3.jpg, 4.jpg"
+        # or 4x "image.png" or "image.jpg" with @everyone ping
+        png_pattern = ["1.png", "2.png", "3.png", "4.png"]
+        jpg_pattern = ["1.jpg", "2.jpg", "3.jpg", "4.jpg"]
+
+        # check for scam image patterns (with links)
+        if message.content:
+            links = re.findall(r'(https?://[^\s]+|http://[^\s]+)', message.content)
+            if links:
+                link_names = [link.split("/")[-1].lower() for link in links]
+                if all(name in link_names for name in png_pattern) or all(name in link_names for name in jpg_pattern):
+                    scam_detected = True
+                else:
+                    image_png_count = sum(1 for name in link_names if name == "image.png")
+                    image_jpg_count = sum(1 for name in link_names if name == "image.jpg")
+                    if ((image_png_count >= 4 or image_jpg_count >= 4) and "@everyone" in message_content_lower):
+                        scam_detected = True
+
+        # check for scam image patterns (with attachments)
         if message.attachments:
             image_names = [a.filename.lower() for a in message.attachments if a.filename]
             if image_names:
-                # current known image scam patterns:
-                # "1.png, 2.png, 3.png, 4.png" or "1.jpg, 2.jpg, 3.jpg, 4.jpg"
-                # "image.png x4, @everyone" or "image.jpg x4, @everyone"
-                png_pattern = ["1.png", "2.png", "3.png", "4.png"]
-                jpg_pattern = ["1.jpg", "2.jpg", "3.jpg", "4.jpg"]
                 if all(name in image_names for name in png_pattern) or all(name in image_names for name in jpg_pattern):
                     scam_detected = True
                 elif ((image_names.count("image.png") >= 4 or image_names.count("image.jpg") >= 4) and "@everyone" in message_content_lower):
