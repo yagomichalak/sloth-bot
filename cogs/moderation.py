@@ -2711,36 +2711,35 @@ We appreciate your understanding and look forward to hearing from you. """, embe
                 if perpetrator_member == ctx.author or (is_staff_manager or is_admin):
                     # Moderation log embed
                     member = discord.utils.get(ctx.guild.members, id=user_infractions[0][0])
-                    if not perms.administrator:
-                        moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
-                        infr_date = datetime.fromtimestamp(user_infractions[0][3]).strftime('%Y/%m/%d at %H:%M')
-                        infr_type = user_infractions[0][1]
-                        reason = user_infractions[0][2]
-                        perpetrator = perpetrator_member.name if perpetrator_member else "Unknown"
-                        
-                        # fix for not being able to remove infractions of users that left the server
-                        if member:
-                            user_name, user_id, user_icon = member.display_name, member.id, member.display_avatar
-                        else:
-                            left_user = await self.client.fetch_user(user_infractions[0][0])
-                            user_name, user_id, user_icon = left_user.name, left_user.id, left_user.display_avatar
+                    moderation_log = discord.utils.get(ctx.guild.channels, id=mod_log_id)
+                    infr_date = datetime.fromtimestamp(user_infractions[0][3]).strftime('%Y/%m/%d at %H:%M')
+                    infr_type = user_infractions[0][1]
+                    reason = user_infractions[0][2]
+                    perpetrator = perpetrator_member.name if perpetrator_member else "Unknown"
+                    
+                    # fix for not being able to remove infractions of users that left the server
+                    if member:
+                        user_name, user_id, user_icon = member.display_name, member.id, member.display_avatar
+                    else:
+                        left_user = await self.client.fetch_user(user_infractions[0][0])
+                        user_name, user_id, user_icon = left_user.name, left_user.id, left_user.display_avatar
 
-                        embed = discord.Embed(title=f'__**Removed Infraction**__ ({infr_type})', colour=discord.Colour.dark_red(),
-                                            timestamp=ctx.message.created_at)
-                        embed.add_field(name='User info:', value=f'```Name: {user_name}\nID: {user_id}```',
-                                        inline=False)
-                        embed.add_field(name='Infraction info:', value=f"> #{infr_id}\n> -# **{infr_date}**\n> -# by {perpetrator}\n> {reason}")
-                        embed.set_author(name=user_name)
-                        embed.set_thumbnail(url=user_icon)
-                        embed.set_footer(text=f"Removed by {author}", icon_url=icon)
-                        await moderation_log.send(embed=embed)
-                        
-                        try:
-                            if user_infractions[0][1] != "watchlist":
-                                embed.set_footer() # clears the footer so it doesn't show the staff member in the DM
-                                await member.send(embed=embed)
-                        except Exception:
-                            pass
+                    embed = discord.Embed(title=f'__**Removed Infraction**__ ({infr_type})', colour=discord.Colour.dark_red(),
+                                        timestamp=ctx.message.created_at)
+                    embed.add_field(name='User info:', value=f'```Name: {user_name}\nID: {user_id}```',
+                                    inline=False)
+                    embed.add_field(name='Infraction info:', value=f"> #{infr_id}\n> -# **{infr_date}**\n> -# by {perpetrator}\n> {reason}")
+                    embed.set_author(name=user_name)
+                    embed.set_thumbnail(url=user_icon)
+                    embed.set_footer(text=f"Removed by {author}", icon_url=icon)
+                    await moderation_log.send(embed=embed)
+                    
+                    try:
+                        if user_infractions[0][1] != "watchlist":
+                            embed.set_footer() # clears the footer so it doesn't show the staff member in the DM
+                            await member.send(embed=embed)
+                    except Exception:
+                        pass
                         
                    # Infraction removal
                     await self.remove_user_infraction(int(infr_id))
