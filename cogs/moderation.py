@@ -1199,7 +1199,7 @@ class Moderation(*moderation_cogs):
 
         await ctx.send(embed=embed)
 
-    @commands.command(name="mute", aliases=["shutup", "shut_up", "stfu", "zitto", "zitta", "shh", "tg", "ta_gueule", "tagueule", "mutado", "xiu", "calaboca", "callate", "calma_calabreso"])
+    @commands.command(name="mute", aliases=["m", "shutup", "shut_up", "stfu", "zitto", "zitta", "shh", "tg", "ta_gueule", "tagueule", "mutado", "xiu", "calaboca", "callate", "calma_calabreso"])
     @utils.is_allowed(allowed_roles, throw_exc=True)
     async def _mute_command(self, ctx, *, message : str = None) -> None:
         """(MOD) Mutes one or more members.
@@ -1339,7 +1339,7 @@ class Moderation(*moderation_cogs):
             await answer(f'**{member} is already muted!**')
 
     # mutes a member who isn't in the server anymore. when the member joins back, they will be muted.
-    @commands.command(aliases=["hmute"])
+    @commands.command(aliases=["hmute", "hm"])
     @utils.is_allowed(allowed_roles, throw_exc=True)
     async def hackmute(self, ctx, *, message: str = None) -> None:
         """ Mutes a member who isn't in the server anymore. When the member joins back, they will be muted. 
