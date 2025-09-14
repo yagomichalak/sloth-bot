@@ -47,12 +47,12 @@ class EventManagement(EventRoomsTable):
 
         productivity_events = await self.get_all_events_by_event_name(event_name="productivity")
         self.productivity_club_vcs_ids = [active_event[1] for active_event in productivity_events]
-        self.check_camera_on_in_productivity_events.start()
+        self.check_productivity_events.start()
         print("[.cogs] EventManagement cog is ready!")
 
     @tasks.loop(seconds=60)
-    async def check_camera_on_in_productivity_events(self) -> None:
-        """ Checks whether people in the Productivity Events channels have their cameras on. """
+    async def check_productivity_events(self) -> None:
+        """ Checks whether people in the Productivity Events channels have their cameras or streams on. """
 
         current_ts = await utils.get_timestamp()
         guild = self.client.get_guild(server_id)
@@ -63,12 +63,12 @@ class EventManagement(EventRoomsTable):
             if secs < 60:
                 continue
 
-            if self.people[user_id]["camera_on"]:
+            if self.people[user_id]["camera_on"] or self.people[user_id]["stream_on"]:
                 continue
 
             del self.people[user_id]
 
-            # Disconnects users with cameras off
+            # Disconnects users with cameras and streams off
             try:
                 member = guild.get_member(user_id)
                 # Mods+ shouldn't get disconnected from the Camera only channel
@@ -103,8 +103,6 @@ class EventManagement(EventRoomsTable):
             return
         if before and before.self_deaf != after.self_deaf:
             return
-        if before and before.self_stream != after.self_stream:
-            return
 
         # Get before/after channels and their categories
         ac = after.channel
@@ -116,6 +114,7 @@ class EventManagement(EventRoomsTable):
             self.people[member.id] = {
                 "timestamp": current_ts,
                 "camera_on": after.self_video,
+                "stream_on": after.self_stream,
                 "notified": False
             }
 
